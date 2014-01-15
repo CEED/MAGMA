@@ -20,7 +20,7 @@
 
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
-    magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
+    magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex *a, magma_int_t lda,
     double *d, double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *work, magma_int_t lwork,
@@ -141,7 +141,7 @@ magma_zhetrd_mgpu(
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib;
@@ -284,7 +284,7 @@ magma_zhetrd_mgpu(
                               1, dx, dy, hwork,
                               stream, times);
 
-            magma_zher2k_mgpu(num_gpus, 'U', 'N', nb, i, ib,
+            magma_zher2k_mgpu(num_gpus, MagmaUpper, MagmaNoTrans, nb, i, ib,
                          c_neg_one, dwork, i+ib, 0,
                          d_one,     da,    ldda, 0,
                          k, stream);
@@ -385,7 +385,7 @@ magma_zhetrd_mgpu(
             }
             magma_event_record(start, 0);
 #endif
-            magma_zher2k_mgpu(num_gpus, 'L', 'N', nb, n-i-ib, ib,
+            magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib,
                          c_neg_one, dwork, n-i, ib,
                          d_one, da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
@@ -465,13 +465,14 @@ magma_zhetrd_mgpu(
 
 
 extern "C" magma_int_t
-magma_zhtodhe(magma_int_t num_gpus, char uplo, magma_int_t n, magma_int_t nb,
+magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *a, magma_int_t lda,
               magmaDoubleComplex **da, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
 {
     magma_int_t k;
-    if ( lapackf77_lsame(&uplo, "L") ) {
+    const char* uplo_ = lapack_const( uplo );
+    if ( lapackf77_lsame(uplo_, "L") ) {
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
         for (j=0; j < n; j += nb) {
@@ -516,7 +517,7 @@ magma_zhtodhe(magma_int_t num_gpus, char uplo, magma_int_t n, magma_int_t nb,
 
 extern "C" void
 magma_zher2k_mgpu(
-    magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -528,7 +529,7 @@ magma_zher2k_mgpu(
 #define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 

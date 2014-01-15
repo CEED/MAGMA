@@ -41,7 +41,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                double* dlamda, double* q2, magma_int_t* indx,
                magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
                double** dwork, magma_queue_t stream[MagmaMaxGPUs][2],
-               char range, double vl, double vu, magma_int_t il, magma_int_t iu,
+               magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
                magma_int_t* info )
 {
 /*
@@ -169,7 +169,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
     double d_zero = 0.;
     magma_int_t ione = 1;
     magma_int_t ineg_one = -1;
-    char range_[] = {range, 0};
+    const char* range_ = lapack_const( range );
 
     magma_int_t iil, iiu, rk;
     magma_int_t n1_loc, n2_loc, ib, nb, ib2, igpu;

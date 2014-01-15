@@ -35,7 +35,7 @@
 
 
 extern "C" magma_int_t
-magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
+magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    magmaDoubleComplex **d_lA,  magma_int_t ldda,
                    magmaDoubleComplex **d_lP,  magma_int_t lddp,
@@ -97,7 +97,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
 
 
     magma_int_t     j, jb, nb0, nb2, dd, d, id, j_local, j_local2, buf;
-    char            uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;

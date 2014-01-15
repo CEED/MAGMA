@@ -14,7 +14,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
+magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
                  magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,
                  magmaDoubleComplex *dA1, magma_int_t ldda1,
                  magmaDoubleComplex *dA2, magma_int_t ldda2,
@@ -99,7 +99,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
 
     int ip, ii, sb;
     magmaDoubleComplex *dA1T, *dA2T;
-    char transL;
+    magma_trans_t transL;
     int lddl2i, lddl2j;
 
     /* Check input arguments */
@@ -144,7 +144,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
     if ((m1 == 0) || (n1 == 0) || (m2 == 0) || (n2 == 0) || (k == 0) || (ib == 0))
         return *info;
 
-    if ( (storev == 'C') || (storev == 'c') ) {
+    if ( (order == 'C') || (order == 'c') ) {
         magmablas_zgetmo_in( dA1, dA1T, ldda1, m1, n1 );
         magmablas_zgetmo_in( dA2, dA2T, ldda2, m2, n2 );
         transL = MagmaTrans;
@@ -161,7 +161,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
         sb = min( k-ii, ib);
 
 #ifndef NOSWAPBLK
-        magmablas_zswapblk( 'R', n1,
+        magmablas_zswapblk( MagmaRowMajor, n1,
                             A1T(0, 0), ldda1,
                             A2T(0, 0), ldda2,
                             ii+1, ii+ib, IPIV, 1, m1 );
@@ -204,7 +204,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
                      c_one,     A2T(0, 0 ), ldda2 );
     }
 
-    if ( (storev == 'C') || (storev == 'c') ) {
+    if ( (order == 'C') || (order == 'c') ) {
         magmablas_zgetmo_out( dA1, dA1T, ldda1, m1, n1 );
         magmablas_zgetmo_out( dA2, dA2T, ldda2, m2, n2 );
     }

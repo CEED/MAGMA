@@ -18,7 +18,7 @@
 
 
 extern "C" magma_int_t
-magma_dsyevdx_gpu(char jobz, char range, char uplo,
+magma_dsyevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                   magma_int_t n,
                   double *da, magma_int_t ldda,
                   double vl, double vu, magma_int_t il, magma_int_t iu,
@@ -161,9 +161,9 @@ magma_dsyevdx_gpu(char jobz, char range, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
     magma_int_t ione = 1;
 
     double d__1;
@@ -303,7 +303,7 @@ magma_dsyevdx_gpu(char jobz, char range, char uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
+    anrm = magmablas_dlansy(MagmaMaxNorm, uplo, n, da, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {

@@ -18,7 +18,7 @@
 //////////////////////////////////////////////////////////////
 //          ZSTEDC          Divide and Conquer for tridiag
 //////////////////////////////////////////////////////////////
-extern "C" void  magma_zstedc_withZ(char JOBZ, magma_int_t N, double *D, double * E, magmaDoubleComplex *Z, magma_int_t LDZ)
+extern "C" void  magma_zstedc_withZ(magma_vec_t JOBZ, magma_int_t N, double *D, double * E, magmaDoubleComplex *Z, magma_int_t LDZ)
 {
     magmaDoubleComplex *WORK;
     double *RWORK;
@@ -28,20 +28,20 @@ extern "C" void  magma_zstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
     
     // use log() as log2() is not defined everywhere (e.g., Windows)
     const double log_2 = 0.6931471805599453;
-    if (JOBZ=='V') {
+    if (JOBZ == MagmaVec) {
         LWORK  = N*N;
         LRWORK = 1 + 3*N + 3*N*((magma_int_t)(log( (double)N )/log_2) + 1) + 4*N*N + 256*N;
         LIWORK = 6 + 6*N + 6*N*((magma_int_t)(log( (double)N )/log_2) + 1) + 256*N;
-    } else if (JOBZ=='I') {
+    } else if (JOBZ == MagmaIVec) {
         LWORK  = N;
         LRWORK = 2*N*N + 4*N + 1 + 256*N;
         LIWORK = 256*N;
-    } else if (JOBZ=='N') {
+    } else if (JOBZ == MagmaNoVec) {
         LWORK  = N;
         LRWORK = 256*N + 1;
         LIWORK = 256*N;
     } else {
-        printf("ERROR JOBZ %c\n",JOBZ);
+        printf("ERROR JOBZ %c\n", JOBZ);
         exit(-1);
     }
     
@@ -49,7 +49,7 @@ extern "C" void  magma_zstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
     magma_zmalloc_cpu( &WORK,  LWORK  );
     magma_imalloc_cpu( &IWORK, LIWORK );
     
-    lapackf77_zstedc(&JOBZ, &N, D, E, Z, &LDZ, WORK, &LWORK, RWORK, &LRWORK, IWORK, &LIWORK, &INFO);
+    lapackf77_zstedc( lapack_const(JOBZ), &N, D, E, Z, &LDZ, WORK, &LWORK, RWORK, &LRWORK, IWORK, &LIWORK, &INFO);
     
     if (INFO != 0) {
         printf("=================================================\n");
@@ -93,12 +93,11 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
     magma_timer_t time;
     timer_start( time );
 
-    char job = 'I';
-
+    magma_range_t job = MagmaRangeI;
     if (NE == N)
-        job = 'A';
+        job = MagmaRangeAll;
 
-    magma_zstedx(job, N, 0.,0., 1, NE, D, E, Z, LDZ, RWORK, LRWORK, IWORK, LIWORK, dwork, &INFO);
+    magma_zstedx(job, N, 0., 0., 1, NE, D, E, Z, LDZ, RWORK, LRWORK, IWORK, LIWORK, dwork, &INFO);
 
     if (INFO != 0) {
         printf("=================================================\n");

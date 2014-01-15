@@ -11,7 +11,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
+magma_zcgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
                   magmaFloatComplex  *dA, magma_int_t ldda,
                   magma_int_t        *dipiv,
                   magmaDoubleComplex *dB, magma_int_t lddb,
@@ -83,7 +83,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
     magmaFloatComplex c_one = MAGMA_C_ONE;
-    char            trans_[2] = {trans, 0};
+    const char* trans_ = lapack_const( trans );
     int notran = lapackf77_lsame(trans_, "N");
     magma_int_t inc;
 

@@ -20,7 +20,7 @@
 #define dB(i, j) (db + (j)*lddb + (i))
 
 extern "C" magma_int_t
-magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
+magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *da, magma_int_t ldda,
                  magmaDoubleComplex *db, magma_int_t lddb, magma_int_t *info)
 {
@@ -85,7 +85,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================*/
     
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;
     magmaDoubleComplex    c_one      = MAGMA_Z_ONE;

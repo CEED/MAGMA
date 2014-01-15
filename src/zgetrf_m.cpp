@@ -123,7 +123,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     /* number of columns in the big panel */
     h = 1+(2+num_gpus0);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
-    char * ngr_nb_char = getenv("MAGMA_NGR_NB");
+    const char* ngr_nb_char = getenv("MAGMA_NGR_NB");
     if ( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
     //NB = 5*max(nb,32);
 

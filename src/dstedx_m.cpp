@@ -17,13 +17,13 @@ extern "C" {
 
 magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
                            double* work, magma_int_t* iwork,
-                           char range, double vl, double vu,
+                           magma_range_t range, double vl, double vu,
                            magma_int_t il, magma_int_t iu, magma_int_t* info);
 
 }  // end extern "C"
 
 extern "C" magma_int_t
-magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double vu,
+magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
                magma_int_t il, magma_int_t iu, double* d, double* e, double* z, magma_int_t ldz,
                double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
                magma_int_t* info)
@@ -143,7 +143,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     =====================================================================
 */
-    char range_[2] = {range, 0};
+    const char* range_ = lapack_const( range );
 
     double d_zero = 0.;
     double d_one  = 1.;
@@ -281,7 +281,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
                     magma_int_t mm = m-1;
                     lapackf77_dlascl("G", &izero, &izero, &orgnrm, &d_one, &mm, &ione, &e[start], &mm, info);
 
-                    magma_dlaex0_m( nrgpu, m, &d[start], &e[start], Z(start, start), ldz, work, iwork, 'A', vl, vu, il, iu, info);
+                    magma_dlaex0_m( nrgpu, m, &d[start], &e[start], Z(start, start), ldz, work, iwork, MagmaRangeAll, vl, vu, il, iu, info);
 
                     if ( *info != 0) {
                         return MAGMA_SUCCESS;

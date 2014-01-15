@@ -11,7 +11,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a,
+magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
              magma_int_t lda, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
              magmaDoubleComplex *dT, magma_int_t nb,
@@ -85,7 +85,7 @@ magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a,
 
 #define a_ref(i,j) ( a + (j)*lda+ (i))
 
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
     
     magma_int_t i__1;
     magma_int_t i, j;

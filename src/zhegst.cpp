@@ -20,7 +20,7 @@
 #define dB(i, j) (dw+n*ldda+(j)*lddb + (i))
 
 extern "C" magma_int_t
-magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
+magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda,
              magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
 {
@@ -86,7 +86,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     
     =====================================================================*/
     
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;
     magmaDoubleComplex    c_one      = MAGMA_Z_ONE;

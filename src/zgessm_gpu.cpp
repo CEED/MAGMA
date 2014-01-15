@@ -14,7 +14,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
+magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
                   magma_int_t *ipiv,
                   magmaDoubleComplex *dL1, magma_int_t lddl1,
                   magmaDoubleComplex *dL,  magma_int_t lddl,
@@ -96,7 +96,7 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
     if (m == 0 || n == 0)
         return *info;
 
-    if ( (storev == 'C') || (storev == 'c') ) {
+    if ( (order == 'C') || (order == 'c') ) {
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
     } else {
         dAT = dA;
@@ -129,7 +129,7 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
         }
     }
 
-    if ( (storev == 'C') || (storev == 'c') ) {
+    if ( (order == 'C') || (order == 'c') ) {
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
     }
 

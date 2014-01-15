@@ -280,7 +280,7 @@ magma_zlahr2_m(
                 lblock += 1;
             }
             // treat V as (nb*ngpu) x nblock matrix, and Vd as nb x nblock matrix
-            magmablas_zlacpy( 'F', nb, nblocks-lblock,
+            magmablas_zlacpy( MagmaFull, nb, nblocks-lblock,
                               dV (d, d*nb + lblock*nb*ngpu, i), nb*ngpu,
                               dVd(d, 0    + lblock*nb,      i), nb );
             
@@ -292,7 +292,7 @@ magma_zlahr2_m(
             // each GPU copies to different temporary vector in Y,
             // which are summed in separate loop below
             if ( dn-dki1 > 0 ) {
-                magma_zgemv( 'N', n-k, dn-dki1,
+                magma_zgemv( MagmaNoTrans, n-k, dn-dki1,
                              c_one,  dA (d, k,    dki1), ldda,
                                      dVd(d, dki1,    i), 1,
                              c_zero, dY (d, k,       i), 1 );
@@ -379,7 +379,7 @@ magma_zlahr2_m(
         // each GPU copies to different temporary block in Y,
         // which are summed in separate loop below
         if ( dn-dki1 > 0 ) {
-            magma_zgemm( 'N', 'N', k, nb, dn-dki1,
+            magma_zgemm( MagmaNoTrans, MagmaNoTrans, k, nb, dn-dki1,
                          c_one,  dA (d, 0,    dki1), ldda,
                                  dVd(d, dki1,    0), ldvd,
                          c_zero, dY (d, 0,       0), ldda );

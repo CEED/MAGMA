@@ -43,7 +43,7 @@
      */
 /***************************************************************************/
 extern "C" magma_int_t
-magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side,
+magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
                         magma_int_t NE, magma_int_t N,
                         magma_int_t NB, magma_int_t Vblksiz,
                         magmaDoubleComplex *E, magma_int_t lde,
@@ -179,7 +179,7 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side,
     /*
      * MagmamaLeft
      */
-    if (side=='L') {
+    if (side == MagmaLeft) {
         /*
          * Version 113:
          * loop over the block_col (nt) and for each find the

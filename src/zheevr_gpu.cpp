@@ -14,7 +14,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
+magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *da, magma_int_t ldda, double vl, double vu,
                  magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
                  double *w, magmaDoubleComplex *dz, magma_int_t lddz, magma_int_t *isuppz,
@@ -235,9 +235,9 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
          California at Berkeley, USA
     =====================================================================     */
     
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
     
     magma_int_t ione = 1;
     float szero = 0.;
@@ -371,7 +371,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
     rmax = magma_dsqrt(bignum);
     
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_zlanhe('M', uplo, n, da, ldda, dwork);
+    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, da, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {

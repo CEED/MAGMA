@@ -19,7 +19,7 @@
 
 
 extern "C" magma_int_t
-magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
+magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
                   magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu,
                   magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
                   magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
@@ -203,7 +203,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
         }
 #endif
 
-        if ( (storev == 'R') || (storev == 'r') ) {
+        if ( (order == 'R') || (order == 'r') ) {
             magma_zsetmatrix( m, n, hU, ldhu, dwork, lddwork );
             magmablas_ztranspose( dU, lddu, dwork, lddwork, m, n );
 
@@ -220,7 +220,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
         /* Use hybrid blocked code. */
         maxm = ((m + 31)/32)*32;
 
-        if ( (storev == 'C') || (storev == 'c') ) {
+        if ( (order == 'C') || (order == 'c') ) {
             magmablas_zgetmo_in( dU, dUT, lddu, m,  n );
             magmablas_zgetmo_in( dA, dAT, ldda, m,  n );
         } else {
@@ -362,7 +362,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             }
         }
 
-        if ( (storev == 'C') || (storev == 'c') ) {
+        if ( (order == 'C') || (order == 'c') ) {
             magmablas_zgetmo_out( dU, dUT, lddu, m,  n );
             magmablas_zgetmo_out( dA, dAT, ldda, m,  n );
         }

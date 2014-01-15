@@ -13,7 +13,7 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zpotri_gpu(char uplo, magma_int_t n,
+magma_zpotri_gpu(magma_uplo_t uplo, magma_int_t n,
               magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -56,7 +56,7 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     *info = 0;
     if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))

@@ -17,7 +17,7 @@
 #include <assert.h>
 
 extern "C" magma_int_t
-magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
+magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                     magmaDoubleComplex *a, magma_int_t lda,
                     magmaDoubleComplex *tau,
                     magmaDoubleComplex *work, magma_int_t lwork,
@@ -155,12 +155,8 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
     #define datest(a_0, a_1, a_2)   (dAmgpu[a_0]  + ((a_2)-1)*(ldda) + (a_1)-1)
 
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
-
-
-
-   
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;

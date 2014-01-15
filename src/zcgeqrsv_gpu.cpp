@@ -199,7 +199,7 @@ magma_zcgeqrsv_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     stau = hworks + lhwork;
 
     eps  = lapackf77_dlamch("Epsilon");
-    Anrm = magmablas_zlange('I', m, n, dA, ldda, (double*)dworkd );
+    Anrm = magmablas_zlange(MagmaInfNorm, m, n, dA, ldda, (double*)dworkd );
     cte  = Anrm * eps * pow((double)n, 0.5) * BWDMAX;
 
     /*

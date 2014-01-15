@@ -13,7 +13,7 @@
 #define dA(i, j) (dA+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
+magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
              magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -68,8 +68,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    char uplo_[2] = {uplo, 0};
-    char diag_[2] = {diag, 0};
+    const char* uplo_ = lapack_const( uplo );
+    const char* diag_ = lapack_const( diag );
     magma_int_t     nb, nn, j, jb;
     //magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one      = MAGMA_Z_ONE;

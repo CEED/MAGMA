@@ -15,7 +15,7 @@
 
 
 extern "C" magma_int_t
-magma_zlauum(char uplo, magma_int_t n,
+magma_zlauum(magma_uplo_t uplo, magma_int_t n,
          magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -64,7 +64,7 @@ magma_zlauum(char uplo, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magma_int_t     ldda, nb;
     magma_int_t i, ib;
     magmaDoubleComplex    c_one = MAGMA_Z_ONE;

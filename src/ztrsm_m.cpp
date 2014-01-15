@@ -22,7 +22,7 @@ magma_int_t magma_get_ztrsm_m_nb() { return 128; }
 #define dA(gpui, i, j) (dw[gpui] + dimb*lddb + (i)*nb + (j)*nb*ldda)
 
 extern "C" magma_int_t
-magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
+magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t transa, magma_diag_t diag,
          magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
          magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb)
 {
@@ -124,10 +124,10 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
             Unchanged on exit.
     =====================================================================    */
 
-    char side_[2] = {side, 0};
-    char uplo_[2] = {uplo, 0};
-    char transa_[2] = {transa, 0};
-    char diag_[2] = {diag, 0};
+    const char* side_   = lapack_const( side   );
+    const char* uplo_   = lapack_const( uplo   );
+    const char* transa_ = lapack_const( transa );
+    const char* diag_   = lapack_const( diag   );
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex  alpha_;

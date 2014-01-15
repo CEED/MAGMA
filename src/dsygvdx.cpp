@@ -15,7 +15,7 @@
 #include "timer.h"
 
 extern "C" magma_int_t
-magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
+magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
               double *a, magma_int_t lda, double *b, magma_int_t ldb,
               double vl, double vu, magma_int_t il, magma_int_t iu,
               magma_int_t *m, double *w, double *work, magma_int_t lwork,
@@ -183,9 +183,9 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
     =====================================================================  */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
 
     double d_one = MAGMA_D_ONE;
 
@@ -195,7 +195,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_int_t lddb = n;
 
     magma_int_t lower;
-    char trans;
+    magma_trans_t trans;
     magma_int_t wantz, lquery;
     magma_int_t alleig, valeig, indeig;
 

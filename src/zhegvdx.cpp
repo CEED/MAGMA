@@ -17,7 +17,7 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
+magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
               magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
               double vl, double vu, magma_int_t il, magma_int_t iu,
               magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
@@ -198,9 +198,9 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
     =====================================================================  */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
@@ -210,7 +210,7 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_int_t lddb = n;
 
     magma_int_t lower;
-    char trans;
+    magma_trans_t trans;
     magma_int_t wantz;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;

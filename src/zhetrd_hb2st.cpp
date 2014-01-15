@@ -107,7 +107,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                           magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
                                           magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
 {
@@ -187,7 +187,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     real_Double_t timeblg=0.0;
     #endif
 
-    //char uplo_[2] = {uplo, 0};
+    //const char* uplo_ = lapack_const( uplo );
     magma_int_t mklth = threads;
     magma_int_t INgrsiz=1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);

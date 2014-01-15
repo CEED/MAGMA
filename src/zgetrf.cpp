@@ -127,7 +127,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
 
         int h = 1+(2+num_gpus), num_gpus2 = num_gpus;
         int NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
-        char * ngr_nb_char = getenv("MAGMA_NGR_NB");
+        const char* ngr_nb_char = getenv("MAGMA_NGR_NB");
         if ( ngr_nb_char != NULL )
             NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 

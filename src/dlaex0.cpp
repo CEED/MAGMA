@@ -17,7 +17,7 @@
 extern "C" magma_int_t
 magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
              double* work, magma_int_t* iwork, double* dwork,
-             char range, double vl, double vu,
+             magma_range_t range, double vl, double vu,
              magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -107,7 +107,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
     ===================================================================== */
 
     magma_int_t ione = 1;
-    char range_;
+    magma_range_t range2;
     magma_int_t curlvl, i, indxq;
     magma_int_t j, k, matsiz, msd2, smlsiz;
     magma_int_t submat, subpbs, tlvls;
@@ -210,15 +210,15 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
             // DLAEX1 is used only for the full eigensystem of a tridiagonal
             // matrix.
             if (matsiz == n)
-                range_ = range;
+                range2 = range;
             else
                 // We need all the eigenvectors if it is not last step
-                range_='A';
+                range2 = MagmaRangeAll;
 
             magma_dlaex1(matsiz, &d[submat], Q(submat, submat), ldq,
                          &iwork[indxq+submat], e[submat+msd2-1], msd2,
                          work, &iwork[subpbs], dwork,
-                         range_, vl, vu, il, iu, info);
+                         range2, vl, vu, il, iu, info);
 
             if (*info != 0) {
                 *info = (submat+1)*(n+1) + submat + matsiz;

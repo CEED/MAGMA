@@ -22,7 +22,7 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zheevdx_2stage(char jobz, char range, char uplo,
+magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                      magma_int_t n,
                      magmaDoubleComplex *a, magma_int_t lda,
                      double vl, double vu, magma_int_t il, magma_int_t iu,
@@ -175,9 +175,9 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     magma_int_t ione = 1;
     magma_int_t izero = 0;
@@ -304,12 +304,12 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        lapackf77_zheevd(jobz_, &uplo, &n,
+        lapackf77_zheevd(jobz_, uplo_, &n,
                         a, &lda, w,
                         work, &lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
+                        #if defined(PRECISION_z) || defined(PRECISION_c)
                         rwork, &lrwork,
-#endif
+                        #endif
                         iwork, &liwork,
                         info);
         *m = n;

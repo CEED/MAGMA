@@ -24,11 +24,11 @@
 #define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
 extern"C"{
-    void magmablas_zsetdiag1subdiag0_stream(char uplo, int k, int nb, magmaDoubleComplex *A, int lda, magma_queue_t stream);
+    void magmablas_zsetdiag1subdiag0_stream(magma_uplo_t uplo, int k, int nb, magmaDoubleComplex *A, int lda, magma_queue_t stream);
 }
 
 extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
+magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
                magmaDoubleComplex *a,    magma_int_t lda,
                magmaDoubleComplex *tau,
@@ -123,8 +123,8 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     =====================================================================   */
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    char side_[2] = {side, 0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* trans_ = lapack_const( trans );
 
     magma_int_t nb = 128;
     magmaDoubleComplex *t;
@@ -269,7 +269,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                                        A(i, i),                 lda,
                                        dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0] );
                 // Put 0s in the upper triangular part of dA;
-                magmablas_zsetdiag1subdiag0_stream('L', kb, kb, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0]);
+                magmablas_zsetdiag1subdiag0_stream( MagmaLower, kb, kb, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0]);
             }
 
             /* Form the triangular factor of the block reflector

@@ -11,7 +11,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
+magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *A, magma_int_t lda,
                  magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
@@ -134,7 +134,7 @@ CPU_INTERFACE:
      * Faster to use LAPACK for potrs than to copy A to GPU. */
     magma_zpotrf( uplo, n, A, lda, info );
     if ( *info == 0 ) {
-        lapackf77_zpotrs( &uplo, &n, &nrhs, A, &lda, B, &ldb, info );
+        lapackf77_zpotrs( lapack_const(uplo), &n, &nrhs, A, &lda, B, &ldb, info );
     }
 
     return *info;

@@ -13,7 +13,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
+magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda, double vl, double vu,
              magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
              double *w, magmaDoubleComplex *z, magma_int_t ldz, magma_int_t *isuppz,
@@ -224,9 +224,9 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
          California at Berkeley, USA
     =====================================================================     */
     
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
-    char range_[2] = {range, 0};
+    const char* uplo_  = lapack_const( uplo  );
+    const char* jobz_  = lapack_const( jobz  );
+    const char* range_ = lapack_const( range );
     
     magma_int_t izero = 0;
     magma_int_t ione = 1;

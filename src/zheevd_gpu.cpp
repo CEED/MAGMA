@@ -21,7 +21,7 @@
 // === End defining what BLAS to use ======================================
 
 extern "C" magma_int_t
-magma_zheevd_gpu(char jobz, char uplo,
+magma_zheevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
                  magma_int_t n,
                  magmaDoubleComplex *da, magma_int_t ldda,
                  double *w,
@@ -153,8 +153,8 @@ magma_zheevd_gpu(char jobz, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
+    const char* uplo_ = lapack_const( uplo );
+    const char* jobz_ = lapack_const( jobz );
     magma_int_t ione = 1;
 
     double d__1;
@@ -287,7 +287,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_zlanhe('M', uplo, n, da, ldda, dwork);
+    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, da, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {
@@ -342,7 +342,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     else {
         timer_start( time );
 
-        magma_zstedx('A', n, 0., 0., 0, 0, w, &rwork[inde],
+        magma_zstedx( MagmaRangeAll, n, 0., 0., 0, 0, w, &rwork[inde],
                       &work[indwrk], n, &rwork[indrwk],
                       llrwk, iwork, liwork, dwork, info);
 

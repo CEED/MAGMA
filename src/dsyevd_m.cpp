@@ -16,7 +16,7 @@
 #include "timer.h"
 
 extern "C" magma_int_t
-magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,
+magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
                magma_int_t n,
                double *a, magma_int_t lda,
                double *w,
@@ -141,8 +141,8 @@ magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
+    const char* uplo_ = lapack_const( uplo );
+    const char* jobz_ = lapack_const( jobz );
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
@@ -299,13 +299,13 @@ magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,
             return *info;
         }
 
-        magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
+        magma_dstedx(MagmaRangeAll, n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
 
         magma_free( dwork );
 #else
-        magma_dstedx_m(nrgpu, 'A', n, 0., 0., 0, 0, w, &work[inde],
+        magma_dstedx_m(nrgpu, MagmaRangeAll, n, 0., 0., 0, 0, w, &work[inde],
                        &work[indwrk], n, &work[indwk2],
                        llwrk2, iwork, liwork, info);
 #endif

@@ -14,7 +14,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmtr_gpu(char side, char uplo, char trans,
+magma_zunmtr_gpu(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
                  magma_int_t m, magma_int_t n,
                  magmaDoubleComplex *da,    magma_int_t ldda,
                  magmaDoubleComplex *tau,
@@ -121,9 +121,9 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    char side_[2]  = {side, 0};
-    char uplo_[2]  = {uplo, 0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* uplo_  = lapack_const( uplo  );
+    const char* trans_ = lapack_const( trans );
     magma_int_t i1, i2, mi, ni, nq, nw;
     int left, upper;
     magma_int_t iinfo;

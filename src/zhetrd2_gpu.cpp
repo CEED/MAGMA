@@ -19,7 +19,7 @@
 
 
 extern "C" magma_int_t
-magma_zhetrd2_gpu(char uplo, magma_int_t n,
+magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
                   magmaDoubleComplex *da, magma_int_t ldda,
                   double *d, double *e, magmaDoubleComplex *tau,
                   magmaDoubleComplex *wa,  magma_int_t ldwa,
@@ -157,7 +157,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     magma_int_t nb = magma_get_zhetrd_nb(n);
 

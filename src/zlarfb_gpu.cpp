@@ -12,7 +12,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zlarfb_gpu( char side, char trans, char direct, char storev,
+magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,
                   const magmaDoubleComplex *dV,    magma_int_t ldv,
                   const magmaDoubleComplex *dT,    magma_int_t ldt,
@@ -153,21 +153,21 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
     }
 
     // opposite of trans
-    char transt;
+    magma_trans_t transt;
     if (trans == 'N' || trans == 'n')
         transt = MagmaConjTrans;
     else
         transt = MagmaNoTrans;
     
     // whether T is upper or lower triangular
-    char uplo;
+    magma_uplo_t uplo;
     if (direct == 'F' || direct == 'f')
         uplo = MagmaUpper;
     else
         uplo = MagmaLower;
     
     // whether V is stored transposed or not
-    char notransV, transV;
+    magma_trans_t notransV, transV;
     if (storev == 'C' || storev == 'c') {
         notransV = MagmaNoTrans;
         transV   = MagmaConjTrans;

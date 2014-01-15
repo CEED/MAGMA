@@ -13,7 +13,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmql(const char side, const char trans,
+magma_zunmql(const magma_side_t side, const magma_trans_t trans,
              magma_int_t m, magma_int_t n, magma_int_t k,
              magmaDoubleComplex *a, magma_int_t lda,
              magmaDoubleComplex *tau,
@@ -108,8 +108,8 @@ magma_zunmql(const char side, const char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
     
-    char side_[2] = {side, 0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* trans_ = lapack_const( trans );
 
     magma_int_t i__4, i__;
     magmaDoubleComplex *T;
@@ -231,9 +231,9 @@ magma_zunmql(const char side, const char trans,
             /* 1) Put 0s in the lower triangular part of A;
                2) copy the panel from A to the GPU, and
                3) restore A                                      */
-            zpanel_to_q('L', ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
+            zpanel_to_q( MagmaLower, ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
             magma_zsetmatrix( i__4, ib, &a[(i__-1) * lda], lda, dwork, i__4 );
-            zq_to_panel('L', ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
+            zq_to_panel( MagmaLower, ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
             
             if (left) {
                 /* H or H' is applied to C(1:m-k+i+ib-1,1:n) */

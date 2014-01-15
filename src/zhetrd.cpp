@@ -17,7 +17,7 @@
 #define dA(i, j) (da+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo, magma_int_t n,
+magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda,
              double *d, double *e, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
@@ -137,7 +137,7 @@ magma_zhetrd(char uplo, magma_int_t n,
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     magma_int_t ldda = lda;
     magma_int_t nb = magma_get_zhetrd_nb(n);

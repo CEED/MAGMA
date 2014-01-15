@@ -18,7 +18,7 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zheevd(char jobz, char uplo,
+magma_zheevd(magma_vec_t jobz, magma_uplo_t uplo,
              magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda,
              double *w,
@@ -143,8 +143,8 @@ magma_zheevd(char jobz, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
+    const char* uplo_ = lapack_const( uplo );
+    const char* jobz_ = lapack_const( jobz );
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
@@ -321,7 +321,7 @@ magma_zheevd(char jobz, char uplo,
             return *info;
         }
 
-        magma_zstedx('A', n, 0., 0., 0, 0, w, &rwork[inde],
+        magma_zstedx(MagmaRangeAll, n, 0., 0., 0, 0, w, &rwork[inde],
                      &work[indwrk], n, &rwork[indrwk],
                      llrwk, iwork, liwork, dwork, info);
 

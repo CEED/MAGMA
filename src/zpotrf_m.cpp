@@ -20,7 +20,7 @@
 #define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
 
 extern "C" magma_int_t
-magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
+magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
                magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -86,8 +86,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     double                 d_neg_one = -1.0;
     magmaDoubleComplex     c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex     c_neg_one = MAGMA_Z_NEG_ONE;
-    char                   uplo_[2]  = {uplo, 0};
-    int                    upper     = lapackf77_lsame(uplo_, "U");
+    const char* uplo_  = lapack_const( uplo  );
+    int upper = lapackf77_lsame(uplo_, "U");
 
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dt[MagmaMaxGPUs];
     magma_int_t     ldda, lddla, nb, iinfo, n_local[MagmaMaxGPUs], J2, d, num_gpus;

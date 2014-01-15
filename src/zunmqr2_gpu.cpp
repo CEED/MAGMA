@@ -14,11 +14,11 @@
 #include "common_magma.h"
 
 extern"C"{
-  void magmablas_zsetdiag1subdiag0(char uplo, int k, int nb, magmaDoubleComplex *A, int lda);
+  void magmablas_zsetdiag1subdiag0(magma_uplo_t uplo, int k, int nb, magmaDoubleComplex *A, int lda);
 }
 
 extern "C" magma_int_t
-magma_zunmqr2_gpu(const char side, const char trans,
+magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
                   magma_int_t m, magma_int_t n, magma_int_t k,
                   magmaDoubleComplex *da,   magma_int_t ldda,
                   magmaDoubleComplex *tau,
@@ -107,8 +107,8 @@ magma_zunmqr2_gpu(const char side, const char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    char side_[2]  = {side,  0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* trans_ = lapack_const( trans );
 
     /* Allocate work space on the GPU */
     magmaDoubleComplex *dwork;
@@ -193,7 +193,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
         ic = 1;
     }
 
-    magmablas_zsetdiag1subdiag0('L', k, nb, da, ldda);
+    magmablas_zsetdiag1subdiag0(MagmaLower, k, nb, da, ldda);
 
     // for i=i1 to i2 by step
     for (i = i1; (step < 0 ? i >= i2 : i <= i2); i += step) {

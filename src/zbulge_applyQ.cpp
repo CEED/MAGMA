@@ -30,7 +30,7 @@
 #define T(m)     &(T[(m)])
 
 extern "C" void magma_zbulge_applyQ(
-    magma_int_t WANTZ, char SIDE, magma_int_t NE, magma_int_t N, magma_int_t NB,
+    magma_int_t WANTZ, magma_side_t SIDE, magma_int_t NE, magma_int_t N, magma_int_t NB,
     magma_int_t Vblksiz, magmaDoubleComplex *E, magma_int_t LDE,
     magmaDoubleComplex *V, magmaDoubleComplex *TAU, magmaDoubleComplex *T,
     magma_int_t *INFO, magmaDoubleComplex *dV, magmaDoubleComplex *dT,
@@ -39,14 +39,14 @@ extern "C" void magma_zbulge_applyQ(
     //%===========================
     //%   local variables
     //%===========================
-    magma_int_t LDT,LDV,blklen,firstcolj;
-    magma_int_t bg, nbGblk,rownbm, k, m, n;
-    magma_int_t st,ed,fst,vlen,vnb,colj,len;
-    magma_int_t blkid, vpos,taupos,tpos;
+    magma_int_t LDT, LDV, blklen, firstcolj;
+    magma_int_t bg, nbGblk, rownbm, k, m, n;
+    magma_int_t st, ed, fst, vlen, vnb, colj, len;
+    magma_int_t blkid, vpos, taupos, tpos;
     //magmaDoubleComplex *WORK;
     magma_int_t LWORK;
-    magma_int_t  cur_blksiz,avai_blksiz, ncolinvolvd;
-    magma_int_t  nbgr, colst, coled, versionL,versionR;
+    magma_int_t  cur_blksiz, avai_blksiz, ncolinvolvd;
+    magma_int_t  nbgr, colst, coled, versionL, versionR;
     magma_int_t blkcnt=-1;
 
     *INFO=0;
@@ -55,7 +55,7 @@ extern "C" void magma_zbulge_applyQ(
     LDT      = Vblksiz;
     LDV      = NB+Vblksiz-1;
     blklen   = LDV*Vblksiz;
-    nbGblk   = plasma_ceildiv((N-1),Vblksiz);
+    nbGblk   = plasma_ceildiv((N-1), Vblksiz);
     //magma_zmalloc_cpu( &WORK, LWORK );
 
     /* find the size of the matrix T V*/
@@ -72,7 +72,7 @@ extern "C" void magma_zbulge_applyQ(
     magmaDoubleComplex *dwork;
     magma_int_t ldwork;
     ldwork  = NE;
-    LWORK   = 2*N*max(Vblksiz,64);
+    LWORK   = 2*N*max(Vblksiz, 64);
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, LWORK )) {
         printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
         exit(-1);
@@ -91,7 +91,7 @@ extern "C" void magma_zbulge_applyQ(
      * */
     if (WANTZ == 1) {
         versionL=113;
-        SIDE='L';
+        SIDE = MagmaLeft;
         //set the matrix to Identity here to avoid copying it from the CPU
         magmablas_zlaset_identity(N, N, dE, N);
     }
@@ -99,7 +99,7 @@ extern "C" void magma_zbulge_applyQ(
 
 
     printf("  APPLY Q_v115 GPU with  N %d   NB %d   Vblksiz %d SIDE %c versionL %d versionR %d WANTZ %d \n",
-           (int) N, (int) NB, (int) Vblksiz, (int) SIDE, (int) versionL, (int) versionR, (int) WANTZ);
+           (int) N, (int) NB, (int) Vblksiz, SIDE, (int) versionL, (int) versionR, (int) WANTZ);
 
 
 #if defined(USESTREAM)
@@ -112,14 +112,14 @@ extern "C" void magma_zbulge_applyQ(
 #endif
     
 
-    if (SIDE == 'L') {
+    if (SIDE == MagmaLeft) {
         if (versionL == 113) {
             for (bg = nbGblk; bg > 0; bg--) {
                 firstcolj = (bg-1)*Vblksiz + 1;
                 if (bg == nbGblk)
-                    rownbm = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
+                    rownbm = plasma_ceildiv((N-(firstcolj)), NB);  // last blk has size=1 used for complex to handle A(N,N-1)
                 else
-                    rownbm = plasma_ceildiv((N-(firstcolj+1)),NB);
+                    rownbm = plasma_ceildiv((N-(firstcolj+1)), NB);
                 
                 for (m = rownbm; m > 0; m--) {
                     vlen = 0;
@@ -129,14 +129,14 @@ extern "C" void magma_zbulge_applyQ(
                     for (k=0; k < Vblksiz; k++) {
                         colj = (bg-1)*Vblksiz + k;
                         st   = (rownbm -m)*NB+colj +1;
-                        ed   = min(st+NB-1,N-1);
+                        ed   = min(st+NB-1, N-1);
                         if (st > ed) break;
                         if ((st == ed) && (colj != N-2)) break;
                         vlen=ed-fst+1;
                         vnb=k+1;
                     }
                     colst     = (bg-1)*Vblksiz;
-                    findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
+                    findVTpos(N, NB, Vblksiz, colst, fst, &vpos, &taupos, &tpos, &blkid);
                     printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n", (int) bg, (int) m, (int) vlen, (int) vnb, (int) colst+1, (int) vpos+1, (int) taupos+1);
                     if ((vlen > 0) && (vnb > 0)) {
                         if (WANTZ == 1) {
@@ -149,11 +149,11 @@ extern "C" void magma_zbulge_applyQ(
                 }
             }
         } else if (versionL == 114) {
-            rownbm = plasma_ceildiv((N-1),NB);
+            rownbm = plasma_ceildiv((N-1), NB);
             for (m = rownbm; m > 0; m--) {
                 ncolinvolvd = min(N-1, m*NB);
-                avai_blksiz=min(Vblksiz,ncolinvolvd);
-                nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
+                avai_blksiz=min(Vblksiz, ncolinvolvd);
+                nbgr = plasma_ceildiv(ncolinvolvd, avai_blksiz);
                 for (n = nbgr; n > 0; n--) {
                     vlen = 0;
                     vnb  = 0;
@@ -163,14 +163,14 @@ extern "C" void magma_zbulge_applyQ(
                     fst   = (rownbm -m)*NB+colst +1;
                     for (colj=colst; colj <= coled; colj++) {
                         st = (rownbm -m)*NB+colj +1;
-                        ed = min(st+NB-1,N-1);
+                        ed = min(st+NB-1, N-1);
                         if (st > ed) break;
                         if ((st == ed) && (colj != N-2)) break;
                         vlen=ed-fst+1;
                         vnb=vnb+1;
                     }
-                    findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
+                    findVTpos(N, NB, Vblksiz, colst, fst, &vpos, &taupos, &tpos, &blkid);
+                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n", bg, m, vlen, vnb, colst+1, vpos+1, taupos+1);
                     if ((vlen > 0) && (vnb > 0)) {
                         #if defined(USESTREAM)
                         magmablasSetKernelStream(stream[0]);
@@ -184,12 +184,12 @@ extern "C" void magma_zbulge_applyQ(
                 }
             }
         }
-    } else if (SIDE == 'R') {
+    } else if (SIDE == MagmaRight) {
         if (versionR == 91) {
             for (bg =1; bg <= nbGblk; bg++) {
                 firstcolj = (bg-1)*Vblksiz + 1;
-                rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
-                if (bg == nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
+                rownbm    = plasma_ceildiv((N-(firstcolj+1)), NB);
+                if (bg == nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)), NB);  // last blk has size=1 used for complex to handle A(N,N-1)
                 for (m = 1; m <= rownbm; m++) {
                     vlen = 0;
                     vnb  = 0;
@@ -199,15 +199,15 @@ extern "C" void magma_zbulge_applyQ(
                     for (k=0; k < Vblksiz; k++) {
                         colj = (bg-1)*Vblksiz + k;
                         st   = (rownbm -m)*NB+colj +1;
-                        ed   = min(st+NB-1,N-1);
+                        ed   = min(st+NB-1, N-1);
                         if (st > ed) break;
                         if ((st == ed) && (colj != N-2)) break;
                         vlen=ed-fst+1;
                         vnb=k+1;
                     }
                     colj     = (bg-1)*Vblksiz;
-                    findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
-                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos,taupos);
+                    findVTpos(N, NB, Vblksiz, colj, fst, &vpos, &taupos, &tpos, &blkid);
+                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n", bg, m, vlen, vnb, colj, vpos, taupos);
                     if ((vlen > 0) && (vnb > 0)) {
                         #if defined(USESTREAM)
                         magmablasSetKernelStream(stream[0]);
@@ -221,11 +221,11 @@ extern "C" void magma_zbulge_applyQ(
                 }
             }
         } else if (versionR == 92) {
-            rownbm = plasma_ceildiv((N-1),NB);
+            rownbm = plasma_ceildiv((N-1), NB);
             for (m = 1; m <= rownbm; m++) {
                 ncolinvolvd = min(N-1, m*NB);
-                avai_blksiz=min(Vblksiz,ncolinvolvd);
-                nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
+                avai_blksiz=min(Vblksiz, ncolinvolvd);
+                nbgr = plasma_ceildiv(ncolinvolvd, avai_blksiz);
                 for (n = 1; n <= nbgr; n++) {
                     vlen = 0;
                     vnb  = 0;
@@ -235,13 +235,13 @@ extern "C" void magma_zbulge_applyQ(
                     fst   = (rownbm -m)*NB+colst +1;
                     for (colj=colst; colj <= coled; colj++) {
                         st = (rownbm -m)*NB+colj +1;
-                        ed = min(st+NB-1,N-1);
+                        ed = min(st+NB-1, N-1);
                         if (st > ed) break;
                         if ((st == ed) && (colj != N-2)) break;
                         vlen=ed-fst+1;
                         vnb=vnb+1;
                     }
-                    findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
+                    findVTpos(N, NB, Vblksiz, colst, fst, &vpos, &taupos, &tpos, &blkid);
                     if ((vlen > 0) && (vnb > 0)) {
                         #if defined(USESTREAM)
                         magmablasSetKernelStream(stream[0]);
@@ -256,7 +256,7 @@ extern "C" void magma_zbulge_applyQ(
             }
         }
     } else {
-            printf("ERROR SIDE %d \n",SIDE);
+            printf("ERROR SIDE %d\n", SIDE);
     }
 
 #if defined(USESTREAM)

@@ -21,7 +21,7 @@
 #define dA(i, j)  (dA + (j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zpotrf_gpu(char uplo, magma_int_t n,
+magma_zpotrf_gpu(magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -80,7 +80,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
 
     magma_int_t     j, jb, nb;
-    char            uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *work;

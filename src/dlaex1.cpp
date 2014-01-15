@@ -17,7 +17,7 @@ extern "C" magma_int_t
 magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
              magma_int_t* indxq, double rho, magma_int_t cutpnt,
              double* work, magma_int_t* iwork, double* dwork,
-             char range, double vl, double vu,
+             magma_range_t range, double vl, double vu,
              magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
 /*  -- MAGMA (version 1.1) --

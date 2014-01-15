@@ -26,7 +26,7 @@
 
                       
 extern "C" magma_int_t
-magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
+magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *a,  magma_int_t lda,
               double *e, magmaDoubleComplex *tau,
               magmaDoubleComplex *w,  magma_int_t ldw,
@@ -160,7 +160,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
     an element of the vector defining H(i).
     =====================================================================    */
     
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
 
     magma_int_t i;
     
@@ -307,7 +307,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
                 //magma_zhemv(MagmaLower, i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
                 //            dW(i+1, i), ione);
                 //#else
-                magmablas_zhemv_work('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
+                magmablas_zhemv_work(MagmaLower, i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
                                      dW(i+1, i), ione,
                                      dwork, ldwork);
                 //#endif

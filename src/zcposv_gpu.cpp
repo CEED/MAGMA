@@ -14,7 +14,7 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
+magma_zcposv_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,
                  magmaDoubleComplex *dB, magma_int_t lddb,
                  magmaDoubleComplex *dX, magma_int_t lddx,
@@ -178,7 +178,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     dR  = dworkd;
 
     eps  = lapackf77_dlamch("Epsilon");
-    Anrm = magmablas_zlanhe('I', uplo, n, dA, ldda, (double*)dworkd );
+    Anrm = magmablas_zlanhe(MagmaInfNorm, uplo, n, dA, ldda, (double*)dworkd );
     cte  = Anrm * eps * pow((double)n, 0.5) * BWDMAX;
 
     /*

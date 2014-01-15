@@ -15,7 +15,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr_gpu_2stages(const char side, const char trans,
+magma_zunmqr_gpu_2stages(const magma_side_t side, const magma_trans_t trans,
                          magma_int_t m, magma_int_t n, magma_int_t k,
                          magmaDoubleComplex *da,   magma_int_t ldda,
                          magmaDoubleComplex *dc,    magma_int_t lddc,
@@ -96,8 +96,8 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
     < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    char side_[2] = {side, 0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* trans_ = lapack_const( trans );
 
     magmaDoubleComplex *dwork;
 

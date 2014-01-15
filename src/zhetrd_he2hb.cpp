@@ -16,7 +16,7 @@
 
 
 extern "C" magma_int_t
-magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
+magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                     magmaDoubleComplex *a, magma_int_t lda,
                     magmaDoubleComplex *tau,
                     magmaDoubleComplex *work, magma_int_t lwork,
@@ -144,7 +144,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     #define tau_ref(a_1)    (tau + (a_1)-1)
     #define t_ref(a_1)      (dT  + ((a_1)-1)*(lddt))
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     int ldda = ((n+31)/32)*32;
     int lddt = nb;

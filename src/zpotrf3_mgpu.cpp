@@ -30,7 +30,7 @@
 
 
 extern "C" magma_int_t
-magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
+magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    magmaDoubleComplex *d_lA[],  magma_int_t ldda,
                    magmaDoubleComplex *d_lP[],  magma_int_t lddp,
@@ -94,7 +94,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
 
 
     magma_int_t     j, jb, nb0, nb2, d, dd, id, j_local, j_local2, buf;
-    char            uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;
@@ -699,14 +699,15 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
 #define dA(d, i, j) (dwork[(d)]+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhtodpo(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
+magma_zhtodpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
               magmaDoubleComplex *a,       magma_int_t lda,
               magmaDoubleComplex *dwork[], magma_int_t ldda,
               magma_queue_t stream[][3], magma_int_t *info)
 {
     magma_int_t k;
-    if ( lapackf77_lsame(&uplo, "U") ) {
+    const char* uplo_ = lapack_const( uplo );
+    if ( lapackf77_lsame(uplo_, "U") ) {
         magma_int_t j, jj, jb, mj;
         
         /* go through each column */
@@ -758,14 +759,15 @@ magma_zhtodpo(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
 }
 
 extern "C" magma_int_t
-magma_zdtohpo(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
+magma_zdtohpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
               magmaDoubleComplex *a,       magma_int_t lda,
               magmaDoubleComplex *dwork[], magma_int_t ldda,
               magma_queue_t stream[][3], magma_int_t *info)
 {
     magma_int_t k;
-    if ( lapackf77_lsame(&uplo, "U") ) {
+    const char* uplo_ = lapack_const( uplo );
+    if ( lapackf77_lsame(uplo_, "U") ) {
         magma_int_t j, jj, jb, mj;
         
         /* go through each column */

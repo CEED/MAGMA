@@ -28,7 +28,7 @@
 #define dW1(id, i, j) (dw[(id)] + ((j)+nb)     *lddw + (i))
 
 extern "C" double
-magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
+magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                   magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
                   magmaDoubleComplex *a,  magma_int_t lda,
                   double *e, magmaDoubleComplex *tau,
@@ -168,7 +168,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
     an element of the vector defining H(i).
     =====================================================================    */
 
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
 
     double mv_time = 0.0;
     magma_int_t i;
@@ -244,7 +244,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
                     magma_zsetvector_async( i, A(0,i), 1, dx[id], 1, stream[id][0] );
 #endif
                 }
-                magmablas_zhemv_mgpu(num_gpus, k, 'U', i, nb0, c_one, da, ldda, 0,
+                magmablas_zhemv_mgpu(num_gpus, k, MagmaUpper, i, nb0, c_one, da, ldda, 0,
                                      dx2, ione, c_zero, dy, ione, dwork, ldwork,
                                      work, W(0, iw), stream );
 
@@ -373,7 +373,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
                 magma_setdevice(0);
                 magma_event_record(start, stream[0][0]);
 #endif
-                magmablas_zhemv_mgpu(num_gpus, k, 'L', i_n, nb0, c_one, da, ldda, offset+i+1,
+                magmablas_zhemv_mgpu(num_gpus, k, MagmaLower, i_n, nb0, c_one, da, ldda, offset+i+1,
                                        dx2, ione, c_zero, dy, ione, dwork, ldwork,
                                        work, W(i+1,i), stream );
 #ifdef PROFILE_SYMV
@@ -462,7 +462,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
+magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
                       magma_int_t n, magma_int_t nb,
                       magmaDoubleComplex alpha,
                       magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
@@ -532,7 +532,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
     }
 #else
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
     magma_int_t i, ii, j, kk, ib, ib0, i_1, i_local, idw;
     magma_int_t i_0=n;
     magma_int_t loffset0 = nb*(offset/(nb*num_gpus));

@@ -26,7 +26,7 @@
 
 static void *magma_zapplyQ_m_parallel_section(void *arg);
 
-static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+static void magma_ztile_bulge_applyQ(magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                      magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
                                      magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt);
 
@@ -108,7 +108,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" magma_int_t
-magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
+magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo,
                         magma_int_t n, magma_int_t nb,
                         magma_int_t ne, magma_int_t Vblksiz,
                         magmaDoubleComplex *Z, magma_int_t ldz,
@@ -200,7 +200,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
          *  use only GPU
          *==========================*/
     } else {
-        magma_zbulge_applyQ_v2_m(nrgpu, 'L', ne, n, nb, Vblksiz, Z, ldz, V, ldv, T, ldt, info);
+        magma_zbulge_applyQ_v2_m(nrgpu, MagmaLeft, ne, n, nb, Vblksiz, Z, ldz, V, ldv, T, ldt, info);
         magma_device_sync();
     }
 
@@ -279,7 +279,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
         timeQgpu = magma_wtime();
         #endif
 
-        magma_zbulge_applyQ_v2_m(nrgpu, 'L', n_gpu, n, nb, Vblksiz, E, lde, V, ldv, T, ldt, &info);
+        magma_zbulge_applyQ_v2_m(nrgpu, MagmaLeft, n_gpu, n, nb, Vblksiz, E, lde, V, ldv, T, ldt, &info);
         magma_device_sync();
 
         #ifdef ENABLE_TIMER
@@ -300,7 +300,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
         magmaDoubleComplex* E_loc = E + (n_gpu+ n_loc * (my_core_id-1))*lde;
         n_loc = min(n_loc,n_cpu - n_loc * (my_core_id-1));
 
-        magma_ztile_bulge_applyQ(my_core_id, 'L', n_loc, n, nb, Vblksiz, E_loc, lde, V, ldv, TAU, T, ldt);
+        magma_ztile_bulge_applyQ(my_core_id, MagmaLeft, n_loc, n, nb, Vblksiz, E_loc, lde, V, ldv, TAU, T, ldt);
         pthread_barrier_wait(barrier);
 
         #ifdef ENABLE_TIMER
@@ -332,7 +332,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)     &(T[(m)])
-static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+static void magma_ztile_bulge_applyQ(magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                      magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
                                      magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt)//, magma_int_t* info)
 {
@@ -394,7 +394,7 @@ static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t
     for (magma_int_t i = 0; i < nbchunk; i++) {
         magma_int_t ib_loc = min(nb_loc, (n_loc - i*nb_loc));
 
-        if (side=='L') {
+        if (side == MagmaLeft) {
             for (bg = nbGblk; bg > 0; bg--) {
                 firstcolj = (bg-1)*Vblksiz + 1;
                 rownbm    = magma_ceildiv((n-(firstcolj+1)),nb);
@@ -425,7 +425,7 @@ static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t
                         printf("ERROR ZUNMQR INFO %d \n", (int) INFO);
                 }
             }
-        } else if (side=='R') {
+        } else if (side == MagmaRight) {
             rownbm    = magma_ceildiv((n-1),nb);
             for (magma_int_t k = 1; k <= rownbm; k++) {
                 ncolinvolvd = min(n-1, k*nb);

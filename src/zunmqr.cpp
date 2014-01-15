@@ -13,7 +13,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr(const char side, const char trans,
+magma_zunmqr(magma_side_t side, magma_trans_t trans,
              magma_int_t m, magma_int_t n, magma_int_t k,
              magmaDoubleComplex *A,    magma_int_t lda,
              magmaDoubleComplex *tau,
@@ -116,8 +116,8 @@ magma_zunmqr(const char side, const char trans,
     
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    char side_[2]  = {side,  0};
-    char trans_[2] = {trans, 0};
+    const char* side_  = lapack_const( side  );
+    const char* trans_ = lapack_const( trans );
 
     magma_int_t nq_i, lddwork;
     magma_int_t i;
@@ -239,9 +239,9 @@ magma_zunmqr(const char side, const char trans,
             /* 1) Put 0s in the upper triangular part of A;
                2) copy the panel from A to the GPU, and
                3) restore A                                      */
-            zpanel_to_q('U', ib, A(i,i), lda, T+ib*ib);
+            zpanel_to_q( MagmaUpper, ib, A(i,i), lda, T+ib*ib);
             magma_zsetmatrix( nq_i, ib, A(i,i), lda, dwork, nq_i );
-            zq_to_panel('U', ib, A(i,i), lda, T+ib*ib);
+            zq_to_panel( MagmaUpper, ib, A(i,i), lda, T+ib*ib);
 
             if (left) {
                 /* H or H' is applied to C(i:m,1:n) */

@@ -25,7 +25,7 @@
 
 extern "C" magma_int_t
 magma_zgeev_m(
-    char jobvl, char jobvr, magma_int_t n,
+    magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *W,
     magmaDoubleComplex *vl, magma_int_t ldvl,
@@ -137,9 +137,9 @@ magma_zgeev_m(
     magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, i__1, i__2, nb;
     magma_int_t scalea, minwrk, irwork, lquery, wantvl, wantvr, select[1];
 
-    char side[2]   = {0, 0};
-    char jobvl_[2] = {jobvl, 0};
-    char jobvr_[2] = {jobvr, 0};
+    const char* side_  = NULL;
+    const char* jobvl_ = lapack_const( jobvl );
+    const char* jobvr_ = lapack_const( jobvr );
 
     irwork = 0;
     *info = 0;
@@ -257,7 +257,7 @@ magma_zgeev_m(
     if (wantvl) {
         /* Want left eigenvectors
          * Copy Householder vectors to VL */
-        side[0] = 'L';
+        side_ = "Left";
         lapackf77_zlacpy( MagmaLowerStr, &n, &n, A, &lda, vl, &ldvl );
 
         /* Generate unitary matrix in VL
@@ -286,14 +286,14 @@ magma_zgeev_m(
         if (wantvr) {
             /* Want left and right eigenvectors
              * Copy Schur vectors to VR */
-            side[0] = 'B';
+            side_ = "Both";
             lapackf77_zlacpy( "F", &n, &n, vl, &ldvl, vr, &ldvr );
         }
     }
     else if (wantvr) {
         /* Want right eigenvectors
          * Copy Householder vectors to VR */
-        side[0] = 'R';
+        side_ = "Right";
         lapackf77_zlacpy( "L", &n, &n, A, &lda, vr, &ldvr );
 
         /* Generate unitary matrix in VR
@@ -339,7 +339,7 @@ magma_zgeev_m(
          * (CWorkspace: need 2*N)
          * (RWorkspace: need 2*N) */
         irwork = ibal + n;
-        lapackf77_ztrevc( side, "B", select, &n, A, &lda, vl, &ldvl,
+        lapackf77_ztrevc( side_, "B", select, &n, A, &lda, vl, &ldvl,
                           vr, &ldvr, &n, &nout, &work[iwrk], &rwork[irwork], &ierr );
     }
 

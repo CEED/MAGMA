@@ -210,7 +210,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     for (i=0; i < nb*nb; i += 4)
         T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
-    magmablas_zlaset( 'F', nb, n, dT, nb );
+    magmablas_zlaset( MagmaFull, nb, n, dT, nb );
 
     // If not enough workspace, use unblocked code
     if ( lwork < iws ) {

@@ -27,7 +27,7 @@ static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaD
                                           magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2);
 
 extern "C" magma_int_t
-magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
+magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
                magmaDoubleComplex *a, magma_int_t lda,
                magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
 {
@@ -96,7 +96,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     
     =====================================================================*/
 
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     double             d_one      = 1.0;
     magmaDoubleComplex    c_one      = MAGMA_Z_ONE;

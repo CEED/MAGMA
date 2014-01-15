@@ -69,7 +69,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
              double* dlamda, double* q2, magma_int_t* indx,
              magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
              double* dwork,
-             char range, double vl, double vu, magma_int_t il, magma_int_t iu,
+             magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
              magma_int_t* info )
 {
 /*
@@ -181,7 +181,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     double d_zero = 0.;
     magma_int_t ione = 1;
     magma_int_t ineg_one = -1;
-    char range_[] = {range, 0};
+    const char* range_ = lapack_const( range );
 
     magma_int_t iil, iiu, rk;
 
@@ -473,7 +473,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             } else {
                 magma_dsetmatrix( n23, rk, Q(ctot[0],iil-1), ldq, ds, n23 );
-                magma_dgemm('N', 'N', n2, rk, n23, d_one, &dq2[iq2], n2, ds, n23, d_zero, dq, lddq);
+                magma_dgemm( MagmaNoTrans, MagmaNoTrans, n2, rk, n23, d_one, &dq2[iq2], n2, ds, n23, d_zero, dq, lddq);
                 magma_dgetmatrix( n2, rk, dq, lddq, Q(n1,iil-1), ldq );
             }
         } else
@@ -486,7 +486,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);
             } else {
                 magma_dsetmatrix( n12, rk, Q(0,iil-1), ldq, ds, n12 );
-                magma_dgemm('N', 'N', n1, rk, n12, d_one, dq2, n1, ds, n12, d_zero, dq, lddq);
+                magma_dgemm( MagmaNoTrans, MagmaNoTrans, n1, rk, n12, d_one, dq2, n1, ds, n12, d_zero, dq, lddq);
                 magma_dgetmatrix( n1, rk, dq, lddq, Q(0,iil-1), ldq );
             }
         } else

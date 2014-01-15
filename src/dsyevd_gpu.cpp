@@ -17,7 +17,7 @@
 #include "timer.h"
 
 extern "C" magma_int_t
-magma_dsyevd_gpu(char jobz, char uplo,
+magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
                  magma_int_t n,
                  double *da, magma_int_t ldda,
                  double *w,
@@ -133,8 +133,8 @@ magma_dsyevd_gpu(char jobz, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    char uplo_[2] = {uplo, 0};
-    char jobz_[2] = {jobz, 0};
+    const char* uplo_ = lapack_const( uplo );
+    const char* jobz_ = lapack_const( jobz );
     magma_int_t ione = 1;
 
     double d__1;
@@ -253,7 +253,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
+    anrm = magmablas_dlansy(MagmaMaxNorm, uplo, n, da, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {
@@ -307,7 +307,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     else {
         timer_start( time );
 
-        magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
+        magma_dstedx(MagmaRangeAll, n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
 

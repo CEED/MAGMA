@@ -13,10 +13,10 @@
 */
 #include "common_magma.h"
 extern "C" void
-magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
+magma_dmove_eig(magma_range_t range, magma_int_t n, double *w, magma_int_t *il,
                      magma_int_t *iu, double vl, double vu, magma_int_t *m)
 {
-    char range_[2] = {range, 0};
+    const char* range_ = lapack_const( range );
 
     magma_int_t valeig, indeig, i;
 

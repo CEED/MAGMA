@@ -30,7 +30,7 @@
 
 extern "C" magma_int_t
 magma_dgeev(
-    char jobvl, char jobvr, magma_int_t n,
+    magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
     double *A, magma_int_t lda,
     double *WR, double *WI,
     double *vl, magma_int_t ldvl,
@@ -144,9 +144,9 @@ magma_dgeev(
     magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, i__1, i__2, nb;
     magma_int_t scalea, minwrk, lquery, wantvl, wantvr, select[1];
 
-    char side[2]   = {0, 0};
-    char jobvl_[2] = {jobvl, 0};
-    char jobvr_[2] = {jobvr, 0};
+    const char* side_  = NULL;
+    const char* jobvl_ = lapack_const( jobvl );
+    const char* jobvr_ = lapack_const( jobvr );
 
     magma_timer_t time_total, time_gehrd, time_unghr, time_hseqr, time_trevc, time_sum;
     magma_flops_t flop_total, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_sum;
@@ -257,7 +257,7 @@ magma_dgeev(
     if (wantvl) {
         /* Want left eigenvectors
          * Copy Householder vectors to VL */
-        side[0] = 'L';
+        side_ = "Left";
         lapackf77_dlacpy( MagmaLowerStr, &n, &n,
                           A, &lda, vl, &ldvl );
 
@@ -290,14 +290,14 @@ magma_dgeev(
         if (wantvr) {
             /* Want left and right eigenvectors
              * Copy Schur vectors to VR */
-            side[0] = 'B';
+            side_ = "Both";
             lapackf77_dlacpy( "F", &n, &n, vl, &ldvl, vr, &ldvr );
         }
     }
     else if (wantvr) {
         /* Want right eigenvectors
          * Copy Householder vectors to VR */
-        side[0] = 'R';
+        side_ = "Right";
         lapackf77_dlacpy( "L", &n, &n, A, &lda, vr, &ldvr );
 
         /* Generate orthogonal matrix in VR
@@ -351,10 +351,10 @@ magma_dgeev(
          * (Workspace: need 4*N) */
         liwrk = lwork - iwrk;
         #if TREVC_VERSION == 1
-        lapackf77_dtrevc( side, "B", select, &n, A, &lda, vl, &ldvl,
+        lapackf77_dtrevc( side_, "B", select, &n, A, &lda, vl, &ldvl,
                           vr, &ldvr, &n, &nout, &work[iwrk], &ierr );
         #elif TREVC_VERSION == 2
-        lapackf77_dtrevc3( side, "B", select, &n, A, &lda, vl, &ldvl,
+        lapackf77_dtrevc3( side_, "B", select, &n, A, &lda, vl, &ldvl,
                            vr, &ldvr, &n, &nout, &work[iwrk], &liwrk, &ierr );
         #endif
     }

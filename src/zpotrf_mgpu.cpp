@@ -12,7 +12,7 @@
 
 
 extern "C" magma_int_t
-magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
+magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                   magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -69,7 +69,7 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
 
 
     magma_int_t     j, nb, d, lddp, h;
-    char            uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex *work;
     int upper = lapackf77_lsame(uplo_, "U");
     magmaDoubleComplex *dwork[MagmaMaxGPUs];

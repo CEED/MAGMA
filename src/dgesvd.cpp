@@ -14,7 +14,7 @@
 #define PRECISION_d
 
 extern "C" magma_int_t
-magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
+magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
              double *A,    magma_int_t lda, double *s,
              double *U,    magma_int_t ldu,
              double *VT,   magma_int_t ldvt,
@@ -145,8 +145,8 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
     
     ===================================================================== */
     
-    char jobu_[2]  = {jobu,  0};
-    char jobvt_[2] = {jobvt, 0};
+    const char* jobu_  = lapack_const( jobu  );
+    const char* jobvt_ = lapack_const( jobvt );
     
     const double c_zero          = MAGMA_D_ZERO;
     const double c_one           = MAGMA_D_ONE;

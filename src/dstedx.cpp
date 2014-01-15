@@ -15,7 +15,7 @@
 
 
 extern "C" magma_int_t
-magma_dstedx(char range, magma_int_t n, double vl, double vu,
+magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
              magma_int_t il, magma_int_t iu, double* d, double* e, double* z, magma_int_t ldz,
              double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
              double* dwork, magma_int_t* info)
@@ -137,7 +137,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
 
     =====================================================================
 */
-    char range_[2] = {range, 0};
+    const char* range_ = lapack_const( range );
 
     double d_zero = 0.;
     double d_one  = 1.;
@@ -275,7 +275,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
                     magma_int_t mm = m-1;
                     lapackf77_dlascl("G", &izero, &izero, &orgnrm, &d_one, &mm, &ione, &e[start], &mm, info);
 
-                    magma_dlaex0( m, &d[start], &e[start], Z(start, start), ldz, work, iwork, dwork, 'A', vl, vu, il, iu, info);
+                    magma_dlaex0( m, &d[start], &e[start], Z(start, start), ldz, work, iwork, dwork, MagmaRangeAll, vl, vu, il, iu, info);
 
                     if ( *info != 0) {
                         return MAGMA_SUCCESS;

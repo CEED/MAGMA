@@ -22,7 +22,7 @@
 #define dA(i, j) (work+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zpotrf(char uplo, magma_int_t n,
+magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -86,7 +86,7 @@ magma_zpotrf(char uplo, magma_int_t n,
 
 
     /* Local variables */
-    char uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
     magma_int_t        ldda, nb;
     magma_int_t j, jb;
     magmaDoubleComplex    c_one     = MAGMA_Z_ONE;

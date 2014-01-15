@@ -25,7 +25,7 @@
 #define dW(i, j) (dw+(j)*lddw + (i))
 
 extern "C" magma_int_t
-magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
+magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
              magmaDoubleComplex *a,  magma_int_t lda,
              double *e, magmaDoubleComplex *tau,
              magmaDoubleComplex *w,  magma_int_t ldw,
@@ -157,7 +157,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
     an element of the vector defining H(i).
     =====================================================================    */
     
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
 
     magma_int_t i;
     

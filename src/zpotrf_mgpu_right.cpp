@@ -15,7 +15,7 @@
 
 extern "C" void
 magma_zherk_mgpu(
-    magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -23,7 +23,7 @@ magma_zherk_mgpu(
     magma_int_t num_streams, magma_queue_t stream[][10]);
 extern "C" void
 magma_zherk_mgpu2(
-    magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -32,7 +32,7 @@ magma_zherk_mgpu2(
 
 
 extern "C" magma_int_t
-magma_zpotrf_mgpu_right(magma_int_t num_gpus, char uplo, magma_int_t n,
+magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.2.1) --
@@ -99,7 +99,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, char uplo, magma_int_t n,
     magmaDoubleComplex mz_one = MAGMA_Z_MAKE( -1.0, 0.0 );
     double             one =  1.0;
     double             m_one = -1.0;
-    char               uplo_[2] = {uplo, 0};
+    const char* uplo_ = lapack_const( uplo );
 
     magma_int_t j, nb, d, id, j_local, blkid, crosspoint, prevj, prevtrsmrows, num_streams = 5;
     magmaDoubleComplex *panel, *tmppanel0, *tmppanel1, *tmppanel, *tmpprevpanel;
@@ -503,7 +503,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, char uplo, magma_int_t n,
 
 extern "C" void
 magma_zherk_mgpu(
-    magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -514,7 +514,7 @@ magma_zherk_mgpu(
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
@@ -586,7 +586,7 @@ magma_zherk_mgpu(
 
 extern "C" void
 magma_zherk_mgpu2(
-    magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -597,7 +597,7 @@ magma_zherk_mgpu2(
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    char uplo_[2]  = {uplo, 0};
+    const char* uplo_  = lapack_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
