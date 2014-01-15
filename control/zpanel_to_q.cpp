@@ -14,7 +14,7 @@
 // Put 0s in the upper triangular part of a panel and 1s on the diagonal.
 // Stores previous values in work array, to be restored later with zq_to_panel.
 extern "C"
-void zpanel_to_q(char uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work)
+void zpanel_to_q(magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work)
 {
     int i, j, k = 0;
     magmaDoubleComplex *col;
@@ -54,7 +54,7 @@ void zpanel_to_q(char uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t l
 // -------------------------
 // Restores a panel, after call to zpanel_to_q.
 extern "C"
-void zq_to_panel(char uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work)
+void zq_to_panel(magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work)
 {
     int i, j, k = 0;
     magmaDoubleComplex *col;
