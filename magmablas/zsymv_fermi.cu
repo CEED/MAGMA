@@ -919,7 +919,7 @@ void magmablas_zsymv_fermi_L(
 extern "C"
 magma_int_t
 magmablas_zsymv(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
     const magmaDoubleComplex *A, magma_int_t lda,
     const magmaDoubleComplex *x, magma_int_t incx,
@@ -1030,7 +1030,7 @@ magmablas_zsymv(
 extern "C"
 magma_int_t
 magmablas_zsymv_work(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
     const magmaDoubleComplex *A, magma_int_t lda,
     const magmaDoubleComplex *x, magma_int_t incx,

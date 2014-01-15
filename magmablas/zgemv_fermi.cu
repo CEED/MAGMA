@@ -348,7 +348,7 @@ magmablas_zgemvc_fermi(
 
 extern "C" void
 magmablas_zgemv(
-    char trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    magma_trans_t trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
     const magmaDoubleComplex *A, magma_int_t lda,
     const magmaDoubleComplex *x, magma_int_t incx,
     magmaDoubleComplex beta,

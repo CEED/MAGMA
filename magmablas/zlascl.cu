@@ -37,7 +37,7 @@ u_zlascl (int m, int n, double mul, magmaDoubleComplex* A, int lda){
 
 
 extern "C" void
-magmablas_zlascl(char type, magma_int_t kl, magma_int_t ku, 
+magmablas_zlascl(magma_uplo_t type, magma_int_t kl, magma_int_t ku, 
                  double cfrom, double cto,
                  magma_int_t m, magma_int_t n, 
                  magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info )
@@ -63,5 +63,3 @@ magmablas_zlascl(char type, magma_int_t kl, magma_int_t ku,
        exit(1);
     }
 }
-
-

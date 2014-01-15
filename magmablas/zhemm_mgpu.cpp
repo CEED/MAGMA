@@ -18,7 +18,7 @@
 
 extern "C"
 void magmablas_zhemm_mgpu_com(
-    char side, char uplo, magma_int_t m, magma_int_t n,
+    magma_side_t side, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
     magmaDoubleComplex *dA[],    magma_int_t ldda,  magma_int_t offset,
     magmaDoubleComplex *dB[],    magma_int_t lddb,
@@ -40,6 +40,10 @@ void magmablas_zhemm_mgpu_com(
     //printf("                      start zhemm                   \n");
     //printf("####################################################\n");
    
+    if ( side != MagmaLeft || uplo != MagmaLower ) {
+        fprintf( stderr, "%s: only Left Lower implemented\n", __func__ );
+    }
+    
     assert( ldda >= m );
     assert( lddb >= m );
     assert( lddc >= m );

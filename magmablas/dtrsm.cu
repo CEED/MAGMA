@@ -28,7 +28,7 @@
 #define NB 128        // outer blocking size, >BLOCK_SIZE
 
 __global__ void
-diag_dtrtri_kernel_upper(char diag, const double *A, double *d_dinvA, int lda)
+diag_dtrtri_kernel_upper(magma_diag_t diag, const double *A, double *d_dinvA, int lda)
 {
     int i, j;
     double Ystx = 0;
@@ -88,7 +88,7 @@ diag_dtrtri_kernel_upper(char diag, const double *A, double *d_dinvA, int lda)
 }
 
 __global__ void
-diag_dtrtri_kernel_lower(char diag, const double *A, double *d_dinvA, int lda)
+diag_dtrtri_kernel_lower(magma_diag_t diag, const double *A, double *d_dinvA, int lda)
 {
     int i, j;
     double Ystx=0;
@@ -1765,7 +1765,7 @@ b_copy_kernel (int M, int N, double *b, int ldb, double *d_x, int ldx)
 }
 
 extern "C"
-void diag_dtrtri (magma_int_t M, char uplo, char diag, const double *A, double *d_dinvA, magma_int_t lda)
+void diag_dtrtri (magma_int_t M, magma_uplo_t uplo, magma_diag_t diag, const double *A, double *d_dinvA, magma_int_t lda)
 {
     int nblocks = M/BLOCK_SIZE + (M % BLOCK_SIZE != 0);
 
@@ -1838,7 +1838,7 @@ void diag_dtrtri (magma_int_t M, char uplo, char diag, const double *A, double *
  */
 extern "C"
 void magmablas_dtrsm(
-    char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
+    magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag, magma_int_t M, magma_int_t N,
     double alpha,
     const double* A, magma_int_t lda,
     double* b, magma_int_t ldb )
@@ -1890,15 +1890,15 @@ void magmablas_dtrsm(
 
             Unchanged on exit.
 
-    tran    CHARACTER*1.
-            On entry, tran specifies the form of op( A ) to be used in
+    transA  CHARACTER*1.
+            On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
 
-                tran = 'N' or 'n'   op( A ) = A.
+                transA = 'N' or 'n'   op( A ) = A.
 
-                tran = 'T' or 't'   op( A ) = A^T.
+                transA = 'T' or 't'   op( A ) = A^T.
 
-                tran = 'C' or 'c'   op( A ) = A^T.
+                transA = 'C' or 'c'   op( A ) = A^T.
 
             Unchanged on exit.
 
@@ -1981,7 +1981,7 @@ void magmablas_dtrsm(
         cudaMemset(d_dinvA, 0, NB*((M/NB)+(M % NB != 0))*NB*sizeof(double));
         diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
 
-        if (tran == 'N' || tran == 'n') {
+        if (transA == 'N' || transA == 'n') {
             /* the non-transpose case */
             if (uplo == 'L' || uplo == 'l') {
                 /* the lower case */
@@ -2103,7 +2103,7 @@ void magmablas_dtrsm(
         cudaMemset(d_dinvA, 0, NB*((N/NB)+(N % NB != 0))*NB*sizeof(double));
         diag_dtrtri (N, uplo, diag, A, d_dinvA, lda);
 
-        if (tran == 'N' || tran == 'n') {
+        if (transA == 'N' || transA == 'n') {
             /* the non-transpose case */
             if (uplo == 'L' || uplo == 'l') {
                 /* the lower case */

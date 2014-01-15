@@ -44,7 +44,7 @@ zlacpy_kernel(
 /* ===================================================================== */
 extern "C" void
 magmablas_zlacpy(
-    char uplo, magma_int_t m, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *dA, magma_int_t ldda,
     magmaDoubleComplex       *dB, magma_int_t lddb )
 {

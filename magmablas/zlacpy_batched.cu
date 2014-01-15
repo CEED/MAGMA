@@ -49,7 +49,7 @@ zlacpy_batched_kernel(
 /* ===================================================================== */
 extern "C" void
 magmablas_zlacpy_batched(
-    char uplo, magma_int_t m, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
     magmaDoubleComplex              **dBarray, magma_int_t lddb,
     magma_int_t batchCount )

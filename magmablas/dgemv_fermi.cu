@@ -199,7 +199,7 @@ magmablas_dgemvt_fermi(
 
 extern "C"
 void magmablas_dgemv(
-    char trans, magma_int_t m, magma_int_t n,
+    magma_trans_t trans, magma_int_t m, magma_int_t n,
     double alpha,
     const double *A, magma_int_t lda,
     const double *x, magma_int_t incx,

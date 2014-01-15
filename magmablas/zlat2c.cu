@@ -623,7 +623,7 @@ u_zlat2c_special (
 
 extern "C" void
 mzlat2c(
-    char uplo, magma_int_t m,
+    magma_uplo_t uplo, magma_int_t m,
     const magmaDoubleComplex *A,  magma_int_t lda,
     magmaFloatComplex        *SA, magma_int_t ldsa,
     magma_int_t *info)
@@ -671,7 +671,7 @@ mzlat2c(
 */
 extern "C" void
 magmablas_zlat2c(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     const magmaDoubleComplex *A,  magma_int_t lda,
     magmaFloatComplex        *SA, magma_int_t ldsa,
     magma_int_t *info)
@@ -967,7 +967,7 @@ u_zlat2c_special (
 
 extern "C" void
 mzlat2c(
-    char uplo, magma_int_t m,
+    magma_uplo_t uplo, magma_int_t m,
     const magmaDoubleComplex *A,  magma_int_t lda,
     magmaFloatComplex        *SA, magma_int_t ldsa,
     magma_int_t *info)
@@ -1015,7 +1015,7 @@ mzlat2c(
 */
 extern "C" void
 magmablas_zlat2c(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     const magmaDoubleComplex *A,  magma_int_t lda,
     magmaFloatComplex        *SA, magma_int_t ldsa,
     magma_int_t *info)

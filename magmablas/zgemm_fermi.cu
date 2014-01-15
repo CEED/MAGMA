@@ -31,7 +31,7 @@
 
 extern "C" void
 magmablas_zgemm(
-    char TRANSA, char TRANSB, magma_int_t m, magma_int_t n, magma_int_t k,
+    magma_trans_t TRANSA, magma_trans_t TRANSB, magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     const magmaDoubleComplex *d_A, magma_int_t lda,
     const magmaDoubleComplex *d_B, magma_int_t ldb,

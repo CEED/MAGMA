@@ -12,7 +12,7 @@
 
 extern "C" void
 magmablas_dgemm_tesla(
-    char transA, char transB, magma_int_t m, magma_int_t n, magma_int_t k,
+    magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k,
     double alpha,
     const double *A, magma_int_t lda,
     const double *B, magma_int_t ldb,
@@ -34,7 +34,7 @@ magmablas_dgemm_tesla(
     
     where op( X ) is one of
     
-        op( X ) = X   or   op( X ) = X',
+        op( X ) = X   or   op( X ) = X**T,
     
     alpha and beta are scalars, and A, B and C are matrices, with op( A )
     an m by k matrix,  op( B ) a k by n matrix and C an m by n matrix.
@@ -139,8 +139,8 @@ magmablas_dgemm_tesla(
     if ( m == 0 || n == 0 || ((alpha == 0.0 || k == 0) && beta == 1.0) ) {
         return;
     }
-    transA = toupper( transA );
-    transB = toupper( transB );
+    transA = (magma_trans_t)toupper( transA );
+    transB = (magma_trans_t)toupper( transB );
     if ( alpha == 0.0 ) {
         if ( beta == 0.0 ) {
             magmablas_dgemm_ab_0(

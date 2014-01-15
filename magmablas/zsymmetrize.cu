@@ -60,7 +60,7 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
 
 
 extern "C" void
-magmablas_zsymmetrize( char uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
+magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
 {
 /*
     Purpose

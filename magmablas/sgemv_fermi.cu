@@ -378,7 +378,7 @@ magmablas_sgemvt_fermi(
 
 extern "C" void
 magmablas_sgemv(
-    char trans, magma_int_t m, magma_int_t n,
+    magma_trans_t trans, magma_int_t m, magma_int_t n,
     float alpha,
     const float *A, magma_int_t lda,
     const float *x, magma_int_t incx,

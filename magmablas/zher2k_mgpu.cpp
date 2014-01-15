@@ -155,7 +155,7 @@
 
 extern "C"
 void magmablas_zher2k_mgpu2(
-    char uplo, char trans, magma_int_t n, magma_int_t k,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t lda, magma_int_t aoffset,
                            magmaDoubleComplex *dB[], magma_int_t ldb, magma_int_t boffset,
     double beta,           magmaDoubleComplex *dC[], magma_int_t ldc, magma_int_t coffset,

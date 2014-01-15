@@ -1301,7 +1301,7 @@ ssyr2k_kernel_odd_special(
 
 extern "C" void
 magmablas_ssyr2k(
-    char uplo, char trans, magma_int_t m, magma_int_t k,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t m, magma_int_t k,
     float alpha,
     const float *A, magma_int_t lda,
     const float *B, magma_int_t ldb,
@@ -1341,6 +1341,11 @@ magmablas_ssyr2k(
     magma_int_t flag = 1;
     if ( lda >= 1024 && lda % 256 == 0 )
         flag = 1; // It was kept to reorder the GPUs internal scheduling of thread blocks.
+    
+    if ( uplo != MagmaLower || trans != MagmaNoTrans ) {
+        fprintf( stderr, "%s: only Lower NoTrans implemented\n", __func__ );
+        return;
+    }
     
     if ( m % block_M == 0 ) {
         if ( in & 1 ) {

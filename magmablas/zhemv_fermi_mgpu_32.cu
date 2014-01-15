@@ -969,7 +969,7 @@ void magmablas_zhemv_fermi_U_mgpu_offset_32(
 extern "C"
 magma_int_t
 magmablas_zhemv_mgpu_32_offset(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
     magmaDoubleComplex **A, magma_int_t lda,
     magmaDoubleComplex **x, magma_int_t incx,
@@ -1069,7 +1069,7 @@ magmablas_zhemv_mgpu_32_offset(
 extern "C"
 magma_int_t
 magmablas_zhemv2_mgpu_32_offset(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
     magmaDoubleComplex **A, magma_int_t lda,
     magmaDoubleComplex **x, magma_int_t incx,
@@ -1167,7 +1167,7 @@ magmablas_zhemv2_mgpu_32_offset(
 extern "C"
 magma_int_t
 magmablas_zhemv2_mgpu_32(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
     magmaDoubleComplex **A, magma_int_t lda,
     magmaDoubleComplex **x, magma_int_t incx,

@@ -68,7 +68,7 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
 
 
 extern "C" void
-magmablas_zsymmetrize_tiles( char uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+magmablas_zsymmetrize_tiles( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
                              magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
 {
 /*
