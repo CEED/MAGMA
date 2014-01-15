@@ -45,16 +45,13 @@ extern __shared__ magmaDoubleComplex shared[];
         int max_ = (d_rowlength[i]+T-1)/T;  // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
-            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];
-            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];
+            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  // original code in paper
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];             // original code in paper
             magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
             int col = d_colind [ k*(T)+(i*alignment)+idp ];
-            dot += val * d_x[col ];
+            dot += val * d_x[ col ];
         }
-        d_y[i] = (shared[idb])*alpha + beta*d_y [i];
         shared[idb]  = dot;
-        d_y[i] = (shared[idb])*alpha + beta*d_y [i];
-
         if( idp < 16 ){
             shared[idb]+=shared[idb+16];
             if( idp < 8 ) shared[idb]+=shared[idb+8];
