@@ -73,6 +73,7 @@ const char *usage =
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
+"  -[TC]            transA = Trans or ConjTrans. Default is NoTrans. Doesn't change transB.\n"
 "  -S[LR]           side   = Left*, Right.\n"
 "  -D[NU]           diag   = NonUnit*, Unit.\n"
 "  -U[NASO]         jobu   = No*, All, Some, or Overwrite; compute left  singular vectors.\n"
@@ -308,6 +309,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         else if ( strcmp("-CN", argv[i]) == 0 ) { opts->transA = MagmaConjTrans; opts->transB = MagmaNoTrans;   }
         else if ( strcmp("-CT", argv[i]) == 0 ) { opts->transA = MagmaConjTrans; opts->transB = MagmaTrans;     }
         else if ( strcmp("-CC", argv[i]) == 0 ) { opts->transA = MagmaConjTrans; opts->transB = MagmaConjTrans; }
+        else if ( strcmp("-T",  argv[i]) == 0 ) { opts->transA = MagmaTrans;     }
+        else if ( strcmp("-C",  argv[i]) == 0 ) { opts->transA = MagmaConjTrans; }
         
         else if ( strcmp("-SL", argv[i]) == 0 ) { opts->side  = MagmaLeft;  }
         else if ( strcmp("-SR", argv[i]) == 0 ) { opts->side  = MagmaRight; }
