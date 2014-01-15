@@ -31,6 +31,7 @@ ZSRC := \
 	testing_zher2k_mgpu.cpp	\
 	\
 	testing_auxiliary.cpp	\
+	testing_constants.cpp	\
 	testing_parse_opts.cpp	\
 	testing_zblas.cpp	\
 	testing_zgeadd.cpp	\
