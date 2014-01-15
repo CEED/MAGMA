@@ -15,7 +15,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr_gpu_2stages(const magma_side_t side, const magma_trans_t trans,
+magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
                          magma_int_t m, magma_int_t n, magma_int_t k,
                          magmaDoubleComplex *da,   magma_int_t ldda,
                          magmaDoubleComplex *dc,    magma_int_t lddc,
