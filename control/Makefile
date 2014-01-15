@@ -30,6 +30,7 @@ SRC := \
 	auxiliary.cpp		\
 	bulge_auxiliary.cpp	\
 	connection_mgpu.cpp	\
+	constants.cpp		\
 	get_nb.cpp		\
 	magma_threadsetting.cpp	\
 	magmawinthread.cpp	\
