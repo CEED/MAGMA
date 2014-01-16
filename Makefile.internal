@@ -101,6 +101,9 @@ FOPTS += $(PTROPT)
 %.i: %.c
 	$(CC) $(OPTS) $(INC_MAGMA) -E $< -o $@
 
+%.i: %.cu
+	$(NVCC) $(NVOPTS) $(INC_MAGMA) -E $< -o $@
+
 # force headers to pre-process as C++
 %.i: %.h
 	$(CXX) $(OPTS) $(INC_MAGMA) -E $< -o $@
