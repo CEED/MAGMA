@@ -53,7 +53,7 @@ int main( int argc, char** argv)
 
     magma_vec_t jobs[] = { MagmaNoVec, MagmaSomeVec, MagmaOverwriteVec, MagmaAllVec };
     
-    if ( opts.check && (jobu == 'N' || jobvt == 'N')) {
+    if ( opts.check && (jobu == MagmaNoVec || jobvt == MagmaNoVec)) {
         printf( "NOTE: some checks require that singular vectors are computed;\n"
                 "      set both jobu (option -U[NASO]) and jobvt (option -V[NASO]) to be S, O, or A.\n\n" );
     }

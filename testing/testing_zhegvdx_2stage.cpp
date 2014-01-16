@@ -30,6 +30,7 @@
 #define PRECISION_z
 
 #define absv(v1) ((v1)>0? (v1): -(v1))
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */
@@ -117,7 +118,7 @@ int main( int argc, char** argv)
             magma_int_t il = 0;
             magma_int_t iu = 0;
 
-            if (range == 'I') {
+            if (range == MagmaRangeI) {
                 il = 1;
                 iu = (int) (opts.fraction*N);
             }

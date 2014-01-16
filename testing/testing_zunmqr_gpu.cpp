@@ -58,7 +58,7 @@ int main( int argc, char** argv )
             nb  = magma_get_zgeqrf_nb( m );
             ldc = ((m + 31)/32)*32;
             lda = ((max(m,n) + 31)/32)*32;
-            gflops = FLOPS_ZUNMQR( m, n, k, *lapack_const( side[iside] ) ) / 1e9;
+            gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
                 printf( "%5d %5d %5d  %-5s  %-9s   skipping because side=left and m < k\n",
