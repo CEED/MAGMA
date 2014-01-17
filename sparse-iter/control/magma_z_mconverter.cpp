@@ -27,16 +27,6 @@
 using namespace std;
 
 
-
-
-
-
-
-
-
-
-
-
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -52,12 +42,26 @@ using namespace std;
     Arguments
     =========
 
+    magmaDoubleComplex ** val           input val pointer to compress
+    magma_int_t ** row                  input row pointer to modify
+    magma_int_t ** col                  input col pointer to compress
+    magmaDoubleComplex ** valn          output val pointer
+    magma_int_t ** rown                 output row pointer
+    magma_int_t ** coln                 output col pointer
+    magma_int_t *n                      number of rows in matrix
 
 
-    =====================================================================  */
+
+    ========================================================================  */
 
 
-magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row, magma_int_t ** col, magmaDoubleComplex ** valn, magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n)
+magma_int_t magma_z_csr_compressor( magmaDoubleComplex ** val, 
+                                    magma_int_t ** row, 
+                                    magma_int_t ** col, 
+                                    magmaDoubleComplex ** valn, 
+                                    magma_int_t ** rown, 
+                                    magma_int_t ** coln, 
+                                    magma_int_t *n)
 {
     magma_int_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
     magma_imalloc_cpu( &(row_nnz), (*n) );
@@ -114,7 +118,6 @@ magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row
 
     Converter between different sparse storage formats.
 
-
     Arguments
     =========
 
@@ -123,7 +126,7 @@ magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row
     magma_storage_t old_format           original storage format
     magma_storage_t new_format           new storage format
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t 
 magma_z_mconvert( magma_z_sparse_matrix A, 
@@ -154,8 +157,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 if(length[i] > maxrowlength)
                      maxrowlength = length[i];
             }
-            //printf( "Conversion to ELLPACK with %d elements per row: ", maxrowlength );
-
+            //printf( "Conversion to ELLPACK with %d elements per row: ",
+                                                            // maxrowlength );
+            //fflush(stdout);
              magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
              magma_imalloc_cpu( &B->col, maxrowlength*A.num_rows );
              for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++){
@@ -224,7 +228,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                      maxrowlength = length[i];
             }
             magma_free_cpu( length );
-            //printf( "Conversion to ELLPACKT with %d elements per row: ", maxrowlength );
+            //printf( "Conversion to ELLPACKT with %d elements per row: ",
+                                                           // maxrowlength );
             //fflush(stdout);
             magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
             magma_imalloc_cpu( &B->col, maxrowlength*A.num_rows );
@@ -377,8 +382,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             int size_b = B->blocksize;
-            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
-            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
+            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     
+                            // max number of blocks per row
+            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     
+                            // max number of blocks per column
             //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
          
             magma_imalloc_cpu( &B->blockinfo, c_blocks * r_blocks );
@@ -442,18 +449,22 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 for( j=A.row[i]; j<A.row[i+1]; j++ ){
                     k = floor(i / size_b);
                     l = floor(A.col[j] / size_b);
-                    //      find correct block + take row into account + correct column
-                    B->val[ (B->blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
+                // find correct block + take row into account + correct column
+                    B->val[ (B->blockinfo(k,l)-1) * size_b * size_b + i%size_b 
+                                        * size_b + A.col[j]%size_b ] = A.val[j];
                 }
             } 
 
-            // the values are now handled special: we want to transpose each block to be in MAGMA format
+            // the values are now handled special: we want to transpose 
+                                        //each block to be in MAGMA format
             magmaDoubleComplex *transpose;
             magma_zmalloc( &transpose, size_b*size_b );
             for( magma_int_t i=0; i<B->numblocks; i++ ){
-                cudaMemcpy( transpose, B->val+i*size_b*size_b,  size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                cudaMemcpy( transpose, B->val+i*size_b*size_b, 
+        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
-                cudaMemcpy( B->val+i*size_b*size_b, transpose, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+                cudaMemcpy( B->val+i*size_b*size_b, transpose, 
+        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
             }
             /*
             printf("blockinfo for blocksize %d:\n", size_b);
@@ -502,14 +513,17 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t size_b = A.blocksize;
-            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
-            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
-            //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);fflush(stdout);
-
+            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     
+                // max number of blocks per row
+            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     
+                // max number of blocks per column
+            //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
+            //fflush(stdout);
             magmaDoubleComplex *val_tmp;      
             magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
             magma_int_t *row_tmp;            
-            magma_imalloc_cpu( &row_tmp, r_blocks*size_b+1 );   // larger than the final size due to overhead blocks
+            magma_imalloc_cpu( &row_tmp, r_blocks*size_b+1 );   
+                // larger than the final size due to overhead blocks
             magma_int_t *col_tmp;            
             magma_imalloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
             if( col_tmp == NULL || val_tmp == NULL || row_tmp == NULL ){
@@ -528,18 +542,22 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 }
             }
             if( r_blocks * size_b == A.num_rows ){
-                // in this case the last entry of the row-pointer has to be filled manually
+                // in this case the last entry of the row-pointer 
+                        //has to be filled manually
                 row_tmp[r_blocks*size_b] = A.row[r_blocks] * size_b * size_b;
             }
 
-            // the val pointer has to be handled special: we need to transpose each block back to row-major
+            // the val pointer has to be handled special: we need to transpose 
+                        //each block back to row-major
             magmaDoubleComplex *transpose, *val_tmp2;
             magma_zmalloc( &transpose, size_b*size_b );
             magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
             for( magma_int_t i=0; i<A.numblocks; i++ ){
-                cudaMemcpy( transpose, A.val+i*size_b*size_b, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                cudaMemcpy( transpose, A.val+i*size_b*size_b, 
+        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
-                cudaMemcpy( val_tmp2+i*size_b*size_b, transpose, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+                cudaMemcpy( val_tmp2+i*size_b*size_b, transpose, 
+        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
             }
 
             // fill col and val
@@ -548,15 +566,17 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 for( i=A.row[j]; i<A.row[j+1]; i++){ // submatrix blocks
                     for( k =0; k<size_b; k++){ // row in submatrix
                         for( l =0; l<size_b; l++){ // col in submatrix
-                            // offset due to col in submatrix: l
-                            // offset due to submatrix block (in row): (i-A.row[j])*size_b
-                            // offset due to submatrix row: size_b*k*(A.row[j+1]-A.row[j])
-                            // offset due to submatrix block row: size_b*size_b*(A.row[j])
-                            col_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
-                                   = A.col[i] * size_b + l;
-                            val_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
-                                   = val_tmp2[index];
-                            index++;
+            // offset due to col in submatrix: l
+            // offset due to submatrix block (in row): (i-A.row[j])*size_b
+            // offset due to submatrix row: size_b*k*(A.row[j+1]-A.row[j])
+            // offset due to submatrix block row: size_b*size_b*(A.row[j])
+            col_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) 
+                            + size_b*size_b*(A.row[j]) ] 
+                   = A.col[i] * size_b + l;
+            val_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) 
+                            + size_b*size_b*(A.row[j]) ] 
+                   = val_tmp2[index];
+            index++;
                         }  
                     }
                 }
@@ -589,19 +609,12 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             printf( "done.\n" );      
             return MAGMA_SUCCESS; 
         }
-
         else{
-
             printf("error: format not supported.\n");
             return MAGMA_ERR_NOT_SUPPORTED;
-
         }
-     
-
     } // end CPU case
-
     else if( A.memory_location == Magma_DEV ){
-
         // CSR to DENSE    
         if( old_format == Magma_CSR && new_format == Magma_DENSE ){
             // fill in information for B
@@ -629,7 +642,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                                 B->val, A.num_rows );
             return MAGMA_SUCCESS; 
         }
-    
         // DENSE to CSR    
         if( old_format == Magma_DENSE && new_format == Magma_CSR ){
             // fill in information for B
@@ -705,8 +717,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             if (NULL != nnzTotalDevHostPtr){
                 nnzb = *nnzTotalDevHostPtr;
             }else{
-                cudaMemcpy(&nnzb, B->row+mb, sizeof(int), cudaMemcpyDeviceToHost);
-                cudaMemcpy(&base, B->row  , sizeof(int), cudaMemcpyDeviceToHost);
+                cudaMemcpy(&nnzb, B->row+mb, sizeof(int), 
+                                        cudaMemcpyDeviceToHost);
+                cudaMemcpy(&base, B->row  , sizeof(int), 
+                                        cudaMemcpyDeviceToHost);
                 nnzb -= base;
             }
             B->numblocks = nnzb; // number of blocks
@@ -848,8 +862,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->row, B->nnz );
             magma_imalloc( &B->col, B->nnz );
 
-            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
+                                                    cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), 
+                                                    cudaMemcpyDeviceToDevice );
 
             // conversion using CUSPARSE
             cusparseXcsr2coo( cusparseHandle, A.row,
@@ -881,8 +897,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->row, B->nnz );
             magma_imalloc( &B->col, B->nnz );
 
-            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
+                                                    cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), 
+                                                    cudaMemcpyDeviceToDevice );
 
             // conversion using CUSPARSE
             cusparseXcoo2csr( cusparseHandle, A.row,
@@ -891,9 +909,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             return MAGMA_SUCCESS; 
         }
-
-
-
         else{
              printf("error: format not supported.\n");
              return MAGMA_ERR_NOT_SUPPORTED;

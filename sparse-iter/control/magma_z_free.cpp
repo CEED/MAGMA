@@ -47,9 +47,9 @@ using namespace std;
     Arguments
     =========
 
-    magma_z_vector x                     vector to free    
+    magma_z_vector *x                     vector to free    
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t 
 magma_z_vfree( magma_z_vector *x ){
@@ -75,6 +75,24 @@ magma_z_vfree( magma_z_vector *x ){
 }
 
 
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Free the memory of a magma_z_sparse_matrix.
+
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix *A                     matrix to free    
+
+    ========================================================================  */
 
 magma_int_t 
 magma_z_mfree( magma_z_sparse_matrix *A ){

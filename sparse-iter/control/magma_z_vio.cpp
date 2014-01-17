@@ -47,7 +47,7 @@ using namespace std;
     magma_int_t offset                   start inex of visualization
     magma_int_t displaylength            number of entries to visualize       
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C"
 magma_int_t
@@ -55,7 +55,8 @@ magma_z_vvisu(      magma_z_vector x,
                     magma_int_t offset, 
                     magma_int_t displaylength ){
 
-    printf("visualize entries %d - %d of vector ", offset, offset+displaylength, x);
+    printf("visualize entries %d - %d of vector ", 
+                    offset, offset+displaylength, x);
     fflush(stdout);  
     if( x.memory_location == Magma_CPU ){
         printf("located on CPU:\n");
@@ -97,7 +98,7 @@ magma_z_vvisu(      magma_z_vector x,
     magma_int_t length                   length of vector
     char filename                        file where vector is stored
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 // small helper function

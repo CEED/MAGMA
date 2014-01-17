@@ -48,7 +48,7 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
 
     magma_z_sparse_matrix *A              sparse matrix     
 
-    =====================================================================  */
+    ========================================================================  */
 
     // check whether matrix on CPU
     if( A->memory_location == Magma_CPU ){
@@ -106,7 +106,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
     Purpose
     =======
 
-    Computes the diameter of a sparse matrix and inserts the value.
+    Computes the diameter of a sparse matrix and stores the value in diameter.
 
 
     Arguments
@@ -114,7 +114,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
 
     magma_z_sparse_matrix *A              sparse matrix     
 
-    =====================================================================  */
+    ========================================================================  */
 
     // check whether matrix on CPU
     if( A->memory_location == Magma_CPU ){

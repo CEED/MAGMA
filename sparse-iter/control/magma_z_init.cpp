@@ -52,7 +52,7 @@ using namespace std;
     magma_int_t num_rows                 desired length of vector      
     magmaDoubleComplex values            entries in vector
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t 
 magma_z_vinit(    magma_z_vector *x, 

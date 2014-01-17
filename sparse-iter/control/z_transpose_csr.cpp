@@ -25,9 +25,6 @@
 
 using namespace std;
 
-
-magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t nnz, magmaDoubleComplex *val, magma_int_t *row, magma_int_t *col, magma_int_t *new_n_rows, magma_int_t *new_n_cols, magma_int_t *new_nnz, magmaDoubleComplex **new_val, magma_int_t **new_row, magma_int_t **new_col ){
-
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -56,7 +53,22 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
     magma_int_t **new_row                row pointer of transposed matrix
     magma_int_t **new_col                column indices of transposed matrix
 
-    =====================================================================  */
+    ========================================================================  */
+
+magma_int_t z_transpose_csr(    magma_int_t n_rows, 
+                                magma_int_t n_cols, m
+                                agma_int_t nnz, 
+                                magmaDoubleComplex *val, 
+                                magma_int_t *row, 
+                                magma_int_t *col, 
+                                magma_int_t *new_n_rows, 
+                                magma_int_t *new_n_cols, 
+                                magma_int_t *new_nnz, 
+                                magmaDoubleComplex **new_val, 
+                                magma_int_t **new_row, 
+                                magma_int_t **new_col ){
+
+
 
   nnz = row[n_rows];
   *new_n_rows = n_cols;
@@ -68,7 +80,8 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
   valtemp =(magmaDoubleComplex**)malloc((n_rows)*sizeof(magmaDoubleComplex*));
   coltemp =(magma_int_t**)malloc((n_rows)*sizeof(magma_int_t*));
 
-  //temporary 2-dimensional arrays valtemp/coltemp where val[i] is the array with the values of the i-th column of the matrix
+  // temporary 2-dimensional arrays valtemp/coltemp 
+  // where val[i] is the array with the values of the i-th column of the matrix
   magma_int_t nnztemp[n_rows];
   for( magma_int_t i=0; i<n_rows; i++ )
     nnztemp[i]=0;
@@ -76,7 +89,8 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
     nnztemp[col[i]]++;    
 
   for( magma_int_t i=0; i<n_rows; i++ ){
-    valtemp[i] = (magmaDoubleComplex*)malloc((nnztemp[i])*sizeof(magmaDoubleComplex));
+    valtemp[i] = 
+        (magmaDoubleComplex*)malloc((nnztemp[i])*sizeof(magmaDoubleComplex));
     coltemp[i] = (magma_int_t*)malloc(nnztemp[i]*sizeof(magma_int_t));
   }
 
@@ -125,7 +139,8 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_CSR ){
-            z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, &(B->num_rows), &(B->num_cols), &(B->nnz), &(B->val), &(B->row), &(B->col) );
+            z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, 
+  &(B->num_rows), &(B->num_cols), &(B->nnz), &(B->val), &(B->row), &(B->col) );
             B->memory_location = Magma_CPU;
             B->storage_type = Magma_CSR;
         }
