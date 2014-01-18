@@ -19,6 +19,12 @@ ZSRC := \
 	magma_z_mpksetup.cu	\
 	magma_clag2z.cpp	\
 	magma_zlag2c.cpp	\
+	zbcsrswp.cu		\
+	zbcsrtrsv.cu		\
+    zbcsrcpy.cu         \
+    zbcsrlugemm.cu      \
+    zbcsrlupivloc.cu      \
+    zbcsrblockinfo.cu      \
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu		\
@@ -33,14 +39,7 @@ ZSRC := \
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
 	zmgeelltmv.cu		\
-	zpipelinedgmrescopyscale.cu	\
-	zpipelinedgs.cu		\
-	zbcsrswp.cu		\
-	zbcsrtrsv.cu		\
-    zbcsrcpy.cu         \
-    zbcsrlugemm.cu      \
-    zbcsrlupivloc.cu      \
-    zbcsrblockinfo.cu      \
+
 
 -include Makefile.local
 -include Makefile.src
