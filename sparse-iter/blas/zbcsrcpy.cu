@@ -83,7 +83,7 @@ zbcsrvalzro_kernel(
     magmaDoubleComplex **Aval       pointers to the nonzero blocks in B
     magmaDoubleComplex **Aval       pointers to the zero blocks in B
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zbcsrvalcpy(  magma_int_t size_b, 

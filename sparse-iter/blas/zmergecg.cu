@@ -17,6 +17,9 @@
 
 
 // These routines merge multiple kernels from zmergecg into one
+// for a description see 
+// "Reformulated Conjugate Gradient for the Energy-Aware 
+// Solution of Linear Systems on GPUs (ICPP '13)
 
 // accelerated reduction for one vector
 __global__ void 
@@ -335,8 +338,10 @@ magma_zcgmerge_spmvellpackrt_kernel(
         int max_ = (d_rowlength[i]+T-1)/T;  // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
-            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  // original code in paper
-            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];             // original code in paper
+            // original code in paper (does not work for me)
+            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];             
+            // my replacement
             magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
             int col = d_colind [ k*(T)+(i*alignment)+idp ];
             dot += val * d[ col ];
@@ -460,7 +465,7 @@ magma_zcg_rhokernel(
     magmaDoubleComplex *d_z             input vector z
     magmaDoubleComplex *skp             array for parameters ( skp[3]=rho )
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zcgmerge_spmv1(  
@@ -494,6 +499,9 @@ magma_zcgmerge_spmv1(
         magma_zcgmerge_spmvellpackt_kernel<<<Gs, Bs, Ms, magma_stream >>>
         ( n, max_nnz_row, d_val, d_colind, d_d, d_z, d1 );
     else if( storage_t == Magma_ELLPACKRT ){
+        // in case of using ELLPACKRT, we need a different grid, assigning
+        // threads_per_row processors to each row
+        // the block size is num_threads
         // fixed values
         int threads_per_row = 32;
         int num_threads = 256;
@@ -506,7 +514,9 @@ magma_zcgmerge_spmv1(
                 <<<gridellpackrt, num_threads, Ms, magma_stream >>>
                 ( n, max_nnz_row, d_val, d_colind, d_rowptr, d_d, d_z, d1, 
                                                 threads_per_row, alignment );
-
+        // in case of using ELLPACKRT, we can't efficiently merge the 
+        // dot product and the first reduction loop into the SpMV kernel
+        // as the SpMV grid would result in low occupancy.
         magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, magma_stream >>>
                               ( n, d_z, d_d, d1 );
     }
@@ -670,7 +680,7 @@ magma_zcg_d_kernel(
     magmaDoubleComplex *d_x             output vector x
     magmaDoubleComplex *skp             array for parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zcgmerge_xrbeta(  

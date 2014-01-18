@@ -37,7 +37,7 @@
     magma_int_t *ipiv               array containing pivots
     magmaDoubleComplex *x           input/output vector x
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zbcsrtrsv( char uplo,
@@ -58,9 +58,11 @@ magma_zbcsrtrsv( char uplo,
         // forward solve
         for( k=0; k<r_blocks; k++){
             // do the forward triangular solve for block M(k,k): L(k,k)y = b
-            magma_ztrsv(MagmaLower, MagmaNoTrans, MagmaUnit, size_b, A(k,k), size_b, x(k), 1 );
+            magma_ztrsv(MagmaLower, MagmaNoTrans, MagmaUnit, size_b, A(k,k), 
+                                                             size_b, x(k), 1 );
 
-             // update for all nonzero blocks below M(k,k) the respective values of y
+             // update for all nonzero blocks below M(k,k) 
+                    // the respective values of y
             for( j=k+1; j<c_blocks; j++ ){
                 if( (blockinfo(j,k)!=0) ){
                     magmablas_zgemv( MagmaNoTrans, size_b, size_b, 
@@ -75,9 +77,11 @@ magma_zbcsrtrsv( char uplo,
         // backward solve
         for( k=r_blocks-1; k>=0; k--){
             // do the backward triangular solve for block M(k,k): U(k,k)x = y
-            magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, size_b, A(k,k), size_b, x(k), 1 );
+            magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, size_b, A(k,k), 
+                                                             size_b, x(k), 1 );
 
-            // update for all nonzero blocks above M(k,k) the respective values of y
+            // update for all nonzero blocks above M(k,k) 
+                    // the respective values of y
             for( j=k-1; j>=0; j-- ){
                 if( (blockinfo(j,k)!=0) ){
                     magmablas_zgemv( MagmaNoTrans, size_b, size_b, 

@@ -18,7 +18,7 @@
 #endif
 
 
-
+// ELLPACKT SpMV kernel
 //Michael Garland
 __global__ void 
 zgeelltmv_kernel( int num_rows, 
@@ -44,7 +44,7 @@ zgeelltmv_kernel( int num_rows,
     }
 }
 
-
+// shifted ELLPACKT SpMV kernel
 //Michael Garland
 __global__ void 
 zgeelltmv_kernel_shift( int num_rows, 
@@ -71,9 +71,11 @@ zgeelltmv_kernel_shift( int num_rows,
                 dot += val * d_x[col ];
         }
         if( row<blocksize )
-            d_y[ row ] = dot * alpha - lambda * d_x[ offset+row ] + beta * d_y [ row ];
+            d_y[ row ] = dot * alpha - lambda 
+                    * d_x[ offset+row ] + beta * d_y [ row ];
         else
-            d_y[ row ] = dot * alpha - lambda * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];            
+            d_y[ row ] = dot * alpha - lambda 
+                    * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];            
     }
 }
 
@@ -104,7 +106,7 @@ zgeelltmv_kernel_shift( int num_rows,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgeelltmv(const char *transA,
@@ -138,7 +140,7 @@ magma_zgeelltmv(const char *transA,
     Purpose
     =======
     
-    This routine computes y = alpha *  ( A - lambda I ) * x + beta * y on the GPU.
+    This routine computes y = alpha *( A - lambda I ) * x + beta * y on the GPU.
     Input format is ELLPACKT.
     
     Arguments
@@ -154,7 +156,7 @@ magma_zgeelltmv(const char *transA,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgeelltmv_shift( const char *transA,
@@ -178,7 +180,8 @@ magma_zgeelltmv_shift( const char *transA,
    //magma_zsetvector(1,&lambda,1,&tmp_shift,1); 
    tmp_shift = lambda;
    zgeelltmv_kernel_shift<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( m, n, nnz_per_row, alpha, tmp_shift, d_val, d_colind, d_x, beta, offset, blocksize, add_rows, d_y );
+                  ( m, n, nnz_per_row, alpha, tmp_shift, d_val, d_colind, d_x, 
+                            beta, offset, blocksize, add_rows, d_y );
 
 
    return MAGMA_SUCCESS;

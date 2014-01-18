@@ -40,7 +40,7 @@
     magma_int_t *ipiv               array containing pivots
     magmaDoubleComplex *x           input/output vector x
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zbcsrswp(   magma_int_t r_blocks,

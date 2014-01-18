@@ -41,11 +41,13 @@ zmgeelltmv_kernel( int num_rows,
             magmaDoubleComplex val = d_val [ num_rows * n + row ];
             if( val != 0){
                 for( int i=0; i<num_vecs; i++ )
-                    dot[ threadIdx.x + i*blockDim.x ] += val * d_x[col + i * num_cols ];
+                    dot[ threadIdx.x + i*blockDim.x ] += 
+                                        val * d_x[col + i * num_cols ];
             }
         }
         for( int i=0; i<num_vecs; i++ )
-                d_y[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] * alpha + beta * d_y [ row + i*num_cols ];
+                d_y[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] 
+                                * alpha + beta * d_y [ row + i*num_cols ];
     }
 }
 
@@ -78,26 +80,27 @@ zmgeelltmv_kernel( int num_rows,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
-magma_zmgeelltmv(const char *transA,
-               magma_int_t m, magma_int_t n,
-               magma_int_t num_vecs,
-               magma_int_t nnz_per_row,
-               magmaDoubleComplex alpha,
-               magmaDoubleComplex *d_val,
-               magma_int_t *d_colind,
-               magmaDoubleComplex *d_x,
-               magmaDoubleComplex beta,
-               magmaDoubleComplex *d_y ){
+magma_zmgeelltmv(  const char *transA,
+                   magma_int_t m, magma_int_t n,
+                   magma_int_t num_vecs,
+                   magma_int_t nnz_per_row,
+                   magmaDoubleComplex alpha,
+                   magmaDoubleComplex *d_val,
+                   magma_int_t *d_colind,
+                   magmaDoubleComplex *d_x,
+                   magmaDoubleComplex beta,
+                   magmaDoubleComplex *d_y ){
 
 
 
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
-    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE * sizeof( magmaDoubleComplex ); // num_vecs vectors 
+    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
+                * sizeof( magmaDoubleComplex ); // num_vecs vectors 
     zmgeelltmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>
-                  ( m, n, num_vecs, nnz_per_row, alpha, d_val, d_colind, d_x, beta, d_y );
+        ( m, n, num_vecs, nnz_per_row, alpha, d_val, d_colind, d_x, beta, d_y );
 
 
     return MAGMA_SUCCESS;

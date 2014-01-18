@@ -18,7 +18,7 @@
 #endif
 
 
-
+// ELLPACK SpMV kernel
 //Michael Garland
 __global__ void 
 zgeellmv_kernel( int num_rows, 
@@ -44,7 +44,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     }
 }
 
-
+// shifted ELLPACK SpMV kernel
 //Michael Garland
 __global__ void 
 zgeellmv_kernel_shift( int num_rows, 
@@ -105,7 +105,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgeellmv(const char *transA,
@@ -140,8 +140,9 @@ magma_zgeellmv(const char *transA,
     Purpose
     =======
     
-    This routine computes y = alpha *  ( A - lambda I ) * x + beta * y on the GPU.
+    This routine computes y = alpha *( A - lambda I ) * x + beta * y on the GPU.
     Input format is ELLPACK.
+    It is the shifted version of the ELLPACK SpMV.
     
     Arguments
     =========
@@ -155,7 +156,7 @@ magma_zgeellmv(const char *transA,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgeellmv_shift( const char *transA,
@@ -177,7 +178,8 @@ magma_zgeellmv_shift( const char *transA,
    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
    zgeellmv_kernel_shift<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( m, n, nnz_per_row, alpha, lambda, d_val, d_colind, d_x, beta, offset, blocksize, add_rows, d_y );
+                  ( m, n, nnz_per_row, alpha, lambda, d_val, d_colind, d_x, 
+                                    beta, offset, blocksize, add_rows, d_y );
 
 
    return MAGMA_SUCCESS;

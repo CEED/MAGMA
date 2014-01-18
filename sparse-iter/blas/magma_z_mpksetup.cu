@@ -50,7 +50,7 @@ compress_kernel(         int num_add_rows,
     magmaDoubleComplex *x                uncompressed input vector
     magmaDoubleComplex *y                compressed output vector
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 
@@ -102,7 +102,7 @@ uncompress_kernel(       int num_add_rows,
     magmaDoubleComplex *x                compressed input vector
     magmaDoubleComplex *y                uncompressed output vector
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 
@@ -130,7 +130,8 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
     Purpose
     =======
 
-    Distributes a compressed vector x after the SpMV using offset, blocksize and key.
+    Distributes a compressed vector x after the SpMV using offset, 
+                                                    blocksize and key.
 
 
     Arguments
@@ -143,7 +144,7 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
     magmaDoubleComplex *x                compressed input vector
     magmaDoubleComplex *y                uncompressed output vector
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 
@@ -157,7 +158,8 @@ magma_z_mpk_uncompspmv(  magma_int_t offset,
 
    dim3 grid( (num_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   cudaMemcpy( y+offset, x, blocksize*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+   cudaMemcpy( y+offset, x, blocksize*sizeof( magmaDoubleComplex ), 
+                                            cudaMemcpyDeviceToDevice );
 
    uncompress_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
                   ( num_add_rows, add_rows, x+blocksize, y );

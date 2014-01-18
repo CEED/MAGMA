@@ -20,8 +20,13 @@
 
 
 __global__ void 
-zvjacobisetup_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c){
-int row = blockDim.x * blockIdx.x + threadIdx.x ;
+zvjacobisetup_gpu(  int num_rows, 
+                    magmaDoubleComplex *b, 
+                    magmaDoubleComplex *d, 
+                    magmaDoubleComplex *c){
+
+    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+
     if(row < num_rows ){
         c[row] = b[row] / d[row];
     }
@@ -53,10 +58,13 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     magma_z_vector d                          vector with diagonal entries
     magma_z_vector *c                         c = D^(-1) * b
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" magma_int_t
-magma_zjacobisetup_vector_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c){
+magma_zjacobisetup_vector_gpu(  int num_rows, 
+                                magmaDoubleComplex *b, 
+                                magmaDoubleComplex *d, 
+                                magmaDoubleComplex *c){
 
 
    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);

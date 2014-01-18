@@ -28,7 +28,8 @@ magmaint_zlag2c_sparse(  int M, int N,
                   const magmaDoubleComplex *A,
                   magmaFloatComplex *SA ){
 
-    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; 
+                                    // global thread index
 
     if( thread_id < M ){
         for( int i=0; i<N; i++ ){
@@ -91,7 +92,7 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N ,
             = 1:  an entry of the matrix A is greater than the COMPLEX
                   overflow threshold, in this case, the content
                   of SA in exit is unspecified.
-    =====================================================================    */
+    ======================================================================    */
 
     *info = 0;
     if ( M < 0 )
@@ -120,30 +121,6 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N ,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 __global__ void 
 magma_zlag2c_CSR_DENSE_kernel( int num_rows, int num_cols, 
                                magmaDoubleComplex *Aval, int *Arow, int *Acol, 
@@ -158,7 +135,7 @@ magma_zlag2c_CSR_DENSE_kernel( int num_rows, int num_cols,
         int start = Arow[ row ];
         int end = Arow[ row+1 ];
         for( j=start; j<end; j++ )
-            Bval[ row * num_rows + Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
+            Bval[ row*num_rows+Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
     }
 }
 
@@ -187,7 +164,7 @@ magma_zlag2c_CSR_DENSE_kernel_2( int num_rows, int num_cols,
         int start = Arow[ row ];
         int end = Arow[ row+1 ];
         for( j=start; j<end; j++ )
-            Bval[ row * num_rows + Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
+            Bval[ row*num_rows+Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
     }
 }
 

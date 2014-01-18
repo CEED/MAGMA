@@ -191,7 +191,7 @@ zbcsr_gemm_kernel(
           for(int y=0; y<4; y++){
              //if (ty2*4+y < n)
                  Bb[tx2][ty2*4+y] = fetch_x_B( trackB + y * ldb) ;
-               // printf("%d  %d  %d  -> %d\n", tx2, ty2, y, trackB + (y/16) * ldb);
+           // printf("%d  %d  %d  -> %d\n", tx2, ty2, y, trackB + (y/16) * ldb);
           }
         //}
         __syncthreads();    // this is necessary!!!
@@ -226,13 +226,15 @@ zbcsr_gemm_kernel(
                         #pragma unroll
                         for( int y=0; y<4; y++){
                                 Axs[y] =  Abs[tx2+y*16][j1+k1] ;
-                                //printf("----Axs[%d]  = Abs[%d][%d]\n", y, tx2+y*16+k1*64, j1);
+                                //printf("----Axs[%d]  = Abs[%d][%d]\n", 
+                                    //y, tx2+y*16+k1*64, j1);
                         }
 
                         #pragma unroll
                         for( int y=0; y<4; y++){
                                 Bxp[y]= Bb[j1][ty2+y*16];
-                                //printf("Bxp[%d]  = Bb[%d][%d]\n", y, j1, ty2+y*16);
+                                //printf("Bxp[%d]  = Bb[%d][%d]\n",
+                                    //y, j1, ty2+y*16);
                         }
 
                         #pragma unroll
@@ -308,8 +310,10 @@ zbcsr_gemm_kernel(
                 for( int y=0; y<4; y++)
                         Bxp[y]= Bb[j1][ty2 + y*16];
 
-//printf("Axs: %2d %2d: %f  %f   %f   %f\n", tx2, ty2, Axs[0], Axs[1], Axs[2], Axs[3]);
-//printf("Bxp: %2d %2d: %f  %f   %f   %f\n", tx2, ty2, Bxp[0], Bxp[1], Bxp[2], Bxp[3]);
+//printf("Axs: %2d %2d: %f  %f   %f   %f\n", 
+    //tx2, ty2, Axs[0], Axs[1], Axs[2], Axs[3]);
+//printf("Bxp: %2d %2d: %f  %f   %f   %f\n", 
+    //tx2, ty2, Bxp[0], Bxp[1], Bxp[2], Bxp[3]);
 
                 #pragma unroll
                 for( int x=0; x<4; x++)
@@ -680,7 +684,7 @@ zbcsr_gemm_kernel64(
     magma_int_t *ipiv               array containing pivots
     double *x           input/output vector x
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zbcsrluegemm( magma_int_t size_b, 

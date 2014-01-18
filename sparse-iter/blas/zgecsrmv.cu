@@ -17,7 +17,7 @@
 #endif
 
 
-
+// CSR-SpMV kernel
 __global__ void 
 zgecsrmv_kernel( int num_rows, int num_cols, 
                  magmaDoubleComplex alpha, 
@@ -41,7 +41,7 @@ zgecsrmv_kernel( int num_rows, int num_cols,
     }
 }
 
-
+// shifted CSR-SpMV kernel
 __global__ void 
 zgecsrmv_kernel_shift( int num_rows, int num_cols, 
                        magmaDoubleComplex alpha, 
@@ -66,9 +66,11 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
         for( j=start; j<end; j++)
             dot += d_val[ j ] * d_x[ d_colind[j] ];
         if( row<blocksize )
-            d_y[ row ] = dot * alpha - lambda * d_x[ offset+row ] + beta * d_y [ row ];
+            d_y[ row ] = dot * alpha - lambda 
+                        * d_x[ offset+row ] + beta * d_y [ row ];
         else
-            d_y[ row ] = dot * alpha - lambda * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];   
+            d_y[ row ] = dot * alpha - lambda 
+                        * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];   
     }
 }
 
@@ -83,6 +85,7 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
     =======
     
     This routine computes y = alpha *  A *  x + beta * y on the GPU.
+    The input format is CSR (val, row, col).
     
     Arguments
     =========
@@ -97,7 +100,7 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgecsrmv(     const char *transA,
@@ -112,9 +115,8 @@ magma_zgecsrmv(     const char *transA,
 
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-    zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>(m, n, alpha,
-                                                              d_val, d_rowptr, d_colind,
-                                                              d_x, beta, d_y);
+    zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
+                    (m, n, alpha, d_val, d_rowptr, d_colind, d_x, beta, d_y);
 
     return MAGMA_SUCCESS;
 }
@@ -131,6 +133,7 @@ magma_zgecsrmv(     const char *transA,
     =======
     
     This routine computes y = alpha * ( A -lambda I ) * x + beta * y on the GPU.
+    It is a shifted version of the CSR-SpMV.
     
     Arguments
     =========
@@ -146,7 +149,7 @@ magma_zgecsrmv(     const char *transA,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zgecsrmv_shift( const char *transA,
@@ -166,7 +169,8 @@ magma_zgecsrmv_shift( const char *transA,
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
     zgecsrmv_kernel_shift<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                         (m, n, alpha, lambda, d_val, d_rowptr, d_colind, d_x, beta, offset, blocksize, add_rows, d_y);
+                         (m, n, alpha, lambda, d_val, d_rowptr, d_colind, d_x, 
+                                    beta, offset, blocksize, add_rows, d_y);
 
     return MAGMA_SUCCESS;
 }

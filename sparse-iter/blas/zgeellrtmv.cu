@@ -42,13 +42,19 @@ extern __shared__ magmaDoubleComplex shared[];
 
     if(i < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int max_ = (d_rowlength[i]+T-1)/T;  // number of elements each thread handles
+        int max_ = (d_rowlength[i]+T-1)/T;  
+            // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
-            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  // original code in paper
-            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];             // original code in paper
+
+            // original code in paper (not working for me)
+            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];    
+
+            // new code (working for me)        
             magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
             int col = d_colind [ k*(T)+(i*alignment)+idp ];
+
             dot += val * d_x[ col ];
         }
         shared[idb]  = dot;
@@ -68,8 +74,6 @@ extern __shared__ magmaDoubleComplex shared[];
 
 
 
-
-
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -80,19 +84,27 @@ extern __shared__ magmaDoubleComplex shared[];
     =======
     
     This routine computes y = alpha *  A *  x + beta * y on the GPU.
-    Input format is ELLPACKRT.
+    Input format is ELLPACKRT. The ideas are taken from 
+    "Improving the performance of the sparse matrix
+    vector product with GPUs", (CIT 2010), 
+    and modified to provide correct values.
+
     
     Arguments
     =========
-
-    magma_int_t m                   number of rows in A
-    magma_int_t n                   number of columns in A 
-    magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
-    magmaDoubleComplex *d_x         input vector x
-    magmaDoubleComplex beta         scalar multiplier
-    magmaDoubleComplex *d_y         input/output vector y
+    const char *transA                  transpose info for matrix (not needed)
+    magma_int_t m                       number of rows 
+    magma_int_t n                       number of columns
+    magma_int_t nnz_per_row             max number of nonzeros in a row
+    magmaDoubleComplex alpha            scalar alpha
+    magmaDoubleComplex *d_val           val array
+    magma_int_t *d_colind               col indices  
+    magma_int_t *d_rowlength            number of elements in each row
+    magmaDoubleComplex *d_x             input vector x
+    magmaDoubleComplex beta             scalar beta
+    magmaDoubleComplex *d_y             output vector y
+    magma_int_t num_threads             threads per block
+    magma_int_t threads_per_row         threads assigned to each row
 
     =====================================================================    */
 
@@ -115,13 +127,15 @@ magma_zgeellrtmv(const char *transA,
                                     /num_threads);
 
 
-    int alignment = ((int)(nnz_per_row+threads_per_row-1)/threads_per_row)*threads_per_row;
+    int alignment = ((int)(nnz_per_row+threads_per_row-1)/threads_per_row)
+                            *threads_per_row;
 
 
     dim3 grid( num_blocks, 1, 1);
     int Ms =  num_threads* sizeof( magmaDoubleComplex );
     zgeellrtmv_kernel<<< grid, num_threads, Ms, magma_stream >>>
-             ( m, n, alpha, d_val, d_colind, d_rowlength, d_x, beta, d_y, threads_per_row, alignment );
+             ( m, n, alpha, d_val, d_colind, d_rowlength, d_x, beta, d_y, 
+                                                threads_per_row, alignment );
 
 
    return MAGMA_SUCCESS;

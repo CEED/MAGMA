@@ -17,13 +17,16 @@
 
 
 // These routines merge multiple kernels from zmergebicgstab into one
+// This is the code used for the ASHES2014 paper
+// "Accelerating Krylov Subspace Solvers on Graphics Processing Units".
+
 
 // accelerated reduction for one vector
 __global__ void 
-magma_zreduce_kernel_spmv1( int Gs,
-                           int n, 
-                           magmaDoubleComplex *vtmp,
-                           magmaDoubleComplex *vtmp2 ){
+magma_zreduce_kernel_spmv1(    int Gs,
+                               int n, 
+                               magmaDoubleComplex *vtmp,
+                               magmaDoubleComplex *vtmp2 ){
 
     extern __shared__ magmaDoubleComplex temp[];    
     int Idx = threadIdx.x;
@@ -33,7 +36,8 @@ magma_zreduce_kernel_spmv1( int Gs,
     int i = blockIdx.x * ( blockSize * 2 ) + Idx;   
     while (i < Gs ) {
         temp[ Idx  ] += vtmp[ i ]; 
-        temp[ Idx  ] += ( i + blockSize < Gs ) ? vtmp[ i + blockSize ] : MAGMA_Z_MAKE( 0.0, 0.0); 
+        temp[ Idx  ] += ( i + blockSize < Gs ) ? vtmp[ i + blockSize ] 
+                                                : MAGMA_Z_MAKE( 0.0, 0.0); 
         i += gridSize;
     }
     __syncthreads();
@@ -192,20 +196,19 @@ magma_zbicgstab_alphakernel(
     magmaDoubleComplex *d_v             output vector v
     magmaDoubleComplex *skp             array for parameters ( skp[0]=alpha )
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
-magma_zbicgmerge_spmv1(  
-                 int n,
-                 magmaDoubleComplex *d1,
-                 magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
-                 magmaDoubleComplex *d_p,
-                 magmaDoubleComplex *d_r,
-                 magmaDoubleComplex *d_v,
-                 magmaDoubleComplex *skp ){
+magma_zbicgmerge_spmv1(  int n,
+                         magmaDoubleComplex *d1,
+                         magmaDoubleComplex *d2,
+                         magmaDoubleComplex *d_val, 
+                         int *d_rowptr, 
+                         int *d_colind,
+                         magmaDoubleComplex *d_p,
+                         magmaDoubleComplex *d_r,
+                         magmaDoubleComplex *d_v,
+                         magmaDoubleComplex *skp ){
 
     int local_block_size=256;
     dim3 Bs( local_block_size );
@@ -215,12 +218,14 @@ magma_zbicgmerge_spmv1(
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
 
-    magma_zbicgmerge_spmv1_kernel<<<Gs, Bs, Ms>>>( n, d_val, d_rowptr, d_colind, d_p, d_r, d_v, d1 );
+    magma_zbicgmerge_spmv1_kernel<<<Gs, Bs, Ms>>>
+                ( n, d_val, d_rowptr, d_colind, d_p, d_r, d_v, d1 );
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
         if( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> ( Gs.x, n, aux1, aux2 );
+        magma_zreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+                            ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
         b = 1 - b;
@@ -229,7 +234,8 @@ magma_zbicgmerge_spmv1(
     }
 
 
-    cudaMemcpy( skp, aux1, sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+    cudaMemcpy( skp, aux1, sizeof( magmaDoubleComplex ), 
+                                        cudaMemcpyDeviceToDevice );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_alphakernel<<<Gs2, Bs2, 0>>>( skp );
@@ -237,7 +243,7 @@ magma_zbicgmerge_spmv1(
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 // accelerated block reduction for multiple vectors
 __global__ void 
@@ -257,7 +263,9 @@ magma_zreduce_kernel_spmv2( int Gs,
         temp[Idx+j*(blockSize)] = MAGMA_Z_MAKE( 0.0, 0.0);
         while (i < Gs ) {
             temp[ Idx+j*(blockSize)  ] += vtmp[ i+j*n ]; 
-            temp[ Idx+j*(blockSize)  ] += ( i + (blockSize) < Gs ) ? vtmp[ i+j*n + (blockSize) ] : MAGMA_Z_MAKE( 0.0, 0.0); 
+            temp[ Idx+j*(blockSize)  ] += 
+                ( i + (blockSize) < Gs ) ? vtmp[ i+j*n + (blockSize) ] 
+                : MAGMA_Z_MAKE( 0.0, 0.0); 
             i += gridSize;
         }
     }
@@ -465,7 +473,7 @@ magma_zbicgstab_omegakernel(
     magmaDoubleComplex *d_t             output vector t
     magmaDoubleComplex *skp             array for parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge_spmv2(  
@@ -487,12 +495,14 @@ magma_zbicgmerge_spmv2(
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
 
-    magma_zbicgmerge_spmv2_kernel<<<Gs, Bs, Ms>>>( n, d_val, d_rowptr, d_colind, d_s, d_t, d1 );
+    magma_zbicgmerge_spmv2_kernel<<<Gs, Bs, Ms>>>
+                ( n, d_val, d_rowptr, d_colind, d_s, d_t, d1 );
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
         if( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> ( Gs.x, n, aux1, aux2 );
+        magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+                    ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
         b = 1 - b;
@@ -501,8 +511,10 @@ magma_zbicgmerge_spmv2(
     }
 
 
-    cudaMemcpy( skp+6, aux1, sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-    cudaMemcpy( skp+7, aux1+n, sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+    cudaMemcpy( skp+6, aux1, sizeof( magmaDoubleComplex ), 
+                                    cudaMemcpyDeviceToDevice );
+    cudaMemcpy( skp+7, aux1+n, sizeof( magmaDoubleComplex ), 
+                                    cudaMemcpyDeviceToDevice );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_omegakernel<<<Gs2, Bs2, 0>>>( skp );
@@ -510,7 +522,7 @@ magma_zbicgmerge_spmv2(
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 __global__ void 
 magma_zbicgmerge_xrbeta_kernel(  
@@ -659,7 +671,7 @@ magma_zbicgstab_betakernel(
     magmaDoubleComplex *d_x             output vector x
     magmaDoubleComplex *skp             array for parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge_xrbeta(  
@@ -681,14 +693,14 @@ magma_zbicgmerge_xrbeta(
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
-    magma_zbicgmerge_xrbeta_kernel<<<Gs, Bs, Ms>>>( n, rr, r, p, s, t, x, skp, d1);  
-
-
+    magma_zbicgmerge_xrbeta_kernel<<<Gs, Bs, Ms>>>
+                    ( n, rr, r, p, s, t, x, skp, d1);  
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
         if( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> ( Gs.x, n, aux1, aux2 );
+        magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+                            ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
         b = 1 - b;
@@ -697,8 +709,10 @@ magma_zbicgmerge_xrbeta(
     }
 
 
-    cudaMemcpy( skp+4, aux1, sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-    cudaMemcpy( skp+5, aux1+n, sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+    cudaMemcpy( skp+4, aux1, sizeof( magmaDoubleComplex ), 
+                                        cudaMemcpyDeviceToDevice );
+    cudaMemcpy( skp+5, aux1+n, sizeof( magmaDoubleComplex ), 
+                                        cudaMemcpyDeviceToDevice );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_betakernel<<<Gs2, Bs2, 0>>>( skp );
@@ -706,5 +720,5 @@ magma_zbicgmerge_xrbeta(
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 

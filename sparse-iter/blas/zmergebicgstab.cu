@@ -16,7 +16,11 @@
 #define PRECISION_z
 
 
-/* ---------------------------------------------------------------------------------- */
+// These routines merge multiple kernels from zmergebicgstab into one
+// The difference to zmergedbicgstab2 is that the SpMV is not merged into the
+// kernes. This results in higher flexibility at the price of lower performance.
+
+/* -------------------------------------------------------------------------- */
 
 __global__ void 
 magma_zbicgmerge1_kernel(  
@@ -46,9 +50,9 @@ magma_zbicgmerge1_kernel(
 
     Mergels multiple operations into one kernel:
 
-    magma_zscal( dofs, beta, p.val, 1 );                                    //p = beta*p
-    magma_zaxpy( dofs, c_mone * omega * beta, v.val, 1 , p.val, 1 );        //p = p-omega*beta*v
-    magma_zaxpy( dofs, c_one, r.val, 1, p.val, 1 );                         //p = p+r
+    p = beta*p
+    p = p-omega*beta*v
+    p = p+r
     
     -> p = r + beta * ( p - omega * v ) 
 
@@ -62,7 +66,7 @@ magma_zbicgmerge1_kernel(
     magmaDoubleComplex *r               input r
     magmaDoubleComplex *p               input/output p
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge1(  int n, 
@@ -79,7 +83,7 @@ magma_zbicgmerge1(  int n,
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 __global__ void 
 magma_zbicgmerge2_kernel(  
@@ -107,8 +111,8 @@ magma_zbicgmerge2_kernel(
 
     Mergels multiple operations into one kernel:
 
-    magma_zcopy( dofs, r.val, 1 , s.val, 1 );                                // s=r
-    magma_zaxpy( dofs, c_mone * alpha, v.val, 1 , s.val, 1 );                // s=s-alpha*v
+    s=r
+    s=s-alpha*v
         
     -> s = r - alpha * v
 
@@ -121,7 +125,7 @@ magma_zbicgmerge2_kernel(
     magmaDoubleComplex *v               input v
     magmaDoubleComplex *s               input/output s
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge2(  int n, 
@@ -139,7 +143,7 @@ magma_zbicgmerge2(  int n,
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 __global__ void 
 magma_zbicgmerge3_kernel(  
@@ -173,10 +177,10 @@ magma_zbicgmerge3_kernel(
 
     Mergels multiple operations into one kernel:
 
-        magma_zaxpy( dofs, alpha, p.val, 1 , x->val, 1 );                        // x=x+alpha*p
-        magma_zaxpy( dofs, omega, s.val, 1 , x->val, 1 );                        // x=x+omega*s
-        magma_zcopy( dofs, s.val, 1 , r.val, 1 );                                // r=s
-        magma_zaxpy( dofs, c_mone * omega, t.val, 1 , r.val, 1 );                // r=r-omega*t
+    x=x+alpha*p
+    x=x+omega*s
+    r=s
+    r=r-omega*t
         
     -> x = x + alpha * p + omega * s
     -> r = s - omega * t
@@ -193,7 +197,7 @@ magma_zbicgmerge3_kernel(
     magmaDoubleComplex *x               input/output x
     magmaDoubleComplex *r               input/output r
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge3(  int n, 
@@ -212,7 +216,7 @@ magma_zbicgmerge3(  int n,
    return MAGMA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 
 __global__ void 
 magma_zbicgmerge4_kernel_1(  
@@ -267,7 +271,7 @@ magma_zbicgmerge4_kernel_3(
     int type                            kernel type
     magmaDoubleComplex *skp             vector with parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 extern "C" int
 magma_zbicgmerge4(  int type, 

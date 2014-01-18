@@ -42,10 +42,12 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
             int col = d_colind [ j ];
             magmaDoubleComplex val = d_val[ j ];
             for( int i=0; i<num_vecs; i++ )
-                dot[ threadIdx.x + i*blockDim.x ] += val * d_x[ col + i*num_cols ];
+                dot[ threadIdx.x + i*blockDim.x ] += 
+                                    val * d_x[ col + i*num_cols ];
         }
         for( int i=0; i<num_vecs; i++ )
-            d_y[ row +i*num_cols ] = alpha * dot[ threadIdx.x + i*blockDim.x ] + beta * d_y[ row + i*num_cols ];
+            d_y[ row +i*num_cols ] = alpha * dot[ threadIdx.x + i*blockDim.x ] 
+                                             + beta * d_y[ row + i*num_cols ];
     }
 }
 
@@ -77,7 +79,7 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
 
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" magma_int_t
 magma_zmgecsrmv(    const char *transA,
@@ -92,10 +94,10 @@ magma_zmgecsrmv(    const char *transA,
                     magmaDoubleComplex *d_y ){
 
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
-    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgecsrmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>(m, n, num_vecs, alpha,
-                                                            d_val, d_rowptr, d_colind,
-                                                            d_x, beta, d_y);
+    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
+                    * sizeof( magmaDoubleComplex ); // num_vecs vectors 
+    zmgecsrmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>
+            (m, n, num_vecs, alpha, d_val, d_rowptr, d_colind, d_x, beta, d_y);
 
    return MAGMA_SUCCESS;
 }

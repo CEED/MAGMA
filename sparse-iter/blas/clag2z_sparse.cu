@@ -31,13 +31,15 @@ magmaint_clag2z_sparse(  int M, int N,
 {
     int inner_bsize = blockDim.x;
     int outer_bsize = inner_bsize * 512;
-    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; 
+            // global thread index
     
 
     double mRMAX = - RMAX;
 
     if( thread_id < M ){
-        for( int i= outer_bsize * blockIdx.x  + threadIdx.x ; i<min( M, outer_bsize * ( blockIdx.x + 1));  i+=inner_bsize){
+        for( int i= outer_bsize * blockIdx.x  + threadIdx.x ; 
+            i<min( M, outer_bsize * ( blockIdx.x + 1));  i+=inner_bsize){
             A[i] = cuComplexFloatToDouble( SA[i] );
 
         }
@@ -89,7 +91,7 @@ magmaint_clag2z_sparse(  int M, int N,
             = 1:  an entry of the matrix A is greater than the COMPLEX
                   overflow threshold, in this case, the content
                   of SA in exit is unspecified.
-    =====================================================================    */
+    ======================================================================    */
 
 extern "C" void 
 magmablas_clag2z_sparse( magma_int_t M, magma_int_t N , 
@@ -125,6 +127,7 @@ magmablas_clag2z_sparse( magma_int_t M, magma_int_t N ,
     dim3 threads( blksize, 1, 1 );
     dim3 grid( (M+blksize-1)/blksize, 1, 1);
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
-    magmaint_clag2z_sparse<<< dimGrid , dimBlock, 0, magma_stream >>>( M, N, SA, lda, A, ldsa, RMAX ) ; 
+    magmaint_clag2z_sparse<<< dimGrid , dimBlock, 0, magma_stream >>>
+                                        ( M, N, SA, lda, A, ldsa, RMAX ) ; 
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
