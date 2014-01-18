@@ -14,10 +14,14 @@
 #include <mkl_cblas.h>
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
+#define RTOLERANCE     1e-16
+#define ATOLERANCE     1e-16
 
 #define  q(i)     (q.val + (i)*dofs)
+
+// uncomment for chronometry
+#define ENABLE_TIMER
+#define iterblock 1
 
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -47,21 +51,19 @@
 
 
 magma_int_t
-magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par )
-{
+magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, 
+        magma_z_vector *x, magma_solver_parameters *solver_par ){
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     
     magma_int_t dofs = A.num_rows;
 
     // GPU stream
-    magma_queue_t stream[3];
+    magma_queue_t stream[2];
     magma_event_t event[1];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
-    magma_queue_create( &stream[2] );
     magma_event_create( &event[0] );
 
     // workspace
@@ -70,10 +72,12 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vecto
     magma_zmalloc( &d1, dofs*(2) );
     magma_zmalloc( &d2, dofs*(2) );
 
-    magma_zmalloc( &skp, 18 );       // skp = [alpha|beta|omega|rho_old|rho|nom|tmp1|tmp2]
+    // array for the parameters
+    magma_zmalloc( &skp, 8 );     
+    // skp = [alpha|beta|omega|rho_old|rho|nom|tmp1|tmp2]  
     magma_z_vinit( &q, Magma_DEV, dofs*6, c_zero );
-    // q = rr|r|p|v|s|t
 
+    // q = rr|r|p|v|s|t
     rr.memory_location = Magma_DEV; rr.val = NULL; rr.num_rows = rr.nnz = dofs;
     r.memory_location = Magma_DEV; r.val = NULL; r.num_rows = r.nnz = dofs;
     p.memory_location = Magma_DEV; p.val = NULL; p.num_rows = p.nnz = dofs;
@@ -90,11 +94,7 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vecto
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, *skp_h;
-    double nom, nom0, r0, den;
-    magma_int_t i;
-
-    magma_zmalloc( &skp, 8 );       // skp = [alpha|beta|omega|rho_old|rho|nom|tmp1|tmp2]
-
+    double nom, nom0, betanom, r0, den;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                            // x = 0
@@ -102,75 +102,95 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vecto
     magma_zcopy( dofs, b.val, 1, q(1), 1 );                            // r = b
 
     rho_new = magma_zdotc( dofs, r.val, 1, r.val, 1 );           // rho=<rr,r>
-    nom0 = nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));           // nom=<r,r>
-
+    nom0 = nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));           
+                                                                // nom=<r,r>
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     beta = rho_new;
     (solver_par->numiter) = 0;
-    
+    // array on host for the parameters 
     magma_zmalloc_cpu( &skp_h, 8 );
-    skp_h[0]=alpha; skp_h[1]=beta; skp_h[2]=omega; skp_h[3]=rho_old; skp_h[4]=rho_new; skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
-    cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+    skp_h[0]=alpha; skp_h[1]=beta; 
+    skp_h[2]=omega; 
+    skp_h[3]=rho_old; 
+    skp_h[4]=rho_new; 
+    skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
+    cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), 
+                                            cudaMemcpyHostToDevice );
 
-    magma_z_spmv( c_one, A, r, c_zero, v );                           // z = A r
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.val, 1, r.val, 1) );      // den = z dot r
+    magma_z_spmv( c_one, A, r, c_zero, v );                     // z = A r
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.val, 1, r.val, 1) );// den = z dot r
 
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
     if ( nom < r0 )
         return MAGMA_SUCCESS;
-    
+    // check positive definite  
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         return -100;
     }
 
     //Chronometry
-    #define ENABLE_TIMER
     #ifdef ENABLE_TIMER
-    double t_spmv1, t_spmv = 0.0;
     double tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
-   //     printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
-   //                 (solver_par->numiter), nom, 0.0, 0.0, 0.0 );
+    printf("#=============================================================#\n");
+    printf("#   BiCGStab (merged2) performance analysis every %d iteration\n",
+                                                                     iterblock);
+    printf("#   iter   ||   residual-nrm2    ||   runtime\n");
+    printf("#=============================================================#\n");
+    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    magma_device_sync(); tempo1=magma_wtime();
     #endif
 
     // start iteration
-    //while(solver_par->numiter < solver_par->maxiter && nom > solver_par->epsilon){
-    while(solver_par->numiter < solver_par->maxiter){
+    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
+                                                    solver_par->numiter++ ){
 
         magmablasSetKernelStream(stream[0]);
-        magma_zbicgmerge1( dofs, skp, v.val, r.val, p.val );            // merge: p=r+beta*(p-omega*v) 
-        magma_zbicgmerge_spmv1(  dofs, d1, d2, A.val, A.row, A.col, q(2), q(0), q(3), skp );          
-        magma_zbicgmerge2( dofs, skp, r.val, v.val, s.val );                  // s=r-alpha*v
-        magma_zbicgmerge_spmv2( dofs, d1, d2, A.val, A.row, A.col, q(4), q(5), skp); 
-        magma_zbicgmerge_xrbeta( dofs, d1, d2, q(0), q(1), q(2), q(4), q(5), x->val, skp);  
-        (solver_par->numiter)++;
 
+        // computes p=r+beta*(p-omega*v)
+        magma_zbicgmerge1( dofs, skp, v.val, r.val, p.val );
+        magma_zbicgmerge_spmv1(  dofs, d1, d2, A.val, A.row, A.col, 
+                                                    q(2), q(0), q(3), skp );          
+        magma_zbicgmerge2( dofs, skp, r.val, v.val, s.val );   // s=r-alpha*v
+        magma_zbicgmerge_spmv2( dofs, d1, d2, A.val, A.row, A.col, 
+                                                            q(4), q(5), skp); 
+        magma_zbicgmerge_xrbeta( dofs, d1, d2, q(0), q(1), q(2), 
+                                                    q(4), q(5), x->val, skp);  
+
+        // check stopping criterion (asynchronous copy)
+        cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+5, 1, 
+                                                        skp_h+5, 1, stream[1] );
+        betanom = sqrt(MAGMA_Z_REAL(skp_h[5]));
+        if (  betanom  < r0 ) {
+            break;
+        }
 
         #ifdef ENABLE_TIMER
         //Chronometry  
         magma_device_sync(); tempo2=magma_wtime();
-        //cublasGetVector(1 , sizeof( magmaDoubleComplex ), skp+5, 1, skp_h+5, 1 );
-        cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+5, 1, skp_h+5, 1, stream[1] );
-        nom = MAGMA_Z_REAL(skp_h[5]);
-        if( solver_par->numiter%1000==0 ) 
-        printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
-                    (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+        if( solver_par->numiter%iterblock==0 ) {
+            printf("   %4d    ||    %e    ||    %.4lf  \n", 
+                (solver_par->numiter), betanom, tempo2-tempo1 );
+        }
         #endif
     }
-    #ifndef ENABLE_TIMER
-    printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
-                (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+
+    #ifdef ENABLE_TIMER
+    double residual;
+    magma_zresidual( A, b, *x, &residual );
+    printf("#=============================================================#\n");
+    printf("# BiCGStab (merged2) solver summary:\n");
+    printf("#    initial residual: %e\n", nom0 );
+    printf("#    iterations: %4d\n#    iterative residual: %e\n",
+            (solver_par->numiter), betanom );
+    printf("#    exact relative residual: %e\n#    runtime: %.4lf sec\n", 
+                residual, tempo2-tempo1);
+    printf("#=============================================================#\n");
     #endif
-    
-    if (solver_par->epsilon == RTOLERANCE) {
-        magma_z_spmv( c_one, A, *x, c_zero, r );                       // z = A d
-        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-        den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
-        printf( "      || r_N ||   = %f\n", den);
-        solver_par->residual = (double)(den);
-    }
+        
+    solver_par->residual = (double)(betanom);
 
     magma_z_vfree(&q);
   
@@ -178,6 +198,6 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vecto
     magma_free(d2);
 
     return MAGMA_SUCCESS;
-}
+}   /* zbicgstab_merge2 */
 
 

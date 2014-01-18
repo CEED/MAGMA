@@ -53,8 +53,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
            magma_solver_parameters *solver_par ){
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
-                                            c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     magma_int_t dofs = A.num_rows;
 
     // GPU stream
@@ -80,7 +79,6 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h;
     double nom, nom0, r0, betanom, den;
-    magma_int_t i;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
@@ -121,16 +119,18 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     #ifdef ENABLE_TIMER
     double tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
-    printf("#===============================================#\n");
-    printf("#   CG performance analysis ever %d iteration   #\n", iterblock);
+    printf("#=============================================================#\n");
+    printf("#   CG (merged) performance analysis every %d iteration   #\n", 
+                                                                    iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime    #\n");
-    printf("#===============================================#\n");
+    printf("#=============================================================#\n");
     printf("      0    ||    %e    ||    0.0000      \n", nom);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
     
     // start iteration
-    for( solver_par->numiter= 1; i<solver_par->maxiter; solver_par->numiter++ ){
+    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
+                                                    solver_par->numiter++ ){
 
         magmablasSetKernelStream(stream[0]);
         
@@ -163,14 +163,14 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     #ifdef ENABLE_TIMER
     double residual;
     magma_zresidual( A, b, *x, &residual );
-    printf("#===============================================#\n");
+    printf("#=============================================================#\n");
     printf("# CG (merged) solver summary:\n");
     printf("#    initial residual: %e\n", nom0 );
     printf("#    iterations: %4d\n#    iterative residual: %e\n",
             (solver_par->numiter), betanom );
     printf("#    exact relative residual: %e\n#    runtime: %.4lf sec\n", 
                 residual, tempo2-tempo1);
-    printf("#===============================================#\n");
+    printf("#=============================================================#\n");
     #endif
         
     solver_par->residual = (double)(betanom);

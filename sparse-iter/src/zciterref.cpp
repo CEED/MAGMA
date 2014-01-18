@@ -17,8 +17,8 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
+#define RTOLERANCE     1e-16
+#define ATOLERANCE     1e-16
 
 
 /*  -- MAGMA (version 1.1) --
@@ -45,19 +45,21 @@
     magma_solver_parameters *solver_par       solver parameters
     magma_precond_parameters *precond_par     parameters for inner solver
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 magma_int_t
 magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par, magma_precond_parameters *precond_par )
-{
+            magma_solver_parameters *solver_par, 
+            magma_precond_parameters *precond_par ){
+
     //Chronometry
     struct timeval inicio, fim;
     double tempo1, tempo2;
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                                    c_mone = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows;
 
@@ -80,11 +82,11 @@ magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                           // x = 0
+    magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
 
-    magma_z_spmv( c_mone, A, *x, c_zero, r );                       // r = - A x
-    magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
-    nom = nom0 = magma_dznrm2(dofs, r.val, 1);                            // nom0 = || r ||
+    magma_z_spmv( c_mone, A, *x, c_zero, r );                  // r = - A x
+    magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);             // r = r + b
+    nom = nom0 = magma_dznrm2(dofs, r.val, 1);                 // nom0 = || r ||
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
@@ -102,15 +104,15 @@ magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // start iteration
     for( i= 1; i<solver_par->maxiter; i++ ) {
 
-        magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.val, 1) ;  // scale it
-        magma_vector_zlag2c(r, &rs);                              // conversion to single precision
-        magma_c_precond( AS, rs, &zs, *precond_par );             // inner solver: AS * zs = rs
-        magma_vector_clag2z(zs, &z);                              // conversion to double precision
-        magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.val, 1) ;     // scale it
-        magma_zaxpy(dofs,  c_one, z.val, 1, x->val, 1);                    // x = x + z
-        magma_z_spmv( c_mone, A, *x, c_zero, r );                       // r = - A x
-        magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
-        nom = magma_dznrm2(dofs, r.val, 1);                            // nom = || r ||
+        magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.val, 1) ;// scale
+        magma_vector_zlag2c(r, &rs);                            // conversion 
+        magma_c_precond( AS, rs, &zs, *precond_par );           // inner solve
+        magma_vector_clag2z(zs, &z);                            // conversion 
+        magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.val, 1) ;   // scale
+        magma_zaxpy(dofs,  c_one, z.val, 1, x->val, 1);         // x = x + z
+        magma_z_spmv( c_mone, A, *x, c_zero, r );               // r = - A x
+        magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);          // r = r + b
+        nom = magma_dznrm2(dofs, r.val, 1);                     // nom = || r ||
 
         //Chronometry  
         gettimeofday(&fim, NULL);
@@ -130,9 +132,9 @@ magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf( "      Number of Iterative Refinement iterations: %d\n", i);
     
     if (solver_par->epsilon == RTOLERANCE) {
-        magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
-        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-        den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
+        magma_z_spmv( c_one, A, *x, c_zero, r );                // r = A x
+        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);         // r = r - b
+        den = magma_dznrm2(dofs, r.val, 1);                     // den = || r ||
         printf( "      || r_N ||   = %e\n", den);
         solver_par->residual = (double)(den);
     }
