@@ -2,8 +2,8 @@ import ctypes
 from magma_interface import *
 from datetime import datetime
 
-libmagma = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma.so')
-libmagma_sparse = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma_sparse.so')
+#libmagma = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma.so')
+#libmagma_sparse = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma_sparse.so')
 
 
 A = MATRIX()

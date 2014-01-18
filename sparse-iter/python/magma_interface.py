@@ -1,8 +1,8 @@
 import ctypes
 from ctypes import *
 
-libmagma = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma.so')
-libmagma_sparse = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma_sparse.so')
+#libmagma = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma.so')
+#libmagma_sparse = ctypes.CDLL('/home/hanzt/magma_dev/magma/trunk/lib/libmagma_sparse.so')
 
 class MATRIX(Structure):
     _fields_ = [("storage_type", c_int),
