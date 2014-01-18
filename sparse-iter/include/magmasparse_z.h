@@ -346,63 +346,63 @@ magma_zmgenerator(  magma_int_t nx,
 */
 
 magma_int_t 
-magma_zcg(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zcg(             magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t 
-magma_zcg_merge(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zcg_merge(       magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t 
-magma_zgmres(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zgmres(          magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
 magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zpcg(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, 
+magma_zpcg(            magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
 
 magma_int_t
-magma_zpbicgstab(      magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, 
+magma_zpbicgstab(      magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
 
 magma_int_t
-magma_zpgmres(         magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, 
+magma_zpgmres(         magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
 magma_int_t
-magma_zjacobi(         magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zjacobi(         magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_ziterref(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, 
+magma_ziterref(        magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
+magma_int_t
+magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zgmres_pipe(     magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zgmres_pipe(     magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
-
-magma_int_t
-magma_zilu(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, magma_int_t *ipiv );
+magma_zilu(            magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
+                       magma_int_t *ipiv );
 
 magma_int_t
 magma_zbcsrlu(         magma_z_sparse_matrix A, 
@@ -410,18 +410,19 @@ magma_zbcsrlu(         magma_z_sparse_matrix A,
                        magma_int_t *ipiv );
 
 magma_int_t
-magma_zbcsrlusv(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par, magma_int_t *ipiv );
+magma_zbcsrlusv(       magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par, 
+                       magma_int_t *ipiv );
 
 
 
 magma_int_t
-magma_zilucg(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par );
+magma_zilucg(          magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zilugmres(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                       magma_solver_parameters *solver_par ); 
+magma_zilugmres(       magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par ); 
 
 
 
