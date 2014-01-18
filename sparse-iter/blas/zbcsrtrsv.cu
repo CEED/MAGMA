@@ -51,8 +51,7 @@ magma_zbcsrtrsv( char uplo,
     // some useful variables
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex mone = MAGMA_Z_MAKE(-1.0, 0.0);
-    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-    magma_int_t i,j,k;
+    magma_int_t j,k;
 
     if( uplo==MagmaLower ){ 
         // forward solve

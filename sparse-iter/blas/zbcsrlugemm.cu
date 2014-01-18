@@ -695,7 +695,6 @@ magma_zbcsrluegemm( magma_int_t size_b,
                     magmaDoubleComplex **dC ){
 
 #if defined(PRECISION_d)
-    int i, j, k;
     dim3 threads( 64, 4 );
 
     dim3 grid(1, 1, num_block_rows);
