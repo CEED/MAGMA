@@ -54,7 +54,7 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
     if( A->memory_location == Magma_CPU ){
         // CSR  
         if( A->storage_type == Magma_CSR ){
-            magma_int_t i, j, *length, maxrowlength=0;
+            magma_int_t i, *length, maxrowlength=0;
             magma_imalloc_cpu( &length, A->num_rows);
 
             for( i=0; i<A->num_rows; i++ ){

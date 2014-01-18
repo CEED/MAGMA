@@ -519,7 +519,7 @@ magma_z_mpk_compress(    magma_int_t num_add_rows,
                          magma_int_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
-    #pragma unroll
+
     for(magma_int_t i=0; i<num_add_rows; i++){
         y[i] = x[ add_rows[i] ];
     }
@@ -555,7 +555,7 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
                          magma_int_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
-    #pragma unroll
+
     for(magma_int_t i=0; i<num_add_rows; i++){
         y[add_rows[i]] = x[ i ];
     }
@@ -599,7 +599,7 @@ magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
                          magma_int_t blocksize,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
-    #pragma unroll
+
     for(magma_int_t i=0; i<num_add_vecs; i++){
         if( ( offset <= add_vecs[i] ) && ( add_vecs[i] < offset+blocksize) )
             y[add_vecs[i]] = x[ i ];

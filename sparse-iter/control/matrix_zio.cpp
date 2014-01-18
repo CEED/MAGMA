@@ -73,7 +73,7 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
     fflush(stdout);
   }
   else{
-    printf("#Unable to open file ", filename);
+    printf("#Unable to open file %s.\n", filename);
     fflush(stdout);
     exit(1);
   }

@@ -194,7 +194,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t *row_tmp;
-            magmaDoubleComplex *val_tmp;
             magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
@@ -509,7 +508,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            magma_int_t i, j, k, l, numblocks, index;
+            magma_int_t i, j, k, l, index;
 
             // conversion
             magma_int_t size_b = A.blocksize;
