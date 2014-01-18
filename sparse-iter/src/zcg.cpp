@@ -19,6 +19,10 @@
 #define RTOLERANCE     1e-16
 #define ATOLERANCE     1e-16
 
+// uncomment for chronometry
+#define ENABLE_TIMER
+#define iterblock 1
+
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -78,20 +82,15 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         r0 = ATOLERANCE;
     if ( nom < r0 )
         return MAGMA_SUCCESS;
-    
+    // check positive definite
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         return -100;
     }
-    
-  //  printf("Iteration : %4d  Norm: %f\n", 0, nom);
 
     //Chronometry
-    #define ENABLE_TIMER
     #ifdef ENABLE_TIMER
-    double t_spmv1, t_spmv = 0.0;
     double tempo1, tempo2;
-    int iterblock = 1;
     magma_device_sync(); tempo1=magma_wtime();
     printf("#===============================================#\n");
     printf("#   CG performance analysis ever %d iteration   #\n", iterblock);
@@ -104,25 +103,27 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // start iteration
     for( solver_par->numiter= 1; i<solver_par->maxiter; solver_par->numiter++ ){
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
-        magma_zaxpy(dofs,  alpha, p.val, 1, x->val, 1);               // x = x + alpha p
-        magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);                // r = r - alpha q
-        betanom = magma_dznrm2(dofs, r.val, 1);                       // betanom = || r ||
-        betanomsq = betanom * betanom;                                // betanoms = r dot r
+        magma_zaxpy(dofs,  alpha, p.val, 1, x->val, 1);     // x = x + alpha p
+        magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);      // r = r - alpha q
+        betanom = magma_dznrm2(dofs, r.val, 1);             // betanom = || r ||
+        betanomsq = betanom * betanom;                      // betanoms = r' * r
         if (  betanom  < r0 ) {
             break;
         }
-        beta = MAGMA_Z_MAKE(betanomsq/nom, 0.);                       // beta = betanoms/nom
-        magma_zscal(dofs, beta, p.val, 1);                            // p = beta*p
-        magma_zaxpy(dofs, c_one, r.val, 1, p.val, 1);                 // p = p + r 
-        magma_z_spmv( c_one, A, p, c_zero, q );                       // q = A p
-        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.val, 1, q.val, 1));    // den = p dot q
+        beta = MAGMA_Z_MAKE(betanomsq/nom, 0.);           // beta = betanoms/nom
+        magma_zscal(dofs, beta, p.val, 1);                // p = beta*p
+        magma_zaxpy(dofs, c_one, r.val, 1, p.val, 1);     // p = p + r 
+        magma_z_spmv( c_one, A, p, c_zero, q );           // q = A p
+        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.val, 1, q.val, 1));    
+                // den = p dot q
         nom = betanomsq;
 
         #ifdef ENABLE_TIMER
         //Chronometry  
         magma_device_sync(); tempo2=magma_wtime();
         if( solver_par->numiter%iterblock==0 ) {
-            printf("   %4d    ||    %e    ||    %.4lf  \n", (solver_par->numiter), betanom, tempo2-tempo1 );
+            printf("   %4d    ||    %e    ||    %.4lf  \n", 
+                (solver_par->numiter), betanom, tempo2-tempo1 );
         }
         #endif
     } 
@@ -141,6 +142,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     #endif
         
     solver_par->residual = (double)(betanom);
+
     magma_z_vfree(&r);
     magma_z_vfree(&p);
     magma_z_vfree(&q);
