@@ -56,8 +56,8 @@ using namespace std;
     ========================================================================  */
 
 magma_int_t z_transpose_csr(    magma_int_t n_rows, 
-                                magma_int_t n_cols, m
-                                agma_int_t nnz, 
+                                magma_int_t n_cols, 
+                                magma_int_t nnz, 
                                 magmaDoubleComplex *val, 
                                 magma_int_t *row, 
                                 magma_int_t *col, 
