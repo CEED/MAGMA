@@ -38,6 +38,7 @@ ZSRC := \
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
 	zmgeelltmv.cu		\
+    zpipelinedgmres.cu  \
 
 
 -include Makefile.local
