@@ -381,11 +381,19 @@ typedef double real_Double_t;
 #define Magma_BICGSTAB     433
 #define Magma_JACOBI       434
 #define Magma_GS           435
+#define Magma_BCSRLU       436
 
 #define Magma_DCOMPLEX     451
 #define Magma_FCOMPLEX     452
 #define Magma_DOUBLE       453
 #define Magma_FLOAT        454
+
+#define Magma_CGS          461
+#define Magma_FUSED_CGS    462
+#define Magma_MGS          463
+
+
+
 
 // When adding constants, remember to do these steps as appropriate:
 // 1)  add new type below
@@ -393,7 +401,7 @@ typedef double real_Double_t;
 // 3a) add to magma2lapack_constants[] in control/constants.cpp
 // 3b) update min & max here, which are used to check bounds for magma2lapack_constants[]
 #define MagmaMinConst       48  // "0"
-#define MagmaMaxConst      402
+#define MagmaMaxConst      461
 
 
 // ----------------------------------------
@@ -423,6 +431,7 @@ typedef int magma_location_t;
 // properties of the magma_precond_parameters
 typedef int magma_precond_type;
 typedef int magma_precision;
+typedef int magma_ortho_t;
 
 
 // ----------------------------------------
