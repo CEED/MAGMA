@@ -71,6 +71,20 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
 // printf( "done.\n");
         return MAGMA_SUCCESS;
     }
+    if( precond.precond == Magma_JACOBI ){
+// printf( "start JACOBI preconditioner with epsilon: %f and maxiter: %d: ", 
+//                                  psolver_par.epsilon, psolver_par.maxiter );
+        magma_zjacobi( A, b, x, &psolver_par );
+// printf( "done.\n");
+        return MAGMA_SUCCESS;
+    }
+    if( precond.precond == Magma_BCSRLU ){
+// printf( "start BCSRLU preconditioner with epsilon: %f and maxiter: %d: ", 
+//                                  psolver_par.epsilon, psolver_par.maxiter );
+        magma_zbcsrlu( A, b, x, &psolver_par );
+// printf( "done.\n");
+        return MAGMA_SUCCESS;
+    }
 
     else{
         printf( "error: preconditioner type not yet supported.\n" );
