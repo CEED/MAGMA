@@ -25,7 +25,9 @@ ZSRC += \
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
-#	zjacobi.cpp		\
+	ziterref.cpp			\
+	zgmres.cpp		\
+	zjacobi.cpp		\
 #	ziterref.cpp			\
 #	zcg_merge.cpp	\
 #	zgmres.cpp		\
@@ -59,8 +61,9 @@ ZSRC += \
 
 # ILU and sparse direct
 ZSRC += \
+	zbcsrlu.cpp      		\
 #	zilu.cpp		\
-#	zbcsrlu.cpp      		\
+
 
 
 # Wrappers, tools etc

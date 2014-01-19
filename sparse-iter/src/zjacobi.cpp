@@ -15,8 +15,12 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
+#define RTOLERANCE     1e-16
+#define ATOLERANCE     1e-16
+
+// uncomment for chronometry
+#define ENABLE_TIMER
+#define iterblock 1
 
 
 /*  -- MAGMA (version 1.1) --
@@ -41,7 +45,7 @@
     magma_z_vector *x                         solution approximation
     magma_solver_parameters *solver_par       solver parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 magma_int_t
@@ -50,39 +54,52 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 {
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                                c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
-    double nom0, nom1;
+    double nom0;
 
 
     magma_z_sparse_matrix M;
     magma_z_vector c, r;
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
-    magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
-    magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-    nom0 = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
+    magma_z_spmv( c_one, A, *x, c_zero, r );                  // r = A x
+    magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);           // r = r - b
+    nom0 = magma_dznrm2(dofs, r.val, 1);                      // den = || r ||
 
     // Jacobi setup
     magma_zjacobisetup( A, b, &M, &c );
     magma_solver_parameters jacobiiter_par;
     jacobiiter_par.maxiter = solver_par->maxiter;
 
+    //Chronometry
+    #ifdef ENABLE_TIMER
+    double tempo1, tempo2;
+    magma_device_sync(); tempo1=magma_wtime();
+    #endif
+
     // Jacobi iterator
     magma_zjacobiiter( M, c, x, &jacobiiter_par ); 
     
-    magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
-    magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-    nom1 = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
-    printf( "      (r_0, r_0) = %e\n", nom0);
-    printf( "      (r_N, r_N) = %e\n", nom1);
-    printf( "      Number of Jacobi iterations: %d\n", solver_par->maxiter);
-    printf( "      || r_N ||   = %e\n", nom1);
-    solver_par->residual = (double)(nom1);
+    #ifdef ENABLE_TIMER
+    magma_device_sync(); tempo2=magma_wtime();
+    double residual;
+    magma_zresidual( A, b, *x, &residual );
+    printf("#=============================================================#\n");
+    printf("# Jacobi solver summary:\n" );
+    printf("#    initial residual: %e\n", nom0 );
+    printf("#    iterations: %4d\n", (solver_par->maxiter) );
+    printf("#    exact relative residual: %e\n#    runtime: %.4lf sec\n", 
+                residual, tempo2-tempo1);
+    printf("#=============================================================#\n");
+    #endif
+  
+    solver_par->residual = (double)(residual);
 
     magma_z_mfree( &M );
     magma_z_vfree( &c );
     magma_z_vfree( &r );
-printf("4\n");
+
     return MAGMA_SUCCESS;
 }   /* magma_zjacobi */
 
@@ -115,14 +132,13 @@ printf("4\n");
     magma_z_sparse_matrix *M                  M = D^(-1) * (L+U)
     magma_z_vector *d                         vector with diagonal elements
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t
 magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b, 
                     magma_z_sparse_matrix *M, magma_z_vector *d ){
-    magma_int_t i;
 
-    
+    magma_int_t i;
 
     magma_z_sparse_matrix A_h1, A_h2, B, C;
     magma_z_vector diag, b_h;
@@ -143,7 +159,8 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
             if( B.col[i]==rowindex ){
                 diag.val[rowindex] = B.val[i];
                 if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
-                    printf(" error: zero diagonal element in row %d!\n", rowindex);
+                    printf(" error: zero diagonal element in row %d!\n", 
+                                                                rowindex);
             }
         }
         for( i=start; i<end; i++ ){
@@ -181,8 +198,6 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_vfree( &b_h);
  
     return MAGMA_SUCCESS;
-
-
 }
 
 /*  -- MAGMA (version 1.1) --
@@ -207,14 +222,12 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_vector d                          vector with diagonal entries
     magma_z_vector *c                         c = D^(-1) * b
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t
 magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d, 
                            magma_z_vector *c ){
-    magma_int_t i;
 
-    
     if( b.memory_location == Magma_CPU ){
         magma_z_vector diag, c_t, b_h;
         magma_z_vinit( &c_t, Magma_CPU, b.num_rows, MAGMA_Z_ZERO );
@@ -235,22 +248,12 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
         return MAGMA_SUCCESS;
     }
     else if( b.memory_location == Magma_DEV ){
-     /*
-
-        // memory allocation
-        c->memory_location = Magma_DEV;
-        c->num_rows = b.num_rows;
-        stat = cublasAlloc( c->num_rows, sizeof( magmaDoubleComplex ), ( void** )&c->val );
-        if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring vector\n"); exit(0); }
-       */ 
         // fill vector
         magma_zjacobisetup_vector_gpu( b.num_rows, b.val, d.val, c->val );
     }
 
 
 }
-
-
 
 
 /*  -- MAGMA (version 1.1) --
@@ -274,14 +277,13 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
     magma_z_sparse_matrix *M                  M = D^(-1) * (L+U)
     magma_z_vector *c                         c = D^(-1) * b
 
-    =====================================================================  */
+    ========================================================================  */
 
 magma_int_t
 magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b, 
                     magma_z_sparse_matrix *M, magma_z_vector *c ){
-    magma_int_t i;
 
-    
+    magma_int_t i;
 
     magma_z_sparse_matrix A_h1, A_h2, B, C;
     magma_z_vector diag, c_t, b_h;
@@ -303,7 +305,8 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
             if( B.col[i]==rowindex ){
                 diag.val[rowindex] = B.val[i];
                 if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
-                    printf(" error: zero diagonal element in row %d!\n", rowindex);
+                    printf(" error: zero diagonal element in row %d!\n", 
+                                                                    rowindex);
             }
         }
         for( i=start; i<end; i++ ){
@@ -340,11 +343,9 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_mfree( &C );  
     magma_z_vfree( &diag);
     magma_z_vfree( &c_t);
-printf("here\n");
     magma_z_vfree( &b_h);
-printf("error\n");
-    return MAGMA_SUCCESS;
 
+    return MAGMA_SUCCESS;
 
 }
 
@@ -371,20 +372,23 @@ printf("error\n");
     magma_z_vector *x                         iteration vector x
     magma_solver_parameters *solver_par       solver parameters
 
-    =====================================================================  */
+    ========================================================================  */
 
 
 magma_int_t
 magma_zjacobiiter( magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,  
-           magma_solver_parameters *solver_par ){
+                                 magma_solver_parameters *solver_par ){
 
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                            c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = M.num_rows;
     magma_z_vector t;
     magma_z_vinit( &t, Magma_DEV, dofs, c_zero );
 
+
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ){
+        printf("loop %d\n", i);
         magma_z_spmv( c_mone, M, *x, c_zero, t );                // t = - M * x
         magma_zaxpy( dofs, c_one , c.val, 1 , t.val, 1 );        // t = t + c
         magma_zcopy( dofs, t.val, 1 , x->val, 1 );               // x = t
