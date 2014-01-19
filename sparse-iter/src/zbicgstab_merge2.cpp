@@ -162,10 +162,6 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
         // check stopping criterion (asynchronous copy)
         cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+5, 1, 
                                                         skp_h+5, 1, stream[1] );
-        betanom = sqrt(MAGMA_Z_REAL(skp_h[5]));
-        if (  betanom  < r0 ) {
-            break;
-        }
 
         #ifdef ENABLE_TIMER
         //Chronometry  
@@ -175,6 +171,11 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
                 (solver_par->numiter), betanom, tempo2-tempo1 );
         }
         #endif
+
+        betanom = sqrt(MAGMA_Z_REAL(skp_h[5]));
+        if (  betanom  < r0 ) {
+            break;
+        }
     }
 
     #ifdef ENABLE_TIMER

@@ -145,9 +145,6 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+1, 1, 
                                                     skp_h+1, 1, stream[1] );
         betanom = sqrt(MAGMA_Z_REAL(skp_h[1]));
-        if (  betanom  < r0 ) {
-            break;
-        }
 
         #ifdef ENABLE_TIMER
         //Chronometry  
@@ -157,6 +154,10 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 (solver_par->numiter), betanom, tempo2-tempo1 );
         }
         #endif
+
+        if (  betanom  < r0 ) {
+            break;
+        }
 
     } 
 

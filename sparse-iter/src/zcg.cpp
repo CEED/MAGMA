@@ -107,16 +107,6 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);      // r = r - alpha q
         betanom = magma_dznrm2(dofs, r.val, 1);             // betanom = || r ||
         betanomsq = betanom * betanom;                      // betanoms = r' * r
-        if (  betanom  < r0 ) {
-            break;
-        }
-        beta = MAGMA_Z_MAKE(betanomsq/nom, 0.);           // beta = betanoms/nom
-        magma_zscal(dofs, beta, p.val, 1);                // p = beta*p
-        magma_zaxpy(dofs, c_one, r.val, 1, p.val, 1);     // p = p + r 
-        magma_z_spmv( c_one, A, p, c_zero, q );           // q = A p
-        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.val, 1, q.val, 1));    
-                // den = p dot q
-        nom = betanomsq;
 
         #ifdef ENABLE_TIMER
         //Chronometry  
@@ -126,6 +116,18 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 (solver_par->numiter), betanom, tempo2-tempo1 );
         }
         #endif
+
+        if (  betanom  < r0 ) {
+            break;
+        }
+
+        beta = MAGMA_Z_MAKE(betanomsq/nom, 0.);           // beta = betanoms/nom
+        magma_zscal(dofs, beta, p.val, 1);                // p = beta*p
+        magma_zaxpy(dofs, c_one, r.val, 1, p.val, 1);     // p = p + r 
+        magma_z_spmv( c_one, A, p, c_zero, q );           // q = A p
+        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.val, 1, q.val, 1));    
+                // den = p dot q
+        nom = betanomsq;
     } 
 
     #ifdef ENABLE_TIMER

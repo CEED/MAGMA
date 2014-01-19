@@ -138,10 +138,6 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         nom = betanom*betanom;
         rho_old = rho_new;                                    // rho_old=rho
 
-        if ( betanom  < r0 ) {
-            break;
-        }
-
         #ifdef ENABLE_TIMER
         //Chronometry  
         magma_device_sync(); tempo2=magma_wtime();
@@ -150,6 +146,10 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 (solver_par->numiter), betanom, tempo2-tempo1 );
         }
         #endif
+
+        if ( betanom  < r0 ) {
+            break;
+        }
     }
     #ifdef ENABLE_TIMER
     double residual;
