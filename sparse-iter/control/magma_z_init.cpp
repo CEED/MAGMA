@@ -69,8 +69,6 @@ magma_z_vinit(    magma_z_vector *x,
         magma_zmalloc_cpu( &x->val, num_rows );
         if ( x->val == NULL )
             return MAGMA_ERR_HOST_ALLOC;
-
-        #pragma unroll
         for( magma_int_t i=0; i<num_rows; i++)
              x->val[i] = values; 
         return MAGMA_SUCCESS;  
@@ -83,8 +81,6 @@ magma_z_vinit(    magma_z_vector *x,
         magma_zmalloc_cpu( &tmp, num_rows );
         if ( tmp == NULL )
             return MAGMA_ERR_HOST_ALLOC;
-
-        #pragma unroll
         for( magma_int_t i=0; i<num_rows; i++)
              tmp[i] = values; 
 
@@ -93,7 +89,6 @@ magma_z_vinit(    magma_z_vector *x,
 
         // data transfer
         magma_zsetvector( x->num_rows, tmp, 1, x->val, 1 );
- 
         magma_free_cpu(tmp);
 
         return MAGMA_SUCCESS; 
