@@ -405,7 +405,12 @@ magma_zilu(            magma_z_sparse_matrix A, magma_z_vector b,
                        magma_int_t *ipiv );
 
 magma_int_t
-magma_zbcsrlu(         magma_z_sparse_matrix A, 
+magma_zbcsrlu(         magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_solver_parameters *solver_par );
+
+
+magma_int_t
+magma_zbcsrlutrf(      magma_z_sparse_matrix A, 
                        magma_z_sparse_matrix *M,
                        magma_int_t *ipiv );
 
@@ -614,6 +619,11 @@ magma_zcopyscale(       int n,
                         magmaDoubleComplex *r, 
                         magmaDoubleComplex *v,
                         magmaDoubleComplex *skp );
+
+magma_int_t
+magma_dznrm2scale(      int m, 
+                        magmaDoubleComplex *r, int lddr, 
+                        magmaDoubleComplex *drnorm);
 
 
 magma_int_t

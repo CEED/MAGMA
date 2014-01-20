@@ -133,9 +133,6 @@ typedef struct magma_s_vector{
 
 
 
-typedef enum {MAGMA_MGS, MAGMA_CGS, MAGMA_FUSED_CGS,
-              MAGMA_CHOLQR, MAGMA_TSQR} magma_ortho_t;
-
 typedef struct magma_solver_parameters{
 
     double             epsilon;  
@@ -143,10 +140,7 @@ typedef struct magma_solver_parameters{
     magma_int_t        restart; 
     magma_int_t        numiter;
     double             residual;
-
-    // orthogonalization scheme for GMRES
-    magma_ortho_t      gmres_ortho;
-    magma_ortho_t      cagmres_ortho;
+    magma_ortho_t      ortho;
 }magma_solver_parameters;
 
 
