@@ -437,6 +437,14 @@ void magmablas_zsymmetrize_tiles(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride );
 
+void magma_zlarfg(
+    magma_int_t n, magmaDoubleComplex *alpha,
+    magmaDoubleComplex *x, magma_int_t incx, magmaDoubleComplex *tau );
+
+void magma_zlarfg_gpu(
+    magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+    magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk );
+
 void magma_zlarfgx_gpu(
     magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
     magmaDoubleComplex *dtau, double *dxnorm,

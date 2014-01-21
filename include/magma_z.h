@@ -105,9 +105,6 @@ magma_int_t magma_zlaqps( magma_int_t m, magma_int_t n, magma_int_t offset,
                           magmaDoubleComplex *F,  magma_int_t ldf,
                           magmaDoubleComplex *dF, magma_int_t lddf );
 
-magma_int_t magma_zlarfg( magma_int_t n, magmaDoubleComplex *alpha, magmaDoubleComplex *x,
-                          magma_int_t incx, magmaDoubleComplex *tau);
-
 magma_int_t magma_zlatrd( magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magmaDoubleComplex *a,
                           magma_int_t lda, double *e, magmaDoubleComplex *tau,
                           magmaDoubleComplex *w, magma_int_t ldw,
@@ -733,9 +730,6 @@ magma_int_t magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma
                               magmaDoubleComplex *dc,       magma_int_t ldc,
                               magmaDoubleComplex *dwork,    magma_int_t ldwork,
                               magmaDoubleComplex *dworkvt,  magma_int_t ldworkvt);
-
-magma_int_t magma_zlarfg_gpu( magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                              magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
 
 magma_int_t magma_zposv_gpu(  magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                               magmaDoubleComplex *dA, magma_int_t ldda,
