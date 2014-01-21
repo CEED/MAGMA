@@ -730,6 +730,9 @@ subs = {
     ('sresidual',      'dresidual',      'cresidual',      'zresidual'       ),
     ('scompact',       'dcompact',       'ccompact',       'zcompact'        ),
 
+    # ----- SPARSE runfiles
+    ('run_s',          'run_d',          'run_c',          'run_z'           ),
+ 
 
     # ----- Xeon Phi (MIC) specific, alphabetic order unless otherwise required
     ('SREG_WIDTH',                  'DREG_WIDTH',                  'CREG_WIDTH',                  'ZREG_WIDTH' ),
