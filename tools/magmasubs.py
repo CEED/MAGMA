@@ -713,6 +713,9 @@ subs = {
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
 
+    # ----- SPARSE Iterative Eigensolvers
+    ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
+
     # ----- SPARSE auxiliary tools
     ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ),
     ('svjacobi',       'dvjacobi',       'cvjacobi',       'zvjacobi'        ),
@@ -724,7 +727,8 @@ subs = {
     ('s_transpose',    'd_transpose',    'c_transpose',    'z_transpose'     ),
     ('SPARSE_S_H',     'SPARSE_D_H',     'SPARSE_C_H',     'SPARSE_Z_H'      ),
     ('_TYPES_S_H',     '_TYPES_D_H',     '_TYPES_C_H',     '_TYPES_Z_H'      ),
-    ('sresidual',      'dresidual',      'cresidual',      'zresidual'       ), 
+    ('sresidual',      'dresidual',      'cresidual',      'zresidual'       ),
+    ('scompact',       'dcompact',       'ccompact',       'zcompact'        ),
 
 
     # ----- Xeon Phi (MIC) specific, alphabetic order unless otherwise required
