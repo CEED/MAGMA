@@ -64,8 +64,13 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
+#if defined(CHECKEIG)
+#if defined(PRECISION_z)  || defined(PRECISION_d)
     magma_int_t WANTZ=0;
     magma_int_t THREADS=1;
+#endif
+#endif
+
     magma_int_t NE = 0;
     magma_int_t NB = 0;
     magma_int_t ngpu = 1;
@@ -138,7 +143,6 @@ int main( int argc, char** argv)
             magma_zhetrd_bhe2trc(THREADS, WANTZ, opts.uplo, NE, N, NB, h_R, lda, D, E, dT1, ldt);
             */
 
-            magma_vec_t   jobz  = MagmaVec;
             magma_range_t range = MagmaRangeAll;
             magma_int_t fraction_ev = 100;
             magma_int_t il, iu, m1;
