@@ -52,7 +52,7 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
     LDDA     (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     dwork   (GPU workspace) COMPLEX_16 array, dimension (N,N)
  

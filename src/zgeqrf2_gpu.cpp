@@ -55,7 +55,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     TAU     (output) COMPLEX_16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors (see Further
@@ -70,11 +70,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     ===============
     The matrix Q is represented as a product of elementary reflectors
 
-       Q = H(1) H(2) . . . H(k), where k = min(m,n).
+        Q = H(1) H(2) . . . H(k), where k = min(m,n).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
@@ -228,8 +228,8 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
     magma_queue_destroy( stream[0] );
     if (current_stream == NULL) {
-      magma_queue_destroy( stream[1] );
-      magmablasSetKernelStream(NULL);
+        magma_queue_destroy( stream[1] );
+        magmablasSetKernelStream(NULL);
     }
 
     return *info;

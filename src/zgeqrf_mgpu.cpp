@@ -47,7 +47,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     TAU     (output) COMPLEX_16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors (see Further
