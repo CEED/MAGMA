@@ -24,53 +24,52 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgetrf
+   -- Testing zprint
 */
 int main( int argc, char** argv)
 {
     TESTING_INIT();
-    magma_setdevice( 0 );
 
     magmaDoubleComplex *hA, *dA;
-
-    /* Matrix size */
-    magma_int_t m = 5;
-    magma_int_t n = 10;
     //magma_int_t ione     = 1;
     //magma_int_t ISEED[4] = {0,0,0,1};
     //magma_int_t size;
-    magma_int_t lda, ldda;
+    magma_int_t M, N, lda, ldda, size;
     
-    lda    = ((m + 31)/32)*32;
-    ldda   = ((m + 31)/32)*32;
+    magma_opts opts;
+    parse_opts( argc, argv, &opts );
+    
+    for( int i = 0; i < opts.ntest; ++i ) {
+        for( int iter = 0; iter < opts.niter; ++iter ) {
+            M     = opts.msize[i];
+            N     = opts.nsize[i];
+            lda   = N;
+            ldda  = ((M + 31)/32)*32;
+            size  = lda*N;
 
-    /* Allocate host memory for the matrix */
-    TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda *n );
-    TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*n );
-
-    //size = lda*n;
-    //lapackf77_zlarnv( &ione, ISEED, &size, hA );
-    for( int j = 0; j < n; ++j ) {
-        for( int i = 0; i < m; ++i ) {
-            hA[i + j*lda] = MAGMA_Z_MAKE( i + j*0.01, 0. );
+            /* Allocate host memory for the matrix */
+            TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda *N );
+            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*N );
+        
+            //lapackf77_zlarnv( &ione, ISEED, &size, hA );
+            for( int j = 0; j < N; ++j ) {
+                for( int i = 0; i < M; ++i ) {
+                    hA[i + j*lda] = MAGMA_Z_MAKE( i + j*0.01, 0. );
+                }
+            }
+            magma_zsetmatrix( M, N, hA, lda, dA, ldda );
+            
+            printf( "A=" );
+            magma_zprint( M, N, hA, lda );
+            
+            printf( "dA=" );
+            magma_zprint_gpu( M, N, dA, ldda );
+            
+            TESTING_FREE_CPU( hA );
+            TESTING_FREE_DEV( dA );
         }
     }
-    magma_zsetmatrix( m, n, hA, lda, dA, ldda );
-    
-    printf( "A=" );
-    magma_zprint( m, n, hA, lda );
-    printf( "dA=" );
-    magma_zprint_gpu( m, n, dA, ldda );
-    
-    //printf( "dA=" );
-    //magma_zprint( m, n, dA, ldda );
-    //printf( "A=" );
-    //magma_zprint_gpu( m, n, hA, lda );
-    
-    /* Memory clean up */
-    TESTING_FREE_CPU( hA );
-    TESTING_FREE_DEV( dA );
 
-    /* Shutdown */
     TESTING_FINALIZE();
+    return 0;
 }
