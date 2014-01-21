@@ -23,10 +23,6 @@
 #define dt(gpui, ind)    (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
 #define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
-extern"C"{
-    void magmablas_zsetdiag1subdiag0_stream(magma_uplo_t uplo, int k, int nb, magmaDoubleComplex *A, int lda, magma_queue_t stream);
-}
-
 extern "C" magma_int_t
 magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                magma_int_t m, magma_int_t n, magma_int_t k,

@@ -12,10 +12,6 @@
 */
 #include "common_magma.h"
 
-extern"C"{
-  void magmablas_zsetdiag1subdiag0(magma_uplo_t uplo, int k, int nb, magmaDoubleComplex *A, int lda);
-}
-
 extern "C" magma_int_t
 magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
                   magma_int_t m, magma_int_t n, magma_int_t k,
