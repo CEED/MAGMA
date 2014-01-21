@@ -107,11 +107,11 @@ int main( int argc, char** argv)
                 // generate Q & P'
                 lapackf77_zungbr("Q", &M, &minmn, &N, h_Q,  &lda, tauq, chkwork, &lchkwork, &info);
                 if (info != 0)
-                    printf("lapackf77_zungbr returned error %d: %s.\n",
+                    printf("lapackf77_zungbr #1 returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 lapackf77_zungbr("P", &minmn, &N, &M, h_PT, &lda, taup, chkwork, &lchkwork, &info);
                 if (info != 0)
-                    printf("lapackf77_zungbr (2) returned error %d: %s.\n",
+                    printf("lapackf77_zungbr #2 returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 
                 // Test 1:  Check the decomposition A := Q * B * PT
