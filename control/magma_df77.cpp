@@ -1017,6 +1017,22 @@ void magmaf_dsygvdx_2stage_m(
         info );
 }
 
+#define magmaf_dgegqr_gpu FORTRAN_NAME( magmaf_dgegqr_gpu, MAGMAF_DGEGQR_GPU )
+void magmaf_dgegqr_gpu(
+    magma_int_t *m, magma_int_t *n,
+    devptr_t *dA, magma_int_t *ldda,
+    devptr_t *dwork,
+    double *work,
+    magma_int_t *info )
+{
+    magma_dgegqr_gpu(
+        *m, *n,
+        magma_ddevptr(dA), *ldda,
+        magma_ddevptr(dwork),
+        work,
+        info );
+}
+
 #define magmaf_dgels_gpu FORTRAN_NAME( magmaf_dgels_gpu, MAGMAF_DGELS_GPU )
 void magmaf_dgels_gpu(
     magma_trans_t *trans, magma_int_t *m, magma_int_t *n, magma_int_t *nrhs,
@@ -1249,7 +1265,7 @@ void magmaf_dgeqrs3_gpu(
 
 #define magmaf_dgessm_gpu FORTRAN_NAME( magmaf_dgessm_gpu, MAGMAF_DGESSM_GPU )
 void magmaf_dgessm_gpu(
-    magma_storev_t *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t *ib,
+    magma_order_t *order, magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t *ib,
     magma_int_t *ipiv,
     devptr_t *dL1, magma_int_t *lddl1,
     devptr_t *dL, magma_int_t *lddl,
@@ -1257,7 +1273,7 @@ void magmaf_dgessm_gpu(
     magma_int_t *info )
 {
     magma_dgessm_gpu(
-        *storev, *m, *n, *k, *ib,
+        *order, *m, *n, *k, *ib,
         ipiv,
         magma_ddevptr(dL1), *lddl1,
         magma_ddevptr(dL), *lddl,
@@ -1669,7 +1685,7 @@ void magmaf_dpotrs_gpu(
 
 #define magmaf_dssssm_gpu FORTRAN_NAME( magmaf_dssssm_gpu, MAGMAF_DSSSSM_GPU )
 void magmaf_dssssm_gpu(
-    magma_storev_t *storev, magma_int_t *m1, magma_int_t *n1, magma_int_t *m2, magma_int_t *n2, magma_int_t *k, magma_int_t *ib,
+    magma_order_t *order, magma_int_t *m1, magma_int_t *n1, magma_int_t *m2, magma_int_t *n2, magma_int_t *k, magma_int_t *ib,
     devptr_t *dA1, magma_int_t *ldda1,
     devptr_t *dA2, magma_int_t *ldda2,
     devptr_t *dL1, magma_int_t *lddl1,
@@ -1678,7 +1694,7 @@ void magmaf_dssssm_gpu(
     magma_int_t *info )
 {
     magma_dssssm_gpu(
-        *storev, *m1, *n1, *m2, *n2, *k, *ib,
+        *order, *m1, *n1, *m2, *n2, *k, *ib,
         magma_ddevptr(dA1), *ldda1,
         magma_ddevptr(dA2), *ldda2,
         magma_ddevptr(dL1), *lddl1,

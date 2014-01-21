@@ -822,6 +822,16 @@ subroutine magmaf_ssygvdx_2stage_m( nrgpu, itype, jobz, range, uplo, n, a, lda, 
     integer          :: info
 end subroutine magmaf_ssygvdx_2stage_m
 
+subroutine magmaf_sgegqr_gpu( m, n, dA, ldda, dwork, work, info )
+    integer          :: m
+    integer          :: n
+    magma_devptr_t   :: dA
+    integer          :: ldda
+    magma_devptr_t   :: dwork
+    real             :: work(*)
+    integer          :: info
+end subroutine magmaf_sgegqr_gpu
+
 subroutine magmaf_sgels_gpu( trans, m, n, nrhs, dA, ldda, dB, lddb, hwork, lwork, info )
     character        :: trans
     integer          :: m
@@ -971,9 +981,9 @@ subroutine magmaf_sgeqrs3_gpu( m, n, nrhs, dA, ldda, tau, dT, dB, lddb, hwork, l
     integer          :: info
 end subroutine magmaf_sgeqrs3_gpu
 
-subroutine magmaf_sgessm_gpu( storev, m, n, k, ib, ipiv, dL1, lddl1, dL, lddl, dA, ldda,  &
+subroutine magmaf_sgessm_gpu( order, m, n, k, ib, ipiv, dL1, lddl1, dL, lddl, dA, ldda,  &
         info )
-    character        :: storev
+    character        :: order
     integer          :: m
     integer          :: n
     integer          :: k
@@ -1297,9 +1307,9 @@ subroutine magmaf_spotrs_gpu( uplo, n, nrhs, dA, ldda, dB, lddb, info )
     integer          :: info
 end subroutine magmaf_spotrs_gpu
 
-subroutine magmaf_sssssm_gpu( storev, m1, n1, m2, n2, k, ib, dA1, ldda1, dA2, ldda2, dL1,  &
+subroutine magmaf_sssssm_gpu( order, m1, n1, m2, n2, k, ib, dA1, ldda1, dA2, ldda2, dL1,  &
         lddl1, dL2, lddl2, IPIV, info )
-    character        :: storev
+    character        :: order
     integer          :: m1
     integer          :: n1
     integer          :: m2
