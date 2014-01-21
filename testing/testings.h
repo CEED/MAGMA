@@ -60,6 +60,21 @@ void flops_init();
  * Macros to handle error checking.
  */
 
+#ifdef CUBLAS_V2_H_
+
+#define TESTING_INIT()                                                     \
+    magma_init();                                                          \
+    flops_init();                                                          \
+    cublasHandle_t handle;                                                 \
+    cudaSetDevice( 0 );                                                    \
+    cublasCreate( &handle );                                               \
+
+#define TESTING_FINALIZE()                                                 \
+    cublasDestroy( handle );                                               \
+    magma_finalize();                                                      \
+
+#else // not CUBLAS_V2_H_
+
 #define TESTING_INIT()                                                     \
     magma_init();                                                          \
     flops_init();                                                          \
@@ -74,6 +89,8 @@ void flops_init();
 #define TESTING_FINALIZE()                                                 \
     magma_finalize();                                                      \
     cublasShutdown();
+
+#endif // not CUBLAS_V2_H_
 
 
 #define TESTING_INIT_MGPU()                                                \
@@ -180,6 +197,7 @@ typedef struct magma_opts
     magma_int_t ngpu;
     magma_int_t niter;
     magma_int_t nthread;
+    magma_int_t offset;
     magma_int_t itype;     // hegvd: problem type
     magma_int_t svd_work;  // gesvd
     magma_int_t version;   // hemm_mgpu, hetrd

@@ -15,7 +15,7 @@
 #include <string.h>
 #include <math.h>
 #include <cuda_runtime_api.h>
-#include <cublas.h>
+#include <cublas_v2.h>
 
 // includes, project
 #include "flops.h"
@@ -50,7 +50,9 @@ int main( int argc, char** argv)
     
     printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "side = %c, uplo = %c, transA = %c, diag = %c \n", opts.side, opts.uplo, opts.transA, opts.diag );
+           "side = %s, uplo = %s, transA = %s, diag = %s \n",
+           lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag) );
     printf("    M     N   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
     printf("==================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -87,16 +89,20 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
             
             /* =====================================================================
-               Performs operation using CUDA-BLAS
+               Performs operation using CUBLAS
                =================================================================== */
             magma_zsetmatrix( Ak, Ak, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M, N, h_B, ldb, d_B, lddb );
             
+            // note cublas does trmm out-of-place (i.e., adds output matrix C),
+            // but allows C=B to do in-place.
             cublas_time = magma_sync_wtime( NULL );
-            cublasZtrmm( opts.side, opts.uplo, opts.transA, opts.diag,
+            cublasZtrmm( handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
+                         cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
                          M, N, 
-                         alpha, d_A, ldda,
-                                d_B, lddb );
+                         &alpha, d_A, ldda,
+                                 d_B, lddb,
+                                 d_B, lddb );
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
@@ -107,7 +113,8 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_ztrmm( lapack_const(opts.side), lapack_const(opts.uplo), lapack_const(opts.transA), lapack_const(opts.diag), 
+                blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
                                &M, &N,
                                &alpha, h_A, &lda,
                                        h_B, &ldb );

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <math.h>
 #include <cuda_runtime_api.h>
-#include <cublas.h>
+#include <cublas_v2.h>
 
 #include "flops.h"
 #include "magma.h"
@@ -81,14 +81,15 @@ int main(int argc, char **argv)
             magma_zsetvector( N, Y, incy, dY, incy );
             
             cublas_time = magma_sync_wtime( 0 );
-            cublasZhemv( opts.uplo, N, alpha, dA, lda, dX, incx, beta, dY, incy );
+            cublasZhemv( handle, cublas_uplo_const(opts.uplo),
+                         N, &alpha, dA, lda, dX, incx, &beta, dY, incy );
             cublas_time = magma_sync_wtime( 0 ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
             magma_zgetvector( N, dY, incy, Ycublas, incy );
             
             /* =====================================================================
-               Performs operation using MAGMA BLAS
+               Performs operation using MAGMABLAS
                =================================================================== */
             magma_zsetvector( N, Y, incy, dY, incy );
             
@@ -105,7 +106,7 @@ int main(int argc, char **argv)
                Performs operation using CPU BLAS
                =================================================================== */
             cpu_time = magma_wtime();
-            blasf77_zhemv( lapack_const(opts.uplo), &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
+            blasf77_zhemv( lapack_uplo_const(opts.uplo), &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             

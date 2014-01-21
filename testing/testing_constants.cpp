@@ -12,6 +12,8 @@
 #undef NDEBUG
 #include <assert.h>
 
+#include <cublas_v2.h>
+
 #include "magma.h"
 
 int main( int argc, char** argv )

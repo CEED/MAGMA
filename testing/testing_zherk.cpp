@@ -14,7 +14,7 @@
 #include <string.h>
 #include <math.h>
 #include <cuda_runtime_api.h>
-#include <cublas.h>
+#include <cublas_v2.h>
 
 // includes, project
 #include "flops.h"
@@ -49,7 +49,8 @@ int main( int argc, char** argv)
     
     printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "uplo = %c, transA = %c\n", opts.uplo, opts.transA );
+           "uplo = %s, transA = %s\n",
+           lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
     printf("    N     K   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
     printf("==================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -86,15 +87,15 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeC, h_C );
             
             /* =====================================================================
-               Performs operation using CUDA-BLAS
+               Performs operation using CUBLAS
                =================================================================== */
             magma_zsetmatrix( An, Ak, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N, h_C, ldc, d_C, lddc );
 
             cublas_time = magma_sync_wtime( NULL );
-            cublasZherk( opts.uplo, opts.transA, N, K,
-                         alpha, d_A, ldda,
-                         beta,  d_C, lddc );
+            cublasZherk( handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA), N, K,
+                         &alpha, d_A, ldda,
+                         &beta,  d_C, lddc );
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
@@ -105,7 +106,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_zherk( lapack_const(opts.uplo), lapack_const(opts.transA), &N, &K,
+                blasf77_zherk( lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA), &N, &K,
                                &alpha, h_A, &lda,
                                &beta,  h_C, &ldc );
                 cpu_time = magma_wtime() - cpu_time;
@@ -118,10 +119,10 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 // compute relative error for both magma & cublas, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlanhe("fro", lapack_const(opts.uplo), &N, h_C, &ldc, work);
+                Cnorm = lapackf77_zlanhe("fro", lapack_uplo_const(opts.uplo), &N, h_C, &ldc, work);
 
                 blasf77_zaxpy( &sizeC, &c_neg_one, h_C, &ione, h_Ccublas, &ione );
-                cublas_error = lapackf77_zlanhe( "fro", lapack_const(opts.uplo), &N, h_Ccublas, &ldc, work ) / Cnorm;
+                cublas_error = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Ccublas, &ldc, work ) / Cnorm;
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e\n",
                        (int) N, (int) K,
