@@ -83,7 +83,7 @@ magma_int_t magma_getlapack_numthreads()
            "==============================================================================\n");
    #endif
 #endif
-    if(num_threads==-1)
+    if (num_threads == -1)
         num_threads = magma_get_numthreads();
     return num_threads;
 }
@@ -94,7 +94,6 @@ magma_int_t magma_get_numthreads()
 {
     /* determine the number of threads */
     magma_int_t threads = 0;
-    char *myenv;
 
     // First check OMP_NUM_THREADS then MKL then the system CPUs
 #if defined(_OPENMP)
@@ -105,12 +104,11 @@ magma_int_t magma_get_numthreads()
 #elif defined(MAGMA_WITH_MKL)
     threads = mkl_get_max_threads();
 #else
-    myenv = getenv("MAGMA_NUM_THREADS");
-    if (myenv != NULL)
-    {
+    const char* myenv = getenv("MAGMA_NUM_THREADS");
+    if (myenv != NULL) {
         threads = atoi(myenv);
     }
-    else{
+    else {
         #ifdef _MSC_VER  // Windows
         SYSTEM_INFO sysinfo;
         GetSystemInfo( &sysinfo );
