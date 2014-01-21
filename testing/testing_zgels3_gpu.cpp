@@ -162,10 +162,10 @@ int main( int argc, char** argv)
             cpu_error = lapackf77_zlange("f", &M, &nrhs, h_B, &ldb, work) / (min_mn*matnorm);
             gpu_error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*matnorm);
             
-            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e",
+            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e  %s\n",
                    (int) M, (int) N, (int) nrhs,
-                   cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error );
-            printf("%s\n", (gpu_error < tol ? "" : "  failed"));
+                   cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error,
+                   (gpu_error < tol ? "ok" : "failed") );
             status |= ! (gpu_error < tol);
             
             TESTING_FREE_CPU( tau    );

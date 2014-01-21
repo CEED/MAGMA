@@ -149,9 +149,9 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e        %8.2e%s\n",
+                printf("   %8.2e        %8.2e  %s\n",
                        result[0]*eps, result[1]*eps,
-                       ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "" : "  failed")  );
+                       ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "ok" : "failed")  );
                 status |= ! (result[0]*eps < tol);
                 status |= ! (result[1]*eps < tol);
             }

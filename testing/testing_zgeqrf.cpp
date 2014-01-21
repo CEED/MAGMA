@@ -127,13 +127,13 @@ int main( int argc, char** argv)
 
                 if ( opts.lapack ) {
                     printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                  %8.2e",
-                           (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0],results[1] );
-                    printf("%s\n", (results[0] < tol ? "" : "  failed"));
+                           (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0], results[1] );
                 } else {
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                  %8.2e",
-                           (int) M, (int) N, gpu_perf, gpu_time, results[0],results[1] );
-                    printf("%s\n", (results[0] < tol ? "" : "  failed"));
+                           (int) M, (int) N, gpu_perf, gpu_time, results[0], results[1] );
                 }
+                // todo also check results[1] < tol?
+                printf("  %s\n", (results[0] < tol ? "ok" : "failed"));
                 status |= ! (results[0] < tol);
 
                 TESTING_FREE_CPU( h_W1 );
@@ -156,7 +156,7 @@ int main( int argc, char** argv)
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, error );
                 }
-                printf("%s\n", (error < tol ? "" : "  failed"));
+                printf("  %s\n", (error < tol ? "ok" : "failed"));
                 status |= ! (error < tol);
             }
             else {
