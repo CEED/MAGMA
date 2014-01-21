@@ -73,8 +73,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
             TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
             
-            magma_zlaset( N, N, ddA, N );
-            magma_zlaset( N, N, d_T, N );
+            magmablas_zlaset( MagmaFull, N, N, ddA, N );
+            magmablas_zlaset( MagmaFull, N, N, d_T, N );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
