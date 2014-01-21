@@ -16,12 +16,10 @@ extern "C" void
 magma_dmove_eig(magma_range_t range, magma_int_t n, double *w, magma_int_t *il,
                      magma_int_t *iu, double vl, double vu, magma_int_t *m)
 {
-    const char* range_ = lapack_const( range );
-
     magma_int_t valeig, indeig, i;
 
-    valeig = lapackf77_lsame( range_, "V" );
-    indeig = lapackf77_lsame( range_, "I" );
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
 
     if (indeig) {
         *m = *iu - *il + 1;

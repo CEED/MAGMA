@@ -145,8 +145,6 @@ magma_dgeev(
     magma_int_t scalea, minwrk, lquery, wantvl, wantvr, select[1];
 
     const char* side_  = NULL;
-    const char* jobvl_ = lapack_const( jobvl );
-    const char* jobvr_ = lapack_const( jobvr );
 
     magma_timer_t time_total, time_gehrd, time_unghr, time_hseqr, time_trevc, time_sum;
     magma_flops_t flop_total, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_sum;
@@ -154,12 +152,12 @@ magma_dgeev(
     flops_start( flop_total );
     
     *info = 0;
-    lquery = lwork == -1;
-    wantvl = lapackf77_lsame( jobvl_, "V" );
-    wantvr = lapackf77_lsame( jobvr_, "V" );
-    if (! wantvl && ! lapackf77_lsame( jobvl_, "N" )) {
+    lquery = (lwork == -1);
+    wantvl = (jobvl == MagmaVec);
+    wantvr = (jobvr == MagmaVec);
+    if (! wantvl && jobvl != MagmaNoVec) {
         *info = -1;
-    } else if (! wantvr && ! lapackf77_lsame( jobvr_, "N" )) {
+    } else if (! wantvr && jobvr != MagmaNoVec) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;

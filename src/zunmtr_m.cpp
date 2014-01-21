@@ -112,9 +112,6 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    const char* side_  = lapack_const( side  );
-    const char* uplo_  = lapack_const( uplo  );
-    const char* trans_ = lapack_const( trans );
     magma_int_t  i__2;
     magma_int_t i1, i2, nb, mi, ni, nq, nw;
     int left, upper, lquery;
@@ -122,9 +119,9 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
     magma_int_t lwkopt;
 
     *info = 0;
-    left   = lapackf77_lsame(side_, "L");
-    upper  = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
+    left   = (side == MagmaLeft);
+    upper  = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
@@ -134,12 +131,12 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
         nq = n;
         nw = m;
     }
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    } else if (! upper && uplo != MagmaLower) {
         *info = -2;
-    } else if (! lapackf77_lsame(trans_, "N") &&
-               ! lapackf77_lsame(trans_, "C")) {
+    } else if (trans != MagmaNoTrans &&
+               trans != MagmaConjTrans) {
         *info = -3;
     } else if (m < 0) {
         *info = -4;

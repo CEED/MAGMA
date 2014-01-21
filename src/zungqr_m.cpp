@@ -34,7 +34,7 @@ magma_zungqr_m(
     which is defined as the first N columns of a product of K elementary
     reflectors of order M
 
-          Q  =  H(1) H(2) . . . H(k)
+        Q  =  H(1) H(2) . . . H(k)
 
     as returned by ZGEQRF.
 

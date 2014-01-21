@@ -235,9 +235,9 @@ magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
          California at Berkeley, USA
     =====================================================================     */
     
-    const char* uplo_  = lapack_const( uplo  );
-    const char* jobz_  = lapack_const( jobz  );
-    const char* range_ = lapack_const( range );
+    const char* uplo_  = lapack_uplo_const( uplo  );
+    const char* jobz_  = lapack_vec_const( jobz  );
+    const char* range_ = lapack_range_const( range );
     
     magma_int_t ione = 1;
     float szero = 0.;
@@ -265,19 +265,19 @@ magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     double rmin, rmax;
     double *dwork;
     
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lwork == -1 || lrwork == -1 || liwork == -1;
+    lower = (uplo == MagmaLower);
+    wantz = (jobz == MagmaVec);
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lwork == -1 || lrwork == -1 || liwork == -1);
     
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -1;
     } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -3;
     } else if (n < 0) {
         *info = -4;

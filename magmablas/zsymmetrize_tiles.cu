@@ -112,10 +112,10 @@ magmablas_zsymmetrize_tiles( magma_uplo_t uplo, magma_int_t m, magmaDoubleComple
     dim3 grid( ntile, (m + NB - 1)/NB );
     
     //printf( "m %d, grid %d x %d, threads %d\n", m, grid.x, grid.y, threads.x );
-    if ( (uplo == 'U') || (uplo == 'u') ) {
+    if ( uplo == MagmaUpper ) {
         zsymmetrize_tiles_upper<<< grid, threads, 0, magma_stream >>>( m, dA, ldda, mstride, nstride );
     }
-    else if ( (uplo == 'L') || (uplo == 'l') ) {
+    else if ( uplo == MagmaLower ) {
         zsymmetrize_tiles_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda, mstride, nstride );
     }
     else {

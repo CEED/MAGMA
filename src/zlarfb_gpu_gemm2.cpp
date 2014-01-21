@@ -93,8 +93,8 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
 
     LDWORK  (input) INTEGER
             The leading dimension of the array WORK.
-            If SIDE == 'L', LDWORK >= max(1,N);
-            if SIDE == 'R', LDWORK >= max(1,M);
+            If SIDE = 'L', LDWORK >= max(1,N);
+            if SIDE = 'R', LDWORK >= max(1,M);
 
     WORKVT  (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
 
@@ -143,21 +143,21 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
 
     // opposite of trans
     magma_trans_t transt;
-    if (trans == 'N' || trans == 'n')
+    if (trans == MagmaNoTrans)
         transt = MagmaConjTrans;
     else
         transt = MagmaNoTrans;
     
     // whether T is upper or lower triangular
     magma_uplo_t uplo;
-    if (direct == 'F' || direct == 'f')
+    if (direct == MagmaForward)
         uplo = MagmaUpper;
     else
         uplo = MagmaLower;
     
     // whether V is stored transposed or not
     magma_trans_t notransV, transV;
-    if (storev == 'C' || storev == 'c') {
+    if (storev == MagmaColumnwise) {
         notransV = MagmaNoTrans;
         transV   = MagmaConjTrans;
     }
@@ -167,7 +167,7 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
     }
         printf("check that workspace dworkvt is of good size \n");
 
-    if ( side  == 'l' || side  == 'L' ) {
+    if ( side == MagmaLeft ) {
         // Form H C or H' C
         // Comments assume H C.
         // When forming H' C, T gets transposed via transt for m >= n or by trans for m < n.

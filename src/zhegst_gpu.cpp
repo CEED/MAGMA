@@ -85,7 +85,7 @@ magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================*/
     
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;
     magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
@@ -96,13 +96,13 @@ magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
     magma_int_t        lda;
     magma_int_t        ldb;
     double             d_one = 1.0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
     
     /* Test the input parameters. */
     *info = 0;
     if (itype < 1 || itype > 3) {
         *info = -1;
-    } else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    } else if (! upper && uplo != MagmaLower) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;

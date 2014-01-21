@@ -82,7 +82,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
     LDDA     (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -94,12 +94,11 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
 
 
     magma_int_t     j, jb, nb0, nb2, d, dd, id, j_local, j_local2, buf;
-    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
     magmaDoubleComplex *dlpanel;
     magma_int_t n_local[MagmaMaxGPUs], ldpanel;
     const magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
@@ -126,7 +125,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
 #endif
     
     *info = 0;
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -676,7 +675,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
     } /* end of else not upper */
 
     /* == finalize the trace == */
-    trace_finalize( "zpotrf.svg","trace.css" );
+    trace_finalize( "zpotrf.svg", "trace.css" );
     for( d=0; d < num_gpus; d++ ) {
         magma_setdevice(d);
         for( j=0; j < 3; j++ ) {
@@ -706,8 +705,7 @@ magma_zhtodpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
               magma_queue_t stream[][3], magma_int_t *info)
 {
     magma_int_t k;
-    const char* uplo_ = lapack_const( uplo );
-    if ( lapackf77_lsame(uplo_, "U") ) {
+    if (uplo == MagmaUpper) {
         magma_int_t j, jj, jb, mj;
         
         /* go through each column */
@@ -766,8 +764,7 @@ magma_zdtohpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
               magma_queue_t stream[][3], magma_int_t *info)
 {
     magma_int_t k;
-    const char* uplo_ = lapack_const( uplo );
-    if ( lapackf77_lsame(uplo_, "U") ) {
+    if (uplo == MagmaUpper) {
         magma_int_t j, jj, jb, mj;
         
         /* go through each column */

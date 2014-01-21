@@ -124,10 +124,6 @@ magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
             Unchanged on exit.
     =====================================================================    */
 
-    const char* side_   = lapack_const( side   );
-    const char* uplo_   = lapack_const( uplo   );
-    const char* transa_ = lapack_const( transa );
-    const char* diag_   = lapack_const( diag   );
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex  alpha_;
@@ -145,24 +141,24 @@ magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
     int gpu_b;
     magma_getdevice(&gpu_b);
 
-    lside = lapackf77_lsame(side_, "L");
+    lside = (side == MagmaLeft);
     if (lside) {
         nrowa = m;
     } else {
         nrowa = n;
     }
-    upper = lapackf77_lsame(uplo_, "U");
-    notransp = lapackf77_lsame(transa_, "N");
+    upper = (uplo == MagmaUpper);
+    notransp = (transa == MagmaNoTrans);
 
     info = 0;
-    if (! lside && ! lapackf77_lsame(side_, "R")) {
+    if (! lside && side != MagmaRight) {
         info = 1;
-    } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    } else if (! upper && uplo != MagmaLower) {
         info = 2;
-    } else if (! notransp && ! lapackf77_lsame(transa_, "T")
-               && ! lapackf77_lsame(transa_, "C")) {
+    } else if (! notransp && transa != MagmaTrans
+               && transa != MagmaConjTrans) {
         info = 3;
-    } else if (! lapackf77_lsame(diag_, "U") && ! lapackf77_lsame(diag_, "N")) {
+    } else if (diag != MagmaUnit && diag != MagmaNonUnit) {
         info = 4;
     } else if (m < 0) {
         info = 5;

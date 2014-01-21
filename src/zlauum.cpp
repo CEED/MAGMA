@@ -64,16 +64,16 @@ magma_zlauum(magma_uplo_t uplo, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t     ldda, nb;
     magma_int_t i, ib;
     magmaDoubleComplex    c_one = MAGMA_Z_ONE;
     double             d_one = MAGMA_D_ONE;
     magmaDoubleComplex    *work;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     *info = 0;
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
+    if (! upper && uplo != MagmaLower)
         *info = -1;
     else if (n < 0)
         *info = -2;

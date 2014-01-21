@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if defined(PRECISION_s) || defined(PRECISION_d)
-  #define magma_ztrsm magmablas_ztrsm
+    #define magma_ztrsm magmablas_ztrsm
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -39,8 +39,8 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     routine.
 
     The factorization has the form
-       A = U**H * U,  if UPLO = 'U', or
-       A = L  * L**H, if UPLO = 'L',
+        A = U**H * U,  if UPLO = 'U', or
+        A = L  * L**H, if UPLO = 'L',
     where U is an upper triangular matrix and L is lower triangular.
 
     This is the block version of the algorithm, calling Level 3 BLAS.
@@ -86,7 +86,7 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
 
 
     /* Local variables */
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        ldda, nb;
     magma_int_t j, jb;
     magmaDoubleComplex    c_one     = MAGMA_Z_ONE;
@@ -94,10 +94,10 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex   *work;
     double             d_one     =  1.0;
     double             d_neg_one = -1.0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     *info = 0;
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -248,8 +248,8 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[2] );
     if (current_stream == NULL) {
-      magma_queue_destroy( stream[1] );
-      magmablasSetKernelStream(NULL);
+        magma_queue_destroy( stream[1] );
+        magmablasSetKernelStream(NULL);
     }
 
     magma_free( work );

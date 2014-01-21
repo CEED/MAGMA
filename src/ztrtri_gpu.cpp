@@ -68,22 +68,22 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    const char* uplo_ = lapack_const( uplo );
-    const char* diag_ = lapack_const( diag );
+    const char* uplo_ = lapack_uplo_const( uplo );
+    const char* diag_ = lapack_diag_const( diag );
     magma_int_t     nb, nn, j, jb;
     //magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one      = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *work;
 
-    int upper  = lapackf77_lsame(uplo_, "U");
-    int nounit = lapackf77_lsame(diag_, "N");
+    int upper  = (uplo == MagmaUpper);
+    int nounit = (diag == MagmaNonUnit);
 
     *info = 0;
 
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
+    if (! upper && uplo != MagmaLower)
         *info = -1;
-    else if ((! nounit) && (! lapackf77_lsame(diag_, "U")))
+    else if (! nounit && diag != MagmaUnit)
         *info = -2;
     else if (n < 0)
         *info = -3;

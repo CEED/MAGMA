@@ -90,8 +90,8 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
 
     LDWORK  (input) INTEGER
             The leading dimension of the array WORK.
-            If SIDE == 'L', LDWORK >= max(1,N);
-            if SIDE == 'R', LDWORK >= max(1,M);
+            If SIDE = 'L', LDWORK >= max(1,N);
+            if SIDE = 'R', LDWORK >= max(1,M);
 
     Further Details
     ===============
@@ -130,16 +130,16 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
         info = -6;
     } else if (k < 0) {
         info = -7;
-    } else if ( ((storev == 'C' || storev == 'c') && (side == 'L' || side == 'l') && ldv < max(1,m)) ||
-                ((storev == 'C' || storev == 'c') && (side == 'R' || side == 'r') && ldv < max(1,n)) ||
-                ((storev == 'R' || storev == 'r') && ldv < k) ) {
+    } else if ( ((storev == MagmaColumnwise) && (side == MagmaLeft) && ldv < max(1,m)) ||
+                ((storev == MagmaColumnwise) && (side == MagmaRight) && ldv < max(1,n)) ||
+                ((storev == MagmaRowwise) && ldv < k) ) {
         info = -9;
     } else if (ldt < k) {
         info = -11;
     } else if (ldc < max(1,m)) {
         info = -13;
-    } else if ( ((side == 'L' || side == 'l') && ldwork < max(1,n)) ||
-                ((side == 'R' || side == 'r') && ldwork < max(1,m)) ) {
+    } else if ( ((side == MagmaLeft) && ldwork < max(1,n)) ||
+                ((side == MagmaRight) && ldwork < max(1,m)) ) {
         info = -15;
     }
     if (info != 0) {
@@ -154,21 +154,21 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
 
     // opposite of trans
     magma_trans_t transt;
-    if (trans == 'N' || trans == 'n')
+    if (trans == MagmaNoTrans)
         transt = MagmaConjTrans;
     else
         transt = MagmaNoTrans;
     
     // whether T is upper or lower triangular
     magma_uplo_t uplo;
-    if (direct == 'F' || direct == 'f')
+    if (direct == MagmaForward)
         uplo = MagmaUpper;
     else
         uplo = MagmaLower;
     
     // whether V is stored transposed or not
     magma_trans_t notransV, transV;
-    if (storev == 'C' || storev == 'c') {
+    if (storev == MagmaColumnwise) {
         notransV = MagmaNoTrans;
         transV   = MagmaConjTrans;
     }
@@ -177,7 +177,7 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
         transV   = MagmaNoTrans;
     }
 
-    if ( side  == 'l' || side  == 'L' ) {
+    if ( side == MagmaLeft ) {
         // Form H C or H^H C
         // Comments assume H C. When forming H^H C, T gets transposed via transt.
         

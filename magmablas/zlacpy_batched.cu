@@ -127,10 +127,10 @@ magmablas_zlacpy_batched(
     dim3 threads( NB );
     dim3 grid( (m + NB - 1)/NB, batchCount );
     
-    if ( (uplo == 'U') || (uplo == 'u') ) {
+    if ( uplo == MagmaUpper ) {
         fprintf(stderr, "lacpy upper is not implemented\n");
     }
-    else if ( (uplo == 'L') || (uplo == 'l') ) {
+    else if ( uplo == MagmaLower ) {
         fprintf(stderr, "lacpy lower is not implemented\n");
     }
     else {

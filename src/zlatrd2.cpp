@@ -116,11 +116,11 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     If UPLO = 'U', the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(n) H(n-1) . . . H(n-nb+1).
+        Q = H(n) H(n-1) . . . H(n-nb+1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(i:n) = 0 and v(i-1) = 1; v(1:i-1) is stored on exit in A(1:i-1,i),
@@ -129,11 +129,11 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     If UPLO = 'L', the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(1) H(2) . . . H(nb).
+        Q = H(1) H(2) . . . H(nb).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i) = 0 and v(i+1) = 1; v(i+1:n) is stored on exit in A(i+1:n,i),
@@ -149,19 +149,17 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
 
     if UPLO = 'U':                       if UPLO = 'L':
 
-      (  a   a   a   v4  v5 )              (  d                  )
-      (      a   a   v4  v5 )              (  1   d              )
-      (          a   1   v5 )              (  v1  1   a          )
-      (              d   1  )              (  v1  v2  a   a      )
-      (                  d  )              (  v1  v2  a   a   a  )
+        (  a   a   a   v4  v5 )              (  d                  )
+        (      a   a   v4  v5 )              (  1   d              )
+        (          a   1   v5 )              (  v1  1   a          )
+        (              d   1  )              (  v1  v2  a   a      )
+        (                  d  )              (  v1  v2  a   a   a  )
 
     where d denotes a diagonal element of the reduced matrix, a denotes
     an element of the original matrix that is unchanged, and vi denotes
     an element of the vector defining H(i).
     =====================================================================    */
     
-    const char* uplo_  = lapack_const( uplo  );
-
     magma_int_t i;
     
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -186,7 +184,7 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_zmalloc_cpu( &f, n );
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd
     
-    if (lapackf77_lsame(uplo_, "U")) {
+    if (uplo == MagmaUpper) {
         /* Reduce last NB columns of upper triangle */
         for (i = n-1; i >= n - nb; --i) {
             i_1 = i + 1;
@@ -330,7 +328,7 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                 magma_queue_sync( stream );
         
                 if (i != 0)
-                  blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
+                    blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
         
                 blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i+1, 0), &ldw,
                               W(0, i), &ione, &c_one, W(i+1, i), &ione);

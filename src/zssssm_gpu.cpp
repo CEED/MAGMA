@@ -144,7 +144,7 @@ magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
     if ((m1 == 0) || (n1 == 0) || (m2 == 0) || (n2 == 0) || (k == 0) || (ib == 0))
         return *info;
 
-    if ( (order == 'C') || (order == 'c') ) {
+    if ( order == MagmaColMajor ) {
         magmablas_zgetmo_in( dA1, dA1T, ldda1, m1, n1 );
         magmablas_zgetmo_in( dA2, dA2T, ldda2, m2, n2 );
         transL = MagmaTrans;
@@ -204,7 +204,7 @@ magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
                      c_one,     A2T(0, 0 ), ldda2 );
     }
 
-    if ( (order == 'C') || (order == 'c') ) {
+    if ( order == MagmaColMajor ) {
         magmablas_zgetmo_out( dA1, dA1T, ldda1, m1, n1 );
         magmablas_zgetmo_out( dA2, dA2T, ldda2, m2, n2 );
     }

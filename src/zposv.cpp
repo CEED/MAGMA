@@ -77,7 +77,7 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
     magma_int_t num_gpus, ldda, lddb;
 
     *info = 0;
-    if ( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+    if ( uplo != MagmaUpper && uplo != MagmaLower )
         *info = -1;
     if ( n < 0 )
         *info = -2;
@@ -134,7 +134,7 @@ CPU_INTERFACE:
      * Faster to use LAPACK for potrs than to copy A to GPU. */
     magma_zpotrf( uplo, n, A, lda, info );
     if ( *info == 0 ) {
-        lapackf77_zpotrs( lapack_const(uplo), &n, &nrhs, A, &lda, B, &ldb, info );
+        lapackf77_zpotrs( lapack_uplo_const(uplo), &n, &nrhs, A, &lda, B, &ldb, info );
     }
 
     return *info;

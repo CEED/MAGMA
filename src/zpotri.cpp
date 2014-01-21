@@ -56,10 +56,8 @@ magma_zpotri(magma_uplo_t uplo, magma_int_t n,
     ===================================================================== */
 
     /* Local variables */
-    const char* uplo_ = lapack_const( uplo );
-
     *info = 0;
-    if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
+    if ((uplo != MagmaUpper) && (uplo != MagmaLower))
         *info = -1;
     else if (n < 0)
         *info = -2;

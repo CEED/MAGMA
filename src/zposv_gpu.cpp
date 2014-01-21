@@ -75,7 +75,7 @@ magma_zposv_gpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================   */
 
     *info = 0;
-    if ( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+    if ( uplo != MagmaUpper && uplo != MagmaLower )
         *info = -1;
     if ( n < 0 )
         *info = -2;

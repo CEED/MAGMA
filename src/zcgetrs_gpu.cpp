@@ -83,14 +83,13 @@ magma_zcgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
     magmaFloatComplex c_one = MAGMA_C_ONE;
-    const char* trans_ = lapack_const( trans );
-    int notran = lapackf77_lsame(trans_, "N");
+    int notran = (trans == MagmaNoTrans);
     magma_int_t inc;
 
     *info = 0;
     if ( (! notran) &&
-         (! lapackf77_lsame(trans_, "T")) &&
-         (! lapackf77_lsame(trans_, "C")) ) {
+         (trans != MagmaTrans) &&
+         (trans != MagmaConjTrans) ) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

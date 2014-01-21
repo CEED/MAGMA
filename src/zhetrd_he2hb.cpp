@@ -144,8 +144,6 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     #define tau_ref(a_1)    (tau + (a_1)-1)
     #define t_ref(a_1)      (dT  + ((a_1)-1)*(lddt))
 
-    const char* uplo_ = lapack_const( uplo );
-
     int ldda = ((n+31)/32)*32;
     int lddt = nb;
    
@@ -163,9 +161,9 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     int lquery;
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    int upper = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

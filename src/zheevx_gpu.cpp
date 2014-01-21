@@ -170,13 +170,13 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
                   Their indices are stored in array IFAIL.
     =====================================================================     */
     
-    const char* uplo_  = lapack_const( uplo  );
-    const char* jobz_  = lapack_const( jobz  );
-    const char* range_ = lapack_const( range );
+    const char* uplo_  = lapack_uplo_const( uplo  );
+    const char* jobz_  = lapack_vec_const( jobz  );
+    const char* range_ = lapack_range_const( range );
     
     magma_int_t ione = 1;
     
-    const char* order;
+    const char* order_;
     magma_int_t indd, inde;
     magma_int_t imax;
     magma_int_t lopt, itmp1, indee;
@@ -200,19 +200,19 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     double *dwork;
     
     /* Function Body */
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lwork == -1;
+    lower  = (uplo  == MagmaLower);
+    wantz  = (jobz  == MagmaVec);
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lwork == -1);
     
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -1;
     } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -3;
     } else if (n < 0) {
         *info = -4;
@@ -372,15 +372,15 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     if (*m == 0) {
         *info = 0;
         if (wantz) {
-            order = "B";
+            order_ = "B";
         } else {
-            order = "E";
+            order_ = "E";
         }
         indibl = 1;
         indisp = indibl + n;
         indiwk = indisp + n;
 
-        lapackf77_dstebz(range_, order, &n, &vl, &vu, &il, &iu, &abstol, &rwork[indd], &rwork[inde], m,
+        lapackf77_dstebz(range_, order_, &n, &vl, &vu, &il, &iu, &abstol, &rwork[indd], &rwork[inde], m,
                          &nsplit, &w[1], &iwork[indibl], &iwork[indisp], &rwork[indrwk], &iwork[indiwk], info);
         
         if (wantz) {

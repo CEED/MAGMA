@@ -121,16 +121,13 @@ magma_zunmtr_gpu(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    const char* side_  = lapack_const( side  );
-    const char* uplo_  = lapack_const( uplo  );
-    const char* trans_ = lapack_const( trans );
     magma_int_t i1, i2, mi, ni, nq, nw;
     int left, upper;
     magma_int_t iinfo;
 
     *info = 0;
-    left   = lapackf77_lsame(side_, "L");
-    upper  = lapackf77_lsame(uplo_, "U");
+    left   = (side == MagmaLeft);
+    upper  = (uplo == MagmaUpper);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
@@ -140,12 +137,12 @@ magma_zunmtr_gpu(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
         nq = n;
         nw = m;
     }
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    } else if (! upper && uplo != MagmaLower) {
         *info = -2;
-    } else if (! lapackf77_lsame(trans_, "N") &&
-               ! lapackf77_lsame(trans_, "C")) {
+    } else if (trans != MagmaNoTrans &&
+               trans != MagmaConjTrans) {
         *info = -3;
     } else if (m < 0) {
         *info = -4;

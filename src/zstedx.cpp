@@ -125,16 +125,15 @@ magma_zstedx(magma_range_t range, magma_int_t n, double vl, double vu,
        at Berkeley, USA
 
     ===================================================================== */
-    const char* range_ = lapack_const( range );
 
     magma_int_t alleig, indeig, valeig, lquery;
     magma_int_t i, j, smlsiz;
     magma_int_t liwmin, lrwmin;
 
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lrwork == -1 || liwork == -1;
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lrwork == -1 || liwork == -1);
 
     *info = 0;
 

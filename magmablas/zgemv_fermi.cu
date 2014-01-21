@@ -360,7 +360,7 @@ magmablas_zgemv(
         // call CUDA ARCH 1.x version
         // magmablas for [sd] precisions, cublas for [zc] precisions.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        cublasZgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
+        cublasZgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_zgemv_tesla( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -370,18 +370,18 @@ magmablas_zgemv(
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
     if ( incx == 1 && incy == 1 ) {
-        if ( trans == 'N' || trans == 'n' ) {
+        if ( trans == MagmaNoTrans ) {
             if ( m < 7000 ) {
-                cublasZgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+                cublasZgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
             }
             else {
                 magmablas_zgemvn_fermi(m, n, alpha, A, lda, x, beta, y);
             }
         }
-        else if ( trans == 'T' || trans == 't' ) {
+        else if ( trans == MagmaTrans ) {
             magmablas_zgemvt_fermi(m, n, alpha, A, lda, x, beta, y);
         }
-        else if ( trans == 'C' || trans == 'c' ) {
+        else if ( trans == MagmaConjTrans ) {
             magmablas_zgemvc_fermi(m, n, alpha, A, lda, x, beta, y);
         }
         else {
@@ -389,7 +389,7 @@ magmablas_zgemv(
         }
     }
     else {
-        cublasZgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasZgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
 

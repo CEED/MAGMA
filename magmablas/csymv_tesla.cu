@@ -758,7 +758,7 @@ void magmablas_csymv_tesla_L(
 extern "C"
 magma_int_t
 magmablas_csymv_tesla_work(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaFloatComplex alpha,
     const magmaFloatComplex *A, magma_int_t lda,
     const magmaFloatComplex *x, magma_int_t incx,
@@ -766,14 +766,12 @@ magmablas_csymv_tesla_work(
     magmaFloatComplex *y, magma_int_t incy,
     magmaFloatComplex *dwork, magma_int_t lwork)
 {
-
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    if ((! upper) && (uplo != MagmaLower)) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -797,7 +795,7 @@ magmablas_csymv_tesla_work(
         #if defined(PRECISION_z) || defined(PRECISION_c)
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
         #else
-        cublasCsymv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasCsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
         #endif
     }
     else {
@@ -898,20 +896,19 @@ magmablas_csymv_tesla_work(
 extern "C"
 magma_int_t
 magmablas_csymv_tesla(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaFloatComplex alpha,
     const magmaFloatComplex *A, magma_int_t lda,
     const magmaFloatComplex *x, magma_int_t incx,
     magmaFloatComplex beta,
     magmaFloatComplex *y, magma_int_t incy)
 {
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    if ((! upper) && (uplo != MagmaLower)) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -935,7 +932,7 @@ magmablas_csymv_tesla(
         #if defined(PRECISION_z) || defined(PRECISION_c)
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
         #else
-        cublasCsymv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasCsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
         #endif
     }
     else {

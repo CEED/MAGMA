@@ -187,7 +187,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo
     real_Double_t timeblg=0.0;
     #endif
 
-    //const char* uplo_ = lapack_const( uplo );
+    //const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t mklth = threads;
     magma_int_t INgrsiz=1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
@@ -630,7 +630,7 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
 
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
     blkpercore = blkcnt/cores_num;
-    blkpercore = blkpercore == 0 ? 1 : blkpercore;
+    blkpercore = (blkpercore == 0 ? 1 : blkpercore);
     //magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
 
     #ifdef ENABLE_DEBUG

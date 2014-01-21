@@ -164,7 +164,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
         magma_zsetmatrix( mindim, mindim, hL2, ldhl, dL2, lddl );
 #endif
 
-        if ( (order == 'R') || (order == 'r') ) {
+        if ( order == MagmaRowMajor ) {
             magma_zsetmatrix( m, n, hA, ldha, dwork, lddwork );
             magmablas_ztranspose( dA, ldda, dwork, lddwork, m, n );
         } else {
@@ -175,7 +175,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
         /* Use hybrid blocked code. */
         maxm = ((m + 31)/32)*32;
 
-        if ( (order == 'C') || (order == 'c') ) {
+        if ( order == MagmaColMajor ) {
             magmablas_zgetmo_in( dA, dAT, ldda, m, n );
         } else {
             dAT = dA;
@@ -283,7 +283,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
             }
         }
 
-        if ( (order == 'C') || (order == 'c') ) {
+        if ( order == MagmaColMajor ) {
             magmablas_zgetmo_out( dA, dAT, ldda, m, n );
         }
     }

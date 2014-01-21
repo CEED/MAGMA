@@ -96,7 +96,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_in
     
     =====================================================================*/
 
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
 
     double             d_one      = 1.0;
     magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
@@ -111,7 +111,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_in
     int gpu_b;
     magma_getdevice(&gpu_b);
 
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     magma_int_t nb = magma_get_zhegst_nb_m(n);
 
@@ -119,7 +119,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_in
     *info = 0;
     if (itype < 1 || itype > 3) {
         *info = -1;
-    } else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    } else if (! upper && uplo != MagmaLower) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;

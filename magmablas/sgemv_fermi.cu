@@ -450,7 +450,7 @@ magmablas_sgemv(
         // call CUDA ARCH 1.x version
         // magmablas for [sd] precisions, cublas for [zc] precisions.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        cublasSgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
+        cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_sgemv_tesla( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -460,15 +460,15 @@ magmablas_sgemv(
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
     if ( incx == 1 && incy == 1 ) {
-        if ( trans == 'n' || trans == 'N' )
+        if ( trans == MagmaNoTrans )
             magmablas_sgemvn_fermi(m, n, alpha, A, lda, x, beta, y);
-        else if (trans == 't' || trans == 'T' || trans == 'c' || trans == 'C')
+        else if (trans == MagmaTrans || trans == MagmaConjTrans)
             magmablas_sgemvt_fermi(m, n, alpha, A, lda, x, beta, y);
         else
             fprintf( stderr, "trans = %c is invalid\n", trans );
     }
     else {
-        cublasSgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
 

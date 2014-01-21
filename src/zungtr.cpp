@@ -85,17 +85,15 @@ magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
 
 #define a_ref(i,j) ( a + (j)*lda+ (i))
 
-    const char* uplo_  = lapack_const( uplo  );
-    
     magma_int_t i__1;
     magma_int_t i, j;
     magma_int_t iinfo;
     magma_int_t upper, lwkopt, lquery;
 
     *info = 0;
-    lquery = lwork == -1;
-    upper = lapackf77_lsame(uplo_, "U");
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    lquery = (lwork == -1);
+    upper = (uplo == MagmaUpper);
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

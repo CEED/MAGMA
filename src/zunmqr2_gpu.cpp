@@ -107,9 +107,6 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    const char* side_  = lapack_const( side  );
-    const char* trans_ = lapack_const( trans );
-
     /* Allocate work space on the GPU */
     magmaDoubleComplex *dwork;
 
@@ -126,8 +123,8 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
     dc -= dc_offset;
 
     *info = 0;
-    left   = lapackf77_lsame(side_,  "L");
-    notran = lapackf77_lsame(trans_, "N");
+    left   = (side == MagmaLeft);
+    notran = (trans == MagmaNoTrans);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
@@ -139,9 +136,9 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         nw = m;
         magma_zmalloc( &dwork, (m + 64)*64 );
     }
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans_, "T")) {
+    } else if (! notran && trans != MagmaTrans) {
         *info = -2;
     } else if (m < 0) {
         *info = -3;

@@ -171,7 +171,7 @@ magmablas_sgemv_tesla(
     ===================================================================== */
 
     if ( incx == 1 && incy == 1 && beta == 0 ) {
-        if ( trans == 'n' || trans == 'N' ) {
+        if ( trans == MagmaNoTrans ) {
             if ( alpha == 1. ) {
                 magma_int_t blocks = (m - 1)/num_threads + 1;
                 dim3 grid( blocks, 1, 1 );
@@ -180,7 +180,7 @@ magmablas_sgemv_tesla(
                     (m, n, (n/gemv_bs)*gemv_bs, A, lda, x, y);
             }
             else {
-                cublasSgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+                cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
             }
         }
         else {
@@ -188,7 +188,7 @@ magmablas_sgemv_tesla(
         }
     }
     else {
-        cublasSgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
 

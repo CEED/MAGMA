@@ -119,11 +119,11 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
     If UPLO = 'U', the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(n-1) . . . H(2) H(1).
+        Q = H(n-1) . . . H(2) H(1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(i+1:n) = 0 and v(i) = 1; v(1:i-1) is stored on exit in
@@ -132,11 +132,11 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
     If UPLO = 'L', the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(1) H(2) . . . H(n-1).
+        Q = H(1) H(2) . . . H(n-1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i) = 0 and v(i+1) = 1; v(i+2:n) is stored on exit in A(i+2:n,i),
@@ -147,17 +147,17 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
 
     if UPLO = 'U':                       if UPLO = 'L':
 
-      (  d   e   v2  v3  v4 )              (  d                  )
-      (      d   e   v3  v4 )              (  e   d              )
-      (          d   e   v4 )              (  v1  e   d          )
-      (              d   e  )              (  v1  v2  e   d      )
-      (                  d  )              (  v1  v2  v3  e   d  )
+        (  d   e   v2  v3  v4 )              (  d                  )
+        (      d   e   v3  v4 )              (  e   d              )
+        (          d   e   v4 )              (  v1  e   d          )
+        (              d   e  )              (  v1  v2  e   d      )
+        (                  d  )              (  v1  v2  v3  e   d  )
 
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
 
     magma_int_t nb = magma_get_zhetrd_nb(n);
 
@@ -172,9 +172,9 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
     magma_int_t lquery;
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    int upper = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -212,8 +212,8 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
         nx = 300;
 
     if (ldwork < (ldw*n+64-1)/64 + 2*ldw*nb) {
-      *info = MAGMA_ERR_DEVICE_ALLOC;
-      return *info;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
     }
 
     if (upper) {

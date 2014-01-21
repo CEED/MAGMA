@@ -98,10 +98,10 @@ magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA,
     dim3 threads( NB );
     dim3 grid( (m + NB - 1)/NB );
     
-    if ( (uplo == 'U') || (uplo == 'u') ) {
+    if ( uplo == MagmaUpper ) {
         zsymmetrize_upper<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
     }
-    else if ( (uplo == 'L') || (uplo == 'l') ) {
+    else if ( uplo == MagmaLower ) {
         zsymmetrize_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
     }
     else {

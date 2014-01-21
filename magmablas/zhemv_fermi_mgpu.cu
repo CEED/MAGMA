@@ -948,13 +948,12 @@ magmablas_zhemv_mgpu_offset(
         
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -1040,13 +1039,12 @@ magmablas_zhemv2_mgpu_offset(
         
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -1134,13 +1132,12 @@ magmablas_zhemv2_mgpu(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;

@@ -94,7 +94,7 @@ magma_zpotf2_gpu(
     magma_int_t j;
 
     *info = 0;
-    if ( uplo != 'U' && uplo != 'u' && uplo != 'L' && uplo != 'l') {
+    if ( uplo != MagmaUpper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0 || n > zdotc_max_bs) {
         *info = -2;
@@ -115,14 +115,14 @@ magma_zpotf2_gpu(
     magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
 
-    if (uplo == 'U' || uplo == 'u') {
+    if (uplo == MagmaUpper) {
         for(j = 0; j < n; j++) {
             zpotf2_zdotc(j, A(0,j), 1); // including zdotc product and update a(j,j)
             if (j < n) {
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 zlacgv(j, A(0, j), 1);
                 #endif
-                cublasZgemv( MagmaTrans, j, n-j-1,
+                cublasZgemv( 'T', j, n-j-1,
                              alpha, A(0, j+1), lda,
                                     A(0, j),   1,
                              beta,  A(j, j+1), lda); // cublas is better in upper case

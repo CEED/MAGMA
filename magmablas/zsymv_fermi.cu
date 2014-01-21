@@ -934,7 +934,7 @@ magmablas_zsymv(
         // NOTE: [cz]symv are not implemented in cublas v1, but are in cublas v2.
         #if defined(PRECISION_z) || defined(PRECISION_c)
         fprintf(stderr, "%s: %s\n", __func__, "complex case not implemented");
-        //cublasZsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
+        //cublasZsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_zsymv_tesla( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -943,13 +943,12 @@ magmablas_zsymv(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -972,9 +971,9 @@ magmablas_zsymv(
     if ( upper ) {
         #if defined(PRECISION_z) || defined(PRECISION_c)
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
-        //cublasZsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
+        //cublasZsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy );
         #else
-        cublasZsymv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasZsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
         #endif
     }
     else {
@@ -1046,7 +1045,7 @@ magmablas_zsymv_work(
         // NOTE: [z]symv is not implemented in cublas v1, but is in cublas v2.
         #if defined(PRECISION_z)
         fprintf(stderr, "%s: %s\n", __func__, "complex case not implemented");
-        //cublasZsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
+        //cublasZsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_zsymv_tesla_work( uplo, n, alpha, A, lda, x, incx, beta, y, incy, dwork, lwork );
         #endif
@@ -1055,13 +1054,12 @@ magmablas_zsymv_work(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -1086,7 +1084,7 @@ magmablas_zsymv_work(
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
         return MAGMA_ERR_NOT_SUPPORTED;
         #else
-        cublasZsymv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasZsymv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
         #endif
     }
     else {

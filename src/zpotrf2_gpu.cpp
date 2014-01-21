@@ -68,7 +68,7 @@ magma_zpotrf_gpu(magma_uplo_t uplo, magma_int_t n,
     LDDA     (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -80,16 +80,16 @@ magma_zpotrf_gpu(magma_uplo_t uplo, magma_int_t n,
 
 
     magma_int_t     j, jb, nb;
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *work;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     *info = 0;
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

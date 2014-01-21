@@ -86,8 +86,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
     double                 d_neg_one = -1.0;
     magmaDoubleComplex     c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex     c_neg_one = MAGMA_Z_NEG_ONE;
-    const char* uplo_  = lapack_const( uplo  );
-    int upper = lapackf77_lsame(uplo_, "U");
+    const char* uplo_  = lapack_uplo_const( uplo  );
+    int upper = (uplo == MagmaUpper);
 
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dt[MagmaMaxGPUs];
     magma_int_t     ldda, lddla, nb, iinfo, n_local[MagmaMaxGPUs], J2, d, num_gpus;
@@ -97,7 +97,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
     magma_timer_t time_total, time_sum, time;
     
     *info = 0;
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

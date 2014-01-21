@@ -161,9 +161,6 @@ magma_dsyevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    const char* uplo_  = lapack_const( uplo  );
-    const char* jobz_  = lapack_const( jobz  );
-    const char* range_ = lapack_const( range );
     magma_int_t ione = 1;
 
     double d__1;
@@ -190,21 +187,21 @@ magma_dsyevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     double *dwork;
     magma_int_t lddc = ldda;
 
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
+    wantz = (jobz == MagmaVec);
+    lower = (uplo == MagmaLower);
 
-    alleig = lapackf77_lsame( range_, "A" );
-    valeig = lapackf77_lsame( range_, "V" );
-    indeig = lapackf77_lsame( range_, "I" );
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
 
-    lquery = lwork == -1 || liwork == -1;
+    lquery = (lwork == -1 || liwork == -1);
 
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -1;
     } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -3;
     } else if (n < 0) {
         *info = -4;
@@ -261,22 +258,23 @@ magma_dsyevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     if (n <= 128) {
-      #ifdef ENABLE_DEBUG
-      printf("--------------------------------------------------------------\n");
-      printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
-      printf("--------------------------------------------------------------\n");
-      #endif
-      char jobz_[2] = {jobz, 0}, uplo_[2] = {uplo, 0};
-      double *a;
-      magma_dmalloc_cpu( &a, n*n );
-      magma_dgetmatrix(n, n, da, ldda, a, n);
-      lapackf77_dsyevd(jobz_, uplo_,
-                       &n, a, &n,
-                       w, work, &lwork,
-                       iwork, &liwork, info);
-      magma_dsetmatrix( n, n, a, n, da, ldda);
-      magma_free_cpu(a);
-      return *info;
+        #ifdef ENABLE_DEBUG
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("--------------------------------------------------------------\n");
+        #endif
+        const char* jobz_ = lapack_vec_const( jobz );
+        const char* uplo_ = lapack_uplo_const( uplo );
+        double *a;
+        magma_dmalloc_cpu( &a, n*n );
+        magma_dgetmatrix(n, n, da, ldda, a, n);
+        lapackf77_dsyevd(jobz_, uplo_,
+                         &n, a, &n,
+                         w, work, &lwork,
+                         iwork, &liwork, info);
+        magma_dsetmatrix( n, n, a, n, da, ldda);
+        magma_free_cpu(a);
+        return *info;
     }
 
     magma_queue_t stream;

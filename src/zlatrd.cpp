@@ -157,8 +157,6 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     an element of the vector defining H(i).
     =====================================================================    */
     
-    const char* uplo_  = lapack_const( uplo  );
-
     magma_int_t i;
     
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -183,7 +181,7 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_zmalloc_cpu( &f, n );
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd
 
-    if (lapackf77_lsame(uplo_, "U")) {
+    if (uplo == MagmaUpper) {
         /* Reduce last NB columns of upper triangle */
         for (i = n-1; i >= n - nb; --i) {
             i_1 = i + 1;

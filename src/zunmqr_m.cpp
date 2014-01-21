@@ -143,8 +143,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 
     *info = 0;
 
-    magma_int_t left   = lapackf77_lsame(side_, "L");
-    magma_int_t notran = lapackf77_lsame(trans_, "N");
+    magma_int_t left   = (side == MagmaLeft);
+    magma_int_t notran = (trans == MagmaNoTrans);
     magma_int_t lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -158,9 +158,9 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     }
 
 
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans_, "T")) {
+    } else if (! notran && trans != MagmaTrans) {
         *info = -2;
     } else if (m < 0) {
         *info = -3;
@@ -350,7 +350,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
             // 1) copy the panel from A to the GPU, and
             // 2) Put 0s in the upper triangular part of dA;
             magma_zsetmatrix( i__4, ib, A(i, i), lda, dA(i, 0), ldda );
-            magmablas_zsetdiag1subdiag0('L', ib, ib, dA(i, 0), ldda);
+            magmablas_zsetdiag1subdiag0(MagmaLower, ib, ib, dA(i, 0), ldda);
             
             
             // H or H' is applied to C(1:m,i:n)

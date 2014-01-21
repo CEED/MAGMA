@@ -183,9 +183,8 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
     =====================================================================  */
 
-    const char* uplo_  = lapack_const( uplo  );
-    const char* jobz_  = lapack_const( jobz  );
-    const char* range_ = lapack_const( range );
+    const char* uplo_  = lapack_uplo_const( uplo  );
+    const char* jobz_  = lapack_vec_const( jobz  );
 
     double d_one = MAGMA_D_ONE;
 
@@ -204,21 +203,21 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
     magma_queue_t stream;
     magma_queue_create( &stream );
 
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lwork == -1 || liwork == -1;
+    wantz  = (jobz  == MagmaVec);
+    lower  = (uplo  == MagmaLower);
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lwork == -1 || liwork == -1);
 
     *info = 0;
     if (itype < 1 || itype > 3) {
         *info = -1;
     } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    } else if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -3;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -4;
     } else if (n < 0) {
         *info = -5;

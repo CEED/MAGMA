@@ -1583,7 +1583,7 @@ magmablas_zhemv(
         // call CUDA ARCH 1.x version
         // magmablas for [sdc] precisions, cublas for [z] precisions.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        cublasZhemv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
+        cublasZhemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_zhemv_tesla( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -1592,13 +1592,12 @@ magmablas_zhemv(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -1618,7 +1617,7 @@ magmablas_zhemv(
 
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper ) {
-        cublasZhemv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasZhemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
     }
     else {
         magma_int_t blocks = (n - 1) / hemv_bs + 1;
@@ -1653,7 +1652,7 @@ magmablas_zhemv_work(
         // magmablas for [sdc] precisions, cublas for [z] precisions.
         // TODO: make _work interface for tesla.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        cublasZhemv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
+        cublasZhemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_zhemv_tesla( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -1662,13 +1661,12 @@ magmablas_zhemv_work(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if ( (! upper) && (uplo != MagmaLower) ) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -1688,7 +1686,7 @@ magmablas_zhemv_work(
 
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper )
-        cublasZhemv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasZhemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
     else {
         magma_int_t blocks = (n - 1) / hemv_bs + 1;
         /* TODO: was n*(blocks); why not lda*(blocks + 1), as elsewhere? */

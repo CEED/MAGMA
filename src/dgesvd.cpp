@@ -145,8 +145,8 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
     
     ===================================================================== */
     
-    const char* jobu_  = lapack_const( jobu  );
-    const char* jobvt_ = lapack_const( jobvt );
+    const char* jobu_  = lapack_vec_const( jobu  );
+    const char* jobvt_ = lapack_vec_const( jobvt );
     
     const double c_zero          = MAGMA_D_ZERO;
     const double c_one           = MAGMA_D_ONE;
@@ -180,16 +180,16 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
     bdspac = 5*n;
     ie = 0;
     
-    want_ua  = lapackf77_lsame(jobu_, "A");
-    want_us  = lapackf77_lsame(jobu_, "S");
-    want_uo  = lapackf77_lsame(jobu_, "O");
-    want_un  = lapackf77_lsame(jobu_, "N");
+    want_ua  = (jobu == MagmaAllVec);
+    want_us  = (jobu == MagmaSomeVec);
+    want_uo  = (jobu == MagmaOverwriteVec);
+    want_un  = (jobu == MagmaNoVec);
     want_uas = want_ua || want_us;
     
-    want_va  = lapackf77_lsame(jobvt_, "A");
-    want_vs  = lapackf77_lsame(jobvt_, "S");
-    want_vo  = lapackf77_lsame(jobvt_, "O");
-    want_vn  = lapackf77_lsame(jobvt_, "N");
+    want_va  = (jobvt == MagmaAllVec);
+    want_vs  = (jobvt == MagmaSomeVec);
+    want_vo  = (jobvt == MagmaOverwriteVec);
+    want_vn  = (jobvt == MagmaNoVec);
     want_vas = want_va || want_vs;
     
     lquery = (lwork == -1);

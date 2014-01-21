@@ -44,7 +44,7 @@ extern "C" void  magma_dstedc_withZ(magma_vec_t JOBZ, magma_int_t N, double *D, 
     magma_dmalloc_cpu( &WORK,  LWORK  );
     magma_imalloc_cpu( &IWORK, LIWORK );
     
-    lapackf77_dstedc( lapack_const(JOBZ), &N, D, E, Z, &LDZ, WORK, &LWORK, IWORK, &LIWORK, &INFO);
+    lapackf77_dstedc( lapack_vec_const(JOBZ), &N, D, E, Z, &LDZ, WORK, &LWORK, IWORK, &LIWORK, &INFO);
     
     if (INFO != 0) {
         printf("=================================================\n");

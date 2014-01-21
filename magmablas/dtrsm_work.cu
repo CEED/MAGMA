@@ -181,37 +181,37 @@ void magmablas_dtrsm_work(
     if (M <= 0 || N <= 0)
         return;
 
-    if (side == 'l' || side == 'L') {
+    if (side == MagmaLeft) {
         // side=L
         /* invert the diagonals */
         if (flag == 1) {
             diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
         }
 
-        if (transA == 'N' || transA == 'n') {
+        if (transA == MagmaNoTrans) {
             /* the non-transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int MM = min (NB, M);
-                cublasDgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
+                cublasDgemm('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
 
                 if (NB >= M) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'N', M-NB, N, NB, -1.0, A+NB, lda, d_x, M, alpha, b+NB, ldb);
+                cublasDgemm('N', 'N', M-NB, N, NB, -1.0, A+NB, lda, d_x, M, alpha, b+NB, ldb);
 
                 /* the rest blocks */
                 for (i=NB; i < M; i += NB) {
                     MM = min (M-i, NB);
-                    cublasDgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
+                    cublasDgemm('N', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
 
                     if (i+NB >= M)
                         break;
 
-                    cublasDgemm ('N', 'N', M-i-NB, N, NB, -1.0, A+i*lda+i+NB, lda, d_x+i, M, 1.0, b+i+NB, ldb);
+                    cublasDgemm('N', 'N', M-i-NB, N, NB, -1.0, A+i*lda+i+NB, lda, d_x+i, M, 1.0, b+i+NB, ldb);
                 }
             }
             else {
@@ -219,74 +219,74 @@ void magmablas_dtrsm_work(
                 /* handle the first block seperately with alpha */
                 int MM = (M%NB==0) ? NB : (M%NB);
                 i = M-MM;
-                cublasDgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
+                cublasDgemm('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
 
                 if (i-NB < 0) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'N', i, N, MM, -1.0, A+i*lda, lda, d_x+i, M, alpha, b, ldb);
+                cublasDgemm('N', 'N', i, N, MM, -1.0, A+i*lda, lda, d_x+i, M, alpha, b, ldb);
 
                 /* the rest blocks */
                 for (i=M-MM-NB; i >= 0; i -= NB) {
-                    cublasDgemm ('N', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
+                    cublasDgemm('N', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
 
                     if (i-NB < 0)
                         break;
 
-                    cublasDgemm ('N', 'N', i, N, NB, -1.0, A+i*lda, lda, d_x+i, M, 1.0, b, ldb);
+                    cublasDgemm('N', 'N', i, N, NB, -1.0, A+i*lda, lda, d_x+i, M, 1.0, b, ldb);
                 }
             }
         }
         else {
             /* the transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int MM = (M%NB==0) ? NB : (M%NB);
                 i = M-MM;
-                cublasDgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
+                cublasDgemm('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
 
                 if (i-NB < 0) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('T', 'N', i, N, MM, -1.0, A+i, lda, d_x+i, M, alpha, b, ldb);
+                cublasDgemm('T', 'N', i, N, MM, -1.0, A+i, lda, d_x+i, M, alpha, b, ldb);
 
                 /* the rest blocks */
                 for (i=M-MM-NB; i >= 0; i -= NB) {
-                    cublasDgemm ('T', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
+                    cublasDgemm('T', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
 
                     if (i-NB < 0)
                         break;
 
-                    cublasDgemm ('T', 'N', i, N, NB, -1.0, A+i, lda, d_x+i, M, 1.0, b, ldb);
+                    cublasDgemm('T', 'N', i, N, NB, -1.0, A+i, lda, d_x+i, M, 1.0, b, ldb);
                 }
             }
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
                 int MM = min (NB, M);
-                cublasDgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
+                cublasDgemm('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
 
                 if (NB >= M) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('T', 'N', M-NB, N, NB, -1.0, A+(NB)*lda, lda, d_x, M, alpha, b+NB, ldb);
+                cublasDgemm('T', 'N', M-NB, N, NB, -1.0, A+(NB)*lda, lda, d_x, M, alpha, b+NB, ldb);
 
                 /* the rest blocks */
                 for (i=NB; i < M; i += NB) {
                     MM = min (M-i, NB);
-                    cublasDgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
+                    cublasDgemm('T', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
 
                     if (i+NB >= M)
                         break;
 
-                    cublasDgemm ('T', 'N', M-i-NB, N, NB, -1.0, A+(i+NB)*lda+i, lda, d_x+i, M, 1.0, b+i+NB, ldb);
+                    cublasDgemm('T', 'N', M-i-NB, N, NB, -1.0, A+(i+NB)*lda+i, lda, d_x+i, M, 1.0, b+i+NB, ldb);
                 }
             }
         }
@@ -298,81 +298,81 @@ void magmablas_dtrsm_work(
             diag_dtrtri (N, uplo, diag, A, d_dinvA, lda);
         }
 
-        if (transA == 'N' || transA == 'n') {
+        if (transA == MagmaNoTrans) {
             /* the non-transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int NN = (N%NB==0) ? NB : (N%NB);
                 i = N-NN;
-                cublasDgemm ('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
+                cublasDgemm('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 
                 if (i-NB < 0) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'N', M, i, NN, -1.0, d_x+i*M, M, A+i, lda, alpha, b, ldb);
+                cublasDgemm('N', 'N', M, i, NN, -1.0, d_x+i*M, M, A+i, lda, alpha, b, ldb);
 
                 /* the rest blocks */
                 for (i=N-NN-NB; i >= 0; i -= NB) {
-                    cublasDgemm ('N', 'N', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
+                    cublasDgemm('N', 'N', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 
                     if (i-NB < 0)
                         break;
 
-                    cublasDgemm ('N', 'N', M, i, NB, -1.0, d_x+i*M, M, A+i, lda, 1.0, b, ldb);
+                    cublasDgemm('N', 'N', M, i, NB, -1.0, d_x+i*M, M, A+i, lda, 1.0, b, ldb);
                 }
             }
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
                 int NN = min(NB, N);
-                cublasDgemm ('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
+                cublasDgemm('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
 
                 if (NB >= N) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'N', M, N-NB, NB, -1.0, d_x, M, A+NB*lda, lda, alpha, b+NB*ldb, ldb);
+                cublasDgemm('N', 'N', M, N-NB, NB, -1.0, d_x, M, A+NB*lda, lda, alpha, b+NB*ldb, ldb);
 
                 /* the rest blocks */
                 for (i=NB; i < N; i += NB) {
                     NN = min(NB, N-i);
-                    cublasDgemm ('N', 'N', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);
+                    cublasDgemm('N', 'N', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);
 
                     if (i+NB >= N)
                         break;
 
-                    cublasDgemm ('N', 'N', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+(i+NB)*lda+i, lda, 1.0, b+(i+NB)*ldb, ldb);
+                    cublasDgemm('N', 'N', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+(i+NB)*lda+i, lda, 1.0, b+(i+NB)*ldb, ldb);
                 }
             }
         }
         else {
             /* the transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int NN = min(NB, N);
-                cublasDgemm ('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
+                cublasDgemm('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
                 
                 if (NB >= N) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'T', M, N-NB, NB, -1.0, d_x, M, A+NB, lda, alpha, b+NB*ldb, ldb);
+                cublasDgemm('N', 'T', M, N-NB, NB, -1.0, d_x, M, A+NB, lda, alpha, b+NB*ldb, ldb);
 
                 /* the rest blocks */
                 for (i=NB; i < N; i += NB) {
                     NN = min(NB, N-i);
-                    cublasDgemm ('N', 'T', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);
+                    cublasDgemm('N', 'T', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);
 
                     if (i+NB >= N)
                         break;
 
-                    cublasDgemm ('N', 'T', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+i*lda+NB+i, lda, 1.0, b+(i+NB)*ldb, ldb);
+                    cublasDgemm('N', 'T', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+i*lda+NB+i, lda, 1.0, b+(i+NB)*ldb, ldb);
                 }
             }
             else {
@@ -380,23 +380,23 @@ void magmablas_dtrsm_work(
                 /* handle the first block seperately with alpha */
                 int NN = (N%NB==0) ? NB : (N%NB);
                 i = N-NN;
-                cublasDgemm ('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
+                cublasDgemm('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 
                 if (i-NB < 0) {
                     b_copy();
                     return;
                 }
 
-                cublasDgemm ('N', 'T', M, i, NN, -1.0, d_x+i*M, M, A+i*lda, lda, alpha, b, ldb);
+                cublasDgemm('N', 'T', M, i, NN, -1.0, d_x+i*M, M, A+i*lda, lda, alpha, b, ldb);
 
                 /* the rest blocks */
                 for (i=N-NN-NB; i >= 0; i -= NB) {
-                    cublasDgemm ('N', 'T', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
+                    cublasDgemm('N', 'T', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 
                     if (i-NB < 0)
                         break;
 
-                    cublasDgemm ('N', 'T', M, i, NB, -1.0, d_x+i*M, M, A+i*lda, lda, 1.0, b, ldb);
+                    cublasDgemm('N', 'T', M, i, NB, -1.0, d_x+i*M, M, A+i*lda, lda, 1.0, b, ldb);
                 }
             }
         }

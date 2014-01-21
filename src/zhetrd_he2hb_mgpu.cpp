@@ -154,9 +154,6 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     #define dttest(a_0, a_1, a_2)   (dTmgpu[a_0]  + ((a_2)-1)*(lddt))
     #define datest(a_0, a_1, a_2)   (dAmgpu[a_0]  + ((a_2)-1)*(ldda) + (a_1)-1)
 
-
-    const char* uplo_ = lapack_const( uplo );
-
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -175,9 +172,9 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
 
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    int upper = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

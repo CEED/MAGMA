@@ -913,20 +913,19 @@ void magmablas_chemv_tesla_L(
 extern "C"
 magma_int_t
 magmablas_chemv_tesla(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     magmaFloatComplex alpha,
     const magmaFloatComplex *A, magma_int_t lda,
     const magmaFloatComplex *x, magma_int_t incx,
     magmaFloatComplex beta,
     magmaFloatComplex *y, magma_int_t incy)
 {
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.
      */
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    if ((! upper) && (uplo != MagmaLower)) {
         return -1;
     } else if ( n < 0 ) {
         return -2;
@@ -946,7 +945,7 @@ magmablas_chemv_tesla(
 
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper )
-        cublasChemv(uplo, n, alpha, A, lda, x, incx, beta, y, incy);
+        cublasChemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
     else {
         magmaFloatComplex *dwork;
         magma_int_t blocks = (n - 1)/thread_x + 1;

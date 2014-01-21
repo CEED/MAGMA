@@ -141,8 +141,8 @@ magma_zhetrd_mgpu(
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    const char* uplo_ = lapack_const( uplo );
-
+    const char* uplo_ = lapack_uplo_const( uplo );
+    
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib;
 
@@ -164,9 +164,9 @@ magma_zhetrd_mgpu(
     magmaDoubleComplex *dwork2[MagmaMaxGPUs];
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
-    if ( !upper && !lapackf77_lsame(uplo_, "L")) {
+    int upper = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
+    if (! upper && uplo != MagmaLower) {
         printf( " uplo = %c\n",uplo );
         *info = -1;
     } else if (n < 0) {
@@ -438,7 +438,7 @@ magma_zhetrd_mgpu(
     magma_event_destroy( stop  );
 #endif
 
-    trace_finalize( "zhetrd.svg","trace.css" );
+    trace_finalize( "zhetrd.svg", "trace.css" );
     for( did=0; did < num_gpus; did++ ) {
         magma_setdevice(did);
         for( kk=0; kk < k; kk++ )
@@ -471,8 +471,7 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
               magma_queue_t stream[][10], magma_int_t *info)
 {
     magma_int_t k;
-    const char* uplo_ = lapack_const( uplo );
-    if ( lapackf77_lsame(uplo_, "L") ) {
+    if (uplo == MagmaLower) {
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
         for (j=0; j < n; j += nb) {
@@ -529,7 +528,6 @@ magma_zher2k_mgpu(
 #define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    const char* uplo_  = lapack_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
@@ -553,7 +551,7 @@ magma_zher2k_mgpu(
     }
 
     /* off-diagonal update */
-    if ( lapackf77_lsame( uplo_, "U" ) ) {
+    if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
             id = ((i+offset)/nb)%num_gpus;
             kk = (i/(nb*num_gpus))%num_streams;
@@ -589,7 +587,7 @@ magma_zher2k_mgpu(
         }
     }
 
-    if ( lapackf77_lsame( uplo_, "U" ) ) {
+    if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
             id = ((i+offset)/nb)%num_gpus;
             kk = (i/(nb*num_gpus))%num_streams;

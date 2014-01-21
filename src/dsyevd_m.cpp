@@ -141,8 +141,8 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    const char* uplo_ = lapack_const( uplo );
-    const char* jobz_ = lapack_const( jobz );
+    const char* uplo_ = lapack_uplo_const( uplo );
+    const char* jobz_ = lapack_vec_const( jobz );
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
@@ -167,14 +167,14 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
     double smlnum;
     magma_int_t lquery;
 
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    lquery = lwork == -1 || liwork == -1;
+    wantz = (jobz == MagmaVec);
+    lower = (uplo == MagmaLower);
+    lquery = (lwork == -1 || liwork == -1);
 
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -1;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;

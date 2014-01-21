@@ -135,10 +135,8 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    =====================================================================
-*/
-    const char* range_ = lapack_const( range );
-
+    ===================================================================== */
+    
     double d_zero = 0.;
     double d_one  = 1.;
     magma_int_t izero = 0;
@@ -153,10 +151,10 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
 
     // Test the input parameters.
 
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lwork == -1 || liwork == -1;
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lwork == -1 || liwork == -1);
 
     *info = 0;
 

@@ -137,7 +137,7 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
     denotes an element of the vector defining H(i).
     =====================================================================    */
 
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
 
     magma_int_t ldda = lda;
     magma_int_t nb = magma_get_zhetrd_nb(n);
@@ -153,9 +153,9 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
     magma_int_t lquery;
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
-    lquery = lwork == -1;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    int upper = (uplo == MagmaUpper);
+    lquery = (lwork == -1);
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

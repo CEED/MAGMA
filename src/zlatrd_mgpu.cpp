@@ -168,8 +168,6 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
     an element of the vector defining H(i).
     =====================================================================    */
 
-    const char* uplo_  = lapack_const( uplo  );
-
     double mv_time = 0.0;
     magma_int_t i;
 #ifndef MAGMABLAS_ZHEMV_MGPU
@@ -207,7 +205,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
     magma_event_create( &stop  );
 #endif
 
-    if (lapackf77_lsame(uplo_, "U")) {
+    if (uplo == MagmaUpper) {
         /* Reduce last NB columns of upper triangle */
         for (i = n-1; i >= n - nb ; --i) {
             i_1 = i + 1;
@@ -513,7 +511,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     }
     //magma_setdevice(0);
     //magmablasSetKernelStream(stream[0][0]);
-    //magma_zhemv('L', n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
+    //magma_zhemv(MagmaLower, n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
     //magmablasSetKernelStream(NULL);
 
     /* send to CPU */
@@ -532,7 +530,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     }
 #else
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
-    const char* uplo_  = lapack_const( uplo  );
+    const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, ii, j, kk, ib, ib0, i_1, i_local, idw;
     magma_int_t i_0=n;
     magma_int_t loffset0 = nb*(offset/(nb*num_gpus));
@@ -549,7 +547,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
         cudaMemset( dy[id], 0, n*k*sizeof(magmaDoubleComplex) );
     }
 
-    if ( lapackf77_lsame( uplo_, "L" ) ) {
+    if (uplo == MagmaLower) {
         /* the first block */
         if ( loffset1 > 0 ) {
             id = idw;

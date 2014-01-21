@@ -658,7 +658,7 @@ zlanhe_inf(
     dim3 threads(inf_bs, 4, 1);
 
     if ( n % inf_bs == 0 ) {
-        if ( uplo == 'L' || uplo == 'l') {
+        if ( uplo == MagmaLower) {
             zlanhe_inf_kernel_special_l<<< grid, threads, 0, magma_stream >>>
                 ( n, A, lda, dwork );
         }
@@ -670,7 +670,7 @@ zlanhe_inf(
     else {
         int n_full_block = (n - n % inf_bs) /inf_bs;
         int n_mod_bs = n % inf_bs;
-        if ( uplo == 'L' || uplo == 'l') {
+        if ( uplo == MagmaLower) {
             zlanhe_inf_kernel_generic_l<<< grid, threads, 0, magma_stream >>>
                 ( n, A, lda, dwork, n_full_block, n_mod_bs );
         }
@@ -749,7 +749,7 @@ zlanhe_max(
     dim3 grid(blocks, 1, 1);
     dim3 threads(max_bs, 1, 1);
 
-    if ( uplo == 'L' || uplo == 'l' ) {
+    if ( uplo == MagmaLower ) {
         zlanhe_max_kernel_l<<< grid, threads, 0, magma_stream >>>
             ( n, A, lda, dwork );
     }
@@ -827,11 +827,11 @@ magmablas_zlanhe(
     magma_int_t info = 0;
     magma_int_t arch = magma_getdevice_arch();
     // 1-norm == inf-norm since A is Hermitian
-    bool inf_norm = (norm == 'I' || norm == 'i' || norm == '1' || norm == 'O' || norm == 'o');
-    bool max_norm = (norm == 'M' || norm == 'm');
+    bool inf_norm = (norm == MagmaInfNorm || norm == MagmaOneNorm);
+    bool max_norm = (norm == MagmaMaxNorm);
     if ( ! max_norm && (! inf_norm || arch < 200) )
         info = -1;
-    else if ( uplo != 'u' && uplo != 'U' && uplo != 'l' && uplo != 'L' )
+    else if ( uplo != MagmaUpper && uplo != MagmaLower )
         info = -2;
     else if ( n < 0 )
         info = -3;

@@ -299,162 +299,169 @@ typedef double real_Double_t;
 // [In the future, these will be numbered, as indicated by comments,
 // [instead of character constants.]
 // numbering is consistent with CBLAS and PLASMA; see plasma/include/plasma.h
-#define MagmaRowMajor      'R'  /* 101 */
-#define MagmaColMajor      'C'  /* 102 */
+typedef enum {
+    MagmaRowMajor      = 101,
+    MagmaColMajor      = 102
+} magma_order_t;
 
-#define MagmaNoTrans       'N'  /* 111 */
-#define MagmaTrans         'T'  /* 112 */
-#define MagmaConjTrans     'C'  /* 113 */
+typedef enum {
+    MagmaNoTrans       = 111,
+    MagmaTrans         = 112,
+    MagmaConjTrans     = 113
+} magma_trans_t;
 
-#define MagmaUpper         'U'  /* 121 */
-#define MagmaLower         'L'  /* 122 */
-#define MagmaUpperLower    'G'  /* 123 */
-#define MagmaFull          'G'  /* 123 */  /* lascl */
-#define MagmaHessenberg    'H'  /* 124 */  /* lascl */
+typedef enum {
+    MagmaUpper         = 121,
+    MagmaLower         = 122,
+    MagmaUpperLower    = 123,
+    MagmaFull          = 123,  /* lascl, laset */
+    MagmaHessenberg    = 124   /* lascl */ 
+} magma_uplo_t;
 
-#define MagmaNonUnit       'N'  /* 131 */
-#define MagmaUnit          'U'  /* 132 */
+typedef magma_uplo_t magma_type_t;  /* lascl */
 
-#define MagmaLeft          'L'  /* 141 */
-#define MagmaRight         'R'  /* 142 */
-#define MagmaBothSides     'B'  /* 143 */  /* trevc */
+typedef enum {
+    MagmaNonUnit       = 131,
+    MagmaUnit          = 132
+} magma_diag_t;
 
-#define MagmaOneNorm       '1'  /* 171 */  /* lange, lanhe */
-#define MagmaRealOneNorm   172
-#define MagmaTwoNorm       '2'  /* 173 */
-#define MagmaFrobeniusNorm 'F'  /* 174 */
-#define MagmaInfNorm       'I'  /* 175 */
-#define MagmaRealInfNorm   176
-#define MagmaMaxNorm       'M'  /* 177 */
-#define MagmaRealMaxNorm   178
+typedef enum {
+    MagmaLeft          = 141,
+    MagmaRight         = 142,
+    MagmaBothSides     = 143   /* trevc */
+} magma_side_t;
 
-#define MagmaDistUniform   201  /* U */  /* latms */
-#define MagmaDistSymmetric 202  /* S */
-#define MagmaDistNormal    203  /* N */
+typedef enum {
+    MagmaOneNorm       = 171,  /* lange, lanhe */
+    MagmaRealOneNorm   = 172,
+    MagmaTwoNorm       = 173,
+    MagmaFrobeniusNorm = 174,
+    MagmaInfNorm       = 175,
+    MagmaRealInfNorm   = 176,
+    MagmaMaxNorm       = 177,
+    MagmaRealMaxNorm   = 178
+} magma_norm_t;
 
-#define MagmaHermGeev      241  /* H */  /* latms */
-#define MagmaHermPoev      242  /* P */
-#define MagmaNonsymPosv    243  /* N */
-#define MagmaSymPosv       244  /* S */
+typedef enum {
+    MagmaDistUniform   = 201,  /* latms */
+    MagmaDistSymmetric = 202,
+    MagmaDistNormal    = 203
+} magma_dist_t;
 
-#define MagmaNoPacking     291  /* N */  /* latms */
-#define MagmaPackSubdiag   292  /* U */
-#define MagmaPackSupdiag   293  /* L */
-#define MagmaPackColumn    294  /* C */
-#define MagmaPackRow       295  /* R */
-#define MagmaPackLowerBand 296  /* B */
-#define MagmaPackUpeprBand 297  /* Q */
-#define MagmaPackAll       298  /* Z */
+typedef enum {
+    MagmaHermGeev      = 241,  /* latms */
+    MagmaHermPoev      = 242,
+    MagmaNonsymPosv    = 243,
+    MagmaSymPosv       = 244,
+} magma_sym_t;
 
-#define MagmaNoVec         'N'  /* 301 */  /* geev, syev, gesvd */
-#define MagmaVec           'V'  /* 302 */  /* geev, syev */
-#define MagmaIVec          'I'  /* 303 */  /* stedc */
-#define MagmaAllVec        'A'  /* 304 */  /* gesvd */
-#define MagmaSomeVec       'S'  /* 305 */  /* gesvd */
-#define MagmaOverwriteVec  'O'  /* 306 */  /* gesvd */
+typedef enum {
+    MagmaNoPacking     = 291,  /* latms */
+    MagmaPackSubdiag   = 292,
+    MagmaPackSupdiag   = 293,
+    MagmaPackColumn    = 294,
+    MagmaPackRow       = 295,
+    MagmaPackLowerBand = 296,
+    MagmaPackUpeprBand = 297,
+    MagmaPackAll       = 298
+} magma_pack_t;
 
-#define MagmaRangeAll      'A'  /* 311 */  /* syevx, etc. */
-#define MagmaRangeV        'V'  /* 312 */
-#define MagmaRangeI        'I'  /* 313 */
+typedef enum {
+    MagmaNoVec         = 301,  /* geev, syev, gesvd */
+    MagmaVec           = 302,  /* geev, syev */
+    MagmaIVec          = 303,  /* stedc */
+    MagmaAllVec        = 304,  /* gesvd */
+    MagmaSomeVec       = 305,  /* gesvd */
+    MagmaOverwriteVec  = 306   /* gesvd */
+} magma_vec_t;
 
-#define MagmaForward       'F'  /* 391 */  /* larfb */
-#define MagmaBackward      'B'  /* 392 */  /* larfb */
+typedef enum {
+    MagmaRangeAll      = 311,  /* syevx, etc. */
+    MagmaRangeV        = 312,
+    MagmaRangeI        = 313
+} magma_range_t;
 
-#define MagmaColumnwise    'C'  /* 401 */  /* larfb */
-#define MagmaRowwise       'R'  /* 402 */  /* larfb */
+typedef enum {
+    MagmaForward       = 391,  /* larfb */
+    MagmaBackward      = 392
+} magma_direct_t;
 
-#define Magma_CSR          411
-#define Magma_ELLPACK      412
-#define Magma_ELLPACKT     413
-#define Magma_DENSE        414  
-#define Magma_BCSR         415
-#define Magma_CSC          416
-#define Magma_HYB          417
-#define Magma_COO          418
-#define Magma_ELLPACKRT    419
+typedef enum {
+    MagmaColumnwise    = 401,  /* larfb */
+    MagmaRowwise       = 402
+} magma_storev_t;
 
-#define Magma_CPU          421
-#define Magma_DEV          422
+// --------------------
+// sparse
+typedef enum {
+    Magma_CSR          = 411,
+    Magma_ELLPACK      = 412,
+    Magma_ELLPACKT     = 413,
+    Magma_DENSE        = 414,
+    Magma_BCSR         = 415,
+    Magma_CSC          = 416,
+    Magma_HYB          = 417,
+    Magma_COO          = 418
+} magma_storage_t;
 
-#define Magma_CG           431
-#define Magma_GMRES        432
-#define Magma_BICGSTAB     433
-#define Magma_JACOBI       434
-#define Magma_GS           435
-#define Magma_BCSRLU       436
+typedef enum {
+    Magma_CPU          = 421,
+    Magma_DEV          = 422
+} magma_location_t;
 
-#define Magma_DCOMPLEX     451
-#define Magma_FCOMPLEX     452
-#define Magma_DOUBLE       453
-#define Magma_FLOAT        454
+typedef enum {
+    Magma_CG           = 431,
+    Magma_GMRES        = 432,
+    Magma_BICGSTAB     = 433,
+    Magma_JACOBI       = 434,
+    Magma_GS           = 435,
+    Magma_BCSRLU       = 436
+} magma_precond_type;
 
-#define Magma_CGS          461
-#define Magma_FUSED_CGS    462
-#define Magma_MGS          463
+typedef enum {
+    Magma_DCOMPLEX     = 451,
+    Magma_FCOMPLEX     = 452,
+    Magma_DOUBLE       = 453,
+    Magma_FLOAT        = 454
+} magma_precision;
 
-
+typedef enum {
+    Magma_CGS          = 461,
+    Magma_FUSED_CGS    = 462,
+    Magma_MGS          = 463
+} magma_ortho_t;
 
 
 // When adding constants, remember to do these steps as appropriate:
-// 1)  add new type below
-// 2)  add magma_xxxx_const() converter below and in control/constants.cpp
-// 3a) add to magma2lapack_constants[] in control/constants.cpp
-// 3b) update min & max here, which are used to check bounds for magma2lapack_constants[]
-#define MagmaMinConst       48  // "0"
-#define MagmaMaxConst      461
-
-
-// ----------------------------------------
-// these could be enums, but that isn't portable in C++,
-// e.g., if -fshort-enums is used
-typedef char magma_order_t;
-typedef char magma_trans_t;
-typedef char magma_uplo_t;
-typedef char magma_diag_t;
-typedef char magma_side_t;
-typedef char magma_type_t;
-typedef char magma_norm_t;
-
-typedef int  magma_dist_t;
-typedef int  magma_sym_t;
-typedef int  magma_pack_t;
-
-typedef char magma_vec_t;
-typedef char magma_range_t;
-typedef char magma_direct_t;
-typedef char magma_storev_t;
-
-// for sparse linear algebra
-// properties of the magma_sparse_matrix
-typedef int magma_storage_t;
-typedef int magma_location_t;
-// properties of the magma_precond_parameters
-typedef int magma_precond_type;
-typedef int magma_precision;
-typedef int magma_ortho_t;
+// 1)  add magma_xxxx_const()  converter below and in control/constants.cpp
+// 2a) add to magma2lapack_constants[] in control/constants.cpp
+// 2b) update min & max here, which are used to check bounds for magma2lapack_constants[]
+// 2c) add lapack_xxxx_const() converter below and in control/constants.cpp
+#define Magma2lapack_Min  MagmaRowMajor  // 101
+#define Magma2lapack_Max  MagmaRowwise   // 402
 
 
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK
-// todo: use translators instead? lapack_trans_const( MagmaUpper )
-#define MagmaRowMajorStr   "Row"
-#define MagmaColMajorStr   "Col"
+// todo: use translators instead? lapack_const( MagmaUpper )
+#define MagmaRowMajorStr      "Row"
+#define MagmaColMajorStr      "Col"
 
-#define MagmaNoTransStr    "NoTrans"
-#define MagmaTransStr      "Trans"
-#define MagmaConjTransStr  "ConjTrans"
+#define MagmaNoTransStr       "NoTrans"
+#define MagmaTransStr         "Trans"
+#define MagmaConjTransStr     "ConjTrans"
 
-#define MagmaUpperStr      "Upper"
-#define MagmaLowerStr      "Lower"
-#define MagmaUpperLowerStr "Full"
-#define MagmaFullStr       "Full"
+#define MagmaUpperStr         "Upper"
+#define MagmaLowerStr         "Lower"
+#define MagmaUpperLowerStr    "Full"
+#define MagmaFullStr          "Full"
 
-#define MagmaNonUnitStr    "NonUnit"
-#define MagmaUnitStr       "Unit"
+#define MagmaNonUnitStr       "NonUnit"
+#define MagmaUnitStr          "Unit"
 
-#define MagmaLeftStr       "Left"
-#define MagmaRightStr      "Right"
-#define MagmaBothSidesStr  "Both"
+#define MagmaLeftStr          "Left"
+#define MagmaRightStr         "Right"
+#define MagmaBothSidesStr     "Both"
 
 #define MagmaOneNormStr       "1"
 #define MagmaTwoNormStr       "2"
@@ -462,18 +469,18 @@ typedef int magma_ortho_t;
 #define MagmaInfNormStr       "Inf"
 #define MagmaMaxNormStr       "Max"
 
-#define MagmaForwardStr    "Forward"
-#define MagmaBackwardStr   "Backward"
+#define MagmaForwardStr       "Forward"
+#define MagmaBackwardStr      "Backward"
 
-#define MagmaColumnwiseStr "Columnwise"
-#define MagmaRowwiseStr    "Rowwise"
+#define MagmaColumnwiseStr    "Columnwise"
+#define MagmaRowwiseStr       "Rowwise"
 
-#define MagmaNoVecStr        "NoVec"
-#define MagmaVecStr          "Vec"
-#define MagmaIVecStr         "IVec"
-#define MagmaAllVecStr       "All"
-#define MagmaSomeVecStr      "Some"
-#define MagmaOverwriteVecStr "Overwrite"
+#define MagmaNoVecStr         "NoVec"
+#define MagmaVecStr           "Vec"
+#define MagmaIVecStr          "IVec"
+#define MagmaAllVecStr        "All"
+#define MagmaSomeVecStr       "Some"
+#define MagmaOverwriteVecStr  "Overwrite"
 
 
 #ifdef __cplusplus
@@ -501,8 +508,37 @@ magma_storev_t magma_storev_const( char lapack_char );
 
 // --------------------
 // Convert MAGMA constants to LAPACK constants.
-char        lapacke_const( int magma_const );
-const char* lapack_const ( int magma_const );
+// The generic lapack_const works for all cases, but the specific routines
+// (e.g., lapack_trans_const) do better error checking.
+const char* lapack_const       ( int            magma_const );
+const char* lapack_order_const ( magma_order_t  magma_const );
+const char* lapack_trans_const ( magma_trans_t  magma_const );
+const char* lapack_uplo_const  ( magma_uplo_t   magma_const );
+const char* lapack_diag_const  ( magma_diag_t   magma_const );
+const char* lapack_side_const  ( magma_side_t   magma_const );
+const char* lapack_norm_const  ( magma_norm_t   magma_const );
+const char* lapack_dist_const  ( magma_dist_t   magma_const );
+const char* lapack_sym_const   ( magma_sym_t    magma_const );
+const char* lapack_pack_const  ( magma_pack_t   magma_const );
+const char* lapack_vec_const   ( magma_vec_t    magma_const );
+const char* lapack_range_const ( magma_range_t  magma_const );
+const char* lapack_direct_const( magma_direct_t magma_const );
+const char* lapack_storev_const( magma_storev_t magma_const );
+
+static inline char lapacke_const       ( int magma_const            ) { return *lapack_const       ( magma_const ); }
+static inline char lapacke_order_const ( magma_order_t  magma_const ) { return *lapack_order_const ( magma_const ); }
+static inline char lapacke_trans_const ( magma_trans_t  magma_const ) { return *lapack_trans_const ( magma_const ); }
+static inline char lapacke_uplo_const  ( magma_uplo_t   magma_const ) { return *lapack_uplo_const  ( magma_const ); }
+static inline char lapacke_diag_const  ( magma_diag_t   magma_const ) { return *lapack_diag_const  ( magma_const ); }
+static inline char lapacke_side_const  ( magma_side_t   magma_const ) { return *lapack_side_const  ( magma_const ); }
+static inline char lapacke_norm_const  ( magma_norm_t   magma_const ) { return *lapack_norm_const  ( magma_const ); }
+static inline char lapacke_dist_const  ( magma_dist_t   magma_const ) { return *lapack_dist_const  ( magma_const ); }
+static inline char lapacke_sym_const   ( magma_sym_t    magma_const ) { return *lapack_sym_const   ( magma_const ); }
+static inline char lapacke_pack_const  ( magma_pack_t   magma_const ) { return *lapack_pack_const  ( magma_const ); }
+static inline char lapacke_vec_const   ( magma_vec_t    magma_const ) { return *lapack_vec_const   ( magma_const ); }
+static inline char lapacke_range_const ( magma_range_t  magma_const ) { return *lapack_range_const ( magma_const ); }
+static inline char lapacke_direct_const( magma_direct_t magma_const ) { return *lapack_direct_const( magma_const ); }
+static inline char lapacke_storev_const( magma_storev_t magma_const ) { return *lapack_storev_const( magma_const ); }
 
 
 // --------------------

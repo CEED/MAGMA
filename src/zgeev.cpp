@@ -142,17 +142,15 @@ magma_zgeev(
     magma_int_t scalea, minwrk, irwork, lquery, wantvl, wantvr, select[1];
 
     const char* side_  = NULL;
-    const char* jobvl_ = lapack_const( jobvl );
-    const char* jobvr_ = lapack_const( jobvr );
 
     irwork = 0;
     *info = 0;
-    lquery = lwork == -1;
-    wantvl = lapackf77_lsame( jobvl_, "V" );
-    wantvr = lapackf77_lsame( jobvr_, "V" );
-    if (! wantvl && ! lapackf77_lsame( jobvl_, "N" )) {
+    lquery = (lwork == -1);
+    wantvl = (jobvl == MagmaVec);
+    wantvr = (jobvr == MagmaVec);
+    if (! wantvl && jobvl != MagmaNoVec) {
         *info = -1;
-    } else if (! wantvr && ! lapackf77_lsame( jobvr_, "N" )) {
+    } else if (! wantvr && jobvr != MagmaNoVec) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;

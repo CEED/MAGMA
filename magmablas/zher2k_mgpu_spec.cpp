@@ -170,21 +170,21 @@ void magmablas_zher2k_mgpu_spec(
     
     /* Check arguments */
     magma_int_t info = 0;
-    if ( ! (uplo == 'l' || uplo == 'L')) {
+    if ( uplo != MagmaLower ) {
         info = -1;  // 'u' not yet handled
-    } else if ( ! (trans == 'n' || trans == 'N')) {
+    } else if ( trans != MagmaNoTrans ) {
         info = -2;  // 'c' not yet handled
     } else if ( n < 0 ) {
         info = -3;
     } else if ( k < 0 ) {
         info = -4;
-    } else if ( ((trans == 'n' || trans == 'N') && lda < max(1,n)) ||
-                ((trans == 'c' || trans == 'C') && lda < max(1,k)) ) {
+    } else if ( ((trans == MagmaNoTrans)   && lda < max(1,n)) ||
+                ((trans == MagmaConjTrans) && lda < max(1,k)) ) {
         info = -7;
     } else if ( aoffset < 0 || aoffset > lda ) {
         info = -8;
-    } else if ( ((trans == 'n' || trans == 'N') && ldb < max(1,n)) ||
-                ((trans == 'c' || trans == 'C') && ldb < max(1,k)) ) {
+    } else if ( ((trans == MagmaNoTrans)   && ldb < max(1,n)) ||
+                ((trans == MagmaConjTrans) && ldb < max(1,k)) ) {
         info = -10;
     } else if ( boffset < 0 || boffset > ldb ) {
         info = -11;

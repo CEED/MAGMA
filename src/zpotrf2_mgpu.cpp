@@ -85,7 +85,7 @@ magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n
     LDDA     (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -97,12 +97,11 @@ magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n
 
 
     magma_int_t     j, jb, nb0, nb2, dd, d, id, j_local, j_local2, buf;
-    const char* uplo_ = lapack_const( uplo );
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    int upper = (uplo == MagmaUpper);
     magmaDoubleComplex *dlpanel;
     //magma_event_t event0[MagmaMaxGPUs], // syrk
     //            event1[MagmaMaxGPUs], // send off-diagonal
@@ -115,7 +114,7 @@ magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n
     #endif
     
     *info = 0;
-    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+    if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -634,7 +633,7 @@ magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n
     } /* end of else not upper */
 
     /* == finalize the trace == */
-    trace_finalize( "zpotrf.svg","trace.css" );
+    trace_finalize( "zpotrf.svg", "trace.css" );
 
     /* clean up */
     for( d=0; d < num_gpus; d++ ) {

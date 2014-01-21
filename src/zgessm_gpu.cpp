@@ -96,7 +96,7 @@ magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
     if (m == 0 || n == 0)
         return *info;
 
-    if ( (order == 'C') || (order == 'c') ) {
+    if ( order == MagmaColMajor ) {
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
     } else {
         dAT = dA;
@@ -129,7 +129,7 @@ magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
         }
     }
 
-    if ( (order == 'C') || (order == 'c') ) {
+    if ( order == MagmaColMajor ) {
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
     }
 

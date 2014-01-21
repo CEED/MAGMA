@@ -72,14 +72,13 @@ magma_zgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex *work = NULL;
-    const char* trans_ = lapack_const( trans );
-    int notran = lapackf77_lsame(trans_, "N");
+    int notran = (trans == MagmaNoTrans);
     magma_int_t i1, i2, inc;
 
     *info = 0;
     if ( (! notran) &&
-         (! lapackf77_lsame(trans_, "T")) &&
-         (! lapackf77_lsame(trans_, "C")) ) {
+         (trans != MagmaTrans) &&
+         (trans != MagmaConjTrans) ) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;

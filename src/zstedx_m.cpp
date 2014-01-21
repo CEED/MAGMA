@@ -122,18 +122,16 @@ magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
-    =====================================================================
-*/
-    const char* range_ = lapack_const( range );
+    ===================================================================== */
 
     magma_int_t alleig, indeig, valeig, lquery;
     magma_int_t i, j, smlsiz;
     magma_int_t liwmin, lrwmin;
 
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
-    lquery = lrwork == -1 || liwork == -1;
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
+    lquery = (lrwork == -1 || liwork == -1);
 
     *info = 0;
 

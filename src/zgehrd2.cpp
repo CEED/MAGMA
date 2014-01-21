@@ -131,7 +131,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     *info = 0;
     work[0] = MAGMA_Z_MAKE( n * nb, 0 );
 
-    lquery = lwork == -1;
+    lquery = (lwork == -1);
     if (n < 0) {
         *info = -1;
     } else if (ilo < 1 || ilo > max(1,n)) {

@@ -95,10 +95,10 @@ magmablas_zlange(
                 (
                 ( normF(A),         NORM = 'F', 'f', 'E' or 'e'  ** not yet supported
     
-    where  norm1  denotes the  one norm of a matrix (maximum column sum),
-    normI  denotes the  infinity norm  of a matrix  (maximum row sum) and
-    normF  denotes the  Frobenius norm of a matrix (square root of sum of
-    squares).  Note that  max(abs(A(i,j)))  is not a consistent matrix norm.
+    where norm1 denotes the one norm of a matrix (maximum column sum),
+    normI denotes the infinity norm of a matrix (maximum row sum) and
+    normF denotes the Frobenius norm of a matrix (square root of sum of
+    squares). Note that max(abs(A(i,j))) is not a consistent matrix norm.
     
     Arguments
     =========
@@ -126,7 +126,7 @@ magmablas_zlange(
     ====================================================================  */
     
     magma_int_t info = 0;
-    if ( norm != 'I' && norm != 'i' )
+    if ( norm != MagmaInfNorm )
         info = -1;
     else if ( m < 0 )
         info = -2;

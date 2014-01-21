@@ -108,8 +108,8 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
     
-    const char* side_  = lapack_const( side  );
-    const char* trans_ = lapack_const( trans );
+    const char* side_  = lapack_side_const( side  );
+    const char* trans_ = lapack_trans_const( trans );
 
     magma_int_t i__4, i__;
     magmaDoubleComplex *T;
@@ -118,8 +118,8 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
     int lquery, left, notran;
 
     *info  = 0;
-    left   = lapackf77_lsame(side_, "L");
-    notran = lapackf77_lsame(trans_, "N");
+    left   = (side == MagmaLeft);
+    notran = (trans == MagmaNoTrans);
     lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -130,9 +130,9 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
         nq = n;
         nw = max(1,m);
     }
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans_, "C")) {
+    } else if (! notran && trans != MagmaConjTrans) {
         *info = -2;
     } else if (m < 0) {
         *info = -3;

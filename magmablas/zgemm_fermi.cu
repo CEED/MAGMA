@@ -152,7 +152,8 @@ magmablas_zgemm(
         // magmablas for [sd] precisions, cublas for [zc] precisions.
         #if defined(PRECISION_z) || defined(PRECISION_c)
         cublasZgemm(
-            TRANSA, TRANSB, m, n, k, alpha, d_A, lda, d_B, ldb, beta, d_C, ldc );
+            lapacke_trans_const(TRANSA), lapacke_trans_const(TRANSB),
+            m, n, k, alpha, d_A, lda, d_B, ldb, beta, d_C, ldc );
         #else
         magmablas_zgemm_tesla(
             TRANSA, TRANSB, m, n, k, alpha, d_A, lda, d_B, ldb, beta, d_C, ldc );
@@ -169,14 +170,14 @@ magmablas_zgemm(
     size_t offsetB = 0;
 
     int TransA = 2, TransB = 2;
-    if      ( TRANSA == 'T' || TRANSA == 't' )
+    if      ( TRANSA == MagmaTrans )
         TransA = 1;
-    else if ( TRANSA == 'N' || TRANSA == 'n' )
+    else if ( TRANSA == MagmaNoTrans )
         TransA = 0;
                     
-    if      ( TRANSB == 'T' || TRANSB == 't' )
+    if      ( TRANSB == MagmaTrans )
         TransB = 1;
-    else if ( TRANSB == 'N' || TRANSB == 'n' )
+    else if ( TRANSB == MagmaNoTrans )
         TransB = 0;
 
     size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
@@ -186,7 +187,7 @@ magmablas_zgemm(
     if ( sizeA >= CUBLAS_MAX_1DBUF_SIZE ||
          sizeB >= CUBLAS_MAX_1DBUF_SIZE )
     {
-        cublasZgemm( TRANSA, TRANSB, m, n, k, alpha,
+        cublasZgemm( lapacke_trans_const(TRANSA), lapacke_trans_const(TRANSB), m, n, k, alpha,
                      d_A, lda, d_B, ldb,
                      beta, d_C, ldc );
         return;

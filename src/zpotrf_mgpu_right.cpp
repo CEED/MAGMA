@@ -77,7 +77,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
     LDDA     (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
-            dividable by 16.
+            divisible by 16.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -99,7 +99,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex mz_one = MAGMA_Z_MAKE( -1.0, 0.0 );
     double             one =  1.0;
     double             m_one = -1.0;
-    const char* uplo_ = lapack_const( uplo );
+    const char* uplo_ = lapack_uplo_const( uplo );
 
     magma_int_t j, nb, d, id, j_local, blkid, crosspoint, prevj, prevtrsmrows, num_streams = 5;
     magmaDoubleComplex *panel, *tmppanel0, *tmppanel1, *tmppanel, *tmpprevpanel;
@@ -514,7 +514,7 @@ magma_zherk_mgpu(
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    const char* uplo_  = lapack_const( uplo  );
+    const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
@@ -538,7 +538,7 @@ magma_zherk_mgpu(
     }
 
     /* off-diagonal update */
-    if ( lapackf77_lsame( uplo_, "U" ) ) {
+    if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
             id = ((i+offset)/nb)%num_gpus;
             kk = STREAM_ID( i+offset );
@@ -597,7 +597,7 @@ magma_zherk_mgpu2(
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    const char* uplo_  = lapack_const( uplo  );
+    const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
@@ -611,7 +611,7 @@ magma_zherk_mgpu2(
         ii = nb*((i+offset)/(nb*num_gpus));
     }
 
-    if ( lapackf77_lsame( uplo_, "U" ) ) {
+    if (uplo == MagmaUpper) {
         for( i=0; i < n; i += nb ) {
             id = ((i+offset)/nb)%num_gpus;
             kk = STREAM_ID( i+offset );

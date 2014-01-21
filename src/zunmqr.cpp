@@ -116,8 +116,8 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
     
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    const char* side_  = lapack_const( side  );
-    const char* trans_ = lapack_const( trans );
+    const char* side_  = lapack_side_const( side  );
+    const char* trans_ = lapack_trans_const( trans );
 
     magma_int_t nq_i, lddwork;
     magma_int_t i;
@@ -127,8 +127,8 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
     magma_int_t iinfo, lwkopt;
 
     *info = 0;
-    left   = lapackf77_lsame(side_,  "L");
-    notran = lapackf77_lsame(trans_, "N");
+    left   = (side == MagmaLeft);
+    notran = (trans == MagmaNoTrans);
     lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -142,9 +142,9 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
     lwkopt = max(1,nw) * nb;
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     
-    if (! left && ! lapackf77_lsame(side_, "R")) {
+    if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans_, MagmaConjTransStr)) {
+    } else if (! notran && trans != MagmaConjTrans) {
         *info = -2;
     } else if (m < 0) {
         *info = -3;

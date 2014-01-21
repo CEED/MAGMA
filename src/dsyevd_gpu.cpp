@@ -133,8 +133,6 @@ magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
 
-    const char* uplo_ = lapack_const( uplo );
-    const char* jobz_ = lapack_const( jobz );
     magma_int_t ione = 1;
 
     double d__1;
@@ -160,14 +158,14 @@ magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
     double *dwork;
     magma_int_t lddc = ldda;
 
-    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
-    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    lquery = lwork == -1 || liwork == -1;
+    wantz = (jobz == MagmaVec);
+    lower = (uplo == MagmaLower);
+    lquery = (lwork == -1 || liwork == -1);
 
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
+    if (! (wantz || (jobz == MagmaNoVec))) {
         *info = -1;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (lower || (uplo == MagmaUpper))) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;
@@ -215,7 +213,8 @@ magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        char jobz_[2] = {jobz, 0}, uplo_[2] = {uplo, 0};
+        const char* jobz_ = lapack_vec_const( jobz );
+        const char* uplo_ = lapack_uplo_const( uplo );
         double *a;
         magma_dmalloc_cpu( &a, n*n );
         magma_dgetmatrix(n, n, da, ldda, a, n);

@@ -83,7 +83,7 @@ magmablas_zswapblk( magma_order_t order, magma_int_t n,
     if ( n == 0 )
         return;
     
-    if ( (order == 'C') || (order == 'c') ) {
+    if ( order == MagmaColMajor ) {
         for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
         {
             magma_int_t sb = min(BLOCK_SIZE, i2-k);

@@ -62,7 +62,7 @@ magma_zpotrs_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     *info = 0;
-    if ( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+    if ( uplo != MagmaUpper && uplo != MagmaLower )
         *info = -1;
     if ( n < 0 )
         *info = -2;
@@ -82,7 +82,7 @@ magma_zpotrs_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
         return *info;
     }
 
-    if ( (uplo=='U') || (uplo=='u') ) {
+    if ( uplo == MagmaUpper ) {
         if ( nrhs == 1) {
             magma_ztrsv(MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
             magma_ztrsv(MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, dA, ldda, dB, 1 );

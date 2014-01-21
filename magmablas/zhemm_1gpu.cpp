@@ -16,7 +16,7 @@
 
 extern "C"
 void magmablas_zhemm_1gpu(
-    char side, char uplo, magma_int_t m, magma_int_t n,
+    magma_side_t side, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
                            magmaDoubleComplex *dB[], magma_int_t lddb,
     magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,

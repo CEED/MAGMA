@@ -1,6 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+#ifdef HAVE_CUBLAS
+#include <cublas_v2.h>
+#endif
+
 #include "magma_types.h"
 
 // ----------------------------------------
@@ -198,85 +202,24 @@ const char *magma2lapack_constants[] =
     "", "", "", "", "", "", "", "", "", "",  // 11-20
     "", "", "", "", "", "", "", "", "", "",  // 21-30
     "", "", "", "", "", "", "", "", "", "",  // 31-40
-    "", "", "", "", "", "", "",              // 41-47
-    
-    "0",                                     // 48: 0
-    "1",                                     // 49: 1
-    "2",                                     // 50: 2
-    "3",                                     // 51: 3
-    "4",                                     // 52: 4
-    "5",                                     // 53: 5
-    "6",                                     // 54: 6
-    "7",                                     // 55: 7
-    "8",                                     // 56: 8
-    "9",                                     // 57: 9
-    
-    "", "", "", "", "", "", "",              // 58-64
-    
-    "A",                                     // 65: A
-    "B",                                     // 66: B
-    "C",                                     // 67: C
-    "D",                                     // 68: D
-    "E",                                     // 69: E
-    "F",                                     // 70: F
-    "G",                                     // 71: G
-    "H",                                     // 72: H
-    "I",                                     // 73: I
-    "J",                                     // 74: J
-    "K",                                     // 75: K
-    "L",                                     // 76: L
-    "M",                                     // 77: M
-    "N",                                     // 78: N
-    "O",                                     // 79: O
-    "P",                                     // 80: P
-    "Q",                                     // 81: Q
-    "R",                                     // 82: R
-    "S",                                     // 83: S
-    "T",                                     // 84: T
-    "U",                                     // 85: U
-    "V",                                     // 86: V
-    "W",                                     // 87: W
-    "X",                                     // 88: X
-    "Y",                                     // 89: Y
-    "Z",                                     // 90: Z
-    
-    "", "", "", "", "", "",                  // 91-96
-    
-    "A",                                     //  97: a
-    "B",                                     //  98: b
-    "C",                                     //  99: c
-    "D",                                     // 100: d
-    "E",                                     // 101: e
-    "F",                                     // 102: f
-    "G",                                     // 103: g
-    "H",                                     // 104: h
-    "I",                                     // 105: i
-    "J",                                     // 106: j
-    "K",                                     // 107: k
-    "L",                                     // 108: l
-    "M",                                     // 109: m
-    "N",                                     // 110: n
-    "O",                                     // 111: o
-    "P",                                     // 112: p
-    "Q",                                     // 113: q
-    "R",                                     // 114: r
-    "S",                                     // 115: s
-    "T",                                     // 116: t
-    "U",                                     // 117: u
-    "V",                                     // 118: v
-    "W",                                     // 119: w
-    "X",                                     // 120: x
-    "Y",                                     // 121: y
-    "Z",                                     // 122: z
-    
-    "", "", "", "", "", "", "", "",          // 123-130
-    
-    // -----------------------------------------------------------------
-    // Above here are old char constants, e.g., MagmaNoTrans is 'n' or 'N' => "N";
-    // those will get replaced soon.
-    // Below here are new enum constants, e.g., MagmaDistUniform is 201    => "Uniform"
-    // -----------------------------------------------------------------
-    
+    "", "", "", "", "", "", "", "", "", "",  // 41-50
+    "", "", "", "", "", "", "", "", "", "",  // 51-60
+    "", "", "", "", "", "", "", "", "", "",  // 61-70
+    "", "", "", "", "", "", "", "", "", "",  // 71-80
+    "", "", "", "", "", "", "", "", "", "",  // 81-90
+    "", "", "", "", "", "", "", "", "", "",  // 91-100
+    "Row",                                   // 101: MagmaRowMajor
+    "Column",                                // 102: MagmaColMajor
+    "", "", "", "", "", "", "", "",          // 103-110
+    "No transpose",                          // 111: MagmaNoTrans
+    "Transpose",                             // 112: MagmaTrans
+    "Conjugate transpose",                   // 113: MagmaConjTrans
+    "", "", "", "", "", "", "",              // 114-120
+    "Upper",                                 // 121: MagmaUpper
+    "Lower",                                 // 122: MagmaLower
+    "GFull",                                 // 123: MagmaFull; see lascl
+    "Hessenberg",                            // 124: MagmaHessenberg
+    "", "", "", "", "", "",                  // 125-130
     "Non-unit",                              // 131: MagmaNonUnit
     "Unit",                                  // 132: MagmaUnit
     "", "", "", "", "", "", "", "",          // 133-140
@@ -288,7 +231,7 @@ const char *magma2lapack_constants[] =
     "", "", "", "", "", "", "", "", "", "",  // 161-170
     "One norm",                              // 171: MagmaOneNorm
     "",                                      // 172: MagmaRealOneNorm
-    "",                                      // 173: MagmaTwoNorm
+    "2 norm",                                // 173: MagmaTwoNorm
     "Frobenius norm",                        // 174: MagmaFrobeniusNorm
     "Infinity norm",                         // 175: MagmaInfNorm
     "",                                      // 176: MagmaRealInfNorm
@@ -329,7 +272,10 @@ const char *magma2lapack_constants[] =
     "Some",                                  // 305 MagmaSomeVec
     "Overwrite",                             // 306 MagmaOverwriteVec
     "", "", "", "",                          // 307-310
-    "", "", "", "", "", "", "", "", "", "",  // 311-320
+    "All",                                   // 311 MagmaRangeAll
+    "V",                                     // 312 MagmaRangeV
+    "I",                                     // 313 MagmaRangeI
+    "", "", "", "", "", "", "",              // 314-320
     "", "", "", "", "", "", "", "", "", "",  // 321-330
     "", "", "", "", "", "", "", "", "", "",  // 331-340
     "", "", "", "", "", "", "", "", "", "",  // 341-350
@@ -346,82 +292,313 @@ const char *magma2lapack_constants[] =
     // Remember to add a comma!
 };
 
+extern "C"
 const char* lapack_const( int magma_const )
 {
-    assert( magma_const >= MagmaMinConst );
-    assert( magma_const <= MagmaMaxConst );
+    assert( magma_const >= Magma2lapack_Min );
+    assert( magma_const <= Magma2lapack_Max );
     return magma2lapack_constants[ magma_const ];
 }
 
-char lapacke_const( int magma_const )
+extern "C"
+const char* lapack_order_const( magma_order_t magma_const )
 {
-    return lapack_const( magma_const )[0];
+    assert( magma_const >= MagmaRowMajor );
+    assert( magma_const <= MagmaColMajor );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_trans_const( magma_trans_t magma_const )
+{
+    assert( magma_const >= MagmaNoTrans   );
+    assert( magma_const <= MagmaConjTrans );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_uplo_const ( magma_uplo_t magma_const )
+{
+    assert( magma_const >= MagmaUpper );
+    assert( magma_const <= MagmaLower );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_diag_const ( magma_diag_t magma_const )
+{
+    assert( magma_const >= MagmaNonUnit );
+    assert( magma_const <= MagmaUnit    );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_side_const ( magma_side_t magma_const )
+{
+    assert( magma_const >= MagmaLeft  );
+    assert( magma_const <= MagmaRight );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_norm_const  ( magma_norm_t   magma_const )
+{
+    assert( magma_const >= MagmaOneNorm     );
+    assert( magma_const <= MagmaRealMaxNorm );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_dist_const  ( magma_dist_t   magma_const )
+{
+    assert( magma_const >= MagmaDistUniform );
+    assert( magma_const <= MagmaDistNormal );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_sym_const   ( magma_sym_t    magma_const )
+{
+    assert( magma_const >= MagmaHermGeev );
+    assert( magma_const <= MagmaSymPosv  );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_pack_const  ( magma_pack_t   magma_const )
+{
+    assert( magma_const >= MagmaNoPacking );
+    assert( magma_const <= MagmaPackAll   );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_vec_const   ( magma_vec_t    magma_const )
+{
+    assert( magma_const >= MagmaNoVec );
+    assert( magma_const <= MagmaOverwriteVec );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_range_const ( magma_range_t  magma_const )
+{
+    assert( magma_const >= MagmaRangeAll );
+    assert( magma_const <= MagmaRangeI   );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_direct_const( magma_direct_t magma_const )
+{
+    assert( magma_const >= MagmaForward );
+    assert( magma_const <= MagmaBackward );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_storev_const( magma_storev_t magma_const )
+{
+    assert( magma_const >= MagmaColumnwise );
+    assert( magma_const <= MagmaRowwise    );
+    return magma2lapack_constants[ magma_const ];
 }
 
 
 // ----------------------------------------
-// Convert MAGMA constants to CBLAS constants.
-#ifdef HAVE_CBLAS
+// Convert magma constants to clAmdBlas constants.
 
+#ifdef HAVE_clAmdBlas
+const int magma2amdblas_constants[] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0,                      // 100
+    clAmdBlasRowMajor,      // 101: MagmaRowMajor
+    clAmdBlasColumnMajor,   // 102: MagmaColMajor
+    0, 0, 0, 0, 0, 0, 0, 0,
+    clAmdBlasNoTrans,       // 111: MagmaNoTrans
+    clAmdBlasTrans,         // 112: MagmaTrans
+    clAmdBlasConjTrans,     // 113: MagmaConjTrans
+    0, 0, 0, 0, 0, 0, 0,
+    clAmdBlasUpper,         // 121: MagmaUpper
+    clAmdBlasLower,         // 122: MagmaLower
+    0, 0, 0, 0, 0, 0, 0, 0,
+    clAmdBlasNonUnit,       // 131: MagmaNonUnit
+    clAmdBlasUnit,          // 132: MagmaUnit
+    0, 0, 0, 0, 0, 0, 0, 0,
+    clAmdBlasLeft,          // 141: MagmaLeft
+    clAmdBlasRight,         // 142: MagmaRight
+    0, 0, 0, 0, 0, 0, 0, 0
+};
+
+extern "C"
+clAmdBlasOrder       amdblas_order_const( magma_order_t magma_const )
+{
+    assert( magma_const >= MagmaRowMajor );
+    assert( magma_const <= MagmaColMajor );
+    return (clAmdBlasOrder)     magma2amdblas_constants[ magma_const ];
+}
+
+extern "C"
+clAmdBlasTranspose   amdblas_trans_const( magma_trans_t magma_const )
+{
+    assert( magma_const >= MagmaNoTrans   );
+    assert( magma_const <= MagmaConjTrans );
+    return (clAmdBlasTranspose) magma2amdblas_constants[ magma_const ];
+}
+
+extern "C"
+clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t magma_const )
+{
+    assert( magma_const >= MagmaUpper );
+    assert( magma_const <= MagmaLower );
+    return (clAmdBlasUplo)      magma2amdblas_constants[ magma_const ];
+}
+
+extern "C"
+clAmdBlasDiag        amdblas_diag_const ( magma_diag_t magma_const )
+{
+    assert( magma_const >= MagmaNonUnit );
+    assert( magma_const <= MagmaUnit    );
+    return (clAmdBlasDiag)      magma2amdblas_constants[ magma_const ];
+}
+
+extern "C"
+clAmdBlasSide        amdblas_side_const ( magma_side_t magma_const )
+{
+    assert( magma_const >= MagmaLeft  );
+    assert( magma_const <= MagmaRight );
+    return (clAmdBlasSide)      magma2amdblas_constants[ magma_const ];
+}
+#endif  // HAVE_clAmdBlas
+
+
+// ----------------------------------------
+// Convert magma constants to Nvidia CUBLAS constants.
+
+#ifdef HAVE_CUBLAS
+const int magma2cublas_constants[] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0,                      // 100
+    0,                      // 101: MagmaRowMajor
+    0,                      // 102: MagmaColMajor
+    0, 0, 0, 0, 0, 0, 0, 0,
+    CUBLAS_OP_N,            // 111: MagmaNoTrans
+    CUBLAS_OP_T,            // 112: MagmaTrans
+    CUBLAS_OP_C,            // 113: MagmaConjTrans
+    0, 0, 0, 0, 0, 0, 0,
+    CUBLAS_FILL_MODE_UPPER, // 121: MagmaUpper
+    CUBLAS_FILL_MODE_LOWER, // 122: MagmaLower
+    0, 0, 0, 0, 0, 0, 0, 0,
+    CUBLAS_DIAG_NON_UNIT,   // 131: MagmaNonUnit
+    CUBLAS_DIAG_UNIT,       // 132: MagmaUnit
+    0, 0, 0, 0, 0, 0, 0, 0,
+    CUBLAS_SIDE_LEFT,       // 141: MagmaLeft
+    CUBLAS_SIDE_RIGHT,      // 142: MagmaRight
+    0, 0, 0, 0, 0, 0, 0, 0
+};
+
+extern "C"
+cublasOperation_t    cublas_trans_const ( magma_trans_t magma_const )
+{
+    assert( magma_const >= MagmaNoTrans   );
+    assert( magma_const <= MagmaConjTrans );
+    return (cublasOperation_t)  magma2cublas_constants[ magma_const ];
+}
+
+extern "C"
+cublasFillMode_t     cublas_uplo_const  ( magma_uplo_t magma_const )
+{
+    assert( magma_const >= MagmaUpper );
+    assert( magma_const <= MagmaLower );
+    return (cublasFillMode_t)   magma2cublas_constants[ magma_const ];
+}
+
+extern "C"
+cublasDiagType_t     cublas_diag_const  ( magma_diag_t magma_const )
+{
+    assert( magma_const >= MagmaNonUnit );
+    assert( magma_const <= MagmaUnit    );
+    return (cublasDiagType_t)   magma2cublas_constants[ magma_const ];
+}
+
+extern "C"
+cublasSideMode_t     cublas_side_const  ( magma_side_t magma_const )
+{
+    assert( magma_const >= MagmaLeft  );
+    assert( magma_const <= MagmaRight );
+    return (cublasSideMode_t)   magma2cublas_constants[ magma_const ];
+}
+#endif  // HAVE_CUBLAS
+
+
+// ----------------------------------------
+// Convert magma constants to CBLAS constants.
+// We assume that magma constants are consistent with cblas constants,
+// so verify that with asserts.
+
+#ifdef HAVE_CBLAS
 extern "C"
 enum CBLAS_ORDER     cblas_order_const  ( magma_order_t magma_const )
 {
-    switch( magma_const ) {
-        case 'r': case 'R': return CblasRowMajor;
-        case 'c': case 'C': return CblasColMajor;
-        default:
-            fprintf( stderr, "Error in %s: unexpected value %d\n", __func__, magma_const );
-            return CblasColMajor;
-    }
+    assert( magma_const >= MagmaRowMajor );
+    assert( magma_const <= MagmaColMajor );
+    assert( (int)MagmaRowMajor == CblasRowMajor );
+    return (enum CBLAS_ORDER)     magma_const;
 }
 
 extern "C"
 enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t magma_const )
 {
-    switch( magma_const ) {
-        case 'n': case 'N': return CblasNoTrans;
-        case 't': case 'T': return CblasTrans;
-        case 'c': case 'C': return CblasConjTrans;
-        default:
-            fprintf( stderr, "Error in %s: unexpected value %d\n", __func__, magma_const );
-            return CblasNoTrans;
-    }
-}
-
-extern "C"
-enum CBLAS_SIDE      cblas_side_const   ( magma_side_t magma_const )
-{
-    switch( magma_const ) {
-        case 'l': case 'L': return CblasLeft;
-        case 'r': case 'R': return CblasRight;
-        default:
-            fprintf( stderr, "Error in %s: unexpected value %d\n", __func__, magma_const );
-            return CblasLeft;
-    }
-}
-
-extern "C"
-enum CBLAS_DIAG      cblas_diag_const   ( magma_diag_t magma_const )
-{
-    switch( magma_const ) {
-        case 'n': case 'N': return CblasNonUnit;
-        case 'u': case 'U': return CblasUnit;
-        default:
-            fprintf( stderr, "Error in %s: unexpected value %d\n", __func__, magma_const );
-            return CblasNonUnit;
-    }
+    assert( magma_const >= MagmaNoTrans   );
+    assert( magma_const <= MagmaConjTrans );
+    assert( (int)MagmaNoTrans == CblasNoTrans );
+    return (enum CBLAS_TRANSPOSE) magma_const;
 }
 
 extern "C"
 enum CBLAS_UPLO      cblas_uplo_const   ( magma_uplo_t magma_const )
 {
-    switch( magma_const ) {
-        case 'u': case 'U': return CblasUpper;
-        case 'l': case 'L': return CblasLower;
-        default:
-            fprintf( stderr, "Error in %s: unexpected value %d\n", __func__, magma_const );
-            return CblasUpper;
-    }
+    assert( magma_const >= MagmaUpper );
+    assert( magma_const <= MagmaLower );
+    assert( (int)MagmaUpper == CblasUpper );
+    return (enum CBLAS_UPLO)      magma_const;
 }
 
+extern "C"
+enum CBLAS_DIAG      cblas_diag_const   ( magma_diag_t magma_const )
+{
+    assert( magma_const >= MagmaNonUnit );
+    assert( magma_const <= MagmaUnit    );
+    assert( (int)MagmaUnit == CblasUnit );
+    return (enum CBLAS_DIAG)      magma_const;
+}
+
+extern "C"
+enum CBLAS_SIDE      cblas_side_const   ( magma_side_t magma_const )
+{
+    assert( magma_const >= MagmaLeft  );
+    assert( magma_const <= MagmaRight );
+    assert( (int)MagmaLeft == CblasLeft );
+    return (enum CBLAS_SIDE)      magma_const;
+}
 #endif  // HAVE_CBLAS

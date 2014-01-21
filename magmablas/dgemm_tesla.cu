@@ -139,8 +139,6 @@ magmablas_dgemm_tesla(
     if ( m == 0 || n == 0 || ((alpha == 0.0 || k == 0) && beta == 1.0) ) {
         return;
     }
-    transA = (magma_trans_t)toupper( transA );
-    transB = (magma_trans_t)toupper( transB );
     if ( alpha == 0.0 ) {
         if ( beta == 0.0 ) {
             magmablas_dgemm_ab_0(
@@ -155,8 +153,8 @@ magmablas_dgemm_tesla(
     }
     
     if ( ldc < m ) return;  /* TODO: error */
-    if ( transA == 'N' ) {
-        if ( transB == 'N' ) {
+    if ( transA == MagmaNoTrans ) {
+        if ( transB == MagmaNoTrans ) {
             if ( lda < m ) return;  /* TODO: error */
             if ( ldb < k ) return;  /* TODO: error */
             /*=======================================================================
@@ -172,7 +170,8 @@ magmablas_dgemm_tesla(
             }
             else {
                 cublasDgemm(
-                    transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+                    lapacke_trans_const(transA), lapacke_trans_const(transB),
+                    m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
             }
         }
         else {
@@ -191,12 +190,13 @@ magmablas_dgemm_tesla(
             }
             else {
                 cublasDgemm(
-                    transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+                    lapacke_trans_const(transA), lapacke_trans_const(transB),
+                    m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
             }
         }
     }
     else {
-        if ( transB == 'N' ) {
+        if ( transB == MagmaNoTrans ) {
             if ( lda < k ) return;  /* TODO: error */
             if ( ldb < k ) return;  /* TODO: error */
             /*=======================================================================
@@ -212,7 +212,8 @@ magmablas_dgemm_tesla(
             }
             else {
                 cublasDgemm(
-                    transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+                    lapacke_trans_const(transA), lapacke_trans_const(transB),
+                    m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
             }
         }
         else {
@@ -231,7 +232,8 @@ magmablas_dgemm_tesla(
             }
             else {
                 cublasDgemm(
-                    transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+                    lapacke_trans_const(transA), lapacke_trans_const(transB),
+                    m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
             }
         }
     }

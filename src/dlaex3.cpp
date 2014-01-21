@@ -181,7 +181,6 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     double d_zero = 0.;
     magma_int_t ione = 1;
     magma_int_t ineg_one = -1;
-    const char* range_ = lapack_const( range );
 
     magma_int_t iil, iiu, rk;
 
@@ -190,13 +189,13 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     double* dq = ds   + n*(n/2+1);
     magma_int_t lddq = n/2 + 1;
 
-    magma_int_t i,iq2,j,n12,n2,n23,tmp,lq2;
+    magma_int_t i, iq2, j, n12, n2, n23, tmp, lq2;
     double temp;
     magma_int_t alleig, valeig, indeig;
 
-    alleig = lapackf77_lsame(range_, "A");
-    valeig = lapackf77_lsame(range_, "V");
-    indeig = lapackf77_lsame(range_, "I");
+    alleig = (range == MagmaRangeAll);
+    valeig = (range == MagmaRangeV);
+    indeig = (range == MagmaRangeI);
 
     *info = 0;
 

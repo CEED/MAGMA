@@ -56,7 +56,7 @@ diag_dtrtri_kernel_upper(magma_diag_t diag, const double *A, double *d_dinvA, in
     // Synchronize to make sure the matrices are loaded
     __syncthreads();
 
-    switcher = (diag=='u' || diag=='U');
+    switcher = (diag == MagmaUnit);
     int diagsw = (Bs[tx*BLOCK_SIZE+tx] == 0);
     Bs[tx*BLOCK_SIZE+tx] = switcher + !switcher*(1/(diagsw + (!diagsw)*Bs[tx*BLOCK_SIZE+tx]));    // solve the diagonals
 
@@ -119,7 +119,7 @@ diag_dtrtri_kernel_lower(magma_diag_t diag, const double *A, double *d_dinvA, in
     // Synchronize to make sure the matrices are loaded
     __syncthreads();
 
-    switcher = (diag=='u' || diag=='U');
+    switcher = (diag == MagmaUnit);
     int diagsw = (Bs[tx*BLOCK_SIZE+tx] == 0);
     Bs[tx*BLOCK_SIZE+tx] = switcher + !switcher*(1/(diagsw + (!diagsw)*Bs[tx*BLOCK_SIZE+tx]));    // solve the diagonals
 
@@ -1769,7 +1769,7 @@ void diag_dtrtri (magma_int_t M, magma_uplo_t uplo, magma_diag_t diag, const dou
 {
     int nblocks = M/BLOCK_SIZE + (M % BLOCK_SIZE != 0);
 
-    if (uplo == 'l' || uplo == 'L') {
+    if (uplo == MagmaLower) {
         // solve the diagonal blocks
         diag_dtrtri_kernel_lower<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
@@ -1970,7 +1970,7 @@ void magmablas_dtrsm(
     if (M <= 0 || N <= 0)
         return;
 
-    if (side == 'l' || side == 'L') {
+    if (side == MagmaLeft) {
         // side=L
         /* invert the diagonals
          * Allocate device memory for the inverted diagonal blocks, size=m*NB
@@ -1981,9 +1981,9 @@ void magmablas_dtrsm(
         cudaMemset(d_dinvA, 0, NB*((M/NB)+(M % NB != 0))*NB*sizeof(double));
         diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
 
-        if (transA == 'N' || transA == 'n') {
+        if (transA == MagmaNoTrans) {
             /* the non-transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int MM = min (NB, M);
@@ -2038,7 +2038,7 @@ void magmablas_dtrsm(
         }
         else {
             /* the transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int MM = (M % NB == 0) ? NB : (M % NB);
@@ -2103,9 +2103,9 @@ void magmablas_dtrsm(
         cudaMemset(d_dinvA, 0, NB*((N/NB)+(N % NB != 0))*NB*sizeof(double));
         diag_dtrtri (N, uplo, diag, A, d_dinvA, lda);
 
-        if (transA == 'N' || transA == 'n') {
+        if (transA == MagmaNoTrans) {
             /* the non-transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int NN = (N % NB == 0) ? NB : (N % NB);
@@ -2160,7 +2160,7 @@ void magmablas_dtrsm(
         }
         else {
             /* the transpose case */
-            if (uplo == 'L' || uplo == 'l') {
+            if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
                 int NN = min(NB, N);

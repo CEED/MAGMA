@@ -35,7 +35,7 @@ magma_zgels_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t 
     =========
     TRANS   (input) CHARACTER*1
             = 'N': the linear system involves A.
-            Only trans='N' is currently handled.
+            Only TRANS='N' is currently handled.
 
     M       (input) INTEGER
             The number of rows of the matrix A. M >= 0.
@@ -89,7 +89,7 @@ magma_zgels_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t 
 
     *info = 0;
     /* For now, N is the only case working */
-    if ( (trans != 'N') && (trans != 'n' ) )
+    if ( trans != MagmaNoTrans )
         *info = -1;
     else if (m < 0)
         *info = -2;

@@ -203,7 +203,7 @@ magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
         }
 #endif
 
-        if ( (order == 'R') || (order == 'r') ) {
+        if ( order == MagmaRowMajor ) {
             magma_zsetmatrix( m, n, hU, ldhu, dwork, lddwork );
             magmablas_ztranspose( dU, lddu, dwork, lddwork, m, n );
 
@@ -220,7 +220,7 @@ magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
         /* Use hybrid blocked code. */
         maxm = ((m + 31)/32)*32;
 
-        if ( (order == 'C') || (order == 'c') ) {
+        if ( order == MagmaColMajor ) {
             magmablas_zgetmo_in( dU, dUT, lddu, m,  n );
             magmablas_zgetmo_in( dA, dAT, ldda, m,  n );
         } else {
@@ -277,7 +277,7 @@ magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
             
             // Need to swap betw U and A
 #ifndef NOSWAPBLK
-            magmablas_zswapblk( 'R', n-(ii+sb),
+            magmablas_zswapblk( MagmaRowMajor, n-(ii+sb),
                                 UT(i, i+1), lddu,
                                 AT(0, i+1), ldda,
                                 1, sb, ipiv+ii, 1, nb );
@@ -362,7 +362,7 @@ magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
             }
         }
 
-        if ( (order == 'C') || (order == 'c') ) {
+        if ( order == MagmaColMajor ) {
             magmablas_zgetmo_out( dU, dUT, lddu, m,  n );
             magmablas_zgetmo_out( dA, dAT, ldda, m,  n );
         }
