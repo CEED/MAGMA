@@ -73,8 +73,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
             TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
             
-            cudaMemset( ddA, 0, N*N*sizeof(magmaDoubleComplex) );
-            cudaMemset( d_T, 0, N*N*sizeof(magmaDoubleComplex) );
+            magma_zlaset( N, N, ddA, N );
+            magma_zlaset( N, N, d_T, N );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -93,7 +93,7 @@ int main( int argc, char** argv)
                 int min_mn = min(M, N);
                 int     nb = N;
 
-                cuDoubleComplex *dtau = dwork;
+                magmaDoubleComplex *dtau = dwork;
                 
                 magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, 
                                    (double *)(dwork+min_mn), &info);

@@ -111,8 +111,7 @@ int main( int argc, char** argv)
                     magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
                 }
                 
-                cudaDeviceSynchronize();
-                gpu_time = magma_wtime();
+                gpu_time = magma_sync_wtime(0);
                 
                 if ( opts.version == 1 ) {
                     magmablas_zher2k_mgpu2(
@@ -141,8 +140,7 @@ int main( int argc, char** argv)
 #endif
                 }
                 
-                cudaDeviceSynchronize();
-                gpu_time = magma_wtime() - gpu_time;
+                gpu_time = magma_sync_wtime(0) - gpu_time;
                 gpu_perf = gflops / gpu_time;
                 
                 // Get dA back to the CPU to compare with the CPU result.
