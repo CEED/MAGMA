@@ -21,15 +21,15 @@ INC += -I$(MAGMA_DIR)/control
 # Krylov space linear solvers
 ZSRC += \
 	zcg.cpp			\
-	zcg_merge.cpp	\
+	zcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
-	ziterref.cpp			\
+	ziterref.cpp		\
 	zgmres.cpp		\
 	zjacobi.cpp		\
-#	ziterref.cpp			\
-#	zcg_merge.cpp	\
+#	ziterref.cpp		\
+#	zcg_merge.cpp		\
 #	zgmres.cpp		\
 #	zpcg.cpp		\
 #	zpbicgstab.cpp		\
@@ -40,8 +40,8 @@ ZSRC += \
 
 # Krylov space eigen-solvers
 ZSRC += \
+	zlobpcg.cpp		\
 	#zcgeig.cpp		\
-	#zlobpcg.cpp		\
 	#zlancsoz.cpp		\
 
 # Mixed-precision solvers
@@ -56,12 +56,12 @@ ZSRC += \
 	#zungqr_lapack.cpp	\
 	#zungqr_cgs.cpp		\
 	#zungqr_mgs.cpp		\
-	#zungqr_chol.cpp		\
-	#zungqr_iter.cpp		\
+	#zungqr_chol.cpp	\
+	#zungqr_iter.cpp	\
 
 # ILU and sparse direct
 ZSRC += \
-	zbcsrlu.cpp      		\
+	zbcsrlu.cpp		\
 #	zilu.cpp		\
 
 
@@ -69,7 +69,7 @@ ZSRC += \
 # Wrappers, tools etc
 ZSRC += \
 	magma_z_precond_wrapper.cpp \
-	zresidual.cpp \
+	zresidual.cpp		\
 
 
 # ------------------------------------------------------------
