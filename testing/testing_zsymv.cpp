@@ -70,7 +70,7 @@ int main(int argc, char **argv)
             /* Note: CUBLAS does not implement zsymv */
             
             /* =====================================================================
-               Performs operation using MAGMA BLAS
+               Performs operation using MAGMABLAS
                =================================================================== */
             magma_zsetvector( N, Y, incy, dY, incy );
             
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
                Performs operation using CPU BLAS
                =================================================================== */
             cpu_time = magma_wtime();
-            lapackf77_zsymv( lapack_const(opts.uplo), &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
+            lapackf77_zsymv( lapack_uplo_const(opts.uplo), &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             

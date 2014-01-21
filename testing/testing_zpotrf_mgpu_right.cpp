@@ -47,7 +47,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     num_gpus0 = opts.ngpu;
 
-    printf("ngpu %d, uplo %c\n", (int) opts.ngpu, opts.uplo );
+    printf("ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
     printf("  N     CPU GFlop/s (sec)   MAGMA GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("=============================================================================================\n");
     for(i = 0; i < opts.ntest; ++i ) {
@@ -126,7 +126,7 @@ int main( int argc, char** argv)
                    Performs operation using LAPACK
                    =================================================================== */
                 cpu_time = magma_wtime();
-                lapackf77_zpotrf( lapack_const(opts.uplo), &N, h_A, &lda, &info );
+                lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 //printf( " ==== LAPACK ====\n" );
                 //magma_zprint( N,N, h_A, lda );
                 cpu_time = magma_wtime() - cpu_time;

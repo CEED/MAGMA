@@ -214,11 +214,11 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zgesvd( lapack_const(jobu), lapack_const(jobvt), &M, &N,
+                lapackf77_zgesvd( lapack_vec_const(jobu), lapack_vec_const(jobvt), &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, rwork, &info);
                 #else
-                lapackf77_zgesvd( lapack_const(jobu), lapack_const(jobvt), &M, &N,
+                lapackf77_zgesvd( lapack_vec_const(jobu), lapack_vec_const(jobvt), &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, &info);
                 #endif
@@ -238,12 +238,12 @@ int main( int argc, char** argv)
                 result[4] /= lapackf77_dlange("f", &min_mn, &one, S1, &min_mn, work);
                 
                 printf("   %s    %s %5d %5d  %7.2f         %7.2f         %8.2e",
-                       lapack_const(jobu), lapack_const(jobvt),
+                       lapack_vec_const(jobu), lapack_vec_const(jobvt),
                        (int) M, (int) N, cpu_time, gpu_time, result[4] );
             }
             else {
                 printf("   %s    %s %5d %5d    ---           %7.2f           ---   ",
-                       lapack_const(jobu), lapack_const(jobvt),
+                       lapack_vec_const(jobu), lapack_vec_const(jobvt),
                        (int) M, (int) N, gpu_time );
             }
             if ( opts.check ) {
@@ -251,7 +251,7 @@ int main( int argc, char** argv)
                 if ( result[1] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[1]); }
                 if ( result[2] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[2]); }
                 int success = (result[0] < tol) && (result[1] < tol) && (result[2] < tol) && (result[3] == 0.) && (result[4] < tol);
-                printf("   %3s%s\n", (result[3] == 0. ? "yes" : "no"), (success ? "" : "  failed"));
+                printf("   %3s  %s\n", (result[3] == 0. ? "yes" : "no"), (success ? "ok" : "failed"));
                 status |= ! success;
             }
             else {

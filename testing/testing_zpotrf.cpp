@@ -43,7 +43,7 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("ngpu %d, uplo %c\n", (int) opts.ngpu, opts.uplo );
+    printf("ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
     printf("    N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -77,7 +77,7 @@ int main( int argc, char** argv)
                    Performs operation using LAPACK
                    =================================================================== */
                 cpu_time = magma_wtime();
-                lapackf77_zpotrf( lapack_const(opts.uplo), &N, h_A, &lda, &info );
+                lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -91,9 +91,9 @@ int main( int argc, char** argv)
                 blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
                 error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / error;
                 
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
+                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       error, (error < tol ? "" : "  failed") );
+                       error, (error < tol ? "ok" : "failed") );
                 status |= ! (error < tol);
             }
             else {
@@ -102,6 +102,9 @@ int main( int argc, char** argv)
             }
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
         }
     }
 

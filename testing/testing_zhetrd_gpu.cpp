@@ -126,25 +126,25 @@ int main( int argc, char** argv)
             if ( opts.check ) {
                 magma_zgetmatrix( N, N, d_R, lda, h_R, lda );
                 magma_zgetmatrix( N, N, d_R, lda, h_Q, lda );
-                lapackf77_zungtr( lapack_const(opts.uplo), &N, h_Q, &lda, tau, h_work, &lwork, &info );
+                lapackf77_zungtr( lapack_uplo_const(opts.uplo), &N, h_Q, &lda, tau, h_work, &lwork, &info );
                 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zhet21( &itwo, lapack_const(opts.uplo), &N, &ione,
+                lapackf77_zhet21( &itwo, lapack_uplo_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, rwork, &result[0] );
                 
-                lapackf77_zhet21( &ithree, lapack_const(opts.uplo), &N, &ione,
+                lapackf77_zhet21( &ithree, lapack_uplo_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, rwork, &result[1] );
                 #else
-                lapackf77_zhet21( &itwo, lapack_const(opts.uplo), &N, &ione,
+                lapackf77_zhet21( &itwo, lapack_uplo_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, &result[0] );
                 
-                lapackf77_zhet21( &ithree, lapack_const(opts.uplo), &N, &ione,
+                lapackf77_zhet21( &ithree, lapack_uplo_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, &result[1] );
@@ -156,7 +156,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zhetrd( lapack_const(opts.uplo), &N, h_A, &lda, diag, offdiag, tau,
+                lapackf77_zhetrd( lapack_uplo_const(opts.uplo), &N, h_A, &lda, diag, offdiag, tau,
                                   h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
@@ -176,8 +176,8 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e        %8.2e%s\n", result[0]*eps, result[1]*eps,
-                        ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "" : "  failed")  );
+                printf("   %8.2e        %8.2e  %s\n", result[0]*eps, result[1]*eps,
+                        ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "ok" : "failed")  );
                 status |= ! (result[0]*eps < tol);
                 status |= ! (result[1]*eps < tol);
             } else {

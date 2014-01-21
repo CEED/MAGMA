@@ -138,44 +138,44 @@ int main( int argc, char** argv)
                 if ( opts.itype == 1 || opts.itype == 2 ) {
                     lapackf77_dlaset( "A", &N, &N, &d_zero, &c_one, h_S, &lda);
                     blasf77_dgemm("N", "C", &N, &N, &N, &c_one, h_R, &lda, h_R, &lda, &d_zero, h_work, &N);
-                    blasf77_dsymm("R", lapack_const(opts.uplo), &N, &N, &c_neg_one, h_B, &lda, h_work, &N, &c_one, h_S, &lda);
+                    blasf77_dsymm("R", lapack_uplo_const(opts.uplo), &N, &N, &c_neg_one, h_B, &lda, h_work, &N, &c_one, h_S, &lda);
                     result[1] = lapackf77_dlange("1", &N, &N, h_S, &lda, h_work) / N;
                 }
                 else if ( opts.itype == 3 ) {
                     lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &lda, h_S, &lda);
-                    blasf77_dsyrk(lapack_const(opts.uplo), "N", &N, &N, &d_neg_one, h_R, &lda, &d_one, h_S, &lda);
-                    result[1] = lapackf77_dlansy("1", lapack_const(opts.uplo), &N, h_S, &lda, h_work) / N
-                              / lapackf77_dlansy("1", lapack_const(opts.uplo), &N, h_B, &lda, h_work);
+                    blasf77_dsyrk(lapack_uplo_const(opts.uplo), "N", &N, &N, &d_neg_one, h_R, &lda, &d_one, h_S, &lda);
+                    result[1] = lapackf77_dlansy("1", lapack_uplo_const(opts.uplo), &N, h_S, &lda, h_work) / N
+                              / lapackf77_dlansy("1", lapack_uplo_const(opts.uplo), &N, h_B, &lda, h_work);
                 }
                 
                 result[0] = 1.;
-                result[0] /= lapackf77_dlansy("1", lapack_const(opts.uplo), &N, h_A, &lda, h_work);
+                result[0] /= lapackf77_dlansy("1", lapack_uplo_const(opts.uplo), &N, h_A, &lda, h_work);
                 result[0] /= lapackf77_dlange("1", &N, &N, h_R, &lda, h_work);
                 
                 if ( opts.itype == 1 ) {
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_R, &lda, &d_zero, h_work, &N);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_R, &lda, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
                         blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_neg_one, h_B, &lda, h_R, &lda, &c_one, h_work, &N);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_neg_one, h_B, &lda, h_R, &lda, &c_one, h_work, &N);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_work, &N, &temp1)/N;
                 }
                 else if ( opts.itype == 2 ) {
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_one, h_B, &lda, h_R, &lda, &d_zero, h_work, &N);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_one, h_B, &lda, h_R, &lda, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
                         blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_work, &N, &c_neg_one, h_R, &lda);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_work, &N, &c_neg_one, h_R, &lda);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_R, &lda, &temp1)/N;
                 }
                 else if ( opts.itype == 3 ) {
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_R, &lda, &d_zero, h_work, &N);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_one, h_A, &lda, h_R, &lda, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
                         blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_dsymm("L", lapack_const(opts.uplo), &N, &N, &c_one, h_B, &lda, h_work, &N, &c_neg_one, h_R, &lda);
+                    blasf77_dsymm("L", lapack_uplo_const(opts.uplo), &N, &N, &c_one, h_B, &lda, h_work, &N, &c_neg_one, h_R, &lda);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_R, &lda, &temp1)/N;
                 }
                 
                 /*
-                lapackf77_dsyt21(&ione, lapack_const(opts.uplo), &N, &izero,
+                lapackf77_dsyt21(&ione, lapack_uplo_const(opts.uplo), &N, &izero,
                                  h_A, &lda,
                                  w1, w1,
                                  h_R, &lda,
@@ -209,7 +209,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_dsygvd( &opts.itype, lapack_const(opts.jobz), lapack_const(opts.uplo),
+                lapackf77_dsygvd( &opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
                                   &N, h_A, &lda, h_B, &lda, w2,
                                   h_work, &lwork,
                                   iwork, &liwork,

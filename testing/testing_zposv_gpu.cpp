@@ -107,21 +107,21 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zposv( lapack_const(opts.uplo), &N, &opts.nrhs, h_A, &lda, h_B, &ldb, &info );
+                lapackf77_zposv( lapack_uplo_const(opts.uplo), &N, &opts.nrhs, h_A, &lda, h_B, &ldb, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
                     printf("lapackf77_zposv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 
-                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
+                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
                         (int) N, (int) opts.nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        error, (error < tol ? "" : "  failed"));
+                        error, (error < tol ? "ok" : "failed"));
             }
             else {
-                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e%s\n",
+                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e  %s\n",
                         (int) N, (int) opts.nrhs, gpu_perf, gpu_time,
-                        error, (error < tol ? "" : "  failed"));
+                        error, (error < tol ? "ok" : "failed"));
             }
             
             TESTING_FREE_CPU( h_A  );

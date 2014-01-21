@@ -89,10 +89,10 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                lapackf77_zpotrf( lapack_const(opts.uplo), &N, h_A, &lda, &info );
+                lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 
                 cpu_time = magma_wtime();
-                lapackf77_zpotri( lapack_const(opts.uplo), &N, h_A, &lda, &info );
+                lapackf77_zpotri( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -105,9 +105,9 @@ int main( int argc, char** argv)
                 error = lapackf77_zlange("f", &N, &N, h_A, &N, work);
                 blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
                 error = lapackf77_zlange("f", &N, &N, h_R, &N, work) / error;
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
+                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       error, (error < tol ? "" : "  failed") );
+                       error, (error < tol ? "ok" : "failed") );
                 status |= ! (error < tol);
             }
             else {

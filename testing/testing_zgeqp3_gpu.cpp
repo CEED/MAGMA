@@ -119,7 +119,6 @@ int main( int argc, char** argv)
             #else
             magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, lwork, &info);
             #endif
-            cudaDeviceSynchronize();
             gpu_time = magma_wtime() - gpu_time;
             
             /* copy outputs to cpu */

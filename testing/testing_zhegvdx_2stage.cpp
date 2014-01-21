@@ -74,7 +74,7 @@ int main( int argc, char** argv)
     }
 
     printf("using: itype = %d, jobz = %s, range = %s, uplo = %s, opts.check = %d, fraction = %6.4f\n",
-           (int) opts.itype, lapack_const(opts.jobz), lapack_const(range), lapack_const(opts.uplo),
+           (int) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
            (int) opts.check, opts.fraction);
 
     printf("  N     M     GPU Time(s) \n");
@@ -173,28 +173,28 @@ int main( int argc, char** argv)
                 double temp1, temp2;
 
                 result[0] = 1.;
-                result[0] /= lapackf77_zlanhe("1", lapack_const(opts.uplo), &N, h_A, &N, rwork);
+                result[0] /= lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_A, &N, rwork);
                 result[0] /= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork);
 
                 if (opts.itype == 1) {
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_work, &N, rwork)/N;
                 }
                 else if (opts.itype == 2) {
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
                 else if (opts.itype == 3) {
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
+                    blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
 
@@ -202,7 +202,7 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
                 magma_int_t m2 = m1;
-                lapackf77_zhegvd(&opts.itype, "N", lapack_const(opts.uplo), &N,
+                lapackf77_zhegvd(&opts.itype, "N", lapack_uplo_const(opts.uplo), &N,
                               h_R, &N, h_S, &N, w2,
                               h_work, &lwork,
                               #if defined(PRECISION_z) || defined(PRECISION_c)
