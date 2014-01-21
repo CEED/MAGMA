@@ -100,9 +100,9 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
     magma_zcopy( dofs, b.val, 1, q(0), 1 );                            // rr = b
     magma_zcopy( dofs, b.val, 1, q(1), 1 );                            // r = b
 
-    rho_new = magma_zdotc( dofs, r.val, 1, r.val, 1 );           // rho=<rr,r>
-    nom0 = nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));
-                                                                 // nom=<r,r>
+    rho_new = magma_zdotc( dofs, r.val, 1, r.val, 1 );             // rho=<rr,r>
+    nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));    
+    nom0 = sqrt(nom);                                       // nom = || r ||                            
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     beta = rho_new;
     (solver_par->numiter) = 0;
@@ -114,7 +114,8 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
     skp_h[3]=rho_old; 
     skp_h[4]=rho_new; 
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
-    cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+    cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), 
+                                            cudaMemcpyHostToDevice );
 
     magma_z_spmv( c_one, A, r, c_zero, v );                     // z = A r
     den = MAGMA_Z_REAL( magma_zdotc(dofs, v.val, 1, r.val, 1) );// den = z dot r
@@ -138,7 +139,7 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
                                                                      iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime\n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
 

@@ -338,13 +338,13 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     if( A.storage_type != Magma_CSR){
         magma_z_mfree( &A_h1 );
         magma_z_mfree( &A_h2 );   
-    }   
+    }   /*
     magma_z_mfree( &B );
     magma_z_mfree( &C );  
     magma_z_vfree( &diag);
     magma_z_vfree( &c_t);
     magma_z_vfree( &b_h);
-
+*/
     return MAGMA_SUCCESS;
 
 }
@@ -388,7 +388,6 @@ magma_zjacobiiter( magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,
 
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ){
-        printf("loop %d\n", i);
         magma_z_spmv( c_mone, M, *x, c_zero, t );                // t = - M * x
         magma_zaxpy( dofs, c_one , c.val, 1 , t.val, 1 );        // t = t + c
         magma_zcopy( dofs, t.val, 1 , x->val, 1 );               // x = t

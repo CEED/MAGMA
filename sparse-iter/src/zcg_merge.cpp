@@ -84,9 +84,8 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
     magma_zcopy( dofs, b.val, 1, d.val, 1 );                    // d = b
-    nom = magma_dznrm2( dofs, r.val, 1 );                       // nom = || r ||
-    nom = nom * nom;
-    nom0 = nom;                                                  // nom = r' * r
+    nom0 = magma_dznrm2( dofs, r.val, 1 );               
+    nom = nom0 * nom0;                                           // nom = r' * r
     magma_z_spmv( c_one, A, d, c_zero, z );                      // z = A d
     den = MAGMA_Z_REAL( magma_zdotc(dofs, d.val, 1, z.val, 1) ); // den = d'* z
     
@@ -124,7 +123,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                                                                     iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime    #\n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0 );
     magma_device_sync(); tempo1=magma_wtime();
     #endif
     

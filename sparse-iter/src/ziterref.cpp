@@ -73,8 +73,8 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     magma_z_spmv( c_mone, A, *x, c_zero, r );                  // r = - A x
     magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);             // r = r + b
-    nom = magma_dznrm2(dofs, r.val, 1);                 // nom0 = || r ||
-    nom = nom0 = nom * nom;
+    nom0 = magma_dznrm2(dofs, r.val, 1);                       // nom0 = || r ||
+    nom = nom0 * nom0;
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
@@ -90,7 +90,7 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                                                                     iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime    \n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
     

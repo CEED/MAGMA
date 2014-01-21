@@ -102,14 +102,15 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
     magma_zcopy( dofs, b.val, 1, q(1), 1 );                            // r = b
 
     rho_new = magma_zdotc( dofs, r.val, 1, r.val, 1 );           // rho=<rr,r>
-    nom0 = nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));           
-                                                                // nom=<r,r>
+    nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));    
+    nom0 = sqrt(nom);                                       // nom = || r ||   
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     beta = rho_new;
     (solver_par->numiter) = 0;
     // array on host for the parameters 
     magma_zmalloc_cpu( &skp_h, 8 );
-    skp_h[0]=alpha; skp_h[1]=beta; 
+    skp_h[0]=alpha; 
+    skp_h[1]=beta; 
     skp_h[2]=omega; 
     skp_h[3]=rho_old; 
     skp_h[4]=rho_new; 
@@ -139,7 +140,7 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
                                                                      iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime\n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
 

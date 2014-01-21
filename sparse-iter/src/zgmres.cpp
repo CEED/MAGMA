@@ -104,9 +104,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magmablasSetKernelStream(stream[0]);
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
-    r0 = magma_dznrm2( dofs, r.val, 1 );                 //  r0= || r||
-    nom = nom0 = r0*r0;
-    H(1,0) = MAGMA_Z_MAKE( r0, 0. ); 
+    nom0 = magma_dznrm2( dofs, r.val, 1 );               //  nom0= || r||
+    nom = nom0  * nom0;
+    H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 
     magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
@@ -120,7 +120,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf("#   GMRES-(%d) performance analysis every %d iteration   \n", restart, iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime    \n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
     

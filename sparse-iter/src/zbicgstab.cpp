@@ -78,8 +78,8 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                   // r = b
     magma_zcopy( dofs, b.val, 1, rr.val, 1 );                  // rr = b
-    nom = magma_dznrm2( dofs, r.val, 1 );                      // nom = || r ||
-    nom0 = nom = nom*nom;
+    nom0 = magma_dznrm2( dofs, r.val, 1 );                      // nom = || r ||
+    nom = nom0*nom0;
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     (solver_par->numiter) = 0;
 
@@ -104,7 +104,7 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf("# BiCGStab performance analysis every %d iteration\n", iterblock);
     printf("#   iter   ||   residual-nrm2    ||   runtime\n");
     printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom);
+    printf("      0    ||    %e    ||    0.0000      \n", nom0);
     magma_device_sync(); tempo1=magma_wtime();
     #endif
 
