@@ -22,6 +22,9 @@
 extern "C"
 magma_err_t magma_malloc( magma_ptr* ptrPtr, size_t size )
 {
+    // CUDA can't allocate 0 bytes, so allocate some minimal size
+    if ( size == 0 )
+        size = sizeof(magmaDoubleComplex);
     if ( cudaSuccess != cudaMalloc( ptrPtr, size )) {
         return MAGMA_ERR_DEVICE_ALLOC;
     }
@@ -52,6 +55,9 @@ magma_err_t magma_free_internal( magma_ptr ptr,
 extern "C"
 magma_err_t magma_malloc_cpu( void** ptrPtr, size_t size )
 {
+    // malloc and free sometimes don't work for size=0, so allocate some minimal size
+    if ( size == 0 )
+        size = sizeof(magmaDoubleComplex);
 #if 1
 #if defined( _WIN32 ) || defined( _WIN64 )
     *ptrPtr = _aligned_malloc( size, 32 );
@@ -94,6 +100,10 @@ magma_err_t magma_free_cpu( void* ptr )
 extern "C"
 magma_err_t magma_malloc_pinned( void** ptrPtr, size_t size )
 {
+    // CUDA can't allocate 0 bytes, so allocate some minimal size
+    // (for pinned memory, the error is detected in free)
+    if ( size == 0 )
+        size = sizeof(magmaDoubleComplex);
     if ( cudaSuccess != cudaMallocHost( ptrPtr, size )) {
         return MAGMA_ERR_HOST_ALLOC;
     }
