@@ -138,7 +138,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
     if( A.memory_location == Magma_CPU ){
 
         // CSR to CSR
-        if( old_format == Magma_CSR && new_format == Magma_ELLPACK ){
+        if( old_format == Magma_CSR && new_format == Magma_CSR ){
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
