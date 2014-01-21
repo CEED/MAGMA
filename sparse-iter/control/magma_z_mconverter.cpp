@@ -137,6 +137,30 @@ magma_z_mconvert( magma_z_sparse_matrix A,
     // check whether matrix on CPU
     if( A.memory_location == Magma_CPU ){
 
+        // CSR to CSR
+        if( old_format == Magma_CSR && new_format == Magma_ELLPACK ){
+            // fill in information for B
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            magma_zmalloc_cpu( &B->val, A.nnz );
+            magma_imalloc_cpu( &B->row, A.num_rows+1 );
+            magma_imalloc_cpu( &B->col, A.nnz );
+
+            for( int i=0; i<A.nnz; i++){
+                B->val[i] = A.val[i];
+                B->col[i] = A.col[i];
+            }
+            for( int i=0; i<A.num_rows+1; i++){
+                B->row[i] = A.row[i];
+            }
+            return MAGMA_SUCCESS; 
+        }
         // CSR to ELLPACK    
         if( old_format == Magma_CSR && new_format == Magma_ELLPACK ){
             // fill in information for B
