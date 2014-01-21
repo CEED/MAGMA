@@ -38,6 +38,7 @@ int main( int argc, char** argv )
     magma_int_t ione =  1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double error, work[1];
+    magma_int_t status = 0;
     
     // test all combinations of input parameters
     magma_side_t   side  [] = { MagmaLeft,       MagmaRight    };
@@ -47,6 +48,8 @@ int main( int argc, char** argv )
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("    M     N     K   storev   side   direct   trans    ||R||_F / ||HC||_F\n");
     printf("========================================================================\n");
@@ -133,8 +136,8 @@ int main( int argc, char** argv )
             magma_zsetmatrix( ldv, nv, V, ldv, dV, ldv );
             magma_zsetmatrix( K,   K,  T, ldt, dT, ldt );
             
-            lapackf77_zlarfb( lapack_const( side[iside] ), lapack_const( trans[itran] ),
-                              lapack_const( direct[idir] ), lapack_const( storev[istor] ),
+            lapackf77_zlarfb( lapack_side_const( side[iside] ), lapack_trans_const( trans[itran] ),
+                              lapack_direct_const( direct[idir] ), lapack_storev_const( storev[istor] ),
                               &M, &N, &K,
                               V, &ldv, T, &ldt, C, &ldc, W, &ldw );
             //printf( "HC=" );  magma_zprint( M, N, C, ldc );
@@ -150,9 +153,12 @@ int main( int argc, char** argv )
             size = ldc*N;
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
             error = lapackf77_zlange( "Fro", &M, &N, R, &ldc, work ) / error;
-            printf( "%5d %5d %5d      %c       %c       %c       %c      %8.2e\n",
+            printf( "%5d %5d %5d      %c       %c       %c       %c      %8.2e  %s\n",
                     (int) M, (int) N, (int) K,
-                    storev[istor], side[iside], direct[idir], trans[itran], error );
+                    lapacke_storev_const(storev[istor]), lapacke_side_const(side[iside]),
+                    lapacke_direct_const(direct[idir]), lapacke_trans_const(trans[itran]),
+                   error, (error < tol ? "ok" : "failed") );
+            status |= ! (error < tol);
             
             TESTING_FREE_CPU( C );
             TESTING_FREE_CPU( R );
@@ -169,5 +175,5 @@ int main( int argc, char** argv )
     }
     
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

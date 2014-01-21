@@ -39,15 +39,18 @@ int main( int argc, char** argv )
     magma_int_t nb, ldc, lda, lwork, lwork_max, dt_size;
     magmaDoubleComplex *C, *R, *A, *W, *tau;
     magmaDoubleComplex *dC, *dA, *dT;
+    magma_int_t status = 0;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     // test all combinations of input parameters
     magma_side_t  side [] = { MagmaLeft,      MagmaRight   };
     magma_trans_t trans[] = { MagmaConjTrans, MagmaNoTrans };
 
-    printf("    M     N     K  side   trans      CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
+    printf("    M     N     K   side   trans   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
     printf("===============================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iside = 0; iside < 2; ++iside ) {
@@ -61,17 +64,17 @@ int main( int argc, char** argv )
             gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
-                printf( "%5d %5d %5d  %-5s  %-9s   skipping because side=left and m < k\n",
+                printf( "%5d %5d %5d   %4c   %5c   skipping because side=left and m < k\n",
                         (int) m, (int) n, (int) k,
-                        lapack_const( side[iside] ),
-                        lapack_const( trans[itran] ) );
+                        lapacke_side_const( side[iside] ),
+                        lapacke_trans_const( trans[itran] ) );
                 continue;
             }
             if ( side[iside] == MagmaRight && n < k ) {
-                printf( "%5d %5d %5d  %-5s  %-9s   skipping because side=right and n < k\n",
+                printf( "%5d %5d %5d   %4c   %4c   skipping because side=right and n < k\n",
                         (int) m, (int) n, (int) k,
-                        lapack_const( side[iside] ),
-                        lapack_const( trans[itran] ) );
+                        lapacke_side_const( side[iside] ),
+                        lapacke_trans_const( trans[itran] ) );
                 continue;
             }
             
@@ -118,7 +121,7 @@ int main( int argc, char** argv )
                Performs operation using LAPACK
                =================================================================== */
             cpu_time = magma_wtime();
-            lapackf77_zunmqr( lapack_const( side[iside] ), lapack_const( trans[itran] ),
+            lapackf77_zunmqr( lapack_side_const( side[iside] ), lapack_trans_const( trans[itran] ),
                               &m, &n, &k,
                               A, &lda, tau, C, &ldc, W, &lwork_max, &info );
             cpu_time = magma_wtime() - cpu_time;
@@ -162,11 +165,13 @@ int main( int argc, char** argv )
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
             error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / error;
             
-            printf( "%5d %5d %5d  %-5s  %-9s  %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
+            printf( "%5d %5d %5d   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                     (int) m, (int) n, (int) k,
-                    lapack_const( side[iside] ),
-                    lapack_const( trans[itran] ),
-                    cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+                    lapacke_side_const( side[iside] ),
+                    lapacke_trans_const( trans[itran] ),
+                    cpu_perf, cpu_time, gpu_perf, gpu_time,
+                    error, (error < tol ? "ok" : "failed") );
+            status |= ! (error < tol);
             
             TESTING_FREE_CPU( C );
             TESTING_FREE_CPU( R );
@@ -182,5 +187,5 @@ int main( int argc, char** argv )
     }
     
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }
