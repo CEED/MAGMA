@@ -83,11 +83,11 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     ===============
     The matrix Q is represented as a product of elementary reflectors
 
-       Q = H(1) H(2) . . . H(k), where k = min(m,n).
+        Q = H(1) H(2) . . . H(k), where k = min(m,n).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
@@ -156,11 +156,12 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[2] );
     if (current_stream == NULL) {
-      magma_queue_create( &stream[1] );
-      magmablasSetKernelStream(stream[1]);
+        magma_queue_create( &stream[1] );
+        magmablasSetKernelStream(stream[1]);
     }
-    else
-      stream[1] = current_stream;
+    else {
+        stream[1] = current_stream;
+    }
 
     dwork = dA + n*ldda;
     dT    = dA + n*ldda + nb*lddwork;
@@ -252,8 +253,8 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[2] );
     if (current_stream == NULL) {
-      magma_queue_destroy( stream[1] );
-      magmablasSetKernelStream(NULL);
+        magma_queue_destroy( stream[1] );
+        magmablasSetKernelStream(NULL);
     }
 
     magma_free( dA );

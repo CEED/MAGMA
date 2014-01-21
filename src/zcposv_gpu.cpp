@@ -30,7 +30,7 @@ magma_zcposv_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
     Purpose
     =======
     ZCPOSV computes the solution to a complex system of linear equations
-       A * X = B,
+        A * X = B,
     where A is an N-by-N Hermitian positive definite matrix and X and B
     are N-by-NRHS matrices.
 

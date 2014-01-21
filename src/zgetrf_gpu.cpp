@@ -27,7 +27,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
     using partial pivoting with row interchanges.
 
     The factorization has the form
-       A = P * L * U
+        A = P * L * U
     where P is a permutation matrix, L is lower triangular with unit
     diagonal elements (lower trapezoidal if m > n), and U is upper
     triangular (upper trapezoidal if m < n).
@@ -153,11 +153,12 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
         magma_queue_create( &stream[0] );
         if (current_stream == NULL) {
-           magma_queue_create( &stream[1] );
-           magmablasSetKernelStream(stream[1]);
+            magma_queue_create( &stream[1] );
+            magmablasSetKernelStream(stream[1]);
         }
-        else
-           stream[1] = current_stream;
+        else {
+            stream[1] = current_stream;
+        }
   
         for( i=0; i < s; i++ ) {
             // download i-th panel

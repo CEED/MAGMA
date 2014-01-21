@@ -90,11 +90,11 @@ magma_zgehrd_m(
     The matrix Q is represented as a product of (ihi-ilo) elementary
     reflectors
 
-       Q = H(ilo) H(ilo+1) . . . H(ihi-1).
+        Q = H(ilo) H(ilo+1) . . . H(ihi-1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i) = 0, v(i+1) = 1 and v(ihi+1:n) = 0; v(i+2:ihi) is stored on
@@ -148,7 +148,7 @@ magma_zgehrd_m(
     iws = n*(nb + nb*ngpu);
     work[0] = MAGMA_Z_MAKE( iws, 0 );
 
-    lquery = lwork == -1;
+    lquery = (lwork == -1);
     if (n < 0) {
         *info = -1;
     } else if (ilo < 1 || ilo > max(1,n)) {

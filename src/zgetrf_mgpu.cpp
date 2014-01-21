@@ -29,7 +29,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     using partial pivoting with row interchanges.
 
     The factorization has the form
-       A = P * L * U
+        A = P * L * U
     where P is a permutation matrix, L is lower triangular with unit
     diagonal elements (lower trapezoidal if m > n), and U is upper
     triangular (upper trapezoidal if m < n).
@@ -133,9 +133,9 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             /* local-n and local-ld */
             n_local[i] = ((n/nb)/num_gpus)*nb;
             if (i < (n/nb)%num_gpus)
-               n_local[i] += nb;
+                n_local[i] += nb;
             else if (i == (n/nb)%num_gpus)
-               n_local[i] += n%nb;
+                n_local[i] += n%nb;
             
             /* workspaces */
             if (MAGMA_SUCCESS != magma_zmalloc( &d_panel[i], (3+num_gpus)*nb*maxm )) {

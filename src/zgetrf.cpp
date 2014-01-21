@@ -30,7 +30,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
     in the routine.
 
     The factorization has the form
-       A = P * L * U
+        A = P * L * U
     where P is a permutation matrix, L is lower triangular with unit
     diagonal elements (lower trapezoidal if m > n), and U is upper
     triangular (upper trapezoidal if m < n).

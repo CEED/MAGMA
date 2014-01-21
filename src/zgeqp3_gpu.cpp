@@ -88,11 +88,11 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     ===============
     The matrix Q is represented as a product of elementary reflectors
 
-      Q = H(1) H(2) . . . H(k), where k = min(m,n).
+        Q = H(1) H(2) . . . H(k), where k = min(m,n).
 
     Each H(i) has the form
 
-      H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
@@ -246,11 +246,11 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
 
                 //magma_zlaqps_gpu    // this is a cpp-file
                 magma_zlaqps2_gpu   // this is a cuda-file
-                     ( m, n_j, j, jb, &fjb,
-                       A (0, j), lda,
-                       &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
-                       work,
-                       &df[jb],   n_j );
+                    ( m, n_j, j, jb, &fjb,
+                      A (0, j), lda,
+                      &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
+                      work,
+                      &df[jb],   n_j );
                 
                 j += fjb;  /* fjb is actual number of columns factored */
             }
