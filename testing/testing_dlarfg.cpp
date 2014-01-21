@@ -65,7 +65,7 @@ int main( int argc, char** argv)
             blasf77_dcopy( &size, h_x, &ione, h_x1, &ione );
             
             /* =====================================================================
-               Performs operation using MAGMA-BLAS
+               Performs operation using MAGMABLAS
                =================================================================== */
             magma_dsetvector( size, h_x, ione, d_x, ione );
     
