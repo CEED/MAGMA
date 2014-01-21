@@ -14,18 +14,10 @@
 /* ------------------------------------------------------------
  *   -- MAGMA Auxiliary structures and functions
  * --------------------------------------------------------- */
-typedef struct magma_timestr_s
-{
-  unsigned int sec;
-  unsigned int usec;
-} magma_timestr_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-magma_timestr_t get_current_time(void);
-double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2);
 
 real_Double_t magma_wtime( void );
 real_Double_t magma_sync_wtime( magma_queue_t queue );
