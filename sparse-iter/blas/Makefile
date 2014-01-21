@@ -21,10 +21,10 @@ ZSRC := \
 	magma_zlag2c.cpp	\
 	zbcsrswp.cu		\
 	zbcsrtrsv.cu		\
-    zbcsrcpy.cu         \
-    zbcsrlugemm.cu      \
-    zbcsrlupivloc.cu      \
-    zbcsrblockinfo.cu      \
+	zbcsrcpy.cu		\
+	zbcsrlugemm.cu		\
+	zbcsrlupivloc.cu	\
+	zbcsrblockinfo.cu	\
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu		\
@@ -34,12 +34,15 @@ ZSRC := \
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\
-	zmergecg.cu	        \
+	zmergecg.cu		\
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
 	zmgeelltmv.cu		\
-    zpipelinedgmres.cu  \
+	zpipelinedgmres.cu	\
 
+# Auxiliary routines
+ZSRC += \
+	zcompact.cu		\
 
 -include Makefile.local
 -include Makefile.src
