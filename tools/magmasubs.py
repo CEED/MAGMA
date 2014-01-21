@@ -810,6 +810,9 @@ subs = {
     # magma_[get_]d -> magma_[get_]s, so revert _sevice to _device
     ('_device',        '_sevice',        '_device',        '_sevice'         ),
     ('magma_diag',     'magma_siag',     'magma_diag',     'magma_siag'      ),
+    ('magma_direct',   'magma_sirect',   'magma_direct',   'magma_sirect'    ),
+    ('lapack_diag',    'lapack_siag',    'lapack_diag',    'lapack_siag'     ),
+    ('lapack_direct',  'lapack_sirect',  'lapack_direct',  'lapack_sirect'   ),
   ],
   
   # ------------------------------------------------------------
