@@ -71,7 +71,8 @@ my @files2delete = qw(
     sparse-iter/src/zpcg.cpp
     sparse-iter/src/zpgmres.cpp
     
-    sparse-iter/testing/test*
+    sparse-iter/testing/test_matrices
+    sparse-iter/testing/testing_*.cpp
 
     sparse-iter/python
 
@@ -110,6 +111,9 @@ sub MakeRelease
     }
 
     my $RELEASE_PATH = $ENV{PWD}."/magma-$numversion";
+    if ( -e $RELEASE_PATH ) {
+        die( "RELEASE_PATH $RELEASE_PATH already exists.\nPlease delete it or use different version.\n" );
+    }
 
     # Save current directory
     my $dir = `pwd`;
