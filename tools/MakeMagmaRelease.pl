@@ -59,7 +59,22 @@ my @files2delete = qw(
     cmake_modules
     contrib
 
-    sparse-iter
+    sparse-iter/src/zciterref.cpp
+    sparse-iter/src/zcpbicgstab.cpp
+    sparse-iter/src/zcpgmres.cpp
+    sparse-iter/src/zcpir.cpp
+    sparse-iter/src/zgmres_pipe.cpp
+    sparse-iter/src/zilu.cpp
+    sparse-iter/src/zlobpcg.cpp
+    sparse-iter/src/zp1gmres.cpp
+    sparse-iter/src/zpbicgstab.cpp
+    sparse-iter/src/zpcg.cpp
+    sparse-iter/src/zpgmres.cpp
+    
+    sparse-iter/testing/test*
+
+    sparse-iter/python
+
 );
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
 #src/magma_zf77.cpp
