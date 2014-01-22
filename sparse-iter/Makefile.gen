@@ -14,8 +14,8 @@ clean_generation_sparse: cleangen
 	( cd control          && $(MAKE) cleangen )
 	( cd testing          && $(MAKE) cleangen )
 
-generation: generation_sparse
-generation_sparse:
+generation: generate
+generate:
 	@echo ======================================== sparse/include
 	( cd include        && $(MAKE) generate )
 	@echo ======================================== sparse/blas
@@ -26,7 +26,6 @@ generation_sparse:
 	( cd control        && $(MAKE) generate )
 	@echo ======================================== sparse/testing
 	( cd testing        && $(MAKE) generate )
-	#$(MAKE) CMakes
 
 headers: headers_sparse
 headers_sparse:

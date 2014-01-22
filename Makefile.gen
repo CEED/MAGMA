@@ -39,6 +39,8 @@ generation:
 	( cd $(MAGMA_DIR)/interface_cuda && $(MAKE) generate )
 	@echo ======================================== testing
 	( cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
+	@echo ======================================== testing
+	-(cd $(MAGMA_DIR)/sparse-iter    && $(MAKE) generate )
 	$(MAKE) CMakes
 
 headers:
