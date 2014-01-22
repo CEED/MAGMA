@@ -151,7 +151,7 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
 
 extern "C"
 magma_int_t read_z_csr_from_mtx(    magma_storage_t *type, 
-                                    magma_storage_t *location, 
+                                    magma_location_t *location, 
                                     magma_int_t* n_row, 
                                     magma_int_t* n_col, 
                                     magma_int_t* nnz, 
