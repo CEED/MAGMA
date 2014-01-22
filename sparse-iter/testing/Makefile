@@ -20,15 +20,15 @@ ZSRC += \
 # ----------
 # Krylov space linear solvers
 ZSRC += \
-	testing_zcg.cpp		\
+#	testing_zcg.cpp		\
 	run_zcg.cpp		    \
-	testing_zbicgstab.cpp	\
+#	testing_zbicgstab.cpp	\
 	run_zbicgstab.cpp	\
-	testing_ziterref.cpp		\
+#	testing_ziterref.cpp		\
 	run_ziterref.cpp	\
-	testing_zgmres.cpp	\
+#	testing_zgmres.cpp	\
 	run_zgmres.cpp	    \
-	testing_zjacobi.cpp	\
+#	testing_zjacobi.cpp	\
 	run_zjacobi.cpp	    \
 #	testing_zp1gmres.cpp	\
 #	testing_zbicgstab.cpp	\
@@ -40,7 +40,7 @@ ZSRC += \
 # ----------
 # Sparse direct solvers
 ZSRC += \
-	testing_zbcsrlu.cpp	\
+#	testing_zbcsrlu.cpp	\
 	run_zbcsrlu.cpp	\
 # ----------
 # Mixed-precision solvers
