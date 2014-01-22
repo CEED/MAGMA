@@ -13,35 +13,46 @@ include $(MAGMA_DIR)/Makefile.internal
 # ----------
 # utility functions
 ZSRC += \
-	testing_z_matrix_io.cpp	\
-	testing_z_matrix_compressor.cpp	\
-	testing_z_mv.cpp	\
+#	testing_z_matrix_io.cpp	\
+#	testing_z_matrix_compressor.cpp	\
+#	testing_z_mv.cpp	\
 
 # ----------
-# Krylov space linear solvers
+# test Krylov space linear solvers
 ZSRC += \
 #	testing_zcg.cpp		\
-	run_zcg.cpp		    \
 #	testing_zbicgstab.cpp	\
-	run_zbicgstab.cpp	\
 #	testing_ziterref.cpp		\
-	run_ziterref.cpp	\
 #	testing_zgmres.cpp	\
-	run_zgmres.cpp	    \
 #	testing_zjacobi.cpp	\
-	run_zjacobi.cpp	    \
 #	testing_zp1gmres.cpp	\
 #	testing_zbicgstab.cpp	\
 #	testing_zir.cpp		\
 #	testing_zcir.cpp	\
 #	testing_zcpir.cpp	\
 
+# ----------
+# run Krylov space linear solvers
+ZSRC += \
+	run_zcg.cpp		    \
+	run_zbicgstab.cpp	\
+	run_ziterref.cpp	\
+	run_zgmres.cpp	    \
+	run_zjacobi.cpp	    \
+
+
 
 # ----------
-# Sparse direct solvers
+# test sparse direct solvers
 ZSRC += \
 #	testing_zbcsrlu.cpp	\
+
+# ----------
+# run sparse direct solvers
+ZSRC += \
 	run_zbcsrlu.cpp	\
+
+
 # ----------
 # Mixed-precision solvers
 ZSRC += \
@@ -95,7 +106,7 @@ lib:
 $(ALLOBJ): testings.h
 
 
-$(EXE): $(LIBMAGMA_SPARSE) testing_util.o
+$(EXE): $(LIBMAGMA_SPARSE) util.o
 
 clean:
 	rm -f *.o *~ 
@@ -107,13 +118,13 @@ cleanall: clean cleanexe
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	testing_util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
+	util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 run_% : run_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	testing_util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
+	util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
