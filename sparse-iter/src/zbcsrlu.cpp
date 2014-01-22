@@ -286,30 +286,30 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     magma_malloc((void **)&dAIIs, r_blocks*c_blocks
                         *sizeof(magmaDoubleComplex *));
 
-        int *ipiv_d;
-        magma_imalloc( &ipiv_d, size_b);
-        for( i = 0; i< r_blocks; i++){
-            for( j = 0; j< r_blocks; j++){
-               if ( (Mblockinfo(i, j) != 0) && (blockinfo(i,j)!=0) ){
-                  hA[rowt] = A(i, j);
-                  hB[rowt] = M(i, j);
-                  rowt++;
-               }
-               else if ( (Mblockinfo(i, j) != 0) && (blockinfo(i, j) == 0) ){
-                  hC[rowt2] = M(i, j);
-                  rowt2++;
-               }
-            }
+    int *ipiv_d;
+    magma_imalloc( &ipiv_d, size_b);
+    for( i = 0; i< r_blocks; i++){
+        for( j = 0; j< r_blocks; j++){
+           if ( (Mblockinfo(i, j) != 0) && (blockinfo(i,j)!=0) ){
+              hA[rowt] = A(i, j);
+              hB[rowt] = M(i, j);
+              rowt++;
+           }
+           else if ( (Mblockinfo(i, j) != 0) && (blockinfo(i, j) == 0) ){
+              hC[rowt2] = M(i, j);
+              rowt2++;
+           }
         }
-        cublasSetVector(  A.numblocks, sizeof(magmaDoubleComplex *), 
-                                                            hA, 1, dA, 1 );
-        cublasSetVector(  A.numblocks, sizeof(magmaDoubleComplex *), 
-                                                            hB, 1, dB, 1 );
-        cublasSetVector(  (M->numblocks-A.numblocks), 
-                            sizeof(magmaDoubleComplex *), hC, 1, dC, 1 );
+    }
+    cublasSetVector(  A.numblocks, sizeof(magmaDoubleComplex *), 
+                                                        hA, 1, dA, 1 );
+    cublasSetVector(  A.numblocks, sizeof(magmaDoubleComplex *), 
+                                                        hB, 1, dB, 1 );
+    cublasSetVector(  (M->numblocks-A.numblocks), 
+                        sizeof(magmaDoubleComplex *), hC, 1, dC, 1 );
 
-        magma_zbcsrvalcpy(  size_b, A.numblocks, (M->numblocks-A.numblocks), 
-                                                            dA, dB, dC );
+    magma_zbcsrvalcpy(  size_b, A.numblocks, (M->numblocks-A.numblocks), 
+                                                        dA, dB, dC );
 
     num_blocks_tmp=0;
     magma_int_t *cpu_row, *cpu_col;
@@ -384,18 +384,18 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
                                                         dA, 1 );
         cublasSetVector( kblocks, sizeof(magmaDoubleComplex *), hB, 1, dB, 1 );
             
-        for( int i = k+1; i< r_blocks; i++)
+        for( i = k+1; i< r_blocks; i++){
            if ( Mblockinfo(i, k) != 0 ){
-              for( int j = k+1; j<c_blocks; j++)
+              for( j = k+1; j<c_blocks; j++ ){
                  if ( Mblockinfo(k, j) != 0 ){
                     hC[row] = M(i, j);
                     row++;
                  }
+              }
            }
+        }
         cublasSetVector( kblocks*num_block_rows, sizeof(magmaDoubleComplex *), 
                                                                 hC, 1, dC, 1 );
-
-
 
         #ifdef CUBLASBATCHED
         // AIs and BIs for the batched GEMMs later
