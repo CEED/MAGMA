@@ -15,50 +15,25 @@ my $revision = "";
 my $rc       = 0;  # release candidate
 my $beta     = 0;
 
+# in alphabetic order
 my @files2delete = qw(
-    Makefile.gen
-    tools
-    quark
-    docs
-    make.inc.bulge
-    make.inc.cumin
-    make.inc.disco
-    make.inc.ig
-    make.inc.ig.pgi
-    Release-ToDo.txt
-    Release-ToDo-1.1.txt
     BugsToFix.txt
-    
-    magmablas/zhemm_1gpu.cpp
-    magmablas/zhemm_1gpu_old.cpp
-    
-    control/sizeptr
-    include/Makefile
-    src/zhetrd_bhe2trc.cpp
-    src/obsolete
-    magmablas/obsolete
-    testing/fortran2.cpp
-    testing/*.txt
-    testing/testing_zgetrf_f.f
-    testing/testing_zgetrf_gpu_f.cuf
-    testing/testing_zgeqrf_mc.cpp
-    testing/testing_zgeqrf-v2.cpp
-    testing/testing_zpotrf_mc.cpp
-    testing/testing_zgetrf_mc.cpp
-    
-    multi-gpu-dynamic-deprecated
-    CPackConfig_MAGMA.cmake
-    CPackConfig_MAGMA_full.cmake
-    CPackConfig_MORSE_full.cmake
-    CPackConfig_MORSE_light.cmake
-    include/CMakeLists.txt
-    magmablas/CMakeLists.txt
-    src/CMakeLists.txt
-    testing/lin/CMakeLists.txt
-    testing/matgen/CMakeLists.txt
+    Makefile.gen
+    Release-ToDo-1.1.txt
+    Release-ToDo.txt
     cmake_modules
     contrib
-
+    control/sizeptr
+    docs
+    include/Makefile
+    magmablas/obsolete
+    magmablas/zhemm_1gpu.cpp
+    magmablas/zhemm_1gpu_old.cpp
+    make.inc.ig.pgi
+    multi-gpu-dynamic-deprecated
+    quark
+    
+    sparse-iter/python
     sparse-iter/src/zciterref.cpp
     sparse-iter/src/zcpbicgstab.cpp
     sparse-iter/src/zcpgmres.cpp
@@ -70,12 +45,15 @@ my @files2delete = qw(
     sparse-iter/src/zpbicgstab.cpp
     sparse-iter/src/zpcg.cpp
     sparse-iter/src/zpgmres.cpp
-    
     sparse-iter/testing/test_matrices
     sparse-iter/testing/testing_*.cpp
-
-    sparse-iter/python
-
+    
+    src/obsolete
+    testing/*.txt
+    testing/fortran2.cpp
+    testing/testing_zgetrf_f.f
+    testing/testing_zgetrf_gpu_f.cuf
+    tools
 );
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
 #src/magma_zf77.cpp
@@ -191,7 +169,8 @@ sub MakeRelease
 #    $RELEASE_PATH = $ENV{ PWD}."/plasma-installer-$numversion";
 #
 #    # Sauvegarde du rep courant
-#    my $dir = `pwd`; chomp $dir;
+#    my $dir = `pwd`;
+#    chomp $dir;
 #
 #    $cmd = "svn export --force $revision $user $svninst $RELEASE_PATH";
 #    myCmd($cmd);
