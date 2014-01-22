@@ -163,7 +163,7 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
         printf("error: CPU not yet supported.\n");
         return MAGMA_ERR_NOT_SUPPORTED;
     }
-
+    return MAGMA_SUCCESS;
 }
 
 
