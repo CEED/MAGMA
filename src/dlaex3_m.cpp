@@ -32,7 +32,7 @@ magma_int_t magma_get_dlaex3_m_nb() { return 1024; }
 void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu);
 void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu);
 
-} // end extern "C"
+}  // end extern "C"
 
 extern "C" magma_int_t
 magma_dlaex3_m(magma_int_t nrgpu,

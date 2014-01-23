@@ -11,8 +11,8 @@
 */
 #include "common_magma.h"
 
-extern "C"
-magma_int_t magma_get_ztrsm_m_nb() { return 128; }
+extern "C" magma_int_t
+magma_get_ztrsm_m_nb() { return 128; }
 
 #define A(i, j) (a+(j)*nb*lda + (i)*nb)
 #define B(i, j) (b+(j)*nb*ldb + (i)*nb)

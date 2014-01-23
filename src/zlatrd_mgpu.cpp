@@ -458,8 +458,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
     return mv_time;
 } /* zlatrd_ */
 
-extern "C"
-magma_int_t
+extern "C" magma_int_t
 magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
                       magma_int_t n, magma_int_t nb,
                       magmaDoubleComplex alpha,
@@ -672,8 +671,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     return 0;
 }
 
-extern "C"
-magma_int_t
+extern "C" magma_int_t
 magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
                       magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *w,
                       magma_queue_t stream[][10] )

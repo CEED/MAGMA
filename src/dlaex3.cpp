@@ -60,7 +60,7 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     return;
 }
 
-} // end extern "C"
+}  // end extern "C"
 
 
 extern "C" magma_int_t

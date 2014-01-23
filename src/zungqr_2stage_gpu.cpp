@@ -10,8 +10,8 @@
 */
 #include "common_magma.h"
 
-extern "C"
-magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
+extern "C" magma_int_t
+magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
                  magmaDoubleComplex *da, magma_int_t ldda,
                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
                  magma_int_t nb, magma_int_t *info)
