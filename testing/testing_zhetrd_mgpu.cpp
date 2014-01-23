@@ -45,6 +45,8 @@ int main( int argc, char** argv)
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t status = 0;
+    magma_int_t k = 0;  // TODO: UNKNOWN, UNDOCUMENTED VARIABLE
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -71,18 +73,19 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZHETRD( N ) / 1e9;
             
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC(    h_A,    magmaDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
-            TESTING_MALLOC(    tau,    magmaDoubleComplex, N     );
-            TESTING_MALLOC( diag,    double, N   );
-            TESTING_MALLOC( offdiag, double, N-1 );
+            TESTING_MALLOC_PIN( h_R,     magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_PIN( h_work,  magmaDoubleComplex, lwork );
+            
+            TESTING_MALLOC_CPU( h_A,     magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_CPU( tau,     magmaDoubleComplex, N     );
+            TESTING_MALLOC_CPU( diag,    double, N   );
+            TESTING_MALLOC_CPU( offdiag, double, N-1 );
             
             if ( opts.check ) {
-                TESTING_MALLOC( h_Q,  magmaDoubleComplex, lda*N );
-                TESTING_MALLOC( work, magmaDoubleComplex, 2*N*N );
+                TESTING_MALLOC_CPU( h_Q,  magmaDoubleComplex, lda*N );
+                TESTING_MALLOC_CPU( work, magmaDoubleComplex, 2*N*N );
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                TESTING_MALLOC( rwork, double, N );
+                TESTING_MALLOC_CPU( rwork, double, N );
                 #endif
             }
         
@@ -167,18 +170,19 @@ int main( int argc, char** argv)
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
 
-            TESTING_FREE( h_A );
-            TESTING_FREE( tau );
-            TESTING_FREE( diag );
-            TESTING_FREE( offdiag );
-            TESTING_HOSTFREE( h_R );
-            TESTING_HOSTFREE( h_work );
+            TESTING_FREE_PIN( h_R );
+            TESTING_FREE_PIN( h_work );
 
+            TESTING_FREE_CPU( h_A );
+            TESTING_FREE_CPU( tau );
+            TESTING_FREE_CPU( diag );
+            TESTING_FREE_CPU( offdiag );
+            
             if ( opts.check ) {
-                TESTING_FREE( h_Q );
-                TESTING_FREE( work );
+                TESTING_FREE_CPU( h_Q );
+                TESTING_FREE_CPU( work );
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                TESTING_FREE( rwork );
+                TESTING_FREE_CPU( rwork );
                 #endif
             }
         }
