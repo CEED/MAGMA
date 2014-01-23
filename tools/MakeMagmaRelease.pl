@@ -36,6 +36,7 @@ my @files2delete = qw(
     sparse-iter/blas/zmergeidr.cu
     sparse-iter/blas/zbcsrblockinfo.cu
     sparse-iter/blas/magma_z_mpksetup.cu
+    sparse-iter/control/magma_z_mpksetup.cpp
     sparse-iter/python
     sparse-iter/src/zciterref.cpp
     sparse-iter/src/zcpbicgstab.cpp
