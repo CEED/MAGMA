@@ -33,7 +33,7 @@ using namespace std;
     Purpose
     =======
 
-    Generate a squared ELLPACK matrix for a stencil.
+    Generate a symmetric n x n CSR matrix for a stencil.
 
     Arguments
     =========
