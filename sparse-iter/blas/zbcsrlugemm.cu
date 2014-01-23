@@ -8,12 +8,12 @@
        @precisions normal z -> c d s
 
 */
-
+#include <iostream>
 #include <cuda_runtime_api.h>
 #include <cublas_v2.h>  // include before magma.h
 
 #include "magma.h"
-#include "common_magma.h"
+
 
 #if (GPUSHMEM < 200)
    #define BLOCK_SIZE 128
