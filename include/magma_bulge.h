@@ -12,7 +12,7 @@
 #include "magma_types.h"
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
     inline magma_int_t magma_ceildiv(magma_int_t a, magma_int_t b)
