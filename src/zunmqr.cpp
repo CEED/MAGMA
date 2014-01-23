@@ -33,7 +33,7 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
 
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
-    TRANS = 'T':      Q**H * C       C * Q**H
+    TRANS = 'C':      Q**H * C       C * Q**H
 
     where Q is a complex orthogonal matrix defined as the product of k
     elementary reflectors
@@ -51,7 +51,7 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
 
     TRANS   (input) CHARACTER*1
             = 'N':  No transpose, apply Q;
-            = 'T':  Transpose, apply Q**H.
+            = 'C':  Conjugate transpose, apply Q**H.
 
     M       (input) INTEGER
             The number of rows of the matrix C. M >= 0.
