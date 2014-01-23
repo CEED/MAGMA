@@ -10,7 +10,7 @@
 
 */
 
-#include <cusparse_v2.h>
+//#include <cusparse_v2.h>
 
 #include "common_magma.h"
 #include "../../include/magmablas.h"
@@ -94,15 +94,15 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             else if( A.storage_type == Magma_BCSR ){
+/*             else if( A.storage_type == Magma_BCSR ){
                  //printf("using CUSPARSE BCSR kernel for SpMV: ");
-                /* CUSPARSE context */
+                // CUSPARSE context //
                 cusparseHandle_t cusparseHandle = 0;
                 cusparseStatus_t cusparseStatus;
                 cusparseStatus = cusparseCreate(&cusparseHandle);
                 cusparseMatDescr_t descr = 0;
                 cusparseStatus = cusparseCreateMatDescr(&descr);
-                /* end CUSPARSE context */
+                // end CUSPARSE context //
                 cusparseDirection_t dirA = CUSPARSE_DIRECTION_ROW;
                 int mb = (A.num_rows + A.blocksize-1)/A.blocksize;
                 int nb = (A.num_cols + A.blocksize-1)/A.blocksize;
@@ -112,7 +112,7 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                     &beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
-             }
+             }*/
              else {
                  printf("error: format not supported.\n");
                  return MAGMA_ERR_NOT_SUPPORTED;
