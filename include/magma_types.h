@@ -59,7 +59,6 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r,i)     make_cuDoubleComplex(r, i)
     #define MAGMA_Z_REAL(a)       (a).x
     #define MAGMA_Z_IMAG(a)       (a).y
-    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_Z_ADD(a, b)     cuCadd(a, b)
     #define MAGMA_Z_SUB(a, b)     cuCsub(a, b)
     #define MAGMA_Z_MUL(a, b)     cuCmul(a, b)
@@ -71,7 +70,6 @@ typedef double real_Double_t;
     #define MAGMA_C_MAKE(r,i)     make_cuFloatComplex(r, i)
     #define MAGMA_C_REAL(a)       (a).x
     #define MAGMA_C_IMAG(a)       (a).y
-    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_C_ADD(a, b)     cuCaddf(a, b)
     #define MAGMA_C_SUB(a, b)     cuCsubf(a, b)
     #define MAGMA_C_MUL(a, b)     cuCmulf(a, b)
@@ -97,7 +95,6 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r,i)     doubleComplex(r,i)
     #define MAGMA_Z_REAL(a)       (a).x
     #define MAGMA_Z_IMAG(a)       (a).y
-    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_Z_ADD(a, b)     MAGMA_Z_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_Z_SUB(a, b)     MAGMA_Z_MAKE((a).x-(b).x, (a).y-(b).y)
     #define MAGMA_Z_ABS(a)        magma_cabs(a)
@@ -107,7 +104,6 @@ typedef double real_Double_t;
     #define MAGMA_C_MAKE(r,i)     floatComplex(r,i)
     #define MAGMA_C_REAL(a)       (a).x
     #define MAGMA_C_IMAG(a)       (a).y
-    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_C_ADD(a, b)     MAGMA_C_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_C_SUB(a, b)     MAGMA_C_MAKE((a).x-(b).x, (a).y-(b).y)
     #define MAGMA_C_ABS(a)        magma_cabsf(a)
@@ -138,7 +134,6 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r, i)    std::complex<double>(r,i)
     #define MAGMA_Z_REAL(x)       (x).real()
     #define MAGMA_Z_IMAG(x)       (x).imag()
-    #define MAGMA_Z_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_Z_ADD(a, b)     ((a)+(b))
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
     #define MAGMA_Z_MUL(a, b)     ((a)*(b))
@@ -149,7 +144,6 @@ typedef double real_Double_t;
     #define MAGMA_C_MAKE(r, i)    std::complex<float> (r,i)
     #define MAGMA_C_REAL(x)       (x).real()
     #define MAGMA_C_IMAG(x)       (x).imag()
-    #define MAGMA_C_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_C_ADD(a, b)     ((a)+(b))
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
     #define MAGMA_C_MUL(a, b)     ((a)*(b))
@@ -169,7 +163,6 @@ typedef double real_Double_t;
 #define MAGMA_D_MAKE(r,i)         (r)
 #define MAGMA_D_REAL(x)           (x)
 #define MAGMA_D_IMAG(x)           (0.0)
-#define MAGMA_D_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_D_ADD(a, b)         ((a) + (b))
 #define MAGMA_D_SUB(a, b)         ((a) - (b))
 #define MAGMA_D_MUL(a, b)         ((a) * (b))
@@ -183,7 +176,6 @@ typedef double real_Double_t;
 #define MAGMA_S_MAKE(r,i)         (r)
 #define MAGMA_S_REAL(x)           (x)
 #define MAGMA_S_IMAG(x)           (0.0)
-#define MAGMA_S_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_S_ADD(a, b)         ((a) + (b))
 #define MAGMA_S_SUB(a, b)         ((a) - (b))
 #define MAGMA_S_MUL(a, b)         ((a) * (b))
@@ -296,8 +288,6 @@ typedef double real_Double_t;
 
 // ----------------------------------------
 // parameter constants
-// [In the future, these will be numbered, as indicated by comments,
-// [instead of character constants.]
 // numbering is consistent with CBLAS and PLASMA; see plasma/include/plasma.h
 typedef enum {
     MagmaRowMajor      = 101,
