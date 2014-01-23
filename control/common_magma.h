@@ -18,12 +18,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <cublas.h>
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
 
 #include <cuda_runtime_api.h>
+#include <cublas.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 
