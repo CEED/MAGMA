@@ -10,11 +10,11 @@
 */
 #include "common_magma.h"
 
-extern "C" int
-magma_ztsqrt_gpu(int *m, int *n,
-                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, int  *lda,
+extern "C" magma_int_t
+magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
+                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, magma_int_t  *lda,
                  magmaDoubleComplex  *tau, magmaDoubleComplex *work,
-                 int *lwork, magmaDoubleComplex *dwork, int *info )
+                 magma_int_t *lwork, magmaDoubleComplex *dwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -100,16 +100,16 @@ magma_ztsqrt_gpu(int *m, int *n,
     #define work_a2        ( work + nb )
     #define hwork          ( work + (nb)*(*m))
     
-    int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
-    int nbmin, ib, ldda;
+    magma_int_t i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
+    magma_int_t nbmin, ib, ldda;
     
     /* Function Body */
     *info = 0;
-    int nb = magma_get_zgeqrf_nb(*m);
+    magma_int_t nb = magma_get_zgeqrf_nb(*m);
     
-    int lwkopt = (*n+*m) * nb;
+    magma_int_t lwkopt = (*n+*m) * nb;
     work[0] = (magmaDoubleComplex) lwkopt;
-    int lquery = *lwork == -1;
+    magma_int_t lquery = *lwork == -1;
     if (*m < 0) {
         *info = -1;
     } else if (*n < 0) {
@@ -132,7 +132,7 @@ magma_ztsqrt_gpu(int *m, int *n,
         return *info;
     }
     
-    int lhwork = *lwork - (*m)*nb;
+    magma_int_t lhwork = *lwork - (*m)*nb;
     
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
