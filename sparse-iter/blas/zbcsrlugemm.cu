@@ -8,7 +8,7 @@
        @precisions normal z -> c d s
 
 */
-#include <iostream>
+#include <stdio.h>
 #include <cuda_runtime_api.h>
 #include <cublas_v2.h>  // include before magma.h
 
