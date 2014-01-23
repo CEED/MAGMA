@@ -381,13 +381,21 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-
+            // fixed alignment
+            int num_threads = 256;
+            int threads_per_row = 32; 
+            int num_blocks = ((  (threads_per_row*A.num_rows+num_threads-1)
+                                            /num_threads)        +num_threads-1)
+                                                / (num_threads);
+            int rowlength = ( (int)
+                    ((A.max_nnz_row+threads_per_row-1)/threads_per_row) ) 
+                                                            * threads_per_row;
             // conversion
             magma_int_t *row_tmp;
             magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
-                row_tmp[i] = i*A.max_nnz_row;
+                row_tmp[i] = i*rowlength;
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 

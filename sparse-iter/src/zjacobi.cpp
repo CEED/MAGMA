@@ -338,13 +338,13 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     if( A.storage_type != Magma_CSR){
         magma_z_mfree( &A_h1 );
         magma_z_mfree( &A_h2 );   
-    }   /*
+    }   
     magma_z_mfree( &B );
     magma_z_mfree( &C );  
     magma_z_vfree( &diag);
     magma_z_vfree( &c_t);
     magma_z_vfree( &b_h);
-*/
+
     return MAGMA_SUCCESS;
 
 }
