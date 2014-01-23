@@ -22,7 +22,7 @@
 #include "../include/mmio.h"
 #include "common_magma.h"
 #include <cuda.h>
-#include <cusparse_v2.h>
+//#include <cusparse_v2.h>
 
 using namespace std;
 
@@ -638,6 +638,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         }
     } // end CPU case
     else if( A.memory_location == Magma_DEV ){
+            printf("error: conversion only supported on CPU.\n");
+            return MAGMA_ERR_NOT_SUPPORTED;
+/*
         // CSR to DENSE    
         if( old_format == Magma_CSR && new_format == Magma_DENSE ){
             // fill in information for B
@@ -649,13 +652,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             magma_zmalloc( &B->val, A.num_rows*A.num_cols );
 
@@ -675,13 +678,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
 
             magma_int_t *nnz_per_row;
@@ -718,13 +721,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             int size_b = B->blocksize;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             int base, nnzb;
             int mb = (A.num_rows + size_b-1)/size_b;
@@ -770,13 +773,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             magma_int_t size_b = A.blocksize;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             int mb = (A.num_rows + size_b-1)/size_b;
             int nb = (A.num_cols + size_b-1)/size_b;
@@ -809,13 +812,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
             magma_imalloc( &B->row, B->nnz );
@@ -841,13 +844,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
             magma_imalloc( &B->row, B->num_rows+1 );
@@ -873,13 +876,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
             magma_imalloc( &B->row, B->nnz );
@@ -908,13 +911,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            /* CUSPARSE context */
+            // CUSPARSE context //
             cusparseHandle_t cusparseHandle = 0;
             cusparseStatus_t cusparseStatus;
             cusparseStatus = cusparseCreate(&cusparseHandle);
             cusparseMatDescr_t descr = 0;
             cusparseStatus = cusparseCreateMatDescr(&descr);
-            /* end CUSPARSE context */
+            // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
             magma_imalloc( &B->row, B->nnz );
@@ -936,6 +939,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
              printf("error: format not supported.\n");
              return MAGMA_ERR_NOT_SUPPORTED;
         }
+*/
     }
      
 }
