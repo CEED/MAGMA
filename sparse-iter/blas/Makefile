@@ -24,7 +24,6 @@ ZSRC := \
 	zbcsrcpy.cu		\
 	zbcsrlugemm.cu		\
 	zbcsrlupivloc.cu	\
-	zbcsrblockinfo.cu	\
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu		\
@@ -42,7 +41,7 @@ ZSRC := \
 
 # Auxiliary routines
 ZSRC += \
-	zcompact.cu		\
+#	zcompact.cu		\
 
 -include Makefile.local
 -include Makefile.src
