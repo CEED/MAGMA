@@ -38,7 +38,7 @@ struct magma_device* g_magma_devices = NULL;
 // ensures there isn't a memory leak if magma_init is called multiple times
 // without calling magma_finalize.
 extern "C"
-magma_err_t magma_init()
+magma_int_t magma_init()
 {
     if ( g_magma_devices == NULL ) {
         cudaGetDeviceCount( &g_magma_devices_cnt );
@@ -56,7 +56,7 @@ magma_err_t magma_init()
 // --------------------
 // Frees information about CUDA devices.
 extern "C"
-magma_err_t magma_finalize()
+magma_int_t magma_finalize()
 {
     free( g_magma_devices );
     g_magma_devices = NULL;
