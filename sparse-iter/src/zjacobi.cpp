@@ -15,12 +15,8 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     1e-16
-#define ATOLERANCE     1e-16
-
-// uncomment for chronometry
-#define ENABLE_TIMER
-#define iterblock 1
+#define RTOLERANCE     lapackf77_dlamch( "E" )
+#define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /*  -- MAGMA (version 1.1) --
@@ -52,6 +48,16 @@ magma_int_t
 magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
            magma_solver_parameters *solver_par )
 {
+    // prepare solver feedback
+    solver_par->solver = Magma_JACOBI;
+    solver_par->info = 0;
+    magma_int_t iterblock = solver_par->verbose;
+    real_Double_t tempo1, tempo2;
+    double residual;
+    magma_zresidual( A, b, *x, &residual );
+    solver_par->init_res = residual;
+    solver_par->res_vec = NULL;
+    solver_par->timing = NULL;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
@@ -72,29 +78,21 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_solver_parameters jacobiiter_par;
     jacobiiter_par.maxiter = solver_par->maxiter;
 
-    //Chronometry
-    #ifdef ENABLE_TIMER
-    double tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
-    #endif
 
     // Jacobi iterator
     magma_zjacobiiter( M, c, x, &jacobiiter_par ); 
-    
-    #ifdef ENABLE_TIMER
+
     magma_device_sync(); tempo2=magma_wtime();
-    double residual;
+    solver_par->runtime = (real_Double_t) tempo2-tempo1;
     magma_zresidual( A, b, *x, &residual );
-    printf("#=============================================================#\n");
-    printf("# Jacobi solver summary:\n" );
-    printf("#    initial residual: %e\n", nom0 );
-    printf("#    iterations: %4d\n", (solver_par->maxiter) );
-    printf("#    exact relative residual: %e\n#    runtime: %.4lf sec\n", 
-                residual, tempo2-tempo1);
-    printf("#=============================================================#\n");
-    #endif
-  
-    solver_par->residual = (double)(residual);
+    solver_par->final_res = residual;
+    solver_par->numiter = solver_par->maxiter;
+
+    if( solver_par->init_res > solver_par->final_res )
+        solver_par->info = 0;
+    else
+        solver_par->info = -1;
 
     magma_z_mfree( &M );
     magma_z_vfree( &c );

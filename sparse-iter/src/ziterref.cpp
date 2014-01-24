@@ -15,12 +15,8 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     1e-16
-#define ATOLERANCE     1e-16
-
-// uncomment for chronometry
-#define ENABLE_TIMER
-#define iterblock 1
+#define RTOLERANCE     lapackf77_dlamch( "E" )
+#define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /*  -- MAGMA (version 1.1) --
@@ -49,10 +45,27 @@
 
     ========================================================================  */
 
-
 magma_int_t
 magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
    magma_solver_parameters *solver_par, magma_precond_parameters *precond_par ){
+
+    // prepare solver feedback
+    solver_par->solver = Magma_ITERREF;
+    solver_par->numiter = 0;
+    solver_par->info = 0;
+    magma_int_t iterblock = solver_par->verbose;
+    if( solver_par->verbose > 0 ){
+        magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
+                * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
+        magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
+                *( (solver_par->maxiter)/(solver_par->verbose)+1) );
+    }else{
+        solver_par->res_vec = NULL;
+        solver_par->timing = NULL;
+    }
+    double residual;
+    magma_zresidual( A, b, *x, &residual );
+    solver_par->init_res = residual;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
@@ -82,17 +95,12 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         return MAGMA_SUCCESS;
     
     //Chronometry
-    #ifdef ENABLE_TIMER
     real_Double_t tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
-    printf("#=============================================================#\n");
-    printf("#   Iterative Refinement performance analysis every %d iteration\n", 
-                                                                    iterblock);
-    printf("#   iter   ||   residual-nrm2    ||   runtime    \n");
-    printf("#=============================================================#\n");
-    printf("      0    ||    %e    ||    0.0000      \n", nom0);
-    magma_device_sync(); tempo1=magma_wtime();
-    #endif
+    if( solver_par->verbose > 0 ){
+        solver_par->res_vec[0] = nom0;
+        solver_par->timing[0] = 0.0;
+    }
     
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
@@ -105,34 +113,33 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_z_spmv( c_mone, A, *x, c_zero, r );              // r = - A x
         magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);         // r = r + b
         nom = magma_dznrm2(dofs, r.val, 1);                    // nom = || r || 
-        #ifdef ENABLE_TIMER
-        //Chronometry  
-        magma_device_sync(); tempo2=magma_wtime();
-        if( solver_par->numiter%iterblock==0 ) {
-            printf("   %4d    ||    %e    ||    %.4lf  \n", 
-                (solver_par->numiter), nom, tempo2-tempo1 );
+
+        if( solver_par->verbose > 0 ){
+            magma_device_sync(); tempo2=magma_wtime();
+            if( (solver_par->numiter)%iterblock==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/iterblock] 
+                        = (real_Double_t) nom;
+                solver_par->timing[(solver_par->numiter)/iterblock] 
+                        = (real_Double_t) tempo2-tempo1;
+            }
         }
-        #endif
 
         if (  nom  < r0 ) {
             break;
         }
     } 
-
-    #ifdef ENABLE_TIMER
-    double residual;
+    magma_device_sync(); tempo2=magma_wtime();
+    solver_par->runtime = (real_Double_t) tempo2-tempo1;
     magma_zresidual( A, b, *x, &residual );
-    printf("#=============================================================#\n");
-    printf("# Iterative Refinement solver summary:\n" );
-    printf("#    initial residual: %e\n", nom0 );
-    printf("#    iterations: %4d\n#    iterative residual: %e\n",
-            (solver_par->numiter), nom );
-    printf("#    exact relative residual: %e\n#    runtime: %.4lf sec\n", 
-                residual, tempo2-tempo1);
-    printf("#=============================================================#\n");
-    #endif
-        
-    solver_par->residual = (double)(nom);
+    solver_par->final_res = residual;
+
+    if( solver_par->numiter < solver_par->maxiter){
+        solver_par->info = 0;
+    }else if( solver_par->init_res > solver_par->final_res )
+        solver_par->info = -2;
+    else
+        solver_par->info = -1;
+
     
     magma_z_vfree(&r);
     magma_z_vfree(&z);

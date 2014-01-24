@@ -39,13 +39,8 @@
 
 #define CUBLASBATCHED
 
-#define RTOLERANCE     1e-16
-#define ATOLERANCE     1e-16
-
-// uncomment for chronometry
-#define ENABLE_TIMER
-#define iterblock 1
-
+#define RTOLERANCE     lapackf77_dlamch( "E" )
+#define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /*  -- MAGMA (version 1.1) --
@@ -74,6 +69,22 @@ magma_int_t
 magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b, 
                        magma_z_vector *x, magma_solver_parameters *solver_par ){
 
+    // prepare solver feedback
+    solver_par->solver = Magma_BCSRLU;
+    magma_int_t iterblock = solver_par->verbose;
+    real_Double_t t_lu1, t_lu = 0.0;
+    real_Double_t t_lusv1, t_lusv = 0.0;
+    double residual;
+    magma_z_sparse_matrix A_d;
+    magma_z_mtransfer( A, &A_d, Magma_CPU, Magma_DEV);
+    magma_zresidual( A_d, b, *x, &residual );
+    solver_par->init_res = residual;
+        magma_malloc_cpu( (void **)&solver_par->timing, 
+                                    2*sizeof(real_Double_t) );
+    solver_par->res_vec = NULL;
+
+
+
     if( A.memory_location == Magma_DEV){
         magma_z_sparse_matrix B;
         magma_z_mtransfer( A, &B, Magma_DEV, Magma_CPU ); 
@@ -81,12 +92,6 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
         magma_z_mfree(&B);
     }
     else{
-
-    //Chronometry
-    #ifdef ENABLE_TIMER
-    real_Double_t t_lu1, t_lu = 0.0;
-    real_Double_t t_lusv1, t_lusv = 0.0;
-    #endif
 
     magma_z_sparse_matrix B, C, D;
     // compute suitable blocksize
@@ -102,24 +107,16 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
     magma_imalloc_cpu( &ipiv, C.blocksize
                 *(ceil( (float)C.num_rows / (float)C.blocksize )+1) );
 
-    #ifdef ENABLE_TIMER
-    magma_device_sync(); t_lu1=magma_wtime();
-    #endif
     // LU factorization
-
+    magma_device_sync(); t_lu1=magma_wtime();
     magma_zbcsrlutrf( C, &D, ipiv);
-
-    #ifdef ENABLE_TIMER
     magma_device_sync(); t_lu+=(magma_wtime()-t_lu1);
-    magma_device_sync(); t_lusv1=magma_wtime();
-    #endif
+
 
     // triangular solves
+    magma_device_sync(); t_lusv1=magma_wtime();
     magma_zbcsrlusv( D, b, x, solver_par, ipiv );
-
-    #ifdef ENABLE_TIMER
     magma_device_sync(); t_lusv+=(magma_wtime()-t_lusv1);
-    #endif
 
 
     magma_z_mfree(&B);
@@ -127,36 +124,19 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_mfree(&D);
     magma_free_cpu(ipiv);
 
-    #ifdef ENABLE_TIMER
-    // local variables
-    magmaDoubleComplex zero = MAGMA_Z_ZERO, 
-                        one = MAGMA_Z_ONE, 
-                        mone = MAGMA_Z_NEG_ONE;
-    magma_int_t dofs = A.num_rows;
-    magma_z_vector r1, r2;
-    magma_z_vinit( &r1, Magma_DEV, dofs, zero );
-    magma_z_vinit( &r2, Magma_DEV, dofs, zero );
-    magma_zcopy( dofs, b.val, 1, r1.val, 1 );           // r1 = b
-    double nom0 = magma_dznrm2(dofs, r1.val, 1);        // nom0 = || r1 ||
-    nom0 = nom0;
-    magma_z_sparse_matrix H;
-    magma_z_mtransfer( A, &H, Magma_CPU, Magma_DEV);
-    magma_zcopy( dofs, x->val, 1, r2.val, 1 );          // r2 = x);
-    magma_z_spmv( mone, H, r2, zero, r1 );              // r1 = - A r2
-    magma_zaxpy(dofs,  one, b.val, 1, r1.val, 1);       // r1 = r1 + b
-    double residual = magma_dznrm2(dofs, r1.val, 1);    // residual = || r1 ||
-    residual = residual;
-    magma_z_mfree(&H); 
-    magma_z_vfree(&r1);
-    magma_z_vfree(&r2);
-    printf("#=============================================================#\n");
-    printf("# BCSRLU solver summary:\n");
-    printf("#    initial residual: %e\n", nom0 );
-    printf("#    final residual: %e\n", residual );
-    printf("#    runtime factorization: %4lf sec\n", t_lu );
-    printf("#    runtime triangular solve: %.4lf sec\n", t_lusv );
-    printf("#=============================================================#\n");
-    #endif
+    solver_par->timing[0] = (real_Double_t)t_lu;
+    solver_par->timing[1] = (real_Double_t)t_lusv;
+    solver_par->runtime = t_lu+t_lusv;
+
+    magma_zresidual( A_d, b, *x, &residual );
+    solver_par->final_res = residual;
+
+    magma_z_mfree(&A_d);
+
+     if( solver_par->init_res > solver_par->final_res )
+        solver_par->info = 0;
+    else
+        solver_par->info = -1;
 
     return MAGMA_SUCCESS;
     }
