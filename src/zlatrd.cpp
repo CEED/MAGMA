@@ -207,13 +207,12 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
             }
             if (i > 0) {
                 /* Generate elementary reflector H(i) to annihilate A(1:i-2,i) */
-                
                 alpha = *A(i-1, i);
                 
                 lapackf77_zlarfg(&i, &alpha, A(0, i), &ione, &tau[i - 1]);
                 
                 e[i-1] = MAGMA_Z_REAL( alpha );
-                *A(i-1,i) = MAGMA_Z_MAKE( 1, 0 );
+                *A(i-1,i) = MAGMA_Z_ONE;
                 
                 /* Compute W(1:i-1,i) */
                 // 1. Send the block reflector  A(0:n-i-1,i) to the GPU
@@ -258,10 +257,10 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                               W(0, iw), &ione);
             }
         }
-    } else {
+    }
+    else {
         /*  Reduce first NB columns of lower triangle */
         for (i = 0; i < nb; ++i) {
-        
             /* Update A(i:n,i) */
             i_n = n - i;
             #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -285,7 +284,7 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                 alpha = *A(i+1, i);
                 lapackf77_zlarfg(&i_n, &alpha, A(min(i+2,n-1), i), &ione, &tau[i]);
                 e[i] = MAGMA_Z_REAL( alpha );
-                *A(i+1,i) = MAGMA_Z_MAKE( 1, 0 );
+                *A(i+1,i) = MAGMA_Z_ONE;
         
                 /* Compute W(i+1:n,i) */
                 // 1. Send the block reflector  A(i+1:n,i) to the GPU
@@ -329,8 +328,8 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         }
     }
 
-    magma_free_cpu(f);
+    magma_free_cpu( f );
     magma_queue_destroy( stream );
 
     return 0;
-} /* zlatrd */
+} /* magma_zlatrd */
