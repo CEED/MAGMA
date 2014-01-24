@@ -307,9 +307,9 @@ magma_zheevd(magma_vec_t jobz, magma_uplo_t uplo,
     timer_printf( "time zhetrd = %6.2f\n", time );
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
-     ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
-     tridiagonal matrix, then call ZUNMTR to multiply it to the Householder
-     transformations represented as Householder vectors in A. */
+     * ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
+     * tridiagonal matrix, then call ZUNMTR to multiply it to the Householder
+     * transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
     }

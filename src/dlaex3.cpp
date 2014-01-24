@@ -495,4 +495,4 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     timer_printf( "gemms = %6.2f\n", time );
 
     return MAGMA_SUCCESS;
-} /*magma_dlaed3*/
+} /* magma_dlaex3 */

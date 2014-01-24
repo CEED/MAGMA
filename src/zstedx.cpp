@@ -214,4 +214,4 @@ magma_zstedx(magma_range_t range, magma_int_t n, double vl, double vu,
     iwork[0] = liwmin;
 
     return *info;
-} /* zstedx */
+} /* magma_zstedx */

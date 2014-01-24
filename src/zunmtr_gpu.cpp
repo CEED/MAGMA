@@ -192,4 +192,4 @@ magma_zunmtr_gpu(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
     }
 
     return *info;
-} /* zunmtr */
+} /* magma_zunmtr */

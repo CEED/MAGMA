@@ -312,4 +312,4 @@ CLEANUP:
     magma_setdevice( cdevice );
     
     return *info;
-} // magma_zgehrd
+} /* magma_zgehrd */

@@ -522,4 +522,4 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     magma_setlapack_numthreads(1);
     return *info;
-} /* zhetrd_he2hb_ */
+} /* magma_zhetrd_he2hb_mgpu */

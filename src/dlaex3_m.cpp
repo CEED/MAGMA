@@ -635,4 +635,4 @@ magma_dlaex3_m(magma_int_t nrgpu,
     timer_printf( "gemms = %6.2f\n", time );
 
     return MAGMA_SUCCESS;
-} /*magma_dlaed3_m*/
+} /* magma_dlaed3_m */

@@ -116,8 +116,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
-    =====================================================================
-*/
+    ===================================================================== */
 
     magma_int_t ione = 1;
     magma_range_t range2;

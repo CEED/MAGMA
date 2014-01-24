@@ -423,4 +423,4 @@ magma_zhegvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
     iwork[0] = liwmin;
 
     return *info;
-} /* zhegvdx_2stage */
+} /* magma_zhegvdx_2stage */

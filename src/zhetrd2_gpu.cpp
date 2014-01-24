@@ -301,4 +301,4 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     return *info;
-} /* zhetrd2_gpu */
+} /* magma_zhetrd2_gpu */

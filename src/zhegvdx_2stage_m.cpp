@@ -380,4 +380,4 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu,
     iwork[0] = liwmin;
 
     return *info;
-} /* zhegvdx_2stage_m */
+} /* magma_zhegvdx_2stage_m */

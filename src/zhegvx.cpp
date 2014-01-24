@@ -336,4 +336,4 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
     magma_free( dz );
     
     return *info;
-} /* zhegvx */
+} /* magma_zhegvx */

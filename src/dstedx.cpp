@@ -335,4 +335,4 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
     iwork[0] = liwmin;
 
     return MAGMA_SUCCESS;
-} /* dstedx */
+} /* magma_dstedx */

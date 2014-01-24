@@ -69,7 +69,6 @@ magma_zgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
     HWORK   (workspace) COMPLEX_16 array, dimension N*NRHS
     =====================================================================    */
 
-
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex *work = NULL;
     int notran = (trans == MagmaNoTrans);

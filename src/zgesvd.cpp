@@ -2806,4 +2806,4 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
     }
     
     return *info;
-} // magma_zgesvd
+} /* magma_zgesvd */

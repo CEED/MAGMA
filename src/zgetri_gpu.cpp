@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
 extern "C" magma_int_t
 magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
                   magma_int_t *ipiv, magmaDoubleComplex *dwork, magma_int_t lwork,

@@ -11,8 +11,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
 extern "C" magma_int_t
 magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
              magmaDoubleComplex *A, magma_int_t lda,

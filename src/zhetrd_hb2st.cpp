@@ -107,9 +107,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
-                                          magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-                                          magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
+extern "C" magma_int_t
+magma_zhetrd_hb2st(
+    magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+    magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
+    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -648,8 +650,7 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
      * which go over the losange block_column
      * by block column. but it is not important
      * here the order because Ts are independent.
-     * ========================================
-    */
+     * ======================================== */
     nt  = magma_ceildiv((n-1), Vblksiz);
     for (blkj=nt-1; blkj >= 0; blkj--) {
         /* the index of the first row on the top of block (blkj) */

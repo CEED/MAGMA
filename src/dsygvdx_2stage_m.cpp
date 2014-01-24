@@ -347,4 +347,4 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
     iwork[0] = liwmin;
 
     return *info;
-} /* dsygvdx_2stage */
+} /* magma_dsygvdx_2stage_m */

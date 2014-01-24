@@ -456,7 +456,8 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
     magma_free_cpu(f);
 
     return mv_time;
-} /* zlatrd_ */
+} /* magma_zlatrd_mgpu */
+
 
 extern "C" magma_int_t
 magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,

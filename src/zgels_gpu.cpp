@@ -78,7 +78,8 @@ magma_zgels_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t 
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    magmaDoubleComplex *dT, *tau;
+    magmaDoubleComplex *dT;
+    magmaDoubleComplex *tau;
     magma_int_t k;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);

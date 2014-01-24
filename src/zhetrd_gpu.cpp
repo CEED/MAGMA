@@ -293,4 +293,4 @@ magma_zhetrd_gpu(magma_uplo_t uplo, magma_int_t n,
     magma_free( dwork );
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
-} /* zhetrd_gpu */
+} /* magma_zhetrd_gpu */

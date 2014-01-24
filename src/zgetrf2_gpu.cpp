@@ -245,4 +245,4 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
         magma_free_pinned( work );
     }
     return *info;
-}   /* End of MAGMA_ZGETRF_GPU */
+} /* magma_zgetrf2_gpu */

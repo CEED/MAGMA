@@ -272,4 +272,4 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     magma_free(df);
 
     return *info;
-} /* zgeqp3 */
+} /* magma_zgeqp3_gpu */

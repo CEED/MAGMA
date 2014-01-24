@@ -299,7 +299,6 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
         i_n = n-i;
         lapackf77_zhetrd(uplo_, &i_n, A(i, i), &lda, &d[i], &e[i],
                          &tau[i], work, &lwork, &iinfo);
-        
     }
     
     magma_free( da );

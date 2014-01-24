@@ -108,8 +108,8 @@ magma_zlauum_gpu(magma_uplo_t uplo, magma_int_t n,
 
                 /* Compute the product U * U'. */
                 magma_ztrmm( MagmaRight, MagmaUpper,
-                         MagmaConjTrans, MagmaNonUnit, i, ib,
-                         c_one, dA(i,i), ldda, dA(0, i),ldda);
+                             MagmaConjTrans, MagmaNonUnit, i, ib,
+                             c_one, dA(i,i), ldda, dA(0, i),ldda);
 
                 magma_zgetmatrix( ib, ib,
                                   dA(i, i), ldda,

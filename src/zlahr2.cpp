@@ -16,7 +16,8 @@
 extern "C" magma_int_t
 magma_zlahr2(
     magma_int_t n, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *dA, magmaDoubleComplex *dV,
+    magmaDoubleComplex *dA,
+    magmaDoubleComplex *dV,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex *T, magma_int_t ldt,
@@ -152,9 +153,8 @@ magma_zlahr2(
     // adjust from 1-based indexing
     k -= 1;
 
-    // Function Body
     if (n <= 1)
-        return 0;
+        return MAGMA_SUCCESS;
     
     for (i = 0; i < nb; ++i) {
         n_k_i_1 = n - k - i - 1;
@@ -275,5 +275,5 @@ magma_zlahr2(
     // Restore diagonal element
     *A(k+nb,nb-1) = ei;
 
-    return 0;
-} // magma_zlahr2
+    return MAGMA_SUCCESS;
+} /* magma_zlahr2 */

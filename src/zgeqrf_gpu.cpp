@@ -6,7 +6,6 @@
        @date
 
        @precisions normal z -> s d c
-
 */
 #include "common_magma.h"
 
@@ -246,9 +245,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     magma_queue_destroy( stream[1] );
     magma_free_pinned( work );
     return *info;
-
-/*     End of MAGMA_ZGEQRF */
-} /* magma_zgeqrf */
+} /* magma_zgeqrf_gpu */
 
 #undef a_ref
 #undef t_ref

@@ -413,4 +413,4 @@ magma_zlahr2_m(
     }
 
     return 0;
-} // magma_zlahr2
+} /* magma_zlahr2 */

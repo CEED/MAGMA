@@ -6,7 +6,6 @@
        @date
 
        @precisions normal z -> s d c
-
 */
 #include "common_magma.h"
 
@@ -79,7 +78,7 @@ magma_zposv_gpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
         *info = -1;
     if ( n < 0 )
         *info = -2;
-    if ( nrhs < 0)
+    if ( nrhs < 0 )
         *info = -3;
     if ( ldda < max(1, n) )
         *info = -5;

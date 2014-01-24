@@ -134,5 +134,4 @@ magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
     }
 
     return *info;
-    /* End of MAGMA_ZGETRF_GPU */
-}
+} /* magma_zgessm_gpu */

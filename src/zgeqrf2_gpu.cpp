@@ -114,7 +114,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     lwork  = (m+n) * nb;
     lhwork = lwork - (m)*nb;
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (n)*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -233,4 +233,4 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     }
 
     return *info;
-}   /* magma_zgeqrf2_gpu */
+} /* magma_zgeqrf2_gpu */

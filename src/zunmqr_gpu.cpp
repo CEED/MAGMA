@@ -315,4 +315,4 @@ magma_zunmqr_gpu(magma_side_t side, magma_trans_t trans,
     // In LAPACK: On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
     //hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
-}   /* end of magma_zunmqr_gpu */
+} /* magma_zunmqr_gpu */

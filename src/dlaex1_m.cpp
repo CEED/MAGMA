@@ -156,8 +156,7 @@ magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    =====================================================================
-*/
+    ===================================================================== */
     magma_int_t coltyp, i, idlmda;
     magma_int_t indx, indxc, indxp;
     magma_int_t iq2, is, iw, iz, k, tmp;

@@ -277,4 +277,4 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     magma_queue_destroy( stream );
 
     return *info;
-} /* zgeqp3 */
+} /* magma_zgeqp3 */

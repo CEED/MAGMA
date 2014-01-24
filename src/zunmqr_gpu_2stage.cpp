@@ -188,4 +188,4 @@ magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
     }
 
     return MAGMA_SUCCESS;
-}   /* End of MAGMA_ZUNMQR_GPU_2stages */
+} /* magma_zunmqr_gpu_2stages */

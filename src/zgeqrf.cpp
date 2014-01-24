@@ -198,6 +198,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
             magma_int_t rows = m-i;
             lapackf77_zgeqrf(&rows, &ib, A(i,i), &lda, tau+i, work, &lwork, info);
+            
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,

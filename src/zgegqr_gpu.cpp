@@ -167,4 +167,4 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
     #endif
     
     return *info;
-}   /* magma_zgegqr_gpu */
+} /* magma_zgegqr_gpu */

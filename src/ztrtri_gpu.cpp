@@ -70,7 +70,7 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* diag_ = lapack_diag_const( diag );
-    magma_int_t     nb, nn, j, jb;
+    magma_int_t nb, nn, j, jb;
     //magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one      = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
@@ -110,19 +110,19 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
 
     /* Determine the block size for this environment */
     nb = magma_get_zpotrf_nb(n);
-    
+
     if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, nb*nb )) {
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
-    
+
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
     if (nb <= 1 || nb >= n) {
         magma_zgetmatrix( n, n, dA, ldda, work, n );
-        lapackf77_ztrtri(uplo_, diag_, &n, work, &n, info);
+        lapackf77_ztrtri( uplo_, diag_, &n, work, &n, info );
         magma_zsetmatrix( n, n, work, n, dA, ldda );
     }
     else {
@@ -134,11 +134,11 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
                 /* Compute rows 1:j-1 of current block column */
                 magma_ztrmm( MagmaLeft, MagmaUpper,
                              MagmaNoTrans, MagmaNonUnit, j, jb,
-                             c_one, dA(0,0), ldda, dA(0, j),ldda);
+                             c_one, dA(0,0), ldda, dA(0, j), ldda );
 
                 magma_ztrsm( MagmaRight, MagmaUpper,
                              MagmaNoTrans, MagmaNonUnit, j, jb,
-                             c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
+                             c_neg_one, dA(j,j), ldda, dA(0, j), ldda );
 
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
@@ -147,7 +147,7 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
                 magma_queue_sync( stream[1] );
 
                 /* Compute inverse of current diagonal block */
-                lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, work, &jb, info);
+                lapackf77_ztrtri( MagmaUpperStr, diag_, &jb, work, &jb, info );
 
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
@@ -156,20 +156,20 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
         }
         else {
             /* Compute inverse of lower triangular matrix */
-            nn=((n-1)/nb)*nb+1;
+            nn = ((n-1)/nb)*nb+1;
 
             for (j=nn-1; j >= 0; j -= nb) {
-                jb=min(nb,(n-j));
+                jb = min(nb,(n-j));
 
                 if ((j+jb) < n) {
                     /* Compute rows j+jb:n of current block column */
                     magma_ztrmm( MagmaLeft, MagmaLower,
                                  MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
-                                 c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda);
+                                 c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda );
 
                     magma_ztrsm( MagmaRight, MagmaLower,
                                  MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
-                                 c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda);
+                                 c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda );
                 }
 
                 magma_zgetmatrix_async( jb, jb,
@@ -179,8 +179,8 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
                 magma_queue_sync( stream[1] );
 
                 /* Compute inverse of current diagonal block */
-                lapackf77_ztrtri(MagmaLowerStr, diag_, &jb, work, &jb, info);
-        
+                lapackf77_ztrtri( MagmaLowerStr, diag_, &jb, work, &jb, info );
+
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
                                         dA(j, j), ldda, stream[0] );

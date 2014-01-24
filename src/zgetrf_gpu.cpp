@@ -265,4 +265,4 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         }
     }
     return *info;
-}   /* End of MAGMA_ZGETRF_GPU */
+} /* magma_zgetrf_gpu */

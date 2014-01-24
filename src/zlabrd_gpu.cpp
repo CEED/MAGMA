@@ -16,10 +16,13 @@
 
 extern "C" magma_int_t
 magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
-                  magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *da, magma_int_t ldda,
+                  magmaDoubleComplex *a,  magma_int_t lda,
+                  magmaDoubleComplex *da, magma_int_t ldda,
                   double *d, double *e, magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
-                  magmaDoubleComplex *x, magma_int_t ldx, magmaDoubleComplex *dx, magma_int_t lddx,
-                  magmaDoubleComplex *y, magma_int_t ldy, magmaDoubleComplex *dy, magma_int_t lddy)
+                  magmaDoubleComplex *x,  magma_int_t ldx,
+                  magmaDoubleComplex *dx, magma_int_t lddx,
+                  magmaDoubleComplex *y,  magma_int_t ldy,
+                  magmaDoubleComplex *dy, magma_int_t lddy)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -142,19 +145,14 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     where a denotes an element of the original matrix which is unchanged,
     vi denotes an element of the vector defining H(i), and ui an element
     of the vector defining G(i).
-
     =====================================================================    */
 
-
-    /* Table of constant values */
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t c__1 = 1;
     
-    /* System generated locals */
     magma_int_t a_dim1, a_offset, x_dim1, x_offset, y_dim1, y_offset, i__2, i__3;
-    /* Local variables */
     magma_int_t i__;
     magmaDoubleComplex alpha;
 
@@ -176,7 +174,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     y -= y_offset;
     dy -= 1 + lddy;
 
-    /* Function Body */
+    /* Quick return if possible */
     if (m <= 0 || n <= 0) {
         return 0;
     }
@@ -205,7 +203,6 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                    &a[i__*a_dim1+1], &c__1, &c_one, &a[i__+i__*a_dim1], &c__1);
             
             /* Generate reflection Q(i) to annihilate A(i+1:m,i) */
-
             alpha = a[i__ + i__ * a_dim1];
             i__2 = m - i__ + 1;
             i__3 = i__ + 1;
@@ -236,19 +233,19 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 i__2 = m - i__ + 1;
                 i__3 = i__ - 1;
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + a_dim1],
-                        &lda, &a[i__ + i__ * a_dim1], &c__1, &c_zero,
-                       &y[i__ * y_dim1 + 1], &c__1);
+                              &lda, &a[i__ + i__ * a_dim1], &c__1, &c_zero,
+                              &y[i__ * y_dim1 + 1], &c__1);
 
                 i__2 = n - i__;
                 i__3 = i__ - 1;
                 blasf77_zgemv("N", &i__2, &i__3, &c_neg_one, &y[i__ + 1 +y_dim1], &ldy,
-                       &y[i__ * y_dim1 + 1], &c__1,
-                       &c_zero, f, &c__1);
+                              &y[i__ * y_dim1 + 1], &c__1,
+                              &c_zero, f, &c__1);
                 i__2 = m - i__ + 1;
                 i__3 = i__ - 1;
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &x[i__ + x_dim1],
-                       &ldx, &a[i__ + i__ * a_dim1], &c__1, &c_zero,
-                       &y[i__ * y_dim1 + 1], &c__1);
+                              &ldx, &a[i__ + i__ * a_dim1], &c__1, &c_zero,
+                              &y[i__ * y_dim1 + 1], &c__1);
                 
                 // 4. Synch to make sure the result is back ----------------
                 magma_queue_sync( stream );
@@ -261,8 +258,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 i__2 = i__ - 1;
                 i__3 = n - i__;
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_neg_one, &a[(i__ + 1) *
-                        a_dim1 + 1], &lda, &y[i__ * y_dim1 + 1], &c__1, &c_one,
-                        &y[i__ + 1 + i__ * y_dim1], &c__1);
+                              a_dim1 + 1], &lda, &y[i__ * y_dim1 + 1], &c__1, &c_one,
+                              &y[i__ + 1 + i__ * y_dim1], &c__1);
                 i__2 = n - i__;
                 blasf77_zscal(&i__2, &tauq[i__], &y[i__ + 1 + i__ * y_dim1], &c__1);
 
@@ -273,8 +270,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 lapackf77_zlacgv( &i__,  &a[i__+a_dim1], &lda );
                 #endif
                 blasf77_zgemv("No transpose", &i__2, &i__, &c_neg_one, &y[i__ + 1 +
-                        y_dim1], &ldy, &a[i__ + a_dim1], &lda, &c_one, &a[i__ + (
-                        i__ + 1) * a_dim1], &lda);
+                              y_dim1], &ldy, &a[i__ + a_dim1], &lda, &c_one, &a[i__ + (
+                              i__ + 1) * a_dim1], &lda);
                 i__2 = i__ - 1;
                 i__3 = n - i__;
                 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -282,8 +279,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 lapackf77_zlacgv( &i__2, &x[i__+x_dim1], &ldx );
                 #endif
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_neg_one, &a[(i__ + 1) *
-                        a_dim1 + 1], &lda, &x[i__ + x_dim1], &ldx, &c_one, &a[
-                        i__ + (i__ + 1) * a_dim1], &lda);
+                              a_dim1 + 1], &lda, &x[i__ + x_dim1], &ldx, &c_one, &a[
+                              i__ + (i__ + 1) * a_dim1], &lda);
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 lapackf77_zlacgv( &i__2, &x[i__+x_dim1], &ldx );
                 #endif
@@ -550,4 +547,4 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     magma_free_cpu(f);
     
     return MAGMA_SUCCESS;
-} /* zlabrd */
+} /* magma_zlabrd_gpu */
