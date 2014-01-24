@@ -88,7 +88,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     //Chronometry
     #ifdef ENABLE_TIMER
-    double tempo1, tempo2;
+    real_Double_t tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
     printf("#=============================================================#\n");
     printf("#   CG performance analysis every %d iteration   \n", iterblock);

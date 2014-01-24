@@ -84,8 +84,8 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
 
     //Chronometry
     #ifdef ENABLE_TIMER
-    double t_lu1, t_lu = 0.0;
-    double t_lusv1, t_lusv = 0.0;
+    real_Double_t t_lu1, t_lu = 0.0;
+    real_Double_t t_lusv1, t_lusv = 0.0;
     #endif
 
     magma_z_sparse_matrix B, C, D;

@@ -132,7 +132,7 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
 
     //Chronometry
     #ifdef ENABLE_TIMER
-    double tempo1, tempo2;
+    real_Double_t tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
     printf("#=============================================================#\n");
     printf("#   BiCGStab (merged) performance analysis every %d iteration\n",
