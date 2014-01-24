@@ -135,6 +135,7 @@ typedef struct magma_s_vector{
 
 typedef struct magma_solver_parameters{
 
+    magma_solver_type  solver;
     double             epsilon;  
     magma_int_t        maxiter;
     magma_int_t        restart; 
@@ -142,18 +143,22 @@ typedef struct magma_solver_parameters{
     magma_int_t        numiter;
     double             init_res;
     double             final_res;
-    double             *res_vec;
-    double             runtime;
-    magma_int_t        *info;
+    real_Double_t      runtime;
+    real_Double_t      *res_vec;
+    real_Double_t      *timing;
+    magma_int_t        verbose;
+    magma_int_t        info;
 
 //---------------------------------
-// if info = 1 on input, the complete
-// list of residuals is stored in 
-// *res_vec
+// the input for verbose is:
+// 0 = production mode
+// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+// k-th iteration 
+//
 // the output of info is:
 //  0 = convergence (stopping criterion met)
 // -1 = no convergence
-//  1 = convergence but stopping criterion not met within maxiter
+// -2 = convergence but stopping criterion not met within maxiter
 //--------------------------------
 
 }magma_solver_parameters;
@@ -161,13 +166,14 @@ typedef struct magma_solver_parameters{
 
 typedef struct magma_precond_parameters{
 
-    magma_precond_type precond;
+    magma_solver_type  solver;
     magma_precision    format;
     double             epsilon;  
     magma_int_t        maxiter;
     magma_int_t        restart; 
     magma_int_t        numiter;
-    double             residual;
+    double             init_res;
+    double             final_res;
 
 }magma_precond_parameters;
 
