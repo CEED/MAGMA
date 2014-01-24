@@ -42,7 +42,7 @@ void magmablas_dtrsm_work(
     double alpha,
     const double* A, magma_int_t lda,
     double* b, magma_int_t ldb,
-    int flag,
+    magma_int_t flag,
     double *d_dinvA, double *d_x )
 {
 /*  -- MAGMA (version 1.1) --
@@ -175,7 +175,7 @@ void magmablas_dtrsm_work(
     Level 3 Blas routine.
     ===================================================================== */
 
-    int i;
+    magma_int_t i;
 
     /* quick return on wrong size */
     if (M <= 0 || N <= 0)
@@ -193,7 +193,7 @@ void magmablas_dtrsm_work(
             if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
-                int MM = min (NB, M);
+                magma_int_t MM = min (NB, M);
                 cublasDgemm('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
 
                 if (NB >= M) {
@@ -217,7 +217,7 @@ void magmablas_dtrsm_work(
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
-                int MM = (M%NB==0) ? NB : (M%NB);
+                magma_int_t MM = (M%NB==0) ? NB : (M%NB);
                 i = M-MM;
                 cublasDgemm('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
 
@@ -244,7 +244,7 @@ void magmablas_dtrsm_work(
             if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
-                int MM = (M%NB==0) ? NB : (M%NB);
+                magma_int_t MM = (M%NB==0) ? NB : (M%NB);
                 i = M-MM;
                 cublasDgemm('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);
 
@@ -268,7 +268,7 @@ void magmablas_dtrsm_work(
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
-                int MM = min (NB, M);
+                magma_int_t MM = min (NB, M);
                 cublasDgemm('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);
 
                 if (NB >= M) {
@@ -303,7 +303,7 @@ void magmablas_dtrsm_work(
             if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
-                int NN = (N%NB==0) ? NB : (N%NB);
+                magma_int_t NN = (N%NB==0) ? NB : (N%NB);
                 i = N-NN;
                 cublasDgemm('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 
@@ -327,7 +327,7 @@ void magmablas_dtrsm_work(
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
-                int NN = min(NB, N);
+                magma_int_t NN = min(NB, N);
                 cublasDgemm('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
 
                 if (NB >= N) {
@@ -354,7 +354,7 @@ void magmablas_dtrsm_work(
             if (uplo == MagmaLower) {
                 /* the lower case */
                 /* handle the first block seperately with alpha */
-                int NN = min(NB, N);
+                magma_int_t NN = min(NB, N);
                 cublasDgemm('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);
                 
                 if (NB >= N) {
@@ -378,7 +378,7 @@ void magmablas_dtrsm_work(
             else {
                 /* the upper case */
                 /* handle the first block seperately with alpha */
-                int NN = (N%NB==0) ? NB : (N%NB);
+                magma_int_t NN = (N%NB==0) ? NB : (N%NB);
                 i = N-NN;
                 cublasDgemm('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M);
 

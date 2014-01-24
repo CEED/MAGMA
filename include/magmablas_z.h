@@ -36,8 +36,8 @@ void zzero_nbxnb_block(
     magmaDoubleComplex_ptr dA, magma_int_t ldda );
 
 void magmablas_zsetdiag1subdiag0_stream(
-    magma_uplo_t uplo, int k, int nb,
-    magmaDoubleComplex *A, int lda, magma_queue_t stream);
+    magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda, magma_queue_t stream);
 
 void magmablas_zsetdiag1subdiag0(
     magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
@@ -645,7 +645,7 @@ void magmablas_ztrsm_work(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       db, magma_int_t lddb,
-    int flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
+    magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
 #endif
 
   /*

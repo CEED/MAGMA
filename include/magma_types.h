@@ -340,7 +340,7 @@ typedef enum {
     MagmaHermGeev      = 241,  /* latms */
     MagmaHermPoev      = 242,
     MagmaNonsymPosv    = 243,
-    MagmaSymPosv       = 244,
+    MagmaSymPosv       = 244
 } magma_sym_t;
 
 typedef enum {

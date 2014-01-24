@@ -122,7 +122,7 @@ int main( int argc, char** argv )
         error = 0;
         for( int j = 0; j < k; ++j ) {
             magma_int_t i1 = magma_izamax( m, dA(0,j), 1 );
-            magma_int_t i2;
+            int i2;  // NOT magma_int_t, for cublas
             cublasIzamax( handle, m, dA(0,j), 1, &i2 );
             // todo need sync here?
             assert( i1 == i2 );
