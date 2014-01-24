@@ -38,6 +38,7 @@ int main( int argc, char** argv)
     solver_par.maxiter = 1000;
     solver_par.restart = 30;
     solver_par.ortho = Magma_CGS;
+    solver_par.verbose = 0;
     int format = 0;
     int ortho = 0;
 
@@ -59,6 +60,8 @@ int main( int argc, char** argv)
                 case 2: B.storage_type = Magma_ELLPACKT; break;
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
             }
+        }else if ( strcmp("--verbose", argv[i]) == 0 ) {
+            solver_par.verbose = atoi( argv[++i] );
         } else if ( strcmp("--ortho", argv[i]) == 0 ) {
             ortho = atoi( argv[++i] );
             switch( ortho ) {
@@ -78,10 +81,11 @@ int main( int argc, char** argv)
     }
     printf( "\n    usage: ./run_zgmres"
             " < --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
+            " --verbose %d (0=summary, k=details every k iterations)"
             " --restart %d --maxiter %d --tol %.2e"
             " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) >"
-            " --matrix filename \n\n", format, solver_par.restart, 
-            solver_par.maxiter, solver_par.epsilon, ortho );
+            " --matrix filename \n\n", format, solver_par.verbose, 
+            solver_par.restart, solver_par.maxiter, solver_par.epsilon, ortho );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 
@@ -95,8 +99,11 @@ int main( int argc, char** argv)
     magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
     magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
 
-
     magma_zgmres( B_d, b, &x, &solver_par );
+
+    magma_zsolverinfo( &solver_par );
+
+    magma_zsolverinfo_free( &solver_par );
 
     magma_z_mfree(&B_d);
     magma_z_mfree(&B);

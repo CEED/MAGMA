@@ -35,6 +35,7 @@ int main( int argc, char** argv)
 
     magma_solver_parameters solver_par;
     solver_par.maxiter = 1000;
+    solver_par.verbose;
     int format = 0;
 
     magma_z_sparse_matrix A, B, B_d;
@@ -80,6 +81,10 @@ int main( int argc, char** argv)
 
 
     magma_zjacobi( B_d, b, &x, &solver_par );
+
+    magma_zsolverinfo( &solver_par );
+
+    magma_zsolverinfo_free( &solver_par );
 
     magma_z_mfree(&B_d);
     magma_z_mfree(&B);

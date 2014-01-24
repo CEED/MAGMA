@@ -36,11 +36,12 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
+    solver_par.verbose = 0;
     int version = 0;
     int format = 0;
 
     magma_precond_parameters precond_par;
-    precond_par.precond = Magma_JACOBI;
+    precond_par.solver = Magma_JACOBI;
     precond_par.epsilon = 1e-8;
     precond_par.maxiter = 100;
     precond_par.restart = 30;
@@ -65,15 +66,17 @@ int main( int argc, char** argv)
             }
         } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
             solver_par.maxiter = atoi( argv[++i] );
+        }else if ( strcmp("--verbose", argv[i]) == 0 ) {
+            solver_par.verbose = atoi( argv[++i] );
         } else if ( strcmp("--tol", argv[i]) == 0 ) {
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
         } else if ( strcmp("--preconditioner", argv[i]) == 0 ) {
             version = atoi( argv[++i] );
             switch( version ) {
-                case 0: precond_par.precond = Magma_JACOBI; break;
-                case 1: precond_par.precond = Magma_CG; break;
-                case 2: precond_par.precond = Magma_BICGSTAB; break;
-                case 3: precond_par.precond = Magma_GMRES; break;
+                case 0: precond_par.solver = Magma_JACOBI; break;
+                case 1: precond_par.solver = Magma_CG; break;
+                case 2: precond_par.solver = Magma_BICGSTAB; break;
+                case 3: precond_par.solver = Magma_GMRES; break;
             }
         } else if ( strcmp("--precond-maxiter", argv[i]) == 0 ) {
             precond_par.maxiter = atoi( argv[++i] );
@@ -87,11 +90,12 @@ int main( int argc, char** argv)
     }
     printf( "\n    usage: ./run_ziterref"
             " < --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
+            " --verbose %d (0=summary, k=details every k iterations)"
             " --maxiter %d --tol %.2e"
             " --preconditioner %d (0=Jacobi, 1=CG, 2=BiCGStab, 3=GMRES)"
             " < --precond-maxiter %d --precond-tol %.2e"
             " --precond-restart %d > >"
-            " --matrix filename \n\n", format,
+            " --matrix filename \n\n", format, solver_par.verbose,
             solver_par.maxiter, solver_par.epsilon, version,
             precond_par.maxiter, precond_par.epsilon, precond_par.restart );
 
@@ -109,6 +113,9 @@ int main( int argc, char** argv)
 
     magma_ziterref( B_d, b, &x, &solver_par, &precond_par );
 
+    magma_zsolverinfo( &solver_par );
+
+    magma_zsolverinfo_free( &solver_par );
 
     magma_z_mfree(&B_d);
     magma_z_mfree(&B);

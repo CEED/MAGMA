@@ -36,6 +36,7 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
+    solver_par.verbose = 0;
     int format = 0;
     int version = 0;
 
@@ -57,6 +58,8 @@ int main( int argc, char** argv)
                 case 2: B.storage_type = Magma_ELLPACKT; break;
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
             }
+        }else if ( strcmp("--verbose", argv[i]) == 0 ) {
+            solver_par.verbose = atoi( argv[++i] );
         } else if ( strcmp("--version", argv[i]) == 0 ) {
             version = atoi( argv[++i] );
         } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
@@ -69,9 +72,10 @@ int main( int argc, char** argv)
     }
     printf( "\n    usage: ./run_zbicgstab"
             " < --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
+            " --verbose %d (0=summary, k=details every k iterations)"
             " --maxiter %d --tol %.2e"
             " --version %d (0=basic, 1=merged, 2=merged2) >"
-            " --matrix filename \n\n", format,
+            " --matrix filename \n\n", format, solver_par.verbose,
             solver_par.maxiter, solver_par.epsilon, version );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
@@ -93,6 +97,9 @@ int main( int argc, char** argv)
     else if ( version == 2 )
         magma_zbicgstab_merge2( B_d, b, &x, &solver_par );
 
+    magma_zsolverinfo( &solver_par );
+
+    magma_zsolverinfo_free( &solver_par );
 
     magma_z_mfree(&B_d);
     magma_z_mfree(&B);

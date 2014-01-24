@@ -35,6 +35,7 @@ int main( int argc, char** argv)
 
     magma_solver_parameters solver_par;
     solver_par.maxiter = 1000;
+    solver_par.verbose = 0;
     int format = 0;
 
     magma_z_sparse_matrix A, B, B_d;
@@ -51,7 +52,7 @@ int main( int argc, char** argv)
             strcpy( filename, argv[++i] );
         }
     }
-    printf( "\n    usage: ./run_zbcsrlu --matrix filename \n\n");
+    printf( "\n    usage: ./run_zbcsrlu --matrix filename \n\n" );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 
@@ -62,9 +63,11 @@ int main( int argc, char** argv)
     magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
     magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-
-
     magma_zbcsrlu( A, b, &x, &solver_par );
+
+    magma_zsolverinfo( &solver_par );
+
+    magma_zsolverinfo_free( &solver_par );
 
     magma_z_mfree(&A); 
     magma_z_vfree(&x);
