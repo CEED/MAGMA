@@ -330,6 +330,12 @@ magma_zmgenerator(  magma_int_t nx,
                     magma_int_t nz,
                     magma_z_sparse_matrix *A );
 
+magma_int_t
+magma_zsolverinfo(  magma_solver_parameters *solver_par );
+
+magma_int_t
+magma_zsolverinfo_free( magma_solver_parameters *solver_par );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
