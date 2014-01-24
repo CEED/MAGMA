@@ -58,7 +58,7 @@ int main( int argc, char** argv )
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t m, n, k, size, maxn, ld, info;
     magma_int_t *piv;
-    magma_err_t err;
+    magma_int_t err;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );

@@ -48,7 +48,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
    
     magma_int_t *piv;
-    magma_err_t err;
+    magma_int_t err;
 
     magmaDoubleComplex *h_A, *h_B, *h_Bcublas, *h_Bmagma, *h_B1, *h_X1, *h_X2, *LU, *LUT;
     magmaDoubleComplex *d_A, *d_B;
