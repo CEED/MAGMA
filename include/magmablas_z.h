@@ -691,7 +691,7 @@ void magma_zgetvector_internal(
     magmaDoubleComplex*          hy_dst, magma_int_t incy,
     const char* func, const char* file, int line );
 
-magma_err_t
+magma_int_t
 magma_zcopyvector_internal(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dx_src, magma_int_t incx,
@@ -712,7 +712,7 @@ void magma_zgetvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line );
 
-magma_err_t
+magma_int_t
 magma_zcopyvector_async_internal(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dx_src, magma_int_t incx,
