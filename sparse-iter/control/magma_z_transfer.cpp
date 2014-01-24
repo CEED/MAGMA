@@ -750,7 +750,7 @@ magma_z_vtransfer( magma_z_vector x,
     // second case: copy matrix from host to host
     if( src == Magma_CPU && dst == Magma_CPU ){
         // fill in information for B
-        y->memory_location = Magma_DEV;
+        y->memory_location = Magma_CPU;
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         // memory allocation
@@ -762,7 +762,7 @@ magma_z_vtransfer( magma_z_vector x,
     // third case: copy matrix from device to host
     if( src == Magma_DEV && dst == Magma_CPU ){
         // fill in information for B
-        y->memory_location = Magma_DEV;
+        y->memory_location = Magma_CPU;
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         // memory allocation
