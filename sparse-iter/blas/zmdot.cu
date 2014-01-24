@@ -71,7 +71,7 @@ magma_zdot_kernel( int Gs,
             temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             temp2[ Idx ] += temp2[ Idx + 32 ];
@@ -158,7 +158,7 @@ magma_zblockdot_kernel( int Gs,
             }
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             for( j=0; j<k; j++){
@@ -242,7 +242,7 @@ magma_zblockreduce_kernel( int Gs,
             }
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             for( j=0; j<k; j++){
@@ -307,7 +307,7 @@ magma_zreduce_kernel_fast( int Gs,
             temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             temp2[ Idx ] += temp2[ Idx + 32 ];
@@ -390,7 +390,7 @@ magma_zblockreduce_kernel_fast( int Gs,
             }
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             for( j=0; j<k; j++){

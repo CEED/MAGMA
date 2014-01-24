@@ -66,7 +66,7 @@ magma_zcgreduce_kernel_spmv1( int Gs,
             temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             temp2[ Idx ] += temp2[ Idx + 32 ];

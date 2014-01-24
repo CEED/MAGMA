@@ -66,7 +66,7 @@ magma_zreduce_kernel_spmv1(    int Gs,
             temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             temp2[ Idx ] += temp2[ Idx + 32 ];
@@ -416,7 +416,7 @@ magma_zbicgmerge_spmv2_kernel(
             }
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             for( j=0; j<2; j++){
@@ -612,7 +612,7 @@ magma_zbicgmerge_xrbeta_kernel(
             }
         }
     #endif
-    #if defined(PRECISION_f)
+    #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
             for( j=0; j<2; j++){
