@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Stan Tomov
        @author Raffaele Solca
@@ -36,7 +36,7 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

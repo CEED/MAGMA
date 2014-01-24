@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
 
@@ -28,7 +28,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

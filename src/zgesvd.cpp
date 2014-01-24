@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Stan Tomov
        @precisions normal z -> c
@@ -26,7 +26,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

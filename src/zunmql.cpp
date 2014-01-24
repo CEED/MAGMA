@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Raffaele Solca
 
@@ -25,7 +25,7 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

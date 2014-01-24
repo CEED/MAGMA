@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
     
        @author Raffaele Solca
     
@@ -24,7 +24,7 @@ magma_zstedx(magma_range_t range, magma_int_t n, double vl, double vu,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

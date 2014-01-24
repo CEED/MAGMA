@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions mixed zc -> ds
 
@@ -64,7 +64,7 @@ magmablas_zclaswp( magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

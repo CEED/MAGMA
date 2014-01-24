@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Hatem Ltaief
        @author Mathieu Faverge
@@ -29,7 +29,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

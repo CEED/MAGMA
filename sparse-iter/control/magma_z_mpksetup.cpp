@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -30,7 +30,7 @@ using namespace std;
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -147,7 +147,7 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -193,7 +193,7 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -353,7 +353,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -438,7 +438,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -494,7 +494,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -531,7 +531,7 @@ magma_z_mpk_compress(    magma_int_t num_add_rows,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -569,7 +569,7 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -614,7 +614,7 @@ magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

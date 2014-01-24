@@ -3,7 +3,7 @@
 *      Univ. of Tennessee, Knoxville
 *      Univ. of California, Berkeley
 *      Univ. of Colorado, Denver
-*      November 2011
+*      @date
 *
 *      @precisions normal z -> c
 *      @author Azzam Haidar
@@ -203,7 +203,7 @@
 *> \author Univ. of Colorado Denver
 *> \author NAG Ltd.
 *
-*> \date November 2011
+*> \date @date
 *
 *> \ingroup complex16OTHERcomputational
 *

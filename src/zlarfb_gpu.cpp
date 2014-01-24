@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Stan Tomov
        @author Mark Gates
@@ -21,7 +21,7 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Univ. of California Berkeley
-       November 2011
+       @date
 
     Purpose
     =======

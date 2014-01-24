@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
 
@@ -21,7 +21,7 @@ magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

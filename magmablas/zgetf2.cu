@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
 */
@@ -42,7 +42,7 @@ magma_zgetf2_gpu(
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     ZGETF2 computes an LU factorization of a general m-by-n matrix A
     using partial pivoting with row interchanges.

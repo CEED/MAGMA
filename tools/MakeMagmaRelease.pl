@@ -113,7 +113,6 @@ sub MakeRelease
     myCmd("perl -pi -e 's/VERSION_STAGE +.+/VERSION_STAGE \"$stage\"/' include/magma_types.h");
 
     # Change the version and date in comments
-    # TODO make a generic date tag to search for, instead of November 2011.
     my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime;
     my @months = (
         'January',   'February', 'March',    'April',
@@ -123,7 +122,7 @@ sub MakeRelease
     $year += 1900;
     my $date = "$months[$mon] $year";
     my $script = "s/MAGMA \\\(version [0-9.]+\\\)/MAGMA (version $numversion)/;";
-    $script .= " s/November 2011/$date/;";
+    $script .= " s/\\\@date.*/\\\@date $date/;";
     myCmd("find . -type f -exec perl -pi -e '$script' {} \\;");
     
     # Change version in pkgconfig

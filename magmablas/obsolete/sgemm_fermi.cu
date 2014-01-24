@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal s
 
@@ -616,7 +616,7 @@ magmablas_sgemm_fermi( char TRANSA, char TRANSB, magma_int_t m , magma_int_t n ,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
    Purpose
    =======

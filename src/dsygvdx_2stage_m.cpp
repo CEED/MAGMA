@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Raffaele Solca
        @author Azzam Haidar
@@ -27,7 +27,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

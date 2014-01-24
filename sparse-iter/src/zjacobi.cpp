@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Hartwig Anzt 
 
@@ -27,7 +27,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -112,7 +112,7 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -204,7 +204,7 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -260,7 +260,7 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -355,7 +355,7 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

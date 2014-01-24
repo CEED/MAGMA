@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -32,7 +32,7 @@ using namespace std;
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -126,7 +126,7 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -429,7 +429,7 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -526,7 +526,7 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -608,7 +608,7 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -656,7 +656,7 @@ magma_int_t print_z_csr(    magma_int_t n_row,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======
@@ -714,7 +714,7 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

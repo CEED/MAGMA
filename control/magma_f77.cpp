@@ -10,7 +10,7 @@ extern "C" {
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 */
 
 #define magmaf_init FORTRAN_NAME( magmaf_init, MAGMAF_INIT )

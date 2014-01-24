@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Raffaele Solca
        @author Azzam Haidar
@@ -24,7 +24,7 @@ magma_zheevx(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

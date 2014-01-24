@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Raffaele Solca
        @author Azzam Haidar
@@ -28,7 +28,7 @@ magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

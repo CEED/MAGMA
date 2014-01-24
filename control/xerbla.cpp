@@ -11,7 +11,7 @@ void magma_xerbla(const char *srname , magma_int_t info)
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

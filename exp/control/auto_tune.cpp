@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 */
 
 #include <stdio.h>
@@ -20,7 +20,7 @@ auto_tune (char algorithm, char precision, magma_int_t ncores, magma_int_t ncore
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

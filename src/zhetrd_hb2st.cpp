@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
        
        @author Azzam Haidar
        @author Stan Tomov
@@ -115,7 +115,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
     Purpose
     =======

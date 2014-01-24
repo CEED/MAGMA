@@ -6,7 +6,7 @@
  *  Univ. of Tennessee, Knoxville
  *  Univ. of California, Berkeley
  *  Univ. of Colorado, Denver
- *  November 2011
+ *  @date
  *
  * @version 1.0.0
  * @author Mathieu Faverge

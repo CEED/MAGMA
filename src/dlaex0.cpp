@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
        
        @author Raffaele Solca
        
@@ -24,7 +24,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        .. Scalar Arguments ..
       CHARACTER          RANGE

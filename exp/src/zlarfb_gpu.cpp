@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
 
@@ -27,7 +27,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Univ. of California Berkeley
-       November 2011
+       @date
 
     Purpose
     =======
