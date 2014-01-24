@@ -400,12 +400,16 @@ typedef enum {
 
 typedef enum {
     Magma_CG           = 431,
-    Magma_GMRES        = 432,
-    Magma_BICGSTAB     = 433,
-    Magma_JACOBI       = 434,
-    Magma_GS           = 435,
-    Magma_BCSRLU       = 436
-} magma_precond_type;
+    Magma_CGMERGE      = 432,
+    Magma_GMRES        = 433,
+    Magma_BICGSTAB     = 434,
+  Magma_BICGSTABMERGE  = 435,
+  Magma_BICGSTABMERGE2 = 436,
+    Magma_JACOBI       = 437,
+    Magma_GS           = 438,
+    Magma_ITERREF      = 439,
+    Magma_BCSRLU       = 440
+} magma_solver_type;
 
 typedef enum {
     Magma_DCOMPLEX     = 451,
