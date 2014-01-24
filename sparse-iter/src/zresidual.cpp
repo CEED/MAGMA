@@ -14,10 +14,6 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
-
-
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -27,8 +23,7 @@
     Purpose
     =======
 
-    Computes the residual ||b-Ax||
-    for a solution approximation x.
+    Computes the residual ||b-Ax|| for a solution approximation x.
 
     Arguments
     =========
@@ -57,7 +52,7 @@ magma_zresidual( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector x,
     magma_z_spmv( one, A, x, zero, r );                   // r = A x
     magma_zaxpy(dofs, mone, b.val, 1, r.val, 1);          // r = r - b
     *res =  magma_dznrm2(dofs, r.val, 1);            // res = ||r||
-    ///magma_dznrm2(dofs, b.val, 1);               /||b||
+    //               /magma_dznrm2(dofs, b.val, 1);               /||b||
     //printf( "relative residual: %e\n", *res );
 
     return MAGMA_SUCCESS;
