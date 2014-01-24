@@ -27,7 +27,7 @@
     Purpose
     =======
 
-    Computes the relative residual ||b-Ax||/||b||
+    Computes the residual ||b-Ax||
     for a solution approximation x.
 
     Arguments
@@ -36,7 +36,7 @@
     magma_z_sparse_matrix A                   input matrix A
     magma_z_vector b                          RHS b
     magma_z_vector x                          solution approximation
-    magmaDoubleComplex *res                   return value: relative residual
+    magmaDoubleComplex *res                   return residual
 
     ========================================================================  */
 
@@ -56,8 +56,8 @@ magma_zresidual( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector x,
 
     magma_z_spmv( one, A, x, zero, r );                   // r = A x
     magma_zaxpy(dofs, mone, b.val, 1, r.val, 1);          // r = r - b
-    *res =  magma_dznrm2(dofs, r.val, 1)
-            /magma_dznrm2(dofs, b.val, 1);                // res = ||r||/||b||
+    *res =  magma_dznrm2(dofs, r.val, 1);            // res = ||r||
+    ///magma_dznrm2(dofs, b.val, 1);               /||b||
     //printf( "relative residual: %e\n", *res );
 
     return MAGMA_SUCCESS;

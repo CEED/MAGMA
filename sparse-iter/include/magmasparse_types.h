@@ -138,9 +138,24 @@ typedef struct magma_solver_parameters{
     double             epsilon;  
     magma_int_t        maxiter;
     magma_int_t        restart; 
-    magma_int_t        numiter;
-    double             residual;
     magma_ortho_t      ortho;
+    magma_int_t        numiter;
+    double             init_res;
+    double             final_res;
+    double             *res_vec;
+    double             runtime;
+    magma_int_t        *info;
+
+//---------------------------------
+// if info = 1 on input, the complete
+// list of residuals is stored in 
+// *res_vec
+// the output of info is:
+//  0 = convergence (stopping criterion met)
+// -1 = no convergence
+//  1 = convergence but stopping criterion not met within maxiter
+//--------------------------------
+
 }magma_solver_parameters;
 
 
