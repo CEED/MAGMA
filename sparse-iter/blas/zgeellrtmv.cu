@@ -109,18 +109,18 @@ extern __shared__ magmaDoubleComplex shared[];
     =====================================================================    */
 
 extern "C" magma_int_t
-magma_zgeellrtmv(const char *transA,
-               magma_int_t m, magma_int_t n,
-               magma_int_t nnz_per_row,
-               magmaDoubleComplex alpha,
-               magmaDoubleComplex *d_val,
-               magma_int_t *d_colind,
-               magma_int_t *d_rowlength,
-               magmaDoubleComplex *d_x,
-               magmaDoubleComplex beta,
-               magmaDoubleComplex *d_y,
-               magma_int_t num_threads,
-               magma_int_t threads_per_row ){
+magma_zgeellrtmv(  magma_trans_t transA,
+                   magma_int_t m, magma_int_t n,
+                   magma_int_t nnz_per_row,
+                   magmaDoubleComplex alpha,
+                   magmaDoubleComplex *d_val,
+                   magma_int_t *d_colind,
+                   magma_int_t *d_rowlength,
+                   magmaDoubleComplex *d_x,
+                   magmaDoubleComplex beta,
+                   magmaDoubleComplex *d_y,
+                   magma_int_t num_threads,
+                   magma_int_t threads_per_row ){
 
 
     int num_blocks = ( (threads_per_row*m+num_threads-1)

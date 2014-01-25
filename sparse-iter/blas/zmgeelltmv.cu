@@ -83,7 +83,7 @@ zmgeelltmv_kernel( int num_rows,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zmgeelltmv(  const char *transA,
+magma_zmgeelltmv(  magma_trans_t transA,
                    magma_int_t m, magma_int_t n,
                    magma_int_t num_vecs,
                    magma_int_t nnz_per_row,

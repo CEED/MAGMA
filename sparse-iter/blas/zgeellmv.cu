@@ -108,7 +108,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgeellmv(const char *transA,
+magma_zgeellmv(magma_trans_t transA,
                magma_int_t m, magma_int_t n,
                magma_int_t nnz_per_row,
                magmaDoubleComplex alpha,
@@ -159,7 +159,7 @@ magma_zgeellmv(const char *transA,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgeellmv_shift( const char *transA,
+magma_zgeellmv_shift( magma_trans_t transA,
                       magma_int_t m, magma_int_t n,
                       magma_int_t nnz_per_row,
                       magmaDoubleComplex alpha,

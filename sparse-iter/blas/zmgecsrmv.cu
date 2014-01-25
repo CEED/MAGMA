@@ -82,7 +82,7 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zmgecsrmv(    const char *transA,
+magma_zmgecsrmv(    magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t num_vecs, 
                     magmaDoubleComplex alpha,

@@ -40,7 +40,7 @@
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zbcsrtrsv( char uplo,
+magma_zbcsrtrsv( magma_uplo_t uplo,
                  magma_int_t r_blocks,
                  magma_int_t c_blocks,
                  magma_int_t size_b, 

@@ -109,15 +109,15 @@ zgeelltmv_kernel_shift( int num_rows,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgeelltmv(const char *transA,
-               magma_int_t m, magma_int_t n,
-               magma_int_t nnz_per_row,
-               magmaDoubleComplex alpha,
-               magmaDoubleComplex *d_val,
-               magma_int_t *d_colind,
-               magmaDoubleComplex *d_x,
-               magmaDoubleComplex beta,
-               magmaDoubleComplex *d_y ){
+magma_zgeelltmv(   magma_trans_t transA,
+                   magma_int_t m, magma_int_t n,
+                   magma_int_t nnz_per_row,
+                   magmaDoubleComplex alpha,
+                   magmaDoubleComplex *d_val,
+                   magma_int_t *d_colind,
+                   magmaDoubleComplex *d_x,
+                   magmaDoubleComplex beta,
+                   magmaDoubleComplex *d_y ){
 
 
 
@@ -159,7 +159,7 @@ magma_zgeelltmv(const char *transA,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgeelltmv_shift( const char *transA,
+magma_zgeelltmv_shift( magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,

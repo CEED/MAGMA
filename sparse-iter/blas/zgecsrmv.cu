@@ -103,7 +103,7 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgecsrmv(     const char *transA,
+magma_zgecsrmv(     magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magmaDoubleComplex alpha,
                     magmaDoubleComplex *d_val,
@@ -152,7 +152,7 @@ magma_zgecsrmv(     const char *transA,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zgecsrmv_shift( const char *transA,
+magma_zgecsrmv_shift( magma_trans_t transA,
                       magma_int_t m, magma_int_t n,
                       magmaDoubleComplex alpha,
                       magmaDoubleComplex lambda,

@@ -84,16 +84,16 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zmgeellmv(const char *transA,
-               magma_int_t m, magma_int_t n,
-               magma_int_t num_vecs,
-               magma_int_t nnz_per_row,
-               magmaDoubleComplex alpha,
-               magmaDoubleComplex *d_val,
-               magma_int_t *d_colind,
-               magmaDoubleComplex *d_x,
-               magmaDoubleComplex beta,
-               magmaDoubleComplex *d_y ){
+magma_zmgeellmv(   magma_trans_t transA,
+                   magma_int_t m, magma_int_t n,
+                   magma_int_t num_vecs,
+                   magma_int_t nnz_per_row,
+                   magmaDoubleComplex alpha,
+                   magmaDoubleComplex *d_val,
+                   magma_int_t *d_colind,
+                   magmaDoubleComplex *d_x,
+                   magmaDoubleComplex beta,
+                   magmaDoubleComplex *d_y ){
 
 
 
