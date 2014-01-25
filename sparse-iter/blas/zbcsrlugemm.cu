@@ -380,12 +380,9 @@ magma_zbcsrluegemm( magma_int_t size_b,
 
     }
 
-#endif
-
-#if ndefined(PRECISION_d)
-        printf("error: currently only supported for double precision.\n"
-               "Please run zbcsrlu.cpp using CUBLAS batched.\n");
-
+#else
+    printf("error: currently only supported for double precision.\n"
+           "Please run zbcsrlu.cpp using CUBLAS batched.\n");
 #endif
 
     return MAGMA_SUCCESS;
