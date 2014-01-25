@@ -68,10 +68,10 @@ magma_int_t magma_finalize()
 extern "C"
 void magma_print_devices()
 {
-    int major, minor, micro;
+    magma_int_t major, minor, micro;
     magma_version( &major, &minor, &micro );
     printf( "MAGMA %d.%d.%d %s, compiled for CUDA capability >= %.1f\n",
-            major, minor, micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100. );
+            (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100. );
     
     int ndevices;
     cudaGetDeviceCount( &ndevices );
