@@ -36,8 +36,7 @@ Test matrices of this type can be downloaded at the University of Florida Matrix
 Collection: http://www.cise.ufl.edu/research/sparse/matrices/ 
 
 A suitable test matrix is given by Trefethen_2000:
-http://www.cise.ufl.edu/research/sparse/matrices/
-                                            JGD_Trefethen/Trefethen_2000.html
+http://www.cise.ufl.edu/research/sparse/matrices/JGD_Trefethen/Trefethen_2000.html
 
 To run a example type
 
@@ -46,12 +45,12 @@ To run a example type
 
 
 Every solver (replace "solver" by cg, gmres, bicgstab, iterref, jacobi, bcsrlu)
-exists in single ("x"=s), double ("x"=d), single and double complex version
-("x"=c or z, respectively).
+exists in single ("x"=s), double ("x"=d), single-complex and double-complex
+version ("x"=c or z, respectively).
 
 
-For different solvers there exist different option, that are printed 
-when executing "./run_xsolver"
+For different solvers there exist different options, which are printed 
+when executing "./run_xsolver".
 
  Some options are:
 
@@ -76,7 +75,7 @@ when executing "./run_xsolver"
     k : upper bound for iterations
 
 "--tol k"
-    k : relative residual stopping criterion (machine accuracy as default)
+    k : relative residual stopping criterion (machine precision as default)
 
 "--restart k"
     k : Krylov subspace restart number for GMRES-(k)
