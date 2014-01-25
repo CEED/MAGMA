@@ -28,9 +28,6 @@
 */
 int main( int argc, char** argv)
 {
-
-    TESTING_INIT();
-
     TESTING_INIT();
 
     magma_solver_parameters solver_par;
