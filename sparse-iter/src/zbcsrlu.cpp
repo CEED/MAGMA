@@ -36,9 +36,6 @@
      _a > _b ? _a : _b; })
 
 
-
-#define CUBLASBATCHED
-
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
@@ -109,7 +106,7 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
 
     // LU factorization
     magma_device_sync(); t_lu1=magma_wtime();
-    magma_zbcsrlutrf( C, &D, ipiv);
+    magma_zbcsrlutrf( C, &D, ipiv, solver_par->version );
     magma_device_sync(); t_lu+=(magma_wtime()-t_lu1);
 
 
@@ -170,7 +167,7 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
 
 magma_int_t
 magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, 
-                                                    magma_int_t *ipiv ){
+                                       magma_int_t *ipiv, magma_int_t version ){
 
 
     // some useful variables
@@ -377,19 +374,19 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
         cublasSetVector( kblocks*num_block_rows, sizeof(magmaDoubleComplex *), 
                                                                 hC, 1, dC, 1 );
 
-        #ifdef CUBLASBATCHED
+        if( version==0 ){ 
         // AIs and BIs for the batched GEMMs later
-        for(i=0; i<num_block_rows; i++){
-           for(j=0; j<kblocks; j++){
-              AIs[j+i*kblocks] = hA[i];
-              BIs[j+i*kblocks] = hB[j];
+            for(i=0; i<num_block_rows; i++){
+               for(j=0; j<kblocks; j++){
+                  AIs[j+i*kblocks] = hA[i];
+                  BIs[j+i*kblocks] = hB[j];
+                }
             }
-        }
-        cublasSetVector( kblocks*num_block_rows, sizeof(magmaDoubleComplex *), 
-                        AIs, 1, dAIs, 1 );
-        cublasSetVector( kblocks*num_block_rows, sizeof(magmaDoubleComplex *), 
-                        BIs, 1, dBIs, 1 );
-        #endif  
+            cublasSetVector( kblocks*num_block_rows, 
+                        sizeof(magmaDoubleComplex *), AIs, 1, dAIs, 1 );
+            cublasSetVector( kblocks*num_block_rows, 
+                        sizeof(magmaDoubleComplex *), BIs, 1, dBIs, 1 );
+        }  
         // AIIs for the batched TRSMs under the factorized block
         for(i=0; i<max(num_block_rows, kblocks); i++){
            AIIs[i] = M(k,k);
@@ -423,23 +420,23 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
                             CUBLAS_OP_N, CUBLAS_DIAG_NON_UNIT, size_b, size_b, 
                             &one, dAIIs, size_b, dA, size_b, num_block_rows );
         
-        #ifndef CUBLASBATCHED
-        magmablasSetKernelStream( stream[0] );
-        magma_zbcsrluegemm( size_b, num_block_rows, kblocks, dA, dB, dC ); 
+        if( version==1 ){ 
+            magmablasSetKernelStream( stream[0] );
+            magma_zbcsrluegemm( size_b, num_block_rows, kblocks, dA, dB, dC ); 
+        }
 
-        #endif
-
-        #ifdef CUBLASBATCHED
-        //----------------------------------------------------------------------
-        // update trailing matrix using cublas batched GEMM
-        magmablasSetKernelStream( stream[0] );
-        cublasZgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, size_b, size_b, 
-                          size_b,&m_one, (const magmaDoubleComplex **) dAIs,  
-                          size_b, (const magmaDoubleComplex **) dBIs, size_b, 
-                          &one, dC , size_b, kblocks*num_block_rows);
-        // end update trailing matrix using cublas batched GEMM
-        //----------------------------------------------------------------------
-        #endif
+        if( version==0 ){ 
+            //------------------------------------------------------------------
+            // update trailing matrix using cublas batched GEMM
+            magmablasSetKernelStream( stream[0] );
+            cublasZgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, size_b, size_b, 
+                              size_b,&m_one, (const magmaDoubleComplex **) dAIs,  
+                              size_b, (const magmaDoubleComplex **) dBIs, 
+                              size_b, &one, dC , size_b, 
+                              kblocks*num_block_rows );
+            // end update trailing matrix using cublas batched GEMM
+            //------------------------------------------------------------------
+        }
     
     }// end block k
 

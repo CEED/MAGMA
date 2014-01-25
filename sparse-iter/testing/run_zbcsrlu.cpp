@@ -36,6 +36,7 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
+    solver_par.version = 0;
     int format = 0;
 
     magma_z_sparse_matrix A, B, B_d;
@@ -50,9 +51,13 @@ int main( int argc, char** argv)
     for( int i = 1; i < argc; ++i ) {
       if ( strcmp("--matrix", argv[i]) == 0 ) {
             strcpy( filename, argv[++i] );
+        }else if ( strcmp("--version", argv[i]) == 0 ) {
+            solver_par.version = atoi( argv[++i] );
         }
     }
-    printf( "\n    usage: ./run_zbcsrlu --matrix filename \n\n" );
+    printf( "\n    usage: ./run_zbcsrlu"
+            " [ --version %d (0=CUBLAS batched, 1=custom kernels) ]"
+            " --matrix filename \n\n", solver_par.version );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 

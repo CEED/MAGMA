@@ -418,7 +418,8 @@ magma_zbcsrlu(         magma_z_sparse_matrix A, magma_z_vector b,
 magma_int_t
 magma_zbcsrlutrf(      magma_z_sparse_matrix A, 
                        magma_z_sparse_matrix *M,
-                       magma_int_t *ipiv );
+                       magma_int_t *ipiv, 
+                       magma_int_t version );
 
 magma_int_t
 magma_zbcsrlusv(       magma_z_sparse_matrix A, magma_z_vector b, 
@@ -472,7 +473,7 @@ magma_z_precond(        magma_z_sparse_matrix A,
    -- MAGMA_SPARSE BLAS function definitions
 */
 magma_int_t 
-magma_zgecsrmv(        const char *transA,
+magma_zgecsrmv(        magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magmaDoubleComplex alpha,
                        magmaDoubleComplex *d_val,
@@ -483,7 +484,7 @@ magma_zgecsrmv(        const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zgecsrmv_shift(  const char *transA,
+magma_zgecsrmv_shift(  magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magmaDoubleComplex alpha,
                        magmaDoubleComplex lambda,
@@ -498,7 +499,7 @@ magma_zgecsrmv_shift(  const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zmgecsrmv(        const char *transA,
+magma_zmgecsrmv(       magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t num_vecs,
                        magmaDoubleComplex alpha,
@@ -510,7 +511,7 @@ magma_zmgecsrmv(        const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zgeellmv(        const char *transA,
+magma_zgeellmv(        magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
@@ -521,47 +522,7 @@ magma_zgeellmv(        const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zgeellmv_shift(  const char *transA,
-                       magma_int_t m, magma_int_t n,
-                       magma_int_t nnz_per_row,
-                       magmaDoubleComplex alpha,
-                       magmaDoubleComplex lambda,
-                       magmaDoubleComplex *d_val,
-                       magma_int_t *d_colind,
-                       magmaDoubleComplex *d_x,
-                       magmaDoubleComplex beta,
-                       int offset,
-                       int blocksize,
-                       int *add_rows,
-                       magmaDoubleComplex *d_y );
-
-
-magma_int_t 
-magma_zmgeellmv(       const char *transA,
-                       magma_int_t m, magma_int_t n,
-                       magma_int_t num_vecs,
-                       magma_int_t nnz_per_row,
-                       magmaDoubleComplex alpha,
-                       magmaDoubleComplex *d_val,
-                       magma_int_t *d_colind,
-                       magmaDoubleComplex *d_x,
-                       magmaDoubleComplex beta,
-                       magmaDoubleComplex *d_y );
-
-
-magma_int_t 
-magma_zgeelltmv(       const char *transA,
-                       magma_int_t m, magma_int_t n,
-                       magma_int_t nnz_per_row,
-                       magmaDoubleComplex alpha,
-                       magmaDoubleComplex *d_val,
-                       magma_int_t *d_colind,
-                       magmaDoubleComplex *d_x,
-                       magmaDoubleComplex beta,
-                       magmaDoubleComplex *d_y );
-
-magma_int_t 
-magma_zgeelltmv_shift( const char *transA,
+magma_zgeellmv_shift(  magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
@@ -577,7 +538,47 @@ magma_zgeelltmv_shift( const char *transA,
 
 
 magma_int_t 
-magma_zmgeelltmv(      const char *transA,
+magma_zmgeellmv(       magma_trans_t transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t num_vecs,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+
+magma_int_t 
+magma_zgeelltmv(       magma_trans_t transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zgeelltmv_shift( magma_trans_t transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex lambda,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
+                       magmaDoubleComplex *d_y );
+
+
+magma_int_t 
+magma_zmgeelltmv(      magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t num_vecs,
                        magma_int_t nnz_per_row,
@@ -589,7 +590,7 @@ magma_zmgeelltmv(      const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zgeellrtmv(      const char *transA,
+magma_zgeellrtmv(      magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
@@ -753,7 +754,7 @@ magma_zbcsrswp(  magma_int_t n,
                  magmaDoubleComplex *x );
 
 magma_int_t
-magma_zbcsrtrsv( char uplo,
+magma_zbcsrtrsv( magma_uplo_t uplo,
                  magma_int_t r_blocks,
                  magma_int_t c_blocks,
                  magma_int_t size_b, 
