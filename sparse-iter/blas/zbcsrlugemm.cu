@@ -367,7 +367,7 @@ magma_zbcsrluegemm( magma_int_t size_b,
     if ( arch < 200  ) {
         printf("error: magma_zbcsrluegemm needs a CUDA architecture"
                " with at least 48K shared memory (Fermi +).\n"
-               "Please compile with zbcsrlu.cpp with CUBLASBATCHED.\n");
+               "Please run zbcsrlu.cpp using CUBLAS batched.\n");
     
     }
     else {
@@ -382,6 +382,11 @@ magma_zbcsrluegemm( magma_int_t size_b,
 
 #endif
 
+#if ndefined(PRECISION_d)
+        printf("error: currently only supported for double precision.\n"
+               "Please run zbcsrlu.cpp using CUBLAS batched.\n");
+
+#endif
 
     return MAGMA_SUCCESS;
 }
