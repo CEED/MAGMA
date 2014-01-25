@@ -14,7 +14,7 @@
 // Returns version of MAGMA, as defined by
 // MAGMA_VERSION_MAJOR, MAGMA_VERSION_MINOR, MAGMA_VERSION_MICRO constants.
 extern "C"
-void magma_version( int* major, int* minor, int* micro )
+void magma_version( magma_int_t* major, magma_int_t* minor, magma_int_t* micro )
 {
     if ( major != NULL && minor != NULL && micro != NULL ) {
         *major = MAGMA_VERSION_MAJOR;
@@ -38,7 +38,7 @@ magma_int_t magma_is_devptr( const void* A )
     cudaError_t err;
     cudaDeviceProp prop;
     cudaPointerAttributes attr;
-    int dev;
+    magma_int_t dev;
     err = cudaGetDevice( &dev );
     if ( ! err ) {
         err = cudaGetDeviceProperties( &prop, dev );
@@ -72,11 +72,11 @@ extern "C"
 magma_int_t magma_num_gpus( void )
 {
     const char *ngpu_str = getenv("MAGMA_NUM_GPUS");
-    int ngpu = 1;
+    magma_int_t ngpu = 1;
     if ( ngpu_str != NULL ) {
         char* endptr;
         ngpu = strtol( ngpu_str, &endptr, 10 );
-        int ndevices;
+        magma_int_t ndevices;
         cudaGetDeviceCount( &ndevices );
         // if *endptr == '\0' then entire string was valid number (or empty)
         if ( ngpu < 1 || *endptr != '\0' ) {

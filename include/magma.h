@@ -42,7 +42,7 @@ magma_init( void );
 magma_int_t
 magma_finalize( void );
 
-void magma_version( int* major, int* minor, int* micro );
+void magma_version( magma_int_t* major, magma_int_t* minor, magma_int_t* micro );
 
 
 // ========================================

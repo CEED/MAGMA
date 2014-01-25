@@ -20,7 +20,7 @@ extern "C" {
 
 struct zgehrd_data
 {
-    int ngpu;
+    magma_int_t ngpu;
     
     magma_int_t ldda;
     magma_int_t ldv;
