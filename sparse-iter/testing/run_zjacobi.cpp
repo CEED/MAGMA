@@ -63,8 +63,8 @@ int main( int argc, char** argv)
         }
     }
     printf( "\n    usage: ./run_zjacobi"
-            " < --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
-            " --maxiter %d >"
+            " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
+            " --maxiter %d ]"
             " --matrix filename \n\n", format, solver_par.maxiter);
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 

@@ -80,10 +80,10 @@ int main( int argc, char** argv)
         }
     }
     printf( "\n    usage: ./run_zgmres"
-            " < --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
+            " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
             " --verbose %d (0=summary, k=details every k iterations)"
             " --restart %d --maxiter %d --tol %.2e"
-            " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) >"
+            " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) ]"
             " --matrix filename \n\n", format, solver_par.verbose, 
             solver_par.restart, solver_par.maxiter, solver_par.epsilon, ortho );
 
