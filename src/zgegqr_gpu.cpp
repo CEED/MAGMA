@@ -153,8 +153,8 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
         else
             blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
         
-        magma_zsetmatrix(n, n, VT, n, G, n);
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, G, n, dA, ldda);
+        magma_zsetmatrix(n, n, VT, n, dwork, n);
+        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
         if (mins > 0.00001f)
             cn = maxs/mins;
         
