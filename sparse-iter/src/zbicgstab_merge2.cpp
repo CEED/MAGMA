@@ -158,11 +158,9 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
 
         // computes p=r+beta*(p-omega*v)
         magma_zbicgmerge1( dofs, skp, v.val, r.val, p.val );
-        magma_zbicgmerge_spmv1(  dofs, d1, d2, A.val, A.row, A.col, 
-                                                    q(2), q(0), q(3), skp );          
+        magma_zbicgmerge_spmv1(  A, d1, d2, q(2), q(0), q(3), skp );          
         magma_zbicgmerge2( dofs, skp, r.val, v.val, s.val );   // s=r-alpha*v
-        magma_zbicgmerge_spmv2( dofs, d1, d2, A.val, A.row, A.col, 
-                                                            q(4), q(5), skp); 
+        magma_zbicgmerge_spmv2( A, d1, d2, q(4), q(5), skp); 
         magma_zbicgmerge_xrbeta( dofs, d1, d2, q(0), q(1), q(2), 
                                                     q(4), q(5), x->val, skp);  
 

@@ -10,6 +10,7 @@
 
 */
 #include "common_magma.h"
+#include "../include/magmasparse.h"
 
 #define BLOCK_SIZE 512
 
@@ -19,6 +20,7 @@
 // These routines merge multiple kernels from zmergebicgstab into one
 // This is the code used for the ASHES2014 paper
 // "Accelerating Krylov Subspace Solvers on Graphics Processing Units".
+// notice that only CSR format is supported so far.
 
 
 // accelerated reduction for one vector
@@ -199,17 +201,15 @@ magma_zbicgstab_alphakernel(
     ========================================================================  */
 
 extern "C" int
-magma_zbicgmerge_spmv1(  int n,
+magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
                          magmaDoubleComplex *d1,
                          magmaDoubleComplex *d2,
-                         magmaDoubleComplex *d_val, 
-                         int *d_rowptr, 
-                         int *d_colind,
                          magmaDoubleComplex *d_p,
                          magmaDoubleComplex *d_r,
                          magmaDoubleComplex *d_v,
                          magmaDoubleComplex *skp ){
 
+    int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
     dim3 Gs( (n+local_block_size-1)/local_block_size );
@@ -218,8 +218,11 @@ magma_zbicgmerge_spmv1(  int n,
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
 
-    magma_zbicgmerge_spmv1_kernel<<<Gs, Bs, Ms>>>
-                ( n, d_val, d_rowptr, d_colind, d_p, d_r, d_v, d1 );
+    if( A.storage_type == Magma_CSR)
+        magma_zbicgmerge_spmv1_kernel<<<Gs, Bs, Ms>>>
+                    ( n, A.val, A.row, A.col, d_p, d_r, d_v, d1 );
+    else
+        printf("error: only CSR format supported.\n");
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
@@ -477,16 +480,14 @@ magma_zbicgstab_omegakernel(
 
 extern "C" int
 magma_zbicgmerge_spmv2(  
-                 int n,
+                 magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
                  magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
                  magmaDoubleComplex *d_s,
                  magmaDoubleComplex *d_t,
                  magmaDoubleComplex *skp ){
 
+    int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
     dim3 Gs( (n+local_block_size-1)/local_block_size );
@@ -494,9 +495,11 @@ magma_zbicgmerge_spmv2(
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
-
-    magma_zbicgmerge_spmv2_kernel<<<Gs, Bs, Ms>>>
-                ( n, d_val, d_rowptr, d_colind, d_s, d_t, d1 );
+    if( A.storage_type == Magma_CSR)
+        magma_zbicgmerge_spmv2_kernel<<<Gs, Bs, Ms>>>
+                    ( n, A.val, A.row, A.col, d_s, d_t, d1 );
+    else
+        printf("error: only CSR format supported.\n");
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;

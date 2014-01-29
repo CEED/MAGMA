@@ -720,12 +720,9 @@ magma_zgemvmdot(    int n,
 
 magma_int_t
 magma_zbicgmerge_spmv1(  
-                 int n,
+                 magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
                  magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
                  magmaDoubleComplex *d_p,
                  magmaDoubleComplex *d_r,
                  magmaDoubleComplex *d_v,
@@ -733,12 +730,9 @@ magma_zbicgmerge_spmv1(
 
 magma_int_t
 magma_zbicgmerge_spmv2(  
-                 int n,
+                 magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
                  magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
                  magmaDoubleComplex *d_s,
                  magmaDoubleComplex *d_t,
                  magmaDoubleComplex *skp );
