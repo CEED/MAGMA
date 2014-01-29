@@ -37,7 +37,8 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
-    
+    B.blocksize = 256;
+
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
@@ -52,6 +53,7 @@ int main( int argc, char** argv)
                 case 1: B.storage_type = Magma_ELLPACK; break;
                 case 2: B.storage_type = Magma_ELLPACKT; break;
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
+                case 4: B.storage_type = Magma_SELLC; break;
             }
         } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
             solver_par.maxiter = atoi( argv[++i] );
@@ -60,9 +62,10 @@ int main( int argc, char** argv)
         }
     }
     printf( "\n    usage: ./run_zjacobi"
-            " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
-            " --maxiter %d ]"
-            " --matrix filename \n\n", format, solver_par.maxiter);
+        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --blocksize %d ]"
+        " --maxiter %d ]"
+        " --matrix filename \n\n", format, B.blocksize, solver_par.maxiter);
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 

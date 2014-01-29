@@ -41,7 +41,8 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
-    
+    B.blocksize = 256;
+
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
@@ -56,7 +57,10 @@ int main( int argc, char** argv)
                 case 1: B.storage_type = Magma_ELLPACK; break;
                 case 2: B.storage_type = Magma_ELLPACKT; break;
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
+                case 4: B.storage_type = Magma_SELLC; break;
             }
+        }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
+            B.blocksize = atoi( argv[++i] );
         }else if ( strcmp("--verbose", argv[i]) == 0 ) {
             solver_par.verbose = atoi( argv[++i] );
         } else if ( strcmp("--ortho", argv[i]) == 0 ) {
@@ -77,12 +81,13 @@ int main( int argc, char** argv)
         }
     }
     printf( "\n    usage: ./run_zgmres"
-            " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
-            " --verbose %d (0=summary, k=details every k iterations)"
-            " --restart %d --maxiter %d --tol %.2e"
-            " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) ]"
-            " --matrix filename \n\n", format, solver_par.verbose, 
-            solver_par.restart, solver_par.maxiter, solver_par.epsilon, ortho );
+        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --blocksize %d ]"
+        " --verbose %d (0=summary, k=details every k iterations)"
+        " --restart %d --maxiter %d --tol %.2e"
+        " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) ]"
+        " --matrix filename \n\n", format, B.blocksize, solver_par.verbose, 
+        solver_par.restart, solver_par.maxiter, solver_par.epsilon, ortho );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 

@@ -39,6 +39,7 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
+    B.blocksize = 256;
     
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -54,10 +55,13 @@ int main( int argc, char** argv)
                 case 1: B.storage_type = Magma_ELLPACK; break;
                 case 2: B.storage_type = Magma_ELLPACKT; break;
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
+                case 4: B.storage_type = Magma_SELLC; break;
             }
         }else if ( strcmp("--verbose", argv[i]) == 0 ) {
             solver_par.verbose = atoi( argv[++i] );
-        } else if ( strcmp("--version", argv[i]) == 0 ) {
+        }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
+            B.blocksize = atoi( argv[++i] );
+        }else if ( strcmp("--version", argv[i]) == 0 ) {
             version = atoi( argv[++i] );
         } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
             solver_par.maxiter = atoi( argv[++i] );
@@ -68,12 +72,13 @@ int main( int argc, char** argv)
         }
     }
     printf( "\n    usage: ./run_zbicgstab"
-            " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT)"
-            " --verbose %d (0=summary, k=details every k iterations)"
-            " --maxiter %d --tol %.2e"
-            " --version %d (0=basic, 1=merged, 2=merged2) ]"
-            " --matrix filename \n\n", format, solver_par.verbose,
-            solver_par.maxiter, solver_par.epsilon, version );
+        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --blocksize %d ]"
+        " --verbose %d (0=summary, k=details every k iterations)"
+        " --maxiter %d --tol %.2e"
+        " --version %d (0=basic, 1=merged, 2=merged2) ]"
+        " --matrix filename \n\n", format, B.blocksize, solver_par.verbose,
+        solver_par.maxiter, solver_par.epsilon, version );
 
     magma_z_csr_mtx( &A, (const char*) filename  ); 
 
