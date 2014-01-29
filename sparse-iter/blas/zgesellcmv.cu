@@ -42,10 +42,10 @@ zgesellcmv_kernel(   int num_rows,
     if(Idx < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < d_blockinfo[ blockIdx.x ] ; n ++){
-            int col = d_colind [offset+ blocksize * n + Idx ];
-            magmaDoubleComplex val = d_val [offset+ blocksize * n + threadIdx.x ];
+            int col = d_colind [offset+ blocksize * n + threadIdx.x ];
+            magmaDoubleComplex val = d_val[offset+ blocksize * n + threadIdx.x];
             if( val != 0){
-                  dot=dot+MAGMA_Z_MAKE(1.0, 0.0);
+                  dot=dot+val*d_x[col];
             }
         }
 
@@ -92,11 +92,10 @@ magma_zgesellcmv(   magma_trans_t transA,
                     magmaDoubleComplex *d_x,
                     magmaDoubleComplex beta,
                     magmaDoubleComplex *d_y ){
-   // the kernel can only handle up to 65535 slices (~2M rows for blocksize 32)
 
-        
+   // the kernel can only handle up to 65535 slices (~2M rows for blocksize 32)
    dim3 grid( slices, 1, 1);
-   // printf("start kernel with < %d, %d, 0 >", grid.x, blocksize, 0);fflush(stdout);
+
    zgesellcmv_kernel<<< grid, blocksize, 0, magma_stream >>>
    ( m, n, blocksize, alpha,
         d_val, d_colind, d_rowptr, d_blockinfo, d_x, beta, d_y );
