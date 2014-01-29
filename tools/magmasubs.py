@@ -693,6 +693,7 @@ subs = {
     ('sgeelltmv',      'dgeelltmv',      'cgeelltmv',      'zgeelltmv'       ),
     ('smgeelltmv',     'dmgeelltmv',     'cmgeelltmv',     'zmgeelltmv'      ),
     ('sgeellrtmv',     'dgeellrtmv',     'cgeellrtmv',     'zgeellrtmv'      ),
+    ('sgesellcmv',     'dgesellcmv',     'cgesellcmv',     'zgesellcmv'      ),
     ('smdot',          'dmdot',          'cmdot',          'zmdot'           ),
     ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
