@@ -141,8 +141,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magmablasSetKernelStream(stream[0]);
         
         // computes SpMV and dot product
-        magma_zcgmerge_spmv1(  A.storage_type, dofs, A.max_nnz_row, d1, d2, 
-                                    A.val, A.row, A.col, d.val, z.val, skp ); 
+        magma_zcgmerge_spmv1(  A, d1, d2, d.val, z.val, skp ); 
             
         // updates x, r, computes scalars and updates d
         magma_zcgmerge_xrbeta( dofs, d1, d2, x->val, r.val, d.val, z.val, skp ); 

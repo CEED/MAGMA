@@ -10,6 +10,7 @@
 
 */
 #include "common_magma.h"
+#include "../include/magmasparse.h"
 
 #define BLOCK_SIZE 512
 
@@ -362,6 +363,7 @@ magma_zcgmerge_spmvellpackrt_kernel(
 
 }
 
+
 // additional kernel necessary to compute first reduction step
 __global__ void 
 magma_zcgmerge_spmvellpackrt_kernel2(  
@@ -424,6 +426,85 @@ magma_zcgmerge_spmvellpackrt_kernel2(
     }
 }
 
+__global__ void 
+magma_zcgmerge_spmvsellc_kernel(   
+                     int num_rows, 
+                     int blocksize,
+                     magmaDoubleComplex *d_val, 
+                     int *d_colind,
+                     int *d_rowptr,
+                     int *d_blockinfo,
+                     magmaDoubleComplex *d,
+                     magmaDoubleComplex *z,
+                     magmaDoubleComplex *vtmp){
+
+    extern __shared__ magmaDoubleComplex temp[]; 
+    int Idx = threadIdx.x;   
+    int i   = blockIdx.x * blockDim.x + Idx;
+    int offset = d_rowptr[ blockIdx.x ];
+
+ temp[ Idx ] = MAGMA_Z_MAKE( 0.0, 0.0);
+
+
+    if(i < num_rows ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        for ( int n = 0; n < d_blockinfo[ blockIdx.x ] ; n ++){
+            int col = d_colind [offset+ blocksize * n + Idx ];
+            magmaDoubleComplex val = d_val[offset+ blocksize * n + Idx];
+            if( val != 0){
+                  dot=dot+val*d[col];
+            }
+        }
+        z[ i ] =  dot;
+        temp[ Idx ] = d[ i ] * dot;
+    }
+    __syncthreads();
+    if ( Idx < 128 ){
+        temp[ Idx ] += temp[ Idx + 128 ];
+    }
+    __syncthreads();
+    if ( Idx < 64 ){
+        temp[ Idx ] += temp[ Idx + 64 ];
+    }
+    __syncthreads();
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+        if( Idx < 32 ){
+            temp[ Idx ] += temp[ Idx + 32 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 16 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 8 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 4 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 2 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 1 ];__syncthreads();
+        }
+    #endif
+    #if defined(PRECISION_d)
+        if( Idx < 32 ){
+            volatile double *temp2 = temp;
+            temp2[ Idx ] += temp2[ Idx + 32 ];
+            temp2[ Idx ] += temp2[ Idx + 16 ];
+            temp2[ Idx ] += temp2[ Idx + 8 ];
+            temp2[ Idx ] += temp2[ Idx + 4 ];
+            temp2[ Idx ] += temp2[ Idx + 2 ];
+            temp2[ Idx ] += temp2[ Idx + 1 ];
+        }
+    #endif
+    #if defined(PRECISION_s)
+        if( Idx < 32 ){
+            volatile float *temp2 = temp;
+            temp2[ Idx ] += temp2[ Idx + 32 ];
+            temp2[ Idx ] += temp2[ Idx + 16 ];
+            temp2[ Idx ] += temp2[ Idx + 8 ];
+            temp2[ Idx ] += temp2[ Idx + 4 ];
+            temp2[ Idx ] += temp2[ Idx + 2 ];
+            temp2[ Idx ] += temp2[ Idx + 1 ];
+        }
+    #endif
+
+    if ( Idx == 0 ){
+            vtmp[ blockIdx.x ] = temp[ 0 ];
+    }
+}
+
 
 // kernel to handle scalars
 __global__ void // rho = beta/tmp; gamma = beta;
@@ -469,63 +550,67 @@ magma_zcg_rhokernel(
 
 extern "C" int
 magma_zcgmerge_spmv1(  
-                 magma_storage_t storage_t,
-                 int n,
-                 int max_nnz_row,  
+                 magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
                  magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
                  magmaDoubleComplex *d_d,
                  magmaDoubleComplex *d_z,
                  magmaDoubleComplex *skp ){
 
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (n+local_block_size-1)/local_block_size );
+    dim3 Gs( (A.num_rows+local_block_size-1)/local_block_size );
     dim3 Gs_next;
     int Ms =  local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex *aux1 = d1, *aux2 = d2;
     int b = 1;        
 
-    if( storage_t == Magma_CSR )
+    if( A.storage_type == Magma_CSR )
         magma_zcgmerge_spmvcsr_kernel<<<Gs, Bs, Ms, magma_stream >>>
-        ( n, d_val, d_rowptr, d_colind, d_d, d_z, d1 );
-    else if( storage_t == Magma_ELLPACK )
+        ( A.num_rows, A.val, A.row, A.col, d_d, d_z, d1 );
+    else if( A.storage_type == Magma_ELLPACK )
         magma_zcgmerge_spmvellpack_kernel<<<Gs, Bs, Ms, magma_stream >>>
-        ( n, max_nnz_row, d_val, d_colind, d_d, d_z, d1 );
-    else if( storage_t == Magma_ELLPACKT )
+        ( A.num_rows, A.max_nnz_row, A.val, A.col, d_d, d_z, d1 );
+    else if( A.storage_type == Magma_ELLPACKT )
         magma_zcgmerge_spmvellpackt_kernel<<<Gs, Bs, Ms, magma_stream >>>
-        ( n, max_nnz_row, d_val, d_colind, d_d, d_z, d1 );
-    else if( storage_t == Magma_ELLPACKRT ){
+        ( A.num_rows, A.max_nnz_row, A.val, A.col, d_d, d_z, d1 );
+    else if( A.storage_type == Magma_SELLC ){
+        if( A.blocksize==256){
+            magma_zcgmerge_spmvsellc_kernel<<<Gs, Bs, Ms, magma_stream >>>
+            ( A.num_rows, A.blocksize, A. val, A.col, A.row, A.blockinfo, 
+                d_d, d_z, d1 );
+        }
+        else
+            printf("error: SELLC only for blocksize 256.\n");
+    }
+    else if( A.storage_type == Magma_ELLPACKRT ){
         // in case of using ELLPACKRT, we need a different grid, assigning
         // threads_per_row processors to each row
         // the block size is num_threads
         // fixed values
-        int threads_per_row = 32;
+        int threads_per_row = A.blocksize;
         int num_threads = 256;
-        int num_blocks = ( (threads_per_row*n+num_threads-1)
+        int num_blocks = ( (threads_per_row*A.num_rows+num_threads-1)
                                         /num_threads);
-        int alignment = ((int)(max_nnz_row+threads_per_row-1)/threads_per_row)
+        int alignment = ((int)(A.max_nnz_row+threads_per_row-1)/threads_per_row)
                                        *threads_per_row;
         dim3 gridellpackrt( num_blocks, 1, 1);
         magma_zcgmerge_spmvellpackrt_kernel
                 <<<gridellpackrt, num_threads, Ms, magma_stream >>>
-                ( n, max_nnz_row, d_val, d_colind, d_rowptr, d_d, d_z, d1, 
+                ( A.num_rows, A.max_nnz_row, A.val, A.col, A.row, d_d, d_z, d1, 
                                                 threads_per_row, alignment );
         // in case of using ELLPACKRT, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
         magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, magma_stream >>>
-                              ( n, d_z, d_d, d1 );
+                              ( A.num_rows, d_z, d_d, d1 );
     }
 
     while( Gs.x > 1 ){
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
         if( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
-                                        ( Gs.x, n, aux1, aux2 );
+                                        ( Gs.x,  A.num_rows, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
         b = 1 - b;

@@ -682,14 +682,9 @@ magma_zbicgmerge4(  int type,
 
 magma_int_t
 magma_zcgmerge_spmv1(  
-                 magma_storage_t storage_t,
-                 int n,
-                 int max_nnz_row,
+                 magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
                  magmaDoubleComplex *d2,
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
                  magmaDoubleComplex *d_d,
                  magmaDoubleComplex *d_z,
                  magmaDoubleComplex *skp );
