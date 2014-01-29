@@ -603,6 +603,20 @@ magma_zgeellrtmv(      magma_trans_t transA,
                        magma_int_t num_threads,
                        magma_int_t threads_per_row );
 
+magma_int_t 
+magma_zgesellcmv(      magma_trans_t transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t blocksize,
+                       magma_int_t slices,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magma_int_t *d_rowptr,
+                       magma_int_t *d_blockinfo,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
 
 magma_int_t 
 magma_zp1gmres_mgs(    magma_int_t  n, 
