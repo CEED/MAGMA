@@ -390,7 +390,8 @@ typedef enum {
     Magma_CSC          = 416,
     Magma_HYB          = 417,
     Magma_COO          = 418,
-    Magma_ELLPACKRT    = 419
+    Magma_ELLPACKRT    = 419,
+    Magma_SELLC        = 420
 } magma_storage_t;
 
 typedef enum {
