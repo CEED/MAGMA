@@ -32,6 +32,7 @@ typedef struct magma_z_sparse_matrix{
     magma_int_t        *blockinfo;
     magma_int_t        blocksize;
     magma_int_t        numblocks;
+    magma_int_t        alignment;
 
 }magma_z_sparse_matrix;
 
@@ -50,6 +51,7 @@ typedef struct magma_c_sparse_matrix{
     magma_int_t        *blockinfo;
     magma_int_t        blocksize;
     magma_int_t        numblocks;
+    magma_int_t        alignment;
 
 }magma_c_sparse_matrix;
 
@@ -69,6 +71,7 @@ typedef struct magma_d_sparse_matrix{
     magma_int_t        *blockinfo;
     magma_int_t        blocksize;
     magma_int_t        numblocks;
+    magma_int_t        alignment;
 
 }magma_d_sparse_matrix;
 
@@ -88,6 +91,7 @@ typedef struct magma_s_sparse_matrix{
     magma_int_t        *blockinfo;
     magma_int_t        blocksize;
     magma_int_t        numblocks;
+    magma_int_t        alignment;
 
 }magma_s_sparse_matrix;
 

@@ -93,7 +93,8 @@ magma_z_csr_compressor( magmaDoubleComplex ** val,
                         magmaDoubleComplex ** valn, 
                         magma_int_t ** rown, 
                         magma_int_t ** coln, 
-                        magma_int_t *n);
+                        magma_int_t *n,
+                        magma_int_t *alignment);
 
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
@@ -608,6 +609,7 @@ magma_zgesellcmv(      magma_trans_t transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t blocksize,
                        magma_int_t slices,
+                       magma_int_t alignment,
                        magmaDoubleComplex alpha,
                        magmaDoubleComplex *d_val,
                        magma_int_t *d_colind,
