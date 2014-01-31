@@ -78,19 +78,18 @@ ZSRC += \
 -include Makefile.local
 -include Makefile.src
 
+# path for testings.h, flops.h
+INC += -I$(MAGMA_DIR)/testing
+
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.cpp=.o)
 EXE    := $(ALLOBJ:.o=)
 
-LIBSRC  := testing_zutil.o testing_cutil.o testing_dutil.o testing_sutil.o testing_util.o
-LIBOBJ  := $(LIBSRC:.cpp=.o)
-LIBEXE  := $(LIBOBJ:.o=)
-
-# strip out fake exe files generated from LIBSRC
-EXE := $(filter-out $(LIBEXE), $(EXE))
+LIBTEST := $(MAGMA_DIR)/testing/libtest.a
 
 .PHONY: all lib clean cleanall
 
+# --------------------
 all: $(EXE)
 
 echo:
@@ -102,11 +101,11 @@ echo:
 lib:
 	cd .. && $(MAKE) lib
 
-# depend on header
-$(ALLOBJ): testings.h
+# depend on header, in case struct magma_opts changes
+$(ALLOBJ): $(MAGMA_DIR)/testing/testings.h
 
 
-$(EXE): $(LIBMAGMA_SPARSE) util.o
+$(EXE): $(LIBMAGMA_SPARSE) $(LIBTEST)
 
 clean:
 	rm -f *.o *~ 
@@ -118,13 +117,13 @@ cleanall: clean cleanexe
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
+	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 run_% : run_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
+	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
