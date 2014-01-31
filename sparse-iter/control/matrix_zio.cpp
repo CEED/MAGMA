@@ -673,7 +673,6 @@ magma_int_t print_z_csr(    magma_int_t n_row,
 extern "C"
 magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
 {
-
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_DENSE ){
             for( magma_int_t i=0; i<(A.num_rows); i++ ){
@@ -989,7 +988,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
       magma_z_csr_compressor(&(A->val), 
                         &(A->row),
                          &(A->col), 
-                       &B.val, &B.row, &B.col, &B.num_rows); 
+                       &B.val, &B.row, &B.col, &B.num_rows, &B.num_rows); 
       B.nnz = B.row[num_rows];
      // printf(" remaining nonzeros:%d ", B.nnz); 
       magma_free_cpu( A->val ); 

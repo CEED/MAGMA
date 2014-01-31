@@ -61,7 +61,8 @@ magma_int_t magma_z_csr_compressor( magmaDoubleComplex ** val,
                                     magmaDoubleComplex ** valn, 
                                     magma_int_t ** rown, 
                                     magma_int_t ** coln, 
-                                    magma_int_t *n)
+                                    magma_int_t *n,
+                                    magma_int_t *alignedrows)
 {
     magma_int_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
     magma_imalloc_cpu( &(row_nnz), (*n) );
@@ -225,7 +226,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
-                                   &B->val, &B->row, &B->col, &B->num_rows);  
+                       &B->val, &B->row, &B->col, &B->num_rows, &B->num_rows);  
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }        
@@ -307,7 +308,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
-                                   &B->val, &B->row, &B->col, &B->num_rows); 
+                       &B->val, &B->row, &B->col, &B->num_rows, &B->num_rows); 
 
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
@@ -399,25 +400,27 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
-                                   &B->val, &B->row, &B->col, &B->num_rows);  
+                   &B->val, &B->row, &B->col, &B->num_rows, &B->num_rows);  
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }   
-        // CSR to SELLC 
+        // CSR to SELLC
         // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
         // A UNIFIED SPARSE MATRIX DATA FORMAT 
         // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+        // alignment posible such that multiple threads can be used for SpMV
         if( old_format == Magma_CSR && new_format == Magma_SELLC ){
             // fill in information for B
             B->storage_type = Magma_SELLC;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->max_nnz_row = 0;
             magma_int_t C = B->blocksize;
             magma_int_t slices = ( A.num_rows+C-1)/(C);
             B->numblocks = slices;
+            magma_int_t alignedlength, alignment = B->alignment;
             // conversion
             magma_int_t i, j, k, *length, maxrowlength=0;
             magma_imalloc_cpu( &length, C);
@@ -425,6 +428,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc_cpu( &B->row, slices+1 );
             // blockinfo contains the maxrowlength for each slice
             magma_imalloc_cpu( &B->blockinfo, slices );
+
 
             B->row[0] = 0;
             for( i=0; i<slices; i++ ){
@@ -439,33 +443,32 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                          maxrowlength = length[j];
                     }
                 }
-                B->blockinfo[i] = maxrowlength;
-                B->row[i+1] = B->row[i] + maxrowlength * C;
+                alignedlength = ((maxrowlength+alignment-1)/alignment) 
+                                                                * alignment;
+                B->blockinfo[i] = alignedlength;
+                B->row[i+1] = B->row[i] + alignedlength * C;
+                if( alignedlength > B->max_nnz_row )
+                    B->max_nnz_row = alignedlength;
             }
             B->nnz = B->row[slices];
             //printf( "Conversion to SELLC with %d slices of size %d and"
-              //      " %d nonzeros.\n", slices, C, B->nnz );
+            //       " %d nonzeros.\n", slices, C, B->nnz );
 
             //fflush(stdout);
             magma_zmalloc_cpu( &B->val, B->row[slices] );
             magma_imalloc_cpu( &B->col, B->row[slices] );
             // zero everything
-            for( i=0; i<slices; i++ ){
-                for( j=0; j<B->blockinfo[i]*C; j++){
-                  B->val[ (B->row[i]) + j ] = MAGMA_Z_MAKE(0., 0.);
-                  B->col[ (B->row[i]) + j ] =  0;
-                }
+            for( i=0; i<B->row[slices]; i++ ){
+              B->val[ i ] = MAGMA_Z_MAKE(0., 0.);
+              B->col[ i ] =  0;
             }
+            // fill in values
             for( i=0; i<slices; i++ ){
                 for(j=0; j<C; j++){
                     magma_int_t line = i*C+j;
                     magma_int_t offset = 0;
                     if( line < A.num_rows){
                          for( k=A.row[line]; k<A.row[line+1]; k++ ){
-                             //B->val[ B->row[i] + j*B->blockinfo[i] +offset ] 
-                             //                                     = A.val[k];
-                             //B->col[ B->row[i] + j*B->blockinfo[i] +offset ]
-                             //                                     = A.col[k];
                              B->val[ B->row[i] + j +offset*C ] = A.val[k];
                              B->col[ B->row[i] + j +offset*C ] = A.col[k];
                              offset++;
@@ -473,12 +476,12 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     }
                 }
             }
-            //printf( "done\n" );
+            //printf( "done.\n" );
             return MAGMA_SUCCESS; 
         }
         // SELLC to CSR    
         if( old_format == Magma_SELLC && new_format == Magma_CSR ){
-            //printf( "Conversion to CSR: " );
+            // printf( "Conversion to CSR: " );
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -491,59 +494,44 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t slices = A.numblocks;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
-            
-/*          // conversion for non-ColMajor
-            magma_int_t i, j, *row_tmp;
-            magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
-            magma_int_t C = A.blocksize;
-            magma_int_t slices = A.numblocks;
-
-
-            //fill the row-pointer
-            for( i=0; i<slices; i++ ){
-                for( j=0; j<C; j++){
-                    magma_int_t line = i*C+j;
-                    // blockinfo[i] is the blocksize in this slice
-                    // A.row[i] is the offset of this block
-                    row_tmp[line] = A.blockinfo[i]*j+A.row[i];
-                }
-            }
-            //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
-            //The CSR compressor removes these
-            magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
-                                   &B->val, &B->row, &B->col, &B->num_rows);  */
-
             // conversion
             magma_int_t *row_tmp;
             magma_int_t *col_tmp;
             magmaDoubleComplex *val_tmp;
-            magma_zmalloc_cpu( &val_tmp, A.nnz );
+            magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) );
             magma_imalloc_cpu( &row_tmp, A.num_rows+C );
-            magma_imalloc_cpu( &col_tmp, A.nnz );
-            //fill the row-pointer
-            for( magma_int_t i=0; i<slices+1; i++ ){
-                for( magma_int_t j=0; j<C; j++){
-                    magma_int_t line = i*C+j;
-                    // blockinfo[i] is the blocksize in this slice
-                    // A.row[i] is the offset of this block
-                    row_tmp[line] = A.blockinfo[i]*j+A.row[i];
-                }
+            magma_imalloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
+
+            // zero everything
+            for(magma_int_t i=0; i<A.max_nnz_row*(A.num_rows+C); i++ ){
+              val_tmp[ i ] = MAGMA_Z_MAKE(0., 0.);
+              col_tmp[ i ] =  0;
             }
+
+            //fill the row-pointer
+            for( magma_int_t i=0; i<A.num_rows+1; i++ ){
+                row_tmp[i] = A.max_nnz_row*i;
+                
+            }
+
             //transform RowMajor to ColMajor
             for( magma_int_t k=0; k<slices; k++){
-                for( magma_int_t j=0;j<A.blockinfo[k];j++ ){
-                    for( magma_int_t i=0;i<C;i++ ){
-                        col_tmp[A.row[k]+i*A.blockinfo[k]+j] = 
-                                                A.col[A.row[k]+j*C+i];
-                        val_tmp[A.row[k]+i*A.blockinfo[k]+j] = 
-                                                A.val[A.row[k]+j*C+i];
+                for( magma_int_t j=0;j<C;j++ ){
+                    for( magma_int_t i=0;i<A.blockinfo[k];i++ ){
+                        col_tmp[ (k*C+j)*A.max_nnz_row+i ] = 
+                                                A.col[A.row[k]+i*C+j];
+                        val_tmp[ (k*C+j)*A.max_nnz_row+i ] = 
+                                                A.val[A.row[k]+i*C+j];
                     }
                 }    
             }
+
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
+
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
-                                   &B->val, &B->row, &B->col, &B->num_rows); 
+                       &B->val, &B->row, &B->col, &B->num_rows, &B->num_rows); 
+
             //printf( "done\n" );      
             return MAGMA_SUCCESS;  
         }
@@ -574,7 +562,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }
-
         // DENSE to CSR
         if( old_format == Magma_DENSE && new_format == Magma_CSR ){
             //printf( "Conversion to CSR: " );
@@ -854,7 +841,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             */
             
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
-                                 &B->val, &B->row, &B->col, &B->num_rows); 
+                     &B->val, &B->row, &B->col, &B->num_rows, &B->num_rows); 
 
             B->nnz = B->row[B->num_rows];
 
