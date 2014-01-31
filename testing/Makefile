@@ -160,6 +160,12 @@ ZSRC += \
 	testing_zgebrd.cpp	\
 
 # ----------
+# utilities
+ZSRC += \
+	magma_util.cpp		\
+	magma_zutil.cpp		\
+
+# ----------
 ifeq ($(FORT), pgfortran)
 	FOBJ  = fortran_thunking.o
 	ZSRCF = testing_zgetrf_gpu_f.cuf
@@ -183,26 +189,14 @@ ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
 
-EXE    := $(ALLOBJ:.o=)
+TESTS  := $(filter testing_%,$(ALLOBJ))
+EXE    := $(TESTS:.o=)
 
 # --------------------
 LIBTEST := libtest.a
-LIBSRC  := testing_zutil.o testing_cutil.o testing_dutil.o testing_sutil.o testing_util.o
+LIBSRC  := magma_zutil.o magma_cutil.o magma_dutil.o magma_sutil.o magma_util.o
 LIBOBJ  := $(LIBSRC:.cpp=.o)
 LIBEXE  := $(LIBOBJ:.o=)
-
-# testing_zutil.cpp isn't in ZSRC (since they don't generate EXEs),
-# so add generation rules here instead of .Makefile.gen
-testing_cutil.cpp: testing_zutil.cpp
-	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p c --file testing_zutil.cpp
-
-testing_dutil.cpp: testing_zutil.cpp
-	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p d --file testing_zutil.cpp
-
-testing_sutil.cpp: testing_zutil.cpp
-	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p s --file testing_zutil.cpp
-
-generate: testing_cutil.cpp testing_dutil.cpp testing_sutil.cpp
 
 
 # --------------------
