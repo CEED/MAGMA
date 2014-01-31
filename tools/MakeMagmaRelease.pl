@@ -29,6 +29,7 @@ my @files2delete = qw(
     magmablas/obsolete
     magmablas/zhemm_1gpu.cpp
     magmablas/zhemm_1gpu_old.cpp
+    make.icl
     make.inc.ig.pgi
     multi-gpu-dynamic-deprecated
     quark

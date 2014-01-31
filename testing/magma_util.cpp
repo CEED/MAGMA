@@ -13,6 +13,8 @@
 
 #include <string.h>
 #include <assert.h>
+#include <sys/file.h>
+#include <errno.h>
 
 #include "testings.h"
 
@@ -29,6 +31,50 @@ void magma_assert( bool condition, const char* msg, ... )
         exit(1);
     }
 }
+
+
+// --------------------
+// Acquire lock file.
+// operation should be LOCK_SH (for shared access) or LOCK_EX (for exclusive access).
+// Returns open file descriptor.
+// Exits program on error.
+// Lock is released by simply closing the file descriptor with close(),
+// or when program exits or crashes.
+
+int open_lockfile( const char* file, int operation )
+{
+    int fd = -1;
+#ifdef USE_FLOCK
+    if ( file == NULL )
+        return -1;
+    else if ( operation != LOCK_SH && operation != LOCK_EX )
+        return -2;
+    
+    fd = open( file, O_WRONLY|O_CREAT, 0666 );
+    if ( fd < 0 ) {
+        fprintf( stderr, "Can't open file %s: %s (%d)\n",
+                 file, strerror(errno), errno );
+        exit(1);
+    }
+    
+    // first try nonblocking lock;
+    // if that fails (e.g., someone has exclusive lock) let user know and try blocking lock.
+    int err = flock( fd, operation|LOCK_NB );
+    if ( err < 0 ) {
+        fprintf( stderr, "Waiting for lock on %s...\n", file );
+        err = flock( fd, operation );
+        if ( err < 0 ) {
+            fprintf( stderr, "Can't lock file %s: %s (%d)\n",
+                     file, strerror(errno), errno );
+            exit(1);
+        }
+    }
+#endif
+    return fd;
+}
+
+// filename to use for lock file
+const char* lockfile = "/tmp/icl-lock";
 
 
 // --------------------
@@ -56,6 +102,7 @@ const char *usage =
 "      --[not]all   Whether to test all combinations of flags, e.g., jobu.\n"
 "  --dev x          GPU device to use, default 0.\n"
 "  --pad n          Pad LDDA on GPU to multiple of pad, default 32.\n"
+"  -x  --exclusive  Lock file for exclusive use (internal ICL functionality).\n"
 "\n"
 "The following options apply to only some routines.\n"
 "  --nb x           Block size, default set automatically.\n"
@@ -122,6 +169,10 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->jobz      = MagmaNoVec;  // heev:  no eigen vectors
     opts->jobvr     = MagmaNoVec;  // geev:  no right eigen vectors
     opts->jobvl     = MagmaNoVec;  // geev:  no left  eigen vectors
+    
+    #ifdef USE_FLOCK
+    opts->flock_op = LOCK_SH;  // default shared lock
+    #endif
     
     printf( usage_short, argv[0] );
     
@@ -337,6 +388,16 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         else if ( strcmp("-RN", argv[i]) == 0 ) { opts->jobvr = MagmaNoVec; }
         else if ( strcmp("-RV", argv[i]) == 0 ) { opts->jobvr = MagmaVec;   }
         
+        // ----- misc
+        else if ( strcmp("-x",          argv[i]) == 0 ||
+                  strcmp("--exclusive", argv[i]) == 0 ) {
+            #ifdef USE_FLOCK
+            opts->flock_op = LOCK_EX;
+            #else
+            fprintf( stderr, "ignoring %s: USE_FLOCK not defined; flock not supported.\n", argv[i] );
+            #endif
+        }
+        
         // ----- usage
         else if ( strcmp("-h",     argv[i]) == 0 ||
                   strcmp("--help", argv[i]) == 0 ) {
@@ -395,6 +456,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         printf( "jobu and jobvt cannot both be Overwrite.\n" );
         exit(1);
     }
+    
+    // lock file
+    #ifdef USE_FLOCK
+    opts->flock_fd = open_lockfile( lockfile, opts->flock_op );
+    #endif
     
     // set device
     magma_setdevice( opts->device );

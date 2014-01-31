@@ -222,6 +222,10 @@ typedef struct magma_opts
     magma_vec_t     jobz;    // heev:   no eigen vectors
     magma_vec_t     jobvr;   // geev:   no right eigen vectors
     magma_vec_t     jobvl;   // geev:   no left  eigen vectors
+    
+    // misc
+    int flock_op;   // shared or exclusive lock
+    int flock_fd;   // lock file
 } magma_opts;
 
 void parse_opts( int argc, char** argv, magma_opts *opts );

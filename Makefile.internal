@@ -7,6 +7,7 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 include $(MAGMA_DIR)/make.inc
+-include $(MAGMA_DIR)/make.icl
 
 #
 # Set default values if they are not set in make.inc
