@@ -85,11 +85,11 @@ int main( int argc, char** argv)
     printf( "nb %d, ngpu %d, nstream %d version %d\n", (int) opts.nb, (int) opts.ngpu, (int) opts.nstream, (int) opts.version );
     printf("    M     N    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
     printf("=========================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int offset = 0; offset < 1; offset += min(N,opts.nb) ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M     = opts.msize[i];
-            N     = opts.nsize[i];
+            M     = opts.msize[itest];
+            N     = opts.nsize[itest];
             msize = M - offset;
             lda   = M;
             ldda  = ((M + 31)/32)*32;

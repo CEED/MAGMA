@@ -45,10 +45,10 @@ int main( int argc, char** argv)
     printf("Inplace transpose requires M==N.\n");
     printf("    M     N   CPU GByte/s (sec)   GPU GByte/s (sec) check   Inplace GB/s (sec) check\n");
     printf("====================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             lda    = M;
             ldda   = ((M+31)/32)*32;
             ldb    = N;

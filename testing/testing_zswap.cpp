@@ -85,13 +85,13 @@ int main( int argc, char** argv)
     printf("            cublasZswap       zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n");
     printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  zlaswp   (GByte/s)\n");
     printf("==================================================================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             // each test is assigned one bit in the check bitmask, bit=1 is failure.
             // shift keeps track of which bit is for current test
             int shift = 1;
             int check = 0;
-            N = opts.nsize[i];
+            N = opts.nsize[itest];
             lda    = N;
             ldda   = ((N+31)/32)*32;
             nb     = (opts.nb > 0 ? opts.nb : magma_get_zgetrf_nb( N ));

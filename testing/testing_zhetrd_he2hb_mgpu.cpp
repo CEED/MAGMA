@@ -87,9 +87,9 @@ int main( int argc, char** argv)
     }
     magma_setdevice( 0 );
 
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N     = opts.nsize[i];
+            N     = opts.nsize[itest];
             lda   = N;
             ldt   = N;
             ldda  = ((N+31)/32)*32;

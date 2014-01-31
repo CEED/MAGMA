@@ -51,11 +51,11 @@ int main( int argc, char** argv)
     
     printf("    M     N   norm   CPU GByte/s (ms)    GPU GByte/s (ms)    error   \n");
     printf("=====================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int inorm = 0; inorm < 1; ++inorm ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M   = opts.msize[i];
-            N   = opts.nsize[i];
+            M   = opts.msize[itest];
+            N   = opts.nsize[itest];
             lda = M;
             n2  = lda*N;
             ldda = roundup( M, opts.pad );

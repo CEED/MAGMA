@@ -46,9 +46,9 @@ int main( int argc, char** argv)
     printf("ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
     printf("    N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N     = opts.nsize[i];
+            N     = opts.nsize[itest];
             lda   = N;
             n2    = lda*N;
             gflops = FLOPS_ZPOTRF( N ) / 1e9;

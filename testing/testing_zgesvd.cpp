@@ -59,7 +59,7 @@ int main( int argc, char** argv)
     }
     printf("jobu jobv     M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S sorted\n");
     printf("===========================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int ijobu = 0; ijobu < 4; ++ijobu ) {
         for( int ijobv = 0; ijobv < 4; ++ijobv ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -76,8 +76,8 @@ int main( int argc, char** argv)
                 continue;
             }
             
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             n2 = M*N;
             min_mn = min(M, N);
             nb = magma_get_zgesvd_nb(N);

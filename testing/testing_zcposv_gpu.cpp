@@ -51,9 +51,9 @@ int main(int argc, char **argv)
     
     printf("    N NRHS   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  Iter\n");
     printf("=====================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+            N = opts.nsize[itest];
             ldb = ldx = lda = N;
             gflopsF = FLOPS_ZPOTRF( N ) / 1e9;
             gflopsS = gflopsF + FLOPS_ZPOTRS( N, nrhs ) / 1e9;

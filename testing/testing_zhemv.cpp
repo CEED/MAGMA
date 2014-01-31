@@ -44,9 +44,9 @@ int main(int argc, char **argv)
 
     printf("    N   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
     printf("=============================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+            N = opts.nsize[itest];
             lda    = ((N + 31)/32)*32;
             sizeA  = N*lda;
             sizeX  = N*incx;

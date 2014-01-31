@@ -66,10 +66,10 @@ int main( int argc, char** argv )
     printf( "Compares magma wrapper function to cublas function; all diffs should be exactly 0.\n\n" );
     
     total_error = 0.;
-    for( int i = 0; i < opts.ntest; ++i ) {
-        m = opts.msize[i];
-        n = opts.nsize[i];
-        k = opts.ksize[i];
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
+        m = opts.msize[itest];
+        n = opts.nsize[itest];
+        k = opts.ksize[itest];
         printf("=========================================================================\n");
         printf( "m=%d, n=%d, k=%d\n", (int) m, (int) n, (int) k );
         

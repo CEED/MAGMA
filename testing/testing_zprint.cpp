@@ -39,10 +39,10 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M     = opts.msize[i];
-            N     = opts.nsize[i];
+            M     = opts.msize[itest];
+            N     = opts.nsize[itest];
             lda   = N;
             ldda  = ((M + 31)/32)*32;
             size  = lda*N;

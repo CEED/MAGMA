@@ -54,10 +54,10 @@ int main( int argc, char** argv)
     printf("                                                            ||b-Ax|| / (N||A||)\n");
     printf("    M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU     \n");
     printf("===============================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             if ( M < N ) {
                 printf( "skipping M=%d, N=%d because M < N is not yet supported.\n", (int) M, (int) N );
                 continue;

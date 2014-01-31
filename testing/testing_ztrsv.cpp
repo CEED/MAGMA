@@ -58,9 +58,9 @@ int main( int argc, char** argv)
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA), lapack_diag_const(opts.diag) );
     printf("    N  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)   CUBLAS error\n");
     printf("============================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+            N = opts.nsize[itest];
             gflops = FLOPS_ZTRSM(opts.side, N, 1) / 1e9;
             lda    = N;
             ldda   = ((lda+31)/32)*32;

@@ -55,11 +55,11 @@ int main( int argc, char** argv)
            lapack_trans_const(opts.transB) );
     printf("    M     N     K   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
     printf("=========================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
-            K = opts.ksize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
+            K = opts.ksize[itest];
             gflops = FLOPS_ZGEMM( M, N, K ) / 1e9;
 
             if ( opts.transA == MagmaNoTrans ) {

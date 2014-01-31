@@ -5,9 +5,9 @@ int main( int argc, char** argv )
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         printf( "m %5d, n %5d, k %5d\n",
-                (int) opts.msize[i], (int) opts.nsize[i], (int) opts.ksize[i] );
+                (int) opts.msize[itest], (int) opts.nsize[itest], (int) opts.ksize[itest] );
     }
     printf( "\n" );
     

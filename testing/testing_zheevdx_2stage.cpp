@@ -79,9 +79,9 @@ int main( int argc, char** argv)
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");
     magma_int_t threads = magma_get_numthreads();
-    for( magma_int_t i = 0; i < opts.ntest; ++i ) {
-        for( magma_int_t iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
+        for( int iter = 0; iter < opts.niter; ++iter ) {
+            N = opts.nsize[itest];
             n2     = N*N;
             #if defined(PRECISION_z) || defined(PRECISION_c)
             lwork  = magma_zbulge_get_lq2(N, threads) + 2*N + N*N;

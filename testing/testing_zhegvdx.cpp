@@ -67,9 +67,9 @@ int main( int argc, char** argv)
     
     printf("    N     M   GPU Time (sec)\n");
     printf("============================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+            N = opts.nsize[itest];
             n2     = N*N;
             nb     = magma_get_zhetrd_nb(N);
             #if defined(PRECISION_z) || defined(PRECISION_c)

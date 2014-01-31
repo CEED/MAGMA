@@ -51,12 +51,12 @@ int main( int argc, char** argv )
 
     printf("    M     N     K   side   trans   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
     printf("===============================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iside = 0; iside < 2; ++iside ) {
         for( int itran = 0; itran < 2; ++itran ) {
-            m = opts.msize[i];
-            n = opts.nsize[i];
-            k = opts.ksize[i];
+            m = opts.msize[itest];
+            n = opts.nsize[itest];
+            k = opts.ksize[itest];
             nb  = magma_get_zgeqrf_nb( m );
             ldc = ((m + 31)/32)*32;
             lda = ((max(m,n) + 31)/32)*32;

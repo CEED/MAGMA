@@ -65,10 +65,10 @@ int main( int argc, char** argv)
         printf("====================================================================================\n");
         tol = opts.tolerance * lapackf77_dlamch("E");
     }
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;

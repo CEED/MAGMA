@@ -55,10 +55,10 @@ int main( int argc, char** argv)
            lapack_trans_const(opts.transA), lapack_diag_const(opts.diag) );
     printf("    M     N   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
     printf("==================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             gflops = FLOPS_ZTRMM(opts.side, M, N) / 1e9;
 
             if ( opts.side == MagmaLeft ) {

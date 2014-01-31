@@ -67,9 +67,9 @@ int main( int argc, char** argv)
     printf( "nb %d, ngpu %d, nstream %d\n", (int) nb, (int) ngpu, (int) nstream );
     printf("    n     k    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R|/(|V|*|W|+|A|)\n");
     printf("===================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
-        n = opts.nsize[i];
-        k = opts.ksize[i];
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
+        n = opts.nsize[itest];
+        k = opts.ksize[itest];
         
         for( int offset = 0; offset < n; offset += min(k,nb) ) {
             for( int iter = 0; iter < opts.niter; ++iter ) {

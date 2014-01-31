@@ -53,10 +53,10 @@ int main( int argc, char** argv )
     
     printf("    M     N     K   storev   side   direct   trans    ||R||_F / ||HC||_F\n");
     printf("========================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
-        M = opts.msize[i];
-        N = opts.nsize[i];
-        K = opts.ksize[i];
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
+        M = opts.msize[itest];
+        N = opts.nsize[itest];
+        K = opts.ksize[itest];
         if ( M < K || N < K || K <= 0 ) {
             printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", (int) M, (int) N, (int) K );
             continue;

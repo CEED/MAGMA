@@ -52,10 +52,10 @@ int main( int argc, char** argv)
     printf("mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
     printf("    M     N ntile   CPU GFlop/s (sec)   GPU GFlop/s (sec)   error   \n");
     printf("====================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
+    for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            M = opts.msize[i];
-            N = opts.nsize[i];
+            M = opts.msize[itest];
+            N = opts.nsize[itest];
             lda    = M;
             ldda   = ((M+31)/32)*32;
             size   = lda*N;
