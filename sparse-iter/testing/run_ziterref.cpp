@@ -18,6 +18,7 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "../include/magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -45,7 +46,8 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
-    B.blocksize = 256;
+    B.blocksize = 16;
+    B.alignment = 16;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -89,13 +91,14 @@ int main( int argc, char** argv)
     }
     printf( "\n    usage: ./run_ziterref"
         " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
-        " [ --blocksize %d ]"
+        " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --preconditioner %d (0=Jacobi, 1=CG, 2=BiCGStab, 3=GMRES)"
         " [ --precond-maxiter %d --precond-tol %.2e"
         " --precond-restart %d ] ]"
-        " --matrix filename \n\n", format, B.blocksize, solver_par.verbose,
+        " --matrix filename \n\n", format, B.blocksize, B.alignment,
+        solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, version,
         precond_par.maxiter, precond_par.epsilon, precond_par.restart );
 
