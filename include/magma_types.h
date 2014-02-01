@@ -391,13 +391,10 @@ typedef enum {
     Magma_HYB          = 417,
     Magma_COO          = 418,
     Magma_ELLPACKRT    = 419,
-    Magma_SELLC        = 420
+    Magma_SELLC        = 420,
+    Magma_SELLCM       = 421
 } magma_storage_t;
 
-typedef enum {
-    Magma_CPU          = 421,
-    Magma_DEV          = 422
-} magma_location_t;
 
 typedef enum {
     Magma_CG           = 431,
@@ -424,6 +421,11 @@ typedef enum {
     Magma_FUSED_CGS    = 462,
     Magma_MGS          = 463
 } magma_ortho_t;
+
+typedef enum {
+    Magma_CPU          = 471,
+    Magma_DEV          = 472
+} magma_location_t;
 
 
 // When adding constants, remember to do these steps as appropriate:
