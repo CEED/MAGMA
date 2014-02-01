@@ -72,11 +72,16 @@ zgesellcmv_kernel(   int num_rows,
     Arguments
     =========
 
+    magma_trans_t transA            transpose A?
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
+    magma_int_t blocksize           number of rows in one ELLPACKT-slice
+    magma_int_t slices              number of slices in matrix
+    magma_int_t alignment           number of threads assigned to one row (=1)
     magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
+    magmaDoubleComplex *d_val       array containing values of A in SELLCM
+    magma_int_t *d_colind           columnindices of A in SELLCM
+    magma_int_t *d_rowptr           rowpointer of SELLCM
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
