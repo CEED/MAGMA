@@ -408,10 +408,14 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
         // A UNIFIED SPARSE MATRIX DATA FORMAT 
         // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
-        // alignment posible such that multiple threads can be used for SpMV
-        if( old_format == Magma_CSR && new_format == Magma_SELLC ){
+        // in SELLCM we modify SELLC:
+        // alignment is posible such that multiple threads can be used for SpMV
+        if( old_format == Magma_CSR && 
+                (new_format == Magma_SELLC || new_format == Magma_SELLCM ) ){
             // fill in information for B
-            B->storage_type = Magma_SELLC;
+            B->storage_type = new_format;
+            if(B->alignment > 1)
+                B->storage_type = Magma_SELLCM;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -426,9 +430,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc_cpu( &length, C);
             // B-row points to the start of each slice
             magma_imalloc_cpu( &B->row, slices+1 );
-            // blockinfo contains the maxrowlength for each slice
-            magma_imalloc_cpu( &B->blockinfo, slices );
-
 
             B->row[0] = 0;
             for( i=0; i<slices; i++ ){
@@ -445,7 +446,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 }
                 alignedlength = ((maxrowlength+alignment-1)/alignment) 
                                                                 * alignment;
-                B->blockinfo[i] = alignedlength;
                 B->row[i+1] = B->row[i] + alignedlength * C;
                 if( alignedlength > B->max_nnz_row )
                     B->max_nnz_row = alignedlength;
@@ -476,11 +476,11 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     }
                 }
             }
-            //printf( "done.\n" );
             return MAGMA_SUCCESS; 
         }
         // SELLC to CSR    
-        if( old_format == Magma_SELLC && new_format == Magma_CSR ){
+        if( (old_format == Magma_SELLC || old_format == Magma_SELLCM )
+                                            && new_format == Magma_CSR ){
             // printf( "Conversion to CSR: " );
             // fill in information for B
             B->storage_type = Magma_CSR;
@@ -516,8 +516,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             //transform RowMajor to ColMajor
             for( magma_int_t k=0; k<slices; k++){
+                magma_int_t blockinfo = (A.row[k+1]-A.row[k])/A.blocksize;
                 for( magma_int_t j=0;j<C;j++ ){
-                    for( magma_int_t i=0;i<A.blockinfo[k];i++ ){
+                    for( magma_int_t i=0;i<blockinfo;i++ ){
                         col_tmp[ (k*C+j)*A.max_nnz_row+i ] = 
                                                 A.col[A.row[k]+i*C+j];
                         val_tmp[ (k*C+j)*A.max_nnz_row+i ] = 

@@ -176,7 +176,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                         A.row, 1, B->row, 1 ); 
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -203,10 +203,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                 ( void** )&B->row );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
-            stat = cublasAlloc( A.numblocks, sizeof( magma_int_t ), 
-                                ( void** )&B->blockinfo );
-            if( ( int )stat != 0 ) 
-            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             cublasSetVector( A.nnz, sizeof( magmaDoubleComplex ), 
                                                     A.val, 1, B->val, 1 );
@@ -214,8 +210,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                                     A.col, 1, B->col, 1 ); 
             cublasSetVector( A.numblocks+1, sizeof( magma_int_t ), 
                                                     A.row, 1, B->row, 1 ); 
-            cublasSetVector( A.numblocks, sizeof( magma_int_t ), 
-                                        A.blockinfo, 1, B->blockinfo, 1 ); 
         } 
         //BCSR-type
         if( A.storage_type == Magma_BCSR ){
@@ -373,7 +367,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             }
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -392,15 +386,13 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &B->val, A.nnz );
             magma_imalloc_cpu( &B->col, A.nnz );
             magma_imalloc_cpu( &B->row, A.numblocks+1 );
-            magma_imalloc_cpu( &B->blockinfo, A.numblocks );
             // data transfer
             for( magma_int_t i=0; i<A.nnz; i++ ){
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
             }
-            for( magma_int_t i=0; i<A.numblocks; i++ ){
+            for( magma_int_t i=0; i<A.numblocks+1; i++ ){
                 B->row[i] = A.row[i];
-                B->blockinfo[i] = A.blockinfo[i];
             }
         } 
         //DENSE-type
@@ -513,7 +505,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                     A.row, 1, B->row, 1 );
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -532,7 +524,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &B->val, A.nnz );
             magma_imalloc_cpu( &B->col, A.nnz );
             magma_imalloc_cpu( &B->row, A.numblocks+1 );
-            magma_imalloc_cpu( &B->blockinfo, A.numblocks );
             // data transfer
             cublasGetVector( A.nnz, sizeof( magmaDoubleComplex ), 
                                     A.val, 1, B->val, 1 );
@@ -540,8 +531,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                     A.col, 1, B->col, 1 );
             cublasGetVector( A.numblocks+1, sizeof( magma_int_t ), 
                                     A.row, 1, B->row, 1 );
-            cublasGetVector( A.numblocks, sizeof( magma_int_t ), 
-                                    A.blockinfo, 1, B->blockinfo, 1 );
         } 
         //BCSR-type
         if( A.storage_type == Magma_BCSR ){
@@ -715,7 +704,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                     *sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
         }
         //SELLC-type
-        if( A.storage_type == Magma_SELLC ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -742,18 +731,12 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                 ( void** )&B->row );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
-            stat = cublasAlloc( A.numblocks, sizeof( magma_int_t ), 
-                                ( void** )&B->blockinfo );
-            if( ( int )stat != 0 ) 
-            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             cudaMemcpy( B->val, A.val, A.nnz
                     *sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
             cudaMemcpy( B->col, A.col, A.nnz
                     *sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
            cudaMemcpy( B->row, A.row, A.numblocks+1
-                    *sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
-           cudaMemcpy( B->blockinfo, A.blockinfo, A.numblocks
                     *sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
         } 
         //BCSR-type

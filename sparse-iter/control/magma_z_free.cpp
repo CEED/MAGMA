@@ -123,11 +123,10 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_SELLC ){
+        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLCM ){
             free( A->val );
             free( A->row );
             free( A->col );
-            free( A->blockinfo );
             A->num_rows = 0;
             A->num_cols = 0;
             A->nnz = 0;        
@@ -219,7 +218,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_SELLC ){
+        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLCM ){
             if( cudaFree( A->val ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;
@@ -231,11 +230,6 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
                 exit(0);
             }
             if( cudaFree( A->col ) != cudaSuccess ) {
-                printf("Memory Free Error.\n");  
-                return MAGMA_ERR_INVALID_PTR;
-                exit(0);
-            }
-            if( cudaFree( A->blockinfo ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;
                 exit(0);
