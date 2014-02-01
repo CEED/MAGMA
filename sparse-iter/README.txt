@@ -66,6 +66,16 @@ when executing "./run_xsolver".
     k = 2 : ELLPACKT
     k = 3 : ELLPACKRT
 
+"--blocksize k"
+    for Magma_SELLC: k denots the number of rows in one slice of the matrix
+                      and the number of rows assigned to one multiprocessor
+    for Magma_SELLCM: k denots the number of rows in one slice of the matrix
+                      and the number of rows assigned to one multiprocessor
+
+"--alignment k"
+    for Magma_SELLCM: k denots the number of threads assigned to one row
+                      notice: blocksize * alignment < 512 !
+
 "--ortho k"
     k = 0 : orthogonalization via classical Gram-Schmidt (CGS)
     k = 1 : orthogonalization via modified Gram-Schmidt (MGS)
