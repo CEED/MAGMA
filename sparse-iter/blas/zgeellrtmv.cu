@@ -133,6 +133,7 @@ magma_zgeellrtmv(  magma_trans_t transA,
 
     dim3 grid( num_blocks, 1, 1);
     int Ms =  num_threads* sizeof( magmaDoubleComplex );
+    //    printf("launch kernel: %d %d %d\n", grid.x, num_threads, Ms);
     zgeellrtmv_kernel<<< grid, num_threads, Ms, magma_stream >>>
              ( m, n, alpha, d_val, d_colind, d_rowlength, d_x, beta, d_y, 
                                                 threads_per_row, alignment );

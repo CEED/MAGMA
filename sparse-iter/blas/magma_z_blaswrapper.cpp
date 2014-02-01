@@ -91,8 +91,16 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("using SELLC kernel for SpMV: ");
                  magma_zgesellcmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     A.blocksize, A.numblocks, A.alignment, 
-                    alpha, A.val, A.col, A.row, A.blockinfo, 
-                                            x.val, beta, y.val );
+                    alpha, A.val, A.col, A.row, x.val, beta, y.val );
+
+                 //printf("done.\n");
+                 return MAGMA_SUCCESS;
+             }
+             else if( A.storage_type == Magma_SELLCM ){
+                 //printf("using SELLCM kernel for SpMV: ");
+                 magma_zgesellcmmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                    A.blocksize, A.numblocks, A.alignment, 
+                    alpha, A.val, A.col, A.row, x.val, beta, y.val );
 
                  //printf("done.\n");
                  return MAGMA_SUCCESS;

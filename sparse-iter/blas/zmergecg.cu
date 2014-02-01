@@ -426,6 +426,9 @@ magma_zcgmerge_spmvellpackrt_kernel2(
     }
 }
 
+
+
+// computes the SpMV using SELLC
 __global__ void 
 magma_zcgmerge_spmvsellc_kernel(   
                      int num_rows, 
@@ -433,7 +436,6 @@ magma_zcgmerge_spmvsellc_kernel(
                      magmaDoubleComplex *d_val, 
                      int *d_colind,
                      int *d_rowptr,
-                     int *d_blockinfo,
                      magmaDoubleComplex *d,
                      magmaDoubleComplex *z,
                      magmaDoubleComplex *vtmp){
@@ -442,13 +444,14 @@ magma_zcgmerge_spmvsellc_kernel(
     int Idx = threadIdx.x;   
     int i   = blockIdx.x * blockDim.x + Idx;
     int offset = d_rowptr[ blockIdx.x ];
+    int border = (d_rowptr[ blockIdx.x+1 ]-offset)/blocksize;
 
  temp[ Idx ] = MAGMA_Z_MAKE( 0.0, 0.0);
 
 
     if(i < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        for ( int n = 0; n < d_blockinfo[ blockIdx.x ] ; n ++){
+        for ( int n = 0; n < border; n ++){
             int col = d_colind [offset+ blocksize * n + Idx ];
             magmaDoubleComplex val = d_val[offset+ blocksize * n + Idx];
             if( val != 0){
@@ -502,6 +505,181 @@ magma_zcgmerge_spmvsellc_kernel(
 
     if ( Idx == 0 ){
             vtmp[ blockIdx.x ] = temp[ 0 ];
+    }
+}
+
+
+// SELLCM SpMV kernel
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+magma_zcgmerge_spmvsellcmt_kernel_8( int num_rows, 
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex *d_val, 
+                     int *d_colind,
+                     int *d_rowptr,
+                     magmaDoubleComplex *d,
+                     magmaDoubleComplex *z)
+{
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int ldx = idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    d_colind[ offset + ldx + block*k ];
+            dot += val * d[ col ];
+        }
+        shared[ldx]  = dot;
+
+        __syncthreads();
+        if( idx < 4 ){
+            shared[ldx]+=shared[ldx+blocksize*4];              
+            __syncthreads();
+            if( idx < 2 ) shared[ldx]+=shared[ldx+blocksize*2];   
+            __syncthreads();
+            if( idx == 0 ) {
+                z[row] = 
+                (shared[ldx]+shared[ldx+blocksize*1]);
+            }
+
+        }
+
+    }
+}
+// SELLCM SpMV kernel
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+magma_zcgmerge_spmvsellcmt_kernel_16( int num_rows, 
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex *d_val, 
+                     int *d_colind,
+                     int *d_rowptr,
+                     magmaDoubleComplex *d,
+                     magmaDoubleComplex *z)
+{
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int ldx = idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    d_colind[ offset + ldx + block*k ];
+            dot += val * d[ col ];
+        }
+        shared[ldx]  = dot;
+
+        __syncthreads();
+        if( idx < 8 ){
+            shared[ldx]+=shared[ldx+blocksize*8];              
+            __syncthreads();
+            if( idx < 4 ) shared[ldx]+=shared[ldx+blocksize*4];   
+            __syncthreads();
+            if( idx < 2 ) shared[ldx]+=shared[ldx+blocksize*2];   
+            __syncthreads();
+            if( idx == 0 ) {
+                z[row] = 
+                (shared[ldx]+shared[ldx+blocksize*1]);
+            }
+
+        }
+
+    }
+}
+
+
+// SELLCM SpMV kernel
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+magma_zcgmerge_spmvsellcmt_kernel_32( int num_rows, 
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex *d_val, 
+                     int *d_colind,
+                     int *d_rowptr,
+                     magmaDoubleComplex *d,
+                     magmaDoubleComplex *z)
+{
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int ldx = idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    d_colind[ offset + ldx + block*k ];
+            dot += val * d[ col ];
+        }
+        shared[ldx]  = dot;
+
+        __syncthreads();
+        if( idx < 16 ){
+            shared[ldx]+=shared[ldx+blocksize*16];              
+            __syncthreads();
+            if( idx < 8 ) shared[ldx]+=shared[ldx+blocksize*8];  
+            __syncthreads();
+            if( idx < 4 ) shared[ldx]+=shared[ldx+blocksize*4];   
+            __syncthreads();
+            if( idx < 2 ) shared[ldx]+=shared[ldx+blocksize*2];   
+            __syncthreads();
+            if( idx == 0 ) {
+                z[row] = 
+                (shared[ldx]+shared[ldx+blocksize*1]);
+            }
+
+        }
+
     }
 }
 
@@ -577,11 +755,51 @@ magma_zcgmerge_spmv1(
     else if( A.storage_type == Magma_SELLC ){
         if( A.blocksize==256){
             magma_zcgmerge_spmvsellc_kernel<<<Gs, Bs, Ms, magma_stream >>>
-            ( A.num_rows, A.blocksize, A. val, A.col, A.row, A.blockinfo, 
+            ( A.num_rows, A.blocksize, A. val, A.col, A.row,  
                 d_d, d_z, d1 );
         }
         else
             printf("error: SELLC only for blocksize 256.\n");
+    }
+    else if( A.storage_type == Magma_SELLCM ){
+            int num_threadssellcm = A.blocksize*A.alignment;
+            if( num_threadssellcm > 512)
+                printf("error: shared memory more than 512 threads.\n");
+
+            dim3 block( A.blocksize, A.alignment, 1);
+            int dimgrid1 = sqrt(A.numblocks);
+            int dimgrid2 = (A.numblocks + dimgrid1 -1 ) / dimgrid1;
+
+            dim3 gridsellcm( dimgrid1, dimgrid2, 1);
+            int Mssellcm = num_threadssellcm * sizeof( magmaDoubleComplex );
+
+            if( A.alignment == 8)
+                magma_zcgmerge_spmvsellcmt_kernel_8
+                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                ( A.num_rows, A.blocksize, A.alignment, 
+                    A.val, A.col, A.row, d_d, d_z);
+
+            else if( A.alignment == 16)
+                magma_zcgmerge_spmvsellcmt_kernel_16
+                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                ( A.num_rows, A.blocksize, A.alignment, 
+                    A.val, A.col, A.row, d_d, d_z);
+
+            else if( A.alignment == 32)
+                magma_zcgmerge_spmvsellcmt_kernel_32
+                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                ( A.num_rows, A.blocksize, A.alignment, 
+                    A.val, A.col, A.row, d_d, d_z);
+
+            else
+                printf("error: alignment not supported.\n");
+
+        // in case of using SELLCM, we can't efficiently merge the 
+        // dot product and the first reduction loop into the SpMV kernel
+        // as the SpMV grid would result in low occupancy.
+        magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, magma_stream >>>
+                              ( A.num_rows, d_z, d_d, d1 );
+
     }
     else if( A.storage_type == Magma_ELLPACKRT ){
         // in case of using ELLPACKRT, we need a different grid, assigning

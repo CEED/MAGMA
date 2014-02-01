@@ -28,6 +28,7 @@ ZSRC := \
 	zgeelltmv.cu		\
 	zgeellrtmv.cu		\
 	zgesellcmv.cu		\
+	zgesellcmmv.cu		\
 	zjacobisetup.cu		\
 	zlag2c_sparse.cu	\
 	zmdot.cu		\
