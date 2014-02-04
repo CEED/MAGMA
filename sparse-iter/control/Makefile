@@ -19,9 +19,11 @@ ZSRC := \
 	magma_z_mconverter.cpp	\
 	magma_z_transfer.cpp	\
 	magma_z_vio.cpp		\
+	magma_zgeneratematrix.cpp	\
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
 	z_transpose_csr.cpp	\
+
 
 SRC := \
 	mmio.cpp		\

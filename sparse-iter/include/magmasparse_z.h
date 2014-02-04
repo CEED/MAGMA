@@ -326,9 +326,10 @@ magma_zresidual(        magma_z_sparse_matrix A,
                         double *res );
 
 magma_int_t
-magma_zmgenerator(  magma_int_t nx,
-                    magma_int_t ny,
-                    magma_int_t nz,
+magma_zmgenerator(  magma_int_t n,
+                    magma_int_t offdiags,
+                    magma_int_t *diag_offset,
+                    magmaDoubleComplex *diag_vals,
                     magma_z_sparse_matrix *A );
 
 magma_int_t
