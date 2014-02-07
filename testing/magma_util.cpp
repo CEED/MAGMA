@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <sys/file.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "testings.h"
 
@@ -45,27 +46,36 @@ int open_lockfile( const char* file, int operation )
 {
     int fd = -1;
 #ifdef USE_FLOCK
+    int err;
+
     if ( file == NULL )
         return -1;
     else if ( operation != LOCK_SH && operation != LOCK_EX )
         return -2;
     
-    fd = open( file, O_WRONLY|O_CREAT, 0666 );
+    fd = open( file, O_RDONLY|O_CREAT, 0666 );
     if ( fd < 0 ) {
-        fprintf( stderr, "Can't open file %s: %s (%d)\n",
+        fprintf( stderr, "Error: Can't read file %s: %s (%d)\n",
                  file, strerror(errno), errno );
         exit(1);
+    }
+
+    // make it world-writable so anyone can rm the lockfile later on if needed
+    err = fchmod( fd, 0666 );
+    if ( err < 0 ) {
+        fprintf( stderr, "Warning: Can't chmod file %s 0666: %s (%d)\n",
+                 file, strerror(errno), errno );
     }
     
     // first try nonblocking lock;
     // if that fails (e.g., someone has exclusive lock) let user know and try blocking lock.
-    int err = flock( fd, operation|LOCK_NB );
+    err = flock( fd, operation|LOCK_NB );
     if ( err < 0 ) {
         fprintf( stderr, "Waiting for lock on %s...\n", file );
         err = flock( fd, operation );
         if ( err < 0 ) {
-            fprintf( stderr, "Can't lock file %s: %s (%d)\n",
-                     file, strerror(errno), errno );
+            fprintf( stderr, "Error: Can't lock file %s (operation %d): %s (%d)\n",
+                     file, operation, strerror(errno), errno );
             exit(1);
         }
     }
