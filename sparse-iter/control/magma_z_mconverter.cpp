@@ -336,17 +336,12 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_free_cpu( length );
             //printf( "Conversion to ELLPACKRT with %d elements per row: ", 
             //                                                   maxrowlength );
-            // fixed alignment
-            int num_threads = 256;
-            int threads_per_row = 32; 
-            int num_blocks = ((  (threads_per_row*A.num_rows+num_threads-1)
-                                            /num_threads)        +num_threads-1)
-                                                / (num_threads);
+
+            int num_threads = B->alignment * B->blocksize;
+            int threads_per_row = B->alignment; 
             int rowlength = ( (int)
                     ((maxrowlength+threads_per_row-1)/threads_per_row) ) 
                                                             * threads_per_row;
-            B->blocksize = threads_per_row;
-            B->numblocks = num_threads;
 
             magma_zmalloc_cpu( &B->val, rowlength*A.num_rows );
             magma_imalloc_cpu( &B->col, rowlength*A.num_rows );
@@ -382,12 +377,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            // fixed alignment
-            int num_threads = 256;
-            int threads_per_row = 32; 
-            int num_blocks = ((  (threads_per_row*A.num_rows+num_threads-1)
-                                            /num_threads)        +num_threads-1)
-                                                / (num_threads);
+
+            int num_threads = A.alignment * A.blocksize;
+            int threads_per_row = A.alignment; 
             int rowlength = ( (int)
                     ((A.max_nnz_row+threads_per_row-1)/threads_per_row) ) 
                                                             * threads_per_row;
