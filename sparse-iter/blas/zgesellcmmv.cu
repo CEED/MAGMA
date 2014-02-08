@@ -14,111 +14,6 @@
 
 #define PRECISION_z
 
-#if defined(PRECISION_d)
-
-texture<int2,1> double_texture;
-
-void bind2tex(const double *x){
-  cudaBindTexture(NULL, double_texture, x);
-}
-
-void unbind2tex(const double *x){
-  cudaUnbindTexture(double_texture);
-}
-
-__inline__ __device__ double read_from_tex(const int& i, const double *x){
-  int2 temp=tex1Dfetch(double_texture,i);
-  return __hiloint2double(temp.y,temp.x);
-}
-#endif
-
-// SELLC SpMV kernel
-// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
-// A UNIFIED SPARSE MATRIX DATA FORMAT 
-// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
-// SELLC SpMV kernel modified assigning multiple threads to each row
-__global__ void 
-zgesellcmtmv_kernel( int num_rows, 
-                     int num_cols,
-                     int blocksize,
-                     int T,
-                     magmaDoubleComplex alpha, 
-                     magmaDoubleComplex *d_val, 
-                     int *d_colind,
-                     int *d_rowptr,
-                     magmaDoubleComplex *d_x,
-                     magmaDoubleComplex beta, 
-                     magmaDoubleComplex *d_y)
-{
-   // T threads assigned to each row
-    int idb = threadIdx.x ;  // local thread index
-    int idp = idb%blocksize;  // local row index
-    int bdx = blockIdx.y * 65535 + blockIdx.x; // global block index
-    int row = bdx * blocksize + idp;  // row index
-    int i = idb/blocksize;  // number of thread in row
-
-    extern __shared__ magmaDoubleComplex shared[];
-
-    if(row < num_rows ){
-        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int offset = d_rowptr[ bdx ];
-        int max_ = ((d_rowptr[ bdx+1 ]-offset)/blocksize) / T;  
-
-            // number of elements each thread handles
-        for ( int k = 0; k < max_ ; k++ ){
-            magmaDoubleComplex val = 
-                        d_val[ offset + idb + blocksize*T*k ];
-            int col = 
-                    d_colind[ offset + idb + blocksize*T*k ];
-            dot += val * d_x[ col ];
-
-        }
-        shared[idb]  = dot;
-
-        __syncthreads();
-        if( i < 16 ){
-            shared[idb]+=shared[idb+blocksize*16];              __syncthreads();
-            if( i < 8 ) shared[idb]+=shared[idb+blocksize*8];   __syncthreads();
-            if( i < 4 ) shared[idb]+=shared[idb+blocksize*4];   __syncthreads();
-            if( i < 2 ) shared[idb]+=shared[idb+blocksize*2];   __syncthreads();
-            if( i == 0 ) {
-                d_y[row] = 
-                (shared[idb]+shared[idb+blocksize*1])*alpha + beta*d_y [row];
-            }
-
-        }
-       // #endif
-  /*      #if defined(PRECISION_d)
-        if( i < 16 ){
-            volatile double *temp2 = shared;
-            if( i < 16 ) temp2[ idb ] += temp2[ idb+blocksize*16 ];
-            if( i < 8 ) temp2[ idb ] += temp2[ idb+blocksize*8 ];
-            if( i < 4 ) temp2[ idb ] += temp2[ idb+blocksize*4 ];
-            if( i < 2 ) temp2[ idb ] += temp2[ idb+blocksize*2 ];
-            if( i == 0 ) {
-                d_y[row] = 
-                (temp2[idb]+temp2[idb+blocksize*1])*alpha + beta*d_y [row];
-            }
-        }
-        #endif
-        #if defined(PRECISION_s)
-        if( i < 16 ){
-            volatile float *temp2 = shared;
-            temp2[ idb ] += temp2[ idb+blocksize*16 ];
-            temp2[ idb ] += temp2[ idb+blocksize*8 ];
-            temp2[ idb ] += temp2[ idb+blocksize*4 ];
-            temp2[ idb ] += temp2[ idb+blocksize*2 ];
-            if( i == 0 ) {
-                d_y[row] = 
-                (temp2[idb]+temp2[idb+blocksize*1])*alpha + beta*d_y [row];
-            }
-        }
-        #endif*/
-    }
-}
-
-
-
 // SELLCM SpMV kernel
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
@@ -386,10 +281,6 @@ magma_zgesellcmmv(  magma_trans_t transA,
     dim3 grid( dimgrid1, dimgrid2, 1);
     int Ms = num_threads * sizeof( magmaDoubleComplex );
 
-    //#if defined(PRECISION_d)
-    //bind2tex((const double *) d_x);
-    //#endif
-
     if( alignment == 8)
         zgesellcmtmv2d_kernel_8<<< grid, block, Ms, magma_stream >>>
         ( m, n, blocksize, alignment, alpha,
@@ -409,10 +300,6 @@ magma_zgesellcmmv(  magma_trans_t transA,
         printf("error: alignment %d not supported.\n", alignment);
         exit(-1);
     }
-
-    //#if defined(PRECISION_d)
-    //unbind2tex((const double* ) d_x);
-    //#endif
 
    return MAGMA_SUCCESS;
 }
