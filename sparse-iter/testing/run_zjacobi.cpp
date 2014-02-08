@@ -38,8 +38,8 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
-    B.blocksize = 16;
-    B.alignment = 16;
+    B.blocksize = 8;
+    B.alignment = 8;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -57,11 +57,12 @@ int main( int argc, char** argv)
                 case 3: B.storage_type = Magma_ELLPACKRT; break;
                 case 4: B.storage_type = Magma_SELLC; break;
             }
-        } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
+        } else if ( strcmp("--maxiter", argv[i]) == 0 ){ // && i+1< argc ) {
             solver_par.maxiter = atoi( argv[++i] );
         } else if ( strcmp("--matrix", argv[i]) == 0 ) {
             strcpy( filename, argv[++i] );
         }
+        // else strcpy( filename, argv[++i] );
     }
     printf( "\n    usage: ./run_zjacobi"
         " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
@@ -70,8 +71,7 @@ int main( int argc, char** argv)
         " --matrix filename \n\n", format, B.blocksize, B.alignment,
         solver_par.maxiter);
 
-    magma_z_csr_mtx( &A, (const char*) filename  ); 
-
+    magma_z_csr_mtx( &A,  filename  ); 
 
     printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
                                 ,A.num_rows,A.num_cols,A.nnz );

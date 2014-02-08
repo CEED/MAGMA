@@ -40,8 +40,8 @@ int main( int argc, char** argv)
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
-    B.blocksize = 16;
-    B.alignment = 16;
+    B.blocksize = 8;
+    B.alignment = 8;
     
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -83,8 +83,7 @@ int main( int argc, char** argv)
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, version );
 
-    magma_z_csr_mtx( &A, (const char*) filename  ); 
-
+    magma_z_csr_mtx( &A,  filename  ); 
 
     printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
                                 ,A.num_rows,A.num_cols,A.nnz );

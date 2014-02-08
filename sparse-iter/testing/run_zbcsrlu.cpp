@@ -57,7 +57,7 @@ int main( int argc, char** argv)
             " [ --version %d (0=CUBLAS batched, 1=custom kernels) ]"
             " --matrix filename \n\n", solver_par.version );
 
-    magma_z_csr_mtx( &A, (const char*) filename  ); 
+    magma_z_csr_mtx( &A,  filename  ); 
 
 
     printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
