@@ -12,15 +12,25 @@
 #include <stdio.h>
 #include "common_magma.h"
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 128
-#else
-   #define BLOCK_SIZE 512
-#endif
-
-
 #define PRECISION_z
 
+#if defined(PRECISION_d)
+
+texture<int2,1> double_texture;
+
+void bind2tex(const double *x){
+  cudaBindTexture(NULL, double_texture, x);
+}
+
+void unbind2tex(const double *x){
+  cudaUnbindTexture(double_texture);
+}
+
+__inline__ __device__ double read_from_tex(const int& i, const double *x){
+  int2 temp=tex1Dfetch(double_texture,i);
+  return __hiloint2double(temp.y,temp.x);
+}
+#endif
 
 // SELLC SpMV kernel
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
@@ -143,13 +153,32 @@ zgesellcmtmv2d_kernel_8( int num_rows,
 
         int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
             // number of elements each thread handles
-        for ( int k = 0; k < max_ ; k++ ){
-            magmaDoubleComplex val = 
-                        d_val[ offset + ldx + block*k ];
-            int col = 
-                    d_colind[ offset + ldx + block*k ];
-            dot += val * d_x[ col ];
+
+        int kk, i1, i2;
+        magmaDoubleComplex x1, x2, v1, v2;
+        d_colind += offset + ldx ;
+        d_val += offset + ldx;
+        for ( kk = 0; kk < max_-1 ; kk+=2 ){
+            i1 = d_colind[ block*kk];
+            i2 = d_colind[ block*kk + block];
+
+            x1 = d_x[ i1 ];   
+            x2 = d_x[ i2 ]; 
+
+            v1 = d_val[ block*kk ];
+            v2 = d_val[ block*kk + block];
+
+            dot += v1 * x1;
+            dot += v2 * x2;
         }
+  
+        if (kk<max_){
+           x1 = d_x[ d_colind[ block*kk] ];            
+           v1 = d_val[ block*kk ];
+
+            dot += v1 * x1;
+        }
+
         shared[ldx]  = dot;
 
         __syncthreads();
@@ -201,11 +230,13 @@ zgesellcmtmv2d_kernel_16( int num_rows,
 
         int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
             // number of elements each thread handles
+
         for ( int k = 0; k < max_ ; k++ ){
             magmaDoubleComplex val = 
                         d_val[ offset + ldx + block*k ];
             int col = 
                     d_colind[ offset + ldx + block*k ];
+
             dot += val * d_x[ col ];
         }
         shared[ldx]  = dot;
@@ -268,6 +299,7 @@ zgesellcmtmv2d_kernel_32( int num_rows,
                         d_val[ offset + ldx + block*k ];
             int col = 
                     d_colind[ offset + ldx + block*k ];
+
             dot += val * d_x[ col ];
         }
         shared[ldx]  = dot;
@@ -342,9 +374,9 @@ magma_zgesellcmmv(  magma_trans_t transA,
     // using a 2D thread grid
 
     int num_threads = blocksize*alignment;
-    if( num_threads > 512)
-        printf("error: shared memory more than 512 threads requested.\n");
-
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch < 200 && num_threads > 256 )
+        printf("error: too much shared memory requested.\n");
 
     dim3 block( blocksize, alignment, 1);
 
@@ -353,8 +385,11 @@ magma_zgesellcmmv(  magma_trans_t transA,
 
     dim3 grid( dimgrid1, dimgrid2, 1);
     int Ms = num_threads * sizeof( magmaDoubleComplex );
-    //printf("launch kernel: %d x %d -> %d %d\n", 
-                        //grid.x, grid.y, num_threads, Ms);
+
+    //#if defined(PRECISION_d)
+    //bind2tex((const double *) d_x);
+    //#endif
+
     if( alignment == 8)
         zgesellcmtmv2d_kernel_8<<< grid, block, Ms, magma_stream >>>
         ( m, n, blocksize, alignment, alpha,
@@ -370,8 +405,14 @@ magma_zgesellcmmv(  magma_trans_t transA,
         ( m, n, blocksize, alignment, alpha,
             d_val, d_colind, d_rowptr, d_x, beta, d_y );
 
-    else
-        printf("error: currently only alignment 8, 16, 32 supported.\n");
+    else{
+        printf("error: alignment %d not supported.\n", alignment);
+        exit(-1);
+    }
+
+    //#if defined(PRECISION_d)
+    //unbind2tex((const double* ) d_x);
+    //#endif
 
    return MAGMA_SUCCESS;
 }
