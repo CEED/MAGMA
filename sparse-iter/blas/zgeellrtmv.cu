@@ -103,7 +103,7 @@ extern __shared__ magmaDoubleComplex shared[];
             dot += val * d_x[ col ];
         }
         shared[idb]  = dot;
-        if( idp < 16 ){
+        if( idp < 8 ){
             shared[idb]+=shared[idb+8];
             if( idp < 4 ) shared[idb]+=shared[idb+4];
             if( idp < 2 ) shared[idb]+=shared[idb+2];
@@ -232,7 +232,7 @@ magma_zgeellrtmv(  magma_trans_t transA,
 
     dim3 grid( num_blocks, 1, 1);
     int Ms = alignment * blocksize * sizeof( magmaDoubleComplex );
-        //printf("launch kernel: %d %d %d\n", grid.x, num_threads , Ms);
+        printf("launch kernel: %d %d %d\n", grid.x, num_threads , Ms);
 
     if( alignment == 32 ){
         zgeellrtmv_kernel_32<<< grid, num_threads , Ms, magma_stream >>>
