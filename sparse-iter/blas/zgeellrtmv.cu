@@ -25,7 +25,8 @@ zgeellrtmv_kernel_32( int num_rows,
                  int T,
                  int alignment )
 {
-int idx = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
 int idb = threadIdx.x ;  // local thread index
 int idp = idb%T;  // number of threads assigned to one row
 int i = idx/T;  // row index
@@ -78,7 +79,8 @@ zgeellrtmv_kernel_16( int num_rows,
                  int T,
                  int alignment )
 {
-int idx = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
 int idb = threadIdx.x ;  // local thread index
 int idp = idb%T;  // number of threads assigned to one row
 int i = idx/T;  // row index
@@ -130,7 +132,8 @@ zgeellrtmv_kernel_8( int num_rows,
                  int T,
                  int alignment )
 {
-int idx = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
 int idb = threadIdx.x ;  // local thread index
 int idp = idb%T;  // number of threads assigned to one row
 int i = idx/T;  // row index
@@ -229,10 +232,12 @@ magma_zgeellrtmv(  magma_trans_t transA,
     if ( arch < 200 && num_threads > 256 )
         printf("error: too much shared memory requested.\n");
 
+    int dimgrid1 = sqrt(num_blocks);
+    int dimgrid2 = (num_blocks + dimgrid1 -1 ) / dimgrid1;
+    dim3 grid( dimgrid1, dimgrid2, 1);
 
-    dim3 grid( num_blocks, 1, 1);
     int Ms = alignment * blocksize * sizeof( magmaDoubleComplex );
-        printf("launch kernel: %d %d %d\n", grid.x, num_threads , Ms);
+    // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads , Ms);
 
     if( alignment == 32 ){
         zgeellrtmv_kernel_32<<< grid, num_threads , Ms, magma_stream >>>
