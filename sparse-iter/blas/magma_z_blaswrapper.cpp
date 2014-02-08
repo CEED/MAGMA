@@ -83,7 +83,7 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("using ELLPACKRT kernel for SpMV: ");
                  magma_zgeellrtmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                             A.max_nnz_row, alpha, A.val, A.col, A.row, x.val, 
-                                        beta, y.val, A.numblocks, A.blocksize );
+                         beta, y.val, A.alignment, A.blocksize );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
