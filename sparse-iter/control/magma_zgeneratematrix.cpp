@@ -93,6 +93,15 @@ magma_zmgenerator(  magma_int_t n,
         } 
 
     }    
+    B.nnz = 0;
+
+    for( int i=0; i<n; i++ ){ // stride over rows
+        for( int j=0; j<B.max_nnz_row; j++ ){ // nonzeros in every row
+            if( MAGMA_Z_REAL( B.val[i*B.max_nnz_row + j]) != 0.0 ) 
+                B.nnz++;
+        } 
+
+    }  
 
     // converting it to CSR will remove the invalit entries completely
     magma_z_mconvert( B, A, Magma_ELLPACK, Magma_CSR );
