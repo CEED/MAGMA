@@ -55,6 +55,8 @@ magma_zresidual( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector x,
     //               /magma_dznrm2(dofs, b.val, 1);               /||b||
     //printf( "relative residual: %e\n", *res );
 
+    magma_z_vfree(&r);
+
     return MAGMA_SUCCESS;
 }
 

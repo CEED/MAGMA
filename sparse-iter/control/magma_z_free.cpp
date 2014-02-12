@@ -61,7 +61,11 @@ magma_z_vfree( magma_z_vector *x ){
         return MAGMA_SUCCESS;     
     }
     else if( x->memory_location == Magma_DEV ){
-        magma_free( x->val );
+        if( cudaFree( x->val ) != cudaSuccess ) {
+            printf("Memory Free Error.\n");  
+            return MAGMA_ERR_INVALID_PTR;
+            exit(0);
+        }
         
         x->num_rows = 0;
         x->nnz = 0;
