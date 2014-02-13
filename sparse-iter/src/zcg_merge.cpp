@@ -183,6 +183,11 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&z);
     magma_z_vfree(&d);
 
+    magma_free( d1 );
+    magma_free( d2 );
+    magma_free( skp );
+    magma_free_cpu( skp_h );
+
     return MAGMA_SUCCESS;
 }   /* magma_zcg_merge */
 

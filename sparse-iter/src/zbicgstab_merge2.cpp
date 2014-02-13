@@ -196,10 +196,12 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
     else
         solver_par->info = -1;
 
-    magma_z_vfree(&q);
-  
+    magma_z_vfree(&q);  // frees all vectors
+
     magma_free(d1);
     magma_free(d2);
+    magma_free( skp );
+    magma_free_cpu( skp_h );
 
     return MAGMA_SUCCESS;
 }   /* zbicgstab_merge2 */
