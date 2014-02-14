@@ -41,7 +41,7 @@ http://www.cise.ufl.edu/research/sparse/matrices/JGD_Trefethen/Trefethen_2000.ht
 To run a example type
 
 
-            ./run_xsolver [ --options ] --matrix filename
+            ./run_xsolver [ --options ] matrices
 
 
 Every solver (replace "solver" by cg, gmres, bicgstab, iterref, jacobi, bcsrlu)
@@ -113,3 +113,5 @@ when executing "./run_xsolver".
     If the merged variants are preferred, they have to be called explicitly in 
     the runfile.
 
+The last argument is the traget matrices. These should be stored in MatrixMarket
+format, see http://math.nist.gov/MatrixMarket/formats.html.
