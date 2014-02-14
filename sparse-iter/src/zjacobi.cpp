@@ -289,7 +289,7 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_vinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO );
     magma_z_vtransfer( b, &b_h, A.memory_location, Magma_CPU);
 
-    if( A.storage_type != Magma_CSR){
+    if( A.storage_type != Magma_CSR ){
         magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU);
         magma_z_mconvert( A_h1, &B, A_h1.storage_type, Magma_CSR);
     }
@@ -316,8 +316,10 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
         c_t.val[rowindex] = b_h.val[rowindex] / diag.val[rowindex];
 
     }
+
     magma_z_csr_compressor(&B.val, &B.row, &B.col, 
                            &C.val, &C.row, &C.col, &B.num_rows, &B.num_rows);  
+
     C.num_rows = B.num_rows;
     C.num_cols = B.num_cols;
     C.memory_location = B.memory_location;
@@ -325,6 +327,8 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     C.storage_type = B.storage_type;
     C.memory_location = B.memory_location;
     if( A.storage_type != Magma_CSR){
+        A_h2.alignment = A.alignment;
+        A_h2.blocksize = A.blocksize;
         magma_z_mconvert( C, &A_h2, Magma_CSR, A_h1.storage_type);
         magma_z_mtransfer( A_h2, M, Magma_CPU, A.memory_location);
     }
