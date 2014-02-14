@@ -50,8 +50,8 @@ int main( int argc, char** argv)
 
     B.storage_type = Magma_CSR;
     char filename[256]; 
-
-    for( int i = 1; i < argc; ++i ) {
+    int i;
+    for( i = 1; i < argc; ++i ) {
      if ( strcmp("--format", argv[i]) == 0 ) {
             format = atoi( argv[++i] );
             switch( format ) {
@@ -63,6 +63,8 @@ int main( int argc, char** argv)
             }
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             B.blocksize = atoi( argv[++i] );
+        }else if ( strcmp("--alignment", argv[i]) == 0 ) {
+            B.alignment = atoi( argv[++i] );
         }else if ( strcmp("--verbose", argv[i]) == 0 ) {
             solver_par.verbose = atoi( argv[++i] );
         } else if ( strcmp("--ortho", argv[i]) == 0 ) {
@@ -78,9 +80,8 @@ int main( int argc, char** argv)
             solver_par.maxiter = atoi( argv[++i] );
         } else if ( strcmp("--tol", argv[i]) == 0 ) {
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
-        } else if ( strcmp("--matrix", argv[i]) == 0 ) {
-            strcpy( filename, argv[++i] );
-        }
+        } else
+            break;
     }
     printf( "\n    usage: ./run_zgmres"
         " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
@@ -88,32 +89,37 @@ int main( int argc, char** argv)
         " --verbose %d (0=summary, k=details every k iterations)"
         " --restart %d --maxiter %d --tol %.2e"
         " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) ]"
-        " --matrix filename \n\n", format, B.blocksize, B.alignment,
+        " matrices \n\n", format, B.blocksize, B.alignment,
         solver_par.verbose, 
         solver_par.restart, solver_par.maxiter, solver_par.epsilon, ortho );
 
-    magma_z_csr_mtx( &A,  filename  ); 
+    while(  i < argc ){
 
-    printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
-                                ,A.num_rows,A.num_cols,A.nnz );
+        magma_z_csr_mtx( &A,  argv[i]  ); 
 
-    magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
-    magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
+                                    ,A.num_rows,A.num_cols,A.nnz );
 
-    magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
-    magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
+        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-    magma_zgmres( B_d, b, &x, &solver_par );
+        magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
+        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
 
-    magma_zsolverinfo( &solver_par );
+        magma_zgmres( B_d, b, &x, &solver_par );
 
-    magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo( &solver_par );
 
-    magma_z_mfree(&B_d);
-    magma_z_mfree(&B);
-    magma_z_mfree(&A); 
-    magma_z_vfree(&x);
-    magma_z_vfree(&b);
+        magma_zsolverinfo_free( &solver_par );
+
+        magma_z_mfree(&B_d);
+        magma_z_mfree(&B);
+        magma_z_mfree(&A); 
+        magma_z_vfree(&x);
+        magma_z_vfree(&b);
+
+        i++;
+    }
 
     TESTING_FINALIZE();
     return 0;

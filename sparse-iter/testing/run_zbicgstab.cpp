@@ -48,8 +48,8 @@ int main( int argc, char** argv)
 
     B.storage_type = Magma_CSR;
     char filename[256]; 
-
-    for( int i = 1; i < argc; ++i ) {
+    int i;
+    for( i = 1; i < argc; ++i ) {
      if ( strcmp("--format", argv[i]) == 0 ) {
             format = atoi( argv[++i] );
             switch( format ) {
@@ -63,15 +63,16 @@ int main( int argc, char** argv)
             solver_par.verbose = atoi( argv[++i] );
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             B.blocksize = atoi( argv[++i] );
+        }else if ( strcmp("--alignment", argv[i]) == 0 ) {
+            B.alignment = atoi( argv[++i] );
         }else if ( strcmp("--version", argv[i]) == 0 ) {
             version = atoi( argv[++i] );
         } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
             solver_par.maxiter = atoi( argv[++i] );
         } else if ( strcmp("--tol", argv[i]) == 0 ) {
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
-        } else if ( strcmp("--matrix", argv[i]) == 0 ) {
-            strcpy( filename, argv[++i] );
-        }
+        } else 
+            break;
     }
     printf( "\n    usage: ./run_zbicgstab"
         " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
@@ -79,37 +80,42 @@ int main( int argc, char** argv)
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --version %d (0=basic, 1=merged, 2=merged2) ]"
-        " --matrix filename \n\n", format, B.blocksize, B.alignment,
+        " matrices \n\n", format, B.blocksize, B.alignment,
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, version );
 
-    magma_z_csr_mtx( &A,  filename  ); 
+    while(  i < argc ){
 
-    printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
-                                ,A.num_rows,A.num_cols,A.nnz );
+        magma_z_csr_mtx( &A,  argv[i]  ); 
 
-    magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
-    magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
+                                    ,A.num_rows,A.num_cols,A.nnz );
 
-    magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
-    magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
+        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-    if( version == 0 )
-        magma_zbicgstab( B_d, b, &x, &solver_par );
-    else if ( version == 1 )
-        magma_zbicgstab_merge( B_d, b, &x, &solver_par );
-    else if ( version == 2 )
-        magma_zbicgstab_merge2( B_d, b, &x, &solver_par );
+        magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
+        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
 
-    magma_zsolverinfo( &solver_par );
+        if( version == 0 )
+            magma_zbicgstab( B_d, b, &x, &solver_par );
+        else if ( version == 1 )
+            magma_zbicgstab_merge( B_d, b, &x, &solver_par );
+        else if ( version == 2 )
+            magma_zbicgstab_merge2( B_d, b, &x, &solver_par );
 
-    magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo( &solver_par );
 
-    magma_z_mfree(&B_d);
-    magma_z_mfree(&B);
-    magma_z_mfree(&A); 
-    magma_z_vfree(&x);
-    magma_z_vfree(&b);
+        magma_zsolverinfo_free( &solver_par );
+
+        magma_z_mfree(&B_d);
+        magma_z_mfree(&B);
+        magma_z_mfree(&A); 
+        magma_z_vfree(&x);
+        magma_z_vfree(&b);
+
+        i++;
+    }
 
     TESTING_FINALIZE();
     return 0;

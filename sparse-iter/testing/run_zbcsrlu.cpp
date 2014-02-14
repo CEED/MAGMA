@@ -45,36 +45,40 @@ int main( int argc, char** argv)
 
     B.storage_type = Magma_CSR;
     char filename[256]; 
-
-    for( int i = 1; i < argc; ++i ) {
-      if ( strcmp("--matrix", argv[i]) == 0 ) {
-            strcpy( filename, argv[++i] );
-        }else if ( strcmp("--version", argv[i]) == 0 ) {
+    int i;
+    for( i = 1; i < argc; ++i ) {
+      if ( strcmp("--version", argv[i]) == 0 ) {
             solver_par.version = atoi( argv[++i] );
         }
+      else
+        break;
     }
     printf( "\n    usage: ./run_zbcsrlu"
             " [ --version %d (0=CUBLAS batched, 1=custom kernels) ]"
-            " --matrix filename \n\n", solver_par.version );
+            " matrices \n\n", solver_par.version );
 
-    magma_z_csr_mtx( &A,  filename  ); 
+    while(  i < argc ){
 
+        magma_z_csr_mtx( &A,  argv[i]  ); 
 
-    printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
-                                ,A.num_rows,A.num_cols,A.nnz );
+        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
+                                    ,A.num_rows,A.num_cols,A.nnz );
 
-    magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
-    magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-    magma_zbcsrlu( A, b, &x, &solver_par );
+        magma_zbcsrlu( A, b, &x, &solver_par );
 
-    magma_zsolverinfo( &solver_par );
+        magma_zsolverinfo( &solver_par );
 
-    magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo_free( &solver_par );
 
-    magma_z_mfree(&A); 
-    magma_z_vfree(&x);
-    magma_z_vfree(&b);
+        magma_z_mfree(&A); 
+        magma_z_vfree(&x);
+        magma_z_vfree(&b);
+
+        i++;
+    }
 
     TESTING_FINALIZE();
     return 0;
