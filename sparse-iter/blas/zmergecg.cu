@@ -313,11 +313,10 @@ magma_zcgmerge_spmvellpack_kernel(
     }
 }
 
-// computes the SpMV using ELLPACKRT 
+// computes the SpMV using ELLPACKRT 8 threads per row
 __global__ void 
-magma_zcgmerge_spmvellpackrt_kernel(  
+magma_zcgmerge_spmvellpackrt_kernel_8(  
                  int n,
-                 int num_cols_per_row,
                  magmaDoubleComplex *d_val, 
                  int *d_colind,
                  int *d_rowlength,
@@ -327,24 +326,132 @@ magma_zcgmerge_spmvellpackrt_kernel(
                  magma_int_t T, 
                  magma_int_t alignment  ){
 
-    int idx = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
-    int idb = threadIdx.x ;  // local thread index
-    int idp = idb%T;  // number of threads assigned to one row
-    int i = idx/T;  // row index
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idb = threadIdx.x ;  // local thread index
+int idp = idb%T;  // number of threads assigned to one row
+int i = idx/T;  // row index
 
-    extern __shared__ magmaDoubleComplex shared[];
+extern __shared__ magmaDoubleComplex shared[];
 
     if(i < n ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int max_ = (d_rowlength[i]+T-1)/T;  // number of elements each thread handles
+        int max_ = (d_rowlength[i]+T-1)/T;  
+            // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
-            // original code in paper (does not work for me)
+
+            // original code in paper (not working for me)
             //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  
-            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];             
-            // my replacement
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];    
+
+            // new code (working for me)        
             magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
             int col = d_colind [ k*(T)+(i*alignment)+idp ];
+
+            dot += val * d[ col ];
+        }
+        shared[idb]  = dot;
+        if( idp < 4 ){
+            shared[idb]+=shared[idb+4];
+            if( idp < 2 ) shared[idb]+=shared[idb+2];
+            if( idp == 0 ) {
+                z[i] = (shared[idb]+shared[idb+1]);
+            }
+
+        }
+    }
+
+}
+
+// computes the SpMV using ELLPACKRT 8 threads per row
+__global__ void 
+magma_zcgmerge_spmvellpackrt_kernel_16(  
+                 int n,
+                 magmaDoubleComplex *d_val, 
+                 int *d_colind,
+                 int *d_rowlength,
+                 magmaDoubleComplex *d,
+                 magmaDoubleComplex *z,
+                 magmaDoubleComplex *vtmp,
+                 magma_int_t T, 
+                 magma_int_t alignment  ){
+
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idb = threadIdx.x ;  // local thread index
+int idp = idb%T;  // number of threads assigned to one row
+int i = idx/T;  // row index
+
+extern __shared__ magmaDoubleComplex shared[];
+
+    if(i < n ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        int max_ = (d_rowlength[i]+T-1)/T;  
+            // number of elements each thread handles
+
+        for ( int k = 0; k < max_ ; k++ ){
+
+            // original code in paper (not working for me)
+            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];    
+
+            // new code (working for me)        
+            magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
+            int col = d_colind [ k*(T)+(i*alignment)+idp ];
+
+            dot += val * d[ col ];
+        }
+        shared[idb]  = dot;
+        if( idp < 8 ){
+            shared[idb]+=shared[idb+8];
+            if( idp < 4 ) shared[idb]+=shared[idb+4];
+            if( idp < 2 ) shared[idb]+=shared[idb+2];
+            if( idp == 0 ) {
+                z[i] = (shared[idb]+shared[idb+1]);
+            }
+
+        }
+    }
+
+}
+
+// computes the SpMV using ELLPACKRT 8 threads per row
+__global__ void 
+magma_zcgmerge_spmvellpackrt_kernel_32(  
+                 int n,
+                 magmaDoubleComplex *d_val, 
+                 int *d_colind,
+                 int *d_rowlength,
+                 magmaDoubleComplex *d,
+                 magmaDoubleComplex *z,
+                 magmaDoubleComplex *vtmp,
+                 magma_int_t T, 
+                 magma_int_t alignment  ){
+
+int idx = blockIdx.y * gridDim.x * blockDim.x + 
+          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
+int idb = threadIdx.x ;  // local thread index
+int idp = idb%T;  // number of threads assigned to one row
+int i = idx/T;  // row index
+
+extern __shared__ magmaDoubleComplex shared[];
+
+    if(i < n ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        int max_ = (d_rowlength[i]+T-1)/T;  
+            // number of elements each thread handles
+
+        for ( int k = 0; k < max_ ; k++ ){
+
+            // original code in paper (not working for me)
+            //magmaDoubleComplex val = d_val[ k*(T*alignment)+(i*T)+idp ];  
+            //int col = d_colind [ k*(T*alignment)+(i*T)+idp ];    
+
+            // new code (working for me)        
+            magmaDoubleComplex val = d_val[ k*(T)+(i*alignment)+idp ];
+            int col = d_colind [ k*(T)+(i*alignment)+idp ];
+
             dot += val * d[ col ];
         }
         shared[idb]  = dot;
@@ -355,13 +462,15 @@ magma_zcgmerge_spmvellpackrt_kernel(
             if( idp < 2 ) shared[idb]+=shared[idb+2];
             if( idp == 0 ) {
                 z[i] = (shared[idb]+shared[idb+1]);
-                //vtmp[i] = z[i]*d[i];
             }
 
         }
     }
 
 }
+
+
+
 
 
 // additional kernel necessary to compute first reduction step
@@ -763,8 +872,9 @@ magma_zcgmerge_spmv1(
     }
     else if( A.storage_type == Magma_SELLCM ){
             int num_threadssellcm = A.blocksize*A.alignment;
-            if( num_threadssellcm > 512)
-                printf("error: shared memory more than 512 threads.\n");
+            magma_int_t arch = magma_getdevice_arch();
+            if ( arch < 200 && num_threadssellcm > 256 )
+                printf("error: too much shared memory requested.\n");
 
             dim3 block( A.blocksize, A.alignment, 1);
             int dimgrid1 = sqrt(A.numblocks);
@@ -806,6 +916,56 @@ magma_zcgmerge_spmv1(
         // threads_per_row processors to each row
         // the block size is num_threads
         // fixed values
+
+
+    int num_blocks = ( (A.num_rows+A.blocksize-1)/A.blocksize);
+
+    int num_threads = A.alignment*A.blocksize;
+
+    int real_row_length = ((int)(A.max_nnz_row+A.alignment-1)/A.alignment)
+                            *A.alignment;
+
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch < 200 && num_threads > 256 )
+        printf("error: too much shared memory requested.\n");
+
+    int dimgrid1 = sqrt(num_blocks);
+    int dimgrid2 = (num_blocks + dimgrid1 -1 ) / dimgrid1;
+    dim3 gridellpackrt( dimgrid1, dimgrid2, 1);
+
+    int Mellrt = A.alignment * A.blocksize * sizeof( magmaDoubleComplex );
+    // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads , Ms);
+
+    if( A.alignment == 32 ){
+        magma_zcgmerge_spmvellpackrt_kernel_32
+                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                 ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
+                                                 A.alignment, real_row_length );
+    }
+    else if( A.alignment == 16 ){
+        magma_zcgmerge_spmvellpackrt_kernel_16
+                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                 ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
+                                                 A.alignment, real_row_length );
+    }
+    else if( A.alignment == 8 ){
+        magma_zcgmerge_spmvellpackrt_kernel_8
+                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                 ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
+                                                 A.alignment, real_row_length );
+    }
+    else{
+        printf("error: alignment %d not supported.\n", A.alignment);
+        exit(-1);
+    }
+
+
+
+
+
+
+
+/*
         int threads_per_row = A.blocksize;
         int num_threads = 256;
         int num_blocks = ( (threads_per_row*A.num_rows+num_threads-1)
@@ -817,9 +977,11 @@ magma_zcgmerge_spmv1(
                 <<<gridellpackrt, num_threads, Ms, magma_stream >>>
                 ( A.num_rows, A.max_nnz_row, A.val, A.col, A.row, d_d, d_z, d1, 
                                                 threads_per_row, alignment );
+*/
         // in case of using ELLPACKRT, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
+
         magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, magma_stream >>>
                               ( A.num_rows, d_z, d_d, d1 );
     }
