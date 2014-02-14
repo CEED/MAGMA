@@ -111,9 +111,8 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
     magma_event_create( &event[0] );
-
-  
     magmablasSetKernelStream(stream[0]);
+
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
     nom0 = magma_dznrm2( dofs, r.val, 1 );               //  nom0= || r||
@@ -133,7 +132,6 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         solver_par->res_vec[0] = nom0;
         solver_par->timing[0] = 0.0;
     }
-    
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
                                                     solver_par->numiter++ ){
@@ -277,6 +275,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             break;
         } 
     }
+
     magma_device_sync(); tempo2=magma_wtime();
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
@@ -290,12 +289,6 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     else
         solver_par->info = -1;
 
-
-    // free GPU streams and events
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
-    magma_event_destroy( event[0] );
-    magmablasSetKernelStream(NULL);
     // free pinned memory
     magma_free_pinned( H );
     magma_free_pinned( y );
@@ -306,6 +299,12 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     if (dH != NULL ) magma_free(dH); 
     magma_z_vfree(&r);
     magma_z_vfree(&q);
+
+    // free GPU streams and events
+    //magma_queue_destroy( stream[0] );
+    //magma_queue_destroy( stream[1] );
+    magma_event_destroy( event[0] );
+    magmablasSetKernelStream(NULL);
 
     return MAGMA_SUCCESS;
 }   /* magma_zgmres */
