@@ -670,6 +670,16 @@ magma_zjacobisetup_vector_gpu( int num_rows,
                                magmaDoubleComplex *c);
 
 magma_int_t
+magma_zjacobi_diagscal(         int num_rows, 
+                                magmaDoubleComplex *b, 
+                                magmaDoubleComplex *d, 
+                                magmaDoubleComplex *c);
+
+magma_int_t
+magma_zjacobisetup_diagscal( magma_z_sparse_matrix A, magma_z_vector *d );
+
+
+magma_int_t
 magma_zbicgmerge1(  int n, 
                     magmaDoubleComplex *skp,
                     magmaDoubleComplex *v, 

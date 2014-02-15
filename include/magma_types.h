@@ -406,7 +406,10 @@ typedef enum {
     Magma_JACOBI       = 437,
     Magma_GS           = 438,
     Magma_ITERREF      = 439,
-    Magma_BCSRLU       = 440
+    Magma_BCSRLU       = 440,
+    Magma_PCG          = 441,
+    Magma_PGMRES       = 442,
+    Magma_PBICGSTAB    = 443
 } magma_solver_type;
 
 typedef enum {

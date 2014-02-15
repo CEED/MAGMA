@@ -198,6 +198,69 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
     return MAGMA_SUCCESS;
 }
 
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+    Purpose
+    =======
+
+
+    It returns a vector d
+    containing the inverse diagonal elements. 
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A                   input matrix A
+    magma_z_vector *d                         vector with diagonal elements
+
+    ========================================================================  */
+
+magma_int_t
+magma_zjacobisetup_diagscal( magma_z_sparse_matrix A, magma_z_vector *d ){
+
+    magma_int_t i;
+
+    magma_z_sparse_matrix A_h1, B;
+    magma_z_vector diag;
+    magma_z_vinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO );
+
+    if( A.storage_type != Magma_CSR){
+        magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU);
+        magma_z_mconvert( A_h1, &B, A_h1.storage_type, Magma_CSR);
+    }
+    else{
+        magma_z_mtransfer( A, &B, A.memory_location, Magma_CPU);
+    }
+    for( magma_int_t rowindex=0; rowindex<B.num_rows; rowindex++ ){
+        magma_int_t start = (B.row[rowindex]);
+        magma_int_t end = (B.row[rowindex+1]);
+        for( i=start; i<end; i++ ){
+            if( B.col[i]==rowindex ){
+                diag.val[rowindex] = 1.0/B.val[i];
+                if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
+                    printf(" error: zero diagonal element in row %d!\n", 
+                                                                rowindex);
+            }
+        }
+    }
+    magma_z_vtransfer( diag, d, Magma_CPU, A.memory_location);
+
+    if( A.storage_type != Magma_CSR){
+        magma_z_mfree( &A_h1 );
+    }
+    magma_z_mfree( &B );
+    magma_z_vfree( &diag);
+ 
+    return MAGMA_SUCCESS;
+}
+
+
+
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
