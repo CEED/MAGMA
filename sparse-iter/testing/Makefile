@@ -10,12 +10,17 @@ DIR = sparse-iter/testing
 MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 
+LIB += -lcusparse /home/hanzt/software/spmvellrt/libspmvELLRTdp.a
+
+
 # ----------
 # utility functions
 ZSRC += \
+#	testing_z_mv.cpp	\
+#	testing_zmgenerator.cpp	\
 #	testing_z_matrix_io.cpp	\
 #	testing_z_matrix_compressor.cpp	\
-#	testing_z_mv.cpp	\
+
 
 # ----------
 # test Krylov space linear solvers
@@ -39,6 +44,15 @@ ZSRC += \
 	run_ziterref.cpp	\
 	run_zgmres.cpp	    \
 	run_zjacobi.cpp	    \
+
+
+# run preconditioned Krylov solvers
+ZSRC += \
+	run_zpcg.cpp		    \
+
+# run solver for laplace problem
+ZSRC += \
+	run_zlaplacesolver.cpp		    \
 
 
 
@@ -71,6 +85,7 @@ ZSRC += \
 # debugging
 ZSRC += \
 #	testing_zdebug.cpp	\
+#    testing_spmvELLRT.cpp \
 #	testing_zcdebug.cpp	\
 
 
@@ -116,6 +131,7 @@ cleanexe:
 cleanall: clean cleanexe
 
 testing_% : testing_%.o
+	echo $(LIB)
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \

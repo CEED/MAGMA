@@ -32,6 +32,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magma_solver_parameters solver_par;
+    magma_precond_parameters precond_par;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
     solver_par.version = 0;
@@ -69,7 +70,7 @@ int main( int argc, char** argv)
 
         magma_zbcsrlu( A, b, &x, &solver_par );
 
-        magma_zsolverinfo( &solver_par );
+        magma_zsolverinfo( &solver_par, &precond_par );
 
         magma_zsolverinfo_free( &solver_par );
 

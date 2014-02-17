@@ -32,6 +32,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magma_solver_parameters solver_par;
+    magma_precond_parameters precond_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
@@ -103,7 +104,7 @@ int main( int argc, char** argv)
         else if ( version == 1 )
             magma_zcg_merge( B_d, b, &x, &solver_par );
 
-        magma_zsolverinfo( &solver_par );
+        magma_zsolverinfo( &solver_par, &precond_par );
 
         magma_zsolverinfo_free( &solver_par );
 
