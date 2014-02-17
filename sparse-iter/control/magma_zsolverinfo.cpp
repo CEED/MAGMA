@@ -37,14 +37,22 @@
 
 
 magma_int_t
-magma_zsolverinfo( magma_solver_parameters *solver_par ){
+magma_zsolverinfo( magma_solver_parameters *solver_par, 
+                    magma_precond_parameters *precond_par ){
 
-    if( solver_par->solver == Magma_CG ){
+    if( (solver_par->solver == Magma_CG) || (solver_par->solver == Magma_PCG) ){
         if( solver_par->verbose > 0 ){
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
                     "======#\n");
-            printf("#   CG performance analysis every %d iteration\n", k);
+            if( solver_par->solver == Magma_CG )
+                printf("#   CG performance analysis every %d iteration\n", k);
+            else if( solver_par->solver == Magma_PCG ){
+                if( precond_par->solver == Magma_JACOBI )
+                        printf("#   Jacobi-CG performance analysis"
+                                " every %d iteration\n", k);
+
+            }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
@@ -274,7 +282,7 @@ magma_zsolverinfo( magma_solver_parameters *solver_par ){
 
 magma_int_t
 magma_zsolverinfo_free( magma_solver_parameters *solver_par ){
-
+/*
     solver_par->solver = Magma_CG;
     solver_par->maxiter = 1000;
     solver_par->numiter = 0;
@@ -286,7 +294,7 @@ magma_zsolverinfo_free( magma_solver_parameters *solver_par ){
     solver_par->runtime = 0.;
     solver_par->verbose = 0;
     solver_par->info = 0;
-
+*/
     if( solver_par->res_vec != NULL ){
         magma_free_cpu( solver_par->res_vec );
         solver_par->res_vec = NULL;
