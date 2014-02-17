@@ -108,7 +108,7 @@ int main( int argc, char** argv)
 
         magma_zpcg( B_d, b, &x, &solver_par, &precond_par );
 
-        magma_zsolverinfo( &solver_par );
+        magma_zsolverinfo( &solver_par, &precond_par );
 
         magma_zsolverinfo_free( &solver_par );
 

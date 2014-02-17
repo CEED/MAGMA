@@ -28,10 +28,10 @@ ZSRC += \
 	ziterref.cpp		\
 	zgmres.cpp		\
 	zjacobi.cpp		\
+	zpcg.cpp		\
 #	ziterref.cpp		\
 #	zcg_merge.cpp		\
 #	zgmres.cpp		\
-#	zpcg.cpp		\
 #	zpbicgstab.cpp		\
 #	zpgmres.cpp		\
 #	zgmres_pipe.cpp		\
