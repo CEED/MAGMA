@@ -333,7 +333,8 @@ magma_zmgenerator(  magma_int_t n,
                     magma_z_sparse_matrix *A );
 
 magma_int_t
-magma_zsolverinfo(  magma_solver_parameters *solver_par );
+magma_zsolverinfo(  magma_solver_parameters *solver_par, 
+                    magma_precond_parameters *precond_par );
 
 magma_int_t
 magma_zsolverinfo_free( magma_solver_parameters *solver_par );
