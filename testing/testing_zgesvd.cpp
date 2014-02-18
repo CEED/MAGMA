@@ -71,7 +71,7 @@ int main( int argc, char** argv)
                 // if not testing all, run only once, with ijobu = ijobv = 0
                 continue;
             }
-            if ( jobu == 'O' && jobvt == 'O' ) {
+            if ( jobu == MagmaOverwriteVec && jobvt == MagmaOverwriteVec ) {
                 // illegal combination; skip
                 continue;
             }
@@ -237,13 +237,13 @@ int main( int argc, char** argv)
                 result[4]  = lapackf77_dlange("f", &min_mn, &one, S2, &min_mn, work);
                 result[4] /= lapackf77_dlange("f", &min_mn, &one, S1, &min_mn, work);
                 
-                printf("   %s    %s %5d %5d  %7.2f         %7.2f         %8.2e",
-                       lapack_vec_const(jobu), lapack_vec_const(jobvt),
+                printf("   %c    %c %5d %5d  %7.2f         %7.2f         %8.2e",
+                       lapack_vec_const(jobu)[0], lapack_vec_const(jobvt)[0],
                        (int) M, (int) N, cpu_time, gpu_time, result[4] );
             }
             else {
-                printf("   %s    %s %5d %5d    ---           %7.2f           ---   ",
-                       lapack_vec_const(jobu), lapack_vec_const(jobvt),
+                printf("   %c    %c %5d %5d    ---           %7.2f           ---   ",
+                       lapack_vec_const(jobu)[0], lapack_vec_const(jobvt)[0],
                        (int) M, (int) N, gpu_time );
             }
             if ( opts.check ) {
