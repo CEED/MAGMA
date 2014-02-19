@@ -56,17 +56,17 @@ using namespace std;
 
 
 magma_int_t magma_z_csr_compressor( magmaDoubleComplex ** val, 
-                                    magma_int_t ** row, 
-                                    magma_int_t ** col, 
+                                    magma_index_t ** row, 
+                                    magma_index_t ** col, 
                                     magmaDoubleComplex ** valn, 
-                                    magma_int_t ** rown, 
-                                    magma_int_t ** coln, 
+                                    magma_index_t ** rown, 
+                                    magma_index_t ** coln, 
                                     magma_int_t *n,
                                     magma_int_t *alignedrows)
 {
     magma_int_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
-    magma_imalloc_cpu( &(row_nnz), (*n) );
-    magma_imalloc_cpu( rown, *n+1 );
+    magma_indexmalloc_cpu( &(row_nnz), (*n) );
+    magma_indexmalloc_cpu( rown, *n+1 );
     for( i=0; i<*n; i++ ){
         (*rown)[i] = nnz_new;
         nnz_this_row = 0;
@@ -81,7 +81,7 @@ magma_int_t magma_z_csr_compressor( magmaDoubleComplex ** val,
     (*rown)[*n] = nnz_new;
 
     magma_zmalloc_cpu( valn, nnz_new );
-    magma_imalloc_cpu( coln, nnz_new );
+    magma_indexmalloc_cpu( coln, nnz_new );
 
     nnz_new = 0;
     for( i=0; i<*n; i++ ){
@@ -150,8 +150,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
 
             magma_zmalloc_cpu( &B->val, A.nnz );
-            magma_imalloc_cpu( &B->row, A.num_rows+1 );
-            magma_imalloc_cpu( &B->col, A.nnz );
+            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, A.nnz );
 
             for( int i=0; i<A.nnz; i++){
                 B->val[i] = A.val[i];
@@ -175,7 +175,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t i, j, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, A.num_rows);
+            magma_indexmalloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ){
                 length[i] = A.row[i+1]-A.row[i];
@@ -186,7 +186,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                                                             // maxrowlength );
             //fflush(stdout);
              magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
-             magma_imalloc_cpu( &B->col, maxrowlength*A.num_rows );
+             magma_indexmalloc_cpu( &B->col, maxrowlength*A.num_rows );
              for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++){
                   B->val[i] = MAGMA_Z_MAKE(0., 0.);
                   B->col[i] =  0;
@@ -219,7 +219,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t *row_tmp;
-            magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
+            magma_indexmalloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -244,7 +244,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t i, j, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, A.num_rows);
+            magma_indexmalloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ){
                 length[i] = A.row[i+1]-A.row[i];
@@ -256,7 +256,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                                                            // maxrowlength );
             //fflush(stdout);
             magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
-            magma_imalloc_cpu( &B->col, maxrowlength*A.num_rows );
+            magma_indexmalloc_cpu( &B->col, maxrowlength*A.num_rows );
             for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++){
                  B->val[i] = MAGMA_Z_MAKE(0., 0.);
                  B->col[i] =  0;
@@ -293,8 +293,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t *col_tmp;
             magmaDoubleComplex *val_tmp;
             magma_zmalloc_cpu( &val_tmp, A.num_rows*A.max_nnz_row );
-            magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
-            magma_imalloc_cpu( &col_tmp, A.num_rows*A.max_nnz_row );
+            magma_indexmalloc_cpu( &row_tmp, A.num_rows+1 );
+            magma_indexmalloc_cpu( &col_tmp, A.num_rows*A.max_nnz_row );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -326,7 +326,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             // conversion
             magma_int_t i, j, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, A.num_rows);
+            magma_indexmalloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ){
                 length[i] = A.row[i+1]-A.row[i];
@@ -344,8 +344,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                                                             * threads_per_row;
 
             magma_zmalloc_cpu( &B->val, rowlength*A.num_rows );
-            magma_imalloc_cpu( &B->col, rowlength*A.num_rows );
-            magma_imalloc_cpu( &B->row, A.num_rows );
+            magma_indexmalloc_cpu( &B->col, rowlength*A.num_rows );
+            magma_indexmalloc_cpu( &B->row, A.num_rows );
             for( magma_int_t i=0; i<rowlength*A.num_rows; i++){
                  B->val[i] = MAGMA_Z_MAKE(0., 0.);
                  B->col[i] =  0;
@@ -385,7 +385,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                                                             * threads_per_row;
             // conversion
             magma_int_t *row_tmp;
-            magma_imalloc_cpu( &row_tmp, A.num_rows+1 );
+            magma_indexmalloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*rowlength;
@@ -419,9 +419,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t alignedlength, alignment = B->alignment;
             // conversion
             magma_int_t i, j, k, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, C);
+            magma_indexmalloc_cpu( &length, C);
             // B-row points to the start of each slice
-            magma_imalloc_cpu( &B->row, slices+1 );
+            magma_indexmalloc_cpu( &B->row, slices+1 );
 
             B->row[0] = 0;
             for( i=0; i<slices; i++ ){
@@ -448,7 +448,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             //fflush(stdout);
             magma_zmalloc_cpu( &B->val, B->row[slices] );
-            magma_imalloc_cpu( &B->col, B->row[slices] );
+            magma_indexmalloc_cpu( &B->col, B->row[slices] );
             // zero everything
             for( i=0; i<B->row[slices]; i++ ){
               B->val[ i ] = MAGMA_Z_MAKE(0., 0.);
@@ -491,8 +491,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t *col_tmp;
             magmaDoubleComplex *val_tmp;
             magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) );
-            magma_imalloc_cpu( &row_tmp, A.num_rows+C );
-            magma_imalloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
+            magma_indexmalloc_cpu( &row_tmp, A.num_rows+C );
+            magma_indexmalloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
 
             // zero everything
             for(magma_int_t i=0; i<A.max_nnz_row*(A.num_rows+C); i++ ){
@@ -575,8 +575,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     (B->nnz)++;
             }
             magma_zmalloc_cpu( &B->val, B->nnz);
-            magma_imalloc_cpu( &B->row, B->num_rows+1 );
-            magma_imalloc_cpu( &B->col, B->nnz );
+            magma_indexmalloc_cpu( &B->row, B->num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, B->nnz );
 
             magma_int_t i = 0;
             magma_int_t j = 0;
@@ -625,7 +625,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                             // max number of blocks per column
             //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
          
-            magma_imalloc_cpu( &B->blockinfo, c_blocks * r_blocks );
+            magma_indexmalloc_cpu( &B->blockinfo, c_blocks * r_blocks );
             if( B->blockinfo == NULL ){
                 printf("error: memory allocation (B->blockinfo).\n");
                 magma_free( B->blockinfo );
@@ -645,7 +645,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             } 
 
             // count blocks and fill rowpointer
-            magma_imalloc_cpu( &B->row, r_blocks+1 );
+            magma_indexmalloc_cpu( &B->row, r_blocks+1 );
             numblocks = 0;
             for( i=0; i<c_blocks * r_blocks; i++ ){
                 if( i%c_blocks == 0)
@@ -660,7 +660,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->numblocks = numblocks;
 
             magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
-            magma_imalloc_cpu( &B->col, numblocks  );
+            magma_indexmalloc_cpu( &B->col, numblocks  );
             if( B->val == NULL || B->col == NULL ){
                 printf("error: memory allocation (B->val or B->col).\n");
                 magma_free( B->blockinfo );
@@ -759,10 +759,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magmaDoubleComplex *val_tmp;      
             magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
             magma_int_t *row_tmp;            
-            magma_imalloc_cpu( &row_tmp, r_blocks*size_b+1 );   
+            magma_indexmalloc_cpu( &row_tmp, r_blocks*size_b+1 );   
                 // larger than the final size due to overhead blocks
             magma_int_t *col_tmp;            
-            magma_imalloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
+            magma_indexmalloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
             if( col_tmp == NULL || val_tmp == NULL || row_tmp == NULL ){
                 magma_free( B->val );
                 magma_free( B->col );
@@ -902,7 +902,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
 
             magma_int_t *nnz_per_row;
-            magma_imalloc( &nnz_per_row, A.num_rows );
+            magma_indexmalloc( &nnz_per_row, A.num_rows );
             //magma_zprint_gpu( A.num_rows, 1, nnz_per_row, A.num_rows )
             cusparseZnnz( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                           A.num_rows, A.num_cols, 
@@ -910,8 +910,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                           A.val, A.num_rows, nnz_per_row, &B->nnz );
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->num_rows+1 );
-            magma_imalloc( &B->col, B->nnz );
+            magma_indexmalloc( &B->row, B->num_rows+1 );
+            magma_indexmalloc( &B->col, B->nnz );
 
             // conversion using CUSPARSE
             cusparseZdense2csr( cusparseHandle, A.num_rows, A.num_cols,
@@ -948,7 +948,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // nnzTotalDevHostPtr points to host memory
             int *nnzTotalDevHostPtr = &nnzb;
 
-            magma_imalloc( &B->row, mb+1 );
+            magma_indexmalloc( &B->row, mb+1 );
             cusparseXcsr2bsrNnz( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                                  A.num_rows, A.num_cols, descr,
                                  A.row, A.col, size_b,
@@ -966,7 +966,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->numblocks = nnzb; // number of blocks
 
             magma_zmalloc( &B->val, nnzb*size_b*size_b );
-            magma_imalloc( &B->col, nnzb );
+            magma_indexmalloc( &B->col, nnzb );
 
             // conversion using CUSPARSE
             cusparseZcsr2bsr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
@@ -1003,8 +1003,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = nb * size_b;
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->num_rows+1 );
-            magma_imalloc( &B->col, B->nnz );
+            magma_indexmalloc( &B->row, B->num_rows+1 );
+            magma_indexmalloc( &B->col, B->nnz );
 
             // conversion using CUSPARSE
             cusparseZbsr2csr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
@@ -1035,8 +1035,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->nnz );
-            magma_imalloc( &B->col, B->num_cols+1 );
+            magma_indexmalloc( &B->row, B->nnz );
+            magma_indexmalloc( &B->col, B->num_cols+1 );
 
             // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
@@ -1067,8 +1067,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->num_rows+1 );
-            magma_imalloc( &B->col, B->nnz );
+            magma_indexmalloc( &B->row, B->num_rows+1 );
+            magma_indexmalloc( &B->col, B->nnz );
 
             // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
@@ -1099,8 +1099,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->nnz );
-            magma_imalloc( &B->col, B->nnz );
+            magma_indexmalloc( &B->row, B->nnz );
+            magma_indexmalloc( &B->col, B->nnz );
 
             cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
                                                     cudaMemcpyDeviceToDevice );
@@ -1134,8 +1134,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // end CUSPARSE context //
 
             magma_zmalloc( &B->val, B->nnz );
-            magma_imalloc( &B->row, B->nnz );
-            magma_imalloc( &B->col, B->nnz );
+            magma_indexmalloc( &B->row, B->nnz );
+            magma_indexmalloc( &B->col, B->nnz );
 
             cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
                                                     cudaMemcpyDeviceToDevice );

@@ -59,14 +59,14 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
                                 magma_int_t n_cols, 
                                 magma_int_t nnz, 
                                 magmaDoubleComplex *val, 
-                                magma_int_t *row, 
-                                magma_int_t *col, 
+                                magma_index_t *row, 
+                                magma_index_t *col, 
                                 magma_int_t *new_n_rows, 
                                 magma_int_t *new_n_cols, 
                                 magma_int_t *new_nnz, 
                                 magmaDoubleComplex **new_val, 
-                                magma_int_t **new_row, 
-                                magma_int_t **new_col ){
+                                magma_index_t **new_row, 
+                                magma_index_t **new_col ){
 
 
 
@@ -77,7 +77,7 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
 
   magmaDoubleComplex ** valtemp;
   magma_int_t ** coltemp;
-  valtemp =(magmaDoubleComplex**)malloc((n_rows)*sizeof(magmaDoubleComplex*));
+  valtemp = (magmaDoubleComplex**)malloc((n_rows)*sizeof(magmaDoubleComplex*));
   coltemp =(magma_int_t**)malloc((n_rows)*sizeof(magma_int_t*));
 
   // temporary 2-dimensional arrays valtemp/coltemp 

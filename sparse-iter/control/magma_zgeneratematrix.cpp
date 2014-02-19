@@ -53,7 +53,7 @@ extern "C"
 magma_int_t
 magma_zmgenerator(  magma_int_t n,
                     magma_int_t offdiags,
-                    magma_int_t *diag_offset,
+                    magma_index_t *diag_offset,
                     magmaDoubleComplex *diag_vals,
                     magma_z_sparse_matrix *A ){
 
@@ -66,7 +66,7 @@ magma_zmgenerator(  magma_int_t n,
     B.max_nnz_row = (2*offdiags+1);
 
     magma_zmalloc_cpu( &B.val, B.max_nnz_row*n );
-    magma_imalloc_cpu( &B.col, B.max_nnz_row*n );
+    magma_indexmalloc_cpu( &B.col, B.max_nnz_row*n );
 
     for( int i=0; i<n; i++ ){ // stride over rows
         // stride over the number of nonzeros in each row

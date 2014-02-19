@@ -12,14 +12,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-
-
-
 #include "../include/mmio.h"
 
+#include "magma.h"
+#include "magmasparse.h"
 
 int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
-                double **val_, int **I_, int **J_)
+                double **val_, magma_index_t **I_, magma_index_t **J_)
 {
     FILE *f;
     MM_typecode matcode;
@@ -64,8 +63,8 @@ return -1;
  
     /* reseve memory for matrices */
  
-    I = (int *) malloc(nz * sizeof(int));
-    J = (int *) malloc(nz * sizeof(int));
+    I = (magma_index_t *) malloc(nz * sizeof(magma_index_t));
+    J = (magma_index_t *) malloc(nz * sizeof(magma_index_t));
     val = (double *) malloc(nz * sizeof(double));
  
     *val_ = val;
@@ -334,8 +333,8 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
                             (nz pairs of real/imaginary values)
 ************************************************************************/
 
-int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J, 
-        double **val, MM_typecode *matcode)
+int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, magma_index_t **I, 
+                    magma_index_t **J, double **val, MM_typecode *matcode)
 {
     int ret_code;
     FILE *f;
@@ -400,8 +399,8 @@ int mm_write_banner(FILE *f, MM_typecode matcode)
         return 0;
 }
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
-        double val[], MM_typecode matcode)
+int mm_write_mtx_crd(char fname[], int M, int N, int nz, magma_index_t I[], 
+                     magma_index_t J[], double val[], MM_typecode matcode)
 {
     FILE *f;
     int i;

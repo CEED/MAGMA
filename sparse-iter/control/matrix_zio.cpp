@@ -49,8 +49,8 @@ using namespace std;
     magma_int_t* n_col                   number of columns in matrix
     magma_int_t* nnz                     number of nonzeros 
     magmaDoubleComplex **val             value array of CSR output 
-    magma_int_t **row                    row pointer of CSR output
-    magma_int_t **col                    column indices of CSR output
+    magma_index_t **row                  row pointer of CSR output
+    magma_index_t **col                  column indices of CSR output
     const char * filename                filname of the binary matrix
 
     ========================================================================  */
@@ -60,8 +60,8 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
                                     magma_int_t* n_col, 
                                     magma_int_t* nnz, 
                                     magmaDoubleComplex **val, 
-                                    magma_int_t **row, 
-                                    magma_int_t **col, 
+                                    magma_index_t **row, 
+                                    magma_index_t **col, 
                                     const char * filename ){
 
 
@@ -142,8 +142,8 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
     magma_int_t* n_col                   number of columns in matrix
     magma_int_t* nnz                     number of nonzeros 
     magmaDoubleComplex **val             value array of CSR output 
-    magma_int_t **row                    row pointer of CSR output
-    magma_int_t **col                    column indices of CSR output
+    magma_index_t **row                  row pointer of CSR output
+    magma_index_t **col                  column indices of CSR output
     const char * filename                filname of the mtx matrix
 
     ========================================================================  */
@@ -156,8 +156,8 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
                                     magma_int_t* n_col, 
                                     magma_int_t* nnz, 
                                     magmaDoubleComplex **val, 
-                                    magma_int_t **row, 
-                                    magma_int_t **col, 
+                                    magma_index_t **row, 
+                                    magma_index_t **col, 
                                     const char *filename ){
   
   FILE *fid;
@@ -199,13 +199,13 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   (*n_col) = (magma_int_t) num_cols;
   (*nnz)   = (magma_int_t) num_nonzeros;
 
-  magma_int_t *coo_col, *coo_row;
+  magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
   
-  coo_col = (magma_int_t *) malloc(*nnz*sizeof(magma_int_t));
+  coo_col = (magma_index_t *) malloc(*nnz*sizeof(magma_index_t));
   assert(coo_col != NULL);
 
-  coo_row = (magma_int_t *) malloc(*nnz*sizeof(magma_int_t)); 
+  coo_row = (magma_index_t *) malloc(*nnz*sizeof(magma_index_t)); 
   assert( coo_row != NULL);
 
   coo_val = (magmaDoubleComplex *) malloc(*nnz*sizeof(magmaDoubleComplex));
@@ -253,9 +253,9 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
     
     
     magma_int_t* new_row = 
-        (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
+        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
     magma_int_t* new_col = 
-        (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
+        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
     magmaDoubleComplex* new_val = 
       (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ; 
     
@@ -346,10 +346,10 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   (*val) = (magmaDoubleComplex *) malloc(*nnz*sizeof(magmaDoubleComplex)) ;
   assert((*val) != NULL);
   
-  (*col) = (magma_int_t *) malloc(*nnz*sizeof(magma_int_t));
+  (*col) = (magma_index_t *) malloc(*nnz*sizeof(magma_index_t));
   assert((*col) != NULL);
   
-  (*row) = (magma_int_t *) malloc((*n_row+1)*sizeof(magma_int_t)) ;
+  (*row) = (magma_index_t *) malloc((*n_row+1)*sizeof(magma_index_t)) ;
   assert((*row) != NULL);
   
 
@@ -443,8 +443,8 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
     magma_int_t* n_col                   number of columns in matrix
     magma_int_t* nnz                     number of nonzeros 
     magmaDoubleComplex **val             value array of CSR  
-    magma_int_t **row                    row pointer of CSR 
-    magma_int_t **col                    column indices of CSR 
+    magma_index_t **row                  row pointer of CSR 
+    magma_index_t **col                  column indices of CSR 
     magma_int_t MajorType                Row or Column sort
                                          default: 0 = RowMajor, 1 = ColMajor
     const char * filename                output filename for the matrix
@@ -456,8 +456,8 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
                                 magma_int_t n_col, 
                                 magma_int_t nnz, 
                                 magmaDoubleComplex **val, 
-                                magma_int_t **row, 
-                                magma_int_t **col, 
+                                magma_index_t **row, 
+                                magma_index_t **col, 
                                 magma_order_t MajorType, 
                                 const char *filename ){
 
@@ -467,8 +467,8 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     //to obtain ColMajr output we transpose the matrix 
     //and flip in the output the row and col pointer
     magmaDoubleComplex *new_val;
-    magma_int_t *new_row;                    
-    magma_int_t *new_col;
+    magma_index_t *new_row;                    
+    magma_index_t *new_col;
     magma_int_t new_n_row;
     magma_int_t new_n_col;
     magma_int_t new_nnz;
@@ -540,8 +540,8 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     magma_int_t* n_col                   number of columns in matrix
     magma_int_t* nnz                     number of nonzeros 
     magmaDoubleComplex **val             value array of CSR  
-    magma_int_t **row                    row pointer of CSR 
-    magma_int_t **col                    column indices of CSR
+    magma_index_t **row                    row pointer of CSR 
+    magma_index_t **col                    column indices of CSR
     magma_int_t MajorType                Row or Column sort
                                          default: 0 = RowMajor, 1 = ColMajor
 
@@ -552,16 +552,16 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
                                 magma_int_t n_col, 
                                 magma_int_t nnz, 
                                 magmaDoubleComplex **val, 
-                                magma_int_t **row, 
-                                magma_int_t **col, 
+                                magma_index_t **row, 
+                                magma_index_t **col, 
                                 magma_order_t MajorType ){
 
   if( MajorType == MagmaColMajor ){
     //to obtain ColMajr output we transpose the matrix 
     //and flip in the output the row and col pointer
     magmaDoubleComplex *new_val;
-    magma_int_t *new_row;                    
-    magma_int_t *new_col;
+    magma_index_t *new_row;                    
+    magma_index_t *new_col;
     magma_int_t new_n_row;
     magma_int_t new_n_col;
     magma_int_t new_nnz;
@@ -622,8 +622,8 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
     magma_int_t* n_col                   number of columns in matrix
     magma_int_t* nnz                     number of nonzeros 
     magmaDoubleComplex **val             value array of CSR  
-    magma_int_t **row                    row pointer of CSR 
-    magma_int_t **col                    column indices of CSR 
+    magma_index_t **row                  row pointer of CSR 
+    magma_index_t **col                  column indices of CSR 
 
     ========================================================================  */
 
@@ -632,8 +632,8 @@ magma_int_t print_z_csr(    magma_int_t n_row,
                             magma_int_t n_col, 
                             magma_int_t nnz, 
                             magmaDoubleComplex **val, 
-                            magma_int_t **row, 
-                            magma_int_t **col ){
+                            magma_index_t **row, 
+                            magma_index_t **col ){
 
   cout << "Matrix in CSR format (row col val)" << endl;
   cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
@@ -774,13 +774,13 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   (A->num_cols) = (magma_int_t) num_cols;
   (A->nnz)   = (magma_int_t) num_nonzeros;
 
-  magma_int_t *coo_col, *coo_row;
+  magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
   
-  coo_col = (magma_int_t *) malloc(A->nnz*sizeof(magma_int_t));
+  coo_col = (magma_index_t *) malloc(A->nnz*sizeof(magma_index_t));
   assert(coo_col != NULL);
 
-  coo_row = (magma_int_t *) malloc(A->nnz*sizeof(magma_int_t)); 
+  coo_row = (magma_index_t *) malloc(A->nnz*sizeof(magma_index_t)); 
   assert( coo_row != NULL);
 
   coo_val = (magmaDoubleComplex *) malloc(A->nnz*sizeof(magmaDoubleComplex));
@@ -826,8 +826,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     magma_int_t* new_row;
     magma_int_t* new_col;
     magma_zmalloc_cpu( &new_val, true_nonzeros );
-    magma_imalloc_cpu( &new_row, true_nonzeros );
-    magma_imalloc_cpu( &new_col, true_nonzeros );
+    magma_indexmalloc_cpu( &new_row, true_nonzeros );
+    magma_indexmalloc_cpu( &new_col, true_nonzeros );
 
     magma_int_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
@@ -915,10 +915,10 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   magma_zmalloc_cpu( &A->val, A->nnz );
   assert((A->val) != NULL);
   
-  magma_imalloc_cpu( &A->col, A->nnz );
+  magma_indexmalloc_cpu( &A->col, A->nnz );
   assert((A->col) != NULL);
   
-  magma_imalloc_cpu( &A->row, A->num_rows+1 );
+  magma_indexmalloc_cpu( &A->row, A->num_rows+1 );
   assert((A->row) != NULL);
   
 
