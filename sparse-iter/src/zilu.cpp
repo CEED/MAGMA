@@ -85,7 +85,7 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
     }
 
 
-    magma_int_t *cpu_row, *cpu_col;
+    magma_index_t *cpu_row, *cpu_col;
 
     magma_imalloc_cpu( &cpu_row, r_blocks+1 );
     magma_imalloc_cpu( &cpu_col, A.numblocks );
