@@ -50,7 +50,7 @@ typedef double real_Double_t;
 // ========================================
 // define types specific to implementation (CUDA, OpenCL, MIC)
 // define macros to deal with complex numbers
-#if HAVE_CUBLAS
+#if defined(HAVE_CUBLAS)
     #ifndef CUBLAS_V2_H_
     #include <cublas.h>
     #endif
@@ -84,7 +84,7 @@ typedef double real_Double_t;
     #define MAGMA_C_CNJG(a)       cuConjf(a)
     #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
-#elif HAVE_clAmdBlas
+#elif defined(HAVE_clAmdBlas)
     #if defined(__APPLE__) || defined(__MACOSX)
     #include "my_amdblas.h"
     #else
@@ -116,7 +116,7 @@ typedef double real_Double_t;
     #define MAGMA_C_CNJG(a)       MAGMA_C_MAKE((a).x, -(a).y)
     #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
 
-#elif HAVE_MIC
+#elif defined(HAVE_MIC)
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdint.h>
@@ -220,7 +220,7 @@ typedef double real_Double_t;
 #define CBLAS_SADDR(a)  &(a)
 #endif
 
-#if HAVE_clAmdBlas
+#if defined(HAVE_clAmdBlas)
     // OpenCL uses opaque memory references on GPU
     typedef cl_mem magma_ptr;
     typedef cl_mem magmaInt_ptr;
@@ -313,8 +313,7 @@ typedef enum {
     MagmaUpper         = 121,
     MagmaLower         = 122,
     MagmaUpperLower    = 123,
-    MagmaFull          = 123,  /* lascl, laset */
-    MagmaHessenberg    = 124   /* lascl */ 
+    MagmaFull          = 123   /* lascl, laset */
 } magma_uplo_t;
 
 typedef magma_uplo_t magma_type_t;  /* lascl */
@@ -517,7 +516,7 @@ magma_storev_t magma_storev_const( char lapack_char );
 
 
 // --------------------
-// Convert MAGMA constants to LAPACK constants.
+// Convert MAGMA constants to LAPACK(E) constants.
 // The generic lapack_const works for all cases, but the specific routines
 // (e.g., lapack_trans_const) do better error checking.
 const char* lapack_const       ( int            magma_const );
@@ -553,7 +552,7 @@ static inline char lapacke_storev_const( magma_storev_t magma_const ) { return *
 
 // --------------------
 // Convert MAGMA constants to clAmdBlas constants.
-#ifdef HAVE_clAmdBlas
+#if defined(HAVE_clAmdBlas)
 clAmdBlasOrder       amdblas_order_const( magma_order_t order );
 clAmdBlasTranspose   amdblas_trans_const( magma_trans_t trans );
 clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t  uplo  );
@@ -564,7 +563,7 @@ clAmdBlasSide        amdblas_side_const ( magma_side_t  side  );
 
 // --------------------
 // Convert MAGMA constants to CUBLAS constants.
-#ifdef CUBLAS_V2_H_
+#if defined(CUBLAS_V2_H_)
 cublasOperation_t    cublas_trans_const ( magma_trans_t trans );
 cublasFillMode_t     cublas_uplo_const  ( magma_uplo_t  uplo  );
 cublasDiagType_t     cublas_diag_const  ( magma_diag_t  diag  );
@@ -574,7 +573,7 @@ cublasSideMode_t     cublas_side_const  ( magma_side_t  side  );
 
 // --------------------
 // Convert MAGMA constants to CBLAS constants.
-#ifdef HAVE_CBLAS
+#if defined(HAVE_CBLAS)
 #include "cblas.h"
 enum CBLAS_ORDER     cblas_order_const  ( magma_order_t order );
 enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t trans );

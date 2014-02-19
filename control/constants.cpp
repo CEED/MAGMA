@@ -45,7 +45,6 @@ magma_uplo_t   magma_uplo_const  ( char lapack_char )
     switch( lapack_char ) {
         case 'U': case 'u': return MagmaUpper;
         case 'L': case 'l': return MagmaLower;
-        case 'H': case 'h': return MagmaHessenberg;  // see lascl
         default:            return MagmaFull;        // see laset
     }
 }
@@ -217,9 +216,8 @@ const char *magma2lapack_constants[] =
     "", "", "", "", "", "", "",              // 114-120
     "Upper",                                 // 121: MagmaUpper
     "Lower",                                 // 122: MagmaLower
-    "GFull",                                 // 123: MagmaFull; see lascl
-    "Hessenberg",                            // 124: MagmaHessenberg
-    "", "", "", "", "", "",                  // 125-130
+    "Full",                                  // 123: MagmaFull; see lascl
+    "", "", "", "", "", "", "",              // 124-130
     "Non-unit",                              // 131: MagmaNonUnit
     "Unit",                                  // 132: MagmaUnit
     "", "", "", "", "", "", "", "",          // 133-140
@@ -229,7 +227,7 @@ const char *magma2lapack_constants[] =
     "", "", "", "", "", "", "",              // 144-150
     "", "", "", "", "", "", "", "", "", "",  // 151-160
     "", "", "", "", "", "", "", "", "", "",  // 161-170
-    "One norm",                              // 171: MagmaOneNorm
+    "1 norm",                                // 171: MagmaOneNorm
     "",                                      // 172: MagmaRealOneNorm
     "2 norm",                                // 173: MagmaTwoNorm
     "Frobenius norm",                        // 174: MagmaFrobeniusNorm

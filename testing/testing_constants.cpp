@@ -29,8 +29,7 @@ int main( int argc, char** argv )
 
     assert( lapack_const( MagmaUpper         )[0] == 'U' );
     assert( lapack_const( MagmaLower         )[0] == 'L' );
-    assert( lapack_const( MagmaFull          )[0] == 'G' );
-    assert( lapack_const( MagmaHessenberg    )[0] == 'H' );
+    assert( lapack_const( MagmaFull          )[0] == 'F' );
 
     assert( lapack_const( MagmaNonUnit       )[0] == 'N' );
     assert( lapack_const( MagmaUnit          )[0] == 'U' );
@@ -92,8 +91,7 @@ int main( int argc, char** argv )
 
     assert( lapacke_const( MagmaUpper         ) == 'U' );
     assert( lapacke_const( MagmaLower         ) == 'L' );
-    assert( lapacke_const( MagmaFull          ) == 'G' );
-    assert( lapacke_const( MagmaHessenberg    ) == 'H' );
+    assert( lapacke_const( MagmaFull          ) == 'F' );
 
     assert( lapacke_const( MagmaNonUnit       ) == 'N' );
     assert( lapacke_const( MagmaUnit          ) == 'U' );
@@ -168,8 +166,6 @@ int main( int argc, char** argv )
     assert( magma_uplo_const( 'g' ) == MagmaFull       );
     assert( magma_uplo_const( 'F' ) == MagmaFull       );
     assert( magma_uplo_const( 'f' ) == MagmaFull       );
-    assert( magma_uplo_const( 'H' ) == MagmaHessenberg );
-    assert( magma_uplo_const( 'h' ) == MagmaHessenberg );
 
     assert( magma_diag_const( 'N' ) == MagmaNonUnit    );
     assert( magma_diag_const( 'n' ) == MagmaNonUnit    );
