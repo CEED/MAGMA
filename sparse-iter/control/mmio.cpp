@@ -17,15 +17,16 @@
 #include "magma.h"
 #include "magmasparse.h"
 
-int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
+int mm_read_unsymmetric_sparse(const char *fname, magma_int_t *M_, 
+                magma_int_t *N_, magma_int_t *nz_,
                 double **val_, magma_index_t **I_, magma_index_t **J_)
 {
     FILE *f;
     MM_typecode matcode;
-    int M, N, nz;
+    magma_int_t M, N, nz;
     int i;
     double *val;
-    int *I, *J;
+    magma_index_t *I, *J;
  
     if ((f = fopen(fname, "r")) == NULL)
             return -1;
@@ -181,7 +182,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     return 0;
 }
 
-int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
+int mm_write_mtx_crd_size(FILE *f, magma_int_t M, magma_int_t N, magma_int_t nz)
 {
     if (fprintf(f, "%d %d %d\n", M, N, nz) != 3)
         return MM_COULD_NOT_WRITE_FILE;
@@ -189,7 +190,8 @@ int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
         return 0;
 }
 
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
+int mm_read_mtx_crd_size(FILE *f, magma_int_t *M, magma_int_t *N, 
+                                                    magma_int_t *nz )
 {
     char line[MM_MAX_LINE_LENGTH];
     int num_items_read;
@@ -220,7 +222,7 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
 }
 
 
-int mm_read_mtx_array_size(FILE *f, int *M, int *N)
+int mm_read_mtx_array_size(FILE *f, magma_int_t *M, magma_int_t *N)
 {
     char line[MM_MAX_LINE_LENGTH];
     int num_items_read;
@@ -265,8 +267,8 @@ int mm_write_mtx_array_size(FILE *f, int M, int N)
 /* use when I[], J[], and val[]J, and val[] are already allocated */
 /******************************************************************/
 
-int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
-        double val[], MM_typecode matcode)
+int mm_read_mtx_crd_data(FILE *f, magma_int_t M, magma_int_t N, magma_int_t nz, 
+    magma_index_t I[], magma_index_t J[], double val[], MM_typecode matcode)
 {
     int i;
     if (mm_is_complex(matcode))
@@ -298,7 +300,7 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
         
 }
 
-int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
+int mm_read_mtx_crd_entry(FILE *f, magma_index_t *I, magma_index_t *J,
         double *real, double *imag, MM_typecode matcode)
 {
     if (mm_is_complex(matcode))
@@ -333,7 +335,8 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
                             (nz pairs of real/imaginary values)
 ************************************************************************/
 
-int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, magma_index_t **I, 
+int mm_read_mtx_crd(char *fname, magma_int_t *M, magma_int_t *N, 
+                            magma_int_t *nz, magma_index_t **I, 
                     magma_index_t **J, double **val, MM_typecode *matcode)
 {
     int ret_code;
@@ -356,8 +359,8 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, magma_index_t **I,
         return ret_code;
 
 
-    *I = (int *)  malloc(*nz * sizeof(int));
-    *J = (int *)  malloc(*nz * sizeof(int));
+    *I = (magma_index_t *)  malloc(*nz * sizeof(magma_index_t));
+    *J = (magma_index_t *)  malloc(*nz * sizeof(magma_index_t));
     *val = NULL;
 
     if (mm_is_complex(*matcode))
@@ -399,8 +402,8 @@ int mm_write_banner(FILE *f, MM_typecode matcode)
         return 0;
 }
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz, magma_index_t I[], 
-                     magma_index_t J[], double val[], MM_typecode matcode)
+int mm_write_mtx_crd(char fname[], magma_int_t M, magma_int_t N, magma_int_t nz, 
+        magma_index_t I[], magma_index_t J[], double val[], MM_typecode matcode)
 {
     FILE *f;
     int i;

@@ -94,8 +94,8 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
   
   
   *val = new magmaDoubleComplex[*nnz];
-  *col = new int[*nnz];
-  *row = new int[*n_row+1];
+  *col = new magma_index_t[*nnz];
+  *row = new magma_index_t[*n_row+1];
   
   
   //read row pointer
