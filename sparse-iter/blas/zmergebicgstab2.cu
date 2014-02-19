@@ -187,12 +187,9 @@ magma_zbicgstab_alphakernel(
     Arguments
     =========
 
-    int n                               dimension n
+    magma_z_sparse_matrix A             system matrix
     magmaDoubleComplex *d1              temporary vector
     magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_val           matrix values
-    int *d_rowptr                       matrix row pointer
-    int *d_colind                       matrix column indices
     magmaDoubleComplex *d_p             input vector p
     magmaDoubleComplex *d_r             input vector r
     magmaDoubleComplex *d_v             output vector v
@@ -200,7 +197,7 @@ magma_zbicgstab_alphakernel(
 
     ========================================================================  */
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
                          magmaDoubleComplex *d1,
                          magmaDoubleComplex *d2,
@@ -208,7 +205,7 @@ magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
                          magmaDoubleComplex *d_r,
                          magmaDoubleComplex *d_v,
                          magmaDoubleComplex *skp ){
-
+/*
     int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
@@ -242,7 +239,7 @@ magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_alphakernel<<<Gs2, Bs2, 0>>>( skp );
-
+*/
    return MAGMA_SUCCESS;
 }
 
@@ -478,7 +475,7 @@ magma_zbicgstab_omegakernel(
 
     ========================================================================  */
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge_spmv2(  
                  magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
@@ -676,7 +673,7 @@ magma_zbicgstab_betakernel(
 
     ========================================================================  */
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge_xrbeta(  
                  int n,
                  magmaDoubleComplex *d1,

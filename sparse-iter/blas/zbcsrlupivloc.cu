@@ -50,7 +50,7 @@ zbcsrlupivloc_kernel(
                        int size_b,
                        int kblocks,   
                        double **A,  
-                       int *ipiv)
+                       magma_int_t *ipiv)
 {
     if( blockIdx.x < kblocks ) {
         if(threadIdx.x < size_b ){

@@ -835,7 +835,7 @@ magma_zcg_rhokernel(
 
     ========================================================================  */
 
-extern "C" int
+extern "C" magma_int_t
 magma_zcgmerge_spmv1(  
                  magma_z_sparse_matrix A,
                  magmaDoubleComplex *d1,
@@ -958,26 +958,6 @@ magma_zcgmerge_spmv1(
         printf("error: alignment %d not supported.\n", A.alignment);
         exit(-1);
     }
-
-
-
-
-
-
-
-/*
-        int threads_per_row = A.blocksize;
-        int num_threads = 256;
-        int num_blocks = ( (threads_per_row*A.num_rows+num_threads-1)
-                                        /num_threads);
-        int alignment = ((int)(A.max_nnz_row+threads_per_row-1)/threads_per_row)
-                                       *threads_per_row;
-        dim3 gridellpackrt( num_blocks, 1, 1);
-        magma_zcgmerge_spmvellpackrt_kernel
-                <<<gridellpackrt, num_threads, Ms, magma_stream >>>
-                ( A.num_rows, A.max_nnz_row, A.val, A.col, A.row, d_d, d_z, d1, 
-                                                threads_per_row, alignment );
-*/
         // in case of using ELLPACKRT, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
@@ -1147,7 +1127,7 @@ magma_zcg_d_kernel(
 
     ========================================================================  */
 
-extern "C" int
+extern "C" magma_int_t
 magma_zcgmerge_xrbeta(  
                  int n,
                  magmaDoubleComplex *d1,

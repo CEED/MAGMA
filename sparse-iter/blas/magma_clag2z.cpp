@@ -66,8 +66,8 @@ magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
         y->nnz = x.nnz;
         magma_zmalloc_cpu( &y->val, x.num_rows );
 
-        int one= 1;
-        int info;
+        magma_int_t one= 1;
+        magma_int_t info;
         lapackf77_clag2z( &x.num_rows, &one, 
                        x.val, &x.num_rows, 
                        y->val, &x.num_rows, &info);

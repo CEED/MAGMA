@@ -49,7 +49,7 @@ magma_zbcsrswp(   magma_int_t r_blocks,
                   magmaDoubleComplex *x ){
 
 
-    int nrhs = 1, n = r_blocks*size_b, ione = 1, inc = 1;
+    const magma_int_t nrhs = 1, n = r_blocks*size_b, ione = 1, inc = 1;
 
     magmaDoubleComplex *work; 
     magma_zmalloc_cpu( &work, r_blocks*size_b );
