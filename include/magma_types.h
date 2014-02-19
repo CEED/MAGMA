@@ -224,6 +224,7 @@ typedef double real_Double_t;
     // OpenCL uses opaque memory references on GPU
     typedef cl_mem magma_ptr;
     typedef cl_mem magmaInt_ptr;
+    typedef cl_mem magmaIndex_ptr;
     typedef cl_mem magmaFloat_ptr;
     typedef cl_mem magmaDouble_ptr;
     typedef cl_mem magmaFloatComplex_ptr;
@@ -239,6 +240,7 @@ typedef double real_Double_t;
     // MIC and CUDA use regular pointers on GPU
     typedef void               *magma_ptr;
     typedef magma_int_t        *magmaInt_ptr;
+    typedef magma_index_t      *magmaIndex_ptr;
     typedef float              *magmaFloat_ptr;
     typedef double             *magmaDouble_ptr;
     typedef magmaFloatComplex  *magmaFloatComplex_ptr;
@@ -246,6 +248,7 @@ typedef double real_Double_t;
     
     typedef void               const *magma_const_ptr;
     typedef magma_int_t        const *magmaInt_const_ptr;
+    typedef magma_index_t      const *magmaIndex_const_ptr;
     typedef float              const *magmaFloat_const_ptr;
     typedef double             const *magmaDouble_const_ptr;
     typedef magmaFloatComplex  const *magmaFloatComplex_const_ptr;
