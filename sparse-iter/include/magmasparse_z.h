@@ -498,7 +498,7 @@ magma_zgecsrmv_shift(  magma_trans_t transA,
                        magmaDoubleComplex beta,
                        int offset,
                        int blocksize,
-                       int *add_rows,
+                       magma_index_t *add_rows,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
@@ -536,7 +536,7 @@ magma_zgeellmv_shift(  magma_trans_t transA,
                        magmaDoubleComplex beta,
                        int offset,
                        int blocksize,
-                       int *add_rows,
+                       magma_index_t *add_rows,
                        magmaDoubleComplex *d_y );
 
 
@@ -576,7 +576,7 @@ magma_zgeelltmv_shift( magma_trans_t transA,
                        magmaDoubleComplex beta,
                        int offset,
                        int blocksize,
-                       int *add_rows,
+                       magma_index_t *add_rows,
                        magmaDoubleComplex *d_y );
 
 

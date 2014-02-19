@@ -6,6 +6,9 @@
 *
 */
 
+#include "magma.h"
+#include "magmasparse.h"
+
 #ifndef MM_IO_H
 #define MM_IO_H
 
@@ -18,12 +21,14 @@ typedef char MM_typecode[4];
 char *mm_typecode_to_str(MM_typecode matcode);
 
 int mm_read_banner(FILE *f, MM_typecode *matcode);
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz);
-int mm_read_mtx_array_size(FILE *f, int *M, int *N);
+int mm_read_mtx_crd_size(FILE *f, magma_int_t *M, magma_int_t *N, 
+                                                    magma_int_t *nz);
+int mm_read_mtx_array_size(FILE *f, magma_int_t *M, magma_int_t *N);
 
 int mm_write_banner(FILE *f, MM_typecode matcode);
-int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz);
-int mm_write_mtx_array_size(FILE *f, int M, int N);
+int mm_write_mtx_crd_size(FILE *f, magma_int_t M, magma_int_t N, 
+                                                    magma_int_t nz);
+int mm_write_mtx_array_size(FILE *f, magma_int_t M, magma_int_t N);
 
 
 /********************* MM_typecode query fucntions ***************************/
@@ -118,15 +123,16 @@ int mm_is_valid(MM_typecode matcode);    /* too complex for a macro */
 
 /*  high level routines */
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
-     double val[], MM_typecode matcode);
-int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
-    double val[], MM_typecode matcode);
-int mm_read_mtx_crd_entry(FILE *f, int *I, int *J, double *real, double *img,
-      MM_typecode matcode);
+int mm_write_mtx_crd(char fname[], magma_int_t M, magma_int_t N, magma_int_t nz, 
+      magma_index_t I[], magma_index_t J[], double val[], MM_typecode matcode);
+int mm_read_mtx_crd_data(FILE *f, magma_int_t M, magma_int_t N, magma_int_t nz, 
+      magma_index_t I[], magma_index_t J[], double val[], MM_typecode matcode);
+int mm_read_mtx_crd_entry(FILE *f, magma_index_t *I, magma_index_t *J, 
+        double *real, double *img, MM_typecode matcode);
 
-int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
-                double **val_, int **I_, int **J_);
+int mm_read_unsymmetric_sparse(const char *fname, magma_int_t *M_, 
+        magma_int_t *N_, magma_int_t *nz_, 
+        double **val_, magma_index_t **I_, magma_index_t **J_);
 
 
 
