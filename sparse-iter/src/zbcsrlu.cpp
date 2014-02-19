@@ -263,7 +263,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     magma_malloc((void **)&dAIIs, r_blocks*c_blocks
                         *sizeof(magmaDoubleComplex *));
 
-    int *ipiv_d;
+    magma_int_t *ipiv_d;
     magma_imalloc( &ipiv_d, size_b);
     for( i = 0; i< r_blocks; i++){
         for( j = 0; j< r_blocks; j++){
