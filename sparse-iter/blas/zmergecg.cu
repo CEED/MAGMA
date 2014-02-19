@@ -88,8 +88,8 @@ __global__ void
 magma_zcgmerge_spmvcsr_kernel(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
+                 magma_index_t *d_rowptr, 
+                 magma_index_t *d_colind,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp
@@ -165,7 +165,7 @@ magma_zcgmerge_spmvellpackt_kernel(
                  int n,
                  int num_cols_per_row,
                  magmaDoubleComplex *d_val, 
-                 int *d_colind,
+                 magma_index_t *d_colind,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp
@@ -242,7 +242,7 @@ magma_zcgmerge_spmvellpack_kernel(
                  int n,
                  int num_cols_per_row,
                  magmaDoubleComplex *d_val, 
-                 int *d_colind,
+                 magma_index_t *d_colind,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp
@@ -318,8 +318,8 @@ __global__ void
 magma_zcgmerge_spmvellpackrt_kernel_8(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_colind,
-                 int *d_rowlength,
+                 magma_index_t *d_colind,
+                 magma_index_t *d_rowlength,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp,
@@ -369,8 +369,8 @@ __global__ void
 magma_zcgmerge_spmvellpackrt_kernel_16(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_colind,
-                 int *d_rowlength,
+                 magma_index_t *d_colind,
+                 magma_index_t *d_rowlength,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp,
@@ -421,8 +421,8 @@ __global__ void
 magma_zcgmerge_spmvellpackrt_kernel_32(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_colind,
-                 int *d_rowlength,
+                 magma_index_t *d_colind,
+                 magma_index_t *d_rowlength,
                  magmaDoubleComplex *d,
                  magmaDoubleComplex *z,
                  magmaDoubleComplex *vtmp,
@@ -543,8 +543,8 @@ magma_zcgmerge_spmvsellc_kernel(
                      int num_rows, 
                      int blocksize,
                      magmaDoubleComplex *d_val, 
-                     int *d_colind,
-                     int *d_rowptr,
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
                      magmaDoubleComplex *d,
                      magmaDoubleComplex *z,
                      magmaDoubleComplex *vtmp){
@@ -628,8 +628,8 @@ magma_zcgmerge_spmvsellcmt_kernel_8( int num_rows,
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
-                     int *d_colind,
-                     int *d_rowptr,
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
                      magmaDoubleComplex *d,
                      magmaDoubleComplex *z)
 {
@@ -683,8 +683,8 @@ magma_zcgmerge_spmvsellcmt_kernel_16( int num_rows,
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
-                     int *d_colind,
-                     int *d_rowptr,
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
                      magmaDoubleComplex *d,
                      magmaDoubleComplex *z)
 {
@@ -742,8 +742,8 @@ magma_zcgmerge_spmvsellcmt_kernel_32( int num_rows,
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
-                     int *d_colind,
-                     int *d_rowptr,
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
                      magmaDoubleComplex *d,
                      magmaDoubleComplex *z)
 {

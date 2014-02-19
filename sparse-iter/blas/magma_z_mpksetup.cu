@@ -46,7 +46,7 @@ compress_kernel(         int num_add_rows,
     =========
 
     magma_int_t num_add_rows             number of elements to unpack
-    magma_int_t *add_rows                indices of elements to unpack
+    magma_index_t *add_rows              indices of elements to unpack
     magmaDoubleComplex *x                uncompressed input vector
     magmaDoubleComplex *y                compressed output vector
 
@@ -56,7 +56,7 @@ compress_kernel(         int num_add_rows,
 
 extern "C" int
 magma_z_mpk_compress_gpu(   magma_int_t num_add_rows,
-                         magma_int_t *add_rows,
+                         magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
@@ -98,7 +98,7 @@ uncompress_kernel(       int num_add_rows,
     =========
 
     magma_int_t num_add_rows             number of elements to unpack
-    magma_int_t *add_rows                indices of elements to unpack
+    magma_index_t *add_rows              indices of elements to unpack
     magmaDoubleComplex *x                compressed input vector
     magmaDoubleComplex *y                uncompressed output vector
 
@@ -108,7 +108,7 @@ uncompress_kernel(       int num_add_rows,
 
 extern "C" int
 magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
-                         magma_int_t *add_rows,
+                         magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
@@ -140,7 +140,7 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
     magma_int_t offset                   offset from 0
     magma_int_t blocksize                number of elements handled by GPU
     magma_int_t num_add_rows             number of elements to pack
-    magma_int_t *add_rows                indices of elements to pack
+    magma_index_t *add_rows              indices of elements to pack
     magmaDoubleComplex *x                compressed input vector
     magmaDoubleComplex *y                uncompressed output vector
 
@@ -152,7 +152,7 @@ extern "C" int
 magma_z_mpk_uncompspmv(  magma_int_t offset,
                          magma_int_t blocksize,
                          magma_int_t num_add_rows,
-                         magma_int_t *add_rows,
+                         magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 

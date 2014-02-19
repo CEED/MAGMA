@@ -219,7 +219,7 @@ magma_z_spmv_shift( magmaDoubleComplex alpha,
                     magmaDoubleComplex beta, 
                     magma_int_t offset, 
                     magma_int_t blocksize, 
-                    magma_int_t *add_rows, 
+                    magma_index_t *add_rows, 
                     magma_z_vector y ){
 
     if( A.memory_location != x.memory_location 

@@ -70,7 +70,7 @@ magma_zbcsrblockinfo5(  magma_int_t lustep,
                         magma_int_t num_blocks, 
                         magma_int_t c_blocks, 
                         magma_int_t size_b,
-                        magma_int_t *blockinfo,
+                        magma_index_t *blockinfo,
                         magmaDoubleComplex *val,
                         magmaDoubleComplex **AII ){
 

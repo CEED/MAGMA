@@ -23,7 +23,7 @@ zcompact_kernel(
     int m, int n,
     magmaDoubleComplex *dA, int ldda,
     double *dnorms, double tol,
-    magma_int_t *active, magma_int_t *cBlock)
+    magma_index_t *active, magma_index_t *cBlock)
 {
     // dA is processed across row i (by the current thread)
     int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -52,7 +52,7 @@ __global__ void
 zcompactactive_kernel(
     int m, int n,
     magmaDoubleComplex *dA, int ldda,
-    magma_int_t *active)
+    magma_index_t *active)
 {
     // dA is processed across row i (by the current thread)
     int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -76,7 +76,7 @@ magma_zcompact(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *dA, magma_int_t ldda,
     double *dnorms, double tol, 
-    magma_int_t *active, magma_int_t *cBlock)
+    magma_index_t *active, magma_index_t *cBlock)
 {
 /*
     Purpose
@@ -142,7 +142,7 @@ extern "C" void
 magma_zcompactActive(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *dA, magma_int_t ldda,
-    magma_int_t *active)
+    magma_index_t *active)
 {
 /*
     Purpose

@@ -45,7 +45,7 @@ magma_zbcsrtrsv( magma_uplo_t uplo,
                  magma_int_t c_blocks,
                  magma_int_t size_b, 
                  magmaDoubleComplex *A,
-                 magma_int_t *blockinfo,   
+                 magma_index_t *blockinfo,   
                  magmaDoubleComplex *x ){
 
     // some useful variables

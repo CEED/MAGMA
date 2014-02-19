@@ -89,8 +89,8 @@ __global__ void
 magma_zbicgmerge_spmv1_kernel(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
+                 magma_index_t *d_rowptr, 
+                 magma_index_t *d_colind,
                  magmaDoubleComplex *p,
                  magmaDoubleComplex *r,
                  magmaDoubleComplex *v,
@@ -338,8 +338,8 @@ __global__ void
 magma_zbicgmerge_spmv2_kernel(  
                  int n,
                  magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
+                 magma_index_t *d_rowptr, 
+                 magma_index_t *d_colind,
                  magmaDoubleComplex *s,
                  magmaDoubleComplex *t,
                  magmaDoubleComplex *vtmp
