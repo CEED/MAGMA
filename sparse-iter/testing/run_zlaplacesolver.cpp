@@ -51,10 +51,10 @@ int main( int argc, char** argv)
     magma_int_t n=10;   // size is n*n
     magma_int_t nn = n*n;
     magma_int_t offdiags = 2;
-    magma_int_t *diag_offset;
+    magma_index_t *diag_offset;
     magmaDoubleComplex *diag_vals;
     magma_zmalloc_cpu( &diag_vals, offdiags+1 );
-    magma_imalloc_cpu( &diag_offset, offdiags+1 );
+    magma_indexmalloc_cpu( &diag_offset, offdiags+1 );
     diag_offset[0] = 0;
     diag_offset[1] = 1;
     diag_offset[2] = n;
