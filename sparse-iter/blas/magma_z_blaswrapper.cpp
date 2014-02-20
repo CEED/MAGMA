@@ -159,6 +159,14 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                         A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
+             }else if( A.storage_type == Magma_SELLCM ){
+                 //printf("using SELLCM kernel for SpMV: ");
+                 magma_zmgesellcmmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                    num_vecs, A.blocksize, A.numblocks, A.alignment, 
+                    alpha, A.val, A.col, A.row, x.val, beta, y.val );
+
+                 //printf("done.\n");
+                 return MAGMA_SUCCESS;
              }/*
              if( A.storage_type == Magma_DENSE ){
                  //printf("using DENSE kernel for SpMV: ");
