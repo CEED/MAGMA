@@ -38,7 +38,7 @@
 
 magma_int_t
 magma_zsolverinfo( magma_solver_parameters *solver_par, 
-                    magma_precond_parameters *precond_par ){
+                    magma_z_preconditioner *precond_par ){
 
     if( (solver_par->solver == Magma_CG) || (solver_par->solver == Magma_PCG) ){
         if( solver_par->verbose > 0 ){
@@ -281,7 +281,8 @@ magma_zsolverinfo( magma_solver_parameters *solver_par,
 
 
 magma_int_t
-magma_zsolverinfo_free( magma_solver_parameters *solver_par ){
+magma_zsolverinfo_free( magma_solver_parameters *solver_par, 
+                        magma_z_preconditioner *precond ){
 /*
     solver_par->solver = Magma_CG;
     solver_par->maxiter = 1000;
@@ -303,6 +304,53 @@ magma_zsolverinfo_free( magma_solver_parameters *solver_par ){
         magma_free_cpu( solver_par->timing );
         solver_par->timing = NULL;
     }
+
+    if( precond->d.val != NULL ){
+        magma_free( precond->d.val );
+        precond->d.val = NULL;
+    }
+    if( precond->M.val != NULL ){
+        if ( precond->M.memory_location = Magma_DEV )
+            magma_free( precond->M.val );
+        else
+            magma_free_cpu( precond->M.val );
+        precond->M.val = NULL;
+    }
+    if( precond->M.col != NULL ){
+        if ( precond->M.memory_location = Magma_DEV )
+            magma_free( precond->M.col );
+        else
+            magma_free_cpu( precond->M.col );
+        precond->M.col = NULL;
+    }
+    if( precond->M.row != NULL ){
+        if ( precond->M.memory_location = Magma_DEV )
+            magma_free( precond->M.row );
+        else
+            magma_free_cpu( precond->M.row );
+        precond->M.row = NULL;
+    }
+    if( precond->M.blockinfo != NULL ){
+        magma_free_cpu( precond->M.blockinfo );
+        precond->M.blockinfo = NULL;
+    }
+
+    return MAGMA_SUCCESS;
+}
+
+
+magma_int_t
+magma_zsolverinfo_init( magma_solver_parameters *solver_par, 
+                        magma_z_preconditioner *precond ){
+
+        solver_par->res_vec = NULL;
+        solver_par->timing = NULL;
+
+        precond->d.val = NULL;
+        precond->M.val = NULL;
+        precond->M.col = NULL;
+        precond->M.row = NULL;
+        precond->M.blockinfo = NULL;
 
     return MAGMA_SUCCESS;
 }

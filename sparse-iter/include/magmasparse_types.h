@@ -169,18 +169,70 @@ typedef struct magma_solver_parameters{
 }magma_solver_parameters;
 
 
-typedef struct magma_precond_parameters{
+typedef struct magma_z_preconditioner{
 
-    magma_solver_type  solver;
-    magma_precision    format;
-    double             epsilon;  
-    magma_int_t        maxiter;
-    magma_int_t        restart; 
-    magma_int_t        numiter;
-    double             init_res;
-    double             final_res;
+    magma_solver_type       solver;
+    magma_precision         format;
+    double                  epsilon;  
+    magma_int_t             maxiter;
+    magma_int_t             restart; 
+    magma_int_t             numiter;
+    double                  init_res;
+    double                  final_res;
+    magma_z_sparse_matrix   M;
+    magma_z_vector          d;
 
-}magma_precond_parameters;
+}magma_z_preconditioner;
+
+typedef struct magma_c_preconditioner{
+
+    magma_solver_type       solver;
+    magma_precision         format;
+    double                  epsilon;  
+    magma_int_t             maxiter;
+    magma_int_t             restart; 
+    magma_int_t             numiter;
+    double                  init_res;
+    double                  final_res;
+    magma_c_sparse_matrix   M;
+    magma_c_vector          d;
+
+}magma_c_preconditioner;
+
+
+typedef struct magma_d_preconditioner{
+
+    magma_solver_type       solver;
+    magma_precision         format;
+    double                  epsilon;  
+    magma_int_t             maxiter;
+    magma_int_t             restart; 
+    magma_int_t             numiter;
+    double                  init_res;
+    double                  final_res;
+    magma_d_sparse_matrix   M;
+    magma_d_vector          d;
+
+}magma_d_preconditioner;
+
+
+typedef struct magma_s_preconditioner{
+
+    magma_solver_type       solver;
+    magma_precision         format;
+    double                  epsilon;  
+    magma_int_t             maxiter;
+    magma_int_t             restart; 
+    magma_int_t             numiter;
+    double                  init_res;
+    double                  final_res;
+    magma_s_sparse_matrix   M;
+    magma_s_vector          d;
+
+}magma_s_preconditioner;
+
+
+
 
 
 

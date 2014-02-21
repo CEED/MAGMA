@@ -41,13 +41,13 @@
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
     magma_solver_parameters *solver_par       solver parameters
-    magma_precond_parameters *precond_par     parameters for inner solver
+    magma_z_preconditioner *precond_par       inner solver
 
     ========================================================================  */
 
 magma_int_t
 magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-   magma_solver_parameters *solver_par, magma_precond_parameters *precond_par ){
+   magma_solver_parameters *solver_par, magma_z_preconditioner *precond_par ){
 
     // prepare solver feedback
     solver_par->solver = Magma_ITERREF;

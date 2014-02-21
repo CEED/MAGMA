@@ -40,13 +40,14 @@
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
     magma_solver_parameters *solver_par       solver parameters
+    magma_z_preconditioner                    preconditioner
 
     ========================================================================  */
 
 magma_int_t
 magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
             magma_solver_parameters *solver_par, 
-            magma_precond_parameters *precond_par ){
+            magma_z_preconditioner *precond_par ){
 
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
@@ -85,11 +86,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
 
     // preconditioner
-    if( precond_par->solver == Magma_JACOBI ){
-        magma_zjacobisetup_diagscal( A, &dinv );
-        magma_zjacobi_diagscal( dofs, dinv.val, r.val, h.val ); // h = D^-1 r
-
-    }
+    magma_z_applyprecond( A, r, &h, precond_par );
 
     magma_zcopy( dofs, h.val, 1, p.val, 1 );                    // p = h
     nom =  MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) );          
@@ -124,10 +121,8 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);      // r = r - alpha q
 
         // preconditioner
-        if( precond_par->solver == Magma_JACOBI ){
-            magma_zjacobi_diagscal( dofs, dinv.val, r.val, h.val );
+        magma_z_applyprecond( A, r, &h, precond_par );
 
-        }
         betanom = sqrt( MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) ) );   
                                                             // betanom = < r,h>
         betanomsq = betanom * betanom;                      // betanoms = r' * r
@@ -171,7 +166,6 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&p);
     magma_z_vfree(&q);
     magma_z_vfree(&h);
-    magma_z_vfree(&dinv);
 
     return MAGMA_SUCCESS;
 }   /* magma_zcg */

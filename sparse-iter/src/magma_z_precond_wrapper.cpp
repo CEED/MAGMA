@@ -33,16 +33,16 @@
     Arguments
     =========
 
-    magma_z_sparse_matrix A       sparse matrix A    
-    magma_z_vector x              input vector x  
-    magma_z_vector y              input vector y      
-    magma_precond_parameters precond
+    magma_z_sparse_matrix A         sparse matrix A    
+    magma_z_vector x                input vector x  
+    magma_z_vector y                input vector y      
+    magma_z_preconditioner precond  preconditioner
 
     ========================================================================  */
 
 magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
-                 magma_z_vector *x, magma_precond_parameters precond )
+                 magma_z_vector *x, magma_z_preconditioner precond )
 {
 // set up precond parameters as solver parameters   
     magma_solver_parameters psolver_par;
@@ -86,6 +86,88 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
 
+    else{
+        printf( "error: preconditioner type not yet supported.\n" );
+        return MAGMA_ERR_NOT_SUPPORTED;
+    }
+
+}
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+    Purpose
+    =======
+
+    For a given input matrix A and vectors x, y and the
+    preconditioner parameters, the respective preconditioner
+    is preprocessed. 
+    E.g. for Jacobi: the scaling-vetor, for ILU the factorization...
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A         sparse matrix A    
+    magma_z_vector x                input vector x  
+    magma_z_vector y                input vector y      
+    magma_z_preconditioner precond  preconditioner
+
+    ========================================================================  */
+
+magma_int_t
+magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b, 
+                      magma_z_preconditioner *precond )
+{
+    if( precond->solver == Magma_JACOBI ){
+        magma_zjacobisetup_diagscal( A, &(precond->d) );
+        return MAGMA_SUCCESS;
+    }
+    else{
+        printf( "error: preconditioner type not yet supported.\n" );
+        return MAGMA_ERR_NOT_SUPPORTED;
+    }
+
+}
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+    Purpose
+    =======
+
+    For a given input matrix A and vectors x, y and the
+    preconditioner parameters, the respective preconditioner
+    is preprocessed. 
+    E.g. for Jacobi: the scaling-vetor, for ILU the factorization...
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A         sparse matrix A    
+    magma_z_vector x                input vector x  
+    magma_z_vector y                input vector y      
+    magma_z_preconditioner precond  preconditioner
+
+    ========================================================================  */
+
+magma_int_t
+magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b, 
+                      magma_z_vector *x, magma_z_preconditioner *precond )
+{
+    if( precond->solver == Magma_JACOBI ){
+        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        return MAGMA_SUCCESS;
+    }
     else{
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
