@@ -45,14 +45,15 @@ __global__ void ztranspose3_32( magmaDoubleComplex       *B, int ldb,
     __syncthreads();
 
 #if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
+    t2 = ibx + iny;
     if (iby + inx < n) {
-        if (ibx + iny < m) {
+        if (t2 < m) {
             B[0*ldb] = sA[inx][iny+0];
-            if (ibx + iny + 8 < m) {
+            if (t2 + 8 < m) {
                 B[8*ldb] = sA[inx][iny+8];
-                if (ibx + iny +16 < m) {
+                if (t2 + 16 < m) {
                     B[16*ldb] = sA[inx][iny+16];
-                    if (ibx + iny + 24 < m) {
+                    if (t2 + 24 < m) {
                         B[24*ldb] = sA[inx][iny+24];
                     }
                 }
