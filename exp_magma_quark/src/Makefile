@@ -18,7 +18,7 @@ ZSRC += dmemset_async.cpp
 
 # ----------
 # LU		
-ZSRC += dgetrf_async_gpu.cpp
+ZSRC += dgetrf_async_gpu_v1.cpp dgetrf_async_gpu_v2.cpp dgetrf_async_mgpu_v1.cpp dgetrf_async_mgpu_v2.cpp dgetrf_async_mgpu_v3.cpp
 
 -include Makefile.local
 -include Makefile.src
