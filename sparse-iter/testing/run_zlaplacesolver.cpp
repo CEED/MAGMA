@@ -34,11 +34,12 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magma_solver_parameters solver_par;
-    magma_precond_parameters precond_par;
+    magma_z_preconditioner precond_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
     precond_par.solver = Magma_JACOBI;
+    magma_zsolverinfo_init( &solver_par, &precond_par );
 
     
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
@@ -80,7 +81,7 @@ int main( int argc, char** argv)
     // solverinfo
     magma_zsolverinfo( &solver_par, &precond_par );
 
-    magma_zsolverinfo_free( &solver_par );
+    magma_zsolverinfo_free( &solver_par, &precond_par );
 
 
 

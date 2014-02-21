@@ -32,11 +32,12 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magma_solver_parameters solver_par;
-    magma_precond_parameters precond_par;
+    magma_z_preconditioner precond_par;
     solver_par.maxiter = 1000;
     solver_par.verbose;
     int format = 0;
-
+    magma_zsolverinfo_init( &solver_par, &precond_par );
+    
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
     B.blocksize = 8;
@@ -93,7 +94,7 @@ int main( int argc, char** argv)
 
         magma_zsolverinfo( &solver_par, &precond_par );
 
-        magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo_free( &solver_par, &precond_par );
 
         magma_z_mfree(&B_d);
         magma_z_mfree(&B);

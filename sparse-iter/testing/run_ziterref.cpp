@@ -38,11 +38,12 @@ int main( int argc, char** argv)
     int version = 0;
     int format = 0;
 
-    magma_precond_parameters precond_par;
+    magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     precond_par.epsilon = 1e-8;
     precond_par.maxiter = 100;
     precond_par.restart = 30;
+    magma_zsolverinfo_init( &solver_par, &precond_par );
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
@@ -122,7 +123,7 @@ int main( int argc, char** argv)
 
         magma_zsolverinfo( &solver_par, &precond_par );
 
-        magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo_free( &solver_par, &precond_par );
 
         magma_z_mfree(&B_d);
         magma_z_mfree(&B);

@@ -35,12 +35,13 @@ int main( int argc, char** argv)
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
-    magma_precond_parameters precond_par;
+    magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     int precond = 0;
     int format = 0;
     int version = 0;
-
+    magma_zsolverinfo_init( &solver_par, &precond_par );
+    
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
     B.blocksize = 8;
@@ -88,7 +89,7 @@ int main( int argc, char** argv)
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --preconditioner %d(0=Jacobi) ]"
+        " --preconditioner %d (0=Jacobi) ]"
         " matrices \n\n", format, B.blocksize, B.alignment,
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, precond );
@@ -106,11 +107,13 @@ int main( int argc, char** argv)
         magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
         magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
 
+        magma_z_precondsetup( B_d, b, &precond_par );
+
         magma_zpcg( B_d, b, &x, &solver_par, &precond_par );
 
         magma_zsolverinfo( &solver_par, &precond_par );
 
-        magma_zsolverinfo_free( &solver_par );
+        magma_zsolverinfo_free( &solver_par, &precond_par );
 
         magma_z_mfree(&B_d);
         magma_z_mfree(&B);
