@@ -11,7 +11,11 @@ include $(MAGMA_DIR)/Makefile.internal
 include ../make.exp.inc
 
 ZSRC := \
-     testing_dgetrf_async_gpu.cpp
+     testing_dgetrf_async_gpu_v1.cpp \
+     testing_dgetrf_async_gpu_v2.cpp \
+	 testing_dgetrf_async_mgpu_v1.cpp \
+	 testing_dgetrf_async_mgpu_v2.cpp \
+	 testing_dgetrf_async_mgpu_v3.cpp \
 	 
 -include Makefile.local
 -include Makefile.src

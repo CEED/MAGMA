@@ -10,17 +10,13 @@ MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 include ../make.exp.inc
 
-ZSRC := \
-	task_core_dkernel.cpp \
-	task_magma_dkernel.cpp \
-	schedule_insert_d.cpp
+ZSRC := schedule.cpp
 	
 -include Makefile.local
 -include Makefile.src
 
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-	schedule.cpp
-	
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+		
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)

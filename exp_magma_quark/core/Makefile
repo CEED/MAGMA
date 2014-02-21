@@ -11,7 +11,7 @@ include $(MAGMA_DIR)/Makefile.internal
 include ../make.exp.inc
 
 ZSRC := \
-	core_dgetrf_reclap.cpp
+	core_dgetrf_reclap.cpp core_dtslu.cpp
 	
 -include Makefile.local
 -include Makefile.src

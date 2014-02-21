@@ -45,4 +45,5 @@
 #define schedule_unpack_args_11    quark_unpack_args_11
 #define schedule_unpack_args_12    quark_unpack_args_12
 #define schedule_unpack_args_13    quark_unpack_args_13
+#define schedule_unpack_args_14    quark_unpack_args_14
 #endif
