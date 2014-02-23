@@ -147,8 +147,8 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective preconditioner
-    is preprocessed. 
-    E.g. for Jacobi: the scaling-vetor, for ILU the factorization...
+    is applied. 
+    E.g. for Jacobi: the scaling-vetor, for ILU the triangular solves...
 
     Arguments
     =========
