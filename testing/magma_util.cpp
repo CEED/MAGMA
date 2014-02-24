@@ -127,6 +127,7 @@ const char *usage =
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
 "  --panel_nthread xNumber of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
+"  --fraction_dcpu xPercentage of the workload to schedule on the cpu. Used in magma_amc algorithms only, default 0.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
@@ -163,7 +164,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->fraction = 1.;
     opts->tolerance = 30.;
     opts->panel_nthread = 1;
-
+    opts->fraction_dcpu = 0.0;
     opts->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
     opts->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
     opts->warmup    = (getenv("MAGMA_WARMUP")         != NULL);
@@ -340,7 +341,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             magma_assert( opts->panel_nthread > 0,
                           "error: --panel_nthread %s is invalid; ensure panel_nthread > 0.\n", argv[i] );
         }
-        
+        else if ( strcmp("--fraction_dcpu", argv[i]) == 0 && i+1 < argc ) {
+            opts->fraction_dcpu = atof( argv[++i] );
+            magma_assert( opts->fraction_dcpu > 0 && opts->fraction_dcpu<=1,
+                          "error: --fraction_dcpu %s is invalid; ensure fraction_dcpu in [0, 1]\n", argv[i] );
+        }
         // ----- boolean arguments
         // check results
         else if ( strcmp("-c",         argv[i]) == 0 ||
