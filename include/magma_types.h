@@ -440,6 +440,11 @@ typedef enum {
     Magma_DEV          = 472
 } magma_location_t;
 
+typedef enum {
+    Magma_GENERAL      = 481,
+    Magma_SYMMETRIC    = 482
+} magma_sym_t;
+
 
 // When adding constants, remember to do these steps as appropriate:
 // 1)  add magma_xxxx_const()  converter below and in control/constants.cpp
