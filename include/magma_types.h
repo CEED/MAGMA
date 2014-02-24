@@ -351,7 +351,7 @@ typedef enum {
     MagmaHermPoev      = 242,
     MagmaNonsymPosv    = 243,
     MagmaSymPosv       = 244
-} magma_symmetry_t;
+} magma_sym_t;
 
 typedef enum {
     MagmaNoPacking     = 291,  /* latms */
@@ -443,7 +443,7 @@ typedef enum {
 typedef enum {
     Magma_GENERAL      = 481,
     Magma_SYMMETRIC    = 482
-} magma_sym_t;
+} magma_symmetry_t;
 
 
 // When adding constants, remember to do these steps as appropriate:
