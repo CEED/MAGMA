@@ -12,7 +12,7 @@
 int NSplit(int N, double ratio);
 
 /* Abort the execution and print a message*/
-int magma_async_abort(char *pattern, ...);
+int magma_amc_abort(char *pattern, ...);
 
 /* Number of blocks for thread tid after a distribution over P threads*/
 int numBlock2p(int tid, int NBblock, int P);

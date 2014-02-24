@@ -23,7 +23,7 @@
 #include "magma_insert_dev_d.h"
 /*Global var in schedule.cpp */
 
-/*TODO: move in async_args for thread safety*/
+/*TODO: move in amc_args for thread safety*/
 extern Schedule *sched_obj;
 
 extern int current_priority;

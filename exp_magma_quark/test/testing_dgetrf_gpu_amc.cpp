@@ -20,7 +20,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "magma_async.h"
+#include "magma_amc.h"
 //#include "magma_threadsetting.h"
 #include "common_magma.h"
 
@@ -37,8 +37,8 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     double work[1], matnorm, residual;
     
 
-    TESTING_MALLOC( L, double, M*min_mn);
-    TESTING_MALLOC( U, double, min_mn*N);
+    TESTING_MALLOC_CPU( L, double, M*min_mn);
+    TESTING_MALLOC_CPU( U, double, min_mn*N);
     memset( L, 0, M*min_mn*sizeof(double) );
     memset( U, 0, min_mn*N*sizeof(double) );
 
@@ -61,8 +61,8 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     }
     residual = lapackf77_dlange("f", &M, &N, LU, &lda, work);
 
-    TESTING_FREE(L);
-    TESTING_FREE(U);
+    TESTING_FREE_CPU(L);
+    TESTING_FREE_CPU(U);
 
     return residual / (matnorm * N);
 }
@@ -153,10 +153,10 @@ int main( int argc, char** argv)
             gflops = FLOPS_DGETRF( M, N ) / 1e9;
             cpu_perf=gpu_perf1=gpu_perf2=gpu_perf3=0.0;
 
-            TESTING_MALLOC(    ipiv, magma_int_t,     min_mn );
-            TESTING_MALLOC(    h_A,  double, n2     );
-            TESTING_HOSTALLOC( h_R,  double, n2     );
-            TESTING_DEVALLOC(  d_A,  double, ldda*N );
+            TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn );
+            TESTING_MALLOC_CPU(    h_A,  double, n2     );
+            TESTING_MALLOC_PIN( h_R,  double, n2     );
+            TESTING_MALLOC_DEV(  d_A,  double, ldda*N );
             
             /* Initialize the matrix */
             lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
@@ -205,14 +205,14 @@ int main( int argc, char** argv)
             magma_setlapack_numthreads(1);
 
             magma_dsetmatrix( M, N, h_R, lda, d_A, ldda );
-            magma_async_init(P, d_cpu, Pr, nb);
+            magma_amc_init(P, d_cpu, Pr, nb);
             gpu_time2 = magma_wtime();
             magma_dgetrf_gpu_amc( M, N, d_A, ldda, ipiv, &info);
             gpu_time2 = magma_wtime() - gpu_time2;
             gpu_perf2 = gflops / gpu_time2;
-            magma_async_finalize();
+            magma_amc_finalize();
             if (info != 0)
-                printf("\nmagma_async_dgetrf_rec_gpu returned error %d: %s.\n     ",
+                printf("\nmagma_amc_dgetrf_rec_gpu returned error %d: %s.\n     ",
                        (int) info, magma_strerror( info ));
             
             /* ====================================================================
@@ -242,20 +242,20 @@ int main( int argc, char** argv)
                 printf("magma_dmalloc_pinned returned error %d: %s.\n     ", (int) info);
             }
             /*First touch the workspace with each thread. This may be needed to avoid using numactl --interleave*/
-            //magma_async_dmemset(WORK, 0.0, WORK_LD*WORK_n, 256, P); //nb
+            //magma_amc_dmemset(WORK, 0.0, WORK_LD*WORK_n, 256, P); //nb
             //#pragma omp parallel for  private(info) schedule(static,nb)
             //for(info=0;info<WORK_LD*WORK_n;info++) WORK[info] = 0.0; //alternative first touch by the thread
 
-            magma_async_init(P, d_cpu, Pr, nb);
+            magma_amc_init(P, d_cpu, Pr, nb);
 
             gpu_time3 = magma_wtime();
-            magma_dgetrf_async_work_gpu_v1(M, N, d_A, ldda, ipiv, &info, WORK, WORK_LD, WORK_n);
+            magma_dgetrf_gpu_work_amc(M, N, d_A, ldda, ipiv, &info, WORK, WORK_LD, WORK_n);
             gpu_time3 = magma_wtime() - gpu_time3;
             gpu_perf3 = gflops / gpu_time3;
-            magma_async_finalize();
+            magma_amc_finalize();
 
             if (info != 0)
-                printf("magma_async_dgetrf_rec_work_gpu returned error %d: %s.\n     ",
+                printf("magma_amc_dgetrf_rec_work_gpu returned error %d: %s.\n     ",
                        (int) info, magma_strerror( info ));
 
             /*Free workspace*/
@@ -311,10 +311,10 @@ int main( int argc, char** argv)
                 printf("     ---  \n");
             }
             printf("\n");
-            TESTING_FREE( ipiv );
-            TESTING_FREE( h_A );
-            TESTING_HOSTFREE( h_R );
-            TESTING_DEVFREE( d_A );
+            TESTING_FREE_CPU( ipiv );
+            TESTING_FREE_CPU( h_A );
+            TESTING_FREE_PIN( h_R );
+            TESTING_FREE_DEV( d_A );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

@@ -38,7 +38,7 @@
 #include "magma_insert_dev_d.h"
 
 /* Fill block of memory in async_dmemset.cpp*/
-void magma_dmemset_async(double *ptr, double value, int n, magma_int_t chunck, int P);
+void magma_dmemset_amc(double *ptr, double value, int n, magma_int_t chunck, int P);
 
 /*LU factorization in async_dgetrf_rec_gpu.cpp*/
 

@@ -216,7 +216,7 @@ Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
      //magma_insert_dlaswp(gpu_ncols, dAT(K,K+A_N), dAT_LD, c_one, nb, &ipiv[K], c_one);
 }
 /**/
-void magma_insert_dtrsm(char side, char uplo, char trans, char diag, magma_int_t m, magma_int_t n, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb )
+void magma_insert_dtrsm(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag, magma_int_t m, magma_int_t n, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb )
 {
              magma_int_t k;
 
@@ -231,10 +231,10 @@ void magma_insert_dtrsm(char side, char uplo, char trans, char diag, magma_int_t
              schedule_Task_Flag_Set(&task_flags, TASK_COLOR, (intptr_t)"pink");
 
              schedule_Insert_Task(sched_obj, magma_task_dtrsm, &task_flags,
-              sizeof(char),                    &side,   VALUE,
-              sizeof(char),                    &uplo,   VALUE,
-              sizeof(char),                    &trans,  VALUE,
-              sizeof(char),                    &diag,   VALUE,
+              sizeof(magma_side_t),            &side,   VALUE,
+              sizeof(magma_uplo_t),            &uplo,   VALUE,
+              sizeof(magma_trans_t),           &trans,  VALUE,
+              sizeof(magma_side_t),            &diag,   VALUE,
               sizeof(magma_int_t),             &m,      VALUE,
               sizeof(magma_int_t),             &n,      VALUE,
               sizeof(double),                  &alpha,  VALUE,
@@ -246,13 +246,13 @@ void magma_insert_dtrsm(char side, char uplo, char trans, char diag, magma_int_t
      //magma_insert_dtrsm('R', 'U', 'N', 'U', gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);
 }
 
-void magma_insert_dgemm(char transA, char transB, magma_int_t m, magma_int_t n, magma_int_t k, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc )
+void magma_insert_dgemm(magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc )
 {
      magma_int_t ka, kb;
      Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
 
-     ka = (transA=='N')?k:m;
-     kb = (transB=='N')?n:k;
+     ka = (transA==MagmaNoTrans)?k:m;
+     kb = (transB==MagmaNoTrans)?n:k;
 
      schedule_Task_Flag_Set(&task_flags, TASK_PRIORITY, current_priority);
      //schedule_Task_Flag_Set(&task_flags, TASK_LOCK_TO_THREAD_MASK,    (intptr_t) str_master_excluded_mask);
@@ -263,8 +263,8 @@ void magma_insert_dgemm(char transA, char transB, magma_int_t m, magma_int_t n, 
      schedule_Task_Flag_Set(&task_flags, TASK_COLOR, (intptr_t)"greenyellow");
 
               schedule_Insert_Task(sched_obj, magma_task_dgemm, &task_flags,
-              sizeof(char),                    &transA, VALUE,
-              sizeof(char),                    &transB, VALUE,
+              sizeof(magma_trans_t),           &transA, VALUE,
+              sizeof(magma_trans_t),           &transB, VALUE,
               sizeof(magma_int_t),             &m,      VALUE,
               sizeof(magma_int_t),             &n,      VALUE,
               sizeof(magma_int_t),             &k,      VALUE,

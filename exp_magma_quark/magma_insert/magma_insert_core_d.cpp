@@ -258,7 +258,7 @@ void magma_insert_core_dgemm(char transa, char transb,
      magma_int_t ka, kb;
      Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
 
-     ka = (transa=='N')?k:m;
+     ka = (transa==MagmaNoTrans)?k:m;
      kb = (transb=='N')?n:k;
 
      schedule_Task_Flag_Set(&task_flags, TASK_PRIORITY, current_priority);

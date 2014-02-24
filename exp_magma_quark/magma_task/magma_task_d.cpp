@@ -238,10 +238,10 @@ ca_trace_end_cpu('C');
 /**/
 void magma_task_dtrsm(Schedule* sched_obj  )
 {
-    char side;
-    char uplo;
-    char trans;
-    char diag;
+    magma_side_t side;
+    magma_uplo_t uplo;
+    magma_trans_t trans;
+    magma_diag_t diag;
     magma_int_t m;
     magma_int_t n;
     double alpha;
@@ -263,8 +263,8 @@ ca_trace_end_cpu('C');
 
 void magma_task_dgemm(Schedule* sched_obj  )
 {
-    char transA;
-    char transB;
+    magma_trans_t transA;
+    magma_trans_t transB;
     magma_int_t m;
     magma_int_t n;
     magma_int_t k;

@@ -23,7 +23,7 @@
 #include "core_d.h"
 
 
-//#include "magma_async_utils.h"
+//#include "magma_amc_utils.h"
 
 pthread_mutex_t *mutex_tree; /*Mutex de modification dans l'arbre*/
 
@@ -42,22 +42,22 @@ void core_dtslu_alloc(int nbThreads, int m, int nb)
 {
     /*Local allocation for tslu*/
 
-if(!(tree_step = (int*) malloc(nbThreads*sizeof(int)))) magma_async_abort("Memory allocation failed for tree_step"); /* private */
+if(!(tree_step = (int*) malloc(nbThreads*sizeof(int)))) magma_amc_abort("Memory allocation failed for tree_step"); /* private */
 
-if(!(mutex_tree = (pthread_mutex_t*) malloc(nbThreads*sizeof(pthread_mutex_t)))) magma_async_abort("Memory allocation failed for mutex_tree");
+if(!(mutex_tree = (pthread_mutex_t*) malloc(nbThreads*sizeof(pthread_mutex_t)))) magma_amc_abort("Memory allocation failed for mutex_tree");
 
 shared_LDT = m; /*possible optimization*/
 
 shared_LDT = max(shared_LDT,2*nb); /*At least 2 blocks needed for tslu*/
 
     /* tslu buffer */
-if(!(shared_Tblock = (double*)    malloc(shared_LDT*nb*sizeof(double)))) magma_async_abort("Memory allocation failed for shared_Tblock");
+if(!(shared_Tblock = (double*)    malloc(shared_LDT*nb*sizeof(double)))) magma_amc_abort("Memory allocation failed for shared_Tblock");
 
-if(!(shared_Twork = (double*) malloc(shared_LDT*nb*sizeof(double)))) magma_async_abort("Memory allocation failed for shared_Twork"); 
+if(!(shared_Twork = (double*) malloc(shared_LDT*nb*sizeof(double)))) magma_amc_abort("Memory allocation failed for shared_Twork"); 
 
-if(!(shared_IPwork =(int*)    malloc(shared_LDT*sizeof(int)))) magma_async_abort("Memory allocation failed for shared_IPwork"); //descA[tid].M
+if(!(shared_IPwork =(int*)    malloc(shared_LDT*sizeof(int)))) magma_amc_abort("Memory allocation failed for shared_IPwork"); //descA[tid].M
 
-if(!(shared_IP =  (int*)    malloc(shared_LDT*sizeof(int)))) magma_async_abort("Memory allocation failed for shared_IP");
+if(!(shared_IP =  (int*)    malloc(shared_LDT*sizeof(int)))) magma_amc_abort("Memory allocation failed for shared_IP");
 
 }
 
@@ -531,7 +531,7 @@ if(nrowPblock > nb || nbBlock==1) /*If I have more than a block then do the firs
                         {
                             /*This should never happen*/
                             printf("locNum:%d IP[%d]=%d not found in perm\n", locNum, l, IP[l]);            
-                            magma_async_abort("***Error when computing permutation vector ! ");// Can never occur 
+                            magma_amc_abort("***Error when computing permutation vector ! ");// Can never occur 
                             
                         }
                 

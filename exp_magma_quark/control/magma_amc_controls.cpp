@@ -12,28 +12,28 @@
 */
 #include "magma_amc_args.h" /* Context and arguments */
 
-int magma_async_init(int P, double dcpu, int Pr, int nb){
+int magma_amc_init(int P, double dcpu, int Pr, int nb){
 
-    async_args_t *args;
+    amc_args_t *args;
     
     /*create a new args*/
-    args = magma_async_args_create();
+    args = magma_amc_args_create();
 
     /*initialize*/
-    magma_async_args_set(args, P, dcpu,  nb, Pr);
+    magma_amc_args_set(args, P, dcpu,  nb, Pr);
 
     /*set as default*/
-    magma_async_args_set_default(args);
+    magma_amc_args_set_default(args);
 
     return 0;
 }
 
-int magma_async_finalize(){
-    async_args_t *args;
+int magma_amc_finalize(){
+    amc_args_t *args;
 
-    args= magma_async_args_get_default();
+    args= magma_amc_args_get_default();
 
-    magma_async_args_free(args);
+    magma_amc_args_free(args);
 
     return 0;
 }

@@ -21,10 +21,10 @@ void magma_insert_dev_dgetmatrix_transpose(magma_int_t deviceID, magma_int_t m, 
 void magma_insert_dev_dgetmatrix_async_transpose(magma_int_t deviceID, magma_int_t m, magma_int_t nb, double *dA_src, magma_int_t dA_LD, double *A_dst, magma_int_t LDA, magma_queue_t stream1, double *dwork, magma_int_t dwork_LD, void *A_dst_dep_ptr);
 
 void magma_insert_dev_dlaswp(magma_int_t deviceID,  magma_int_t n, double *dA, magma_int_t lda, magma_int_t i1, magma_int_t i2, magma_int_t *ipiv, magma_int_t inci, void *dA_dep_ptr);
-void magma_insert_dev_dtrsm(magma_int_t deviceID, char side, char uplo, char trans, char diag, 
+void magma_insert_dev_dtrsm(magma_int_t deviceID, magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag, 
                                  magma_int_t m, magma_int_t n, double alpha, 
                                  double *dA, magma_int_t lda, double *dB, magma_int_t ldb );
-void magma_insert_dev_dgemm(magma_int_t deviceID, char transA, char transB, 
+void magma_insert_dev_dgemm(magma_int_t deviceID, magma_trans_t transA, magma_trans_t transB, 
                                  magma_int_t m, magma_int_t n, magma_int_t k, double alpha, 
                                  double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc );
 #endif

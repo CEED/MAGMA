@@ -13,7 +13,7 @@ int NSplit(int N, double ratio){
 }
 
 /* Abort the execution and print a message*/
-int magma_async_abort(char *pattern, ...)
+int magma_amc_abort(char *pattern, ...)
 {
     va_list args;
     int len;

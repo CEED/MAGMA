@@ -445,10 +445,10 @@ ca_trace_end_cpu('C');
 void magma_task_dev_dtrsm(Schedule* sched_obj  )
 {
     magma_int_t deviceID;
-    char side;
-    char uplo;
-    char trans;
-    char diag;
+    magma_side_t side;
+    magma_uplo_t uplo;
+    magma_trans_t trans;
+    magma_diag_t diag;
     magma_int_t m;
     magma_int_t n;
     double alpha;
@@ -470,7 +470,7 @@ void magma_task_dev_dtrsm(Schedule* sched_obj  )
     magmablasSetKernelStream(compute_stream[deviceID]);
     
     magma_dtrsm( side,  uplo,  trans,  diag,  m,  n, alpha, dA,  lda, dB,  ldb );
-     //task_magma_dtrsm('R', 'U', 'N', 'U', gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);
+     //task_magma_dtrsm('R', 'U', MagmaNoTrans, 'U', gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);
     pthread_mutex_unlock(&mutex_compute_stream);
 
     #if (dbglevel==10)
@@ -486,8 +486,8 @@ ca_trace_end_cpu('C');
 void magma_task_dev_dgemm(Schedule* sched_obj  )
 {
     magma_int_t deviceID;
-    char transA;
-    char transB;
+    magma_trans_t transA;
+    magma_trans_t transB;
     magma_int_t m;
     magma_int_t n;
     magma_int_t k;
@@ -517,7 +517,7 @@ magma_setdevice(deviceID);
     magmablasSetKernelStream(compute_stream[deviceID]);
     
     magma_dgemm( transA,  transB,  m,  n,  k, alpha, dA,  lda, dB,  ldb, beta, dC,  ldc );
-     //task_magma_dgemm('N','N', gpu_ncols, gpu_nrows, nb, c_neg_one, dAT(K,K+A_N), dAT_LD, dAT(K+1,K), dAT_LD, c_one, dAT(K+1,K+A_N), dAT_LD);
+     //task_magma_dgemm(MagmaNoTrans,MagmaNoTrans, gpu_ncols, gpu_nrows, nb, c_neg_one, dAT(K,K+A_N), dAT_LD, dAT(K+1,K), dAT_LD, c_one, dAT(K+1,K+A_N), dAT_LD);
     pthread_mutex_unlock(&mutex_compute_stream);
 #if (dbglevel==10)
             ca_dbg_printMat_transpose_gpu(m, n, dC, ldc, "C after magma_dgemm");

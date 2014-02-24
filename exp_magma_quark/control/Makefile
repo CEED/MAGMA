@@ -16,9 +16,9 @@ ZSRC := \
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-	magma_async_utils.cpp \
-	magma_async_args.cpp \
-	magma_async_controls.cpp
+	magma_amc_args.cpp \
+	magma_amc_controls.cpp \
+	magma_amc_utils.cpp
 	
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)

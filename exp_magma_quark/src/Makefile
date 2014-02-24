@@ -14,11 +14,12 @@ ZSRC := \
 
 # ----------
 # parallel memory set		
-ZSRC += dmemset_async.cpp
+ZSRC += dmemset_amc.cpp
 
 # ----------
 # LU		
-ZSRC += dgetrf_async_gpu_v1.cpp dgetrf_async_gpu_v2.cpp dgetrf_async_mgpu_v1.cpp dgetrf_async_mgpu_v2.cpp dgetrf_async_mgpu_v3.cpp
+ZSRC += dgetrf_gpu_amc.cpp dgetrf_gpu_amc_v2.cpp\
+	dgetrf_mgpu_amc.cpp dgetrf_mgpu_amc_v2.cpp dgetrf_mgpu_amc_v3.cpp
 
 -include Makefile.local
 -include Makefile.src

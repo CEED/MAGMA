@@ -3,7 +3,7 @@
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of Colorado, Denver
-#      @date
+#      November 2011
 #
 #	   @author: Simplice Donfack
 #//////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,10 @@ libexp:
 	( cd core     && $(MAKE) )
 	@echo ======================================== schedule
 	( cd schedule && $(MAKE) )
+	@echo ======================================== magma_insert
+	( cd magma_insert && $(MAKE) )
+	@echo ======================================== magma_task
+	( cd magma_task && $(MAKE) )
 	@echo ======================================== src
 	( cd src      && $(MAKE) )
 	

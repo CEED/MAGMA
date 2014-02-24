@@ -119,7 +119,7 @@ extern "C" magma_int_t magma_dgetrf_gpu_amc(magma_int_t m, magma_int_t n,
     // int panel_num_threads; /*Number of threads for the panel*/ 
      double dcpu; /*percentage of the matrix to allocate on the CPUs*/ 
      int nb;
-     async_args_t *args;
+     amc_args_t *args;
 
 #if (dbglevel >=1) 
     double t1;
@@ -149,7 +149,7 @@ extern "C" magma_int_t magma_dgetrf_gpu_amc(magma_int_t m, magma_int_t n,
     
     
     
-    args = magma_async_args_get_default();
+    args = magma_amc_args_get_default();
 
     if(args->nb==0)
      nb    = magma_get_dgetrf_nb(m) ;//magma dgetrf block size
@@ -190,7 +190,7 @@ extern "C" magma_int_t magma_dgetrf_gpu_amc(magma_int_t m, magma_int_t n,
 #endif
 
     /*First touch the workspace by each thread*/
-    //magma_async_dmemset(AWORK, 0.0, AWORK_LD*AWORK_n, nb, nbcores);
+    //magma_amc_dmemset(AWORK, 0.0, AWORK_LD*AWORK_n, nb, nbcores);
 
     /* Call the workspace interface */
     magma_dgetrf_gpu_work_amc(m, n, dA, dA_LD, ipiv, info, AWORK, AWORK_LD, AWORK_n);
@@ -336,7 +336,7 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
      double *A;
      int i_nrows;
 
-     async_args_t *args;
+     amc_args_t *args;
     /*magma_event_t *A_event;*/ /*Control bucket*/
 
 
@@ -363,7 +363,7 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
 
       
      /*Get parameters*/ 
-    args = magma_async_args_get_default();
+    args = magma_amc_args_get_default();
      nb= args->nb;
 
      nbcores = args->P;  
@@ -576,10 +576,10 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
               magma_insert_dlaswp(gpu_ncols, dAT(K, K+A_N), dAT_LD, ONE, nb, ipiv(K), ONE, dAT(K, K+A_N-1)); /*non blocking*/                  
               //printf("debug barrier\n");
               //magma_schedule_barrier();
-              magma_insert_dtrsm('R', 'U', 'N', 'U', gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);/*non blocking*/ 
+              magma_insert_dtrsm(MagmaRight,  MagmaUpper, MagmaNoTrans, MagmaUnit, gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);/*non blocking*/ 
  
               /* aij^T = aij^T - (lik.ukj)^T = aij^T - ukj^T.lik^T*/ 
-              magma_insert_dgemm('N','N', gpu_ncols, gpu_nrows, nb, c_neg_one, dAT(K,K+A_N), dAT_LD, dAT(K+1,K), dAT_LD, c_one, dAT(K+1,K+A_N), dAT_LD);/*non blocking*/    
+              magma_insert_dgemm(MagmaNoTrans,MagmaNoTrans, gpu_ncols, gpu_nrows, nb, c_neg_one, dAT(K,K+A_N), dAT_LD, dAT(K+1,K), dAT_LD, c_one, dAT(K+1,K+A_N), dAT_LD);/*non blocking*/    
        
           } 
           

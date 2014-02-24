@@ -22,7 +22,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#include "magma_async.h"
+#include "magma_amc.h"
 
 /* number of columns on device dev in a cyclic distribution of the data*/
 static int numcols2p(int dev, int n, int b, int P)
@@ -106,8 +106,8 @@ double get_residual(
     double *x, *b;
     
     // initialize RHS
-    TESTING_MALLOC( x, double, n );
-    TESTING_MALLOC( b, double, n );
+    TESTING_MALLOC_CPU( x, double, n );
+    TESTING_MALLOC_CPU( b, double, n );
     lapackf77_dlarnv( &ione, ISEED, &n, b );
     blasf77_dcopy( &n, b, &ione, x, &ione );
     
@@ -131,8 +131,8 @@ double get_residual(
     
     //printf( "r=\n" ); magma_dprint( 1, n, b, 1 );
     
-    TESTING_FREE( x );
-    TESTING_FREE( b );
+    TESTING_FREE_CPU( x );
+    TESTING_FREE_CPU( b );
     
     //printf( "r=%.2e, A=%.2e, x=%.2e, n=%d\n", norm_r, norm_A, norm_x, n );
     return norm_r / (n * norm_A * norm_x);
@@ -156,9 +156,9 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     double *A, *L, *U;
     double work[1], matnorm, residual;
     
-    TESTING_MALLOC( A, double, lda*N    );
-    TESTING_MALLOC( L, double, M*min_mn );
-    TESTING_MALLOC( U, double, min_mn*N );
+    TESTING_MALLOC_CPU( A, double, lda*N    );
+    TESTING_MALLOC_CPU( L, double, M*min_mn );
+    TESTING_MALLOC_CPU( U, double, min_mn*N );
     memset( L, 0, M*min_mn*sizeof(double) );
     memset( U, 0, min_mn*N*sizeof(double) );
 
@@ -184,9 +184,9 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     }
     residual = lapackf77_dlange("f", &M, &N, LU, &lda, work);
 
-    TESTING_FREE(A);
-    TESTING_FREE(L);
-    TESTING_FREE(U);
+    TESTING_FREE_CPU(A);
+    TESTING_FREE_CPU(L);
+    TESTING_FREE_CPU(U);
 
     return residual / (matnorm * N);
 }
@@ -254,8 +254,8 @@ int main( int argc, char** argv )
             
             
             // Allocate host memory for the matrix
-            TESTING_MALLOC(    ipiv, magma_int_t,        min_mn );
-            TESTING_MALLOC(    h_A,  double, n2     );
+            TESTING_MALLOC_CPU(    ipiv, magma_int_t,        min_mn );
+            TESTING_MALLOC_CPU(    h_A,  double, n2     );
             
             /*set default number of threads for lapack*/
             magma_setlapack_numthreads(P);
@@ -295,7 +295,7 @@ int main( int argc, char** argv )
                     n_local += N % nb;
                 ldn_local = ((n_local+31)/32)*32;  // TODO why?
                 magma_setdevice( dev );
-                TESTING_DEVALLOC( d_lA[dev], double, ldda*ldn_local );
+                TESTING_MALLOC_DEV( d_lA[dev], double, ldda*ldn_local );
             }
 
             init_matrix( M, N, h_A, lda );
@@ -314,7 +314,7 @@ int main( int argc, char** argv )
             printf("freeing ...1\n");
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_DEVFREE( d_lA[dev] );
+                TESTING_FREE_DEV( d_lA[dev] );
             }
             
             /* ====================================================================
@@ -322,8 +322,8 @@ int main( int argc, char** argv )
                =================================================================== */
 
             /*For the benchmark we have 2 approaches*/
-            /*1. use directly magma_async */
-            /*2. use magma_async_work and add pinned memory time*/
+            /*1. use directly magma_amc */
+            /*2. use magma_amc_work and add pinned memory time*/
             /*We choose approach 2*/
             /*
             nb = async_nb;
@@ -342,7 +342,7 @@ int main( int argc, char** argv )
             for( int dev=0; dev < ngpu; dev++){
   
                 magma_setdevice( dev );
-                TESTING_DEVALLOC( d_lA[dev], double, ldda*ldn_local );
+                TESTING_MALLOC_DEV( d_lA[dev], double, ldda*ldn_local );
             }
 
             init_matrix( M, N, h_A, lda );
@@ -351,12 +351,12 @@ int main( int argc, char** argv )
             // Switch to the sequential version of BLAS
             magma_setlapack_numthreads(1);
 
-            magma_async_init(P, d_cpu, Pr, nb);
+            magma_amc_init(P, d_cpu, Pr, nb);
             gpu_time2 = magma_wtime();
             magma_dgetrf_async_mgpu( ngpu, M, N, d_lA, ldda, ipiv, &info );
             gpu_time2 = magma_wtime() - gpu_time2;
             gpu_perf2 = gflops / gpu_time2;
-            magma_async_finalize();
+            magma_amc_finalize();
             if (info != 0)
                 printf("magma_dgetrf_mgpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
@@ -366,7 +366,7 @@ int main( int argc, char** argv )
             printf("freeing ...2\n");
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_DEVFREE( d_lA[dev] );
+                TESTING_FREE_DEV( d_lA[dev] );
             }
             */
 
@@ -389,7 +389,7 @@ int main( int argc, char** argv )
             //ldn_local = ((n_local+31)/32)*32;
             for( int dev=0; dev < ngpu; dev++){
                 magma_setdevice( dev );
-                TESTING_DEVALLOC( d_lA[dev], double, ldda*ldn_local );
+                TESTING_MALLOC_DEV( d_lA[dev], double, ldda*ldn_local );
             }
 
             init_matrix( M, N, h_A, lda );
@@ -431,16 +431,16 @@ int main( int argc, char** argv )
             alloc_time = magma_wtime() - alloc_time;
 
             //First touch the workspace with each thread. This may be needed to avoid using numactl --interleave
-            //magma_async_dmemset(WORK, 0.0, WORK_LD*WORK_n, 256, P); //nb
+            //magma_amc_dmemset(WORK, 0.0, WORK_LD*WORK_n, 256, P); //nb
             //#pragma omp parallel for  private(info) schedule(static,nb)
             //for(info=0;info<WORK_LD*WORK_n;info++) WORK[info] = 0.0; //alternative first touch by the thread
 
-            magma_async_init(P, d_cpu, Pr, nb);
+            magma_amc_init(P, d_cpu, Pr, nb);
             gpu_time3 = magma_wtime();
             magma_dgetrf_mgpu_work_amc( ngpu, M, N, d_lA, ldda, ipiv, &info, WORK, WORK_LD, WORK_n, dlpanelT, dlpanelT_m, dlpanelT_n);
             gpu_time3 = magma_wtime() - gpu_time3;
             gpu_perf3 = gflops / gpu_time3;
-            magma_async_finalize();
+            magma_amc_finalize();
             if (info != 0)
                 printf("magma_dgetrf_mgpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
@@ -462,7 +462,7 @@ int main( int argc, char** argv )
 
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
-                TESTING_DEVFREE( d_lA[dev] );
+                TESTING_FREE_DEV( d_lA[dev] );
             }
 
             
@@ -525,8 +525,8 @@ int main( int argc, char** argv )
                 printf( "     ---\n" );
             }
             
-            TESTING_FREE( ipiv );
-            TESTING_FREE( h_A );
+            TESTING_FREE_CPU( ipiv );
+            TESTING_FREE_CPU( h_A );
   
         }
         if ( opts.niter > 1 ) {

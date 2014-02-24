@@ -326,7 +326,7 @@ Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
      //magma_insert_dlaswp(gpu_ncols, dAT(K,K+A_N), dAT_LD, c_one, nb, &ipiv[K], c_one);
 }
 /**/
-void magma_insert_dev_dtrsm(magma_int_t deviceID, char side, char uplo, char trans, char diag, magma_int_t m, magma_int_t n, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb)
+void magma_insert_dev_dtrsm(magma_int_t deviceID, magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag, magma_int_t m, magma_int_t n, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb)
 {
              magma_int_t k;
 Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
@@ -341,11 +341,11 @@ Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
              schedule_Task_Flag_Set(&task_flags, TASK_COLOR, (intptr_t)"pink");
 
              schedule_Insert_Task(sched_obj, magma_task_dev_dtrsm, &task_flags,
-                 sizeof(magma_int_t),             &deviceID,VALUE,
-              sizeof(char),                    &side,   VALUE,
-              sizeof(char),                    &uplo,   VALUE,
-              sizeof(char),                    &trans,  VALUE,
-              sizeof(char),                    &diag,   VALUE,
+                 sizeof(magma_int_t),          &deviceID,VALUE,
+              sizeof(magma_side_t),            &side,   VALUE,
+              sizeof(magma_uplo_t),            &uplo,   VALUE,
+              sizeof(magma_trans_t),           &trans,  VALUE,
+              sizeof(magma_side_t),            &diag,   VALUE,
               sizeof(magma_int_t),             &m,      VALUE,
               sizeof(magma_int_t),             &n,      VALUE,
               sizeof(double),                  &alpha,  VALUE,
@@ -357,13 +357,13 @@ Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
      //magma_insert_dtrsm('R', 'U', 'N', 'U', gpu_ncols, nb, c_one, dAT(K,K), dAT_LD, dAT(K,K+A_N), dAT_LD);
 }
 
-void magma_insert_dev_dgemm(magma_int_t deviceID, char transA, char transB, magma_int_t m, magma_int_t n, magma_int_t k, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc)
+void magma_insert_dev_dgemm(magma_int_t deviceID, magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k, double alpha, double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc)
 {
      magma_int_t ka, kb;
      Schedule_Task_Flags  task_flags = Schedule_Task_Flags_Initializer;
 
-     ka = (transA=='N')?k:m;
-     kb = (transB=='N')?n:k;
+     ka = (transA==MagmaNoTrans)?k:m;
+     kb = (transB==MagmaNoTrans)?n:k;
 
      schedule_Task_Flag_Set(&task_flags, TASK_PRIORITY, current_priority);
    //  schedule_Task_Flag_Set (&task_flags, TASK_LOCK_TO_THREAD, 1 ) ;
@@ -374,9 +374,9 @@ void magma_insert_dev_dgemm(magma_int_t deviceID, char transA, char transB, magm
      schedule_Task_Flag_Set(&task_flags, TASK_COLOR, (intptr_t)"greenyellow");
 
               schedule_Insert_Task(sched_obj, magma_task_dev_dgemm, &task_flags,
-                  sizeof(magma_int_t),             &deviceID,VALUE,
-              sizeof(char),                    &transA, VALUE,
-              sizeof(char),                    &transB, VALUE,
+                  sizeof(magma_int_t),         &deviceID,VALUE,
+              sizeof(magma_trans_t),           &transA, VALUE,
+              sizeof(magma_trans_t),           &transB, VALUE,
               sizeof(magma_int_t),             &m,      VALUE,
               sizeof(magma_int_t),             &n,      VALUE,
               sizeof(magma_int_t),             &k,      VALUE,
