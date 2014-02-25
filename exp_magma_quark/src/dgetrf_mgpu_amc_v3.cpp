@@ -3,12 +3,9 @@
        Univ. of Tennessee, Knoxville 
        Univ. of California, Berkeley 
        Univ. of Colorado, Denver 
-       May 2013 
+       Sept 2013 
  
        @author: Simplice Donfack 
- 
-       @generated d Thu May 23 11:46:05 2013 
- 
 */ 
 
 #include <math.h>
@@ -1229,7 +1226,7 @@ ca_trace_end_1gpu('W');
 
     //free(dlAP_set); 
     //free(dlAP_get);
-    free(dlpanel);
+    //free(dlpanel);
     free(dlAT);
 
 #if dbglevel>=1
@@ -1245,3 +1242,4 @@ ca_trace_end_1gpu('W');
 
     return *info; 
 }   /* End of MAGMA_DGETRF_REC_ASYNC_WORK_GPU */
+

@@ -3,12 +3,9 @@
        Univ. of Tennessee, Knoxville 
        Univ. of California, Berkeley 
        Univ. of Colorado, Denver 
-       May 2013 
+       Sept 2013 
  
        @author: Simplice Donfack 
- 
-       @generated d Thu May 23 11:46:05 2013 
- 
 */ 
 
 #include <math.h>
@@ -432,9 +429,9 @@ double **dlpanelT, magma_int_t dlpanelT_m, magma_int_t dlpanelT_n
      magma_queue_t mstream[MagmaMaxGPUs][3]; /*0: H2D, 1: compute, 2:D2H*/
      int dd;
 
-     
+#ifdef USE_CALU     
      int i_nrows;
-     
+#endif     
 
     /* Check arguments */ 
     *info = 0; 
@@ -1064,3 +1061,4 @@ ca_trace_end_1gpu('W');
 
     return *info; 
 }   /* End of MAGMA_DGETRF_REC_ASYNC_WORK_GPU */
+

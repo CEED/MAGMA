@@ -3,13 +3,10 @@
        Univ. of Tennessee, Knoxville 
        Univ. of California, Berkeley 
        Univ. of Colorado, Denver 
-       May 2013 
+       Sept 2013 
  
        @author: Simplice Donfack 
- 
-       @generated d Thu May 23 11:46:05 2013 
- 
-*/ 
+*/
 
 #include <math.h>
 #include "common_magma.h"
@@ -1329,3 +1326,4 @@ ca_trace_end_1gpu('W');
 
     return *info; 
 }   /* End of MAGMA_DGETRF_REC_ASYNC_WORK_GPU */
+

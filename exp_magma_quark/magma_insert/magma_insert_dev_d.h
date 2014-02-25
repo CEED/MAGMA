@@ -1,5 +1,14 @@
-#ifndef SCHEDULE_INSERT_D_DEV
-#define SCHEDULE_INSERT_D_DEV
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+*/
+#ifndef MAGMA_INSERT_DEV_D_H
+#define MAGMA_INSERT_DEV_D_H
 
 
 

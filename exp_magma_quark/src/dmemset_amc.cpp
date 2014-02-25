@@ -3,11 +3,11 @@
        Univ. of Tennessee, Knoxville 
        Univ. of California, Berkeley 
        Univ. of Colorado, Denver 
-       May 2013 
+       Sept 2013 
  
        @author: Simplice Donfack 
- 
 */
+
 #include "common_magma.h"
 
 #include "magma_amc.h"
@@ -54,3 +54,4 @@ void magma_dmemset_amc(double *ptr, double value, int n,  magma_int_t chunck, in
     /*Shutdown the scheduler*/
      magma_schedule_delete();
 }
+

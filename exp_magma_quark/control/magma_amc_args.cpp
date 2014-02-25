@@ -6,9 +6,6 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
-       @generated d Thu May 23 11:46:05 2013 
- 
 */
 #include <stdlib.h>
 #include "magma_amc_args.h"

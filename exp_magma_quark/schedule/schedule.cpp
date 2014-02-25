@@ -4,12 +4,11 @@
        Univ. of California, Berkeley 
        Univ. of Colorado, Denver 
        May 2013 
-       
-       * This file is a wrapper for an underlying scheduler
-       * Actually, it uses quark as scheduler by default, but any scheduler can be used later by surcharging ALL of these functions
-       *
-       @author: Simplice Donfack 
  
+       @author: Simplice Donfack 
+*/
+/* 
+       This file is a wrapper for any underlying scheduler.
 */
 
 #include <math.h>
@@ -190,6 +189,7 @@ void magma_schedule_insert_gatherv_dependency(void *ptr1, void *ptr2)
               sizeof(void*),             ptr2,     OUTPUT|GATHERV,  ///|GATHERV
               0);
 }
+
 
 
 

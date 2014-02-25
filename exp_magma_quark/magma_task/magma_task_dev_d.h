@@ -6,7 +6,6 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
 */
 #ifndef MAGMA_TASK_DEV_H
 #define MAGMA_TASK_DEV_H

@@ -7,9 +7,8 @@
  
        @author: Simplice Donfack 
  
-       @generated d Thu May 23 11:46:05 2013 
- 
 */
+
 #include "magma_amc_args.h" /* Context and arguments */
 
 int magma_amc_init(int P, double dcpu, int Pr, int nb){
@@ -37,3 +36,4 @@ int magma_amc_finalize(){
 
     return 0;
 }
+

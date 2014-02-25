@@ -6,12 +6,10 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
-       @generated d Thu May 23 11:46:05 2013 
- 
-       Any scheduler can be used later using this wrapper.
 */
-
+/* 
+       This file is a wrapper for any underlying scheduler.
+*/
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
 
@@ -54,3 +52,4 @@ void magma_schedule_insert_RW_dependencies(void *ptr1, void *ptr2);
 void magma_schedule_insert_gatherv_dependency(void *ptr1, void *ptr2);
 
 #endif
+

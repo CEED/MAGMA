@@ -1,11 +1,13 @@
-/*
-* Communication avoiding algorith LU
-*
-* Author: Simplice Donfack
-*
-*  
+/* 
+ * Preprocessing step of Communication Avoiding LU factorization
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
 */
-
 #ifdef _WIN32    
     #include "sched.h"
     #include "pthread.h"

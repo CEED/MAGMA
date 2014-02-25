@@ -6,11 +6,12 @@
        May 2013 
  
        @author: Simplice Donfack 
-
- 
-*/ 
-#ifndef MAGMA_ASYNC_H
-#define MAGMA_ASYNC_H
+*/
+/*
+       Asynchronous and optimized multicore capabilities in MAGMA (AMC).
+*/
+#ifndef MAGMA_AMC_H
+#define MAGMA_AMC_H
 
 
 
@@ -116,3 +117,4 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
 );
 
 #endif
+

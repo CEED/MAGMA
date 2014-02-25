@@ -6,7 +6,6 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
 */
 #if (dbglevel >=1)
 #include "ca_dbg_tools.h"
@@ -300,4 +299,5 @@ ca_trace_end_1gpu('S');
 ca_trace_end_cpu('C');
 #endif
 }
+
 

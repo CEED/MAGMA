@@ -7,8 +7,6 @@
  
        @author: Simplice Donfack 
  
-       @generated d Thu May 23 11:46:05 2013 
- 
 */ 
 
 #include <math.h>
@@ -66,7 +64,7 @@ extern "C" magma_int_t magma_dgetrf_gpu_amc(magma_int_t m, magma_int_t n,
     Purpose 
     ======= 
  
-    DGETRF_ASYNC_GPU computes an LU factorization of a general M-by-N matrix A 
+    DGETRF_GPU_AMC computes an LU factorization of a general M-by-N matrix A 
     using partial pivoting with row interchanges. The technique used for the panel factorization
     is the parallel recursif LU (see lawn 259).
  
@@ -244,7 +242,7 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
     Purpose 
     ======= 
  
-    DGETRF_REC_ASYNC computes an LU factorization of a general M-by-N matrix A 
+    DGETRF_GPU_WORK_AMC computes an LU factorization of a general M-by-N matrix A 
     using partial pivoting with row interchanges. The technique used for the panel factorization
     is the parallel recursif LU (see lawn 259).
  
@@ -303,12 +301,7 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
  
      magma_int_t dm_max, dn_max; 
      magma_int_t I, J, K, M, N, U_K; 
-     int i;
-     //magma_int_t A_m, A_n, A_N; 
-     //magma_int_t Am_max, An_max; 
-     //magma_int_t A_nb; 
-     
- 
+  
      //magma_int_t A_K; 
      double *dAT; 
      magma_int_t dAT_LD; 
@@ -334,7 +327,9 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
      /* Recommanded dimension in the workspace*/ 
      int A_m, A_n, A_N, A_NMAX, A_LD;
      double *A;
+#ifdef USE_CALU     
      int i_nrows;
+#endif
 
      amc_args_t *args;
     /*magma_event_t *A_event;*/ /*Control bucket*/
@@ -518,8 +513,8 @@ double *AWORK, magma_int_t AWORK_LD, magma_int_t AWORK_n
      core_dtslu_alloc(panel_num_threads, A_m, nb);
      core_dtslu_init(panel_num_threads);
 
-     /*Initialize rows indice*/
-     for(i=0;i<A_m;i++) ipiv[i]=i;
+     /*Initialize rows indice: required*/
+     for(I=0;I<A_m;I++) ipiv[I]=I;
 #else
      /*initialize parallel recursif panel environment*/
      CORE_zgetrf_reclap_init();
@@ -794,4 +789,5 @@ ca_trace_end_1gpu('W');
 
     return *info; 
 }   /* End of MAGMA_DGETRF_REC_ASYNC_WORK_GPU */
+
 

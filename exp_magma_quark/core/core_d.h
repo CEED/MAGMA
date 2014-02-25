@@ -1,5 +1,15 @@
-#ifndef CORE_DKERNEL_H
-#define CORE_DKERNEL_H
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+ 
+*/
+#ifndef CORE_D_H
+#define CORE_D_H
 
 void CORE_zgetrf_reclap_init();
 
@@ -24,3 +34,4 @@ void core_dtslu_free();
 /*Do the preprocessing step of TSLU on a matrix A to factorize*/
 void core_dtslu(int M, int nb, double *A, int LDA, int *IPIV, int *iinfo, int num_threads, int locNum);
 #endif
+

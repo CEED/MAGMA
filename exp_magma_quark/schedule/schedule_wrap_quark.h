@@ -6,9 +6,11 @@
        Sept 2013 
  
        @author: Simplice Donfack 
- 
-        This file is a wrapper for quark
-*/ 
+*/
+/* 
+       This file is a wrapper for quark
+       Actually, it uses quark as scheduler by default, but any scheduler can be used later by surcharging ALL of these functions.
+*/
 #ifndef SCHEDULE_WRAP_QUARK_H
 #define SCHEDULE_WRAP_QUARK_H
 
@@ -47,3 +49,4 @@
 #define schedule_unpack_args_13    quark_unpack_args_13
 #define schedule_unpack_args_14    quark_unpack_args_14
 #endif
+

@@ -1,3 +1,12 @@
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+*/
 #ifndef MAGMA_INSERT_CORE_D_H
 #define MAGMA_INSERT_CORE_D_H
 /*CPU task wrapper*/
@@ -26,3 +35,4 @@ void magma_insert_core_dgemm(char transa, char transb,
                            double *A, magma_int_t LDA, double *B, magma_int_t LDB, double beta, double *C, magma_int_t LDC, 
                            void *A_colptr, void *C_colptr);
 #endif
+

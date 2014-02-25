@@ -1,8 +1,20 @@
 /*
- Enable some functions for debug
- *@author: Simplice Donfack
-*/
 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+ */
+/*
+ * Enable some functions for debug
+ * dbglevel = 1: activate this file
+ *
+ * dbglevel = 10: print the matrix after each step
+ * dbgleading=X , print the leading principal part of the matrix (useful for debug).
+ */
 #include <math.h>
 #if defined( _WIN32 )
 #  include <time.h>
@@ -320,4 +332,3 @@ for(j=0;j<N;j++)
 fclose(f);
 }
 
-/*Llog wrapper*/

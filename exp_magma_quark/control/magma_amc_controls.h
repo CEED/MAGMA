@@ -8,10 +8,12 @@
        @author: Simplice Donfack 
  
 */
+
 /*The routines control the initialisation of the routines called in magma_amc*/
-#ifndef MAGMA_ASYNC_CONTROLS_H
-#define MAGMA_ASYNC_CONTROLS_H
+#ifndef MAGMA_AMC_CONTROLS_H
+#define MAGMA_AMC_CONTROLS_H
 
 int magma_amc_init(int P, double dcpu, int Pr, int nb);
 int magma_amc_finalize();
 #endif
+

@@ -1,3 +1,12 @@
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+*/
 #include "common_magma.h"
 
 #include "schedule.h"

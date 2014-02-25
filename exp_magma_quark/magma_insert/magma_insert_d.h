@@ -1,5 +1,14 @@
-#ifndef SCHEDULE_INSERT_D
-#define SCHEDULE_INSERT_D
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+*/
+#ifndef MAGMA_INSERT_D
+#define MAGMA_INSERT_D
 
 #include "common_magma.h"
 
@@ -26,3 +35,4 @@ void magma_insert_dgemm(magma_trans_t transA, magma_trans_t transB,
                                  magma_int_t m, magma_int_t n, magma_int_t k, double alpha, 
                                  double *dA, magma_int_t lda, double *dB, magma_int_t ldb, double beta, double *dC, magma_int_t ldc );
 #endif
+

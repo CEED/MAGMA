@@ -7,11 +7,10 @@
  
        @author: Simplice Donfack 
  
-       @generated d Thu May 23 11:46:05 2013 
- 
 */
-#ifndef MAGMA_ASYNC_ARGS_H
-#define MAGMA_ASYNC_ARGS_H
+
+#ifndef MAGMA_AMC_ARGS_H
+#define MAGMA_AMC_ARGS_H
 /* Create a struct for setting context */
 struct amc_args_struct {
 
@@ -40,3 +39,4 @@ void magma_amc_args_set_default(amc_args_t *args);
 /* get default args */
 amc_args_t *magma_amc_args_get_default();
 #endif
+

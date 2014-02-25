@@ -6,10 +6,9 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
 */
-#ifndef TASK_MAGMA_KERNEL
-#define TASK_MAGMA_KERNEL
+#ifndef MAGMA_TASK_D_H
+#define MAGMA_TASK_D_H
 
 #include "schedule.h"
 
@@ -25,3 +24,4 @@ void magma_task_dtrsm(Schedule* sched_obj);
 void magma_task_dgemm(Schedule* sched_obj);
 void magma_task_update(Schedule* sched_obj);
 #endif
+

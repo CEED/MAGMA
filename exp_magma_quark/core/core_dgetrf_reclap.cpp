@@ -434,3 +434,4 @@ CORE_zgetrf_reclap_rec(int M, int N,
         CORE_zbarrier_thread( thidx, thcnt );
     }
 }
+

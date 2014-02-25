@@ -1,3 +1,12 @@
+/* 
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+*/
 #include "common_magma.h"
 
 #include "schedule.h"
@@ -280,3 +289,4 @@ void magma_insert_dgemm(magma_trans_t transA, magma_trans_t transB, magma_int_t 
 
      //magma_insert_dgemm('N','N', gpu_ncols, gpu_nrows, nb, c_neg_one, dAT(K,K+A_N), dAT_LD, dAT(K+1,K), dAT_LD, c_one, dAT(K+1,K+A_N), dAT_LD);
 }
+

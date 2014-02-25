@@ -6,7 +6,6 @@
        May 2013 
  
        @author: Simplice Donfack 
- 
 */
 #if (dbglevel >=1)
 #include "ca_dbg_tools.h"
@@ -333,3 +332,4 @@ ca_trace_start();
 ca_trace_end_cpu('S');
 #endif
 }
+

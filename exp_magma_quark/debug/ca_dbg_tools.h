@@ -1,12 +1,20 @@
 /*
- Enable some functions for debug
- *@author: Simplice Donfack
- *
+
+    -- MAGMA (version 1.3) -- 
+       Univ. of Tennessee, Knoxville 
+       Univ. of California, Berkeley 
+       Univ. of Colorado, Denver 
+       May 2013 
+ 
+       @author: Simplice Donfack 
+ */
+/*
+ * Enable some functions for debug
  * dbglevel = 1: activate this file
  *
  * dbglevel = 10: print the matrix after each step
- * dbgleading=X , print the leading part of the matrix for each print
-*/
+ * dbgleading=X , print the leading principal part of the matrix (useful for debug).
+ */
 #ifndef CA_DBG_TOOLS_H
 #define CA_DBG_TOOLS_H
 
@@ -79,3 +87,4 @@ void ca_dbg_fwriteMat(char *filename, int M, int N, double *A, int LDA);
 /*read a matrix from a file*/
 void ca_dbg_freadMat(char *filename, int M, int N, double *A, int LDA);
 #endif
+

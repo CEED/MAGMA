@@ -126,19 +126,18 @@ int main( int argc, char** argv)
     // nb  = magma_get_dgetrf_nb(m) ;//magma dgetrf block size
 
     /*TODO: set these parameters in parse_opts*/
-    d_cpu =  opts.fraction;
     Pr = opts.panel_nthread;
 
-/*
-    printf("mkl_get_max_threads defined and returned:%d",mkl_get_max_threads());
-#ifdef mkl_set_num_threads
-    printf("mkl_set_num_threads defined");
-#endif
-#ifdef mkl_get_max_threads
-    printf("mkl_get_max_threads defined and returned:%d",mkl_get_max_threads());
-#endif
-*/
-
+    d_cpu = 0.0;
+    #if defined(CPU_PEAK) && defined(GPU_PEAK)
+    d_cpu = magma_amc_recommanded_dcpu(opts.nthread, CPU_PEAK, 1, GPU_PEAK); //assume 1 GPU
+    #endif
+    if(opts.fraction_dcpu!=0){ /*Overwrite the one computed with the model*/
+    d_cpu = opts.fraction_dcpu;
+    }
+    magma_assert(d_cpu > 0 && d_cpu<=1.0,
+    "error: The cpu fraction is invalid. Ensure you use --fraction_dcpu with fraction_dcpu in [0.0, 1.0] or compile with both -DCPU_PEAK=<cpu peak performance> and -DGPU_PEAK=<gpu peak performance> set.\n");
+    
     printf("Asynchronous recursif LU... nb:%d, nbcores:%d, dcpu:%f, panel_nbcores:%d\n", nb, P, d_cpu, Pr);
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   GPU_Async GFlop/s (sec)  GPU_Async_work GFlop/s (sec)     ||PA-LU||/(||A||*N)\n");
     printf("=========================================================================\n");

@@ -227,8 +227,18 @@ int main( int argc, char** argv )
     
     P =  opts.nthread;
     async_nb = opts.nb;
-    d_cpu =  opts.fraction;
     Pr = opts.panel_nthread;
+    
+    d_cpu = 0.0;
+    #if defined(CPU_PEAK) && defined(GPU_PEAK)
+    d_cpu = magma_amc_recommanded_dcpu(opts.nthread, CPU_PEAK, opts.ngpu, GPU_PEAK);
+    #endif
+    if(opts.fraction_dcpu!=0){ /*Overwrite the one computed with the model*/
+    d_cpu = opts.fraction_dcpu;
+    }
+    magma_assert(d_cpu > 0 && d_cpu<=1.0,
+    "error: The cpu fraction is invalid. Ensure you use --fraction_dcpu with fraction_dcpu in [0.0, 1.0] or compile with both -DCPU_PEAK=<cpu peak performance> and -DGPU_PEAK=<gpu peak performance> set.\n");
+    
     
     printf("Asynchronous recursif LU... nb:%d, nbcores:%d, dcpu:%f, panel_nbcores:%d, ngpu: %d\n", async_nb, P, d_cpu, Pr, opts.ngpu);
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   GPU_Async_v2 GFlop/s (sec)  GPU_Async_work_v2 GFlop/s (sec)");
@@ -311,7 +321,6 @@ int main( int argc, char** argv )
                        
             magma_dgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb );
 
-            printf("freeing ...1\n");
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
@@ -363,7 +372,6 @@ int main( int argc, char** argv )
                        
             magma_dgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb );
 
-            printf("freeing ...2\n");
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
@@ -472,7 +480,6 @@ int main( int argc, char** argv )
              gpu_time2 =  gpu_time3 + alloc_time +  free_time;
              gpu_perf2 = gflops / gpu_time2;
 
-             printf("freeing ...3\n");
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
