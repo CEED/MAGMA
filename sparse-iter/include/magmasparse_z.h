@@ -445,7 +445,14 @@ magma_zilugmres(       magma_z_sparse_matrix A, magma_z_vector b,
                        magma_z_vector *x, magma_solver_parameters *solver_par ); 
 
 
+magma_int_t
+magma_zpastixsetup(     magma_z_sparse_matrix A, magma_z_vector b,
+                        magma_z_preconditioner *precond );
 
+
+magma_int_t
+magma_zapplypastix(     magma_z_vector b, magma_z_vector *x, 
+                        magma_z_preconditioner *precond );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions

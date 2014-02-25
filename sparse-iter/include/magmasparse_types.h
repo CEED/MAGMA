@@ -9,6 +9,15 @@
 #ifndef MAGMASPARSE_TYPES_H
 #define MAGMASPARSE_TYPES_H
 
+//PaStiX include
+#include <stdint.h>
+/* to access functions from the libpastix, respect this order */
+#include <pastix.h>
+#include <read_matrix.h>
+#include <get_options.h>
+#include <assert.h>
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,6 +194,13 @@ typedef struct magma_z_preconditioner{
     double                  final_res;
     magma_z_sparse_matrix   M;
     magma_z_vector          d;
+    magma_int_t*            int_array_1;
+    magma_int_t*            int_array_2;
+#if defined(HAVE_PASTIX)
+    pastix_data_t*          pastix_data;
+    magma_int_t*            iparm;
+    double*                 dparm;
+#endif
 
 }magma_z_preconditioner;
 
@@ -200,6 +216,13 @@ typedef struct magma_c_preconditioner{
     double                  final_res;
     magma_c_sparse_matrix   M;
     magma_c_vector          d;
+    magma_int_t*            int_array_1;
+    magma_int_t*            int_array_2;
+#if defined(HAVE_PASTIX)
+    pastix_data_t*          pastix_data;
+    magma_int_t*            iparm;
+    float*                  dparm;
+#endif
 
 }magma_c_preconditioner;
 
@@ -216,6 +239,13 @@ typedef struct magma_d_preconditioner{
     double                  final_res;
     magma_d_sparse_matrix   M;
     magma_d_vector          d;
+    magma_int_t*            int_array_1;
+    magma_int_t*            int_array_2;
+#if defined(HAVE_PASTIX)
+    pastix_data_t*          pastix_data;
+    magma_int_t*            iparm;
+    double*                 dparm;
+#endif
 
 }magma_d_preconditioner;
 
@@ -232,6 +262,13 @@ typedef struct magma_s_preconditioner{
     double                  final_res;
     magma_s_sparse_matrix   M;
     magma_s_vector          d;
+    magma_int_t*            int_array_1;
+    magma_int_t*            int_array_2;
+#if defined(HAVE_PASTIX)
+    pastix_data_t*          pastix_data;
+    magma_int_t*            iparm;
+    float*                  dparm;
+#endif
 
 }magma_s_preconditioner;
 
