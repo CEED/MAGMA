@@ -127,6 +127,10 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zjacobisetup_diagscal( A, &(precond->d) );
         return MAGMA_SUCCESS;
     }
+    if( precond->solver == Magma_PASTIX ){
+        magma_zpastixsetup( A, b, precond );
+        return MAGMA_SUCCESS;
+    }
     else{
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
@@ -166,6 +170,10 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
 {
     if( precond->solver == Magma_JACOBI ){
         magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        return MAGMA_SUCCESS;
+    }
+    if( precond->solver == Magma_PASTIX ){
+        magma_zapplypastix( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else{

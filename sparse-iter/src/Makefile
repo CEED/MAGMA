@@ -11,6 +11,14 @@ MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 
 INC += -I$(MAGMA_DIR)/control
+INC += -g3
+# PaStiX 
+LIB += -L/home/hanzt/software/PaStiX/pastix_release_4694/install/lib -lmatrix_driver -lpastix
+LIB += -L/home/hanzt/software/scotch/lib -lscotch -lscotcherrexit
+LIB += `pkg-config --libs hwloc`
+
+INC += -I/home/hanzt/software/PaStiX/pastix_release_4694/install/include/
+
 
 # ------------------------------------------------------------
 # Loosely, the order is alphabetic in each section, but mixed precision,
@@ -62,6 +70,7 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zbcsrlu.cpp		\
+    zpastix.cpp     \
 #	zilu.cpp		\
 
 
