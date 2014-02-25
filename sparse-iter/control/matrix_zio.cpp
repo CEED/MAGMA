@@ -813,6 +813,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   
   
    A->sym = Magma_GENERAL;
+
   if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
     A->sym = Magma_SYMMETRIC;
   //printf("detected symmetric case\n");

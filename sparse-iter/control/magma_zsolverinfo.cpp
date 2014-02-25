@@ -283,6 +283,54 @@ magma_zsolverinfo( magma_solver_parameters *solver_par,
 magma_int_t
 magma_zsolverinfo_free( magma_solver_parameters *solver_par, 
                         magma_z_preconditioner *precond ){
+
+    if( solver_par->res_vec != NULL ){
+        magma_free_cpu( solver_par->res_vec );
+        solver_par->res_vec = NULL;
+    }
+    if( solver_par->timing != NULL ){
+        magma_free_cpu( solver_par->timing );
+        solver_par->timing = NULL;
+    }
+
+    if( precond->d.val != NULL ){
+        magma_free( precond->d.val );
+        precond->d.val = NULL;
+    }/*
+    if( precond->M.val != NULL ){
+        if ( precond->M.memory_location == Magma_DEV )
+            magma_free( precond->M.val );
+        else
+            magma_free_cpu( precond->M.val );
+        precond->M.val = NULL;
+    }
+    if( precond->M.col != NULL ){
+        if ( precond->M.memory_location == Magma_DEV )
+            magma_free( precond->M.col );
+        else
+            magma_free_cpu( precond->M.col );
+        precond->M.col = NULL;
+    }
+    if( precond->M.row != NULL ){
+        if ( precond->M.memory_location == Magma_DEV )
+            magma_free( precond->M.row );
+        else
+            magma_free_cpu( precond->M.row );
+        precond->M.row = NULL;
+    }
+    if( precond->M.blockinfo != NULL ){
+        magma_free_cpu( precond->M.blockinfo );
+        precond->M.blockinfo = NULL;
+    }*/
+
+    return MAGMA_SUCCESS;
+}
+
+
+magma_int_t
+magma_zsolverinfo_init( magma_solver_parameters *solver_par, 
+                        magma_z_preconditioner *precond ){
+
 /*
     solver_par->solver = Magma_CG;
     solver_par->maxiter = 1000;
@@ -296,52 +344,6 @@ magma_zsolverinfo_free( magma_solver_parameters *solver_par,
     solver_par->verbose = 0;
     solver_par->info = 0;
 */
-    if( solver_par->res_vec != NULL ){
-        magma_free_cpu( solver_par->res_vec );
-        solver_par->res_vec = NULL;
-    }
-    if( solver_par->timing != NULL ){
-        magma_free_cpu( solver_par->timing );
-        solver_par->timing = NULL;
-    }
-
-    if( precond->d.val != NULL ){
-        magma_free( precond->d.val );
-        precond->d.val = NULL;
-    }
-    if( precond->M.val != NULL ){
-        if ( precond->M.memory_location = Magma_DEV )
-            magma_free( precond->M.val );
-        else
-            magma_free_cpu( precond->M.val );
-        precond->M.val = NULL;
-    }
-    if( precond->M.col != NULL ){
-        if ( precond->M.memory_location = Magma_DEV )
-            magma_free( precond->M.col );
-        else
-            magma_free_cpu( precond->M.col );
-        precond->M.col = NULL;
-    }
-    if( precond->M.row != NULL ){
-        if ( precond->M.memory_location = Magma_DEV )
-            magma_free( precond->M.row );
-        else
-            magma_free_cpu( precond->M.row );
-        precond->M.row = NULL;
-    }
-    if( precond->M.blockinfo != NULL ){
-        magma_free_cpu( precond->M.blockinfo );
-        precond->M.blockinfo = NULL;
-    }
-
-    return MAGMA_SUCCESS;
-}
-
-
-magma_int_t
-magma_zsolverinfo_init( magma_solver_parameters *solver_par, 
-                        magma_z_preconditioner *precond ){
 
         solver_par->res_vec = NULL;
         solver_par->timing = NULL;
