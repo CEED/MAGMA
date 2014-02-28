@@ -74,6 +74,12 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
             magma_z_spmv(alpha, A, x, beta, ax );                       \
         }                                                               \
 }
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
+            magma_z_vector x, ax;                                       \
+            x.memory_location = Magma_DEV;  x.num_rows = m*n;  x.nnz = m*n;  x.val = X; \
+            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX; \
+            magma_z_spmv(alpha, A, x, beta, ax );                       \
+}
 
 #define gramA(    m, n)   (gramA     + (m) + (n)*ldgram)
 #define gramB(    m, n)   (gramB     + (m) + (n)*ldgram)
