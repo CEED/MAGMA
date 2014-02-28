@@ -42,7 +42,7 @@ ZSRC := \
 
 # Auxiliary routines
 ZSRC += \
-#	zcompact.cu		\
+	zcompact.cu		\
 
 -include Makefile.local
 -include Makefile.src
