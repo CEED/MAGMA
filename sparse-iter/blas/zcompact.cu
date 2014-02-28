@@ -11,7 +11,7 @@
 #include "common_magma.h"
 #include <assert.h>
 
-#define NB 512
+#define NB 64
 
 /* =====================================================================
     Matrix is m x n, and is divided into block rows, each NB x n.
@@ -32,12 +32,9 @@ zcompact_kernel(
         dA += i;
         
         for(int j = 0; j<n; j++){
-            if (dnorms[j] > tol){
+            if (dnorms[j] > tol && active[j]){
                dA[ldda*cBlockSize] = dA[ldda*j];
                cBlockSize++;
-
-               if (i==0)
-                  active[j] = 1;
             }
             else if (i==0)
                active[j] = 0;
@@ -71,6 +68,7 @@ zcompactactive_kernel(
 
 
 /* ===================================================================== */
+
 extern "C" void
 magma_zcompact(
     magma_int_t m, magma_int_t n,
@@ -133,7 +131,9 @@ magma_zcompact(
     dim3 grid( (m + NB - 1)/NB );
     
     zcompact_kernel<<< grid, threads, 0, magma_stream >>>(
-            m, n, dA, ldda, dnorms, tol, active, cBlock );
+            m, n, dA, ldda, dnorms, tol, active, active+n );
+
+    cublasGetMatrix( 1, 1, sizeof( magma_int_t ), active+n, 1, cBlock, 1 ) ;
 }
 
 /* ===================================================================== */
