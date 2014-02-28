@@ -48,7 +48,7 @@ ZSRC += \
 
 # Krylov space eigen-solvers
 ZSRC += \
-	#zlobpcg.cpp		\
+	zlobpcg.cpp		\
 	#zcgeig.cpp		\
 	#zlancsoz.cpp		\
 
