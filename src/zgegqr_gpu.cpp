@@ -97,15 +97,15 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
     G    = R    + n*n;       // Size n * n
     VT   = G    + n*n;       // Size n * n
 
-    magma_zmalloc_cpu( &hwork, 2*n*n + 2*n);
+    magma_zmalloc_cpu( &hwork, 32 + 2*n*n + 2*n);
     if ( hwork == NULL ) {
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
 
-    magma_int_t lwork = n*n;  // First part f hwork; used as workspace in svd
+    magma_int_t lwork=n*n+32; // First part f hwork; used as workspace in svd
 
-    U    = hwork + n*n;       // Size n*n
+    U    = hwork + n*n + 32;  // Size n*n
     S    = (double *)(U+n*n); // Size n
     tau  = U + n*n + n;       // Size n
 
