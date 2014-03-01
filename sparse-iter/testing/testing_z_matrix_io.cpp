@@ -20,8 +20,10 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "../include/magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing matrix IO
@@ -45,7 +47,7 @@ int main( int argc, char** argv)
      //"test_matrices/kkt_power.mtx",
      //"test_matrices/pre2.mtx",
      //"test_matrices/kron_g500-logn21.mtx",-
-     "test_matrices/para-10.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/audikw_1.mtx",
      "test_matrices/Fault_639.mtx",
      "test_matrices/thermomech_dK.mtx",
      "test_matrices/thermal2.mtx",
@@ -102,7 +104,7 @@ int main( int argc, char** argv)
      "test_matrices/parabolic_fem.mtx",
      "test_matrices/crankseg_2.mtx",
     };
-for(magma_int_t matrix=0; matrix<8; matrix++){
+for(magma_int_t matrix=0; matrix<1; matrix++){
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, Z;
     magma_z_sparse_matrix A_D, B_D, C_D, D_D, E_D, F_D, G_D, Z_D;
@@ -112,6 +114,8 @@ for(magma_int_t matrix=0; matrix<8; matrix++){
 
     //read matrix from file
     magma_z_csr_mtx( &A, filename[matrix] );
+
+    printf("n:%d nnz:%d nnz/n:%d\n", A.num_rows, A.nnz, A.nnz/A.num_rows);
 
     magma_z_mfree(&A);
 

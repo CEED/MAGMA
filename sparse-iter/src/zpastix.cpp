@@ -15,6 +15,7 @@
 
 #include <assert.h>
 
+#if defined(HAVE_PASTIX)
 //PaStiX include
 #include <stdint.h>
 /* to access functions from the libpastix, respect this order */
@@ -22,8 +23,10 @@
 #include <read_matrix.h>
 #include <get_options.h>
 #include <assert.h>
-
 #define MPI_COMM_WORLD 0
+#endif
+
+
 
 
 #define PRECISION_z

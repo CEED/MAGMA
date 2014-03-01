@@ -89,8 +89,8 @@ ZSRC += \
 
 # debugging
 ZSRC += \
-	testing_zdebug.cpp	\
-    testing_spmvELLRT.cpp \
+#	testing_zdebug.cpp	\
+#   testing_spmvELLRT.cpp \
 #	testing_zcdebug.cpp	\
 
 

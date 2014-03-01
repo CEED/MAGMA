@@ -16,10 +16,13 @@
 #include <math.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cusparse_v2.h>
+#include <cuda_profiler_api.h>
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "../include/magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
 #include "mkl_spblas.h"
@@ -43,6 +46,49 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/Trefethen_20000.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/audikw_1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/bone010.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/boneS10.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/bmw3_2.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/bmwcra_1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/cage10.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/cant.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/crankseg_2.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/jj_Cube_Coup_dt0.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/dielFilterV2real.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/F1.mtx",   
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/Fault_639.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/Hook_1498.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/inline_1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/ldoor.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/m_t1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/jj_ML_Geer.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/pwtk.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/shipsec1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/Trefethen_20000.mtx",
+
+   //  "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/Serena_b.mtx",
+
+    // "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/circuit5M.mtx",
+
+   //  "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/FullChip.mtx",
+
+//     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/af_shell10.mtx",
+//     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/kim2.mtx",
+
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/StocF-1465.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/kkt_power.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/bmwcra_1.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/thermal2.mtx",
+
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/pre2.mtx",
+
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/xenon2.mtx",
+     "/home/hanzt/magma_dev/magma/trunk/sparse-iter/testing/test_matrices/stomach.mtx",
+
+
+
      "test_matrices/Trefethen_20.mtx",       // 0
      "test_matrices/Trefethen_200.mtx",      // 1
      "test_matrices/Trefethen_2000.mtx",     // 2
@@ -74,7 +120,8 @@ int main( int argc, char** argv)
      "test_matrices/jj_ML_Laplace.mtx",      // 27
     };
 
-    int id = -1, matrix = 0, i, ione = 1, *pntre, num_rblocks, num_cblocks;
+    magma_int_t id = -1, matrix = 0, i, ione = 1, *pntre, 
+                                    num_rblocks, num_cblocks;
     double start, end, work[1];
     for( int i = 1; i < argc; ++i ) {
         if ( strcmp("--id", argv[i]) == 0 ) {
@@ -83,10 +130,10 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=16; matrix<27; matrix++)
+    for(matrix=0; matrix<40; matrix++)
     {
-        magma_z_sparse_matrix hA, hB, hC, dA, dB;
-        magma_z_vector hx, hy, dx, dy;
+        magma_z_sparse_matrix hA, hB, hC, dA, dB, hD, dD, hE, dE;
+        magma_z_vector hx, hy, dx, dy, dx2, dy2;
 
         magmaDoubleComplex one  = MAGMA_Z_MAKE(1.0, 0.0);
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -94,11 +141,7 @@ int main( int argc, char** argv)
         // init matrix on CPU
         if (id > -1) matrix = id;
         magma_z_csr_mtx( &hA, filename[matrix] );
-        printf( "\nmatrix read: %d-by-%d with %d nonzeros\n\n",hA.num_rows,hA.num_cols,hA.nnz );
-        // conver to ELLPACKT and copy to GPU
-        magma_z_mconvert(  hA, &hB, Magma_CSR, Magma_ELLPACKT);
-        magma_z_mtransfer( hB, &dB, Magma_CPU, Magma_DEV);
-        magma_z_mfree(&hB);
+        //printf( "\nmatrix read: %d-by-%d with %d nonzeros\n\n",hA.num_rows,hA.num_cols,hA.nnz );
 
         // init CPU vectors
         hC.blocksize = min(hA.num_rows, 8);
@@ -106,10 +149,16 @@ int main( int argc, char** argv)
         num_cblocks = (hA.num_cols+hC.blocksize-1)/hC.blocksize;
         magma_z_vinit( &hx, Magma_CPU, num_cblocks*hC.blocksize, one );
         magma_z_vinit( &hy, Magma_CPU, num_rblocks*hC.blocksize, zero );
-        printf( " num_rblocks=%d, block_size=%d\n",num_rblocks,hC.blocksize );
+
+        // init GPU vectors
+        magma_z_vinit( &dx, Magma_DEV, hA.num_cols, one );
+        magma_z_vinit( &dy, Magma_DEV, hA.num_cols, zero );
+        magma_z_vinit( &dx2, Magma_DEV, hA.num_cols, one );
+        magma_z_vinit( &dy2, Magma_DEV, hA.num_cols, zero );
+        //printf( " num_rblocks=%d, block_size=%d\n",num_rblocks,hC.blocksize );
 
         // calling MKL with CSR
-        pntre = (int*)malloc( (hA.num_rows+1)*sizeof(int) );
+        pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
         pntre[0] = 0;
         for (i=0; i<hA.num_rows; i++ ) pntre[i] = hA.row[i+1];
         start = magma_wtime(); 
@@ -119,10 +168,12 @@ int main( int argc, char** argv)
                                             MKL_ADDR(hx.val), 
                     MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
         end = magma_wtime();
-        printf( "\n > MKL  : %.2e seconds (CSR).\n",(end-start)/10 );
+        //printf( "\n > MKL  : %.2e seconds (CSR).\n",(end-start)/10 );
+        printf( "  %.2e  &",(end-start)/10 );
         free(pntre);
-        //magma_zprint( 10,1, hy.val,10 );
 
+        //magma_zprint( 10,1, hy.val,10 );
+/*
         // calling MKL with BSR
         if( hA.num_rows / hC.blocksize < 10000) {
             // conver to BSR for MKL
@@ -144,10 +195,8 @@ int main( int argc, char** argv)
         } else {
             printf( " > MKL  : ?? seconds (BSR, %dx%d,%d), too big.\n",num_rblocks,num_cblocks,hC.blocksize );
         }
-        // init GPU vectors
-        magma_z_vinit( &dx, Magma_DEV, hA.num_cols, one );
-        magma_z_vinit( &dy, Magma_DEV, hA.num_cols, zero );
-        //magma_z_vvisu( dx, 0,10);
+*/
+
 
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
@@ -157,28 +206,156 @@ int main( int argc, char** argv)
         for (i=0; i<10; i++)
             magma_z_spmv( one, dA, dx, zero, dy);
         magma_device_sync(); end = magma_wtime(); 
-        printf( " > MAGMA: %.2e seconds (CSR).\n",(end-start)/10 );
+        //printf( " > MAGMA: %.2e seconds (CSR).\n",(end-start)/10 );
+        printf( "  %.2e  &",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
+        magma_z_mfree(&dA);
+
+        // convert to ELLPACKT and copy to GPU
+        magma_z_mconvert(  hA, &hB, Magma_CSR, Magma_ELLPACKT);
+        magma_z_mtransfer( hB, &dB, Magma_CPU, Magma_DEV);
+        magma_z_mfree(&hB);
         // SpMV on GPU (ELLPACKT)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
-        magma_z_spmv( one, dB, dx, zero, dy);
+            magma_z_spmv( one, dB, dx, zero, dy);
         magma_device_sync(); end = magma_wtime(); 
-        printf( " > MAGMA: %.2e seconds (ELLPACKT).\n",(end-start)/10 );
+        //printf( " > MAGMA: %.2e seconds (ELLPACKT).\n",(end-start)/10 );
+        printf( "  %.2e  &",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
-        magma_zgetvector( hA.num_rows, dy.val,1, hx.val,1 );
-        for( i=0; i<hA.num_rows; i++ ) hx.val[i] = MAGMA_Z_SUB( hx.val[i], hy.val[i] );
-        printf( " >> error = %.2e\n\n",lapackf77_zlange( "F", &hA.num_rows, &ione, hx.val, &hA.num_rows, work ) );
+        magma_z_mfree(&dB);
+/*
+    printf("here!\n");
+        // convert to ELLPACKRT and copy to GPU
+        magma_z_mconvert(  hA, &hE, Magma_CSR, Magma_ELLPACKRT);
+        magma_z_mtransfer( hE, &dE, Magma_CPU, Magma_DEV);
+        magma_z_mfree(&hE);
+        // SpMV on GPU (ELLPACKRT)
+        magma_device_sync(); start = magma_wtime(); 
+        for (i=0; i<10; i++)
+        magma_z_spmv( one, dE, dx2, zero, dy2);
+        magma_device_sync(); end = magma_wtime(); 
+        printf( " > MAGMA: %.2e seconds (ELLPACKRT).\n",(end-start)/10 );
+        //magma_z_vvisu( dy, 0,10);
+        magma_z_mfree(&dE);
+*/
+
+        // convert to SELLC and copy to GPU
+        hD.blocksize = 256;
+        hD.alignment = 1;
+        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLC);
+        magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV);
+        magma_z_mfree(&hD);
+        // SpMV on GPU (SELLC)
+        magma_device_sync(); start = magma_wtime(); 
+        for (i=0; i<10; i++)
+        magma_z_spmv( one, dD, dx, zero, dy);
+        magma_device_sync(); end = magma_wtime(); 
+        // printf( " > MAGMA: %.2e seconds (SELLC).\n",(end-start)/10 );
+        //magma_z_vvisu( dy, 0,10);
+        magma_z_mfree(&dD);
+
+
+        // convert to SELLC-mod and copy to GPU
+        hD.blocksize = 8;
+        hD.alignment = 16;
+        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLC);
+        magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV);
+        magma_z_mfree(&hD);
+        // SpMV on GPU (SELLC-mod)
+        magma_device_sync(); start = magma_wtime(); 
+        //cudaProfilerStart();
+        for (i=0; i<10; i++)
+            magma_z_spmv( one, dD, dx2, zero, dy2);
+        //cudaProfilerStop();
+        magma_device_sync(); end = magma_wtime(); 
+        //printf( " > MAGMA: %.2e seconds (SELLC-mod).\n",(end-start)/10 );
+        printf( "  %.2e  &",(end-start)/10 );
+        //magma_z_vvisu( dy2, 0,2000);
+        magma_z_mfree(&dD);
+
+
+      // SpMV on GPU (CUSPARSE - CSR)
+        // CUSPARSE context //
+        #ifdef PRECISION_d
+        cusparseHandle_t cusparseHandle = 0;
+        cusparseStatus_t cusparseStatus;
+        cusparseStatus = cusparseCreate(&cusparseHandle);
+
+
+        cusparseMatDescr_t descr = 0;
+        cusparseStatus = cusparseCreateMatDescr(&descr);
+
+
+        cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+        cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+        double alpha = 1.0;
+        double beta = 0.0;
+
+        // copy matrix to GPU
+        magma_d_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
+
+        magma_device_sync(); start = magma_wtime(); 
+        cudaProfilerStart();
+        for (i=0; i<10; i++)
+            cusparseDcsrmv(cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                        hA.num_rows, hA.num_cols, hA.nnz, &alpha, descr, 
+                        dA.val, dA.row, dA.col, dx.val, &beta, dy.val);
+        cudaProfilerStop();
+        magma_device_sync(); end = magma_wtime(); 
+        //printf( " > CUSPARSE: %.2e seconds (CSR).\n",(end-start)/10 );
+        printf( "  %.2e  &",(end-start)/10 );
+        //magma_d_vvisu( dy, 0,10);
+
+        cusparseMatDescr_t descrA;
+        cusparseStatus = cusparseCreateMatDescr(&descrA);
+         if(cusparseStatus != 0)    printf("error\n");
+        cusparseHybMat_t hybA;
+        cusparseStatus = cusparseCreateHybMat( &hybA );
+         if(cusparseStatus != 0)    printf("error\n");
+
+       
+        cusparseDcsr2hyb(cusparseHandle,  hA.num_rows, hA.num_cols,
+                        descrA, dA.val, dA.row, dA.col,
+                        hybA, 0, CUSPARSE_HYB_PARTITION_AUTO);
+
+        magma_device_sync(); start = magma_wtime(); 
+        for (i=0; i<10; i++)
+        cusparseDhybmv( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+               &alpha, descrA, hybA,
+               dx.val, &beta, dy.val);
+        magma_device_sync(); end = magma_wtime(); 
+        //printf( " > CUSPARSE: %.2e seconds (HYB).\n",(end-start)/10 );
+        printf( "  %.2e  ",(end-start)/10 );
+
+        cusparseDestroyMatDescr( descrA );
+        cusparseDestroyHybMat( hybA );
+        cusparseDestroy( cusparseHandle );
+
+        magma_d_mfree(&dA);
+
+        #endif
+
+        printf("\n");
+
+        magma_zgetvector( hA.num_rows, dy2.val,1, hx.val,1 );
+        magma_zgetvector( hA.num_rows, dy.val,1, hy.val,1 );
+        for(int i=0; i<hA.num_rows; i++)
+            if(abs(MAGMA_Z_REAL(hx.val[i])-MAGMA_Z_REAL(hy.val[i]))>0.001 ){
+                printf("error in index %d : %f vs %f difference. %e\n", i, MAGMA_Z_REAL(hx.val[i]), MAGMA_Z_REAL(hy.val[i]), MAGMA_Z_REAL(hx.val[i])-MAGMA_Z_REAL(hy.val[i]));
+            }
+        //for( i=0; i<hA.num_rows; i++ ) hx.val[i] = MAGMA_Z_SUB( hx.val[i], hy.val[i] );
+        //printf( " >> error = %.2e\n\n",lapackf77_zlange( "F", &hA.num_rows, &ione, hx.val, &hA.num_rows, work ) );
 
         // free CPU memory
         magma_z_mfree(&hA);
         magma_z_vfree(&hx);
         magma_z_vfree(&hy);
         // free GPU memory
-        magma_z_mfree(&dA);
-        magma_z_mfree(&dB);
         magma_z_vfree(&dx);
         magma_z_vfree(&dy);
+        magma_z_vfree(&dx2);
+        magma_z_vfree(&dy2);
 
         if (id > -1) break;
     }

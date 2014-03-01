@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> s d c
+       @precisions normal z -> c d s
        @author Hartwig Anzt
 */
 
@@ -14,165 +14,120 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <sys/time.h>
-#include <time.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
+#include <omp.h>
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "../include/magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
+
+
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Debugging file
+   -- running magma_zcg magma_zcg_merge 
 */
 int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    //Chronometry
-    struct timeval inicio, fim;
-    double tempo1, tempo2;
-
-    magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    magma_solver_parameters solver_par;
+    solver_par.epsilon = 10e-16;
+    solver_par.maxiter = 1000;
+    solver_par.verbose = 0;
+    magma_z_preconditioner precond_par;
+    precond_par.solver = Magma_JACOBI;
+    int precond = 0;
+    int format = 0;
+    int version = 0;
+    magma_zsolverinfo_init( &solver_par, &precond_par );
     
-    printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
-           "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "transA = %c, transB = %c\n", opts.transA, opts.transB );
-    printf("    M     N     K   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
-    printf("=========================================================================================================\n");
-
-
-    const char *filename[] =
-    {
-     "test_matrices/fv1.mtx",
-     "test_matrices/diag.mtx",
-     "test_matrices/tridiag.mtx",
-     "test_matrices/LF10.mtx",
-     "test_matrices/Trefethen_20.mtx",
-     "test_matrices/test.mtx",
-     "test_matrices/bcsstk01.mtx",
-     "test_matrices/Trefethen_200.mtx",
-     "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Pres_Poisson.mtx",
-     "test_matrices/bloweybq.mtx",
-     "test_matrices/ecology2.mtx",
-     "test_matrices/apache2.mtx",
-     "test_matrices/crankseg_2.mtx",
-     "test_matrices/bmwcra_1.mtx",
-     "test_matrices/F1.mtx",
-     "test_matrices/audikw_1.mtx",
-     "test_matrices/circuit5M.mtx",
-     "test_matrices/boneS10.mtx",
-     "test_matrices/parabolic_fem.mtx",
-     "test_matrices/inline_1.mtx",
-     "test_matrices/ldoor.mtx"
-    };
-for(magma_int_t matrix=2; matrix<4; matrix++){
-
-
-    magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
-    magma_z_vector a,b,c,x, y, z;
-    magma_int_t k=30;
-
+    magma_z_sparse_matrix A, B, B_d;
+    magma_z_vector x, b;
+    B.blocksize = 8;
+    B.alignment = 8;
+    
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-    const char *N="N";
 
+    B.storage_type = Magma_CSR;
+    char filename[256]; 
+    int i;
+    for( i = 1; i < argc; ++i ) {
+     if ( strcmp("--format", argv[i]) == 0 ) {
+            format = atoi( argv[++i] );
+            switch( format ) {
+                case 0: B.storage_type = Magma_CSR; break;
+                case 1: B.storage_type = Magma_ELLPACK; break;
+                case 2: B.storage_type = Magma_ELLPACKT; break;
+                case 3: B.storage_type = Magma_ELLPACKRT; break;
+                case 4: B.storage_type = Magma_SELLC; break;
+            }
+        }else if ( strcmp("--precond", argv[i]) == 0 ) {
+            format = atoi( argv[++i] );
+            switch( precond ) {
+                case 0: precond_par.solver = Magma_JACOBI; break;
+            }
 
-
-
-    magma_z_csr_mtx( &A, filename[matrix] );
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
-    magma_z_mvisu( A );
-    //magma_zlra( B, &C, 15 );
-    magma_z_mconvert( C, &D, Magma_ELLPACK, Magma_CSR);
-    magma_z_mvisu( D );
-
-
-
-
-
-
-/*
-    magma_z_vinit( &x, Magma_DEV, A.num_cols, one );
-    magma_z_vinit( &y, Magma_DEV, A.num_cols*(k+1), one );
-    printf("A.num_cols: %d  x.num_rows: %d\n", A.num_cols, x.num_rows);
-
-
-
-    magma_zdiameter( &A );
-    magma_zrowentries( &A );
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACKT);
-    magma_z_mtransfer( B, &C, Magma_CPU, Magma_DEV);
-    printf("A max row: %d  A diamter: %d\n", A.max_nnz_row, A.diameter);
-    printf("B max row: %d  B diamter: %d\n", B.max_nnz_row, B.diameter);
-
-/*
-
-    //Chronometry 
-    gettimeofday(&inicio, NULL);
-    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
-    magma_z_mpk( one, C, x, zero, y, k);
-    magma_device_sync();
-    //Chronometry  
-    gettimeofday(&fim, NULL);
-    tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
-
-    printf("matrix powers: %4d  runtime: %e\n", k, tempo2-tempo1);
-
-    //for( magma_int_t i=0; i<k; i++ )
-       // magma_z_vvisu( y, A.num_rows*(i),10);
-
-    //for( magma_int_t i=0; i<k; i++ )
-      //  magma_z_vvisu( y, A.num_rows*(i+1)-10,5);
-
-    magma_z_vvisu( y, A.num_rows*(k-1),10);
-
-    magma_z_vfree(&x);
-    magma_z_vfree(&y);
-    magma_z_vinit( &b, Magma_DEV, A.num_cols*k, zero );
-    magma_z_vinit( &a, Magma_DEV, A.num_cols, one );
-    magma_z_vinit( &c, Magma_DEV, A.num_cols, zero );
-*/
-/*
-    //Chronometry 
-    gettimeofday(&inicio, NULL);
-    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
-    for(magma_int_t i=0; i<k; i++){
-        magma_z_spmv( one, C, a, zero, c);
-        magma_device_sync();
-        magma_zcopy(A.num_rows, c.val, 1, b.val+i*A.num_rows, 1);  
-        magma_device_sync();
-        a.val = b.val+i*A.num_rows;
-        magma_device_sync();
-        magma_z_vvisu( a, 0,10);
-        magma_device_sync();
+        }else if ( strcmp("--version", argv[i]) == 0 ) {
+            version = atoi( argv[++i] );
+        }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
+            B.blocksize = atoi( argv[++i] );
+        }else if ( strcmp("--alignment", argv[i]) == 0 ) {
+            B.alignment = atoi( argv[++i] );
+        }else if ( strcmp("--verbose", argv[i]) == 0 ) {
+            solver_par.verbose = atoi( argv[++i] );
+        }  else if ( strcmp("--maxiter", argv[i]) == 0 ) {
+            solver_par.maxiter = atoi( argv[++i] );
+        } else if ( strcmp("--tol", argv[i]) == 0 ) {
+            sscanf( argv[++i], "%lf", &solver_par.epsilon );
+        } else
+            break;
     }
-    //Chronometry  
-    gettimeofday(&fim, NULL);
-    tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
+    printf( "\n    usage: ./run_zpcg"
+        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --blocksize %d --alignment %d ]"
+        " --verbose %d (0=summary, k=details every k iterations)"
+        " --maxiter %d --tol %.2e"
+        " --preconditioner %d (0=Jacobi) ]"
+        " matrices \n\n", format, B.blocksize, B.alignment,
+        solver_par.verbose,
+        solver_par.maxiter, solver_par.epsilon, precond );
 
-    printf("matrix powers: %4d  runtime: %e\n", k, tempo2-tempo1);
-    magma_z_vvisu( a, 0,10);
+    while(  i < argc ){
 
-*/
-/*
-    magma_z_vfree(&a);
-    magma_z_vfree(&b);
-    magma_z_vfree(&c);
-*/
-    magma_z_mfree(&A);
-    magma_z_mfree(&B);
-    magma_z_mfree(&C);
+        magma_z_csr_mtx( &A,  argv[i]  ); 
 
-}
+        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
+                                    ,A.num_rows,A.num_cols,A.nnz );
 
 
 
+        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+
+        magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
+        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
+
+        precond_par.solver = Magma_PASTIX;
+
+        magma_z_precondsetup( B_d, b, &precond_par );
+
+        magma_zpcg( B_d, b, &x, &solver_par, &precond_par );
+
+        magma_zsolverinfo( &solver_par, &precond_par );
+
+        magma_zsolverinfo_free( &solver_par, &precond_par );
+
+        magma_z_mfree(&B_d);
+        magma_z_mfree(&B);
+        magma_z_mfree(&A); 
+        magma_z_vfree(&x);
+        magma_z_vfree(&b);
+
+        i++;
+    }
 
     TESTING_FINALIZE();
     return 0;

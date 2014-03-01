@@ -24,6 +24,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#include "../include/magmasparse.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Debugging file
@@ -32,9 +33,10 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_z_sparse_matrix A;
+    magma_z_sparse_matrix A, B;
 
-    magma_int_t n = 10;
+    magma_int_t n=10;
+    magma_int_t nn = n*n;
     magma_int_t offdiags = 1;
     magma_int_t *diag_offset;
     magmaDoubleComplex *diag_vals;
@@ -43,14 +45,20 @@ int main( int argc, char** argv)
     
     diag_offset[0] = 0;
     diag_offset[1] = 1;
-    //diag_offset[2] = 4;
-    diag_vals[0] = MAGMA_Z_MAKE( 2.0, 0.0 );
+    diag_offset[2] = n;
+    diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
     diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
     //    diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
     
-    magma_zmgenerator( n, offdiags, diag_offset, diag_vals, &A );
+    magma_zmgenerator( nn, offdiags, diag_offset, diag_vals, &A );
 
     magma_z_mvisu( A );
+
+    printf("nnz:%d\n", A.nnz);
+
+    magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV );
+
+    magma_z_mvisu( B );
 
     TESTING_FINALIZE();
     return 0;

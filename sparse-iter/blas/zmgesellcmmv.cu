@@ -43,7 +43,6 @@ zmgesellcmtmv_kernel_1_3D( int num_rows,
     int idy = threadIdx.x;      // local row
     int idz = threadIdx.z;      // vector
     int ldx = idx * blocksize + idy;
-    int ldz = idz * blocksize * T + idx * blocksize + idy;
     int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
     int row = bdx * blocksize + idy;  // global row index
     int vec = idz*num_rows;
@@ -381,10 +380,8 @@ zmgesellcmtmv_kernel_1_3D_tex( int num_rows,
     int idy = threadIdx.x;      // local row
     int idz = threadIdx.z;      // vector
     int ldx = idx * blocksize + idy;
-    int ldz = idz * blocksize * T + idx * blocksize + idy;
     int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
     int row = bdx * blocksize + idy;  // global row index
-    int sv = num_vecs/2 * blocksize * T;
 
 
     if(row < num_rows ){
@@ -492,7 +489,7 @@ zmgesellcmtmv_kernel_4_3D_tex( int num_rows,
     }
 
 }
-
+ 
 
 // SELLCM SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP

@@ -38,6 +38,7 @@ ZSRC := \
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
 	zmgeelltmv.cu		\
+	zmgesellcmmv.cu		\
 	zpipelinedgmres.cu	\
 
 # Auxiliary routines

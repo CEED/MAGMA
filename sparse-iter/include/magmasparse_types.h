@@ -9,6 +9,8 @@
 #ifndef MAGMASPARSE_TYPES_H
 #define MAGMASPARSE_TYPES_H
 
+
+#if defined(HAVE_PASTIX)
 //PaStiX include
 #include <stdint.h>
 /* to access functions from the libpastix, respect this order */
@@ -16,7 +18,7 @@
 #include <read_matrix.h>
 #include <get_options.h>
 #include <assert.h>
-
+#endif
 
 
 #ifdef __cplusplus
