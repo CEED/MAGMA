@@ -16,8 +16,9 @@
 
 #define PRECISION_z
 
+#if (__CUDA_ARCH__ >= 300)
 #define TEXTURE
-
+#endif
 
 // SELLCM SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
@@ -354,7 +355,7 @@ zmgesellcmtmv_kernel_32_3D( int num_rows,
 
 /************************* same but using texture mem *************************/
 
-#if defined(PRECISION_d) && defined(TEXTURE)
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
 
 // SELLCM SpMV kernel 2D grid - for large number of vectors
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
@@ -801,11 +802,12 @@ magma_zmgesellcmmv( magma_trans_t transA,
     // using a 3D thread grid
 
 
-    #if defined(PRECISION_d) && defined(TEXTURE)
+    #if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
 
         // Create channel.
         cudaChannelFormatDesc channel_desc;
-        channel_desc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindSigned);
+        channel_desc = cudaCreateChannelDesc(32, 32, 32, 32, 
+                                        cudaChannelFormatKindSigned);
 
         // Create resource descriptor.
         struct cudaResourceDesc resDescdx;
