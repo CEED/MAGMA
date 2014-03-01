@@ -1004,5 +1004,252 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 }
 
 
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Reads in a SYMMETRIC matrix stored in coo format from a Matrix Market (.mtx)
+    file and converts it into CSR format. It does not duplicate the off-diagonal
+    entries!
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix *A             matrix in magma sparse matrix format
+    const char * filename                filname of the mtx matrix
+
+    =====================================================================  */
+
+extern "C"
+magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A, 
+                                 const char *filename ){
+
+  int csr_compressor = 0;       // checks for zeros in original file
+
+  FILE *fid;
+  MM_typecode matcode;
+    
+  fid = fopen(filename, "r");
+  
+  if (fid == NULL) {
+    printf("#Unable to open file %s\n", filename);
+    exit(1);
+  }
+  
+  if (mm_read_banner(fid, &matcode) != 0) {
+    printf("#Could not process lMatrix Market banner.\n");
+    exit(1);
+  }
+  
+  if (!mm_is_valid(matcode)) {
+    printf("#Invalid lMatrix Market file.\n");
+    exit(1);
+  }
+  
+  if (!((mm_is_real(matcode) || mm_is_integer(matcode) 
+        || mm_is_pattern(matcode)) && mm_is_coordinate(matcode) 
+            && mm_is_sparse(matcode))) {
+    printf("#Sorry, this application does not support ");
+    printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+    printf("#Only real-valued or pattern coordinate matrices are supported\n");
+    exit(1);
+  }
+  
+  magma_int_t num_rows, num_cols, num_nonzeros;
+  if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
+    exit(1);
+  
+  (A->storage_type) = Magma_CSR;
+  (A->memory_location) = Magma_CPU;
+  (A->num_rows) = (magma_int_t) num_rows;
+  (A->num_cols) = (magma_int_t) num_cols;
+  (A->nnz)   = (magma_int_t) num_nonzeros;
+
+  magma_index_t *coo_col, *coo_row;
+  magmaDoubleComplex *coo_val;
+  
+  coo_col = (magma_index_t *) malloc(A->nnz*sizeof(magma_index_t));
+  assert(coo_col != NULL);
+
+  coo_row = (magma_index_t *) malloc(A->nnz*sizeof(magma_index_t)); 
+  assert( coo_row != NULL);
+
+  coo_val = (magmaDoubleComplex *) malloc(A->nnz*sizeof(magmaDoubleComplex));
+  assert( coo_val != NULL);
 
 
+  printf("Reading sparse matrix from file (%s):",filename);
+  fflush(stdout);
+
+
+  if (mm_is_real(matcode) || mm_is_integer(matcode)){
+    for(magma_int_t i = 0; i < A->nnz; ++i){
+      magma_int_t ROW ,COL;
+      double VAL;  // always read in a double and convert later if necessary
+      
+      fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
+      if( VAL == 0 ) 
+        csr_compressor=1;
+      coo_row[i] = (magma_int_t) ROW - 1; 
+      coo_col[i] = (magma_int_t) COL - 1;
+      coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
+    }
+  } else {
+    printf("Unrecognized data type\n");
+    exit(1);
+  }
+  
+  fclose(fid);
+  printf(" done\n");
+  
+  
+   A->sym = Magma_GENERAL;
+
+  if(mm_is_symmetric(matcode)) { //do not duplicate off diagonal entries!
+    A->sym = Magma_SYMMETRIC;
+  } //end symmetric case
+  
+  magmaDoubleComplex tv;
+  magma_int_t ti;
+  
+  
+  //If matrix is not in standard format, sorting is necessary
+  /*
+  
+    std::cout << "Sorting the cols...." << std::endl;
+  // bubble sort (by cols)
+  for (int i=0; i<A->nnz-1; ++i)
+    for (int j=0; j<A->nnz-i-1; ++j)
+      if (coo_col[j] > coo_col[j+1] ){
+
+        ti = coo_col[j];
+        coo_col[j] = coo_col[j+1];
+        coo_col[j+1] = ti;
+
+        ti = coo_row[j];
+        coo_row[j] = coo_row[j+1];
+        coo_row[j+1] = ti;
+
+        tv = coo_val[j];
+        coo_val[j] = coo_val[j+1];
+        coo_val[j+1] = tv;
+
+      }
+
+  std::cout << "Sorting the rows...." << std::endl;
+  // bubble sort (by rows)
+  for (int i=0; i<A->nnz-1; ++i)
+    for (int j=0; j<A->nnz-i-1; ++j)
+      if ( coo_row[j] > coo_row[j+1] ){
+
+        ti = coo_col[j];
+        coo_col[j] = coo_col[j+1];
+        coo_col[j+1] = ti;
+
+        ti = coo_row[j];
+        coo_row[j] = coo_row[j+1];
+        coo_row[j+1] = ti;
+
+        tv = coo_val[j];
+        coo_val[j] = coo_val[j+1];
+        coo_val[j+1] = tv;
+
+      }
+  std::cout << "Sorting: done" << std::endl;
+  
+  */
+  
+  
+  magma_zmalloc_cpu( &A->val, A->nnz );
+  assert((A->val) != NULL);
+  
+  magma_indexmalloc_cpu( &A->col, A->nnz );
+  assert((A->col) != NULL);
+  
+  magma_indexmalloc_cpu( &A->row, A->num_rows+1 );
+  assert((A->row) != NULL);
+  
+
+  
+  
+  // original code from  Nathan Bell and Michael Garland
+  // the output CSR structure is NOT sorted!
+
+  for (magma_int_t i = 0; i < num_rows; i++)
+    (A->row)[i] = 0;
+  
+  for (magma_int_t i = 0; i < A->nnz; i++)
+    (A->row)[coo_row[i]]++;
+  
+  
+  //cumsum the nnz per row to get Bp[]
+  for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
+    magma_int_t temp = (A->row)[i];
+    (A->row)[i] = cumsum;
+    cumsum += temp;
+  }
+  (A->row)[num_rows] = A->nnz;
+  
+  //write Aj,Ax into Bj,Bx
+  for(magma_int_t i = 0; i < A->nnz; i++){
+    magma_int_t row_  = coo_row[i];
+    magma_int_t dest = (A->row)[row_];
+    
+    (A->col)[dest] = coo_col[i];
+    
+    (A->val)[dest] = coo_val[i];
+    
+    (A->row)[row_]++;
+  }
+  free (coo_row);
+  free (coo_col);
+  free (coo_val);
+  
+  for(int i = 0, last = 0; i <= num_rows; i++){
+    int temp = (A->row)[i];
+    (A->row)[i]  = last;
+    last   = temp;
+  }
+  
+  (A->row)[A->num_rows]=A->nnz;
+     
+
+  for (magma_int_t k=0; k<A->num_rows; ++k)
+    for (magma_int_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
+      for (magma_int_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
+
+      if ( (A->col)[j] > (A->col)[j+1] ){
+
+        ti = (A->col)[j];
+        (A->col)[j] = (A->col)[j+1];
+        (A->col)[j+1] = ti;
+
+        tv = (A->val)[j];
+        (A->val)[j] = (A->val)[j+1];
+        (A->val)[j+1] = tv;
+
+      }
+  if( csr_compressor > 0){ // run the CSR compressor to remove zeros
+      //printf("removing zeros: ");
+      magma_z_sparse_matrix B;
+      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU ); 
+      magma_z_csr_compressor(&(A->val), 
+                        &(A->row),
+                         &(A->col), 
+                       &B.val, &B.row, &B.col, &B.num_rows, &B.num_rows); 
+      B.nnz = B.row[num_rows];
+     // printf(" remaining nonzeros:%d ", B.nnz); 
+      magma_free_cpu( A->val ); 
+      magma_free_cpu( A->row ); 
+      magma_free_cpu( A->col ); 
+      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU ); 
+      magma_z_mfree( &B ); 
+     // printf("done.\n");
+  }
+  return MAGMA_SUCCESS;
+}

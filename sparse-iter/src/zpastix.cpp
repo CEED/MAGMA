@@ -112,16 +112,28 @@ magma_zpastixsetup( magma_z_sparse_matrix A, magma_z_vector b,
         iparm[IPARM_THREAD_NBR]          = 16;
         iparm[IPARM_SYM]                 = mat_type;
         iparm[IPARM_FACTORIZATION]       = API_FACT_LU;
-        iparm[IPARM_MATRIX_VERIFICATION] = API_YES;
-        iparm[IPARM_VERBOSE]             = API_VERBOSE_NO;
+        iparm[IPARM_VERBOSE]             = API_VERBOSE_YES;
         iparm[IPARM_ORDERING]            = API_ORDER_SCOTCH;
         iparm[IPARM_INCOMPLETE]          = API_NO;
         iparm[IPARM_RHS_MAKING]          = API_RHS_B;
-    /*  if (incomplete == 1)
-        {
-          dparm[DPARM_EPSILON_REFINEMENT] = 1e-7;
-        }
-    */
+        //iparm[IPARM_AMALGAMATION]         = 5;
+        iparm[IPARM_LEVEL_OF_FILL]       = 0;
+        /*  if (incomplete == 1)
+            {
+            dparm[DPARM_EPSILON_REFINEMENT] = 1e-7;
+            }
+        */
+
+
+        /*
+         * Matrix needs :
+         *    - to be in fortran numbering
+         *    - to have only the lower triangular part in symmetric case
+         *    - to have a graph with a symmetric structure in unsymmetric case
+         * If those criteria are not matched, the csc will be reallocated and changed. 
+         */
+        iparm[IPARM_MATRIX_VERIFICATION] = API_YES;
+
         perm = (pastix_int_t*)malloc(ncol*sizeof(pastix_int_t));
         invp = (pastix_int_t*)malloc(ncol*sizeof(pastix_int_t));
 
@@ -286,8 +298,3 @@ magma_zapplypastix( magma_z_vector b, magma_z_vector *x,
     return MAGMA_SUCCESS;
 
 }
-
-
-
-
-

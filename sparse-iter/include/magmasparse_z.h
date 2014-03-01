@@ -87,6 +87,10 @@ magma_z_csr_mtx(        magma_z_sparse_matrix *A,
                         const char *filename );
 
 magma_int_t 
+magma_z_csr_mtxsymm(    magma_z_sparse_matrix *A, 
+                        const char *filename );
+
+magma_int_t 
 magma_z_csr_compressor( magmaDoubleComplex ** val, 
                         magma_index_t ** row, 
                         magma_index_t ** col, 
@@ -668,6 +672,21 @@ magma_zmgesellcmmv( magma_trans_t transA,
                     magmaDoubleComplex beta,
                     magmaDoubleComplex *d_y );
 
+magma_int_t
+magma_zmgesellcmmv_blocked( magma_trans_t transA,
+                    magma_int_t m, magma_int_t n,
+                    magma_int_t num_vecs,
+                    magma_int_t blocksize,
+                    magma_int_t slices,
+                    magma_int_t alignment,
+                    magmaDoubleComplex alpha,
+                    magmaDoubleComplex *d_val,
+                    magma_index_t *d_colind,
+                    magma_index_t *d_rowptr,
+                    magmaDoubleComplex *d_x,
+                    magmaDoubleComplex beta,
+                    magmaDoubleComplex *d_y );
+
 
 magma_int_t 
 magma_zp1gmres_mgs(    magma_int_t  n, 
@@ -856,6 +875,20 @@ magma_zbcsrblockinfo5(  magma_int_t lustep,
                         magma_index_t *blockinfo,
                         magmaDoubleComplex *val,
                         magmaDoubleComplex **AII );
+
+magma_int_t
+magma_zgesellcmmv_mpk(  magma_trans_t transA,
+                    magma_int_t m, magma_int_t n,
+                    magma_int_t blocksize,
+                    magma_int_t slices,
+                    magma_int_t alignment,
+                    magmaDoubleComplex alpha,
+                    magmaDoubleComplex *d_val,
+                    magma_index_t *d_colind,
+                    magma_index_t *d_rowptr,
+                    magmaDoubleComplex *d_x,
+                    magmaDoubleComplex beta,
+                    magmaDoubleComplex *d_y );
 
  
 #ifdef __cplusplus
