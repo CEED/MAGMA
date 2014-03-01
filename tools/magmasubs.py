@@ -694,6 +694,7 @@ subs = {
     ('smgeelltmv',     'dmgeelltmv',     'cmgeelltmv',     'zmgeelltmv'      ),
     ('sgeellrtmv',     'dgeellrtmv',     'cgeellrtmv',     'zgeellrtmv'      ),
     ('sgesellcm',      'dgesellcm',      'cgesellcm',      'zgesellcm'       ),
+    ('smgesellcm',     'dmgesellcm',     'cmgesellcm',     'zmgesellcm'      ),
     ('smdot',          'dmdot',          'cmdot',          'zmdot'           ),
     ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
@@ -713,6 +714,7 @@ subs = {
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
+    ('spastix',        'dpastix',        'cpastix',        'zpastix'         ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
