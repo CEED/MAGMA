@@ -47,6 +47,11 @@ ZSRC += \
 	run_zjacobi.cpp	    \
 
 # ----------
+# run Krylov space eigen-solvers
+ZSRC += \
+	run_zlobpcg.cpp     \
+
+# ----------
 # test Krylov space eigen-solvers
 ZSRC += \
 	testing_zlobpcg.cpp     \
