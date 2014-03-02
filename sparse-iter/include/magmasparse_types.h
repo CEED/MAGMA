@@ -167,6 +167,7 @@ typedef struct magma_solver_parameters{
     real_Double_t      *res_vec;
     real_Double_t      *timing;
     magma_int_t        verbose;
+    magma_int_t        eigenvalues;
     magma_int_t        info;
 
 //---------------------------------
