@@ -14,16 +14,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <sys/time.h>
-#include <time.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cusparse_v2.h>
+#include <cuda_profiler_api.h>
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "../include/magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#include "mkl_spblas.h"
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- testing zdot
@@ -32,8 +35,8 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
+    for( magma_int_t n=100000; n<100001; n+=1000 ){
 
-    for( magma_int_t num_vecs=2; num_vecs<3; num_vecs+=1 ){
 
         printf("#================================================================================================================================================\n");
         printf("\n");
@@ -43,12 +46,14 @@ int main( int argc, char** argv)
     printf("\n");
 
 
-    for( magma_int_t n=1000; n<2000001; n+=1000 ){
+
+
+    for( magma_int_t num_vecs=1; num_vecs<17; num_vecs+=1 ){
            
             magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
             magma_z_vector a,b,c,x, y, z, skp;
             int iters = 10;
-            double computations = (2.* n * iters * 5);//num_vecs); 
+            double computations = (2.* n * iters * num_vecs); 
 
             
             magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
@@ -77,7 +82,7 @@ int main( int argc, char** argv)
             magma_device_sync(); cudot1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                for( int l=0; l<5; l++)
+                for( int l=0; l<num_vecs; l++)
                     alpha = magma_zdotc(n, a.val, 1, b.val, 1);
             }
             #ifdef ENABLE_TIMER
@@ -89,8 +94,8 @@ int main( int argc, char** argv)
             magma_device_sync(); cugemv1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                //magma_zgemv(MagmaTrans, n, num_vecs, one, a.val, n, b.val, 1, zero, skp.val, 1);
-                h++;
+                magma_zgemv(MagmaTrans, n, num_vecs, one, a.val, n, b.val, 1, zero, skp.val, 1);
+                //h++;
             }
             #ifdef ENABLE_TIMER
             magma_device_sync(); cugemv2=magma_wtime();
@@ -101,8 +106,8 @@ int main( int argc, char** argv)
             magma_device_sync(); magmagemv1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                //magmablas_zgemv(MagmaTrans, n, num_vecs, one, a.val, n, b.val, 1, zero, skp.val, 1);
-                h++;
+                magmablas_zgemv(MagmaTrans, n, num_vecs, one, a.val, n, b.val, 1, zero, skp.val, 1);
+                //h++;
             }
             #ifdef ENABLE_TIMER
             magma_device_sync(); magmagemv2=magma_wtime();
@@ -113,9 +118,10 @@ int main( int argc, char** argv)
             magma_device_sync(); mdot1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
-                magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
-                magma_zmdotc( n, 1, a.val, b.val, x.val, y.val, skp.val );
+                magma_zmdotc( n, num_vecs, a.val, b.val, x.val, y.val, skp.val );
+                //magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
+                //magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
+                //magma_zmdotc( n, 1, a.val, b.val, x.val, y.val, skp.val );
                 //h++;
             }
             #ifdef ENABLE_TIMER
@@ -127,8 +133,8 @@ int main( int argc, char** argv)
             magma_device_sync(); mdgm1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                //magma_zgemvmdot( n, num_vecs, a.val, b.val, x.val, y.val, skp.val );
-                h++;
+                magma_zgemvmdot( n, num_vecs, a.val, b.val, x.val, y.val, skp.val );
+                //h++;
             }
             #ifdef ENABLE_TIMER
             magma_device_sync(); mdgm2=magma_wtime();

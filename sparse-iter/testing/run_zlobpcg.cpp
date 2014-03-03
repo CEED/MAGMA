@@ -165,6 +165,7 @@ int main( int argc, char** argv)
         magma_free(     dwork    );
         magma_free_pinned( hwork    );
 
+        i++;
     }
 
     TESTING_FINALIZE();

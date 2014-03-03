@@ -17,6 +17,7 @@ LIB += -lcusparse /home/hanzt/software/spmvellrt/libspmvELLRTdp.a
 # utility functions
 ZSRC += \
 	testing_z_mv.cpp	\
+	testing_zdot.cpp	\
 	testing_z_multimv.cpp	\
 	testing_zmgenerator.cpp	\
 	testing_z_matrix_io.cpp	\
