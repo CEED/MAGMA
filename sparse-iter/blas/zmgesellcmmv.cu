@@ -16,9 +16,8 @@
 
 #define PRECISION_z
 
-#if (__CUDA_ARCH__ >= 300)
 #define TEXTURE
-#endif
+
 
 // SELLCM SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
@@ -355,7 +354,7 @@ zmgesellcmtmv_kernel_32_3D( int num_rows,
 
 /************************* same but using texture mem *************************/
 
-#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+
 
 // SELLCM SpMV kernel 2D grid - for large number of vectors
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
@@ -376,6 +375,7 @@ zmgesellcmtmv_kernel_1_3D_tex( int num_rows,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
    // T threads assigned to each row
     int idx = threadIdx.y ;     // thread in row
     int idy = threadIdx.x;      // local row
@@ -411,7 +411,7 @@ zmgesellcmtmv_kernel_1_3D_tex( int num_rows,
                             dot1*alpha
                             + beta*d_y [row*num_vecs+idz*2+1];
     }
-
+#endif
 }
 
 
@@ -434,6 +434,7 @@ zmgesellcmtmv_kernel_4_3D_tex( int num_rows,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
    // T threads assigned to each row
     int idx = threadIdx.y ;     // thread in row
     int idy = threadIdx.x;      // local row
@@ -488,7 +489,7 @@ zmgesellcmtmv_kernel_4_3D_tex( int num_rows,
         }
 
     }
-
+#endif
 }
  
 
@@ -511,6 +512,7 @@ zmgesellcmtmv_kernel_8_3D_tex( int num_rows,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
    // T threads assigned to each row
     int idx = threadIdx.y ;     // thread in row
     int idy = threadIdx.x;      // local row
@@ -570,7 +572,7 @@ zmgesellcmtmv_kernel_8_3D_tex( int num_rows,
         }
 
     }
-
+#endif
 }
 
 
@@ -593,6 +595,7 @@ zmgesellcmtmv_kernel_16_3D_tex( int num_rows,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
    // T threads assigned to each row
     int idx = threadIdx.y ;     // thread in row
     int idy = threadIdx.x;      // local row
@@ -656,7 +659,7 @@ zmgesellcmtmv_kernel_16_3D_tex( int num_rows,
         }
 
     }
-
+#endif
 }
 
 
@@ -679,6 +682,7 @@ zmgesellcmtmv_kernel_32_3D_tex( int num_rows,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
    // T threads assigned to each row
     int idx = threadIdx.y ;     // thread in row
     int idy = threadIdx.x;      // local row
@@ -746,11 +750,401 @@ zmgesellcmtmv_kernel_32_3D_tex( int num_rows,
         }
 
     }
+#endif
+}
 
+//***************** routines for beta = 0 ************************************//
+
+
+// SELLCM SpMV kernel 2D grid - for large number of vectors
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+zmgesellcmtmv_kernel_1_3D_texb( int num_rows, 
+                     int num_cols,
+                     int num_vecs,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     cudaTextureObject_t texdx,
+                     magmaDoubleComplex *d_y)
+{
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int idz = threadIdx.z;      // vector
+    int ldx = idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
+        magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            dot1 += val * __hiloint2double(v.y, v.x);
+            dot2 += val * __hiloint2double(v.w, v.z);
+        }
+        d_y[row*num_vecs+idz*2] = 
+                            dot1*alpha;
+        d_y[row*num_vecs+idz*2+1] = 
+                            dot1*alpha;
+    }
+#endif
 }
 
 
+// SELLCM SpMV kernel 3D grid
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+zmgesellcmtmv_kernel_4_3D_texb( int num_rows, 
+                     int num_cols,
+                     int num_vecs,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     cudaTextureObject_t texdx,
+                     magmaDoubleComplex *d_y)
+{
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int idz = threadIdx.z;      // vector
+    int ldx = idx * blocksize + idy;
+    int ldz = idz * blocksize * T + idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+    int sv = num_vecs/2 * blocksize * T;
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
+        magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+
+
+
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            dot1 += val * __hiloint2double(v.y, v.x);
+            dot2 += val * __hiloint2double(v.w, v.z);
+        }
+        shared[ldz]  = dot1;
+        shared[ldz+sv]  = dot2;
+
+        __syncthreads();
+        if( idx < 2 ){
+            shared[ldz]+=shared[ldz+blocksize*2];    
+            shared[ldz+sv]+=shared[ldz+sv+blocksize*2];               
+            __syncthreads();
+            if( idx == 0 ) {
+                d_y[row*num_vecs+idz*2] = 
+                (shared[ldz]+shared[ldz+blocksize*1])*alpha;
+                d_y[row*num_vecs+idz*2+1] = 
+                (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
+            }
+
+        }
+
+    }
 #endif
+}
+ 
+
+// SELLCM SpMV kernel 3D grid
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+zmgesellcmtmv_kernel_8_3D_texb( int num_rows, 
+                     int num_cols,
+                     int num_vecs,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     cudaTextureObject_t texdx,
+                     magmaDoubleComplex *d_y)
+{
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int idz = threadIdx.z;      // vector
+    int ldx = idx * blocksize + idy;
+    int ldz = idz * blocksize * T + idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+    int sv = num_vecs/2 * blocksize * T;
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
+        magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+
+
+
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            dot1 += val * __hiloint2double(v.y, v.x);
+            dot2 += val * __hiloint2double(v.w, v.z);
+        }
+        shared[ldz]  = dot1;
+        shared[ldz+sv]  = dot2;
+
+        __syncthreads();
+        if( idx < 4 ){
+            shared[ldz]+=shared[ldz+blocksize*4];    
+            shared[ldz+sv]+=shared[ldz+sv+blocksize*4];               
+            __syncthreads();
+            if( idx < 2 ){
+                shared[ldz]+=shared[ldz+blocksize*2];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*2];   
+            }
+            __syncthreads();
+            if( idx == 0 ) {
+                d_y[row*num_vecs+idz*2] = 
+                (shared[ldz]+shared[ldz+blocksize*1])*alpha;
+
+                d_y[row*num_vecs+idz*2+1] = 
+                (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
+            }
+
+        }
+
+    }
+#endif
+}
+
+
+// SELLCM SpMV kernel 3D grid
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+zmgesellcmtmv_kernel_16_3D_texb( int num_rows, 
+                     int num_cols,
+                     int num_vecs,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     cudaTextureObject_t texdx,
+                     magmaDoubleComplex *d_y)
+{
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int idz = threadIdx.z;      // vector
+    int ldx = idx * blocksize + idy;
+    int ldz = idz * blocksize * T + idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+    int sv = num_vecs/2 * blocksize * T;
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
+        magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+
+
+
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            dot1 += val * __hiloint2double(v.y, v.x);
+            dot2 += val * __hiloint2double(v.w, v.z);
+        }
+        shared[ldz]  = dot1;
+        shared[ldz+sv]  = dot2;
+
+        __syncthreads();
+        if( idx < 8 ){
+            shared[ldz]+=shared[ldz+blocksize*8];    
+            shared[ldz+sv]+=shared[ldz+sv+blocksize*8];               
+            __syncthreads();
+            if( idx < 4 ){
+                shared[ldz]+=shared[ldz+blocksize*4];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*4];   
+            }
+            if( idx < 2 ){
+                shared[ldz]+=shared[ldz+blocksize*2];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*2];   
+            }
+            __syncthreads();
+            if( idx == 0 ) {
+                d_y[row*num_vecs+idz*2] = 
+                (shared[ldz]+shared[ldz+blocksize*1])*alpha;
+
+                d_y[row*num_vecs+idz*2+1] = 
+                (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
+            }
+
+        }
+
+    }
+#endif
+}
+
+
+// SELLCM SpMV kernel 3D grid
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
+__global__ void 
+zmgesellcmtmv_kernel_32_3D_texb( int num_rows, 
+                     int num_cols,
+                     int num_vecs,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     cudaTextureObject_t texdx,
+                     magmaDoubleComplex *d_y)
+{
+#if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+   // T threads assigned to each row
+    int idx = threadIdx.y ;     // thread in row
+    int idy = threadIdx.x;      // local row
+    int idz = threadIdx.z;      // vector
+    int ldx = idx * blocksize + idy;
+    int ldz = idz * blocksize * T + idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+    int sv = num_vecs/2 * blocksize * T;
+
+    extern __shared__ magmaDoubleComplex shared[];
+
+
+    if(row < num_rows ){
+        magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
+        magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
+        int offset = d_rowptr[ bdx ];
+        int block = blocksize * T; // total number of threads
+
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+            // number of elements each thread handles
+
+
+
+        for ( int k = 0; k < max_ ; k++ ){
+            magmaDoubleComplex val = 
+                        d_val[ offset + ldx + block*k ];
+            int col = 
+                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            dot1 += val * __hiloint2double(v.y, v.x);
+            dot2 += val * __hiloint2double(v.w, v.z);
+        }
+        shared[ldz]  = dot1;
+        shared[ldz+sv]  = dot2;
+
+        __syncthreads();
+        if( idx < 16 ){
+            shared[ldz]+=shared[ldz+blocksize*16];    
+            shared[ldz+sv]+=shared[ldz+sv+blocksize*16];               
+            __syncthreads();
+            if( idx < 8 ){
+                shared[ldz]+=shared[ldz+blocksize*8];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*8];   
+            }
+            if( idx < 4 ){
+                shared[ldz]+=shared[ldz+blocksize*4];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*4];   
+            }
+            if( idx < 2 ){
+                shared[ldz]+=shared[ldz+blocksize*2];   
+                shared[ldz+sv]+=shared[ldz+sv+blocksize*2];   
+            }
+            __syncthreads();
+            if( idx == 0 ) {
+                d_y[row*num_vecs+idz*2] = 
+                (shared[ldz]+shared[ldz+blocksize*1])*alpha;
+
+                d_y[row*num_vecs+idz*2+1] = 
+                (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
+            }
+
+        }
+
+    }
+#endif
+}
+
+
+//*************************** end  kernels using texture  ********************//
+
+
 
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -799,11 +1193,23 @@ magma_zmgesellcmmv( magma_trans_t transA,
                     magmaDoubleComplex beta,
                     magmaDoubleComplex *d_y ){
 
-    // using a 3D thread grid
+    // using a 3D thread grid for small num_vecs, a 2D grid otherwise
+    
+    int texture=0, kepler=0, precision=0;
 
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch > 300 )
+        kepler = 1;
+           
+    #if defined(PRECISION_d)
+        precision = 1;
+    #endif
 
-    #if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
+    #if defined(TEXTURE)
+        texture = 1;
+    #endif
 
+    if( (texture==1) && (precision==1) && (kepler==1) ){
         // Create channel.
         cudaChannelFormatDesc channel_desc;
         channel_desc = cudaCreateChannelDesc(32, 32, 32, 32, 
@@ -837,13 +1243,11 @@ magma_zmgesellcmmv( magma_trans_t transA,
         if( num_vecs > 8 ) // avoid running into memory problems
             alignment = 1; 
 
-        int num_threads = (num_vecs/2) * blocksize*alignment; 
+        int num_threads = (num_vecs/2) * blocksize*alignment;            
+
         // every thread handles two vectors
-        magma_int_t arch = magma_getdevice_arch();
-        if ( arch < 200 && num_threads*2 > 256 )
-            printf("error: too much shared memory requested.\n");
-        else if (  num_threads*2 > 1500 )
-            printf("error: too much shared memory requested.\n");
+        if (  num_threads > 1024 )
+            printf("error: too many threads requested.\n");
 
         dim3 block( blocksize, alignment, num_vecs/2 );
 
@@ -854,50 +1258,81 @@ magma_zmgesellcmmv( magma_trans_t transA,
         int Ms = num_vecs * blocksize*alignment * sizeof( magmaDoubleComplex );
 
 
-        if( alignment == 1)
+        if( alignment == 1){
+            dim3 block( blocksize, num_vecs/2, 1 );
+            if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
+            zmgesellcmtmv_kernel_1_3D_texb<<< grid, block, 0, magma_stream >>>
+            ( m, n, num_vecs, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, texdx, d_y );
+            else
             zmgesellcmtmv_kernel_1_3D_tex<<< grid, block, 0, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
-        else if( alignment == 4)
+        }
+        else if( alignment == 4){
+            dim3 block( blocksize, alignment, num_vecs/2 );
+            if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
+            zmgesellcmtmv_kernel_4_3D_texb<<< grid, block, Ms, magma_stream >>>
+            ( m, n, num_vecs, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, texdx, d_y );
+            else
             zmgesellcmtmv_kernel_4_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
-        else if( alignment == 8)
+        }
+        else if( alignment == 8){
+            dim3 block( blocksize, alignment, num_vecs/2 );
+            if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
+            zmgesellcmtmv_kernel_8_3D_texb<<< grid, block, Ms, magma_stream >>>
+            ( m, n, num_vecs, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, texdx, d_y );
+            else
             zmgesellcmtmv_kernel_8_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
-        else if( alignment == 16)
+        }
+        else if( alignment == 16){
+            dim3 block( blocksize, alignment, num_vecs/2 );
+            if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
+            zmgesellcmtmv_kernel_16_3D_texb<<< grid, block, Ms, magma_stream >>>
+            ( m, n, num_vecs, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, texdx, d_y );
+            else
             zmgesellcmtmv_kernel_16_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
-        else if( alignment == 32)
+        }
+        else if( alignment == 32){
+            dim3 block( blocksize, alignment, num_vecs/2 );
+            if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
+            zmgesellcmtmv_kernel_32_3D_texb<<< grid, block, Ms, magma_stream >>>
+            ( m, n, num_vecs, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, texdx, d_y );
+            else
             zmgesellcmtmv_kernel_32_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
+        }
         else{
             printf("error: alignment %d not supported.\n", alignment);
             exit(-1);
         }
 
-
-
-    #else
+    }else{
 
         if( num_vecs%2 ==1 ){ // only multiple of 2 can be processed
             printf("error: number of vectors has to be multiple of 2.\n");
             exit(-1);
         }
+
         if( num_vecs > 8 ) // avoid running into memory problems
-            alignment = 1; 
+            alignment = 1;
 
         int num_threads = num_vecs * blocksize*alignment;
-        magma_int_t arch = magma_getdevice_arch();
-        if ( arch < 200 && num_threads > 256 )
-            printf("error: too much shared memory requested.\n");
-        else if (  num_threads > 1500 )
-            printf("error: too much shared memory requested.\n");
 
-        dim3 block( blocksize, alignment, num_vecs );
+        // every thread handles two vectors
+        if (  num_threads > 1024 )
+            printf("error: too many threads requested.\n");
 
         int dimgrid1 = sqrt(slices);
         int dimgrid2 = (slices + dimgrid1 -1 ) / dimgrid1;
@@ -905,31 +1340,41 @@ magma_zmgesellcmmv( magma_trans_t transA,
         dim3 grid( dimgrid1, dimgrid2, 1);
         int Ms =  num_threads * sizeof( magmaDoubleComplex );
 
-        if( alignment == 1)
+        if( alignment == 1){
+            dim3 block( blocksize, num_vecs, 1 ); 
             zmgesellcmtmv_kernel_1_3D<<< grid, block, 0, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
-        else if( alignment == 4)
+        }
+        else if( alignment == 4){
+            dim3 block( blocksize, alignment, num_vecs );
             zmgesellcmtmv_kernel_4_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
-        else if( alignment == 8)
+        }
+        else if( alignment == 8){
+            dim3 block( blocksize, alignment, num_vecs );
             zmgesellcmtmv_kernel_8_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
-        else if( alignment == 16)
+        }
+        else if( alignment == 16){
+            dim3 block( blocksize, alignment, num_vecs );
             zmgesellcmtmv_kernel_16_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
-        else if( alignment == 32)
+        }
+        else if( alignment == 32){
+            dim3 block( blocksize, alignment, num_vecs );
             zmgesellcmtmv_kernel_32_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
+        }
         else{
             printf("error: alignment %d not supported.\n", alignment);
             exit(-1);
         }
-    #endif
+    }
 
    return MAGMA_SUCCESS;
 }
