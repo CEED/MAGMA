@@ -458,6 +458,12 @@ magma_int_t
 magma_zapplypastix(     magma_z_vector b, magma_z_vector *x, 
                         magma_z_preconditioner *precond );
 
+magma_int_t
+magma_zlobpcg_shift(    magma_int_t num_rows,
+                        magma_int_t num_vecs, 
+                        magma_int_t shift,
+                        magmaDoubleComplex *x );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
 */

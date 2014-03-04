@@ -31,6 +31,7 @@ ZSRC := \
 	zgesellcmmv.cu		\
 	zjacobisetup.cu		\
 	zlag2c_sparse.cu	\
+    zlobpcg_shift.cu    \
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\
@@ -40,6 +41,7 @@ ZSRC := \
 	zmgeelltmv.cu		\
 	zmgesellcmmv.cu		\
 	zpipelinedgmres.cu	\
+
 
 # Auxiliary routines
 ZSRC += \
