@@ -39,19 +39,19 @@
     magma_z_sparse_matrix A                   input matrix A
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
 
     ========================================================================  */
 
 
 magma_int_t
 magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par )
+           magma_z_solver_par *solver_par )
 {
     // prepare solver feedback
     solver_par->solver = Magma_JACOBI;
     solver_par->info = 0;
-    magma_int_t iterblock = solver_par->verbose;
+
     real_Double_t tempo1, tempo2;
     double residual;
     magma_zresidual( A, b, *x, &residual );
@@ -75,7 +75,7 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // Jacobi setup
     magma_zjacobisetup( A, b, &M, &c );
-    magma_solver_parameters jacobiiter_par;
+    magma_z_solver_par jacobiiter_par;
     jacobiiter_par.maxiter = solver_par->maxiter;
 
     magma_device_sync(); tempo1=magma_wtime();
@@ -435,14 +435,14 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_sparse_matrix M                   input matrix M = D^(-1) * (L+U)
     magma_z_vector c                          c = D^(-1) * b
     magma_z_vector *x                         iteration vector x
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
 
     ========================================================================  */
 
 
 magma_int_t
 magma_zjacobiiter( magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,  
-                                 magma_solver_parameters *solver_par ){
+                                 magma_z_solver_par *solver_par ){
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 

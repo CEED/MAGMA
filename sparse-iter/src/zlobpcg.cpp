@@ -39,7 +39,7 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *blockX, double *evalues,
                magmaDoubleComplex *dwork, magma_int_t ldwork, 
                magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_solver_parameters *solver_par,
+               magma_z_solver_par *solver_par,
                magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --

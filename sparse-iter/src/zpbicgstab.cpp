@@ -39,7 +39,7 @@
     magma_z_sparse_matrix A                   input matrix A
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
     magma_precond_parameters *precond_par     preconditioner parameters
 
     =====================================================================  */
@@ -47,7 +47,7 @@
 
 magma_int_t
 magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par, magma_precond_parameters *precond_par )
+           magma_z_solver_par *solver_par, magma_precond_parameters *precond_par )
 {
 
     // some useful variables

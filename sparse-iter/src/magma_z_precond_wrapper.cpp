@@ -45,7 +45,7 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
                  magma_z_vector *x, magma_z_preconditioner precond )
 {
 // set up precond parameters as solver parameters   
-    magma_solver_parameters psolver_par;
+    magma_z_solver_par psolver_par;
     psolver_par.epsilon = precond.epsilon;
     psolver_par.maxiter = precond.maxiter;
     psolver_par.restart = precond.restart;

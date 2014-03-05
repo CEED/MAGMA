@@ -58,13 +58,13 @@
     magma_z_sparse_matrix A                   descriptor for matrix A
     magma_z_vector b                          RHS b vector
     magma_z_vector *x                         solution approximation
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
 
     ========================================================================  */
 
 magma_int_t
 magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b, 
-                       magma_z_vector *x, magma_solver_parameters *solver_par ){
+                       magma_z_vector *x, magma_z_solver_par *solver_par ){
 
     // prepare solver feedback
     solver_par->solver = Magma_BCSRLU;
@@ -465,7 +465,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
 
 magma_int_t
 magma_zbcsrlusv( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par, magma_int_t *ipiv ){
+           magma_z_solver_par *solver_par, magma_int_t *ipiv ){
 
     // some useful variables
     magma_int_t size_b = A.blocksize;
@@ -483,8 +483,8 @@ magma_zbcsrlusv( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
 
     // forward solve
-        magma_zbcsrtrsv( MagmaLower, r_blocks, c_blocks, size_b, 
-                         A.val, A.blockinfo, x->val );
+    magma_zbcsrtrsv( MagmaLower, r_blocks, c_blocks, size_b, 
+                     A.val, A.blockinfo, x->val );
 
     // backward solve
     magma_zbcsrtrsv( MagmaUpper, r_blocks, c_blocks, size_b, 

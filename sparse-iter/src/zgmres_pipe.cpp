@@ -45,13 +45,13 @@
     magma_z_sparse_matrix A                   descriptor for matrix A
     magma_z_vector b                          RHS b vector
     magma_z_vector *x                         solution approximation
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
 
     =====================================================================  */
 
 magma_int_t
 magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                   magma_solver_parameters *solver_par ){
+                   magma_z_solver_par *solver_par ){
 
 #define  q(i)     (q.val + (i)*dofs)
 #define hQ(i)     (hQ    + (i)*dofs)

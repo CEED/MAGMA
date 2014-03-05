@@ -39,30 +39,20 @@
     magma_z_sparse_matrix A                   input matrix A
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
-    magma_solver_parameters *solver_par       solver parameters
+    magma_z_solver_par *solver_par       solver parameters
     magma_z_preconditioner                    preconditioner
 
     ========================================================================  */
 
 magma_int_t
 magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-            magma_solver_parameters *solver_par, 
+            magma_z_solver_par *solver_par, 
             magma_z_preconditioner *precond_par ){
 
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
     solver_par->numiter = 0;
     solver_par->info = 0;
-    magma_int_t iterblock = solver_par->verbose;
-    if( solver_par->verbose > 0 ){
-        magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
-                * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
-        magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
-                *( (solver_par->maxiter)/(solver_par->verbose)+1) );
-    }else{
-        solver_par->res_vec = NULL;
-        solver_par->timing = NULL;
-    }   
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -129,10 +119,10 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
         if( solver_par->verbose > 0 ){
             magma_device_sync(); tempo2=magma_wtime();
-            if( (solver_par->numiter)%iterblock==0 ) {
-                solver_par->res_vec[(solver_par->numiter)/iterblock] 
+            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
-                solver_par->timing[(solver_par->numiter)/iterblock] 
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) tempo2-tempo1;
             }
         }

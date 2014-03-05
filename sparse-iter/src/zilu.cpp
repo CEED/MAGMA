@@ -222,7 +222,7 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
 
 magma_int_t
 magma_zilu( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par, magma_int_t *ipiv ){
+           magma_z_solver_par *solver_par, magma_int_t *ipiv ){
 
     // some useful variables
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
