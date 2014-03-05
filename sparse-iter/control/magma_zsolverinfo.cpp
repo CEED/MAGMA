@@ -365,7 +365,7 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     }  
 
     if( solver_par->num_eigenvalues > 0 ){
-        magma_zmalloc_cpu( &solver_par->eigenvalues , 
+        magma_dmalloc_cpu( &solver_par->eigenvalues , 
                                 3*solver_par->num_eigenvalues );
 
         // setup initial guess EV using lapack

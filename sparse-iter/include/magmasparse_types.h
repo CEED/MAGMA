@@ -169,7 +169,7 @@ typedef struct magma_z_solver_par{
     magma_int_t        verbose;
     magma_int_t        num_eigenvalues;
     magma_int_t        ev_length;
-    magmaDoubleComplex *eigenvalues;
+    double             *eigenvalues;
     magmaDoubleComplex *eigenvectors;
     magma_int_t        info;
 
@@ -206,7 +206,7 @@ typedef struct magma_c_solver_par{
     magma_int_t        verbose;
     magma_int_t        num_eigenvalues;
     magma_int_t        ev_length;
-    magmaFloatComplex  *eigenvalues;
+    float              *eigenvalues;
     magmaFloatComplex  *eigenvectors;
     magma_int_t        info;
 
