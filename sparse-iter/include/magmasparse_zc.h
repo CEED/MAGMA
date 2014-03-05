@@ -85,22 +85,22 @@ magma_zlag2c_CSR_DENSE_convert(   magma_z_sparse_matrix A,
 */
 magma_int_t
 magma_zcpgmres(    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                   magma_solver_parameters *solver_par,  
+                   magma_z_solver_par *solver_par,  
                    magma_z_preconditioner *precond_par);
 
 magma_int_t
 magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                   magma_solver_parameters *solver_par,  
+                   magma_z_solver_par *solver_par,  
                    magma_z_preconditioner *precond_par);
 
 magma_int_t
 magma_zcir(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                   magma_solver_parameters *solver_par, 
+                   magma_z_solver_par *solver_par, 
                    magma_z_preconditioner *precond_par );
 
 magma_int_t
 magma_zcpir(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-                   magma_solver_parameters *solver_par, 
+                   magma_z_solver_par *solver_par, 
                    magma_z_preconditioner *precond_par );
 
 

@@ -150,9 +150,9 @@ typedef struct magma_s_vector{
 
 }magma_s_vector;
 
+//*****************     solver parameters     ********************************//
 
-
-typedef struct magma_solver_parameters{
+typedef struct magma_z_solver_par{
 
     magma_solver_type  solver;
     magma_int_t        version;
@@ -167,7 +167,10 @@ typedef struct magma_solver_parameters{
     real_Double_t      *res_vec;
     real_Double_t      *timing;
     magma_int_t        verbose;
-    magma_int_t        eigenvalues;
+    magma_int_t        num_eigenvalues;
+    magma_int_t        ev_length;
+    magmaDoubleComplex *eigenvalues;
+    magmaDoubleComplex *eigenvectors;
     magma_int_t        info;
 
 //---------------------------------
@@ -182,8 +185,122 @@ typedef struct magma_solver_parameters{
 // -2 = convergence but stopping criterion not met within maxiter
 //--------------------------------
 
-}magma_solver_parameters;
+}magma_z_solver_par;
 
+
+
+typedef struct magma_c_solver_par{
+
+    magma_solver_type  solver;
+    magma_int_t        version;
+    float              epsilon;  
+    magma_int_t        maxiter;
+    magma_int_t        restart; 
+    magma_ortho_t      ortho;
+    magma_int_t        numiter;
+    float              init_res;
+    float              final_res;
+    real_Double_t      runtime;
+    real_Double_t      *res_vec;
+    real_Double_t      *timing;
+    magma_int_t        verbose;
+    magma_int_t        num_eigenvalues;
+    magma_int_t        ev_length;
+    magmaFloatComplex  *eigenvalues;
+    magmaFloatComplex  *eigenvectors;
+    magma_int_t        info;
+
+//---------------------------------
+// the input for verbose is:
+// 0 = production mode
+// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+// k-th iteration 
+//
+// the output of info is:
+//  0 = convergence (stopping criterion met)
+// -1 = no convergence
+// -2 = convergence but stopping criterion not met within maxiter
+//--------------------------------
+
+}magma_c_solver_par;
+
+
+
+typedef struct magma_d_solver_par{
+
+    magma_solver_type  solver;
+    magma_int_t        version;
+    double             epsilon;  
+    magma_int_t        maxiter;
+    magma_int_t        restart; 
+    magma_ortho_t      ortho;
+    magma_int_t        numiter;
+    double             init_res;
+    double             final_res;
+    real_Double_t      runtime;
+    real_Double_t      *res_vec;
+    real_Double_t      *timing;
+    magma_int_t        verbose;
+    magma_int_t        num_eigenvalues;
+    magma_int_t        ev_length;
+    double             *eigenvalues;
+    double             *eigenvectors;
+    magma_int_t        info;
+
+//---------------------------------
+// the input for verbose is:
+// 0 = production mode
+// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+// k-th iteration 
+//
+// the output of info is:
+//  0 = convergence (stopping criterion met)
+// -1 = no convergence
+// -2 = convergence but stopping criterion not met within maxiter
+//--------------------------------
+
+}magma_d_solver_par;
+
+
+
+typedef struct magma_s_solver_par{
+
+    magma_solver_type  solver;
+    magma_int_t        version;
+    float              epsilon;  
+    magma_int_t        maxiter;
+    magma_int_t        restart; 
+    magma_ortho_t      ortho;
+    magma_int_t        numiter;
+    float              init_res;
+    float              final_res;
+    real_Double_t      runtime;
+    real_Double_t      *res_vec;
+    real_Double_t      *timing;
+    magma_int_t        verbose;
+    magma_int_t        num_eigenvalues;
+    magma_int_t        ev_length;
+    float              *eigenvalues;
+    float              *eigenvectors;
+    magma_int_t        info;
+
+//---------------------------------
+// the input for verbose is:
+// 0 = production mode
+// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+// k-th iteration 
+//
+// the output of info is:
+//  0 = convergence (stopping criterion met)
+// -1 = no convergence
+// -2 = convergence but stopping criterion not met within maxiter
+//--------------------------------
+
+}magma_s_solver_par;
+
+
+
+//************            preconditioner parameters       ********************//
 
 typedef struct magma_z_preconditioner{
 
