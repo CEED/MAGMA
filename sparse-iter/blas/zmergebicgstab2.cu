@@ -205,7 +205,7 @@ magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
                          magmaDoubleComplex *d_r,
                          magmaDoubleComplex *d_v,
                          magmaDoubleComplex *skp ){
-/*
+
     int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
@@ -239,7 +239,7 @@ magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_alphakernel<<<Gs2, Bs2, 0>>>( skp );
-*/
+
    return MAGMA_SUCCESS;
 }
 
