@@ -9,6 +9,7 @@
        @author Hartwig Anzt
 
 */
+#include "magma_lapack.h"
 #include "common_magma.h"
 #include "../include/magmasparse.h"
 
@@ -31,13 +32,13 @@
     Arguments
     =========
 
-    magma_solver_parameters *solver_par    structure containing all information
+    magma_z_solver_par *solver_par    structure containing all information
 
     ========================================================================  */
 
 
 magma_int_t
-magma_zsolverinfo( magma_solver_parameters *solver_par, 
+magma_zsolverinfo( magma_z_solver_par *solver_par, 
                     magma_z_preconditioner *precond_par ){
 
     if( (solver_par->solver == Magma_CG) || (solver_par->solver == Magma_PCG) ){
@@ -275,13 +276,13 @@ magma_zsolverinfo( magma_solver_parameters *solver_par,
     Arguments
     =========
 
-    magma_solver_parameters *solver_par    structure containing all information
+    magma_z_solver_par *solver_par    structure containing all information
 
     ========================================================================  */
 
 
 magma_int_t
-magma_zsolverinfo_free( magma_solver_parameters *solver_par, 
+magma_zsolverinfo_free( magma_z_solver_par *solver_par, 
                         magma_z_preconditioner *precond ){
 
     if( solver_par->res_vec != NULL ){
@@ -292,11 +293,19 @@ magma_zsolverinfo_free( magma_solver_parameters *solver_par,
         magma_free_cpu( solver_par->timing );
         solver_par->timing = NULL;
     }
+    if( solver_par->eigenvectors != NULL ){
+        magma_free( solver_par->eigenvectors );
+        solver_par->eigenvectors = NULL;
+    }
+    if( solver_par->eigenvalues != NULL ){
+        magma_free_cpu( solver_par->eigenvalues );
+        solver_par->eigenvalues = NULL;
+    }
 
     if( precond->d.val != NULL ){
         magma_free( precond->d.val );
         precond->d.val = NULL;
-    }/*
+    }
     if( precond->M.val != NULL ){
         if ( precond->M.memory_location == Magma_DEV )
             magma_free( precond->M.val );
@@ -321,14 +330,14 @@ magma_zsolverinfo_free( magma_solver_parameters *solver_par,
     if( precond->M.blockinfo != NULL ){
         magma_free_cpu( precond->M.blockinfo );
         precond->M.blockinfo = NULL;
-    }*/
+    }
 
     return MAGMA_SUCCESS;
 }
 
 
 magma_int_t
-magma_zsolverinfo_init( magma_solver_parameters *solver_par, 
+magma_zsolverinfo_init( magma_z_solver_par *solver_par, 
                         magma_z_preconditioner *precond ){
 
 /*
@@ -344,15 +353,44 @@ magma_zsolverinfo_init( magma_solver_parameters *solver_par,
     solver_par->verbose = 0;
     solver_par->info = 0;
 */
-
+    magma_int_t iterblock = solver_par->verbose;
+    if( solver_par->verbose > 0 ){
+        magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
+                * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
+        magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
+                *( (solver_par->maxiter)/(solver_par->verbose)+1) );
+    }else{
         solver_par->res_vec = NULL;
         solver_par->timing = NULL;
+    }  
 
-        precond->d.val = NULL;
-        precond->M.val = NULL;
-        precond->M.col = NULL;
-        precond->M.row = NULL;
-        precond->M.blockinfo = NULL;
+    if( solver_par->num_eigenvalues > 0 ){
+        magma_zmalloc_cpu( &solver_par->eigenvalues , 
+                                3*solver_par->num_eigenvalues );
+
+        // setup initial guess EV using lapack
+        // then copy to GPU
+        magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
+        magmaDoubleComplex *initial_guess;
+        magma_zmalloc_cpu( &initial_guess, ev );
+        magma_zmalloc( &solver_par->eigenvectors, ev );
+        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
+        lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
+        magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
+            initial_guess, solver_par->ev_length, solver_par->eigenvectors, 
+                                                    solver_par->ev_length );
+
+        magma_free_cpu( initial_guess );
+    }else{
+        solver_par->eigenvectors = NULL;
+        solver_par->eigenvalues = NULL;
+    }  
+
+    precond->d.val = NULL;
+    precond->M.val = NULL;
+    precond->M.col = NULL;
+    precond->M.row = NULL;
+    precond->M.blockinfo = NULL;
 
     return MAGMA_SUCCESS;
 }
