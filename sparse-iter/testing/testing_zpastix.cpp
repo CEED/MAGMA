@@ -32,7 +32,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;

@@ -68,7 +68,7 @@ int main( int argc, char** argv)
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 10e-8;
     solver_par.maxiter = 1000;
     solver_par.restart = 1;

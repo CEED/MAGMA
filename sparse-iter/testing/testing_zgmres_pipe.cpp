@@ -23,7 +23,7 @@
 
 magma_int_t
 magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
-                   magma_solver_parameters *solver_par );
+                   magma_z_solver_par *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zgmres
@@ -32,7 +32,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 10e-8;
     solver_par.maxiter = 10;
     solver_par.restart = 30;

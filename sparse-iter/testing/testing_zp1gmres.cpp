@@ -91,7 +91,7 @@ for(magma_int_t matrix=0; matrix<1; matrix++){
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
 
     solver_par.epsilon = 10e-8;
     solver_par.maxiter = 1;

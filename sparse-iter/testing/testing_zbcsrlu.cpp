@@ -161,7 +161,7 @@ for(magma_int_t matrix=0; matrix<18; matrix++){
     magma_z_vinit( &y, Magma_DEV, A.num_cols, one );
     magma_z_vvisu( x, 0, 5 );
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 10e-12;
     solver_par.maxiter = 10000;
     solver_par.restart = 30;

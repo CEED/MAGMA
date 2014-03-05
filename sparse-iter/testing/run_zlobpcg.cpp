@@ -27,7 +27,7 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *blockX, double *evalues,
                magmaDoubleComplex *dwork, magma_int_t ldwork,
                magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_solver_parameters *solver_par, magma_int_t *info );
+               magma_z_solver_par *solver_par, magma_int_t *info );
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -37,17 +37,16 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
-    solver_par.eigenvalues = 20;
+    solver_par.num_eigenvalues = 20;
     magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     int precond = 0;
     int format = 0;
     int version = 0;
-    magma_zsolverinfo_init( &solver_par, &precond_par );
     
     magma_z_sparse_matrix A, B, dA;
     magma_z_vector x, b;
@@ -89,7 +88,7 @@ int main( int argc, char** argv)
         } else if ( strcmp("--tol", argv[i]) == 0 ) {
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
         } else if ( strcmp("--eigenvalues", argv[i]) == 0 ) {
-            solver_par.eigenvalues = atoi( argv[++i] );
+            solver_par.num_eigenvalues = atoi( argv[++i] );
         } else
             break;
     }
@@ -103,7 +102,7 @@ int main( int argc, char** argv)
         " matrices \n\n", format, B.blocksize, B.alignment,
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, precond,  
-        solver_par.eigenvalues);
+        solver_par.num_eigenvalues);
 
     while(  i < argc ){
 
@@ -112,12 +111,17 @@ int main( int argc, char** argv)
         printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
                                     ,A.num_rows,A.num_cols,A.nnz );
 
+        magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
+                           // as the matrix size has influence on the EV-length
+
+        solver_par.ev_length = A.num_cols;
+
         real_Double_t  gpu_time;
         magma_opts opts;
         //parse_opts( argc, argv, &opts );
         magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
     
-        magma_int_t blockSize = solver_par.eigenvalues;    
+        magma_int_t blockSize = solver_par.num_eigenvalues;    
         magma_int_t m = A.num_rows;
 
         magma_z_mtransfer(A, &dA, Magma_CPU, Magma_DEV);
@@ -139,7 +143,7 @@ int main( int argc, char** argv)
         magma_zmalloc_pinned( &hwork   ,        lhwork );
 
         // Solver parameters
-        magma_solver_parameters solver_par;
+        magma_z_solver_par solver_par;
         solver_par.epsilon = 1e-3;
         solver_par.maxiter = 360;
         
@@ -164,6 +168,8 @@ int main( int argc, char** argv)
         magma_free_cpu( hevectors);
         magma_free(     dwork    );
         magma_free_pinned( hwork    );
+
+        magma_zsolverinfo_free( &solver_par, &precond_par );
 
         i++;
     }

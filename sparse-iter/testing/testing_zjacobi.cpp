@@ -82,7 +82,7 @@ for(magma_int_t matrix=0; matrix<5; matrix++){
   //  magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
     magma_z_mtransfer( A, &D, Magma_CPU, Magma_DEV);
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
 
     solver_par.epsilon = 10e-10;
     solver_par.maxiter = 500000;

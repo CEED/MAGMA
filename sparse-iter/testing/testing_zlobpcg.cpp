@@ -27,7 +27,7 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *blockX, double *evalues,
                magmaDoubleComplex *dwork, magma_int_t ldwork,
                magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_solver_parameters *solver_par, magma_int_t *info );
+               magma_z_solver_par *solver_par, magma_int_t *info );
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -81,9 +81,9 @@ int main( int argc, char** argv)
     magma_zmalloc_pinned( &hwork   ,        lhwork );
 
     // Solver parameters
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     solver_par.epsilon = 1e-3;
-    solver_par.maxiter = 360;
+    solver_par.maxiter = 10;
     
     magma_int_t n2 = m * blockSize;
     lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );

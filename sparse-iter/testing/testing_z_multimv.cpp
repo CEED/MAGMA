@@ -132,7 +132,7 @@ int main( int argc, char** argv)
 
 
 
-    for(matrix=1; matrix<40; matrix++)
+    for(matrix=5; matrix<40; matrix++)
     {
         magma_z_sparse_matrix hA, hB, hC, dA, dB, hD, dD, hE, dE;
         magma_z_vector hx, hy, dx, dy, dx2, dy2;

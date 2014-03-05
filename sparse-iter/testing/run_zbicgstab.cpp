@@ -31,14 +31,14 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     magma_z_preconditioner precond_par;
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
+    solver_par.num_eigenvalues = 0;
     int format = 0;
     int version = 0;
-    magma_zsolverinfo_init( &solver_par, &precond_par );
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
@@ -86,6 +86,8 @@ int main( int argc, char** argv)
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, version );
 
+    magma_zsolverinfo_init( &solver_par, &precond_par );
+
     while(  i < argc ){
 
         magma_z_csr_mtx( &A,  argv[i]  ); 
@@ -108,8 +110,6 @@ int main( int argc, char** argv)
 
         magma_zsolverinfo( &solver_par, &precond_par );
 
-        magma_zsolverinfo_free( &solver_par, &precond_par );
-
         magma_z_mfree(&B_d);
         magma_z_mfree(&B);
         magma_z_mfree(&A); 
@@ -118,6 +118,8 @@ int main( int argc, char** argv)
 
         i++;
     }
+
+    magma_zsolverinfo_free( &solver_par, &precond_par );
 
     TESTING_FINALIZE();
     return 0;

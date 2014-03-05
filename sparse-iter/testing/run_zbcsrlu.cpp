@@ -31,13 +31,12 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    magma_solver_parameters solver_par;
+    magma_z_solver_par solver_par;
     magma_z_preconditioner precond_par;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
     solver_par.version = 0;
     int format = 0;
-    magma_zsolverinfo_init( &solver_par, &precond_par );
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
@@ -59,6 +58,8 @@ int main( int argc, char** argv)
             " [ --version %d (0=CUBLAS batched, 1=custom kernels) ]"
             " matrices \n\n", solver_par.version );
 
+    magma_zsolverinfo_init( &solver_par, &precond_par );
+
     while(  i < argc ){
 
         magma_z_csr_mtx( &A,  argv[i]  ); 
@@ -73,14 +74,14 @@ int main( int argc, char** argv)
 
         magma_zsolverinfo( &solver_par, &precond_par );
 
-        magma_zsolverinfo_free( &solver_par, &precond_par );
-
         magma_z_mfree(&A); 
         magma_z_vfree(&x);
         magma_z_vfree(&b);
 
         i++;
     }
+
+    magma_zsolverinfo_free( &solver_par, &precond_par );
 
     TESTING_FINALIZE();
     return 0;
