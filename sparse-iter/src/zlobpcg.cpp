@@ -159,9 +159,9 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
     magma_int_t gramDim, ldgram  = 3*n;
      
     // Make the initial vectors orthonormal
-//    magma_zgegqr_gpu( m, n, blockX, m, dwork, hwork, info );
+    magma_zgegqr_gpu( m, n, blockX, m, dwork, hwork, info );
 
-magma_zorthomgs( m, n, blockX );
+//magma_zorthomgs( m, n, blockX );
 
     magma_z_bspmv(m, n, c_one, A, blockX, c_zero, blockAX );
 
@@ -212,10 +212,10 @@ magma_zorthomgs( m, n, blockX );
             // magmablas_zlacpy( MagmaUpperLower, m, cBlockSize, blockR, m, blockW, m);
 
             // === make the active preconditioned residuals orthonormal
-            //magma_zgegqr_gpu( m, cBlockSize, blockR, m, dwork, hwork, info );
+            magma_zgegqr_gpu( m, cBlockSize, blockR, m, dwork, hwork, info );
 
 
-magma_zorthomgs( m, cBlockSize, blockR );
+//magma_zorthomgs( m, cBlockSize, blockR );
 
             
             // === compute AR
