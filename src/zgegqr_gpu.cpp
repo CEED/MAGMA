@@ -14,7 +14,7 @@
 
 
 extern "C" magma_int_t
-magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
+magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dA,   magma_int_t ldda,
                   magmaDoubleComplex *dwork, magmaDoubleComplex *work,
                   magma_int_t *info )
@@ -90,81 +90,117 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    magmaDoubleComplex *U, *VT, *vt, *R, *G, *hwork, *tau;
-    double *S;
 
-    R    = work;             // Size n * n
-    G    = R    + n*n;       // Size n * n
-    VT   = G    + n*n;       // Size n * n
+    if (ikind == 1) {
+        magmaDoubleComplex *U, *VT, *vt, *R, *G, *hwork, *tau;
+        double *S;
 
-    magma_zmalloc_cpu( &hwork, 32 + 2*n*n + 2*n);
-    if ( hwork == NULL ) {
-        *info = MAGMA_ERR_HOST_ALLOC;
-        return *info;
-    }
-
-    magma_int_t lwork=n*n+32; // First part f hwork; used as workspace in svd
-
-    U    = hwork + n*n + 32;  // Size n*n
-    S    = (double *)(U+n*n); // Size n
-    tau  = U + n*n + n;       // Size n
-
-    #if defined(PRECISION_c) || defined(PRECISION_z)
-    double *rwork;
-    magma_dmalloc_cpu( &rwork, 5*n);
-    if ( rwork == NULL ) {
-        *info = MAGMA_ERR_HOST_ALLOC;
-        return *info;
-    }
-    #endif
-
-    do {
-        i++;
+        R    = work;             // Size n * n
+        G    = R    + n*n;       // Size n * n
+        VT   = G    + n*n;       // Size n * n
         
-        magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
-        // magmablas_zgemm_reduce(n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
-        magma_zgetmatrix(n, n, dwork, n, G, n);
+        magma_zmalloc_cpu( &hwork, 32 + 2*n*n + 2*n);
+        if ( hwork == NULL ) {
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
         
-        #if defined(PRECISION_s) || defined(PRECISION_d)
-        lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
-                         hwork, &lwork, info);
-        #else
-        lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
-                         hwork, &lwork, rwork, info);
-        #endif
+        magma_int_t lwork=n*n+32; // First part f hwork; used as workspace in svd
         
-        mins = 100.f, maxs = 0.f;
-        for (k=0; k < n; k++) {
-            S[k] = magma_dsqrt( S[k] );
+        U    = hwork + n*n + 32;  // Size n*n
+        S    = (double *)(U+n*n); // Size n
+        tau  = U + n*n + n;       // Size n
+        
+#if defined(PRECISION_c) || defined(PRECISION_z)
+        double *rwork;
+        magma_dmalloc_cpu( &rwork, 5*n);
+        if ( rwork == NULL ) {
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
+#endif
+        
+        do {
+            i++;
             
-            if (S[k] < mins)  mins = S[k];
-            if (S[k] > maxs)  maxs = S[k];
-        }
+            magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+            // magmablas_zgemm_reduce(n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+            magma_zgetmatrix(n, n, dwork, n, G, n);
+            
+#if defined(PRECISION_s) || defined(PRECISION_d)
+            lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
+                             hwork, &lwork, info);
+#else
+            lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
+                             hwork, &lwork, rwork, info);
+#endif
+            
+            mins = 100.f, maxs = 0.f;
+            for (k=0; k < n; k++) {
+                S[k] = magma_dsqrt( S[k] );
+                
+                if (S[k] < mins)  mins = S[k];
+                if (S[k] > maxs)  maxs = S[k];
+            }
+            
+            for (k=0; k < n; k++) {
+                vt = VT + k*n;
+                for (j=0; j < n; j++)
+                    vt[j] *= S[j];
+            }
+            lapackf77_zgeqrf(&n, &n, VT, &n, tau, hwork, &lwork, info);
+            
+            if (i == 1)
+                blasf77_zcopy(&n2, VT, &ione, R, &ione);
+            else
+                blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
+            
+            magma_zsetmatrix(n, n, VT, n, dwork, n);
+            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+            if (mins > 0.00001f)
+                cn = maxs/mins;
+            
+            //fprintf(stderr, "Iteration %d, cond num = %f \n", i, cn);
+        } while (cn > 10.f);
         
-        for (k=0; k < n; k++) {
-            vt = VT + k*n;
-            for (j=0; j < n; j++)
-                vt[j] *= S[j];
-        }
-        lapackf77_zgeqrf(&n, &n, VT, &n, tau, hwork, &lwork, info);
-        
-        if (i == 1)
-            blasf77_zcopy(&n2, VT, &ione, R, &ione);
-        else
-            blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
-        
-        magma_zsetmatrix(n, n, VT, n, dwork, n);
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
-        if (mins > 0.00001f)
-            cn = maxs/mins;
-        
-        //fprintf(stderr, "Iteration %d, cond num = %f \n", i, cn);
-    } while (cn > 10.f);
+        magma_free_cpu( hwork );
+#if defined(PRECISION_c) || defined(PRECISION_z)
+        magma_free_cpu( rwork );
+#endif
+        // ================== end of ikind == 1 ===================================================
+    }
+    else if (ikind == 2) {
+        // ================== LAPACK based      ===================================================
+        magma_int_t min_mn = min(m, n);
+        int             nb = n;
 
-    magma_free_cpu( hwork );
-    #if defined(PRECISION_c) || defined(PRECISION_z)
-    magma_free_cpu( rwork );
-    #endif
-    
+        magmaDoubleComplex *dtau = dwork + 2*n*n, *d_T = dwork, *ddA = dwork + n*n;
+        magmaDoubleComplex *tau  = work;
+
+        magma_zgeqr2x3_gpu(&m, &n, dA, &ldda, dtau, d_T, ddA,
+                           (double *)(dwork+min_mn+2*n*n), info);
+        magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);
+        magma_zungqr_gpu( m, n, n, dA, ldda, tau, d_T, nb, info );
+        // ================== end of ikind == 2 ===================================================       
+    }
+    else if (ikind == 3) {
+        // ================== MGS               ===================================================
+        #define work(i,j) (work + (i) + (j)*n)
+        #define dA(  i,j) (dA   + (i) + (j)*ldda)
+        for(magma_int_t j = 0; j<n; j++){
+            for(magma_int_t i = 0; i<j; i++){
+                *work(i, j) = magma_zdotc(m, dA(0,i), 1, dA(0,j), 1);
+                magma_zaxpy(m, -(*work(i,j)),  dA(0,i), 1, dA(0,j), 1);
+            }
+            for(magma_int_t i = j; i<n; i++)
+                *work(i, j) = MAGMA_Z_ZERO;
+            //*work(j,j) = MAGMA_Z_MAKE( magma_dznrm2(m, dA(0,j), 1), 0. );
+            *work(j,j) = magma_zdotc(m, dA(0,j), 1, dA(0,j), 1);
+            *work(j,j) = MAGMA_Z_MAKE( sqrt(MAGMA_Z_REAL( *work(j,j) )), 0.);
+            magma_zscal(m, 1./ *work(j,j), dA(0,j), 1);
+        }
+        // ================== end of ikind == 3 ===================================================
+    }
+             
     return *info;
 } /* magma_zgegqr_gpu */
