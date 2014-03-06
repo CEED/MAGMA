@@ -74,6 +74,12 @@ ZSRC += \
 #	zilu.cpp		\
 
 
+# orthogonalization schemes
+ZSRC += \
+	zorthomgs.cpp   \
+
+
+
 
 # Wrappers, tools etc
 ZSRC += \

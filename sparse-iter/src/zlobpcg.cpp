@@ -159,7 +159,10 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
     magma_int_t gramDim, ldgram  = 3*n;
      
     // Make the initial vectors orthonormal
-    magma_zgegqr_gpu( m, n, blockX, m, dwork, hwork, info );
+//    magma_zgegqr_gpu( m, n, blockX, m, dwork, hwork, info );
+
+magma_zorthomgs( m, n, blockX );
+
     magma_z_bspmv(m, n, c_one, A, blockX, c_zero, blockAX );
 
     // Compute the Gram matrix = (X, AX) & its eigenstates
@@ -209,7 +212,11 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
             // magmablas_zlacpy( MagmaUpperLower, m, cBlockSize, blockR, m, blockW, m);
 
             // === make the active preconditioned residuals orthonormal
-            magma_zgegqr_gpu( m, cBlockSize, blockR, m, dwork, hwork, info );
+            //magma_zgegqr_gpu( m, cBlockSize, blockR, m, dwork, hwork, info );
+
+
+magma_zorthomgs( m, cBlockSize, blockR );
+
             
             // === compute AR
             magma_z_bspmv(m, cBlockSize, c_one, A, blockR, c_zero, blockAR );
@@ -221,6 +228,9 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
           
                 // === Make P orthonormal & properly change AP (without multiplication by A)
                 magma_zgegqr_gpu( m, cBlockSize, blockP, m, dwork, hwork, info );
+
+//magma_zorthomgs( m, cBlockSize, blockP );
+
                 magma_zsetmatrix( cBlockSize, cBlockSize, hwork, cBlockSize, dwork, cBlockSize);
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
                              m, cBlockSize, c_one, dwork, cBlockSize, blockAP, m);
