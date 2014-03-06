@@ -536,7 +536,7 @@ magma_int_t magma_zhegvdx_2stage_m( magma_int_t nrgpu,
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA function definitions / Data on GPU
 */
-magma_int_t magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
+magma_int_t magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                               magmaDoubleComplex *dA,   magma_int_t ldda,
                               magmaDoubleComplex *dwork, magmaDoubleComplex *work,
                               magma_int_t *info );
