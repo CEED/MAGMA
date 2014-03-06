@@ -499,6 +499,11 @@ magma_int_t
 magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b, 
                       magma_z_vector *x, magma_z_preconditioner *precond );
 
+magma_int_t
+magma_zorthomgs(        magma_int_t num_rows,
+                        magma_int_t num_vecs, 
+                        magmaDoubleComplex *X );
+
 
 
 /* ////////////////////////////////////////////////////////////////////////////
