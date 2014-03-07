@@ -792,7 +792,7 @@ zmgesellcmtmv_kernel_1_3D_texb( int num_rows,
         }
         d_y[row+num_rows*idy*2] = 
                             dot1*alpha;
-        d_y[row+num_rows*idy*2=num_rows] = 
+        d_y[row+num_rows*idy*2+num_rows] = 
                             dot2*alpha;
     }
 #endif
