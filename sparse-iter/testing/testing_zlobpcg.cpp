@@ -29,6 +29,13 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *hwork, magma_int_t lwork,
                magma_z_solver_par *solver_par, magma_int_t *info );
 
+extern "C" magma_int_t
+magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
+               magmaDoubleComplex *blockX, double *evalues,
+               magmaDoubleComplex *dwork, magma_int_t ldwork,
+               magmaDoubleComplex *hwork, magma_int_t lwork,
+               magma_z_solver_par *solver_par, magma_int_t *info );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zlobpcg
@@ -82,8 +89,8 @@ int main( int argc, char** argv)
 
     // Solver parameters
     magma_z_solver_par solver_par;
-    solver_par.epsilon = 1e-3;
-    solver_par.maxiter = 10;
+    solver_par.epsilon = 1e-5;
+    solver_par.maxiter = 180;
     
     magma_int_t n2 = m * blockSize;
     lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );
@@ -91,7 +98,7 @@ int main( int argc, char** argv)
 
     // Find the blockSize smallest eigenvalues and corresponding eigen-vectors
     gpu_time = magma_wtime();
-    magma_zlobpcg( m, blockSize, 
+    magma_zlobpcg2( m, blockSize, 
                    dA, evectors, evalues,
                    dwork, ldwork,
                    hwork, lhwork,
