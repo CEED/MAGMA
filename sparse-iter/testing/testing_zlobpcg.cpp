@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
 
-    magma_z_sparse_matrix A;
+    magma_z_sparse_matrix A, A2;
     magma_z_sparse_matrix dA;
 
     magma_int_t m         = opts.msize[0];
@@ -69,7 +69,16 @@ int main( int argc, char** argv)
     diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
 
     magma_zmgenerator( m, offdiags, diag_offset, diag_vals, &A );
-    magma_z_mtransfer(A, &dA, Magma_CPU, Magma_DEV);
+    //magma_z_mtransfer(A, &dA, Magma_CPU, Magma_DEV);
+
+    // Convert A to A2 in SELLC format
+    A2.storage_type = Magma_SELLC;
+    A2.blocksize = 8;
+    A2.alignment = 4;
+    magma_z_mconvert( A, &A2, Magma_CSR, A2.storage_type );
+
+    // copy matrix to GPU
+    magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
 
     // Memory allocation for the eigenvectors, eigenvalues, and workspace
     double *evalues;
@@ -90,7 +99,7 @@ int main( int argc, char** argv)
     // Solver parameters
     magma_z_solver_par solver_par;
     solver_par.epsilon = 1e-5;
-    solver_par.maxiter = 180;
+    solver_par.maxiter = 5;
     
     magma_int_t n2 = m * blockSize;
     lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );
