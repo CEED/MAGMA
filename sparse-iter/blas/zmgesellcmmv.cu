@@ -790,9 +790,9 @@ zmgesellcmtmv_kernel_1_3D_texb( int num_rows,
             dot1 += val * __hiloint2double(v.y, v.x);
             dot2 += val * __hiloint2double(v.w, v.z);
         }
-        d_y[row*num_vecs+idy*2] = 
+        d_y[row+num_rows*idy*2] = 
                             dot1*alpha;
-        d_y[row*num_vecs+idy*2+1] = 
+        d_y[row+num_rows*idy*2=num_rows] = 
                             dot2*alpha;
     }
 #endif
