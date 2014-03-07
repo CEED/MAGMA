@@ -32,8 +32,10 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           e1, e2, work[1];
-    magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, tmp[1];
+    double           e1, e2, e3, e4, e5, *work;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE, one = MAGMA_Z_ONE, zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, *h_rwork, tmp[1];
+
     magmaDoubleComplex *d_A, *dwork, *ddA, *d_T;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
     magma_int_t ione     = 1;
@@ -43,8 +45,8 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||I - Q'Q||_F    \n");
-    printf("=======================================================================\n");
+    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)        ||I-Q'Q||_F     ||I-Q'Q||_I     ||A-Q R||_I \n");
+    printf("=====================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
@@ -63,9 +65,11 @@ int main( int argc, char** argv)
             
             TESTING_MALLOC_PIN( tau,    magmaDoubleComplex, min_mn );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
-            
+            TESTING_MALLOC_PIN(h_rwork, magmaDoubleComplex, lwork  );            
+
             TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, n2     );
             TESTING_MALLOC_CPU( h_R,   magmaDoubleComplex, n2     );
+            TESTING_MALLOC_CPU( work, double,             M       ); 
             
             TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( dtau,  magmaDoubleComplex, min_mn );
@@ -78,11 +82,12 @@ int main( int argc, char** argv)
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             // warmup
-            magma_zgegqr_gpu( M, N, d_A, ldda, dwork, h_work, &info );
+            magma_zgegqr_gpu( 1, M, N, d_A, ldda, dwork, h_work, &info );
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             /* ====================================================================
@@ -101,14 +106,27 @@ int main( int argc, char** argv)
                 magma_zungqr_gpu( M, N, N, d_A, ldda, tau, d_T, nb, &info );
             }
             else
-               magma_zgegqr_gpu( M, N, d_A, ldda, dwork, h_work, &info );
+                magma_zgegqr_gpu( 1, M, N, d_A, ldda, dwork, h_rwork, &info );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
 
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zgegqr returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+
+            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
+
+            // Regenerate R
+            // blasf77_zgemm("t", "n", &N, &N, &M, &one, h_R, &M, h_A, &M, &zero, h_work, &N); 
             
+            //magma_zprint(N, N, h_work, N);
+
+            blasf77_ztrmm("r", "u", "n", "n", &M, &N, &one, h_rwork, &N, h_R, &M);
+            blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
+            e5 = lapackf77_zlange("i", &M, &N, h_R, &M, work) / 
+            lapackf77_zlange("i", &M, &N, h_A, &lda, work);
+            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
+ 
             if ( opts.lapack ) {
                 /* =====================================================================
                    Performs operation using LAPACK
@@ -128,20 +146,20 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
-
-                magmaDoubleComplex one = MAGMA_Z_ONE, zero = MAGMA_Z_ZERO;
                 blasf77_zgemm("t", "n", &N, &N, &M, &one, h_R, &M, h_R, &M, &zero, h_work, &N);
                 for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
 
                 e1    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
+                e3    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
 
                 blasf77_zgemm("t", "n", &N, &N, &M, &one, h_A, &M, h_A, &M, &zero, h_work, &N);
                 for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
                 e2    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
-                
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %8.2e\n",
-                       (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time, e1, e2 );
+                e4    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
+
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2e/%7.2e  %7.2e/%7.2e  %7.2e\n",
+                       (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time, e1, e2,
+                       e3, e4, e5);
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
@@ -150,15 +168,18 @@ int main( int argc, char** argv)
             
             TESTING_FREE_PIN( tau    );
             TESTING_FREE_PIN( h_work );
-            
+            TESTING_FREE_PIN( h_rwork );
+           
             TESTING_FREE_CPU( h_A  );
             TESTING_FREE_CPU( h_R  );
-            
+            TESTING_FREE_CPU( work );            
+
             TESTING_FREE_DEV( d_A   );
             TESTING_FREE_DEV( dtau  );
             TESTING_FREE_DEV( dwork );
             TESTING_FREE_DEV( ddA   );
             TESTING_FREE_DEV( d_T   );
+
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
