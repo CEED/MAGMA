@@ -39,32 +39,27 @@ zmgesellcmtmv_kernel_1_3D( int num_rows,
                      magmaDoubleComplex *d_y)
 {
    // T threads assigned to each row
-    int idx = threadIdx.y ;     // thread in row
-    int idy = threadIdx.x;      // local row
-    int idz = threadIdx.z;      // vector
-    int ldx = idx * blocksize + idy;
+    int idx = threadIdx.x;      // local row
+    int idy = threadIdx.y;      // vector
     int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
-    int row = bdx * blocksize + idy;  // global row index
-    int vec = idz*num_rows;
+    int row = bdx * blocksize + idx;  // global row index
 
 
     if(row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         int offset = d_rowptr[ bdx ];
-        int block = blocksize * T; // total number of threads
-
-        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/blocksize;  
             // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
             magmaDoubleComplex val = 
-                        d_val[ offset + ldx + block*k ];
+                        d_val[ offset + idx + blocksize*k ];
             int col = 
-                    d_colind[ offset + ldx + block*k ] ;
+                    d_colind[ offset + idx + blocksize*k ] ;
 
-            dot += val * d_x[ col+vec ];
+            dot += val * d_x[ col*num_vecs+idy ];
         }
-        d_y[row+vec] = dot*alpha + beta*d_y [row+vec];
+        d_y[ row*num_vecs+idy ] = dot*alpha + beta*d_y [ row*num_vecs+idy ];
 
     }
 
@@ -376,40 +371,35 @@ zmgesellcmtmv_kernel_1_3D_tex( int num_rows,
                      magmaDoubleComplex *d_y)
 {
 #if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
-   // T threads assigned to each row
-    int idx = threadIdx.y ;     // thread in row
-    int idy = threadIdx.x;      // local row
-    int idz = threadIdx.z;      // vector
-    int ldx = idx * blocksize + idy;
-    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
-    int row = bdx * blocksize + idy;  // global row index
 
+    int idx = threadIdx.x;      // local row
+    int idy = threadIdx.y;      // vector
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idx;  // global row index
 
     if(row < num_rows ){
         magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
         magmaDoubleComplex dot2 = MAGMA_Z_MAKE(0.0, 0.0);
         int offset = d_rowptr[ bdx ];
-        int block = blocksize * T; // total number of threads
-
-        int max_ = (d_rowptr[ bdx+1 ]-offset)/block;  
+        int max_ = (d_rowptr[ bdx+1 ]-offset)/blocksize;  
             // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
             magmaDoubleComplex val = 
-                        d_val[ offset + ldx + block*k ];
+                        d_val[ offset + idx + blocksize*k ];
             int col = 
-                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+                    num_vecs * d_colind[ offset + idx + blocksize*k ] ;
 
-            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idy );
             dot1 += val * __hiloint2double(v.y, v.x);
             dot2 += val * __hiloint2double(v.w, v.z);
         }
-        d_y[row*num_vecs+idz*2] = 
+        d_y[row*num_vecs+idy*2] = 
                             dot1*alpha
-                            + beta*d_y [row*num_vecs+idz*2];
-        d_y[row*num_vecs+idz*2+1] = 
+                            + beta*d_y [row*num_vecs+idy*2];
+        d_y[row*num_vecs+idy*2+1] = 
                             dot1*alpha
-                            + beta*d_y [row*num_vecs+idz*2+1];
+                            + beta*d_y [row*num_vecs+idy*2+1];
     }
 #endif
 }
@@ -775,14 +765,11 @@ zmgesellcmtmv_kernel_1_3D_texb( int num_rows,
                      magmaDoubleComplex *d_y)
 {
 #if defined(PRECISION_d) && defined(TEXTURE) && (__CUDA_ARCH__ >= 300)
-   // T threads assigned to each row
-    int idx = threadIdx.y ;     // thread in row
-    int idy = threadIdx.x;      // local row
-    int idz = threadIdx.z;      // vector
-    int ldx = idx * blocksize + idy;
-    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
-    int row = bdx * blocksize + idy;  // global row index
 
+    int idx = threadIdx.x;      // local row
+    int idy = threadIdx.y;      // vector
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idx;  // global row index
 
     if(row < num_rows ){
         magmaDoubleComplex dot1 = MAGMA_Z_MAKE(0.0, 0.0);
@@ -795,17 +782,17 @@ zmgesellcmtmv_kernel_1_3D_texb( int num_rows,
 
         for ( int k = 0; k < max_ ; k++ ){
             magmaDoubleComplex val = 
-                        d_val[ offset + ldx + block*k ];
+                        d_val[ offset + idx + blocksize*k ];
             int col = 
-                    num_vecs * d_colind[ offset + ldx + block*k ] ;
+                    num_vecs * d_colind[ offset + idx + blocksize*k ] ;
 
-            int4 v = tex1Dfetch<int4>(texdx, col/2 + idz );
+            int4 v = tex1Dfetch<int4>(texdx, col/2 + idy );
             dot1 += val * __hiloint2double(v.y, v.x);
             dot2 += val * __hiloint2double(v.w, v.z);
         }
-        d_y[row*num_vecs+idz*2] = 
+        d_y[row*num_vecs+idy*2] = 
                             dot1*alpha;
-        d_y[row*num_vecs+idz*2+1] = 
+        d_y[row*num_vecs+idy*2+1] = 
                             dot1*alpha;
     }
 #endif
@@ -1210,6 +1197,7 @@ magma_zmgesellcmmv( magma_trans_t transA,
     #endif
 
     if( (texture==1) && (precision==1) && (kepler==1) ){
+
         // Create channel.
         cudaChannelFormatDesc channel_desc;
         channel_desc = cudaCreateChannelDesc(32, 32, 32, 32, 
