@@ -62,6 +62,11 @@ magma_zorthomgs(        magma_int_t num_rows,
             magma_zscal( num_rows, nrm , X(i), 1 );   
         }
         else{
+            // normalize vector i to norm 1
+            magmaDoubleComplex nrm = MAGMA_Z_MAKE(
+                               1.0 / magma_dznrm2( num_rows, X(i), 1 ), 0.0 );
+            magma_zscal( num_rows, nrm , X(i), 1 );  
+
             // orthogonalize against the vectors right of i
             for (magma_int_t j=0; j<i; j++) {
                 magmaDoubleComplex dot = 
@@ -70,7 +75,19 @@ magma_zorthomgs(        magma_int_t num_rows,
                     magma_zaxpy(num_rows,-dot, X(j), 1, X(i), 1);            
             }
             // normalize vector i to norm 1
-            magmaDoubleComplex nrm = MAGMA_Z_MAKE(
+            nrm = MAGMA_Z_MAKE(
+                               1.0 / magma_dznrm2( num_rows, X(i), 1 ), 0.0 );
+            magma_zscal( num_rows, nrm , X(i), 1 );  
+
+            // orthogonalize against the vectors right of i
+            for (magma_int_t j=0; j<i; j++) {
+                magmaDoubleComplex dot = 
+                    magma_zdotc( num_rows, X(j), 1, X(i), 1);    
+                    // compute X(i) = X(i) - <X(j),X(i)> * X(j)           
+                    magma_zaxpy(num_rows,-dot, X(j), 1, X(i), 1);            
+            }
+            // normalize vector i to norm 1
+            nrm = MAGMA_Z_MAKE(
                                1.0 / magma_dznrm2( num_rows, X(i), 1 ), 0.0 );
             magma_zscal( num_rows, nrm , X(i), 1 );   
         }
