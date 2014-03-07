@@ -67,9 +67,8 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
 #define  residualNorms(i,iter)  ( residualNorms + (i) + (iter)*n )
 #define magmablas_swap(x, y)    { pointer = x; x = y; y = pointer; }
 #define hresidualNorms(i,iter)  (hresidualNorms + (i) + (iter)*n )
-#define magma_z_bspmv(m, n, alpha, A, X, beta, AX)       {              \
-        magmablas_ztranspose2( blockW, n,      X, m, m, n );            \
-        magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
+  /*
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {              \
         for(int k = 0; k<n; k++) {                                      \
             magma_z_vector x, ax;                                       \
             x.memory_location = Magma_DEV;  x.num_rows = m;  x.nnz = m;  x.val =  X+(k)*(m); \
@@ -77,15 +76,31 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
             magma_z_spmv(alpha, A, x, beta, ax );                       \
         }                                                               \
 }
+  */
+
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose2( blockW, n,      X, m, m, n );        \
             magma_z_vector x, ax;                                       \
             x.memory_location = Magma_DEV;  x.num_rows = m*n;  x.nnz = m*n;  x.val = blockW; \
-            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = X;     \
+            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax );                           \
-            magmablas_ztranspose2(     AX, m,      X, n, n, m );            \
             magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
 }
+  
+  /*  
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
+    magma_z_vector x, ax;                                       \
+    magmablas_ztranspose2( blockW, n,      X, m, m, n );            \
+    x.memory_location = Magma_DEV;  x.num_rows = m*n;  x.nnz = m*n;  x.val = blockW; \
+    ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = X; \
+    magma_zprint_gpu(n,m, x.val, n);                                    \
+    magma_z_spmv(alpha, A, x, beta, ax );                           \
+    magma_zprint_gpu(n,m, ax.val, n);                   \
+    magmablas_ztranspose2(     AX, m,      X, n, n, m );            \
+    magma_zprint_gpu(m, n, AX, m);                                  \
+    magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
+}
+  */
 
 #define gramA(    m, n)   (gramA     + (m) + (n)*ldgram)
 #define gramB(    m, n)   (gramB     + (m) + (n)*ldgram)
@@ -170,7 +185,7 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
     // === Make the initial vectors orthonormal ===
     magma_zgegqr_gpu(ikind, m, n, blockX, m, dwork, hwork, info );
     //magma_zorthomgs( m, n, blockX );
-
+    
     magma_z_bspmv_tuned(m, n, c_one, A, blockX, c_zero, blockAX );
 
     // === Compute the Gram matrix = (X, AX) & its eigenstates ===
