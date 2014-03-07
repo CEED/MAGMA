@@ -29,6 +29,12 @@ magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *hwork, magma_int_t lwork,
                magma_z_solver_par *solver_par, magma_int_t *info );
 
+extern "C" magma_int_t
+magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
+               magmaDoubleComplex *blockX, double *evalues,
+               magmaDoubleComplex *dwork, magma_int_t ldwork,
+               magmaDoubleComplex *hwork, magma_int_t lwork,
+               magma_z_solver_par *solver_par, magma_int_t *info );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zlobpcg
@@ -124,7 +130,15 @@ int main( int argc, char** argv)
         magma_int_t blockSize = solver_par.num_eigenvalues;    
         magma_int_t m = A.num_rows;
 
-        magma_z_mtransfer(A, &dA, Magma_CPU, Magma_DEV);
+        magma_z_sparse_matrix A2;
+        A2.storage_type = Magma_SELLC;
+        A2.blocksize = 8;
+        A2.alignment = 4;
+        magma_z_mconvert( A, &A2, Magma_CSR, A2.storage_type );
+
+        // copy matrix to GPU                                                     
+        magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
+
 
         // Memory allocation for the eigenvectors, eigenvalues, and workspace
         double *evalues;
@@ -141,19 +155,14 @@ int main( int argc, char** argv)
         magma_zmalloc_cpu(   &hevectors, m * blockSize );
         magma_zmalloc(        &dwork   ,        ldwork );
         magma_zmalloc_pinned( &hwork   ,        lhwork );
-
-        // Solver parameters
-        magma_z_solver_par solver_par;
-        solver_par.epsilon = 1e-3;
-        solver_par.maxiter = 360;
-        
+ 
         magma_int_t n2 = m * blockSize;
         lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );
         magma_zsetmatrix( m, blockSize, hevectors, m, evectors, m );
 
         // Find the blockSize smallest eigenvalues and corresponding eigen-vectors
         gpu_time = magma_wtime();
-        magma_zlobpcg( m, blockSize, 
+        magma_zlobpcg2( m, blockSize, 
                        dA, evectors, evalues,
                        dwork, ldwork,
                        hwork, lhwork,
