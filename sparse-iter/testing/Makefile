@@ -55,7 +55,7 @@ ZSRC += \
 # ----------
 # test Krylov space eigen-solvers
 ZSRC += \
-	testing_zlobpcg.cpp     \
+#	testing_zlobpcg.cpp     \
 
 # run preconditioned Krylov solvers
 ZSRC += \
