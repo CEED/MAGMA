@@ -468,10 +468,10 @@ zmgesellcmtmv_kernel_4_3D_tex( int num_rows,
             shared[ldz+sv]+=shared[ldz+sv+blocksize*2];               
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2];
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2+1];
             }
@@ -551,10 +551,10 @@ zmgesellcmtmv_kernel_8_3D_tex( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2];
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2+1];
             }
@@ -638,10 +638,10 @@ zmgesellcmtmv_kernel_16_3D_tex( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2];
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2+1];
             }
@@ -729,10 +729,10 @@ zmgesellcmtmv_kernel_32_3D_tex( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2];
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha
                                             + beta*d_y [row*num_vecs+idz*2+1];
             }
@@ -861,9 +861,9 @@ zmgesellcmtmv_kernel_4_3D_texb( int num_rows,
             shared[ldz+sv]+=shared[ldz+sv+blocksize*2];               
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha;
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
             }
 
@@ -941,10 +941,10 @@ zmgesellcmtmv_kernel_8_3D_texb( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha;
 
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
             }
 
@@ -1026,10 +1026,10 @@ zmgesellcmtmv_kernel_16_3D_texb( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha;
 
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
             }
 
@@ -1115,10 +1115,10 @@ zmgesellcmtmv_kernel_32_3D_texb( int num_rows,
             }
             __syncthreads();
             if( idx == 0 ) {
-                d_y[row+num_rows*idy*2] = 
+                d_y[row+num_rows*idz*2] = 
                 (shared[ldz]+shared[ldz+blocksize*1])*alpha;
 
-                d_y[row+num_rows*idy*2+num_rows] = 
+                d_y[row+num_rows*idz*2+num_rows] = 
                 (shared[ldz+sv]+shared[ldz+sv+blocksize*1])*alpha;
             }
 
