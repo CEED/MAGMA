@@ -53,7 +53,7 @@ int main( int argc, char** argv)
     magma_z_sparse_matrix dA;
 
     magma_int_t m         = opts.msize[0];
-    magma_int_t blockSize = 10; 
+    magma_int_t blockSize = 32; 
 
     // Initialize a matrix to be 2 on the diagonal and -1 on subdiagonals
     magma_int_t offdiags = 1;
@@ -99,7 +99,7 @@ int main( int argc, char** argv)
     // Solver parameters
     magma_z_solver_par solver_par;
     solver_par.epsilon = 1e-5;
-    solver_par.maxiter = 5;
+    solver_par.maxiter = 30;
     
     magma_int_t n2 = m * blockSize;
     lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );

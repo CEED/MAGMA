@@ -44,10 +44,10 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magma_z_solver_par solver_par;
-    solver_par.epsilon = 10e-16;
+    solver_par.epsilon = 1e-5;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
-    solver_par.num_eigenvalues = 20;
+    solver_par.num_eigenvalues = 32;
     magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     int precond = 0;

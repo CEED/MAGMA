@@ -76,7 +76,7 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
             magma_z_spmv(alpha, A, x, beta, ax );                       \
         }                                                               \
 }
-  */
+*/
 
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose2( blockW, n,      X, m, m, n );        \
@@ -86,7 +86,7 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
             magma_z_spmv(alpha, A, x, beta, ax );                           \
             magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
 }
-  
+    
   /*  
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
     magma_z_vector x, ax;                                       \
@@ -180,7 +180,7 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
         iwork[k]=1;
     magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n);
 
-    magma_int_t gramDim, ldgram  = 3*n, ikind = 1;
+    magma_int_t gramDim, ldgram  = 3*n, ikind = 3;
        
     // === Make the initial vectors orthonormal ===
     magma_zgegqr_gpu(ikind, m, n, blockX, m, dwork, hwork, info );
