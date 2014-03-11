@@ -120,11 +120,12 @@ int main( int argc, char** argv)
 
         printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
                                     ,A.num_rows,A.num_cols,A.nnz );
+        solver_par.ev_length = A.num_cols;
 
         magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
                            // as the matrix size has influence on the EV-length
 
-        solver_par.ev_length = A.num_cols;
+
 
         real_Double_t  gpu_time;
         magma_opts opts;
