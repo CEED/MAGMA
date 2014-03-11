@@ -6,7 +6,7 @@
        November 2011
 
        @precisions normal z -> c d s
-       @author Stan Tomov
+       @author Hartwig Anzt
 */
 
 // includes, system
@@ -35,6 +35,10 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *dwork, magma_int_t ldwork,
                magmaDoubleComplex *hwork, magma_int_t lwork,
                magma_z_solver_par *solver_par, magma_int_t *info );
+
+extern "C" magma_int_t
+magma_zlobpcg3( magma_z_sparse_matrix A,
+               magma_z_solver_par *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zlobpcg
@@ -139,44 +143,15 @@ int main( int argc, char** argv)
         // copy matrix to GPU                                                     
         magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
 
-
-        // Memory allocation for the eigenvectors, eigenvalues, and workspace
-        double *evalues;
-        magmaDoubleComplex *evectors, *hevectors, *dwork, *hwork;
-        magma_int_t info, ldwork = 8*m*blockSize;
-        magma_int_t lhwork = max(2*blockSize+blockSize*magma_get_dsytrd_nb(blockSize),
-                                 1 + 6*3*blockSize + 2* 3*blockSize* 3*blockSize);
-
-        // This to be revisited - return is just blockSize but we use this for the
-        // generalized eigensolver as well so we need 3X the memory
-        magma_dmalloc_cpu(    &evalues ,     3*blockSize );
-
-        magma_zmalloc(        &evectors, m * blockSize );
-        magma_zmalloc_cpu(   &hevectors, m * blockSize );
-        magma_zmalloc(        &dwork   ,        ldwork );
-        magma_zmalloc_pinned( &hwork   ,        lhwork );
- 
-        magma_int_t n2 = m * blockSize;
-        lapackf77_zlarnv( &ione, ISEED, &n2, hevectors );
-        magma_zsetmatrix( m, blockSize, hevectors, m, evectors, m );
-
         // Find the blockSize smallest eigenvalues and corresponding eigen-vectors
         gpu_time = magma_wtime();
-        magma_zlobpcg2( m, blockSize, 
-                       dA, evectors, evalues,
-                       dwork, ldwork,
-                       hwork, lhwork,
-                       &solver_par, &info);
+        magma_zlobpcg3( dA, &solver_par );
         gpu_time = magma_wtime() - gpu_time;
 
         printf("Time (sec) = %7.2f\n", gpu_time);
+        printf("solver runtime (sec) = %7.2f\n", solver_par.runtime );
 
         magma_z_mfree(     &A    );
-        magma_free_cpu(  evalues );
-        magma_free(     evectors );
-        magma_free_cpu( hevectors);
-        magma_free(     dwork    );
-        magma_free_pinned( hwork    );
 
         magma_zsolverinfo_free( &solver_par, &precond_par );
 

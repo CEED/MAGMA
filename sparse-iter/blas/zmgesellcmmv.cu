@@ -16,7 +16,7 @@
 
 #define PRECISION_z
 
-#define TEXTURE
+//#define TEXTURE
 
 
 // SELLCM SpMV kernel 3D grid
