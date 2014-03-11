@@ -374,7 +374,7 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
         magmaDoubleComplex *initial_guess;
         magma_zmalloc_cpu( &initial_guess, ev );
         magma_zmalloc( &solver_par->eigenvectors, ev );
-        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
+        magma_int_t ISEED[4] = {0,0,0,1}, ione = 3;
         lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
         magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
             initial_guess, solver_par->ev_length, solver_par->eigenvectors, 
