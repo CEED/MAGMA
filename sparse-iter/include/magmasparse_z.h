@@ -463,6 +463,18 @@ magma_zlobpcg_shift(    magma_int_t num_rows,
                         magma_int_t num_vecs, 
                         magma_int_t shift,
                         magmaDoubleComplex *x );
+magma_int_t
+magma_zlobpcg_res(      magma_int_t num_rows,
+                        magma_int_t num_vecs, 
+                        double *evalues, 
+                        magmaDoubleComplex *X,
+                        magmaDoubleComplex *R, 
+                        double *res );
+magma_int_t
+magma_zlobpcg_maxpy(    magma_int_t num_rows,
+                        magma_int_t num_vecs, 
+                        magmaDoubleComplex *X,
+                        magmaDoubleComplex *Y);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions

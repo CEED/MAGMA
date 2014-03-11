@@ -116,6 +116,7 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magmaDoubleComplex *gevectors, *h_gramB;
 
     magmaDoubleComplex *pointer, *origX = blockX;
+    double *eval_gpu;
 
     magma_int_t lwork = max( 2*n+n*magma_get_dsytrd_nb(n),
                                             1 + 6*3*n + 2* 3*n* 3*n);
@@ -127,7 +128,8 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_zmalloc(        &blockR    ,        m*n );
     magma_zmalloc(        &blockP    ,        m*n );
     magma_zmalloc(        &blockW    ,        m*n );
-    magma_zmalloc(        &dwork     ,        m*n );
+    magma_zmalloc(        &dwork     ,        m*n );            
+    magma_dmalloc(        &eval_gpu  ,        3*n );
 
 
 
@@ -232,9 +234,20 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
         { 
             // === compute the residuals (R = Ax - x evalues )
             magmablas_zlacpy( MagmaUpperLower, m, n, blockAX, m, blockR, m);
+
+/*
             for(int i=0; i<n; i++){
-                magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i],0), blockX+i*m, 1, blockR+i*m, 1);
+               magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i],0), blockX+i*m, 1, blockR+i*m, 1);
             }
+  */        
+            #if defined(PRECISION_z) || defined(PRECISION_d)
+                magma_dsetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
+            #else if defined(PRECISION_c) || defined(PRECISION_s)
+                magma_ssetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
+            #endif
+
+            magma_zlobpcg_res( m, n, eval_gpu, blockX, blockR, eval_gpu);
+
             magmablas_dznrm2_cols(m, n, blockR, m, residualNorms(0, iterationNumber));
 
             // === remove the residuals corresponding to already converged evectors
@@ -431,13 +444,16 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
                         c_one, blockX, m, gramA, ldgram, c_zero, dwork, m);
             magmablas_swap(dwork, blockX);
-            magma_zaxpy(m*n, c_one, blockP, 1, blockX, 1);
+            //magma_zaxpy(m*n, c_one, blockP, 1, blockX, 1);
+            magma_zlobpcg_maxpy( m, n, blockP, blockX );    
+
             
             // === corresponding contribution from old AX to new AX + AP
             magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
                         c_one, blockAX, m, gramA, ldgram, c_zero, dwork, m);
             magmablas_swap(dwork, blockAX);
-            magma_zaxpy(m*n, c_one, blockAP, 1, blockAX, 1);
+            //magma_zaxpy(m*n, c_one, blockAP, 1, blockAX, 1);
+            magma_zlobpcg_maxpy( m, n, blockAP, blockAX );    
 
             condestGhistory[iterationNumber+1]=condestG;
             if (verbosity==1) {
@@ -558,9 +574,11 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_free(     blockR    );
     magma_free(     blockP    );
     magma_free(     blockW    );
-    magma_free(     dwork    );    
+    magma_free(     dwork    );   
+    magma_free(     eval_gpu    );    
 
     magma_free_pinned( hwork    );
+
 
     #if defined(PRECISION_z) || defined(PRECISION_c)
     magma_free_cpu( rwork           );
