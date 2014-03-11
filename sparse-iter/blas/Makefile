@@ -31,7 +31,9 @@ ZSRC := \
 	zgesellcmmv.cu		\
 	zjacobisetup.cu		\
 	zlag2c_sparse.cu	\
+    zlobpcg_maxpy.cu    \
     zlobpcg_shift.cu    \
+    zlobpcg_residuals.cu\
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\
