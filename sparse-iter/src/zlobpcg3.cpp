@@ -194,7 +194,7 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
         iwork[k]=1;
     magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n);
 
-    magma_int_t gramDim, ldgram  = 3*n, ikind = 3;
+    magma_int_t gramDim, ldgram  = 3*n, ikind = 1;
        
     // === Make the initial vectors orthonormal ===
     magma_zgegqr_gpu(ikind, m, n, blockX, m, dwork, hwork, info );
