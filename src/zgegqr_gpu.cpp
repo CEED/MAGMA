@@ -90,8 +90,8 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
         return *info;
     }
 
-
     if (ikind == 1) {
+        // === Iterative, based on SVD ============================================================
         magmaDoubleComplex *U, *VT, *vt, *R, *G, *hwork, *tau;
         double *S;
 
@@ -124,7 +124,6 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
             i++;
             
             magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
-            // magmablas_zgemm_reduce(n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
             magma_zgetmatrix(n, n, dwork, n, G, n);
             
 #if defined(PRECISION_s) || defined(PRECISION_d)
@@ -200,6 +199,15 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
             magma_zscal(m, 1./ *work(j,j), dA(0,j), 1);
         }
         // ================== end of ikind == 3 ===================================================
+    }
+    else if (ikind == 4) {
+        // ================== Cholesky QR       ===================================================
+        magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+        magma_zgetmatrix(n, n, dwork, n, work, n);
+        lapackf77_zpotrf("u", &n, work, &n, info);
+        magma_zsetmatrix(n, n, work, n, dwork, n);
+        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+        // ================== end of ikind == 4 ===================================================
     }
              
     return *info;
