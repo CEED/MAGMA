@@ -12,15 +12,16 @@
 #include <cblas.h>
 
 #define PRECISION_z
+#define COMPLEX
 
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *A, magma_int_t lda,
                   magma_int_t *jpvt, magmaDoubleComplex *tau,
                   magmaDoubleComplex *work, magma_int_t lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
+                  #ifdef COMPLEX
                   double *rwork,
-#endif
+                  #endif
                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -124,9 +125,9 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         } else {
             nb = magma_get_zgeqp3_nb(min(m, n));
             lwkopt = (n + 1)*nb;
-#if defined(PRECISION_d) || defined(PRECISION_s)
+            #ifdef REAL
             lwkopt += 2*n;
-#endif
+            #endif
         }
         //work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
 
@@ -145,9 +146,9 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     if (minmn == 0)
         return *info;
 
-#if defined(PRECISION_d) || defined(PRECISION_s)
+    #ifdef REAL
     double *rwork = work + (n + 1)*nb;
-#endif
+    #endif
     magmaDoubleComplex   *df;
     if (MAGMA_SUCCESS != magma_zmalloc( &df, (n+1)*(nb+32) )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
