@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2012
+       @date
 
        @precisions normal z -> s d c
 
@@ -39,7 +39,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2012
+       @date
 
     Purpose
     =======
