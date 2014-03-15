@@ -194,7 +194,7 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
         iwork[k]=1;
     magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n);
 
-    magma_int_t gramDim, ldgram  = 3*n, ikind = 1;
+    magma_int_t gramDim, ldgram  = 3*n, ikind = 4;
        
     // === Make the initial vectors orthonormal ===
     magma_zgegqr_gpu(ikind, m, n, blockX, m, dwork, hwork, info );
@@ -302,8 +302,17 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 
                 //magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockP, c_zero, blockAP );
                 magma_zsetmatrix( cBlockSize, cBlockSize, hwork, cBlockSize, dwork, cBlockSize);
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                             m, cBlockSize, c_one, dwork, cBlockSize, blockAP, m);
+
+
+//                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+  //                           m, cBlockSize, c_one, dwork, cBlockSize, blockAP, m);
+
+            // replacement according to Stan
+#if defined(PRECISION_s) || defined(PRECISION_d)
+            magmablas_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, cBlockSize, c_one, dwork, cBlockSize, blockAP, m);
+#else
+            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, cBlockSize, c_one, dwork, cBlockSize, blockAP, m);
+#endif
             }
 
             iter = max(1,iterationNumber-10- (int)(log(1.*cBlockSize)));
