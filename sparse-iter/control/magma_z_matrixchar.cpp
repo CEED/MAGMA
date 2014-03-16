@@ -178,8 +178,8 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
             A->diameter = maxdim;
             return MAGMA_SUCCESS; 
         }
-        // ELLPACKT
-        else if( A->storage_type == Magma_ELLPACKT ){
+        // ELL
+        else if( A->storage_type == Magma_ELL ){
             printf("error:format not supported.\n");
             return MAGMA_ERR_ALLOCATION;
         }

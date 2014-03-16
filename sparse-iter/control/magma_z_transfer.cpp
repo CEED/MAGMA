@@ -113,8 +113,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cublasSetVector( A.num_rows * A.max_nnz_row , 
                             sizeof( magma_index_t )  , A.col, 1, B->col, 1 ); 
         } 
-        //ELLPACKT-type
-        if( A.storage_type == Magma_ELLPACKT ){
+        //ELL-type
+        if( A.storage_type == Magma_ELL ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -138,8 +138,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cublasSetVector( A.num_rows * A.max_nnz_row , 
                             sizeof( magma_index_t )  , A.col, 1, B->col, 1 ); 
         } 
-        //ELLPACKRT-type
-        if( A.storage_type == Magma_ELLPACKRT ){
+        //ELLRT-type
+        if( A.storage_type == Magma_ELLRT ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -176,7 +176,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                         A.row, 1, B->row, 1 ); 
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -318,8 +318,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                 B->col[i] = A.col[i];
             }
         }
-        //ELLPACKT-type
-        if( A.storage_type == Magma_ELLPACKT ){
+        //ELL-type
+        if( A.storage_type == Magma_ELL ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -337,8 +337,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                 B->col[i] = A.col[i];
             }
         } 
-        //ELLPACKRT-type
-        if( A.storage_type == Magma_ELLPACKRT ){
+        //ELLRT-type
+        if( A.storage_type == Magma_ELLRT ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -367,7 +367,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             }
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -457,8 +457,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cublasGetVector( A.num_rows*A.max_nnz_row, 
                             sizeof( magma_index_t ), A.col, 1, B->col, 1 );
         } 
-        //ELLPACKT-type
-        if( A.storage_type == Magma_ELLPACKT ){
+        //ELL-type
+        if( A.storage_type == Magma_ELL ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -476,8 +476,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cublasGetVector( A.num_rows*A.max_nnz_row, 
                     sizeof( magma_index_t ), A.col, 1, B->col, 1 );
         } 
-        //ELLPACKRT-type
-        if( A.storage_type == Magma_ELLPACKRT ){
+        //ELLRT-type
+        if( A.storage_type == Magma_ELLRT ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -505,7 +505,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                     A.row, 1, B->row, 1 );
         } 
         //SELLC-type
-        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -641,8 +641,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cudaMemcpy( B->col, A.col, A.num_rows*A.max_nnz_row
                 *sizeof( magma_index_t ), cudaMemcpyDeviceToDevice );
         } 
-        //ELLPACKT-type
-        if( A.storage_type == Magma_ELLPACKT ){
+        //ELL-type
+        if( A.storage_type == Magma_ELL ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -666,8 +666,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cudaMemcpy( B->col, A.col, A.num_rows*A.max_nnz_row
                          *sizeof( magma_index_t ), cudaMemcpyDeviceToDevice );
         }
-        //ELLPACKRT-type
-        if( A.storage_type == Magma_ELLPACKRT ){
+        //ELLRT-type
+        if( A.storage_type == Magma_ELLRT ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -703,8 +703,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             cudaMemcpy( B->row, A.row, A.num_rows
                     *sizeof( magma_index_t ), cudaMemcpyDeviceToDevice );
         }
-        //SELLC-type
-        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLCM ){
+        //SELLC/SELLP-type
+        if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;

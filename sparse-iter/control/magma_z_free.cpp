@@ -110,7 +110,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_ELLPACKT ){
+        if( A->storage_type == Magma_ELL ){
             free( A->val );
             free( A->col );
             A->num_rows = 0;
@@ -118,7 +118,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_ELLPACKRT ){
+        if( A->storage_type == Magma_ELLRT ){
             free( A->val );
             free( A->row );
             free( A->col );
@@ -127,7 +127,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLCM ){
+        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLP ){
             free( A->val );
             free( A->row );
             free( A->col );
@@ -183,7 +183,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_ELLPACKT ){
+        if( A->storage_type == Magma_ELL ){
             if( cudaFree( A->val ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;
@@ -200,7 +200,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_ELLPACKRT ){
+        if( A->storage_type == Magma_ELLRT ){
             if( cudaFree( A->val ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;
@@ -222,7 +222,7 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLCM ){
+        if( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLP ){
             if( cudaFree( A->val ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;

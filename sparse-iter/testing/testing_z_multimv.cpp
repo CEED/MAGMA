@@ -46,8 +46,8 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
-     "/home/hanzt/sparse_matrices/mtx/Trefethen_20.mtx",
-     "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx",
+ /*    "/home/hanzt/sparse_matrices/mtx/Trefethen_20.mtx",
+     "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx",*/
      "/home/hanzt/sparse_matrices/mtx/audikw_1.mtx",
      "/home/hanzt/sparse_matrices/mtx/bone010.mtx",
      "/home/hanzt/sparse_matrices/mtx/boneS10.mtx",
@@ -133,7 +133,7 @@ int main( int argc, char** argv)
 
 
 
-    for(matrix=0; matrix<1; matrix++)
+    for(matrix=12; matrix<40; matrix++)
     {
         magma_z_sparse_matrix hA, hB, hC, dA, dB, hD, dD, hE, dE;
         magma_z_vector hx, hy, dx, dy, dx2, dy2;
@@ -160,7 +160,7 @@ int main( int argc, char** argv)
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
 
 
-        for(int k=2; k<5; k+=2){
+        for(int k=2; k<131; k+=2){
         //printf("number of vectors:%d\n",k);
         printf( "%d  &",k );
         magma_int_t num_vecs=k; 
@@ -199,11 +199,11 @@ int main( int argc, char** argv)
         printf( "  %.2e  &",FLOPS/((end-start)/10.0) );//GFLOPS
 
         //printf( "  %.2e  &",(end-start)/10 );
-        magma_z_vvisu( dy2, 0,20);
-        magma_z_vvisu( dy2, (num_vecs)*hA.num_rows-20, 20);
+       // magma_z_vvisu( dy2, 0,20);
+       // magma_z_vvisu( dy2, (num_vecs)*hA.num_rows-20, 20);
 
 
-        magma_zprint_gpu( hA.num_rows, num_vecs, dy2.val, hA.num_rows );
+        //magma_zprint_gpu( hA.num_rows, num_vecs, dy2.val, hA.num_rows );
 
 
 

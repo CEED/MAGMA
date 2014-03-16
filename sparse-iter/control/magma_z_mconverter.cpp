@@ -231,10 +231,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             return MAGMA_SUCCESS; 
         }        
 
-        // CSR to ELLPACKT
-        if( old_format == Magma_CSR && new_format == Magma_ELLPACKT ){
+        // CSR to ELL (former ELLPACKT, ELLPACK using column-major storage)
+        if( old_format == Magma_CSR && new_format == Magma_ELL ){
             // fill in information for B
-            B->storage_type = Magma_ELLPACKT;
+            B->storage_type = Magma_ELL;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -252,7 +252,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                      maxrowlength = length[i];
             }
             magma_free_cpu( length );
-            //printf( "Conversion to ELLPACKT with %d elements per row: ",
+            //printf( "Conversion to ELL with %d elements per row: ",
                                                            // maxrowlength );
             //fflush(stdout);
             magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
@@ -275,8 +275,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             return MAGMA_SUCCESS; 
         }
 
-        // ELLPACKT to CSR
-        if( old_format == Magma_ELLPACKT && new_format == Magma_CSR ){
+        // ELL (ELLPACKT) to CSR
+        if( old_format == Magma_ELL && new_format == Magma_CSR ){
             //printf( "Conversion to CSR: " ); 
             //fflush(stdout);
             // fill in information for B
@@ -313,10 +313,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }  
-        // CSR to ELLPACKRT
-        if( old_format == Magma_CSR && new_format == Magma_ELLPACKRT ){
+        // CSR to ELLRT (also ELLPACKRT)
+        if( old_format == Magma_CSR && new_format == Magma_ELLRT ){
             // fill in information for B
-            B->storage_type = Magma_ELLPACKRT;
+            B->storage_type = Magma_ELLRT;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -334,7 +334,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                      maxrowlength = length[i];
             }
             magma_free_cpu( length );
-            //printf( "Conversion to ELLPACKRT with %d elements per row: ", 
+            //printf( "Conversion to ELLRT with %d elements per row: ", 
             //                                                   maxrowlength );
 
             int num_threads = B->alignment * B->blocksize;
@@ -365,8 +365,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             return MAGMA_SUCCESS; 
         }
 
-        // ELLPACKRT to CSR
-        if( old_format == Magma_ELLPACKRT && new_format == Magma_CSR ){
+        // ELLRT to CSR
+        if( old_format == Magma_ELLRT && new_format == Magma_CSR ){
             //printf( "Conversion to CSR: " ); 
             //fflush(stdout);
             // fill in information for B
@@ -396,18 +396,20 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }   
-        // CSR to SELLC
+        // CSR to SELLC / SELLP
+        // SELLC is SELLP using alignment 1
         // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
         // A UNIFIED SPARSE MATRIX DATA FORMAT 
         // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
-        // in SELLCM we modify SELLC:
+        // in SELLP we modify SELLC:
         // alignment is posible such that multiple threads can be used for SpMV
+        // so the rowlength is padded (SELLP) to a multiple of the alignment
         if( old_format == Magma_CSR && 
-                (new_format == Magma_SELLC || new_format == Magma_SELLCM ) ){
+                (new_format == Magma_SELLC || new_format == Magma_SELLP ) ){
             // fill in information for B
             B->storage_type = new_format;
             if(B->alignment > 1)
-                B->storage_type = Magma_SELLCM;
+                B->storage_type = Magma_SELLP;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -470,8 +472,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             return MAGMA_SUCCESS; 
         }
-        // SELLC to CSR    
-        if( (old_format == Magma_SELLC || old_format == Magma_SELLCM )
+        // SELLC/SELLP to CSR    
+        if( (old_format == Magma_SELLC || old_format == Magma_SELLP )
                                             && new_format == Magma_CSR ){
             // printf( "Conversion to CSR: " );
             // fill in information for B

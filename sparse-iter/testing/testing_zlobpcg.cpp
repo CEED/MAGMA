@@ -36,6 +36,11 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
                magmaDoubleComplex *hwork, magma_int_t lwork,
                magma_z_solver_par *solver_par, magma_int_t *info );
 
+extern "C" magma_int_t
+magma_zlobpcg3( magma_z_sparse_matrix A,
+               magmaDoubleComplex *blockX, double *evalues,
+               magma_z_solver_par *solver_par, magma_int_t *info );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zlobpcg
@@ -49,10 +54,19 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
 
+
+
+//    magma_int_t m         = opts.msize[0];
+
+for(magma_int_t m = 1000; m<100000000; m=m*10){
+
+    printf("######################################################n\n\n\n\n");
+
+    printf("matrix size %d x %d \n\n\n\n\n", m, m);
+
     magma_z_sparse_matrix A, A2;
     magma_z_sparse_matrix dA;
 
-    magma_int_t m         = opts.msize[0];
     magma_int_t blockSize = 32; 
 
     // Initialize a matrix to be 2 on the diagonal and -1 on subdiagonals
@@ -122,6 +136,8 @@ int main( int argc, char** argv)
     magma_free_cpu( hevectors);
     magma_free(     dwork    );
     magma_free_pinned( hwork    );
+
+}// test over matrixsizes
 
     TESTING_FINALIZE();
     return 0;

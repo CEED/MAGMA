@@ -211,65 +211,65 @@ int main( int argc, char** argv)
         //magma_z_vvisu( dy, 0,10);
         magma_z_mfree(&dA);
 
-        // convert to ELLPACKT and copy to GPU
-        magma_z_mconvert(  hA, &hB, Magma_CSR, Magma_ELLPACKT);
+        // convert to ELL and copy to GPU
+        magma_z_mconvert(  hA, &hB, Magma_CSR, Magma_ELL);
         magma_z_mtransfer( hB, &dB, Magma_CPU, Magma_DEV);
         magma_z_mfree(&hB);
-        // SpMV on GPU (ELLPACKT)
+        // SpMV on GPU (ELL)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
             magma_z_spmv( one, dB, dx, zero, dy);
         magma_device_sync(); end = magma_wtime(); 
-        //printf( " > MAGMA: %.2e seconds (ELLPACKT).\n",(end-start)/10 );
+        //printf( " > MAGMA: %.2e seconds (ELL).\n",(end-start)/10 );
         printf( "  %.2e  &",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
         magma_z_mfree(&dB);
 /*
     printf("here!\n");
-        // convert to ELLPACKRT and copy to GPU
-        magma_z_mconvert(  hA, &hE, Magma_CSR, Magma_ELLPACKRT);
+        // convert to ELLRT and copy to GPU
+        magma_z_mconvert(  hA, &hE, Magma_CSR, Magma_ELLRT);
         magma_z_mtransfer( hE, &dE, Magma_CPU, Magma_DEV);
         magma_z_mfree(&hE);
-        // SpMV on GPU (ELLPACKRT)
+        // SpMV on GPU (ELLRT)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
         magma_z_spmv( one, dE, dx2, zero, dy2);
         magma_device_sync(); end = magma_wtime(); 
-        printf( " > MAGMA: %.2e seconds (ELLPACKRT).\n",(end-start)/10 );
+        printf( " > MAGMA: %.2e seconds (ELLRT).\n",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
         magma_z_mfree(&dE);
 */
 
-        // convert to SELLC and copy to GPU
+        // convert to SELLP and copy to GPU
         hD.blocksize = 256;
         hD.alignment = 1;
-        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLC);
+        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLP);
         magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV);
         magma_z_mfree(&hD);
-        // SpMV on GPU (SELLC)
+        // SpMV on GPU (SELLP)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
         magma_z_spmv( one, dD, dx, zero, dy);
         magma_device_sync(); end = magma_wtime(); 
-        // printf( " > MAGMA: %.2e seconds (SELLC).\n",(end-start)/10 );
+        // printf( " > MAGMA: %.2e seconds (SELLP).\n",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
         magma_z_mfree(&dD);
 
 
-        // convert to SELLC-mod and copy to GPU
+        // convert to SELLP-mod and copy to GPU
         hD.blocksize = 8;
         hD.alignment = 16;
-        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLC);
+        magma_z_mconvert(  hA, &hD, Magma_CSR, Magma_SELLP);
         magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV);
         magma_z_mfree(&hD);
-        // SpMV on GPU (SELLC-mod)
+        // SpMV on GPU (SELLP-mod)
         magma_device_sync(); start = magma_wtime(); 
         //cudaProfilerStart();
         for (i=0; i<10; i++)
             magma_z_spmv( one, dD, dx2, zero, dy2);
         //cudaProfilerStop();
         magma_device_sync(); end = magma_wtime(); 
-        //printf( " > MAGMA: %.2e seconds (SELLC-mod).\n",(end-start)/10 );
+        //printf( " > MAGMA: %.2e seconds (SELLP-mod).\n",(end-start)/10 );
         printf( "  %.2e  &",(end-start)/10 );
         //magma_z_vvisu( dy2, 0,2000);
         magma_z_mfree(&dD);

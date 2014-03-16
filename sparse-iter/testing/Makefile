@@ -23,6 +23,10 @@ ZSRC += \
 	testing_z_matrix_io.cpp	\
 #	testing_z_matrix_compressor.cpp	\
 
+# ----------
+# run utility functions
+ZSRC += \
+	run_zspmv.cpp	\
 
 # ----------
 # test Krylov space linear solvers
@@ -55,7 +59,8 @@ ZSRC += \
 # ----------
 # test Krylov space eigen-solvers
 ZSRC += \
-#	testing_zlobpcg.cpp     \
+	testing_zlobpcg.cpp     \
+	testing_zlobpcg3.cpp     \
 
 # run preconditioned Krylov solvers
 ZSRC += \
