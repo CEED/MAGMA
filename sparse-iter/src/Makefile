@@ -44,6 +44,7 @@ ZSRC += \
 ZSRC += \
 	zlobpcg.cpp		\
 	zlobpcg2.cpp            \
+	zlobpcg3.cpp            \
 	#zcgeig.cpp		\
 	#zlancsoz.cpp		\
 
