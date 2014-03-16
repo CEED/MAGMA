@@ -36,6 +36,7 @@ int main( int argc, char** argv)
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
     solver_par.version = 0;
+    solver_par.num_eigenvalues = 0;
     int format = 0;
 
     magma_z_sparse_matrix A, B, B_d;

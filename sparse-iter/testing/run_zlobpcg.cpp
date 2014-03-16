@@ -74,10 +74,9 @@ int main( int argc, char** argv)
             format = atoi( argv[++i] );
             switch( format ) {
                 case 0: B.storage_type = Magma_CSR; break;
-                case 1: B.storage_type = Magma_ELLPACK; break;
-                case 2: B.storage_type = Magma_ELLPACKT; break;
-                case 3: B.storage_type = Magma_ELLPACKRT; break;
-                case 4: B.storage_type = Magma_SELLC; break;
+                case 1: B.storage_type = Magma_ELL; break;
+                case 2: B.storage_type = Magma_ELLRT; break;
+                case 3: B.storage_type = Magma_SELLP; break;
             }
         }else if ( strcmp("--precond", argv[i]) == 0 ) {
             format = atoi( argv[++i] );
@@ -103,7 +102,7 @@ int main( int argc, char** argv)
             break;
     }
     printf( "\n    usage: ./run_zlobpcg"
-        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --format %d (0=CSR, 1=ELL, 2=ELLRT, 4=SELLP)"
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
@@ -122,19 +121,6 @@ int main( int argc, char** argv)
                                     ,A.num_rows,A.num_cols,A.nnz );
         solver_par.ev_length = A.num_cols;
 
-        magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
-                           // as the matrix size has influence on the EV-length
-
-
-
-        real_Double_t  gpu_time;
-        magma_opts opts;
-        //parse_opts( argc, argv, &opts );
-        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
-    
-        magma_int_t blockSize = solver_par.num_eigenvalues;    
-        magma_int_t m = A.num_rows;
-
         magma_z_sparse_matrix A2;
         A2.storage_type = Magma_SELLC;
         A2.blocksize = 8;
@@ -144,6 +130,17 @@ int main( int argc, char** argv)
         // copy matrix to GPU                                                     
         magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
 
+//    for(int num_vecs = 56; num_vecs < 65; num_vecs+=2){
+
+   //     solver_par.num_eigenvalues = num_vecs;
+
+        magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
+                           // as the matrix size has influence on the EV-length
+
+
+
+        real_Double_t  gpu_time;
+
         // Find the blockSize smallest eigenvalues and corresponding eigen-vectors
         gpu_time = magma_wtime();
         magma_zlobpcg3( dA, &solver_par );
@@ -151,6 +148,8 @@ int main( int argc, char** argv)
 
         printf("Time (sec) = %7.2f\n", gpu_time);
         printf("solver runtime (sec) = %7.2f\n", solver_par.runtime );
+
+  //  }
 
         magma_z_mfree(     &A    );
 

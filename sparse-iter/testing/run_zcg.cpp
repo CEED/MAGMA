@@ -36,6 +36,7 @@ int main( int argc, char** argv)
     solver_par.epsilon = 10e-16;
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
+    solver_par.num_eigenvalues = 0;
     int format = 0;
     int version = 0;
 
@@ -55,10 +56,9 @@ int main( int argc, char** argv)
             format = atoi( argv[++i] );
             switch( format ) {
                 case 0: B.storage_type = Magma_CSR; break;
-                case 1: B.storage_type = Magma_ELLPACK; break;
-                case 2: B.storage_type = Magma_ELLPACKT; break;
-                case 3: B.storage_type = Magma_ELLPACKRT; break;
-                case 4: B.storage_type = Magma_SELLC; break;
+                case 1: B.storage_type = Magma_ELL; break;
+                case 2: B.storage_type = Magma_ELLRT; break;
+                case 3: B.storage_type = Magma_SELLP; break;
             }
         } else if ( strcmp("--version", argv[i]) == 0 ) {
             version = atoi( argv[++i] );
@@ -76,7 +76,7 @@ int main( int argc, char** argv)
             break;
     }
     printf( "\n    usage: ./run_zcg"
-        " [ --format %d (0=CSR, 1=ELLPACK, 2=ELLPACKT, 3=ELLPACKRT, 4=SELLC)"
+        " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
