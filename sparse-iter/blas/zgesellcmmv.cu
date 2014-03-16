@@ -15,7 +15,7 @@
 
 #define PRECISION_z
 
-#define TEXTURE
+//#define TEXTURE
 
 /*
 // SELLP SpMV kernel
@@ -113,7 +113,7 @@ zgesellptmv2d_kernel_4( int num_rows,
                      magmaDoubleComplex *d_val, 
                      magma_index_t *d_colind,
                      magma_index_t *d_rowptr,
-                     const magmaDoubleComplex* __restrict__ d_x,
+                     magmaDoubleComplex* d_x,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
@@ -190,7 +190,7 @@ zgesellptmv2d_kernel_8( int num_rows,
                      magmaDoubleComplex *d_val, 
                      magma_index_t *d_colind,
                      magma_index_t *d_rowptr,
-                     const magmaDoubleComplex* __restrict__ d_x,
+                     magmaDoubleComplex* d_x,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
@@ -269,7 +269,7 @@ zgesellptmv2d_kernel_16( int num_rows,
                      magmaDoubleComplex *d_val, 
                      magma_index_t *d_colind,
                      magma_index_t *d_rowptr,
-                     const magmaDoubleComplex* __restrict__ d_x,
+                     magmaDoubleComplex* d_x,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
@@ -333,7 +333,7 @@ zgesellptmv2d_kernel_32( int num_rows,
                      magmaDoubleComplex *d_val, 
                      magma_index_t *d_colind,
                      magma_index_t *d_rowptr,
-                     const magmaDoubleComplex* __restrict__ d_x,
+                     magmaDoubleComplex* d_x,
                      magmaDoubleComplex beta, 
                      magmaDoubleComplex *d_y)
 {
