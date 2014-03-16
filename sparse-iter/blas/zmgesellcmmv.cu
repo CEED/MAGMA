@@ -19,13 +19,13 @@
 #define TEXTURE
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_1_3D( int num_rows, 
+zmgesellptmv_kernel_1_3D( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -66,13 +66,13 @@ zmgesellcmtmv_kernel_1_3D( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_4_3D( int num_rows, 
+zmgesellptmv_kernel_4_3D( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -135,13 +135,13 @@ zmgesellcmtmv_kernel_4_3D( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_8_3D( int num_rows, 
+zmgesellptmv_kernel_8_3D( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -206,13 +206,13 @@ zmgesellcmtmv_kernel_8_3D( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_16_3D( int num_rows, 
+zmgesellptmv_kernel_16_3D( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -276,13 +276,13 @@ zmgesellcmtmv_kernel_16_3D( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_32_3D( int num_rows, 
+zmgesellptmv_kernel_32_3D( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -351,13 +351,13 @@ zmgesellcmtmv_kernel_32_3D( int num_rows,
 
 
 
-// SELLCM SpMV kernel 2D grid - for large number of vectors
+// SELLP SpMV kernel 2D grid - for large number of vectors
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_1_3D_tex( int num_rows, 
+zmgesellptmv_kernel_1_3D_tex( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -405,13 +405,13 @@ zmgesellcmtmv_kernel_1_3D_tex( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_4_3D_tex( int num_rows, 
+zmgesellptmv_kernel_4_3D_tex( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -483,13 +483,13 @@ zmgesellcmtmv_kernel_4_3D_tex( int num_rows,
 }
  
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_8_3D_tex( int num_rows, 
+zmgesellptmv_kernel_8_3D_tex( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -566,13 +566,13 @@ zmgesellcmtmv_kernel_8_3D_tex( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_16_3D_tex( int num_rows, 
+zmgesellptmv_kernel_16_3D_tex( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -653,13 +653,13 @@ zmgesellcmtmv_kernel_16_3D_tex( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_32_3D_tex( int num_rows, 
+zmgesellptmv_kernel_32_3D_tex( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -746,13 +746,13 @@ zmgesellcmtmv_kernel_32_3D_tex( int num_rows,
 //***************** routines for beta = 0 ************************************//
 
 
-// SELLCM SpMV kernel 2D grid - for large number of vectors
+// SELLP SpMV kernel 2D grid - for large number of vectors
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_1_3D_texb( int num_rows, 
+zmgesellptmv_kernel_1_3D_texb( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -799,13 +799,13 @@ zmgesellcmtmv_kernel_1_3D_texb( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_4_3D_texb( int num_rows, 
+zmgesellptmv_kernel_4_3D_texb( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -874,13 +874,13 @@ zmgesellcmtmv_kernel_4_3D_texb( int num_rows,
 }
  
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_8_3D_texb( int num_rows, 
+zmgesellptmv_kernel_8_3D_texb( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -955,13 +955,13 @@ zmgesellcmtmv_kernel_8_3D_texb( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_16_3D_texb( int num_rows, 
+zmgesellptmv_kernel_16_3D_texb( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -1040,13 +1040,13 @@ zmgesellcmtmv_kernel_16_3D_texb( int num_rows,
 }
 
 
-// SELLCM SpMV kernel 3D grid
+// SELLP SpMV kernel 3D grid
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-zmgesellcmtmv_kernel_32_3D_texb( int num_rows, 
+zmgesellptmv_kernel_32_3D_texb( int num_rows, 
                      int num_cols,
                      int num_vecs,
                      int blocksize,
@@ -1143,7 +1143,7 @@ zmgesellcmtmv_kernel_32_3D_texb( int num_rows,
     =======
     
     This routine computes Y = alpha *  A^t *  X + beta * Y on the GPU.
-    Input format is SELLCM. Note, that the input format for X is row-major
+    Input format is SELLP. Note, that the input format for X is row-major
     while the output format for Y is column major!
     
     Arguments
@@ -1153,13 +1153,13 @@ zmgesellcmtmv_kernel_32_3D_texb( int num_rows,
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
     magma_int_t num_vecs            number of columns in X and Y
-    magma_int_t blocksize           number of rows in one ELLPACKT-slice
+    magma_int_t blocksize           number of rows in one ELL-slice
     magma_int_t slices              number of slices in matrix
     magma_int_t alignment           number of threads assigned to one row
     magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in SELLCM
-    magma_int_t *d_colind           columnindices of A in SELLCM
-    magma_int_t *d_rowptr           rowpointer of SELLCM
+    magmaDoubleComplex *d_val       array containing values of A in SELLP
+    magma_int_t *d_colind           columnindices of A in SELLP
+    magma_int_t *d_rowptr           rowpointer of SELLP
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
@@ -1167,7 +1167,7 @@ zmgesellcmtmv_kernel_32_3D_texb( int num_rows,
     ======================================================================    */
 
 extern "C" magma_int_t
-magma_zmgesellcmmv( magma_trans_t transA,
+magma_zmgesellpmv( magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t num_vecs,
                     magma_int_t blocksize,
@@ -1250,55 +1250,55 @@ magma_zmgesellcmmv( magma_trans_t transA,
         if( alignment == 1){
             dim3 block( blocksize, num_vecs/2, 1 );
             if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellcmtmv_kernel_1_3D_texb<<< grid, block, 0, magma_stream >>>
+            zmgesellptmv_kernel_1_3D_texb<<< grid, block, 0, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, d_y );
             else
-            zmgesellcmtmv_kernel_1_3D_tex<<< grid, block, 0, magma_stream >>>
+            zmgesellptmv_kernel_1_3D_tex<<< grid, block, 0, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
         }
         else if( alignment == 4){
             dim3 block( blocksize, alignment, num_vecs/2 );
             if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellcmtmv_kernel_4_3D_texb<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_4_3D_texb<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, d_y );
             else
-            zmgesellcmtmv_kernel_4_3D_tex<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_4_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
         }
         else if( alignment == 8){
             dim3 block( blocksize, alignment, num_vecs/2 );
             if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellcmtmv_kernel_8_3D_texb<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_8_3D_texb<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, d_y );
             else
-            zmgesellcmtmv_kernel_8_3D_tex<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_8_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
         }
         else if( alignment == 16){
             dim3 block( blocksize, alignment, num_vecs/2 );
             if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellcmtmv_kernel_16_3D_texb<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_16_3D_texb<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, d_y );
             else
-            zmgesellcmtmv_kernel_16_3D_tex<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_16_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
         }
         else if( alignment == 32){
             dim3 block( blocksize, alignment, num_vecs/2 );
             if( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellcmtmv_kernel_32_3D_texb<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_32_3D_texb<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, d_y );
             else
-            zmgesellcmtmv_kernel_32_3D_tex<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_32_3D_tex<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, texdx, beta, d_y );
         }
@@ -1331,31 +1331,31 @@ magma_zmgesellcmmv( magma_trans_t transA,
 
         if( alignment == 1){
             dim3 block( blocksize, num_vecs, 1 ); 
-            zmgesellcmtmv_kernel_1_3D<<< grid, block, 0, magma_stream >>>
+            zmgesellptmv_kernel_1_3D<<< grid, block, 0, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
         }
         else if( alignment == 4){
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellcmtmv_kernel_4_3D<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_4_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
         }
         else if( alignment == 8){
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellcmtmv_kernel_8_3D<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_8_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
         }
         else if( alignment == 16){
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellcmtmv_kernel_16_3D<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_16_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
         }
         else if( alignment == 32){
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellcmtmv_kernel_32_3D<<< grid, block, Ms, magma_stream >>>
+            zmgesellptmv_kernel_32_3D<<< grid, block, Ms, magma_stream >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
         }

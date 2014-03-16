@@ -182,7 +182,7 @@ extern __shared__ magmaDoubleComplex shared[];
     =======
     
     This routine computes y = alpha *  A *  x + beta * y on the GPU.
-    Input format is ELLPACKRT. The ideas are taken from 
+    Input format is ELLRT. The ideas are taken from 
     "Improving the performance of the sparse matrix
     vector product with GPUs", (CIT 2010), 
     and modified to provide correct values.

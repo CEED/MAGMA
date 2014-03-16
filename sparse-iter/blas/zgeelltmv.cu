@@ -18,7 +18,7 @@
 #endif
 
 
-// ELLPACKT SpMV kernel
+// ELL SpMV kernel
 //Michael Garland
 __global__ void 
 zgeelltmv_kernel( int num_rows, 
@@ -44,7 +44,7 @@ zgeelltmv_kernel( int num_rows,
     }
 }
 
-// shifted ELLPACKT SpMV kernel
+// shifted ELL SpMV kernel
 //Michael Garland
 __global__ void 
 zgeelltmv_kernel_shift( int num_rows, 
@@ -92,7 +92,7 @@ zgeelltmv_kernel_shift( int num_rows,
     =======
     
     This routine computes y = alpha *  A^t *  x + beta * y on the GPU.
-    Input format is ELLPACKT.
+    Input format is ELL.
     
     Arguments
     =========
@@ -100,8 +100,8 @@ zgeelltmv_kernel_shift( int num_rows,
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
     magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
+    magmaDoubleComplex *d_val       array containing values of A in ELL
+    magma_int_t *d_colind           columnindices of A in ELL
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y
@@ -141,7 +141,7 @@ magma_zgeelltmv(   magma_trans_t transA,
     =======
     
     This routine computes y = alpha *( A - lambda I ) * x + beta * y on the GPU.
-    Input format is ELLPACKT.
+    Input format is ELL.
     
     Arguments
     =========
@@ -150,8 +150,8 @@ magma_zgeelltmv(   magma_trans_t transA,
     magma_int_t n                   number of columns in A 
     magmaDoubleComplex alpha        scalar multiplier
     magmaDoubleComplex lambda       scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
+    magmaDoubleComplex *d_val       array containing values of A in ELL
+    magma_int_t *d_colind           columnindices of A in ELL
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y

@@ -121,7 +121,7 @@ magma_sparse_matrix_zlag2c( magma_z_sparse_matrix A, magma_c_sparse_matrix *B )
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
-        if( A.storage_type == Magma_ELLPACKT ){
+        if( A.storage_type == Magma_ELL ){
             magma_cmalloc( &B->val, A.num_rows*A.max_nnz_row );
             magmablas_zlag2c_sparse(  A.num_rows*A.max_nnz_row, 1, A.val, 
             A.num_rows*A.max_nnz_row, B->val, A.num_rows*A.max_nnz_row, &info );

@@ -67,7 +67,7 @@ zgesellcmv_kernel(   int num_rows,
     =======
     
     This routine computes y = alpha *  A^t *  x + beta * y on the GPU.
-    Input format is SELLC.
+    Input format is SELLC/SELLP.
     
     Arguments
     =========
@@ -75,13 +75,13 @@ zgesellcmv_kernel(   int num_rows,
     magma_trans_t transA            transpose A?
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
-    magma_int_t blocksize           number of rows in one ELLPACKT-slice
+    magma_int_t blocksize           number of rows in one ELL-slice
     magma_int_t slices              number of slices in matrix
     magma_int_t alignment           number of threads assigned to one row (=1)
     magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in SELLCM
-    magma_int_t *d_colind           columnindices of A in SELLCM
-    magma_int_t *d_rowptr           rowpointer of SELLCM
+    magmaDoubleComplex *d_val       array containing values of A in SELLC/P
+    magma_int_t *d_colind           columnindices of A in SELLC/P
+    magma_int_t *d_rowptr           rowpointer of SELLP
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y

@@ -159,7 +159,7 @@ magma_zcgmerge_spmvcsr_kernel(
     }
 }
 
-// computes the SpMV using ELLPACKT and the first step of the reduction
+// computes the SpMV using ELL and the first step of the reduction
 __global__ void 
 magma_zcgmerge_spmvellpackt_kernel(  
                  int n,
@@ -313,7 +313,7 @@ magma_zcgmerge_spmvellpack_kernel(
     }
 }
 
-// computes the SpMV using ELLPACKRT 8 threads per row
+// computes the SpMV using ELLRT 8 threads per row
 __global__ void 
 magma_zcgmerge_spmvellpackrt_kernel_8(  
                  int n,
@@ -364,7 +364,7 @@ extern __shared__ magmaDoubleComplex shared[];
 
 }
 
-// computes the SpMV using ELLPACKRT 8 threads per row
+// computes the SpMV using ELLRT 8 threads per row
 __global__ void 
 magma_zcgmerge_spmvellpackrt_kernel_16(  
                  int n,
@@ -416,7 +416,7 @@ extern __shared__ magmaDoubleComplex shared[];
 
 }
 
-// computes the SpMV using ELLPACKRT 8 threads per row
+// computes the SpMV using ELLRT 8 threads per row
 __global__ void 
 magma_zcgmerge_spmvellpackrt_kernel_32(  
                  int n,
@@ -618,13 +618,13 @@ magma_zcgmerge_spmvsellc_kernel(
 }
 
 
-// SELLCM SpMV kernel
+// SELLP SpMV kernel
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-magma_zcgmerge_spmvsellcmt_kernel_8( int num_rows, 
+magma_zcgmerge_spmvsellpt_kernel_8( int num_rows, 
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
@@ -673,13 +673,13 @@ magma_zcgmerge_spmvsellcmt_kernel_8( int num_rows,
 
     }
 }
-// SELLCM SpMV kernel
+// SELLP SpMV kernel
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-magma_zcgmerge_spmvsellcmt_kernel_16( int num_rows, 
+magma_zcgmerge_spmvsellpt_kernel_16( int num_rows, 
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
@@ -732,13 +732,13 @@ magma_zcgmerge_spmvsellcmt_kernel_16( int num_rows,
 }
 
 
-// SELLCM SpMV kernel
+// SELLP SpMV kernel
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
-magma_zcgmerge_spmvsellcmt_kernel_32( int num_rows, 
+magma_zcgmerge_spmvsellpt_kernel_32( int num_rows, 
                      int blocksize,
                      int T,
                      magmaDoubleComplex *d_val, 
@@ -823,7 +823,7 @@ magma_zcg_rhokernel(
 
     magma_storage_t storage_t           matrix storage type
     int n                               dimension n
-    int max_nnz_row                     for ELLPACK/T
+    int max_nnz_row                     for ELL/ELLRT
     magmaDoubleComplex *d1              temporary vector
     magmaDoubleComplex *d2              temporary vector
     magmaDoubleComplex *d_val           matrix values
@@ -858,10 +858,10 @@ magma_zcgmerge_spmv1(
     else if( A.storage_type == Magma_ELLPACK )
         magma_zcgmerge_spmvellpack_kernel<<<Gs, Bs, Ms, magma_stream >>>
         ( A.num_rows, A.max_nnz_row, A.val, A.col, d_d, d_z, d1 );
-    else if( A.storage_type == Magma_ELLPACKT )
+    else if( A.storage_type == Magma_ELL )
         magma_zcgmerge_spmvellpackt_kernel<<<Gs, Bs, Ms, magma_stream >>>
         ( A.num_rows, A.max_nnz_row, A.val, A.col, d_d, d_z, d1 );
-    else if( A.storage_type == Magma_SELLC ){
+    else if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
         if( A.blocksize==256){
             magma_zcgmerge_spmvsellc_kernel<<<Gs, Bs, Ms, magma_stream >>>
             ( A.num_rows, A.blocksize, A. val, A.col, A.row,  
@@ -870,49 +870,49 @@ magma_zcgmerge_spmv1(
         else
             printf("error: SELLC only for blocksize 256.\n");
     }
-    else if( A.storage_type == Magma_SELLCM ){
-            int num_threadssellcm = A.blocksize*A.alignment;
+    else if( A.storage_type == Magma_SELLP ){
+            int num_threadssellp = A.blocksize*A.alignment;
             magma_int_t arch = magma_getdevice_arch();
-            if ( arch < 200 && num_threadssellcm > 256 )
+            if ( arch < 200 && num_threadssellp > 256 )
                 printf("error: too much shared memory requested.\n");
 
             dim3 block( A.blocksize, A.alignment, 1);
             int dimgrid1 = sqrt(A.numblocks);
             int dimgrid2 = (A.numblocks + dimgrid1 -1 ) / dimgrid1;
 
-            dim3 gridsellcm( dimgrid1, dimgrid2, 1);
-            int Mssellcm = num_threadssellcm * sizeof( magmaDoubleComplex );
+            dim3 gridsellp( dimgrid1, dimgrid2, 1);
+            int Mssellp = num_threadssellp * sizeof( magmaDoubleComplex );
 
             if( A.alignment == 8)
-                magma_zcgmerge_spmvsellcmt_kernel_8
-                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                magma_zcgmerge_spmvsellpt_kernel_8
+                <<< gridsellp, block, Mssellp, magma_stream >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.val, A.col, A.row, d_d, d_z);
 
             else if( A.alignment == 16)
-                magma_zcgmerge_spmvsellcmt_kernel_16
-                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                magma_zcgmerge_spmvsellpt_kernel_16
+                <<< gridsellp, block, Mssellp, magma_stream >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.val, A.col, A.row, d_d, d_z);
 
             else if( A.alignment == 32)
-                magma_zcgmerge_spmvsellcmt_kernel_32
-                <<< gridsellcm, block, Mssellcm, magma_stream >>>
+                magma_zcgmerge_spmvsellpt_kernel_32
+                <<< gridsellp, block, Mssellp, magma_stream >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.val, A.col, A.row, d_d, d_z);
 
             else
                 printf("error: alignment not supported.\n");
 
-        // in case of using SELLCM, we can't efficiently merge the 
+        // in case of using SELLP, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
         magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, magma_stream >>>
                               ( A.num_rows, d_z, d_d, d1 );
 
     }
-    else if( A.storage_type == Magma_ELLPACKRT ){
-        // in case of using ELLPACKRT, we need a different grid, assigning
+    else if( A.storage_type == Magma_ELLRT ){
+        // in case of using ELLRT, we need a different grid, assigning
         // threads_per_row processors to each row
         // the block size is num_threads
         // fixed values
@@ -931,26 +931,26 @@ magma_zcgmerge_spmv1(
 
     int dimgrid1 = sqrt(num_blocks);
     int dimgrid2 = (num_blocks + dimgrid1 -1 ) / dimgrid1;
-    dim3 gridellpackrt( dimgrid1, dimgrid2, 1);
+    dim3 gridellrt( dimgrid1, dimgrid2, 1);
 
     int Mellrt = A.alignment * A.blocksize * sizeof( magmaDoubleComplex );
     // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads , Ms);
 
     if( A.alignment == 32 ){
         magma_zcgmerge_spmvellpackrt_kernel_32
-                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                <<< gridellrt, num_threads , Mellrt, magma_stream >>>
                  ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
                                                  A.alignment, real_row_length );
     }
     else if( A.alignment == 16 ){
         magma_zcgmerge_spmvellpackrt_kernel_16
-                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                <<< gridellrt, num_threads , Mellrt, magma_stream >>>
                  ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
                                                  A.alignment, real_row_length );
     }
     else if( A.alignment == 8 ){
         magma_zcgmerge_spmvellpackrt_kernel_8
-                <<< gridellpackrt, num_threads , Mellrt, magma_stream >>>
+                <<< gridellrt, num_threads , Mellrt, magma_stream >>>
                  ( A.num_rows, A.val, A.col, A.row, d_d, d_z, d1, 
                                                  A.alignment, real_row_length );
     }
@@ -958,7 +958,7 @@ magma_zcgmerge_spmv1(
         printf("error: alignment %d not supported.\n", A.alignment);
         exit(-1);
     }
-        // in case of using ELLPACKRT, we can't efficiently merge the 
+        // in case of using ELLRT, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
 

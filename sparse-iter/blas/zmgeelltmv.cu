@@ -65,7 +65,7 @@ zmgeelltmv_kernel( int num_rows,
     =======
     
     This routine computes Y = alpha *  A *  X + beta * Y for X and Y sets of 
-    num_vec vectors on the GPU. Input format is ELLPACKT. 
+    num_vec vectors on the GPU. Input format is ELL. 
     
     Arguments
     =========
@@ -74,8 +74,8 @@ zmgeelltmv_kernel( int num_rows,
     magma_int_t n                   number of columns in A 
     mama_int_t num_vecs             number of vectors
     magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
+    magmaDoubleComplex *d_val       array containing values of A in ELL
+    magma_int_t *d_colind           columnindices of A in ELL
     magmaDoubleComplex *d_x         input vector x
     magmaDoubleComplex beta         scalar multiplier
     magmaDoubleComplex *d_y         input/output vector y

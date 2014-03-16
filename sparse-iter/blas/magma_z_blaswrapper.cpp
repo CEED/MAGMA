@@ -72,15 +72,15 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             else if( A.storage_type == Magma_ELLPACKT ){
-                 //printf("using ELLPACKT kernel for SpMV: ");
+             else if( A.storage_type == Magma_ELL ){
+                 //printf("using ELL kernel for SpMV: ");
                  magma_zgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             else if( A.storage_type == Magma_ELLPACKRT ){
-                 //printf("using ELLPACKRT kernel for SpMV: ");
+             else if( A.storage_type == Magma_ELLRT ){
+                 //printf("using ELLRT kernel for SpMV: ");
                  magma_zgeellrtmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                             A.max_nnz_row, alpha, A.val, A.col, A.row, x.val, 
                          beta, y.val, A.alignment, A.blocksize );
@@ -96,9 +96,9 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             else if( A.storage_type == Magma_SELLCM ){
-                 //printf("using SELLCM kernel for SpMV: ");
-                 magma_zgesellcmmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+             else if( A.storage_type == Magma_SELLP ){
+                 //printf("using SELLP kernel for SpMV: ");
+                 magma_zgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     A.blocksize, A.numblocks, A.alignment, 
                     alpha, A.val, A.col, A.row, x.val, beta, y.val );
 
@@ -152,16 +152,16 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             else if( A.storage_type == Magma_ELLPACKT ){
-                 //printf("using ELLPACKT kernel for SpMV: ");
+             else if( A.storage_type == Magma_ELL ){
+                 //printf("using ELL kernel for SpMV: ");
                  magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                         num_vecs, A.max_nnz_row, alpha, A.val, 
                         A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
-             }else if( A.storage_type == Magma_SELLCM ){
-                 //printf("using SELLCM kernel for SpMV: ");
-                 magma_zmgesellcmmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+             }else if( A.storage_type == Magma_SELLP ){
+                 //printf("using SELLP kernel for SpMV: ");
+                 magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.blocksize, A.numblocks, A.alignment, 
                     alpha, A.val, A.col, A.row, x.val, beta, y.val );
 
@@ -255,8 +255,8 @@ magma_z_spmv_shift( magmaDoubleComplex alpha,
              //printf("done.\n");
              return MAGMA_SUCCESS;
          }
-         else if( A.storage_type == Magma_ELLPACKT ){
-             //printf("using ELLPACKT kernel for SpMV: ");
+         else if( A.storage_type == Magma_ELL ){
+             //printf("using ELL kernel for SpMV: ");
              magma_zgeelltmv_shift( MagmaNoTrans, A.num_rows, A.num_cols, 
                 A.max_nnz_row, alpha, lambda, A.val, A.col, x.val, beta, offset, 
                 blocksize, add_rows, y.val );
