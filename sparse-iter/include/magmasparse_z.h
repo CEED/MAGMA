@@ -667,7 +667,7 @@ magma_zgesellcmv(      magma_trans_t transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t
-magma_zgesellcmmv(  magma_trans_t transA,
+magma_zgesellpmv(  magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t blocksize,
                     magma_int_t slices,
@@ -681,7 +681,7 @@ magma_zgesellcmmv(  magma_trans_t transA,
                     magmaDoubleComplex *d_y );
 
 magma_int_t
-magma_zmgesellcmmv( magma_trans_t transA,
+magma_zmgesellpmv( magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t num_vecs,
                     magma_int_t blocksize,
@@ -696,7 +696,7 @@ magma_zmgesellcmmv( magma_trans_t transA,
                     magmaDoubleComplex *d_y );
 
 magma_int_t
-magma_zmgesellcmmv_blocked( magma_trans_t transA,
+magma_zmgesellpmv_blocked( magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t num_vecs,
                     magma_int_t blocksize,
@@ -900,7 +900,7 @@ magma_zbcsrblockinfo5(  magma_int_t lustep,
                         magmaDoubleComplex **AII );
 
 magma_int_t
-magma_zgesellcmmv_mpk(  magma_trans_t transA,
+magma_zgesellpmv_mpk(  magma_trans_t transA,
                     magma_int_t m, magma_int_t n,
                     magma_int_t blocksize,
                     magma_int_t slices,
