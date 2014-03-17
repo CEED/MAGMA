@@ -38,7 +38,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, magma_perf=0, magma_time=0, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
+    real_Double_t   gflops, magma_perf, magma_time=0, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
     double          magma_error, cublas_error, work[1];
     magma_int_t M, N, info;
     magma_int_t Ak;
@@ -59,9 +59,6 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    #if defined(PRECISION_z) || defined(PRECISION_c)
-    printf( "magmablas trsm only defined for real precisions [sd], not complex [cz].\n" );
-    #endif
 
     printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
@@ -133,7 +130,6 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Ak, Ak, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M, N, h_B, ldb, d_B, lddb );
             
-            #if defined(PRECISION_s) || defined(PRECISION_d)
             magma_time = magma_sync_wtime( NULL );
             magmablas_ztrsm( opts.side, opts.uplo, opts.transA, opts.diag, 
                              M, N,
@@ -141,7 +137,6 @@ int main( int argc, char** argv)
                                     d_B, lddb );
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
-            #endif
             
             magma_zgetmatrix( M, N, d_B, lddb, h_Bmagma, ldb );
             
@@ -216,7 +211,7 @@ int main( int argc, char** argv)
                         magma_error, cublas_error );
             }
             else {
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e     %8.2e\n",
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2f     %8.2e\n",
                         (int) M, (int) N,
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
