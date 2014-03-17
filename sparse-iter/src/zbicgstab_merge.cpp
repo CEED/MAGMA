@@ -117,11 +117,8 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
     cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), 
                                             cudaMemcpyHostToDevice );
-    magma_z_vvisu(r, 0, 10); 
-    magma_zprint_gpu( 10, 1, A.val, 10 );
     magma_z_spmv( c_one, A, r, c_zero, v );                     // z = A r
     den = MAGMA_Z_REAL( magma_zdotc(dofs, v.val, 1, r.val, 1) );// den = z dot r
-    magma_z_vvisu(v, 0, 10); 
 
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;

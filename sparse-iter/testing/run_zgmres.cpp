@@ -51,7 +51,6 @@ int main( int argc, char** argv)
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
     B.storage_type = Magma_CSR;
-    char filename[256]; 
     int i;
     for( i = 1; i < argc; ++i ) {
      if ( strcmp("--format", argv[i]) == 0 ) {

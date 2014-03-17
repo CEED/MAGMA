@@ -42,9 +42,9 @@ ZSRC += \
 
 # Krylov space eigen-solvers
 ZSRC += \
-	zlobpcg.cpp		\
-	zlobpcg2.cpp            \
 	zlobpcg3.cpp            \
+#	zlobpcg.cpp		\
+#	zlobpcg2.cpp            \
 	#zcgeig.cpp		\
 	#zlancsoz.cpp		\
 
@@ -72,7 +72,7 @@ ZSRC += \
 
 # orthogonalization schemes
 ZSRC += \
-	zorthomgs.cpp   \
+#	zorthomgs.cpp   \
 
 
 

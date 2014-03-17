@@ -67,7 +67,6 @@ int main( int argc, char** argv)
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
     B.storage_type = Magma_CSR;
-    char filename[256]; 
     int i;
     for( i = 1; i < argc; ++i ) {
      if ( strcmp("--format", argv[i]) == 0 ) {
@@ -130,10 +129,6 @@ int main( int argc, char** argv)
         // copy matrix to GPU                                                     
         magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
 
-//    for(int num_vecs = 56; num_vecs < 65; num_vecs+=2){
-
-   //     solver_par.num_eigenvalues = num_vecs;
-
         magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
                            // as the matrix size has influence on the EV-length
 
@@ -148,8 +143,6 @@ int main( int argc, char** argv)
 
         printf("Time (sec) = %7.2f\n", gpu_time);
         printf("solver runtime (sec) = %7.2f\n", solver_par.runtime );
-
-  //  }
 
         magma_z_mfree(     &A    );
 
