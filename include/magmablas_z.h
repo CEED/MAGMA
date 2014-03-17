@@ -630,8 +630,6 @@ void magmablas_zher2k(
     double  beta,
     magmaDoubleComplex_ptr       dC, magma_int_t lddc );
 
-#ifdef REAL
-// only real [sd] precisions available
 void magmablas_ztrsm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
@@ -639,6 +637,8 @@ void magmablas_ztrsm(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
 
+//#ifdef REAL
+// only real [sd] precisions available
 void magmablas_ztrsm_work(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
@@ -646,7 +646,7 @@ void magmablas_ztrsm_work(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       db, magma_int_t lddb,
     magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
-#endif
+//#endif
 
   /*
    * Wrappers for platform independence.
