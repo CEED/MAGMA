@@ -338,7 +338,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }        
-
         // CSR to ELLD (ELL with diagonal element first)
         if( old_format == Magma_CSR && new_format == Magma_ELLD ){
             // fill in information for B
@@ -384,13 +383,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 }
             }
             B->max_nnz_row = maxrowlength;
-
-            magma_zprint( B->num_rows, B->max_nnz_row, B->val, B->num_rows);
-
             //printf( "done\n" );
             return MAGMA_SUCCESS; 
         }
-
         // ELLD (ELL with diagonal element first) to CSR
         if( old_format == Magma_ELLD && new_format == Magma_CSR ){
             //printf( "Conversion to CSR: " ); 
@@ -454,6 +449,106 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }  
+        // CSR to ELLDD (2x ELLD (first row, then col major)
+        if( old_format == Magma_CSR && new_format == Magma_ELLDD ){         
+            // fill in information for B
+            B->storage_type = Magma_ELLDD;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            // conversion
+            magma_int_t i, j;
+            magma_z_sparse_matrix A_tmp;
+            magma_z_mconvert( A, &A_tmp, Magma_CSR, Magma_ELLD );
+            magma_int_t maxrowlength = A_tmp.max_nnz_row;
+            B->max_nnz_row = maxrowlength;
+            magma_int_t off = maxrowlength*A.num_rows;
+
+            magma_zmalloc_cpu( &B->val, 2*off );
+            magma_indexmalloc_cpu( &B->col, 2*off );
+
+            magma_indexmalloc_cpu( &B->blockinfo, 2*off );
+            
+            for( i=0; i<off; i++){
+                B->val[ i ] = A_tmp.val[ i ];
+                B->col[ i ] = A_tmp.col[ i ];
+            }
+            for( i=0; i<off; i++){
+                B->val[ i+off ] = A_tmp.val[ i ];
+                B->col[ i+off ] = A_tmp.col[ i ];
+            }
+            for( j=0; j<maxrowlength; j++){
+                for( i=0; i<A.num_rows; i++){
+                    if( (i > B->col[j*A.num_rows+i]) 
+                            && (MAGMA_Z_REAL(B->val[j*A.num_rows+i]) != 0.0 ) )
+                        B->blockinfo[j*A.num_rows+i] = 1;
+                    else
+                        B->blockinfo[j*A.num_rows+i] = 0;                        
+                }
+            }
+            for( j=0; j<maxrowlength; j++){
+                for( i=0; i < A.num_rows; i++){
+                    if( (i >= B->col[off+j*A.num_rows+i]) 
+                        && (MAGMA_Z_REAL(B->val[off+j*A.num_rows+i]) != 0.0 ) )
+                        B->blockinfo[off+j*A.num_rows+i] = 1;
+                    else
+                        B->blockinfo[off+j*A.num_rows+i] = 0;                        
+                }
+            }
+
+            magma_z_mfree(&A_tmp);
+            //printf( "done\n" );
+            return MAGMA_SUCCESS; 
+        }
+        // ELLDD to CSR
+        if( old_format == Magma_ELLDD && new_format == Magma_CSR ){         
+            
+            magma_int_t maxrowlength = A.max_nnz_row;
+            magma_int_t off = A.max_nnz_row*A.num_rows;
+
+            // conversion
+            magma_int_t i, j;
+            magma_z_sparse_matrix A_tmp;
+            magma_zmalloc_cpu( &A_tmp.val, off );
+            magma_indexmalloc_cpu( &A_tmp.col, off );
+            A_tmp.num_rows = A.num_rows;
+            A_tmp.num_cols = A.num_cols;
+            A_tmp.nnz = A.nnz;
+            A_tmp.max_nnz_row = A.max_nnz_row;
+            A_tmp.storage_type = Magma_ELLD;
+            A_tmp.memory_location = A.memory_location;
+
+            for( i=0; i<off; i++){
+                    A_tmp.col[ i ] = A.col[ i+off ];
+                if( A.blockinfo[ i ] == 1 ){
+                    A_tmp.val[ i ] = A.val[ i+off ];
+                }
+            }
+            for( j=0; j<maxrowlength; j++){
+                for( i=0; i<A.num_rows; i++){
+                    if( A.blockinfo[ j*A.num_rows +i+off ] == 1 ){
+                        magma_int_t row = A.col[ j*A.num_rows +i+off ];
+                        magmaDoubleComplex val = A.val[ j*A.num_rows +i+off ];
+                        for(int k=0; k<maxrowlength; k++){
+                            if( A_tmp.col[row+k*A.num_rows] == i ){
+                                A_tmp.val[ row+k*A.num_rows ] = val;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            magma_z_mconvert(A_tmp, B, Magma_ELLD, Magma_CSR );
+
+            magma_z_mfree(&A_tmp);
+            //printf( "done\n" );
+            return MAGMA_SUCCESS; 
+        }
         // CSR to ELLRT (also ELLPACKRT)
         if( old_format == Magma_CSR && new_format == Magma_ELLRT ){
             // fill in information for B
