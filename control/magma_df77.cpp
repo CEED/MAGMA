@@ -1019,14 +1019,14 @@ void magmaf_dsygvdx_2stage_m(
 
 #define magmaf_dgegqr_gpu FORTRAN_NAME( magmaf_dgegqr_gpu, MAGMAF_DGEGQR_GPU )
 void magmaf_dgegqr_gpu(
-    magma_int_t *m, magma_int_t *n,
+    magma_int_t *ikind, magma_int_t *m, magma_int_t *n,
     devptr_t *dA, magma_int_t *ldda,
     devptr_t *dwork,
     double *work,
     magma_int_t *info )
 {
     magma_dgegqr_gpu(
-        *m, *n,
+        *ikind, *m, *n,
         magma_ddevptr(dA), *ldda,
         magma_ddevptr(dwork),
         work,

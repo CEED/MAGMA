@@ -1139,14 +1139,14 @@ void magmaf_chegvdx_2stage_m(
 
 #define magmaf_cgegqr_gpu FORTRAN_NAME( magmaf_cgegqr_gpu, MAGMAF_CGEGQR_GPU )
 void magmaf_cgegqr_gpu(
-    magma_int_t *m, magma_int_t *n,
+    magma_int_t *ikind, magma_int_t *m, magma_int_t *n,
     devptr_t *dA, magma_int_t *ldda,
     devptr_t *dwork,
     magmaFloatComplex *work,
     magma_int_t *info )
 {
     magma_cgegqr_gpu(
-        *m, *n,
+        *ikind, *m, *n,
         magma_cdevptr(dA), *ldda,
         magma_cdevptr(dwork),
         work,

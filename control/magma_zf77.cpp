@@ -1139,14 +1139,14 @@ void magmaf_zhegvdx_2stage_m(
 
 #define magmaf_zgegqr_gpu FORTRAN_NAME( magmaf_zgegqr_gpu, MAGMAF_ZGEGQR_GPU )
 void magmaf_zgegqr_gpu(
-    magma_int_t *m, magma_int_t *n,
+    magma_int_t *ikind, magma_int_t *m, magma_int_t *n,
     devptr_t *dA, magma_int_t *ldda,
     devptr_t *dwork,
     magmaDoubleComplex *work,
     magma_int_t *info )
 {
     magma_zgegqr_gpu(
-        *m, *n,
+        *ikind, *m, *n,
         magma_zdevptr(dA), *ldda,
         magma_zdevptr(dwork),
         work,

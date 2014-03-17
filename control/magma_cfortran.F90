@@ -948,7 +948,8 @@ subroutine magmaf_chegvdx_2stage_m( nrgpu, itype, jobz, range, uplo, n, a, lda, 
     integer          :: info
 end subroutine magmaf_chegvdx_2stage_m
 
-subroutine magmaf_cgegqr_gpu( m, n, dA, ldda, dwork, work, info )
+subroutine magmaf_cgegqr_gpu( ikind, m, n, dA, ldda, dwork, work, info )
+    integer          :: ikind
     integer          :: m
     integer          :: n
     magma_devptr_t   :: dA
