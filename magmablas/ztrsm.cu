@@ -71,9 +71,6 @@ void magmablas_ztrsm(
 
     The matrix X is overwritten on B.
 
-    When M or N is not a multiple of blocking size, which is 32 for now, cublasDtrsm will
-    be called instead. There soon will not be this limitation both for arbitrary problem
-    size and blocking size.
 
     Arguments
     ==========
