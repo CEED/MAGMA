@@ -276,7 +276,7 @@ static __device__ void daxpy(
     c[15] += alpha * b[15];
 }
 
-__device__ void dgemm_kernel_16(
+__device__ void zgemm_kernel_16(
     magmaDoubleComplex *A, int lda,
     magmaDoubleComplex *B, int ldb,
     magmaDoubleComplex *C, int ldc,
@@ -344,7 +344,7 @@ __device__ void dgemm_kernel_16(
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_16_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_16_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     //const int page = (blockIdx.y)%(npages);
@@ -518,7 +518,7 @@ triple_dgemm_update_16_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_d
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_16_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_16_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     //const int page = (blockIdx.y)%(npages);
@@ -619,7 +619,7 @@ triple_dgemm_update_16_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_16_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_16_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -716,7 +716,7 @@ triple_dgemm_update_16_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_32_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_32_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -807,7 +807,7 @@ triple_dgemm_update_32_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_32_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_32_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -896,7 +896,7 @@ triple_dgemm_update_32_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_32_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_32_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -987,7 +987,7 @@ triple_dgemm_update_32_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_32_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_32_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1076,7 +1076,7 @@ triple_dgemm_update_32_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1161,7 +1161,7 @@ triple_dgemm_update_64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1247,7 +1247,7 @@ triple_dgemm_update_64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1332,7 +1332,7 @@ triple_dgemm_update_64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_64_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_64_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1418,7 +1418,7 @@ triple_dgemm_update_64_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComple
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_above64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1503,7 +1503,7 @@ triple_dgemm_update_above64_part1_R (const magmaDoubleComplex *Ain, magmaDoubleC
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_above64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1588,7 +1588,7 @@ triple_dgemm_update_above64_part1_L (const magmaDoubleComplex *Ain, magmaDoubleC
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_dgemm_update_above64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1675,7 +1675,7 @@ triple_dgemm_update_above64_part2_R (const magmaDoubleComplex *Ain, magmaDoubleC
  * part 3, copy data into position
  */
 __global__ void
-triple_dgemm_update_above64_part3_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part3_R (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1720,7 +1720,7 @@ triple_dgemm_update_above64_part3_R (const magmaDoubleComplex *Ain, magmaDoubleC
  * part 3: copy data back to position
  */
 __global__ void
-triple_dgemm_update_above64_part3_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part3_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1764,7 +1764,7 @@ triple_dgemm_update_above64_part3_L (const magmaDoubleComplex *Ain, magmaDoubleC
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_dgemm_update_above64_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
+triple_zgemm_update_above64_part2_L (const magmaDoubleComplex *Ain, magmaDoubleComplex *d_dinvA, int blk, int lda, int npages)
 {
     const int bIdy = blockIdx.y/npages;
     const int page = qmod(blockIdx.y, npages);
@@ -1875,21 +1875,21 @@ magma_int_t lda)
 
             switch (i) {
                 case 16:
-                    triple_dgemm_update_16_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_16_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_16_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_16_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 case 32:
-                    triple_dgemm_update_32_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_32_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_32_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_32_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 case 64:
-                    triple_dgemm_update_64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 default:
-                    triple_dgemm_update_above64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_above64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_above64_part3_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part3_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
             }
             if (i*2 >= M) break;
@@ -1906,20 +1906,20 @@ magma_int_t lda)
 
             switch (i) {
                 case 16:
-                    triple_dgemm_update_16_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_16_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 case 32:
-                    triple_dgemm_update_32_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_32_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_32_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_32_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 case 64:
-                    triple_dgemm_update_64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
                 default:
-                    triple_dgemm_update_above64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_above64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                    triple_dgemm_update_above64_part3_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                    triple_zgemm_update_above64_part3_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                     break;
             }
             if (i*2 >= M) break;
