@@ -21,11 +21,6 @@ magma_get_ztrsm_m_nb() { return 128; }
 
 #define dA(gpui, i, j) (dw[gpui] + dimb*lddb + (i)*nb + (j)*nb*ldda)
 
-extern "C" magma_int_t
-magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t transa, magma_diag_t diag,
-         magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
-         magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -113,7 +108,11 @@ magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
             in  the  calling  (sub)  program.   LDB  must  be  at  least
             max( 1, m ).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t transa, magma_diag_t diag,
+         magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
+         magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb)
+{
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex  alpha_;

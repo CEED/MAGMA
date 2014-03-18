@@ -12,12 +12,7 @@
 
 #define dA(i, j) (dA+(j)*ldda + (i))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZLAUUM computes the product U * U' or L' * L, where the triangular
@@ -32,29 +27,35 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
+    @param[in]
+    uplo    CHARACTER*1
             Specifies whether the triangular factor stored in the array dA
             is upper or lower triangular:
-            = 'U':  Upper triangular
-            = 'L':  Lower triangular
+      -     = 'U':  Upper triangular
+      -     = 'L':  Lower triangular
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the triangular factor U or L.  N >= 0.
 
-    dA      (input/output) DOUBLE PRECISION array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      DOUBLE PRECISION array on the GPU, dimension (LDDA,N)
             On entry, the triangular factor U or L.
             On exit, if UPLO = 'U', the upper triangle of dA is
             overwritten with the upper triangle of the product U * U';
             if UPLO = 'L', the lower triangle of dA is overwritten with
             the lower triangle of the product L' * L.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A.  LDDA >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0: successful exit
-            < 0: if INFO = -k, the k-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0: successful exit
+      -     < 0: if INFO = -k, the k-th argument had an illegal value
 
+    @ingroup magma_zposv_aux
     ===================================================================== */
 extern "C" magma_int_t
 magma_zlauum_gpu(magma_uplo_t uplo, magma_int_t n,

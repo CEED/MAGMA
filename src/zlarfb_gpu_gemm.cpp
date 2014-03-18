@@ -11,10 +11,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Univ. of California Berkeley
-       @date
-
+/**
     Purpose
     =======
     ZLARFB applies a complex block reflector H or its transpose H' to a
@@ -24,65 +21,79 @@
 
     Arguments
     =========
-    SIDE    (input) CHARACTER
-            = 'L': apply H or H' from the Left
-            = 'R': apply H or H' from the Right
+    @param[in]
+    side    CHARACTER
+      -     = 'L': apply H or H' from the Left
+      -     = 'R': apply H or H' from the Right
 
-    TRANS   (input) CHARACTER
-            = 'N': apply H   (No transpose)
-            = 'C': apply H' (Conjugate transpose)
+    @param[in]
+    trans   CHARACTER
+      -     = 'N': apply H   (No transpose)
+      -     = 'C': apply H' (Conjugate transpose)
 
-    DIRECT  (input) CHARACTER
+    @param[in]
+    direct  CHARACTER
             Indicates how H is formed from a product of elementary
             reflectors
             = 'F': H = H(1) H(2) . . . H(k) (Forward)
             = 'B': H = H(k) . . . H(2) H(1) (Backward)
 
-    STOREV  (input) CHARACTER
+    @param[in]
+    storev  CHARACTER
             Indicates how the vectors which define the elementary
             reflectors are stored:
             = 'C': Columnwise
             = 'R': Rowwise
 
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix C.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix C.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The order of the matrix T (= the number of elementary
             reflectors whose product defines the block reflector).
 
-    DV      (input) COMPLEX_16 array on the GPU, dimension
+    @param[in]
+    DV      COMPLEX_16 array on the GPU, dimension
                 (LDV,K) if STOREV = 'C'
                 (LDV,M) if STOREV = 'R' and SIDE = 'L'
                 (LDV,N) if STOREV = 'R' and SIDE = 'R'
             The matrix V. See further details.
 
-    LDV     (input) INTEGER
+    @param[in]
+    ldv     INTEGER
             The leading dimension of the array V.
             If STOREV = 'C' and SIDE = 'L', LDV >= max(1,M);
             if STOREV = 'C' and SIDE = 'R', LDV >= max(1,N);
             if STOREV = 'R', LDV >= K.
 
-    DT      (input) COMPLEX_16 array on the GPU, dimension (LDT,K)
+    @param[in]
+    DT      COMPLEX_16 array on the GPU, dimension (LDT,K)
             The triangular k by k matrix T in the representation of the
             block reflector.
 
-    LDT     (input) INTEGER
+    @param[in]
+    ldt     INTEGER
             The leading dimension of the array T. LDT >= K.
 
-    DC      (input/output) COMPLEX_16 array on the GPU, dimension (LDC,N)
+    @param[in,out]
+    DC      COMPLEX_16 array on the GPU, dimension (LDC,N)
             On entry, the m by n matrix C.
             On exit, C is overwritten by H*C, or H'*C, or C*H, or C*H'.
 
-    LDC     (input) INTEGER
+    @param[in]
+    ldc     INTEGER
             The leading dimension of the array C. LDA >= max(1,M).
 
     WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
-    LDWORK  (input) INTEGER
+    @param[in]
+    ldwork  INTEGER
             The leading dimension of the array WORK.
             If SIDE = 'L', LDWORK >= max(1,N);
             if SIDE = 'R', LDWORK >= max(1,M);
@@ -116,7 +127,8 @@
                      (  0  1 v3 )
                      (  0  0  1 )
 
-    ===================================================================      */
+    @ingroup magma_zaux3
+    =================================================================== */
 extern "C" magma_int_t
 magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,
