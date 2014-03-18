@@ -15,12 +15,7 @@ extern "C" magma_int_t
 magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                    magma_int_t *lda, magma_int_t *info);
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZGETRF_NOPIV_GPU computes an LU factorization of a general M-by-N
@@ -36,29 +31,36 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
 
     Arguments
     =========
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    @param[in,out]
+    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    LDDA     (input) INTEGER
+    @param[in]
+    ldda     INTEGER
             The leading dimension of the array A.  LDDA >= max(1,M).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
-            > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
                   has been completed, but the factor U is exactly
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
-    =====================================================================    */
+
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
                        magmaDoubleComplex *dA, magma_int_t ldda,

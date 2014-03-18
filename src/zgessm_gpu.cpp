@@ -13,12 +13,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZGESSM applies the factors L computed by ZGETRF_INCPIV to
@@ -26,39 +21,50 @@
     
     Arguments
     =========
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The number of columns of the matrix L.  K >= 0.
 
-    IB      (input) INTEGER
+    @param[in]
+    ib      INTEGER
             The inner-blocking size.  IB >= 0.
 
-    IPIV    (input) INTEGER array on the cpu.
+    @param[in]
+    ipiv    INTEGER array on the cpu.
             The pivot indices array of size K as returned by
             ZGETRF_INCPIV.
 
-    dL1     (input) DOUBLE COMPLEX array, dimension(LDDL1, N)
+    @param[in]
+    dL1     DOUBLE COMPLEX array, dimension(LDDL1, N)
             The IB-by-K matrix in which is stored L^(-1) as returned by GETRF_INCPIV
 
-    LDDL1   (input) INTEGER
+    @param[in]
+    LDDL1   INTEGER
             The leading dimension of the array L1.  LDDL1 >= max(1,2*IB).
 
-    dL      (input) DOUBLE COMPLEX array, dimension(LDDL, N)
+    @param[in]
+    dL      DOUBLE COMPLEX array, dimension(LDDL, N)
             The M-by-K lower triangular tile on the gpu.
 
-    LDDL    (input) INTEGER
+    @param[in]
+    lddl    INTEGER
             The leading dimension of the array L.  LDDL >= max(1,M).
 
-    dA      (input/output) DOUBLE COMPLEX array, dimension (LDDA, N)
+    @param[in,out]
+    dA      DOUBLE COMPLEX array, dimension (LDDA, N)
             On entry, the M-by-N tile A on the gpu.
             On exit, updated by the application of L on the gpu.
 
-    =====================================================================    */
+    @ingroup magma_zgesv_tile
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
                   magma_int_t *ipiv,

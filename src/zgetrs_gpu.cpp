@@ -10,12 +10,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     Solves a system of linear equations
@@ -24,43 +19,55 @@
 
     Arguments
     =========
-    TRANS   (input) CHARACTER*1
+    @param[in]
+    trans   CHARACTER*1
             Specifies the form of the system of equations:
-            = 'N':  A * X = B  (No transpose)
-            = 'T':  A'* X = B  (Transpose)
-            = 'C':  A'* X = B  (Conjugate transpose = Transpose)
+      -     = 'N':  A * X = B  (No transpose)
+      -     = 'T':  A'* X = B  (Transpose)
+      -     = 'C':  A'* X = B  (Conjugate transpose = Transpose)
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input) COMPLEX_16 array on the GPU, dimension (LDA,N)
+    @param[in]
+    A       COMPLEX_16 array on the GPU, dimension (LDA,N)
             The factors L and U from the factorization A = P*L*U as computed
             by ZGETRF_GPU.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    IPIV    (input) INTEGER array, dimension (N)
+    @param[in]
+    ipiv    INTEGER array, dimension (N)
             The pivot indices from ZGETRF; for 1 <= i <= N, row i of the
             matrix was interchanged with row IPIV(i).
 
-    B       (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    @param[in,out]
+    B       COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDB     (input) INTEGER
+    @param[in]
+    ldb     INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
+    @param
     HWORK   (workspace) COMPLEX_16 array, dimension N*NRHS
-    =====================================================================    */
+
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,

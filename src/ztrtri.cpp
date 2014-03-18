@@ -10,12 +10,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZTRTRI computes the inverse of a real upper or lower triangular
@@ -25,18 +20,22 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  A is upper triangular;
-            = 'L':  A is lower triangular.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  A is upper triangular;
+      -     = 'L':  A is lower triangular.
 
-    DIAG    (input) CHARACTER*1
-            = 'N':  A is non-unit triangular;
-            = 'U':  A is unit triangular.
+    @param[in]
+    diag    CHARACTER*1
+      -     = 'N':  A is non-unit triangular;
+      -     = 'U':  A is unit triangular.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the triangular matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of the array A contains
             the upper triangular matrix, and the strictly lower
@@ -49,16 +48,19 @@
             On exit, the (triangular) inverse of the original matrix, in
             the same storage format.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0: successful exit
-            < 0: if INFO = -i, the i-th argument had an illegal value
-            > 0: if INFO = i, A(i,i) is exactly zero.  The triangular
+    @param[out]
+    info    INTEGER
+      -     = 0: successful exit
+      -     < 0: if INFO = -i, the i-th argument had an illegal value
+      -     > 0: if INFO = i, A(i,i) is exactly zero.  The triangular
                     matrix is singular and its inverse cannot be computed.
 
-    ===================================================================== */
+    @ingroup magma_zgesv_aux
+    ********************************************************************/
 extern "C" magma_int_t
 magma_ztrtri(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
               magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)

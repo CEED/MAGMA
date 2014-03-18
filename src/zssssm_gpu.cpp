@@ -13,12 +13,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZSSSSM applies the LU factorization update from a complex
@@ -30,55 +25,71 @@
 
     Arguments
     =========
-    M1      (input) INTEGER
+    @param[in]
+    M1      INTEGER
             The number of rows of the matrix A1.  M1 >= 0.
 
-    N1      (input) INTEGER
+    @param[in]
+    N1      INTEGER
             The number of columns of the matrix A1.  N1 >= 0.
 
-    M2      (input) INTEGER
+    @param[in]
+    M2      INTEGER
             The number of rows of the matrix A2.  M2 >= 0.
 
-    N2      (input) INTEGER
+    @param[in]
+    N2      INTEGER
             The number of columns of the matrix A2.  N2 >= 0.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The number of columns of the matrix L1 and L2.  K >= 0.
 
-    IB      (input) INTEGER
+    @param[in]
+    ib      INTEGER
             The inner-blocking size.  IB >= 0.
 
-    dA1     (input,output) COMPLEX_16 array, dimension(LDDA1, N), on gpu.
+    @param[in,out]
+    dA1     COMPLEX_16 array, dimension(LDDA1, N), on gpu.
             On entry, the M1-by-N1 tile dA1.
             On exit, dA1 is updated by the application of dL (dL1 dL2).
 
-    LDDA1   (input) INTEGER
+    @param[in]
+    LDDA1   INTEGER
             The leading dimension of the array dA1.  LDDA1 >= max(1,M1).
 
-    dA2     (input,output) COMPLEX_16 array, dimension(LDDA2, N), on gpu.
+    @param[in,out]
+    dA2     COMPLEX_16 array, dimension(LDDA2, N), on gpu.
             On entry, the M2-by-N2 tile dA2.
             On exit, dA2 is updated by the application of dL (dL1 dL2).
 
-    LDDA2   (input) INTEGER
+    @param[in]
+    LDDA2   INTEGER
             The leading dimension of the array dA2.  LDDA2 >= max(1,M2).
 
-    dL1     (input) COMPLEX_16 array, dimension(LDDL1, K), on gpu.
+    @param[in]
+    dL1     COMPLEX_16 array, dimension(LDDL1, K), on gpu.
             The inverse of the IB-by-K lower triangular tile as returned by
             ZTSTRF.
 
-    LDDL1   (input) INTEGER
+    @param[in]
+    LDDL1   INTEGER
             The leading dimension of the array L1.  LDDL1 >= max(1,2*IB).
 
-    dL2     (input) COMPLEX_16 array, dimension(LDDL2, K)
+    @param[in]
+    dL2     COMPLEX_16 array, dimension(LDDL2, K)
             The M2-by-K tile as returned by ZTSTRF.
 
-    LDDL2   (input) INTEGER
+    @param[in]
+    LDDL2   INTEGER
             The leading dimension of the array L2.  LDDL2 >= max(1,M2).
 
-    IPIV    (input) INTEGER array on the cpu.
+    @param[in]
+    ipiv    INTEGER array on the cpu.
             The pivot indices array of size K as returned by ZTSTRF
 
-    =====================================================================    */
+    @ingroup magma_zgesv_tile
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
                  magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,

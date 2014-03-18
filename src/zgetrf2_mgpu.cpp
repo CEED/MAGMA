@@ -13,12 +13,7 @@
 #include "timer.h"
 #include "../testing/flops.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZGETRF computes an LU factorization of a general M-by-N matrix A
@@ -31,41 +26,49 @@
     triangular (upper trapezoidal if m < n).
 
     This is the right-looking Level 3 BLAS version of the algorithm.
-    Use two buffer to send panels..
+    Use two buffer to send panels.
 
     Arguments
     =========
-    NUM_GPUS
-            (input) INTEGER
-            The number of GPUS to be used for the factorization.
+    @param[in]
+    num_gpus INTEGER
+            The number of GPUs to be used for the factorization.
 
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    @param[in,out]
+    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    LDDA     (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A.  LDDA >= max(1,M).
 
-    IPIV    (output) INTEGER array, dimension (min(M,N))
+    @param[out]
+    ipiv    INTEGER array, dimension (min(M,N))
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
-            > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
                   has been completed, but the factor U is exactly
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
-    =====================================================================    */
+
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus,
          magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,

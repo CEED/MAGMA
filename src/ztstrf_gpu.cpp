@@ -18,12 +18,7 @@
 #include "common_magma.h"
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZSSSSM applies the LU factorization update from a complex
@@ -35,76 +30,98 @@
 
     Arguments
     =========
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    IB      (input) INTEGER
+    @param[in]
+    ib      INTEGER
             The inner-blocking size.  IB >= 0.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             The blocking size.  NB >= 0.
 
-    hU      (input,output) COMPLEX_16 array, dimension(LDHU, N), on cpu.
+    @param[in,out]
+    hU      COMPLEX_16 array, dimension(LDHU, N), on cpu.
             On entry, the NB-by-N upper triangular tile hU.
             On exit, the content is incomplete. Shouldn't be used.
 
-    LDHU    (input) INTEGER
+    @param[in]
+    ldhu    INTEGER
             The leading dimension of the array hU.  LDHU >= max(1,NB).
 
-    dU      (input,output) COMPLEX_16 array, dimension(LDDU, N), on gpu.
+    @param[in,out]
+    dU      COMPLEX_16 array, dimension(LDDU, N), on gpu.
             On entry, the NB-by-N upper triangular tile dU identical to hU.
             On exit, the new factor U from the factorization.
 
-    LDDU    (input) INTEGER
+    @param[in]
+    lddu    INTEGER
             The leading dimension of the array dU.  LDDU >= max(1,NB).
 
-    hA      (input,output) COMPLEX_16 array, dimension(LDHA, N), on cpu.
+    @param[in,out]
+    hA      COMPLEX_16 array, dimension(LDHA, N), on cpu.
             On entry, only the M-by-IB first panel needs to be identical to dA(1..M, 1..IB).
             On exit, the content is incomplete. Shouldn't be used.
 
-    LDHA    (input) INTEGER
+    @param[in]
+    ldha    INTEGER
             The leading dimension of the array hA.  LDHA >= max(1,M).
 
-    dA      (input,output) COMPLEX_16 array, dimension(LDDA, N), on gpu.
+    @param[in,out]
+    dA      COMPLEX_16 array, dimension(LDDA, N), on gpu.
             On entry, the M-by-N tile to be factored.
             On exit, the factor L from the factorization
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
 
-    hL      (output) COMPLEX_16 array, dimension(LDHL, K), on vpu.
+    @param[out]
+    hL      COMPLEX_16 array, dimension(LDHL, K), on vpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
 
-    LDHL    (input) INTEGER
+    @param[in]
+    ldhl    INTEGER
             The leading dimension of the array hL.  LDHL >= max(1,2*IB).
 
-    dL      (output) COMPLEX_16 array, dimension(LDDL, K), on gpu.
+    @param[out]
+    dL      COMPLEX_16 array, dimension(LDDL, K), on gpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
 
-    LDDL    (input) INTEGER
+    @param[in]
+    lddl    INTEGER
             The leading dimension of the array dL.  LDDL >= max(1,2*IB).
 
-    hWORK   (output) COMPLEX_16 array, dimension(LDHWORK, 2*IB), on cpu.
+    @param[out]
+    hWORK   COMPLEX_16 array, dimension(LDHWORK, 2*IB), on cpu.
             Workspace.
 
-    LDHWORK (input) INTEGER
+    @param[in]
+    ldhwork INTEGER
             The leading dimension of the array hWORK.  LDHWORK >= max(NB, 1).
 
-    dWORK   (output) COMPLEX_16 array, dimension(LDDWORK, 2*IB), on gpu.
+    @param[out]
+    dWORK   COMPLEX_16 array, dimension(LDDWORK, 2*IB), on gpu.
             Workspace.
 
-    LDDWORK (input) INTEGER
+    @param[in]
+    lddwork INTEGER
             The leading dimension of the array dWORK.  LDDWORK >= max(NB, 1).
 
-    IPIV    (output) INTEGER array on the cpu.
+    @param[out]
+    ipiv    INTEGER array on the cpu.
             The pivot indices array of size K as returned by ZTSTRF
 
-    INFO    (output) INTEGER
+    @param[out]
+    info    INTEGER
             - PLASMA_SUCCESS successful exit
             - < 0 if INFO = -k, the k-th argument had an illegal value
             - > 0 if INFO = k, U(k,k) is exactly zero. The factorization
@@ -112,7 +129,8 @@
                 singular, and division by zero will occur if it is used
                 to solve a system of equations.
 
-    =====================================================================    */
+    @ingroup magma_zgesv_tile
+    ********************************************************************/
 extern "C" magma_int_t
 magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
                   magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu,

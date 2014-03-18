@@ -9,12 +9,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     Solves a system of linear equations
@@ -29,36 +24,46 @@
 
     Arguments
     =========
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    @param[in,out]
+    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    IPIV    (output) INTEGER array, dimension (min(M,N))
+    @param[out]
+    ipiv    INTEGER array, dimension (min(M,N))
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
-    B       (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    @param[in,out]
+    B       COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDB     (input) INTEGER
+    @param[in]
+    ldb     INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================    */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zgesv_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,
