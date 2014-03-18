@@ -35,15 +35,15 @@
     direct  CHARACTER
             Indicates how H is formed from a product of elementary
             reflectors
-            = 'F': H = H(1) H(2) . . . H(k) (Forward)
-            = 'B': H = H(k) . . . H(2) H(1) (Backward)
+      -     = 'F': H = H(1) H(2) . . . H(k) (Forward)
+      -     = 'B': H = H(k) . . . H(2) H(1) (Backward)
 
     @param[in]
     storev  CHARACTER
             Indicates how the vectors which define the elementary
             reflectors are stored:
-            = 'C': Columnwise
-            = 'R': Rowwise
+      -     = 'C': Columnwise
+      -     = 'R': Rowwise
 
     @param[in]
     m       INTEGER
@@ -90,6 +90,7 @@
     ldc     INTEGER
             The leading dimension of the array C. LDA >= max(1,M).
 
+    @param
     WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
     @param[in]
@@ -98,14 +99,16 @@
             If SIDE = 'L', LDWORK >= max(1,N);
             if SIDE = 'R', LDWORK >= max(1,M);
 
+    @param
     WORKVT  (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
 
-    LDWORKVT(input) INTEGER
+    @param
+    LDWORKVT (input) INTEGER
             The leading dimension of the array WORKVT.
             LDWORKVT >= max(1,min(M,N));
 
     Further Details
-    ===============
+    ---------------
     The shape of the matrix V and the storage of the vectors which define
     the H(i) is best illustrated by the following example with n = 5 and
     k = 3.
@@ -128,7 +131,7 @@
                      (  0  0  1 )
 
     @ingroup magma_zaux3
-    =================================================================== */
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,
