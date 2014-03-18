@@ -205,7 +205,7 @@
 *
 *> \date @date
 *
-*> \ingroup complex16OTHERcomputational
+*> \ingroup magma_zgeev_comp
 *
 *> \par Further Details:
 *  =====================

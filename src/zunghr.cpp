@@ -10,14 +10,9 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZUNGHR generates a COMPLEX_16 unitary matrix Q which is defined as the
     product of IHI-ILO elementary reflectors of order N, as returned by
     ZGEHRD:
@@ -25,43 +20,54 @@
     Q = H(ilo) H(ilo+1) . . . H(ihi-1).
 
     Arguments
-    =========
-    N       (input) INTEGER
+    ---------
+    @param[in]
+    n       INTEGER
             The order of the matrix Q. N >= 0.
 
-    ILO     (input) INTEGER
-    IHI     (input) INTEGER
+    @param[in]
+    ilo     INTEGER
+    @param[in]
+    ihi     INTEGER
             ILO and IHI must have the same values as in the previous call
             of ZGEHRD. Q is equal to the unit matrix except in the
             submatrix Q(ilo+1:ihi,ilo+1:ihi).
             1 <= ILO <= IHI <= N, if N > 0; ILO=1 and IHI=0, if N=0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the vectors which define the elementary reflectors,
             as returned by ZGEHRD.
             On exit, the N-by-N unitary matrix Q.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A. LDA >= max(1,N).
 
-    TAU     (input) COMPLEX_16 array, dimension (N-1)
+    @param[in]
+    tau     COMPLEX_16 array, dimension (N-1)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEHRD.
 
-    DT      (input) COMPLEX_16 array on the GPU device.
+    @param[in]
+    DT      COMPLEX_16 array on the GPU device.
             DT contains the T matrices used in blocking the elementary
             reflectors H(i), e.g., this can be the 9th argument of
             magma_zgehrd.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             This is the block size used in ZGEHRD, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    ===================================================================== */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zgeev_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
              magmaDoubleComplex *a, magma_int_t lda,

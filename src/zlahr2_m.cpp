@@ -12,14 +12,9 @@
 
 #define PRECISION_z
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)
     matrix A so that elements below the k-th subdiagonal are zero. The
     reduction is performed by an orthogonal similarity transformation
@@ -30,19 +25,23 @@
     This is an auxiliary routine called by ZGEHRD.
 
     Arguments
-    =========
-    N       (input) INTEGER
+    ---------
+    @param[in]
+    n       INTEGER
             The order of the matrix A.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The offset for the reduction. Elements below the k-th
             subdiagonal in the first NB columns are reduced to zero.
             K < N.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             The number of columns to be reduced.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N-K+1)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N-K+1)
             On entry, the n-by-(n-k+1) general matrix A.
             On exit, the elements on and above the k-th subdiagonal in
             the first NB columns are overwritten with the corresponding
@@ -51,35 +50,43 @@
             product of elementary reflectors. The other columns of A are
             unchanged. See Further Details.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    TAU     (output) COMPLEX_16 array, dimension (NB)
+    @param[out]
+    tau     COMPLEX_16 array, dimension (NB)
             The scalar factors of the elementary reflectors. See Further
             Details.
 
-    T       (output) COMPLEX_16 array, dimension (LDT,NB)
+    @param[out]
+    T       COMPLEX_16 array, dimension (LDT,NB)
             The upper triangular matrix T.
 
-    LDT     (input) INTEGER
+    @param[in]
+    ldt     INTEGER
             The leading dimension of the array T.  LDT >= NB.
 
-    Y       (output) COMPLEX_16 array, dimension (LDY,NB)
+    @param[out]
+    Y       COMPLEX_16 array, dimension (LDY,NB)
             The n-by-nb matrix Y.
 
-    LDY     (input) INTEGER
+    @param[in]
+    ldy     INTEGER
             The leading dimension of the array Y. LDY >= N.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)
             On entry, the n-by-(n-k+1) general matrix A.
             On exit, the elements in rows K:N of the first NB columns are
             overwritten with the matrix Y.
 
-    DV      (output) COMPLEX_16 array on the GPU, dimension (N, NB)
+    @param[out]
+    DV      COMPLEX_16 array on the GPU, dimension (N, NB)
             On exit this contains the Householder vectors of the transformation.
 
     Further Details
-    ===============
+    ---------------
     The matrix Q is represented as a product of nb elementary reflectors
 
        Q = H(1) H(2) . . . H(nb).
@@ -100,6 +107,7 @@
     The contents of A on exit are illustrated by the following example
     with n = 7, k = 3 and nb = 2:
 
+    @verbatim
        ( a   a   a   a   a )
        ( a   a   a   a   a )
        ( a   a   a   a   a )
@@ -107,6 +115,7 @@
        ( v1  h   a   a   a )
        ( v1  v2  a   a   a )
        ( v1  v2  a   a   a )
+    @endverbatim
 
     where "a" denotes an element of the original matrix A, h denotes a
     modified element of the upper Hessenberg matrix H, and vi denotes an
@@ -118,7 +127,9 @@
     form through hybrid GPU-based computing," University of Tennessee Computer
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
-    =====================================================================    */
+
+    @ingroup magma_zgeev_aux
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zlahr2_m(
     magma_int_t n, magma_int_t k, magma_int_t nb,

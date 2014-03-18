@@ -210,7 +210,7 @@
 *
 *> \date @date
 *
-*> \ingroup doubleOTHERcomputational
+*> \ingroup magma_dgeev_comp
 *
 *> \par Further Details:
 *  =====================
