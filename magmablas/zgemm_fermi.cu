@@ -59,90 +59,78 @@ magmablas_zgemm(
     
     Parameters
     ==========
-    TRANSA  CHARACTER*1.
+    TRANSA  (input) CHARACTER*1.
             On entry, TRANSA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
                 TRANSA = 'N' or 'n',  op( A ) = A.
                 TRANSA = 'T' or 't',  op( A ) = A**T.
                 TRANSA = 'C' or 'c',  op( A ) = A**H.
-            Unchanged on exit.
     
-    TRANSB  CHARACTER*1.
+    TRANSB  (input) CHARACTER*1.
             On entry, TRANSB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
                 TRANSB = 'N' or 'n',  op( B ) = B.
                 TRANSB = 'T' or 't',  op( B ) = B**T.
                 TRANSB = 'C' or 'c',  op( B ) = B**H.
-            Unchanged on exit.
     
-    M       INTEGER.
+    M       (input) INTEGER.
             On entry,  M  specifies  the number  of rows  of the  matrix
             op( d_A )  and of the  matrix d_C.  M  must  be at least  zero.
-            Unchanged on exit.
     
-    N       INTEGER.
+    N       (input) INTEGER.
             On entry,  N  specifies the number  of columns of the matrix
             op( d_B ) and the number of columns of the matrix d_C. N must be
             at least zero.
-            Unchanged on exit.
     
-    K       INTEGER.
+    K       (input) INTEGER.
             On entry,  K  specifies  the number of columns of the matrix
             op( d_A ) and the number of rows of the matrix op( d_B ). K must
             be at least  zero.
-            Unchanged on exit.
     
-    ALPHA   COMPLEX_16
+    ALPHA   (input) COMPLEX_16
             On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
     
-    d_A     COMPLEX_16 array of DIMENSION ( LDA, ka ), where ka is
+    d_A     (input) COMPLEX_16 array of DIMENSION ( LDA, ka ), where ka is
             k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
             Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
             part of the array d_A must contain the matrix d_A, otherwise
             the leading  k by m  part of the array d_A must contain  the
             matrix d_A.
-            Unchanged on exit.
     
-    LDA     INTEGER.
+    LDA     (input) INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program. When  TRANSA = 'N' or 'n' then
             LDA must be at least  max( 1, m ), otherwise  LDA must be at
             least  max( 1, k ).
-            Unchanged on exit.
     
-    d_B     COMPLEX_16 array of DIMENSION ( LDB, kb ), where kb is
+    d_B     (input) COMPLEX_16 array of DIMENSION ( LDB, kb ), where kb is
             n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
             Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
             part of the array d_B must contain the matrix d_B, otherwise
             the leading  n by k  part of the array d_B must contain  the
             matrix d_B.
-            Unchanged on exit.
     
-    LDB     INTEGER.
+    LDB     (input) INTEGER.
             On entry, LDB specifies the first dimension of d_B as declared
             in the calling (sub) program. When  TRANSB = 'N' or 'n' then
             LDB must be at least  max( 1, k ), otherwise  LDB must be at
             least  max( 1, n ).
-            Unchanged on exit.
     
-    BETA    COMPLEX_16.
+    BETA    (input) COMPLEX_16.
             On entry,  BETA  specifies the scalar  beta.  When  BETA  is
             supplied as zero then d_C need not be set on input.
-            Unchanged on exit.
     
-    d_C     COMPLEX_16 array of DIMENSION ( LDC, n ).
+    d_C     (input,output) COMPLEX_16 array of DIMENSION ( LDC, n ).
             Before entry, the leading  m by n  part of the array  d_C must
             contain the matrix  d_C,  except when  beta  is zero, in which
             case d_C need not be set on entry.
             On exit, the array  d_C  is overwritten by the  m by n  matrix
             ( alpha*op( d_A )*op( d_B ) + beta*d_C ).
     
-    LDC     INTEGER.
+    LDC     (input) INTEGER.
             On entry, LDC specifies the first dimension of d_C as declared
             in  the  calling  (sub)  program.   LDC  must  be  at  least
             max( 1, m ).
-            Unchanged on exit.
     =====================================================================    */
     
     magma_int_t arch = magma_getdevice_arch();

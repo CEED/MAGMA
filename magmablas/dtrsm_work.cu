@@ -74,7 +74,7 @@ void magmablas_dtrsm_work(
     Arguments
     ==========
 
-    side    CHARACTER*1.
+    side    (input) CHARACTER*1.
             On entry, side specifies whether op( A ) appears on the left
             or right of X as follows:
 
@@ -82,9 +82,7 @@ void magmablas_dtrsm_work(
 
                side = 'R' or 'r'   X*op( A ) = alpha*B.
 
-            Unchanged on exit.
-
-    uplo    CHARACTER*1.
+    uplo    (input) CHARACTER*1.
             On entry, uplo specifies whether the matrix A is an upper or
             lower triangular matrix as follows:
 
@@ -92,9 +90,7 @@ void magmablas_dtrsm_work(
 
                uplo = 'L' or 'l'   A is a lower triangular matrix.
 
-            Unchanged on exit.
-
-    transA  CHARACTER*1.
+    transA  (input) CHARACTER*1.
             On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
 
@@ -104,9 +100,7 @@ void magmablas_dtrsm_work(
 
                transA = 'C' or 'c'   op( A ) = A^T.
 
-            Unchanged on exit.
-
-    diag    CHARACTER*1.
+    diag    (input) CHARACTER*1.
             On entry, diag specifies whether or not A is unit triangular
             as follows:
 
@@ -114,25 +108,20 @@ void magmablas_dtrsm_work(
 
                diag = 'N' or 'n'   A is not assumed to be unit triangular.
 
-            Unchanged on exit.
-
-    m       INTEGER.
+    m       (input) INTEGER.
             On entry, m specifies the number of rows of B. m must be at
             least zero.
-            Unchanged on exit.
 
-    n       INTEGER.
+    n       (input) INTEGER.
             On entry, n specifies the number of columns of B. n must be
             at least zero.
-            Unchanged on exit.
 
-    alpha   REAL.
+    alpha   (input) REAL.
             On entry, alpha specifies the scalar alpha. When alpha is
             zero then A is not referenced and B need not be set before
             entry.
-            Unchanged on exit.
 
-    A       REAL array of DIMENSION ( lda, k ), where k is m
+    A       (input) REAL array of DIMENSION ( lda, k ), where k is m
             when side = 'L' or 'l' and is n when side = 'R' or 'r'.
             Before entry with uplo = 'U' or 'u', the leading k by k
             upper triangular part of the array A must contain the upper
@@ -144,27 +133,24 @@ void magmablas_dtrsm_work(
             A is not referenced.
             Note that when diag = 'U' or 'u', the diagonal elements of
             A are not referenced either, but are assumed to be unity.
-            Unchanged on exit.
 
-    lda     INTEGER.
+    lda     (input) INTEGER.
             On entry, lda specifies the first dimension of A as declared
             in the calling (sub) program. When side = 'L' or 'l' then
             lda must be at least max( 1, m ), when side = 'R' or 'r'
             then lda must be at least max( 1, n ).
-            Unchanged on exit.
 
-    b       REAL array of DIMENSION ( ldb, n ).
+    b       (input,output) REAL array of DIMENSION ( ldb, n ).
             Before entry, the leading m by n part of the array B must
             contain the right-hand side matrix B, and on exit is
             overwritten by the solution matrix X.
 
-    ldb     INTEGER.
+    ldb     (input) INTEGER.
             On entry, ldb specifies the first dimension of B as declared
             in the calling (sub) program. ldb must be at least
             max( 1, m ).
-            Unchanged on exit.
 
-    flag    BOOLEAN.
+    flag    (input) BOOLEAN.
             If flag is true, invert diagonal blocks.
             If flag is false, assume diagonal blocks are already inverted. (?)
 

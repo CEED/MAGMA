@@ -129,7 +129,7 @@ magmablas_sgemv_tesla(
 
     Arguments
     ==========
-    TRANS   CHARACTER*1
+    TRANS   (input) CHARACTER*1
             On entry, TRANS specifies the operation to be performed as
             follows:
                 TRANS = 'N' or 'n'   y := alpha*A  *x + beta*y
@@ -141,9 +141,8 @@ magmablas_sgemv_tesla(
     N       (input) INTEGER
             On entry, N specifies the number of columns of the matrix A
             
-    ALPHA   REAL
+    ALPHA   (input) REAL
             On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
             
     A       (input) REAL array of dimension (LDA, N) on the GPU.
             
@@ -155,19 +154,18 @@ magmablas_sgemv_tesla(
             m if trans == 't'
             
     INCX    (input) Specifies the increment for the elements of X.
-            INCX must not be zero. Unchanged on exit.
+            INCX must not be zero.
             
-    BETA    REAL
+    BETA    (input) REAL
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
-            Unchanged on exit.
             
     Y       (output) REAL array of dimension
             m if trans == 'n'
             n if trans == 't'
             
     INCY    (input) Specifies the increment for the elements of Y.
-            INCY must not be zero. Unchanged on exit.
+            INCY must not be zero.
     ===================================================================== */
 
     if ( incx == 1 && incy == 1 && beta == 0 ) {
@@ -224,7 +222,7 @@ magmablas_sgemv2_tesla(
     X       (input) REAL array of dimension N.
 
     INCX    (input) Specifies the increment for the elements of X.
-            INCX must not be zero. Unchanged on exit.
+            INCX must not be zero.
 
     Y       (output) REAL array of dimension M.
             On exit Y = A X.

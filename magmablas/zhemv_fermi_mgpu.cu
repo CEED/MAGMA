@@ -850,7 +850,7 @@ void magmablas_zhemv_fermi_L_mgpu_offset(
     Arguments
     ==========
 
-    UPLO    CHARACTER*1.
+    UPLO    (input) CHARACTER*1.
             On entry, UPLO specifies whether the upper or lower
             triangular part of the array A is to be referenced as
             follows:
@@ -861,18 +861,15 @@ void magmablas_zhemv_fermi_L_mgpu_offset(
                 UPLO = 'L' or 'l'   Only the lower triangular part of A
                                     is to be referenced.
 
-            Unchanged on exit.
 
-    N       INTEGER.
+    N       (input) INTEGER.
             On entry, N specifies the order of the matrix A.
             N must be at least zero.
-            Unchanged on exit.
 
-    ALPHA   COMPLEX*16.
+    ALPHA   (input) COMPLEX*16.
             On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
 
-    A       COMPLEX*16 array of DIMENSION ( LDA, n ).
+    A       (input) COMPLEX*16 array of DIMENSION ( LDA, n ).
             Before entry with  UPLO = 'U' or 'u', the leading n by n
             upper triangular part of the array A must contain the upper
             triangular part of the hermitian matrix and the strictly
@@ -883,43 +880,37 @@ void magmablas_zhemv_fermi_L_mgpu_offset(
             upper triangular part of A is not referenced.
             Note that the imaginary parts of the diagonal elements need
             not be set and are assumed to be zero.
-            Unchanged on exit.
 
-    LDA     INTEGER.
+    LDA     (input) INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program. LDA must be at least
             max( 1, n ).
-            Unchanged on exit.
             It is recommended that lda is multiple of 16. Otherwise
             performance would be deteriorated as the memory accesses
             would not be fully coalescent.
 
-    X       COMPLEX*16 array of dimension at least
+    X       (input) COMPLEX*16 array of dimension at least
             ( 1 + ( n - 1 )*abs( INCX ) ).
             Before entry, the incremented array X must contain the n
             element vector x.
-            Unchanged on exit.
 
-    INCX    INTEGER.
+    INCX    (input) INTEGER.
             On entry, INCX specifies the increment for the elements of
             X. INCX must not be zero.
-            Unchanged on exit.
 
-    BETA    COMPLEX*16.
+    BETA    (input) COMPLEX*16.
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
-            Unchanged on exit.
 
-    Y       COMPLEX*16 array of dimension at least
+    Y       (input,output) COMPLEX*16 array of dimension at least
             ( 1 + ( n - 1 )*abs( INCY ) ).
             Before entry, the incremented array Y must contain the n
             element vector y. On exit, Y is overwritten by the updated
             vector y.
 
-    INCY    INTEGER.
+    INCY    (input) INTEGER.
             On entry, INCY specifies the increment for the elements of
             Y. INCY must not be zero.
-            Unchanged on exit.
 
 */
 

@@ -224,7 +224,7 @@ void magmablas_dgemv(
 
     Arguments
     ==========
-    TRANS   CHARACTER*1
+    TRANS   (input) CHARACTER*1
             On entry, TRANS specifies the operation to be performed as
             follows:
                 TRANS = 'N' or 'n'   y := alpha*A  *x + beta*y
@@ -236,9 +236,8 @@ void magmablas_dgemv(
     N       (input) INTEGER
             On entry, n specifies the number of columns of the matrix A
  
-    ALPHA   DOUBLE REAL
+    ALPHA   (input) DOUBLE REAL
             On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
 
     A       (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
    
@@ -250,19 +249,18 @@ void magmablas_dgemv(
             m if trans == 't'
      
     INCX    (input) Specifies the increment for the elements of X.
-            INCX must not be zero. Unchanged on exit.
+            INCX must not be zero.
   
-    BETA    DOUBLE REAL
+    BETA    (input) DOUBLE REAL
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
-            Unchanged on exit.
 
     Y       (output) DOUBLE PRECISION array of dimension
             m if trans == 'n'
             n if trans == 't'
 
     INCY    (input) Specifies the increment for the elements of Y.
-            INCY must not be zero. Unchanged on exit.
+            INCY must not be zero.
     ===================================================================== */
 
     magma_int_t arch = magma_getdevice_arch();

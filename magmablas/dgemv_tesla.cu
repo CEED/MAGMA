@@ -87,7 +87,7 @@ magmablas_dgemv_tesla(
 
     Arguments
     ==========
-    TRANS   CHARACTER*1
+    TRANS   (input) CHARACTER*1
             On entry, TRANS specifies the operation to be performed as
             follows:
                 TRANS = 'N' or 'n'   y := alpha*A  *x + beta*y
@@ -99,9 +99,8 @@ magmablas_dgemv_tesla(
     N       (input) INTEGER
             On entry, N specifies the number of columns of the matrix A
             
-    ALPHA   DOUBLE PRECISION
+    ALPHA   (input) DOUBLE PRECISION
             On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
             
     A       (input) DOUBLE PRECISION array of dimension (LDA, N) on the GPU.
             
@@ -113,19 +112,18 @@ magmablas_dgemv_tesla(
             m if trans == 't'
             
     INCX    (input) Specifies the increment for the elements of X.
-            INCX must not be zero. Unchanged on exit.
-            
-    BETA    DOUBLE PRECISION
+            INCX must not be zero.
+        
+    BETA    (input) DOUBLE PRECISION
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
-            Unchanged on exit.
             
     Y       (output) DOUBLE PRECISION array of dimension
             m if trans == 'n'
             n if trans == 't'
             
     INCY    (input) Specifies the increment for the elements of Y.
-            INCY must not be zero. Unchanged on exit.
+            INCY must not be zero.
     ===================================================================== */
 
     if ( incx == 1 && incy == 1 && beta == 0 ) {
