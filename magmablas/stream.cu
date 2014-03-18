@@ -10,6 +10,7 @@
 
 magma_queue_t magma_stream = 0;
 
+extern "C"
 cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
 {
 /*  -- MAGMA (version 1.1) --
@@ -34,6 +35,7 @@ cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
 }
 
 
+extern "C"
 cublasStatus_t magmablasGetKernelStream( magma_queue_t *stream )
 {
 /*  -- MAGMA (version 1.1) --
