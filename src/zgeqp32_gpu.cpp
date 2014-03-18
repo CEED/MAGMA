@@ -14,26 +14,24 @@
 #define PRECISION_z
 #define COMPLEX
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZGEQP3 computes a QR factorization with column pivoting of a
     matrix A:  A*P = Q*R  using Level 3 BLAS.
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, the upper triangle of the array contains the
             min(M,N)-by-N upper trapezoidal matrix R; the elements below
@@ -41,42 +39,48 @@
             unitary matrix Q as a product of min(M,N) elementary
             reflectors.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A. LDA >= max(1,M).
 
-    JPVT    (input/output) INTEGER array, dimension (N)
+    @param[in,out]
+    jpvt    INTEGER array, dimension (N)
             On entry, if JPVT(J).ne.0, the J-th column of A is permuted
             to the front of A*P (a leading column); if JPVT(J)=0,
             the J-th column of A is a free column.
             On exit, if JPVT(J)=K, then the J-th column of A*P was the
             the K-th column of A.
 
-    TAU     (output) COMPLEX_16 array, dimension (min(M,N))
+    @param[out]
+    tau     COMPLEX_16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors.
 
-    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO=0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK.
             For [sd]geqp3, LWORK >= (N+1)*NB + 2*N;
             for [cz]geqp3, LWORK >= (N+1)*NB,
             where NB is the optimal blocksize.
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    For [cz]geqp3 only:
-    RWORK   (workspace) DOUBLE PRECISION array, dimension (2*N)
+    @param
+    rwork   (workspace, for [cz]geqp3 only) DOUBLE PRECISION array, dimension (2*N)
 
-    INFO    (output) INTEGER
-            = 0: successful exit.
-            < 0: if INFO = -i, the i-th argument had an illegal value.
+    @param[out]
+    info    INTEGER
+      -     = 0: successful exit.
+      -     < 0: if INFO = -i, the i-th argument had an illegal value.
 
     Further Details
-    ===============
+    ---------------
     The matrix Q is represented as a product of elementary reflectors
 
       Q = H(1) H(2) . . . H(k), where k = min(m,n).
@@ -88,7 +92,9 @@
     where tau is a complex scalar, and v is a complex vector
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
     A(i+1:m,i), and tau in TAU(i).
-    =====================================================================   */
+
+    @ingroup magma_zgeqp3_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *A, magma_int_t lda,

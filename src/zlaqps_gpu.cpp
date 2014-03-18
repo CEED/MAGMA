@@ -13,14 +13,9 @@
 
 #define PRECISION_z
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZLAQPS computes a step of QR factorization with column pivoting
     of a complex M-by-N matrix A by using Blas-3.  It tries to factorize
     NB columns from A starting from the row OFFSET+1, and updates all
@@ -33,24 +28,30 @@
     Block A(1:OFFSET,1:N) is accordingly pivoted, but not factorized.
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A. N >= 0
 
-    OFFSET  (input) INTEGER
+    @param[in]
+    offset  INTEGER
             The number of rows of A that have been factorized in
             previous steps.
 
-    NB      (input) INTEGER
+    @param[in]
+    nb      INTEGER
             The number of columns to factorize.
 
-    KB      (output) INTEGER
+    @param[out]
+    kb      INTEGER
             The number of columns actually factorized.
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX*16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, block A(OFFSET+1:M,1:KB) is the triangular
             factor obtained and block A(1:OFFSET,1:N) has been
@@ -58,32 +59,41 @@
             The rest of the matrix, block A(OFFSET+1:M,KB+1:N) has
             been updated.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A. LDA >= max(1,M).
 
-    JPVT    (input/output) INTEGER array, dimension (N)
+    @param[in,out]
+    jpvt    INTEGER array, dimension (N)
             JPVT(I) = K <==> Column K of the full matrix A has been
             permuted into position I in AP.
 
-    TAU     (output) COMPLEX*16 array, dimension (KB)
+    @param[out]
+    tau     COMPLEX*16 array, dimension (KB)
             The scalar factors of the elementary reflectors.
 
-    VN1     (input/output) DOUBLE PRECISION array, dimension (N)
+    @param[in,out]
+    vn1     DOUBLE PRECISION array, dimension (N)
             The vector with the partial column norms.
 
-    VN2     (input/output) DOUBLE PRECISION array, dimension (N)
+    @param[in,out]
+    vn2     DOUBLE PRECISION array, dimension (N)
             The vector with the exact column norms.
 
-    AUXV    (input/output) COMPLEX*16 array, dimension (NB)
+    @param[in,out]
+    auxv    COMPLEX*16 array, dimension (NB)
             Auxiliar vector.
 
-    F       (input/output) COMPLEX*16 array, dimension (LDF,NB)
+    @param[in,out]
+    F       COMPLEX*16 array, dimension (LDF,NB)
             Matrix F' = L*Y'*A.
 
-    LDF     (input) INTEGER
+    @param[in]
+    ldf     INTEGER
             The leading dimension of the array F. LDF >= max(1,N).
 
-    =====================================================================    */
+    @ingroup magma_zgeqp3_aux
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
              magma_int_t nb, magma_int_t *kb,
