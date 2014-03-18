@@ -18,28 +18,26 @@
 #define dA(id, i, j) (da[(id)]    + (j)*ldda + (i))
 #define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZHETRD reduces a complex Hermitian matrix A to real symmetric
     tridiagonal form T by an orthogonal similarity transformation:
     Q\*\*H * A * Q = T.
 
     Arguments
-    =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    ---------
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -58,40 +56,47 @@
             the array TAU, represent the orthogonal matrix Q as a product
             of elementary reflectors. See Further Details.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    D       (output) COMPLEX_16 array, dimension (N)
+    @param[out]
+    d       COMPLEX_16 array, dimension (N)
             The diagonal elements of the tridiagonal matrix T:
             D(i) = A(i,i).
 
-    E       (output) COMPLEX_16 array, dimension (N-1)
+    @param[out]
+    e       COMPLEX_16 array, dimension (N-1)
             The off-diagonal elements of the tridiagonal matrix T:
             E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
 
-    TAU     (output) COMPLEX_16 array, dimension (N-1)
+    @param[out]
+    tau     COMPLEX_16 array, dimension (N-1)
             The scalar factors of the elementary reflectors (see Further
             Details).
 
-    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK.  LWORK >= 1.
             For optimum performance LWORK >= N*NB, where NB is the
             optimal blocksize.
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
     Further Details
-    ===============
+    ---------------
     If UPLO = 'U', the matrix Q is represented as a product of elementary
     reflectors
 
@@ -131,7 +136,9 @@
 
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
-    =====================================================================    */
+
+    @ingroup magma_zheev_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
     magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo, magma_int_t n,

@@ -15,14 +15,9 @@
 #include "timer.h"
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZHEEVDX_GPU computes selected eigenvalues and, optionally, eigenvectors
     of a complex Hermitian matrix A. Eigenvalues and eigenvectors can
     be selected by specifying either a range of values or a range of
@@ -37,25 +32,30 @@
     without guard digits, but we know of none.
 
     Arguments
-    =========
-    JOBZ    (input) CHARACTER*1
-            = 'N':  Compute eigenvalues only;
-            = 'V':  Compute eigenvalues and eigenvectors.
+    ---------
+    @param[in]
+    jobz    CHARACTER*1
+      -     = 'N':  Compute eigenvalues only;
+      -     = 'V':  Compute eigenvalues and eigenvectors.
 
-    RANGE   (input) CHARACTER*1
-            = 'A': all eigenvalues will be found.
-            = 'V': all eigenvalues in the half-open interval (VL,VU]
+    @param[in]
+    range   CHARACTER*1
+      -     = 'A': all eigenvalues will be found.
+      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
                    will be found.
-            = 'I': the IL-th through IU-th eigenvalues will be found.
+      -     = 'I': the IL-th through IU-th eigenvalues will be found.
 
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    DA      (device input/output) COMPLEX_16 array on the GPU,
+    @param[in,out]
+    DA      COMPLEX_16 array on the GPU,
             dimension (LDDA, N).
             On entry, the Hermitian matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
@@ -69,84 +69,100 @@
             or the upper triangle (if UPLO='U') of A, including the
             diagonal, is destroyed.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array DA.  LDDA >= max(1,N).
 
-    VL      (input) DOUBLE PRECISION
-    VU      (input) DOUBLE PRECISION
+    @param[in]
+    VL      DOUBLE PRECISION
+    @param[in]
+    VU      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
 
-    IL      (input) INTEGER
-    IU      (input) INTEGER
+    @param[in]
+    il      INTEGER
+    @param[in]
+    iu      INTEGER
             If RANGE='I', the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
 
-    M       (output) INTEGER
+    @param[out]
+    m       INTEGER
             The total number of eigenvalues found.  0 <= M <= N.
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
-    W       (output) DOUBLE PRECISION array, dimension (N)
+    @param[out]
+    W       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the required m eigenvalues in ascending order.
 
+    @param
     WA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
 
-    LDWA    (input) INTEGER
+    @param[in]
+    ldwa    INTEGER
             The leading dimension of the array WA.  LDWA >= max(1,N).
 
-    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                LWORK >= 1.
             If JOBZ  = 'N' and N > 1, LWORK >= N + N*NB.
             If JOBZ  = 'V' and N > 1, LWORK >= max( N + N*NB, 2*N + N**2 ).
             NB can be obtained through magma_get_zhetrd_nb(N).
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
             IWORK arrays, returns these values as the first entries of
             the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
-    RWORK   (workspace/output) DOUBLE PRECISION array, dimension (LRWORK)
+    @param[out]
+    rwork   (workspace) DOUBLE PRECISION array, dimension (LRWORK)
             On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
-    LRWORK  (input) INTEGER
+    @param[in]
+    lrwork  INTEGER
             The dimension of the array RWORK.
             If N <= 1,                LRWORK >= 1.
             If JOBZ  = 'N' and N > 1, LRWORK >= N.
             If JOBZ  = 'V' and N > 1, LRWORK >= 1 + 5*N + 2*N**2.
-
+    \n
             If LRWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
             and IWORK arrays, returns these values as the first entries
             of the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
-    IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
+    @param[out]
+    iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
             On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
-    LIWORK  (input) INTEGER
+    @param[in]
+    liwork  INTEGER
             The dimension of the array IWORK.
             If N <= 1,                LIWORK >= 1.
             If JOBZ  = 'N' and N > 1, LIWORK >= 1.
             If JOBZ  = 'V' and N > 1, LIWORK >= 3 + 5*N.
-
+    \n
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
             and IWORK arrays, returns these values as the first entries
             of the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-            > 0:  if INFO = i and JOBZ = 'N', then the algorithm failed
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+      -     > 0:  if INFO = i and JOBZ = 'N', then the algorithm failed
                   to converge; i off-diagonal elements of an intermediate
                   tridiagonal form did not converge to zero;
                   if INFO = i and JOBZ = 'V', then the algorithm failed
@@ -155,13 +171,15 @@
                   mod(INFO,N+1).
 
     Further Details
-    ===============
+    ---------------
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
     Modified description of INFO. Sven, 16 Feb 05.
-    =====================================================================   */
+
+    @ingroup magma_zheev_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                   magma_int_t n,

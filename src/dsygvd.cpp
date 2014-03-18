@@ -15,14 +15,9 @@
 #include "common_magma.h"
 #include "timer.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     DSYGVD computes all the eigenvalues, and optionally, the eigenvectors
     of a real generalized symmetric-definite eigenproblem, of the form
     A*x=(lambda)*B*x,  A*Bx=(lambda)*x,  or B*A*x=(lambda)*x.  Here A and
@@ -37,31 +32,36 @@
     without guard digits, but we know of none.
 
     Arguments
-    =========
-    ITYPE   (input) INTEGER
+    ---------
+    @param[in]
+    itype   INTEGER
             Specifies the problem type to be solved:
             = 1:  A*x = (lambda)*B*x
             = 2:  A*B*x = (lambda)*x
             = 3:  B*A*x = (lambda)*x
 
-    JOBZ    (input) CHARACTER*1
-            = 'N':  Compute eigenvalues only;
-            = 'V':  Compute eigenvalues and eigenvectors.
+    @param[in]
+    jobz    CHARACTER*1
+      -     = 'N':  Compute eigenvalues only;
+      -     = 'V':  Compute eigenvalues and eigenvectors.
 
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangles of A and B are stored;
-            = 'L':  Lower triangles of A and B are stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangles of A and B are stored;
+      -     = 'L':  Lower triangles of A and B are stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrices A and B.  N >= 0.
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA, N)
+    @param[in,out]
+    A       COMPLEX*16 array, dimension (LDA, N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = 'L',
             the leading N-by-N lower triangular part of A contains
             the lower triangular part of the matrix A.
-
+    \n
             On exit, if JOBZ = 'V', then if INFO = 0, A contains the
             matrix Z of eigenvectors.  The eigenvectors are normalized
             as follows:
@@ -71,64 +71,74 @@
             or the lower triangle (if UPLO='L') of A, including the
             diagonal, is destroyed.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input/output) COMPLEX*16 array, dimension (LDB, N)
+    @param[in,out]
+    B       COMPLEX*16 array, dimension (LDB, N)
             On entry, the symmetric matrix B.  If UPLO = 'U', the
             leading N-by-N upper triangular part of B contains the
             upper triangular part of the matrix B.  If UPLO = 'L',
             the leading N-by-N lower triangular part of B contains
             the lower triangular part of the matrix B.
-
+    \n
             On exit, if INFO <= N, the part of B containing the matrix is
             overwritten by the triangular factor U or L from the Cholesky
             factorization B = U**T * U or B = L * L**T.
 
-    LDB     (input) INTEGER
+    @param[in]
+    ldb     INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    W       (output) DOUBLE PRECISION array, dimension (N)
+    @param[out]
+    W       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) COMPLEX*16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    WORK    (workspace/output) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                LWORK >= 1.
             If JOBZ  = 'N' and N > 1, LWORK >= 2*N + N*NB.
             If JOBZ  = 'V' and N > 1, LWORK >= max( 2*N + N*NB, 1 + 6*N + 2*N**2 ).
             NB can be obtained through magma_get_dsytrd_nb(N).
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK and IWORK
             arrays, returns these values as the first entries of the WORK
             and IWORK arrays, and no error message related to LWORK or
             LIWORK is issued by XERBLA.
 
-    IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
+    @param[out]
+    iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
             On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
-    LIWORK  (input) INTEGER
+    @param[in]
+    liwork  INTEGER
             The dimension of the array IWORK.
             If N <= 1,                LIWORK >= 1.
             If JOBZ  = 'N' and N > 1, LIWORK >= 1.
             If JOBZ  = 'V' and N > 1, LIWORK >= 3 + 5*N.
-
+    \n
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK and
             IWORK arrays, returns these values as the first entries of
             the WORK and IWORK arrays, and no error message related to
             LWORK or LIWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-            > 0:  DPOTRF or DSYEVD returned an error code:
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+      -     > 0:  DPOTRF or DSYEVD returned an error code:
                <= N:  if INFO = i and JOBZ = 'N', then the algorithm
                       failed to converge; i off-diagonal elements of an
                       intermediate tridiagonal form did not converge to
@@ -143,7 +153,7 @@
                       no eigenvalues or eigenvectors were computed.
 
     Further Details
-    ===============
+    ---------------
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -151,7 +161,9 @@
     converge (NEIG in old code could be greater than N causing out of
     bounds reference to A - reported by Ralf Meyer).  Also corrected the
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
-    =====================================================================  */
+
+    @ingroup magma_dsygv_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_dsygvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
              double *a, magma_int_t lda, double *b, magma_int_t ldb,

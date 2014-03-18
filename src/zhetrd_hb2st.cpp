@@ -107,77 +107,88 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
 
     Arguments
-    =========
-    THREADS (input) INTEGER
+    ---------
+    @param[in]
+    THREADS INTEGER
             Specifies the number of pthreads used.
             THREADS > 0
 
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangles of A is stored;
-            = 'L':  Lower triangles of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangles of A is stored;
+      -     = 'L':  Lower triangles of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             The order of the band matrix A.  N >= NB >= 0.
 
-    VBLKSIZ (input) INTEGER
+    @param[in]
+    vblksiz INTEGER
             The size of the block of householder vectors applied at once.
 
-    A       (input/workspace) COMPLEX_16 array, dimension (LDA, N)
+    @param[in]
+    A       (workspace) COMPLEX_16 array, dimension (LDA, N)
             On entry the band matrix stored in the following way:
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= 2*NB.
 
-    D       (output) DOUBLE array, dimension (N)
+    @param[out]
+    d       DOUBLE array, dimension (N)
             The diagonal elements of the tridiagonal matrix T:
             D(i) = A(i,i).
 
-    E       (output) DOUBLE array, dimension (N-1)
+    @param[out]
+    e       DOUBLE array, dimension (N-1)
             The off-diagonal elements of the tridiagonal matrix T:
             E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
 
-    V       (output) COMPLEX_16 array, dimension (BLKCNT, LDV, VBLKSIZ)
+    @param[out]
+    V       COMPLEX_16 array, dimension (BLKCNT, LDV, VBLKSIZ)
             On exit it contains the blocks of householder reflectors
             BLKCNT is the number of block and it is returned by the funtion MAGMA_BULGE_GET_BLKCNT.
 
-    LDV     (input) INTEGER
+    @param[in]
+    ldv     INTEGER
             The leading dimension of V.
             LDV > NB + VBLKSIZ + 1
 
-    TAU     (output) COMPLEX_16 dimension(BLKCNT, VBLKSIZ)
+    @param[out]
+    tau     COMPLEX_16 dimension(BLKCNT, VBLKSIZ)
             ???
 
-    COMPT   (input) INTEGER
+    @param[in]
+    compt   INTEGER
             if COMPT = 0 T is not computed
             if COMPT = 1 T is computed
 
-    T       (output) COMPLEX_16 dimension(LDT *)
+    @param[out]
+    T       COMPLEX_16 dimension(LDT *)
             if COMPT = 1 on exit contains the matrices T needed for Q2
             if COMPT = 0 T is not referenced
 
-    LDT     (input) INTEGER
+    @param[in]
+    ldt     INTEGER
             The leading dimension of T.
             LDT > Vblksiz
 
-    INFO    (output) INTEGER ????????????????????????????????????????????????????????????????????????????????????
-            = 0:  successful exit
+    @param[out]
+    info    INTEGER ????????????????????????????????????????????????????????????????????????????????????
+      -     = 0:  successful exit
 
-
-    =====================================================================  */
+    @ingroup magma_zheev_2stage
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_hb2st(
     magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,

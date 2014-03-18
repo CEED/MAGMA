@@ -14,25 +14,20 @@
 #define Z(ix, iy) (z + (ix) + ldz * (iy))
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-       .. Scalar Arguments ..
+/**
+       .. Scalar Arguments .
       CHARACTER          RANGE
       INTEGER            IL, IU, INFO, LDZ, LIWORK, LWORK, N
       DOUBLE PRECISION   VL, VU
-       ..
-       .. Array Arguments ..
+       .
+       .. Array Arguments .
       INTEGER            IWORK( * )
       DOUBLE PRECISION   D( * ), E( * ), WORK( * ), Z( LDZ, * ),
      $                   DWORK ( * )
-       ..
+       .
 
     Purpose
-    =======
+    -------
     DSTEDX computes some eigenvalues and, optionally, eigenvectors of a
     symmetric tridiagonal matrix using the divide and conquer method.
 
@@ -44,92 +39,109 @@
     without guard digits, but we know of none.  See DLAEX3 for details.
 
     Arguments
-    =========
-    RANGE   (input) CHARACTER*1
-            = 'A': all eigenvalues will be found.
-            = 'V': all eigenvalues in the half-open interval (VL,VU]
+    ---------
+    @param[in]
+    range   CHARACTER*1
+      -     = 'A': all eigenvalues will be found.
+      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
                    will be found.
-            = 'I': the IL-th through IU-th eigenvalues will be found.
+      -     = 'I': the IL-th through IU-th eigenvalues will be found.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The dimension of the symmetric tridiagonal matrix.  N >= 0.
 
-    VL      (input) DOUBLE PRECISION
-    VU      (input) DOUBLE PRECISION
+    @param[in]
+    VL      DOUBLE PRECISION
+    @param[in]
+    VU      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
 
-    IL      (input) INTEGER
-    IU      (input) INTEGER
+    @param[in]
+    il      INTEGER
+    @param[in]
+    iu      INTEGER
             If RANGE='I', the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
 
-    D       (input/output) DOUBLE PRECISION array, dimension (N)
+    @param[in,out]
+    d       DOUBLE PRECISION array, dimension (N)
             On entry, the diagonal elements of the tridiagonal matrix.
             On exit, if INFO = 0, the eigenvalues in ascending order.
 
-    E       (input/output) DOUBLE PRECISION array, dimension (N-1)
+    @param[in,out]
+    e       DOUBLE PRECISION array, dimension (N-1)
             On entry, the subdiagonal elements of the tridiagonal matrix.
             On exit, E has been destroyed.
 
-    Z       (input/output) DOUBLE PRECISION array, dimension (LDZ,N)
+    @param[in,out]
+    Z       DOUBLE PRECISION array, dimension (LDZ,N)
             On exit, if INFO = 0, Z contains the orthonormal eigenvectors
             of the symmetric tridiagonal matrix.
 
-    LDZ     (input) INTEGER
+    @param[in]
+    ldz     INTEGER
             The leading dimension of the array Z. LDZ >= max(1,N).
 
-    WORK    (workspace/output) DOUBLE PRECISION array,
+    @param[out]
+    work    (workspace) DOUBLE PRECISION array,
                                            dimension (LWORK)
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK.
             If N > 1 then LWORK >= ( 1 + 4*N + N**2 ).
             Note that  if N is less than or
             equal to the minimum divide size, usually 25, then LWORK need
             only be max(1,2*(N-1)).
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
+    @param[out]
+    iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
             On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
 
-    LIWORK  (input) INTEGER
+    @param[in]
+    liwork  INTEGER
             The dimension of the array IWORK.
             LIWORK >= ( 3 + 5*N ).
             Note that if N is less than or
             equal to the minimum divide size, usually 25, then LIWORK
             need only be 1.
-
+    \n
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal size of the IWORK array,
             returns this value as the first entry of the IWORK array, and
             no error message related to LIWORK is issued by XERBLA.
 
-    DWORK  (device workspace) DOUBLE PRECISION array, dimension (3*N*N/2+3*N)
+    @param
+    dwork  (workspace) DOUBLE PRECISION array, dimension (3*N*N/2+3*N)
 
-    INFO    (output) INTEGER
-            = 0:  successful exit.
-            < 0:  if INFO = -i, the i-th argument had an illegal value.
-            > 0:  The algorithm failed to compute an eigenvalue while
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit.
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+      -     > 0:  The algorithm failed to compute an eigenvalue while
                   working on the submatrix lying in rows and columns
                   INFO/(N+1) through mod(INFO,N+1).
 
     Further Details
-    ===============
+    ---------------
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    ===================================================================== */
+    @ingroup magma_dsyev_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
              magma_int_t il, magma_int_t iu, double* d, double* e, double* z, magma_int_t ldz,

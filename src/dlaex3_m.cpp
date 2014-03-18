@@ -34,19 +34,9 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
 
 }  // end extern "C"
 
-extern "C" magma_int_t
-magma_dlaex3_m(magma_int_t nrgpu,
-               magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
-               double* q, magma_int_t ldq, double rho,
-               double* dlamda, double* q2, magma_int_t* indx,
-               magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
-               double** dwork, magma_queue_t stream[MagmaMaxGPUs][2],
-               magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
-               magma_int_t* info )
-{
-/*
+/**
     Purpose
-    =======
+    -------
     DLAEX3 finds the roots of the secular equation, as defined by the
     values in D, W, and RHO, between 1 and K.  It makes the
     appropriate calls to DLAED4 and then updates the eigenvectors by
@@ -67,97 +57,124 @@ magma_dlaex3_m(magma_int_t nrgpu,
     without guard digits, but we know of none.
 
     Arguments
-    =========
-    K       (input) INTEGER
+    ---------
+    @param[in]
+    k       INTEGER
             The number of terms in the rational function to be solved by
             DLAED4.  K >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of rows and columns in the Q matrix.
             N >= K (deflation may result in N > K).
 
-    N1      (input) INTEGER
+    @param[in]
+    N1      INTEGER
             The location of the last eigenvalue in the leading submatrix.
             min(1,N) <= N1 <= N/2.
 
-    D       (output) DOUBLE PRECISION array, dimension (N)
+    @param[out]
+    d       DOUBLE PRECISION array, dimension (N)
             D(I) contains the updated eigenvalues for
             1 <= I <= K.
 
-    Q       (output) DOUBLE PRECISION array, dimension (LDQ,N)
+    @param[out]
+    Q       DOUBLE PRECISION array, dimension (LDQ,N)
             Initially the first K columns are used as workspace.
             On output the columns ??? to ??? contain
             the updated eigenvectors.
 
-    LDQ     (input) INTEGER
+    @param[in]
+    ldq     INTEGER
             The leading dimension of the array Q.  LDQ >= max(1,N).
 
-    RHO     (input) DOUBLE PRECISION
+    @param[in]
+    rho     DOUBLE PRECISION
             The value of the parameter in the rank one update equation.
             RHO >= 0 required.
 
-    DLAMDA  (input/output) DOUBLE PRECISION array, dimension (K)
+    @param[in,out]
+    DLAMDA  DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the old roots
             of the deflated updating problem.  These are the poles
             of the secular equation. May be changed on output by
             having lowest order bit set to zero on Cray X-MP, Cray Y-MP,
             Cray-2, or Cray C-90, as described above.
 
-    Q2      (input) DOUBLE PRECISION array, dimension (LDQ2, N)
+    @param[in]
+    Q2      DOUBLE PRECISION array, dimension (LDQ2, N)
             The first K columns of this matrix contain the non-deflated
             eigenvectors for the split problem.
 
-    INDX    (input) INTEGER array, dimension (N)
+    @param[in]
+    INDX    INTEGER array, dimension (N)
             The permutation used to arrange the columns of the deflated
             Q matrix into three groups (see DLAED2).
             The rows of the eigenvectors found by DLAED4 must be likewise
             permuted before the matrix multiply can take place.
 
-    CTOT    (input) INTEGER array, dimension (4)
+    @param[in]
+    CTOT    INTEGER array, dimension (4)
             A count of the total number of the various types of columns
             in Q, as described in INDX.  The fourth column type is any
             column which has been deflated.
 
-    W       (input/output) DOUBLE PRECISION array, dimension (K)
+    @param[in,out]
+    W       DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the components
             of the deflation-adjusted updating vector. Destroyed on
             output.
 
+    @param
     S       (workspace) DOUBLE PRECISION array, dimension (N1 + 1)*K
             Will contain the eigenvectors of the repaired matrix which
             will be multiplied by the previously accumulated eigenvectors
             to update the system.
 
-    INDXQ   (output) INTEGER array, dimension (N)
+    @param[out]
+    indxq   INTEGER array, dimension (N)
             On exit, the permutation which will reintegrate the
             subproblems back into sorted order,
             i.e. D( INDXQ( I = 1, N ) ) will be in ascending order.
-
-    DWORK   (devices workspaces) DOUBLE PRECISION array of arrays,
+    
+    @param
+    dwork   (devices workspaces) DOUBLE PRECISION array of arrays,
             dimension NRGPU.
             if NRGPU = 1 the dimension of the first workspace
             should be (3*N*N/2+3*N)
             otherwise the NRGPU workspaces should have the size
             ceil((N-N1) * (N-N1) / floor(nrgpu/2)) +
             NB * ((N-N1) + (N-N1) / floor(nrgpu/2))
-
-    STREAM  (device stream) magma_queue_t array,
+    
+    @param
+    stream  (device stream) magma_queue_t array,
             dimension (MagmaMaxGPUs,2)
 
-    INFO    (output) INTEGER
-            = 0:  successful exit.
-            < 0:  if INFO = -i, the i-th argument had an illegal value.
-            > 0:  if INFO = 1, an eigenvalue did not converge
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit.
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+      -     > 0:  if INFO = 1, an eigenvalue did not converge
 
     Further Details
-    ===============
+    ---------------
     Based on contributions by
     Jeff Rutter, Computer Science Division, University of California
     at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    ===================================================================== */
-    
+    @ingroup magma_dsyev_aux
+    ********************************************************************/
+extern "C" magma_int_t
+magma_dlaex3_m(magma_int_t nrgpu,
+               magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
+               double* q, magma_int_t ldq, double rho,
+               double* dlamda, double* q2, magma_int_t* indx,
+               magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
+               double** dwork, magma_queue_t stream[MagmaMaxGPUs][2],
+               magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
+               magma_int_t* info )
+{
     if (nrgpu == 1) {
         magma_setdevice(0);
         magma_dlaex3(k, n, n1, d, q, ldq, rho,

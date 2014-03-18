@@ -19,14 +19,9 @@
 #define dA(i, j) (da + (j)*ldda + (i))
 #define dB(i, j) (db + (j)*lddb + (i))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZHEGST_GPU reduces a complex Hermitian-definite generalized
     eigenproblem to standard form.
     
@@ -39,21 +34,25 @@
     B must have been previously factorized as U**H*U or L*L**H by ZPOTRF.
     
     Arguments
-    =========
-    ITYPE   (input) INTEGER
+    ---------
+    @param[in]
+    itype   INTEGER
             = 1: compute inv(U**H)*A*inv(U) or inv(L)*A*inv(L**H);
             = 2 or 3: compute U*A*U**H or L**H*A*L.
     
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored and B is factored as
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored and B is factored as
                     U**H*U;
-            = 'L':  Lower triangle of A is stored and B is factored as
+      -     = 'L':  Lower triangle of A is stored and B is factored as
                     L*L**H.
     
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrices A and B.  N >= 0.
     
-    DA      (device input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    DA      COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -61,24 +60,30 @@
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-    
+    \n
             On exit, if INFO = 0, the transformed matrix, stored in the
             same format as A.
     
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
     
-    DB      (device input) COMPLEX_16 array, dimension (LDB,N)
+    @param[in]
+    DB      COMPLEX_16 array, dimension (LDB,N)
             The triangular factor from the Cholesky factorization of B,
             as returned by ZPOTRF.
     
-    LDDB    (input) INTEGER
+    @param[in]
+    lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
     
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================*/
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zheev_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *da, magma_int_t ldda,

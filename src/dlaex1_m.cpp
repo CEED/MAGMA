@@ -26,24 +26,9 @@ magma_int_t magma_dlaex3_m(magma_int_t nrgpu,
 
 }  // end extern "C"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-       .. Scalar Arguments ..
-      CHARACTER          RANGE
-      INTEGER            IL, IU, CUTPNT, INFO, LDQ, N
-      DOUBLE PRECISION   RHO, VL, VU
-       ..
-       .. Array Arguments ..
-      INTEGER            INDXQ( * ), iwork[* )
-      DOUBLE PRECISION   D( * ), Q( LDQ, * ), WORK( * ), DWORK( * )
-       ..
-
+/**
     Purpose
-    =======
+    -------
     DLAEX1 computes the updated eigensystem of a diagonal
     matrix after modification by a rank-one symmetric matrix.
 
@@ -73,40 +58,50 @@ magma_int_t magma_dlaex3_m(magma_int_t nrgpu,
     the overall problem.
 
     Arguments
-    =========
-    N       (input) INTEGER
+    ---------
+    @param[in]
+    n       INTEGER
             The dimension of the symmetric tridiagonal matrix.  N >= 0.
             
-    D       (input/output) DOUBLE PRECISION array, dimension (N)
+    @param[in,out]
+    d       DOUBLE PRECISION array, dimension (N)
             On entry, the eigenvalues of the rank-1-perturbed matrix.
             On exit, the eigenvalues of the repaired matrix.
             
-    Q       (input/output) DOUBLE PRECISION array, dimension (LDQ,N)
+    @param[in,out]
+    Q       DOUBLE PRECISION array, dimension (LDQ,N)
             On entry, the eigenvectors of the rank-1-perturbed matrix.
             On exit, the eigenvectors of the repaired tridiagonal matrix.
             
-    LDQ     (input) INTEGER
+    @param[in]
+    ldq     INTEGER
             The leading dimension of the array Q.  LDQ >= max(1,N).
             
-    INDXQ   (input/output) INTEGER array, dimension (N)
+    @param[in,out]
+    indxq   INTEGER array, dimension (N)
             On entry, the permutation which separately sorts the two
             subproblems in D into ascending order.
             On exit, the permutation which will reintegrate the
             subproblems back into sorted order,
             i.e. D( INDXQ( I = 1, N ) ) will be in ascending order.
             
-    RHO     (input) DOUBLE PRECISION
+    @param[in]
+    rho     DOUBLE PRECISION
             The subdiagonal entry used to create the rank-1 modification.
             
-    CUTPNT  (input) INTEGER
+    @param[in]
+    cutpnt  INTEGER
             The location of the last eigenvalue in the leading sub-matrix.
             min(1,N) <= CUTPNT <= N/2.
             
-    WORK    (workspace) DOUBLE PRECISION array, dimension (4*N + N**2)
+    @param
+    work    (workspace) DOUBLE PRECISION array, dimension (4*N + N**2)
             
-    IWORK   (workspace) INTEGER array, dimension (4*N)
-            
-    DWORK   (devices workspaces) DOUBLE PRECISION array of arrays,
+    @param
+    iwork   (workspace) INTEGER array, dimension (4*N)
+    
+    @param
+    dwork   (devices workspaces) DOUBLE PRECISION array of arrays,
             dimension NRGPU.
             if NRGPU = 1 the dimension of the first workspace
             should be (3*N*N/2+3*N)
@@ -114,41 +109,49 @@ magma_int_t magma_dlaex3_m(magma_int_t nrgpu,
             ceil((N-N1) * (N-N1) / floor(nrgpu/2)) +
             NB * ((N-N1) + (N-N1) / floor(nrgpu/2))
 
-    STREAM  (device stream) magma_queue_t array,
+    @param
+    stream  (device stream) magma_queue_t array,
             dimension (MagmaMaxGPUs,2)
 
-    RANGE   (input) CHARACTER*1
-            = 'A': all eigenvalues will be found.
-            = 'V': all eigenvalues in the half-open interval (VL,VU]
+    @param[in]
+    range   CHARACTER*1
+      -     = 'A': all eigenvalues will be found.
+      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
                    will be found.
-            = 'I': the IL-th through IU-th eigenvalues will be found.
+      -     = 'I': the IL-th through IU-th eigenvalues will be found.
 
-    VL      (input) DOUBLE PRECISION
-    VU      (input) DOUBLE PRECISION
+    @param[in]
+    VL      DOUBLE PRECISION
+    @param[in]
+    VU      DOUBLE PRECISION
             if RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
 
-    IL      (input) INTEGER
-    IU      (input) INTEGER
+    @param[in]
+    il      INTEGER
+    @param[in]
+    iu      INTEGER
             if RANGE='I', the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit.
-            < 0:  if INFO = -i, the i-th argument had an illegal value.
-            > 0:  if INFO = 1, an eigenvalue did not converge
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit.
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+      -     > 0:  if INFO = 1, an eigenvalue did not converge
 
     Further Details
-    ===============
+    ---------------
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
     Modified by Francoise Tisseur, University of Tennessee.
 
-    ===================================================================== */
+    @ingroup magma_dsyev_aux
+    ********************************************************************/
 extern "C" magma_int_t
 magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int_t ldq,
                magma_int_t* indxq, double rho, magma_int_t cutpnt,
