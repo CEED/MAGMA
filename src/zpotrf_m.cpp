@@ -19,12 +19,7 @@
 #define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
 #define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOTRF_OOC computes the Cholesky factorization of a complex Hermitian
@@ -41,14 +36,17 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -56,25 +54,28 @@
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-
+    \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization A = U**H * U or A = L * L**H.
-
+    \n
             Higher performance is achieved if A is in pinned memory, e.g.
             allocated using magma_malloc_pinned.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
-            > 0:  if INFO = i, the leading minor of order i is not
+      -     > 0:  if INFO = i, the leading minor of order i is not
                   positive definite, and the factorization could not be
                   completed.
 
-    =====================================================================    */
+    @ingroup magma_zposv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
                magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)

@@ -9,12 +9,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOSV computes the solution to a complex system of linear equations
@@ -30,18 +25,22 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the Hermitian matrix dA.  If UPLO = 'U', the leading
             N-by-N upper triangular part of dA contains the upper
             triangular part of the matrix dA, and the strictly lower
@@ -49,24 +48,30 @@
             leading N-by-N lower triangular part of dA contains the lower
             triangular part of the matrix dA, and the strictly upper
             triangular part of dA is not referenced.
-
+    \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization dA = U**H*U or dA = L*L**H.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    dB      (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    @param[in,out]
+    dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDDB    (input) INTEGER
+    @param[in]
+    lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================   */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zposv_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zposv_gpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,

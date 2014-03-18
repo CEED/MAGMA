@@ -20,12 +20,7 @@
 
 #define dA(i, j)  (dA + (j)*ldda + (i))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
@@ -42,14 +37,17 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of dA is stored;
-            = 'L':  Lower triangle of dA is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of dA is stored;
+      -     = 'L':  Lower triangle of dA is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix dA.  N >= 0.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the Hermitian matrix dA.  If UPLO = 'U', the leading
             N-by-N upper triangular part of dA contains the upper
             triangular part of the matrix dA, and the strictly lower
@@ -57,22 +55,26 @@
             leading N-by-N lower triangular part of dA contains the lower
             triangular part of the matrix dA, and the strictly upper
             triangular part of dA is not referenced.
-
+    \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization dA = U**H * U or dA = L * L**H.
 
-    LDDA     (input) INTEGER
+    @param[in]
+    ldda     INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-            > 0:  if INFO = i, the leading minor of order i is not
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+      -     > 0:  if INFO = i, the leading minor of order i is not
                   positive definite, and the factorization could not be
                   completed.
-    =====================================================================   */
+
+    @ingroup magma_zposv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_gpu(magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)

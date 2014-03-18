@@ -50,7 +50,7 @@
     lwork   INTEGER
             The dimension of the array DWORK.  LWORK >= N*NB, where NB is
             the optimal blocksize returned by magma_get_zgetri_nb(n).
-            
+    \n
             Unlike LAPACK, this version does not currently support a
             workspace query, because the workspace is on the GPU.
 

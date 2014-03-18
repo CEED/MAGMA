@@ -15,12 +15,7 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *A, magma_int_t lda,
                  magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOSV computes the solution to a complex system of linear equations
@@ -36,18 +31,22 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -55,24 +54,30 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-
+    \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization A = U**H*U or A = L*L**H.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input/output) COMPLEX_16 array, dimension (LDB,NRHS)
+    @param[in,out]
+    B       COMPLEX_16 array, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDB     (input) INTEGER
+    @param[in]
+    ldb     INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================   */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zposv_driver
+    ********************************************************************/
 
     magma_int_t num_gpus, ldda, lddb;
 

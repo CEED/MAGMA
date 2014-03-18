@@ -45,7 +45,7 @@
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
-
+    \n
             Higher performance is achieved if A is in pinned memory, e.g.
             allocated using magma_malloc_pinned.
 

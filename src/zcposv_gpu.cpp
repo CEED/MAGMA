@@ -13,12 +13,7 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZCPOSV computes the solution to a complex system of linear equations
@@ -54,19 +49,23 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of linear equations, i.e., the order of the
             matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA      (input or input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -81,29 +80,37 @@
             array dA contains the factor U or L from the Cholesky
             factorization A = U**T*U or A = L*L**T.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
 
-    dB      (input) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    @param[in]
+    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             The N-by-NRHS right hand side matrix B.
 
-    LDDB    (input) INTEGER
+    @param[in]
+    lddb    INTEGER
             The leading dimension of the array dB.  LDDB >= max(1,N).
 
-    dX      (output) COMPLEX_16 array on the GPU, dimension (LDDX,NRHS)
+    @param[out]
+    dX      COMPLEX_16 array on the GPU, dimension (LDDX,NRHS)
             If INFO = 0, the N-by-NRHS solution matrix X.
 
-    LDDX    (input) INTEGER
+    @param[in]
+    lddx    INTEGER
             The leading dimension of the array dX.  LDDX >= max(1,N).
 
+    @param
     dworkd  (workspace) COMPLEX_16 array on the GPU, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
+    @param
     dworks  (workspace) COMPLEX array on the GPU, dimension (N*(N+NRHS))
             This array is used to store the complex single precision matrix
             and the right-hand sides or solutions in single precision.
 
-    ITER    (output) INTEGER
+    @param[out]
+    iter    INTEGER
             < 0: iterative refinement has failed, double precision
                  factorization has been performed
                  -1 : the routine fell back to full precision for
@@ -115,15 +122,17 @@
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-            > 0:  if INFO = i, the leading minor of order i of (DOUBLE
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+      -     > 0:  if INFO = i, the leading minor of order i of (DOUBLE
                   PRECISION) A is not positive definite, so the
                   factorization could not be completed, and the solution
                   has not been computed.
 
-    =====================================================================    */
+    @ingroup magma_zposv_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zcposv_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,

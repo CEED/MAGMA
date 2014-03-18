@@ -10,12 +10,7 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOTRS solves a system of linear equations A*X = B with a Hermitian
@@ -24,35 +19,45 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA      (input) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The triangular factor U or L from the Cholesky factorization
             A = U**H*U or A = L*L**H, as computed by ZPOTRF.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A.  LDDA >= max(1,N).
 
-    dB      (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    @param[in,out]
+    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDDB    (input) INTEGER
+    @param[in]
+    lddb    INTEGER
             The leading dimension of the array B.  LDDB >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================   */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zposv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrs_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,

@@ -12,12 +12,7 @@
 
 #define PRECISION_z
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     =======
     ZPOTRI computes the inverse of a real symmetric positive definite
@@ -26,30 +21,36 @@
 
     Arguments
     =========
-    UPLO    (input) CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    @param[in]
+    uplo    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the triangular factor U or L from the Cholesky
             factorization A = U**T*U or A = L*L**T, as computed by
             ZPOTRF.
             On exit, the upper or lower triangle of the (symmetric)
             inverse of A, overwriting the input factor U or L.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-            > 0:  if INFO = i, the (i,i) element of the factor U or L is
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+      -     > 0:  if INFO = i, the (i,i) element of the factor U or L is
                   zero, and the inverse could not be computed.
 
-    ===================================================================== */
+    @ingroup magma_zposv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotri(magma_uplo_t uplo, magma_int_t n,
               magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
