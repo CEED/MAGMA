@@ -12,10 +12,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
-                   magma_int_t *lda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -59,7 +55,10 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                  singular, and division by zero will occur if it is used
                  to solve a system of equations.
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
+                   magma_int_t *lda, magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

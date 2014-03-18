@@ -50,12 +50,6 @@ magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
 
 //////////////////////////////////////////////////////////////////////////////
 
-extern "C" magma_int_t
-magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
-                   magma_int_t *ldda, magmaDoubleComplex *dtau,
-                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
-                   double *dwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -132,7 +126,12 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
+                   magma_int_t *ldda, magmaDoubleComplex *dtau,
+                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
+                   double *dwork, magma_int_t *info)
+{
     #define da_ref(a_1,a_2) ( dA+(a_2)*(*ldda) + (a_1))
     #define BLOCK_SIZE 32
 

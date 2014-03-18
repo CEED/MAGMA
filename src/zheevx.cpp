@@ -13,13 +13,6 @@
  */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zheevx(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, double vl, double vu,
-             magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
-             double *w, magmaDoubleComplex *z, magma_int_t ldz, magmaDoubleComplex *work, magma_int_t lwork,
-             double *rwork, magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -156,7 +149,13 @@ magma_zheevx(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
             > 0:  if INFO = i, then i eigenvectors failed to converge.
                   Their indices are stored in array IFAIL.
     =====================================================================     */
-    
+extern "C" magma_int_t
+magma_zheevx(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda, double vl, double vu,
+             magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
+             double *w, magmaDoubleComplex *z, magma_int_t ldz, magmaDoubleComplex *work, magma_int_t lwork,
+             double *rwork, magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
+{
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );
     const char* range_ = lapack_range_const( range );

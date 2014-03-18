@@ -23,15 +23,6 @@
 #define dt(gpui, ind)    (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
 #define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
-extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
-               magma_int_t m, magma_int_t n, magma_int_t k,
-               magmaDoubleComplex *a,    magma_int_t lda,
-               magmaDoubleComplex *tau,
-               magmaDoubleComplex *c,    magma_int_t ldc,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -117,6 +108,15 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
+extern "C" magma_int_t
+magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
+               magma_int_t m, magma_int_t n, magma_int_t k,
+               magmaDoubleComplex *a,    magma_int_t lda,
+               magmaDoubleComplex *tau,
+               magmaDoubleComplex *c,    magma_int_t ldc,
+               magmaDoubleComplex *work, magma_int_t lwork,
+               magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     const char* side_  = lapack_const( side  );

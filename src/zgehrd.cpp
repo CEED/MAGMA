@@ -11,14 +11,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
-             magmaDoubleComplex *A, magma_int_t lda,
-             magmaDoubleComplex *tau,
-             magmaDoubleComplex *work, magma_int_t lwork,
-             magmaDoubleComplex *dT,
-             magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -125,7 +117,14 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     This version stores the T matrices in dT, for later use in magma_zunghr.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+             magmaDoubleComplex *A, magma_int_t lda,
+             magmaDoubleComplex *tau,
+             magmaDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *dT,
+             magma_int_t *info)
+{
     #define  A( i, j ) ( A + (i) + (j)*lda)
     #define dA( i, j ) (dA + (i) + (j-ilo)*ldda)
 

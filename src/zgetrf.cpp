@@ -12,10 +12,6 @@
 
 
 
-extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
-             magma_int_t *ipiv, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -72,7 +68,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
                   to solve a system of equations.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
+             magma_int_t *ipiv, magma_int_t *info)
+{
 #define dAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
 
     magmaDoubleComplex *dAT, *dA, *da, *work;

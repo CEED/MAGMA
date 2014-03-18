@@ -17,16 +17,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
-               magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda,
-               double *w,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               double *rwork, magma_int_t lrwork,
-               magma_int_t *iwork, magma_int_t liwork,
-               magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -143,7 +133,16 @@ magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
 
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
+               magma_int_t n,
+               magmaDoubleComplex *a, magma_int_t lda,
+               double *w,
+               magmaDoubleComplex *work, magma_int_t lwork,
+               double *rwork, magma_int_t lrwork,
+               magma_int_t *iwork, magma_int_t liwork,
+               magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* jobz_ = lapack_vec_const( jobz );
     magma_int_t ione = 1;

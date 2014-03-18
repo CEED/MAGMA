@@ -12,15 +12,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlahr2_m(
-    magma_int_t n, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *tau,
-    magmaDoubleComplex *T, magma_int_t ldt,
-    magmaDoubleComplex *Y, magma_int_t ldy,
-    struct zgehrd_data* data )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -128,7 +119,15 @@ magma_zlahr2_m(
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zlahr2_m(
+    magma_int_t n, magma_int_t k, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *T, magma_int_t ldt,
+    magmaDoubleComplex *Y, magma_int_t ldy,
+    struct zgehrd_data* data )
+{
     #define  A(  i, j ) ( A + (i) + (j)*lda)
     #define  Y(  i, j ) ( Y + (i) + (j)*ldy)
     #define  T(  i, j ) ( T + (i) + (j)*ldt)

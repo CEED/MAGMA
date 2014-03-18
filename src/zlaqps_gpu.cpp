@@ -13,15 +13,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
-             magma_int_t nb, magma_int_t *kb,
-             magmaDoubleComplex *A,  magma_int_t lda,
-             magma_int_t *jpvt, magmaDoubleComplex *tau,
-             double *vn1, double *vn2,
-             magmaDoubleComplex *auxv,
-             magmaDoubleComplex *F,  magma_int_t ldf)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -93,7 +84,15 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             The leading dimension of the array F. LDF >= max(1,N).
 
     =====================================================================    */
-    
+extern "C" magma_int_t
+magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
+             magma_int_t nb, magma_int_t *kb,
+             magmaDoubleComplex *A,  magma_int_t lda,
+             magma_int_t *jpvt, magmaDoubleComplex *tau,
+             double *vn1, double *vn2,
+             magmaDoubleComplex *auxv,
+             magmaDoubleComplex *F,  magma_int_t ldf)
+{
 #define  A(i, j) (A  + (i) + (j)*(lda ))
 #define  F(i, j) (F  + (i) + (j)*(ldf ))
 

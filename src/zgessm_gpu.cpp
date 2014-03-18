@@ -13,14 +13,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
-                  magma_int_t *ipiv,
-                  magmaDoubleComplex *dL1, magma_int_t lddl1,
-                  magmaDoubleComplex *dL,  magma_int_t lddl,
-                  magmaDoubleComplex *dA,  magma_int_t ldda,
-                  magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -67,7 +59,14 @@ magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
             On exit, updated by the application of L on the gpu.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
+                  magma_int_t *ipiv,
+                  magmaDoubleComplex *dL1, magma_int_t lddl1,
+                  magmaDoubleComplex *dL,  magma_int_t lddl,
+                  magmaDoubleComplex *dA,  magma_int_t ldda,
+                  magma_int_t *info)
+{
 #define AT(i,j) (dAT + (i)*ldda + (j)      )
 #define L(i,j)  (dL  + (i)      + (j)*lddl )
 #define dL1(j)  (dL1            + (j)*lddl1)

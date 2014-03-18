@@ -11,15 +11,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
-                  magma_int_t m, magma_int_t n, magma_int_t k,
-                  const magmaDoubleComplex *dV,    magma_int_t ldv,
-                  const magmaDoubleComplex *dT,    magma_int_t ldt,
-                  magmaDoubleComplex *dC,          magma_int_t ldc,
-                  magmaDoubleComplex *dwork,       magma_int_t ldwork,
-                  magmaDoubleComplex *dworkvt,     magma_int_t ldworkvt)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Univ. of California Berkeley
        @date
@@ -126,7 +117,15 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
                      (  0  0  1 )
 
     ===================================================================      */
-
+extern "C" magma_int_t
+magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
+                  magma_int_t m, magma_int_t n, magma_int_t k,
+                  const magmaDoubleComplex *dV,    magma_int_t ldv,
+                  const magmaDoubleComplex *dT,    magma_int_t ldt,
+                  magmaDoubleComplex *dC,          magma_int_t ldc,
+                  magmaDoubleComplex *dwork,       magma_int_t ldwork,
+                  magmaDoubleComplex *dworkvt,     magma_int_t ldworkvt)
+{
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

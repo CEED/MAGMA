@@ -18,15 +18,6 @@
 #include "common_magma.h"
 
 
-extern "C" magma_int_t
-magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
-                  magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu,
-                  magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
-                  magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
-                  magma_int_t *ipiv,
-                  magmaDoubleComplex *hwork, magma_int_t ldhwork, magmaDoubleComplex *dwork, magma_int_t lddwork,
-                  magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -122,7 +113,15 @@ magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
                 to solve a system of equations.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_ztstrf_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
+                  magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu,
+                  magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
+                  magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
+                  magma_int_t *ipiv,
+                  magmaDoubleComplex *hwork, magma_int_t ldhwork, magmaDoubleComplex *dwork, magma_int_t lddwork,
+                  magma_int_t *info)
+{
 #define UT(i,j) (dUT + (i)*ib*lddu + (j)*ib )
 #define AT(i,j) (dAT + (i)*ib*ldda + (j)*ib )
 #define L(i)    (dL  + (i)*ib*lddl          )

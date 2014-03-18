@@ -10,10 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_ztrtri(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -63,7 +59,10 @@ magma_ztrtri(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
                     matrix is singular and its inverse cannot be computed.
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_ztrtri(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
+              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+{
     #define  A(i, j) ( A + (i) + (j)*lda )
     #define dA(i, j) (dA + (i) + (j)*ldda)
 

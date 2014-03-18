@@ -107,12 +107,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" magma_int_t
-magma_zhetrd_hb2st(
-    magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
-    magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -184,7 +178,12 @@ magma_zhetrd_hb2st(
 
 
     =====================================================================  */
-
+extern "C" magma_int_t
+magma_zhetrd_hb2st(
+    magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+    magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
+    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
+{
     #ifdef ENABLE_TIMER
     real_Double_t timeblg=0.0;
     #endif

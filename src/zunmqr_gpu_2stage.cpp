@@ -14,14 +14,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
-                         magma_int_t m, magma_int_t n, magma_int_t k,
-                         magmaDoubleComplex *da,   magma_int_t ldda,
-                         magmaDoubleComplex *dc,    magma_int_t lddc,
-                         magmaDoubleComplex *dT,    magma_int_t nb,
-                         magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -95,7 +87,14 @@ magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
     = 0:  successful exit
     < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
+                         magma_int_t m, magma_int_t n, magma_int_t k,
+                         magmaDoubleComplex *da,   magma_int_t ldda,
+                         magmaDoubleComplex *dc,    magma_int_t lddc,
+                         magmaDoubleComplex *dT,    magma_int_t nb,
+                         magma_int_t *info)
+{
     magmaDoubleComplex *dwork;
 
     magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw, ret;

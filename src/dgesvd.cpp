@@ -13,14 +13,6 @@
 
 #define PRECISION_d
 
-extern "C" magma_int_t
-magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
-             double *A,    magma_int_t lda, double *s,
-             double *U,    magma_int_t ldu,
-             double *VT,   magma_int_t ldvt,
-             double *work, magma_int_t lwork,
-             magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -144,7 +136,14 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                 above for details.
     
     ===================================================================== */
-    
+extern "C" magma_int_t
+magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
+             double *A,    magma_int_t lda, double *s,
+             double *U,    magma_int_t ldu,
+             double *VT,   magma_int_t ldvt,
+             double *work, magma_int_t lwork,
+             magma_int_t *info )
+{
     const char* jobu_  = lapack_vec_const( jobu  );
     const char* jobvt_ = lapack_vec_const( jobvt );
     

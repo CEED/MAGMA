@@ -14,10 +14,6 @@
 #define dA(i, j) (work+(j)*ldda + (i))
 
 
-extern "C" magma_int_t
-magma_zlauum(magma_uplo_t uplo, magma_int_t n,
-         magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -62,7 +58,10 @@ magma_zlauum(magma_uplo_t uplo, magma_int_t n,
             < 0: if INFO = -k, the k-th argument had an illegal value
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_zlauum(magma_uplo_t uplo, magma_int_t n,
+         magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+{
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t     ldda, nb;

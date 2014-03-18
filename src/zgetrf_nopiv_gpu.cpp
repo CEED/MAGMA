@@ -15,11 +15,6 @@ extern "C" magma_int_t
 magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                    magma_int_t *lda, magma_int_t *info);
 
-extern "C" magma_int_t
-magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
-                       magmaDoubleComplex *dA, magma_int_t ldda,
-                       magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -64,7 +59,11 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
+                       magmaDoubleComplex *dA, magma_int_t ldda,
+                       magma_int_t *info)
+{
 #define inA(i,j) (dA + (i)*nb + (j)*nb*ldda)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;

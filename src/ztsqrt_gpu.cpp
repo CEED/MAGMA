@@ -10,12 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
-                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, magma_int_t  *lda,
-                 magmaDoubleComplex  *tau, magmaDoubleComplex *work,
-                 magma_int_t *lwork, magmaDoubleComplex *dwork, magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -90,7 +84,12 @@ magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
+                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, magma_int_t  *lda,
+                 magmaDoubleComplex  *tau, magmaDoubleComplex *work,
+                 magma_int_t *lwork, magmaDoubleComplex *dwork, magma_int_t *info )
+{
     #define a1_ref(a_1,a_2) ( a1+(a_2)*(*lda) + (a_1))
     #define a2_ref(a_1,a_2) ( a2+(a_2)*(*lda) + (a_1))
     #define t_ref(a_1)     (dwork+(a_1))

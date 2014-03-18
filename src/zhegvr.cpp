@@ -12,15 +12,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zhegvr(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
-             double vl, double vu, magma_int_t il, magma_int_t iu, double abstol,
-             magma_int_t *m, double *w,  magmaDoubleComplex *z, magma_int_t ldz,
-             magma_int_t *isuppz, magmaDoubleComplex *work, magma_int_t lwork,
-             double *rwork, magma_int_t lrwork, magma_int_t *iwork,
-             magma_int_t liwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -248,7 +239,15 @@ magma_zhegvr(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
        Ken Stanley, Computer Science Division, University of
          California at Berkeley, USA
     =====================================================================  */
-    
+extern "C" magma_int_t
+magma_zhegvr(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             double vl, double vu, magma_int_t il, magma_int_t iu, double abstol,
+             magma_int_t *m, double *w,  magmaDoubleComplex *z, magma_int_t ldz,
+             magma_int_t *isuppz, magmaDoubleComplex *work, magma_int_t lwork,
+             double *rwork, magma_int_t lrwork, magma_int_t *iwork,
+             magma_int_t liwork, magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
     magmaDoubleComplex *da;

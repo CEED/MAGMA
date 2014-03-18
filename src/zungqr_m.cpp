@@ -14,14 +14,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zungqr_m(
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *tau,
-    magmaDoubleComplex *T, magma_int_t nb,
-    magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -78,7 +70,14 @@ magma_zungqr_m(
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument has an illegal value
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zungqr_m(
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *T, magma_int_t nb,
+    magma_int_t *info)
+{
 #define  A(i,j)   ( A    + (i) + (j)*lda )
 #define dA(d,i,j) (dA[d] + (i) + (j)*ldda)
 #define dT(d,i,j) (dT[d] + (i) + (j)*nb)

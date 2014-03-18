@@ -12,15 +12,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
-                  magma_int_t m, magma_int_t n, magma_int_t k,
-                  magmaDoubleComplex *da, magma_int_t ldda,
-                  magmaDoubleComplex *tau,
-                  magmaDoubleComplex *dc, magma_int_t lddc,
-                  magmaDoubleComplex *wa, magma_int_t ldwa,
-                  magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -101,7 +92,15 @@ magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
-    
+extern "C" magma_int_t
+magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
+                  magma_int_t m, magma_int_t n, magma_int_t k,
+                  magmaDoubleComplex *da, magma_int_t ldda,
+                  magmaDoubleComplex *tau,
+                  magmaDoubleComplex *dc, magma_int_t lddc,
+                  magmaDoubleComplex *wa, magma_int_t ldwa,
+                  magma_int_t *info)
+{
     /* Allocate work space on the GPU */
     magmaDoubleComplex *dwork;
     magma_zmalloc( &dwork, 2*(m + 64)*64 );

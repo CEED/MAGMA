@@ -213,7 +213,6 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo,
 //##################################################################################################
 static void *magma_zapplyQ_m_parallel_section(void *arg)
 {
-
     magma_int_t my_core_id     = ((magma_zapplyQ_m_id_data*)arg) -> id;
     magma_zapplyQ_m_data* data = ((magma_zapplyQ_m_id_data*)arg) -> data;
 

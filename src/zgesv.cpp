@@ -10,13 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgesv(     magma_int_t n, magma_int_t nrhs,
-                 magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *ipiv,
-                 magmaDoubleComplex *B, magma_int_t ldb,
-                 magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -67,7 +60,13 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgesv(     magma_int_t n, magma_int_t nrhs,
+                 magmaDoubleComplex *A, magma_int_t lda,
+                 magma_int_t *ipiv,
+                 magmaDoubleComplex *B, magma_int_t ldb,
+                 magma_int_t *info)
+{
     magma_int_t num_gpus, ldda, lddb;
     
     *info = 0;

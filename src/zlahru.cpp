@@ -11,16 +11,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zlahru(
-    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *dA,
-    magmaDoubleComplex *dY,
-    magmaDoubleComplex *dV,
-    magmaDoubleComplex *dT,
-    magmaDoubleComplex *dwork )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -98,7 +88,16 @@ magma_zlahru(
     The difference is that here Am is computed on the GPU.
     M is renamed Am, G is renamed Ag.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zlahru(
+    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *dA,
+    magmaDoubleComplex *dY,
+    magmaDoubleComplex *dV,
+    magmaDoubleComplex *dT,
+    magmaDoubleComplex *dwork )
+{
     #define dA( i, j ) (dA + (i) + (j)*ldda)
     
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;

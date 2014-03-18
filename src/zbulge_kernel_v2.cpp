@@ -80,7 +80,6 @@ magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb,
                                 magma_int_t sweep, magma_int_t Vblksiz,
                                 magmaDoubleComplex *work)
 {
-
 /*
     WORK (workspace) double complex array, dimension N
 */
@@ -126,7 +125,6 @@ magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb,
                                 magma_int_t sweep, magma_int_t Vblksiz,
                                 magmaDoubleComplex *work)
 {
-
     /*
      WORK (workspace) double complex array, dimension NB
     */
@@ -185,7 +183,6 @@ magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb,
                                 magma_int_t sweep, magma_int_t Vblksiz,
                                 magmaDoubleComplex *work)
 {
-
     /*
      WORK (workspace) double complex array, dimension N
      */

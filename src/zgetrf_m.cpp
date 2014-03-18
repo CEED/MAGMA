@@ -13,10 +13,6 @@
 #include "timer.h"
 #include "../testing/flops.h"
 
-extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
-               magma_int_t *ipiv, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -74,7 +70,10 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
                   to solve a system of equations.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
+               magma_int_t *ipiv, magma_int_t *info)
+{
 #define    A(i,j) (a   + (j)*lda + (i))
 #define inAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
 #define inPT(d,i,j) (dPT[d] + (i)*nb*nb + (j)*nb*maxm)

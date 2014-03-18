@@ -21,17 +21,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zheevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
-                       magma_int_t n,
-                       magmaDoubleComplex *a, magma_int_t lda,
-                       double vl, double vu, magma_int_t il, magma_int_t iu,
-                       magma_int_t *m, double *w,
-                       magmaDoubleComplex *work, magma_int_t lwork,
-                       double *rwork, magma_int_t lrwork,
-                       magma_int_t *iwork, magma_int_t liwork,
-                       magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -174,7 +163,17 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
 
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_zheevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
+                       magma_int_t n,
+                       magmaDoubleComplex *a, magma_int_t lda,
+                       double vl, double vu, magma_int_t il, magma_int_t iu,
+                       magma_int_t *m, double *w,
+                       magmaDoubleComplex *work, magma_int_t lwork,
+                       double *rwork, magma_int_t lrwork,
+                       magma_int_t *iwork, magma_int_t liwork,
+                       magma_int_t *info)
+{
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;

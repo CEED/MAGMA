@@ -23,16 +23,6 @@
  */
 #define Version5
 
-extern "C" magma_int_t
-magma_dgeev_m(
-    magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
-    double *A, magma_int_t lda,
-    double *WR, double *WI,
-    double *vl, magma_int_t ldvl,
-    double *vr, magma_int_t ldvr,
-    double *work, magma_int_t lwork,
-    magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -123,7 +113,16 @@ magma_dgeev_m(
                   elements and i+1:N of W contain eigenvalues which have
                   converged.
     =====================================================================    */
-    
+extern "C" magma_int_t
+magma_dgeev_m(
+    magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
+    double *A, magma_int_t lda,
+    double *WR, double *WI,
+    double *vl, magma_int_t ldvl,
+    double *vr, magma_int_t ldvr,
+    double *work, magma_int_t lwork,
+    magma_int_t *info )
+{
     #define vl(i,j)  (vl + (i) + (j)*ldvl)
     #define vr(i,j)  (vr + (i) + (j)*ldvr)
     

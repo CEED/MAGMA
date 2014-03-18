@@ -13,13 +13,6 @@
 #include "timer.h"
 #include "../testing/flops.h"
 
-extern "C" magma_int_t
-magma_zgetrf2_mgpu(magma_int_t num_gpus,
-         magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-         magmaDoubleComplex *d_lAT[], magma_int_t lddat, magma_int_t *ipiv,
-         magmaDoubleComplex *d_lAP[], magmaDoubleComplex *w, magma_int_t ldw,
-         magma_queue_t streaml[][2], magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -73,7 +66,13 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf2_mgpu(magma_int_t num_gpus,
+         magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
+         magmaDoubleComplex *d_lAT[], magma_int_t lddat, magma_int_t *ipiv,
+         magmaDoubleComplex *d_lAP[], magmaDoubleComplex *w, magma_int_t ldw,
+         magma_queue_t streaml[][2], magma_int_t *info)
+{
 #define inAT(id,i,j)  (d_lAT[(id)] + ((offset)+(i)*nb)*lddat + (j)*nb)
 #define W(j) (w+((j)%num_gpus)*nb*ldw)
 

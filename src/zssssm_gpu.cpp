@@ -13,15 +13,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
-                 magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,
-                 magmaDoubleComplex *dA1, magma_int_t ldda1,
-                 magmaDoubleComplex *dA2, magma_int_t ldda2,
-                 magmaDoubleComplex *dL1, magma_int_t lddl1,
-                 magmaDoubleComplex *dL2, magma_int_t lddl2,
-                 magma_int_t *IPIV, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -88,7 +79,15 @@ magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
             The pivot indices array of size K as returned by ZTSTRF
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
+                 magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,
+                 magmaDoubleComplex *dA1, magma_int_t ldda1,
+                 magmaDoubleComplex *dA2, magma_int_t ldda2,
+                 magmaDoubleComplex *dL1, magma_int_t lddl1,
+                 magmaDoubleComplex *dL2, magma_int_t lddl2,
+                 magma_int_t *IPIV, magma_int_t *info)
+{
 #define A1T(i,j) (dA1T + (i)*ldda1 + (j))
 #define A2T(i,j) (dA2T + (i)*ldda2 + (j))
 #define L1(i)    (dL1  + (i)*lddl1      )

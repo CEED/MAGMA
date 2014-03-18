@@ -19,10 +19,6 @@
 #define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
 #define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
 
-extern "C" magma_int_t
-magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -79,8 +75,10 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
                   completed.
 
     =====================================================================    */
-
-
+extern "C" magma_int_t
+magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
+               magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+{
     /* Local variables */
     double                 d_one     =  1.0;
     double                 d_neg_one = -1.0;

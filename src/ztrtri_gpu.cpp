@@ -12,10 +12,6 @@
 
 #define dA(i, j) (dA+(j)*ldda + (i))
 
-extern "C" magma_int_t
-magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-             magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -66,7 +62,10 @@ magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
                  (Singularity check is currently disabled.)
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_ztrtri_gpu(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
+             magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
+{
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* diag_ = lapack_diag_const( diag );

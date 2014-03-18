@@ -10,11 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
-                  magma_int_t *ipiv, magmaDoubleComplex *dwork, magma_int_t lwork,
-                  magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -65,7 +60,11 @@ magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
                   singular and its cannot be computed.
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
+                  magma_int_t *ipiv, magmaDoubleComplex *dwork, magma_int_t lwork,
+                  magma_int_t *info )
+{
     #define dA(i, j)  (dA + (i) + (j)*ldda)
     #define dL(i, j)  (dL + (i) + (j)*lddl)
     

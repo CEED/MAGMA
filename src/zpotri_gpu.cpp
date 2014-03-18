@@ -12,10 +12,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zpotri_gpu(magma_uplo_t uplo, magma_int_t n,
-              magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -54,7 +50,10 @@ magma_zpotri_gpu(magma_uplo_t uplo, magma_int_t n,
                   zero, and the inverse could not be computed.
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_zpotri_gpu(magma_uplo_t uplo, magma_int_t n,
+              magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
+{
     /* Local variables */
     *info = 0;
     if ((uplo != MagmaUpper) && (uplo != MagmaLower))

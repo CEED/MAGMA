@@ -13,13 +13,6 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-extern "C" magma_int_t
-magma_zcgeqrsv_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                   magmaDoubleComplex *dA,  magma_int_t ldda,
-                   magmaDoubleComplex *dB,  magma_int_t lddb,
-                   magmaDoubleComplex *dX,  magma_int_t lddx,
-                   magma_int_t *iter, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -112,7 +105,13 @@ magma_zcgeqrsv_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             < 0:  if info = -i, the i-th argument had an illegal value
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zcgeqrsv_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
+                   magmaDoubleComplex *dA,  magma_int_t ldda,
+                   magmaDoubleComplex *dB,  magma_int_t lddb,
+                   magmaDoubleComplex *dX,  magma_int_t lddx,
+                   magma_int_t *iter, magma_int_t *info)
+{
     #define dB(i,j)     (dB + (i) + (j)*lddb)
     #define dX(i,j)     (dX + (i) + (j)*lddx)
     #define dR(i,j)     (dR + (i) + (j)*lddr)

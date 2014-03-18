@@ -10,12 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
-              magmaDoubleComplex *a, magma_int_t lda,
-              magmaDoubleComplex *tau, magmaDoubleComplex *work,
-              magma_int_t lwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -112,8 +106,12 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
     =====================================================================    */
-
-
+extern "C" magma_int_t
+magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+              magmaDoubleComplex *a, magma_int_t lda,
+              magmaDoubleComplex *tau, magmaDoubleComplex *work,
+              magma_int_t lwork, magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 

@@ -14,16 +14,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
-                  magmaDoubleComplex *a,  magma_int_t lda,
-                  magmaDoubleComplex *da, magma_int_t ldda,
-                  double *d, double *e, magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
-                  magmaDoubleComplex *x,  magma_int_t ldx,
-                  magmaDoubleComplex *dx, magma_int_t lddx,
-                  magmaDoubleComplex *y,  magma_int_t ldy,
-                  magmaDoubleComplex *dy, magma_int_t lddy)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -146,7 +136,16 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     vi denotes an element of the vector defining H(i), and ui an element
     of the vector defining G(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
+                  magmaDoubleComplex *a,  magma_int_t lda,
+                  magmaDoubleComplex *da, magma_int_t ldda,
+                  double *d, double *e, magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
+                  magmaDoubleComplex *x,  magma_int_t ldx,
+                  magmaDoubleComplex *dx, magma_int_t lddx,
+                  magmaDoubleComplex *y,  magma_int_t ldy,
+                  magmaDoubleComplex *dy, magma_int_t lddy)
+{
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;

@@ -12,14 +12,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
-             double vl, double vu, magma_int_t il, magma_int_t iu, double abstol,
-             magma_int_t *m, double *w,  magmaDoubleComplex *z, magma_int_t ldz,
-             magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
-             magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -189,7 +181,14 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
     =====================================================================  */
-    
+extern "C" magma_int_t
+magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             double vl, double vu, magma_int_t il, magma_int_t iu, double abstol,
+             magma_int_t *m, double *w,  magmaDoubleComplex *z, magma_int_t ldz,
+             magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
+             magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
     magmaDoubleComplex *da;

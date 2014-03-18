@@ -13,12 +13,6 @@
 #define PRECISION_z
 
 
-extern "C" magma_int_t
-magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
-                  magmaDoubleComplex *dA,   magma_int_t ldda,
-                  magmaDoubleComplex *dwork, magmaDoubleComplex *work,
-                  magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -71,7 +65,12 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
 
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
+                  magmaDoubleComplex *dA,   magma_int_t ldda,
+                  magmaDoubleComplex *dwork, magmaDoubleComplex *work,
+                  magma_int_t *info )
+{
     magma_int_t i = 0, j, k, n2 = n*n, ione = 1;
     magmaDoubleComplex zero = MAGMA_Z_ZERO, one = MAGMA_Z_ONE;
     double cn = 200., mins, maxs;

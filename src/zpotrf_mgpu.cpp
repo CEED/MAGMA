@@ -11,10 +11,6 @@
 #include "common_magma.h"
 
 
-extern "C" magma_int_t
-magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
-                  magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -66,8 +62,10 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                   positive definite, and the factorization could not be
                   completed.
     =====================================================================   */
-
-
+extern "C" magma_int_t
+magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
+                  magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
+{
     magma_int_t     j, nb, d, lddp, h;
     const char* uplo_ = lapack_uplo_const( uplo );
     magmaDoubleComplex *work;

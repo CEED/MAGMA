@@ -13,13 +13,6 @@
 #define A(i, j)  (a + (j)*lda  + (i))
 #define dA(i, j) (da+ (j)*ldda + (i))
 
-extern "C" magma_int_t
-magma_zgebrd(magma_int_t m, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, double *d, double *e,
-             magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
-             magmaDoubleComplex *work, magma_int_t lwork,
-             magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -134,7 +127,13 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     denotes an element of the vector defining H(i), and ui an element of
     the vector defining G(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgebrd(magma_int_t m, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda, double *d, double *e,
+             magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
+             magmaDoubleComplex *work, magma_int_t lwork,
+             magma_int_t *info)
+{
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex *da, *dwork;

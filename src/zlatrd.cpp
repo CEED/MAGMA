@@ -24,14 +24,6 @@
 #define dA(i, j) (da+(j)*ldda + (i))
 #define dW(i, j) (dw+(j)*lddw + (i))
 
-extern "C" magma_int_t
-magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-             magmaDoubleComplex *a,  magma_int_t lda,
-             double *e, magmaDoubleComplex *tau,
-             magmaDoubleComplex *w,  magma_int_t ldw,
-             magmaDoubleComplex *da, magma_int_t ldda,
-             magmaDoubleComplex *dw, magma_int_t lddw)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -156,7 +148,14 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     an element of the original matrix that is unchanged, and vi denotes
     an element of the vector defining H(i).
     =====================================================================    */
-    
+extern "C" magma_int_t
+magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+             magmaDoubleComplex *a,  magma_int_t lda,
+             double *e, magmaDoubleComplex *tau,
+             magmaDoubleComplex *w,  magma_int_t ldw,
+             magmaDoubleComplex *da, magma_int_t ldda,
+             magmaDoubleComplex *dw, magma_int_t lddw)
+{
     magma_int_t i;
     
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

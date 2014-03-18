@@ -16,16 +16,6 @@
 #include "common_magma.h"
 #include "timer.h"
 
-extern "C" magma_int_t
-magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
-                 magma_int_t n,
-                 double *da, magma_int_t ldda,
-                 double *w,
-                 double *wa,  magma_int_t ldwa,
-                 double *work, magma_int_t lwork,
-                 magma_int_t *iwork, magma_int_t liwork,
-                 magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -132,7 +122,16 @@ magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
 
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_dsyevd_gpu(magma_vec_t jobz, magma_uplo_t uplo,
+                 magma_int_t n,
+                 double *da, magma_int_t ldda,
+                 double *w,
+                 double *wa,  magma_int_t ldwa,
+                 double *work, magma_int_t lwork,
+                 magma_int_t *iwork, magma_int_t liwork,
+                 magma_int_t *info)
+{
     magma_int_t ione = 1;
 
     double d__1;

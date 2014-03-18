@@ -22,12 +22,6 @@ magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* 
 
 }  // end extern "C"
 
-extern "C" magma_int_t
-magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
-               magma_int_t il, magma_int_t iu, double* d, double* e, double* z, magma_int_t ldz,
-               double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
-               magma_int_t* info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -142,7 +136,12 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
     Modified by Francoise Tisseur, University of Tennessee.
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
+               magma_int_t il, magma_int_t iu, double* d, double* e, double* z, magma_int_t ldz,
+               double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
+               magma_int_t* info)
+{
     double d_zero = 0.;
     double d_one  = 1.;
     magma_int_t izero = 0;

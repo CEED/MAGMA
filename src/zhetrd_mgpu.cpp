@@ -18,14 +18,6 @@
 #define dA(id, i, j) (da[(id)]    + (j)*ldda + (i))
 #define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
 
-extern "C" magma_int_t
-magma_zhetrd_mgpu(
-    magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex *a, magma_int_t lda,
-    double *d, double *e, magmaDoubleComplex *tau,
-    magmaDoubleComplex *work, magma_int_t lwork,
-    magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -140,7 +132,14 @@ magma_zhetrd_mgpu(
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zhetrd_mgpu(
+    magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *a, magma_int_t lda,
+    double *d, double *e, magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
     
     magma_int_t ln, ldda;
@@ -523,7 +522,6 @@ magma_zher2k_mgpu(
     magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
     magma_int_t num_streams, magma_queue_t stream[][10])
 {
-
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))

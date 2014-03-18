@@ -18,15 +18,6 @@
 #define dA(i, j) (da+(j)*ldda + (i))
 
 
-extern "C" magma_int_t
-magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
-                  magmaDoubleComplex *da, magma_int_t ldda,
-                  double *d, double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *wa,  magma_int_t ldwa,
-                  magmaDoubleComplex *work, magma_int_t lwork,
-                  magmaDoubleComplex *dwork, magma_int_t ldwork,
-                  magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -156,7 +147,15 @@ magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
+                  magmaDoubleComplex *da, magma_int_t ldda,
+                  double *d, double *e, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *wa,  magma_int_t ldwa,
+                  magmaDoubleComplex *work, magma_int_t lwork,
+                  magmaDoubleComplex *dwork, magma_int_t ldwork,
+                  magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
 
     magma_int_t nb = magma_get_zhetrd_nb(n);

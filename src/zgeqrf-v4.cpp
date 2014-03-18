@@ -10,12 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
-              magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
-              magmaDoubleComplex *work, magma_int_t lwork,
-              magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -93,7 +87,12 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
+              magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
+              magmaDoubleComplex *work, magma_int_t lwork,
+              magma_int_t *info )
+{
     magmaDoubleComplex *da[MagmaMaxGPUs];
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 

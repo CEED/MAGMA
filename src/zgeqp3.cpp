@@ -15,16 +15,6 @@
 #define PRECISION_z
 #define COMPLEX
 
-extern "C" magma_int_t
-magma_zgeqp3( magma_int_t m, magma_int_t n,
-              magmaDoubleComplex *A, magma_int_t lda,
-              magma_int_t *jpvt, magmaDoubleComplex *tau,
-              magmaDoubleComplex *work, magma_int_t lwork,
-              #ifdef COMPLEX
-              double *rwork,
-              #endif
-              magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -100,7 +90,16 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
     A(i+1:m,i), and tau in TAU(i).
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_zgeqp3( magma_int_t m, magma_int_t n,
+              magmaDoubleComplex *A, magma_int_t lda,
+              magma_int_t *jpvt, magmaDoubleComplex *tau,
+              magmaDoubleComplex *work, magma_int_t lwork,
+              #ifdef COMPLEX
+              double *rwork,
+              #endif
+              magma_int_t *info )
+{
 #define  A(i, j) (A     + (i) + (j)*(lda ))
 #define dA(i, j) (dwork + (i) + (j)*(ldda))
 

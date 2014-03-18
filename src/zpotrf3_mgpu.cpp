@@ -29,15 +29,6 @@
 #define dlPT(id, i, j, k) (d_lP[(id)] + (k)*nb*lddp + (j)*nb   + (i))
 
 
-extern "C" magma_int_t
-magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   magmaDoubleComplex *d_lA[],  magma_int_t ldda,
-                   magmaDoubleComplex *d_lP[],  magma_int_t lddp,
-                   magmaDoubleComplex *a,       magma_int_t lda, magma_int_t h,
-                   magma_queue_t stream[][3], magma_event_t event[][5],
-                   magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -91,8 +82,15 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
                   positive definite, and the factorization could not be
                   completed.
     =====================================================================   */
-
-
+extern "C" magma_int_t
+magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+                   magmaDoubleComplex *d_lA[],  magma_int_t ldda,
+                   magmaDoubleComplex *d_lP[],  magma_int_t lddp,
+                   magmaDoubleComplex *a,       magma_int_t lda, magma_int_t h,
+                   magma_queue_t stream[][3], magma_event_t event[][5],
+                   magma_int_t *info )
+{
     magma_int_t     j, jb, nb0, nb2, d, dd, id, j_local, j_local2, buf;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

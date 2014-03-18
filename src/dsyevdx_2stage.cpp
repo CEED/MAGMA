@@ -21,16 +21,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
-                     magma_int_t n,
-                     double *a, magma_int_t lda,
-                     double vl, double vu, magma_int_t il, magma_int_t iu,
-                     magma_int_t *m, double *w,
-                     double *work, magma_int_t lwork,
-                     magma_int_t *iwork, magma_int_t liwork,
-                     magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -157,7 +147,16 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
 
     Modified description of INFO. Sven, 16 Feb 05.
     =====================================================================   */
-
+extern "C" magma_int_t
+magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
+                     magma_int_t n,
+                     double *a, magma_int_t lda,
+                     double vl, double vu, magma_int_t il, magma_int_t iu,
+                     magma_int_t *m, double *w,
+                     double *work, magma_int_t lwork,
+                     magma_int_t *iwork, magma_int_t liwork,
+                     magma_int_t *info)
+{
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );
     double d_one  = 1.;

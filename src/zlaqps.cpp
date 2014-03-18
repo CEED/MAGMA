@@ -14,16 +14,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
-             magma_int_t nb, magma_int_t *kb,
-             magmaDoubleComplex *A,  magma_int_t lda,
-             magmaDoubleComplex *dA, magma_int_t ldda,
-             magma_int_t *jpvt, magmaDoubleComplex *tau, double *vn1, double *vn2,
-             magmaDoubleComplex *auxv,
-             magmaDoubleComplex *F,  magma_int_t ldf,
-             magmaDoubleComplex *dF, magma_int_t lddf)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -95,7 +85,16 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             The leading dimension of the array F. LDF >= max(1,N).
 
     =====================================================================    */
-    
+extern "C" magma_int_t
+magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
+             magma_int_t nb, magma_int_t *kb,
+             magmaDoubleComplex *A,  magma_int_t lda,
+             magmaDoubleComplex *dA, magma_int_t ldda,
+             magma_int_t *jpvt, magmaDoubleComplex *tau, double *vn1, double *vn2,
+             magmaDoubleComplex *auxv,
+             magmaDoubleComplex *F,  magma_int_t ldf,
+             magmaDoubleComplex *dF, magma_int_t lddf)
+{
 #define  A(i, j) (A  + (i) + (j)*(lda ))
 #define dA(i, j) (dA + (i) + (j)*(ldda))
 #define  F(i, j) (F  + (i) + (j)*(ldf ))

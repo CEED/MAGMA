@@ -28,12 +28,6 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 }  // end extern "C"
 
 
-extern "C" magma_int_t
-magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
-               double* work, magma_int_t* iwork,
-               magma_range_t range, double vl, double vu,
-               magma_int_t il, magma_int_t iu, magma_int_t* info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -117,7 +111,12 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
        at Berkeley, USA
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
+               double* work, magma_int_t* iwork,
+               magma_range_t range, double vl, double vu,
+               magma_int_t il, magma_int_t iu, magma_int_t* info)
+{
     magma_int_t ione = 1;
     magma_range_t range2;
     magma_int_t curlvl, i, indxq;

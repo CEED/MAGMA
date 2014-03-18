@@ -12,13 +12,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
-             magmaDoubleComplex *A, magma_int_t lda,
-             magmaDoubleComplex *tau,
-             magmaDoubleComplex *dT, magma_int_t nb,
-             magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -75,7 +68,13 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument has an illegal value
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
+             magmaDoubleComplex *A, magma_int_t lda,
+             magmaDoubleComplex *tau,
+             magmaDoubleComplex *dT, magma_int_t nb,
+             magma_int_t *info)
+{
 #define  A(i,j) ( A + (i) + (j)*lda )
 #define dA(i,j) (dA + (i) + (j)*ldda)
 #define dT(j)   (dT + (j)*nb)

@@ -17,14 +17,6 @@
 #include <core_blas.h>
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib,
-                         magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
-                         magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
-                         magma_int_t *ipiv,
-                         magmaDoubleComplex *dwork, magma_int_t lddwork,
-                         magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -104,7 +96,14 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
                 to solve a system of equations.
 
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t ib,
+                         magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
+                         magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
+                         magma_int_t *ipiv,
+                         magmaDoubleComplex *dwork, magma_int_t lddwork,
+                         magma_int_t *info)
+{
 #define AT(i,j) (dAT + (i)*ib*ldda + (j)*ib)
 #define hA(i,j) (hA  + (i)*ib + (j)*ib*ldha)
 #define hL(j)   (hL  + (j)*ib*ldhl         )

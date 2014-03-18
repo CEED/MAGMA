@@ -13,15 +13,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
-             magma_int_t m, magma_int_t n,
-             magmaDoubleComplex *a,    magma_int_t lda,
-             magmaDoubleComplex *tau,
-             magmaDoubleComplex *c,    magma_int_t ldc,
-             magmaDoubleComplex *work, magma_int_t lwork,
-             magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -109,7 +100,15 @@ magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
+             magma_int_t m, magma_int_t n,
+             magmaDoubleComplex *a,    magma_int_t lda,
+             magmaDoubleComplex *tau,
+             magmaDoubleComplex *c,    magma_int_t ldc,
+             magmaDoubleComplex *work, magma_int_t lwork,
+             magma_int_t *info)
+{
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     magma_int_t  i__2;

@@ -12,12 +12,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlahru_m(
-    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda,
-    struct zgehrd_data* data )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -95,7 +89,12 @@ magma_zlahru_m(
     The difference is that here Am is computed on the GPU.
     M is renamed Am, G is renamed Ag.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zlahru_m(
+    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda,
+    struct zgehrd_data* data )
+{
     #define dA(  d, i, j ) (data->A [d] + (i) + (j)*ldda)
     #define dTi( d       ) (data->Ti[d])
     #define dV(  d, i, j ) (data->V [d] + (i) + (j)*ldv )

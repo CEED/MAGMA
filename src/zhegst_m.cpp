@@ -26,11 +26,6 @@ static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaD
 static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_row, magma_int_t ldda,
                                           magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2);
 
-extern "C" magma_int_t
-magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda,
-               magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -95,7 +90,11 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_in
             < 0:  if INFO = -i, the i-th argument had an illegal value
     
     =====================================================================*/
-
+extern "C" magma_int_t
+magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
+               magmaDoubleComplex *a, magma_int_t lda,
+               magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
 
     double             d_one      = 1.0;

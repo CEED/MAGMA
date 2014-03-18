@@ -13,17 +13,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                 magmaDoubleComplex *da, magma_int_t ldda, double vl, double vu,
-                 magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
-                 double *w, magmaDoubleComplex *dz, magma_int_t lddz, magma_int_t *isuppz,
-                 magmaDoubleComplex *wa, magma_int_t ldwa,
-                 magmaDoubleComplex *wz, magma_int_t ldwz,
-                 magmaDoubleComplex *work, magma_int_t lwork,
-                 double *rwork, magma_int_t lrwork, magma_int_t *iwork,
-                 magma_int_t liwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -234,7 +223,17 @@ magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
        Ken Stanley, Computer Science Division, University of
          California at Berkeley, USA
     =====================================================================     */
-    
+extern "C" magma_int_t
+magma_zheevr_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
+                 magmaDoubleComplex *da, magma_int_t ldda, double vl, double vu,
+                 magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
+                 double *w, magmaDoubleComplex *dz, magma_int_t lddz, magma_int_t *isuppz,
+                 magmaDoubleComplex *wa, magma_int_t ldwa,
+                 magmaDoubleComplex *wz, magma_int_t ldwz,
+                 magmaDoubleComplex *work, magma_int_t lwork,
+                 double *rwork, magma_int_t lrwork, magma_int_t *iwork,
+                 magma_int_t liwork, magma_int_t *info)
+{
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );
     const char* range_ = lapack_range_const( range );

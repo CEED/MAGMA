@@ -19,11 +19,6 @@
 #define dA(i, j) (dw+(j)*ldda + (i))
 #define dB(i, j) (dw+n*ldda+(j)*lddb + (i))
 
-extern "C" magma_int_t
-magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda,
-             magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -85,7 +80,11 @@ magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     
     =====================================================================*/
-    
+extern "C" magma_int_t
+magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda,
+             magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;

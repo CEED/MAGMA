@@ -471,7 +471,6 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
                       magmaDoubleComplex *work, magmaDoubleComplex *w,
                       magma_queue_t stream[][10] )
 {
-
 #define dX(id, i)    (dx[(id)]+incx*(i))
 #define dY(id, i, j) (dy[(id)]+incy*(i)+n*(j))
 
@@ -677,7 +676,6 @@ magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
                       magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *w,
                       magma_queue_t stream[][10] )
 {
-
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t ione = 1;
     magma_int_t id, kk;

@@ -17,13 +17,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
-             double *w, magmaDoubleComplex *work, magma_int_t lwork,
-             double *rwork, magma_int_t lrwork,
-             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -173,7 +166,13 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
     bounds reference to A - reported by Ralf Meyer).  Also corrected the
     description of INFO and the test on ITYPE. Sven, 16 Feb 05.
     =====================================================================  */
-
+extern "C" magma_int_t
+magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
+             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             double *w, magmaDoubleComplex *work, magma_int_t lwork,
+             double *rwork, magma_int_t lrwork,
+             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+{
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* jobz_ = lapack_vec_const( jobz );
 

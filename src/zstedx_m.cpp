@@ -11,14 +11,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
-               magma_int_t il, magma_int_t iu, double* d, double* e,
-               magmaDoubleComplex* z, magma_int_t ldz,
-               double* rwork, magma_int_t lrwork,
-               magma_int_t* iwork, magma_int_t liwork,
-               magma_int_t* info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -123,7 +115,14 @@ magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
        at Berkeley, USA
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
+               magma_int_t il, magma_int_t iu, double* d, double* e,
+               magmaDoubleComplex* z, magma_int_t ldz,
+               double* rwork, magma_int_t lrwork,
+               magma_int_t* iwork, magma_int_t liwork,
+               magma_int_t* info)
+{
     magma_int_t alleig, indeig, valeig, lquery;
     magma_int_t i, j, smlsiz;
     magma_int_t liwmin, lrwmin;

@@ -14,12 +14,6 @@
 
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
-extern "C" magma_int_t
-magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
-             double* work, magma_int_t* iwork, double* dwork,
-             magma_range_t range, double vl, double vu,
-             magma_int_t il, magma_int_t iu, magma_int_t* info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -105,7 +99,12 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
        at Berkeley, USA
 
     ===================================================================== */
-
+extern "C" magma_int_t
+magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
+             double* work, magma_int_t* iwork, double* dwork,
+             magma_range_t range, double vl, double vu,
+             magma_int_t il, magma_int_t iu, magma_int_t* info)
+{
     magma_int_t ione = 1;
     magma_range_t range2;
     magma_int_t curlvl, i, indxq;

@@ -10,11 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgelqf( magma_int_t m, magma_int_t n,
-              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau,
-              magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -87,7 +82,11 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     v(1:i-1) = 0 and v(i) = 1; v(i+1:n) is stored on exit in A(i,i+1:n),
     and tau in TAU(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgelqf( magma_int_t m, magma_int_t n,
+              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau,
+              magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
+{
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
 
     magmaDoubleComplex *dA, *dAT;

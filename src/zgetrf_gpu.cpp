@@ -10,11 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -65,7 +60,11 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
+                 magma_int_t *ipiv, magma_int_t *info)
+{
     #define dAT(i,j) (dAT + (i)*nb*lddat + (j)*nb)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;

@@ -13,15 +13,6 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-extern "C" magma_int_t
-magma_zcgesv_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv,  magma_int_t *dipiv,
-                 magmaDoubleComplex *dB, magma_int_t lddb,
-                 magmaDoubleComplex *dX, magma_int_t lddx,
-                 magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
-                 magma_int_t *iter, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -140,7 +131,15 @@ magma_zcgesv_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
                   but the factor U is exactly singular, so the solution
                   could not be computed.
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zcgesv_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
+                 magma_int_t *ipiv,  magma_int_t *dipiv,
+                 magmaDoubleComplex *dB, magma_int_t lddb,
+                 magmaDoubleComplex *dX, magma_int_t lddx,
+                 magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
+                 magma_int_t *iter, magma_int_t *info)
+{
     #define dB(i,j)     (dB + (i) + (j)*lddb)
     #define dX(i,j)     (dX + (i) + (j)*lddx)
     #define dR(i,j)     (dR + (i) + (j)*lddr)

@@ -34,12 +34,6 @@ void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleCompl
     }
 }
 
-extern "C" magma_int_t
-magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
-                  magmaDoubleComplex *dA,   magma_int_t ldda,
-                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
-                  magma_int_t *info )
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -110,7 +104,12 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
     =====================================================================    */
-
+extern "C" magma_int_t
+magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
+                  magmaDoubleComplex *dA,   magma_int_t ldda,
+                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
+                  magma_int_t *info )
+{
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
     #define t_ref(a_1)     (dT+(a_1)*nb)
     #define d_ref(a_1)     (dT+(minmn+(a_1))*nb)

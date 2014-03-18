@@ -16,17 +16,6 @@
 #include "trace.h"
 #include <assert.h>
 
-extern "C" magma_int_t
-magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *a, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk,
-                    magma_queue_t streams[][20], magma_int_t nstream,
-                    magma_int_t threads, magma_int_t *info)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -142,8 +131,17 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
     =====================================================================    */
-
-
+extern "C" magma_int_t
+magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+                    magmaDoubleComplex *a, magma_int_t lda,
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
+                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
+                    magma_int_t ngpu, magma_int_t distblk,
+                    magma_queue_t streams[][20], magma_int_t nstream,
+                    magma_int_t threads, magma_int_t *info)
+{
     #define a_ref(a_1,a_2)  ( a  + ((a_2)-1)*( lda) + (a_1)-1)
     #define da_ref(a_1,a_2) (da  + ((a_2)-1)*(ldda) + (a_1)-1)
     #define tau_ref(a_1)    (tau + (a_1)-1)
