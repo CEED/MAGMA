@@ -10,14 +10,9 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R.
     
@@ -29,14 +24,17 @@
     intermediate T matrices.
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N matrix A.
             On exit, the elements on and above the diagonal of the array
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is
@@ -45,22 +43,25 @@
             product of min(m,n) elementary reflectors (see Further
             Details).
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
 
-    TAU     (output) COMPLEX_16 array, dimension (min(M,N))
+    @param[out]
+    tau     COMPLEX_16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors (see Further
             Details).
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
 
     Further Details
-    ===============
+    ---------------
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(1) H(2) . . . H(k), where k = min(m,n).
@@ -72,7 +73,9 @@
     where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
-    =====================================================================    */
+
+    @ingroup magma_zgeqrf_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                    magmaDoubleComplex *dA, magma_int_t ldda,

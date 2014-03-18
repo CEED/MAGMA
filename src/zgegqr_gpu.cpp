@@ -13,14 +13,9 @@
 #define PRECISION_z
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZGEGQR orthogonalizes the N vectors given by a complex M-by-N matrix A:
            
             A = Q * R.
@@ -32,39 +27,43 @@
     makes the computation numerically accurate.
     
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N matrix A.
             On exit, the M-by-N matrix Q with orthogonal columns.
 
-    LDDA     (input) INTEGER
+    @param[in]
+    ldda     INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
-
+    \n
     dwork   (GPU workspace) COMPLEX_16 array, dimension (N,N)
- 
+    \n
     work    (CPU workspace/output) COMPLEX_16 array, dimension 3n^2.
             On exit, work(1:n^2) holds the rectangular matrix R.
             Preferably, for higher performance, work must be in pinned memory.
  
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
 
     Further Details
-    ===============
+    ---------------
 
-
-
-    =====================================================================    */
+    @ingroup magma_zgeqrf_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dA,   magma_int_t ldda,

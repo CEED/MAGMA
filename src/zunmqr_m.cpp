@@ -23,19 +23,16 @@
 #define dt(gpui, ind)    (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
 #define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZUNMQR overwrites the general complex M-by-N matrix C with
 
+    @verbatim
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
     TRANS = 'T':      Q**H * C       C * Q**H
+    @endverbatim
 
     where Q is a complex orthogonal matrix defined as the product of k
     elementary reflectors
@@ -46,68 +43,83 @@
     if SIDE = 'R'.
 
     Arguments
-    =========
-    SIDE    (input) CHARACTER*1
-            = 'L': apply Q or Q**H from the Left;
-            = 'R': apply Q or Q**H from the Right.
+    ---------
+    @param[in]
+    side    CHARACTER*1
+      -     = 'L': apply Q or Q**H from the Left;
+      -     = 'R': apply Q or Q**H from the Right.
 
-    TRANS   (input) CHARACTER*1
-            = 'N':  No transpose, apply Q;
-            = 'T':  Transpose, apply Q**H.
+    @param[in]
+    trans   CHARACTER*1
+      -     = 'N':  No transpose, apply Q;
+      -     = 'T':  Transpose, apply Q**H.
 
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix C. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix C. N >= 0.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The number of elementary reflectors whose product defines
             the matrix Q.
             If SIDE = 'L', M >= K >= 0;
             if SIDE = 'R', N >= K >= 0.
 
-    A       (input) COMPLEX_16 array, dimension (LDA,K)
+    @param[in]
+    A       COMPLEX_16 array, dimension (LDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument A.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.
             If SIDE = 'L', LDA >= max(1,M);
             if SIDE = 'R', LDA >= max(1,N).
 
-    TAU     (input) COMPLEX_16 array, dimension (K)
+    @param[in]
+    tau     COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF.
 
-    C       (input/output) COMPLEX_16 array, dimension (LDC,N)
+    @param[in,out]
+    C       COMPLEX_16 array, dimension (LDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q**H*C or C*Q**H or C*Q.
 
-    LDC     (input) INTEGER
+    @param[in]
+    ldc     INTEGER
             The leading dimension of the array C. LDC >= max(1,M).
 
-    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(0) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK.
             If SIDE = 'L', LWORK >= max(1,N);
             if SIDE = 'R', LWORK >= max(1,M).
             For optimum performance LWORK >= N*NB if SIDE = 'L', and
             LWORK >= M*NB if SIDE = 'R', where NB is the optimal
             blocksize.
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================   */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zgeqrf_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                magma_int_t m, magma_int_t n, magma_int_t k,

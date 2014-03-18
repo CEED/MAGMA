@@ -10,14 +10,9 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZUNGQR generates an M-by-N COMPLEX_16 matrix Q with orthonormal columns,
     which is defined as the first N columns of a product of K elementary
     reflectors of order M
@@ -27,47 +22,58 @@
     as returned by ZGEQRF_GPU.
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix Q. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix Q. M >= N >= 0.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The number of elementary reflectors whose product defines the
             matrix Q. N >= K >= 0.
 
-    DA      (input/output) COMPLEX_16 array A on the GPU device,
+    @param[in,out]
+    DA      COMPLEX_16 array A on the GPU device,
             dimension (LDDA,N). On entry, the i-th column must contain
             the vector which defines the elementary reflector H(i), for
             i = 1,2,...,k, as returned by ZGEQRF_GPU in the first k
             columns of its array argument A.
             On exit, the M-by-N matrix Q.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The first dimension of the array A. LDDA >= max(1,M).
 
-    TAU     (input) COMPLEX_16 array, dimension (K)
+    @param[in]
+    tau     COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF_GPU.
 
-    DT      (input) COMPLEX_16 work space array on the GPU device,
+    @param[in]
+    DT      COMPLEX_16 work space array on the GPU device,
             dimension (MIN(M, N) )*NB.
             This must be the 6th argument of magma_zgeqrf_gpu
             [ note that if N here is bigger than N in magma_zgeqrf_gpu,
               the workspace requirement DT in magma_zgeqrf_gpu must be
               as specified in this routine ].
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument has an illegal value
-    =====================================================================    */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument has an illegal value
+
+    @ingroup magma_zheev_2stage
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
                  magmaDoubleComplex *da, magma_int_t ldda,

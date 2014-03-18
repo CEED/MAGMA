@@ -13,19 +13,16 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZUNMQR_GPU overwrites the general complex M-by-N matrix C with
 
+    @verbatim
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
     TRANS = 'T':      Q**H * C       C * Q**H
+    @endverbatim
 
     where Q is a complex orthogonal matrix defined as the product of k
     elementary reflectors
@@ -36,76 +33,93 @@
     if SIDE = 'R'.
 
     Arguments
-    =========
-    SIDE    (input) CHARACTER*1
-            = 'L': apply Q or Q**H from the Left;
-            = 'R': apply Q or Q**H from the Right.
+    ---------
+    @param[in]
+    side    CHARACTER*1
+      -     = 'L': apply Q or Q**H from the Left;
+      -     = 'R': apply Q or Q**H from the Right.
 
-    TRANS   (input) CHARACTER*1
-            = 'N':  No transpose, apply Q;
-            = 'T':  Transpose, apply Q**H.
+    @param[in]
+    trans   CHARACTER*1
+      -     = 'N':  No transpose, apply Q;
+      -     = 'T':  Transpose, apply Q**H.
 
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix C. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix C. N >= 0.
 
-    K       (input) INTEGER
+    @param[in]
+    k       INTEGER
             The number of elementary reflectors whose product defines
             the matrix Q.
             If SIDE = 'L', M >= K >= 0;
             if SIDE = 'R', N >= K >= 0.
 
-    DA      (input) COMPLEX_16 array on the GPU, dimension (LDDA,K)
+    @param[in]
+    DA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument DA.
             DA is modified by the routine but restored on exit.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array DA.
             If SIDE = 'L', LDDA >= max(1,M);
             if SIDE = 'R', LDDA >= max(1,N).
 
-    TAU     (input) COMPLEX_16 array, dimension (K)
+    @param[in]
+    tau     COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF.
 
-    DC      (input/output) COMPLEX_16 array on the GPU, dimension (LDDC,N)
+    @param[in,out]
+    DC      COMPLEX_16 array on the GPU, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.
 
-    LDDC    (input) INTEGER
+    @param[in]
+    lddc    INTEGER
             The leading dimension of the array DC. LDDC >= max(1,M).
 
-    HWORK   (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
-    
+    @param[out]
+    hwork   (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    \n
             Currently, zgetrs_gpu assumes that on exit, hwork contains the last
             block of A and C. This will change and *should not be relied on*!
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array HWORK.
             LWORK >= (M-K+NB)*(N+NB) + N*NB if SIDE = 'L', and
             LWORK >= (N-K+NB)*(M+NB) + M*NB if SIDE = 'R',
             where NB is the given blocksize.
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
             this value as the first entry of the HWORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    DT      (input) COMPLEX_16 array on the GPU that is the output
+    @param[in]
+    DT      COMPLEX_16 array on the GPU that is the output
             (the 9th argument) of magma_zgeqrf_gpu.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             This is the blocking size that was used in pre-computing DT, e.g.,
             the blocking size used in magma_zgeqrf_gpu.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================   */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zgeqrf_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zunmqr_gpu(magma_side_t side, magma_trans_t trans,
                  magma_int_t m, magma_int_t n, magma_int_t k,
