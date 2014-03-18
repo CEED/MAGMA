@@ -14,14 +14,9 @@
 
 #define PRECISION_z
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZLABRD reduces the first NB rows and columns of a complex general
     m by n matrix A to upper or lower bidiagonal form by an orthogonal
     transformation Q' * A * P, and returns the matrices X and Y which
@@ -33,17 +28,21 @@
     This is an auxiliary routine called by SGEBRD
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows in the matrix A.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns in the matrix A.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             The number of leading rows and columns of A to be reduced.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the m by n general matrix to be reduced.
             On exit, the first NB rows and columns of the matrix are
             overwritten; the rest of the array is unchanged.
@@ -53,6 +52,7 @@
               elements above the diagonal in the first NB rows, with the
               array TAUP, represent the orthogonal matrix P as a product
               of elementary reflectors.
+    \n
             If m < n, elements below the diagonal in the first NB
               columns, with the array TAUQ, represent the orthogonal
               matrix Q as a product of elementary reflectors, and
@@ -61,41 +61,50 @@
               a product of elementary reflectors.
             See Further Details.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
 
-    D       (output) COMPLEX_16 array, dimension (NB)
+    @param[out]
+    d       COMPLEX_16 array, dimension (NB)
             The diagonal elements of the first NB rows and columns of
             the reduced matrix.  D(i) = A(i,i).
 
-    E       (output) COMPLEX_16 array, dimension (NB)
+    @param[out]
+    e       COMPLEX_16 array, dimension (NB)
             The off-diagonal elements of the first NB rows and columns of
             the reduced matrix.
 
-    TAUQ    (output) COMPLEX_16 array dimension (NB)
+    @param[out]
+    tauq    COMPLEX_16 array dimension (NB)
             The scalar factors of the elementary reflectors which
             represent the orthogonal matrix Q. See Further Details.
 
-    TAUP    (output) COMPLEX_16 array, dimension (NB)
+    @param[out]
+    taup    COMPLEX_16 array, dimension (NB)
             The scalar factors of the elementary reflectors which
             represent the orthogonal matrix P. See Further Details.
 
-    X       (output) COMPLEX_16 array, dimension (LDX,NB)
+    @param[out]
+    X       COMPLEX_16 array, dimension (LDX,NB)
             The m-by-nb matrix X required to update the unreduced part
             of A.
 
-    LDX     (input) INTEGER
+    @param[in]
+    ldx     INTEGER
             The leading dimension of the array X. LDX >= M.
 
-    Y       (output) COMPLEX_16 array, dimension (LDY,NB)
+    @param[out]
+    Y       COMPLEX_16 array, dimension (LDY,NB)
             The n-by-nb matrix Y required to update the unreduced part
             of A.
 
-    LDY     (input) INTEGER
+    @param[in]
+    ldy     INTEGER
             The leading dimension of the array Y. LDY >= N.
 
     Further Details
-    ===============
+    ---------------
     The matrices Q and P are represented as products of elementary
     reflectors:
 
@@ -123,6 +132,7 @@
     The contents of A on exit are illustrated by the following examples
     with nb = 2:
 
+    @verbatim
     m = 6 and n = 5 (m > n):          m = 5 and n = 6 (m < n):
 
       (  1   1   u1  u1  u1 )           (  1   u1  u1  u1  u1  u1 )
@@ -131,11 +141,14 @@
       (  v1  v2  a   a   a  )           (  v1  v2  a   a   a   a  )
       (  v1  v2  a   a   a  )           (  v1  v2  a   a   a   a  )
       (  v1  v2  a   a   a  )
+    @endverbatim
 
     where a denotes an element of the original matrix which is unchanged,
     vi denotes an element of the vector defining H(i), and ui an element
     of the vector defining G(i).
-    =====================================================================    */
+
+    @ingroup magma_zgesvd_aux
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                   magmaDoubleComplex *a,  magma_int_t lda,

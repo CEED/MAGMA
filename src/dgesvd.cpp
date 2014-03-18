@@ -13,14 +13,9 @@
 
 #define PRECISION_d
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-    
+/**    
     Purpose
-    =======
+    -------
     DGESVD computes the singular value decomposition (SVD) of a real
     M-by-N matrix A, optionally computing the left and/or right singular
     vectors. The SVD is written
@@ -37,77 +32,90 @@
     Note that the routine returns V**T, not V.
     
     Arguments
-    =========
-    JOBU    (input) CHARACTER*1
+    ---------
+    @param[in]
+    jobu    CHARACTER*1
             Specifies options for computing all or part of the matrix U:
-            = 'A':  all M columns of U are returned in array U:
-            = 'S':  the first min(m,n) columns of U (the left singular
+      -     = 'A':  all M columns of U are returned in array U:
+      -     = 'S':  the first min(m,n) columns of U (the left singular
                     vectors) are returned in the array U;
-            = 'O':  the first min(m,n) columns of U (the left singular
+      -     = 'O':  the first min(m,n) columns of U (the left singular
                     vectors) are overwritten on the array A;
-            = 'N':  no columns of U (no left singular vectors) are
+      -     = 'N':  no columns of U (no left singular vectors) are
                     computed.
     
-    JOBVT   (input) CHARACTER*1
+    @param[in]
+    jobvt   CHARACTER*1
             Specifies options for computing all or part of the matrix
             V**T:
-            = 'A':  all N rows of V**T are returned in the array VT;
-            = 'S':  the first min(m,n) rows of V**T (the right singular
+      -     = 'A':  all N rows of V**T are returned in the array VT;
+      -     = 'S':  the first min(m,n) rows of V**T (the right singular
                     vectors) are returned in the array VT;
-            = 'O':  the first min(m,n) rows of V**T (the right singular
+      -     = 'O':  the first min(m,n) rows of V**T (the right singular
                     vectors) are overwritten on the array A;
-            = 'N':  no rows of V**T (no right singular vectors) are
+      -     = 'N':  no rows of V**T (no right singular vectors) are
                     computed.
-            
+    \n
             JOBVT and JOBU cannot both be 'O'.
     
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the input matrix A.  M >= 0.
     
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the input matrix A.  N >= 0.
     
-    A       (input/output) DOUBLE_PRECISION array, dimension (LDA,N)
+    @param[in,out]
+    A       DOUBLE_PRECISION array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit,
-            if JOBU = 'O',  A is overwritten with the first min(m,n)
+      -     if JOBU = 'O',  A is overwritten with the first min(m,n)
                             columns of U (the left singular vectors,
                             stored columnwise);
-            if JOBVT = 'O', A is overwritten with the first min(m,n)
+      -     if JOBVT = 'O', A is overwritten with the first min(m,n)
                             rows of V**T (the right singular vectors,
                             stored rowwise);
-            if JOBU .ne. 'O' and JOBVT .ne. 'O', the contents of A
+      -     if JOBU .ne. 'O' and JOBVT .ne. 'O', the contents of A
                             are destroyed.
     
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
     
-    S       (output) DOUBLE_PRECISION array, dimension (min(M,N))
+    @param[out]
+    s       DOUBLE_PRECISION array, dimension (min(M,N))
             The singular values of A, sorted so that S(i) >= S(i+1).
     
-    U       (output) DOUBLE_PRECISION array, dimension (LDU,UCOL)
+    @param[out]
+    U       DOUBLE_PRECISION array, dimension (LDU,UCOL)
             (LDU,M) if JOBU = 'A' or (LDU,min(M,N)) if JOBU = 'S'.
-            If JOBU = 'A', U contains the M-by-M orthogonal matrix U;
-            if JOBU = 'S', U contains the first min(m,n) columns of U
+      -     If JOBU = 'A', U contains the M-by-M orthogonal matrix U;
+      -     if JOBU = 'S', U contains the first min(m,n) columns of U
             (the left singular vectors, stored columnwise);
-            if JOBU = 'N' or 'O', U is not referenced.
+      -     if JOBU = 'N' or 'O', U is not referenced.
     
-    LDU     (input) INTEGER
+    @param[in]
+    ldu     INTEGER
             The leading dimension of the array U.  LDU >= 1; if
             JOBU = 'S' or 'A', LDU >= M.
     
-    VT      (output) DOUBLE_PRECISION array, dimension (LDVT,N)
-            If JOBVT = 'A', VT contains the N-by-N orthogonal matrix
+    @param[out]
+    VT      DOUBLE_PRECISION array, dimension (LDVT,N)
+      -     If JOBVT = 'A', VT contains the N-by-N orthogonal matrix
             V**T;
-            if JOBVT = 'S', VT contains the first min(m,n) rows of
+      -     if JOBVT = 'S', VT contains the first min(m,n) rows of
             V**T (the right singular vectors, stored rowwise);
-            if JOBVT = 'N' or 'O', VT is not referenced.
+      -     if JOBVT = 'N' or 'O', VT is not referenced.
     
-    LDVT    (input) INTEGER
-            The leading dimension of the array VT.  LDVT >= 1; if
-            JOBVT = 'A', LDVT >= N; if JOBVT = 'S', LDVT >= min(M,N).
+    @param[in]
+    ldvt    INTEGER
+            The leading dimension of the array VT.  LDVT >= 1;
+      -     if JOBVT = 'A', LDVT >= N;
+      -     if JOBVT = 'S', LDVT >= min(M,N).
     
-    WORK    (workspace/output) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
+    @param[out]
+    work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the required LWORK.
             if INFO > 0, WORK(2:MIN(M,N)) contains the unconverged
             superdiagonal elements of an upper bidiagonal matrix B
@@ -115,27 +123,31 @@
             satisfies A = U * B * VT, so it has the same singular values
             as A, and singular vectors related by U and VT.
             
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK.
             LWORK >= (M+N)*nb + 3*min(M,N).
             For optimum performance with some paths
             (m >> n and jobu=A,S,O; or n >> m and jobvt=A,S,O),
             LWORK >= (M+N)*nb + 3*min(M,N) + 2*min(M,N)**2 (see comments inside code).
-            
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the required size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
     
-    INFO    (output) INTEGER
-            = 0:  successful exit.
-            < 0:  if INFO = -i, the i-th argument had an illegal value.
-            > 0:  if DBDSQR did not converge, INFO specifies how many
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit.
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+      -     > 0:  if DBDSQR did not converge, INFO specifies how many
                 superdiagonals of an intermediate bidiagonal form B
                 did not converge to zero. See the description of RWORK
                 above for details.
     
-    ===================================================================== */
+
+    @ingroup magma_dgesvd_driver
+    ********************************************************************/
 extern "C" magma_int_t
 magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
              double *A,    magma_int_t lda, double *s,
