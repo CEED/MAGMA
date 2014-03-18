@@ -111,15 +111,15 @@
 
     @param[out]
     iter    INTEGER
-            < 0: iterative refinement has failed, double precision
+      -     < 0: iterative refinement has failed, double precision
                  factorization has been performed
-                 -1 : the routine fell back to full precision for
+        +        -1 : the routine fell back to full precision for
                       implementation- or machine-specific reasons
-                 -2 : narrowing the precision induced an overflow,
+        +        -2 : narrowing the precision induced an overflow,
                       the routine fell back to full precision
-                 -3 : failure of SPOTRF
-                 -31: stop the iterative refinement after the 30th iteration
-            > 0: iterative refinement has been successfully used.
+        +        -3 : failure of SPOTRF
+        +        -31: stop the iterative refinement after the 30th iteration
+      -     > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
 
     @param[out]

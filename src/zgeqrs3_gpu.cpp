@@ -10,46 +10,49 @@
 */
 #include "common_magma.h"
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     Solves the least squares problem
            min || A*X - C ||
     using the QR factorization A = Q*R computed by ZGEQRF3_GPU.
 
     Arguments
-    =========
-    M       (input) INTEGER
+    ---------
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A. M >= 0.
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A. M >= N >= 0.
 
-    NRHS    (input) INTEGER
+    @param[in]
+    nrhs    INTEGER
             The number of columns of the matrix C. NRHS >= 0.
 
-    A       (input) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    @param[in]
+    A       COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,n, as returned by
             ZGEQRF3_GPU in the first n columns of its array argument A.
 
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array A, LDDA >= M.
 
-    TAU     (input) COMPLEX_16 array, dimension (N)
+    @param[in]
+    tau     COMPLEX_16 array, dimension (N)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by MAGMA_ZGEQRF_GPU.
 
-    DB      (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    @param[in,out]
+    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the M-by-NRHS matrix C.
             On exit, the N-by-NRHS solution matrix X.
 
-    DT      (input) COMPLEX_16 array that is the output (the 6th argument)
+    @param[in]
+    dT      COMPLEX_16 array that is the output (the 6th argument)
             of magma_zgeqrf_gpu of size
             2*MIN(M, N)*NB + ((N+31)/32*32 )* MAX(NB, NRHS).
             The array starts with a block of size MIN(M,N)*NB that stores
@@ -58,25 +61,31 @@
             matrices for the R matrix, followed by work space of size
             ((N+31)/32*32 )* MAX(NB, NRHS).
 
-    LDDB    (input) INTEGER
-            The leading dimension of the array DB. LDDB >= M.
+    @param[in]
+    lddb    INTEGER
+            The leading dimension of the array dB. LDDB >= M.
 
-    HWORK   (workspace/output) COMPLEX_16 array, dimension (LWORK)
+    @param[out]
+    hwork   (workspace) COMPLEX_16 array, dimension (LWORK)
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER
+    @param[in]
+    lwork   INTEGER
             The dimension of the array WORK,
             LWORK >= (M - N + NB)*(NRHS + NB) + NRHS*NB,
             where NB is the blocksize given by magma_get_zgeqrf_nb( M ).
-
+    \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
             this value as the first entry of the WORK array.
 
-    INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-    =====================================================================    */
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    @ingroup magma_zgels_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
                   magmaDoubleComplex *dA,    magma_int_t ldda,
