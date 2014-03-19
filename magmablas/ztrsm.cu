@@ -16,7 +16,7 @@
 #define NB 128        // outer blocking size, >BLOCK_SIZE
 
 __global__ void
-b_copy_kernel (int M, int N, magmaDoubleComplex *b, int ldb, magmaDoubleComplex *d_x, int ldx)
+ztrsm_copy_kernel (int M, int N, magmaDoubleComplex *b, int ldb, magmaDoubleComplex *d_x, int ldx)
 {
     int by = blockIdx.y;
     int gx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -29,11 +29,11 @@ b_copy_kernel (int M, int N, magmaDoubleComplex *b, int ldb, magmaDoubleComplex 
 #define WARP_SIZE 32
 
 
-#define b_copy() \
+#define ztrsm_copy() \
     do { \
         dim3 dimBlock( (M >= MAX_THREAD_PER_BLOCK) ? MAX_THREAD_PER_BLOCK : (WARP_SIZE*((M/WARP_SIZE)+(M % WARP_SIZE != 0))), 1 ); \
         dim3 dimGrid( (M - 1)/dimBlock.x + 1, N ); \
-        b_copy_kernel<<< dimGrid, dimBlock, 0, magma_stream >>>(M, N, b, ldb, d_x, M); \
+        ztrsm_copy_kernel<<< dimGrid, dimBlock, 0, magma_stream >>>(M, N, b, ldb, d_x, M); \
         magma_device_sync(); \
     } while(0)
 
@@ -205,7 +205,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Notrans, MM, N, MM, alpha, d_dinvA, NB, b, ldb, zero, d_x, M);
 
                 if (NB >= M) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -232,7 +232,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Notrans, MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, zero, d_x+i, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -261,7 +261,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Trans, Notrans, MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, zero, d_x+i, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -286,7 +286,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Trans, Notrans, MM, N, MM, alpha, d_dinvA, NB, b, ldb, zero, d_x, M);
 
                 if (NB >= M) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -316,7 +316,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Conjtrans, Notrans, MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, zero, d_x+i, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -341,7 +341,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Conjtrans, Notrans, MM, N, MM, alpha, d_dinvA, NB, b, ldb, zero, d_x, M);
 
                 if (NB >= M) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_dinvA );
                     magma_free( d_x );
                     return;
@@ -383,7 +383,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Notrans, M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, zero, d_x+i*M, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -408,7 +408,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Notrans, M, NN, NN, alpha, b, ldb, d_dinvA, NB, zero, d_x, M);
 
                 if (NB >= N) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -437,7 +437,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Trans, M, NN, NN, alpha, b, ldb, d_dinvA, NB, zero, d_x, M);
 
                 if (NB >= N) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -464,7 +464,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Trans, M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, zero, d_x+i*M, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -492,7 +492,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Conjtrans, M, NN, NN, alpha, b, ldb, d_dinvA, NB, zero, d_x, M);
 
                 if (NB >= N) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -520,7 +520,7 @@ void magmablas_ztrsm(
                 cublasZgemm(Notrans, Conjtrans, M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, zero, d_x+i*M, M);
 
                 if (i-NB < 0) {
-                    b_copy();
+                    ztrsm_copy();
                     magma_free( d_x );
                     magma_free( d_dinvA );
                     return;
@@ -542,7 +542,7 @@ void magmablas_ztrsm(
 
     }
 
-    b_copy();
+    ztrsm_copy();
     magma_free( d_dinvA );
     magma_free( d_x );
 }
