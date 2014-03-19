@@ -53,6 +53,7 @@ ZSRC := \
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
 	ztrsm.cu		\
+	ztrtri.cu		\
 	ztrsm_work.cu		\
 
 # Tesla-specific (CUDA arch 1.x) codes
