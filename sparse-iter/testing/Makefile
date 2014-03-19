@@ -10,8 +10,7 @@ DIR = sparse-iter/testing
 MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 
-LIB += -lcusparse /home/hanzt/software/spmvellrt/libspmvELLRTdp.a
-
+LIB += -lcusparse 
 
 # ----------
 # utility functions
