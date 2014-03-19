@@ -10,8 +10,8 @@
 */
 #include "common_magma.h"
 
-#define A(i, j)  (a + (j)*lda  + (i))
-#define dA(i, j) (da+ (j)*ldda + (i))
+#define  A(i, j) (A  + (j)*lda  + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
 
 /**
     Purpose
@@ -148,14 +148,14 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgebrd(magma_int_t m, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, double *d, double *e,
+             magmaDoubleComplex *A, magma_int_t lda, double *d, double *e,
              magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
 {
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex *da, *dwork;
+    magmaDoubleComplex *dA, *dwork;
 
     magma_int_t ncol, nrow, jmax, nb, ldda;
 
@@ -198,12 +198,12 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda + (m + n)*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda + (m + n)*nb )) {
         fprintf (stderr, "!!!! device memory allocation error in zgebrd\n" );
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    dwork = da + (n)*ldda;
+    dwork = dA + (n)*ldda;
 
     ldwrkx = m;
     ldwrky = n;
@@ -213,7 +213,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     /* Copy the matrix to the GPU */
     if (minmn - nx >= 1) {
-        magma_zsetmatrix( m, n, a, lda, da, ldda );
+        magma_zsetmatrix( m, n, A, lda, dA, ldda );
     }
     
     for (i=0; i < (minmn - nx); i += nb) {
@@ -289,6 +289,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                       tauq+i, taup+i, work, &lwork, &iinfo);
     work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
 
-    magma_free( da );
+    magma_free( dA );
     return *info;
 } /* magma_zgebrd */

@@ -17,7 +17,7 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
 {
 /**
     Purpose
-    =======
+    -------
     ZPOSV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N Hermitian positive definite matrix and X and B
@@ -30,7 +30,7 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
     equations A * X = B.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;

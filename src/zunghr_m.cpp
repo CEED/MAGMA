@@ -58,7 +58,7 @@
             magma_zgehrd.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZGEHRD, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in T.

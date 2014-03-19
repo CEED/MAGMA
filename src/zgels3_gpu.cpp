@@ -39,7 +39,7 @@
             The number of columns of the matrix C. NRHS >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, A is overwritten by details of its QR
             factorization as returned by ZGEQRF3.
@@ -85,8 +85,6 @@ magma_zgels3_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t
                   magmaDoubleComplex *hwork, magma_int_t lwork,
                   magma_int_t *info)
 {
-    #define a_ref(a_1,a_2) (dA + (a_2)*(ldda) + (a_1))
-
     magmaDoubleComplex *dT, *tau;
     magma_int_t k;
 
@@ -155,5 +153,3 @@ magma_zgels3_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t
     magma_free_cpu(tau);
     return *info;
 }
-
-#undef a_ref

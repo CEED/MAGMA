@@ -13,8 +13,8 @@
 */
 #include "common_magma.h"
 
-#define  A(i, j) ( a+(j)*lda  + (i))
-#define dA(i, j) (da+(j)*ldda + (i))
+#define  A(i, j) ( A + (j)*lda  + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
 
 /**
     Purpose
@@ -138,7 +138,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda,
+             magmaDoubleComplex *A, magma_int_t lda,
              double *d, double *e, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
@@ -191,13 +191,13 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
         return *info;
     }
 
-    magmaDoubleComplex *da;
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda + 2*n*nb )) {
+    magmaDoubleComplex *dA;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda + 2*n*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
-    magmaDoubleComplex *dwork = da + (n)*ldda;
+    magmaDoubleComplex *dwork = dA + (n)*ldda;
 
     if (n < 2048)
         nx = n;
@@ -251,7 +251,7 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
             magma_zsetmatrix( n, n, A(0,0), lda, dA(0,0), ldda );
 
         #ifdef FAST_HEMV
-        // TODO this leaks memory from da, above
+        // TODO this leaks memory from dA, above
         magmaDoubleComplex *dwork2;
         if (MAGMA_SUCCESS != magma_zmalloc( &dwork2, n*n )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -307,7 +307,7 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
                          &tau[i], work, &lwork, &iinfo);
     }
     
-    magma_free( da );
+    magma_free( dA );
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     return *info;

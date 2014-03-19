@@ -61,7 +61,7 @@
             if SIDE = 'R', N >= K >= 0.
 
     @param[in]
-    DA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument DA.
@@ -74,7 +74,7 @@
             if SIDE = 'R', LDDA >= max(1,N).
 
     @param[in,out]
-    DC      COMPLEX_16 array on the GPU, dimension (LDDC,N)
+    dC      COMPLEX_16 array on the GPU, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.
 
@@ -83,11 +83,11 @@
             The leading dimension of the array DC. LDDC >= max(1,M).
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU that is the output
+    dT      COMPLEX_16 array on the GPU that is the output
             (the 9th argument) of magma_zgeqrf_gpu.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the blocking size that was used in pre-computing DT, e.g.,
             the blocking size used in magma_zgeqrf_gpu.
 
@@ -101,8 +101,8 @@
 extern "C" magma_int_t
 magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
                          magma_int_t m, magma_int_t n, magma_int_t k,
-                         magmaDoubleComplex *da,   magma_int_t ldda,
-                         magmaDoubleComplex *dc,    magma_int_t lddc,
+                         magmaDoubleComplex *dA,   magma_int_t ldda,
+                         magmaDoubleComplex *dC,    magma_int_t lddc,
                          magmaDoubleComplex *dT,    magma_int_t nb,
                          magma_int_t *info)
 {
@@ -188,8 +188,8 @@ magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
             jc = i;
         }
         ret = magma_zlarfb_gpu( MagmaLeft, trans, MagmaForward, MagmaColumnwise,
-                               mi, ni, ib, da+i+i*ldda, ldda, dT+i*nb, nb,
-                               dc+ic+jc*lddc, lddc, dwork, nw);
+                               mi, ni, ib, dA+i+i*ldda, ldda, dT+i*nb, nb,
+                               dC+ic+jc*lddc, lddc, dwork, nw);
 
         if ( ret != MAGMA_SUCCESS ) {
             magma_free(dwork);

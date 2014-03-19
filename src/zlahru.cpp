@@ -34,7 +34,7 @@
             Number of rows of the matrix Am (see details below)
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             Block size
 
     @param[out]

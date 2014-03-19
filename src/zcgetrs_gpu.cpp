@@ -12,7 +12,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZCGETRS solves a system of linear equations
        A * X = B  or  A' * X = B
     with a general N-by-N matrix A using the LU factorization computed
@@ -21,7 +21,7 @@
     magma_zcgesv.
 
     Arguments
-    =========
+    ---------
     @param[in]
     trans   CHARACTER*1
             Specifies the form of the system of equations:
@@ -48,7 +48,7 @@
             The leading dimension of the array dA.  LDDA >= max(1,N).
 
     @param[in]
-    dIPIV   INTEGER array on the GPU, dimension (N)
+    dipiv   INTEGER array on the GPU, dimension (N)
             The pivot indices; for 1 <= i <= N, after permuting, row i of the
             matrix was moved to row dIPIV(i).
             Note this is different than IPIV from ZGETRF, where interchanges

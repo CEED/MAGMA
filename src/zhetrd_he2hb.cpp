@@ -138,16 +138,16 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *a, magma_int_t lda,
+                    magmaDoubleComplex *A, magma_int_t lda,
                     magmaDoubleComplex *tau,
                     magmaDoubleComplex *work, magma_int_t lwork,
                     magmaDoubleComplex *dT,
                     magma_int_t threads, magma_int_t *info)
 {
-    #define a_ref(a_1,a_2)  ( a  + ((a_2)-1)*( lda) + (a_1)-1)
-    #define da_ref(a_1,a_2) (da  + ((a_2)-1)*(ldda) + (a_1)-1)
-    #define tau_ref(a_1)    (tau + (a_1)-1)
-    #define t_ref(a_1)      (dT  + ((a_1)-1)*(lddt))
+    #define  A(a_1,a_2)  ( A + ((a_2)-1)*( lda) + (a_1)-1)
+    #define dA(a_1,a_2)  (dA + ((a_2)-1)*(ldda) + (a_1)-1)
+    #define tau_ref(a_1) (tau + (a_1)-1)
+    #define dT(a_1)      (dT + ((a_1)-1)*(lddt))
 
     int ldda = ((n+31)/32)*32;
     int lddt = nb;
@@ -195,8 +195,8 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-    magmaDoubleComplex *da;
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, (n + 2*nb)*ldda )) {
+    magmaDoubleComplex *dA;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n + 2*nb)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -205,8 +205,8 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_setlapack_numthreads(mklth);
 
 
-    /* Use the first panel of da as work space */
-    magmaDoubleComplex *dwork = da+n*ldda;
+    /* Use the first panel of dA as work space */
+    magmaDoubleComplex *dwork = dA+n*ldda;
     magmaDoubleComplex *dW    = dwork + nb*ldda;
 
     #ifdef TRACING
@@ -237,8 +237,8 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         if (1 <= n-nb) {
             trace_gpu_start( 0, 0, "set", "set A" );
             magma_zsetmatrix_async( (n-nb), (n-nb),
-                                    a_ref(nb+1, nb+1),  lda,
-                                    da_ref(nb+1, nb+1), ldda, stream[0] );
+                                    A(nb+1, nb+1),  lda,
+                                    dA(nb+1, nb+1), ldda, stream[0] );
             trace_gpu_end( 0, 0 );
         }
 
@@ -258,27 +258,27 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                  //   because we don't have a function that copy only the
                  //    upper part of A to be restored after copying the
                  //    lookahead panel that has been computted from GPU to CPU.
-                 zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
+                 zpanel_to_q(MagmaUpper, pn-1, A(i, i+1), lda, work);
 
                  trace_gpu_start( 0, 1, "get", "get panel" );
                  //magma_queue_sync( stream[0] );
                  cudaStreamWaitEvent(stream[1], Pupdate_event, 0);
                  magma_zgetmatrix_async( (pm+pn), pn,
-                                         da_ref( i, i), ldda,
-                                         a_ref ( i, i), lda, stream[1] );
+                                         dA( i, i), ldda,
+                                         A ( i, i), lda, stream[1] );
                  trace_gpu_end( 0, 1 );
 
                  trace_gpu_start( 0, 2, "her2k", "her2k" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old, c_neg_one,
-                      da_ref(indi_old+pn_old, indj_old), ldda,
+                      dA(indi_old+pn_old, indj_old), ldda,
                       dW + pn_old,            pm_old, d_one,
-                      da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
+                      dA(indi_old+pn_old, indi_old+pn_old), ldda);
                  trace_gpu_end( 0, 2 );
 
                  trace_cpu_start( 0, "sync", "sync on 1" );
                  magma_queue_sync( stream[1] );
                  trace_cpu_end( 0 );
-                 zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
+                 zq_to_panel(MagmaUpper, pn-1, A(i, i+1), lda, work);
              }
 
              /* ==========================================================
@@ -289,30 +289,30 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
              snprintf( buf, sizeof(buf), "panel %d", i );
              #endif
              trace_cpu_start( 0, "geqrf", buf );
-             lapackf77_zgeqrf(&pm, &pn, a_ref(indi, indj), &lda,
+             lapackf77_zgeqrf(&pm, &pn, A(indi, indj), &lda,
                         tau_ref(i), work, &lwork, info);
              
              /* Form the matrix T */
                          pk=min(pm,pn);
              lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
-                           &pm, &pk, a_ref(indi, indj), &lda,
+                           &pm, &pk, A(indi, indj), &lda,
                            tau_ref(i), hT, &nb);
 
              /* Prepare V - put 0s in the upper triangular part of the panel
                 (and 1s on the diagonal), temporaly storing the original in work */
-             zpanel_to_q(MagmaUpper, pk, a_ref(indi, indj), lda, work);
+             zpanel_to_q(MagmaUpper, pk, A(indi, indj), lda, work);
              trace_cpu_end( 0 );
 
              /* Send V from the CPU to the GPU */
              trace_gpu_start( 0, 0, "set", "set V and T" );
              magma_zsetmatrix_async( pm, pk,
-                                     a_ref(indi, indj),  lda,
-                                     da_ref(indi, indj), ldda, stream[0] );
+                                     A(indi, indj),  lda,
+                                     dA(indi, indj), ldda, stream[0] );
 
              /* Send the triangular factor T to the GPU */
              magma_zsetmatrix_async( pk, pk,
                                      hT,       nb,
-                                     t_ref(i), lddt, stream[0] );
+                                     dT(i), lddt, stream[0] );
              trace_gpu_end( 0, 0 );
              
              /* ==========================================================
@@ -331,20 +331,20 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
              
              trace_gpu_start( 0, 2, "gemm", "work = V*T" );
              magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
-                         c_one, da_ref(indi, indj), ldda,
-                         t_ref(i), lddt,
+                         c_one, dA(indi, indj), ldda,
+                         dT(i), lddt,
                          c_zero, dwork, pm);
              trace_gpu_end( 0, 2 );
              
              /* dW = X = A*V*T. dW = A*dwork */
              trace_gpu_start( 0, 2, "hemm", "X = A*work" );
              magma_zhemm(MagmaLeft, uplo, pm, pk,
-                         c_one, da_ref(indi, indi), ldda,
+                         c_one, dA(indi, indi), ldda,
                          dwork, pm,
                          c_zero, dW, pm);
              trace_gpu_end( 0, 2 );
              /* restore the panel */
-             zq_to_panel(MagmaUpper, pk, a_ref(indi, indj), lda, work);
+             zq_to_panel(MagmaUpper, pk, A(indi, indj), lda, work);
              
              /* dwork = V*T already ==> dwork' = T'*V'
               * compute T'*V'*X ==> dwork'*W ==>
@@ -360,7 +360,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               *   = X - 0.5 * V * (dwork + pm*nb) = W - 0.5 * V * (dwork + pm*nb) */
              trace_gpu_start( 0, 2, "gemm", "W = X - 0.5*V*(T'*V'*X)" );
              magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
-                         c_neg_half, da_ref(indi, indj), ldda,
+                         c_neg_half, dA(indi, indj), ldda,
                          dwork + pm*nb, nb,
                          c_one,     dW, pm);
              trace_gpu_end( 0, 2 );
@@ -374,16 +374,16 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                     do lookahead - update the next panel */
                  trace_gpu_start( 0, 2, "gemm", "gemm 4 next panel left" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
-                             da_ref(indi, indj), ldda,
+                             dA(indi, indj), ldda,
                              dW,                 pm, c_one,
-                             da_ref(indi, indi), ldda);
+                             dA(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
              
                  trace_gpu_start( 0, 2, "gemm", "gemm 5 next panel right" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              dW,                 pm,
-                             da_ref(indi, indj), ldda, c_one,
-                             da_ref(indi, indi), ldda);
+                             dA(indi, indj), ldda, c_one,
+                             dA(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
                  cudaEventRecord(Pupdate_event, stream[0]);
              }
@@ -391,9 +391,9 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                  /* no look-ahead as this is last iteration */
                  trace_gpu_start( 0, 2, "her2k", "her2k last iteration" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
-                              da_ref(indi, indj), ldda,
+                              dA(indi, indj), ldda,
                               dW,                 pm, d_one,
-                              da_ref(indi, indi), ldda);
+                              dA(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
              }
              
@@ -406,13 +406,13 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         /* Send the last block to the CPU */
         pk = min(pm,pn);
         if (1 <= n-nb) {
-            zpanel_to_q(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
+            zpanel_to_q(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
             trace_gpu_start( 0, 2, "get", "get last block" );
             magma_zgetmatrix( pk, pk,
-                              da_ref(n-pk+1, n-pk+1), ldda,
-                              a_ref(n-pk+1, n-pk+1),  lda );
+                              dA(n-pk+1, n-pk+1), ldda,
+                              A(n-pk+1, n-pk+1),  lda );
             trace_gpu_end( 0, 2 );
-            zq_to_panel(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
+            zq_to_panel(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
         }
     }// end of LOWER
     
@@ -421,7 +421,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     cudaEventDestroy(Pupdate_event);
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
-    magma_free( da );
+    magma_free( dA );
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     magmablasSetKernelStream( 0 );
     

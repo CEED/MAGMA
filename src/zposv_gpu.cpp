@@ -11,7 +11,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZPOSV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N Hermitian positive definite matrix and X and B
@@ -24,7 +24,7 @@
     equations A * X = B.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;

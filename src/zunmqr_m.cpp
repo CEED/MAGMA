@@ -14,14 +14,14 @@
 */
 #include "common_magma.h"
 
-#define  A(i, j) ( a+(j)*lda  + (i))
-#define  C(i, j) ( c+(j)*ldc  + (i))
+#define  A(i, j) (A + (j)*lda  + (i))
+#define  C(i, j) (C + (j)*ldc  + (i))
 
-#define dC(gpui, i, j) (dw[gpui]+(j)*lddc + (i))
-#define dA_c(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddac)
-#define dA_r(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddar)
-#define dt(gpui, ind)    (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
-#define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
+#define    dC(gpui,      i, j) (dw[gpui] + (j)*lddc + (i))
+#define  dA_c(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddac)
+#define  dA_r(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddar)
+#define    dT(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
+#define dwork(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
 /**
     Purpose
@@ -44,6 +44,10 @@
 
     Arguments
     ---------
+    @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
     @param[in]
     side    CHARACTER*1
       -     = 'L': apply Q or Q**H from the Left;
@@ -123,9 +127,9 @@
 extern "C" magma_int_t
 magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
-               magmaDoubleComplex *a,    magma_int_t lda,
+               magmaDoubleComplex *A,    magma_int_t lda,
                magmaDoubleComplex *tau,
-               magmaDoubleComplex *c,    magma_int_t ldc,
+               magmaDoubleComplex *C,    magma_int_t ldc,
                magmaDoubleComplex *work, magma_int_t lwork,
                magma_int_t *info)
 {
@@ -135,8 +139,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     const char* trans_ = lapack_const( trans );
 
     magma_int_t nb = 128;
-    magmaDoubleComplex *t;
-    magma_zmalloc_pinned(&t, nb*nb);
+    magmaDoubleComplex *T;
+    magma_zmalloc_pinned(&T, nb*nb);
     //printf("calling zunmqr_m with nb=%d\n", (int) nb);
 
     magmaDoubleComplex* dw[MagmaMaxGPUs];
@@ -205,8 +209,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 
     if (nb >= k) {
         /* Use CPU code */
-        lapackf77_zunmqr(side_, trans_, &m, &n, &k, a, &lda, tau,
-                         c, &ldc, work, &lwork, info);
+        lapackf77_zunmqr(side_, trans_, &m, &n, &k, A, &lda, tau,
+                         C, &ldc, work, &lwork, info);
         return *info;
     }
 
@@ -284,7 +288,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
              H = H(i) H(i+1) . . . H(i+ib-1) */
             magma_int_t nqi = nq - i;
             lapackf77_zlarft("F", "C", &nqi, &kb, A(i, i), &lda,
-                             &tau[i], t, &kb);
+                             &tau[i], T, &kb);
 
             /* H or H' is applied to C(1:m,i:n) */
 
@@ -292,8 +296,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
             for (igpu = 0; igpu < nrgpu; ++igpu) {
                 magma_setdevice(igpu);
                 magma_zsetmatrix_async(kb, kb,
-                                       t,               kb,
-                                       dt(igpu, ind_c), kb, stream[igpu][0] );
+                                       T,               kb,
+                                       dT(igpu, ind_c), kb, stream[igpu][0] );
             }
 
             for (igpu = 0; igpu < nrgpu; ++igpu) {
@@ -302,7 +306,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                 magmablasSetKernelStream(stream[igpu][1]);
                 magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                                  m-i, nlocal[igpu], kb,
-                                 dA_c(igpu, ind_c, i, 0), lddac, dt(igpu, ind_c), kb,
+                                 dA_c(igpu, ind_c, i, 0), lddac, dT(igpu, ind_c), kb,
                                  dC(igpu, i, 0), lddc,
                                  dwork(igpu, ind_c), lddwork);
                 magma_event_record(event[igpu][ind_c], stream[igpu][1] );
@@ -353,7 +357,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
             // H = H(i) H(i+1) . . . H(i+ib-1)
             i__4 = nq - i;
             lapackf77_zlarft("F", "C", &i__4, &ib, A(i, i), &lda,
-            &tau[i], t, &ib);
+            &tau[i], T, &ib);
             
             // 1) copy the panel from A to the GPU, and
             // 2) Put 0s in the upper triangular part of dA;
@@ -366,10 +370,10 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
             jc = i;
             
             // Apply H or H'; First copy T to the GPU
-            magma_zsetmatrix( ib, ib, t, ib, dt, ib );
+            magma_zsetmatrix( ib, ib, T, ib, dT, ib );
             magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
             mi, ni, ib,
-            dA(i, 0), ldda, dt, ib,
+            dA(i, 0), ldda, dT, ib,
             dC(ic, jc), lddc,
             dwork, lddwork);
         }

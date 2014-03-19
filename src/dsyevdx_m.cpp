@@ -32,6 +32,10 @@
     Arguments
     ---------
     @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
+    @param[in]
     jobz    CHARACTER*1
       -     = 'N':  Compute eigenvalues only;
       -     = 'V':  Compute eigenvalues and eigenvectors.
@@ -70,9 +74,9 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -92,7 +96,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -110,25 +114,6 @@
             only calculates the optimal sizes of the WORK, RWORK and
             IWORK arrays, returns these values as the first entries of
             the WORK, RWORK and IWORK arrays, and no error message
-            related to LWORK or LRWORK or LIWORK is issued by XERBLA.
-
-    @param[out]
-    rwork   (workspace) DOUBLE PRECISION array,
-                                           dimension (LRWORK)
-            On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
-
-    @param[in]
-    lrwork  INTEGER
-            The dimension of the array RWORK.
-            If N <= 1,                LRWORK >= 1.
-            If JOBZ  = 'N' and N > 1, LRWORK >= N.
-            If JOBZ  = 'V' and N > 1, LRWORK >=
-                           1 + 5*N + 2*N**2.
-    \n
-            If LRWORK = -1, then a workspace query is assumed; the
-            routine only calculates the optimal sizes of the WORK, RWORK
-            and IWORK arrays, returns these values as the first entries
-            of the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
     @param[out]
@@ -173,7 +158,7 @@
 extern "C" magma_int_t
 magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                 magma_int_t n,
-                double *a, magma_int_t lda,
+                double *A, magma_int_t lda,
                 double vl, double vu, magma_int_t il, magma_int_t iu,
                 magma_int_t *m, double *w,
                 double *work, magma_int_t lwork,
@@ -280,9 +265,9 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
     }
     
     if (n == 1) {
-        w[0] = a[0];
+        w[0] = A[0];
         if (wantz) {
-            a[0] = 1.;
+            A[0] = 1.;
         }
         return *info;
     }
@@ -294,7 +279,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsyevd(jobz_, uplo_,
-                         &n, a, &lda,
+                         &n, A, &lda,
                          w, work, &lwork,
                          iwork, &liwork, info);
         return *info;
@@ -309,7 +294,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_dlansy("M", uplo_, &n, a, &lda, work);
+    anrm = lapackf77_dlansy("M", uplo_, &n, A, &lda, work);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -319,7 +304,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
+        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, A,
                          &lda, info);
     }
 
@@ -336,7 +321,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
     magma_timer_t time;
     timer_start( time );
 
-    magma_dsytrd_mgpu(nrgpu, 1, uplo, n, a, lda, w, &work[inde],
+    magma_dsytrd_mgpu(nrgpu, 1, uplo, n, A, lda, w, &work[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );
@@ -362,10 +347,10 @@ magma_dsyevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
-        magma_dormtr_m(nrgpu, MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
+        magma_dormtr_m(nrgpu, MagmaLeft, uplo, MagmaNoTrans, n, *m, A, lda, &work[indtau],
                        &work[indwrk + n * (il-1)], n, &work[indwk2], llwrk2, &iinfo);
 
-        lapackf77_dlacpy("A", &n, m, &work[indwrk + n * (il-1)], &n, a, &lda);
+        lapackf77_dlacpy("A", &n, m, &work[indwrk + n * (il-1)], &n, A, &lda);
 
         timer_stop( time );
         timer_printf( "time dormtr + copy = %6.2f\n", time );

@@ -102,9 +102,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -124,7 +124,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -211,7 +211,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-              magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+              magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb,
               double vl, double vu, magma_int_t il, magma_int_t iu,
               magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
               magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
@@ -221,8 +221,8 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    magmaDoubleComplex *da;
-    magmaDoubleComplex *db;
+    magmaDoubleComplex *dA;
+    magmaDoubleComplex *dB;
     magma_int_t ldda = n;
     magma_int_t lddb = n;
 
@@ -326,7 +326,7 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zhegvd(&itype, jobz_, uplo_,
-                         &n, a, &lda, b, &ldb,
+                         &n, A, &lda, B, &ldb,
                          w, work, &lwork,
                          #if defined(PRECISION_z) || defined(PRECISION_c)
                          rwork, &lrwork,
@@ -337,22 +337,22 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
     }
 
     // TODO: fix memory leak
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
-        MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda ) ||
+        MAGMA_SUCCESS != magma_zmalloc( &dB, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
     /* Form a Cholesky factorization of B. */
-    magma_zsetmatrix( n, n, b, ldb, db, lddb );
+    magma_zsetmatrix( n, n, B, ldb, dB, lddb );
 
     magma_zsetmatrix_async( n, n,
-                            a,  lda,
-                            da, ldda, stream );
+                            A,  lda,
+                            dA, ldda, stream );
 
     magma_timer_t time;
     timer_start( time );
-    magma_zpotrf_gpu(uplo, n, db, lddb, info);
+    magma_zpotrf_gpu(uplo, n, dB, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -362,26 +362,26 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
 
     magma_queue_sync( stream );
     magma_zgetmatrix_async( n, n,
-                            db, lddb,
-                            b,  ldb, stream );
+                            dB, lddb,
+                            B,  ldb, stream );
 
     timer_start( time );
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
+    magma_zhegst_gpu(itype, uplo, n, dA, ldda, dB, lddb, info);
     timer_stop( time );
     timer_printf( "time zhegst_gpu = %6.2f\n", time );
 
     /* simple fix to be able to run bigger size.
      * need to have a dwork here that will be used
-     * a db and then passed to  dsyevd.
+     * a dB and then passed to  dsyevd.
      * */
     if (n > 5000) {
         magma_queue_sync( stream );
-        magma_free( db );
+        magma_free( dB );
     }
 
     timer_start( time );
-    magma_zheevdx_gpu(jobz, range, uplo, n, da, ldda, vl, vu, il, iu, m, w, a, lda,
+    magma_zheevdx_gpu(jobz, range, uplo, n, dA, ldda, vl, vu, il, iu, m, w, A, lda,
                       work, lwork, rwork, lrwork, iwork, liwork, info);
     timer_stop( time );
     timer_printf( "time zheevdx_gpu = %6.2f\n", time );
@@ -389,13 +389,13 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
     if (wantz && *info == 0) {
         timer_start( time );
         
-        /* allocate and copy db back */
+        /* allocate and copy dB back */
         if (n > 5000) {
-            if (MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &dB, n*lddb ) ) {
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
-            magma_zsetmatrix( n, n, b, ldb, db, lddb );
+            magma_zsetmatrix( n, n, B, ldb, dB, lddb );
         }
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
@@ -408,7 +408,7 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
             }
 
             magma_ztrsm(MagmaLeft, uplo, trans, MagmaNonUnit,
-                        n, *m, c_one, db, lddb, da, ldda);
+                        n, *m, c_one, dB, lddb, dA, ldda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
@@ -420,14 +420,14 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
             }
 
             magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
-                        n, *m, c_one, db, lddb, da, ldda);
+                        n, *m, c_one, dB, lddb, dA, ldda);
         }
 
-        magma_zgetmatrix( n, *m, da, ldda, a, lda );
+        magma_zgetmatrix( n, *m, dA, ldda, A, lda );
         
-        /* free db */
+        /* free dB */
         if (n > 5000) {
-            magma_free( db );
+            magma_free( dB );
         }
         
         timer_stop( time );
@@ -441,9 +441,9 @@ magma_zhegvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
     rwork[0] = lrwmin * one_eps;
     iwork[0] = liwmin;
 
-    magma_free( da );
+    magma_free( dA );
     if (n <= 5000) {
-        magma_free( db );
+        magma_free( dB );
     }
 
     return *info;

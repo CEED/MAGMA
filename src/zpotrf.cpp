@@ -18,12 +18,12 @@
 // === End defining what BLAS to use ======================================
 
 
-#define A(i, j)  (a   +(j)*lda  + (i))
-#define dA(i, j) (work+(j)*ldda + (i))
+#define A(i, j)  (A    + (j)*lda  + (i))
+#define dA(i, j) (work + (j)*ldda + (i))
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
     positive definite matrix A. This version does not require work
     space on the GPU passed as input. GPU memory is allocated in the
@@ -39,7 +39,7 @@
     stream to overlap computation with communication.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
@@ -82,7 +82,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+             magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
@@ -115,14 +115,14 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     magma_int_t num_gpus = magma_num_gpus();
     if ( num_gpus > 1 ) {
         /* call multiple-GPU interface  */
-        return magma_zpotrf_m(num_gpus, uplo, n, a, lda, info);
+        return magma_zpotrf_m(num_gpus, uplo, n, A, lda, info);
     }
 
     ldda = ((n+31)/32)*32;
     
     if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
         /* alloc failed so call the non-GPU-resident version */
-        return magma_zpotrf_m(num_gpus, uplo, n, a, lda, info);
+        return magma_zpotrf_m(num_gpus, uplo, n, A, lda, info);
     }
 
     /* Define user stream if current stream is NULL */
@@ -142,7 +142,7 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     nb = magma_get_zpotrf_nb(n);
 
     if (nb <= 1 || nb >= n) {
-        lapackf77_zpotrf(uplo_, &n, a, &lda, info);
+        lapackf77_zpotrf(uplo_, &n, A, &lda, info);
     } else {
         /* Use hybrid blocked code. */
         if (upper) {

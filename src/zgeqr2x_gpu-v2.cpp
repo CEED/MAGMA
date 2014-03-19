@@ -36,7 +36,7 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDA,N)
             On entry, the m by n matrix A.
             On exit, the unitary matrix Q as a
             product of elementary reflectors (see Further Details).
@@ -48,11 +48,11 @@
             product of elementary reflectors (see Further Details).
 
     @param[in]
-    lda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
-    tau     COMPLEX_16 array, dimension (min(M,N))
+    dtau    COMPLEX_16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors (see Further
             Details).
 
@@ -67,7 +67,7 @@
             LAPACK stores this array in A. There are 0s below the diagonal.
 
     @param
-    rwork   (workspace) DOUBLE_PRECISION array, dimension (3 N)
+    dwork   (workspace) DOUBLE_PRECISION array, dimension (3 N)
 
     @param[out]
     info    INTEGER
@@ -96,7 +96,7 @@ magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info)
 {
-    #define  da_ref(a_1,a_2) ( dA+(a_2)*(*ldda) + (a_1))
+    #define dA(a_1,a_2) (dA + (a_2)*(*ldda) + (a_1))
     
     magma_int_t i, k;
     
@@ -119,15 +119,15 @@ magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2_cols(*m, k, da_ref(0,0), *ldda, dnorm);
+    magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
 
     for (i = 0; i < k; ++i) {
         /*   1. Apply H' to A(:,i) from the left
              2. Adjust the dnorm[i] to hold the norm of A(i:m,i) */
         if (i > 0) {
-            magma_zlarfbx_gpu(*m, i, da_ref(0, 0), *ldda,
-                              dT, k, da_ref(0, i), work);
-            magmablas_dznrm2_adjust(i, dnorm+i, da_ref(0, i));
+            magma_zlarfbx_gpu(*m, i, dA(0, 0), *ldda,
+                              dT, k, dA(0, i), work);
+            magmablas_dznrm2_adjust(i, dnorm+i, dA(0, i));
         }
 
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i)
@@ -135,9 +135,9 @@ magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
             2. Elements above the diagonal are copied in ddA and the ones
                in A are set to zero
             3. update T                                                  */
-        magma_zlarfgtx_gpu(*m-i, da_ref(i, i), da_ref(min(i+1,*m), i), dtau+i,
+        magma_zlarfgtx_gpu(*m-i, dA(i, i), dA(min(i+1,*m), i), dtau+i,
                            dnorm+i, ddA + i + i*(*n), i,
-                           da_ref(i,0), *ldda,  dT, k, work);
+                           dA(i,0), *ldda,  dT, k, work);
     }
 
     return *info;

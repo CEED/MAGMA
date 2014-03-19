@@ -41,7 +41,7 @@
             matrix Q. N >= K >= 0.
 
     @param[in,out]
-    DA      COMPLEX_16 array A on the GPU, dimension (LDDA,N).
+    dA      COMPLEX_16 array A on the GPU, dimension (LDDA,N).
             On entry, the i-th column must contain the vector
             which defines the elementary reflector H(i), for
             i = 1,2,...,k, as returned by ZGEQRF_GPU in the
@@ -58,7 +58,7 @@
             reflector H(i), as returned by ZGEQRF_GPU.
 
     @param[in]
-    DT      (workspace) COMPLEX_16 work space array on the GPU,
+    dT      (workspace) COMPLEX_16 work space array on the GPU,
             dimension (2*MIN(M, N) + (N+31)/32*32 )*NB.
             This must be the 6th argument of magma_zgeqrf_gpu
             [ note that if N here is bigger than N in magma_zgeqrf_gpu,
@@ -66,7 +66,7 @@
               as specified in this routine ].
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.

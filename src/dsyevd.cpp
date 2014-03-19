@@ -62,7 +62,7 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -125,7 +125,7 @@
 extern "C" magma_int_t
 magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
              magma_int_t n,
-             double *a, magma_int_t lda,
+             double *A, magma_int_t lda,
              double *w,
              double *work, magma_int_t lwork,
              magma_int_t *iwork, magma_int_t liwork,
@@ -214,9 +214,9 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
     }
 
     if (n == 1) {
-        w[0] = a[0];
+        w[0] = A[0];
         if (wantz) {
-            a[0] = 1.;
+            A[0] = 1.;
         }
         return *info;
     }
@@ -229,7 +229,7 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsyevd(jobz_, uplo_,
-                         &n, a, &lda,
+                         &n, A, &lda,
                          w, work, &lwork,
                          iwork, &liwork, info);
         return *info;
@@ -244,7 +244,7 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_dlansy("M", uplo_, &n, a, &lda, work );
+    anrm = lapackf77_dlansy("M", uplo_, &n, A, &lda, work );
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -254,7 +254,7 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
+        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, A,
                 &lda, info);
     }
 
@@ -271,7 +271,7 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
     magma_timer_t time;
     timer_start( time );
 
-    magma_dsytrd(uplo, n, a, lda, w, &work[inde],
+    magma_dsytrd(uplo, n, A, lda, w, &work[inde],
                  &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );
@@ -303,10 +303,10 @@ magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
         timer_printf( "time dstedx = %6.2f\n", time );
         timer_start( time );
 
-        magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, n, a, lda, &work[indtau],
+        magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, n, A, lda, &work[indtau],
                      &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
 
-        lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, a, &lda);
+        lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, A, &lda);
 
         timer_stop( time );
         timer_printf( "time dormtr + copy = %6.2f\n", time );

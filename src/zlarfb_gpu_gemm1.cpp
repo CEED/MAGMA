@@ -13,14 +13,15 @@
 
 /**
     Purpose
-    =======
+    -------
     ZLARFB applies a complex block reflector H or its transpose H' to a
     COMPLEX_16 m by n matrix C, from the left.
-    NOTE THAT THIS FUNCTION ASSUME THAT THE UPPER PART OF dV IS 0 BECAUSE IT IS REFERENCED.
-    SAME FOR UPPEr/LOWER PART OF dT
+
+    __Note that this function assumes__ that the upper part of dV is 0
+    because it is referenced. Same for upper/lower part of dT.
 
     Arguments
-    =========
+    ---------
     @param[in]
     side    CHARACTER
       -     = 'L': apply H or H' from the Left
@@ -59,7 +60,7 @@
             reflectors whose product defines the block reflector).
 
     @param[in]
-    DV      COMPLEX_16 array on the GPU, dimension
+    dV      COMPLEX_16 array on the GPU, dimension
                 (LDV,K) if STOREV = 'C'
                 (LDV,M) if STOREV = 'R' and SIDE = 'L'
                 (LDV,N) if STOREV = 'R' and SIDE = 'R'
@@ -73,7 +74,7 @@
             if STOREV = 'R', LDV >= K.
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU, dimension (LDT,K)
+    dT      COMPLEX_16 array on the GPU, dimension (LDT,K)
             The triangular k by k matrix T in the representation of the
             block reflector.
 
@@ -82,7 +83,7 @@
             The leading dimension of the array T. LDT >= K.
 
     @param[in,out]
-    DC      COMPLEX_16 array on the GPU, dimension (LDC,N)
+    dC      COMPLEX_16 array on the GPU, dimension (LDC,N)
             On entry, the m by n matrix C.
             On exit, C is overwritten by H*C, or H'*C, or C*H, or C*H'.
 
@@ -91,7 +92,7 @@
             The leading dimension of the array C. LDA >= max(1,M).
 
     @param
-    WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
+    dwork   (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
     @param[in]
     ldwork  INTEGER
@@ -100,10 +101,10 @@
             if SIDE = 'R', LDWORK >= max(1,M);
 
     @param
-    WORKVT  (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
+    dworkvt (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
 
     @param[in]
-    LDWORKVT (input) INTEGER
+    ldworkvt INTEGER
             The leading dimension of the array WORKVT.
             LDWORKVT >= max(1,min(M,N));
 
@@ -133,7 +134,7 @@
     @ingroup magma_zaux3
     ********************************************************************/
 extern "C" magma_int_t
-magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_diag_t diag,
+magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,
                   const magmaDoubleComplex *dV,    magma_int_t ldv,
                   const magmaDoubleComplex *dT,    magma_int_t ldt,

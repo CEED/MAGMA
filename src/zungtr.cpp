@@ -65,12 +65,12 @@
             message related to LWORK is issued by XERBLA.
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU device.
+    dT      COMPLEX_16 array on the GPU device.
             DT contains the T matrices used in blocking the elementary
             reflectors H(i) as returned by magma_zhetrd.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZHETRD, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.
@@ -83,13 +83,13 @@
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
+magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A,
              magma_int_t lda, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
              magmaDoubleComplex *dT, magma_int_t nb,
              magma_int_t *info)
 {
-#define a_ref(i,j) ( a + (j)*lda+ (i))
+#define A(i,j) (A + (j)*lda+ (i))
 
     magma_int_t i__1;
     magma_int_t i, j;
@@ -137,18 +137,18 @@ magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
             those of the unit matrix                                    */
         for (j = 0; j < n-1; ++j) {
             for (i = 0; i < j-1; ++i)
-                *a_ref(i, j) = *a_ref(i, j + 1);
+                *A(i, j) = *A(i, j + 1);
 
-            *a_ref(n-1, j) = MAGMA_Z_ZERO;
+            *A(n-1, j) = MAGMA_Z_ZERO;
         }
         for (i = 0; i < n-1; ++i) {
-            *a_ref(i, n-1) = MAGMA_Z_ZERO;
+            *A(i, n-1) = MAGMA_Z_ZERO;
         }
-        *a_ref(n-1, n-1) = MAGMA_Z_ONE;
+        *A(n-1, n-1) = MAGMA_Z_ONE;
         
         /* Generate Q(1:n-1,1:n-1) */
         i__1 = n - 1;
-        lapackf77_zungql(&i__1, &i__1, &i__1, a_ref(0,0), &lda, tau, work,
+        lapackf77_zungql(&i__1, &i__1, &i__1, A(0,0), &lda, tau, work,
                          &lwork, &iinfo);
     } else {
         
@@ -157,18 +157,18 @@ magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
             column to the right, and set the first row and column of Q to
             those of the unit matrix                                      */
         for (j = n-1; j > 0; --j) {
-            *a_ref(0, j) = MAGMA_Z_ZERO;
+            *A(0, j) = MAGMA_Z_ZERO;
             for (i = j; i < n-1; ++i)
-                *a_ref(i, j) = *a_ref(i, j - 1);
+                *A(i, j) = *A(i, j - 1);
         }
 
-        *a_ref(0, 0) = MAGMA_Z_ONE;
+        *A(0, 0) = MAGMA_Z_ONE;
         for (i = 1; i < n-1; ++i)
-            *a_ref(i, 0) = MAGMA_Z_ZERO;
+            *A(i, 0) = MAGMA_Z_ZERO;
         
         if (n > 1) {
             /* Generate Q(2:n,2:n) */
-            magma_zungqr(n-1, n-1, n-1, a_ref(1, 1), lda, tau, dT, nb, &iinfo);
+            magma_zungqr(n-1, n-1, n-1, A(1, 1), lda, tau, dT, nb, &iinfo);
         }
     }
     
@@ -177,4 +177,4 @@ magma_zungtr(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *a,
     return *info;
 } /* magma_zungtr */
 
-#undef a_ref
+#undef A

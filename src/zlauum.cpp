@@ -10,13 +10,13 @@
 */
 #include "common_magma.h"
 
-#define A(i, j)  (a   +(j)*lda  + (i))
-#define dA(i, j) (work+(j)*ldda + (i))
+#define A(i, j)  (A  + (j)*lda  + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
 
 
 /**
     Purpose
-    =======
+    -------
     ZLAUUM computes the product U * U' or L' * L, where the triangular
     factor U or L is stored in the upper or lower triangular part of
     the array A.
@@ -28,7 +28,7 @@
     This is the blocked form of the algorithm, calling Level 3 BLAS.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
             Specifies whether the triangular factor stored in the array A
@@ -58,18 +58,18 @@
       -     < 0: if INFO = -k, the k-th argument had an illegal value
 
     @ingroup magma_zposv_aux
-    ===================================================================== */
+    ***************************************************************************/
 extern "C" magma_int_t
 magma_zlauum(magma_uplo_t uplo, magma_int_t n,
-         magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+         magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t     ldda, nb;
     magma_int_t i, ib;
-    magmaDoubleComplex    c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     double             d_one = MAGMA_D_ONE;
-    magmaDoubleComplex    *work;
+    magmaDoubleComplex    *dA;
     int upper = (uplo == MagmaUpper);
 
     *info = 0;
@@ -91,7 +91,7 @@ magma_zlauum(magma_uplo_t uplo, magma_int_t n,
 
     ldda = ((n+31)/32)*32;
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -103,7 +103,7 @@ magma_zlauum(magma_uplo_t uplo, magma_int_t n,
     nb = magma_get_zpotrf_nb(n);
 
     if (nb <= 1 || nb >= n)
-        lapackf77_zlauum(uplo_, &n, a, &lda, info);
+        lapackf77_zlauum(uplo_, &n, A, &lda, info);
     else {
         if (upper) {
             /* Compute the product U * U'. */
@@ -196,7 +196,7 @@ magma_zlauum(magma_uplo_t uplo, magma_int_t n,
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
 
-    magma_free( work );
+    magma_free( dA );
 
     return *info;
 }

@@ -12,12 +12,12 @@
 
 
 extern "C" magma_int_t
-magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
+magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *A,
                    magma_int_t *lda, magma_int_t *info);
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF_NOPIV_GPU computes an LU factorization of a general M-by-N
     matrix A without any pivoting.
 
@@ -30,7 +30,7 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
     This is the right-looking Level 3 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -40,7 +40,7 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -66,7 +66,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
                        magmaDoubleComplex *dA, magma_int_t ldda,
                        magma_int_t *info)
 {
-#define inA(i,j) (dA + (i)*nb + (j)*nb*ldda)
+#define dA(i,j) (dA + (i)*nb + (j)*nb*ldda)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -126,7 +126,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         for( i=0; i < s; i++ ) {
             // download i-th panel
             cols = maxm - i*nb;
-            magma_zgetmatrix( m-i*nb, nb, inA(i,i), ldda, work, lddwork );
+            magma_zgetmatrix( m-i*nb, nb, dA(i,i), ldda, work, lddwork );
             
             // make sure that gpu queue is empty
             magma_device_sync();
@@ -134,12 +134,12 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             if ( i > 0 ) {
                 magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                              nb, n - (i+1)*nb,
-                             c_one, inA(i-1,i-1), ldda,
-                             inA(i-1,i+1), ldda );
+                             c_one, dA(i-1,i-1), ldda,
+                             dA(i-1,i+1), ldda );
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              m-i*nb, n-(i+1)*nb, nb,
-                             c_neg_one, inA(i,  i-1), ldda, inA(i-1,i+1), ldda,
-                             c_one,     inA(i,  i+1), ldda );
+                             c_neg_one, dA(i,  i-1), ldda, dA(i-1,i+1), ldda,
+                             c_one,     dA(i,  i+1), ldda );
             }
 
             // do the cpu part
@@ -149,35 +149,35 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
                 *info = iinfo + i*nb;
 
             // upload i-th panel
-            magma_zsetmatrix( m-i*nb, nb, work, lddwork, inA(i, i), ldda );
+            magma_zsetmatrix( m-i*nb, nb, work, lddwork, dA(i, i), ldda );
             
             // do the small non-parallel computations
             if ( s > (i+1) ) {
                 magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                              nb, nb,
-                             c_one, inA(i, i  ), ldda,
-                             inA(i, i+1), ldda);
+                             c_one, dA(i, i  ), ldda,
+                             dA(i, i+1), ldda);
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              m-(i+1)*nb, nb, nb,
-                             c_neg_one, inA(i+1, i  ), ldda, inA(i,   i+1), ldda,
-                             c_one,     inA(i+1, i+1), ldda );
+                             c_neg_one, dA(i+1, i  ), ldda, dA(i,   i+1), ldda,
+                             c_one,     dA(i+1, i+1), ldda );
             }
             else {
                 magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                              nb, n-s*nb,
-                             c_one, inA(i, i  ), ldda,
-                             inA(i, i+1), ldda);
+                             c_one, dA(i, i  ), ldda,
+                             dA(i, i+1), ldda);
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              m-(i+1)*nb, n-(i+1)*nb, nb,
-                             c_neg_one, inA(i+1, i  ), ldda, inA(i,   i+1), ldda,
-                             c_one,     inA(i+1, i+1), ldda );
+                             c_neg_one, dA(i+1, i  ), ldda, dA(i,   i+1), ldda,
+                             c_one,     dA(i+1, i+1), ldda );
             }
         }
 
         magma_int_t nb0 = min(m - s*nb, n - s*nb);
         rows = m - s*nb;
         cols = maxm - s*nb;
-        magma_zgetmatrix( rows, nb0, inA(s,s), ldda, work, lddwork );
+        magma_zgetmatrix( rows, nb0, dA(s,s), ldda, work, lddwork );
 
         // make sure that gpu queue is empty
         magma_device_sync();
@@ -188,12 +188,12 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             *info = iinfo + s*nb;
 
         // upload i-th panel
-        magma_zsetmatrix( rows, nb0, work, lddwork, inA(s,s), ldda );
+        magma_zsetmatrix( rows, nb0, work, lddwork, dA(s,s), ldda );
 
         magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                      nb0, n-s*nb-nb0,
-                     c_one, inA(s,s),     ldda,
-                            inA(s,s)+nb0, ldda);
+                     c_one, dA(s,s),     ldda,
+                            dA(s,s)+nb0, ldda);
 
         magma_free_pinned( work );
     }
@@ -201,4 +201,4 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
     return *info;
 } /* magma_zgetrf_nopiv_gpu */
 
-#undef inA
+#undef dA

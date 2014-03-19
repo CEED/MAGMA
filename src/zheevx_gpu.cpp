@@ -45,7 +45,7 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    DA      COMPLEX_16 array, dimension (LDDA, N)
+    dA      COMPLEX_16 array, dimension (LDDA, N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = 'L',
@@ -60,9 +60,9 @@
             The leading dimension of the array DA.  LDDA >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -106,12 +106,12 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             On normal exit, the first M elements contain the selected
             eigenvalues in ascending order.
 
     @param[out]
-    DZ      COMPLEX_16 array, dimension (LDDZ, max(1,M))
+    dZ      COMPLEX_16 array, dimension (LDDZ, max(1,M))
             If JOBZ = 'V', then if INFO = 0, the first M columns of Z
             contain the orthonormal eigenvectors of the matrix A
             corresponding to the selected eigenvalues, with the i-th
@@ -131,18 +131,18 @@
             JOBZ = 'V', LDDZ >= max(1,N).
 
     @param
-    WA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
+    wA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
 
     @param[in]
     ldwa    INTEGER
-            The leading dimension of the array WA.  LDWA >= max(1,N).
+            The leading dimension of the array wA.  LDWA >= max(1,N).
 
     @param
-    WZ      (workspace) COMPLEX_16 array, dimension (LDWZ, max(1,M))
+    wZ      (workspace) COMPLEX_16 array, dimension (LDWZ, max(1,M))
 
     @param[in]
     ldwz    INTEGER
-            The leading dimension of the array DZ.  LDWZ >= 1, and if
+            The leading dimension of the array wZ.  LDWZ >= 1, and if
             JOBZ = 'V', LDWZ >= max(1,N).
 
     @param[out]
@@ -183,11 +183,11 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                 magmaDoubleComplex *da, magma_int_t ldda, double vl, double vu,
+                 magmaDoubleComplex *dA, magma_int_t ldda, double vl, double vu,
                  magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
-                 double *w, magmaDoubleComplex *dz, magma_int_t lddz,
-                 magmaDoubleComplex *wa, magma_int_t ldwa,
-                 magmaDoubleComplex *wz, magma_int_t ldwz,
+                 double *w, magmaDoubleComplex *dZ, magma_int_t lddz,
+                 magmaDoubleComplex *wA, magma_int_t ldwa,
+                 magmaDoubleComplex *wZ, magma_int_t ldwz,
                  magmaDoubleComplex *work, magma_int_t lwork,
                  double *rwork, magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
 {
@@ -286,13 +286,13 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
         #endif
         magmaDoubleComplex *a;
         magma_zmalloc_cpu( &a, n*n );
-        magma_zgetmatrix(n, n, da, ldda, a, n);
+        magma_zgetmatrix(n, n, dA, ldda, a, n);
         lapackf77_zheevx(jobz_, range_, uplo_,
                          &n, a, &n, &vl, &vu, &il, &iu, &abstol, m,
-                         w, wz, &ldwz, work, &lwork,
+                         w, wZ, &ldwz, work, &lwork,
                          rwork, iwork, ifail, info);
-        magma_zsetmatrix( n,  n,  a,    n, da, ldda);
-        magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz);
+        magma_zsetmatrix( n,  n,  a,    n, dA, ldda);
+        magma_zsetmatrix( n, *m, wZ, ldwz, dZ, lddz);
         magma_free_cpu(a);
         return *info;
     }
@@ -318,7 +318,7 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     rmax = magma_dsqrt(bignum);
     
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, da, ldda, dwork);
+    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, dA, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {
@@ -330,7 +330,7 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     }
     if (iscale == 1) {
         d__1 = 1.;
-        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da,
+        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, dA,
                          ldda, info);
         
         if (abstol > 0.) {
@@ -351,11 +351,11 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
     llwork = lwork - indwrk + 1;
     
 #ifdef FAST_HEMV
-    magma_zhetrd2_gpu(uplo, n, da, ldda, &rwork[indd], &rwork[inde],
-                      &work[indtau], wa, ldwa, &work[indwrk], llwork, dz, lddz*n, &iinfo);
+    magma_zhetrd2_gpu(uplo, n, dA, ldda, &rwork[indd], &rwork[inde],
+                      &work[indtau], wA, ldwa, &work[indwrk], llwork, dZ, lddz*n, &iinfo);
 #else
-    magma_zhetrd_gpu (uplo, n, da, ldda, &rwork[indd], &rwork[inde],
-                      &work[indtau], wa, ldwa, &work[indwrk], llwork, &iinfo);
+    magma_zhetrd_gpu (uplo, n, dA, ldda, &rwork[indd], &rwork[inde],
+                      &work[indtau], wA, ldwa, &work[indwrk], llwork, &iinfo);
 #endif
 
     lopt = n + (magma_int_t)MAGMA_Z_REAL(work[indwrk]);
@@ -372,16 +372,16 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
             lapackf77_dsterf(&n, &w[1], &rwork[indee], info);
         }
         else {
-            lapackf77_zlacpy("A", &n, &n, wa, &ldwa, wz, &ldwz);
-            lapackf77_zungtr(uplo_, &n, wz, &ldwz, &work[indtau], &work[indwrk], &llwork, &iinfo);
+            lapackf77_zlacpy("A", &n, &n, wA, &ldwa, wZ, &ldwz);
+            lapackf77_zungtr(uplo_, &n, wZ, &ldwz, &work[indtau], &work[indwrk], &llwork, &iinfo);
             i__1 = n - 1;
             blasf77_dcopy(&i__1, &rwork[inde], &ione, &rwork[indee], &ione);
-            lapackf77_zsteqr(jobz_, &n, &w[1], &rwork[indee], wz, &ldwz, &rwork[indrwk], info);
+            lapackf77_zsteqr(jobz_, &n, &w[1], &rwork[indee], wZ, &ldwz, &rwork[indrwk], info);
             if (*info == 0) {
                 for (i = 1; i <= n; ++i) {
                     ifail[i] = 0;
                 }
-                magma_zsetmatrix( n, n, wz, ldwz, dz, lddz );
+                magma_zsetmatrix( n, n, wZ, ldwz, dZ, lddz );
             }
         }
         if (*info == 0) {
@@ -407,14 +407,14 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
         if (wantz) {
             
             lapackf77_zstein(&n, &rwork[indd], &rwork[inde], m, &w[1], &iwork[indibl], &iwork[indisp],
-                             wz, &ldwz, &rwork[indrwk], &iwork[indiwk], &ifail[1], info);
+                             wZ, &ldwz, &rwork[indrwk], &iwork[indiwk], &ifail[1], info);
             
-            magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz );
+            magma_zsetmatrix( n, *m, wZ, ldwz, dZ, lddz );
             
             /* Apply unitary matrix used in reduction to tridiagonal
                form to eigenvectors returned by ZSTEIN. */
-            magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
-                             dz, lddz, wa, ldwa, &iinfo);
+            magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, dA, ldda, &work[indtau],
+                             dZ, lddz, wA, ldwa, &iinfo);
         }
     }
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -447,7 +447,7 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
                 iwork[indibl + i - 1] = iwork[indibl + j - 1];
                 w[j] = tmp1;
                 iwork[indibl + j - 1] = itmp1;
-                magma_zswap(n, dz + (i-1)*lddz, ione, dz + (j-1)*lddz, ione);
+                magma_zswap(n, dZ + (i-1)*lddz, ione, dZ + (j-1)*lddz, ione);
                 if (*info != 0) {
                     itmp1 = ifail[i];
                     ifail[i] = ifail[j];

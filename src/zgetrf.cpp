@@ -14,7 +14,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.  This version does not
     require work space on the GPU passed as input. GPU memory is allocated
@@ -31,7 +31,7 @@
     stream to overlap computation with communication.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -71,7 +71,7 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
+magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
              magma_int_t *ipiv, magma_int_t *info)
 {
 #define dAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
@@ -103,7 +103,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
 
     if ( (nb <= 1) || (nb >= min(m,n)) ) {
         /* Use CPU code. */
-        lapackf77_zgetrf(&m, &n, a, &lda, ipiv, info);
+        lapackf77_zgetrf(&m, &n, A, &lda, ipiv, info);
     } else {
         /* Use hybrid blocked code. */
         magma_int_t maxm, maxn, ldda, maxdim;
@@ -117,7 +117,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         magma_int_t num_gpus = magma_num_gpus();
         if ( num_gpus > 1 ) {
             /* call multi-GPU non-GPU-resident interface  */
-            magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+            magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
             return *info;
         }
 
@@ -139,23 +139,23 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         }
         if ( num_gpus2*NB < n ) {
             /* require too much memory, so call non-GPU-resident version */
-            magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+            magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
             return *info;
         }
 
         ldda = maxn;
-        work = a;
+        work = A;
         if (maxdim*maxdim < 2*maxm*maxn) {
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                 /* alloc failed so call non-GPU-resident version */
-                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
                 return *info;
             }
             da = dA + nb*maxm;
             
             ldda = maxdim;
-            magma_zsetmatrix( m, n, a, lda, da, ldda );
+            magma_zsetmatrix( m, n, A, lda, da, ldda );
             
             dAT = da;
             magmablas_ztranspose_inplace( ldda, dAT, ldda );
@@ -164,17 +164,17 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
             // if very rectangular, allocate dA and dAT and transpose out-of-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                 /* alloc failed so call non-GPU-resident version */
-                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
                 return *info;
             }
             da = dA + nb*maxm;
             
-            magma_zsetmatrix( m, n, a, lda, da, maxm );
+            magma_zsetmatrix( m, n, A, lda, da, maxm );
             
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                 /* alloc failed so call non-GPU-resident version */
                 magma_free( dA );
-                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
                 return *info;
             }
 
@@ -289,10 +289,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
        
         if (maxdim*maxdim < 2*maxm*maxn) {
             magmablas_ztranspose_inplace( ldda, dAT, ldda );
-            magma_zgetmatrix( m, n, da, ldda, a, lda );
+            magma_zgetmatrix( m, n, da, ldda, A, lda );
         } else {
             magmablas_ztranspose2( da, maxm, dAT, ldda, n, m );
-            magma_zgetmatrix( m, n, da, maxm, a, lda );
+            magma_zgetmatrix( m, n, da, maxm, A, lda );
             magma_free( dAT );
         }
 

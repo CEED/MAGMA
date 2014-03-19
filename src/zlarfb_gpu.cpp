@@ -13,12 +13,12 @@
 
 /**
     Purpose
-    =======
+    -------
     ZLARFB applies a complex block reflector H or its transpose H^H to a
     COMPLEX_16 m by n matrix C, from the left.
 
     Arguments
-    =========
+    ---------
     @param[in]
     side    CHARACTER
       -     = 'L': apply H or H^H from the Left
@@ -57,7 +57,7 @@
             reflectors whose product defines the block reflector).
 
     @param[in]
-    DV      COMPLEX_16 array on the GPU, dimension
+    dV      COMPLEX_16 array on the GPU, dimension
                 (LDV,K) if STOREV = 'C'
                 (LDV,M) if STOREV = 'R' and SIDE = 'L'
                 (LDV,N) if STOREV = 'R' and SIDE = 'R'
@@ -71,7 +71,7 @@
             if STOREV = 'R', LDV >= K.
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU, dimension (LDT,K)
+    dT      COMPLEX_16 array on the GPU, dimension (LDT,K)
             The triangular k by k matrix T in the representation of the
             block reflector.
 
@@ -80,7 +80,7 @@
             The leading dimension of the array T. LDT >= K.
 
     @param[in,out]
-    DC      COMPLEX_16 array on the GPU, dimension (LDC,N)
+    dC      COMPLEX_16 array on the GPU, dimension (LDC,N)
             On entry, the m by n matrix C.
             On exit, C is overwritten by H*C, or H^H*C, or C*H, or C*H^H.
 
@@ -89,7 +89,7 @@
             The leading dimension of the array C. LDA >= max(1,M).
 
     @param
-    WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
+    dwork   (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
     @param[in]
     ldwork  INTEGER

@@ -27,6 +27,10 @@
     Arguments
     ---------
     @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
+    @param[in]
     range   CHARACTER*1
       -     = 'A': all eigenvalues will be found.
       -     = 'V': all eigenvalues in the half-open interval (VL,VU]
@@ -38,9 +42,9 @@
             The dimension of the symmetric tridiagonal matrix.  N >= 0.
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -129,7 +133,7 @@
 extern "C" magma_int_t
 magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl, double vu,
                magma_int_t il, magma_int_t iu, double* d, double* e,
-               magmaDoubleComplex* z, magma_int_t ldz,
+               magmaDoubleComplex* Z, magma_int_t ldz,
                double* rwork, magma_int_t lrwork,
                magma_int_t* iwork, magma_int_t liwork,
                magma_int_t* info)
@@ -198,7 +202,7 @@ magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
     if (n == 0)
         return *info;
     if (n == 1) {
-        *z = MAGMA_Z_MAKE( 1, 0 );
+        *Z = MAGMA_Z_MAKE( 1, 0 );
         return *info;
     }
 
@@ -206,7 +210,7 @@ magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
     // solve the problem with another solver.
 
     if (n < smlsiz) {
-        lapackf77_zsteqr("I", &n, d, e, z, &ldz, rwork, info);
+        lapackf77_zsteqr("I", &n, d, e, Z, &ldz, rwork, info);
     } else {
         // We simply call DSTEDX instead.
         magma_dstedx_m(nrgpu, range, n, vl, vu, il, iu, d, e, rwork, n,
@@ -214,7 +218,7 @@ magma_zstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
 
         for (j=0; j < n; ++j)
             for (i=0; i < n; ++i) {
-                *(z+i+ldz*j) = MAGMA_Z_MAKE( *(rwork+i+n*j), 0 );
+                *(Z+i+ldz*j) = MAGMA_Z_MAKE( *(rwork+i+n*j), 0 );
             }
     }
 

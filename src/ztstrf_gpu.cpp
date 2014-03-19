@@ -20,7 +20,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZSSSSM applies the LU factorization update from a complex
     matrix formed by a lower triangular IB-by-K tile L1 on top of a
     M2-by-K tile L2 to a second complex matrix formed by a M1-by-N1
@@ -29,7 +29,7 @@
     This is the right-looking Level 2.5 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.

@@ -32,7 +32,7 @@
             The number of columns of the matrix C. NRHS >= 0.
 
     @param[in]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,n, as returned by
             ZGEQRF3_GPU in the first n columns of its array argument A.
@@ -94,8 +94,8 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
                   magmaDoubleComplex *hwork, magma_int_t lwork,
                   magma_int_t *info)
 {
-    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
+    #define dA(a_1,a_2) (dA + (a_2)*(ldda) + (a_1))
+    #define dT(a_1)     (dT + (lddwork+(a_1))*nb)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t k, lddwork;
@@ -137,29 +137,29 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     /* B := Q' * B */
     magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans,
                       m, nrhs, n,
-                      a_ref(0,0), ldda, tau,
+                      dA(0,0), ldda, tau,
                       dB, lddb, hwork, lwork, dT, nb, info );
     if ( *info != 0 ) {
         return *info;
     }
 
     /* Solve R*X = B(1:n,:)
-       1. Move the block diagonal submatrices from d_ref to R
+       1. Move the block diagonal submatrices from dT to R
        2. Solve
-       3. Restore the data format moving data from R back to d_ref
+       3. Restore the data format moving data from R back to dT
     */
-    magmablas_zswapdblk(k, nb, a_ref(0,0), ldda, 1, d_ref(0), nb, 0);
+    magmablas_zswapdblk(k, nb, dA(0,0), ldda, 1, dT(0), nb, 0);
     if ( nrhs == 1 ) {
         magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-                    n, a_ref(0,0), ldda, dB, 1);
+                    n, dA(0,0), ldda, dB, 1);
     } else {
         magma_ztrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-                    n, nrhs, c_one, a_ref(0,0), ldda, dB, lddb);
+                    n, nrhs, c_one, dA(0,0), ldda, dB, lddb);
     }
-    magmablas_zswapdblk(k, nb, d_ref(0), nb, 0, a_ref(0,0), ldda, 1);
+    magmablas_zswapdblk(k, nb, dT(0), nb, 0, dA(0,0), ldda, 1);
 
     return *info;
 }
 
-#undef a_ref
-#undef d_ref
+#undef dA
+#undef dT

@@ -12,20 +12,9 @@
 #include "common_magma.h"
 #include "timer.h"
 
-#define Q(ix, iy) (q + (ix) + ldq * (iy))
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
 
 /**
-       .. Scalar Arguments .
-      CHARACTER          RANGE
-      INTEGER            IL, IU, INFO, LDQ, N
-      DOUBLE PRECISION   VL, VU
-       .
-       .. Array Arguments .
-      INTEGER            IWORK( * )
-      DOUBLE PRECISION   D( * ), E( * ), Q( LDQ, * ),
-     $                   WORK( * ), DWORK( * )
-       .
-
     Purpose
     -------
     DLAEX0 computes all eigenvalues and the choosen eigenvectors of a
@@ -77,9 +66,9 @@
       -     = 'I': the IL-th through IU-th eigenvalues will be found.
             
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -110,7 +99,7 @@
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
+magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
              double* work, magma_int_t* iwork, double* dwork,
              magma_range_t range, double vl, double vu,
              magma_int_t il, magma_int_t iu, magma_int_t* info)
@@ -250,7 +239,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
     }
     blasf77_dcopy(&n, work, &ione, d, &ione);
-    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, q, &ldq );
+    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, Q, &ldq );
 
     return MAGMA_SUCCESS;
 } /* magma_dlaex0 */

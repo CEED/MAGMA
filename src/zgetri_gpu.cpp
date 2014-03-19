@@ -12,7 +12,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRI computes the inverse of a matrix using the LU factorization
     computed by ZGETRF. This method inverts U and then computes inv(A) by
     solving the system inv(A)*L = inv(U) for inv(A).
@@ -23,7 +23,7 @@
     instances should an explicit inverse be computed with this routine.
 
     Arguments
-    =========
+    ---------
     @param[in]
     n       INTEGER
             The order of the matrix A.  N >= 0.

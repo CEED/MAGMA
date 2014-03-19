@@ -37,7 +37,7 @@
             K < N.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The number of columns to be reduced.
 
     @param[in,out]
@@ -76,14 +76,8 @@
             The leading dimension of the array Y. LDY >= N.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)
-            On entry, the n-by-(n-k+1) general matrix A.
-            On exit, the elements in rows K:N of the first NB columns are
-            overwritten with the matrix Y.
-
-    @param[out]
-    DV      COMPLEX_16 array on the GPU, dimension (N, NB)
-            On exit this contains the Householder vectors of the transformation.
+    data    Structure with pointers to dA, dT, dV, dW, dY
+            which are distributed across multiple GPUs.
 
     Further Details
     ---------------

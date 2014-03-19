@@ -38,7 +38,7 @@
             K < N.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The number of columns to be reduced.
 
     @param[in,out]
@@ -48,7 +48,7 @@
             overwritten with the matrix Y.
 
     @param[out]
-    DV      COMPLEX_16 array on the GPU, dimension (N, NB)
+    dV      COMPLEX_16 array on the GPU, dimension (N, NB)
             On exit this contains the Householder vectors of the transformation.
 
     @param[in,out]

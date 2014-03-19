@@ -12,13 +12,13 @@
 
 /**
     Purpose
-    =======
+    -------
     Solves a system of linear equations
       A * X = B  or  A' * X = B
     with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
 
     Arguments
-    =========
+    ---------
     @param[in]
     trans   CHARACTER*1
             Specifies the form of the system of equations:
@@ -36,12 +36,12 @@
             of the matrix B.  NRHS >= 0.
 
     @param[in]
-    A       COMPLEX_16 array on the GPU, dimension (LDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDA,N)
             The factors L and U from the factorization A = P*L*U as computed
             by ZGETRF_GPU.
 
     @param[in]
-    lda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in]
@@ -50,21 +50,18 @@
             matrix was interchanged with row IPIV(i).
 
     @param[in,out]
-    B       COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
-    ldb     INTEGER
+    lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[out]
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
-
-    @param
-    HWORK   (workspace) COMPLEX_16 array, dimension N*NRHS
 
     @ingroup magma_zgesv_comp
     ********************************************************************/

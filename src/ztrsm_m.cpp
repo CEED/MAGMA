@@ -14,8 +14,8 @@
 extern "C" magma_int_t
 magma_get_ztrsm_m_nb() { return 128; }
 
-#define A(i, j) (a+(j)*nb*lda + (i)*nb)
-#define B(i, j) (b+(j)*nb*ldb + (i)*nb)
+#define A(i, j) (A + (j)*nb*lda + (i)*nb)
+#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
 
 #define dB(gpui, i, j) (dw[gpui] + (j)*nb*lddb + (i)*nb)
 
@@ -23,7 +23,7 @@ magma_get_ztrsm_m_nb() { return 128; }
 
 /**
     Purpose
-    =======
+    -------
     ZTRSM  solves one of the matrix equations
        op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
     where alpha is a scalar, X and B are m by n matrices, A is a unit, or
@@ -34,7 +34,11 @@ magma_get_ztrsm_m_nb() { return 128; }
     The matrix X is overwritten on B.
 
     Arguments
-    =========
+    ---------
+    @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
     @param[in]
     side    CHARACTER*1.
             On entry, SIDE specifies whether op( A ) appears on the left
@@ -115,11 +119,14 @@ magma_get_ztrsm_m_nb() { return 128; }
             max( 1, m ).
 
     @ingroup magma_zblas3
-    ===================================================================== */
+    ********************************************************************/
 extern "C" magma_int_t
-magma_ztrsm_m (magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t transa, magma_diag_t diag,
-         magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
-         magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb)
+magma_ztrsm_m(
+    magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo,
+    magma_trans_t transa, magma_diag_t diag,
+    magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *B, magma_int_t ldb)
 {
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;

@@ -55,7 +55,7 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    DA      COMPLEX_16 array on the GPU,
+    dA      COMPLEX_16 array on the GPU,
             dimension (LDDA, N).
             On entry, the Hermitian matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
@@ -74,9 +74,9 @@
             The leading dimension of the array DA.  LDDA >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -96,15 +96,15 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the required m eigenvalues in ascending order.
 
     @param
-    WA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
+    wA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
 
     @param[in]
     ldwa    INTEGER
-            The leading dimension of the array WA.  LDWA >= max(1,N).
+            The leading dimension of the array wA.  LDWA >= max(1,N).
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
@@ -183,10 +183,10 @@
 extern "C" magma_int_t
 magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                   magma_int_t n,
-                  magmaDoubleComplex *da, magma_int_t ldda,
+                  magmaDoubleComplex *dA, magma_int_t ldda,
                   double vl, double vu, magma_int_t il, magma_int_t iu,
                   magma_int_t *m, double *w,
-                  magmaDoubleComplex *wa,  magma_int_t ldwa,
+                  magmaDoubleComplex *wA,  magma_int_t ldwa,
                   magmaDoubleComplex *work, magma_int_t lwork,
                   double *rwork, magma_int_t lrwork,
                   magma_int_t *iwork, magma_int_t liwork,
@@ -220,7 +220,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_int_t alleig, valeig, indeig;
 
     double *dwork;
-    magmaDoubleComplex *dc;
+    magmaDoubleComplex *dC;
     magma_int_t lddc = ldda;
 
     wantz = (jobz == MagmaVec);
@@ -305,16 +305,16 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        magmaDoubleComplex *a;
-        magma_zmalloc_cpu( &a, n*n );
-        magma_zgetmatrix(n, n, da, ldda, a, n);
+        magmaDoubleComplex *A;
+        magma_zmalloc_cpu( &A, n*n );
+        magma_zgetmatrix(n, n, dA, ldda, A, n);
         lapackf77_zheevd(jobz_, uplo_,
-                         &n, a, &n,
+                         &n, A, &n,
                          w, work, &lwork,
                          rwork, &lrwork,
                          iwork, &liwork, info);
-        magma_zsetmatrix( n, n, a, n, da, ldda);
-        magma_free_cpu(a);
+        magma_zsetmatrix( n, n, A, n, dA, ldda);
+        magma_free_cpu(A);
         *m=n;
         return *info;
     }
@@ -322,7 +322,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_queue_t stream;
     magma_queue_create( &stream );
 
-    // dc and dwork are never used together, so use one buffer for both;
+    // dC and dwork are never used together, so use one buffer for both;
     // unfortunately they're different types (complex and double).
     // (this works better in dsyevd_gpu where they're both double).
     // n*lddc for zhetrd2_gpu, *2 for complex
@@ -336,7 +336,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    dc = (magmaDoubleComplex*) dwork;
+    dC = (magmaDoubleComplex*) dwork;
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
@@ -347,7 +347,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, da, ldda, dwork);
+    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, dA, ldda, dwork);
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {
@@ -358,7 +358,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da, ldda, info);
+        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, dA, ldda, info);
     }
 
     /* Call ZHETRD to reduce Hermitian matrix to tridiagonal form. */
@@ -381,12 +381,12 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     timer_start( time );
 
 #ifdef FAST_HEMV
-    magma_zhetrd2_gpu(uplo, n, da, ldda, w, &rwork[inde],
-                      &work[indtau], wa, ldwa, &work[indwrk], llwork,
-                      dc, n*lddc, &iinfo);
+    magma_zhetrd2_gpu(uplo, n, dA, ldda, w, &rwork[inde],
+                      &work[indtau], wA, ldwa, &work[indwrk], llwork,
+                      dC, n*lddc, &iinfo);
 #else
-    magma_zhetrd_gpu (uplo, n, da, ldda, w, &rwork[inde],
-                      &work[indtau], wa, ldwa, &work[indwrk], llwork, &iinfo);
+    magma_zhetrd_gpu (uplo, n, dA, ldda, w, &rwork[inde],
+                      &work[indtau], wA, ldwa, &work[indwrk], llwork, &iinfo);
 #endif
 
     timer_stop( time );
@@ -415,12 +415,12 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
-        magma_zsetmatrix( n, *m, &work[indwrk + n * (il-1) ], n, dc, lddc );
+        magma_zsetmatrix( n, *m, &work[indwrk + n * (il-1) ], n, dC, lddc );
 
-        magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
-                         dc, lddc, wa, ldwa, &iinfo);
+        magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, dA, ldda, &work[indtau],
+                         dC, lddc, wA, ldwa, &iinfo);
 
-        magma_zcopymatrix( n, *m, dc, lddc, da, ldda );
+        magma_zcopymatrix( n, *m, dC, lddc, dA, ldda );
 
         timer_stop( time );
         timer_printf( "time zunmtr_gpu + copy = %6.2f\n", time );

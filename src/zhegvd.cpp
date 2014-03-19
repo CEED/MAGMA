@@ -94,7 +94,7 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -181,7 +181,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb,
              double *w, magmaDoubleComplex *work, magma_int_t lwork,
              double *rwork, magma_int_t lrwork,
              magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
@@ -278,7 +278,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zhegvd(&itype, jobz_, uplo_,
-                         &n, a, &lda, b, &ldb,
+                         &n, A, &lda, B, &ldb,
                          w, work, &lwork,
                          #if defined(PRECISION_z) || defined(PRECISION_c)
                          rwork, &lrwork,
@@ -295,10 +295,10 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
     }
 
     /* Form a Cholesky factorization of B. */
-    magma_zsetmatrix( n, n, b, ldb, db, lddb );
+    magma_zsetmatrix( n, n, B, ldb, db, lddb );
 
     magma_zsetmatrix_async( n, n,
-                           a,  lda,
+                           A,  lda,
                            da, ldda, stream );
 
     magma_timer_t time;
@@ -314,7 +314,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
     magma_queue_sync( stream );
     magma_zgetmatrix_async( n, n,
                            db, lddb,
-                           b,  ldb, stream );
+                           B,  ldb, stream );
 
     timer_start( time );
     /* Transform problem to standard eigenvalue problem and solve. */
@@ -332,7 +332,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
     }
 
     timer_start( time );
-    magma_zheevd_gpu(jobz, uplo, n, da, ldda, w, a, lda,
+    magma_zheevd_gpu(jobz, uplo, n, da, ldda, w, A, lda,
                      work, lwork, rwork, lrwork, iwork, liwork, info);
     timer_stop( time );
     timer_printf( "time zheevd_gpu = %6.2f\n", time );
@@ -346,7 +346,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
-            magma_zsetmatrix( n, n, b, ldb, db, lddb );
+            magma_zsetmatrix( n, n, B, ldb, db, lddb );
         }
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
@@ -374,7 +374,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
                         n, n, c_one, db, lddb, da, ldda);
         }
 
-        magma_zgetmatrix( n, n, da, ldda, a, lda );
+        magma_zgetmatrix( n, n, da, ldda, A, lda );
         
         /* free db */
         if (n > 5000) {

@@ -12,13 +12,13 @@
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRS solves a system of linear equations A*X = B with a Hermitian
     positive definite matrix A using the Cholesky factorization
     A = U**H*U or A = L*L**H computed by ZPOTRF.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;

@@ -26,17 +26,17 @@
 //#define dlP(id, i, j)  (d_lP[id] + (j)*lddp + (i))
 //#define dlPT(id, i, j)  (d_lP[id] + (j)*nb    + (i))
 
-#define Alo(i, j)  (a   +            ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
-#define Aup(i, j)  (a   +(nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
+#define Alo(i, j)  (A +             ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
+#define Aup(i, j)  (A + (nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
 
-#define dlA(id, i, j)     (d_lA[(id)] + (j)*ldda + (i))
-#define dlP(id, i, j, k)  (d_lP[(id)] + (k)*nb*lddp + (j)*lddp + (i))
+#define  dlA(id, i, j)    (d_lA[(id)] + (j)*ldda + (i))
+#define  dlP(id, i, j, k) (d_lP[(id)] + (k)*nb*lddp + (j)*lddp + (i))
 #define dlPT(id, i, j, k) (d_lP[(id)] + (k)*nb*lddp + (j)*nb   + (i))
 
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
     positive definite matrix dA.
 
@@ -48,7 +48,7 @@
     This is the block version of the algorithm, calling Level 3 BLAS.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of dA is stored;
@@ -92,7 +92,7 @@ magma_zpotrf2_mgpu(int num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_t n
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    magmaDoubleComplex **d_lA,  magma_int_t ldda,
                    magmaDoubleComplex **d_lP,  magma_int_t lddp,
-                   magmaDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
+                   magmaDoubleComplex *A,      magma_int_t lda,   magma_int_t h,
                    magma_queue_t stream[][3], magma_event_t event[][5],
                    magma_int_t *info )
 {

@@ -113,9 +113,9 @@
 extern "C" magma_int_t
 magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
              magma_int_t m, magma_int_t n,
-             magmaDoubleComplex *a,    magma_int_t lda,
+             magmaDoubleComplex *A,    magma_int_t lda,
              magmaDoubleComplex *tau,
-             magmaDoubleComplex *c,    magma_int_t ldc,
+             magmaDoubleComplex *C,    magma_int_t ldc,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
 {
@@ -190,10 +190,10 @@ magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
     if (upper) {
         /* Q was determined by a call to SSYTRD with UPLO = 'U' */
         i__2 = nq - 1;
-        //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda,
-        //                 tau, c, &ldc, work, &lwork, &iinfo);
-        magma_zunmql(side, trans, mi, ni, i__2, &a[lda], lda, tau,
-                     c, ldc, work, lwork, &iinfo);
+        //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &A[lda], &lda,
+        //                 tau, C, &ldc, work, &lwork, &iinfo);
+        magma_zunmql(side, trans, mi, ni, i__2, &A[lda], lda, tau,
+                     C, ldc, work, lwork, &iinfo);
     }
     else {
         /* Q was determined by a call to SSYTRD with UPLO = 'L' */
@@ -205,8 +205,8 @@ magma_zunmtr(magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
             i2 = 1;
         }
         i__2 = nq - 1;
-        magma_zunmqr(side, trans, mi, ni, i__2, &a[1], lda, tau,
-                     &c[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
+        magma_zunmqr(side, trans, mi, ni, i__2, &A[1], lda, tau,
+                     &C[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
     }
 
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );

@@ -12,7 +12,7 @@
 
 /**
     Purpose
-    =======
+    -------
     Solves a system of linear equations
        A * X = B
     where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
@@ -24,7 +24,7 @@
     system of equations A * X = B.
 
     Arguments
-    =========
+    ---------
     @param[in]
     n       INTEGER
             The order of the matrix A.  N >= 0.

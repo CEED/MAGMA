@@ -14,8 +14,8 @@
 #include "common_magma.h"
 #include "trace.h"
 
-#define  A(i, j)     (a           + (j)*lda  + (i))
-#define dA(id, i, j) (da[(id)]    + (j)*ldda + (i))
+#define  A(i, j)     (A           + (j)*lda  + (i))
+#define dA(id, i, j) (dA[(id)]    + (j)*ldda + (i))
 #define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
 
 /**
@@ -142,7 +142,7 @@
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
     magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex *a, magma_int_t lda,
+    magmaDoubleComplex *A, magma_int_t lda,
     double *d, double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info)
@@ -205,7 +205,7 @@ magma_zhetrd_mgpu(
         return 0;
     }
 
-    magmaDoubleComplex *da[MagmaMaxGPUs];
+    magmaDoubleComplex *dA[MagmaMaxGPUs];
     magmaDoubleComplex *dwork[MagmaMaxGPUs];
 
     double times[11];
@@ -225,20 +225,20 @@ magma_zhetrd_mgpu(
     for( did=0; did < num_gpus; did++ ) {
         magma_setdevice(did);
         // TODO fix memory leak
-        if ( MAGMA_SUCCESS != magma_zmalloc(&da[did],     ln*ldda+3*lddwork*nb) ||
+        if ( MAGMA_SUCCESS != magma_zmalloc(&dA[did],     ln*ldda+3*lddwork*nb) ||
              MAGMA_SUCCESS != magma_zmalloc(&dx[did],     k*n     ) ||
              MAGMA_SUCCESS != magma_zmalloc(&dy[did],     k*n     ) ||
              MAGMA_SUCCESS != magma_zmalloc(&dwork2[did], ldwork2 ) ) {
             for( i=0; i < did; i++ ) {
                 magma_setdevice(i);
-                magma_free(da[i]);
+                magma_free(dA[i]);
                 magma_free(dx[i]);
                 magma_free(dy[i]);
             }
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
-        dwork[did] = da[did] + ln*ldda;
+        dwork[did] = dA[did] + ln*ldda;
         
         for( kk=0; kk < k; kk++ )
             magma_queue_create(&stream[did][kk]);
@@ -248,7 +248,7 @@ magma_zhetrd_mgpu(
     if ( MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, k*num_gpus*n ) ) {
         for( i=0; i < num_gpus; i++ ) {
             magma_setdevice(i);
-            magma_free(da[i]);
+            magma_free(dA[i]);
             magma_free(dx[i]);
             magma_free(dy[i]);
         }
@@ -264,7 +264,7 @@ magma_zhetrd_mgpu(
     if (upper) {
         /* Copy the matrix to the GPU */
         if (1 <= n-nx) {
-            magma_zhtodhe(num_gpus, uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
+            magma_zhtodhe(num_gpus, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
         }
 
         /*  Reduce the upper triangle of A.
@@ -284,7 +284,7 @@ magma_zhetrd_mgpu(
             magma_zlatrd_mgpu(num_gpus, uplo, n, i+ib, ib, nb,
                               A(0, 0), lda, e, tau,
                               work, ldwork,
-                              da, ldda, 0,
+                              dA, ldda, 0,
                               dwork, i+ib,
                               dwork2, ldwork2,
                               1, dx, dy, hwork,
@@ -292,7 +292,7 @@ magma_zhetrd_mgpu(
 
             magma_zher2k_mgpu(num_gpus, MagmaUpper, MagmaNoTrans, nb, i, ib,
                          c_neg_one, dwork, i+ib, 0,
-                         d_one,     da,    ldda, 0,
+                         d_one,     dA,    ldda, 0,
                          k, stream);
 
             /* get the next panel */
@@ -346,7 +346,7 @@ magma_zhetrd_mgpu(
         trace_init( 1, num_gpus, k, (CUstream_st**)stream );
         /* Copy the matrix to the GPU */
         if (1 <= n-nx) {
-            magma_zhtodhe(num_gpus, uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
+            magma_zhtodhe(num_gpus, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
         }
 
         /* Reduce the lower triangle of A */
@@ -377,7 +377,7 @@ magma_zhetrd_mgpu(
             magma_zlatrd_mgpu(num_gpus, uplo, n, n-i, ib, nb,
                               A(i, i), lda, &e[i],
                               &tau[i], work, ldwork,
-                              da, ldda, i,
+                              dA, ldda, i,
                               dwork,  (n-i),
                               dwork2, ldwork2,
                               1, dx, dy, hwork,
@@ -393,7 +393,7 @@ magma_zhetrd_mgpu(
 #endif
             magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib,
                          c_neg_one, dwork, n-i, ib,
-                         d_one, da, ldda, i+ib, k, stream);
+                         d_one, dA, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
             magma_setdevice(0);
             magma_event_record(stop, 0);
@@ -451,7 +451,7 @@ magma_zhetrd_mgpu(
             magma_queue_sync(stream[did][kk]);
         for( kk=0; kk < k; kk++ )
             magma_queue_destroy(stream[did][kk]);
-        magma_free(da[did]);
+        magma_free(dA[did]);
         magma_free(dx[did]);
         magma_free(dy[did]);
         magma_free(dwork2[did]);
@@ -472,8 +472,8 @@ magma_zhetrd_mgpu(
 
 extern "C" magma_int_t
 magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-              magmaDoubleComplex *a, magma_int_t lda,
-              magmaDoubleComplex **da, magma_int_t ldda,
+              magmaDoubleComplex *A, magma_int_t lda,
+              magmaDoubleComplex **dA, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
 {
     magma_int_t k;

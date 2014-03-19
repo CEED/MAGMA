@@ -93,14 +93,14 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
+                 magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau,
                  magmaDoubleComplex *work, magma_int_t lwork,
                  magma_int_t *info )
 {
-    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-    #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
+    #define  A(a_1,a_2) ( A + (a_2)*(lda) + (a_1))
+    #define dA(a_1,a_2) (dA + (a_2)*ldda  + (a_1))
 
-    magmaDoubleComplex *da, *dwork;
+    magmaDoubleComplex *dA, *dwork;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     int  k, lddwork, ldda;
@@ -136,7 +136,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     NB = (NB / nb) * nb;
 
     if (NB >= n)
-        return magma_zgeqrf(m, n, a, lda, tau, work, lwork, info);
+        return magma_zgeqrf(m, n, A, lda, tau, work, lwork, info);
 
     k = min(m,n);
     if (k == 0) {
@@ -147,7 +147,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     lddwork = ((NB+31)/32)*32+nb;
     ldda    = ((m+31)/32)*32;
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, (NB + nb)*ldda + nb*lddwork )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, (NB + nb)*ldda + nb*lddwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -158,8 +158,8 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
     //   magmablasSetKernelStream(stream[1]);
 
-    magmaDoubleComplex *ptr = da + ldda * NB;
-    dwork = da + ldda*(NB + nb);
+    magmaDoubleComplex *ptr = dA + ldda * NB;
+    dwork = dA + ldda*(NB + nb);
 
     /* start the main loop over the blocks that fit in the GPU memory */
     for (int i=0; i < n; i += NB) {
@@ -168,8 +168,8 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
         /* 1. Copy the next part of the matrix to the GPU */
         magma_zsetmatrix_async( (m), IB,
-                                a_ref(0,i),  lda,
-                                da_ref(0,0), ldda, stream[0] );
+                                A(0,i),  lda,
+                                dA(0,0), ldda, stream[0] );
         magma_queue_sync( stream[0] );
 
         /* 2. Update it with the previous transformations */
@@ -185,40 +185,40 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             //   6. Restore the upper part of V.
             magma_int_t rows = m-j;
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
-                              &rows, &ib, a_ref(j,j), &lda, tau+j, work, &ib);
+                              &rows, &ib, A(j,j), &lda, tau+j, work, &ib);
             magma_zsetmatrix_async( ib, ib,
                                     work,  ib,
                                     dwork, lddwork, stream[1] );
 
-            zpanel_to_q(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
+            zpanel_to_q(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
             magma_zsetmatrix_async( rows, ib,
-                                    a_ref(j,j), lda,
+                                    A(j,j), lda,
                                     ptr,        rows, stream[1] );
             magma_queue_sync( stream[1] );
 
             magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                               rows, IB, ib,
                               ptr, rows, dwork,    lddwork,
-                              da_ref(j, 0), ldda, dwork+ib, lddwork);
+                              dA(j, 0), ldda, dwork+ib, lddwork);
 
-            zq_to_panel(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
+            zq_to_panel(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
         }
 
         /* 3. Do a QR on the current part */
         if (i < k)
-            magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
+            magma_zgeqrf2_gpu(m-i, IB, dA(i,0), ldda, tau+i, info);
 
         /* 4. Copy the current part back to the CPU */
         magma_zgetmatrix_async( (m), IB,
-                                da_ref(0,0), ldda,
-                                a_ref(0,i),  lda, stream[0] );
+                                dA(0,0), ldda,
+                                A(0,i),  lda, stream[0] );
     }
 
     magma_queue_sync( stream[0] );
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
-    magma_free( da );
+    magma_free( dA );
 
     return *info;
 } /* magma_zgeqrf_ooc */

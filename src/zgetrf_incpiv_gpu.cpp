@@ -19,7 +19,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF_INCPIV computes an LU factorization of a general M-by-N tile A
     using partial pivoting with row interchanges.
 
@@ -34,7 +34,7 @@
     This is the right-looking Level 2.5 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.

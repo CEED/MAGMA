@@ -92,18 +92,18 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
-                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, magma_int_t  *lda,
-                 magmaDoubleComplex  *tau, magmaDoubleComplex *work,
+                 magmaDoubleComplex *A1, magmaDoubleComplex *A2, magma_int_t  *lda,
+                 magmaDoubleComplex *tau, magmaDoubleComplex *work,
                  magma_int_t *lwork, magmaDoubleComplex *dwork, magma_int_t *info )
 {
-    #define a1_ref(a_1,a_2) ( a1+(a_2)*(*lda) + (a_1))
-    #define a2_ref(a_1,a_2) ( a2+(a_2)*(*lda) + (a_1))
-    #define t_ref(a_1)     (dwork+(a_1))
-    #define d_ref(a_1)     (dwork+(lddwork+(a_1))*nb)
-    #define dd_ref(a_1)    (dwork+(2*lddwork+(a_1))*nb)
-    #define work_a1        ( work )
-    #define work_a2        ( work + nb )
-    #define hwork          ( work + (nb)*(*m))
+    #define A1(a_1,a_2) (A1 + (a_2)*(*lda) + (a_1))
+    #define A2(a_1,a_2) (A2 + (a_2)*(*lda) + (a_1))
+    #define t_ref(a_1)  (dwork + (a_1))
+    #define d_ref(a_1)  (dwork + (lddwork+(a_1))*nb)
+    #define dd_ref(a_1) (dwork + (2*lddwork+(a_1))*nb)
+    #define work_A1     (work)
+    #define work_A2     (work + nb)
+    #define hwork       (work + (nb)*(*m))
     
     magma_int_t i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
     magma_int_t nbmin, ib, ldda;
@@ -154,26 +154,26 @@ magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
         rows = *m -i;
         rows = *m;
         // Send the next panel (diagonal block of A1 & block column of A2)
-        // to the CPU (in work_a1 and work_a2)
+        // to the CPU (in work_A1 and work_A2)
         magma_zgetmatrix_async( rows, ib,
-                                a2_ref(0,i), (*lda),
-                                work_a2,     ldwork, stream[1] );
+                                A2(0,i), (*lda),
+                                work_A2,     ldwork, stream[1] );
         
-                            // a1_ref(i,i), (*lda)*sizeof(magmaDoubleComplex),
-                            // the diagonal of a1 is in d_ref generated and
+                            // A1(i,i), (*lda)*sizeof(magmaDoubleComplex),
+                            // the diagonal of A1 is in d_ref generated and
                             // passed from magma_zgeqrf_gpu
         magma_zgetmatrix_async( ib, ib,
                                 d_ref(i), ib,
-                                work_a1,  ldwork, stream[1] );
+                                work_A1,  ldwork, stream[1] );
         
         if (i > 0) {
             /* Apply H' to A(i:m,i+2*ib:n) from the left */
             // update T2
             cols = *n-old_i-2*old_ib;
             magma_zssrfb(*m, cols, &old_ib,
-                         a2_ref(    0, old_i), lda, t_ref(old_i), &lddwork,
-                         a1_ref(old_i, old_i+2*old_ib), lda,
-                         a2_ref(    0, old_i+2*old_ib), lda,
+                         A2(    0, old_i), lda, t_ref(old_i), &lddwork,
+                         A1(old_i, old_i+2*old_ib), lda,
+                         A2(    0, old_i+2*old_ib), lda,
                          dd_ref(0), &lddwork);
         }
         
@@ -186,10 +186,10 @@ magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
         // Now diag of A1 is updated, send it back asynchronously to the GPU.
         // We have to play interchaning these copies to see which is faster
         magma_zsetmatrix_async( ib, ib,
-                                work_a1,  ib,
+                                work_A1,  ib,
                                 d_ref(i), ib, stream[0] );
         // Send the panel from A2 back to the GPU
-        magma_zsetmatrix( *m, ib, work_a2, ldwork, a2_ref(0,i), *lda );
+        magma_zsetmatrix( *m, ib, work_A2, ldwork, A2(0,i), *lda );
         
         if (i + ib < *n) {
             // Send the triangular factor T from hwork to the GPU in t_ref(i)
@@ -199,18 +199,18 @@ magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
                 /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                 // if we can do one more step, first update T1
                 magma_zssrfb(*m, ib, &ib,
-                             a2_ref(0, i),    lda, t_ref(i), &lddwork,
-                             a1_ref(i, i+ib), lda,
-                             a2_ref(0, i+ib), lda,
+                             A2(0, i),    lda, t_ref(i), &lddwork,
+                             A1(i, i+ib), lda,
+                             A2(0, i+ib), lda,
                              dd_ref(0), &lddwork);
             }
             else {
                 cols = *n-i-ib;
                 // otherwise, update until the end and fix the panel
                 magma_zssrfb(*m, cols, &ib,
-                             a2_ref(0, i),    lda, t_ref(i), &lddwork,
-                             a1_ref(i, i+ib), lda,
-                             a2_ref(0, i+ib), lda,
+                             A2(0, i),    lda, t_ref(i), &lddwork,
+                             A1(i, i+ib), lda,
+                             A2(0, i+ib), lda,
                              dd_ref(0), &lddwork);
             }
             old_i = i;
@@ -221,11 +221,11 @@ magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
     return *info;
 } /* magma_ztsqrt_gpu */
 
-#undef a1_ref
-#undef a2_ref
+#undef A1
+#undef A2
 #undef t_ref
 #undef d_ref
 #undef dd_ref
 #undef hwork
-#undef work_a1
-#undef work_a2
+#undef work_A1
+#undef work_A2

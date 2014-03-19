@@ -13,7 +13,7 @@
 #include "timer.h"
 
 
-#define    A(i, j)    (    a      + (j)*lda   + (i))
+#define    A(i, j)    (    A      + (j)*lda   + (i))
 #define   dA(d, i, j) (dwork[(d)] + (j)*lddla + (i))
 #define   dT(d, i, j) (   dt[(d)] + (j)*ldda  + (i))
 #define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
@@ -21,7 +21,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRF_OOC computes the Cholesky factorization of a complex Hermitian
     positive definite matrix A. This version does not require work
     space on the GPU passed as input. GPU memory is allocated in the
@@ -35,7 +35,7 @@
     This is the block version of the algorithm, calling Level 3 BLAS.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
@@ -78,7 +78,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+               magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
     /* Local variables */
     double                 d_one     =  1.0;
@@ -167,7 +167,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
     timer_start( time_total );
 
     if (nb <= 1 || nb >= n) {
-        lapackf77_zpotrf(uplo_, &n, a, &lda, info);
+        lapackf77_zpotrf(uplo_, &n, A, &lda, info);
     } else {
 
     /* Use hybrid blocked code. */
@@ -188,7 +188,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             }
             
             /* load the new big-panel by block-rows */
-            magma_zhtodpo( num_gpus, uplo, JB, n, J, J, nb, a, lda, dwork, NB, stream, &iinfo);
+            magma_zhtodpo( num_gpus, uplo, JB, n, J, J, nb, A, lda, dwork, NB, stream, &iinfo);
             
             /* update with the previous big-panels */
             timer_start( time );
@@ -285,10 +285,10 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             h  = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
             // using two streams
             //magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb,
-            //                   dwork, NB, dt, ldda, a, lda, h, stream, event, &iinfo);
+            //                   dwork, NB, dt, ldda, A, lda, h, stream, event, &iinfo);
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb,
-                               dwork, NB, dt, ldda, a, lda, h, stream, event, &iinfo);
+                               dwork, NB, dt, ldda, A, lda, h, stream, event, &iinfo);
             if ( iinfo != 0 ) {
                 *info = J+iinfo;
                 break;
@@ -296,8 +296,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             time_sum += timer_stop( time );
             
             /* upload the off-diagonal (and diagonal!!!) big panel */
-            magma_zdtohpo(num_gpus, uplo, JB, n, J, J, nb, NB, a, lda, dwork, NB, stream, &iinfo);
-            //magma_zdtohpo(num_gpus, uplo, JB, n, J, J, nb, 0, a, lda, dwork, NB, stream, &iinfo);
+            magma_zdtohpo(num_gpus, uplo, JB, n, J, J, nb, NB, A, lda, dwork, NB, stream, &iinfo);
+            //magma_zdtohpo(num_gpus, uplo, JB, n, J, J, nb, 0, A, lda, dwork, NB, stream, &iinfo);
         }
     } else {
         /* ========================================================= *
@@ -314,7 +314,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             }
             
             /* load the new big-panel by block-columns */
-            magma_zhtodpo( num_gpus, uplo, n, JB, J, J, nb, a, lda, dwork, lddla, stream, &iinfo);
+            magma_zhtodpo( num_gpus, uplo, n, JB, J, J, nb, A, lda, dwork, lddla, stream, &iinfo);
             
             /* update with the previous big-panels */
             timer_start( time );
@@ -409,10 +409,10 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             h = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
             // using two streams
             //magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb,
-            //                   dwork, lddla, dt, ldda, a, lda, h, stream, event, &iinfo);
+            //                   dwork, lddla, dt, ldda, A, lda, h, stream, event, &iinfo);
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb,
-                               dwork, lddla, dt, ldda, a, lda, h, stream, event, &iinfo);
+                               dwork, lddla, dt, ldda, A, lda, h, stream, event, &iinfo);
             if ( iinfo != 0 ) {
                 *info = J+iinfo;
                 break;
@@ -420,7 +420,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
             time_sum += timer_stop( time );
             
             /* upload the off-diagonal big panel */
-            magma_zdtohpo( num_gpus, uplo, n, JB, J, J, nb, JB, a, lda, dwork, lddla, stream, &iinfo);
+            magma_zdtohpo( num_gpus, uplo, n, JB, J, J, nb, JB, A, lda, dwork, lddla, stream, &iinfo);
         
         } /* end of for J */
     } /* if upper */

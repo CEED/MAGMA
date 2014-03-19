@@ -15,7 +15,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZSSSSM applies the LU factorization update from a complex
     matrix formed by a lower triangular IB-by-K tile L1 on top of a
     M2-by-K tile L2 to a second complex matrix formed by a M1-by-N1
@@ -24,21 +24,21 @@
     This is the right-looking Level 2.5 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
-    M1      INTEGER
+    m1      INTEGER
             The number of rows of the matrix A1.  M1 >= 0.
 
     @param[in]
-    N1      INTEGER
+    n1      INTEGER
             The number of columns of the matrix A1.  N1 >= 0.
 
     @param[in]
-    M2      INTEGER
+    m2      INTEGER
             The number of rows of the matrix A2.  M2 >= 0.
 
     @param[in]
-    N2      INTEGER
+    n2      INTEGER
             The number of columns of the matrix A2.  N2 >= 0.
 
     @param[in]
@@ -55,7 +55,7 @@
             On exit, dA1 is updated by the application of dL (dL1 dL2).
 
     @param[in]
-    LDDA1   INTEGER
+    ldda1   INTEGER
             The leading dimension of the array dA1.  LDDA1 >= max(1,M1).
 
     @param[in,out]
@@ -64,7 +64,7 @@
             On exit, dA2 is updated by the application of dL (dL1 dL2).
 
     @param[in]
-    LDDA2   INTEGER
+    ldda2   INTEGER
             The leading dimension of the array dA2.  LDDA2 >= max(1,M2).
 
     @param[in]
@@ -73,7 +73,7 @@
             ZTSTRF.
 
     @param[in]
-    LDDL1   INTEGER
+    lddl1   INTEGER
             The leading dimension of the array L1.  LDDL1 >= max(1,2*IB).
 
     @param[in]
@@ -81,7 +81,7 @@
             The M2-by-K tile as returned by ZTSTRF.
 
     @param[in]
-    LDDL2   INTEGER
+    lddl2   INTEGER
             The leading dimension of the array L2.  LDDL2 >= max(1,M2).
 
     @param[in]
@@ -97,7 +97,7 @@ magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
                  magmaDoubleComplex *dA2, magma_int_t ldda2,
                  magmaDoubleComplex *dL1, magma_int_t lddl1,
                  magmaDoubleComplex *dL2, magma_int_t lddl2,
-                 magma_int_t *IPIV, magma_int_t *info)
+                 magma_int_t *ipiv, magma_int_t *info)
 {
 #define A1T(i,j) (dA1T + (i)*ldda1 + (j))
 #define A2T(i,j) (dA2T + (i)*ldda2 + (j))
@@ -174,12 +174,12 @@ magma_zssssm_gpu(magma_order_t order, magma_int_t m1, magma_int_t n1,
         magmablas_zswapblk( MagmaRowMajor, n1,
                             A1T(0, 0), ldda1,
                             A2T(0, 0), ldda2,
-                            ii+1, ii+ib, IPIV, 1, m1 );
+                            ii+1, ii+ib, ipiv, 1, m1 );
 #else
         {
             int im;
             for (i=0; i < ib; i++) {
-                im = IPIV[ip]-1;
+                im = ipiv[ip]-1;
 
                 if (im != (ii+i)) {
                     im = im - m1;

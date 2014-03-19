@@ -35,7 +35,7 @@
             Number of rows of the matrix Am (see details below)
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             Block size
 
     @param[out]
@@ -50,38 +50,8 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in,out]
-    DA      COMPLEX_16 array on the GPU, dimension
-            (N,N-K). On entry, the N-by-(N-K) general matrix to be updated.
-            On exit, the 1st K rows (matrix Am) of A are updated by
-            applying an orthogonal transformation from the right
-            Am = Am (I-V T V'), and sub-matrix Ag is updated by
-            Ag = (I - V T V') Ag (I - V T V(NB+1:)' )
-            where Q = I - V T V' represent the orthogonal matrix
-            (as a product of elementary reflectors V) used to reduce
-            the current panel of A to upper Hessenberg form. After Am
-            is updated Am(:,1:NB) is sent to the CPU.
-            See Further Details below.
-
-    @param[in]
-    DY      (workspace) COMPLEX_16 array on the GPU, dimension
-            (N, NB). On entry the (N-K)-by-NB Y = A V. It is used internally
-            as workspace, so its value is changed on exit.
-
-    @param[in]
-    DV      (workspace) COMPLEX_16 array on the GPU, dimension
-            (N, NB). On entry the (N-K)-by-NB matrix V of elementary reflectors
-            used to reduce the current panel of A to upper Hessenberg form.
-            The rest K-by-NB part is used as workspace. V is unchanged on
-            exit.
-
-    @param[in]
-    DT      COMPLEX_16 array on the GPU, dimension (NB, NB).
-            On entry the NB-by-NB upper trinagular matrix defining the
-            orthogonal Hessenberg reduction transformation matrix for
-            the current panel. The lower triangular part are 0s.
-
-    @param
-    DWORK   (workspace) COMPLEX_16 array on the GPU, dimension N*NB.
+    data    Structure with pointers to dA, dT, dV, dW, dY
+            which are distributed across multiple GPUs.
 
     Further Details
     ---------------

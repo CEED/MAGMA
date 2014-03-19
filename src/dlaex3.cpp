@@ -18,7 +18,7 @@
 #include "timer.h"
 #include <cblas.h>
 
-#define Q(ix, iy) (q + (ix) + ldq * (iy))
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
 
 extern "C" {
 
@@ -63,16 +63,8 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
 }  // end extern "C"
 
 
-extern "C" magma_int_t
-magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
-             double* q, magma_int_t ldq, double rho,
-             double* dlamda, double* q2, magma_int_t* indx,
-             magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
-             double* dwork,
-             magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
-             magma_int_t* info )
-{
-/**    Purpose
+/**
+    Purpose
     -------
     DLAEX3 finds the roots of the secular equation, as defined by the
     values in D, W, and RHO, between 1 and K.  It makes the
@@ -106,7 +98,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
             N >= K (deflation may result in N > K).
 
     @param[in]
-    N1      INTEGER
+    n1      INTEGER
             The location of the last eigenvalue in the leading submatrix.
             min(1,N) <= N1 <= N/2.
 
@@ -131,7 +123,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
             RHO >= 0 required.
 
     @param[in,out]
-    DLAMDA  DOUBLE PRECISION array, dimension (K)
+    dlamda  DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the old roots
             of the deflated updating problem.  These are the poles
             of the secular equation. May be changed on output by
@@ -142,28 +134,29 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     Q2      DOUBLE PRECISION array, dimension (LDQ2, N)
             The first K columns of this matrix contain the non-deflated
             eigenvectors for the split problem.
+            TODO what is LDQ2?
 
     @param[in]
-    INDX    INTEGER array, dimension (N)
+    indx    INTEGER array, dimension (N)
             The permutation used to arrange the columns of the deflated
             Q matrix into three groups (see DLAED2).
             The rows of the eigenvectors found by DLAED4 must be likewise
             permuted before the matrix multiply can take place.
 
     @param[in]
-    CTOT    INTEGER array, dimension (4)
+    ctot    INTEGER array, dimension (4)
             A count of the total number of the various types of columns
             in Q, as described in INDX.  The fourth column type is any
             column which has been deflated.
 
     @param[in,out]
-    W       DOUBLE PRECISION array, dimension (K)
+    w       DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the components
             of the deflation-adjusted updating vector. Destroyed on
             output.
 
     @param
-    S       (workspace) DOUBLE PRECISION array, dimension (N1 + 1)*K
+    s       (workspace) DOUBLE PRECISION array, dimension (N1 + 1)*K
             Will contain the eigenvectors of the repaired matrix which
             will be multiplied by the previously accumulated eigenvectors
             to update the system.
@@ -176,6 +169,31 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     @param
     dwork   (workspace) DOUBLE PRECISION array, dimension (3*N*N/2+3*N)
+
+    @param[in]
+    range   CHARACTER*1
+      -     = 'A': all eigenvalues will be found.
+      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
+                   will be found.
+      -     = 'I': the IL-th through IU-th eigenvalues will be found.
+            TODO verify range, vl, vu, il, iu -- copied from dlaex1.
+
+    @param[in]
+    vl      DOUBLE PRECISION
+    @param[in]
+    vu      DOUBLE PRECISION
+            if RANGE='V', the lower and upper bounds of the interval to
+            be searched for eigenvalues. VL < VU.
+            Not referenced if RANGE = 'A' or 'I'.
+
+    @param[in]
+    il      INTEGER
+    @param[in]
+    iu      INTEGER
+            if RANGE='I', the indices (in ascending order) of the
+            smallest and largest eigenvalues to be returned.
+            1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
+            Not referenced if RANGE = 'A' or 'V'.
 
     @param[out]
     info    INTEGER
@@ -192,7 +210,15 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     @ingroup magma_dsyev_aux
     ********************************************************************/
-
+extern "C" magma_int_t
+magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
+             double* Q, magma_int_t ldq, double rho,
+             double* dlamda, double* Q2, magma_int_t* indx,
+             magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
+             double* dwork,
+             magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
+             magma_int_t* info )
+{
     double d_one  = 1.;
     double d_zero = 0.;
     magma_int_t ione = 1;
@@ -271,7 +297,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     iq2 = n1 * n12;
     lq2 = iq2 + n2 * n23;
 
-    magma_dsetvector_async( lq2, q2, 1, dq2, 1, NULL );
+    magma_dsetvector_async( lq2, Q2, 1, dq2, 1, NULL );
 
 #ifdef _OPENMP
     /////////////////////////////////////////////////////////////////////////////////
@@ -447,7 +473,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
         // Initialize W(I) = Q(I,I)
         tmp = ldq + 1;
-        blasf77_dcopy( &k, q, &tmp, w, &ione);
+        blasf77_dcopy( &k, Q, &tmp, w, &ione);
 
         for (j = 0; j < k; ++j) {
             for (i = 0; i < j; ++i)
@@ -484,7 +510,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         if ( n23 != 0 ) {
             if (rk < magma_get_dlaed3_k()) {
                 lapackf77_dlacpy("A", &n23, &rk, Q(ctot[0],iil-1), &ldq, s, &n23);
-                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &q2[iq2], &n2,
+                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &Q2[iq2], &n2,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             } else {
                 magma_dsetmatrix( n23, rk, Q(ctot[0],iil-1), ldq, ds, n23 );
@@ -497,7 +523,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         if ( n12 != 0 ) {
             if (rk < magma_get_dlaed3_k()) {
                 lapackf77_dlacpy("A", &n12, &rk, Q(0,iil-1), &ldq, s, &n12);
-                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, q2, &n1,
+                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, Q2, &n1,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);
             } else {
                 magma_dsetmatrix( n12, rk, Q(0,iil-1), ldq, ds, n12 );

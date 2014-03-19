@@ -70,9 +70,9 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
-    WR      DOUBLE PRECISION array, dimension (N)
+    wr      DOUBLE PRECISION array, dimension (N)
     @param[out]
-    WI      DOUBLE PRECISION array, dimension (N)
+    wi      DOUBLE PRECISION array, dimension (N)
             WR and WI contain the real and imaginary parts,
             respectively, of the computed eigenvalues.  Complex
             conjugate pairs of eigenvalues appear consecutively
@@ -134,14 +134,14 @@ extern "C" magma_int_t
 magma_dgeev(
     magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
     double *A, magma_int_t lda,
-    double *WR, double *WI,
-    double *vl, magma_int_t ldvl,
-    double *vr, magma_int_t ldvr,
+    double *wr, double *wi,
+    double *VL, magma_int_t ldvl,
+    double *VR, magma_int_t ldvr,
     double *work, magma_int_t lwork,
     magma_int_t *info )
 {
-    #define vl(i,j)  (vl + (i) + (j)*ldvl)
-    #define vr(i,j)  (vr + (i) + (j)*ldvr)
+    #define VL(i,j)  (VL + (i) + (j)*ldvl)
+    #define VR(i,j)  (VR + (i) + (j)*ldvr)
     
     magma_int_t c_one = 1;
     magma_int_t c_zero = 0;
@@ -267,7 +267,7 @@ magma_dgeev(
          * Copy Householder vectors to VL */
         side_ = "Left";
         lapackf77_dlacpy( MagmaLowerStr, &n, &n,
-                          A, &lda, vl, &ldvl );
+                          A, &lda, VL, &ldvl );
 
         /* Generate orthogonal matrix in VL
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
@@ -275,11 +275,11 @@ magma_dgeev(
         flops_start( flop_unghr );
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
-            lapackf77_dorghr( &n, &ilo, &ihi, vl, &ldvl, &work[itau],
+            lapackf77_dorghr( &n, &ilo, &ihi, VL, &ldvl, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(VERSION3)
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
-            magma_dorghr( n, ilo, ihi, vl, ldvl, &work[itau], dT, nb, &ierr );
+            magma_dorghr( n, ilo, ihi, VL, ldvl, &work[itau], dT, nb, &ierr );
         #endif
         time_sum += timer_stop( time_unghr );
         flop_sum += flops_stop( flop_unghr );
@@ -290,8 +290,8 @@ magma_dgeev(
          * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, WR, WI,
-                          vl, &ldvl, &work[iwrk], &liwrk, info );
+        lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, wr, wi,
+                          VL, &ldvl, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
 
@@ -299,14 +299,14 @@ magma_dgeev(
             /* Want left and right eigenvectors
              * Copy Schur vectors to VR */
             side_ = "Both";
-            lapackf77_dlacpy( "F", &n, &n, vl, &ldvl, vr, &ldvr );
+            lapackf77_dlacpy( "F", &n, &n, VL, &ldvl, VR, &ldvr );
         }
     }
     else if (wantvr) {
         /* Want right eigenvectors
          * Copy Householder vectors to VR */
         side_ = "Right";
-        lapackf77_dlacpy( "L", &n, &n, A, &lda, vr, &ldvr );
+        lapackf77_dlacpy( "L", &n, &n, A, &lda, VR, &ldvr );
 
         /* Generate orthogonal matrix in VR
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
@@ -314,11 +314,11 @@ magma_dgeev(
         flops_start( flop_unghr );
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
-            lapackf77_dorghr( &n, &ilo, &ihi, vr, &ldvr, &work[itau],
+            lapackf77_dorghr( &n, &ilo, &ihi, VR, &ldvr, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(VERSION3)
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
-            magma_dorghr( n, ilo, ihi, vr, ldvr, &work[itau], dT, nb, &ierr );
+            magma_dorghr( n, ilo, ihi, VR, ldvr, &work[itau], dT, nb, &ierr );
         #endif
         time_sum += timer_stop( time_unghr );
         flop_sum += flops_stop( flop_unghr );
@@ -329,8 +329,8 @@ magma_dgeev(
         flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, WR, WI,
-                          vr, &ldvr, &work[iwrk], &liwrk, info );
+        lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, wr, wi,
+                          VR, &ldvr, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
     }
@@ -341,8 +341,8 @@ magma_dgeev(
         flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_dhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, WR, WI,
-                          vr, &ldvr, &work[iwrk], &liwrk, info );
+        lapackf77_dhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, wr, wi,
+                          VR, &ldvr, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
     }
@@ -359,11 +359,11 @@ magma_dgeev(
          * (Workspace: need 4*N) */
         liwrk = lwork - iwrk;
         #if TREVC_VERSION == 1
-        lapackf77_dtrevc( side_, "B", select, &n, A, &lda, vl, &ldvl,
-                          vr, &ldvr, &n, &nout, &work[iwrk], &ierr );
+        lapackf77_dtrevc( side_, "B", select, &n, A, &lda, VL, &ldvl,
+                          VR, &ldvr, &n, &nout, &work[iwrk], &ierr );
         #elif TREVC_VERSION == 2
-        lapackf77_dtrevc3( side_, "B", select, &n, A, &lda, vl, &ldvl,
-                           vr, &ldvr, &n, &nout, &work[iwrk], &liwrk, &ierr );
+        lapackf77_dtrevc3( side_, "B", select, &n, A, &lda, VL, &ldvl,
+                           VR, &ldvr, &n, &nout, &work[iwrk], &liwrk, &ierr );
         #endif
     }
     time_sum += timer_stop( time_trevc );
@@ -373,30 +373,30 @@ magma_dgeev(
         /* Undo balancing of left eigenvectors
          * (Workspace: need N) */
         lapackf77_dgebak( "B", "L", &n, &ilo, &ihi, &work[ibal], &n,
-                          vl, &ldvl, &ierr );
+                          VL, &ldvl, &ierr );
 
         /* Normalize left eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
-            if ( WI[i] == 0. ) {
-                scl = 1. / cblas_dnrm2( n, vl(0,i), 1 );
-                cblas_dscal( n, scl, vl(0,i), 1 );
+            if ( wi[i] == 0. ) {
+                scl = 1. / cblas_dnrm2( n, VL(0,i), 1 );
+                cblas_dscal( n, scl, VL(0,i), 1 );
             }
-            else if ( WI[i] > 0. ) {
-                d__1 = cblas_dnrm2( n, vl(0,i),   1 );
-                d__2 = cblas_dnrm2( n, vl(0,i+1), 1 );
+            else if ( wi[i] > 0. ) {
+                d__1 = cblas_dnrm2( n, VL(0,i),   1 );
+                d__2 = cblas_dnrm2( n, VL(0,i+1), 1 );
                 scl = 1. / lapackf77_dlapy2( &d__1, &d__2 );
-                cblas_dscal( n, scl, vl(0,i),   1 );
-                cblas_dscal( n, scl, vl(0,i+1), 1 );
+                cblas_dscal( n, scl, VL(0,i),   1 );
+                cblas_dscal( n, scl, VL(0,i+1), 1 );
                 for (k = 0; k < n; ++k) {
                     /* Computing 2nd power */
-                    d__1 = *vl(k,i);
-                    d__2 = *vl(k,i+1);
+                    d__1 = *VL(k,i);
+                    d__2 = *VL(k,i+1);
                     work[iwrk + k] = d__1*d__1 + d__2*d__2;
                 }
                 k = cblas_idamax( n, &work[iwrk], 1 );
-                lapackf77_dlartg( vl(k,i), vl(k,i+1), &cs, &sn, &r );
-                cblas_drot( n, vl(0,i), 1, vl(0,i+1), 1, cs, sn );
-                *vl(k,i+1) = 0.;
+                lapackf77_dlartg( VL(k,i), VL(k,i+1), &cs, &sn, &r );
+                cblas_drot( n, VL(0,i), 1, VL(0,i+1), 1, cs, sn );
+                *VL(k,i+1) = 0.;
             }
         }
     }
@@ -405,30 +405,30 @@ magma_dgeev(
         /* Undo balancing of right eigenvectors
          * (Workspace: need N) */
         lapackf77_dgebak( "B", "R", &n, &ilo, &ihi, &work[ibal], &n,
-                          vr, &ldvr, &ierr );
+                          VR, &ldvr, &ierr );
 
         /* Normalize right eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
-            if ( WI[i] == 0. ) {
-                scl = 1. / cblas_dnrm2( n, vr(0,i), 1 );
-                cblas_dscal( n, scl, vr(0,i), 1 );
+            if ( wi[i] == 0. ) {
+                scl = 1. / cblas_dnrm2( n, VR(0,i), 1 );
+                cblas_dscal( n, scl, VR(0,i), 1 );
             }
-            else if ( WI[i] > 0. ) {
-                d__1 = cblas_dnrm2( n, vr(0,i),   1 );
-                d__2 = cblas_dnrm2( n, vr(0,i+1), 1 );
+            else if ( wi[i] > 0. ) {
+                d__1 = cblas_dnrm2( n, VR(0,i),   1 );
+                d__2 = cblas_dnrm2( n, VR(0,i+1), 1 );
                 scl = 1. / lapackf77_dlapy2( &d__1, &d__2 );
-                cblas_dscal( n, scl, vr(0,i),   1 );
-                cblas_dscal( n, scl, vr(0,i+1), 1 );
+                cblas_dscal( n, scl, VR(0,i),   1 );
+                cblas_dscal( n, scl, VR(0,i+1), 1 );
                 for (k = 0; k < n; ++k) {
                     /* Computing 2nd power */
-                    d__1 = *vr(k,i);
-                    d__2 = *vr(k,i+1);
+                    d__1 = *VR(k,i);
+                    d__2 = *VR(k,i+1);
                     work[iwrk + k] = d__1*d__1 + d__2*d__2;
                 }
                 k = cblas_idamax( n, &work[iwrk], 1 );
-                lapackf77_dlartg( vr(k,i), vr(k,i+1), &cs, &sn, &r );
-                cblas_drot( n, vr(0,i), 1, vr(0,i+1), 1, cs, sn );
-                *vr(k,i+1) = 0.;
+                lapackf77_dlartg( VR(k,i), VR(k,i+1), &cs, &sn, &r );
+                cblas_drot( n, VR(0,i), 1, VR(0,i+1), 1, cs, sn );
+                *VR(k,i+1) = 0.;
             }
         }
     }
@@ -439,15 +439,15 @@ CLEANUP:
         i__1 = n - (*info);
         i__2 = max( n - (*info), 1 );
         lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                          WR + (*info), &i__2, &ierr );
+                          wr + (*info), &i__2, &ierr );
         lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                          WI + (*info), &i__2, &ierr );
+                          wi + (*info), &i__2, &ierr );
         if (*info > 0) {
             i__1 = ilo - 1;
             lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                              WR, &n, &ierr );
+                              wr, &n, &ierr );
             lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                              WI, &n, &ierr );
+                              wi, &n, &ierr );
         }
     }
 
@@ -459,7 +459,7 @@ CLEANUP:
     flops_stop( flop_total );
     timer_printf( "dgeev times n %5d, gehrd %7.3f, unghr %7.3f, hseqr %7.3f, trevc %7.3f, total %7.3f, sum %7.3f\n",
                   (int) n, time_gehrd, time_unghr, time_hseqr, time_trevc, time_total, time_sum );
-    timer_printf( "dgeev flops n %5d, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7.3f\n",
+    timer_printf( "dgeev flops n %5d, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7lld\n",
                   (int) n, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_total, flop_sum );
     
     return *info;

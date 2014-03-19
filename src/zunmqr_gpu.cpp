@@ -60,7 +60,7 @@
             if SIDE = 'R', N >= K >= 0.
 
     @param[in]
-    DA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument DA.
@@ -78,7 +78,7 @@
             reflector H(i), as returned by ZGEQRF.
 
     @param[in,out]
-    DC      COMPLEX_16 array on the GPU, dimension (LDDC,N)
+    dC      COMPLEX_16 array on the GPU, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.
 
@@ -105,11 +105,11 @@
             message related to LWORK is issued by XERBLA.
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU that is the output
+    dT      COMPLEX_16 array on the GPU that is the output
             (the 9th argument) of magma_zgeqrf_gpu.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the blocking size that was used in pre-computing DT, e.g.,
             the blocking size used in magma_zgeqrf_gpu.
 

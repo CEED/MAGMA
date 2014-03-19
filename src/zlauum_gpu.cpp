@@ -10,11 +10,11 @@
 */
 #include "common_magma.h"
 
-#define dA(i, j) (dA+(j)*ldda + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
 
 /**
     Purpose
-    =======
+    -------
     ZLAUUM computes the product U * U' or L' * L, where the triangular
     factor U or L is stored in the upper or lower triangular part of
     the array dA.
@@ -26,7 +26,7 @@
     This is the blocked form of the algorithm, calling Level 3 BLAS.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
             Specifies whether the triangular factor stored in the array dA
@@ -56,7 +56,7 @@
       -     < 0: if INFO = -k, the k-th argument had an illegal value
 
     @ingroup magma_zposv_aux
-    ===================================================================== */
+    ***************************************************************************/
 extern "C" magma_int_t
 magma_zlauum_gpu(magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex  *dA, magma_int_t ldda, magma_int_t *info)

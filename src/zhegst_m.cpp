@@ -13,11 +13,11 @@
 #include "common_magma.h"
 #include <cblas.h>
 
-#define A(i, j) (a+(j)*nb*lda + (i)*nb)
-#define B(i, j) (b+(j)*nb*ldb + (i)*nb)
-#define dA(gpui, i, j) (dw[gpui] + (j)*nb*ldda + (i)*nb)
-#define dB_c(gpui, i, j) (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbc)
-#define dB_r(gpui, i, j) (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
+#define A(i, j) (A + (j)*nb*lda + (i)*nb)
+#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
+#define dA(gpui, i, j)    (dw[gpui] + (j)*nb*ldda + (i)*nb)
+#define dB_c(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbc)
+#define dB_r(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
 #define dwork(gpui, i, j) (dw[gpui] + dima*ldda + lddbc*lddbr + (j)*nb*nb + (i)*nb)
 
 static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_col, magma_int_t ldda,
@@ -44,8 +44,8 @@ static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaD
     ---------
     @param[in]
     nrgpu   INTEGER
-            the number of gpu used
-    
+            Number of GPUs to use.
+
     @param[in]
     itype   INTEGER
             = 1: compute inv(U**H)*A*inv(U) or inv(L)*A*inv(L**H);
@@ -98,8 +98,8 @@ static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaD
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda,
-               magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+               magmaDoubleComplex *A, magma_int_t lda,
+               magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
 {
     const char* uplo_ = lapack_uplo_const( uplo );
 

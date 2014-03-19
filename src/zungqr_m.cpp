@@ -64,7 +64,7 @@
             magma_zgeqrf_gpu (except stored on the CPU, not the GPU).
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in T.

@@ -12,14 +12,14 @@
 
 /**
     Purpose
-    =======
+    -------
     ZTRTRI computes the inverse of a real upper or lower triangular
     matrix A.
 
     This is the Level 3 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  A is upper triangular;

@@ -11,7 +11,7 @@
 
 /**
     Purpose
-    =======
+    -------
     Solves a system of linear equations
        A * X = B
     where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
@@ -23,7 +23,7 @@
     system of equations A * X = B.
 
     Arguments
-    =========
+    ---------
     @param[in]
     n       INTEGER
             The order of the matrix A.  N >= 0.
@@ -34,13 +34,13 @@
             of the matrix B.  NRHS >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
-    lda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
@@ -49,12 +49,12 @@
             matrix was interchanged with row IPIV(i).
 
     @param[in,out]
-    B       COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
-    ldb     INTEGER
+    lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[out]

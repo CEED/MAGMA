@@ -85,9 +85,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
     
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -127,7 +127,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
     
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             The first M elements contain the selected
             eigenvalues in ascending order.
     
@@ -204,17 +204,17 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb,
              double vl, double vu, magma_int_t il, magma_int_t iu, double abstol,
-             magma_int_t *m, double *w,  magmaDoubleComplex *z, magma_int_t ldz,
+             magma_int_t *m, double *w,  magmaDoubleComplex *Z, magma_int_t ldz,
              magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
              magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
 {
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
-    magmaDoubleComplex *da;
-    magmaDoubleComplex *db;
-    magmaDoubleComplex *dz;
+    magmaDoubleComplex *dA;
+    magmaDoubleComplex *dB;
+    magmaDoubleComplex *dZ;
     magma_int_t ldda = n;
     magma_int_t lddb = n;
     magma_int_t lddz = n;
@@ -291,22 +291,22 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
         return *info;
     }
     
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
-        MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ||
-        MAGMA_SUCCESS != magma_zmalloc( &dz, n*lddz )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda ) ||
+        MAGMA_SUCCESS != magma_zmalloc( &dB, n*lddb ) ||
+        MAGMA_SUCCESS != magma_zmalloc( &dZ, n*lddz )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     
     /*     Form a Cholesky factorization of B. */
     
-    magma_zsetmatrix( n, n, b, ldb, db, lddb );
+    magma_zsetmatrix( n, n, B, ldb, dB, lddb );
     
     magma_zsetmatrix_async( n, n,
-                            a,  lda,
-                            da, ldda, stream );
+                            A,  lda,
+                            dA, ldda, stream );
     
-    magma_zpotrf_gpu(uplo, n, db, lddb, info);
+    magma_zpotrf_gpu(uplo, n, dB, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -315,12 +315,12 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
     magma_queue_sync( stream );
     
     magma_zgetmatrix_async( n, n,
-                            db, lddb,
-                            b,  ldb, stream );
+                            dB, lddb,
+                            B,  ldb, stream );
     
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
-    magma_zheevx_gpu(jobz, range, uplo, n, da, ldda, vl, vu, il, iu, abstol, m, w, dz, lddz, a, lda, z, ldz, work, lwork, rwork, iwork, ifail, info);
+    magma_zhegst_gpu(itype, uplo, n, dA, ldda, dB, lddb, info);
+    magma_zheevx_gpu(jobz, range, uplo, n, dA, ldda, vl, vu, il, iu, abstol, m, w, dZ, lddz, A, lda, Z, ldz, work, lwork, rwork, iwork, ifail, info);
     
     if (wantz && *info == 0) {
         /* Backtransform eigenvectors to the original problem. */
@@ -332,7 +332,7 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
             } else {
                 trans = MagmaNoTrans;
             }
-            magma_ztrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
+            magma_ztrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, dB, lddb, dZ, lddz);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
@@ -342,18 +342,18 @@ magma_zhegvx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_upl
             } else {
                 trans = MagmaConjTrans;
             }
-            magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
+            magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, dB, lddb, dZ, lddz);
         }
         
-        magma_zgetmatrix( n, *m, dz, lddz, z, ldz );
+        magma_zgetmatrix( n, *m, dZ, lddz, Z, ldz );
     }
     
     magma_queue_sync( stream );
     magma_queue_destroy( stream );
     
-    magma_free( da );
-    magma_free( db );
-    magma_free( dz );
+    magma_free( dA );
+    magma_free( dB );
+    magma_free( dZ );
     
     return *info;
 } /* magma_zhegvx */

@@ -132,7 +132,7 @@
             message related to LWORK is issued by XERBLA.
 
     @param
-    RWORK   (workspace) DOUBLE_PRECISION array, dimension (5*min(M,N))
+    rwork   (workspace) DOUBLE_PRECISION array, dimension (5*min(M,N))
             On exit, if INFO > 0, RWORK(1:MIN(M,N)-1) contains the
             unconverged superdiagonal elements of an upper bidiagonal
             matrix B whose diagonal is in S (not necessarily sorted).

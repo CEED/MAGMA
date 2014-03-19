@@ -12,7 +12,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.
 
@@ -27,7 +27,7 @@
     stream to overlap computation with communication.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -37,7 +37,7 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.

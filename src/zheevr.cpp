@@ -95,9 +95,9 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -146,7 +146,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             The first M elements contain the selected eigenvalues in
             ascending order.
 
@@ -236,9 +236,9 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda, double vl, double vu,
+             magmaDoubleComplex *A, magma_int_t lda, double vl, double vu,
              magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
-             double *w, magmaDoubleComplex *z, magma_int_t ldz, magma_int_t *isuppz,
+             double *w, magmaDoubleComplex *Z, magma_int_t ldz, magma_int_t *isuppz,
              magmaDoubleComplex *work, magma_int_t lwork,
              double *rwork, magma_int_t lrwork, magma_int_t *iwork,
              magma_int_t liwork, magma_int_t *info)
@@ -341,8 +341,8 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zheevr(jobz_, range_, uplo_,
-                         &n, a, &lda, &vl, &vu, &il, &iu, &abstol, m,
-                         w, z, &ldz, isuppz, work, &lwork,
+                         &n, A, &lda, &vl, &vu, &il, &iu, &abstol, m,
+                         w, Z, &ldz, isuppz, work, &lwork,
                          rwork, &lrwork, iwork, &liwork, info);
         return *info;
     }
@@ -362,7 +362,7 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
     rmax = magma_dsqrt(bignum);
     
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_zlanhe("M", uplo_, &n, a, &lda, &rwork[1]);
+    anrm = lapackf77_zlanhe("M", uplo_, &n, A, &lda, &rwork[1]);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -373,7 +373,7 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
     }
     if (iscale == 1) {
         d__1 = 1.;
-        lapackf77_zlascl(uplo_, &izero, &izero, &d__1, &sigma, &n, &n, a,
+        lapackf77_zlascl(uplo_, &izero, &izero, &d__1, &sigma, &n, &n, A,
                          &lda, info);
         
         if (abstol > 0.) {
@@ -402,7 +402,7 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
     indisp = indibl + n;
     indiwo = indisp + n;
     
-    magma_zhetrd(uplo, n, a, lda, &rwork[indrd], &rwork[indre], &work[indtau], &work[indwk], llwork, &iinfo);
+    magma_zhetrd(uplo, n, A, lda, &rwork[indrd], &rwork[indre], &work[indtau], &work[indwk], llwork, &iinfo);
     
     lopt = n + (magma_int_t)MAGMA_Z_REAL(work[indwk]);
     
@@ -440,12 +440,12 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
             tryrac=0;
         
         lapackf77_zstemr(jobz_, range_, &n, &rwork[indrdd], &rwork[indree], &vl, &vu, &il,
-                         &iu, m, &w[1], z, &ldz, &n, &isuppz[1], &tryrac, &rwork[indrwk],
+                         &iu, m, &w[1], Z, &ldz, &n, &isuppz[1], &tryrac, &rwork[indrwk],
                          &llrwork, &iwork[1], &liwork, info);
         
         if (*info == 0 && wantz) {
-            magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
-                         z, ldz, &work[indwk], llwork, &iinfo);
+            magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, A, lda, &work[indtau],
+                         Z, ldz, &work[indwk], llwork, &iinfo);
         }
     }
     
@@ -458,12 +458,12 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
                          &nsplit, &w[1], &iwork[indibl], &iwork[indisp], &rwork[indrwk], &iwork[indiwo], info);
         
         lapackf77_zstein(&n, &rwork[indrd], &rwork[indre], m, &w[1], &iwork[indibl], &iwork[indisp],
-                         z, &ldz, &rwork[indrwk], &iwork[indiwo], &iwork[indifl], info);
+                         Z, &ldz, &rwork[indrwk], &iwork[indiwo], &iwork[indifl], info);
         
         /* Apply unitary matrix used in reduction to tridiagonal
            form to eigenvectors returned by ZSTEIN. */
-        magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
-                     z, ldz, &work[indwk], llwork, &iinfo);
+        magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, A, lda, &work[indtau],
+                     Z, ldz, &work[indwk], llwork, &iinfo);
     }
     
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -496,7 +496,7 @@ magma_zheevr(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int
                 iwork[indibl + i - 1] = iwork[indibl + j - 1];
                 w[j] = tmp1;
                 iwork[indibl + j - 1] = itmp1;
-                blasf77_zswap(&n, z + (i-1)*ldz, &ione, z + (j-1)*ldz, &ione);
+                blasf77_zswap(&n, Z + (i-1)*ldz, &ione, Z + (j-1)*ldz, &ione);
             }
         }
     }

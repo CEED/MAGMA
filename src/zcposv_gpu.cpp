@@ -15,7 +15,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZCPOSV computes the solution to a complex system of linear equations
         A * X = B,
     where A is an N-by-N Hermitian positive definite matrix and X and B
@@ -48,7 +48,7 @@
     The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER
       -     = 'U':  Upper triangle of A is stored;

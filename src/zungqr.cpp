@@ -56,13 +56,13 @@
             reflector H(i), as returned by ZGEQRF_GPU.
 
     @param[in]
-    DT      COMPLEX_16 array on the GPU device.
+    dT      COMPLEX_16 array on the GPU device.
             DT contains the T matrices used in blocking the elementary
             reflectors H(i), e.g., this can be the 6th argument of
             magma_zgeqrf_gpu.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.

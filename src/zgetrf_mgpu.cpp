@@ -13,7 +13,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.
 
@@ -26,7 +26,7 @@
     This is the right-looking Level 3 BLAS version of the algorithm.
 
     Arguments
-    =========
+    ---------
     @param[in]
     num_gpus INTEGER
             The number of GPUs to be used for the factorization.
@@ -72,8 +72,6 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                  magmaDoubleComplex **d_lA, magma_int_t ldda,
                  magma_int_t *ipiv, magma_int_t *info)
 {
-#define inAT(id,i,j) (d_lAT[(id)] + (i)*nb*lddat + (j)*nb)
-
     magma_int_t nb, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
     magma_int_t i, j, d, lddat, lddwork;
@@ -218,5 +216,3 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
         
     return *info;
 }
-
-#undef inAT

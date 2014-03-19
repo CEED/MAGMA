@@ -32,7 +32,7 @@
             The number of columns of the matrix C. NRHS >= 0.
 
     @param[in]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,n, as returned by
             ZGEQRF_GPU in the first n columns of its array argument A.
@@ -94,8 +94,8 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *hwork, magma_int_t lwork,
                  magma_int_t *info)
 {
-    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
+    #define dA(a_1,a_2) (dA + (a_2)*(ldda) + (a_1))
+    #define dT(a_1)     (dT + (lddwork+(a_1))*nb)
 
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -140,7 +140,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     /* B := Q' * B */
     magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans,
                       m, nrhs, n,
-                      a_ref(0,0), ldda, tau,
+                      dA(0,0), ldda, tau,
                       dB, lddb, hwork, lwork, dT, nb, info );
     if ( *info != 0 ) {
         return *info;
@@ -180,13 +180,13 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     // update c
     if (nrhs == 1)
         magma_zgemv( MagmaNoTrans, i, ib,
-                     c_neg_one, a_ref(0, i), ldda,
+                     c_neg_one, dA(0, i), ldda,
                                 dwork + i,   1,
                      c_one,     dB,           1);
     else
         magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                      i, nrhs, ib,
-                     c_neg_one, a_ref(0, i), ldda,
+                     c_neg_one, dA(0, i), ldda,
                                 dwork + i,   lddwork,
                      c_one,     dB,           lddb);
 
@@ -199,23 +199,23 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             if (i + ib < n) {
                 if (nrhs == 1) {
                     magma_zgemv( MagmaNoTrans, ib, ib,
-                                 c_one,  d_ref(i), ib,
+                                 c_one,  dT(i), ib,
                                          dB+i,      1,
                                  c_zero, dwork+i,  1);
                     magma_zgemv( MagmaNoTrans, i, ib,
-                                 c_neg_one, a_ref(0, i), ldda,
+                                 c_neg_one, dA(0, i), ldda,
                                             dwork + i,   1,
                                  c_one,     dB,           1);
                 }
                 else {
                     magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                                  ib, nrhs, ib,
-                                 c_one,  d_ref(i), ib,
+                                 c_one,  dT(i), ib,
                                          dB+i,      lddb,
                                  c_zero, dwork+i,  lddwork);
                     magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                                  i, nrhs, ib,
-                                 c_neg_one, a_ref(0, i), ldda,
+                                 c_neg_one, dA(0, i), ldda,
                                             dwork + i,   lddwork,
                                  c_one,     dB,          lddb);
                 }
@@ -230,5 +230,5 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     return *info;
 }
 
-#undef a_ref
-#undef d_ref
+#undef dA
+#undef dT

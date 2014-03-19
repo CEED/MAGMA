@@ -13,11 +13,11 @@
 
 #include "common_magma.h"
 
-#define A(i, j) (a+(j)*lda + (i))
-#define B(i, j) (b+(j)*ldb + (i))
+#define A(i, j) (A + (j)*lda + (i))
+#define B(i, j) (B + (j)*ldb + (i))
 
-#define dA(i, j) (dw+(j)*ldda + (i))
-#define dB(i, j) (dw+n*ldda+(j)*lddb + (i))
+#define dA(i, j) (dw + (j)*ldda + (i))
+#define dB(i, j) (dw + n*ldda + (j)*lddb + (i))
 
 /**
     Purpose
@@ -87,8 +87,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda,
-             magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+             magmaDoubleComplex *A, magma_int_t lda,
+             magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
 {
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;

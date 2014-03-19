@@ -20,29 +20,13 @@
 
 #define MAGMABLAS_ZHEMV_MGPU
 
-#define A(i, j) (a + (j)*lda + (i))
-#define W(i, j) (w + (j)*ldw + (i))
+#define A(i, j) (A + (j)*lda + (i))
+#define W(i, j) (W + (j)*ldw + (i))
 
-#define dA(id, i, j)  (da[(id)] + ((j)+loffset)*ldda + (i) + offset)
-#define dW(id, i, j)  (dw[(id)] + (j)          *lddw + (i))
-#define dW1(id, i, j) (dw[(id)] + ((j)+nb)     *lddw + (i))
+#define dA(id, i, j)  (dA[(id)] + ((j)+loffset)*ldda + (i) + offset)
+#define dW(id, i, j)  (dW[(id)] + (j)          *lddw + (i))
+#define dW1(id, i, j) (dW[(id)] + ((j)+nb)     *lddw + (i))
 
-extern "C" double
-magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
-                  magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
-                  magmaDoubleComplex *a,  magma_int_t lda,
-                  double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *w,   magma_int_t ldw,
-                  magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
-                  magmaDoubleComplex **dw, magma_int_t lddw,
-                  magmaDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
-                  magma_int_t k,
-                  magmaDoubleComplex *dx[MagmaMaxGPUs],
-                  magmaDoubleComplex *dy[MagmaMaxGPUs],
-                  magmaDoubleComplex *work,
-                  magma_queue_t stream[][10],
-                  double *times)
-{
 /**
     Purpose
     -------
@@ -72,7 +56,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
             The order of the matrix A.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The number of rows and columns to be reduced.
 
     @param[in,out]
@@ -173,7 +157,22 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
 
     @ingroup magma_zheev_aux
     ********************************************************************/
-
+extern "C" double
+magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
+                  magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
+                  magmaDoubleComplex *A,  magma_int_t lda,
+                  double *e, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *W,   magma_int_t ldw,
+                  magmaDoubleComplex **dA, magma_int_t ldda, magma_int_t offset,
+                  magmaDoubleComplex **dW, magma_int_t lddw,
+                  magmaDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
+                  magma_int_t k,
+                  magmaDoubleComplex *dx[MagmaMaxGPUs],
+                  magmaDoubleComplex *dy[MagmaMaxGPUs],
+                  magmaDoubleComplex *work,
+                  magma_queue_t stream[][10],
+                  double *times)
+{
     double mv_time = 0.0;
     magma_int_t i;
 #ifndef MAGMABLAS_ZHEMV_MGPU
@@ -248,7 +247,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                     magma_zsetvector_async( i, A(0,i), 1, dx[id], 1, stream[id][0] );
 #endif
                 }
-                magmablas_zhemv_mgpu(num_gpus, k, MagmaUpper, i, nb0, c_one, da, ldda, 0,
+                magmablas_zhemv_mgpu(num_gpus, k, MagmaUpper, i, nb0, c_one, dA, ldda, 0,
                                      dx2, ione, c_zero, dy, ione, dwork, ldwork,
                                      work, W(0, iw), stream );
 
@@ -377,7 +376,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                 magma_setdevice(0);
                 magma_event_record(start, stream[0][0]);
 #endif
-                magmablas_zhemv_mgpu(num_gpus, k, MagmaLower, i_n, nb0, c_one, da, ldda, offset+i+1,
+                magmablas_zhemv_mgpu(num_gpus, k, MagmaLower, i_n, nb0, c_one, dA, ldda, offset+i+1,
                                        dx2, ione, c_zero, dy, ione, dwork, ldwork,
                                        work, W(i+1,i), stream );
 #ifdef PROFILE_SYMV
@@ -469,12 +468,12 @@ extern "C" magma_int_t
 magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
                       magma_int_t n, magma_int_t nb,
                       magmaDoubleComplex alpha,
-                      magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
+                      magmaDoubleComplex **dA, magma_int_t ldda, magma_int_t offset,
                       magmaDoubleComplex **dx, magma_int_t incx,
                       magmaDoubleComplex beta,
                       magmaDoubleComplex **dy, magma_int_t incy,
                       magmaDoubleComplex **dwork, magma_int_t ldwork,
-                      magmaDoubleComplex *work, magmaDoubleComplex *w,
+                      magmaDoubleComplex *work, magmaDoubleComplex *W,
                       magma_queue_t stream[][10] )
 {
 #define dX(id, i)    (dx[(id)]+incx*(i))
@@ -493,7 +492,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     }
 
     if ( nb == 32 ) {
-        magmablas_zhemv_mgpu_32_offset( uplo, offset+n, alpha, da, ldda,
+        magmablas_zhemv_mgpu_32_offset( uplo, offset+n, alpha, dA, ldda,
                                         dx, incx,
                                         beta,
                                         dy, incy,
@@ -501,7 +500,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
                                         num_gpus, nb, offset,
                                         stream );
     } else {
-        magmablas_zhemv_mgpu_offset( uplo, offset+n, alpha, da, ldda,
+        magmablas_zhemv_mgpu_offset( uplo, offset+n, alpha, dA, ldda,
                                      dx, incx,
                                      beta,
                                      dy, incy,
@@ -516,13 +515,13 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     }
     //magma_setdevice(0);
     //magmablasSetKernelStream(stream[0][0]);
-    //magma_zhemv(MagmaLower, n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
+    //magma_zhemv(MagmaLower, n, alpha, &dA[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
     //magmablasSetKernelStream(NULL);
 
     /* send to CPU */
     magma_setdevice(0);
     trace_gpu_start( 0, 0, "comm", "comm" );
-    magma_zgetvector_async( n, dY(0, offset, 0), 1, w, 1, stream[0][0] );
+    magma_zgetvector_async( n, dY(0, offset, 0), 1, W, 1, stream[0][0] );
     trace_gpu_end( 0, 0 );
     magmablasSetKernelStream(NULL);
 
@@ -542,7 +541,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     magma_int_t loffset1 = offset%nb;
     magma_int_t loffset;
     
-    //magma_zhemv(uplo, n, alpha, da, ldda, dx, incx, beta, dy, incy );
+    //magma_zhemv(uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
 
     idw = (offset/nb)%num_gpus;
 
@@ -660,7 +659,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
     }
     /* send to CPU */
     magma_setdevice(0);
-    magma_zgetvector_async( n, dY(0, 0, 0), 1, w, 1, stream[0][0] );
+    magma_zgetvector_async( n, dY(0, 0, 0), 1, W, 1, stream[0][0] );
     for( kk=1; kk < k; kk++ ) {
         magma_zgetvector_async( n, dY(0, 0, kk), 1, &work[kk*n], 1, stream[0][kk] );
     }
@@ -679,7 +678,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, magma_uplo_t uplo,
 
 extern "C" magma_int_t
 magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
-                      magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *w,
+                      magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *W,
                       magma_queue_t stream[][10] )
 {
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
@@ -691,13 +690,13 @@ magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
     magma_queue_sync(stream[0][0]);
     for( kk=1; kk < k; kk++ ) {
         magma_queue_sync(stream[0][kk]);
-        blasf77_zaxpy( &n, &c_one, &work[kk*n], &ione, w, &ione );
+        blasf77_zaxpy( &n, &c_one, &work[kk*n], &ione, W, &ione );
     }
     for( id=1; id < num_gpus; id++ ) {
         magma_setdevice(id);
         for( kk=0; kk < k; kk++ ) {
             magma_queue_sync(stream[id][kk]);
-            blasf77_zaxpy( &n, &c_one, &work[id*k*n + kk*n], &ione, w, &ione );
+            blasf77_zaxpy( &n, &c_one, &work[id*k*n + kk*n], &ione, W, &ione );
         }
     }
 

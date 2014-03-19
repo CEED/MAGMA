@@ -91,13 +91,13 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqlf(magma_int_t m, magma_int_t n,
-             magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
+             magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
-    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-    #define da_ref(a_1,a_2) (da+(a_2)*ldda   + (a_1))
+    #define  A(a_1,a_2) ( A + (a_2)*(lda) + (a_1))
+    #define dA(a_1,a_2) (dA + (a_2)*ldda  + (a_1))
 
-    magmaDoubleComplex *da, *dwork;
+    magmaDoubleComplex *dA, *dwork;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t i, k, lddwork, old_i, old_ib, nb;
     magma_int_t rows, cols;
@@ -146,11 +146,11 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, (n)*ldda + nb*lddwork )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n)*ldda + nb*lddwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    dwork = da + ldda*(n);
+    dwork = dA + ldda*(n);
 
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
@@ -161,8 +161,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
             The last kk columns are handled by the block method.
             First, copy the matrix on the GPU except the last kk columns */
         magma_zsetmatrix_async( (m), (n-nb),
-                                a_ref(0, 0),  lda,
-                                da_ref(0, 0), ldda, stream[0] );
+                                A(0, 0),  lda,
+                                dA(0, 0), ldda, stream[0] );
 
         ki = ((k - nb - 1) / nb) * nb;
         kk = min(k, ki + nb);
@@ -175,12 +175,12 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                    to the CPU)                                        */
                 rows = m - k + i + ib;
                 magma_zgetmatrix_async( rows, ib,
-                                        da_ref(0, n-k+i), ldda,
-                                        a_ref(0, n-k+i),  lda, stream[1] );
+                                        dA(0, n-k+i), ldda,
+                                        A(0, n-k+i),  lda, stream[1] );
 
                 magma_zgetmatrix_async( (m-rows), ib,
-                                        da_ref(rows, n-k+i), ldda,
-                                        a_ref(rows, n-k+i),  lda, stream[0] );
+                                        dA(rows, n-k+i), ldda,
+                                        A(rows, n-k+i),  lda, stream[0] );
 
                 /* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
                    two steps - implementing the lookahead techniques.
@@ -189,8 +189,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                 cols = n - k + old_i - old_ib;
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
                                   rows, cols, old_ib,
-                                  da_ref(0, cols+old_ib), ldda, dwork,        lddwork,
-                                  da_ref(0, 0          ), ldda, dwork+old_ib, lddwork);
+                                  dA(0, cols+old_ib), ldda, dwork,        lddwork,
+                                  dA(0, 0          ), ldda, dwork+old_ib, lddwork);
             }
 
             magma_queue_sync( stream[1] );
@@ -198,20 +198,20 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
             rows = m - k + i + ib;
             cols = n - k + i;
-            lapackf77_zgeqlf(&rows,&ib, a_ref(0,cols), &lda, tau+i, work, &lwork, &iinfo);
+            lapackf77_zgeqlf(&rows,&ib, A(0,cols), &lda, tau+i, work, &lwork, &iinfo);
 
             if (cols > 0) {
                 /* Form the triangular factor of the block reflector
                    H = H(i+ib-1) . . . H(i+1) H(i) */
                 lapackf77_zlarft( MagmaBackwardStr, MagmaColumnwiseStr,
                                   &rows, &ib,
-                                  a_ref(0, cols), &lda, tau + i, work, &ib);
+                                  A(0, cols), &lda, tau + i, work, &ib);
 
-                zpanel_to_q( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
+                zpanel_to_q( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
                 magma_zsetmatrix( rows, ib,
-                                  a_ref(0,cols),  lda,
-                                  da_ref(0,cols), ldda );
-                zq_to_panel( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
+                                  A(0,cols),  lda,
+                                  dA(0,cols), ldda );
+                zq_to_panel( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
 
                 // Send the triangular part on the GPU
                 magma_zsetmatrix( ib, ib, work, ib, dwork, lddwork );
@@ -222,13 +222,13 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                 if (i-ib >= k -kk)
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
                                       rows, ib, ib,
-                                      da_ref(0, cols),   ldda, dwork,    lddwork,
-                                      da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
+                                      dA(0, cols),   ldda, dwork,    lddwork,
+                                      dA(0,cols-ib), ldda, dwork+ib, lddwork);
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
                                       rows, cols, ib,
-                                      da_ref(0, cols), ldda, dwork,    lddwork,
-                                      da_ref(0, 0   ), ldda, dwork+ib, lddwork);
+                                      dA(0, cols), ldda, dwork,    lddwork,
+                                      dA(0, 0   ), ldda, dwork+ib, lddwork);
                 }
 
                 old_i  = i;
@@ -238,7 +238,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
         mu = m - k + i + nb;
         nu = n - k + i + nb;
 
-        magma_zgetmatrix( m, nu, da_ref(0,0), ldda, a_ref(0,0), lda );
+        magma_zgetmatrix( m, nu, dA(0,0), ldda, A(0,0), lda );
     } else {
         mu = m;
         nu = n;
@@ -246,13 +246,13 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     /* Use unblocked code to factor the last or only block */
     if (mu > 0 && nu > 0)
-        lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
+        lapackf77_zgeqlf(&mu, &nu, A(0,0), &lda, tau, work, &lwork, &iinfo);
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
-    magma_free( da );
+    magma_free( dA );
     return *info;
 } /* magma_zgeqlf */
 
-#undef  a_ref
-#undef da_ref
+#undef  A
+#undef dA

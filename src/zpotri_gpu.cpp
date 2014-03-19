@@ -14,13 +14,13 @@
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRI computes the inverse of a real symmetric positive definite
     matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
     computed by ZPOTRF.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;

@@ -60,7 +60,7 @@
             if SIDE = 'R', N >= K >= 0.
 
     @param[in]
-    DA      COMPLEX_16 array, dimension (LDA,K)
+    dA      COMPLEX_16 array, dimension (LDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument A.
@@ -78,7 +78,7 @@
             reflector H(i), as returned by ZGEQRF.
 
     @param[in,out]
-    DC      COMPLEX_16 array, dimension (LDDC,N)
+    dC      COMPLEX_16 array, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by (Q*C) or (Q**H * C) or (C * Q**H) or (C*Q).
 
@@ -87,7 +87,7 @@
             The leading dimension of the array C. LDDC >= max(1,M).
 
     @param[in]
-    WA      (workspace) COMPLEX_16 array, dimension
+    wA      (workspace) COMPLEX_16 array, dimension
                                  (LDWA,M) if SIDE = 'L'
                                  (LDWA,N) if SIDE = 'R'
             The vectors which define the elementary reflectors, as
@@ -95,7 +95,7 @@
 
     @param[in]
     ldwa    INTEGER
-            The leading dimension of the array A.
+            The leading dimension of the array wA.
             LDWA >= max(1,M) if SIDE = 'L'; LDWA >= max(1,N) if SIDE = 'R'.
 
     @param[out]
@@ -108,10 +108,10 @@
 extern "C" magma_int_t
 magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
                   magma_int_t m, magma_int_t n, magma_int_t k,
-                  magmaDoubleComplex *da,   magma_int_t ldda,
+                  magmaDoubleComplex *dA, magma_int_t ldda,
                   magmaDoubleComplex *tau,
-                  magmaDoubleComplex *dc,    magma_int_t lddc,
-                  magmaDoubleComplex *wa,    magma_int_t ldwa,
+                  magmaDoubleComplex *dC, magma_int_t lddc,
+                  magmaDoubleComplex *wA, magma_int_t ldwa,
                   magma_int_t *info)
 {
     /* Allocate work space on the GPU */
@@ -124,10 +124,10 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
     int left, notran;
 
     wa_offset = 1 + ldwa;
-    wa -= wa_offset;
+    wA -= wa_offset;
     --tau;
     dc_offset = 1 + lddc;
-    dc -= dc_offset;
+    dC -= dc_offset;
 
     *info = 0;
     left   = (side == MagmaLeft);
@@ -197,7 +197,7 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         ic = 1;
     }
 
-    magmablas_zsetdiag1subdiag0(MagmaLower, k, nb, da, ldda);
+    magmablas_zsetdiag1subdiag0(MagmaLower, k, nb, dA, ldda);
 
     // for i=i1 to i2 by step
     for (i = i1; (step < 0 ? i >= i2 : i <= i2); i += step) {
@@ -206,7 +206,7 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         /* Form the triangular factor of the block reflector
            H = H(i) H(i+1) . . . H(i+ib-1) */
         i__4 = nq - i + 1;
-        lapackf77_zlarft("F", "C", &i__4, &ib, &wa[i + i*ldwa], &ldwa,
+        lapackf77_zlarft("F", "C", &i__4, &ib, &wA[i + i*ldwa], &ldwa,
                          &tau[i], t, &ib);
 
 
@@ -230,8 +230,8 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         magma_zsetmatrix( ib, ib, t, ib, dwork, ib );
         magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                           mi, ni, ib,
-                          da + (i - 1) + (i - 1)*ldda, ldda, dwork, ib,
-                          &dc[ic + jc*lddc], lddc,
+                          dA + (i - 1) + (i - 1)*ldda, ldda, dwork, ib,
+                          &dC[ic + jc*lddc], lddc,
                           dwork + ib*ib, lddwork);
     }
 

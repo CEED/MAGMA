@@ -11,19 +11,9 @@
 */
 #include "common_magma.h"
 
-#define Q(ix, iy) (q + (ix) + ldq * (iy))
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
 
 /**
-       .. Scalar Arguments .
-      CHARACTER          RANGE
-      INTEGER            IL, IU, CUTPNT, INFO, LDQ, N
-      DOUBLE PRECISION   RHO, VL, VU
-       .
-       .. Array Arguments .
-      INTEGER            INDXQ( * ), iwork[* )
-      DOUBLE PRECISION   D( * ), Q( LDQ, * ), WORK( * ), DWORK( * )
-       .
-
     Purpose
     -------
     DLAEX1 computes the updated eigensystem of a diagonal
@@ -108,9 +98,9 @@
       -     = 'I': the IL-th through IU-th eigenvalues will be found.
             
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             if RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -140,7 +130,7 @@
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
+magma_dlaex1(magma_int_t n, double* d, double* Q, magma_int_t ldq,
              magma_int_t* indxq, double rho, magma_int_t cutpnt,
              double* work, magma_int_t* iwork, double* dwork,
              magma_range_t range, double vl, double vu,
@@ -193,7 +183,7 @@ magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
 
     //  Deflate eigenvalues.
 
-    lapackf77_dlaed2(&k, &n, &cutpnt, d, q, &ldq, indxq, &rho, &work[iz],
+    lapackf77_dlaed2(&k, &n, &cutpnt, d, Q, &ldq, indxq, &rho, &work[iz],
                      &work[idlmda], &work[iw], &work[iq2],
                      &iwork[indx], &iwork[indxc], &iwork[indxp],
                      &iwork[coltyp], info);
@@ -205,7 +195,7 @@ magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
 
     if ( k != 0 ) {
         is = (iwork[coltyp]+iwork[coltyp+1])*cutpnt + (iwork[coltyp+1]+iwork[coltyp+2])*(n-cutpnt) + iq2;
-        magma_dlaex3(k, n, cutpnt, d, q, ldq, rho,
+        magma_dlaex3(k, n, cutpnt, d, Q, ldq, rho,
                      &work[idlmda], &work[iq2], &iwork[indxc],
                      &iwork[coltyp], &work[iw], &work[is],
                      indxq, dwork, range, vl, vu, il, iu, info );

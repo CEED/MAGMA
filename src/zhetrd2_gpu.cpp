@@ -14,8 +14,8 @@
 #include "common_magma.h"
 
 
-#define A(i, j) (wa+(j)*ldwa + (i))
-#define dA(i, j) (da+(j)*ldda + (i))
+#define  A(i, j) (wA + (j)*ldwa + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
 
 
 /**
@@ -39,7 +39,7 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    DA      COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -78,13 +78,13 @@
             Details).
 
     @param[out]
-    WA      (workspace) COMPLEX_16 array, dimension (LDA,N)
+    wA      (workspace) COMPLEX_16 array, dimension (LDA,N)
             On exit the diagonal, the  upper part (UPLO='U')
             or the lower part (UPLO='L') are copies of DA
 
     @param[in]
     ldwa    INTEGER
-            The leading dimension of the array WA.  LDWA >= max(1,N).
+            The leading dimension of the array wA.  LDWA >= max(1,N).
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
@@ -160,9 +160,9 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd2_gpu(magma_uplo_t uplo, magma_int_t n,
-                  magmaDoubleComplex *da, magma_int_t ldda,
+                  magmaDoubleComplex *dA, magma_int_t ldda,
                   double *d, double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *wa,  magma_int_t ldwa,
+                  magmaDoubleComplex *wA,  magma_int_t ldwa,
                   magmaDoubleComplex *work, magma_int_t lwork,
                   magmaDoubleComplex *dwork, magma_int_t ldwork,
                   magma_int_t *info)

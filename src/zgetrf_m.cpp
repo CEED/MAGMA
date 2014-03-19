@@ -15,7 +15,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGETRF_m computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.  This version does not
     require work space on the GPU passed as input. GPU memory is allocated
@@ -33,7 +33,7 @@
     Pivots are applied on GPU within the big panel.
 
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -73,12 +73,13 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
+magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n,
+               magmaDoubleComplex *A, magma_int_t lda,
                magma_int_t *ipiv, magma_int_t *info)
 {
-#define    A(i,j) (a   + (j)*lda + (i))
-#define inAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
-#define inPT(d,i,j) (dPT[d] + (i)*nb*nb + (j)*nb*maxm)
+#define     A(i,j) (A      + (j)*lda + (i))
+#define dAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
+#define dPT(d,i,j) (dPT[d] + (i)*nb*nb + (j)*nb*maxm)
 
     magma_timer_t time, time_total, time_alloc, time_set=0, time_get=0, time_comp=0;
     timer_start( time_total );
@@ -155,7 +156,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
 
     if ( (nb <= 1) || (nb >= min(m,n)) ) {
         /* Use CPU code for scalar of one tile. */
-        lapackf77_zgetrf(&m, &n, a, &lda, ipiv, info);
+        lapackf77_zgetrf(&m, &n, A, &lda, ipiv, info);
     } else {
         /* Use hybrid blocked code. */
 
@@ -234,14 +235,14 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
                 magma_queue_wait_event( stream[d][0], event[d][0] );
                 
                 /* transpose */
-                magmablas_ztranspose2( inPT(d,0,0), nb, dA[d], maxm-offset, M-offset, nbi);
+                magmablas_ztranspose2( dPT(d,0,0), nb, dA[d], maxm-offset, M-offset, nbi);
             }
             
             /* applying the pivot from the previous big-panel */
             for( d=0; d < num_gpus; d++ ) {
                 magma_setdevice(d);
                 magmablasSetKernelStream(stream[d][1]);
-                magmablas_zpermute_long3( inAT(d,0,0), ldn_local, ipiv, NBk, offset );
+                magmablas_zpermute_long3( dAT(d,0,0), ldn_local, ipiv, NBk, offset );
             }
             
             /* == going through each block-column of previous big-panels == */
@@ -267,17 +268,17 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
                         magma_queue_wait_event( stream[d][0], event[d][(1+jj/nb)%2] );
                         
                         /* transpose next column */
-                        magmablas_ztranspose2( inPT(d,0,(1+jj/nb)%2), nb, dA[d], rows-nb, M-ii-nb, nb);
+                        magmablas_ztranspose2( dPT(d,0,(1+jj/nb)%2), nb, dA[d], rows-nb, M-ii-nb, nb);
                     }
                     
                     /* update with the block column */
                     magmablasSetKernelStream(stream[d][1]);
                     magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
-                                 n_local[d], nbi, c_one, inPT(d,0,(jj/nb)%2), nb, inAT(d,ib,0), ldn_local );
+                                 n_local[d], nbi, c_one, dPT(d,0,(jj/nb)%2), nb, dAT(d,ib,0), ldn_local );
                     if ( M > ii+nb ) {
                         magma_zgemm( MagmaNoTrans, MagmaNoTrans,
-                            n_local[d], M-(ii+nb), nbi, c_neg_one, inAT(d,ib,0), ldn_local,
-                            inPT(d,1,(jj/nb)%2), nb, c_one, inAT(d,ib+1,0), ldn_local );
+                            n_local[d], M-(ii+nb), nbi, c_neg_one, dAT(d,ib,0), ldn_local,
+                            dPT(d,1,(jj/nb)%2), nb, c_one, dAT(d,ib+1,0), ldn_local );
                     }
                     magma_event_record( event[d][(jj/nb)%2], stream[d][1] );
                 
@@ -293,7 +294,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
 
         /* calling magma-gpu interface to panel-factorize the big panel */
         if ( M > I ) {
-            //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
+            //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &A[I*lda], lda,
             //                   (magma_queue_t **)stream, &iinfo);
             magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                                stream, &iinfo);
@@ -345,14 +346,14 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     magma_setdevice(0);
     
     }
-    if ( *info >= 0 ) magma_zgetrf_piv(m, n, NB, a, lda, ipiv, info);
+    if ( *info >= 0 ) magma_zgetrf_piv(m, n, NB, A, lda, ipiv, info);
     return *info;
 } /* magma_zgetrf_m */
 
 
 extern "C" magma_int_t
 magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
-                 magmaDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+                 magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t I, k1, k2, incx, minmn;
     *info = 0;
@@ -377,7 +378,7 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
         k1 = 1+I+NB;
         k2 = minmn;
         incx = 1;
-        lapackf77_zlaswp(&NB, &a[I*lda], &lda, &k1, &k2, ipiv, &incx);
+        lapackf77_zlaswp(&NB, &A[I*lda], &lda, &k1, &k2, ipiv, &incx);
     }
 
     return *info;
@@ -386,7 +387,7 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
 
 extern "C" magma_int_t
 magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t end,
-                  magmaDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+                  magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t I, k1, k2, nb, incx, minmn;
 
@@ -414,13 +415,13 @@ magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t e
         incx = 1;
         k1 = 1+I+nb;
         k2 = minmn;
-        lapackf77_zlaswp(&nb, &a[I*lda], &lda, &k1, &k2, ipiv, &incx);
+        lapackf77_zlaswp(&nb, &A[I*lda], &lda, &k1, &k2, ipiv, &incx);
     }
 
     return MAGMA_SUCCESS;
 } /* magma_zgetrf_piv */
 
 
-#undef inAT
-#undef inPT
+#undef dAT
+#undef dPT
 #undef A

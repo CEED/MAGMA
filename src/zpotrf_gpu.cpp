@@ -22,7 +22,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
     positive definite matrix dA.
 
@@ -36,7 +36,7 @@
     stream to overlap computation with communication.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of dA is stored;

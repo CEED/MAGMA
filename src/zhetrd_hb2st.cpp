@@ -115,7 +115,7 @@ public:
     Arguments
     ---------
     @param[in]
-    THREADS INTEGER
+    threads INTEGER
             Specifies the number of pthreads used.
             THREADS > 0
 
@@ -129,11 +129,11 @@ public:
             The order of the matrix A.  N >= 0.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The order of the band matrix A.  N >= NB >= 0.
 
     @param[in]
-    vblksiz INTEGER
+    Vblksiz INTEGER
             The size of the block of householder vectors applied at once.
 
     @param[in]
@@ -165,11 +165,11 @@ public:
             LDV > NB + VBLKSIZ + 1
 
     @param[out]
-    tau     COMPLEX_16 dimension(BLKCNT, VBLKSIZ)
+    TAU     COMPLEX_16 dimension(BLKCNT, VBLKSIZ)
             ???
 
     @param[in]
-    compt   INTEGER
+    compT   INTEGER
             if COMPT = 0 T is not computed
             if COMPT = 1 T is computed
 
@@ -183,17 +183,14 @@ public:
             The leading dimension of T.
             LDT > Vblksiz
 
-    @param[out]
-    info    INTEGER ????????????????????????????????????????????????????????????????????????????????????
-      -     = 0:  successful exit
-
     @ingroup magma_zheev_2stage
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_hb2st(
     magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
-    magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
+    magmaDoubleComplex *A, magma_int_t lda, double *d, double *e,
+    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
+    magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
 {
     #ifdef ENABLE_TIMER
     real_Double_t timeblg=0.0;
@@ -260,16 +257,16 @@ magma_zhetrd_hb2st(
 
     magma_setlapack_numthreads(mklth);
     /*================================================
-     *  store resulting diag and lower diag D and E
-     *  note that D and E are always real
+     *  store resulting diag and lower diag d and e
+     *  note that d and e are always real
      *================================================*/
 
     /* Make diagonal and superdiagonal elements real,
-     * storing them in D and E
+     * storing them in d and e
      */
     /* In complex case, the off diagonal element are
      * not necessary real. we have to make off-diagonal
-     * elements real and copy them to E.
+     * elements real and copy them to e.
      * When using HouseHolder elimination,
      * the ZLARFG give us a real as output so, all the
      * diagonal/off-diagonal element except the last one are already
@@ -280,30 +277,30 @@ magma_zhetrd_hb2st(
 #if defined(PRECISION_z) || defined(PRECISION_c)
     if (uplo == MagmaLower) {
         for (magma_int_t i=0; i < n-1; i++) {
-            D[i] = MAGMA_Z_REAL( A[i*lda  ] );
-            E[i] = MAGMA_Z_REAL( A[i*lda+1] );
+            d[i] = MAGMA_Z_REAL( A[i*lda  ] );
+            e[i] = MAGMA_Z_REAL( A[i*lda+1] );
         }
-        D[n-1] = MAGMA_Z_REAL(A[(n-1)*lda]);
+        d[n-1] = MAGMA_Z_REAL(A[(n-1)*lda]);
     } else { /* MagmaUpper not tested yet */
         for (magma_int_t i=0; i < n-1; i++) {
-            D[i] = MAGMA_Z_REAL( A[i*lda+nb]   );
-            E[i] = MAGMA_Z_REAL( A[i*lda+nb-1] );
+            d[i] = MAGMA_Z_REAL( A[i*lda+nb]   );
+            e[i] = MAGMA_Z_REAL( A[i*lda+nb-1] );
         }
-        D[n-1] = MAGMA_Z_REAL(A[(n-1)*lda+nb]);
+        d[n-1] = MAGMA_Z_REAL(A[(n-1)*lda+nb]);
     } /* end MagmaUpper */
 #else
     if ( uplo == MagmaLower ) {
         for (magma_int_t i=0; i < n-1; i++) {
-            D[i] = A[i*lda];   // diag
-            E[i] = A[i*lda+1]; // lower diag
+            d[i] = A[i*lda];   // diag
+            e[i] = A[i*lda+1]; // lower diag
         }
-        D[n-1] = A[(n-1)*lda];
+        d[n-1] = A[(n-1)*lda];
     } else {
         for (magma_int_t i=0; i < n-1; i++) {
-            D[i] = A[i*lda+nb];   // diag
-            E[i] = A[i*lda+nb-1]; // lower diag
+            d[i] = A[i*lda+nb];   // diag
+            e[i] = A[i*lda+nb-1]; // lower diag
         }
-        D[n-1] = A[(n-1)*lda+nb];
+        d[n-1] = A[(n-1)*lda+nb];
     }
 #endif
     return MAGMA_SUCCESS;

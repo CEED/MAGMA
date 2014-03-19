@@ -37,7 +37,7 @@
             matrix Q. N >= K >= 0.
 
     @param[in,out]
-    DA      COMPLEX_16 array A on the GPU device,
+    dA      COMPLEX_16 array A on the GPU device,
             dimension (LDDA,N). On entry, the i-th column must contain
             the vector which defines the elementary reflector H(i), for
             i = 1,2,...,k, as returned by ZGEQRF_GPU in the first k
@@ -54,7 +54,7 @@
             reflector H(i), as returned by ZGEQRF_GPU.
 
     @param[in]
-    DT      COMPLEX_16 work space array on the GPU device,
+    dT      COMPLEX_16 work space array on the GPU device,
             dimension (MIN(M, N) )*NB.
             This must be the 6th argument of magma_zgeqrf_gpu
             [ note that if N here is bigger than N in magma_zgeqrf_gpu,
@@ -62,7 +62,7 @@
               as specified in this routine ].
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.
@@ -76,12 +76,12 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
-                 magmaDoubleComplex *da, magma_int_t ldda,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
                  magma_int_t nb, magma_int_t *info)
 {
-    #define da_ref(a_1,a_2) (da+(a_2)*(ldda) + (a_1))
-    #define t_ref(a_1)      (dT+(a_1)*nb)
+    #define dA(a_1,a_2) (dA + (a_2)*(ldda) + (a_1))
+    #define dT(a_1)     (dT + (a_1)*nb)
 
     magma_int_t  i__1, i__2, i__3;
     //magma_int_t lwork;
@@ -123,9 +123,9 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         kk = min(k, ki + nb);
 
         /* Set A(1:kk,kk+1:n) to zero. */
-        magmablas_zlaset(MagmaUpperLower, kk, n-kk, da_ref(0,kk), ldda);
+        magmablas_zlaset(MagmaUpperLower, kk, n-kk, dA(0,kk), ldda);
         /* A(kk+1:m, kk+1:n) = I */
-        magmablas_zlaset_identity(m-kk, n-kk, da_ref(kk,kk), ldda);
+        magmablas_zlaset_identity(m-kk, n-kk, dA(kk,kk), ldda);
     }
     else {
         ki = 0;
@@ -151,20 +151,20 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         i__2 = n - kk;
         i__3 = k - kk;
         //cublasGetMatrix(i__1, i__2, sizeof(magmaDoubleComplex),
-        //                da_ref(kk, kk), ldda, panel, i__1);
+        //                dA(kk, kk), ldda, panel, i__1);
         //lapackf77_zungqr(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk],
         //                 work, &lwork, &iinfo);
         //
         //cublasSetMatrix(i__1, i__2, sizeof(magmaDoubleComplex),
-        //              panel, i__1, da_ref(kk, kk), ldda);
+        //              panel, i__1, dA(kk, kk), ldda);
         
         magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                           i__1, i__2, i__3,
-                          da_ref(kk, kk-nb), ldda, t_ref(kk-nb),          ldt,
-                                  da_ref(kk, kk), ldda, dwork, i__2);
+                          dA(kk, kk-nb), ldda, dT(kk-nb), ldt,
+                          dA(kk, kk), ldda, dwork, i__2);
         
-        //magmablas_zlaset(MagmaUpperLower, kk-nb, nb, da_ref(0,kk-nb), ldda);
-        //magmablas_zlaset_identity(m-(kk-nb), nb, da_ref(kk-nb,kk-nb), ldda);
+        //magmablas_zlaset(MagmaUpperLower, kk-nb, nb, dA(0,kk-nb), ldda);
+        //magmablas_zlaset_identity(m-(kk-nb), nb, dA(kk-nb,kk-nb), ldda);
     }
 
     if (kk > 0) {
@@ -174,39 +174,39 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             /* Send current panel to the CPU for update */
             i__2 = m - i;
             //cudaMemcpy2DAsync(panel,       i__2 * sizeof(magmaDoubleComplex),
-            //                  da_ref(i,i), ldda * sizeof(magmaDoubleComplex),
+            //                  dA(i,i), ldda * sizeof(magmaDoubleComplex),
             //                  sizeof(magmaDoubleComplex)*i__2, ib,
             //                  cudaMemcpyDeviceToHost,stream[0]);
             if (i + ib < n) {
                 /* Apply H to A(i:m,i+ib:n) from the left */
                 i__3 = n - i;
 
-                magmablas_zlaset(MagmaUpperLower, i, ib, da_ref(0,i), ldda);
-                magmablas_zlaset_identity(m-i, ib, da_ref(i,i), ldda);
+                magmablas_zlaset(MagmaUpperLower, i, ib, dA(0,i), ldda);
+                magmablas_zlaset_identity(m-i, ib, dA(i,i), ldda);
 
                 magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                                   i__2, i__3, ib,
-                                  da_ref(i, i-nb), ldda, t_ref(i-nb),             ldt,
-                                  da_ref(i, i), ldda, dwork, i__3);
+                                  dA(i, i-nb), ldda, dT(i-nb),             ldt,
+                                  dA(i, i), ldda, dwork, i__3);
             }
 
             /* Apply H to rows i:m of current block on the CPU */
             //magma_queue_sync( stream[0] );
             //lapackf77_zungqr(&i__2, &ib, &ib, panel, &i__2, &tau[i],
             //                 work, &lwork, &iinfo);
-            //cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(magmaDoubleComplex),
+            //cudaMemcpy2DAsync(dA(i,i), ldda * sizeof(magmaDoubleComplex),
             //                  panel,       i__2 * sizeof(magmaDoubleComplex),
             //                  sizeof(magmaDoubleComplex)*i__2, ib,
             //                  cudaMemcpyHostToDevice,stream[1]);
 
             /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;
-            //magmablas_zlaset(MagmaUpperLower, i-ib, ib, da_ref(0,i-ib), ldda);
-            //magmablas_zlaset_identity(m-(i-ib), ib, da_ref(i-ib,i-ib), ldda);
+            //magmablas_zlaset(MagmaUpperLower, i-ib, ib, dA(0,i-ib), ldda);
+            //magmablas_zlaset_identity(m-(i-ib), ib, dA(i-ib,i-ib), ldda);
         }
     }
 
-    magmablas_zlaset_identity(m, nb, da_ref(0,0), ldda);
+    magmablas_zlaset_identity(m, nb, dA(0,0), ldda);
 
     magma_free( dwork );
     //magma_free_pinned( work );
@@ -216,5 +216,5 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     return *info;
 } /* magma_zungqr_gpu */
 
-#undef da_ref
-#undef t_ref
+#undef dA
+#undef dT

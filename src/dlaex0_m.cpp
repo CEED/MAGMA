@@ -12,11 +12,11 @@
 #include "common_magma.h"
 #include "timer.h"
 
-#define Q(ix, iy) (q + (ix) + ldq * (iy))
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
 
 extern "C" {
 
-magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int_t ldq,
+magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* Q, magma_int_t ldq,
                            magma_int_t* indxq, double rho, magma_int_t cutpnt,
                            double* work, magma_int_t* iwork, double** dwork,
                            magma_queue_t stream[MagmaMaxGPUs][2],
@@ -29,17 +29,6 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 
 
 /**
-       .. Scalar Arguments .
-      CHARACTER          RANGE
-      INTEGER            IL, IU, INFO, LDQ, N
-      DOUBLE PRECISION   VL, VU
-       .
-       .. Array Arguments .
-      INTEGER            IWORK( * )
-      DOUBLE PRECISION   D( * ), E( * ), Q( LDQ, * ),
-     $                   WORK( * )
-       .
-
     Purpose
     -------
     DLAEX0 computes all eigenvalues and the choosen eigenvectors of a
@@ -47,6 +36,10 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 
     Arguments
     ---------
+    @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
     @param[in]
     n       INTEGER
             The dimension of the symmetric tridiagonal matrix.  N >= 0.
@@ -88,9 +81,9 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
       -     = 'I': the IL-th through IU-th eigenvalues will be found.
             
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -121,7 +114,7 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
+magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
                double* work, magma_int_t* iwork,
                magma_range_t range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
@@ -295,7 +288,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
     }
     blasf77_dcopy(&n, work, &ione, d, &ione);
-    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, q, &ldq );
+    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, Q, &ldq );
 
     for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);

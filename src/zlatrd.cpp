@@ -18,11 +18,11 @@
 
 #define PRECISION_z
 
-#define A(i, j) (a+(j)*lda + (i))
-#define W(i, j) (w+(j)*ldw + (i))
+#define A(i, j) (A + (j)*lda + (i))
+#define W(i, j) (W + (j)*ldw + (i))
 
-#define dA(i, j) (da+(j)*ldda + (i))
-#define dW(i, j) (dw+(j)*lddw + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
+#define dW(i, j) (dW + (j)*lddw + (i))
 
 /**
     Purpose
@@ -53,7 +53,7 @@
             The order of the matrix A.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The number of rows and columns to be reduced.
 
     @param[in,out]
@@ -156,11 +156,11 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-             magmaDoubleComplex *a,  magma_int_t lda,
+             magmaDoubleComplex *A,  magma_int_t lda,
              double *e, magmaDoubleComplex *tau,
-             magmaDoubleComplex *w,  magma_int_t ldw,
-             magmaDoubleComplex *da, magma_int_t ldda,
-             magmaDoubleComplex *dw, magma_int_t lddw)
+             magmaDoubleComplex *W,  magma_int_t ldw,
+             magmaDoubleComplex *dA, magma_int_t ldda,
+             magmaDoubleComplex *dW, magma_int_t lddw)
 {
     magma_int_t i;
     

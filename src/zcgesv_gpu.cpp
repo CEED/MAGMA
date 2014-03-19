@@ -15,7 +15,7 @@
 
 /**
     Purpose
-    =======
+    -------
     ZCGESV computes the solution to a complex system of linear equations
        A * X = B or A' * X = B
     where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
@@ -47,7 +47,7 @@
     The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
 
     Arguments
-    =========
+    ---------
     @param[in]
     trans   CHARACTER*1
             Specifies the form of the system of equations:
@@ -88,7 +88,7 @@
             factorization (if info.EQ.0 and ITER.LT.0).
 
     @param[out]
-    dIPIV   INTEGER array on the GPU, dimension (N)
+    dipiv   INTEGER array on the GPU, dimension (N)
             The pivot indices; for 1 <= i <= N, after permuting, row i of the
             matrix was moved to row dIPIV(i).
             Note this is different than IPIV, where interchanges

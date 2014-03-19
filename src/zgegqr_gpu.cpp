@@ -46,12 +46,14 @@
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
-    \n
+
+    @param
     dwork   (GPU workspace) COMPLEX_16 array, dimension (N,N)
-    \n
-    work    (CPU workspace/output) COMPLEX_16 array, dimension 3n^2.
+
+    @param[out]
+    work    (CPU workspace) COMPLEX_16 array, dimension 3n^2.
             On exit, work(1:n^2) holds the rectangular matrix R.
-            Preferably, for higher performance, work must be in pinned memory.
+            Preferably, for higher performance, work should be in pinned memory.
  
     @param[out]
     info    INTEGER

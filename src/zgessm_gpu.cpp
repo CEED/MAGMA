@@ -15,12 +15,12 @@
 
 /**
     Purpose
-    =======
+    -------
     ZGESSM applies the factors L computed by ZGETRF_INCPIV to
     a complex M-by-N tile A.
     
     Arguments
-    =========
+    ---------
     @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -47,7 +47,7 @@
             The IB-by-K matrix in which is stored L^(-1) as returned by GETRF_INCPIV
 
     @param[in]
-    LDDL1   INTEGER
+    lddl1   INTEGER
             The leading dimension of the array L1.  LDDL1 >= max(1,2*IB).
 
     @param[in]
@@ -62,6 +62,10 @@
     dA      DOUBLE COMPLEX array, dimension (LDDA, N)
             On entry, the M-by-N tile A on the gpu.
             On exit, updated by the application of L on the gpu.
+
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array A.  LDDA >= max(1,M).
 
     @ingroup magma_zgesv_tile
     ********************************************************************/

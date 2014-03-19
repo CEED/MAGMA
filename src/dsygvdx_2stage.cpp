@@ -101,9 +101,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -123,7 +123,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -195,7 +195,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                     double *a, magma_int_t lda, double *b, magma_int_t ldb,
+                     double *A, magma_int_t lda, double *B, magma_int_t ldb,
                      double vl, double vu, magma_int_t il, magma_int_t iu,
                      magma_int_t *m, double *w, double *work, magma_int_t lwork,
                      magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
@@ -205,8 +205,8 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
 
     double d_one = MAGMA_D_ONE;
 
-    double *da;
-    double *db;
+    double *dA;
+    double *dB;
     magma_int_t ldda = n;
     magma_int_t lddb = n;
 
@@ -303,7 +303,7 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsygvd(&itype, jobz_, uplo_,
-                         &n, a, &lda, b, &ldb,
+                         &n, A, &lda, B, &ldb,
                          w, work, &lwork,
                          iwork, &liwork, info);
         *m = n;
@@ -311,22 +311,22 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
     }
 
     // TODO: fix memory leak
-    if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
-        MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
+    if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda ) ||
+        MAGMA_SUCCESS != magma_dmalloc( &dB, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
     /* Form a Cholesky factorization of B. */
-    magma_dsetmatrix( n, n, b, ldb, db, lddb );
+    magma_dsetmatrix( n, n, B, ldb, dB, lddb );
     magma_dsetmatrix_async( n, n,
-                            a,  lda,
-                            da, ldda, stream );
+                            A,  lda,
+                            dA, ldda, stream );
 
     magma_timer_t time;
     timer_start( time );
 
-    magma_dpotrf_gpu(uplo, n, db, lddb, info);
+    magma_dpotrf_gpu(uplo, n, dB, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -337,41 +337,41 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
 
     magma_queue_sync( stream );
     magma_dgetmatrix_async( n, n,
-                            db, lddb,
-                            b,  ldb, stream );
+                            dB, lddb,
+                            B,  ldb, stream );
 
     timer_start( time );
 
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_dsygst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
+    magma_dsygst_gpu(itype, uplo, n, dA, ldda, dB, lddb, info);
 
     timer_stop( time );
     timer_printf( "time dsygst_gpu = %6.2f\n", time );
 
-    magma_dgetmatrix( n, n, da, ldda, a, lda );
+    magma_dgetmatrix( n, n, dA, ldda, A, lda );
     magma_queue_sync( stream );
-    magma_free( da );
-    magma_free( db );
+    magma_free( dA );
+    magma_free( dB );
 
     timer_start( time );
 
-    magma_dsyevdx_2stage(jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info);
+    magma_dsyevdx_2stage(jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info);
 
     timer_stop( time );
     timer_printf( "time dsyevdx_2stage = %6.2f\n", time );
 
     if (wantz && *info == 0) {
         // TODO fix memory leak
-        if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
-            MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
+        if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda ) ||
+            MAGMA_SUCCESS != magma_dmalloc( &dB, n*lddb )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
 
         timer_start( time );
 
-        magma_dsetmatrix( n, *m, a, lda, da, ldda );
-        magma_dsetmatrix( n,  n, b, ldb, db, lddb );
+        magma_dsetmatrix( n, *m, A, lda, dA, ldda );
+        magma_dsetmatrix( n,  n, B, ldb, dB, lddb );
 
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
@@ -383,7 +383,7 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
                 trans = MagmaNoTrans;
             }
 
-            magma_dtrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, db, lddb, da, ldda);
+            magma_dtrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, dB, lddb, dA, ldda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
@@ -394,16 +394,16 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
                 trans = MagmaConjTrans;
             }
 
-            magma_dtrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, db, lddb, da, ldda);
+            magma_dtrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, dB, lddb, dA, ldda);
         }
 
-        magma_dgetmatrix( n, *m, da, ldda, a, lda );
+        magma_dgetmatrix( n, *m, dA, ldda, A, lda );
 
         timer_stop( time );
         timer_printf( "time dtrsm/mm + getmatrix = %6.2f\n", time );
 
-        magma_free( da );
-        magma_free( db );
+        magma_free( dA );
+        magma_free( dB );
     }
 
     magma_queue_destroy( stream );

@@ -89,11 +89,9 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgelqf( magma_int_t m, magma_int_t n,
-              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau,
+              magmaDoubleComplex *A,    magma_int_t lda,   magmaDoubleComplex *tau,
               magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
-    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-
     magmaDoubleComplex *dA, *dAT;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
@@ -141,7 +139,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        magma_zsetmatrix( m, n, a, lda, dA, ldda );
+        magma_zsetmatrix( m, n, A, lda, dA, ldda );
         dAT = dA;
         magmablas_ztranspose_inplace( ldda, dAT, ldda );
     }
@@ -153,7 +151,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        magma_zsetmatrix( m, n, a, lda, dA, maxm );
+        magma_zsetmatrix( m, n, A, lda, dA, maxm );
 
         dAT = dA + maxn * maxm;
         magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
@@ -163,15 +161,13 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     if (maxdim*maxdim < 2*maxm*maxn) {
         magmablas_ztranspose_inplace( ldda, dAT, ldda );
-        magma_zgetmatrix( m, n, dA, ldda, a, lda );
+        magma_zgetmatrix( m, n, dA, ldda, A, lda );
     } else {
         magmablas_ztranspose2( dA, maxm, dAT, ldda, n, m );
-        magma_zgetmatrix( m, n, dA, maxm, a, lda );
+        magma_zgetmatrix( m, n, dA, maxm, A, lda );
     }
 
     magma_free( dA );
 
     return *info;
 } /* magma_zgelqf */
-
-#undef  a_ref

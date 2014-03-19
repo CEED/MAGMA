@@ -113,9 +113,9 @@
 extern "C" magma_int_t
 magma_zunmql(magma_side_t side, magma_trans_t trans,
              magma_int_t m, magma_int_t n, magma_int_t k,
-             magmaDoubleComplex *a, magma_int_t lda,
+             magmaDoubleComplex *A, magma_int_t lda,
              magmaDoubleComplex *tau,
-             magmaDoubleComplex *c, magma_int_t ldc,
+             magmaDoubleComplex *C, magma_int_t ldc,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
 {
@@ -192,7 +192,7 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
     magma_zmalloc( &dwork, 2*(m + 64)*64 );
 
     /* Copy matrix C from the CPU to the GPU */
-    magma_zsetmatrix( m, n, c, ldc, dc, m );
+    magma_zsetmatrix( m, n, C, ldc, dc, m );
 
     /* work space on CPU */
     if (  MAGMA_SUCCESS != magma_zmalloc_pinned( &T, 2*nb*nb ) ) {
@@ -205,8 +205,8 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
 
     if ( nb >= k ) {
         /* Use CPU code */
-        lapackf77_zunmql(side_, trans_, &m, &n, &k, a, &lda, tau,
-                         c, &ldc, work, &lwork, &iinfo);
+        lapackf77_zunmql(side_, trans_, &m, &n, &k, A, &lda, tau,
+                         C, &ldc, work, &lwork, &iinfo);
     }
     else {
         /* Use hybrid CPU-GPU code */
@@ -237,14 +237,14 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
                H = H(i+ib-1) . . . H(i+1) H(i) */
             i__4 = nq - k + i__ + ib - 1;
             lapackf77_zlarft("Backward", "Columnwise", &i__4, &ib,
-                             &a[(i__-1) * lda], &lda, &tau[i__-1], T, &ib);
+                             &A[(i__-1) * lda], &lda, &tau[i__-1], T, &ib);
             
             /* 1) Put 0s in the lower triangular part of A;
                2) copy the panel from A to the GPU, and
                3) restore A                                      */
-            zpanel_to_q( MagmaLower, ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
-            magma_zsetmatrix( i__4, ib, &a[(i__-1) * lda], lda, dwork, i__4 );
-            zq_to_panel( MagmaLower, ib, &a[i__-1 + (i__-1) * lda], lda, T+ib*ib);
+            zpanel_to_q( MagmaLower, ib, &A[i__-1 + (i__-1) * lda], lda, T+ib*ib);
+            magma_zsetmatrix( i__4, ib, &A[(i__-1) * lda], lda, dwork, i__4 );
+            zq_to_panel( MagmaLower, ib, &A[i__-1 + (i__-1) * lda], lda, T+ib*ib);
             
             if (left) {
                 /* H or H' is applied to C(1:m-k+i+ib-1,1:n) */
@@ -264,7 +264,7 @@ magma_zunmql(magma_side_t side, magma_trans_t trans,
                              dwork+i__4*ib + ib*ib, ldwork);
         }
 
-        magma_zgetmatrix( m, n, dc, m, c, ldc );
+        magma_zgetmatrix( m, n, dc, m, C, ldc );
     }
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 

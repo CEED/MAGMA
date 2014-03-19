@@ -38,7 +38,7 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX*16 array, dimension (LDA,N)
+    dA      COMPLEX*16 array, dimension (LDA,N)
             On entry, the m by n matrix A.
             On exit, the unitary matrix Q as a
             product of elementary reflectors (see Further Details).
@@ -50,11 +50,11 @@
             product of elementary reflectors (see Further Details).
 
     @param[in]
-    lda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
-    tau     COMPLEX*16 array, dimension (min(M,N))
+    dtau    COMPLEX*16 array, dimension (min(M,N))
             The scalar factors of the elementary reflectors (see Further
             Details).
 
@@ -69,7 +69,7 @@
             LAPACK stores this array in A. There are 0s below the diagonal.
 
     @param
-    work    (workspace) COMPLEX*16 array, dimension (N)
+    dwork   (workspace) COMPLEX*16 array, dimension (N)
 
     @param[out]
     info    INTEGER
@@ -98,7 +98,7 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info)
 {
-    #define  da_ref(a_1,a_2) ( dA+(a_2)*(*ldda) + (a_1))
+    #define dA(a_1,a_2) (dA + (a_2)*(*ldda) + (a_1))
     
     magma_int_t i, k;
 
@@ -120,18 +120,18 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2_cols(*m, k, da_ref(0,0), *ldda, dnorm);
+    magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
-        magma_zlarfgx_gpu(*m-i, da_ref(i, i), da_ref(min(i+1,*m), i), dtau+i, dnorm+i,
+        magma_zlarfgx_gpu(*m-i, dA(i, i), dA(min(i+1,*m), i), dtau+i, dnorm+i,
                           ddA + i + i*(*n), i);
         
         if (i < *n) {
             /* Apply H(i)' to A(i:m,i+1:n) from the left */
-            magma_zlarfx_gpu(*m-i, *n-i-1, da_ref(i, i), dtau+i,
-                             //da_ref(i, i+1), *ldda, dnorm+i+1,
-                             da_ref(i, 0), *ldda, dnorm+i+1,
+            magma_zlarfx_gpu(*m-i, *n-i-1, dA(i, i), dtau+i,
+                             //dA(i, i+1), *ldda, dnorm+i+1,
+                             dA(i, 0), *ldda, dnorm+i+1,
                              dT, i, work );
         }
     }

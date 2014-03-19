@@ -33,7 +33,7 @@ magma_zherk_mgpu2(
 
 /**
     Purpose
-    =======
+    -------
     ZPOTRF computes the Cholesky factorization of a complex Hermitian
     positive definite matrix dA.
 
@@ -45,7 +45,7 @@ magma_zherk_mgpu2(
     This is the block version of the algorithm, calling Level 3 BLAS.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangle of dA is stored;

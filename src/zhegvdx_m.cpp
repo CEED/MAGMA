@@ -36,6 +36,10 @@
     Arguments
     ---------
     @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
+    @param[in]
     itype   INTEGER
             Specifies the problem type to be solved:
             = 1:  A*x = (lambda)*B*x
@@ -101,9 +105,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -123,7 +127,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -209,7 +213,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+                magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb,
                 double vl, double vu, magma_int_t il, magma_int_t iu,
                 magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
                 double *rwork, magma_int_t lrwork,
@@ -317,7 +321,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zhegvd(&itype, jobz_, uplo_,
-                         &n, a, &lda, b, &ldb,
+                         &n, A, &lda, B, &ldb,
                          w, work, &lwork,
                          #if defined(PRECISION_z) || defined(PRECISION_c)
                          rwork, &lrwork,
@@ -330,7 +334,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
     magma_timer_t time;
     timer_start( time );
 
-    magma_zpotrf_m(nrgpu, uplo, n, b, ldb, info);
+    magma_zpotrf_m(nrgpu, uplo, n, B, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -341,13 +345,13 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
     timer_start( time );
 
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_zhegst_m(nrgpu, itype, uplo, n, a, lda, b, ldb, info);
+    magma_zhegst_m(nrgpu, itype, uplo, n, A, lda, B, ldb, info);
 
     timer_stop( time );
     timer_printf( "time zhegst = %6.2f\n", time );
     timer_start( time );
 
-    magma_zheevdx_m(nrgpu, jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, rwork, lrwork, iwork, liwork, info);
+    magma_zheevdx_m(nrgpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, work, lwork, rwork, lrwork, iwork, liwork, info);
 
     timer_stop( time );
     timer_printf( "time zheevd = %6.2f\n", time );
@@ -366,7 +370,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
             }
 
             magma_ztrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit,
-                          n, *m, c_one, b, ldb, a, lda);
+                          n, *m, c_one, B, ldb, A, lda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;

@@ -77,9 +77,9 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -99,7 +99,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the required m eigenvalues in ascending order.
 
     @param[out]
@@ -164,7 +164,7 @@
 extern "C" magma_int_t
 magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                      magma_int_t n,
-                     double *a, magma_int_t lda,
+                     double *A, magma_int_t lda,
                      double vl, double vu, magma_int_t il, magma_int_t iu,
                      magma_int_t *m, double *w,
                      double *work, magma_int_t lwork,
@@ -273,9 +273,9 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     }
 
     if (n == 1) {
-        w[0] = a[0];
+        w[0] = A[0];
         if (wantz) {
-            a[0] = MAGMA_D_ONE;
+            A[0] = MAGMA_D_ONE;
         }
         return *info;
     }
@@ -291,7 +291,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsyevd(jobz_, uplo_, &n,
-                        a, &lda, w,
+                        A, &lda, w,
                         work, &lwork,
                         iwork, &liwork,
                         info);
@@ -308,7 +308,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_dlansy("M", uplo_, &n, a, &lda, work);
+    anrm = lapackf77_dlansy("M", uplo_, &n, A, &lda, work);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -318,7 +318,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
+        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, A,
                          &lda, info);
     }
 
@@ -344,7 +344,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         return *info;
     }
 
-    magma_dsytrd_sy2sb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
+    magma_dsytrd_sy2sb(uplo, n, nb, A, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
 
     timer_stop( time );
     timer_printf( "  time dsytrd_sy2sb = %6.2f\n", time );
@@ -357,13 +357,13 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     memset(A2, 0, n*lda2*sizeof(double));
 
     for (magma_int_t j = 0; j < n-nb; j++) {
-        cblas_dcopy(nb+1, &a[j*(lda+1)], 1, &A2[j*lda2], 1);
-        memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(double));
-        a[nb + j*(lda+1)] = d_one;
+        cblas_dcopy(nb+1, &A[j*(lda+1)], 1, &A2[j*lda2], 1);
+        memset(&A[j*(lda+1)], 0, (nb+1)*sizeof(double));
+        A[nb + j*(lda+1)] = d_one;
     }
     for (magma_int_t j = 0; j < nb; j++) {
-        cblas_dcopy(nb-j, &a[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
-        memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(double));
+        cblas_dcopy(nb-j, &A[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
+        memset(&A[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(double));
     }
 
     timer_stop( time );
@@ -412,7 +412,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         double *dZ;
         magma_int_t lddz = n;
 
-        double *da;
+        double *dA;
         magma_int_t ldda = n;
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
@@ -421,7 +421,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
-        if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda )) {
+        if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
@@ -433,15 +433,15 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         timer_printf( "  time dbulge_back = %6.2f\n", time );
         timer_start( time );
 
-        magma_dsetmatrix( n, n, a, lda, da, ldda );
+        magma_dsetmatrix( n, n, A, lda, dA, ldda );
 
-        magma_dormqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, da+nb, ldda,
+        magma_dormqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dA+nb, ldda,
                                  dZ+nb, n, dT1, nb, info);
 
-        magma_dgetmatrix( n, *m, dZ, lddz, a, lda );
+        magma_dgetmatrix( n, *m, dZ, lddz, A, lda );
         magma_free(dT1);
         magma_free(dZ);
-        magma_free(da);
+        magma_free(dA);
 
         timer_stop( time );
         timer_stop( time_total );

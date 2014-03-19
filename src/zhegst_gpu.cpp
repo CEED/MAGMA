@@ -14,10 +14,10 @@
 #include "common_magma.h"
 
 #define A(i, j) (w + (j)*lda + (i))
-#define B(i, j) (w+nb*lda + (j)*ldb + (i))
+#define B(i, j) (w + nb*lda + (j)*ldb + (i))
 
-#define dA(i, j) (da + (j)*ldda + (i))
-#define dB(i, j) (db + (j)*lddb + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
+#define dB(i, j) (dB + (j)*lddb + (i))
 
 /**
     Purpose
@@ -52,7 +52,7 @@
             The order of the matrices A and B.  N >= 0.
     
     @param[in,out]
-    DA      COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -69,7 +69,7 @@
             The leading dimension of the array A.  LDA >= max(1,N).
     
     @param[in]
-    DB      COMPLEX_16 array, dimension (LDB,N)
+    dB      COMPLEX_16 array, dimension (LDB,N)
             The triangular factor from the Cholesky factorization of B,
             as returned by ZPOTRF.
     
@@ -86,8 +86,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-                 magmaDoubleComplex *da, magma_int_t ldda,
-                 magmaDoubleComplex *db, magma_int_t lddb, magma_int_t *info)
+                 magmaDoubleComplex *dA, magma_int_t ldda,
+                 magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
 {
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;

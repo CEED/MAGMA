@@ -17,9 +17,9 @@
 #include "timer.h"
 #include <cblas.h>
 
-#define Q(ix, iy) (q + (ix) + ldq * (iy))
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
 
-#define dQ2(id) (dwork[id])
+#define dQ2(id)    (dwork[id])
 #define dS(id, ii) (dwork[id] + n2*n2_loc +(ii)* (n2*nb))
 #define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
 
@@ -59,6 +59,10 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     Arguments
     ---------
     @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
+    @param[in]
     k       INTEGER
             The number of terms in the rational function to be solved by
             DLAED4.  K >= 0.
@@ -69,7 +73,7 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
             N >= K (deflation may result in N > K).
 
     @param[in]
-    N1      INTEGER
+    n1      INTEGER
             The location of the last eigenvalue in the leading submatrix.
             min(1,N) <= N1 <= N/2.
 
@@ -94,7 +98,7 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
             RHO >= 0 required.
 
     @param[in,out]
-    DLAMDA  DOUBLE PRECISION array, dimension (K)
+    dlamda  DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the old roots
             of the deflated updating problem.  These are the poles
             of the secular equation. May be changed on output by
@@ -107,26 +111,26 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
             eigenvectors for the split problem.
 
     @param[in]
-    INDX    INTEGER array, dimension (N)
+    indx    INTEGER array, dimension (N)
             The permutation used to arrange the columns of the deflated
             Q matrix into three groups (see DLAED2).
             The rows of the eigenvectors found by DLAED4 must be likewise
             permuted before the matrix multiply can take place.
 
     @param[in]
-    CTOT    INTEGER array, dimension (4)
+    ctot    INTEGER array, dimension (4)
             A count of the total number of the various types of columns
             in Q, as described in INDX.  The fourth column type is any
             column which has been deflated.
 
     @param[in,out]
-    W       DOUBLE PRECISION array, dimension (K)
+    w       DOUBLE PRECISION array, dimension (K)
             The first K elements of this array contain the components
             of the deflation-adjusted updating vector. Destroyed on
             output.
 
     @param
-    S       (workspace) DOUBLE PRECISION array, dimension (N1 + 1)*K
+    s       (workspace) DOUBLE PRECISION array, dimension (N1 + 1)*K
             Will contain the eigenvectors of the repaired matrix which
             will be multiplied by the previously accumulated eigenvectors
             to update the system.
@@ -150,6 +154,31 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     stream  (device stream) magma_queue_t array,
             dimension (MagmaMaxGPUs,2)
 
+    @param[in]
+    range   CHARACTER*1
+      -     = 'A': all eigenvalues will be found.
+      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
+                   will be found.
+      -     = 'I': the IL-th through IU-th eigenvalues will be found.
+            TODO verify range, vl, vu, il, iu -- copied from dlaex1.
+
+    @param[in]
+    vl      DOUBLE PRECISION
+    @param[in]
+    vu      DOUBLE PRECISION
+            if RANGE='V', the lower and upper bounds of the interval to
+            be searched for eigenvalues. VL < VU.
+            Not referenced if RANGE = 'A' or 'I'.
+
+    @param[in]
+    il      INTEGER
+    @param[in]
+    iu      INTEGER
+            if RANGE='I', the indices (in ascending order) of the
+            smallest and largest eigenvalues to be returned.
+            1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
+            Not referenced if RANGE = 'A' or 'V'.
+
     @param[out]
     info    INTEGER
       -     = 0:  successful exit.
@@ -168,8 +197,8 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
 extern "C" magma_int_t
 magma_dlaex3_m(magma_int_t nrgpu,
                magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
-               double* q, magma_int_t ldq, double rho,
-               double* dlamda, double* q2, magma_int_t* indx,
+               double* Q, magma_int_t ldq, double rho,
+               double* dlamda, double* Q2, magma_int_t* indx,
                magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
                double** dwork, magma_queue_t stream[MagmaMaxGPUs][2],
                magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
@@ -177,8 +206,8 @@ magma_dlaex3_m(magma_int_t nrgpu,
 {
     if (nrgpu == 1) {
         magma_setdevice(0);
-        magma_dlaex3(k, n, n1, d, q, ldq, rho,
-                     dlamda, q2, indx, ctot, w, s, indxq,
+        magma_dlaex3(k, n, n1, d, Q, ldq, rho,
+                     dlamda, Q2, indx, ctot, w, s, indxq,
                      *dwork, range, vl, vu, il, iu, info );
         return MAGMA_SUCCESS;
     }
@@ -282,19 +311,19 @@ magma_dlaex3_m(magma_int_t nrgpu,
         for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
 #ifdef CHECK_CPU
-            lapackf77_dlacpy("A", &ni_loc[igpu], &n12, q2+n1_loc*(igpu/2), &n1, hQ2(igpu), &n1_loc);
+            lapackf77_dlacpy("A", &ni_loc[igpu], &n12, Q2+n1_loc*(igpu/2), &n1, hQ2(igpu), &n1_loc);
 #endif
             magma_setdevice(igpu);
             magma_dsetmatrix_async( ni_loc[igpu], n12,
-                                    q2+n1_loc*(igpu/2), n1,
+                                    Q2+n1_loc*(igpu/2), n1,
                                     dQ2(igpu),          n1_loc, stream[igpu][0] );
             ni_loc[igpu+1] = min(n2_loc, n2 - igpu/2 * n2_loc);
 #ifdef CHECK_CPU
-            lapackf77_dlacpy("A", &ni_loc[igpu+1], &n23, q2+iq2+n2_loc*(igpu/2), &n2, hQ2(igpu+1), &n2_loc);
+            lapackf77_dlacpy("A", &ni_loc[igpu+1], &n23, Q2+iq2+n2_loc*(igpu/2), &n2, hQ2(igpu+1), &n2_loc);
 #endif
             magma_setdevice(igpu+1);
             magma_dsetmatrix_async( ni_loc[igpu+1], n23,
-                                    q2+iq2+n2_loc*(igpu/2), n2,
+                                    Q2+iq2+n2_loc*(igpu/2), n2,
                                     dQ2(igpu+1),            n2_loc, stream[igpu+1][0] );
         }
     }
@@ -475,7 +504,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
         // Initialize W(I) = Q(I,I)
         tmp = ldq + 1;
-        blasf77_dcopy( &k, q, &tmp, w, &ione);
+        blasf77_dcopy( &k, Q, &tmp, w, &ione);
 
         for (j = 0; j < k; ++j) {
             for (i = 0; i < j; ++i)
@@ -513,7 +542,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             // stay on the CPU
             if ( n23 != 0 ) {
                 lapackf77_dlacpy("A", &n23, &rk, Q(ctot[0],iil-1), &ldq, s, &n23);
-                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &q2[iq2], &n2,
+                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &Q2[iq2], &n2,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             }
             else
@@ -521,7 +550,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
             if ( n12 != 0 ) {
                 lapackf77_dlacpy("A", &n12, &rk, Q(0,iil-1), &ldq, s, &n12);
-                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, q2, &n1,
+                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, Q2, &n1,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);
             }
             else

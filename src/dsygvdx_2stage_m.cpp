@@ -36,6 +36,10 @@
     Arguments
     ---------
     @param[in]
+    nrgpu   INTEGER
+            Number of GPUs to use.
+
+    @param[in]
     itype   INTEGER
             Specifies the problem type to be solved:
             = 1:  A*x = (lambda)*B*x
@@ -101,9 +105,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[in]
-    VL      DOUBLE PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    VU      DOUBLE PRECISION
+    vu      DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
@@ -123,7 +127,7 @@
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     @param[out]
-    W       DOUBLE PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -195,7 +199,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                       double *a, magma_int_t lda, double *b, magma_int_t ldb,
+                       double *A, magma_int_t lda, double *B, magma_int_t ldb,
                        double vl, double vu, magma_int_t il, magma_int_t iu,
                        magma_int_t *m, double *w, double *work, magma_int_t lwork,
                        magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
@@ -295,18 +299,18 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsygvd(&itype, jobz_, uplo_,
-                         &n, a, &lda, b, &ldb,
+                         &n, A, &lda, B, &ldb,
                          w, work, &lwork,
                          iwork, &liwork, info);
         *m = n;
         return *info;
     }
 
-    /* Form a Cholesky factorization of B. */
+    /* Form A Cholesky factorization of B. */
     magma_timer_t time;
     timer_start( time );
 
-    magma_dpotrf_m(nrgpu, uplo, n, b, ldb, info);
+    magma_dpotrf_m(nrgpu, uplo, n, B, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -317,13 +321,13 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
     timer_start( time );
 
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_dsygst_m(nrgpu, itype, uplo, n, a, lda, b, ldb, info);
+    magma_dsygst_m(nrgpu, itype, uplo, n, A, lda, B, ldb, info);
 
     timer_stop( time );
     timer_printf( "time dsygst_m = %6.2f\n", time );
     timer_start( time );
 
-    magma_dsyevdx_2stage_m(nrgpu, jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info);
+    magma_dsyevdx_2stage_m(nrgpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info);
 
     timer_stop( time );
     timer_printf( "time dsyevdx_2stage_m = %6.2f\n", time );
@@ -341,7 +345,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
                 trans = MagmaNoTrans;
             }
 
-            magma_dtrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
+            magma_dtrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, B, ldb, A, lda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
@@ -352,7 +356,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
                 trans = MagmaConjTrans;
             }
 
-            //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
+            //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, B, ldb, A, lda);
         }
 
         timer_stop( time );
