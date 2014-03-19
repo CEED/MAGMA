@@ -7,7 +7,8 @@
 
        @precisions normal z -> c d s
 
-       @author Peng Du, Tingxing Dong
+       @author Peng Du
+       @author Tingxing Dong
 */
 #include "common_magma.h"
 
