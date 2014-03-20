@@ -45,9 +45,9 @@ magma_zlarfxsym_v2(magma_int_t n,
 
     /* compute dtmp= X'*V */
 #if defined(PRECISION_z) || defined(PRECISION_c)
-   dtmp = c_zero;
-   for (magma_int_t j = 0; j < n; j++)
-      dtmp = dtmp + MAGMA_Z_CNJG(work[j]) * V[j];
+    dtmp = c_zero;
+    for (magma_int_t j = 0; j < n; j++)
+        dtmp = dtmp + MAGMA_Z_CNJG(work[j]) * V[j];
     //cblas_zdotc_sub(n, work, ione, V, ione, &dtmp);
 #else
     dtmp = cblas_zdotc(n, work, ione, V, ione);
