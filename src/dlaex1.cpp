@@ -11,8 +11,6 @@
 */
 #include "common_magma.h"
 
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
-
 /**
     Purpose
     -------
@@ -136,6 +134,8 @@ magma_dlaex1(magma_int_t n, double* d, double* Q, magma_int_t ldq,
              magma_range_t range, double vl, double vu,
              magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+
     magma_int_t coltyp, i, idlmda;
     magma_int_t indx, indxc, indxp;
     magma_int_t iq2, is, iw, iz, k, tmp;

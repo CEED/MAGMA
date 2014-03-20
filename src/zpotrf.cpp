@@ -17,10 +17,6 @@
 #endif
 // === End defining what BLAS to use ======================================
 
-
-#define A(i, j)  (A    + (j)*lda  + (i))
-#define dA(i, j) (work + (j)*ldda + (i))
-
 /**
     Purpose
     -------
@@ -84,6 +80,9 @@ extern "C" magma_int_t
 magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
+#define A(i, j)  (A    + (j)*lda  + (i))
+#define dA(i, j) (work + (j)*ldda + (i))
+
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        ldda, nb;

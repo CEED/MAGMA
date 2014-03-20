@@ -12,13 +12,6 @@
 #include "../testing/flops.h"
 #include "timer.h"
 
-
-#define    A(i, j)    (    A      + (j)*lda   + (i))
-#define   dA(d, i, j) (dwork[(d)] + (j)*lddla + (i))
-#define   dT(d, i, j) (   dt[(d)] + (j)*ldda  + (i))
-#define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
-#define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
-
 /**
     Purpose
     -------
@@ -80,6 +73,12 @@ extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
                magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
+#define    A(i, j)    (    A      + (j)*lda   + (i))
+#define   dA(d, i, j) (dwork[(d)] + (j)*lddla + (i))
+#define   dT(d, i, j) (   dt[(d)] + (j)*ldda  + (i))
+#define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
+#define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
+
     /* Local variables */
     double                 d_one     =  1.0;
     double                 d_neg_one = -1.0;

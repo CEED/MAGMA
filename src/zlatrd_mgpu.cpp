@@ -20,13 +20,6 @@
 
 #define MAGMABLAS_ZHEMV_MGPU
 
-#define A(i, j) (A + (j)*lda + (i))
-#define W(i, j) (W + (j)*ldw + (i))
-
-#define dA(id, i, j)  (dA[(id)] + ((j)+loffset)*ldda + (i) + offset)
-#define dW(id, i, j)  (dW[(id)] + (j)          *lddw + (i))
-#define dW1(id, i, j) (dW[(id)] + ((j)+nb)     *lddw + (i))
-
 /**
     Purpose
     -------
@@ -173,6 +166,13 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                   magma_queue_t stream[][10],
                   double *times)
 {
+#define A(i, j) (A + (j)*lda + (i))
+#define W(i, j) (W + (j)*ldw + (i))
+
+#define dA(id, i, j)  (dA[(id)] + ((j)+loffset)*ldda + (i) + offset)
+#define dW(id, i, j)  (dW[(id)] + (j)          *lddw + (i))
+#define dW1(id, i, j) (dW[(id)] + ((j)+nb)     *lddw + (i))
+
     double mv_time = 0.0;
     magma_int_t i;
 #ifndef MAGMABLAS_ZHEMV_MGPU
@@ -462,6 +462,12 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
 
     return mv_time;
 } /* magma_zlatrd_mgpu */
+
+#undef A
+#undef W
+#undef dA
+#undef dW
+#undef dW1
 
 
 extern "C" magma_int_t

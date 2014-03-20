@@ -14,10 +14,6 @@
 #include "common_magma.h"
 #include "trace.h"
 
-#define  A(i, j)     (A           + (j)*lda  + (i))
-#define dA(id, i, j) (dA[(id)]    + (j)*ldda + (i))
-#define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
-
 /**
     Purpose
     -------
@@ -147,6 +143,10 @@ magma_zhetrd_mgpu(
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info)
 {
+#define  A(i, j)     (A           + (j)*lda  + (i))
+#define dA(id, i, j) (dA[(id)]    + (j)*ldda + (i))
+#define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
+
     const char* uplo_ = lapack_uplo_const( uplo );
     
     magma_int_t ln, ldda;

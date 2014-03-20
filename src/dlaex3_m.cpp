@@ -17,12 +17,6 @@
 #include "timer.h"
 #include <cblas.h>
 
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
-
-#define dQ2(id)    (dwork[id])
-#define dS(id, ii) (dwork[id] + n2*n2_loc +(ii)* (n2*nb))
-#define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
-
 extern "C" {
 
 magma_int_t magma_get_dlaex3_m_k()  { return  512; }
@@ -204,6 +198,12 @@ magma_dlaex3_m(magma_int_t nrgpu,
                magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
                magma_int_t* info )
 {
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+
+#define dQ2(id)    (dwork[id])
+#define dS(id, ii) (dwork[id] + n2*n2_loc +(ii)* (n2*nb))
+#define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
+
     if (nrgpu == 1) {
         magma_setdevice(0);
         magma_dlaex3(k, n, n1, d, Q, ldq, rho,

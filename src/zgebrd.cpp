@@ -10,9 +10,6 @@
 */
 #include "common_magma.h"
 
-#define  A(i, j) (A  + (j)*lda  + (i))
-#define dA(i, j) (dA + (j)*ldda + (i))
-
 /**
     Purpose
     -------
@@ -153,6 +150,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
 {
+#define  A(i, j) (A  + (j)*lda  + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
+
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex *dA, *dwork;

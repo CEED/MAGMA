@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#define dA(i, j) (dA + (j)*ldda + (i))
-
 /**
     Purpose
     -------
@@ -61,6 +59,8 @@ extern "C" magma_int_t
 magma_zlauum_gpu(magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex  *dA, magma_int_t ldda, magma_int_t *info)
 {
+#define dA(i, j) (dA + (j)*ldda + (i))
+
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t         nb, i, ib;

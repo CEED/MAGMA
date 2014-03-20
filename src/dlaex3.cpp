@@ -18,8 +18,6 @@
 #include "timer.h"
 #include <cblas.h>
 
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
-
 extern "C" {
 
 int magma_get_dlaed3_k() { return 512; }
@@ -61,7 +59,6 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
 }
 
 }  // end extern "C"
-
 
 /**
     Purpose
@@ -219,6 +216,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
              magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
              magma_int_t* info )
 {
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+
     double d_one  = 1.;
     double d_zero = 0.;
     magma_int_t ione = 1;

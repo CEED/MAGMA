@@ -13,12 +13,6 @@
 #include "common_magma.h"
 #include <cblas.h>
 
-#define A(i, j) (A + (j)*nb*lda + (i)*nb)
-#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
-#define dA(gpui, i, j)    (dw[gpui] + (j)*nb*ldda + (i)*nb)
-#define dB_c(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbc)
-#define dB_r(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
-#define dwork(gpui, i, j) (dw[gpui] + dima*ldda + lddbc*lddbr + (j)*nb*nb + (i)*nb)
 
 static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_col, magma_int_t ldda,
                                           magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2);
@@ -101,6 +95,13 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, magma_uplo_t uplo, magma_in
                magmaDoubleComplex *A, magma_int_t lda,
                magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
 {
+#define A(i, j) (A + (j)*nb*lda + (i)*nb)
+#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
+#define dA(gpui, i, j)    (dw[gpui] + (j)*nb*ldda + (i)*nb)
+#define dB_c(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbc)
+#define dB_r(gpui, i, j)  (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
+#define dwork(gpui, i, j) (dw[gpui] + dima*ldda + lddbc*lddbr + (j)*nb*nb + (i)*nb)
+
     const char* uplo_ = lapack_uplo_const( uplo );
 
     double             d_one      = 1.0;

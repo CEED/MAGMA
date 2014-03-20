@@ -14,15 +14,6 @@
 */
 #include "common_magma.h"
 
-#define  A(i, j) (A + (j)*lda  + (i))
-#define  C(i, j) (C + (j)*ldc  + (i))
-
-#define    dC(gpui,      i, j) (dw[gpui] + (j)*lddc + (i))
-#define  dA_c(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddac)
-#define  dA_r(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddar)
-#define    dT(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
-#define dwork(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
-
 /**
     Purpose
     -------
@@ -133,6 +124,15 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                magmaDoubleComplex *work, magma_int_t lwork,
                magma_int_t *info)
 {
+#define  A(i, j) (A + (j)*lda  + (i))
+#define  C(i, j) (C + (j)*ldc  + (i))
+
+#define    dC(gpui,      i, j) (dw[gpui] + (j)*lddc + (i))
+#define  dA_c(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddac)
+#define  dA_r(gpui, ind, i, j) (dw[gpui] + maxnlocal*lddc + (ind)*lddar*lddac + (i) + (j)*lddar)
+#define    dT(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + (ind)*((nb+1)*nb))
+#define dwork(gpui, ind)       (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
+
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     const char* side_  = lapack_const( side  );

@@ -12,8 +12,6 @@
 #include "common_magma.h"
 #include "timer.h"
 
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
-
 extern "C" {
 
 magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* Q, magma_int_t ldq,
@@ -26,7 +24,6 @@ magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* 
 magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 
 }  // end extern "C"
-
 
 /**
     Purpose
@@ -119,6 +116,8 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
                magma_range_t range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
+#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+
     magma_int_t ione = 1;
     magma_range_t range2;
     magma_int_t curlvl, i, indxq;

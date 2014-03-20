@@ -13,10 +13,6 @@
 */
 #include "common_magma.h"
 
-
-#define  A(i, j) (wA + (j)*ldwa + (i))
-#define dA(i, j) (dA + (j)*ldda + (i))
-
 /**
     Purpose
     -------
@@ -154,6 +150,9 @@ magma_zhetrd_gpu(magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *work, magma_int_t lwork,
                  magma_int_t *info)
 {
+#define  A(i, j) (wA + (j)*ldwa + (i))
+#define dA(i, j) (dA + (j)*ldda + (i))
+
     const char* uplo_ = lapack_uplo_const( uplo );
 
     magma_int_t nb = magma_get_zhetrd_nb(n);

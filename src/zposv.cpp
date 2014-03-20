@@ -10,11 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" magma_int_t
-magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
-                 magmaDoubleComplex *A, magma_int_t lda,
-                 magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
-{
 /**
     Purpose
     -------
@@ -78,7 +73,12 @@ magma_zposv    ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
 
     @ingroup magma_zposv_driver
     ********************************************************************/
-
+extern "C" magma_int_t
+magma_zposv(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
+{
     magma_int_t num_gpus, ldda, lddb;
 
     *info = 0;

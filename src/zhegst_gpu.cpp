@@ -13,12 +13,6 @@
 
 #include "common_magma.h"
 
-#define A(i, j) (w + (j)*lda + (i))
-#define B(i, j) (w + nb*lda + (j)*ldb + (i))
-
-#define dA(i, j) (dA + (j)*ldda + (i))
-#define dB(i, j) (dB + (j)*lddb + (i))
-
 /**
     Purpose
     -------
@@ -89,6 +83,12 @@ magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
                  magmaDoubleComplex *dA, magma_int_t ldda,
                  magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
 {
+#define A(i, j) (w + (j)*lda + (i))
+#define B(i, j) (w + nb*lda + (j)*ldb + (i))
+
+#define dA(i, j) (dA + (j)*ldda + (i))
+#define dB(i, j) (dB + (j)*lddb + (i))
+
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;
@@ -412,6 +412,7 @@ magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
     
     return *info;
 } /* magma_zhegst_gpu */
+
 #undef A
 #undef B
 #undef dA

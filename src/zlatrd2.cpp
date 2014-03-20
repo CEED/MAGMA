@@ -18,13 +18,6 @@
 
 #define PRECISION_z
 
-#define A(i, j) (A + (j)*lda + (i))
-#define W(i, j) (W + (j)*ldw + (i))
-
-#define dA(i, j) (dA + (j)*ldda + (i))
-#define dW(i, j) (dW + (j)*lddw + (i))
-
-                      
 /**
     Purpose
     -------
@@ -165,6 +158,12 @@ magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *dW, magma_int_t lddw,
               magmaDoubleComplex *dwork, magma_int_t ldwork)
 {
+#define A(i, j) (A + (j)*lda + (i))
+#define W(i, j) (W + (j)*ldw + (i))
+
+#define dA(i, j) (dA + (j)*ldda + (i))
+#define dW(i, j) (dW + (j)*lddw + (i))
+
     magma_int_t i;
     
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

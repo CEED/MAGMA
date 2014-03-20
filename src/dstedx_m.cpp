@@ -11,7 +11,6 @@
 */
 #include "common_magma.h"
 
-#define Z(ix, iy) (Z + (ix) + ldz*(iy))
 
 extern "C" {
 
@@ -146,6 +145,8 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
                double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
                magma_int_t* info)
 {
+#define Z(ix, iy) (Z + (ix) + ldz*(iy))
+
     double d_zero = 0.;
     double d_one  = 1.;
     magma_int_t izero = 0;

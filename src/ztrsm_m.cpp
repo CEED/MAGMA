@@ -14,13 +14,6 @@
 extern "C" magma_int_t
 magma_get_ztrsm_m_nb() { return 128; }
 
-#define A(i, j) (A + (j)*nb*lda + (i)*nb)
-#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
-
-#define dB(gpui, i, j) (dw[gpui] + (j)*nb*lddb + (i)*nb)
-
-#define dA(gpui, i, j) (dw[gpui] + dimb*lddb + (i)*nb + (j)*nb*ldda)
-
 /**
     Purpose
     -------
@@ -128,6 +121,13 @@ magma_ztrsm_m(
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *B, magma_int_t ldb)
 {
+#define A(i, j) (A + (j)*nb*lda + (i)*nb)
+#define B(i, j) (B + (j)*nb*ldb + (i)*nb)
+
+#define dB(gpui, i, j) (dw[gpui] + (j)*nb*lddb + (i)*nb)
+
+#define dA(gpui, i, j) (dw[gpui] + dimb*lddb + (i)*nb + (j)*nb*ldda)
+
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex  alpha_;

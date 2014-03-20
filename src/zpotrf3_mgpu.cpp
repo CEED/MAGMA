@@ -20,15 +20,6 @@
 #endif
 /* === End defining what BLAS to use ======================================= */
 
-
-#define Alo(i, j)  (A +             ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
-#define Aup(i, j)  (A + (nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
-
-#define dlA(id, i, j)     (d_lA[(id)] + (j)*ldda + (i))
-#define dlP(id, i, j, k)  (d_lP[(id)] + (k)*nb*lddp + (j)*lddp + (i))
-#define dlPT(id, i, j, k) (d_lP[(id)] + (k)*nb*lddp + (j)*nb   + (i))
-
-
 /**
     Purpose
     -------
@@ -93,6 +84,13 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
                    magma_queue_t stream[][3], magma_event_t event[][5],
                    magma_int_t *info )
 {
+#define Alo(i, j)  (A +             ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
+#define Aup(i, j)  (A + (nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
+
+#define dlA(id, i, j)     (d_lA[(id)] + (j)*ldda + (i))
+#define dlP(id, i, j, k)  (d_lP[(id)] + (k)*nb*lddp + (j)*lddp + (i))
+#define dlPT(id, i, j, k) (d_lP[(id)] + (k)*nb*lddp + (j)*nb   + (i))
+
     magma_int_t     j, jb, nb0, nb2, d, dd, id, j_local, j_local2, buf;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -694,6 +692,11 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
 
 #undef Alo
 #undef Aup
+#undef dlA
+#undef dlP
+#undef dlPT
+
+
 #define A(i, j)  (A +(j)*lda  + (i))
 #define dA(d, i, j) (dwork[(d)]+(j)*ldda + (i))
 
@@ -818,6 +821,3 @@ magma_zdtohpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
 
 #undef A
 #undef dA
-#undef dlA
-#undef dlP
-#undef dlPT

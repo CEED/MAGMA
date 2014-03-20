@@ -13,12 +13,6 @@
 
 #include "common_magma.h"
 
-#define A(i, j) (A + (j)*lda + (i))
-#define B(i, j) (B + (j)*ldb + (i))
-
-#define dA(i, j) (dw + (j)*ldda + (i))
-#define dB(i, j) (dw + n*ldda + (j)*lddb + (i))
-
 /**
     Purpose
     -------
@@ -81,7 +75,6 @@
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
-    
 
     @ingroup magma_zheev_comp
     ********************************************************************/
@@ -90,6 +83,12 @@ magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
              magmaDoubleComplex *A, magma_int_t lda,
              magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
 {
+#define A(i, j) (A + (j)*lda + (i))
+#define B(i, j) (B + (j)*ldb + (i))
+
+#define dA(i, j) (dw + (j)*ldda + (i))
+#define dB(i, j) (dw + n*ldda + (j)*lddb + (i))
+
     const char* uplo_ = lapack_uplo_const( uplo );
     magma_int_t        nb;
     magma_int_t        k, kb, kb2;
@@ -374,6 +373,7 @@ magma_zhegst(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
     
     return *info;
 } /* magma_zhegst_gpu */
+
 #undef A
 #undef B
 #undef dA
