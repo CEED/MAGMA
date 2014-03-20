@@ -8,7 +8,8 @@
 
        @precisions normal z -> c d s
 
-       @author Peng Du, Tingxing Dong
+       @author Peng Du
+       @author Tingxing Dong
 */
 
 #include "common_magma.h"
@@ -1857,7 +1858,6 @@ magmaDoubleComplex *d_dinvA,
 magma_int_t lda)
 {
 /*
-   author: Peng Du
    This routine is used in ztrsm
 */
 
