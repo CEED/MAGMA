@@ -414,12 +414,12 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &val_tmp2, A.num_rows*A.max_nnz_row );
             magma_indexmalloc_cpu( &col_tmp2, A.num_rows*A.max_nnz_row );
             for( magma_int_t j=0;j<A.num_rows;j++ ){
-                magmaDoubleComplex diagval = val_tmp[j*A.max_nnz_row];
-                magma_index_t diagcol = col_tmp[j*A.max_nnz_row];
+                magmaDoubleComplex diagval = A.val[j*A.max_nnz_row];
+                magma_index_t diagcol = A.col[j*A.max_nnz_row];
                 magma_int_t smaller = 0;
                 for( magma_int_t i=1;i<A.max_nnz_row;i++ ){
-                    if( (col_tmp[j*A.max_nnz_row+i] < diagcol)
-                         && (val_tmp[j*A.max_nnz_row+i] !=  zero) )          
+                    if( (A.col[j*A.max_nnz_row+i] < diagcol)
+                         && (A.val[j*A.max_nnz_row+i] !=  zero) )          
                         smaller++;
                 }
                 for( magma_int_t i=0;i<smaller;i++ ){                
