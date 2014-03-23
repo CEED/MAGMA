@@ -5,6 +5,7 @@
        Univ. of Colorado, Denver
        @date
 
+       @author Stan Tomov
        @precisions normal z -> s d c
 
 */
@@ -13,6 +14,7 @@
 #include <assert.h>
 
 #define PRECISION_z
+#define magma_zgemv magmablas_zgemv
 
 /**
     Purpose
