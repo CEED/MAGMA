@@ -239,6 +239,8 @@ ZSRC += \
 # ----------
 # SVD
 ZSRC += \
+	dgesdd.cpp		\
+	zgesdd.cpp		\
 	dgesvd.cpp		\
 	zgesvd.cpp		\
 	zgebrd.cpp		\

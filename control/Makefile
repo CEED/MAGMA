@@ -32,6 +32,8 @@ SRC := \
 	connection_mgpu.cpp	\
 	constants.cpp		\
 	get_nb.cpp		\
+	ilaenv_f77.f		\
+	ilaenv.cpp		\
 	magma_threadsetting.cpp	\
 	magmawinthread.cpp	\
 	pthread_barrier.cpp	\
@@ -61,6 +63,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
+ALLOBJ := $(ALLOBJ:.f=.o)
 
 .PHONY: all clean cleanall
 

@@ -489,6 +489,7 @@ subs = {
     # -----
     # LAPACK, lowercase, real == complex name
     # add to both lowercase and UPPERCASE lists, alphabetic order
+    ('sbdsdc',         'dbdsdc',         'sbdsdc',         'dbdsdc'          ),
     ('sbdsqr',         'dbdsqr',         'cbdsqr',         'zbdsqr'          ),
     ('sbdt01',         'dbdt01',         'cbdt01',         'zbdt01'          ),
     ('scheck',         'dcheck',         'ccheck',         'zcheck'          ),
@@ -510,8 +511,9 @@ subs = {
     ('sgeqrf',         'dgeqrf',         'cgeqrf',         'zgeqrf'          ),
     ('sgeqrs',         'dgeqrs',         'cgeqrs',         'zgeqrs'          ),
     ('sgeqrt',         'dgeqrt',         'cgeqrt',         'zgeqrt'          ),
+    ('sgesdd',         'dgesdd',         'cgesdd',         'zgesdd'          ),
     ('sgessm',         'dgessm',         'cgessm',         'zgessm'          ),
-    ('sgesv',          'dgesv',          'cgesv',          'zgesv'           ),
+    ('sgesv',          'dgesv',          'cgesv',          'zgesv'           ),  # also zgesvd
     ('sgesv',          'sgesv',          'cgesv',          'cgesv'           ),
     ('sget22',         'dget22',         'cget22',         'zget22'          ),
     ('sgetf2',         'dgetf2',         'cgetf2',         'zgetf2'          ),
@@ -526,7 +528,9 @@ subs = {
     ('slabad',         'dlabad',         'slabad',         'dlabad'          ),
     ('slabrd',         'dlabrd',         'clabrd',         'zlabrd'          ),
     ('slacgv',         'dlacgv',         'clacgv',         'zlacgv'          ),
+    ('slacp2',         'dlacp2',         'clacp2',         'zlacp2'          ),
     ('slacpy',         'dlacpy',         'clacpy',         'zlacpy'          ),
+    ('slacrm',         'dlacrm',         'clacrm',         'zlacrm'          ),
     ('sladiv',         'dladiv',         'cladiv',         'zladiv'          ),
     ('slaed',          'dlaed',          'slaed',          'dlaed'           ),
     ('slaex',          'dlaex',          'slaex',          'dlaex'           ),
@@ -544,6 +548,7 @@ subs = {
     ('slaqps',         'dlaqps',         'claqps',         'zlaqps'          ),
     ('slaqp2',         'dlaqp2',         'claqp2',         'zlaqp2'          ),
     ('slaqtrs',        'dlaqtrs',        'claqtrs',        'zlaqtrs'         ),
+    ('slarcm',         'dlarcm',         'clarcm',         'zlarcm'          ),
     ('slarf',          'dlarf',          'clarf',          'zlarf'           ),  # handles zlarf[ bgtxy]
     ('slarnv',         'dlarnv',         'clarnv',         'zlarnv'          ),
     ('slarnv',         'dlarnv',         'slarnv',         'dlarnv'          ),
@@ -587,6 +592,7 @@ subs = {
     ('sstegr',         'dstegr',         'cstegr',         'zstegr'          ),
     
     # LAPACK, UPPERCASE, real == complex name
+    ('SBDSDC',         'DBDSDC',         'SBDSDC',         'DBDSDC'          ),
     ('SBDSQR',         'DBDSQR',         'CBDSQR',         'ZBDSQR'          ),
     ('SBDT01',         'DBDT01',         'CBDT01',         'ZBDT01'          ),
     ('SCHECK',         'DCHECK',         'CCHECK',         'ZCHECK'          ),
@@ -624,7 +630,9 @@ subs = {
     ('SLABAD',         'DLABAD',         'SLABAD',         'DLABAD'          ),
     ('SLABRD',         'DLABRD',         'CLABRD',         'ZLABRD'          ),
     ('SLACGV',         'DLACGV',         'CLACGV',         'ZLACGV'          ),
+    ('SLACP2',         'DLACP2',         'CLACP2',         'ZLACP2'          ),
     ('SLACPY',         'DLACPY',         'CLACPY',         'ZLACPY'          ),
+    ('SLACRM',         'DLACRM',         'CLACRM',         'ZLACRM'          ),
     ('SLADIV',         'DLADIV',         'CLADIV',         'ZLADIV'          ),
     ('SLAED',          'DLAED',          'SLAED',          'DLAED'           ),
     ('SLAEX',          'DLAEX',          'SLAEX',          'DLAEX'           ),
@@ -641,6 +649,7 @@ subs = {
     ('SLANTR',         'DLANTR',         'CLANTR',         'ZLANTR'          ),
     ('SLAQPS',         'DLAQPS',         'CLAQPS',         'ZLAQPS'          ),
     ('SLAQP2',         'DLAQP2',         'CLAQP2',         'ZLAQP2'          ),
+    ('SLARCM',         'DLARCM',         'CLARCM',         'ZLARCM'          ),
     ('SLARF',          'DLARF',          'CLARF',          'ZLARF'           ),  # HANDLES ZLARF[ BGTXY]
     ('SLARNV',         'DLARNV',         'CLARNV',         'ZLARNV'          ),
     ('SLARNV',         'DLARNV',         'SLARNV',         'DLARNV'          ),
