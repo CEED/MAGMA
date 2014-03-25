@@ -22,7 +22,7 @@ magma_int_t magma_ilaenv(
     magma_int_t ispec, const char* name, const char* opts,
     magma_int_t n1, magma_int_t n2, magma_int_t n3, magma_int_t n4 )
 {
-    int namelen = strlen( name );
-    int optslen = strlen( opts );
+    magma_int_t namelen = strlen( name );
+    magma_int_t optslen = strlen( opts );
     return magmaf77_ilaenv( &ispec, name, &namelen, opts, &optslen, &n1, &n2, &n3, &n4 );
 }
