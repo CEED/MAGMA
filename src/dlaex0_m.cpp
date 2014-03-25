@@ -137,8 +137,8 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
     else if ( ldq < max(1, n) )
         *info = -5;
     if ( *info != 0 ) {
-        magma_xerbla( __func__, -*info );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        magma_xerbla( __func__, -(*info) );
+        return *info;
     }
 
     // Quick return if possible

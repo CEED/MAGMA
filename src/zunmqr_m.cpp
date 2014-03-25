@@ -334,7 +334,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
         }
     } else {
         fprintf(stderr, "The case (side == right) is not implemented\n");
-        magma_xerbla( __func__, 1 );
+        *info = MAGMA_ERR_NOT_IMPLEMENTED;
+        magma_xerbla( __func__, -(*info) );
         return *info;
         /*
         if ( notran ) {

@@ -175,7 +175,7 @@ magma_ztrsm_m(
     }
 
     if (info != 0) {
-        magma_xerbla( __func__, -info );
+        magma_xerbla( __func__, -(info) );
         return info;
     }
 

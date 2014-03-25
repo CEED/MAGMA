@@ -151,8 +151,8 @@ magma_dlaex1(magma_int_t n, double* d, double* Q, magma_int_t ldq,
     else if ( min( 1, n/2 ) > cutpnt || n/2 < cutpnt )
         *info = -7;
     if ( *info != 0 ) {
-        magma_xerbla( __func__, -*info );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        magma_xerbla( __func__, -(*info) );
+        return *info;
     }
 
     //  Quick return if possible
