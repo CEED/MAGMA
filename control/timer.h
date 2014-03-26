@@ -15,12 +15,18 @@ typedef double    magma_timer_t;
 typedef long long magma_flops_t;
 
 #if defined(ENABLE_TIMER)
+    #include <stdio.h>
     #include <stdarg.h>
     
     #if defined(HAVE_PAPI)
         #include <papi.h>
         extern int gPAPI_flops_set;  // defined in testing_util.cpp
     #endif
+#endif
+
+// If we're not using GNU C, elide __attribute__
+#ifndef __GNUC__
+  #define  __attribute__(x)  /*NOTHING*/
 #endif
 
 
@@ -90,6 +96,9 @@ static inline magma_flops_t flops_stop( magma_flops_t &flops )
 // If ENABLE_TIMER is defined, same as printf;
 // else does nothing (returns 0).
 static inline int timer_printf( const char* format, ... )
+    __attribute__((format(printf,1,2)));
+
+static inline int timer_printf( const char* format, ... )
 {
     int len = 0;
     #if defined(ENABLE_TIMER)
@@ -104,6 +113,9 @@ static inline int timer_printf( const char* format, ... )
 // If ENABLE_TIMER is defined, same as fprintf;
 // else does nothing (returns 0).
 static inline int timer_fprintf( FILE* stream, const char* format, ... )
+    __attribute__((format(printf,2,3)));
+
+static inline int timer_fprintf( FILE* stream, const char* format, ... )
 {
     int len = 0;
     #if defined(ENABLE_TIMER)
@@ -117,6 +129,9 @@ static inline int timer_fprintf( FILE* stream, const char* format, ... )
 
 // If ENABLE_TIMER is defined, same as snprintf;
 // else does nothing (returns 0).
+static inline int timer_snprintf( char* str, size_t size, const char* format, ... )
+    __attribute__((format(printf,3,4)));
+
 static inline int timer_snprintf( char* str, size_t size, const char* format, ... )
 {
     int len = 0;
