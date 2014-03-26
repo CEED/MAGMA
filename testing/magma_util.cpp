@@ -5,7 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> c d s
        @author Mark Gates
        
        Utilities for testing.
