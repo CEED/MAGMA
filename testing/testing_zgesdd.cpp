@@ -102,7 +102,10 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( S2,  double, min_mn );
             TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
             #ifdef COMPLEX
-            TESTING_MALLOC_CPU( rwork, double, 5*min_mn );
+            magma_int_t lrwork = 5*min(M,N);
+            if ( jobz != MagmaNoVec )
+                lrwork = min(M,N)*max(5*min(M,N) + 7, 2*max(M,N) + 2*min(M,N) + 1);
+            TESTING_MALLOC_CPU( rwork, double, lrwork );
             #endif
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
             
