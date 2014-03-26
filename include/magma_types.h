@@ -405,7 +405,8 @@ typedef enum {
     Magma_SELLP        = 421,
     Magma_ELLD         = 422,
     Magma_ELLDD        = 423,
-    Magma_CSRCSC       = 424
+    Magma_CSRD         = 424,
+    Magma_CSRCSC       = 425
 } magma_storage_t;
 
 

@@ -58,7 +58,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     // first case: copy matrix from host to device
     if( src == Magma_CPU && dst == Magma_DEV ){
         //CSR-type
-        if( A.storage_type == Magma_CSR ){
+        if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
+                                        || A.storage_type == Magma_CSRD ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -103,6 +104,10 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                                         ( void** )&B->val );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+            stat = cublasAlloc( A.num_rows, sizeof( magmaDoubleComplex ), 
+                                                        ( void** )&B->diag );
+            if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             stat = cublasAlloc(  2*(A.num_rows+1) , sizeof( magma_index_t ), 
                                                         ( void** )&B->row );
             if( ( int )stat != 0 ) 
@@ -111,13 +116,21 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                                                         ( void** )&B->col );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+            stat = cublasAlloc( 2*A.nnz, sizeof( magma_index_t ), 
+                                                    ( void** )&B->blockinfo );
+            if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             cublasSetVector( 2*A.nnz , sizeof( magmaDoubleComplex ), 
                                                     A.val, 1, B->val, 1 );
+            cublasSetVector( A.num_rows , sizeof( magmaDoubleComplex ), 
+                                                    A.diag, 1, B->diag, 1 );
             cublasSetVector( 2*(A.num_rows+1) , sizeof( magma_index_t ), 
                                                     A.row, 1, B->row, 1 );
             cublasSetVector( 2*A.nnz , sizeof( magma_index_t ), 
                                                     A.col, 1, B->col, 1 ); 
+            cublasSetVector( 2*A.nnz , sizeof( magma_index_t ), 
+                                            A.blockinfo, 1, B->blockinfo, 1 ); 
         } 
         //ELLPACK-type
         if( A.storage_type == Magma_ELLPACK ){
@@ -333,7 +346,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     // second case: copy matrix from host to host
     if( src == Magma_CPU && dst == Magma_CPU ){
         //CSR-type
-        if( A.storage_type == Magma_CSR ){
+        if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
+                                        || A.storage_type == Magma_CSRD ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -367,15 +381,21 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, 2*A.nnz );
+            magma_zmalloc_cpu( &B->diag, A.num_rows );
             magma_indexmalloc_cpu( &B->row, 2*(A.num_rows+1) );
             magma_indexmalloc_cpu( &B->col, 2*A.nnz );
+            magma_indexmalloc_cpu( &B->blockinfo, 2*A.nnz );
             // data transfer
             for( magma_int_t i=0; i<2*A.nnz; i++ ){
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
+                B->blockinfo[i] = A.blockinfo[i];
             }
             for( magma_int_t i=0; i<2*(A.num_rows+1); i++ ){
                 B->row[i] = A.row[i];
+            }
+            for( magma_int_t i=0; i<A.num_rows; i++ ){
+                B->diag[i] = A.diag[i];
             }
         } 
         //ELLPACK-type
@@ -515,7 +535,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     // third case: copy matrix from device to host
     if( src == Magma_DEV && dst == Magma_CPU ){
         //CSR-type
-        if( A.storage_type == Magma_CSR ){
+        if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
+                                        || A.storage_type == Magma_CSRD ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -548,15 +569,21 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, 2*A.nnz );
+            magma_zmalloc_cpu( &B->diag, A.num_rows );
             magma_indexmalloc_cpu( &B->row, 2*(A.num_rows+1) );
             magma_indexmalloc_cpu( &B->col, 2*A.nnz );
+            magma_indexmalloc_cpu( &B->blockinfo, 2*A.nnz );
             // data transfer
             cublasGetVector( 2*A.nnz, 
                     sizeof( magmaDoubleComplex ), A.val, 1, B->val, 1 );
+            cublasGetVector( A.num_rows, 
+                    sizeof( magmaDoubleComplex ), A.diag, 1, B->diag, 1 );
             cublasGetVector( 2*(A.num_rows+1), 
                     sizeof( magma_index_t ), A.row, 1, B->row, 1 );            
             cublasGetVector( 2*A.nnz, 
-                        sizeof( magma_index_t ), A.col, 1, B->col, 1 );
+                    sizeof( magma_index_t ), A.col, 1, B->col, 1 );
+            cublasGetVector( 2*A.nnz, 
+                    sizeof( magma_index_t ), A.blockinfo, 1, B->blockinfo, 1 );
         } 
         //ELLPACK-type
         if( A.storage_type == Magma_ELLPACK ){
@@ -725,7 +752,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     // fourth case: copy matrix from device to device
     if( src == Magma_DEV && dst == Magma_DEV ){
         //CSR-type
-        if( A.storage_type == Magma_CSR ){
+        if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
+                                        || A.storage_type == Magma_CSRD ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -770,6 +798,10 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                     sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+            stat = cublasAlloc( A.num_rows, 
+                    sizeof( magmaDoubleComplex ), ( void** )&B->diag );
+            if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             stat = cublasAlloc(  2*(A.num_rows+1) , 
                     sizeof( magma_index_t ), ( void** )&B->row );
             if( ( int )stat != 0 ) 
@@ -778,13 +810,21 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
                     sizeof( magma_index_t ), ( void** )&B->col );
             if( ( int )stat != 0 ) 
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+            stat = cublasAlloc( 2*A.nnz, 
+                    sizeof( magma_index_t ), ( void** )&B->blockinfo );
+            if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             cudaMemcpy( B->val, A.val, 2*A.nnz*sizeof( magmaDoubleComplex ), 
+                    cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->diag, A.diag,A.num_rows*sizeof( magmaDoubleComplex ), 
                     cudaMemcpyDeviceToDevice );
             cudaMemcpy( B->row, A.row, 2*(A.num_rows+1)*sizeof( magma_index_t ), 
                     cudaMemcpyDeviceToDevice );
             cudaMemcpy( B->col, A.col, 2*A.nnz*sizeof( magma_index_t ), 
                     cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->blockinfo, A.blockinfo, 
+                    2*A.nnz*sizeof( magma_index_t ), cudaMemcpyDeviceToDevice );
         } 
         //ELLPACK-type
         if( A.storage_type == Magma_ELLPACK ){

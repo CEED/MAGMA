@@ -165,13 +165,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             return MAGMA_SUCCESS; 
         }
-        // CSR to CSRCSC
-        // doubles the matrix: first CSR then CSC storage
-        // for symmetric matrices, CSR and CSC are identical
-        // motivation is the iterative LU factorization proposed by Chow
-        if( old_format == Magma_CSR && new_format == Magma_CSRCSC ){
+        // CSR to CSRD (diagonal elements first)
+        if( old_format == Magma_CSR && new_format == Magma_CSRD ){
             // fill in information for B
-            B->storage_type = Magma_CSRCSC;
+            B->storage_type = Magma_CSRD;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -179,29 +176,30 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            magma_zmalloc_cpu( &B->val, 2*A.nnz );
-            magma_indexmalloc_cpu( &B->row, 2*(A.num_rows+1) );
-            magma_indexmalloc_cpu( &B->col, 2*A.nnz );
+            magma_zmalloc_cpu( &B->val, A.nnz );
+            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, A.nnz );
 
-            for( int i=0; i<A.nnz; i++){
-                B->val[i] = A.val[i];
-                B->col[i] = A.col[i];
+            for(int i=0; i<A.num_rows; i++){
+                magma_int_t count = 1;
+                for(int j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j] == i ){
+                        B->col[A.row[i]] = A.col[j];
+                        B->val[A.row[i]] = A.val[j];
+                    }else{
+                        B->col[A.row[i]+count] = A.col[j];
+                        B->val[A.row[i]+count] = A.val[j];
+                        count++;
+                    }               
+                }
             }
             for( int i=0; i<A.num_rows+1; i++){
                 B->row[i] = A.row[i];
             }
-
-            for( int i=0; i<A.nnz; i++){
-                B->val[i+A.nnz] = A.val[i];
-                B->col[i+A.nnz] = A.col[i];
-            }
-            for( int i=0; i<A.num_rows+1; i++){
-                B->row[i+A.num_rows+1] = A.row[i];
-            }
             return MAGMA_SUCCESS; 
         }
-        // CSRCSC to CSR
-        if( old_format == Magma_CSRCSC && new_format == Magma_CSR ){
+        // CSRD to CSR (diagonal elements first)
+        if( old_format == Magma_CSRD && new_format == Magma_CSR ){
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -214,14 +212,132 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &B->val, A.nnz );
             magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
             magma_indexmalloc_cpu( &B->col, A.nnz );
+
+            for(int i=0; i<A.num_rows; i++){
+                magmaDoubleComplex diagval = A.val[A.row[i]];
+                magma_index_t diagcol = A.col[A.row[i]];
+                magma_int_t smaller = 0;
+                for( magma_int_t k=A.row[i]; k<A.row[i+1]; k++ ){
+                    if( (A.col[k] < diagcol) )          
+                        smaller++;
+                }
+                for( magma_int_t k=A.row[i]; k<A.row[i]+smaller; k++ ){            
+                    B->col[k] = A.col[k+1];
+                    B->val[k] = A.val[k+1];
+                }
+                B->col[A.row[i]+smaller] = diagcol;
+                B->val[A.row[i]+smaller] = diagval;
+                for( magma_int_t k=A.row[i]+smaller+1;k<A.row[i+1];k++ ){                
+                    B->col[k] = A.col[k];
+                    B->val[k] = A.val[k];
+                }     
+        }
+            for( int i=0; i<A.num_rows+1; i++){
+                B->row[i] = A.row[i];
+            }
+            return MAGMA_SUCCESS; 
+        }
+        // CSR to CSRCSC
+        // doubles the matrix: first CSR then CSC storage
+        // for symmetric matrices, CSR and CSC are identical
+        // motivation is the iterative LU factorization proposed by Chow
+        // difference to normal CSR: diag element is always first!
+        if( old_format == Magma_CSR && new_format == Magma_CSRCSC ){
+            // fill in information for B
+            B->storage_type = Magma_CSRCSC;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+
+            // store also the maximal rowlength
+            magma_int_t length=0, maxrowlength=0;
             
-            // first the CSR part
-            for( int i=0; i<A.nnz; i++){
-                B->val[i] = A.val[i];
-                B->col[i] = A.col[i];
+            for(int i=0; i<A.num_rows; i++ ){
+                length = A.row[i+1]-A.row[i];
+                if(length > maxrowlength)
+                     maxrowlength = length;
+            }
+            B->max_nnz_row = maxrowlength;
+
+            magma_zmalloc_cpu( &B->val, 2*A.nnz );
+            magma_zmalloc_cpu( &B->diag, A.num_rows );
+            magma_indexmalloc_cpu( &B->row, 2*(A.num_rows+1) );
+            magma_indexmalloc_cpu( &B->col, 2*A.nnz );
+            magma_indexmalloc_cpu( &B->blockinfo, 2*A.nnz );
+
+            for(int i=0; i<A.num_rows; i++){
+                magma_int_t count = 1;
+                for(int j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j] == i ){
+                        B->col[A.row[i]] = A.col[j];
+                        B->val[A.row[i]] = A.val[j];
+                        B->blockinfo[A.row[i]] = i;
+                    }else{
+                        B->col[A.row[i]+count] = A.col[j];
+                        B->val[A.row[i]+count] = A.val[j];
+                        B->blockinfo[A.row[i]+count] = i;
+                        count++;
+                    }               
+                }
+            }
+            for(int i=0; i<A.num_rows; i++){
+                magma_int_t count = 1;
+                for(int j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j] == i ){
+                        B->col[A.row[i]+A.nnz] = A.col[j];
+                        B->val[A.row[i]+A.nnz] = A.val[j];
+                        B->blockinfo[A.row[i]+A.nnz] = i;
+                    }else{
+                        B->col[A.row[i]+count+A.nnz] = A.col[j];
+                        B->val[A.row[i]+count+A.nnz] = A.val[j];
+                        B->blockinfo[A.row[i]+count+A.nnz] = i;
+                        count++;
+                    }               
+                }
             }
             for( int i=0; i<A.num_rows+1; i++){
                 B->row[i] = A.row[i];
+            }
+            for( int i=0; i<A.num_rows+1; i++){
+                B->row[i+A.num_rows+1] = A.row[i];
+            }
+
+            // store diag part and blockinfo
+            for(int i=0; i<A.num_rows; i++){
+                for(int j=A.row[i]; j<A.row[i+1]; j++){
+                    B->blockinfo[j] = i;
+                    B->blockinfo[j+A.nnz] = i;
+                    if( A.col[j] == i ){
+                        B->diag[i] = A.val[j];
+                    }
+                }
+            }
+            return MAGMA_SUCCESS; 
+        }
+        // CSRCSC to CSR
+        if( old_format == Magma_CSRCSC && new_format == Magma_CSR ){
+            // fill in information for B
+            magma_z_sparse_matrix T;
+            T.storage_type = Magma_CSR;
+            T.memory_location = A.memory_location;
+            T.num_rows = A.num_rows;
+            T.num_cols = A.num_cols;
+            T.nnz = A.nnz;
+            T.max_nnz_row = A.max_nnz_row;
+            T.diameter = A.diameter;
+
+            magma_zmalloc_cpu( &T.val, A.nnz );
+            magma_indexmalloc_cpu( &T.row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &T.col, A.nnz );
+            
+            // first the CSR part
+            for( int i=0; i<A.nnz; i++){
+                T.val[i] = A.val[i];
+                T.col[i] = A.col[i];
+            }
+            for( int i=0; i<A.num_rows+1; i++){
+                T.row[i] = A.row[i];
             }
             // then the CSC part
             for(int i=0; i<A.num_rows; i++){
@@ -232,14 +348,15 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     if( (lcol>=lrow) && ( val != zero) ){
                         for(int k=A.row[lrow]; k<A.row[lrow+1]; k++){
                             if( A.col[ k ] == lcol ){
-                                B->val[ k ] = val;
+                                T.val[ k ] = val;
                                 break;
                             }
                         }
                     }
                 }
             }
-
+            magma_z_mconvert( T, B, Magma_CSRD, Magma_CSR );
+            magma_z_mfree( &T );
             return MAGMA_SUCCESS; 
         }
         // CSR to ELLPACK    
