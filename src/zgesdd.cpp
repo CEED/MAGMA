@@ -17,7 +17,7 @@
     Purpose
     -------
     ZGESDD computes the singular value decomposition (SVD) of a complex
-    M-by-N matrix A, optionally computing the left and/or right singular
+    M-by-N matrix A, optionally computing the left and right singular
     vectors, by using divide-and-conquer method. The SVD is written
 
          A = U * SIGMA * conjugate-transpose(V)
@@ -49,19 +49,19 @@
                     min(M,N) rows of V**H are returned in the arrays U
                     and VT;
       -     = 'O':  If M >= N, the first N columns of U are overwritten
-                    in the array A and all rows of V**H are returned in
+                    on the array A and all rows of V**H are returned in
                     the array VT;
                     otherwise, all columns of U are returned in the
                     array U and the first M rows of V**H are overwritten
-                    in the array A;
+                    on the array A;
       -     = 'N':  no columns of U or rows of V**H are computed.
 
     @param[in]
-    m       MAGMA_INT_T
+    m       INTEGER
             The number of rows of the input matrix A.  M >= 0.
 
     @param[in]
-    n       MAGMA_INT_T
+    n       INTEGER
             The number of columns of the input matrix A.  N >= 0.
 
     @param[in,out]
@@ -77,7 +77,7 @@
             if JOBZ != 'O', the contents of A are destroyed.
 
     @param[in]
-    lda     MAGMA_INT_T
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
@@ -88,45 +88,47 @@
     U       COMPLEX*16 array, dimension (LDU,UCOL)
             UCOL = M if JOBZ = 'A' or JOBZ = 'O' and M < N;
             UCOL = min(M,N) if JOBZ = 'S'.
-            If JOBZ = 'A' or JOBZ = 'O' and M < N, U contains the M-by-M
+      -     If JOBZ = 'A' or JOBZ = 'O' and M < N, U contains the M-by-M
             unitary matrix U;
-            if JOBZ = 'S', U contains the first min(M,N) columns of U
+      -     if JOBZ = 'S', U contains the first min(M,N) columns of U
             (the left singular vectors, stored columnwise);
-            if JOBZ = 'O' and M >= N, or JOBZ = 'N', U is not referenced.
+      -     if JOBZ = 'O' and M >= N, or JOBZ = 'N', U is not referenced.
 
     @param[in]
-    ldu     MAGMA_INT_T
+    ldu     INTEGER
             The leading dimension of the array U.  LDU >= 1; if
             JOBZ = 'S' or 'A' or JOBZ = 'O' and M < N, LDU >= M.
 
     @param[out]
     VT      COMPLEX*16 array, dimension (LDVT,N)
-            If JOBZ = 'A' or JOBZ = 'O' and M >= N, VT contains the
+      -     If JOBZ = 'A' or JOBZ = 'O' and M >= N, VT contains the
             N-by-N unitary matrix V**H;
-            if JOBZ = 'S', VT contains the first min(M,N) rows of
+      -     if JOBZ = 'S', VT contains the first min(M,N) rows of
             V**H (the right singular vectors, stored rowwise);
-            if JOBZ = 'O' and M < N, or JOBZ = 'N', VT is not referenced.
+      -     if JOBZ = 'O' and M < N, or JOBZ = 'N', VT is not referenced.
 
     @param[in]
-    ldvt    MAGMA_INT_T
+    ldvt    INTEGER
             The leading dimension of the array VT.  LDVT >= 1; if
             JOBZ = 'A' or JOBZ = 'O' and M >= N, LDVT >= N;
             if JOBZ = 'S', LDVT >= min(M,N).
 
     @param[out]
-    work    (workspace) COMPLEX*16 array, dimension (MAX(1,&lwork))
-            On exit, if INFO = 0, WORK[1] returns the optimal &lwork.
+    work    (workspace) COMPLEX*16 array, dimension (MAX(1,lwork))
+            On exit, if INFO = 0, WORK[1] returns the optimal lwork.
 
-    &lwork   (input) MAGMA_INT_T
-            The dimension of the array WORK. &lwork >= 1.
-            if JOBZ = 'N', &lwork >= 2*min(M,N)+max(M,N).
-            if JOBZ = 'O',
-                  &lwork >= 2*min(M,N)*min(M,N)+2*min(M,N)+max(M,N).
-            if JOBZ = 'S' or 'A',
-                  &lwork >= min(M,N)*min(M,N)+2*min(M,N)+max(M,N).
-            For good performance, &lwork should generally be larger.
+    @param[in]
+    lwork   INTEGER
+            The dimension of the array WORK. LWORK >= 1.
+      -     if JOBZ = 'N',
+                LWORK >= 2*min(M,N) + max(M,N).
+      -     if JOBZ = 'O',
+                LWORK >= 2*min(M,N)*min(M,N) + 2*min(M,N) + max(M,N).
+      -     if JOBZ = 'S' or 'A',
+                LWORK >= min(M,N)*min(M,N) + 2*min(M,N) + max(M,N).
+            For good performance, lwork should generally be larger.
     \n
-            If &lwork = -1, a workspace query is assumed.  The optimal
+            If lwork = -1, a workspace query is assumed.  The optimal
             size for the WORK array is calculated and stored in WORK[1],
             and no other work except argument checking is performed.
 
@@ -136,13 +138,13 @@
             Otherwise, LRWORK >= 5*min(M,N)*min(M,N) + 7*min(M,N)
 
     @param
-    iwork   (workspace) MAGMA_INT_T array, dimension (8*min(M,N))
+    iwork   (workspace) INTEGER array, dimension (8*min(M,N))
 
     @param[out]
-    info    MAGMA_INT_T
-            = 0:  successful exit.
-            < 0:  if INFO = -i, the i-th argument had an illegal value.
-            > 0:  The updating process of DBDSDC did not converge.
+    info    INTEGER
+      -     = 0:  successful exit.
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+      -     > 0:  The updating process of DBDSDC did not converge.
 
     Further Details
     ---------------
@@ -153,27 +155,28 @@
     @ingroup magma_z
     ********************************************************************/
 magma_int_t magma_zgesdd(
-    const char *jobz, magma_int_t m, magma_int_t n,
+    magma_vec_t jobz, magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     double *s,
     magmaDoubleComplex *U, magma_int_t ldu,
     magmaDoubleComplex *VT, magma_int_t ldvt,
     magmaDoubleComplex *work, magma_int_t lwork,
-    double *rwork, magma_int_t *iwork, magma_int_t *info)
+    double *rwork,
+    magma_int_t *iwork, magma_int_t *info)
 {
 #define  A(i_,j_) (A  + (i_) + (j_)*lda)
 #define  U(i_,j_) (U  + (i_) + (j_)*ldu)
 #define VT(i_,j_) (VT + (i_) + (j_)*ldvt)
 
     /* Constants */
-    const magmaDoubleComplex c_zero = {0., 0.};
-    const magmaDoubleComplex c_one  = {1., 0.};
+    const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    const magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     const magma_int_t izero = 0;
     const magma_int_t ione  = 1;
 
     /* Local variables */
     magma_int_t i__1, i__2;
-    magma_int_t i, ie, il, ir, iu, blk;
+    magma_int_t i, ie, il, ir, iu, blk, lquery;
     double anrm, dum[1], eps, bignum, smlnum;
     magma_int_t iru, ivt, iscl;
     magma_int_t idum[1], ierr, itau, irvt;
@@ -199,39 +202,45 @@ magma_int_t magma_zgesdd(
     /* Function Body */
     *info = 0;
     minmn = min(m,n);
-    mnthr1 = (magma_int_t) (minmn * 17. / 9.);
-    mnthr2 = (magma_int_t) (minmn * 5. / 3.);
-    wantqa = lapackf77_lsame(jobz, "A");
-    wantqs = lapackf77_lsame(jobz, "S");
+    mnthr1  = (magma_int_t) (minmn * 17. / 9.);
+    mnthr2  = (magma_int_t) (minmn * 5. / 3.);
+    wantqa  = (jobz == MagmaAllVec);
+    wantqs  = (jobz == MagmaSomeVec);
     wantqas = (wantqa || wantqs);
-    wantqo = lapackf77_lsame(jobz, "O");
-    wantqn = lapackf77_lsame(jobz, "N");
-    minwrk = 1;
-    maxwrk = 1;
+    wantqo  = (jobz == MagmaOverwriteVec);
+    wantqn  = (jobz == MagmaNoVec);
+    lquery  = (lwork == -1);
+    minwrk  = 1;
+    maxwrk  = 1;
 
     /* Test the input arguments */
     if (! (wantqa || wantqs || wantqo || wantqn)) {
         *info = -1;
-    } else if (m < 0) {
+    }
+    else if (m < 0) {
         *info = -2;
-    } else if (n < 0) {
+    }
+    else if (n < 0) {
         *info = -3;
-    } else if (lda < max(1,m)) {
+    }
+    else if (lda < max(1,m)) {
         *info = -5;
-    } else if (ldu < 1 || (wantqas && ldu < m) || (wantqo && m < n && ldu < m)) {
+    }
+    else if (ldu < 1 || (wantqas && ldu < m) || (wantqo && m < n && ldu < m)) {
         *info = -8;
-    } else if (ldvt < 1 || (wantqa && ldvt < n) || (wantqs && ldvt < minmn)
-                        || (wantqo && m >= n && ldvt < n)) {
+    }
+    else if (ldvt < 1 || (wantqa && ldvt < n) || (wantqs && ldvt < minmn)
+                      || (wantqo && m >= n && ldvt < n)) {
         *info = -10;
     }
 
     /* Compute workspace */
-    /*  (Note: Comments in the code beginning "Workspace:" describe the */
-    /*   minimal amount of workspace needed at that point in the code, */
-    /*   as well as the preferred amount for good performance. */
-    /*   CWorkspace refers to complex workspace, and RWorkspace to */
-    /*   real workspace. NB refers to the optimal block size for the */
-    /*   immediately following subroutine, as returned by ILAENV.) */
+    /* (Note: Comments in the code beginning "Workspace:" describe the */
+    /* minimal amount of workspace needed at that point in the code, */
+    /* as well as the preferred amount for good performance. */
+    /* CWorkspace refers to complex workspace, and RWorkspace to */
+    /* real workspace. NB refers to the optimal block size for the */
+    /* immediately following subroutine, as returned by ILAENV.) */
     if (*info == 0 && m > 0 && n > 0) {
         if (m >= n) {
             /* There is no complex work space needed for bidiagonal SVD */
@@ -239,7 +248,7 @@ magma_int_t magma_zgesdd(
             /* for computing singular values and singular vectors; BDSPAN */
             /* for computing singular values only. */
             /* BDSPAC = 5*N*N + 7*N */
-            /* BDSPAN = MAX(7*N+4, 3*N+2+SMLSIZ*(SMLSIZ+8)) */
+            /* BDSPAN = MAX(7*N + 4, 3*N + 2 + SMLSIZ*(SMLSIZ + 8)) */
             if (m >= mnthr1) {
                 if (wantqn) {
                     /* Path 1 (M much larger than N, JOBZ='N') */
@@ -323,7 +332,7 @@ magma_int_t magma_zgesdd(
             /* for computing singular values and singular vectors; BDSPAN */
             /* for computing singular values only. */
             /* BDSPAC = 5*M*M + 7*M */
-            /* BDSPAN = MAX(7*M+4, 3*M+2+SMLSIZ*(SMLSIZ+8)) */
+            /* BDSPAN = MAX(7*M + 4, 3*M + 2 + SMLSIZ*(SMLSIZ + 8)) */
             if (n >= mnthr1) {
                 if (wantqn) {
                     /* Path 1t (N much larger than M, JOBZ='N') */
@@ -405,19 +414,20 @@ magma_int_t magma_zgesdd(
     }
     if (*info == 0) {
         work[1] = MAGMA_Z_MAKE( maxwrk, 0 );
-        if (lwork < minwrk && lwork != -1) {
+        if (lwork < minwrk && ! lquery) {
             *info = -13;
         }
     }
 
-    /* Quick returns */
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
         return *info;
     }
-    if (lwork == -1) {
+    if (lquery) {
         return *info;
     }
+
+    /* Quick return if possible */
     if (m == 0 || n == 0) {
         return *info;
     }
@@ -451,7 +461,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + n;
 
                 /* Compute A=Q*R */
-                /* (CWorkspace: need 2*N, prefer N+N*NB) */
+                /* (CWorkspace: need 2*N, prefer N + N*NB) */
                 /* (RWorkspace: need 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
@@ -465,7 +475,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in A */
-                /* (CWorkspace: need 3*N, prefer 2*N+2*N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + 2*N*NB) */
                 /* (RWorkspace: need N) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgebrd(&n, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -496,7 +506,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + n;
 
                 /* Compute A=Q*R */
-                /* (CWorkspace: need N*N+2*N, prefer M*N+N+N*NB) */
+                /* (CWorkspace: need N*N + 2*N, prefer M*N + N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
@@ -507,7 +517,7 @@ magma_int_t magma_zgesdd(
                 lapackf77_zlaset("L", &i__1, &i__1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
 
                 /* Generate Q in A */
-                /* (CWorkspace: need 2*N, prefer N+N*NB) */
+                /* (CWorkspace: need 2*N, prefer N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zungqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
@@ -517,7 +527,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in WORK[IR] */
-                /* (CWorkspace: need N*N+3*N, prefer M*N+2*N+2*N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer M*N + 2*N + 2*N*NB) */
                 /* (RWorkspace: need N) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgebrd(&n, &n, &work[ir], &ldwrkr, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -534,7 +544,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix WORK[IU] */
                 /* Overwrite WORK[IU] by the left singular vectors of R */
-                /* (CWorkspace: need 2*N*N+3*N, prefer M*N+N*N+2*N+N*NB) */
+                /* (CWorkspace: need 2*N*N + 3*N, prefer M*N + N*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[iru], &n, &work[iu], &ldwrku);
                 i__1 = lwork - nwork + 1;
@@ -542,7 +552,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by the right singular vectors of R */
-                /* (CWorkspace: need N*N+3*N, prefer M*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer M*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;
@@ -550,7 +560,7 @@ magma_int_t magma_zgesdd(
 
                 /* Multiply Q in A by left singular vectors of R in */
                 /* WORK[IU], storing result in WORK[IR] and copying to A */
-                /* (CWorkspace: need 2*N*N, prefer N*N+M*N) */
+                /* (CWorkspace: need 2*N*N, prefer N*N + M*N) */
                 /* (RWorkspace: 0) */
                 for (i = 1; (ldwrkr < 0 ? i >= m : i <= m); i += ldwrkr) {
                     chunk = min(m - i + 1, ldwrkr);
@@ -570,7 +580,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + n;
 
                 /* Compute A=Q*R */
-                /* (CWorkspace: need N*N+2*N, prefer N*N+N+N*NB) */
+                /* (CWorkspace: need N*N + 2*N, prefer N*N + N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
@@ -581,7 +591,7 @@ magma_int_t magma_zgesdd(
                 lapackf77_zlaset("L", &i__1, &i__1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
 
                 /* Generate Q in A */
-                /* (CWorkspace: need 2*N, prefer N+N*NB) */
+                /* (CWorkspace: need 2*N, prefer N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
@@ -591,7 +601,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in WORK[IR] */
-                /* (CWorkspace: need N*N+3*N, prefer N*N+2*N+2*N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer N*N + 2*N + 2*N*NB) */
                 /* (RWorkspace: need N) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgebrd(&n, &n, &work[ir], &ldwrkr, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -608,7 +618,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of R */
-                /* (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer N*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[iru], &n, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
@@ -616,7 +626,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of R */
-                /* (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer N*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -641,14 +651,14 @@ magma_int_t magma_zgesdd(
                 nwork = itau + n;
 
                 /* Compute A=Q*R, copying result to U */
-                /* (CWorkspace: need 2*N, prefer N+N*NB) */
+                /* (CWorkspace: need 2*N, prefer N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
                 lapackf77_zlacpy("L", &m, &n, A(1,1), &lda, U(1,1), &ldu);
 
                 /* Generate Q in U */
-                /* (CWorkspace: need N+M, prefer N+M*NB) */
+                /* (CWorkspace: need N + M, prefer N + M*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungqr(&m, &m, &n, U(1,1), &ldu, &work[itau], &work[nwork], &i__2, &ierr);
@@ -662,7 +672,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in A */
-                /* (CWorkspace: need 3*N, prefer 2*N+2*N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + 2*N*NB) */
                 /* (RWorkspace: need N) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgebrd(&n, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -679,7 +689,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix WORK[IU] */
                 /* Overwrite WORK[IU] by left singular vectors of R */
-                /* (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer N*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[iru], &n, &work[iu], &ldwrku);
                 i__2 = lwork - nwork + 1;
@@ -687,7 +697,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of R */
-                /* (CWorkspace: need 3*N, prefer 2*N+N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -715,7 +725,7 @@ magma_int_t magma_zgesdd(
             nwork = itaup + n;
 
             /* Bidiagonalize A */
-            /* (CWorkspace: need 2*N+M, prefer 2*N+(M+N)*NB) */
+            /* (CWorkspace: need 2*N + M, prefer 2*N + (M + N)*NB) */
             /* (RWorkspace: need N) */
             i__2 = lwork - nwork + 1;
             lapackf77_zgebrd(&m, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -732,14 +742,14 @@ magma_int_t magma_zgesdd(
                 nrwork = irvt + n*n;
 
                 /* Copy A to VT, generate P**H */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("U", &n, &n, A(1,1), &lda, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungbr("P", &n, &n, &n, VT(1,1), &ldvt, &work[itaup], &work[nwork], &i__2, &ierr);
 
                 /* Generate Q in A */
-                /* (CWorkspace: need 2*N, prefer N+N*NB) */
+                /* (CWorkspace: need 2*N, prefer N + N*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungbr("Q", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[nwork], &i__2, &ierr);
@@ -771,7 +781,7 @@ magma_int_t magma_zgesdd(
                 /* Multiply Q in A by real matrix RWORK[IRU], storing the */
                 /* result in WORK[IU], copying to A */
                 /* (CWorkspace: need N*N, prefer M*N) */
-                /* (Rworkspace: need 3*N*N, prefer N*N+2*M*N) */
+                /* (Rworkspace: need 3*N*N, prefer N*N + 2*M*N) */
                 nrwork = irvt;
                 for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                     chunk = min(m - i + 1, ldwrku);
@@ -781,14 +791,14 @@ magma_int_t magma_zgesdd(
             }
             else if (wantqs) {
                 /* Copy A to VT, generate P**H */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("U", &n, &n, A(1,1), &lda, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;
                 lapackf77_zungbr("P", &n, &n, &n, VT(1,1), &ldvt, &work[itaup], &work[nwork], &i__1, &ierr);
 
                 /* Copy A to U, generate Q */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("L", &m, &n, A(1,1), &lda, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -814,21 +824,21 @@ magma_int_t magma_zgesdd(
                 /* Multiply Q in U by real matrix RWORK[IRU], storing the */
                 /* result in A, copying to U */
                 /* (CWorkspace: need 0) */
-                /* (Rworkspace: need N*N+2*M*N) */
+                /* (Rworkspace: need N*N + 2*M*N) */
                 nrwork = irvt;
                 lapackf77_zlacrm(&m, &n, U(1,1), &ldu, &rwork[iru], &n, A(1,1), &lda, &rwork[nrwork]);
                 lapackf77_zlacpy("F", &m, &n, A(1,1), &lda, U(1,1), &ldu);
             }
             else {
                 /* Copy A to VT, generate P**H */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("U", &n, &n, A(1,1), &lda, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;
                 lapackf77_zungbr("P", &n, &n, &n, VT(1,1), &ldvt, &work[itaup], &work[nwork], &i__1, &ierr);
 
                 /* Copy A to U, generate Q */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("L", &m, &n, A(1,1), &lda, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -872,7 +882,7 @@ magma_int_t magma_zgesdd(
             nwork = itaup + n;
 
             /* Bidiagonalize A */
-            /* (CWorkspace: need 2*N+M, prefer 2*N+(M+N)*NB) */
+            /* (CWorkspace: need 2*N + M, prefer 2*N + (M + N)*NB) */
             /* (RWorkspace: need N) */
             i__1 = lwork - nwork + 1;
             lapackf77_zgebrd(&m, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -906,7 +916,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of A */
-                /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                /* (Cworkspace: need 2*N, prefer N + N*NB) */
                 /* (Rworkspace: need 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;
@@ -916,7 +926,7 @@ magma_int_t magma_zgesdd(
                 /* Copy real matrix RWORK[IRU] to complex matrix WORK[IU] */
                 /* Overwrite WORK[IU] by left singular vectors of A, copying */
                 /* to A */
-                /* (Cworkspace: need M*N+2*N, prefer M*N+N+N*NB) */
+                /* (Cworkspace: need M*N + 2*N, prefer M*N + N + N*NB) */
                 /* (Rworkspace: need 0) */
                     lapackf77_zlaset("F", &m, &n, &c_zero, &c_zero, &work[iu], &ldwrku);
                     lapackf77_zlacp2("F", &n, &n, &rwork[iru], &n, &work[iu], &ldwrku);
@@ -926,7 +936,7 @@ magma_int_t magma_zgesdd(
                 }
                 else {
                     /* Generate Q in A */
-                    /* (Cworkspace: need 2*N, prefer N+N*NB) */
+                    /* (Cworkspace: need 2*N, prefer N + N*NB) */
                     /* (Rworkspace: need 0) */
                     i__1 = lwork - nwork + 1;
                     lapackf77_zungbr("Q", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[nwork], &i__1, &ierr);
@@ -934,7 +944,7 @@ magma_int_t magma_zgesdd(
                     /* Multiply Q in A by real matrix RWORK[IRU], storing the */
                     /* result in WORK[IU], copying to A */
                     /* (CWorkspace: need N*N, prefer M*N) */
-                    /* (Rworkspace: need 3*N*N, prefer N*N+2*M*N) */
+                    /* (Rworkspace: need 3*N*N, prefer N*N + 2*M*N) */
                     nrwork = irvt;
                     for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                         chunk = min(m - i + 1, ldwrku);
@@ -956,7 +966,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of A */
-                /* (CWorkspace: need 3*N, prefer 2*N+N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlaset("F", &m, &n, &c_zero, &c_zero, U(1,1), &ldu)
                         ;
@@ -966,7 +976,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of A */
-                /* (CWorkspace: need 3*N, prefer 2*N+N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -993,7 +1003,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of A */
-                /* (CWorkspace: need 2*N+M, prefer 2*N+M*NB) */
+                /* (CWorkspace: need 2*N + M, prefer 2*N + M*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[iru], &n, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
@@ -1001,7 +1011,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of A */
-                /* (CWorkspace: need 3*N, prefer 2*N+N*NB) */
+                /* (CWorkspace: need 3*N, prefer 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &n, &n, &rwork[irvt], &n, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -1021,7 +1031,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + m;
 
                 /* Compute A=L*Q */
-                /* (CWorkspace: need 2*M, prefer M+M*NB) */
+                /* (CWorkspace: need 2*M, prefer M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
@@ -1035,7 +1045,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in A */
-                /* (CWorkspace: need 3*M, prefer 2*M+2*M*NB) */
+                /* (CWorkspace: need 3*M, prefer 2*M + 2*M*NB) */
                 /* (RWorkspace: need M) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgebrd(&m, &m, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -1069,7 +1079,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + m;
 
                 /* Compute A=L*Q */
-                /* (CWorkspace: need 2*M, prefer M+M*NB) */
+                /* (CWorkspace: need 2*M, prefer M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
@@ -1080,7 +1090,7 @@ magma_int_t magma_zgesdd(
                 lapackf77_zlaset("U", &i__1, &i__1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
 
                 /* Generate Q in A */
-                /* (CWorkspace: need M*M+2*M, prefer M*M+M+M*NB) */
+                /* (CWorkspace: need M*M + 2*M, prefer M*M + M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zunglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
@@ -1090,7 +1100,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in WORK[IL] */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + 2*M*NB) */
                 /* (RWorkspace: need M) */
                 i__2 = lwork - nwork + 1;
                 lapackf77_zgebrd(&m, &m, &work[il], &ldwrkl, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -1107,7 +1117,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix WORK[IU] */
                 /* Overwrite WORK[IU] by the left singular vectors of L */
-                /* (CWorkspace: need N*N+3*N, prefer M*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer M*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
@@ -1115,7 +1125,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix WORK[IVT] */
                 /* Overwrite WORK[IVT] by the right singular vectors of L */
-                /* (CWorkspace: need N*N+3*N, prefer M*N+2*N+N*NB) */
+                /* (CWorkspace: need N*N + 3*N, prefer M*N + 2*N + N*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, &work[ivt], &ldwkvt);
                 i__2 = lwork - nwork + 1;
@@ -1123,7 +1133,7 @@ magma_int_t magma_zgesdd(
 
                 /* Multiply right singular vectors of L in WORK[IL] by Q */
                 /* in A, storing result in WORK[IL] and copying to A */
-                /* (CWorkspace: need 2*M*M, prefer M*M+M*N)) */
+                /* (CWorkspace: need 2*M*M, prefer M*M + M*N)) */
                 /* (RWorkspace: 0) */
                 for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
                     blk = min(n - i + 1, chunk);
@@ -1143,7 +1153,7 @@ magma_int_t magma_zgesdd(
                 nwork = itau + m;
 
                 /* Compute A=L*Q */
-                /* (CWorkspace: need 2*M, prefer M+M*NB) */
+                /* (CWorkspace: need 2*M, prefer M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
@@ -1154,7 +1164,7 @@ magma_int_t magma_zgesdd(
                 lapackf77_zlaset("U", &i__1, &i__1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
 
                 /* Generate Q in A */
-                /* (CWorkspace: need M*M+2*M, prefer M*M+M+M*NB) */
+                /* (CWorkspace: need M*M + 2*M, prefer M*M + M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zunglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
@@ -1164,7 +1174,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in WORK[IL] */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + 2*M*NB) */
                 /* (RWorkspace: need M) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgebrd(&m, &m, &work[il], &ldwrkl, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -1181,7 +1191,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of L */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + M*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -1189,7 +1199,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by left singular vectors of L */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + M*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;
@@ -1214,14 +1224,14 @@ magma_int_t magma_zgesdd(
                 nwork = itau + m;
 
                 /* Compute A=L*Q, copying result to VT */
-                /* (CWorkspace: need 2*M, prefer M+M*NB) */
+                /* (CWorkspace: need 2*M, prefer M + M*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
                 lapackf77_zlacpy("U", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
 
                 /* Generate Q in VT */
-                /* (CWorkspace: need M+N, prefer M+N*NB) */
+                /* (CWorkspace: need M + N, prefer M + N*NB) */
                 /* (RWorkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zunglq(&n, &n, &m, VT(1,1), &ldvt, &work[itau], &work[nwork], &i__1, &ierr);
@@ -1235,7 +1245,7 @@ magma_int_t magma_zgesdd(
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in A */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + 2*M*NB) */
                 /* (RWorkspace: need M) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zgebrd(&m, &m, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -1252,7 +1262,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of L */
-                /* (CWorkspace: need 3*M, prefer 2*M+M*NB) */
+                /* (CWorkspace: need 3*M, prefer 2*M + M*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -1260,7 +1270,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix WORK[IVT] */
                 /* Overwrite WORK[IVT] by right singular vectors of L */
-                /* (CWorkspace: need M*M+3*M, prefer M*M+2*M+M*NB) */
+                /* (CWorkspace: need M*M + 3*M, prefer M*M + 2*M + M*NB) */
                 /* (RWorkspace: 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, &work[ivt], &ldwkvt);
                 i__1 = lwork - nwork + 1;
@@ -1288,7 +1298,7 @@ magma_int_t magma_zgesdd(
             nwork = itaup + m;
 
             /* Bidiagonalize A */
-            /* (CWorkspace: need 2*M+N, prefer 2*M+(M+N)*NB) */
+            /* (CWorkspace: need 2*M + N, prefer 2*M + (M + N)*NB) */
             /* (RWorkspace: M) */
             i__1 = lwork - nwork + 1;
             lapackf77_zgebrd(&m, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
@@ -1306,14 +1316,14 @@ magma_int_t magma_zgesdd(
                 ivt = nwork;
 
                 /* Copy A to U, generate Q */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("L", &m, &m, A(1,1), &lda, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
                 lapackf77_zungbr("Q", &m, &m, &n, U(1,1), &ldu, &work[itauq], &work[nwork], &i__1, &ierr);
 
                 /* Generate P**H in A */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 i__1 = lwork - nwork + 1;
                 lapackf77_zungbr("P", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[nwork], &i__1, &ierr);
@@ -1357,14 +1367,14 @@ magma_int_t magma_zgesdd(
             }
             else if (wantqs) {
                 /* Copy A to U, generate Q */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("L", &m, &m, A(1,1), &lda, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungbr("Q", &m, &m, &n, U(1,1), &ldu, &work[itauq], &work[nwork], &i__2, &ierr);
 
                 /* Copy A to VT, generate P**H */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("U", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -1390,21 +1400,21 @@ magma_int_t magma_zgesdd(
                 /* Multiply real matrix RWORK[IRVT] by P**H in VT, */
                 /* storing the result in A, copying to VT */
                 /* (Cworkspace: need 0) */
-                /* (Rworkspace: need M*M+2*M*N) */
+                /* (Rworkspace: need M*M + 2*M*N) */
                 nrwork = iru;
                 lapackf77_zlarcm(&m, &n, &rwork[irvt], &m, VT(1,1), &ldvt, A(1,1), &lda, &rwork[nrwork]);
                 lapackf77_zlacpy("F", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
             }
             else {
                 /* Copy A to U, generate Q */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("L", &m, &m, A(1,1), &lda, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
                 lapackf77_zungbr("Q", &m, &m, &n, U(1,1), &ldu, &work[itauq], &work[nwork], &i__2, &ierr);
 
                 /* Copy A to VT, generate P**H */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: 0) */
                 lapackf77_zlacpy("U", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
                 i__2 = lwork - nwork + 1;
@@ -1430,7 +1440,7 @@ magma_int_t magma_zgesdd(
                 /* Multiply real matrix RWORK[IRVT] by P**H in VT, */
                 /* storing the result in A, copying to VT */
                 /* (Cworkspace: need 0) */
-                /* (Rworkspace: need M*M+2*M*N) */
+                /* (Rworkspace: need M*M + 2*M*N) */
                 lapackf77_zlarcm(&m, &n, &rwork[irvt], &m, VT(1,1), &ldvt, A(1,1), &lda, &rwork[nrwork]);
                 lapackf77_zlacpy("F", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
             }
@@ -1447,7 +1457,7 @@ magma_int_t magma_zgesdd(
             nwork = itaup + m;
 
             /* Bidiagonalize A */
-            /* (CWorkspace: need 2*M+N, prefer 2*M+(M+N)*NB) */
+            /* (CWorkspace: need 2*M + N, prefer 2*M + (M + N)*NB) */
             /* (RWorkspace: M) */
             i__2 = lwork - nwork + 1;
             lapackf77_zgebrd(&m, &n, A(1,1), &lda, &s[1], &rwork[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
@@ -1483,7 +1493,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of A */
-                /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                /* (Cworkspace: need 2*M, prefer M + M*NB) */
                 /* (Rworkspace: need 0) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__2 = lwork - nwork + 1;
@@ -1493,7 +1503,7 @@ magma_int_t magma_zgesdd(
                 /* Copy real matrix RWORK[IRVT] to complex matrix WORK[IVT] */
                 /* Overwrite WORK[IVT] by right singular vectors of A, */
                 /* copying to A */
-                /* (Cworkspace: need M*N+2*M, prefer M*N+M+M*NB) */
+                /* (Cworkspace: need M*N + 2*M, prefer M*N + M + M*NB) */
                 /* (Rworkspace: need 0) */
                     lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, &work[ivt], &ldwkvt);
                     i__2 = lwork - nwork + 1;
@@ -1502,7 +1512,7 @@ magma_int_t magma_zgesdd(
                 }
                 else {
                     /* Generate P**H in A */
-                    /* (Cworkspace: need 2*M, prefer M+M*NB) */
+                    /* (Cworkspace: need 2*M, prefer M + M*NB) */
                     /* (Rworkspace: need 0) */
                     i__2 = lwork - nwork + 1;
                     lapackf77_zungbr("P", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[nwork], &i__2, &ierr);
@@ -1510,7 +1520,7 @@ magma_int_t magma_zgesdd(
                     /* Multiply Q in A by real matrix RWORK[IRU], storing the */
                     /* result in WORK[IU], copying to A */
                     /* (CWorkspace: need M*M, prefer M*N) */
-                    /* (Rworkspace: need 3*M*M, prefer M*M+2*M*N) */
+                    /* (Rworkspace: need 3*M*M, prefer M*M + 2*M*N) */
                     nrwork = iru;
                     for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
                         blk = min(n - i + 1, chunk);
@@ -1532,7 +1542,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of A */
-                /* (CWorkspace: need 3*M, prefer 2*M+M*NB) */
+                /* (CWorkspace: need 3*M, prefer 2*M + M*NB) */
                 /* (RWorkspace: M*M) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -1540,7 +1550,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of A */
-                /* (CWorkspace: need 3*M, prefer 2*M+M*NB) */
+                /* (CWorkspace: need 3*M, prefer 2*M + M*NB) */
                 /* (RWorkspace: M*M) */
                 lapackf77_zlaset("F", &m, &n, &c_zero, &c_zero, VT(1,1), &ldvt);
                 lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, VT(1,1), &ldvt);
@@ -1561,7 +1571,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRU] to complex matrix U */
                 /* Overwrite U by left singular vectors of A */
-                /* (CWorkspace: need 3*M, prefer 2*M+M*NB) */
+                /* (CWorkspace: need 3*M, prefer 2*M + M*NB) */
                 /* (RWorkspace: M*M) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[iru], &m, U(1,1), &ldu);
                 i__1 = lwork - nwork + 1;
@@ -1572,7 +1582,7 @@ magma_int_t magma_zgesdd(
 
                 /* Copy real matrix RWORK[IRVT] to complex matrix VT */
                 /* Overwrite VT by right singular vectors of A */
-                /* (CWorkspace: need 2*M+N, prefer 2*M+N*NB) */
+                /* (CWorkspace: need 2*M + N, prefer 2*M + N*NB) */
                 /* (RWorkspace: M*M) */
                 lapackf77_zlacp2("F", &m, &m, &rwork[irvt], &m, VT(1,1), &ldvt);
                 i__1 = lwork - nwork + 1;

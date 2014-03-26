@@ -156,6 +156,7 @@ ZSRC += \
 # ----------
 # SVD
 ZSRC += \
+	testing_zgesdd.cpp	\
 	testing_zgesvd.cpp	\
 	testing_zgebrd.cpp	\
 

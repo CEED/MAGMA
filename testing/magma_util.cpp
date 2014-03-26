@@ -122,7 +122,7 @@ const char *usage =
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
 "  --nthread x      Number of CPU threads, default 1.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
-"  --work  [123]    SVD workspace size, from min (1) to max (3), default 1.\n"
+"  --work  [123]    SVD workspace size, from min (1) to optimal (3), default 3.\n"
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
@@ -134,11 +134,11 @@ const char *usage =
 "  -[TC]            transA = Trans or ConjTrans. Default is NoTrans. Doesn't change transB.\n"
 "  -S[LR]           side   = Left*, Right.\n"
 "  -D[NU]           diag   = NonUnit*, Unit.\n"
-"  -U[NASO]         jobu   = No*, All, Some, or Overwrite; compute left  singular vectors.\n"
+"  -U[NASO]         jobu   = No*, All, Some, or Overwrite; compute left  singular vectors. gesdd uses this for jobz.\n"
 "  -V[NASO]         jobvt  = No*, All, Some, or Overwrite; compute right singular vectors.\n"
-"  -J[NV]           jobz   = No* or Vectors; compute eigenvectors.\n"
-"  -L[NV]           jobvl  = No* or Vectors; compute left  eigenvectors.\n"
-"  -R[NV]           jobvr  = No* or Vectors; compute right eigenvectors.\n"
+"  -J[NV]           jobz   = No* or Vectors; compute eigenvectors (symmetric).\n"
+"  -L[NV]           jobvl  = No* or Vectors; compute left  eigenvectors (non-symmetric).\n"
+"  -R[NV]           jobvr  = No* or Vectors; compute right eigenvectors (non-symmetric).\n"
 "                   * default values\n";
 
 extern "C"
@@ -159,7 +159,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->niter    = 1;
     opts->nthread  = 1;
     opts->itype    = 1;
-    opts->svd_work = 1;
+    opts->svd_work = 3;
     opts->version  = 1;
     opts->fraction = 1.;
     opts->tolerance = 30.;
@@ -466,7 +466,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         opts->kmax = max( opts->kmax, opts->ksize[i] );
     }
 
-    // jobu=O, job
+    // disallow jobu=O, jobvt=O
     if ( opts->jobu == MagmaOverwriteVec && opts->jobvt == MagmaOverwriteVec ) {
         printf( "jobu and jobvt cannot both be Overwrite.\n" );
         exit(1);

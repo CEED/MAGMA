@@ -212,6 +212,17 @@ magma_int_t magma_zgeqp3( magma_int_t m, magma_int_t n,
                           #endif
                           magma_int_t *info);
 
+magma_int_t magma_zgesdd( magma_vec_t jobz, magma_int_t m, magma_int_t n,
+                          magmaDoubleComplex *A, magma_int_t lda,
+                          double *s,
+                          magmaDoubleComplex *U, magma_int_t ldu,
+                          magmaDoubleComplex *VT, magma_int_t ldvt,
+                          magmaDoubleComplex *work, magma_int_t lwork,
+                          #ifdef COMPLEX
+                          double *rwork,
+                          #endif
+                          magma_int_t *iwork, magma_int_t *info);
+
 magma_int_t magma_zgesvd( magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                           magmaDoubleComplex *a,    magma_int_t lda, double *s,
                           magmaDoubleComplex *u,    magma_int_t ldu,
