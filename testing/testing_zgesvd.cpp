@@ -22,7 +22,8 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#define PRECISION_z
+
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesvd
@@ -34,10 +35,10 @@ int main( int argc, char** argv)
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
     double *S1, *S2;
-#if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
     double *rwork;
-#endif
-    magma_int_t M, N, n2, min_mn, info, nb, lwork;
+    #endif
+    magma_int_t M, N, lda, ldu, ldv, n2, min_mn, info, nb, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_vec_t jobu, jobvt;
@@ -50,10 +51,10 @@ int main( int argc, char** argv)
     
     jobu  = opts.jobu;
     jobvt = opts.jobvt;
-
+    
     magma_vec_t jobs[] = { MagmaNoVec, MagmaSomeVec, MagmaOverwriteVec, MagmaAllVec };
     
-    if ( opts.check && (jobu == MagmaNoVec || jobvt == MagmaNoVec)) {
+    if ( opts.check && ! opts.all && (jobu == MagmaNoVec || jobvt == MagmaNoVec)) {
         printf( "NOTE: some checks require that singular vectors are computed;\n"
                 "      set both jobu (option -U[NASO]) and jobvt (option -V[NASO]) to be S, O, or A.\n\n" );
     }
@@ -68,7 +69,8 @@ int main( int argc, char** argv)
                 jobvt = jobs[ ijobv ];
             }
             else if ( ijobu > 0 || ijobv > 0 ) {
-                // if not testing all, run only once, with ijobu = ijobv = 0
+                // if not testing all, run only once, when ijobu = ijobv = 0,
+                // but jobu and jobv come from opts (above loops).
                 continue;
             }
             if ( jobu == MagmaOverwriteVec && jobvt == MagmaOverwriteVec ) {
@@ -78,12 +80,15 @@ int main( int argc, char** argv)
             
             M = opts.msize[itest];
             N = opts.nsize[itest];
-            n2 = M*N;
+            lda = M;
+            ldu = M;
+            ldv = N;
+            n2 = lda*N;
             min_mn = min(M, N);
             nb = magma_get_zgesvd_nb(N);
             switch( opts.svd_work ) {
                 default:
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 case 1: lwork = (M+N)*nb + 2*min_mn;                   break;  // minimum
                 case 2: lwork = (M+N)*nb + 2*min_mn +   min_mn*min_mn; break;  // optimal for some paths
                 case 3: lwork = (M+N)*nb + 2*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
@@ -94,34 +99,31 @@ int main( int argc, char** argv)
                 #endif
             }
             
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2  );
-            TESTING_MALLOC_CPU( VT,  magmaDoubleComplex, N*N );
-            TESTING_MALLOC_CPU( U,   magmaDoubleComplex, M*M );
+            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_CPU( VT,  magmaDoubleComplex, ldv*N );
+            TESTING_MALLOC_CPU( U,   magmaDoubleComplex, ldu*M );
             TESTING_MALLOC_CPU( S1,  double, min_mn );
             TESTING_MALLOC_CPU( S2,  double, min_mn );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_MALLOC_CPU( rwork, double, 5*min_mn );
             #endif
-            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2    );
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
+            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            #if defined(PRECISION_z) || defined(PRECISION_c)
             magma_zgesvd( jobu, jobvt, M, N,
-                          h_R, M, S1, U, M,
-                          VT, N, h_work, lwork, rwork, &info );
-            #else
-            magma_zgesvd( jobu, jobvt, M, N,
-                          h_R, M, S1, U, M,
-                          VT, N, h_work, lwork, &info );
-            #endif
+                          h_R, lda, S1, U, ldu, VT, ldv, h_work, lwork,
+                          #ifdef COMPLEX
+                          rwork,
+                          #endif
+                          &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
                 printf("magma_zgesvd returned error %d: %s.\n",
@@ -146,27 +148,29 @@ int main( int argc, char** argv)
                 
                 // get size and location of U and V^T depending on jobu and jobvt
                 // U2=NULL and VT2=NULL if they were not computed (e.g., jobu=N)
-                magma_int_t M2  = (jobu  == 'A' ? M : min_mn);
-                magma_int_t N2  = (jobvt == 'A' ? N : min_mn);
-                magma_int_t ldu = M;
-                magma_int_t ldv = (jobvt == 'O' ? M : N);
+                magma_int_t M2 = (jobu  == MagmaAllVec ? M : min_mn);
+                magma_int_t N2 = (jobvt == MagmaAllVec ? N : min_mn);
                 magmaDoubleComplex *U2  = NULL;
                 magmaDoubleComplex *VT2 = NULL;
-                if ( jobu == 'S' || jobu == 'A' ) {
+                if ( jobu == MagmaSomeVec || jobu == MagmaAllVec ) {
                     U2 = U;
-                } else if ( jobu == 'O' ) {
-                    U2 = h_R;
                 }
-                if ( jobvt == 'S' || jobvt == 'A' ) {
+                else if ( jobu == MagmaOverwriteVec ) {
+                    U2 = h_R;
+                    ldu = lda;
+                }
+                if ( jobvt == MagmaSomeVec || jobvt == MagmaAllVec ) {
                     VT2 = VT;
-                } else if ( jobvt == 'O' ) {
+                }
+                else if ( jobvt == MagmaOverwriteVec ) {
                     VT2 = h_R;
+                    ldv = lda;
                 }
                 
                 // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 if ( U2 != NULL && VT2 != NULL ) {
-                    lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
+                    lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
                                      U2, &ldu, S1, NULL, VT2, &ldv,
                                      h_work_err, rwork, &result[0]);
                 }
@@ -178,7 +182,7 @@ int main( int argc, char** argv)
                 }
                 #else
                 if ( U2 != NULL && VT2 != NULL ) {
-                    lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
+                    lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
                                       U2, &ldu, S1, NULL, VT2, &ldv,
                                       h_work_err, &result[0]);
                 }
@@ -213,15 +217,12 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                #if defined(PRECISION_z) || defined(PRECISION_c)
                 lapackf77_zgesvd( lapack_vec_const(jobu), lapack_vec_const(jobvt), &M, &N,
-                                  h_A, &M, S2, U, &M,
-                                  VT, &N, h_work, &lwork, rwork, &info);
-                #else
-                lapackf77_zgesvd( lapack_vec_const(jobu), lapack_vec_const(jobvt), &M, &N,
-                                  h_A, &M, S2, U, &M,
-                                  VT, &N, h_work, &lwork, &info);
-                #endif
+                                  h_A, &lda, S2, U, &ldu, VT, &ldv, h_work, &lwork,
+                                  #ifdef COMPLEX
+                                  rwork,
+                                  #endif
+                                  &info);
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
                     printf("lapackf77_zgesvd returned error %d: %s.\n",
@@ -263,7 +264,7 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( U   );
             TESTING_FREE_CPU( S1  );
             TESTING_FREE_CPU( S2  );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_FREE_CPU( rwork );
             #endif
             TESTING_FREE_PIN( h_R    );
