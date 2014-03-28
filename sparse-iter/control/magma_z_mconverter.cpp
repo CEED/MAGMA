@@ -300,7 +300,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 B->row[i] = A.row[i];
             }
             for( int i=0; i<A.num_rows+1; i++){
-                B->row[i+A.num_rows+1] = A.row[i];
+                B->row[i+A.num_rows] = A.nnz+A.row[i];
             }
 
             // store diag part and blockinfo
