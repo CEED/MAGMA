@@ -710,6 +710,8 @@ subs = {
     ('mkl_sbsrmv',     'mkl_dbsrmv',     'mkl_cbsrmv',     'mkl_zbsrmv'      ),
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
+    ('silu_chow',      'dilu_chow',      'cilu_chow',      'zilu_chow'       ),
+    ('ialu',           'dail',           'cailu',          'zailu'           ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
@@ -724,6 +726,7 @@ subs = {
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
     ('spastix',        'dpastix',        'cpastix',        'zpastix'         ),
+    ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
@@ -741,6 +744,7 @@ subs = {
     ('_TYPES_S_H',     '_TYPES_D_H',     '_TYPES_C_H',     '_TYPES_Z_H'      ),
     ('sresidual',      'dresidual',      'cresidual',      'zresidual'       ),
     ('scompact',       'dcompact',       'ccompact',       'zcompact'        ),
+    ('sortho',         'dortho',         'cortho',         'zortho'          ),
 
     # ----- SPARSE runfiles
     ('run_s',          'run_d',          'run_c',          'run_z'           ),
