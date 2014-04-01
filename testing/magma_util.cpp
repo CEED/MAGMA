@@ -60,11 +60,12 @@ int open_lockfile( const char* file, int operation )
     }
 
     // make it world-writable so anyone can rm the lockfile later on if needed
+    // Ignore error -- occurs when someone else created the file.
     err = fchmod( fd, 0666 );
-    if ( err < 0 ) {
-        fprintf( stderr, "Warning: Can't chmod file %s 0666: %s (%d)\n",
-                 file, strerror(errno), errno );
-    }
+    //if ( err < 0 ) {
+    //    fprintf( stderr, "Warning: Can't chmod file %s 0666: %s (%d)\n",
+    //             file, strerror(errno), errno );
+    //}
     
     // first try nonblocking lock;
     // if that fails (e.g., someone has exclusive lock) let user know and try blocking lock.
