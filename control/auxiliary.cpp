@@ -81,12 +81,12 @@ magma_int_t magma_num_gpus( void )
         // if *endptr == '\0' then entire string was valid number (or empty)
         if ( ngpu < 1 || *endptr != '\0' ) {
             ngpu = 1;
-            fprintf( stderr, "$MAGMA_NUM_GPUS=%s is an invalid number; using %d GPU.\n",
+            fprintf( stderr, "$MAGMA_NUM_GPUS='%s' is an invalid number; using %d GPU.\n",
                      ngpu_str, (int) ngpu );
         }
         else if ( ngpu > MagmaMaxGPUs || ngpu > ndevices ) {
             ngpu = min( ndevices, MagmaMaxGPUs );
-            fprintf( stderr, "$MAGMA_NUM_GPUS=%s exceeds MagmaMaxGPUs=%d or available GPUs=%d; using %d GPUs.\n",
+            fprintf( stderr, "$MAGMA_NUM_GPUS='%s' exceeds MagmaMaxGPUs=%d or available GPUs=%d; using %d GPUs.\n",
                      ngpu_str, MagmaMaxGPUs, ndevices, (int) ngpu );
         }
         assert( 1 <= ngpu && ngpu <= ndevices );
