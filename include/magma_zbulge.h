@@ -33,7 +33,7 @@ magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
                               magmaDoubleComplex *T, magma_int_t ldt, 
                               magma_int_t *info);
 
-magma_int_t magma_zbulge_back( magma_int_t threads, magma_uplo_t uplo, 
+magma_int_t magma_zbulge_back( magma_uplo_t uplo, 
                               magma_int_t n, magma_int_t nb, 
                               magma_int_t ne, magma_int_t Vblksiz,
                               magmaDoubleComplex *Z, magma_int_t ldz,
@@ -42,7 +42,7 @@ magma_int_t magma_zbulge_back( magma_int_t threads, magma_uplo_t uplo,
                               magmaDoubleComplex *TAU,
                               magmaDoubleComplex *T, magma_int_t ldt,
                               magma_int_t* info);
-magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo, 
+magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo, 
                               magma_int_t n, magma_int_t nb, 
                               magma_int_t ne, magma_int_t Vblksiz,
                               magmaDoubleComplex *Z, magma_int_t ldz,

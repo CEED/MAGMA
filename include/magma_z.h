@@ -809,7 +809,7 @@ magma_int_t magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, magma_uplo_t 
                               magmaDoubleComplex *work, magma_int_t lwork,
                               magma_int_t *info);
 
-magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo,
+magma_int_t magma_zhetrd_hb2st(magma_uplo_t uplo,
                               magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                               magmaDoubleComplex *A, magma_int_t lda,
                               double *D, double *E,
@@ -820,7 +820,7 @@ magma_int_t magma_zhetrd_hb2st(magma_int_t threads, magma_uplo_t uplo,
 magma_int_t magma_zhetrd_he2hb(magma_uplo_t uplo, magma_int_t n, magma_int_t NB,
                               magmaDoubleComplex *a, magma_int_t lda,
                               magmaDoubleComplex *tau, magmaDoubleComplex *work, magma_int_t lwork,
-                              magmaDoubleComplex *dT, magma_int_t threads,
+                              magmaDoubleComplex *dT,
                               magma_int_t *info);
 
 magma_int_t magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
@@ -831,7 +831,7 @@ magma_int_t magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int
                               magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                               magma_int_t ngpu, magma_int_t distblk,
                               magma_queue_t streams[][20], magma_int_t nstream,
-                              magma_int_t threads, magma_int_t *info);
+                              magma_int_t *info);
 
 magma_int_t magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                               magmaDoubleComplex *a, magma_int_t lda,
@@ -841,7 +841,7 @@ magma_int_t magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magm
                               magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                               magma_int_t ngpu, magma_int_t distblk,
                               magma_queue_t streams[][20], magma_int_t nstream,
-                              magma_int_t threads, magma_int_t *info);
+                              magma_int_t *info);
 
 magma_int_t magma_zpotrs_gpu( magma_uplo_t uplo,  magma_int_t n, magma_int_t nrhs,
                               magmaDoubleComplex *dA, magma_int_t ldda,
