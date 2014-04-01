@@ -365,6 +365,25 @@ subroutine magmaf_zgeqp3( m, n, a, lda, jpvt, tau, work, lwork, rwork, info )
     integer          :: info
 end subroutine magmaf_zgeqp3
 
+subroutine magmaf_zgesdd( jobz, m, n, A, lda, s, U, ldu, VT, ldvt, work, lwork, rwork,  &
+        iwork, info )
+    character        :: jobz
+    integer          :: m
+    integer          :: n
+    complex*16       :: A(*)
+    integer          :: lda
+    double precision :: s(*)
+    complex*16       :: U(*)
+    integer          :: ldu
+    complex*16       :: VT(*)
+    integer          :: ldvt
+    complex*16       :: work(*)
+    integer          :: lwork
+    double precision :: rwork(*)
+    integer          :: iwork(*)
+    integer          :: info
+end subroutine magmaf_zgesdd
+
 subroutine magmaf_zgesvd( jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork,  &
         rwork, info )
     character        :: jobu
@@ -1389,9 +1408,8 @@ subroutine magmaf_zhetrd2_gpu( uplo, n, da, ldda, d, e, tau, wa, ldwa, work, lwo
     integer          :: info
 end subroutine magmaf_zhetrd2_gpu
 
-subroutine magmaf_zhetrd_hb2st( threads, uplo, n, nb, Vblksiz, A, lda, D, E, V, ldv, TAU,  &
-        compT, T, ldt )
-    integer          :: threads
+subroutine magmaf_zhetrd_hb2st( uplo, n, nb, Vblksiz, A, lda, D, E, V, ldv, TAU, compT,  &
+        T, ldt )
     character        :: uplo
     integer          :: n
     integer          :: nb
@@ -1408,8 +1426,7 @@ subroutine magmaf_zhetrd_hb2st( threads, uplo, n, nb, Vblksiz, A, lda, D, E, V, 
     integer          :: ldt
 end subroutine magmaf_zhetrd_hb2st
 
-subroutine magmaf_zhetrd_he2hb( uplo, n, NB, a, lda, tau, work, lwork, dT, threads, info  &
-        )
+subroutine magmaf_zhetrd_he2hb( uplo, n, NB, a, lda, tau, work, lwork, dT, info )
     character        :: uplo
     integer          :: n
     integer          :: NB
@@ -1419,7 +1436,6 @@ subroutine magmaf_zhetrd_he2hb( uplo, n, NB, a, lda, tau, work, lwork, dT, threa
     complex*16       :: work(*)
     integer          :: lwork
     magma_devptr_t   :: dT
-    integer          :: threads
     integer          :: info
 end subroutine magmaf_zhetrd_he2hb
 

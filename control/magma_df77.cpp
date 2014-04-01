@@ -551,6 +551,28 @@ void magmaf_dgeqp3(
         info );
 }
 
+#define magmaf_dgesdd FORTRAN_NAME( magmaf_dgesdd, MAGMAF_DGESDD )
+void magmaf_dgesdd(
+    magma_vec_t *jobz, magma_int_t *m, magma_int_t *n,
+    double *A, magma_int_t *lda,
+    double *s,
+    double *U, magma_int_t *ldu,
+    double *VT, magma_int_t *ldvt,
+    double *work, magma_int_t *lwork,
+    magma_int_t *iwork,
+    magma_int_t *info )
+{
+    magma_dgesdd(
+        *jobz, *m, *n,
+        A, *lda,
+        s,
+        U, *ldu,
+        VT, *ldvt,
+        work, *lwork,
+        iwork,
+        info );
+}
+
 #define magmaf_dgesvd FORTRAN_NAME( magmaf_dgesvd, MAGMAF_DGESVD )
 void magmaf_dgesvd(
     magma_vec_t *jobu, magma_vec_t *jobvt, magma_int_t *m, magma_int_t *n,
@@ -1633,7 +1655,7 @@ void magmaf_dsytrd2_gpu(
 
 #define magmaf_dsytrd_sb2st FORTRAN_NAME( magmaf_dsytrd_sb2st, MAGMAF_DSYTRD_SB2ST )
 void magmaf_dsytrd_sb2st(
-    magma_int_t *threads, magma_uplo_t *uplo, magma_int_t *n, magma_int_t *nb, magma_int_t *Vblksiz,
+    magma_uplo_t *uplo, magma_int_t *n, magma_int_t *nb, magma_int_t *Vblksiz,
     double *A, magma_int_t *lda,
     double *D,
     double *E,
@@ -1642,7 +1664,7 @@ void magmaf_dsytrd_sb2st(
     double *T, magma_int_t *ldt )
 {
     magma_dsytrd_sb2st(
-        *threads, *uplo, *n, *nb, *Vblksiz,
+        *uplo, *n, *nb, *Vblksiz,
         A, *lda,
         D,
         E,
@@ -1657,7 +1679,7 @@ void magmaf_dsytrd_sy2sb(
     double *a, magma_int_t *lda,
     double *tau,
     double *work, magma_int_t *lwork,
-    devptr_t *dT, magma_int_t *threads,
+    devptr_t *dT,
     magma_int_t *info )
 {
     magma_dsytrd_sy2sb(
@@ -1665,7 +1687,7 @@ void magmaf_dsytrd_sy2sb(
         a, *lda,
         tau,
         work, *lwork,
-        magma_ddevptr(dT), *threads,
+        magma_ddevptr(dT),
         info );
 }
 

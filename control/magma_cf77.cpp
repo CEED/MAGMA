@@ -537,6 +537,30 @@ void magmaf_cgeqp3(
         info );
 }
 
+#define magmaf_cgesdd FORTRAN_NAME( magmaf_cgesdd, MAGMAF_CGESDD )
+void magmaf_cgesdd(
+    magma_vec_t *jobz, magma_int_t *m, magma_int_t *n,
+    magmaFloatComplex *A, magma_int_t *lda,
+    float *s,
+    magmaFloatComplex *U, magma_int_t *ldu,
+    magmaFloatComplex *VT, magma_int_t *ldvt,
+    magmaFloatComplex *work, magma_int_t *lwork,
+    float *rwork,
+    magma_int_t *iwork,
+    magma_int_t *info )
+{
+    magma_cgesdd(
+        *jobz, *m, *n,
+        A, *lda,
+        s,
+        U, *ldu,
+        VT, *ldvt,
+        work, *lwork,
+        rwork,
+        iwork,
+        info );
+}
+
 #define magmaf_cgesvd FORTRAN_NAME( magmaf_cgesvd, MAGMAF_CGESVD )
 void magmaf_cgesvd(
     magma_vec_t *jobu, magma_vec_t *jobvt, magma_int_t *m, magma_int_t *n,
@@ -1753,7 +1777,7 @@ void magmaf_chetrd2_gpu(
 
 #define magmaf_chetrd_hb2st FORTRAN_NAME( magmaf_chetrd_hb2st, MAGMAF_CHETRD_HB2ST )
 void magmaf_chetrd_hb2st(
-    magma_int_t *threads, magma_uplo_t *uplo, magma_int_t *n, magma_int_t *nb, magma_int_t *Vblksiz,
+    magma_uplo_t *uplo, magma_int_t *n, magma_int_t *nb, magma_int_t *Vblksiz,
     magmaFloatComplex *A, magma_int_t *lda,
     float *D,
     float *E,
@@ -1762,7 +1786,7 @@ void magmaf_chetrd_hb2st(
     magmaFloatComplex *T, magma_int_t *ldt )
 {
     magma_chetrd_hb2st(
-        *threads, *uplo, *n, *nb, *Vblksiz,
+        *uplo, *n, *nb, *Vblksiz,
         A, *lda,
         D,
         E,
@@ -1777,7 +1801,7 @@ void magmaf_chetrd_he2hb(
     magmaFloatComplex *a, magma_int_t *lda,
     magmaFloatComplex *tau,
     magmaFloatComplex *work, magma_int_t *lwork,
-    devptr_t *dT, magma_int_t *threads,
+    devptr_t *dT,
     magma_int_t *info )
 {
     magma_chetrd_he2hb(
@@ -1785,7 +1809,7 @@ void magmaf_chetrd_he2hb(
         a, *lda,
         tau,
         work, *lwork,
-        magma_cdevptr(dT), *threads,
+        magma_cdevptr(dT),
         info );
 }
 

@@ -375,6 +375,24 @@ subroutine magmaf_sgeqp3( m, n, a, lda, jpvt, tau, work, lwork, info )
     integer          :: info
 end subroutine magmaf_sgeqp3
 
+subroutine magmaf_sgesdd( jobz, m, n, A, lda, s, U, ldu, VT, ldvt, work, lwork, iwork,  &
+        info )
+    character        :: jobz
+    integer          :: m
+    integer          :: n
+    real             :: A(*)
+    integer          :: lda
+    real             :: s(*)
+    real             :: U(*)
+    integer          :: ldu
+    real             :: VT(*)
+    integer          :: ldvt
+    real             :: work(*)
+    integer          :: lwork
+    integer          :: iwork(*)
+    integer          :: info
+end subroutine magmaf_sgesdd
+
 subroutine magmaf_sgesvd( jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork,  &
         info )
     character        :: jobu
@@ -1263,9 +1281,8 @@ subroutine magmaf_ssytrd2_gpu( uplo, n, da, ldda, d, e, tau, wa, ldwa, work, lwo
     integer          :: info
 end subroutine magmaf_ssytrd2_gpu
 
-subroutine magmaf_ssytrd_sb2st( threads, uplo, n, nb, Vblksiz, A, lda, D, E, V, ldv, TAU,  &
-        compT, T, ldt )
-    integer          :: threads
+subroutine magmaf_ssytrd_sb2st( uplo, n, nb, Vblksiz, A, lda, D, E, V, ldv, TAU, compT,  &
+        T, ldt )
     character        :: uplo
     integer          :: n
     integer          :: nb
@@ -1282,8 +1299,7 @@ subroutine magmaf_ssytrd_sb2st( threads, uplo, n, nb, Vblksiz, A, lda, D, E, V, 
     integer          :: ldt
 end subroutine magmaf_ssytrd_sb2st
 
-subroutine magmaf_ssytrd_sy2sb( uplo, n, NB, a, lda, tau, work, lwork, dT, threads, info  &
-        )
+subroutine magmaf_ssytrd_sy2sb( uplo, n, NB, a, lda, tau, work, lwork, dT, info )
     character        :: uplo
     integer          :: n
     integer          :: NB
@@ -1293,7 +1309,6 @@ subroutine magmaf_ssytrd_sy2sb( uplo, n, NB, a, lda, tau, work, lwork, dT, threa
     real             :: work(*)
     integer          :: lwork
     magma_devptr_t   :: dT
-    integer          :: threads
     integer          :: info
 end subroutine magmaf_ssytrd_sy2sb
 
