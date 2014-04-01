@@ -214,9 +214,10 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
         return MAGMA_SUCCESS;
     }
 
-    /* determine the number of threads */
-    magma_int_t threads = magma_get_numthreads();
-    magma_setlapack_numthreads(threads);
+    /* determine the number of threads *///not needed here to be checked Azzam
+    magma_int_t threads = magma_get_parallel_numthreads();
+    //magma_int_t mklth   = magma_get_lapack_numthreads();
+    //magma_set_lapack_numthreads(mklth);
 
 #ifdef ENABLE_DEBUG
     printf("  D&C is using %d threads\n", threads);

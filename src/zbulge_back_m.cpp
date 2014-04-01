@@ -108,7 +108,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" magma_int_t
-magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo,
+magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo,
                         magma_int_t n, magma_int_t nb,
                         magma_int_t ne, magma_int_t Vblksiz,
                         magmaDoubleComplex *Z, magma_int_t ldz,
@@ -117,7 +117,9 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo,
                         magmaDoubleComplex *T, magma_int_t ldt,
                         magma_int_t* info)
 {
-    magma_setlapack_numthreads(1);
+    magma_int_t threads = magma_get_parallel_numthreads();
+    magma_int_t mklth   = magma_get_lapack_numthreads();
+    magma_set_lapack_numthreads(1);
 
     real_Double_t timeaplQ2=0.0;
 
@@ -206,7 +208,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, magma_uplo_t uplo,
 
     timeaplQ2 = magma_wtime()-timeaplQ2;
 
-    magma_setlapack_numthreads(threads);
+    magma_set_lapack_numthreads(mklth);
     return MAGMA_SUCCESS;
 }
 
@@ -242,7 +244,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
     // it need that all threads setting it to 1.
-    magma_setlapack_numthreads(1);
+    magma_set_lapack_numthreads(1);
 
 #ifdef MAGMA_SETAFFINITY
     //#define PRINTAFFINITY

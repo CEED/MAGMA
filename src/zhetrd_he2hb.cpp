@@ -142,7 +142,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                     magmaDoubleComplex *tau,
                     magmaDoubleComplex *work, magma_int_t lwork,
                     magmaDoubleComplex *dT,
-                    magma_int_t threads, magma_int_t *info)
+                    magma_int_t *info)
 {
     #define  A(a_1,a_2)  ( A + ((a_2)-1)*( lda) + (a_1)-1)
     #define dA(a_1,a_2)  (dA + ((a_2)-1)*(ldda) + (a_1)-1)
@@ -201,9 +201,9 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-    magma_int_t mklth = min(threads,16);
-    magma_setlapack_numthreads(mklth);
-
+    magma_int_t threads = magma_get_lapack_numthreads();
+    magma_int_t mklth   = min(threads,16);
+    magma_set_lapack_numthreads(mklth);
 
     /* Use the first panel of dA as work space */
     magmaDoubleComplex *dwork = dA+n*ldda;
@@ -425,7 +425,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     magmablasSetKernelStream( 0 );
     
-    magma_setlapack_numthreads(1);
+    magma_set_lapack_numthreads(threads);
 
     return *info;
 } /* magma_zhetrd_he2hb */

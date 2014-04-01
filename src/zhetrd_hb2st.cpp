@@ -115,11 +115,6 @@ public:
     Arguments
     ---------
     @param[in]
-    threads INTEGER
-            Specifies the number of pthreads used.
-            THREADS > 0
-
-    @param[in]
     uplo    CHARACTER*1
       -     = 'U':  Upper triangles of A is stored;
       -     = 'L':  Lower triangles of A is stored.
@@ -187,7 +182,7 @@ public:
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_hb2st(
-    magma_int_t threads, magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
     magmaDoubleComplex *A, magma_int_t lda, double *d, double *e,
     magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
     magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
@@ -196,8 +191,11 @@ magma_zhetrd_hb2st(
     real_Double_t timeblg=0.0;
     #endif
 
+    magma_int_t threads = magma_get_parallel_numthreads();
+    magma_int_t mklth   = magma_get_lapack_numthreads();
+    magma_set_lapack_numthreads(1);
+
     //const char* uplo_ = lapack_uplo_const( uplo );
-    magma_int_t mklth = threads;
     magma_int_t INgrsiz=1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
     magma_int_t nbtiles = magma_ceildiv(n, nb);
@@ -217,7 +215,6 @@ magma_zhetrd_hb2st(
     magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
     pthread_attr_t thread_attr;
 
-    magma_setlapack_numthreads(1);
     magma_zbulge_data data_bulge(threads, n, nb, nbtiles, INgrsiz, Vblksiz, compT,
                                  A, lda, V, ldv, TAU, T, ldt, prog);
 
@@ -255,7 +252,7 @@ magma_zhetrd_hb2st(
     magma_free_cpu(arg);
     magma_free_cpu(prog);
 
-    magma_setlapack_numthreads(mklth);
+    magma_set_lapack_numthreads(mklth);
     /*================================================
      *  store resulting diag and lower diag d and e
      *  note that d and e are always real
@@ -339,7 +336,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
     // it need that all threads setting it to 1.
-    magma_setlapack_numthreads(1);
+    magma_set_lapack_numthreads(1);
 
 #ifdef MAGMA_SETAFFINITY
 //#define PRINTAFFINITY

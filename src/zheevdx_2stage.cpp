@@ -218,8 +218,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     double* dwork;
 
     /* determine the number of threads */
-    magma_int_t threads = magma_get_numthreads();
-    magma_setlapack_numthreads(threads);
+    magma_int_t parallel_threads = magma_get_parallel_numthreads();
 
     wantz = (jobz == MagmaVec);
     lower = (uplo == MagmaLower);
@@ -255,13 +254,13 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         }
     }
 
-    magma_int_t nb = magma_get_zbulge_nb(n,threads);
-    magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb, threads);
+    magma_int_t nb = magma_get_zbulge_nb(n,parallel_threads);
+    magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb, parallel_threads);
 
     magma_int_t ldt = Vblksiz;
     magma_int_t ldv = nb + Vblksiz;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-    magma_int_t lq2 = magma_zbulge_get_lq2(n, threads);
+    magma_int_t lq2 = magma_zbulge_get_lq2(n, parallel_threads);
 
     if (wantz) {
         lwmin = lq2 + 2 * n + n * n;
@@ -308,7 +307,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     }
 
 
-    timer_printf("using %d threads\n", threads);
+    timer_printf("using %d parallel_threads\n", parallel_threads);
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t ntiles = n/nb;
@@ -374,7 +373,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    magma_zhetrd_he2hb(uplo, n, nb, A, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
+    magma_zhetrd_he2hb(uplo, n, nb, A, lda, &work[indtau1], &work[indwrk], llwork, dT1, info);
 
     timer_stop( time );
     timer_printf( "  time zhetrd_he2hb = %6.2f\n", time );
@@ -400,7 +399,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     timer_printf( "  time zhetrd_convert = %6.2f\n", time );
     timer_start( time );
 
-    magma_zhetrd_hb2st(threads, uplo, n, nb, Vblksiz, A2, lda2, w, &rwork[inde], &work[indV2], ldv, &work[indTAU2], wantz, &work[indT2], ldt);
+    magma_zhetrd_hb2st(uplo, n, nb, Vblksiz, A2, lda2, w, &rwork[inde], &work[indV2], ldv, &work[indTAU2], wantz, &work[indT2], ldt);
 
     timer_stop( time );
     timer_stop( time_total );
@@ -456,7 +455,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
             return *info;
         }
 
-        magma_zbulge_back(threads, uplo, n, nb, *m, Vblksiz, &work[indwrk + n * (il-1)], n, dZ, lddz,
+        magma_zbulge_back(uplo, n, nb, *m, Vblksiz, &work[indwrk + n * (il-1)], n, dZ, lddz,
                           &work[indV2], ldv, &work[indTAU2], &work[indT2], ldt, info);
 
         timer_stop( time );

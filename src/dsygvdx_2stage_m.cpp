@@ -219,8 +219,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
     magma_int_t liwmin;
 
     /* determine the number of threads */
-    magma_int_t threads = magma_get_numthreads();
-    magma_setlapack_numthreads(threads);
+    magma_int_t parallel_threads = magma_get_parallel_numthreads();
 
     wantz  = (jobz  == MagmaVec);
     lower  = (uplo  == MagmaLower);
@@ -258,8 +257,8 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
         }
     }
 
-    magma_int_t nb = magma_get_dbulge_nb(n, threads);
-    magma_int_t lq2 = magma_dbulge_get_lq2(n, threads);
+    magma_int_t nb = magma_get_dbulge_nb(n, parallel_threads);
+    magma_int_t lq2 = magma_dbulge_get_lq2(n, parallel_threads);
 
     if (wantz) {
         lwmin = lq2 + 1 + 6*n + 2*n*n;
