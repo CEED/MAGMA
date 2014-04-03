@@ -115,7 +115,7 @@ FOPTS += $(PTROPT)
 %.o: %.c
 	$(CC) $(OPTS) $(INC_MAGMA) -c $< -o $@
 
-%.cu_o: %.cu
+%.o: %.cu
 	$(NVCC) $(NVOPTS) $(INC_MAGMA) -c $< -o $@
 
 %.o: %.f90  $(PTREXEC)

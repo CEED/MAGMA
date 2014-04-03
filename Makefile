@@ -119,10 +119,8 @@ LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
 shared: lib
 	$(MAKE) $(LIBMAGMA_SO)
 
-$(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.cu_o
+$(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
 	@echo ======================================== $(LIBMAGMA_SO)
-	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) \
-	src/*.o control/*.o \
-	interface_cuda/*.o magmablas/*.cu_o magmablas/*.o \
+	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)

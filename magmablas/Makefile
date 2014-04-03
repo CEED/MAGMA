@@ -52,9 +52,9 @@ ZSRC := \
 	ztranspose_inplace.cu	\
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
-	ztrtri.cu		\
 	ztrsm.cu		\
 	ztrsm_work.cu		\
+	ztrtri.cu		\
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
@@ -113,7 +113,7 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.cu=.cu_o) 
+ALLOBJ := $(ALLSRC:.cu=.o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 
 .PHONY: all clean cleanall
@@ -136,7 +136,7 @@ cleanall: clean
 	rm -f $(LIBMAGMA)
 
 # extra include dependencies
-zgemm_fermi.cu_o: zgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-cgemm_fermi.cu_o: cgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-dgemm_fermi.cu_o: dgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-sgemm_fermi.cu_o: sgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+zgemm_fermi.o: zgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+cgemm_fermi.o: cgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+dgemm_fermi.o: dgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+sgemm_fermi.o: sgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h

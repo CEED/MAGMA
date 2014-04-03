@@ -56,7 +56,7 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.cu=.cu_o) 
+ALLOBJ := $(ALLSRC:.cu=.o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 
 .PHONY: all clean cleanall
