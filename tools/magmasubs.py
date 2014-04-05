@@ -711,7 +711,7 @@ subs = {
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
     ('silu_chow',      'dilu_chow',      'cilu_chow',      'zilu_chow'       ),
-    ('ialu',           'dail',           'cailu',          'zailu'           ),
+    ('ialu',           'dailu',          'cailu',          'zailu'           ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
