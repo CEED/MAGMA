@@ -144,8 +144,10 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC
-                                         || A->storage_type == Magma_CSRD ){
+        if( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC 
+                                        || A->storage_type == Magma_CSRD
+                                        || A->storage_type == Magma_CSRL
+                                        || A->storage_type == Magma_CSRU ){
             free( A->val );
             free( A->col );
             free( A->row );
@@ -289,8 +291,10 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC
-                                         || A->storage_type == Magma_CSRD ){
+        if( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC 
+                                        || A->storage_type == Magma_CSRD
+                                        || A->storage_type == Magma_CSRL
+                                        || A->storage_type == Magma_CSRU ){
             if( cudaFree( A->val ) != cudaSuccess ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;

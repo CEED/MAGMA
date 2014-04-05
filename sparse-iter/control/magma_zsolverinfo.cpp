@@ -15,6 +15,12 @@
 
 #include <assert.h>
 
+// includes CUDA
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include <cusparse_v2.h>
+#include <cuda_profiler_api.h>
+
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
@@ -95,7 +101,8 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
                 "======#\n");
-    }else if( solver_par->solver == Magma_BICGSTAB ){
+    }else if( solver_par->solver == Magma_BICGSTAB || 
+                        solver_par->solver == Magma_PBICGSTAB ){
         if( solver_par->verbose > 0 ){
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
@@ -332,6 +339,14 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         precond->M.blockinfo = NULL;
     }
 
+    if( precond->solver == Magma_ILU ){
+        cusparseStatus_t cusparseStatus;
+        cusparseStatus =
+        cusparseDestroySolveAnalysisInfo( precond->cuinfo );
+         if(cusparseStatus != 0)    printf("error in info-free.\n");
+
+    }
+
     return MAGMA_SUCCESS;
 }
 
@@ -374,7 +389,7 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
         magmaDoubleComplex *initial_guess;
         magma_zmalloc_cpu( &initial_guess, ev );
         magma_zmalloc( &solver_par->eigenvectors, ev );
-        magma_int_t ISEED[4] = {0,0,0,1}, ione = 3;
+        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
         lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
         magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
             initial_guess, solver_par->ev_length, solver_par->eigenvectors, 

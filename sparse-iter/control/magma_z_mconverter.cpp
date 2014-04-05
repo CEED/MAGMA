@@ -165,6 +165,106 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             return MAGMA_SUCCESS; 
         }
+        // CSR to CSRL
+        if( old_format == Magma_CSR && new_format == Magma_CSRL ){
+            // fill in information for B
+            B->storage_type = Magma_CSRL;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->diameter = A.diameter;
+
+            magma_int_t numzeros=0;
+            for( magma_int_t i=0; i<A.num_rows; i++){
+                for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j]<=i){
+                        numzeros++;
+                    }
+                }
+            }
+            B->nnz = numzeros;
+            magma_zmalloc_cpu( &B->val, numzeros );
+            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, numzeros );
+            numzeros=0;
+            for( magma_int_t i=0; i<A.num_rows; i++){
+                B->row[i]=numzeros;
+                for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j]<i){
+                        B->val[numzeros] = A.val[j];
+                        B->col[numzeros] = A.col[j];
+                        numzeros++;
+                    }
+                    else if( A.col[j] == i){
+                        B->val[numzeros] = MAGMA_Z_MAKE(1.0, 0.0);
+                        B->col[numzeros] = A.col[j];
+                        numzeros++;
+                    }
+                }
+            }
+            B->row[B->num_rows] = numzeros;
+            return MAGMA_SUCCESS; 
+        }
+        // CSR to CSRU
+        if( old_format == Magma_CSR && new_format == Magma_CSRU ){
+            // fill in information for B
+            B->storage_type = Magma_CSRU;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->diameter = A.diameter;
+
+            magma_int_t numzeros=0;
+            for( magma_int_t i=0; i<A.num_rows; i++){
+                for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j]>=i){
+                        numzeros++;
+                    }
+                }
+            }
+            B->nnz = numzeros;
+            magma_zmalloc_cpu( &B->val, numzeros );
+            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, numzeros );
+            numzeros=0;
+            for( magma_int_t i=0; i<A.num_rows; i++){
+                B->row[i]=numzeros;
+                for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j]>=i){
+                        B->val[numzeros] = A.val[j];
+                        B->col[numzeros] = A.col[j];
+                        numzeros++;
+                    }
+                }
+            }
+            B->row[B->num_rows] = numzeros;
+            return MAGMA_SUCCESS; 
+        }
+        // CSRL/CSRU to CSR
+        if( ( old_format == Magma_CSRL || old_format == Magma_CSRU ) 
+                                        && new_format == Magma_CSR ){
+            // fill in information for B
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            magma_zmalloc_cpu( &B->val, A.nnz );
+            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_indexmalloc_cpu( &B->col, A.nnz );
+
+            for( int i=0; i<A.nnz; i++){
+                B->val[i] = A.val[i];
+                B->col[i] = A.col[i];
+            }
+            for( int i=0; i<A.num_rows+1; i++){
+                B->row[i] = A.row[i];
+            }
+            return MAGMA_SUCCESS; 
+        }
         // CSR to CSRD (diagonal elements first)
         if( old_format == Magma_CSR && new_format == Magma_CSRD ){
             // fill in information for B

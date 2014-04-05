@@ -59,7 +59,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     if( src == Magma_CPU && dst == Magma_DEV ){
         //CSR-type
         if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
-                                        || A.storage_type == Magma_CSRD ){
+                                        || A.storage_type == Magma_CSRD
+                                        || A.storage_type == Magma_CSRL
+                                        || A.storage_type == Magma_CSRU ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -347,7 +349,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     if( src == Magma_CPU && dst == Magma_CPU ){
         //CSR-type
         if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
-                                        || A.storage_type == Magma_CSRD ){
+                                        || A.storage_type == Magma_CSRD
+                                        || A.storage_type == Magma_CSRL
+                                        || A.storage_type == Magma_CSRU ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -536,7 +540,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     if( src == Magma_DEV && dst == Magma_CPU ){
         //CSR-type
         if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
-                                        || A.storage_type == Magma_CSRD ){
+                                        || A.storage_type == Magma_CSRD
+                                        || A.storage_type == Magma_CSRL
+                                        || A.storage_type == Magma_CSRU ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -753,7 +759,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     if( src == Magma_DEV && dst == Magma_DEV ){
         //CSR-type
         if( A.storage_type == Magma_CSR || A.storage_type == Magma_CSC 
-                                        || A.storage_type == Magma_CSRD ){
+                                        || A.storage_type == Magma_CSRD
+                                        || A.storage_type == Magma_CSRL
+                                        || A.storage_type == Magma_CSRU ){
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
