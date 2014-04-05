@@ -427,7 +427,8 @@ typedef enum {
     Magma_PGMRES       = 442,
     Magma_PBICGSTAB    = 443,
     Magma_PASTIX       = 444,
-    Magma_ILU          = 445
+    Magma_ILU          = 445,
+    Magma_ICC          = 446
 } magma_solver_type;
 
 typedef enum {
