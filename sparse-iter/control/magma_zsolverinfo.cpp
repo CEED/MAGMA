@@ -58,6 +58,9 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                 if( precond_par->solver == Magma_JACOBI )
                         printf("#   Jacobi-CG performance analysis"
                                 " every %d iteration\n", k);
+                if( precond_par->solver == Magma_ICC )
+                        printf("#   IC-CG performance analysis"
+                                " every %d iteration\n", k);
 
             }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");

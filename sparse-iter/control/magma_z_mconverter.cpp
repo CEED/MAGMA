@@ -167,6 +167,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         }
         // CSR to CSRL
         if( old_format == Magma_CSR && new_format == Magma_CSRL ){
+
             // fill in information for B
             B->storage_type = Magma_CSRL;
             B->memory_location = A.memory_location;
@@ -190,7 +191,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             for( magma_int_t i=0; i<A.num_rows; i++){
                 B->row[i]=numzeros;
                 for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
-                    if( A.col[j]<i){
+                    if( A.col[j]<=i){
                         B->val[numzeros] = A.val[j];
                         B->col[numzeros] = A.col[j];
                         numzeros++;
@@ -204,6 +205,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             B->row[B->num_rows] = numzeros;
             return MAGMA_SUCCESS; 
+            
         }
         // CSR to CSRU
         if( old_format == Magma_CSR && new_format == Magma_CSRU ){
@@ -243,6 +245,100 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         // CSRL/CSRU to CSR
         if( ( old_format == Magma_CSRL || old_format == Magma_CSRU ) 
                                         && new_format == Magma_CSR ){
+
+            magma_int_t i, j, k, *ELL_count;
+
+            magma_int_t offdiags = 0, maxrowlength = 0, maxrowtmp = 0 ;
+            for( i=0; i<A.num_rows; i++){
+                maxrowtmp = 0 ;
+                for( j=A.row[i]; j<A.row[i+1]; j++){
+                    if( A.col[j] < i ){
+                        maxrowtmp+=2;
+                        offdiags++;
+                    }
+                    else if( A.col[j] == i )
+                        maxrowtmp++;
+                }
+                if( maxrowtmp > maxrowlength )
+                    maxrowlength = maxrowtmp;
+            }
+
+            magma_int_t nnz = A.row[A.num_rows] + offdiags;
+            magma_z_sparse_matrix ELL_sorted, ELL;
+
+            ELL.num_rows = A.num_rows;
+            ELL.num_cols = A.num_cols;
+            ELL.nnz = nnz;
+            ELL.storage_type = Magma_ELLPACK;
+            ELL.memory_location = Magma_CPU;
+            ELL.max_nnz_row = maxrowlength;
+
+            magma_zmalloc_cpu( &ELL.val, maxrowlength*A.num_rows );
+            magma_indexmalloc_cpu( &ELL.col, maxrowlength*A.num_rows );
+            magma_indexmalloc_cpu( &ELL_count, maxrowlength*A.num_rows );
+
+            ELL_sorted.num_rows = A.num_rows;
+            ELL_sorted.num_cols = A.num_cols;
+            ELL_sorted.nnz = nnz;
+            ELL_sorted.storage_type = Magma_ELLPACK;
+            ELL_sorted.memory_location = Magma_CPU;
+            ELL_sorted.max_nnz_row = maxrowlength;
+
+            magma_zmalloc_cpu( &ELL_sorted.val, maxrowlength*A.num_rows );
+            magma_indexmalloc_cpu( &ELL_sorted.col, maxrowlength*A.num_rows );
+
+            for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++){
+                ELL.val[i] = MAGMA_Z_MAKE(0., 0.);
+                ELL.col[i] =  -1;
+                ELL_count[i] =  0;
+                ELL_sorted.val[i] = MAGMA_Z_MAKE(0., 0.);
+                ELL_sorted.col[i] =  -1;
+            }
+
+            for( i=0; i<A.num_rows; i++ ){
+                magma_int_t offset = 0;
+                for( j=A.row[i]; j<A.row[i+1]; j++ ){
+                    if( A.col[j] == i ){
+                        ELL.val[i*maxrowlength+ELL_count[i]] = A.val[j];
+                        ELL.col[i*maxrowlength+ELL_count[i]] = A.col[j];
+                        ELL_count[i]++;
+                    }
+                    else if( A.col[j] < i ){
+                        ELL.val[i*maxrowlength+ELL_count[i]] = A.val[j];
+                        ELL.col[i*maxrowlength+ELL_count[i]] = A.col[j];
+                        ELL_count[i]++;
+                        // insert the entry in the upper part
+                        ELL.val[A.col[j]*maxrowlength+ELL_count[A.col[j]]] = A.val[j];
+                        ELL.col[A.col[j]*maxrowlength+ELL_count[A.col[j]]] = i;
+                        ELL_count[A.col[j]]++;
+                    }
+                }  
+            }
+            magma_index_t offset;
+            for( i=0; i<A.num_rows; i++ ){
+                offset = 0;
+                magma_index_t pivot=-2;
+                for(magma_index_t j=0; j<A.num_rows+1; j++){
+                    pivot++;
+                    for( k=0; k<maxrowlength; k++ ){
+                        if( ELL.col[i*maxrowlength+k] == pivot ){
+                            ELL_sorted.col[i*maxrowlength+offset] =
+                                                    ELL.col[i*maxrowlength+k];
+                            ELL_sorted.val[i*maxrowlength+offset] =
+                                                    ELL.val[i*maxrowlength+k];
+                            offset++;
+                        }
+                            
+                    }       
+                }
+            }
+            magma_z_mconvert( ELL_sorted, B, Magma_ELLPACK, Magma_CSR );
+
+            magma_z_mfree( &ELL_sorted );
+            magma_z_mfree( &ELL );
+            free( ELL_count );
+
+/*
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -262,7 +358,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             for( int i=0; i<A.num_rows+1; i++){
                 B->row[i] = A.row[i];
-            }
+            }*/
             return MAGMA_SUCCESS; 
         }
         // CSR to CSRD (diagonal elements first)
@@ -488,7 +584,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                   B->val[i] = MAGMA_Z_MAKE(0., 0.);
                   B->col[i] =  -1;
              }
-   
+
             for( i=0; i<A.num_rows; i++ ){
                  magma_int_t offset = 0;
                  for( j=A.row[i]; j<A.row[i+1]; j++ ){
@@ -520,6 +616,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
+
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 

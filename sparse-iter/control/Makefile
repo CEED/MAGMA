@@ -23,6 +23,8 @@ ZSRC := \
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
 	z_transpose_csr.cpp	\
+    magma_z_chowutils.cpp   \
+    magma_zp2p.cpp   \
 
 
 SRC := \
