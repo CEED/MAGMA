@@ -65,11 +65,11 @@ OPTS   += -DHAVE_CUBLAS -DMIN_CUDA_ARCH=$(MIN_ARCH)
 LIBEXT = $(LIBDIR) $(LIB)
 
 # Use Plasma to compile zgetfl and ztstrf
-PLASMA = $(shell pkg-config --libs plasma 2> /dev/null )
-ifeq (1, $(words $(findstring plasma, $(PLASMA))))
+PLASMA = $(shell pkg-config --libs coreblas 2> /dev/null )
+ifeq (1, $(words $(findstring coreblas, $(PLASMA))))
     OPTS    := $(OPTS) -DMAGMA_WITH_PLASMA
-    INC     := $(INC) $(shell pkg-config --cflags-only-I plasma)
-    LIBEXT  := $(LIBEXT) $(shell pkg-config --libs plasma)
+    INC     := $(INC) $(shell pkg-config --cflags-only-I coreblas)
+    LIBEXT  := $(LIBEXT) $(shell pkg-config --libs coreblas)
     require := plasma
 endif
 
