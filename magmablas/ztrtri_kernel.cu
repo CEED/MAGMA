@@ -10,6 +10,9 @@
 
        @author Peng Du
        @author Tingxing Dong
+       
+       File named ztrtri_kernel.cu to avoid name conflict with src/ztrtri.o
+       in the library.
 */
 
 #include "common_magma.h"
