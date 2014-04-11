@@ -160,7 +160,7 @@ int main( int argc, char** argv)
             magmaDoubleComplex *hh_work;
             magma_int_t *iwork;
             magma_int_t nb, /*lwork,*/ liwork;
-            magma_int_t threads = magma_get_numthreads();
+            magma_int_t threads = magma_get_parallel_numthreads();
             #if defined(PRECISION_z) || defined(PRECISION_c)
                 double *rwork;
                 magma_int_t lrwork;

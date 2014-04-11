@@ -79,7 +79,7 @@ int main( int argc, char** argv)
 
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");
-    magma_int_t threads = magma_get_numthreads();
+    magma_int_t threads = magma_get_parallel_numthreads();
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
