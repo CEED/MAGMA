@@ -406,9 +406,10 @@ typedef enum {
     Magma_ELLD         = 422,
     Magma_ELLDD        = 423,
     Magma_CSRD         = 424,
-    Magma_CSRCSC       = 425,
-    Magma_CSRL         = 426,
-    Magma_CSRU         = 427
+    Magma_CSRCSCL      = 425,
+    Magma_CSRCSCU      = 426,
+    Magma_CSRL         = 427,
+    Magma_CSRU         = 428
 } magma_storage_t;
 
 
@@ -453,6 +454,14 @@ typedef enum {
     Magma_GENERAL      = 481,
     Magma_SYMMETRIC    = 482
 } magma_symmetry_t;
+
+typedef enum {
+    Magma_ORDERED      = 491,
+    Magma_DIAGFIRST    = 492,
+    Magma_UNITY        = 493,
+    Magma_VALUE        = 494
+} magma_diagorder_t;
+
 
 
 // When adding constants, remember to do these steps as appropriate:
