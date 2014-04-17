@@ -26,7 +26,7 @@
 #define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgesvd
+   -- Testing zgesvd (SVD with QR iteration)
 */
 int main( int argc, char** argv)
 {
@@ -34,6 +34,7 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
+    magmaDoubleComplex dummy[1];
     double *S1, *S2;
     #ifdef COMPLEX
     double *rwork;
@@ -80,14 +81,35 @@ int main( int argc, char** argv)
             
             M = opts.msize[itest];
             N = opts.nsize[itest];
+            min_mn = min(M, N);
             lda = M;
             ldu = M;
-            ldv = N;
+            if ( jobvt == MagmaAllVec ) {
+                ldv = N;
+            }
+            else {
+                ldv = min_mn;
+            }
             n2 = lda*N;
-            min_mn = min(M, N);
             nb = magma_get_zgesvd_nb(N);
+            
+            // query or use formula for workspace size 
             switch( opts.svd_work ) {
-                default:
+                case 0: {  // query for workspace size
+                    lwork = -1;
+                    magma_zgesvd( jobu, jobvt, M, N,
+                                  h_R, lda, S1, U, ldu, VT, ldv, dummy, lwork,
+                                  #ifdef COMPLEX
+                                  rwork,
+                                  #endif
+                                  &info );
+                    lwork = (int) MAGMA_Z_REAL( dummy[0] );
+                    break;
+                }
+                
+                // these are not tight bounds:
+                // if (m >> n), it may need only (2*N)*nb instead of (M+N)*nb.
+                // if (n >> m), it may need only (2*M)*nb instead of (M+N)*nb.
                 #ifdef COMPLEX
                 case 1: lwork = (M+N)*nb + 2*min_mn;                   break;  // minimum
                 case 2: lwork = (M+N)*nb + 2*min_mn +   min_mn*min_mn; break;  // optimal for some paths
@@ -97,18 +119,30 @@ int main( int argc, char** argv)
                 case 2: lwork = (M+N)*nb + 3*min_mn +   min_mn*min_mn; break;  // optimal for some paths
                 case 3: lwork = (M+N)*nb + 3*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
                 #endif
+                
+                default: {
+                    fprintf( stderr, "Error: unknown option svd_work %d\n", opts.svd_work );
+                    exit(1);
+                    break;
+                }
             }
             
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( VT,  magmaDoubleComplex, ldv*N );
-            TESTING_MALLOC_CPU( U,   magmaDoubleComplex, ldu*M );
-            TESTING_MALLOC_CPU( S1,  double, min_mn );
-            TESTING_MALLOC_CPU( S2,  double, min_mn );
+            TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_CPU( VT,    magmaDoubleComplex, ldv*N );
+            if ( jobu == MagmaAllVec ) {
+                TESTING_MALLOC_CPU( U, magmaDoubleComplex, ldu*M );
+            }
+            else {
+                TESTING_MALLOC_CPU( U, magmaDoubleComplex, ldu*min_mn );
+            }
+            TESTING_MALLOC_CPU( S1,    double, min_mn );
+            TESTING_MALLOC_CPU( S2,    double, min_mn );
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
+            
             #ifdef COMPLEX
             TESTING_MALLOC_CPU( rwork, double, 5*min_mn );
             #endif
-            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -142,14 +176,11 @@ int main( int argc, char** argv)
                           (Return 0 if true, 1/ULP if false.)
                    =================================================================== */
                 magma_int_t izero = 0;
-                magmaDoubleComplex *h_work_err;
-                magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
-                TESTING_MALLOC_CPU( h_work_err, magmaDoubleComplex, lwork_err );
                 
                 // get size and location of U and V^T depending on jobu and jobvt
                 // U2=NULL and VT2=NULL if they were not computed (e.g., jobu=N)
-                magma_int_t M2 = (jobu  == MagmaAllVec ? M : min_mn);
-                magma_int_t N2 = (jobvt == MagmaAllVec ? N : min_mn);
+                magma_int_t N_U  = (jobu  == MagmaAllVec ? M : min_mn);
+                magma_int_t M_VT = (jobvt == MagmaAllVec ? N : min_mn);
                 magmaDoubleComplex *U2  = NULL;
                 magmaDoubleComplex *VT2 = NULL;
                 if ( jobu == MagmaSomeVec || jobu == MagmaAllVec ) {
@@ -167,33 +198,46 @@ int main( int argc, char** argv)
                     ldv = lda;
                 }
                 
-                // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
-                #ifdef COMPLEX
+                // zbdt01 needs M+N
+                // zunt01 prefers N*(N+1) to check U; M*(M+1) to check V
+                magma_int_t lwork_err = M+N;
+                if ( U2 != NULL ) {
+                    lwork_err = max( lwork_err, N_U*(N_U+1) );
+                }
+                if ( VT2 != NULL ) {
+                    lwork_err = max( lwork_err, M_VT*(M_VT+1) );
+                }
+                magmaDoubleComplex *h_work_err;
+                TESTING_MALLOC_CPU( h_work_err, magmaDoubleComplex, lwork_err );
+                
+                // zbdt01 and zunt01 need max(M,N), depending
+                double *rwork_err;
+                TESTING_MALLOC_CPU( rwork_err, double, max(M,N) );                
+                
                 if ( U2 != NULL && VT2 != NULL ) {
+                    // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
                     lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
                                      U2, &ldu, S1, NULL, VT2, &ldv,
-                                     h_work_err, rwork, &result[0]);
+                                     h_work_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[0]);
                 }
                 if ( U2 != NULL ) {
-                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, rwork, &result[1]);
+                    lapackf77_zunt01("Columns", &M,  &N_U, U2,  &ldu, h_work_err, &lwork_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[1]);
                 }
                 if ( VT2 != NULL ) {
-                    lapackf77_zunt01(   "Rows", &N2, &N, VT2, &ldv, h_work_err, &lwork_err, rwork, &result[2]);
+                    lapackf77_zunt01("Rows",    &M_VT, &N, VT2, &ldv, h_work_err, &lwork_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[2]);
                 }
-                #else
-                if ( U2 != NULL && VT2 != NULL ) {
-                    lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
-                                      U2, &ldu, S1, NULL, VT2, &ldv,
-                                      h_work_err, &result[0]);
-                }
-                if ( U2 != NULL ) {
-                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, &result[1]);
-                }
-                if ( VT2 != NULL ) {
-                    // this step may be really slow for large N
-                    lapackf77_zunt01(   "Rows", &N2, &N, VT2, &ldv, h_work_err, &lwork_err, &result[2]);
-                }
-                #endif
                 
                 result[3] = 0.;
                 for(int j=0; j < min_mn-1; j++){
@@ -210,6 +254,7 @@ int main( int argc, char** argv)
                 result[2] *= eps;
                 
                 TESTING_FREE_CPU( h_work_err );
+                TESTING_FREE_CPU( rwork_err );
             }
             
             /* =====================================================================
