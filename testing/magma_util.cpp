@@ -122,12 +122,12 @@ const char *usage =
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
 "  --nthread x      Number of CPU threads, default 1.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
-"  --work  [123]    SVD workspace size, from min (1) to optimal (3), default 3.\n"
+"  --svd_work [0123] SVD workspace size, from min (1) to optimal (3), or query (0), default 0.\n"
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
-"  --panel_nthread xNumber of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
-"  --fraction_dcpu xPercentage of the workload to schedule on the cpu. Used in magma_amc algorithms only, default 0.\n"
+"  --panel_nthread x Number of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
+"  --fraction_dcpu x Percentage of the workload to schedule on the cpu. Used in magma_amc algorithms only, default 0.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
@@ -159,7 +159,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->niter    = 1;
     opts->nthread  = 1;
     opts->itype    = 1;
-    opts->svd_work = 3;
+    opts->svd_work = 0;
     opts->version  = 1;
     opts->fraction = 1.;
     opts->tolerance = 30.;
@@ -316,10 +316,10 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             magma_assert( opts->itype >= 1 && opts->itype <= 3,
                           "error: --itype %s is invalid; ensure itype in [1,2,3].\n", argv[i] );
         }
-        else if ( strcmp("--work",    argv[i]) == 0 && i+1 < argc ) {
+        else if ( strcmp("--svd_work", argv[i]) == 0 && i+1 < argc ) {
             opts->svd_work = atoi( argv[++i] );
-            magma_assert( opts->svd_work >= 1 && opts->svd_work <= 3,
-                          "error: --work %s is invalid; ensure work in [1,2,3].\n", argv[i] );
+            magma_assert( opts->svd_work >= 0 && opts->svd_work <= 3,
+                          "error: --svd_work %s is invalid; ensure svd_work in [0,1,2,3].\n", argv[i] );
         }
         else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             opts->version = atoi( argv[++i] );
