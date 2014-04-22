@@ -1,6 +1,7 @@
 /**
     ------------------------------------------------------------
     @defgroup magma_init   Initialization
+    @defgroup magma_util   Utilities
 
     ------------------------------------------------------------
     @defgroup solvers   Linear Systems

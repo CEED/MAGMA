@@ -738,6 +738,7 @@ INPUT                  = doxygen-modules.h \
 	../src/dbulge_aux.cpp             \
 	../src/dgeev.cpp                  \
 	../src/dgeev_m.cpp                \
+	../src/dgesdd.cpp                 \
 	../src/dgesvd.cpp                 \
 	../src/dlaex0.cpp                 \
 	../src/dlaex0_m.cpp               \
@@ -745,6 +746,8 @@ INPUT                  = doxygen-modules.h \
 	../src/dlaex1_m.cpp               \
 	../src/dlaex3.cpp                 \
 	../src/dlaex3_m.cpp               \
+	../src/dlaln2.cpp                 \
+	../src/dlaqtrsd.cpp               \
 	../src/dmove_eig.cpp              \
 	../src/dstedx.cpp                 \
 	../src/dstedx_m.cpp               \
@@ -755,13 +758,15 @@ INPUT                  = doxygen-modules.h \
 	../src/dsyevdx_2stage.cpp         \
 	../src/dsyevdx_2stage_m.cpp       \
 	../src/dsyevdx_gpu.cpp            \
-	../src/dsyevdx_m.cpp              \    
+	../src/dsyevdx_m.cpp              \
 	../src/dsygvd.cpp                 \
 	../src/dsygvd_m.cpp               \
 	../src/dsygvdx.cpp                \
 	../src/dsygvdx_2stage.cpp         \
 	../src/dsygvdx_2stage_m.cpp       \
 	../src/dsygvdx_m.cpp              \
+	../src/dtrevc3.cpp                \
+	../src/dtrevc3_mt.cpp             \
 	../src/lapack_dtrevc3.f           \
 	../src/lapack_ztrevc3.f           \
 	../src/zbulge_applyQ.cpp          \
@@ -804,8 +809,9 @@ INPUT                  = doxygen-modules.h \
 	../src/zgeqrf_ooc.cpp             \
 	../src/zgeqrs3_gpu.cpp            \
 	../src/zgeqrs_gpu.cpp             \
+	../src/zgesdd.cpp                 \
 	../src/zgessm_gpu.cpp             \
-	../src/zgesv.cpp                  \  
+	../src/zgesv.cpp                  \
 	../src/zgesv_gpu.cpp              \
 	../src/zgesvd.cpp                 \
 	../src/zgetf2_nopiv.cpp           \
@@ -866,6 +872,7 @@ INPUT                  = doxygen-modules.h \
 	../src/zlatrd.cpp                 \
 	../src/zlatrd2.cpp                \
 	../src/zlatrd_mgpu.cpp            \
+	../src/zlatrsd.cpp                \
 	../src/zlauum.cpp                 \
 	../src/zlauum_gpu.cpp             \
 	../src/zposv.cpp                  \
@@ -884,6 +891,8 @@ INPUT                  = doxygen-modules.h \
 	../src/zssssm_gpu.cpp             \
 	../src/zstedx.cpp                 \
 	../src/zstedx_m.cpp               \
+	../src/ztrevc3.cpp                \
+	../src/ztrevc3_mt.cpp             \
 	../src/ztrsm_m.cpp                \
 	../src/ztrtri.cpp                 \
 	../src/ztrtri_gpu.cpp             \
