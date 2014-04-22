@@ -13,6 +13,10 @@
 
 #define PRECISION_d
 
+// Version 1 - LAPACK
+// Version 2 - MAGMA
+#define VERSION 2
+
 /**
     Purpose
     -------
@@ -68,12 +72,10 @@
     A       DOUBLE PRECISION array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit,
-            if JOBZ = 'O',  A is overwritten with the first N columns
-                            of U (the left singular vectors, stored
-                            columnwise) if M >= N;
-                            A is overwritten with the first M rows
-                            of V**T (the right singular vectors, stored
-                            rowwise) otherwise.
+            if JOBZ = 'O',  if M >= N, A is overwritten with the first N columns
+                            of U (the left singular vectors, stored columnwise);
+                            otherwise, A is overwritten with the first M rows
+                            of V**T (the right singular vectors, stored owwise).
             if JOBZ != 'O', the contents of A are destroyed.
 
     @param[in]
@@ -81,7 +83,7 @@
             The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
-    S       DOUBLE PRECISION array, dimension (min(M,N))
+    s       DOUBLE PRECISION array, dimension (min(M,N))
             The singular values of A, sorted so that S(i) >= S(i + 1).
 
     @param[out]
@@ -119,14 +121,26 @@
 
     @param[in]
     lwork   INTEGER
-            The dimension of the array WORK. LWORK >= 1.
+            The dimension of the array WORK.
+            Let x = max(M,N) and y = min(M,N). The optimal block size
+            nb can be obtained through magma_get_dgesvd_nb(N).
+            The threshold for x >> y currently is x >= y*11/6.
+            *Required size different than in LAPACK.* In most cases, these
+            sizes should give optimal performance for both MAGMA and LAPACK.
       -     If JOBZ = 'N',
-                LWORK >= 3*min(M,N) + max(max(M,N), 7*min(M,N)).
+                if x >> y, LWORK >=       3*y + max( (2*y)*nb, 7*y );
+                otherwise, LWORK >=       3*y + max( (x+y)*nb, 7*y ).
       -     If JOBZ = 'O',
-                LWORK >= 3*min(M,N) + max(max(M,N), 5*min(M,N)*min(M,N) + 4*min(M,N)).
-      -     If JOBZ = 'S' or 'A',
-                LWORK >= 3*min(M,N) + max(max(M,N), 4*min(M,N)*min(M,N) + 4*min(M,N)).
-            For good performance, LWORK should generally be larger.
+                if x >> y, LWORK >= y*y + 3*y + max( (2*y)*nb, 4*y*y + 4*y ),
+                   prefer  LWORK >= y*y + 3*y + max( (2*y)*nb, 4*y*y + 4*y, y*y + y*nb );
+                otherwise, LWORK >=       3*y + max( (x+y)*nb, 4*y*y + 4*y ).
+      -     If JOBZ = 'S',
+                if x >> y, LWORK >= y*y + 3*y + max( (2*y)*nb, 3*y*y + 4*y );
+                otherwise, LWORK >=       3*y + max( (x+y)*nb, 3*y*y + 4*y ).
+      -     If JOBZ = 'A',
+                if x >> y, LWORK >= y*y + max( 3*y + max( (2*y)*nb, 3*y*y + 4*y ), y + x    ),
+                   prefer  LWORK >= y*y + max( 3*y + max( (2*y)*nb, 3*y*y + 4*y ), y + x*nb );
+                otherwise, LWORK >=            3*y + max( (x+y)*nb, 3*y*y + 4*y ).
     \n
             If LWORK = -1 but other input arguments are legal, WORK[1]
             returns the optimal LWORK.
@@ -146,7 +160,7 @@
     Ming Gu and Huan Ren, Computer Science Division, University of
     California at Berkeley, USA
 
-    @ingroup magma_d
+    @ingroup magma_dgesvd_driver
     ********************************************************************/
 magma_int_t magma_dgesdd(
     magma_vec_t jobz, magma_int_t m, magma_int_t n,
@@ -158,56 +172,44 @@ magma_int_t magma_dgesdd(
     magma_int_t *iwork, magma_int_t *info)
 {
 #define  A(i_,j_) (A  + (i_) + (j_)*lda)
-#define  U(i_,j_) (U  + (i_) + (j_)*ldu)
-#define VT(i_,j_) (VT + (i_) + (j_)*ldvt)
 
     /* Constants */
     const double c_zero = MAGMA_D_ZERO;
     const double c_one  = MAGMA_D_ONE;
     const magma_int_t izero = 0;
     const magma_int_t ione  = 1;
-    
+
     /* Local variables */
-    magma_int_t i__1, i__2;
-    magma_int_t i, ie, il, ir, iu, blk;
+    magma_int_t lnwork, i__1;
+    magma_int_t i, ie, il=0, ir=0, iu, blk, nb;
     double dum[1], eps;
     magma_int_t ivt, iscl;
     double anrm;
     magma_int_t idum[1], ierr, itau;
-
-
-    magma_int_t chunk, minmn, wrkbl, itaup, itauq, mnthr;
-    magma_int_t wantqa;  /* logical */
+    magma_int_t chunk=0, wrkbl, itaup, itauq, mnthr=0;
     magma_int_t nwork;
-    magma_int_t wantqn, wantqo, wantqs;  /* logical */
-
-
-    magma_int_t bdspac;
-
-
+    magma_int_t bdspac=0;
     double bignum;
-
     magma_int_t ldwrkl, ldwrkr, minwrk, ldwrku, maxwrk, ldwkvt;
     double smlnum;
-    magma_int_t wantqas, lquery;  /* logical */
 
     /* Parameter adjustments */
     A  -= 1 + lda;
-    U  -= 1 + ldu;
-    VT -= 1 + ldvt;
-    --s;
     --work;
-    --iwork;
 
     /* Function Body */
     *info = 0;
-    minmn = min(m,n);
-    wantqa  = (jobz == MagmaAllVec);
-    wantqs  = (jobz == MagmaSomeVec);
-    wantqas = (wantqa || wantqs);
-    wantqo  = (jobz == MagmaOverwriteVec);
-    wantqn  = (jobz == MagmaNoVec);
-    lquery  = (lwork == -1);
+    const magma_int_t m_1 = m - 1;
+    const magma_int_t n_1 = n - 1;
+    const magma_int_t minmn   = min(m,n);
+    const magma_int_t wantqa  = (jobz == MagmaAllVec);
+    const magma_int_t wantqs  = (jobz == MagmaSomeVec);
+    const magma_int_t wantqas = (wantqa || wantqs);
+    const magma_int_t wantqo  = (jobz == MagmaOverwriteVec);
+    const magma_int_t wantqn  = (jobz == MagmaNoVec);
+    const magma_int_t lquery  = (lwork == -1);
+    minwrk = 1;
+    maxwrk = 1;
 
     /* Test the input arguments */
     if (! (wantqa || wantqs || wantqo || wantqn)) {
@@ -229,6 +231,8 @@ magma_int_t magma_dgesdd(
                       || (wantqo && m >= n && ldvt < n)) {
         *info = -10;
     }
+    
+    nb = magma_get_dgesvd_nb(n);
 
     /* Compute workspace */
     /* (Note: Comments in the code beginning "Workspace:" describe the */
@@ -237,84 +241,83 @@ magma_int_t magma_dgesdd(
     /* NB refers to the optimal block size for the immediately */
     /* following subroutine, as returned by ILAENV.) */
     if (*info == 0) {
-        minwrk = 1;
-        maxwrk = 1;
         if (m >= n && minmn > 0) {
             /* Compute space needed for DBDSDC */
             mnthr = (magma_int_t) (minmn*11. / 6.);
             if (wantqn) {
-                bdspac = 7*n;
+                bdspac = 7*n;          // dbdsdc claims only 4*n
             }
             else {
-                bdspac = 3*n*n + 4*n;
+                bdspac = 3*n*n + 4*n;  // consistent with dbdsdc
             }
             if (m >= mnthr) {
                 if (wantqn) {
                     /* Path 1 (M much larger than N, JOBZ='N') */
-                    wrkbl =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl, 3*n + 2*n * magma_ilaenv( 1, "DGEBRD", " ",   n, n, -1, -1 ));
-                    maxwrk = max(wrkbl, bdspac + n);
-                    minwrk = bdspac + n;
+                    wrkbl  =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl, 3*n + 2*n * nb);
+                    maxwrk = max(wrkbl,   n + bdspac);
+                    minwrk = maxwrk;  // lapack was: bdspac + n
                 }
                 else if (wantqo) {
                     /* Path 2 (M much larger than N, JOBZ='O') */
-                    wrkbl =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   n +   n * magma_ilaenv( 1, "DORGQR", " ",   m, n,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + 2*n * magma_ilaenv( 1, "DGEBRD", " ",   n, n, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*n);
-                    maxwrk = wrkbl + 2*n*n;
-                    minwrk = bdspac + 2*n*n + 3*n;
+                    wrkbl  =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   n +   n * magma_ilaenv( 1, "DORGQR", " ",   m, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + 2*n * nb);
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + n*n + bdspac);
+                    maxwrk = wrkbl + n*n;
+                    minwrk = maxwrk;  // lapack was: bdspac + 2*n*n + 3*n
                 }
                 else if (wantqs) {
                     /* Path 3 (M much larger than N, JOBZ='S') */
-                    wrkbl =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   n +   n * magma_ilaenv( 1, "DORGQR", " ",   m, n,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + 2*n * magma_ilaenv( 1, "DGEBRD", " ",   n, n, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*n);
+                    wrkbl  =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   n +   n * magma_ilaenv( 1, "DORGQR", " ",   m, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + 2*n * nb);
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + bdspac);
                     maxwrk = wrkbl + n*n;
-                    minwrk = bdspac + n*n + 3*n;
+                    minwrk = maxwrk;  // lapack was: bdspac + n*n + 3*n
                 }
                 else if (wantqa) {
                     /* Path 4 (M much larger than N, JOBZ='A') */
-                    wrkbl =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   n +   m * magma_ilaenv( 1, "DORGQR", " ",   m, m,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + 2*n * magma_ilaenv( 1, "DGEBRD", " ",   n, n, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*n);
+                    wrkbl  =              n +   n * magma_ilaenv( 1, "DGEQRF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   n +   m);  // min for dorgqr; preferred is below
+                    wrkbl  = max(wrkbl, 3*n + 2*n * nb);
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "QLN", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n +   n * magma_ilaenv( 1, "DORMBR", "PRT", n, n,  n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + bdspac);
+                    minwrk = wrkbl + n*n;  // lapack was: bdspac + n*n + 2*n + m
+                    // include preferred size for dorgqr
+                    wrkbl  = max(wrkbl,   n +   m * magma_ilaenv( 1, "DORGQR", " ",   m, m,  n, -1 ));
                     maxwrk = wrkbl + n*n;
-                    minwrk = bdspac + n*n + 2*n + m;  /* was 3*n in clapack 3.2.1 */
                 }
             }
             else {
                 /* Path 5 (M at least N, but not much larger) */
-                wrkbl = 3*n + (m + n) * magma_ilaenv( 1, "DGEBRD", " ",   m, n, -1, -1);
+                wrkbl  = 3*n + (m + n) * nb;
                 if (wantqn) {
-                    maxwrk = max(wrkbl, bdspac + 3*n);
-                    minwrk = 3*n + max(m,bdspac);
+                    maxwrk = max(wrkbl, 3*n + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*n + max(m, bdspac)
                 }
                 else if (wantqo) {
-                    wrkbl = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "QLN", m, n, n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*n);
-                    maxwrk = wrkbl + m*n;
-                    minwrk = 3*n + max(m, n*n + bdspac);
+                    wrkbl  = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "QLN", m, n, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
+                    maxwrk = max(wrkbl, 3*n + m*n + bdspac);
+                    minwrk = max(wrkbl, 3*n + n*n + bdspac);  // lapack was: 3*n + max(m, n*n + bdspac)
                 }
                 else if (wantqs) {
-                    wrkbl = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "QLN", m, n, n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
-                    maxwrk = max(wrkbl, bdspac + 3*n);
-                    minwrk = 3*n + max(m,bdspac);
+                    wrkbl  = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "QLN", m, n, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
+                    maxwrk = max(wrkbl, 3*n + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*n + max(m, bdspac)
                 }
                 else if (wantqa) {
-                    wrkbl = max(wrkbl, 3*n + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
-                    wrkbl = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
-                    maxwrk = max(maxwrk, bdspac + 3*n);
-                    minwrk = 3*n + max(m,bdspac);
+                    wrkbl  = max(wrkbl, 3*n + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*n + n * magma_ilaenv( 1, "DORMBR", "PRT", n, n, n, -1 ));
+                    maxwrk = max(wrkbl, 3*n + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*n + max(m, bdspac)
                 }
             }
         }
@@ -330,70 +333,71 @@ magma_int_t magma_dgesdd(
             if (n >= mnthr) {
                 if (wantqn) {
                     /* Path 1t (N much larger than M, JOBZ='N') */
-                    wrkbl =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl, 3*m + 2*m * magma_ilaenv( 1, "DGEBRD", " ",   m, m, -1, -1 ));
-                    maxwrk = max(wrkbl, bdspac + m);
-                    minwrk = bdspac + m;
+                    wrkbl  =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl, 3*m + 2*m * nb);
+                    maxwrk = max(wrkbl,  m + bdspac);
+                    minwrk = maxwrk;  // lapack was: bdspac + m
                 }
                 else if (wantqo) {
                     /* Path 2t (N much larger than M, JOBZ='O') */
-                    wrkbl =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   m +   m * magma_ilaenv( 1, "DORGLQ", " ",   m, n,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m + 2*m * magma_ilaenv( 1, "DGEBRD", " ",   m, m, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*m);
-                    maxwrk = wrkbl + 2*m*m;
-                    minwrk = bdspac + 2*m*m + 3*m;
+                    wrkbl  =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   m +   m * magma_ilaenv( 1, "DORGLQ", " ",   m, n,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + 2*m * nb);
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + m*m + bdspac);
+                    maxwrk = wrkbl + m*m;
+                    minwrk = maxwrk;  // lapack was: bdspac + 2*m*m + 3*m
                 }
                 else if (wantqs) {
                     /* Path 3t (N much larger than M, JOBZ='S') */
-                    wrkbl =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   m +   m * magma_ilaenv( 1, "DORGLQ", " ",   m, n,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m + 2*m * magma_ilaenv( 1, "DGEBRD", " ",   m, m, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*m);
+                    wrkbl  =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   m +   m * magma_ilaenv( 1, "DORGLQ", " ",   m, n,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + 2*m * nb);
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + bdspac);
                     maxwrk = wrkbl + m*m;
-                    minwrk = bdspac + m*m + 3*m;
+                    minwrk = maxwrk;  // lapack was: bdspac + m*m + 3*m
                 }
                 else if (wantqa) {
                     /* Path 4t (N much larger than M, JOBZ='A') */
-                    wrkbl =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
-                    wrkbl = max(wrkbl,   m +   n * magma_ilaenv( 1, "DORGLQ", " ",   n, n,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m + 2*m * magma_ilaenv( 1, "DGEBRD", " ",   m, m, -1, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*m);
+                    wrkbl  =              m +   m * magma_ilaenv( 1, "DGELQF", " ",   m, n, -1, -1 );
+                    wrkbl  = max(wrkbl,   m +   n);  // min for dorgqr; preferred is below
+                    wrkbl  = max(wrkbl, 3*m + 2*m * nb);
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "QLN", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m +   m * magma_ilaenv( 1, "DORMBR", "PRT", m, m,  m, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + bdspac);
+                    minwrk = wrkbl + m*m;  // corrected lapack was: bdspac + m*m + 2*m + n
+                    // include preferred size for dorgqr
+                    wrkbl  = max(wrkbl,   m +   n * magma_ilaenv( 1, "DORGLQ", " ",   n, n,  m, -1 ));
                     maxwrk = wrkbl + m*m;
-                    minwrk = bdspac + m*m + 3*m;
                 }
             }
             else {
                 /* Path 5t (N greater than M, but not much larger) */
-                wrkbl = 3*m + (m + n) * magma_ilaenv( 1, "DGEBRD", " ",   m, n, -1, -1);
+                wrkbl  = 3*m + (m + n) * nb;
                 if (wantqn) {
-                    maxwrk = max(wrkbl, bdspac + 3*m);
-                    minwrk = 3*m + max(n,bdspac);
+                    maxwrk = max(wrkbl, 3*m + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*m + max(n, bdspac)
                 }
                 else if (wantqo) {
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", m, n, m, -1 ));
-                    wrkbl = max(wrkbl, bdspac + 3*m);
-                    maxwrk = wrkbl + m*n;
-                    minwrk = 3*m + max(n, m*m + bdspac);
+                    wrkbl  = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", m, n, m, -1 ));
+                    maxwrk = max(wrkbl, 3*m + m*n + bdspac);
+                    minwrk = max(wrkbl, 3*m + m*m + bdspac);  // lapack was: 3*m + max(n, m*m + bdspac)
                 }
                 else if (wantqs) {
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", m, n, m, -1 ));
-                    maxwrk = max(wrkbl, bdspac + 3*m);
-                    minwrk = 3*m + max(n,bdspac);
+                    wrkbl  = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", m, n, m, -1 ));
+                    maxwrk = max(wrkbl, 3*m + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*m + max(n, bdspac)
                 }
                 else if (wantqa) {
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
-                    wrkbl = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", n, n, m, -1 ));
-                    maxwrk = max(wrkbl, bdspac + 3*m);
-                    minwrk = 3*m + max(n,bdspac);
+                    wrkbl  = max(wrkbl, 3*m + n * magma_ilaenv( 1, "DORMBR", "QLN", m, m, n, -1 ));
+                    wrkbl  = max(wrkbl, 3*m + m * magma_ilaenv( 1, "DORMBR", "PRT", n, n, m, -1 ));
+                    maxwrk = max(wrkbl, 3*m + bdspac);
+                    minwrk = maxwrk;  // lapack was: 3*m + max(n, bdspac)
                 }
             }
         }
@@ -436,9 +440,9 @@ magma_int_t magma_dgesdd(
     }
 
     if (m >= n) {
-        /* A has at least as many rows as columns. If A has sufficiently */
-        /* more rows than columns, first reduce using the QR */
-        /* decomposition (if sufficient workspace available) */
+        /* A has at least as many rows as columns. */
+        /* If A has sufficiently more rows than columns, first reduce using */
+        /* the QR decomposition (if sufficient workspace available) */
         if (m >= mnthr) {
             if (wantqn) {
                 /* Path 1 (M much larger than N, JOBZ='N') */
@@ -448,96 +452,104 @@ magma_int_t magma_dgesdd(
 
                 /* Compute A=Q*R */
                 /* (Workspace: need 2*N, prefer N + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Zero out below R */
-                i__1 = n - 1;
-                lapackf77_dlaset("L", &i__1, &i__1, &c_zero, &c_zero, &A[lda + 2], &lda);
-                ie = 1;
-                itauq = ie + n;
+                lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[lda + 2], &lda);
+                ie    = 1;
+                itauq = ie    + n;
                 itaup = itauq + n;
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in A */
-                /* (Workspace: need 4*N, prefer 3*N + 2*N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgebrd(&n, &n, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
+                /* (LAPACK Workspace: need 4*N, prefer 3*N + 2*N*NB) */
+                /* (MAGMA  Workspace: need 3*N + 2*N*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&n, &n, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(n, n, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
                 nwork = ie + n;
 
                 /* Perform bidiagonal SVD, computing singular values only */
                 /* (Workspace: need N + BDSPAC) */
-                lapackf77_dbdsdc("U", "N", &n, &s[1], &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], &iwork[1], info);
+                lapackf77_dbdsdc("U", "N", &n, s, &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], iwork, info);
             }
             else if (wantqo) {
                 /* Path 2 (M much larger than N, JOBZ = 'O') */
-                /* N left singular vectors to be overwritten on A and */
+                /* N left  singular vectors to be overwritten on A and */
                 /* N right singular vectors to be computed in VT */
                 ir = 1;
 
-                /* WORK[IR] is LDWRKR by N */
-                if (lwork >= lda*n + n*n + 3*n + bdspac) {
-                    ldwrkr = lda;
-                }
-                else {
-                    ldwrkr = (lwork - n*n - 3*n - bdspac) / n;
-                }
+                /* WORK[IR] is LDWRKR by N, at least N*N, up to M*N */
+                //if (lwork >= lda*n + 3*n + max( 2*n*nb, n*n + bdspac )) {
+                //    ldwrkr = lda;
+                //}
+                //else {
+                    ldwrkr = min( m, (lwork - (3*n + max( 2*n*nb, n*n + bdspac ))) / n );
+                //}
                 itau = ir + ldwrkr*n;
                 nwork = itau + n;
 
                 /* Compute A=Q*R */
-                /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
+                /* (Workspace: need [N*N] + 2*N, prefer N*N + N + N*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Copy R to WORK[IR], zeroing out below it */
                 lapackf77_dlacpy("U", &n, &n, A(1,1), &lda, &work[ir], &ldwrkr);
-                i__1 = n - 1;
-                lapackf77_dlaset("L", &i__1, &i__1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
+                lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
 
                 /* Generate Q in A */
-                /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dorgqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
-                ie = itau;
-                itauq = ie + n;
+                /* (Workspace: need [N*N] + 2*N, prefer N*N + N + N*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorgqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                ie    = itau;
+                itauq = ie    + n;
                 itaup = itauq + n;
                 nwork = itaup + n;
-
-                /* Bidiagonalize R in VT, copying result to WORK[IR] */
-                /* (Workspace: need N*N + 4*N, prefer N*N + 3*N + 2*N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgebrd(&n, &n, &work[ir], &ldwrkr, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
+                
+                /* Bidiagonalize R in WORK[IR] */  /* was: R in VT, copying result to ... */
+                /* (LAPACK Workspace: need N*N + 4*N, prefer N*N + 3*N + 2*N*NB) */
+                /* (MAGMA  Workspace: need N*N + 3*N + 2*N*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&n, &n, &work[ir], &ldwrkr, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(n, n, &work[ir], ldwrkr, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
                 /* WORK[IU] is N by N */
                 iu = nwork;
                 nwork = iu + n*n;
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in WORK[IU] and computing right */
-                /* singular vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + N*N + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], &work[iu], &n, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in WORK[IU] and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + N*N + BDSPAC + [N*N + 2*N]) */
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], &work[iu], &n, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite WORK[IU] by left singular vectors of R */
-                /* and VT by right singular vectors of R */
-                /* (Workspace: need 2*N*N + 3*N, prefer 2*N*N + 2*N + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, &work[ir], &ldwrkr, &work[itauq], &work[iu], &n, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &n, &n, &n, &work[ir], &ldwrkr, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__1, &ierr);
+                /* Overwrite WORK[IU] by left  singular vectors of R, and */
+                /* overwrite VT       by right singular vectors of R */
+                /* (Workspace: need 2*N*N + 3*N + [N], prefer 2*N*N + 2*N + N*NB + [N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, &work[ir], &ldwrkr, &work[itauq], &work[iu], &n, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &n, &work[ir], &ldwrkr, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
 
-                /* Multiply Q in A by left singular vectors of R in */
-                /* WORK[IU], storing result in WORK[IR] and copying to A */
-                /* (Workspace: need 2*N*N, prefer N*N + M*N) */
-                for (i = 1; (ldwrkr < 0 ? i >= m : i <= m); i += ldwrkr) {
-                    chunk = min(m - i + 1, ldwrkr);
-                    blasf77_dgemm("N", "N", &chunk, &n, &n, &c_one, &A[i + lda], &lda, &work[iu], &n, &c_zero, &work[ir], &ldwrkr);
-                    lapackf77_dlacpy("F", &chunk, &n, &work[ir], &ldwrkr, &A[i + lda], &lda);
+                /* Multiply Q in A by left singular vectors of R in WORK[IU], */
+                /* storing result in WORK[IR] and copying to A */
+                /* (Workspace: need 2*N*N + [3*N], prefer M*N + N*N + [3*N]) */
+                for (i = 1; i <= m; i += ldwrkr) {
+                    blk = min(m - i + 1, ldwrkr);
+                    blasf77_dgemm("N", "N", &blk, &n, &n, &c_one, &A[i + lda], &lda, &work[iu], &n, &c_zero, &work[ir], &ldwrkr);
+                    lapackf77_dlacpy("F", &blk, &n, &work[ir], &ldwrkr, &A[i + lda], &lda);
                 }
             }
             else if (wantqs) {
                 /* Path 3 (M much larger than N, JOBZ='S') */
-                /* N left singular vectors to be computed in U and */
+                /* N left  singular vectors to be computed in U and */
                 /* N right singular vectors to be computed in VT */
                 ir = 1;
 
@@ -548,52 +560,54 @@ magma_int_t magma_dgesdd(
 
                 /* Compute A=Q*R */
                 /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Copy R to WORK[IR], zeroing out below it */
                 lapackf77_dlacpy("U", &n, &n, A(1,1), &lda, &work[ir], &ldwrkr);
-                i__1 = n - 1;
-                lapackf77_dlaset("L", &i__1, &i__1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
+                lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero, &work[ir + 1], &ldwrkr);
 
                 /* Generate Q in A */
                 /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dorgqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
-                ie = itau;
-                itauq = ie + n;
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorgqr(&m, &n, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                ie    = itau;
+                itauq = ie    + n;
                 itaup = itauq + n;
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in WORK[IR] */
-                /* (Workspace: need N*N + 4*N, prefer N*N + 3*N + 2*N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgebrd(&n, &n, &work[ir], &ldwrkr, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+                /* (LAPACK Workspace: need N*N + 4*N, prefer N*N + 3*N + 2*N*NB) */
+                /* (MAGMA  Workspace: need N*N + 3*N + 2*N*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&n, &n, &work[ir], &ldwrkr, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(n, n, &work[ir], ldwrkr, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + BDSPAC + [N*N + 2*N]) */
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite U by left singular vectors of R and VT */
-                /* by right singular vectors of R */
-                /* (Workspace: need N*N + 3*N, prefer N*N + 2*N + N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, &work[ir], &ldwrkr, &work[itauq], U(1,1), &ldu, &work[nwork], &i__2, &ierr);
+                /* Overwrite U  by left  singular vectors of R, and */
+                /* overwrite VT by right singular vectors of R */
+                /* (Workspace: need N*N + 3*N + [N], prefer N*N + 2*N + N*NB + [N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, &work[ir], &ldwrkr, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &n, &work[ir], &ldwrkr, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
 
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("P", "R", "T", &n, &n, &n, &work[ir], &ldwrkr, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__2, &ierr);
-
-                /* Multiply Q in A by left singular vectors of R in */
-                /* WORK[IR], storing result in U */
+                /* Multiply Q in A by left singular vectors of R in WORK[IR], */
+                /* storing result in U */
                 /* (Workspace: need N*N) */
-                lapackf77_dlacpy("F", &n, &n, U(1,1), &ldu, &work[ir], &ldwrkr);
-                blasf77_dgemm("N", "N", &m, &n, &n, &c_one, A(1,1), &lda, &work[ir], &ldwrkr, &c_zero, U(1,1), &ldu);
+                lapackf77_dlacpy("F", &n, &n, U, &ldu, &work[ir], &ldwrkr);
+                blasf77_dgemm("N", "N", &m, &n, &n, &c_one, A(1,1), &lda, &work[ir], &ldwrkr, &c_zero, U, &ldu);
             }
             else if (wantqa) {
                 /* Path 4 (M much larger than N, JOBZ='A') */
-                /* M left singular vectors to be computed in U and */
+                /* M left  singular vectors to be computed in U and */
                 /* N right singular vectors to be computed in VT */
                 iu = 1;
 
@@ -603,70 +617,83 @@ magma_int_t magma_dgesdd(
                 nwork = itau + n;
 
                 /* Compute A=Q*R, copying result to U */
-                /* (Workspace: need N*N + N + M, prefer N*N + N + M*NB);  was N*N + 2*N, prefer N*N + N + N*NB in clapack 3.2.1 */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
-                lapackf77_dlacpy("L", &m, &n, A(1,1), &lda, U(1,1), &ldu);
+                /* (was:       need N*N + N + M, prefer N*N + N + M*NB in lapack 3.4.2; correct in clapack 3.2.1) */
+                /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgeqrf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                lapackf77_dlacpy("L", &m, &n, A(1,1), &lda, U, &ldu);
 
                 /* Generate Q in U */
-                /* (Workspace: need N*N + N + M, prefer N*N + N + M*NB);  was N*N + 2*N, prefer N*N + N + N*NB in clapack 3.2.1 */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dorgqr(&m, &m, &n, U(1,1), &ldu, &work[itau], &work[nwork], &i__2, &ierr);
+                /* (Workspace: need [N*N] + N + M, prefer [N*N] + N + M*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorgqr(&m, &m, &n, U, &ldu, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Produce R in A, zeroing out other entries */
-                i__1 = n - 1;
-                lapackf77_dlaset("L", &i__1, &i__1, &c_zero, &c_zero, &A[lda + 2], &lda);
-                ie = itau;
-                itauq = ie + n;
+                lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[lda + 2], &lda);
+                ie    = itau;
+                itauq = ie    + n;
                 itaup = itauq + n;
                 nwork = itaup + n;
 
                 /* Bidiagonalize R in A */
-                /* (Workspace: need N*N + 4*N, prefer N*N + 3*N + 2*N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgebrd(&n, &n, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+                /* (LAPACK Workspace: need [N*N] + 4*N, prefer [N*N] + 3*N + 2*N*NB) */
+                /* (MAGMA  Workspace: need [N*N] + 3*N + 2*N*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&n, &n, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(n, n, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in WORK[IU] and computing right */
-                /* singular vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + N*N + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], &work[iu], &n, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in WORK[IU] and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + N*N + BDSPAC + [2*N]) */
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], &work[iu], &n, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite WORK[IU] by left singular vectors of R and VT */
-                /* by right singular vectors of R */
-                /* (Workspace: need N*N + 3*N, prefer N*N + 2*N + N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, A(1,1), &lda, &work[itauq], &work[iu], &ldwrku, &work[nwork], &i__2, &ierr);
-                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__2, &ierr);
+                /* Overwrite WORK[IU] by left  singular vectors of R, and */
+                /* overwrite VT       by right singular vectors of R */
+                /* (Workspace: need N*N + 3*N + [N], prefer N*N + 2*N + N*NB + [N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &n, &n, &n, A(1,1), &lda, &work[itauq], &work[iu], &ldwrku, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
 
-                /* Multiply Q in U by left singular vectors of R in */
-                /* WORK[IU], storing result in A */
+                /* Multiply Q in U by left singular vectors of R in WORK[IU], */
+                /* storing result in A */
                 /* (Workspace: need N*N) */
-                blasf77_dgemm("N", "N", &m, &n, &n, &c_one, U(1,1), &ldu, &work[iu], &ldwrku, &c_zero, A(1,1), &lda);
+                blasf77_dgemm("N", "N", &m, &n, &n, &c_one, U, &ldu, &work[iu], &ldwrku, &c_zero, A(1,1), &lda);
 
                 /* Copy left singular vectors of A from A to U */
-                lapackf77_dlacpy("F", &m, &n, A(1,1), &lda, U(1,1), &ldu);
+                lapackf77_dlacpy("F", &m, &n, A(1,1), &lda, U, &ldu);
             }
         }
         else {
             /* M < MNTHR */
             /* Path 5 (M at least N, but not much larger) */
             /* Reduce to bidiagonal form without QR decomposition */
-            ie = 1;
-            itauq = ie + n;
+            ie    = 1;
+            itauq = ie    + n;
             itaup = itauq + n;
             nwork = itaup + n;
 
             /* Bidiagonalize A */
-            /* (Workspace: need 3*N + M, prefer 3*N + (M + N)*NB) */
-            i__2 = lwork - nwork + 1;
-            lapackf77_dgebrd(&m, &n, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+            /* (LAPACK Workspace: need 3*N + M, prefer 3*N + (M + N)*NB) */
+            /* (MAGMA  Workspace: need 3*N + (M + N)*NB) */
+            lnwork = lwork - nwork + 1;
+            #if VERSION == 1
+            lapackf77_dgebrd(&m, &n, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+            #else
+            magma_dgebrd(m, n, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+            #endif
+            
             if (wantqn) {
-                /* Perform bidiagonal SVD, only computing singular values */
-                /* (Workspace: need N + BDSPAC) */
-                lapackf77_dbdsdc("U", "N", &n, &s[1], &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5n (M >= N, JOBZ='N') */
+                /* Perform bidiagonal SVD, computing singular values only */
+                /* (Workspace: need N + BDSPAC + [2*N]) */
+                lapackf77_dbdsdc("U", "N", &n, s, &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], iwork, info);
             }
             else if (wantqo) {
+                /* Path 5o (M >= N, JOBZ='O') */
                 iu = nwork;
                 if (lwork >= m*n + 3*n + bdspac) {
                     /* WORK[ IU ] is M by N */
@@ -683,87 +710,93 @@ magma_int_t magma_dgesdd(
                     ir = nwork;
                     ldwrkr = (lwork - n*n - 3*n) / n;
                 }
-                nwork = iu + ldwrku*n;
+                nwork = iu + ldwrku*n;  // todo redundant?
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in WORK[IU] and computing right */
-                /* singular vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + N*N + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], &work[iu], &ldwrku, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in WORK[IU] and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + N*N + BDSPAC + [2*N]) */
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], &work[iu], &ldwrku, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
                 /* Overwrite VT by right singular vectors of A */
-                /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__2, &ierr);
+                /* (Workspace: need N*N + 2*N + [2*N], prefer N*N + N + N*NB + [2*N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
 
+                /* TODO should be m*n + 4*n + n*nb, instead of bdspac? */
+                /* Affects n = 1, ..., 9 for nb=32. */
                 if (lwork >= m*n + 3*n + bdspac) {
                     /* Overwrite WORK[IU] by left singular vectors of A */
-                    /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                    i__2 = lwork - nwork + 1;
-                    lapackf77_dormbr("Q", "L", "N", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[iu], &ldwrku, &work[nwork], &i__2, &ierr);
-
+                    /* (was:       need N*N + 2*N + [2*N], prefer N*N + N + N*NB + [2*N]) */
+                    /* (Workspace: need M*N + 2*N + [2*N], prefer M*N + N + N*NB + [2*N]) */
+                    lnwork = lwork - nwork + 1;
+                    lapackf77_dormbr("Q", "L", "N", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[iu], &ldwrku, &work[nwork], &lnwork, &ierr);
+                
                     /* Copy left singular vectors of A from WORK[IU] to A */
                     lapackf77_dlacpy("F", &m, &n, &work[iu], &ldwrku, A(1,1), &lda);
                 }
                 else {
                     /* Generate Q in A */
-                    /* (Workspace: need N*N + 2*N, prefer N*N + N + N*NB) */
-                    i__2 = lwork - nwork + 1;
-                    lapackf77_dorgbr("Q", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[nwork], &i__2, &ierr);
+                    /* (Workspace: need N*N + 2*N + [2*N], prefer N*N + N + N*NB + [2*N]) */
+                    lnwork = lwork - nwork + 1;
+                    lapackf77_dorgbr("Q", &m, &n, &n, A(1,1), &lda, &work[itauq], &work[nwork], &lnwork, &ierr);
 
                     /* Multiply Q in A by left singular vectors of */
                     /* bidiagonal matrix in WORK[IU], storing result in */
                     /* WORK[IR] and copying to A */
-                    /* (Workspace: need 2*N*N, prefer N*N + M*N) */
-                    for (i = 1; (ldwrkr < 0 ? i >= m : i <= m); i += ldwrkr) {
-                        chunk = min(m - i + 1, ldwrkr);
-                        blasf77_dgemm("N", "N", &chunk, &n, &n, &c_one, &A[i + lda], &lda, &work[iu], &ldwrku, &c_zero, &work[ir], &ldwrkr);
-                        lapackf77_dlacpy("F", &chunk, &n, &work[ir], &ldwrkr, &A[i + lda], &lda);
+                    /* (Workspace: need 2*N*N + [3*N], prefer N*N + M*N + [3*N]) */
+                    for (i = 1; i <= m; i += ldwrkr) {
+                        blk = min(m - i + 1, ldwrkr);
+                        blasf77_dgemm("N", "N", &blk, &n, &n, &c_one, &A[i + lda], &lda, &work[iu], &ldwrku, &c_zero, &work[ir], &ldwrkr);
+                        lapackf77_dlacpy("F", &blk, &n, &work[ir], &ldwrkr, &A[i + lda], &lda);
                     }
                 }
             }
             else if (wantqs) {
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + BDSPAC) */
-                lapackf77_dlaset("F", &m, &n, &c_zero, &c_zero, U(1,1), &ldu);
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5s (M >= N, JOBZ='S') */
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + BDSPAC + [2*N]) */
+                lapackf77_dlaset("F", &m, &n, &c_zero, &c_zero, U, &ldu);
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite U by left singular vectors of A and VT */
-                /* by right singular vectors of A */
-                /* (Workspace: need 3*N, prefer 2*N + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &n, &n, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__1, &ierr);
+                /* Overwrite U  by left  singular vectors of A, and */
+                /* overwrite VT by right singular vectors of A */
+                /* (Workspace: need 3*N + [N], prefer 2*N + N*NB + [N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &n, &n, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &n, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
             }
             else if (wantqa) {
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need N + BDSPAC) */
-                lapackf77_dlaset("F", &m, &m, &c_zero, &c_zero, U(1,1), &ldu);
-                lapackf77_dbdsdc("U", "I", &n, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5a (M >= N, JOBZ='A') */
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need N + BDSPAC + [2*N]) */
+                lapackf77_dlaset("F", &m, &m, &c_zero, &c_zero, U, &ldu);
+                lapackf77_dbdsdc("U", "I", &n, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
                 /* Set the right corner of U to identity matrix */
                 if (m > n) {
                     i__1 = m - n;
-                    lapackf77_dlaset("F", &i__1, &i__1, &c_zero, &c_one, &U[n + 1 + (n + 1)*ldu], &ldu);
+                    lapackf77_dlaset("F", &i__1, &i__1, &c_zero, &c_one, &U[n + n*ldu], &ldu);
                 }
 
-                /* Overwrite U by left singular vectors of A and VT */
-                /* by right singular vectors of A */
-                /* (Workspace: need N*N + 2*N + M, prefer N*N + 2*N + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &n, &n, &m, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__1, &ierr);
+                /* Overwrite U  by left  singular vectors of A, and */
+                /* overwrite VT by right singular vectors of A */
+                /* (Workspace: need 2*N + M + [N], prefer 2*N + M*NB + [N]) */
+                /* (was:       need N*N + 2*N + M + [N], prefer N*N + 2*N + M*NB + [N]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &m, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
             }
         }
     }
     else {
-        /* A has more columns than rows. If A has sufficiently more */
-        /* columns than rows, first reduce using the LQ decomposition (if */
-        /* sufficient workspace available) */
+        /* A has more columns than rows. */
+        /* If A has sufficiently more columns than rows, first reduce using */
+        /* the LQ decomposition (if sufficient workspace available) */
         if (n >= mnthr) {
             if (wantqn) {
                 /* Path 1t (N much larger than M, JOBZ='N') */
@@ -773,88 +806,101 @@ magma_int_t magma_dgesdd(
 
                 /* Compute A=L*Q */
                 /* (Workspace: need 2*M, prefer M + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Zero out above L */
-                i__1 = m - 1;
-                lapackf77_dlaset("U", &i__1, &i__1, &c_zero, &c_zero, &A[(2*lda) + 1], &lda);
-                ie = 1;
-                itauq = ie + m;
+                lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[(2*lda) + 1], &lda);
+                ie    = 1;
+                itauq = ie    + m;
                 itaup = itauq + m;
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in A */
-                /* (Workspace: need 4*M, prefer 3*M + 2*M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgebrd(&m, &m, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
+                /* (LAPACK Workspace: need 4*M, prefer 3*M + 2*M*NB) */
+                /* (MAGMA  Workspace: need 3*M + 2*M*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&m, &m, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(m, m, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
                 nwork = ie + m;
 
                 /* Perform bidiagonal SVD, computing singular values only */
                 /* (Workspace: need M + BDSPAC) */
-                lapackf77_dbdsdc("U", "N", &m, &s[1], &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], &iwork[1], info);
+                lapackf77_dbdsdc("U", "N", &m, s, &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], iwork, info);
             }
             else if (wantqo) {
                 /* Path 2t (N much larger than M, JOBZ='O') */
                 /* M right singular vectors to be overwritten on A and */
-                /* M left singular vectors to be computed in U */
-                ivt = 1;
+                /* M left  singular vectors to be computed in U */
+                // LAPACK put ivt first, but it isn't needed until after gebrd;
+                // putting it later matches Path 2.
+                il = 1;
 
-                /* IVT is M by M */
-                il = ivt + m*m;
-                if (lwork >= m*n + m*m + 3*m + bdspac) {
-                    /* WORK[IL] is M by N */
+                /* WORK[IL] is M by chunk, at least M*M, up to M*N */
+                //if (lwork >= m*n + 3*m + max( 2*m*nb, m*m + bdspac )) {
+                //    ldwrkl = m;
+                //    chunk = n;
+                //}
+                //else {
                     ldwrkl = m;
-                    chunk = n;
-                }
-                else {
-                    ldwrkl = m;
-                    chunk = (lwork - m*m) / m;
-                }
+                    // was: chunk = (lwork - m*m) / m;
+                    chunk = min( n, (lwork - (3*m + max( 2*m*nb, m*m + bdspac ))) / m );
+                //}
                 itau = il + ldwrkl*m;
                 nwork = itau + m;
 
                 /* Compute A=L*Q */
-                /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
+                /* (Workspace: need [M*M] + 2*M, prefer M*M + M + M*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
-                /* Copy L to WORK[IL], zeroing about above it */
+                /* Copy L to WORK[IL], zeroing out above it */
                 lapackf77_dlacpy("L", &m, &m, A(1,1), &lda, &work[il], &ldwrkl);
-                i__1 = m - 1;
-                lapackf77_dlaset("U", &i__1, &i__1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
+                lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
 
                 /* Generate Q in A */
-                /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dorglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &i__1, &ierr);
-                ie = itau;
-                itauq = ie + m;
+                /* (Workspace: need [M*M] + 2*M, prefer M*M + M + M*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                ie    = itau;
+                itauq = ie    + m;
                 itaup = itauq + m;
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in WORK[IL] */
-                /* (Workspace: need M*M + 4*M, prefer M*M + 3*M + 2*M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dgebrd(&m, &m, &work[il], &ldwrkl, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__1, &ierr);
+                /* (LAPACK Workspace: need M*M + 4*M, prefer M*M + 3*M + 2*M*NB) */
+                /* (MAGMA  Workspace: need M*M + 3*M + 2*M*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&m, &m, &work[il], &ldwrkl, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(m, m, &work[il], ldwrkl, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U, and computing right singular */
-                /* vectors of bidiagonal matrix in WORK[IVT] */
-                /* (Workspace: need M + M*M + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &m, &s[1], &work[ie], U(1,1), &ldu, &work[ivt], &m, dum, idum, &work[nwork], &iwork[1], info);
+                /* WORK[IVT] is M by M */
+                ivt = nwork;
+                nwork = ivt + m*m;
 
-                /* Overwrite U by left singular vectors of L and WORK[IVT] */
-                /* by right singular vectors of L */
-                /* (Workspace: need 2*M*M + 3*M, prefer 2*M*M + 2*M + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, &work[il], &ldwrkl, &work[itauq], U(1,1), &ldu, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &m, &m, &m, &work[il], &ldwrkl, &work[itaup], &work[ivt], &m, &work[nwork], &i__1, &ierr);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U, and */
+                /* computing right singular vectors of bidiagonal matrix in WORK[IVT] */
+                /* (Workspace: need M + M*M + BDSPAC + [M*M + 2*M]) */
+                lapackf77_dbdsdc("U", "I", &m, s, &work[ie], U, &ldu, &work[ivt], &m, dum, idum, &work[nwork], iwork, info);
 
-                /* Multiply right singular vectors of L in WORK[IVT] by Q */
-                /* in A, storing result in WORK[IL] and copying to A */
-                /* (Workspace: need 2*M*M, prefer M*M + M*N) */
-                for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
+                /* Overwrite U         by left  singular vectors of L, and */
+                /* overwrite WORK[IVT] by right singular vectors of L */
+                /* (Workspace: need 2*M*M + 3*M + [M], prefer 2*M*M + 2*M + M*NB + [M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, &work[il], &ldwrkl, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &m, &m, &m, &work[il], &ldwrkl, &work[itaup], &work[ivt], &m, &work[nwork], &lnwork, &ierr);
+
+                /* Multiply right singular vectors of L in WORK[IVT] by Q in A, */
+                /* storing result in WORK[IL] and copying to A */
+                /* (Workspace: need 2*M*M + [3*M], prefer M*N + M*M + [3*M]) */
+                for (i = 1; i <= n; i += chunk) {
                     blk = min(n - i + 1, chunk);
                     blasf77_dgemm("N", "N", &m, &blk, &m, &c_one, &work[ivt], &m, &A[i*lda + 1], &lda, &c_zero, &work[il], &ldwrkl);
                     lapackf77_dlacpy("F", &m, &blk, &work[il], &ldwrkl, &A[i*lda + 1], &lda);
@@ -863,7 +909,7 @@ magma_int_t magma_dgesdd(
             else if (wantqs) {
                 /* Path 3t (N much larger than M, JOBZ='S') */
                 /* M right singular vectors to be computed in VT and */
-                /* M left singular vectors to be computed in U */
+                /* M left  singular vectors to be computed in U */
                 il = 1;
 
                 /* WORK[IL] is M by M */
@@ -873,51 +919,55 @@ magma_int_t magma_dgesdd(
 
                 /* Compute A=L*Q */
                 /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Copy L to WORK[IL], zeroing out above it */
                 lapackf77_dlacpy("L", &m, &m, A(1,1), &lda, &work[il], &ldwrkl);
-                i__1 = m - 1;
-                lapackf77_dlaset("U", &i__1, &i__1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
+                lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero, &work[il + ldwrkl], &ldwrkl);
 
                 /* Generate Q in A */
                 /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dorglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
-                ie = itau;
-                itauq = ie + m;
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorglq(&m, &n, &m, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                ie    = itau;
+                itauq = ie    + m;
                 itaup = itauq + m;
                 nwork = itaup + m;
 
-                /* Bidiagonalize L in WORK[IU], copying result to U */
-                /* (Workspace: need M*M + 4*M, prefer M*M + 3*M + 2*M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgebrd(&m, &m, &work[il], &ldwrkl, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+                /* Bidiagonalize L in WORK[IU] */ /* was: ..., copying result to U */
+                /* (LAPACK Workspace: need M*M + 4*M, prefer M*M + 3*M + 2*M*NB) */
+                /* (MAGMA  Workspace: need M*M + 3*M + 2*M*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&m, &m, &work[il], &ldwrkl, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(m, m, &work[il], ldwrkl, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need M + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &m, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need M + BDSPAC + [M*M + 2*M]) */
+                lapackf77_dbdsdc("U", "I", &m, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite U by left singular vectors of L and VT */
-                /* by right singular vectors of L */
-                /* (Workspace: need M*M + 3*M, prefer M*M + 2*M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, &work[il], &ldwrkl, &work[itauq], U(1,1), &ldu, &work[nwork], &i__2, &ierr);
-                lapackf77_dormbr("P", "R", "T", &m, &m, &m, &work[il], &ldwrkl, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__2, &ierr);
+                /* Overwrite U  by left  singular vectors of L, and */
+                /* overwrite VT by right singular vectors of L */
+                /* (Workspace: need M*M + 3*M + [M], prefer M*M + 2*M + M*NB + [M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, &work[il], &ldwrkl, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &m, &m, &m, &work[il], &ldwrkl, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
 
-                /* Multiply right singular vectors of L in WORK[IL] by */
-                /* Q in A, storing result in VT */
+                /* Multiply right singular vectors of L in WORK[IL] by Q in A, */
+                /* storing result in VT */
                 /* (Workspace: need M*M) */
-                lapackf77_dlacpy("F", &m, &m, VT(1,1), &ldvt, &work[il], &ldwrkl);
-                blasf77_dgemm("N", "N", &m, &n, &m, &c_one, &work[il], &ldwrkl, A(1,1), &lda, &c_zero, VT(1,1), &ldvt);
+                lapackf77_dlacpy("F", &m, &m, VT, &ldvt, &work[il], &ldwrkl);
+                blasf77_dgemm("N", "N", &m, &n, &m, &c_one, &work[il], &ldwrkl, A(1,1), &lda, &c_zero, VT, &ldvt);
             }
             else if (wantqa) {
                 /* Path 4t (N much larger than M, JOBZ='A') */
                 /* N right singular vectors to be computed in VT and */
-                /* M left singular vectors to be computed in U */
+                /* M left  singular vectors to be computed in U */
                 ivt = 1;
 
                 /* WORK[IVT] is M by M */
@@ -927,69 +977,82 @@ magma_int_t magma_dgesdd(
 
                 /* Compute A=L*Q, copying result to VT */
                 /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &i__2, &ierr);
-                lapackf77_dlacpy("U", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
+                lnwork = lwork - nwork + 1;
+                lapackf77_dgelqf(&m, &n, A(1,1), &lda, &work[itau], &work[nwork], &lnwork, &ierr);
+                lapackf77_dlacpy("U", &m, &n, A(1,1), &lda, VT, &ldvt);
 
                 /* Generate Q in VT */
-                /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dorglq(&n, &n, &m, VT(1,1), &ldvt, &work[itau], &work[nwork], &i__2, &ierr);
+                /* (was:       need [M*M] + 2*M,   prefer [M*M] + M + M*NB) */
+                /* (Workspace: need [M*M] + M + N, prefer [M*M] + M + N*NB) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dorglq(&n, &n, &m, VT, &ldvt, &work[itau], &work[nwork], &lnwork, &ierr);
 
                 /* Produce L in A, zeroing out other entries */
-                i__1 = m - 1;
-                lapackf77_dlaset("U", &i__1, &i__1, &c_zero, &c_zero, &A[(2*lda) + 1], &lda);
-                ie = itau;
-                itauq = ie + m;
+                lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[(2*lda) + 1], &lda);
+                ie    = itau;
+                itauq = ie    + m;
                 itaup = itauq + m;
                 nwork = itaup + m;
 
                 /* Bidiagonalize L in A */
-                /* (Workspace: need M*M + 4*M, prefer M*M + 3*M + 2*M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dgebrd(&m, &m, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+                /* (LAPACK Workspace: need [M*M] + 4*M, prefer [M*M] + 3*M + 2*M*NB) */
+                /* (MAGMA  Workspace: need [M*M] + 3*M + 2*M*NB) */
+                lnwork = lwork - nwork + 1;
+                #if VERSION == 1
+                lapackf77_dgebrd(&m, &m, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+                #else
+                magma_dgebrd(m, m, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+                #endif
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in WORK[IVT] */
-                /* (Workspace: need M + M*M + BDSPAC) */
-                lapackf77_dbdsdc("U", "I", &m, &s[1], &work[ie], U(1,1), &ldu, &work[ivt], &ldwkvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in WORK[IVT] */
+                /* (Workspace: need M + M*M + BDSPAC + [2*M]) */
+                lapackf77_dbdsdc("U", "I", &m, s, &work[ie], U, &ldu, &work[ivt], &ldwkvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite U by left singular vectors of L and WORK[IVT] */
-                /* by right singular vectors of L */
-                /* (Workspace: need M*M + 3*M, prefer M*M + 2*M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__2, &ierr);
-                lapackf77_dormbr("P", "R", "T", &m, &m, &m, A(1,1), &lda, &work[itaup], &work[ivt], &ldwkvt, &work[nwork], &i__2, &ierr);
+                /* Overwrite U         by left  singular vectors of L, and */
+                /* overwrite WORK[IVT] by right singular vectors of L */
+                /* (Workspace: need M*M + 3*M + [M], prefer M*M + 2*M + M*NB + [M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &m, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &m, &m, &m, A(1,1), &lda, &work[itaup], &work[ivt], &ldwkvt, &work[nwork], &lnwork, &ierr);
 
-                /* Multiply right singular vectors of L in WORK[IVT] by */
-                /* Q in VT, storing result in A */
+                /* Multiply right singular vectors of L in WORK[IVT] by Q in VT, */
+                /* storing result in A */
                 /* (Workspace: need M*M) */
-                blasf77_dgemm("N", "N", &m, &n, &m, &c_one, &work[ivt], &ldwkvt, VT(1,1), &ldvt, &c_zero, A(1,1), &lda);
+                blasf77_dgemm("N", "N", &m, &n, &m, &c_one, &work[ivt], &ldwkvt, VT, &ldvt, &c_zero, A(1,1), &lda);
 
                 /* Copy right singular vectors of A from A to VT */
-                lapackf77_dlacpy("F", &m, &n, A(1,1), &lda, VT(1,1), &ldvt);
+                lapackf77_dlacpy("F", &m, &n, A(1,1), &lda, VT, &ldvt);
             }
         }
         else {
             /* N < MNTHR */
             /* Path 5t (N greater than M, but not much larger) */
             /* Reduce to bidiagonal form without LQ decomposition */
-            ie = 1;
-            itauq = ie + m;
+            ie    = 1;
+            itauq = ie    + m;
             itaup = itauq + m;
             nwork = itaup + m;
 
             /* Bidiagonalize A */
-            /* (Workspace: need 3*M + N, prefer 3*M + (M + N)*NB) */
-            i__2 = lwork - nwork + 1;
-            lapackf77_dgebrd(&m, &n, A(1,1), &lda, &s[1], &work[ie], &work[itauq], &work[itaup], &work[nwork], &i__2, &ierr);
+            /* (LAPACK Workspace: need 3*M + N, prefer 3*M + (M + N)*NB) */
+            /* (MAGMA  Workspace: need 3*M + (M + N)*NB) */
+            lnwork = lwork - nwork + 1;
+            #if VERSION == 1
+            lapackf77_dgebrd(&m, &n, A(1,1), &lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], &lnwork, &ierr);
+            #else
+            magma_dgebrd(m, n, A(1,1), lda, s, &work[ie], &work[itauq], &work[itaup], &work[nwork], lnwork, &ierr);
+            #endif
+            
             if (wantqn) {
-                /* Perform bidiagonal SVD, only computing singular values */
-                /* (Workspace: need M + BDSPAC) */
-                lapackf77_dbdsdc("L", "N", &m, &s[1], &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5tn (N > M, JOBZ='N') */
+                /* Perform bidiagonal SVD, computing singular values only */
+                /* (Workspace: need M + BDSPAC + [2*M]) */
+                lapackf77_dbdsdc("L", "N", &m, s, &work[ie], dum, &ione, dum, &ione, dum, idum, &work[nwork], iwork, info);
             }
             else if (wantqo) {
+                /* Path 5to (N > M, JOBZ='O') */
                 ldwkvt = m;
                 ivt = nwork;
                 if (lwork >= m*n + 3*m + bdspac) {
@@ -1006,37 +1069,41 @@ magma_int_t magma_dgesdd(
                     chunk = (lwork - m*m - 3*m) / m;
                 }
 
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in WORK[IVT] */
-                /* (Workspace: need M*M + BDSPAC) */
-                lapackf77_dbdsdc("L", "I", &m, &s[1], &work[ie], U(1,1), &ldu, &work[ivt], &ldwkvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in WORK[IVT] */
+                /* (Workspace: need M + M*M + BDSPAC + [2*M]) */
+                /* (was:       need     M*M + BDSPAC) */
+                lapackf77_dbdsdc("L", "I", &m, s, &work[ie], U, &ldu, &work[ivt], &ldwkvt, dum, idum, &work[nwork], iwork, info);
 
                 /* Overwrite U by left singular vectors of A */
-                /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                i__2 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__2, &ierr);
+                /* (Workspace: need M*M + 2*M + [2*M], prefer M*M + M + M*NB + [2*M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
 
+                /* TODO should be m*n + 4*m + m*nb, instead of bdspac? */
+                /* Affects m = 1, ..., 9 for nb=32. */
                 if (lwork >= m*n + 3*m + bdspac) {
                     /* Overwrite WORK[IVT] by left singular vectors of A */
-                    /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                    i__2 = lwork - nwork + 1;
-                    lapackf77_dormbr("P", "R", "T", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[ivt], &ldwkvt, &work[nwork], &i__2, &ierr);
-
+                    /* (was:       need M*M + 2*M + [2*M], prefer M*M + M + M*NB + [2*M]) */
+                    /* (Workspace: need M*N + 2*M + [2*M], prefer M*N + M + M*NB + [2*M]) */
+                    lnwork = lwork - nwork + 1;
+                    lapackf77_dormbr("P", "R", "T", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[ivt], &ldwkvt, &work[nwork], &lnwork, &ierr);
+                
                     /* Copy right singular vectors of A from WORK[IVT] to A */
                     lapackf77_dlacpy("F", &m, &n, &work[ivt], &ldwkvt, A(1,1), &lda);
                 }
                 else {
                     /* Generate P**T in A */
-                    /* (Workspace: need M*M + 2*M, prefer M*M + M + M*NB) */
-                    i__2 = lwork - nwork + 1;
-                    lapackf77_dorgbr("P", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[nwork], &i__2, &ierr);
+                    /* (Workspace: need M*M + 2*M + [2*M], prefer M*M + M + M*NB + [2*M]) */
+                    lnwork = lwork - nwork + 1;
+                    lapackf77_dorgbr("P", &m, &n, &m, A(1,1), &lda, &work[itaup], &work[nwork], &lnwork, &ierr);
 
                     /* Multiply Q in A by right singular vectors of */
                     /* bidiagonal matrix in WORK[IVT], storing result in */
                     /* WORK[IL] and copying to A */
-                    /* (Workspace: need 2*M*M, prefer M*M + M*N) */
-                    for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
+                    /* (Workspace: need 2*M*M + [3*M], prefer M*M + M*N + [3*M]) */
+                    for (i = 1; i <= n; i += chunk) {
                         blk = min(n - i + 1, chunk);
                         blasf77_dgemm("N", "N", &m, &blk, &m, &c_one, &work[ivt], &ldwkvt, &A[i*lda + 1], &lda, &c_zero, &work[il], &m);
                         lapackf77_dlacpy("F", &m, &blk, &work[il], &m, &A[i*lda + 1], &lda);
@@ -1044,40 +1111,42 @@ magma_int_t magma_dgesdd(
                 }
             }
             else if (wantqs) {
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need M + BDSPAC) */
-                lapackf77_dlaset("F", &m, &n, &c_zero, &c_zero, VT(1,1), &ldvt);
-                lapackf77_dbdsdc("L", "I", &m, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5ts (N > M, JOBZ='S') */
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need M + BDSPAC + [2*M]) */
+                lapackf77_dlaset("F", &m, &n, &c_zero, &c_zero, VT, &ldvt);
+                lapackf77_dbdsdc("L", "I", &m, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
-                /* Overwrite U by left singular vectors of A and VT */
-                /* by right singular vectors of A */
-                /* (Workspace: need 3*M, prefer 2*M + M*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &m, &n, &m, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__1, &ierr);
+                /* Overwrite U  by left  singular vectors of A, and */
+                /* overwrite VT by right singular vectors of A */
+                /* (Workspace: need 3*M + [M], prefer 2*M + M*NB + [M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &m, &n, &m, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
             }
             else if (wantqa) {
-                /* Perform bidiagonal SVD, computing left singular vectors */
-                /* of bidiagonal matrix in U and computing right singular */
-                /* vectors of bidiagonal matrix in VT */
-                /* (Workspace: need M + BDSPAC) */
-                lapackf77_dlaset("F", &n, &n, &c_zero, &c_zero, VT(1,1), &ldvt);
-                lapackf77_dbdsdc("L", "I", &m, &s[1], &work[ie], U(1,1), &ldu, VT(1,1), &ldvt, dum, idum, &work[nwork], &iwork[1], info);
+                /* Path 5ta (N > M, JOBZ='A') */
+                /* Perform bidiagonal SVD, */
+                /* computing left  singular vectors of bidiagonal matrix in U and */
+                /* computing right singular vectors of bidiagonal matrix in VT */
+                /* (Workspace: need M + BDSPAC + [2*M]) */
+                lapackf77_dlaset("F", &n, &n, &c_zero, &c_zero, VT, &ldvt);
+                lapackf77_dbdsdc("L", "I", &m, s, &work[ie], U, &ldu, VT, &ldvt, dum, idum, &work[nwork], iwork, info);
 
                 /* Set the right corner of VT to identity matrix */
                 if (n > m) {
                     i__1 = n - m;
-                    lapackf77_dlaset("F", &i__1, &i__1, &c_zero, &c_one, &VT[m + 1 + (m + 1)*ldvt], &ldvt);
+                    lapackf77_dlaset("F", &i__1, &i__1, &c_zero, &c_one, &VT[m + m*ldvt], &ldvt);
                 }
 
-                /* Overwrite U by left singular vectors of A and VT */
-                /* by right singular vectors of A */
-                /* (Workspace: need 2*M + N, prefer 2*M + N*NB) */
-                i__1 = lwork - nwork + 1;
-                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U(1,1), &ldu, &work[nwork], &i__1, &ierr);
-                lapackf77_dormbr("P", "R", "T", &n, &n, &m, A(1,1), &lda, &work[itaup], VT(1,1), &ldvt, &work[nwork], &i__1, &ierr);
+                /* Overwrite U  by left  singular vectors of A, and */
+                /* overwrite VT by right singular vectors of A */
+                /* (Workspace: need 2*M + N + [M], prefer 2*M + N*NB + [M]) */
+                lnwork = lwork - nwork + 1;
+                lapackf77_dormbr("Q", "L", "N", &m, &m, &n, A(1,1), &lda, &work[itauq], U, &ldu, &work[nwork], &lnwork, &ierr);
+                lapackf77_dormbr("P", "R", "T", &n, &n, &m, A(1,1), &lda, &work[itaup], VT, &ldvt, &work[nwork], &lnwork, &ierr);
             }
         }
     }
@@ -1085,10 +1154,10 @@ magma_int_t magma_dgesdd(
     /* Undo scaling if necessary */
     if (iscl == 1) {
         if (anrm > bignum) {
-            lapackf77_dlascl("G", &izero, &izero, &bignum, &anrm, &minmn, &ione, &s[1], &minmn, &ierr);
+            lapackf77_dlascl("G", &izero, &izero, &bignum, &anrm, &minmn, &ione, s, &minmn, &ierr);
         }
         if (anrm < smlnum) {
-            lapackf77_dlascl("G", &izero, &izero, &smlnum, &anrm, &minmn, &ione, &s[1], &minmn, &ierr);
+            lapackf77_dlascl("G", &izero, &izero, &smlnum, &anrm, &minmn, &ione, s, &minmn, &ierr);
         }
     }
 
