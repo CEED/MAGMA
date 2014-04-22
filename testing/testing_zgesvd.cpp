@@ -39,7 +39,7 @@ int main( int argc, char** argv)
     #ifdef COMPLEX
     double *rwork;
     #endif
-    magma_int_t M, N, lda, ldu, ldv, n2, min_mn, info, nb, lwork;
+    magma_int_t M, N, N_U, M_VT, lda, ldu, ldv, n2, min_mn, info, nb, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_vec_t jobu, jobvt;
@@ -82,14 +82,11 @@ int main( int argc, char** argv)
             M = opts.msize[itest];
             N = opts.nsize[itest];
             min_mn = min(M, N);
+            N_U  = (jobu  == MagmaAllVec ? M : min_mn);
+            M_VT = (jobvt == MagmaAllVec ? N : min_mn);
             lda = M;
             ldu = M;
-            if ( jobvt == MagmaAllVec ) {
-                ldv = N;
-            }
-            else {
-                ldv = min_mn;
-            }
+            ldv = M_VT;
             n2 = lda*N;
             nb = magma_get_zgesvd_nb(N);
             
@@ -128,13 +125,8 @@ int main( int argc, char** argv)
             }
             
             TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( VT,    magmaDoubleComplex, ldv*N );
-            if ( jobu == MagmaAllVec ) {
-                TESTING_MALLOC_CPU( U, magmaDoubleComplex, ldu*M );
-            }
-            else {
-                TESTING_MALLOC_CPU( U, magmaDoubleComplex, ldu*min_mn );
-            }
+            TESTING_MALLOC_CPU( VT,    magmaDoubleComplex, ldv*N );   // N x N (jobvt=A) or min(M,N) x N
+            TESTING_MALLOC_CPU( U,     magmaDoubleComplex, ldu*N_U ); // M x M (jobu=A)  or M x min(M,N)
             TESTING_MALLOC_CPU( S1,    double, min_mn );
             TESTING_MALLOC_CPU( S2,    double, min_mn );
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
@@ -179,8 +171,6 @@ int main( int argc, char** argv)
                 
                 // get size and location of U and V^T depending on jobu and jobvt
                 // U2=NULL and VT2=NULL if they were not computed (e.g., jobu=N)
-                magma_int_t N_U  = (jobu  == MagmaAllVec ? M : min_mn);
-                magma_int_t M_VT = (jobvt == MagmaAllVec ? N : min_mn);
                 magmaDoubleComplex *U2  = NULL;
                 magmaDoubleComplex *VT2 = NULL;
                 if ( jobu == MagmaSomeVec || jobu == MagmaAllVec ) {
