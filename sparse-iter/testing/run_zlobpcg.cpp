@@ -128,7 +128,9 @@ int main( int argc, char** argv)
 
         // copy matrix to GPU                                                     
         magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
+for(int ev=1; ev<3; ev+=16){
 
+solver_par.num_eigenvalues = ev;
         magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
                            // as the matrix size has influence on the EV-length
 
@@ -144,9 +146,15 @@ int main( int argc, char** argv)
         printf("Time (sec) = %7.2f\n", gpu_time);
         printf("solver runtime (sec) = %7.2f\n", solver_par.runtime );
 
-        magma_z_mfree(     &A    );
+
 
         magma_zsolverinfo_free( &solver_par, &precond_par );
+
+}
+
+        magma_z_mfree(     &dA    );
+        magma_z_mfree(     &A2    );
+        magma_z_mfree(     &A    );
 
         i++;
     }

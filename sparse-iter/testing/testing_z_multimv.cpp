@@ -15,7 +15,7 @@
 #include <string.h>
 #include <math.h>
 #include <cuda_runtime_api.h>
-#include <cublas.h>
+#include <cublas_v2.h>
 #include <cusparse_v2.h>
 #include <cuda_profiler_api.h>
 
@@ -46,6 +46,15 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
+
+     "/home/hanzt/sparse_matrices/mtx/audikw_1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/bone010.mtx",
+     "/home/hanzt/sparse_matrices/mtx/bmwcra_1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/crankseg_2.mtx",
+     "/home/hanzt/sparse_matrices/mtx/F1.mtx",   
+     "/home/hanzt/sparse_matrices/mtx/inline_1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/ldoor.mtx",
+
  /*    "/home/hanzt/sparse_matrices/mtx/Trefethen_20.mtx",
      "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx",*/
      "/home/hanzt/sparse_matrices/mtx/audikw_1.mtx",
@@ -133,7 +142,7 @@ int main( int argc, char** argv)
 
 
 
-    for(matrix=12; matrix<40; matrix++)
+    for(matrix=0; matrix<40; matrix++)
     {
         magma_z_sparse_matrix hA, hB, hC, dA, dB, hD, dD, hE, dE;
         magma_z_vector hx, hy, dx, dy, dx2, dy2;
@@ -160,7 +169,7 @@ int main( int argc, char** argv)
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
 
 
-        for(int k=2; k<131; k+=2){
+        for(int k=64; k<65; k+=2){
         //printf("number of vectors:%d\n",k);
         printf( "%d  &",k );
         magma_int_t num_vecs=k; 
@@ -179,9 +188,9 @@ int main( int argc, char** argv)
 
         // init GPU vectors
         magma_z_vinit( &dx, Magma_DEV, hA.num_cols*num_vecs, one );
-        magma_z_vinit( &dy, Magma_DEV, hA.num_cols*num_vecs, zero );
+        magma_z_vinit( &dy, Magma_DEV, hA.num_cols*num_vecs, one );
         magma_z_vinit( &dx2, Magma_DEV, hA.num_cols*num_vecs, one );
-        magma_z_vinit( &dy2, Magma_DEV, hA.num_cols*num_vecs, zero );
+        magma_z_vinit( &dy2, Magma_DEV, hA.num_cols*num_vecs, one );
 
 
 
@@ -190,13 +199,17 @@ int main( int argc, char** argv)
 
         magma_device_sync(); start = magma_wtime(); 
         //cudaProfilerStart();
-        for (i=0; i<10; i++)
+        for (i=0; i<10; i++){
+            // include transpose
+            magmablas_ztranspose2( dx.val, num_vecs, dy.val, hA.num_cols, hA.num_cols, num_vecs );
             magma_z_spmv( one, dD, dx2, zero, dy2);
+
+        }
         //cudaProfilerStop();
         magma_device_sync(); end = magma_wtime(); 
         //printf( " > MAGMA: %.2e seconds (SELLC-mod).\n",(end-start)/100 );
-        printf( "  %.2e  &",(end-start)/10 );
-        printf( "  %.2e  &",FLOPS/((end-start)/10.0) );//GFLOPS
+        printf( "  %.4e  &",(end-start)/10 );
+        printf( "  %.4e  &",FLOPS/((end-start)/10.0) );//GFLOPS
 
         //printf( "  %.2e  &",(end-start)/10 );
        // magma_z_vvisu( dy2, 0,20);
@@ -214,32 +227,71 @@ int main( int argc, char** argv)
         cusparseHandle_t cusparseHandle = 0;
         cusparseStatus_t cusparseStatus;
         cusparseStatus = cusparseCreate(&cusparseHandle);
+             if(cusparseStatus != 0)    printf("error handle: %d\n", cusparseStatus);
 
+        cublasHandle_t cublasHandle;
+        cublasCreate(&cublasHandle);          
+        cublasSetPointerMode(cublasHandle, CUBLAS_POINTER_MODE_HOST);
 
         cusparseMatDescr_t descr = 0;
         cusparseStatus = cusparseCreateMatDescr(&descr);
+             if(cusparseStatus != 0)    printf("error descr: %d\n", cusparseStatus);
 
-
-        cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-        cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+        cusparseStatus = cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+             if(cusparseStatus != 0)    printf("error general: %d\n", cusparseStatus);
+        cusparseStatus = cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+             if(cusparseStatus != 0)    printf("error index: %d\n", cusparseStatus);
         double alpha = 1.0;
         double beta = 0.0;
+        double one  = 1.0;
+        double zero = 0.0;
+
 
 
 
         magma_device_sync(); start = magma_wtime(); 
-        cudaProfilerStart();
-        for (i=0; i<10; i++)
+       // cudaProfilerStart();
+        for (i=0; i<10; i++){
+/*
+cusparseZcsrmm(cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
+               hA.num_rows,   num_vecs, hA.num_cols, hA.nnz, 
+ &alpha, descr, dA.val, dA.row, dA.col,
+dx2.val, hA.num_cols, &beta,dy2.val, hA.num_cols);
+
+
+
+        cusparseStatus =
         cusparseZcsrmm2(cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
                             CUSPARSE_OPERATION_NON_TRANSPOSE, 
                             hA.num_rows, num_vecs, hA.num_cols, hA.nnz, 
                             &alpha, descr, dA.val, dA.row, dA.col, dx2.val,
                             hA.num_cols, &beta, dy2.val, hA.num_cols);
-        cudaProfilerStop();
+*/
+
+
+// step 1: Bt := transpose(B)
+    cublasZgeam(cublasHandle, CUBLAS_OP_T, CUBLAS_OP_T,
+         hA.num_rows, num_vecs, &one, dx.val, num_vecs, &zero, dx.val, num_vecs, dx2.val, hA.num_rows);
+
+
+
+        cusparseZcsrmm2(cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                            CUSPARSE_OPERATION_TRANSPOSE, 
+                            hA.num_rows, num_vecs, hA.num_cols, hA.nnz, 
+                            &alpha, descr, dA.val, dA.row, dA.col, dx2.val,
+                            num_vecs, &beta, dy2.val, hA.num_cols);
+
+    cublasZgeam(cublasHandle, CUBLAS_OP_T, CUBLAS_OP_T,
+         num_vecs, hA.num_rows, &one, dx.val, hA.num_rows, &zero, dx.val, hA.num_rows, dx2.val, num_vecs);
+           //  if(cusparseStatus != 0)    printf("error: %d\n", cusparseStatus);
+        }
+
+       // cudaProfilerStop();
         magma_device_sync(); end = magma_wtime(); 
+
         //printf( " > CUSPARSE: %.2e seconds (CSR).\n",(end-start)/100 );
-        printf( "  %.2e  &",(end-start)/10 );
-        printf( "  %.2e  &",FLOPS/((end-start)/10.0) );//GFLOPS
+        printf( "  %.4e  &",(end-start)/10 );
+        printf( "  %.4e  &",FLOPS/((end-start)/10.0) );//GFLOPS
         //magma_z_vvisu( dy2, 0, 20);
         //magma_z_vvisu( dy2, (num_vecs)*hA.num_rows-20, 20);
 

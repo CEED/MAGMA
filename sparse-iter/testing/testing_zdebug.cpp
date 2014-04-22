@@ -16,6 +16,12 @@
 #include <math.h>
 #include <omp.h>
 
+// includes CUDA
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include <cusparse_v2.h>
+#include <cuda_profiler_api.h>
+
 // includes, project
 #include "flops.h"
 #include "magma.h"
@@ -23,6 +29,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define PRECISION_z
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -31,121 +38,91 @@
 int main( int argc, char** argv)
 {
     TESTING_INIT();
+magma_setdevice(2);
 
     const char *filename[] =
     {
      "test_matrices/Trefethen_20.mtx",       // 0
-     "test_matrices/Trefethen_200.mtx",      // 1
-     "test_matrices/Trefethen_2000.mtx",     // 2
-     "test_matrices/G3_circuit.mtx",         // 3
-     "test_matrices/test.mtx",               // 4
-     "test_matrices/bcsstk01.mtx",           // 5
-     "test_matrices/Pres_Poisson.mtx",       // 6
-     "test_matrices/bloweybq.mtx",           // 7
-     "test_matrices/ecology2.mtx",           // 8
-     "test_matrices/apache2.mtx",            // 9
-     "test_matrices/crankseg_2.mtx",         // 10
-     "test_matrices/bmwcra_1.mtx",           // 11
-     "test_matrices/F1.mtx",                 // 12
-     "test_matrices/audikw_1.mtx",           // 13
-     "test_matrices/boneS10.mtx",            // 14
-     "test_matrices/parabolic_fem.mtx",      // 15
-     "test_matrices/airfoil_2d.mtx",         // 16
-     "test_matrices/bmw3_2.mtx",             // 17
-     "test_matrices/cage10.mtx",             // 18
-     "test_matrices/fv1.mtx",                // 19
-     "test_matrices/poisson3Da.mtx",         // 20
-     "test_matrices/Trefethen_20000.mtx",    // 21
-     "test_matrices/inline_1.mtx",           // 22
-     "test_matrices/ldoor.mtx",              // 23
-     "test_matrices/thermal2.mtx",           // 24
-     "test_matrices/tmt_sym.mtx",            // 25
-     "test_matrices/offshore.mtx",            // 26
-     "test_matrices/tmt_unsym.mtx"           // 27
+     "/home/hanzt/sparse_matrices/mtx/Trefethen_200.mtx",
+     "/home/hanzt/sparse_matrices/mtx/Trefethen_2000.mtx",
+     "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx",
+     "/home/hanzt/sparse_matrices/mtx/apache2.mtx", //4
+     "/home/hanzt/sparse_matrices/mtx/ecology2.mtx",
+     "/home/hanzt/sparse_matrices/mtx/parabolic_fem.mtx",
+     "/home/hanzt/sparse_matrices/mtx/G3_circuit.mtx",
+     "/home/hanzt/sparse_matrices/mtx/af_shell3.mtx",
+     "/home/hanzt/sparse_matrices/mtx/offshore.mtx",
+     "/home/hanzt/sparse_matrices/mtx/thermal2.mtx",
+     "/home/hanzt/sparse_matrices/mtx/audikw_1.mtx",    //11
+     "/home/hanzt/sparse_matrices/mtx/bone010.mtx",
+     "/home/hanzt/sparse_matrices/mtx/boneS10.mtx",
+     "/home/hanzt/sparse_matrices/mtx/bmw3_2.mtx",
+     "/home/hanzt/sparse_matrices/mtx/bmwcra_1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/cage10.mtx",
+     "/home/hanzt/sparse_matrices/mtx/cant.mtx",
+     "/home/hanzt/sparse_matrices/mtx/crankseg_2.mtx",
+     "/home/hanzt/sparse_matrices/mtx/jj_Cube_Coup_dt0.mtx",
+     "/home/hanzt/sparse_matrices/mtx/dielFilterV2real.mtx",
+     "/home/hanzt/sparse_matrices/mtx/F1.mtx",   
+     "/home/hanzt/sparse_matrices/mtx/Fault_639.mtx",
+     "/home/hanzt/sparse_matrices/mtx/Hook_1498.mtx",
+     "/home/hanzt/sparse_matrices/mtx/inline_1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/ldoor.mtx",
+     "/home/hanzt/sparse_matrices/mtx/m_t1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/jj_ML_Geer.mtx",
+     "/home/hanzt/sparse_matrices/mtx/pwtk.mtx",
+     "/home/hanzt/sparse_matrices/mtx/shipsec1.mtx",
+     "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx",
 
     };
     
+    double start, end;
 
-
-    for(int matrix=0; matrix<1; matrix++){
+   // for(int matrix=16; matrix<20; matrix++){
+    for(int matrix=2; matrix<3; matrix++){
+   // for(int matrix=4; matrix<11; matrix++){
     int num_vecs = 10;
-
-    magma_z_sparse_matrix hA, hA2, dA;
-
-    magma_z_csr_mtx( &hA, filename[matrix] );
-
-    hA2.storage_type = Magma_SELLC;
-    hA2.blocksize = 8;
-    hA2.alignment = 4;
-    magma_z_mconvert( hA, &hA2, Magma_CSR, hA2.storage_type );
-
-    // copy matrix to GPU
-    magma_z_mtransfer( hA2, &dA, Magma_CPU, Magma_DEV);
-
-    int n=hA2.num_cols;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
-    magma_z_vector x1_h, x2_h, x1_d, x2_d;
-
-    magma_z_vinit( &x1_h, Magma_CPU, n*num_vecs, one );
-
-    for(int j=0; j<n; j++){
-        for(int i=0; i<num_vecs; i++){
-        x1_h.val[i+j*num_vecs] = MAGMA_Z_MAKE(double(i+1), 0.0);
-        }
-    }
-  //  for(int i=0; i<num_vecs; i++)
-    //    x1_h.val[i*n] = MAGMA_Z_MAKE(double(i+1), 0.0);
-
-    magma_z_vtransfer( x1_h, &x1_d, Magma_CPU, Magma_DEV );
 
 
-    //magma_z_vinit( &x1_d, Magma_DEV, n*num_vecs, one );
-
-    magma_z_vinit( &x2_d, Magma_DEV, n*num_vecs, zero );
+    magma_z_sparse_matrix hA, hA2, hA3, dA, hAD, hADD, dAD, dADD, M, hM, hL, hU, dL, dU, hF, hG, hI, hJ, D, R, dD, dR;
 
 
 
-    magma_zprint_gpu( n, num_vecs, x1_d.val, n );
+    magma_z_csr_mtx( &hA, filename[matrix] );
 
-        real_Double_t  gpu_time;
-        real_Double_t FLOPS = 2.0*num_vecs*n/1e9;
-        gpu_time = magma_wtime();
-    //magma_zlobpcg_shift( n, num_vecs, 2, x1_d.val );
-
-    magma_z_spmv( one, dA, x1_d, zero, x2_d );
-
-    //magma_zorthomgs(n, num_vecs, x1_d.val );
-        gpu_time = magma_wtime() - gpu_time;
-        printf( "blocksize: %d   GFLOP/s:  %.2e\n",num_vecs, FLOPS/gpu_time );//GFLOPS
-
-    magma_zprint_gpu( n, num_vecs, x2_d.val, n );
+    magma_z_vector x, x1, x2, b;
+        magma_z_vinit( &b, Magma_DEV, hA.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, hA.num_cols, zero );
+        magma_z_vinit( &x1, Magma_DEV, hA.num_cols, zero );
+        magma_z_vinit( &x2, Magma_DEV, hA.num_cols, zero );
 
 
+    
+    magma_zcsrsplit( 256, hA, &D, &R );
 
-    magma_z_vfree(&x1_d);
-    magma_z_vfree(&x2_d);
+        magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV );
+        magma_z_mtransfer( D, &dD, Magma_CPU, Magma_DEV );
+        magma_z_mtransfer( R, &dR, Magma_CPU, Magma_DEV );
 
-    magma_z_vinit( &x1_d, Magma_DEV, n, one );
 
-    magma_z_vinit( &x2_d, Magma_DEV, n, zero );
+    real_Double_t res;
 
-    magma_z_spmv( one, dA, x1_d, zero, x2_d );
+    magma_zresidual( dA,  b, x, &res );
 
-        magma_z_vvisu( x2_d, 0,n);
+    printf("res before: %.2e\n", res);
 
-    magma_z_vfree(&x1_h);
-    magma_z_vfree(&x1_d);
-    magma_z_vfree(&x2_d);
+    for(int k=0; k<100; k++)
+        magma_zbajac_csr( dD, dR, b, &x );
 
-    magma_z_mfree(&hA);
-    magma_z_mfree(&hA2);
-    // free GPU memory
-    magma_z_mfree(&dA);
-    }
+    magma_zresidual( dA,  b, x, &res );
 
+    printf("res after: %.2e\n", res);
+
+}
 
 
     TESTING_FINALIZE();
