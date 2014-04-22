@@ -27,6 +27,7 @@
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesdd (SVD with Divide & Conquer)
+      Please keep code in testing_zgesdd.cpp and testing_zgesvd.cpp similar.
 */
 int main( int argc, char** argv)
 {
@@ -34,14 +35,15 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
+    magmaDoubleComplex dummy[1];
     double *S1, *S2;
     #ifdef COMPLEX
+    magma_int_t lrwork=0;
     double *rwork;
     #endif
     magma_int_t *iwork;
-    magmaDoubleComplex dummy[1];
     
-    magma_int_t M, N, lda, ldu, ldv, n2, min_mn, info, lwork;
+    magma_int_t M, N, N_U, M_VT, lda, ldu, ldv, n2, min_mn, max_mn, info, nb, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_vec_t jobz;
@@ -76,51 +78,138 @@ int main( int argc, char** argv)
             
             M = opts.msize[itest];
             N = opts.nsize[itest];
+            min_mn = min(M, N);
+            max_mn = max(M, N);
+            N_U  = (jobz == MagmaAllVec ? M : min_mn);
+            M_VT = (jobz == MagmaAllVec ? N : min_mn);
             lda = M;
             ldu = M;
-            ldv = N;
+            ldv = M_VT;
             n2 = lda*N;
-            min_mn = min(M, N);
-            //nb = magma_get_zgesvd_nb(N);
-            //switch( opts.svd_work ) {
-            //    default:
-            //    #ifdef COMPLEX
-            //    case 1: lwork = (M+N)*nb + 2*min_mn;                   break;  // minimum
-            //    case 2: lwork = (M+N)*nb + 2*min_mn +   min_mn*min_mn; break;  // optimal for some paths
-            //    case 3: lwork = (M+N)*nb + 2*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
-            //    #else
-            //    case 1: lwork = (M+N)*nb + 3*min_mn;                   break;  // minimum
-            //    case 2: lwork = (M+N)*nb + 3*min_mn +   min_mn*min_mn; break;  // optimal for some paths
-            //    case 3: lwork = (M+N)*nb + 3*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
-            //    #endif
-            //}
+            nb = magma_get_zgesvd_nb(N);
             
-            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, lda*N );
-            TESTING_MALLOC_CPU( VT,  magmaDoubleComplex, ldv*N );
-            TESTING_MALLOC_CPU( U,   magmaDoubleComplex, ldu*M );
-            TESTING_MALLOC_CPU( S1,  double, min_mn );
-            TESTING_MALLOC_CPU( S2,  double, min_mn );
-            TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
+            // x and y abbreviations used in zgesdd and dgesdd documentation
+            magma_int_t x = max(M,N);
+            magma_int_t y = min(M,N);
             #ifdef COMPLEX
-            magma_int_t lrwork = 5*min(M,N);
-            if ( jobz != MagmaNoVec )
-                lrwork = min(M,N)*max(5*min(M,N) + 7, 2*max(M,N) + 2*min(M,N) + 1);
-            TESTING_MALLOC_CPU( rwork, double, lrwork );
+            bool tall = (x >= int(y*17/9.));  // true if tall (m >> n) or wide (n >> m)
+            #else
+            bool tall = (x >= int(y*11/6.));  // true if tall (m >> n) or wide (n >> m)
             #endif
+            
+            // query or use formula for workspace size
+            switch( opts.svd_work ) {
+                case 0: {  // query for workspace size
+                    lwork = -1;
+                    magma_zgesdd( jobz, M, N,
+                                  NULL, lda, NULL, NULL, ldu, NULL, ldv, dummy, lwork,
+                                  #ifdef COMPLEX
+                                  NULL,
+                                  #endif
+                                  NULL, &info );
+                    lwork = (int) MAGMA_Z_REAL( dummy[0] );
+                    break;
+                }
+                
+                case 1:    // minimum
+                case 2:    // optimal
+                case 3: {  // optimal (for gesdd, 2 & 3 are same; for gesvd, they differ)
+                    // formulas from zgesdd and dgesdd documentation
+                    bool sml = (opts.svd_work == 1);  // 1 is small workspace, 2,3 are large workspace
+                    
+                    #ifdef COMPLEX  // ----------------------------------------
+                        if (jobz == MagmaNoVec) {
+                            if (tall)    { lwork = 2*y + (2*y)*nb; }
+                            else         { lwork = 2*y + (x+y)*nb; }
+                        }
+                        if (jobz == MagmaOverwriteVec) {
+                            if (tall)    {
+                                if (sml) { lwork = 2*y*y     + 2*y + (2*y)*nb; }
+                                else     { lwork = y*y + x*y + 2*y + (2*y)*nb; }  // not big deal
+                            }
+                            else         {
+                                //if (sml) { lwork = 2*y + max( (x+y)*nb, y*y + y    ); }
+                                //else     { lwork = 2*y + max( (x+y)*nb, x*y + y*nb ); }
+                                // LAPACK 3.4.2 over-estimates workspaces. For compatability, use these:
+                                if (sml) { lwork = 2*y + max( (x+y)*nb, y*y + x ); }
+                                else     { lwork = 2*y +      (x+y)*nb + x*y; }
+                            }
+                        }
+                        if (jobz == MagmaSomeVec) {
+                            if (tall)    { lwork = y*y + 2*y + (2*y)*nb; }
+                            else         { lwork =       2*y + (x+y)*nb; }
+                        }
+                        if (jobz == MagmaAllVec) {
+                            if (tall) {
+                                if (sml) { lwork = y*y + 2*y + max( (2*y)*nb, x    ); }
+                                else     { lwork = y*y + 2*y + max( (2*y)*nb, x*nb ); }
+                            }
+                            else         { lwork =       2*y +      (x+y)*nb; }
+                        }
+                    #else // REAL ----------------------------------------
+                        if (jobz == MagmaNoVec) {
+                            if (tall)    { lwork =       3*y + max( (2*y)*nb, 7*y ); }
+                            else         { lwork =       3*y + max( (x+y)*nb, 7*y ); }
+                        }
+                        if (jobz == MagmaOverwriteVec) {
+                            if (tall)    {
+                                if (sml) { lwork = y*y + 3*y +      max( (2*y)*nb, 4*y*y + 4*y ); }
+                                else     { lwork = y*y + 3*y + max( max( (2*y)*nb, 4*y*y + 4*y ), y*y + y*nb ); }
+                            }
+                            else         {
+                                if (sml) { lwork =       3*y + max( (x+y)*nb, 4*y*y + 4*y ); }
+                                else     { lwork =       3*y + max( (x+y)*nb, 3*y*y + 4*y + x*y ); }  // extra space not too important?
+                            }
+                        }
+                        if (jobz == MagmaSomeVec) {
+                            if (tall)    { lwork = y*y + 3*y + max( (2*y)*nb, 3*y*y + 4*y ); }
+                            else         { lwork =       3*y + max( (x+y)*nb, 3*y*y + 4*y ); }
+                        }
+                        if (jobz == MagmaAllVec) {
+                            if (tall) {
+                                if (sml) { lwork = y*y + max( 3*y + max( (2*y)*nb, 3*y*y + 4*y ), y + x    ); }
+                                else     { lwork = y*y + max( 3*y + max( (2*y)*nb, 3*y*y + 4*y ), y + x*nb ); }
+                                // LAPACK 3.4.2 over-estimates workspaces. For compatability, use these:
+                                //if (sml) { lwork = y*y +      3*y + max( (2*y)*nb,      3*y*y + 3*y + x ); }
+                                //else     { lwork = y*y + max( 3*y + max( (2*y)*nb, max( 3*y*y + 3*y + x, 3*y*y + 4*y )), y + x*nb ); }
+                            }
+                            else         { lwork =            3*y + max( (x+y)*nb, 3*y*y + 4*y ); }
+                        }
+                    #endif
+                    break;
+                }
+                
+                default: {
+                    fprintf( stderr, "Error: unknown option svd_work %d\n", opts.svd_work );
+                    exit(1);
+                    break;
+                }
+            }
+            
+            TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_CPU( VT,    magmaDoubleComplex, ldv*N );   // N x N (jobz=A) or min(M,N) x N
+            TESTING_MALLOC_CPU( U,     magmaDoubleComplex, ldu*N_U ); // M x M (jobz=A) or M x min(M,N)
+            TESTING_MALLOC_CPU( S1,    double, min_mn );
+            TESTING_MALLOC_CPU( S2,    double, min_mn );
+            TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
-            
-            // query for workspace size
-            lwork = -1;
-            magma_zgesdd( jobz, M, N,
-                          h_R, lda, S1, U, ldu, VT, ldv, dummy, lwork,
-                          #ifdef COMPLEX
-                          rwork,
-                          #endif
-                          iwork, &info );
-            lwork = (magma_int_t) MAGMA_Z_REAL( dummy[0] );
-            //printf( "lwork %d\n", lwork );
-            
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
+            
+            #ifdef COMPLEX
+                if (jobz == MagmaNoVec) {
+                    // requires  5*min_mn, but MKL (11.1) seems to have a bug
+                    // requiring 7*min_mn in some cases (e.g., jobz=N, m=100, n=170)
+                    lrwork = 7*min_mn;
+                }
+                else if (tall) {
+                    lrwork = 5*min_mn*min_mn + 5*min_mn;
+                }
+                else {
+                    lrwork = max( 5*min_mn*min_mn + 5*min_mn,
+                                  2*max_mn*min_mn + 2*min_mn*min_mn + min_mn );
+                }
+                TESTING_MALLOC_CPU( rwork, double, lrwork );
+            #endif
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -140,7 +229,7 @@ int main( int argc, char** argv)
             if (info != 0)
                 printf("magma_zgesdd returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-            
+
             double eps = lapackf77_dlamch( "E" );
             double result[5] = { -1/eps, -1/eps, -1/eps, -1/eps, -1/eps };
             if ( opts.check ) {
@@ -154,14 +243,9 @@ int main( int argc, char** argv)
                           (Return 0 if true, 1/ULP if false.)
                    =================================================================== */
                 magma_int_t izero = 0;
-                magmaDoubleComplex *h_work_err;
-                magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
-                TESTING_MALLOC_CPU( h_work_err, magmaDoubleComplex, lwork_err );
                 
                 // get size and location of U and V^T depending on jobz
                 // U2=NULL and VT2=NULL if they were not computed (e.g., jobz=N)
-                magma_int_t M2 = (jobz == MagmaAllVec ? M : min_mn);
-                magma_int_t N2 = (jobz == MagmaAllVec ? N : min_mn);
                 magmaDoubleComplex *U2  = NULL;
                 magmaDoubleComplex *VT2 = NULL;
                 if ( jobz == MagmaSomeVec || jobz == MagmaAllVec ) {
@@ -181,33 +265,46 @@ int main( int argc, char** argv)
                     }
                 }
                 
-                // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
-                #ifdef COMPLEX
+                // zbdt01 needs M+N
+                // zunt01 prefers N*(N+1) to check U; M*(M+1) to check V
+                magma_int_t lwork_err = M+N;
+                if ( U2 != NULL ) {
+                    lwork_err = max( lwork_err, N_U*(N_U+1) );
+                }
+                if ( VT2 != NULL ) {
+                    lwork_err = max( lwork_err, M_VT*(M_VT+1) );
+                }
+                magmaDoubleComplex *h_work_err;
+                TESTING_MALLOC_CPU( h_work_err, magmaDoubleComplex, lwork_err );
+                
+                // zbdt01 and zunt01 need max(M,N), depending
+                double *rwork_err;
+                TESTING_MALLOC_CPU( rwork_err, double, max(M,N) );
+                
                 if ( U2 != NULL && VT2 != NULL ) {
+                    // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
                     lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
                                      U2, &ldu, S1, NULL, VT2, &ldv,
-                                     h_work_err, rwork, &result[0]);
+                                     h_work_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[0]);
                 }
                 if ( U2 != NULL ) {
-                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, rwork, &result[1]);
+                    lapackf77_zunt01("Columns", &M,  &N_U, U2,  &ldu, h_work_err, &lwork_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[1]);
                 }
                 if ( VT2 != NULL ) {
-                    lapackf77_zunt01(   "Rows", &N2, &N, VT2, &ldv, h_work_err, &lwork_err, rwork, &result[2]);
+                    lapackf77_zunt01("Rows",    &M_VT, &N, VT2, &ldv, h_work_err, &lwork_err,
+                                     #ifdef COMPLEX
+                                     rwork_err,
+                                     #endif
+                                     &result[2]);
                 }
-                #else
-                if ( U2 != NULL && VT2 != NULL ) {
-                    lapackf77_zbdt01(&M, &N, &izero, h_A, &lda,
-                                      U2, &ldu, S1, NULL, VT2, &ldv,
-                                      h_work_err, &result[0]);
-                }
-                if ( U2 != NULL ) {
-                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, &result[1]);
-                }
-                if ( VT2 != NULL ) {
-                    // this step may be really slow for large N
-                    lapackf77_zunt01(   "Rows", &N2, &N, VT2, &ldv, h_work_err, &lwork_err, &result[2]);
-                }
-                #endif
                 
                 result[3] = 0.;
                 for(int j=0; j < min_mn-1; j++){
@@ -224,6 +321,7 @@ int main( int argc, char** argv)
                 result[2] *= eps;
                 
                 TESTING_FREE_CPU( h_work_err );
+                TESTING_FREE_CPU( rwork_err );
             }
             
             /* =====================================================================

@@ -27,6 +27,7 @@
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesvd (SVD with QR iteration)
+      Please keep code in testing_zgesdd.cpp and testing_zgesvd.cpp similar.
 */
 int main( int argc, char** argv)
 {
