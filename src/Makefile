@@ -223,6 +223,13 @@ ZSRC += \
 	zgehrd2.cpp		\
 	zlahr2.cpp		\
 	zlahru.cpp		\
+	dlaln2.cpp		\
+	dlaqtrsd.cpp		\
+	zlatrsd.cpp		\
+	dtrevc3.cpp		\
+	dtrevc3_mt.cpp		\
+	ztrevc3.cpp		\
+	ztrevc3_mt.cpp		\
 	zunghr.cpp		\
 	lapack_dtrevc3.f	\
 	lapack_ztrevc3.f	\

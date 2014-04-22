@@ -24,8 +24,11 @@
 /*
  * TREVC version 1 - LAPACK
  * TREVC version 2 - new blocked LAPACK
+ * TREVC version 3 - blocked, single-threaded (MAGMA)
+ * TREVC version 4 - blocked, multi-threaded  (MAGMA)
+ * TREVC version 5 - blocked, multi-threaded, GPU (MAGMA)
  */
-#define TREVC_VERSION 2
+#define TREVC_VERSION 3
 
 /**
     Purpose
@@ -142,16 +145,15 @@ magma_zgeev(
     magma_int_t c_zero = 0;
     
     double d__1, d__2;
-    magmaDoubleComplex z__1, z__2;
     magmaDoubleComplex tmp;
     double scl;
     double dum[1], eps;
     double anrm, cscale, bignum, smlnum;
     magma_int_t i, k, ilo, ihi;
-    magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, i__1, i__2, nb;
+    magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, nb;
     magma_int_t scalea, minwrk, irwork, lquery, wantvl, wantvr, select[1];
 
-    const char* side_  = NULL;
+    magma_side_t side;
 
     irwork = 0;
     *info = 0;
@@ -228,13 +230,15 @@ magma_zgeev(
 
     /* Balance the matrix
      * (CWorkspace: none)
-     * (RWorkspace: need N) */
+     * (RWorkspace: need N)
+     *  - this space is reserved until after gebak */
     ibal = 0;
     lapackf77_zgebal( "B", &n, A, &lda, &ilo, &ihi, &rwork[ibal], &ierr );
 
     /* Reduce to upper Hessenberg form
      * (CWorkspace: need 2*N, prefer N + N*NB)
-     * (RWorkspace: none) */
+     * (RWorkspace: N)
+     *  - including N reserved for gebal/gebak, unused by zgehrd */
     itau = 0;
     iwrk = itau + n;
     liwrk = lwork - iwrk;
@@ -256,12 +260,13 @@ magma_zgeev(
     if (wantvl) {
         /* Want left eigenvectors
          * Copy Householder vectors to VL */
-        side_ = "Left";
+        side = MagmaLeft;
         lapackf77_zlacpy( MagmaLowerStr, &n, &n, A, &lda, VL, &ldvl );
 
         /* Generate unitary matrix in VL
          * (CWorkspace: need 2*N-1, prefer N + (N-1)*NB)
-         * (RWorkspace: none) */
+         * (RWorkspace: N)
+         *  - including N reserved for gebal/gebak, unused by zunghr */
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
             lapackf77_zunghr( &n, &ilo, &ihi, VL, &ldvl, &work[itau],
@@ -273,7 +278,8 @@ magma_zgeev(
 
         /* Perform QR iteration, accumulating Schur vectors in VL
          * (CWorkspace: need 1, prefer HSWORK (see comments) )
-         * (RWorkspace: none) */
+         * (RWorkspace: N)
+         *  - including N reserved for gebal/gebak, unused by zhseqr */
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, W,
@@ -282,19 +288,20 @@ magma_zgeev(
         if (wantvr) {
             /* Want left and right eigenvectors
              * Copy Schur vectors to VR */
-            side_ = "Both";
+            side = MagmaBothSides;
             lapackf77_zlacpy( "F", &n, &n, VL, &ldvl, VR, &ldvr );
         }
     }
     else if (wantvr) {
         /* Want right eigenvectors
          * Copy Householder vectors to VR */
-        side_ = "Right";
+        side = MagmaRight;
         lapackf77_zlacpy( "L", &n, &n, A, &lda, VR, &ldvr );
 
         /* Generate unitary matrix in VR
          * (CWorkspace: need 2*N-1, prefer N + (N-1)*NB)
-         * (RWorkspace: none) */
+         * (RWorkspace: N)
+         *  - including N reserved for gebal/gebak, unused by zunghr */
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
             lapackf77_zunghr( &n, &ilo, &ihi, VR, &ldvr, &work[itau],
@@ -306,7 +313,8 @@ magma_zgeev(
 
         /* Perform QR iteration, accumulating Schur vectors in VR
          * (CWorkspace: need 1, prefer HSWORK (see comments) )
-         * (RWorkspace: none) */
+         * (RWorkspace: N)
+         *  - including N reserved for gebal/gebak, unused by zhseqr */
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, W,
@@ -315,7 +323,8 @@ magma_zgeev(
     else {
         /* Compute eigenvalues only
          * (CWorkspace: need 1, prefer HSWORK (see comments) )
-         * (RWorkspace: none) */
+         * (RWorkspace: N)
+         *  - including N reserved for gebal/gebak, unused by zhseqr */
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_zhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, W,
@@ -330,15 +339,27 @@ magma_zgeev(
     if (wantvl || wantvr) {
         /* Compute left and/or right eigenvectors
          * (CWorkspace: need 2*N)
-         * (RWorkspace: need 2*N) */
+         * (RWorkspace: need 2*N)
+         *  - including N reserved for gebal/gebak, unused by ztrevc */
         irwork = ibal + n;
         #if TREVC_VERSION == 1
-        lapackf77_ztrevc( side_, "B", select, &n, A, &lda, VL, &ldvl,
+        lapackf77_ztrevc( lapack_side_const(side), "B", select, &n, A, &lda, VL, &ldvl,
                           VR, &ldvr, &n, &nout, &work[iwrk], &rwork[irwork], &ierr );
         #elif TREVC_VERSION == 2
         liwrk = lwork - iwrk;
-        lapackf77_ztrevc3( side_, "B", select, &n, A, &lda, VL, &ldvl,
+        lapackf77_ztrevc3( lapack_side_const(side), "B", select, &n, A, &lda, VL, &ldvl,
                            VR, &ldvr, &n, &nout, &work[iwrk], &liwrk, &rwork[irwork], &ierr );
+        #elif TREVC_VERSION == 3
+        magma_ztrevc3( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                       VR, ldvr, n, &nout, &work[iwrk], liwrk, &rwork[irwork], &ierr );
+        #elif TREVC_VERSION == 4
+        magma_ztrevc3_mt( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                          VR, ldvr, n, &nout, &work[iwrk], liwrk, &rwork[irwork], &ierr );
+        #elif TREVC_VERSION == 5
+        magma_ztrevc3_mt_gpu( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                              VR, ldvr, n, &nout, &work[iwrk], liwrk, &rwork[irwork], &ierr );
+        #else
+        #error Unknown TREVC_VERSION
         #endif
     }
 
@@ -360,14 +381,9 @@ magma_zgeev(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = cblas_idamax( n, &rwork[irwork], 1 );
-            z__2 = MAGMA_Z_CNJG( *VL(k,i) );
-            d__1 = magma_dsqrt( rwork[irwork + k] );
-            MAGMA_Z_DSCALE( z__1, z__2, d__1 );
-            tmp = z__1;
+            tmp = MAGMA_Z_CNJG( *VL(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             cblas_zscal( n, CBLAS_SADDR(tmp), VL(0,i), 1 );
-            d__1 = MAGMA_Z_REAL( *VL(k,i) );
-            z__1 = MAGMA_Z_MAKE( d__1, 0 );
-            *VL(k,i) = z__1;
+            *VL(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VL(k,i) ), 0. );
         }
     }
 
@@ -389,28 +405,24 @@ magma_zgeev(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = cblas_idamax( n, &rwork[irwork], 1 );
-            z__2 = MAGMA_Z_CNJG( *VR(k,i) );
-            d__1 = magma_dsqrt( rwork[irwork + k] );
-            MAGMA_Z_DSCALE( z__1, z__2, d__1 );
-            tmp = z__1;
+            tmp = MAGMA_Z_CNJG( *VR(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             cblas_zscal( n, CBLAS_SADDR(tmp), VR(0,i), 1 );
-            d__1 = MAGMA_Z_REAL( *VR(k,i) );
-            z__1 = MAGMA_Z_MAKE( d__1, 0 );
-            *VR(k,i) = z__1;
+            *VR(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VR(k,i) ), 0. );
         }
     }
 
 CLEANUP:
     /* Undo scaling if necessary */
     if (scalea) {
-        i__1 = n - (*info);
-        i__2 = max( n - (*info), 1 );
-        lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                          W + (*info), &i__2, &ierr );
+        // converged eigenvalues, stored in WR[i+1:n] and WI[i+1:n] for i = INFO
+        magma_int_t nval = n - (*info);
+        magma_int_t ld   = max( nval, 1 );
+        lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &nval, &c_one, W + (*info), &ld, &ierr );
         if (*info > 0) {
-            i__1 = ilo - 1;
-            lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                              W, &n, &ierr );
+            // first ilo columns were already upper triangular,
+            // so the corresponding eigenvalues are also valid.
+            nval = ilo - 1;
+            lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &nval, &c_one, W, &n, &ierr );
         }
     }
 
@@ -418,5 +430,7 @@ CLEANUP:
     magma_free( dT );
     #endif
     
+    work[0] = MAGMA_Z_MAKE( (double) minwrk, 0. );  // TODO use optwrk as in dgeev
+
     return *info;
 } /* magma_zgeev */

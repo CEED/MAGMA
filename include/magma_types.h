@@ -29,17 +29,12 @@
 
 // ========================================
 // To use int64_t, link with mkl_intel_ilp64 or similar (instead of mkl_intel_lp64).
-#if defined(MAGMA_ILP64) || defined(MKL_ILP64)
-typedef int64_t magma_int_t;
-#else
-typedef int magma_int_t;
-#endif
-
-// ========================================
 // Similar to magma_int_t we declare magma_index_t used for row/column indices in sparse
 #if defined(MAGMA_ILP64) || defined(MKL_ILP64)
+typedef int64_t magma_int_t;
 typedef int64_t magma_index_t;
 #else
+typedef int magma_int_t;
 typedef int magma_index_t;
 #endif
 
@@ -70,6 +65,7 @@ typedef double real_Double_t;
     #define MAGMA_Z_MUL(a, b)     cuCmul(a, b)
     #define MAGMA_Z_DIV(a, b)     cuCdiv(a, b)
     #define MAGMA_Z_ABS(a)        cuCabs(a)
+    #define MAGMA_Z_ABS1(a)       (fabs((a).x) + fabs((a).y))
     #define MAGMA_Z_CNJG(a)       cuConj(a)
     #define MAGMA_Z_DSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
@@ -81,6 +77,7 @@ typedef double real_Double_t;
     #define MAGMA_C_MUL(a, b)     cuCmulf(a, b)
     #define MAGMA_C_DIV(a, b)     cuCdivf(a, b)
     #define MAGMA_C_ABS(a)        cuCabsf(a)
+    #define MAGMA_C_ABS1(a)       (fabsf((a).x) + fabsf((a).y))
     #define MAGMA_C_CNJG(a)       cuConjf(a)
     #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
@@ -104,6 +101,7 @@ typedef double real_Double_t;
     #define MAGMA_Z_ADD(a, b)     MAGMA_Z_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_Z_SUB(a, b)     MAGMA_Z_MAKE((a).x-(b).x, (a).y-(b).y)
     #define MAGMA_Z_ABS(a)        magma_cabs(a)
+    #define MAGMA_Z_ABS1(a)       (fabs((a).x) + fabs((a).y))
     #define MAGMA_Z_CNJG(a)       MAGMA_Z_MAKE((a).x, -(a).y)
     #define MAGMA_Z_DSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
@@ -113,6 +111,7 @@ typedef double real_Double_t;
     #define MAGMA_C_ADD(a, b)     MAGMA_C_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_C_SUB(a, b)     MAGMA_C_MAKE((a).x-(b).x, (a).y-(b).y)
     #define MAGMA_C_ABS(a)        magma_cabsf(a)
+    #define MAGMA_C_ABS1(a)       (fabsf((a).x) + fabsf((a).y))
     #define MAGMA_C_CNJG(a)       MAGMA_C_MAKE((a).x, -(a).y)
     #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
 
@@ -173,7 +172,8 @@ typedef double real_Double_t;
 #define MAGMA_D_SUB(a, b)         ((a) - (b))
 #define MAGMA_D_MUL(a, b)         ((a) * (b))
 #define MAGMA_D_DIV(a, b)         ((a) / (b))
-#define MAGMA_D_ABS(a)            ((a)>0?(a):-(a))
+#define MAGMA_D_ABS(a)            ((a)>0 ? (a) : -(a))
+#define MAGMA_D_ABS1(a)           ((a)>0 ? (a) : -(a))
 #define MAGMA_D_CNJG(a)           (a)
 #define MAGMA_D_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_D_NEGATE(a)         (-a)
@@ -186,7 +186,8 @@ typedef double real_Double_t;
 #define MAGMA_S_SUB(a, b)         ((a) - (b))
 #define MAGMA_S_MUL(a, b)         ((a) * (b))
 #define MAGMA_S_DIV(a, b)         ((a) / (b))
-#define MAGMA_S_ABS(a)            ((a)>0?(a):-(a))
+#define MAGMA_S_ABS(a)            ((a)>0 ? (a) : -(a))
+#define MAGMA_D_ABS1(a)           ((a)>0 ? (a) : -(a))
 #define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_S_NEGATE(a)         (-a)
@@ -232,6 +233,7 @@ typedef double real_Double_t;
     
     typedef cl_mem magma_const_ptr;
     typedef cl_mem magmaInt_const_ptr;
+    typedef cl_mem magmaIndex_const_ptr;
     typedef cl_mem magmaFloat_const_ptr;
     typedef cl_mem magmaDouble_const_ptr;
     typedef cl_mem magmaFloatComplex_const_ptr;
@@ -298,6 +300,12 @@ typedef double real_Double_t;
 // ----------------------------------------
 // parameter constants
 // numbering is consistent with CBLAS and PLASMA; see plasma/include/plasma.h
+// also with lapack_cwrapper/include/lapack_enum.h
+typedef enum {
+    MagmaFalse         = 0,
+    MagmaTrue          = 1
+} magma_bool_t;
+
 typedef enum {
     MagmaRowMajor      = 101,
     MagmaColMajor      = 102
@@ -368,9 +376,10 @@ typedef enum {
     MagmaNoVec         = 301,  /* geev, syev, gesvd */
     MagmaVec           = 302,  /* geev, syev */
     MagmaIVec          = 303,  /* stedc */
-    MagmaAllVec        = 304,  /* gesvd */
-    MagmaSomeVec       = 305,  /* gesvd */
-    MagmaOverwriteVec  = 306   /* gesvd */
+    MagmaAllVec        = 304,  /* gesvd, trevc */
+    MagmaSomeVec       = 305,  /* gesvd, trevc */
+    MagmaOverwriteVec  = 306,  /* gesvd */
+    MagmaBacktransVec  = 307   /* trevc */
 } magma_vec_t;
 
 typedef enum {

@@ -48,6 +48,7 @@ extern "C" {
 
 #define lapackf77_dlaed2   FORTRAN_NAME( dlaed2, DLAED2 )
 #define lapackf77_dlaed4   FORTRAN_NAME( dlaed4, DLAED4 )
+#define lapackf77_dlaln2   FORTRAN_NAME( dlaln2, DLALN2 )
 #define lapackf77_dlamc3   FORTRAN_NAME( dlamc3, DLAMC3 )
 #define lapackf77_dlamrg   FORTRAN_NAME( dlamrg, DLAMRG )
 #define lapackf77_dlasrt   FORTRAN_NAME( dlasrt, DLASRT )
@@ -110,6 +111,7 @@ extern "C" {
 #define lapackf77_zlaset   FORTRAN_NAME( zlaset, ZLASET )
 #define lapackf77_zlaswp   FORTRAN_NAME( zlaswp, ZLASWP )
 #define lapackf77_zlatrd   FORTRAN_NAME( zlatrd, ZLATRD )
+#define lapackf77_zlatrs   FORTRAN_NAME( zlatrs, ZLATRS )
 #define lapackf77_zlauum   FORTRAN_NAME( zlauum, ZLAUUM )
 #define lapackf77_zlavhe   FORTRAN_NAME( zlavhe, ZLAVHE )
 #define lapackf77_zposv    FORTRAN_NAME( zposv,  ZPOSV  )
@@ -603,9 +605,15 @@ void   lapackf77_zlacrm( const magma_int_t *m, const magma_int_t *n,
                          double *rwork );
 #endif
 
+#ifdef COMPLEX
 void   lapackf77_zladiv( magmaDoubleComplex *ret_val,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y );
+#else // REAL
+void   lapackf77_zladiv( const double *a, const double *b,
+                         const double *c, const double *d,
+                         double *p, double *q );
+#endif
 
 void   lapackf77_zlahef( const char *uplo,
                          const magma_int_t *n, const magma_int_t *kn,
@@ -706,6 +714,13 @@ void   lapackf77_zlatrd( const char *uplo,
                          double *e,
                          magmaDoubleComplex *tau,
                          magmaDoubleComplex *work, const magma_int_t *ldwork );
+
+void   lapackf77_zlatrs( const char *uplo, const char *trans, const char *diag,
+                         const char *normin,
+                         const magma_int_t *n,
+                         const magmaDoubleComplex *A, const magma_int_t *lda,
+                         magmaDoubleComplex *x, double *scale,
+                         double *cnorm, magma_int_t *info );
 
 void   lapackf77_zlauum( const char *uplo,
                          const magma_int_t *n,
@@ -930,6 +945,16 @@ void   lapackf77_dstebz( const char *range, const char *order,
                          double *work,
                          magma_int_t *iwork,
                          magma_int_t *info );
+
+void   lapackf77_dlaln2( const magma_int_t *ltrans,
+                         const magma_int_t *na, const magma_int_t *nw,
+                         const double *smin, const double *ca,
+                         const double *a,  const magma_int_t *lda,
+                         const double *d1, const double *d2,
+                         const double *b,  const magma_int_t *ldb,
+                         const double *wr, const double *wi,
+                         double *x, const magma_int_t *ldx,
+                         double *scale, double *xnorm, magma_int_t *info );
 
 double lapackf77_dlamc3( double *a, double *b );
 
