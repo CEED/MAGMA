@@ -55,19 +55,9 @@ zclaswp_inv_kernel(int n, magmaDoubleComplex *a, int lda, magmaFloatComplex *sa,
 }
 
 
-extern "C" void
-magmablas_zclaswp( magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
-                   magmaFloatComplex *sa, magma_int_t m,
-                   const magma_int_t *ipiv, magma_int_t incx )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     Row i of A is cast to single precision in row ipiv[i] of SA, for 0 <= i < M.
 
     N      - (input) INTEGER.
@@ -91,8 +81,14 @@ magmablas_zclaswp( magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
     INCX   - (input) INTEGER
              If IPIV is negative, the pivots are applied in reverse 
              order, otherwise in straight-forward order.
-    ===================================================================== */
 
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zclaswp( magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
+                   magmaFloatComplex *sa, magma_int_t m,
+                   const magma_int_t *ipiv, magma_int_t incx )
+{
     int blocks = (m - 1)/num_threadzc + 1;
     dim3 grid(blocks, 1, 1);
     dim3 threazc(num_threadzc, 1, 1);

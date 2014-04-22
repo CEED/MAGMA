@@ -10,23 +10,9 @@
 #include "common_magma.h"
 #include "commonblas_d.h"
 
-extern "C" void
-magmablas_dgemm_tesla(
-    magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k,
-    double alpha,
-    const double *A, magma_int_t lda,
-    const double *B, magma_int_t ldb,
-    double beta,
-    double *C, magma_int_t ldc )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     DGEMM performs one of the matrix-matrix operations
     
@@ -40,88 +26,105 @@ magmablas_dgemm_tesla(
     an m by k matrix,  op( B ) a k by n matrix and C an m by n matrix.
     
     Parameters
-    ==========
+    ----------
     
-    transA  (input) CHARACTER*1.
+    @param[in]
+    transA  CHARACTER*1.
             On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
+      -     = 'N':  op( A ) = A.
+      -     = 'T':  op( A ) = A**T.
+      -     = 'C':  op( A ) = A**T.
     
-                transA = 'N' or 'n',  op( A ) = A.
-    
-                transA = 'T' or 't',  op( A ) = A**T.
-    
-                transA = 'C' or 'c',  op( A ) = A**T.
-    
-    transB  (input) CHARACTER*1.
+    @param[in]
+    transB  CHARACTER*1.
             On entry, transB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
+      -     = 'N':  op( B ) = B.
+      -     = 'T':  op( B ) = B**T.
+      -     = 'C':  op( B ) = B**T.
     
-                transB = 'N' or 'n',  op( B ) = B.
-    
-                transB = 'T' or 't',  op( B ) = B**T.
-    
-                transB = 'C' or 'c',  op( B ) = B**T.
-    
-    M       (input) INTEGER.
+    @param[in]
+    m       INTEGER.
             On entry,  M  specifies  the number  of rows  of the  matrix
             op( A )  and of the  matrix  C.  M  must  be at least  zero.
     
-    N       (input) INTEGER.
+    @param[in]
+    n       INTEGER.
             On entry,  N  specifies the number  of columns of the matrix
             op( B ) and the number of columns of the matrix C. N must be
             at least zero.
     
-    K       (input) INTEGER.
+    @param[in]
+    k       INTEGER.
             On entry,  K  specifies  the number of columns of the matrix
             op( A ) and the number of rows of the matrix op( B ). K must
             be at least  zero.
     
-    ALPHA   (input) DOUBLE PRECISION.
+    @param[in]
+    alpha   DOUBLE PRECISION.
             On entry, ALPHA specifies the scalar alpha.
     
-    A       (input) DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
+    @param[in]
+    A       DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
             k  when  transA = 'N' or 'n',  and is  m  otherwise.
             Before entry with  transA = 'N' or 'n',  the leading  m by k
             part of the array  A  must contain the matrix  A,  otherwise
             the leading  k by m  part of the array  A  must contain  the
             matrix A.
     
-    LDA     (input) INTEGER.
+    @param[in]
+    lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program. When  transA = 'N' or 'n' then
             LDA must be at least  max( 1, m ), otherwise  LDA must be at
             least  max( 1, k ).
     
-    B       (input) DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
+    @param[in]
+    B       DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
             n  when  transB = 'N' or 'n',  and is  k  otherwise.
             Before entry with  transB = 'N' or 'n',  the leading  k by n
             part of the array  B  must contain the matrix  B,  otherwise
             the leading  n by k  part of the array  B  must contain  the
             matrix B.
     
-    LDB     (input) INTEGER.
+    @param[in]
+    ldb     INTEGER.
             On entry, LDB specifies the first dimension of B as declared
             in the calling (sub) program. When  transB = 'N' or 'n' then
             LDB must be at least  max( 1, k ), otherwise  LDB must be at
             least  max( 1, n ).
     
-    BETA    (input) DOUBLE PRECISION.
+    @param[in]
+    beta    DOUBLE PRECISION.
             On entry,  BETA  specifies the scalar  beta.  When  BETA  is
             supplied as zero then C need not be set on input.
     
-    C       (input,output) DOUBLE PRECISION array of DIMENSION ( LDC, n ).
+    @param[in,out]
+    C       DOUBLE PRECISION array of DIMENSION ( LDC, n ).
             Before entry, the leading  m by n  part of the array  C must
             contain the matrix  C,  except when  beta  is zero, in which
             case C need not be set on entry.
             On exit, the array  C  is overwritten by the  m by n  matrix
             ( alpha*op( A )*op( B ) + beta*C ).
     
-    LDC     (input) INTEGER.
+    @param[in]
+    ldc     INTEGER.
             On entry, LDC specifies the first dimension of C as declared
             in  the  calling  (sub)  program.   LDC  must  be  at  least
             max( 1, m ).
-    =====================================================================    */
 
+    @ingroup magma_dblas3
+    ********************************************************************/
+extern "C" void
+magmablas_dgemm_tesla(
+    magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k,
+    double alpha,
+    const double *A, magma_int_t lda,
+    const double *B, magma_int_t ldb,
+    double beta,
+    double *C, magma_int_t ldc )
+{
     if ( m == 0 || n == 0 || ((alpha == 0.0 || k == 0) && beta == 1.0) ) {
         return;
     }

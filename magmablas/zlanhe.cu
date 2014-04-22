@@ -761,10 +761,9 @@ zlanhe_max(
 
 
 /* ====================================================================== */
-/*
+/**
     Purpose
-    =======
-    
+    -------
     ZLANHE returns the value of the one norm, or the Frobenius norm, or
     the infinity norm, or the element of largest absolute value of a
     complex Hermitian matrix A.
@@ -785,22 +784,25 @@ zlanhe_max(
     Returns ZLANHE < 0: if ZLANHE = -i, the i-th argument had an illegal value.
     
     Arguments:
-    ==========
-    
-    NORM    (input) CHARACTER*1
+    ----------
+    @param[in]
+    norm    CHARACTER*1
             Specifies the value to be returned in ZLANHE as described above.
     
-    UPLO    (input) CHARACTER*1
+    @param[in]
+    uplo    CHARACTER*1
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is to be referenced.
-            = 'U': Upper triangular part of A is referenced
-            = 'L': Lower triangular part of A is referenced
+      -     = 'U': Upper triangular part of A is referenced
+      -     = 'L': Lower triangular part of A is referenced
     
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A. N >= 0. When N = 0, ZLANHE is
             set to zero.
     
-    A       (input) COMPLEX*16 array on the GPU, dimension (LDA,N)
+    @param[in]
+    A       COMPLEX*16 array on the GPU, dimension (LDA,N)
             The Hermitian matrix A. If UPLO = 'U', the leading n by n
             upper triangular part of A contains the upper triangular part
             of the matrix A, and the strictly lower triangular part of A
@@ -810,14 +812,18 @@ zlanhe_max(
             not referenced. Note that the imaginary parts of the diagonal
             elements need not be set and are assumed to be zero.
     
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A. LDA >= max(N,1).
     
-    DWORK   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),
+    @param
+    dwork   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),
             where LWORK >= N.
             NOTE: this is different than LAPACK, where WORK is only required
             for norm1 and normI.
-*/
+    
+    @ingroup magma_zaux2
+    ********************************************************************/
 
 extern "C" double
 magmablas_zlanhe(

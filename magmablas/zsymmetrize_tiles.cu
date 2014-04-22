@@ -67,36 +67,54 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
 }
 
 
+/**
+    Purpose
+    -------
+    
+    ZSYMMETRIZE_TILES copies lower triangle to upper triangle, or vice-versa,
+    to make some blocks of dA into general representations of a symmetric block.
+    This processes NTILE blocks, typically the diagonal blocks.
+    Each block is offset by mstride rows and nstride columns from the previous block.
+    
+    Arguments
+    ---------
+    
+    @param[in]
+    uplo    CHARACTER*1
+            Specifies the part of the matrix dA that is valid on input.
+      -     = 'U':      Upper triangular part
+      -     = 'L':      Lower triangular part
+    
+    @param[in]
+    m       INTEGER
+            The number of rows & columns of each square block of dA.  M >= 0.
+    
+    @param[in,out]
+    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+            The matrix dA. N = m + nstride*(ntile-1).
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1, m + mstride*(ntile-1)).
+    
+    @param[in]
+    ntile   INTEGER
+            Number of blocks to symmetrize.
+    
+    @param[in]
+    mstride INTEGER
+            Row offset from start of one block to start of next block.
+    
+    @param[in]
+    nstride INTEGER
+            Column offset from start of one block to start of next block.
+
+    @ingroup magma_zaux2
+    ********************************************************************/
 extern "C" void
 magmablas_zsymmetrize_tiles( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
                              magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
 {
-/*
-    Purpose
-    =======
-    
-    ZSYMMETRIZE copies lower triangle to upper triangle, or vice-versa,
-    to make dA a general representation of a symmetric matrix.
-    
-    Arguments
-    =========
-    
-    UPLO    (input) CHARACTER*1
-            Specifies the part of the matrix dA that is valid on input.
-            = 'U':      Upper triangular part
-            = 'L':      Lower triangular part
-    
-    M       (input) INTEGER
-            The number of rows of the matrix dA.  M >= 0.
-    
-    dA      (input/output) COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
-            The m by m matrix dA.
-    
-    LDDA    (input) INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,M).
-    
-    =====================================================================   */
-
     if ( m == 0 || ntile == 0 )
         return;
     

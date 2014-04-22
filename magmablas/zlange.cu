@@ -71,20 +71,15 @@ zlange_inf_kernel(
     }
 }
 
-extern "C" double
-magmablas_zlange(
-    magma_norm_t norm, magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *A, magma_int_t lda, double *dwork )
-{
-/*
+/**
     Purpose
-    =======
+    -------
     ZLANGE  returns the value of the one norm, or the Frobenius norm, or
     the  infinity norm, or the  element of  largest absolute value  of a
     real matrix A.
     
     Description
-    ===========
+    -----------
     ZLANGE returns the value
     
        ZLANGE = ( max(abs(A(i,j))), NORM = 'M' or 'm'            ** not yet supported
@@ -101,30 +96,42 @@ magmablas_zlange(
     squares). Note that max(abs(A(i,j))) is not a consistent matrix norm.
     
     Arguments
-    =========
-    NORM    (input) CHARACTER*1
+    ---------
+    @param[in]
+    norm    CHARACTER*1
             Specifies the value to be returned in ZLANGE as described
             above.
     
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.  When M = 0,
             ZLANGE is set to zero.
     
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.  When N = 0,
             ZLANGE is set to zero.
     
-    A       (input) DOUBLE PRECISION array on the GPU, dimension (LDA,N)
+    @param[in]
+    A       DOUBLE PRECISION array on the GPU, dimension (LDA,N)
             The m by n matrix A.
     
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(M,1).
     
-    DWORK   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),
+    @param
+    dwork   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),
             where LWORK >= M when NORM = 'I'; otherwise, WORK is not
             referenced.
-    ====================================================================  */
-    
+
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" double
+magmablas_zlange(
+    magma_norm_t norm, magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *A, magma_int_t lda, double *dwork )
+{
     magma_int_t info = 0;
     if ( norm != MagmaInfNorm )
         info = -1;

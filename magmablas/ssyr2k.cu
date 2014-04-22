@@ -1299,23 +1299,9 @@ ssyr2k_kernel_odd_special(
     }
 }
 
-extern "C" void
-magmablas_ssyr2k(
-    magma_uplo_t uplo, magma_trans_t trans, magma_int_t m, magma_int_t k,
-    float alpha,
-    const float *A, magma_int_t lda,
-    const float *B, magma_int_t ldb,
-    float beta,
-    float *C, magma_int_t ldc)
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     SSYR2K performs one of the symmetric rank 2k operations
         C := alpha*A*B^T + alpha*B*A^T + beta*C,
     or
@@ -1328,15 +1314,25 @@ magmablas_ssyr2k(
     This implementation is for UPLO == 'L' and TRANS == 'N'.
 
     Assumptions
-    ===========
+    -----------
     Both lda and ldb must be multiple of 32.
     Parameter k must be divisible by 8 - note that this algorithm was developed
     for the tridiagonal factorization and k in that case would be the blocking size.
     We always request the blocking size to be divisible by at least 16.
 
     This kernel goes to about 300 GFlop/s on the GTX280.
-    ====================================================================== */
 
+    @ingroup magma_sblas3
+    ********************************************************************/
+extern "C" void
+magmablas_ssyr2k(
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t m, magma_int_t k,
+    float alpha,
+    const float *A, magma_int_t lda,
+    const float *B, magma_int_t ldb,
+    float beta,
+    float *C, magma_int_t ldc)
+{
     magma_int_t in = m / block_M;
     magma_int_t flag = 1;
     if ( lda >= 1024 && lda % 256 == 0 )

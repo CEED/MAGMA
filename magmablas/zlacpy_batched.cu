@@ -47,6 +47,65 @@ zlacpy_batched_kernel(
 
 
 /* ===================================================================== */
+/**
+    Note
+    --------
+    - UPLO Parameter is disabled
+    - Do we want to provide a generic function to the user with all the options?
+    
+    Purpose
+    -------
+    ZLACPY copies all or part of a set of two-dimensional matrices dAarray[i]
+    to another set of matrices dBarray[i], for i = 0, ..., batchCount-1.
+    
+    Arguments
+    ---------
+    
+    @param[in]
+    uplo    CHARACTER*1
+            Specifies the part of each matrix dAarray[i] to be copied to dBarray[i].
+      -     = 'U':      Upper triangular part
+      -     = 'L':      Lower triangular part
+            Otherwise:  All of each matrix dAarray[i]
+    
+    @param[in]
+    m       INTEGER
+            The number of rows of each matrix dAarray[i].  M >= 0.
+    
+    @param[in]
+    n       INTEGER
+            The number of columns of each matrix dAarray[i].  N >= 0.
+    
+    @param[in]
+    dAarray array on GPU, dimension(batchCount), of pointers to arrays,
+            with each array a COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+            The m by n matrices dAarray[i].
+            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
+            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of each array dAarray[i].  LDDA >= max(1,M).
+    
+    @param[out]
+    dBarray array on GPU, dimension(batchCount), of pointers to arrays,
+            with each array a COMPLEX DOUBLE PRECISION array, dimension (LDDB,N)
+            The m by n matrices dBarray[i].
+            On exit, matrix dBarray[i] = matrix dAarray[i] in the locations
+            specified by UPLO.
+    
+    @param[in]
+    lddb    INTEGER
+            The leading dimension of each array dBarray[i].  LDDB >= max(1,M).
+    
+    @param[in]
+    batchCount INTEGER
+            The number of matrices to add; length of dAarray and dBarray.
+            batchCount >= 0.
+    
+
+    @ingroup magma_zaux2
+    ********************************************************************/
 extern "C" void
 magmablas_zlacpy_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
@@ -54,56 +113,6 @@ magmablas_zlacpy_batched(
     magmaDoubleComplex              **dBarray, magma_int_t lddb,
     magma_int_t batchCount )
 {
-/*
-      Note
-    ========
-    - UPLO Parameter is disabled
-    - Do we want to provide a generic function to the user with all the options?
-    
-    Purpose
-    =======
-    ZLACPY copies all or part of a set of two-dimensional matrices dAarray[i]
-    to another set of matrices dBarray[i], for i = 0, ..., batchCount-1.
-    
-    Arguments
-    =========
-    
-    UPLO    (input) CHARACTER*1
-            Specifies the part of each matrix dAarray[i] to be copied to dBarray[i].
-            = 'U':      Upper triangular part
-            = 'L':      Lower triangular part
-            Otherwise:  All of each matrix dAarray[i]
-    
-    M       (input) INTEGER
-            The number of rows of each matrix dAarray[i].  M >= 0.
-    
-    N       (input) INTEGER
-            The number of columns of each matrix dAarray[i].  N >= 0.
-    
-    dAarray (input) array on GPU, dimension(batchCount), of pointers to arrays,
-            with each array a COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
-            The m by n matrices dAarray[i].
-            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
-            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
-    
-    LDDA    (input) INTEGER
-            The leading dimension of each array dAarray[i].  LDDA >= max(1,M).
-    
-    dBarray (output) array on GPU, dimension(batchCount), of pointers to arrays,
-            with each array a COMPLEX DOUBLE PRECISION array, dimension (LDDB,N)
-            The m by n matrices dBarray[i].
-            On exit, matrix dBarray[i] = matrix dAarray[i] in the locations
-            specified by UPLO.
-    
-    LDDB    (input) INTEGER
-            The leading dimension of each array dBarray[i].  LDDB >= max(1,M).
-    
-    batchCount (input) INTEGER
-            The number of matrices to add; length of dAarray and dBarray.
-            batchCount >= 0.
-    
-    =====================================================================   */
-
     magma_int_t info = 0;
     if ( m < 0 )
         info = -2;

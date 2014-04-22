@@ -95,6 +95,44 @@ zgemvn_kernel2_fermi(
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
 
+/**
+    Purpose
+    -------
+
+    This routine computes Y = alpha A x + beta y, on the GPU.
+
+    @param[in]
+    m       INTEGER.
+            On entry, M specifies the number of rows of the matrix A.
+
+    @param[in]
+    n       INTEGER.
+            On entry, N specifies the number of columns of the matrix A
+
+    @param[in]
+    alpha   COMPLEX*16.
+            On entry, ALPHA specifies the scalar alpha.
+
+    @param[in]
+    A       COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
+   
+    @param[in]
+    lda     INTEGER.
+            LDA specifies the leading dimension of A.
+
+    @param[in]
+    x       COMPLEX*16 array of dimension n.
+
+    @param[in]
+    beta    DOUBLE PRECISION.
+            On entry, BETA specifies the scalar beta.
+
+    @param[out]
+    y       COMPLEX*16 array of dimension n.
+            On exit Y = alpha A X + beta Y.
+
+    @ingroup magma_zblas2
+    ********************************************************************/
 extern "C" void
 magmablas_zgemvn_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
@@ -102,35 +140,6 @@ magmablas_zgemvn_fermi(
     const magmaDoubleComplex *x, magmaDoubleComplex beta,
     magmaDoubleComplex       *y)
 {
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-    Purpose
-    =======
-
-    This routine computes Y = alpha A x on the GPU.
-
-    M       (input) INTEGER.
-            On entry, M specifies the number of rows of the matrix A.
-
-    N       (input) INTEGER.
-            On entry, N specifies the number of columns of the matrix A
-
-    A       (input) COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
-   
-    LDA     (input) INTEGER.
-            LDA specifies the leading dimension of A.
-
-    X       (input) COMPLEX*16 array of dimension n.
-     
-    Y       (output) COMPLEX*16 array of dimension n.
-            On exit Y = alpha A X.
-
-    ===================================================================== */
-
     magma_int_t blocks = (m - 1)/num_threads + 1;
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
@@ -200,6 +209,45 @@ zgemvt_kernel_fermi(
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
 
+
+/**
+    Purpose
+    -------
+
+    This routine computes y = alpha * A^T * x + beta*y, on the GPU.
+
+    @param[in]
+    m       INTEGER.
+            On entry, M specifies the number of rows of the matrix A.
+
+    @param[in]
+    n       INTEGER.
+            On entry, N specifies the number of columns of the matrix A
+
+    @param[in]
+    alpha   COMPLEX*16.
+            On entry, ALPHA specifies the scalar alpha.
+
+    @param[in]
+    A       COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
+
+    @param[in]
+    lda     INTEGER.
+            LDA specifies the leading dimension of A.
+
+    @param[in]
+    x       COMPLEX*16 array of dimension m.
+
+    @param[in]
+    beta    COMPLEX*16.
+            On entry, BETA specifies the scalar beta.
+
+    @param[out]
+    y       COMPLEX*16 array of dimension n.
+            On exit Y = alpha A^T X + beta Y.
+
+    @ingroup magma_zblas2
+    ********************************************************************/
 extern "C" void
 magmablas_zgemvt_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
@@ -207,35 +255,6 @@ magmablas_zgemvt_fermi(
     const magmaDoubleComplex *x, magmaDoubleComplex beta,
     magmaDoubleComplex       *y)
 {
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-    Purpose
-    =======
-
-    This routine computes y = alpha * A^T * x on the GPU.
-
-    M       (input) INTEGER.
-            On entry, M specifies the number of rows of the matrix A.
-
-    N       (input) INTEGER.
-            On entry, N specifies the number of columns of the matrix A
-
-    A       (input) COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
-
-    LDA     (input) INTEGER.
-            LDA specifies the leading dimension of A.
-
-    X       (input) COMPLEX*16 array of dimension m.
-
-    Y       (output) COMPLEX*16 array of dimension n.
-            On exit Y = alpha A^T X.
-
-    ===================================================================== */
-
     dim3 grid    ( 1, n, 1 );
     dim3 threads ( threadSize, 1, 1 );
     zgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>
@@ -303,6 +322,45 @@ zgemvc_kernel_fermi(
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
 
+
+/**
+    Purpose
+    -------
+
+    This routine computes y = alpha * A^H * x + beta*y, on the GPU.
+
+    @param[in]
+    m       INTEGER.
+            On entry, M specifies the number of rows of the matrix A.
+
+    @param[in]
+    n       INTEGER.
+            On entry, N specifies the number of columns of the matrix A
+
+    @param[in]
+    alpha   COMPLEX*16.
+            On entry, ALPHA specifies the scalar alpha.
+
+    @param[in]
+    A       COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
+
+    @param[in]
+    lda     INTEGER.
+            LDA specifies the leading dimension of A.
+
+    @param[in]
+    x       COMPLEX*16 array of dimension m.
+
+    @param[in]
+    beta    COMPLEX*16.
+            On entry, BETA specifies the scalar beta.
+
+    @param[out]
+    y       COMPLEX*16 array of dimension n.
+            On exit Y = alpha A^H X + beta y.
+
+    @ingroup magma_zblas2
+    ********************************************************************/
 extern "C" void
 magmablas_zgemvc_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
@@ -311,35 +369,6 @@ magmablas_zgemvc_fermi(
     magmaDoubleComplex beta,
     magmaDoubleComplex *y)
 {
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-    Purpose
-    =======
-
-    This routine computes y = alpha * A^H * x on the GPU.
-
-    M       (input) INTEGER.
-            On entry, M specifies the number of rows of the matrix A.
-
-    N       (input) INTEGER.
-            On entry, N specifies the number of columns of the matrix A
-
-    A       (input) COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
-
-    LDA     (input) INTEGER.
-            LDA specifies the leading dimension of A.
-
-    X       (input) COMPLEX*16 array of dimension m.
-
-    Y       (output) COMPLEX*16 array of dimension n.
-            On exit Y = alpha A^H X.
-
-    ===================================================================== */
-
     dim3 grid    ( 1, n, 1 );
     dim3 threads ( threadSize, 1, 1 );
     zgemvc_kernel_fermi<<< grid, threads, 0, magma_stream >>>

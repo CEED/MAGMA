@@ -721,11 +721,9 @@ void magmablas_csymv_tesla_L(
         (n, alpha, A, lda, x, incx, beta, y, incy, dwork);
 }
 
-/*************************************************************************
-
+/**
     Purpose
-    =======
-
+    -------
     magmablas_csymv_work performs the matrix-vector operation:
 
         y := alpha*A*x + beta*y,
@@ -753,8 +751,8 @@ void magmablas_csymv_tesla_L(
     As the overhead of allocating and free in device memory in magmablas_csymv would hurt performance.
     Our tests show that this penalty is about 10Gflop/s when matrix size is around 10000.
     
-*/
-
+    @ingroup magma_blas2
+    ********************************************************************/
 extern "C"
 magma_int_t
 magmablas_csymv_tesla_work(
@@ -808,7 +806,7 @@ magmablas_csymv_tesla_work(
 /*************************************************************************
 
     Purpose
-    =======
+    -------
 
     magmablas_csymv performs the matrix-vector operation:
 
@@ -818,27 +816,27 @@ magmablas_csymv_tesla_work(
     A is an n by n hermitian matrix.
 
     Arguments
-    ==========
+    ----------
 
-    UPLO    (input) CHARACTER*1.
+    @param[in]
+    uplo    CHARACTER*1.
             On entry, UPLO specifies whether the upper or lower
             triangular part of the array A is to be referenced as
             follows:
+      -     = 'U':  Only the upper triangular part of A is to be referenced.
+      -     = 'L':  Only the lower triangular part of A is to be referenced.
 
-                UPLO = 'U' or 'u'   Only the upper triangular part of A
-                                    is to be referenced.
-
-                UPLO = 'L' or 'l'   Only the lower triangular part of A
-                                    is to be referenced.
-
-    N       (input) INTEGER.
+    @param[in]
+    n       INTEGER.
             On entry, N specifies the order of the matrix A.
             N must be at least zero.
 
-    ALPHA   (input) COMPLEX*16.
+    @param[in]
+    alpha   COMPLEX*16.
             On entry, ALPHA specifies the scalar alpha.
 
-    A       (input) COMPLEX*16 array of DIMENSION ( LDA, n ).
+    @param[in]
+    A       COMPLEX*16 array of DIMENSION ( LDA, n ).
             Before entry with UPLO = 'U' or 'u', the leading n by n
             upper triangular part of the array A must contain the upper
             triangular part of the hermitian matrix and the strictly
@@ -850,7 +848,8 @@ magmablas_csymv_tesla_work(
             Note that the imaginary parts of the diagonal elements need
             not be set and are assumed to be zero.
 
-    LDA     (input) INTEGER.
+    @param[in]
+    lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program. LDA must be at least
             max( 1, n ).
@@ -858,26 +857,31 @@ magmablas_csymv_tesla_work(
             performance would be deteriorated as the memory accesses
             would not be fully coalescent.
 
-    X       (input) COMPLEX*16 array of dimension at least
+    @param[in]
+    X       COMPLEX*16 array of dimension at least
             ( 1 + ( n - 1 )*abs( INCX ) ).
             Before entry, the incremented array X must contain the n
             element vector x.
 
-    INCX    (input) INTEGER.
+    @param[in]
+    INCX    INTEGER.
             On entry, INCX specifies the increment for the elements of
             X. INCX must not be zero.
 
-    BETA    (input) COMPLEX*16.
+    @param[in]
+    beta    COMPLEX*16.
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
 
-    Y       (input,output) COMPLEX*16 array of dimension at least
+    @param[in,out]
+    Y       COMPLEX*16 array of dimension at least
             ( 1 + ( n - 1 )*abs( INCY ) ).
             Before entry, the incremented array Y must contain the n
             element vector y. On exit, Y is overwritten by the updated
             vector y.
 
-    INCY    (input) INTEGER.
+    @param[in]
+    INCY    INTEGER.
             On entry, INCY specifies the increment for the elements of
             Y. INCY must not be zero.
 

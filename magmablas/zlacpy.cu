@@ -42,55 +42,63 @@ zlacpy_kernel(
 
 
 /* ===================================================================== */
+/**
+    Note
+    --------
+    - UPLO Parameter is disabled
+    - Do we want to provide a generic function to the user with all the options?
+    
+    Purpose
+    -------
+    ZLACPY copies all or part of a two-dimensional matrix dA to another
+    matrix dB.
+    
+    Arguments
+    ---------
+    
+    @param[in]
+    uplo    CHARACTER*1
+            Specifies the part of the matrix dA to be copied to dB.
+      -     = 'U':      Upper triangular part
+      -     = 'L':      Lower triangular part
+            Otherwise:  All of the matrix dA
+    
+    @param[in]
+    m       INTEGER
+            The number of rows of the matrix dA.  M >= 0.
+    
+    @param[in]
+    n       INTEGER
+            The number of columns of the matrix dA.  N >= 0.
+    
+    @param[in]
+    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+            The m by n matrix dA.
+            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
+            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1,M).
+    
+    @param[out]
+    dB      COMPLEX DOUBLE PRECISION array, dimension (LDDB,N)
+            The m by n matrix dB.
+            On exit, dB = dA in the locations specified by UPLO.
+    
+    @param[in]
+    lddb    INTEGER
+            The leading dimension of the array dB.  LDDB >= max(1,M).
+    
+
+    @ingroup magma_zaux2
+    ********************************************************************/
 extern "C" void
 magmablas_zlacpy(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *dA, magma_int_t ldda,
     magmaDoubleComplex       *dB, magma_int_t lddb )
 {
-/*
-      Note
-    ========
-    - UPLO Parameter is disabled
-    - Do we want to provide a generic function to the user with all the options?
-    
-    Purpose
-    =======
-    ZLACPY copies all or part of a two-dimensional matrix dA to another
-    matrix dB.
-    
-    Arguments
-    =========
-    
-    UPLO    (input) CHARACTER*1
-            Specifies the part of the matrix dA to be copied to dB.
-            = 'U':      Upper triangular part
-            = 'L':      Lower triangular part
-            Otherwise:  All of the matrix dA
-    
-    M       (input) INTEGER
-            The number of rows of the matrix dA.  M >= 0.
-    
-    N       (input) INTEGER
-            The number of columns of the matrix dA.  N >= 0.
-    
-    dA      (input) COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
-            The m by n matrix dA.
-            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
-            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
-    
-    LDDA    (input) INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,M).
-    
-    dB      (output) COMPLEX DOUBLE PRECISION array, dimension (LDDB,N)
-            The m by n matrix dB.
-            On exit, dB = dA in the locations specified by UPLO.
-    
-    LDDB    (input) INTEGER
-            The leading dimension of the array dB.  LDDB >= max(1,M).
-    
-    =====================================================================   */
-
     magma_int_t info = 0;
     if ( m < 0 )
         info = -2;

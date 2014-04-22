@@ -59,35 +59,40 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
 }
 
 
-extern "C" void
-magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
-{
-/*
+/**
     Purpose
-    =======
+    -------
     
     ZSYMMETRIZE copies lower triangle to upper triangle, or vice-versa,
     to make dA a general representation of a symmetric matrix.
     
     Arguments
-    =========
+    ---------
     
-    UPLO    (input) CHARACTER*1
+    @param[in]
+    uplo    CHARACTER*1
             Specifies the part of the matrix dA that is valid on input.
-            = 'U':      Upper triangular part
-            = 'L':      Lower triangular part
+      -     = 'U':      Upper triangular part
+      -     = 'L':      Lower triangular part
     
-    M       (input) INTEGER
+    @param[in]
+    m       INTEGER
             The number of rows of the matrix dA.  M >= 0.
     
-    dA      (input/output) COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+    @param[in,out]
+    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
             The m by m matrix dA.
     
-    LDDA    (input) INTEGER
+    @param[in]
+    ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
     
-    =====================================================================   */
 
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
+{
     //printf( "m %d, grid %d, threads %d\n", m, grid.x, threads.x );
     if ( m == 0 )
         return;

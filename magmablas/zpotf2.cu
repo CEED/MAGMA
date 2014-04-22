@@ -29,20 +29,9 @@ void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 #endif
 
-extern "C" magma_int_t
-magma_zpotf2_gpu(
-    magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magma_int_t *info )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     zpotf2 computes the Cholesky factorization of a real symmetric
     positive definite matrix A.
@@ -55,19 +44,22 @@ magma_zpotf2_gpu(
     This is the unblocked version of the algorithm, calling Level 2 BLAS.
 
     Arguments
-    =========
+    ---------
 
-    UPLO    (input) CHARACTER*1
+    @param[in]
+    uplo    CHARACTER*1
             Specifies whether the upper or lower triangular part of the
             symmetric matrix A is stored.
-            = 'U':  Upper triangular
-            = 'L':  Lower triangular
+      -     = 'U':  Upper triangular
+      -     = 'L':  Lower triangular
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The order of the matrix A.  N >= 0 and N <= 1024.
             On CUDA architecture 1.x cards, N <= 512.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
             n by n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -75,22 +67,30 @@ magma_zpotf2_gpu(
             leading n by n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-
+    \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization A = U'*U  or A = L*L'.
 
-    LDA     (input) INTEGER
+    @param[in]
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0: successful exit
-            < 0: if INFO = -k, the k-th argument had an illegal value
-            > 0: if INFO = k, the leading minor of order k is not
+    @param[out]
+    info    INTEGER
+      -     = 0: successful exit
+      -     < 0: if INFO = -k, the k-th argument had an illegal value
+      -     > 0: if INFO = k, the leading minor of order k is not
                  positive definite, and the factorization could not be
                  completed.
 
-    ===================================================================== */
-
+    @ingroup magma_zposv_aux
+    ********************************************************************/
+extern "C" magma_int_t
+magma_zpotf2_gpu(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info )
+{
     magma_int_t j;
 
     *info = 0;
@@ -280,30 +280,33 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
 }
 
 
-void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
-{
-/*
+/**
     Purpose
-    =======
+    -------
 
     ZLACGV conjugates a complex vector of length N.
 
     Arguments
-    =========
+    ---------
 
-    N       (input) INTEGER
+    @param[in]
+    n       INTEGER
             The length of the vector X.  N >= 0.
 
-    X       (input/output) COMPLEX*16 array, dimension
+    @param[in,out]
+    x       COMPLEX*16 array, dimension
                            (1+(N-1)*abs(INCX))
             On entry, the vector of length N to be conjugated.
             On exit, X is overwritten with conjg(X).
 
-    INCX    (input) INTEGER
+    @param[in]
+    incx    INTEGER
             The spacing between successive elements of X.
 
-    ===================================================================== */
-
+    @ingroup magma_zposv_aux
+    ********************************************************************/
+void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
+{
     dim3 threads(zlacgv_bs, 1, 1);
     int num_blocks = (n - 1)/zlacgv_bs + 1;
     dim3 grid(num_blocks,1);

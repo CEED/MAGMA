@@ -29,23 +29,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" void
-magmablas_zgemm(
-    magma_trans_t TRANSA, magma_trans_t TRANSB, magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex alpha,
-    const magmaDoubleComplex *d_A, magma_int_t lda,
-    const magmaDoubleComplex *d_B, magma_int_t ldb,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex *d_C, magma_int_t ldc )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     ZGEMM performs one of the matrix-matrix operations
     
         C = alpha*op( A )*op( B ) + beta*C,
@@ -58,80 +44,104 @@ magmablas_zgemm(
     op( A ) an m by k matrix, op( B ) a k by n matrix and C an m by n matrix.
     
     Parameters
-    ==========
-    TRANSA  (input) CHARACTER*1.
+    ----------
+    @param[in]
+    TRANSA  CHARACTER*1.
             On entry, TRANSA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
-                TRANSA = 'N' or 'n',  op( A ) = A.
-                TRANSA = 'T' or 't',  op( A ) = A**T.
-                TRANSA = 'C' or 'c',  op( A ) = A**H.
+      -     = 'N':  op( A ) = A.
+      -     = 'T':  op( A ) = A**T.
+      -     = 'C':  op( A ) = A**H.
     
-    TRANSB  (input) CHARACTER*1.
+    @param[in]
+    TRANSB  CHARACTER*1.
             On entry, TRANSB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
-                TRANSB = 'N' or 'n',  op( B ) = B.
-                TRANSB = 'T' or 't',  op( B ) = B**T.
-                TRANSB = 'C' or 'c',  op( B ) = B**H.
+      -     = 'N':  op( B ) = B.
+      -     = 'T':  op( B ) = B**T.
+      -     = 'C':  op( B ) = B**H.
     
-    M       (input) INTEGER.
+    @param[in]
+    m       INTEGER.
             On entry,  M  specifies  the number  of rows  of the  matrix
             op( d_A )  and of the  matrix d_C.  M  must  be at least  zero.
     
-    N       (input) INTEGER.
+    @param[in]
+    n       INTEGER.
             On entry,  N  specifies the number  of columns of the matrix
             op( d_B ) and the number of columns of the matrix d_C. N must be
             at least zero.
     
-    K       (input) INTEGER.
+    @param[in]
+    k       INTEGER.
             On entry,  K  specifies  the number of columns of the matrix
             op( d_A ) and the number of rows of the matrix op( d_B ). K must
             be at least  zero.
     
-    ALPHA   (input) COMPLEX_16
+    @param[in]
+    alpha   COMPLEX_16
             On entry, ALPHA specifies the scalar alpha.
     
-    d_A     (input) COMPLEX_16 array of DIMENSION ( LDA, ka ), where ka is
+    @param[in]
+    d_A     COMPLEX_16 array of DIMENSION ( LDA, ka ), where ka is
             k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
             Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
             part of the array d_A must contain the matrix d_A, otherwise
             the leading  k by m  part of the array d_A must contain  the
             matrix d_A.
     
-    LDA     (input) INTEGER.
+    @param[in]
+    lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program. When  TRANSA = 'N' or 'n' then
             LDA must be at least  max( 1, m ), otherwise  LDA must be at
             least  max( 1, k ).
     
-    d_B     (input) COMPLEX_16 array of DIMENSION ( LDB, kb ), where kb is
+    @param[in]
+    d_B     COMPLEX_16 array of DIMENSION ( LDB, kb ), where kb is
             n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
             Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
             part of the array d_B must contain the matrix d_B, otherwise
             the leading  n by k  part of the array d_B must contain  the
             matrix d_B.
     
-    LDB     (input) INTEGER.
+    @param[in]
+    ldb     INTEGER.
             On entry, LDB specifies the first dimension of d_B as declared
             in the calling (sub) program. When  TRANSB = 'N' or 'n' then
             LDB must be at least  max( 1, k ), otherwise  LDB must be at
             least  max( 1, n ).
     
-    BETA    (input) COMPLEX_16.
+    @param[in]
+    beta    COMPLEX_16.
             On entry,  BETA  specifies the scalar  beta.  When  BETA  is
             supplied as zero then d_C need not be set on input.
     
-    d_C     (input,output) COMPLEX_16 array of DIMENSION ( LDC, n ).
+    @param[in,out]
+    d_C     COMPLEX_16 array of DIMENSION ( LDC, n ).
             Before entry, the leading  m by n  part of the array  d_C must
             contain the matrix  d_C,  except when  beta  is zero, in which
             case d_C need not be set on entry.
             On exit, the array  d_C  is overwritten by the  m by n  matrix
             ( alpha*op( d_A )*op( d_B ) + beta*d_C ).
     
-    LDC     (input) INTEGER.
+    @param[in]
+    ldc     INTEGER.
             On entry, LDC specifies the first dimension of d_C as declared
             in  the  calling  (sub)  program.   LDC  must  be  at  least
             max( 1, m ).
-    =====================================================================    */
+
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magmablas_zgemm(
+    magma_trans_t TRANSA, magma_trans_t TRANSB, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *d_A, magma_int_t lda,
+    const magmaDoubleComplex *d_B, magma_int_t ldb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex *d_C, magma_int_t ldc )
+{
     
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200  ) {

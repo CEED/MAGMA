@@ -37,23 +37,9 @@ static __device__ void daxpy(
 }
 
 
-__global__ void
-dgemm_kernel_T_T_64_16_16_16_4(
-    double*       __restrict__ C,
-    const double* __restrict__ A,
-    const double* __restrict__ B,
-    int m, int n, int k,
-    int lda, int ldb, int ldc,
-    double alpha, double beta )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose:
-    ========
+    --------
     This routine computes
         C = alpha * A^T*B^T + beta * C
 
@@ -63,8 +49,18 @@ dgemm_kernel_T_T_64_16_16_16_4(
 
     This code should run for any matrix size.
     This kernel outperforms cuda-2.2 when m, n, k >= 512
-    ===============================================================  */
 
+    @ingroup magma_dblas3
+    ********************************************************************/
+__global__ void
+dgemm_kernel_T_T_64_16_16_16_4(
+    double*       __restrict__ C,
+    const double* __restrict__ A,
+    const double* __restrict__ B,
+    int m, int n, int k,
+    int lda, int ldb, int ldc,
+    double alpha, double beta )
+{
     __shared__ double Bb[16][17];
 
     const int tx = threadIdx.x;

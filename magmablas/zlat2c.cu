@@ -118,9 +118,9 @@ l_zlat2c_generic(
 
     if ( blockIdx.x == m_full_block ) {
         /************************************************************************
-   -- Last block --
-   -- We will do something unusual here
-   -- For sufficiently large matrix the overhead will be very low
+        -- Last block --
+        -- We will do something unusual here
+        -- For sufficiently large matrix the overhead will be very low
         *************************************************************************/
         if  ( tx < m_mod_32 ) {
             A+= ( blockIdx.x * dgemv_bs + tx ) ;
@@ -214,10 +214,10 @@ l_zlat2c_generic(
     }
     else {
         /***************************************
-    -----------------------------------
-  -- All the blocks but the last one --
-  ****************************************
-  -------------------------------------*/
+        -----------------------------------
+        -- All the blocks but the last one --
+        ****************************************
+        -------------------------------------*/
         A += ind;
         SA += ind;
         A+= ty * lda  ;
@@ -326,9 +326,9 @@ u_zlat2c_generic(
     if ( blockIdx.x == m_full_block ) {
 
         /************************************************************************
-   -- Last block --
-   -- We will do something unusual here
-   -- For sufficiently large matrix the overhead will be very low
+        -- Last block --
+        -- We will do something unusual here
+        -- For sufficiently large matrix the overhead will be very low
         *************************************************************************/
 
         ind =  tx ;
@@ -427,11 +427,11 @@ u_zlat2c_generic(
     }
     else {
         /***************************************
-    -----------------------------------
-  -- All the blocks but the last one --
-  -- By the way this code can be optimized more.
-  ****************************************
-  -------------------------------------*/
+        -----------------------------------
+        -- All the blocks but the last one --
+        -- By the way this code can be optimized more.
+        ****************************************
+        -------------------------------------*/
         ind = blockIdx.x *  dgemv_bs + tx + m_mod_32 ;
         A+= lda*(n-1)  ;
         SA+= ldsa*(n-1)  ;
@@ -730,9 +730,9 @@ l_zlat2c_generic(
 
     if ( blockIdx.x == m_full_block ) {
         /************************************************************************
-   -- Last block --
-   -- We will do something unusual here
-   -- For sufficiently large matrix the overhead will be very low
+        -- Last block --
+        -- We will do something unusual here
+        -- For sufficiently large matrix the overhead will be very low
         *************************************************************************/
         if  ( tx < m_mod_32 ) {
             A+= ( blockIdx.x * dgemv_bs + tx ) ;
@@ -831,9 +831,9 @@ u_zlat2c_generic(
     if ( blockIdx.x == m_full_block ) {
 
         /************************************************************************
-   -- Last block --
-   -- We will do something unusual here
-   -- For sufficiently large matrix the overhead will be very low
+        -- Last block --
+        -- We will do something unusual here
+        -- For sufficiently large matrix the overhead will be very low
         *************************************************************************/
         ind =  tx ;
         A+= lda*(n-1) ;
