@@ -11,6 +11,8 @@
 #ifndef MAGMA_TIMER_H
 #define MAGMA_TIMER_H
 
+#include "magma.h"
+
 typedef double    magma_timer_t;
 typedef long long magma_flops_t;
 
