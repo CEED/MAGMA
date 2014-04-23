@@ -6,7 +6,8 @@
        November 2011
 
        @author Mark Gates
-       @precisions normal z -> s d c
+       @precisions normal z -> c
+       Making s,d precisions requires fixing dot call.
 */
 #include "common_magma.h"
 #include <cblas.h>
