@@ -12,7 +12,7 @@ class magma_task
 {
 public:
     magma_task() {}
-    ~magma_task() {}
+    virtual ~magma_task() {}
     
     virtual void run() = 0;  // pure virtual function to execute task
 };
