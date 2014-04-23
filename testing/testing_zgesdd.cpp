@@ -180,7 +180,7 @@ int main( int argc, char** argv)
                 }
                 
                 default: {
-                    fprintf( stderr, "Error: unknown option svd_work %d\n", opts.svd_work );
+                    fprintf( stderr, "Error: unknown option svd_work %d\n", (int) opts.svd_work );
                     exit(1);
                     break;
                 }

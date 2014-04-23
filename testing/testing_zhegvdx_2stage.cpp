@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     #endif
 
     /* Matrix size */
-    double *w1, *w2, result[2];
+    double *w1, *w2, result[2]={0,0};
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;

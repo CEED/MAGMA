@@ -54,7 +54,7 @@ int main( int argc, char** argv)
     if ( arch < 200 ) {
         printf("!!!! NOTE: %s and %s norm are not supported on CUDA architecture %d (less than 200).\n"
                "!!!! It should report \"parameter number 1 had an illegal value\" below.\n\n",
-               MagmaInfNormStr, MagmaOneNormStr, arch );
+               MagmaInfNormStr, MagmaOneNormStr, (int) arch );
         for( int inorm = 0; inorm < 2; ++inorm ) {
         for( int iuplo = 0; iuplo < 2; ++iuplo ) {
             printf( "Testing that magmablas_zlanhe( %s, %s, ... ) returns -1 error...\n",
