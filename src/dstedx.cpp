@@ -215,12 +215,12 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
     }
 
     /* determine the number of threads *///not needed here to be checked Azzam
-    magma_int_t threads = magma_get_parallel_numthreads();
+    //magma_int_t threads = magma_get_parallel_numthreads();
     //magma_int_t mklth   = magma_get_lapack_numthreads();
     //magma_set_lapack_numthreads(mklth);
 
 #ifdef ENABLE_DEBUG
-    printf("  D&C is using %d threads\n", threads);
+    //printf("  D&C is using %d threads\n", threads);
 #endif
 
     // If N is smaller than the minimum divide size (SMLSIZ+1), then

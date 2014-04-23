@@ -326,7 +326,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n,
     timer_stop( time_total );
     flops = FLOPS_ZGETRF( m, n ) / 1e9;
     timer_printf(" memory-allocation time: %e\n", time_alloc );
-    timer_printf(" NB=%d nb=%d\n", NB, nb );
+    timer_printf(" NB=%d nb=%d\n", (int) NB, (int) nb );
     timer_printf(" memcopy and transpose %e seconds\n", time_set );
     timer_printf(" total time %e seconds\n", time_total );
     timer_printf(" Performance %f GFlop/s, %f seconds without htod and dtoh\n",     flops / (time_comp),               time_comp               );

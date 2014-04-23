@@ -228,7 +228,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
         ++curlvl;
         
         timer_stop( time );
-        timer_printf("%d: time: %6.2f\n", curlvl, time );
+        timer_printf("%d: time: %6.2f\n", (int) curlvl, time );
     }
 
     // Re-merge the eigenvalues/vectors which were deflated at the final

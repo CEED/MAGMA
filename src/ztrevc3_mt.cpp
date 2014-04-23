@@ -56,7 +56,7 @@ public:
                        T, ldt, lambda, x, &s, cnorm, &info );
         *scale = MAGMA_Z_MAKE( s, 0 );
         if ( info != 0 ) {
-            fprintf( stderr, "zlatrsd info %d\n", info );
+            fprintf( stderr, "zlatrsd info %d\n", (int) info );
         }
     }
     

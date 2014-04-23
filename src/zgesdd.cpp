@@ -1710,14 +1710,14 @@ magma_int_t magma_zgesdd(
             lapackf77_dlascl("G", &izero, &izero, &bignum, &anrm, &minmn, &ione, s, &minmn, &ierr);
         }
         if (*info != 0 && anrm > bignum) {
-            int minmn_1 = minmn - 1;
+            magma_int_t minmn_1 = minmn - 1;
             lapackf77_dlascl("G", &izero, &izero, &bignum, &anrm, &minmn_1, &ione, &rwork[ie], &minmn, &ierr);
         }
         if (anrm < smlnum) {
             lapackf77_dlascl("G", &izero, &izero, &smlnum, &anrm, &minmn, &ione, s, &minmn, &ierr);
         }
         if (*info != 0 && anrm < smlnum) {
-            int minmn_1 = minmn - 1;
+            magma_int_t minmn_1 = minmn - 1;
             lapackf77_dlascl("G", &izero, &izero, &smlnum, &anrm, &minmn_1, &ione, &rwork[ie], &minmn, &ierr);
         }
     }

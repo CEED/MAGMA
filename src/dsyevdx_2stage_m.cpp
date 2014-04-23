@@ -282,7 +282,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
         return *info;
     }
 
-    timer_printf("using %d parallel_threads\n", parallel_threads);
+    timer_printf("using %d parallel_threads\n", (int) parallel_threads);
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t ntiles = n/nb;

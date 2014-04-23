@@ -157,7 +157,7 @@ magma_dgeev(
     magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, nb;
     magma_int_t scalea, minwrk, optwrk, lquery, wantvl, wantvr, select[1];
 
-    magma_side_t side;
+    magma_side_t side = MagmaRight;
 
     magma_timer_t time_total, time_gehrd, time_unghr, time_hseqr, time_trevc, time_sum;
     magma_flops_t flop_total, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_sum;

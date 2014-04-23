@@ -153,7 +153,7 @@ magma_zgeev(
     magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, nb;
     magma_int_t scalea, minwrk, irwork, lquery, wantvl, wantvr, select[1];
 
-    magma_side_t side;
+    magma_side_t side = MagmaRight;
 
     irwork = 0;
     *info = 0;

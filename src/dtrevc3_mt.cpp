@@ -42,7 +42,7 @@ public:
         magma_int_t info = 0;
         magma_dlaqtrsd( trans, n, T, ldt, x, incx, cnorm, &info );
         if ( info != 0 ) {
-            fprintf( stderr, "dlaqtrsd info %d\n", info );
+            fprintf( stderr, "dlaqtrsd info %d\n", (int) info );
         }
     }
     

@@ -446,7 +446,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
     }
     magma_setdevice(0);
                  
-    timer_printf( "\n n=%d NB=%d nb=%d\n", n, NB, nb );
+    timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
     timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
                   FLOPS_ZPOTRF(n) / 1e9,  time_total,
                   FLOPS_ZPOTRF(n) / 1e9 / time_total );
