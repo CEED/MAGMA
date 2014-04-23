@@ -339,7 +339,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                trans = MagmaConjTrans;
+                trans = MagmaTrans;
             } else {
                 trans = MagmaNoTrans;
             }
@@ -352,7 +352,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
             if (lower) {
                 trans = MagmaNoTrans;
             } else {
-                trans = MagmaConjTrans;
+                trans = MagmaTrans;
             }
 
             //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, B, ldb, A, lda);

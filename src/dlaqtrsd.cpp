@@ -125,9 +125,7 @@ magma_int_t magma_dlaqtrsd(
     notran = (trans == MagmaNoTrans);
     
     *info = 0;
-    if ( ! notran &&
-         trans != MagmaTrans &&
-         trans != MagmaConjTrans) {
+    if ( ! notran && trans != MagmaTrans ) {
         *info = -1;
     }
     else if ( n < 0 ) {
