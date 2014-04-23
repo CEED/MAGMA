@@ -321,7 +321,7 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
                             A,  lda,
                             dA, ldda, stream );
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_dpotrf_gpu(uplo, n, dB, lddb, info);

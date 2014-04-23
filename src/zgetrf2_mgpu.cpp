@@ -144,7 +144,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     trace_gpu_end( 0, 1 );
 
     /* ------------------------------------------------------------------------------------- */
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     s = mindim / nb;

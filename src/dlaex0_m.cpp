@@ -202,7 +202,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
 
     // Solve each submatrix eigenproblem at the bottom of the divide and
     // conquer tree.
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     for (i = 0; i < subpbs; ++i) {

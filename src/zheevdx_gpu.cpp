@@ -377,7 +377,7 @@ magma_zheevdx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
 #ifdef FAST_HEMV

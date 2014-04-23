@@ -297,7 +297,7 @@ magma_int_t magma_dtrevc3(
         }
     }
 
-    magma_timer_t time_total, time_trsv, time_gemm, time_gemv, time_trsv_sum=0, time_gemm_sum=0, time_gemv_sum=0;
+    magma_timer_t time_total=0, time_trsv=0, time_gemm=0, time_gemv=0, time_trsv_sum=0, time_gemm_sum=0, time_gemv_sum=0;
     timer_start( time_total );
 
     // Index ip is used to specify the real or complex eigenvalue:

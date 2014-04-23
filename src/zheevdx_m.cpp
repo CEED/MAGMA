@@ -351,7 +351,7 @@ magma_zheevdx_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range, magma_
     llwrk2 = lwork - indwk2;
     llrwk = lrwork - indrwk;
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_zhetrd_mgpu(nrgpu, 1, uplo, n, A, lda, w, &rwork[inde],

@@ -334,7 +334,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
     magma_int_t llwork = lwork - indwrk;
     magma_int_t llwrk2 = lwork - indwk2;
 
-    magma_timer_t time, time_total, time_alloc, time_dist, time_band;
+    magma_timer_t time=0, time_total=0, time_alloc=0, time_dist=0, time_band=0;
     timer_start( time_total );
 
 #ifdef HE2HB_SINGLEGPU

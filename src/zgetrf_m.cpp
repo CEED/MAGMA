@@ -81,7 +81,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n,
 #define dAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
 #define dPT(d,i,j) (dPT[d] + (i)*nb*nb + (j)*nb*maxm)
 
-    magma_timer_t time, time_total, time_alloc, time_set=0, time_get=0, time_comp=0;
+    magma_timer_t time=0, time_total=0, time_alloc=0, time_set=0, time_get=0, time_comp=0;
     timer_start( time_total );
     real_Double_t flops;
 

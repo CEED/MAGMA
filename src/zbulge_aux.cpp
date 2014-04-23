@@ -90,7 +90,7 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
     }
     printf("using magma_zstedx\n");
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_range_t job = MagmaRangeI;

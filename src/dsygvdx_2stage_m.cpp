@@ -306,7 +306,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
     }
 
     /* Form A Cholesky factorization of B. */
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_dpotrf_m(nrgpu, uplo, n, B, ldb, info);

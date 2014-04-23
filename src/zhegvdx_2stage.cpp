@@ -354,7 +354,7 @@ magma_zhegvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
                            A,  lda,
                            dA, ldda, stream );
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_zpotrf_gpu(uplo, n, dB, lddb, info);

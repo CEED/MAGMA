@@ -302,7 +302,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     /////////////////////////////////////////////////////////////////////////////////
     //openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
 #pragma omp parallel private(i, j, tmp, temp)
@@ -423,7 +423,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     /////////////////////////////////////////////////////////////////////////////////
     // Non openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     for (i = 0; i < k; ++i)

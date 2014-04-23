@@ -159,8 +159,8 @@ magma_dgeev(
 
     magma_side_t side = MagmaRight;
 
-    magma_timer_t time_total, time_gehrd, time_unghr, time_hseqr, time_trevc, time_sum;
-    magma_flops_t flop_total, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_sum;
+    magma_timer_t time_total=0, time_gehrd=0, time_unghr=0, time_hseqr=0, time_trevc=0, time_sum=0;
+    magma_flops_t flop_total=0, flop_gehrd=0, flop_unghr=0, flop_hseqr=0, flop_trevc=0, flop_sum=0;
     timer_start( time_total );
     flops_start( flop_total );
     

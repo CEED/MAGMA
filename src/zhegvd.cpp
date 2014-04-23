@@ -301,7 +301,7 @@ magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
                            A,  lda,
                            da, ldda, stream );
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
     magma_zpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {

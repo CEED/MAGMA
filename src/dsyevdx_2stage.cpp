@@ -332,7 +332,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_int_t llwork = lwork - indwrk;
     magma_int_t llwrk2 = lwork - indwk2;
 
-    magma_timer_t time_total, time;
+    magma_timer_t time_total=0, time=0;
     timer_start( time_total );
     timer_start( time );
 

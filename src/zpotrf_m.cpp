@@ -92,7 +92,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, magma_uplo_t uplo, magma_int_t n,
     magma_int_t     j, jj, jb, J, JB, NB, MB, h;
     magma_queue_t   stream[MagmaMaxGPUs][3];
     magma_event_t   event[MagmaMaxGPUs][5];
-    magma_timer_t time_total, time_sum, time;
+    magma_timer_t time_total=0, time_sum=0, time=0;
     
     *info = 0;
     if (! upper && uplo != MagmaLower) {

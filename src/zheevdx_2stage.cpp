@@ -364,7 +364,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_int_t indrwk = inde + n;
     magma_int_t llrwk = lrwork - indrwk;
 
-    magma_timer_t time, time_total;
+    magma_timer_t time=0, time_total=0;
     timer_start( time_total );
     timer_start( time );
 

@@ -268,7 +268,7 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_dsytrd_mgpu(nrgpu, 1, uplo, n, A, lda, w, &work[inde],

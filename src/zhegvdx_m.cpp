@@ -331,7 +331,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
         return *info;
     }
 
-    magma_timer_t time;
+    magma_timer_t time=0;
     timer_start( time );
 
     magma_zpotrf_m(nrgpu, uplo, n, B, ldb, info);
