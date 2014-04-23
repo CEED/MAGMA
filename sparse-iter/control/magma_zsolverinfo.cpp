@@ -341,15 +341,120 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         magma_free_cpu( precond->M.blockinfo );
         precond->M.blockinfo = NULL;
     }
+    if( precond->L.val != NULL ){
+        if ( precond->L.memory_location == Magma_DEV )
+            magma_free( precond->L.val );
+        else
+            magma_free_cpu( precond->L.val );
+        precond->L.val = NULL;
+    }
+    if( precond->L.col != NULL ){
+        if ( precond->L.memory_location == Magma_DEV )
+            magma_free( precond->L.col );
+        else
+            magma_free_cpu( precond->L.col );
+        precond->L.col = NULL;
+    }
+    if( precond->L.row != NULL ){
+        if ( precond->L.memory_location == Magma_DEV )
+            magma_free( precond->L.row );
+        else
+            magma_free_cpu( precond->L.row );
+        precond->L.row = NULL;
+    }
+    if( precond->L.blockinfo != NULL ){
+        magma_free_cpu( precond->L.blockinfo );
+        precond->L.blockinfo = NULL;
+    }
+    if( precond->U.val != NULL ){
+        if ( precond->U.memory_location == Magma_DEV )
+            magma_free( precond->U.val );
+        else
+            magma_free_cpu( precond->U.val );
+        precond->U.val = NULL;
+    }
+    if( precond->U.col != NULL ){
+        if ( precond->U.memory_location == Magma_DEV )
+            magma_free( precond->U.col );
+        else
+            magma_free_cpu( precond->U.col );
+        precond->U.col = NULL;
+    }
+    if( precond->U.row != NULL ){
+        if ( precond->U.memory_location == Magma_DEV )
+            magma_free( precond->U.row );
+        else
+            magma_free_cpu( precond->U.row );
+        precond->U.row = NULL;
+    }
+    if( precond->U.blockinfo != NULL ){
+        magma_free_cpu( precond->U.blockinfo );
+        precond->U.blockinfo = NULL;
+    }
 
     if( precond->solver == Magma_ILU ){
         cusparseStatus_t cusparseStatus;
         cusparseStatus =
         cusparseDestroySolveAnalysisInfo( precond->cuinfo );
          if(cusparseStatus != 0)    printf("error in info-free.\n");
+        cusparseStatus =
+        cusparseDestroySolveAnalysisInfo( precond->cuinfoL );
+         if(cusparseStatus != 0)    printf("error in info-free.\n");
+        cusparseStatus =
+        cusparseDestroySolveAnalysisInfo( precond->cuinfoU );
+         if(cusparseStatus != 0)    printf("error in info-free.\n");
 
     }
-
+    if( precond->LD.val != NULL ){
+        if ( precond->LD.memory_location == Magma_DEV )
+            magma_free( precond->LD.val );
+        else
+            magma_free_cpu( precond->LD.val );
+        precond->LD.val = NULL;
+    }
+    if( precond->LD.col != NULL ){
+        if ( precond->LD.memory_location == Magma_DEV )
+            magma_free( precond->LD.col );
+        else
+            magma_free_cpu( precond->LD.col );
+        precond->LD.col = NULL;
+    }
+    if( precond->LD.row != NULL ){
+        if ( precond->LD.memory_location == Magma_DEV )
+            magma_free( precond->LD.row );
+        else
+            magma_free_cpu( precond->LD.row );
+        precond->LD.row = NULL;
+    }
+    if( precond->LD.blockinfo != NULL ){
+        magma_free_cpu( precond->LD.blockinfo );
+        precond->LD.blockinfo = NULL;
+    }
+    if( precond->UD.val != NULL ){
+        if ( precond->UD.memory_location == Magma_DEV )
+            magma_free( precond->UD.val );
+        else
+            magma_free_cpu( precond->UD.val );
+        precond->UD.val = NULL;
+    }
+    if( precond->UD.col != NULL ){
+        if ( precond->UD.memory_location == Magma_DEV )
+            magma_free( precond->UD.col );
+        else
+            magma_free_cpu( precond->UD.col );
+        precond->UD.col = NULL;
+    }
+    if( precond->UD.row != NULL ){
+        if ( precond->UD.memory_location == Magma_DEV )
+            magma_free( precond->UD.row );
+        else
+            magma_free_cpu( precond->UD.row );
+        precond->UD.row = NULL;
+    }
+    if( precond->UD.blockinfo != NULL ){
+        magma_free_cpu( precond->UD.blockinfo );
+        precond->UD.blockinfo = NULL;
+    }
     return MAGMA_SUCCESS;
 }
 

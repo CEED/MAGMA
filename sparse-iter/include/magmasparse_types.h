@@ -20,6 +20,10 @@
 #include <assert.h>
 #endif
 
+// includes CUDA
+#include <cusparse_v2.h>
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,12 +37,14 @@ typedef struct magma_z_sparse_matrix{
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
     magma_symmetry_t   sym;
+    magma_diagorder_t  diagorder_type;
     magma_int_t        num_rows;
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
     magma_int_t        diameter;
     magmaDoubleComplex *val;
+    magmaDoubleComplex *diag;
     magma_index_t      *row; 
     magma_index_t      *col;
     magma_index_t      *blockinfo;
@@ -53,12 +59,14 @@ typedef struct magma_c_sparse_matrix{
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
     magma_symmetry_t   sym;
+    magma_diagorder_t  diagorder_type;
     magma_int_t        num_rows;
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
     magma_int_t        diameter;
     magmaFloatComplex  *val;
+    magmaFloatComplex  *diag;
     magma_index_t      *row; 
     magma_index_t      *col;
     magma_index_t      *blockinfo;
@@ -74,12 +82,14 @@ typedef struct magma_d_sparse_matrix{
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
     magma_symmetry_t   sym;
+    magma_diagorder_t  diagorder_type;
     magma_int_t        num_rows;
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
     magma_int_t        diameter;
     double             *val;
+    double             *diag;
     magma_index_t      *row; 
     magma_index_t      *col;
     magma_index_t      *blockinfo;
@@ -95,12 +105,14 @@ typedef struct magma_s_sparse_matrix{
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
     magma_symmetry_t   sym;
+    magma_diagorder_t  diagorder_type;
     magma_int_t        num_rows;
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
     magma_int_t        diameter;
     float              *val;
+    float              *diag;
     magma_index_t      *row; 
     magma_index_t      *col;
     magma_index_t      *blockinfo;
@@ -313,9 +325,16 @@ typedef struct magma_z_preconditioner{
     double                  init_res;
     double                  final_res;
     magma_z_sparse_matrix   M;
+    magma_z_sparse_matrix   L;
+    magma_z_sparse_matrix   U;
+    magma_z_sparse_matrix   LD;
+    magma_z_sparse_matrix   UD;
     magma_z_vector          d;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
+    cusparseSolveAnalysisInfo_t cuinfo;
+    cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoU;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -335,9 +354,16 @@ typedef struct magma_c_preconditioner{
     double                  init_res;
     double                  final_res;
     magma_c_sparse_matrix   M;
+    magma_c_sparse_matrix   L;
+    magma_c_sparse_matrix   U;
+    magma_c_sparse_matrix   LD;
+    magma_c_sparse_matrix   UD;
     magma_c_vector          d;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
+    cusparseSolveAnalysisInfo_t cuinfo;
+    cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoU;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -358,9 +384,16 @@ typedef struct magma_d_preconditioner{
     double                  init_res;
     double                  final_res;
     magma_d_sparse_matrix   M;
+    magma_d_sparse_matrix   L;
+    magma_d_sparse_matrix   U;
+    magma_d_sparse_matrix   LD;
+    magma_d_sparse_matrix   UD;
     magma_d_vector          d;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
+    cusparseSolveAnalysisInfo_t cuinfo;
+    cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoU;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -381,9 +414,16 @@ typedef struct magma_s_preconditioner{
     double                  init_res;
     double                  final_res;
     magma_s_sparse_matrix   M;
+    magma_s_sparse_matrix   L;
+    magma_s_sparse_matrix   U;
+    magma_s_sparse_matrix   LD;
+    magma_s_sparse_matrix   UD;
     magma_s_vector          d;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
+    cusparseSolveAnalysisInfo_t cuinfo;
+    cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoU;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
