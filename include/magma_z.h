@@ -134,12 +134,14 @@ magma_int_t magma_zlatrd2(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                           magmaDoubleComplex *dw, magma_int_t lddw,
                           magmaDoubleComplex *dwork, magma_int_t ldwork);
 
+#ifdef COMPLEX
 magma_int_t magma_zlatrsd(magma_uplo_t uplo, magma_trans_t trans,
                           magma_diag_t diag, magma_bool_t normin,
                           magma_int_t n, const magmaDoubleComplex *A, magma_int_t lda,
                           magmaDoubleComplex lambda,
                           magmaDoubleComplex *x,
                           double *scale, double *cnorm, magma_int_t *info);
+#endif
 
 magma_int_t magma_zlahr2( magma_int_t m, magma_int_t n, magma_int_t nb,
                           magmaDoubleComplex *da, magmaDoubleComplex *dv, magmaDoubleComplex *a,

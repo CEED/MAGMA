@@ -187,7 +187,7 @@ typedef double real_Double_t;
 #define MAGMA_S_MUL(a, b)         ((a) * (b))
 #define MAGMA_S_DIV(a, b)         ((a) / (b))
 #define MAGMA_S_ABS(a)            ((a)>0 ? (a) : -(a))
-#define MAGMA_D_ABS1(a)           ((a)>0 ? (a) : -(a))
+#define MAGMA_S_ABS1(a)           ((a)>0 ? (a) : -(a))
 #define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_S_NEGATE(a)         (-a)
