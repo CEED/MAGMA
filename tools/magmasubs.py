@@ -710,10 +710,8 @@ subs = {
     ('mkl_sbsrmv',     'mkl_dbsrmv',     'mkl_cbsrmv',     'mkl_zbsrmv'      ),
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
-    ('silu_chow',      'dilu_chow',      'cilu_chow',      'zilu_chow'       ),
     ('ialu',           'dailu',          'cailu',          'zailu'           ),
-    ('sicc',           'dicc',           'cicc',           'zicc'            ),
-    ('saicc',          'daicc',          'caicc',          'zaicc'           ),
+    ('saic',           'daic',           'caic',           'zaic'            ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
@@ -727,8 +725,12 @@ subs = {
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
+    ('sailu',          'dailu',          'cailu',          'zailu'           ),
+    ('scuilu',         'dcuilu',         'ccuilu',         'zcuilu'          ),
+    ('sbailu',         'dbailu',         'cbailu',         'zbailu'          ),
     ('spastix',        'dpastix',        'cpastix',        'zpastix'         ),
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
+    ('sbajac',         'dbajac',         'cbajac',         'zbajac'          ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
