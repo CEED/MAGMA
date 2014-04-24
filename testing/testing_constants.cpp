@@ -20,6 +20,9 @@ int main( int argc, char** argv )
 {
     // ------------------------------------------------------------
     printf( "testing MAGMA  -> lapack_xxxxx_const\n" );
+    assert( lapack_bool_const(   MagmaFalse         )[0] == 'N' );
+    assert( lapack_bool_const(   MagmaTrue          )[0] == 'Y' );
+
     assert( lapack_order_const(  MagmaRowMajor      )[0] == 'R' );
     assert( lapack_order_const(  MagmaColMajor      )[0] == 'C' );
 
@@ -82,6 +85,9 @@ int main( int argc, char** argv )
 
     // ------------------------------------------------------------
     printf( "testing MAGMA  -> lapacke_xxxxx_const\n" );
+    assert( lapacke_bool_const(   MagmaFalse         ) == 'N' );
+    assert( lapacke_bool_const(   MagmaTrue          ) == 'Y' );
+
     assert( lapacke_order_const(  MagmaRowMajor      ) == 'R' );
     assert( lapacke_order_const(  MagmaColMajor      ) == 'C' );
 
@@ -144,6 +150,9 @@ int main( int argc, char** argv )
 
     // ------------------------------------------------------------
     printf( "testing MAGMA  -> lapack_const\n" );
+    assert( lapack_const( MagmaFalse         )[0] == 'N' );
+    assert( lapack_const( MagmaTrue          )[0] == 'Y' );
+
     assert( lapack_const( MagmaRowMajor      )[0] == 'R' );
     assert( lapack_const( MagmaColMajor      )[0] == 'C' );
 
@@ -206,6 +215,9 @@ int main( int argc, char** argv )
 
     // ------------------------------------------------------------
     printf( "testing MAGMA  -> lapacke_const\n" );
+    assert( lapacke_const( MagmaFalse         ) == 'N' );
+    assert( lapacke_const( MagmaTrue          ) == 'Y' );
+
     assert( lapacke_const( MagmaRowMajor      ) == 'R' );
     assert( lapacke_const( MagmaColMajor      ) == 'C' );
 
@@ -268,6 +280,11 @@ int main( int argc, char** argv )
 
     // ------------------------------------------------------------
     printf( "testing LAPACK -> magma_xxxxx_const\n" );
+    assert( magma_bool_const('N') == MagmaFalse );
+    assert( magma_bool_const('n') == MagmaFalse );
+    assert( magma_bool_const('Y') == MagmaTrue  );
+    assert( magma_bool_const('y') == MagmaTrue  );
+
     assert( magma_order_const( 'R' ) == MagmaRowMajor  );
     assert( magma_order_const( 'r' ) == MagmaRowMajor  );
     assert( magma_order_const( 'C' ) == MagmaColMajor  );

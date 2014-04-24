@@ -478,7 +478,7 @@ typedef enum {
 // 2a) add to magma2lapack_constants[] in control/constants.cpp
 // 2b) update min & max here, which are used to check bounds for magma2lapack_constants[]
 // 2c) add lapack_xxxx_const() converter below and in control/constants.cpp
-#define Magma2lapack_Min  MagmaRowMajor  // 101
+#define Magma2lapack_Min  MagmaFalse     // 0
 #define Magma2lapack_Max  MagmaRowwise   // 402
 
 
@@ -532,6 +532,7 @@ extern "C" {
 // Convert LAPACK character constants to MAGMA constants.
 // This is a one-to-many mapping, requiring multiple translators
 // (e.g., "N" can be NoTrans or NonUnit or NoVec).
+magma_bool_t   magma_bool_const  ( char lapack_char );
 magma_order_t  magma_order_const ( char lapack_char );
 magma_trans_t  magma_trans_const ( char lapack_char );
 magma_uplo_t   magma_uplo_const  ( char lapack_char );
@@ -552,6 +553,7 @@ magma_storev_t magma_storev_const( char lapack_char );
 // The generic lapack_const works for all cases, but the specific routines
 // (e.g., lapack_trans_const) do better error checking.
 const char* lapack_const       ( int            magma_const );
+const char* lapack_bool_const  ( magma_bool_t   magma_const );
 const char* lapack_order_const ( magma_order_t  magma_const );
 const char* lapack_trans_const ( magma_trans_t  magma_const );
 const char* lapack_uplo_const  ( magma_uplo_t   magma_const );
@@ -567,6 +569,7 @@ const char* lapack_direct_const( magma_direct_t magma_const );
 const char* lapack_storev_const( magma_storev_t magma_const );
 
 static inline char lapacke_const       ( int magma_const            ) { return *lapack_const       ( magma_const ); }
+static inline char lapacke_bool_const  ( magma_bool_t   magma_const ) { return *lapack_bool_const  ( magma_const ); }
 static inline char lapacke_order_const ( magma_order_t  magma_const ) { return *lapack_order_const ( magma_const ); }
 static inline char lapacke_trans_const ( magma_trans_t  magma_const ) { return *lapack_trans_const ( magma_const ); }
 static inline char lapacke_uplo_const  ( magma_uplo_t   magma_const ) { return *lapack_uplo_const  ( magma_const ); }

@@ -15,6 +15,18 @@
 // declared in magma_types.h
 
 extern "C"
+magma_bool_t   magma_bool_const  ( char lapack_char )
+{
+    switch( lapack_char ) {
+        case 'N': case 'n': return MagmaFalse;
+        case 'Y': case 'y': return MagmaTrue;
+        default:
+            fprintf( stderr, "Error in %s: unexpected value %c\n", __func__, lapack_char );
+            return MagmaFalse;
+    }
+}
+
+extern "C"
 magma_order_t  magma_order_const ( char lapack_char )
 {
     switch( lapack_char ) {
@@ -196,8 +208,9 @@ magma_storev_t magma_storev_const( char lapack_char )
 
 const char *magma2lapack_constants[] =
 {
-    "",                                      //  0
-    "", "", "", "", "", "", "", "", "", "",  //  1-10
+    "No",                                    //  0: MagmaFalse
+    "Yes",                                   //  1: MagmaTrue (zlatrs)
+    "", "", "", "", "", "", "", "", "",      //  2-10
     "", "", "", "", "", "", "", "", "", "",  // 11-20
     "", "", "", "", "", "", "", "", "", "",  // 21-30
     "", "", "", "", "", "", "", "", "", "",  // 31-40
@@ -295,6 +308,14 @@ const char* lapack_const( int magma_const )
 {
     assert( magma_const >= Magma2lapack_Min );
     assert( magma_const <= Magma2lapack_Max );
+    return magma2lapack_constants[ magma_const ];
+}
+
+extern "C"
+const char* lapack_bool_const( magma_bool_t magma_const )
+{
+    assert( magma_const >= MagmaFalse );
+    assert( magma_const <= MagmaTrue  );
     return magma2lapack_constants[ magma_const ];
 }
 
