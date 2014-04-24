@@ -330,6 +330,7 @@ for my $arg ( @ARGV ) {
 	$f =~ s/_mt$//;
 	$f =~ s/[_-]v\d$//;
 	$f =~ s/hemv_32/hemv/;
+	$f =~ s/_kernel//;
 	my $p = '';
 	if ( $f =~ s/^(z)c//     ) { $p = $1; }
 	if ( $f =~ s/^([sdcz])// ) { $p = $1; }
@@ -361,7 +362,7 @@ for my $arg ( @ARGV ) {
 		print OUT $1;
 	}
 	if ( not $g_match ) {
-		print "  --  no match\n";
+		print "  --  no documentation found\n";
 	}
 	else {
 		print "\n";
