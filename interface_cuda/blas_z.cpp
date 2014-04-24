@@ -22,43 +22,10 @@
 // ----------------------------------------
 // Convert MAGMA constants to CUBLAS v1 constants, which are the same as lapack.
 // These must be static to avoid conflict with CUBLAS v2 translators.
-extern const char *magma2lapack_constants[];
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-static char cublas_trans_const ( magma_trans_t magma_const )
-{
-    assert( magma_const >= MagmaNoTrans   );
-    assert( magma_const <= MagmaConjTrans );
-    return *magma2lapack_constants[ magma_const ];
-}
-
-static char cublas_side_const  ( magma_side_t magma_const )
-{
-    assert( magma_const >= MagmaLeft  );
-    assert( magma_const <= MagmaRight );
-    return *magma2lapack_constants[ magma_const ];
-}
-
-static char cublas_diag_const  ( magma_diag_t magma_const )
-{
-    assert( magma_const >= MagmaNonUnit );
-    assert( magma_const <= MagmaUnit    );
-    return *magma2lapack_constants[ magma_const ];
-}
-
-static char cublas_uplo_const  ( magma_uplo_t magma_const )
-{
-    assert( magma_const >= MagmaUpper );
-    assert( magma_const <= MagmaLower );
-    return *magma2lapack_constants[ magma_const ];
-}
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
+#define cublas_trans_const( magma_const ) lapacke_trans_const( magma_const )
+#define cublas_side_const(  magma_const ) lapacke_side_const(  magma_const )
+#define cublas_diag_const(  magma_const ) lapacke_diag_const(  magma_const )
+#define cublas_uplo_const(  magma_const ) lapacke_uplo_const(  magma_const )
 
 
 // ========================================
