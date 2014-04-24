@@ -194,6 +194,22 @@ subroutine magmaf_cgetrf( m, n, A, lda, ipiv, info )
     integer          :: info
 end subroutine magmaf_cgetrf
 
+subroutine magmaf_clatrsd( uplo, trans, diag, normin, n, A, lda, lambda, x, scale, cnorm,  &
+        info )
+    character        :: uplo
+    character        :: trans
+    character        :: diag
+    character        :: normin
+    integer          :: n
+    complex          :: A(*)
+    integer          :: lda
+    complex          :: lambda
+    complex          :: x(*)
+    real             :: scale(*)
+    real             :: cnorm(*)
+    integer          :: info
+end subroutine magmaf_clatrsd
+
 subroutine magmaf_cposv( uplo, n, nrhs, A, lda, B, ldb, info )
     character        :: uplo
     integer          :: n
@@ -228,6 +244,46 @@ subroutine magmaf_clauum( uplo, n, A, lda, info )
     integer          :: lda
     integer          :: info
 end subroutine magmaf_clauum
+
+subroutine magmaf_ctrevc3( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm, mout,  &
+        work, lwork, rwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    complex          :: T(*)
+    integer          :: ldt
+    complex          :: VL(*)
+    integer          :: ldvl
+    complex          :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    complex          :: work(*)
+    integer          :: lwork
+    real             :: rwork(*)
+    integer          :: info
+end subroutine magmaf_ctrevc3
+
+subroutine magmaf_ctrevc3_mt( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm,  &
+        mout, work, lwork, rwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    complex          :: T(*)
+    integer          :: ldt
+    complex          :: VL(*)
+    integer          :: ldvl
+    complex          :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    complex          :: work(*)
+    integer          :: lwork
+    real             :: rwork(*)
+    integer          :: info
+end subroutine magmaf_ctrevc3_mt
 
 subroutine magmaf_ctrtri( uplo, diag, n, A, lda, info )
     character        :: uplo

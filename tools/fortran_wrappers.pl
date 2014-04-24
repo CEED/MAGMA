@@ -51,30 +51,34 @@ my @ignore = qw(
 my $ignore = join( "|", @ignore );
 print STDERR "ignore: $ignore\n";
 
+# map C types to name for magma_<name>_const(...) call
+my %constants = (
+	'magma_order_t'      => 'order'  ,
+	'magma_trans_t'      => 'trans'  ,
+	'magma_uplo_t'       => 'uplo'   ,
+	'magma_diag_t'       => 'diag'   ,
+	'magma_side_t'       => 'side'   ,
+	'magma_type_t'       => 'type'   ,
+	'magma_norm_t'       => 'norm'   ,
+	'magma_dist_t'       => 'dist'   ,
+	'magma_pack_t'       => 'pack'   ,
+	'magma_vec_t'        => 'vec'    ,
+	'magma_range_t'      => 'range'  ,
+	'magma_direct_t'     => 'direct' ,
+	'magma_storev_t'     => 'storev' ,
+	'magma_order_t'      => 'order'  ,
+	'magma_trans_t'      => 'trans'  ,
+	'magma_uplo_t'       => 'uplo'   ,
+	'magma_diag_t'       => 'diag'   ,
+	'magma_side_t'       => 'side'   ,
+	'magma_type_t'       => 'type'   ,
+	'magma_norm_t'       => 'norm'   ,
+	'magma_dist_t'       => 'dist'   ,
+	'magma_bool_t'       => 'bool'   ,
+);
+
 # map C base types to Fortran types
-my %types = (
-	'magma_order_t'      => 'character       ',
-	'magma_trans_t'      => 'character       ',
-	'magma_uplo_t'       => 'character       ',
-	'magma_diag_t'       => 'character       ',
-	'magma_side_t'       => 'character       ',
-	'magma_type_t'       => 'character       ',
-	'magma_norm_t'       => 'character       ',
-	'magma_dist_t'       => 'character       ',
-	'magma_pack_t'       => 'character       ',
-	'magma_vec_t'        => 'character       ',
-	'magma_range_t'      => 'character       ',
-	'magma_direct_t'     => 'character       ',
-	'magma_storev_t'     => 'character       ',
-	'magma_order_t'      => 'character       ',
-	'magma_trans_t'      => 'character       ',
-	'magma_uplo_t'       => 'character       ',
-	'magma_diag_t'       => 'character       ',
-	'magma_side_t'       => 'character       ',
-	'magma_type_t'       => 'character       ',
-	'magma_norm_t'       => 'character       ',
-	'magma_dist_t'       => 'character       ',
-	
+my %f90types = (
 	'size_t'             => 'integer         ',  # dose Fortran have unsigned?
 	'char'               => 'character       ',
 	'int'                => 'integer         ',
@@ -92,6 +96,11 @@ my %types = (
 	'magmaFloatComplex_ptr'  => 'magma_devptr_t',
 	'magmaDoubleComplex_ptr' => 'magma_devptr_t',
 );
+
+# add all symbolic constant types (magma_uplo_t, etc.), mapping to character
+for my $type ( keys %constants ) {
+	$f90types{ $type } = 'character       ';
+}
 
 my %devptrs = (
 	'magma_int_t'        => 'magma_idevptr',
@@ -320,10 +329,10 @@ while( $_ ) {
 							# special case for variables passed as pointers in C,
 							# but are single values, not arrays.
 							# e.g., see zhegvd and zcgesv
-							$vars .= "    $types{$base_type} :: $var\n";
+							$vars .= "    $f90types{$base_type} :: $var\n";
 						}
 						else {
-							$vars .= "    $types{$base_type} :: $var(*)\n";
+							$vars .= "    $f90types{$base_type} :: $var(*)\n";
 						}
 					}
 					$interface .= $var;
@@ -335,10 +344,17 @@ while( $_ ) {
 						$interface .= ", ";
 					}
 					# convert scalars to pointers for Fortran interface
-					$wrapper   .= "$type *$var";
-					$call      .= "*$var";
+					# map string constants => symbolic constants
+					if ( $constants{$type} ) {
+						$wrapper   .= "const char* $var";
+						$call      .= "magma_$constants{$type}_const(*$var)";
+					}
+					else {
+						$wrapper   .= "$type *$var";
+						$call      .= "*$var";
+					}
 					$interface .= $var;
-					$vars      .= "    $types{$base_type} :: $var\n";
+					$vars      .= "    $f90types{$base_type} :: $var\n";
 				}
 				$first_arg = 0;
 			}

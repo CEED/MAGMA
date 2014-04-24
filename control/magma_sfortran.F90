@@ -205,6 +205,39 @@ subroutine magmaf_sgetrf( m, n, A, lda, ipiv, info )
     integer          :: info
 end subroutine magmaf_sgetrf
 
+subroutine magmaf_slaln2( trans, na, nw, smin, ca, a, lda, d1, d2, b, ldb, wr, wi, x,  &
+        ldx, scale, xnorm, info )
+    integer          :: trans
+    integer          :: na
+    integer          :: nw
+    real             :: smin
+    real             :: ca
+    real             :: a(*)
+    integer          :: lda
+    real             :: d1
+    real             :: d2
+    real             :: b(*)
+    integer          :: ldb
+    real             :: wr
+    real             :: wi
+    real             :: x(*)
+    integer          :: ldx
+    real             :: scale(*)
+    real             :: xnorm(*)
+    integer          :: info
+end subroutine magmaf_slaln2
+
+subroutine magmaf_slaqtrsd( trans, n, T, ldt, x, ldx, cnorm, info )
+    character        :: trans
+    integer          :: n
+    real             :: T(*)
+    integer          :: ldt
+    real             :: x(*)
+    integer          :: ldx
+    real             :: cnorm(*)
+    integer          :: info
+end subroutine magmaf_slaqtrsd
+
 subroutine magmaf_sposv( uplo, n, nrhs, A, lda, B, ldb, info )
     character        :: uplo
     integer          :: n
@@ -239,6 +272,44 @@ subroutine magmaf_slauum( uplo, n, A, lda, info )
     integer          :: lda
     integer          :: info
 end subroutine magmaf_slauum
+
+subroutine magmaf_strevc3( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm, mout,  &
+        work, lwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    real             :: T(*)
+    integer          :: ldt
+    real             :: VL(*)
+    integer          :: ldvl
+    real             :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    real             :: work(*)
+    integer          :: lwork
+    integer          :: info
+end subroutine magmaf_strevc3
+
+subroutine magmaf_strevc3_mt( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm,  &
+        mout, work, lwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    real             :: T(*)
+    integer          :: ldt
+    real             :: VL(*)
+    integer          :: ldvl
+    real             :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    real             :: work(*)
+    integer          :: lwork
+    integer          :: info
+end subroutine magmaf_strevc3_mt
 
 subroutine magmaf_strtri( uplo, diag, n, A, lda, info )
     character        :: uplo

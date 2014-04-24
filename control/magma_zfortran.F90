@@ -194,6 +194,22 @@ subroutine magmaf_zgetrf( m, n, A, lda, ipiv, info )
     integer          :: info
 end subroutine magmaf_zgetrf
 
+subroutine magmaf_zlatrsd( uplo, trans, diag, normin, n, A, lda, lambda, x, scale, cnorm,  &
+        info )
+    character        :: uplo
+    character        :: trans
+    character        :: diag
+    character        :: normin
+    integer          :: n
+    complex*16       :: A(*)
+    integer          :: lda
+    complex*16       :: lambda
+    complex*16       :: x(*)
+    double precision :: scale(*)
+    double precision :: cnorm(*)
+    integer          :: info
+end subroutine magmaf_zlatrsd
+
 subroutine magmaf_zposv( uplo, n, nrhs, A, lda, B, ldb, info )
     character        :: uplo
     integer          :: n
@@ -228,6 +244,46 @@ subroutine magmaf_zlauum( uplo, n, A, lda, info )
     integer          :: lda
     integer          :: info
 end subroutine magmaf_zlauum
+
+subroutine magmaf_ztrevc3( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm, mout,  &
+        work, lwork, rwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    complex*16       :: T(*)
+    integer          :: ldt
+    complex*16       :: VL(*)
+    integer          :: ldvl
+    complex*16       :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    complex*16       :: work(*)
+    integer          :: lwork
+    double precision :: rwork(*)
+    integer          :: info
+end subroutine magmaf_ztrevc3
+
+subroutine magmaf_ztrevc3_mt( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm,  &
+        mout, work, lwork, rwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    complex*16       :: T(*)
+    integer          :: ldt
+    complex*16       :: VL(*)
+    integer          :: ldvl
+    complex*16       :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    complex*16       :: work(*)
+    integer          :: lwork
+    double precision :: rwork(*)
+    integer          :: info
+end subroutine magmaf_ztrevc3_mt
 
 subroutine magmaf_ztrtri( uplo, diag, n, A, lda, info )
     character        :: uplo

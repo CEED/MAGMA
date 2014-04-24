@@ -205,6 +205,39 @@ subroutine magmaf_dgetrf( m, n, A, lda, ipiv, info )
     integer          :: info
 end subroutine magmaf_dgetrf
 
+subroutine magmaf_dlaln2( trans, na, nw, smin, ca, a, lda, d1, d2, b, ldb, wr, wi, x,  &
+        ldx, scale, xnorm, info )
+    integer          :: trans
+    integer          :: na
+    integer          :: nw
+    double precision :: smin
+    double precision :: ca
+    double precision :: a(*)
+    integer          :: lda
+    double precision :: d1
+    double precision :: d2
+    double precision :: b(*)
+    integer          :: ldb
+    double precision :: wr
+    double precision :: wi
+    double precision :: x(*)
+    integer          :: ldx
+    double precision :: scale(*)
+    double precision :: xnorm(*)
+    integer          :: info
+end subroutine magmaf_dlaln2
+
+subroutine magmaf_dlaqtrsd( trans, n, T, ldt, x, ldx, cnorm, info )
+    character        :: trans
+    integer          :: n
+    double precision :: T(*)
+    integer          :: ldt
+    double precision :: x(*)
+    integer          :: ldx
+    double precision :: cnorm(*)
+    integer          :: info
+end subroutine magmaf_dlaqtrsd
+
 subroutine magmaf_dposv( uplo, n, nrhs, A, lda, B, ldb, info )
     character        :: uplo
     integer          :: n
@@ -239,6 +272,44 @@ subroutine magmaf_dlauum( uplo, n, A, lda, info )
     integer          :: lda
     integer          :: info
 end subroutine magmaf_dlauum
+
+subroutine magmaf_dtrevc3( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm, mout,  &
+        work, lwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    double precision :: T(*)
+    integer          :: ldt
+    double precision :: VL(*)
+    integer          :: ldvl
+    double precision :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    double precision :: work(*)
+    integer          :: lwork
+    integer          :: info
+end subroutine magmaf_dtrevc3
+
+subroutine magmaf_dtrevc3_mt( side, howmny, select, n, T, ldt, VL, ldvl, VR, ldvr, mm,  &
+        mout, work, lwork, info )
+    character        :: side
+    character        :: howmny
+    integer          :: select(*)
+    integer          :: n
+    double precision :: T(*)
+    integer          :: ldt
+    double precision :: VL(*)
+    integer          :: ldvl
+    double precision :: VR(*)
+    integer          :: ldvr
+    integer          :: mm
+    integer          :: mout(*)
+    double precision :: work(*)
+    integer          :: lwork
+    integer          :: info
+end subroutine magmaf_dtrevc3_mt
 
 subroutine magmaf_dtrtri( uplo, diag, n, A, lda, info )
     character        :: uplo
