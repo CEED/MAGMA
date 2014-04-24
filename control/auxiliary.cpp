@@ -106,7 +106,7 @@ extern "C"
 void swp2pswp( magma_trans_t trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv)
 {
   magma_int_t i, newind, ind;
-  magma_int_t    notran = (trans == 'N' || trans == 'n');
+  magma_int_t    notran = (trans == MagmaNoTrans);
 
   for(i=0; i<n; i++)
     newipiv[i] = -1;

@@ -21,7 +21,7 @@ void zpanel_to_q(magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     
-    if (uplo == 'U' || uplo == 'u'){
+    if (uplo == MagmaUpper){
         for(i = 0; i < ib; ++i){
             col = A + i*lda;
             for(j = 0; j < i; ++j){
@@ -59,7 +59,7 @@ void zq_to_panel(magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma
     int i, j, k = 0;
     magmaDoubleComplex *col;
     
-    if (uplo == 'U' || uplo == 'u'){
+    if (uplo == MagmaUpper){
         for(i = 0; i < ib; ++i){
             col = A + i*lda;
             for(j = 0; j <= i; ++j){
