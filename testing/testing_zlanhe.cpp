@@ -58,8 +58,8 @@ int main( int argc, char** argv)
         for( int inorm = 0; inorm < 2; ++inorm ) {
         for( int iuplo = 0; iuplo < 2; ++iuplo ) {
             printf( "Testing that magmablas_zlanhe( %s, %s, ... ) returns -1 error...\n",
-                    lapack_const( norm[inorm] ),
-                    lapack_const( uplo[iuplo] ));
+                    lapack_norm_const( norm[inorm] ),
+                    lapack_uplo_const( uplo[iuplo] ));
             norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], 1, NULL, 1, NULL );
             if ( norm_magma != -1 ) {
                 printf( "expected magmablas_zlanhe to return -1 error, but got %f\n", norm_magma );
@@ -116,8 +116,8 @@ int main( int argc, char** argv)
                =================================================================== */
             cpu_time = magma_wtime();
             norm_lapack = lapackf77_zlanhe(
-                lapack_const( norm[inorm] ),
-                lapack_const( uplo[iuplo] ),
+                lapack_norm_const( norm[inorm] ),
+                lapack_uplo_const( uplo[iuplo] ),
                 &N, h_A, &lda, h_work );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
@@ -135,8 +135,8 @@ int main( int argc, char** argv)
             
             printf("%5d   %4s   %5s   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
                    (int) N,
-                   lapack_const( norm[inorm] ),
-                   lapack_const( uplo[iuplo] ),
+                   lapack_norm_const( norm[inorm] ),
+                   lapack_uplo_const( uplo[iuplo] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error < tol ? "ok" : "failed") );
             status |= ! (error < tol);

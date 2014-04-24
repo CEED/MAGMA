@@ -87,7 +87,7 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             cpu_time = magma_wtime();
-            norm_lapack = lapackf77_zlange( lapack_const(norm[inorm]), &M, &N, h_A, &lda, h_work );
+            norm_lapack = lapackf77_zlange( lapack_norm_const(norm[inorm]), &M, &N, h_A, &lda, h_work );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
             if (norm_lapack < 0)
@@ -103,7 +103,7 @@ int main( int argc, char** argv)
                 error = fabs( norm_magma - norm_lapack ) / norm_lapack;
             
             printf("%5d %5d   %4s   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
-                   (int) M, (int) N, lapack_const(norm[inorm]),
+                   (int) M, (int) N, lapack_norm_const(norm[inorm]),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error < tol ? "ok" : "failed") );
             status |= ! (error < tol);
