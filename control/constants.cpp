@@ -318,7 +318,7 @@ extern "C"
 const char* lapack_uplo_const ( magma_uplo_t magma_const )
 {
     assert( magma_const >= MagmaUpper );
-    assert( magma_const <= MagmaLower );
+    assert( magma_const <= MagmaFull  );
     return magma2lapack_constants[ magma_const ];
 }
 
@@ -334,7 +334,7 @@ extern "C"
 const char* lapack_side_const ( magma_side_t magma_const )
 {
     assert( magma_const >= MagmaLeft  );
-    assert( magma_const <= MagmaRight );
+    assert( magma_const <= MagmaBothSides );
     return magma2lapack_constants[ magma_const ];
 }
 
