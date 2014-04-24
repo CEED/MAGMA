@@ -135,8 +135,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    const char* side_  = lapack_const( side  );
-    const char* trans_ = lapack_const( trans );
+    const char* side_  = lapack_side_const( side );
+    const char* trans_ = lapack_trans_const( trans );
 
     magma_int_t nb = 128;
     magmaDoubleComplex *T;
