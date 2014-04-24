@@ -167,18 +167,6 @@ magma_int_t magma_zpotri( magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *
 magma_int_t magma_zlauum( magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A,
                           magma_int_t lda, magma_int_t *info);
 
-magma_int_t magma_ztrevc( magma_side_t side, magma_vec_t howmny,
-                          magma_int_t *select, magma_int_t n,
-                          magmaDoubleComplex *T,  magma_int_t ldt,
-                          magmaDoubleComplex *VL, magma_int_t ldvl,
-                          magmaDoubleComplex *VR, magma_int_t ldvr,
-                          magma_int_t mm, magma_int_t *mout,
-                          magmaDoubleComplex *work,
-                          #ifdef COMPLEX
-                          double *rwork,
-                          #endif
-                          magma_int_t *info );
-
 magma_int_t magma_ztrevc3(magma_side_t side, magma_vec_t howmny,
                           magma_int_t *select, magma_int_t n,
                           magmaDoubleComplex *T,  magma_int_t ldt,
@@ -192,18 +180,6 @@ magma_int_t magma_ztrevc3(magma_side_t side, magma_vec_t howmny,
                           magma_int_t *info );
                           
 magma_int_t magma_ztrevc3_mt( magma_side_t side, magma_vec_t howmny,
-                          magma_int_t *select, magma_int_t n,
-                          magmaDoubleComplex *T,  magma_int_t ldt,
-                          magmaDoubleComplex *VL, magma_int_t ldvl,
-                          magmaDoubleComplex *VR, magma_int_t ldvr,
-                          magma_int_t mm, magma_int_t *mout,
-                          magmaDoubleComplex *work, magma_int_t lwork,
-                          #ifdef COMPLEX
-                          double *rwork,
-                          #endif
-                          magma_int_t *info );
-
-magma_int_t magma_ztrevc3_mt_gpu( magma_side_t side, magma_vec_t howmny,
                           magma_int_t *select, magma_int_t n,
                           magmaDoubleComplex *T,  magma_int_t ldt,
                           magmaDoubleComplex *VL, magma_int_t ldvl,
