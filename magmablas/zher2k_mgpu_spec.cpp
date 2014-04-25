@@ -33,21 +33,21 @@
     ----------
 
     @param[in]
-    uplo     CHARACTER*1.
+    uplo     magma_uplo_t.
              On entry, UPLO specifies whether the upper or lower
              triangular part of the array C is to be referenced as
              follows:
-      -     = 'U':  Only the upper triangular part of C is to be referenced.
-      -     = 'L':  Only the lower triangular part of C is to be referenced.
+      -     = MagmaUpper:  Only the upper triangular part of C is to be referenced.
+      -     = MagmaLower:  Only the lower triangular part of C is to be referenced.
 
              **** current only Lower case is implemented.
 
     @param[in]
-    trans    CHARACTER*1.
+    trans    magma_trans_t.
              On entry, TRANS specifies the operation to be performed as
              follows:
-      -     = 'N':   C := alpha*A*B**H + conj( alpha )*B*A**H + beta*C.
-      -     = 'C':   C := alpha*A**H*B + conj( alpha )*B**H*A + beta*C.
+      -     = MagmaNoTrans:     C := alpha*A*B**H + conj( alpha )*B*A**H + beta*C.
+      -     = MagmaConjTrans:   C := alpha*A**H*B + conj( alpha )*B**H*A + beta*C.
 
              **** current only NoTrans case is implemented.
 
@@ -58,9 +58,9 @@
 
     @param[in]
     k        INTEGER.
-             On entry with TRANS = 'N' or 'n', K specifies the number
+             On entry with TRANS = MagmaNoTrans, K specifies the number
              of columns of the matrices A and B, and on entry with
-             TRANS = 'C' or 'c', K specifies the number of rows of the
+             TRANS = MagmaConjTrans, K specifies the number of rows of the
              matrices A and B. K must be at least zero.
 
     @param[in]
@@ -69,8 +69,8 @@
 
     @param[in]
     dA       COMPLEX*16 array of DIMENSION ( LDA, ka ), where ka is
-             k when TRANS = 'N' or 'n', and is n otherwise.
-             Before entry with TRANS = 'N' or 'n', the leading n by k
+             k when TRANS = MagmaNoTrans, and is n otherwise.
+             Before entry with TRANS = MagmaNoTrans, the leading n by k
              part of the array A must contain the matrix A, otherwise
              the leading k by n part of the array A must contain the
              matrix A.
@@ -80,7 +80,7 @@
     @param[in]
     lda      INTEGER.
              On entry, LDA specifies the first dimension of A as declared
-             in the calling (sub) program. When TRANS = 'N' or 'n'
+             in the calling (sub) program. When TRANS = MagmaNoTrans
              then LDA must be at least max( 1, n ), otherwise LDA must
              be at least max( 1, k ).
 
@@ -91,8 +91,8 @@
 
     @param[in]
     dB       COMPLEX*16 array of DIMENSION ( LDB, kb ), where kb is
-             k when TRANS = 'N' or 'n', and is n otherwise.
-             Before entry with TRANS = 'N' or 'n', the leading n by k
+             k when TRANS = MagmaNoTrans, and is n otherwise.
+             Before entry with TRANS = MagmaNoTrans, the leading n by k
              part of the array B must contain the matrix B, otherwise
              the leading k by n part of the array B must contain the
              matrix B.
@@ -102,7 +102,7 @@
     @param[in]
     ldb      INTEGER.
              On entry, LDB specifies the first dimension of B as declared
-             in the calling (sub) program. When TRANS = 'N' or 'n'
+             in the calling (sub) program. When TRANS = MagmaNoTrans
              then LDB must be at least max( 1, n ), otherwise LDB must
              be at least max( 1, k ).
 
@@ -117,14 +117,14 @@
 
     @param[in,out]
     dC       COMPLEX*16 array of DIMENSION ( LDC, n ).
-             Before entry with UPLO = 'U' or 'u', the leading n by n
+             Before entry with UPLO = MagmaUpper, the leading n by n
              upper triangular part of the array C must contain the upper
              triangular part of the Hermitian matrix and the strictly
              lower triangular part of C is not referenced. On exit, the
              upper triangular part of the array C is overwritten by the
              upper triangular part of the updated matrix.
     \n
-             Before entry with UPLO = 'L' or 'l', the leading n by n
+             Before entry with UPLO = MagmaLower, the leading n by n
              lower triangular part of the array C must contain the lower
              triangular part of the Hermitian matrix and the strictly
              upper triangular part of C is not referenced. On exit, the

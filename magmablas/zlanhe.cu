@@ -790,11 +790,11 @@ zlanhe_max(
             Specifies the value to be returned in ZLANHE as described above.
     
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is to be referenced.
-      -     = 'U': Upper triangular part of A is referenced
-      -     = 'L': Lower triangular part of A is referenced
+      -     = MagmaUpper: Upper triangular part of A is referenced
+      -     = MagmaLower: Lower triangular part of A is referenced
     
     @param[in]
     n       INTEGER
@@ -803,10 +803,10 @@ zlanhe_max(
     
     @param[in]
     A       COMPLEX*16 array on the GPU, dimension (LDA,N)
-            The Hermitian matrix A. If UPLO = 'U', the leading n by n
+            The Hermitian matrix A. If UPLO = MagmaUpper, the leading n by n
             upper triangular part of A contains the upper triangular part
             of the matrix A, and the strictly lower triangular part of A
-            is not referenced. If UPLO = 'L', the leading n by n lower
+            is not referenced. If UPLO = MagmaLower, the leading n by n lower
             triangular part of A contains the lower triangular part of
             the matrix A, and the strictly upper triangular part of A is
             not referenced. Note that the imaginary parts of the diagonal

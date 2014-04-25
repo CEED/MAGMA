@@ -65,33 +65,33 @@ void diag_ztrtri (magma_int_t m, magma_uplo_t uplo, magma_diag_t diag, const mag
     ----------
 
     @param[in]
-    side    CHARACTER*1.
+    side    magma_side_t.
             On entry, side specifies whether op( A ) appears on the left
             or right of X as follows:
-      -     = 'L':  op( A )*X = alpha*B.
-      -     = 'R':  X*op( A ) = alpha*B.
+      -     = MagmaLeft:       op( A )*X = alpha*B.
+      -     = MagmaRight:      X*op( A ) = alpha*B.
 
     @param[in]
-    uplo    CHARACTER*1.
+    uplo    magma_uplo_t.
             On entry, uplo specifies whether the matrix A is an upper or
             lower triangular matrix as follows:
-      -     = 'U':  A is an upper triangular matrix.
-      -     = 'L':  A is a  lower triangular matrix.
+      -     = MagmaUpper:  A is an upper triangular matrix.
+      -     = MagmaLower:  A is a  lower triangular matrix.
 
     @param[in]
-    transA  CHARACTER*1.
+    transA  magma_trans_t.
             On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
-      -     = 'N':  op( A ) = A.
-      -     = 'T':  op( A ) = A^T.
-      -     = 'C':  op( A ) = A^T.
+      -     = MagmaNoTrans:    op( A ) = A.
+      -     = MagmaTrans:      op( A ) = A^T.
+      -     = MagmaConjTrans:  op( A ) = A^T.
 
     @param[in]
-    diag    CHARACTER*1.
+    diag    magma_diag_t.
             On entry, diag specifies whether or not A is unit triangular
             as follows:
-      -     = 'U':  A is assumed to be unit triangular.
-      -     = 'N':  A is not assumed to be unit triangular.
+      -     = MagmaUnit:     A is assumed to be unit triangular.
+      -     = MagmaNonUnit:  A is not assumed to be unit triangular.
 
     @param[in]
     m       INTEGER.
@@ -111,23 +111,23 @@ void diag_ztrtri (magma_int_t m, magma_uplo_t uplo, magma_diag_t diag, const mag
 
     @param[in]
     A       COMPLEX array of DIMENSION ( lda, k ), where k is m
-            when side = 'L' or 'l' and is n when side = 'R' or 'r'.
-            Before entry with uplo = 'U' or 'u', the leading k by k
+            when side = MagmaLeft and is n when side = MagmaRight.
+            Before entry with uplo = MagmaUpper, the leading k by k
             upper triangular part of the array A must contain the upper
             triangular matrix and the strictly lower triangular part of
             A is not referenced.
-            Before entry with uplo = 'L' or 'l', the leading k by k
+            Before entry with uplo = MagmaLower, the leading k by k
             lower triangular part of the array A must contain the lower
             triangular matrix and the strictly upper triangular part of
             A is not referenced.
-            Note that when diag = 'U' or 'u', the diagonal elements of
+            Note that when diag = MagmaUnit, the diagonal elements of
             A are not referenced either, but are assumed to be unity.
 
     @param[in]
     lda     INTEGER.
             On entry, lda specifies the first dimension of A as declared
-            in the calling (sub) program. When side = 'L' or 'l' then
-            lda must be at least max( 1, m ), when side = 'R' or 'r'
+            in the calling (sub) program. When side = MagmaLeft then
+            lda must be at least max( 1, m ), when side = MagmaRight
             then lda must be at least max( 1, n ).
 
     @param[in,out]

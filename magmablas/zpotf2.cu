@@ -37,8 +37,8 @@ void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
     positive definite matrix A.
 
     The factorization has the form
-        A = U' * U , if UPLO = 'U', or
-        A = L  * L', if UPLO = 'L',
+        A = U' * U , if UPLO = MagmaUpper, or
+        A = L  * L', if UPLO = MagmaLower,
     where U is an upper triangular matrix and L is lower triangular.
 
     This is the unblocked version of the algorithm, calling Level 2 BLAS.
@@ -47,11 +47,11 @@ void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
     ---------
 
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies whether the upper or lower triangular part of the
             symmetric matrix A is stored.
-      -     = 'U':  Upper triangular
-      -     = 'L':  Lower triangular
+      -     = MagmaUpper:  Upper triangular
+      -     = MagmaLower:  Lower triangular
 
     @param[in]
     n       INTEGER
@@ -60,10 +60,10 @@ void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+            On entry, the symmetric matrix A.  If UPLO = MagmaUpper, the leading
             n by n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading n by n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.

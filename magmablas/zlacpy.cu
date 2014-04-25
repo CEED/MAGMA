@@ -57,10 +57,10 @@ zlacpy_kernel(
     ---------
     
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies the part of the matrix dA to be copied to dB.
-      -     = 'U':      Upper triangular part
-      -     = 'L':      Lower triangular part
+      -     = MagmaUpper:      Upper triangular part
+      -     = MagmaLower:      Lower triangular part
             Otherwise:  All of the matrix dA
     
     @param[in]
@@ -74,8 +74,8 @@ zlacpy_kernel(
     @param[in]
     dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
             The m by n matrix dA.
-            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
-            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
+            If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
+            if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
     
     @param[in]
     ldda    INTEGER

@@ -29,20 +29,20 @@
     ----------
     
     @param[in]
-    transA  CHARACTER*1.
+    transA  magma_trans_t.
             On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
-      -     = 'N':  op( A ) = A.
-      -     = 'T':  op( A ) = A**T.
-      -     = 'C':  op( A ) = A**T.
+      -     = MagmaNoTrans:    op( A ) = A.
+      -     = MagmaTrans:      op( A ) = A**T.
+      -     = MagmaConjTrans:  op( A ) = A**T.
     
     @param[in]
-    transB  CHARACTER*1.
+    transB  magma_trans_t.
             On entry, transB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
-      -     = 'N':  op( B ) = B.
-      -     = 'T':  op( B ) = B**T.
-      -     = 'C':  op( B ) = B**T.
+      -     = MagmaNoTrans:    op( B ) = B.
+      -     = MagmaTrans:      op( B ) = B**T.
+      -     = MagmaConjTrans:  op( B ) = B**T.
     
     @param[in]
     m       INTEGER.
@@ -67,8 +67,8 @@
     
     @param[in]
     A       DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
-            k  when  transA = 'N' or 'n',  and is  m  otherwise.
-            Before entry with  transA = 'N' or 'n',  the leading  m by k
+            k  when  transA = MagmaNoTrans,  and is  m  otherwise.
+            Before entry with  transA = MagmaNoTrans,  the leading  m by k
             part of the array  A  must contain the matrix  A,  otherwise
             the leading  k by m  part of the array  A  must contain  the
             matrix A.
@@ -76,14 +76,14 @@
     @param[in]
     lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
-            in the calling (sub) program. When  transA = 'N' or 'n' then
+            in the calling (sub) program. When  transA = MagmaNoTrans then
             LDA must be at least  max( 1, m ), otherwise  LDA must be at
             least  max( 1, k ).
     
     @param[in]
     B       DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
-            n  when  transB = 'N' or 'n',  and is  k  otherwise.
-            Before entry with  transB = 'N' or 'n',  the leading  k by n
+            n  when  transB = MagmaNoTrans,  and is  k  otherwise.
+            Before entry with  transB = MagmaNoTrans,  the leading  k by n
             part of the array  B  must contain the matrix  B,  otherwise
             the leading  n by k  part of the array  B  must contain  the
             matrix B.
@@ -91,7 +91,7 @@
     @param[in]
     ldb     INTEGER.
             On entry, LDB specifies the first dimension of B as declared
-            in the calling (sub) program. When  transB = 'N' or 'n' then
+            in the calling (sub) program. When  transB = MagmaNoTrans then
             LDB must be at least  max( 1, k ), otherwise  LDB must be at
             least  max( 1, n ).
     

@@ -74,11 +74,11 @@ magmablas_dgemvt_tesla(
     Arguments
     ----------
     @param[in]
-    trans   CHARACTER*1
+    trans   magma_trans_t
             On entry, TRANS specifies the operation to be performed as
             follows:
-      -     = 'N':  y := alpha*A  *x + beta*y
-      -     = 'T':  y := alpha*A^T*x + beta*y
+      -     = MagmaNoTrans:    y := alpha*A  *x + beta*y
+      -     = MagmaTrans:      y := alpha*A^T*x + beta*y
             
     @param[in]
     m       INTEGER

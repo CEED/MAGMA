@@ -84,8 +84,8 @@
     
     @param[in]
     d_A     COMPLEX_16 array of DIMENSION ( LDA, ka ), where ka is
-            k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
-            Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
+            k  when  TRANSA = MagmaNoTrans,  and is  m  otherwise.
+            Before entry with  TRANSA = MagmaNoTrans,  the leading  m by k
             part of the array d_A must contain the matrix d_A, otherwise
             the leading  k by m  part of the array d_A must contain  the
             matrix d_A.
@@ -93,14 +93,14 @@
     @param[in]
     lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
-            in the calling (sub) program. When  TRANSA = 'N' or 'n' then
+            in the calling (sub) program. When  TRANSA = MagmaNoTrans then
             LDA must be at least  max( 1, m ), otherwise  LDA must be at
             least  max( 1, k ).
     
     @param[in]
     d_B     COMPLEX_16 array of DIMENSION ( LDB, kb ), where kb is
-            n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
-            Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
+            n  when  TRANSB = MagmaNoTrans,  and is  k  otherwise.
+            Before entry with  TRANSB = MagmaNoTrans,  the leading  k by n
             part of the array d_B must contain the matrix d_B, otherwise
             the leading  n by k  part of the array d_B must contain  the
             matrix d_B.
@@ -108,7 +108,7 @@
     @param[in]
     ldb     INTEGER.
             On entry, LDB specifies the first dimension of d_B as declared
-            in the calling (sub) program. When  TRANSB = 'N' or 'n' then
+            in the calling (sub) program. When  TRANSB = MagmaNoTrans then
             LDB must be at least  max( 1, k ), otherwise  LDB must be at
             least  max( 1, n ).
     

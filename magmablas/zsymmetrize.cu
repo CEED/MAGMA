@@ -70,10 +70,10 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
     ---------
     
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies the part of the matrix dA that is valid on input.
-      -     = 'U':      Upper triangular part
-      -     = 'L':      Lower triangular part
+      -     = MagmaUpper:      Upper triangular part
+      -     = MagmaLower:      Lower triangular part
     
     @param[in]
     m       INTEGER

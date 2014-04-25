@@ -1492,12 +1492,12 @@ void magmablas_zhemv_fermi_L_32(
     Arguments
     ----------
     @param[in]
-    uplo    CHARACTER*1.
+    uplo    magma_uplo_t.
             On entry, UPLO specifies whether the upper or lower
             triangular part of the array A is to be referenced as
             follows:
-      -     = 'U':  Only the upper triangular part of A is to be referenced.
-      -     = 'L':  Only the lower triangular part of A is to be referenced.
+      -     = MagmaUpper:  Only the upper triangular part of A is to be referenced.
+      -     = MagmaLower:  Only the lower triangular part of A is to be referenced.
 
     @param[in]
     n       INTEGER.
@@ -1510,11 +1510,11 @@ void magmablas_zhemv_fermi_L_32(
 
     @param[in]
     A       COMPLEX*16 array of DIMENSION ( LDA, n ).
-            Before entry with UPLO = 'U' or 'u', the leading n by n
+            Before entry with UPLO = MagmaUpper, the leading n by n
             upper triangular part of the array A must contain the upper
             triangular part of the hermitian matrix and the strictly
             lower triangular part of A is not referenced.
-            Before entry with UPLO = 'L' or 'l', the leading n by n
+            Before entry with UPLO = MagmaLower, the leading n by n
             lower triangular part of the array A must contain the lower
             triangular part of the hermitian matrix and the strictly
             upper triangular part of A is not referenced.

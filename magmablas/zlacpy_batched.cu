@@ -62,10 +62,10 @@ zlacpy_batched_kernel(
     ---------
     
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies the part of each matrix dAarray[i] to be copied to dBarray[i].
-      -     = 'U':      Upper triangular part
-      -     = 'L':      Lower triangular part
+      -     = MagmaUpper:      Upper triangular part
+      -     = MagmaLower:      Lower triangular part
             Otherwise:  All of each matrix dAarray[i]
     
     @param[in]
@@ -80,8 +80,8 @@ zlacpy_batched_kernel(
     dAarray array on GPU, dimension(batchCount), of pointers to arrays,
             with each array a COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
             The m by n matrices dAarray[i].
-            If UPLO = 'U', only the upper triangle or trapezoid is accessed;
-            if UPLO = 'L', only the lower triangle or trapezoid is accessed.
+            If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
+            if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
     
     @param[in]
     ldda    INTEGER
