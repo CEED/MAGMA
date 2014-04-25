@@ -167,13 +167,13 @@
 
     ------------------------------------------------------------
     @defgroup eigenvalue   Eigenvalue
-    @brief    Solve \f$ Ax = λx \f$
+    @brief    Solve \f$ Ax = \lambda x \f$
     @{
         @defgroup magma_geev   Non-symmetric eigenvalue
-        @brief    Solve \f$ Ax = λx \f$ for non-symmetric \f$ A \f$
+        @brief    Solve \f$ Ax = \lambda x \f$ for non-symmetric \f$ A \f$
         @{
             @defgroup magma_geev_driver   Non-symmetric eigenvalue: driver
-            @brief    Whole \f$ Ax = λx \f$ non-symmetric eigenvalue problem
+            @brief    Whole \f$ Ax = \lambda x \f$ non-symmetric eigenvalue problem
             @{
                 @defgroup magma_sgeev_driver single precision
                 @defgroup magma_dgeev_driver double precision
@@ -201,10 +201,10 @@
         @}
 
         @defgroup magma_syev   Symmetric eigenvalue
-        @brief    Solve \f$ Ax = λx \f$ for symmetric \f$ A \f$
+        @brief    Solve \f$ Ax = \lambda x \f$ for symmetric \f$ A \f$
         @{
             @defgroup magma_syev_driver   Symmetric eigenvalue: driver
-            @brief    Whole \f$ Ax = λx \f$ eigenvalue problem
+            @brief    Whole \f$ Ax = \lambda x \f$ eigenvalue problem
             @{
                 @defgroup magma_ssyev_driver single precision
                 @defgroup magma_dsyev_driver double precision
@@ -213,7 +213,7 @@
             @}
 
             @defgroup magma_sygv_driver   Generalized symmetric eigenvalue: driver
-            @brief    Whole \f$ Ax = λBx \f$, or \f$ ABx = λx \f$, or \f$ BAx = λx \f$ generalized symmetric eigenvalue problem
+            @brief    Whole \f$ Ax = \lambda Bx \f$, or \f$ ABx = \lambda x \f$, or \f$ BAx = \lambda x \f$ generalized symmetric eigenvalue problem
             @{
                 @defgroup magma_ssygv_driver single precision
                 @defgroup magma_dsygv_driver double precision
@@ -255,7 +255,7 @@
 
     ------------------------------------------------------------
     @defgroup magma_gesvd   Singular Value Decomposition (SVD)
-    @brief    Compute SVD, \f$ A = U Λ V^T \f$
+    @brief    Compute SVD, \f$ A = U \Sigma V^T \f$
     @{
             @defgroup magma_gesvd_driver   SVD: driver
             @brief    Whole SVD problem
