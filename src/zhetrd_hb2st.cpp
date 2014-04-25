@@ -115,9 +115,9 @@ public:
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangles of A is stored;
-      -     = 'L':  Lower triangles of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangles of A is stored;
+      -     = MagmaLower:  Lower triangles of A is stored.
 
     @param[in]
     n       INTEGER
@@ -147,7 +147,7 @@ public:
     @param[out]
     e       DOUBLE array, dimension (N-1)
             The off-diagonal elements of the tridiagonal matrix T:
-            E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
+            E(i) = A(i,i+1) if UPLO = MagmaUpper, E(i) = A(i+1,i) if UPLO = MagmaLower.
 
     @param[out]
     V       COMPLEX_16 array, dimension (BLKCNT, LDV, VBLKSIZ)

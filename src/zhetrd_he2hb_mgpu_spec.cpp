@@ -28,9 +28,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored;
-      -     = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
     n       INTEGER
@@ -38,19 +38,19 @@
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-            On exit, if UPLO = 'U', the Upper band-diagonal of A is
+            On exit, if UPLO = MagmaUpper, the Upper band-diagonal of A is
             overwritten by the corresponding elements of the
             band-diagonal matrix T, and the elements above the band
             diagonal, with the array TAU, represent the orthogonal
             matrix Q as a product of elementary reflectors; if UPLO
-            = 'L', the the Lower band-diagonal of A is overwritten by
+            = MagmaLower, the the Lower band-diagonal of A is overwritten by
             the corresponding elements of the band-diagonal
             matrix T, and the elements below the band-diagonal, with
             the array TAU, represent the orthogonal matrix Q as a product
@@ -95,7 +95,7 @@
 
     Further Details
     ---------------
-    If UPLO = 'U', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaUpper, the matrix Q is represented as a product of elementary
     reflectors
 
         Q = H(n-1) . . . H(2) H(1).
@@ -108,7 +108,7 @@
     v(i+1:n) = 0 and v(i) = 1; v(1:i-1) is stored on exit in
     A(1:i-1,i+1), and tau in TAU(i).
 
-    If UPLO = 'L', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaLower, the matrix Q is represented as a product of elementary
     reflectors
 
         Q = H(1) H(2) . . . H(n-1).
@@ -124,7 +124,7 @@
     The contents of A on exit are illustrated by the following examples
     with n = 5:
 
-    if UPLO = 'U':                       if UPLO = 'L':
+    if UPLO = MagmaUpper:                if UPLO = MagmaLower:
 
       (  d   e   v2  v3  v4 )              (  d                  )
       (      d   e   v3  v4 )              (  e   d              )

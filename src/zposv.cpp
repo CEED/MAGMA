@@ -18,8 +18,8 @@
     where A is an N-by-N Hermitian positive definite matrix and X and B
     are N-by-NRHS matrices.
     The Cholesky decomposition is used to factor A as
-       A = U**H * U,  if UPLO = 'U', or
-       A = L * L**H,  if UPLO = 'L',
+       A = U**H * U,  if UPLO = MagmaUpper, or
+       A = L * L**H,  if UPLO = MagmaLower,
     where U is an upper triangular matrix and  L is a lower triangular
     matrix.  The factored form of A is then used to solve the system of
     equations A * X = B.
@@ -27,9 +27,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored;
-      -     = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
     n       INTEGER
@@ -42,10 +42,10 @@
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.

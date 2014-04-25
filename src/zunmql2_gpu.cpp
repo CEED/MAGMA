@@ -18,9 +18,9 @@
     ZUNMQL overwrites the general complex M-by-N matrix C with
 
     @verbatim
-                    SIDE = 'L'     SIDE = 'R'
-    TRANS = 'N':      Q * C          C * Q
-    TRANS = 'C':      Q**H * C       C * Q**H
+                               SIDE = MagmaLeft   SIDE = MagmaRight
+    TRANS = MagmaNoTrans:      Q * C              C * Q
+    TRANS = MagmaConjTrans:    Q**H * C           C * Q**H
     @endverbatim
 
     where Q is a complex unitary matrix defined as the product of k
@@ -28,20 +28,20 @@
 
           Q = H(k) . . . H(2) H(1)
 
-    as returned by ZGEQLF. Q is of order M if SIDE = 'L' and of order N
-    if SIDE = 'R'.
+    as returned by ZGEQLF. Q is of order M if SIDE = MagmaLeft and of order N
+    if SIDE = MagmaRight.
 
     Arguments
     ---------
     @param[in]
-    side    CHARACTER*1
-      -     = 'L': apply Q or Q**H from the Left;
-      -     = 'R': apply Q or Q**H from the Right.
+    side    magma_side_t
+      -     = MagmaLeft:      apply Q or Q**H from the Left;
+      -     = MagmaRight:     apply Q or Q**H from the Right.
 
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N':  No transpose, apply Q;
-      -     = 'C':  Transpose, apply Q**H.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:    No transpose, apply Q;
+      -     = MagmaConjTrans:  Transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -55,8 +55,8 @@
     k       INTEGER
             The number of elementary reflectors whose product defines
             the matrix Q.
-            If SIDE = 'L', M >= K >= 0;
-            if SIDE = 'R', N >= K >= 0.
+            If SIDE = MagmaLeft,  M >= K >= 0;
+            if SIDE = MagmaRight, N >= K >= 0.
 
     @param[in]
     dA      COMPLEX_16 array, dimension (LDA,K)
@@ -69,7 +69,7 @@
     @param[in]
     ldda    INTEGER
             The leading dimension of the array DA.
-            LDDA >= max(1,M) if SIDE = 'L'; LDDA >= max(1,N) if SIDE = 'R'.
+            LDDA >= max(1,M) if SIDE = MagmaLeft; LDDA >= max(1,N) if SIDE = MagmaRight.
 
     @param[in]
     tau     COMPLEX_16 array, dimension (K)
@@ -87,15 +87,15 @@
 
     @param[in]
     wA      (workspace) COMPLEX_16 array, dimension
-                                 (LDWA,M) if SIDE = 'L'
-                                 (LDWA,N) if SIDE = 'R'
+                                 (LDWA,M) if SIDE = MagmaLeft
+                                 (LDWA,N) if SIDE = MagmaRight
             The vectors which define the elementary reflectors, as
             returned by ZHETRD_GPU.
 
     @param[in]
     ldwa    INTEGER
             The leading dimension of the array wA.
-            LDWA >= max(1,M) if SIDE = 'L'; LDWA >= max(1,N) if SIDE = 'R'.
+            LDWA >= max(1,M) if SIDE = MagmaLeft; LDWA >= max(1,N) if SIDE = MagmaRight.
 
     @param[out]
     info    INTEGER

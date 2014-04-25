@@ -25,9 +25,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored;
-      -     = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
     n       INTEGER
@@ -35,19 +35,19 @@
 
     @param[in,out]
     dA      COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
-            On exit, if UPLO = 'U', the diagonal and first superdiagonal
+            On exit, if UPLO = MagmaUpper, the diagonal and first superdiagonal
             of A are overwritten by the corresponding elements of the
             tridiagonal matrix T, and the elements above the first
             superdiagonal, with the array TAU, represent the orthogonal
             matrix Q as a product of elementary reflectors; if UPLO
-            = 'L', the diagonal and first subdiagonal of A are over-
+            = MagmaLower, the diagonal and first subdiagonal of A are over-
             written by the corresponding elements of the tridiagonal
             matrix T, and the elements below the first subdiagonal, with
             the array TAU, represent the orthogonal matrix Q as a product
@@ -65,7 +65,7 @@
     @param[out]
     e       COMPLEX_16 array, dimension (N-1)
             The off-diagonal elements of the tridiagonal matrix T:
-            E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
+            E(i) = A(i,i+1) if UPLO = MagmaUpper, E(i) = A(i+1,i) if UPLO = MagmaLower.
 
     @param[out]
     tau     COMPLEX_16 array, dimension (N-1)
@@ -74,8 +74,8 @@
 
     @param[out]
     wA      (workspace) COMPLEX_16 array, dimension (LDA,N)
-            On exit the diagonal, the  upper part (UPLO='U')
-            or the lower part (UPLO='L') are copies of DA
+            On exit the diagonal, the  upper part (UPLO=MagmaUpper)
+            or the lower part (UPLO=MagmaLower) are copies of DA
 
     @param[in]
     ldwa    INTEGER
@@ -111,7 +111,7 @@
 
     Further Details
     ---------------
-    If UPLO = 'U', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaUpper, the matrix Q is represented as a product of elementary
     reflectors
 
         Q = H(n-1) . . . H(2) H(1).
@@ -124,7 +124,7 @@
     v(i+1:n) = 0 and v(i) = 1; v(1:i-1) is stored on exit in
     A(1:i-1,i+1), and tau in TAU(i).
 
-    If UPLO = 'L', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaLower, the matrix Q is represented as a product of elementary
     reflectors
 
         Q = H(1) H(2) . . . H(n-1).
@@ -140,7 +140,7 @@
     The contents of A on exit are illustrated by the following examples
     with n = 5:
 
-    if UPLO = 'U':                       if UPLO = 'L':
+    if UPLO = MagmaUpper:                if UPLO = MagmaLower:
 
         (  d   e   v2  v3  v4 )              (  d                  )
         (      d   e   v3  v4 )              (  e   d              )

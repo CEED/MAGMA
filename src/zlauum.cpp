@@ -17,20 +17,20 @@
     factor U or L is stored in the upper or lower triangular part of
     the array A.
 
-    If UPLO = 'U' or 'u' then the upper triangle of the result is stored,
+    If UPLO = MagmaUpper then the upper triangle of the result is stored,
     overwriting the factor U in A.
-    If UPLO = 'L' or 'l' then the lower triangle of the result is stored,
+    If UPLO = MagmaLower then the lower triangle of the result is stored,
     overwriting the factor L in A.
     This is the blocked form of the algorithm, calling Level 3 BLAS.
 
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies whether the triangular factor stored in the array A
             is upper or lower triangular:
-      -     = 'U':  Upper triangular
-      -     = 'L':  Lower triangular
+      -     = MagmaUpper:  Upper triangular
+      -     = MagmaLower:  Lower triangular
 
     @param[in]
     n       INTEGER
@@ -39,9 +39,9 @@
     @param[in,out]
     A       COPLEX_16 array, dimension (LDA,N)
             On entry, the triangular factor U or L.
-            On exit, if UPLO = 'U', the upper triangle of A is
+            On exit, if UPLO = MagmaUpper, the upper triangle of A is
             overwritten with the upper triangle of the product U * U';
-            if UPLO = 'L', the lower triangle of A is overwritten with
+            if UPLO = MagmaLower, the lower triangle of A is overwritten with
             the lower triangle of the product L' * L.
 
     @param[in]

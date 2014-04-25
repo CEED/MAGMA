@@ -44,26 +44,26 @@
     Arguments
     ---------
     @param[in]
-    side     CHARACTER*1
-       -     = 'R':  compute right eigenvectors only;
-       -     = 'L':  compute left eigenvectors only;
-       -     = 'B':  compute both right and left eigenvectors.
+    side     magma_side_t
+       -     = MagmaRight:      compute right eigenvectors only;
+       -     = MagmaLeft:       compute left eigenvectors only;
+       -     = MagmaBothSides:  compute both right and left eigenvectors.
 
     @param[in]
-    howmany  CHARACTER*1
-             = 'A':  compute all right and/or left eigenvectors;
-             = 'B':  compute all right and/or left eigenvectors,
-                     backtransformed by the matrices in VR and/or VL;
-             = 'S':  compute selected right and/or left eigenvectors,
-                     as indicated by the logical array select.
+    howmany  magma_vec_t
+       -     = MagmaAllVec:        compute all right and/or left eigenvectors;
+       -     = MagmaBacktransVec:  compute all right and/or left eigenvectors,
+                                   backtransformed by the matrices in VR and/or VL;
+       -     = MagmaSomeVec:       compute selected right and/or left eigenvectors,
+                                   as indicated by the logical array select.
 
     @param[in]
     select   LOGICAL array, dimension (n)
-             If howmany = 'S', select specifies the eigenvectors to be
+             If howmany = MagmaSomeVec, select specifies the eigenvectors to be
              computed.
              The eigenvector corresponding to the j-th eigenvalue is
              computed if select[j] = true.
-             Not referenced if howmany = 'A' or 'B'.
+             Not referenced if howmany = MagmaAllVec or MagmaBacktransVec.
 
     @param[in]
     n        INTEGER
@@ -79,41 +79,39 @@
 
     @param[in,out]
     VL       COMPLEX*16 array, dimension (ldvl,mm)
-             On entry, if side = 'L' or 'B' and howmany = 'B', VL must
+             On entry, if side = MagmaLeft or MagmaBothSides and howmany = MagmaBacktransVec, VL must
              contain an n-by-n matrix Q (usually the unitary matrix Q
              of Schur vectors returned by ZHSEQR).
-             On exit, if side = 'L' or 'B', VL contains:
-             if howmany = 'A', the matrix Y of left eigenvectors of T;
-             if howmany = 'B', the matrix Q*Y;
-             if howmany = 'S', the left eigenvectors of T specified by
+             On exit, if side = MagmaLeft or MagmaBothSides, VL contains:
+             if howmany = MagmaAllVec, the matrix Y of left eigenvectors of T;
+             if howmany = MagmaBacktransVec, the matrix Q*Y;
+             if howmany = MagmaSomeVec, the left eigenvectors of T specified by
                               select, stored consecutively in the columns
-                              of VL, in the same order as their
-                              eigenvalues.
-             Not referenced if side = 'R'.
+                              of VL, in the same order as their eigenvalues.
+             Not referenced if side = MagmaRight.
 
     @param[in]
     ldvl     INTEGER
              The leading dimension of the array VL.
-             ldvl >= 1, and if side = 'L' or 'B', ldvl >= n.
+             ldvl >= 1, and if side = MagmaLeft or MagmaBothSides, ldvl >= n.
 
     @param[in,out]
     VR       COMPLEX*16 array, dimension (ldvr,mm)
-             On entry, if side = 'R' or 'B' and howmany = 'B', VR must
+             On entry, if side = MagmaRight or MagmaBothSides and howmany = MagmaBacktransVec, VR must
              contain an n-by-n matrix Q (usually the unitary matrix Q
              of Schur vectors returned by ZHSEQR).
-             On exit, if side = 'R' or 'B', VR contains:
-             if howmany = 'A', the matrix X of right eigenvectors of T;
-             if howmany = 'B', the matrix Q*X;
-             if howmany = 'S', the right eigenvectors of T specified by
+             On exit, if side = MagmaRight or MagmaBothSides, VR contains:
+             if howmany = MagmaAllVec, the matrix X of right eigenvectors of T;
+             if howmany = MagmaBacktransVec, the matrix Q*X;
+             if howmany = MagmaSomeVec, the right eigenvectors of T specified by
                                select, stored consecutively in the columns
-                               of VR, in the same order as their
-                               eigenvalues.
-             Not referenced if side = 'L'.
+                               of VR, in the same order as their eigenvalues.
+             Not referenced if side = MagmaLeft.
 
     @param[in]
     ldvr     INTEGER
              The leading dimension of the array VR.
-             ldvr >= 1, and if side = 'R' or 'B', ldvr >= n.
+             ldvr >= 1, and if side = MagmaRight or MagmaBothSides, ldvr >= n.
 
     @param[in]
     mm       INTEGER
@@ -123,7 +121,7 @@
     mout     INTEGER
              The number of columns in the arrays VL and/or VR actually
              used to store the eigenvectors.
-             If howmany = 'A' or 'B', mout is set to n.
+             If howmany = MagmaAllVec or MagmaBacktransVec, mout is set to n.
              Each selected eigenvector occupies one column.
 
     @param[out]

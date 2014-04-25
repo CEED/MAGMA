@@ -18,8 +18,8 @@
     positive definite matrix dA.
 
     The factorization has the form
-       dA = U**H * U,  if UPLO = 'U', or
-       dA = L  * L**H,  if UPLO = 'L',
+       dA = U**H * U,   if UPLO = MagmaUpper, or
+       dA = L  * L**H,  if UPLO = MagmaLower,
     where U is an upper triangular matrix and L is lower triangular.
 
     This is the block version of the algorithm, calling Level 3 BLAS.
@@ -27,9 +27,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of dA is stored;
-      -     = 'L':  Lower triangle of dA is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of dA is stored;
+      -     = MagmaLower:  Lower triangle of dA is stored.
 
     @param[in]
     n       INTEGER
@@ -37,10 +37,10 @@
 
     @param[in,out]
     dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the Hermitian matrix dA.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix dA.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of dA contains the upper
             triangular part of the matrix dA, and the strictly lower
-            triangular part of dA is not referenced.  If UPLO = 'L', the
+            triangular part of dA is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of dA contains the lower
             triangular part of the matrix dA, and the strictly upper
             triangular part of dA is not referenced.

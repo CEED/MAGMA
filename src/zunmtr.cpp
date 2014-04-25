@@ -18,36 +18,36 @@
     -------
     ZUNMTR overwrites the general complex M-by-N matrix C with
 
-                    SIDE = 'L'     SIDE = 'R'
-    TRANS = 'N':      Q * C          C * Q
-    TRANS = 'T':      Q**H * C       C * Q**H
+                    SIDE = MagmaLeft     SIDE = MagmaRight
+    TRANS = MagmaNoTrans:      Q * C          C * Q
+    TRANS = MagmaTrans:      Q**H * C       C * Q**H
 
     where Q is a complex orthogonal matrix of order nq, with nq = m if
-    SIDE = 'L' and nq = n if SIDE = 'R'. Q is defined as the product of
+    SIDE = MagmaLeft and nq = n if SIDE = MagmaRight. Q is defined as the product of
     nq-1 elementary reflectors, as returned by SSYTRD:
 
-    if UPLO = 'U', Q = H(nq-1) . . . H(2) H(1);
+    if UPLO = MagmaUpper, Q = H(nq-1) . . . H(2) H(1);
 
-    if UPLO = 'L', Q = H(1) H(2) . . . H(nq-1).
+    if UPLO = MagmaLower, Q = H(1) H(2) . . . H(nq-1).
 
     Arguments
     ---------
     @param[in]
-    side    CHARACTER*1
-      -     = 'L': apply Q or Q**H from the Left;
-      -     = 'R': apply Q or Q**H from the Right.
+    side    magma_side_t
+      -     = MagmaLeft:      apply Q or Q**H from the Left;
+      -     = MagmaRight:     apply Q or Q**H from the Right.
 
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U': Upper triangle of A contains elementary reflectors
+    uplo    magma_uplo_t
+      -     = MagmaUpper: Upper triangle of A contains elementary reflectors
                    from SSYTRD;
-      -     = 'L': Lower triangle of A contains elementary reflectors
+      -     = MagmaLower: Lower triangle of A contains elementary reflectors
                    from SSYTRD.
 
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N':  No transpose, apply Q;
-      -     = 'T':  Transpose, apply Q**H.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:    No transpose, apply Q;
+      -     = MagmaTrans:      Transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -59,20 +59,20 @@
 
     @param[in]
     A       COMPLEX_16 array, dimension
-                                 (LDA,M) if SIDE = 'L'
-                                 (LDA,N) if SIDE = 'R'
+                                 (LDA,M) if SIDE = MagmaLeft
+                                 (LDA,N) if SIDE = MagmaRight
             The vectors which define the elementary reflectors, as
             returned by SSYTRD.
 
     @param[in]
     lda     INTEGER
             The leading dimension of the array A.
-            LDA >= max(1,M) if SIDE = 'L'; LDA >= max(1,N) if SIDE = 'R'.
+            LDA >= max(1,M) if SIDE = MagmaLeft; LDA >= max(1,N) if SIDE = MagmaRight.
 
     @param[in]
     tau     COMPLEX_16 array, dimension
-                                 (M-1) if SIDE = 'L'
-                                 (N-1) if SIDE = 'R'
+                                 (M-1) if SIDE = MagmaLeft
+                                 (N-1) if SIDE = MagmaRight
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by SSYTRD.
 
@@ -92,10 +92,10 @@
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.
-            If SIDE = 'L', LWORK >= max(1,N);
-            if SIDE = 'R', LWORK >= max(1,M).
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and
-            LWORK >= M*NB if SIDE = 'R', where NB is the optimal
+            If SIDE = MagmaLeft,  LWORK >= max(1,N);
+            if SIDE = MagmaRight, LWORK >= max(1,M).
+            For optimum performance LWORK >= N*NB if SIDE = MagmaLeft, and
+            LWORK >= M*NB if SIDE = MagmaRight, where NB is the optimal
             blocksize.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine

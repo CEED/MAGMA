@@ -89,28 +89,28 @@
     dwork   (workspace) DOUBLE PRECISION array, dimension (3*N*N/2+3*N)
             
     @param[in]
-    range   CHARACTER*1
-      -     = 'A': all eigenvalues will be found.
-      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
-                   will be found.
-      -     = 'I': the IL-th through IU-th eigenvalues will be found.
+    range   magma_range_t
+      -     = MagmaRangeAll: all eigenvalues will be found.
+      -     = MagmaRangeV:   all eigenvalues in the half-open interval (VL,VU]
+                             will be found.
+      -     = MagmaRangeI:   the IL-th through IU-th eigenvalues will be found.
             
     @param[in]
     vl      DOUBLE PRECISION
     @param[in]
     vu      DOUBLE PRECISION
-            if RANGE='V', the lower and upper bounds of the interval to
+            if RANGE=MagmaRangeV, the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
-            Not referenced if RANGE = 'A' or 'I'.
+            Not referenced if RANGE = MagmaRangeAll or MagmaRangeI.
             
     @param[in]
     il      INTEGER
     @param[in]
     iu      INTEGER
-            if RANGE='I', the indices (in ascending order) of the
+            if RANGE=MagmaRangeI, the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
-            Not referenced if RANGE = 'A' or 'V'.
+            Not referenced if RANGE = MagmaRangeAll or MagmaRangeV.
             
     @param[out]
     info    INTEGER

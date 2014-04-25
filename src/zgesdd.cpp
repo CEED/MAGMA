@@ -45,20 +45,21 @@
     Arguments
     ---------
     @param[in]
-    jobz    CHARACTER*1
+    jobz    magma_vec_t
             Specifies options for computing all or part of the matrix U:
-      -     = 'A':  all M columns of U and all N rows of V**H are
-                    returned in the arrays U and VT;
-      -     = 'S':  the first min(M,N) columns of U and the first
-                    min(M,N) rows of V**H are returned in the arrays U
-                    and VT;
-      -     = 'O':  If M >= N, the first N columns of U are overwritten
+      -     = MagmaAllVec:  all M columns of U and all N rows of V**H are
+                            returned in the arrays U and VT;
+      -     = MagmaSomeVec: the first min(M,N) columns of U and
+                            the first min(M,N) rows of V**H are
+                            returned in the arrays U and VT;
+      -     = MagmaOverwriteVec: 
+                    If M >= N, the first N columns of U are overwritten
                     on the array A and all rows of V**H are returned in
                     the array VT;
                     otherwise, all columns of U are returned in the
                     array U and the first M rows of V**H are overwritten
                     on the array A;
-      -     = 'N':  no columns of U or rows of V**H are computed.
+      -     = MagmaNoVec:   no columns of U or rows of V**H are computed.
 
     @param[in]
     m       INTEGER
@@ -72,11 +73,12 @@
     A       COMPLEX*16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit,
-            if JOBZ = 'O', if M >= N, A is overwritten with the first N columns
-                           of U (the left singular vectors, stored columnwise);
-                           otherwise, A is overwritten with the first M rows
-                           of V**H (the right singular vectors, stored rowwise).
-            if JOBZ != 'O', the contents of A are destroyed.
+      -     if JOBZ = MagmaOverwriteVec,
+                if M >= N, A is overwritten with the first N columns
+                of U (the left singular vectors, stored columnwise);
+                otherwise, A is overwritten with the first M rows
+                of V**H (the right singular vectors, stored rowwise).
+      -     if JOBZ != MagmaOverwriteVec, the contents of A are destroyed.
 
     @param[in]
     lda     INTEGER
@@ -88,32 +90,32 @@
 
     @param[out]
     U       COMPLEX*16 array, dimension (LDU,UCOL)
-            UCOL = M if JOBZ = 'A' or JOBZ = 'O' and M < N;
-            UCOL = min(M,N) if JOBZ = 'S'.
-      -     If JOBZ = 'A' or JOBZ = 'O' and M < N, U contains the M-by-M
-            unitary matrix U;
-      -     if JOBZ = 'S', U contains the first min(M,N) columns of U
+            UCOL = M if JOBZ = MagmaAllVec or JOBZ = MagmaOverwriteVec and M < N;
+            UCOL = min(M,N) if JOBZ = MagmaSomeVec.
+      -     If JOBZ = MagmaAllVec or JOBZ = MagmaOverwriteVec and M < N,
+            U contains the M-by-M unitary matrix U;
+      -     if JOBZ = MagmaSomeVec, U contains the first min(M,N) columns of U
             (the left singular vectors, stored columnwise);
-      -     if JOBZ = 'O' and M >= N, or JOBZ = 'N', U is not referenced.
+      -     if JOBZ = MagmaOverwriteVec and M >= N, or JOBZ = MagmaNoVec, U is not referenced.
 
     @param[in]
     ldu     INTEGER
             The leading dimension of the array U.  LDU >= 1; if
-            JOBZ = 'S' or 'A' or JOBZ = 'O' and M < N, LDU >= M.
+            JOBZ = MagmaSomeVec or MagmaAllVec or JOBZ = MagmaOverwriteVec and M < N, LDU >= M.
 
     @param[out]
     VT      COMPLEX*16 array, dimension (LDVT,N)
-      -     If JOBZ = 'A' or JOBZ = 'O' and M >= N, VT contains the
-            N-by-N unitary matrix V**H;
-      -     if JOBZ = 'S', VT contains the first min(M,N) rows of
+      -     If JOBZ = MagmaAllVec or JOBZ = MagmaOverwriteVec and M >= N,
+            VT contains the N-by-N unitary matrix V**H;
+      -     if JOBZ = MagmaSomeVec, VT contains the first min(M,N) rows of
             V**H (the right singular vectors, stored rowwise);
-      -     if JOBZ = 'O' and M < N, or JOBZ = 'N', VT is not referenced.
+      -     if JOBZ = MagmaOverwriteVec and M < N, or JOBZ = MagmaNoVec, VT is not referenced.
 
     @param[in]
     ldvt    INTEGER
             The leading dimension of the array VT.  LDVT >= 1; if
-            JOBZ = 'A' or JOBZ = 'O' and M >= N, LDVT >= N;
-            if JOBZ = 'S', LDVT >= min(M,N).
+            JOBZ = MagmaAllVec or JOBZ = MagmaOverwriteVec and M >= N, LDVT >= N;
+            if JOBZ = MagmaSomeVec, LDVT >= min(M,N).
 
     @param[out]
     work    (workspace) COMPLEX*16 array, dimension (MAX(1,lwork))
@@ -127,17 +129,17 @@
             The threshold for x >> y currently is x >= int( y*17/9 ).
             *Required size different than in LAPACK.* In most cases, these
             sizes should give optimal performance for both MAGMA and LAPACK.
-      -     If JOBZ = 'N',
+      -     If JOBZ = MagmaNoVec,
                 if x >> y, LWORK >= 2*y + (2*y)*nb;
                 otherwise, LWORK >= 2*y + (x+y)*nb.
-      -     If JOBZ = 'O',
+      -     If JOBZ = MagmaOverwriteVec,
                 if x >> y, LWORK >= 2*y*y + 2*y +      (2*y)*nb;
                 otherwise, LWORK >=         2*y + max( (x+y)*nb, y*y + x    ),
                    prefer  LWORK >=         2*y + max( (x+y)*nb, x*y + y*nb ).
-      -     If JOBZ = 'S',
+      -     If JOBZ = MagmaSomeVec,
                 if x >> y, LWORK >= y*y + 2*y + (2*y)*nb;
                 otherwise, LWORK >=       2*y + (x+y)*nb.
-      -     If JOBZ = 'A',
+      -     If JOBZ = MagmaAllVec,
                 if x >> y, LWORK >= y*y + 2*y + max( (2*y)*nb, x    ),
                    prefer  LWORK >= y*y + 2*y + max( (2*y)*nb, x*nb );
                 otherwise, LWORK >=       2*y +      (x+y)*nb.
@@ -150,13 +152,13 @@
     rwork   (workspace) DOUBLE PRECISION array, dimension (MAX(1,LRWORK))
             Let x = max(M,N) and y = min(M,N).
             These sizes should work for both MAGMA and LAPACK.
-            If JOBZ == 'N', LRWORK >= 5*y.
-            If JOBZ != 'N',
+            If JOBZ =  MagmaNoVec, LRWORK >= 5*y.
+            If JOBZ != MagmaNoVec,
                 if x >> y,  LRWORK >=      5*y*y + 5*y;
                 otherwise,  LRWORK >= max( 5*y*y + 5*y,
                                            2*x*y + 2*y*y + y ).
     \n
-            For JOBZ = 'N', some implementations seem to have a bug requiring
+            For JOBZ = MagmaNoVec, some implementations seem to have a bug requiring
             LRWORK >= 7*y in some cases.
 
     @param

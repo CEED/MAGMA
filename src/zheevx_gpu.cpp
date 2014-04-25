@@ -24,21 +24,21 @@
     Arguments
     ---------
     @param[in]
-    jobz    CHARACTER*1
-      -     = 'N':  Compute eigenvalues only;
-      -     = 'V':  Compute eigenvalues and eigenvectors.
+    jobz    magma_vec_t
+      -     = MagmaNoVec:  Compute eigenvalues only;
+      -     = MagmaVec:    Compute eigenvalues and eigenvectors.
 
     @param[in]
-    range   CHARACTER*1
-      -     = 'A': all eigenvalues will be found.
-      -     = 'V': all eigenvalues in the half-open interval (VL,VU]
+    range   magma_range_t
+      -     = MagmaRangeAll: all eigenvalues will be found.
+      -     = MagmaRangeV:   all eigenvalues in the half-open interval (VL,VU]
                    will be found.
-      -     = 'I': the IL-th through IU-th eigenvalues will be found.
+      -     = MagmaRangeI:   the IL-th through IU-th eigenvalues will be found.
 
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored;
-      -     = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
     n       INTEGER
@@ -46,13 +46,13 @@
 
     @param[in,out]
     dA      COMPLEX_16 array, dimension (LDDA, N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of A contains the
-            upper triangular part of the matrix A.  If UPLO = 'L',
+            upper triangular part of the matrix A.  If UPLO = MagmaLower,
             the leading N-by-N lower triangular part of A contains
             the lower triangular part of the matrix A.
-            On exit, the lower triangle (if UPLO='L') or the upper
-            triangle (if UPLO='U') of A, including the diagonal, is
+            On exit, the lower triangle (if UPLO=MagmaLower) or the upper
+            triangle (if UPLO=MagmaUpper) of A, including the diagonal, is
             destroyed.
 
     @param[in]
@@ -63,18 +63,18 @@
     vl      DOUBLE PRECISION
     @param[in]
     vu      DOUBLE PRECISION
-            If RANGE='V', the lower and upper bounds of the interval to
+            If RANGE=MagmaRangeV, the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
-            Not referenced if RANGE = 'A' or 'I'.
+            Not referenced if RANGE = MagmaRangeAll or MagmaRangeI.
 
     @param[in]
     il      INTEGER
     @param[in]
     iu      INTEGER
-            If RANGE='I', the indices (in ascending order) of the
+            If RANGE=MagmaRangeI, the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
-            Not referenced if RANGE = 'A' or 'V'.
+            Not referenced if RANGE = MagmaRangeAll or MagmaRangeV.
 
     @param[in]
     abstol  DOUBLE PRECISION
@@ -103,7 +103,7 @@
     @param[out]
     m       INTEGER
             The total number of eigenvalues found.  0 <= M <= N.
-            If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
+            If RANGE = MagmaRangeAll, M = N, and if RANGE = MagmaRangeI, M = IU-IL+1.
 
     @param[out]
     w       DOUBLE PRECISION array, dimension (N)
@@ -112,23 +112,23 @@
 
     @param[out]
     dZ      COMPLEX_16 array, dimension (LDDZ, max(1,M))
-            If JOBZ = 'V', then if INFO = 0, the first M columns of Z
+            If JOBZ = MagmaVec, then if INFO = 0, the first M columns of Z
             contain the orthonormal eigenvectors of the matrix A
             corresponding to the selected eigenvalues, with the i-th
             column of Z holding the eigenvector associated with W(i).
             If an eigenvector fails to converge, then that column of Z
             contains the latest approximation to the eigenvector, and the
             index of the eigenvector is returned in IFAIL.
-            If JOBZ = 'N', then Z is not referenced.
+            If JOBZ = MagmaNoVec, then Z is not referenced.
             Note: the user must ensure that at least max(1,M) columns are
-            supplied in the array Z; if RANGE = 'V', the exact value of M
+            supplied in the array Z; if RANGE = MagmaRangeV, the exact value of M
             is not known in advance and an upper bound must be used.
 *********   (workspace) If FAST_HEMV is defined DZ should be (LDDZ, max(1,N)) in both cases.
 
     @param[in]
     lddz    INTEGER
             The leading dimension of the array DZ.  LDDZ >= 1, and if
-            JOBZ = 'V', LDDZ >= max(1,N).
+            JOBZ = MagmaVec, LDDZ >= max(1,N).
 
     @param
     wA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
@@ -143,7 +143,7 @@
     @param[in]
     ldwz    INTEGER
             The leading dimension of the array wZ.  LDWZ >= 1, and if
-            JOBZ = 'V', LDWZ >= max(1,N).
+            JOBZ = MagmaVec, LDWZ >= max(1,N).
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (LWORK)
@@ -167,10 +167,10 @@
 
     @param[out]
     ifail   INTEGER array, dimension (N)
-            If JOBZ = 'V', then if INFO = 0, the first M elements of
+            If JOBZ = MagmaVec, then if INFO = 0, the first M elements of
             IFAIL are zero.  If INFO > 0, then IFAIL contains the
             indices of the eigenvectors that failed to converge.
-            If JOBZ = 'N', then IFAIL is not referenced.
+            If JOBZ = MagmaNoVec, then IFAIL is not referenced.
 
     @param[out]
     info    INTEGER

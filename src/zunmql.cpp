@@ -18,9 +18,9 @@
     ZUNMQL overwrites the general complex M-by-N matrix C with
 
     @verbatim
-                    SIDE = 'L'     SIDE = 'R'
-    TRANS = 'N':      Q * C          C * Q
-    TRANS = 'C':      Q**H * C       C * Q**H
+                              SIDE = MagmaLeft   SIDE = MagmaRight
+    TRANS = MagmaNoTrans:     Q * C              C * Q
+    TRANS = MagmaConjTrans:   Q**H * C           C * Q**H
     @endverbatim
 
     where Q is a complex unitary matrix defined as the product of k
@@ -28,20 +28,20 @@
 
           Q = H(k) . . . H(2) H(1)
 
-    as returned by ZGEQLF. Q is of order M if SIDE = 'L' and of order N
-    if SIDE = 'R'.
+    as returned by ZGEQLF. Q is of order M if SIDE = MagmaLeft and of order N
+    if SIDE = MagmaRight.
 
     Arguments
     ---------
     @param[in]
-    side    CHARACTER*1
-      -     = 'L': apply Q or Q**H from the Left;
-      -     = 'R': apply Q or Q**H from the Right.
+    side    magma_side_t
+      -     = MagmaLeft:      apply Q or Q**H from the Left;
+      -     = MagmaRight:     apply Q or Q**H from the Right.
 
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N':  No transpose, apply Q;
-      -     = 'C':  Transpose, apply Q**H.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:    No transpose, apply Q;
+      -     = MagmaConjTrans:  Transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -55,8 +55,8 @@
     k       INTEGER
             The number of elementary reflectors whose product defines
             the matrix Q.
-            If SIDE = 'L', M >= K >= 0;
-            if SIDE = 'R', N >= K >= 0.
+            If SIDE = MagmaLeft,  M >= K >= 0;
+            if SIDE = MagmaRight, N >= K >= 0.
 
     @param[in]
     A       COMPLEX_16 array, dimension (LDA,K)
@@ -68,8 +68,8 @@
     @param[in]
     lda     INTEGER
             The leading dimension of the array A.
-            If SIDE = 'L', LDA >= max(1,M);
-            if SIDE = 'R', LDA >= max(1,N).
+            If SIDE = MagmaLeft,  LDA >= max(1,M);
+            if SIDE = MagmaRight, LDA >= max(1,N).
 
     @param[in]
     tau     COMPLEX_16 array, dimension (K)
@@ -92,10 +92,10 @@
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.
-            If SIDE = 'L', LWORK >= max(1,N);
-            if SIDE = 'R', LWORK >= max(1,M).
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and
-            LWORK >= M*NB if SIDE = 'R', where NB is the optimal
+            If SIDE = MagmaLeft,  LWORK >= max(1,N);
+            if SIDE = MagmaRight, LWORK >= max(1,M).
+            For optimum performance LWORK >= N*NB if SIDE = MagmaLeft, and
+            LWORK >= M*NB if SIDE = MagmaRight, where NB is the optimal
             blocksize.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine

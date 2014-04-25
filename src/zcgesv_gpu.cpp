@@ -49,11 +49,11 @@
     Arguments
     ---------
     @param[in]
-    trans   CHARACTER*1
+    trans   magma_trans_t
             Specifies the form of the system of equations:
-      -     = 'N':  A * X = B  (No transpose)
-      -     = 'T':  A'* X = B  (Transpose)
-      -     = 'C':  A'* X = B  (Conjugate transpose = Transpose)
+      -     = MagmaNoTrans:    A * X = B  (No transpose)
+      -     = MagmaTrans:      A'* X = B  (Transpose)
+      -     = MagmaConjTrans:  A'* X = B  (Conjugate transpose = Transpose)
 
     @param[in]
     n       INTEGER

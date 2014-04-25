@@ -42,14 +42,14 @@
     Arguments
     ---------
     @param[in]
-    jobvl   CHARACTER*1
-      -     = 'N': left eigenvectors of A are not computed;
-      -     = 'V': left eigenvectors of are computed.
+    jobvl   magma_vec_t
+      -     = MagmaNoVec: left eigenvectors of A are not computed;
+      -     = MagmaVec:   left eigenvectors of are computed.
 
     @param[in]
-    jobvr   CHARACTER*1
-      -     = 'N': right eigenvectors of A are not computed;
-      -     = 'V': right eigenvectors of A are computed.
+    jobvr   magma_vec_t
+      -     = MagmaNoVec: right eigenvectors of A are not computed;
+      -     = MagmaVec:   right eigenvectors of A are computed.
 
     @param[in]
     n       INTEGER
@@ -70,29 +70,29 @@
 
     @param[out]
     VL      COMPLEX*16 array, dimension (LDVL,N)
-            If JOBVL = 'V', the left eigenvectors u(j) are stored one
+            If JOBVL = MagmaVec, the left eigenvectors u(j) are stored one
             after another in the columns of VL, in the same order
             as their eigenvalues.
-            If JOBVL = 'N', VL is not referenced.
+            If JOBVL = MagmaNoVec, VL is not referenced.
             u(j) = VL(:,j), the j-th column of VL.
 
     @param[in]
     ldvl    INTEGER
             The leading dimension of the array VL.  LDVL >= 1; if
-            JOBVL = 'V', LDVL >= N.
+            JOBVL = MagmaVec, LDVL >= N.
 
     @param[out]
     VR      COMPLEX*16 array, dimension (LDVR,N)
-            If JOBVR = 'V', the right eigenvectors v(j) are stored one
+            If JOBVR = MagmaVec, the right eigenvectors v(j) are stored one
             after another in the columns of VR, in the same order
             as their eigenvalues.
-            If JOBVR = 'N', VR is not referenced.
+            If JOBVR = MagmaNoVec, VR is not referenced.
             v(j) = VR(:,j), the j-th column of VR.
 
     @param[in]
     ldvr    INTEGER
             The leading dimension of the array VR.  LDVR >= 1; if
-            JOBVR = 'V', LDVR >= N.
+            JOBVR = MagmaVec, LDVR >= N.
 
     @param[out]
     work    (workspace) COMPLEX*16 array, dimension (MAX(1,LWORK))

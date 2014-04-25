@@ -19,9 +19,9 @@
     ZUNMQR_GPU overwrites the general complex M-by-N matrix C with
 
     @verbatim
-                    SIDE = 'L'     SIDE = 'R'
-    TRANS = 'N':      Q * C          C * Q
-    TRANS = 'T':      Q**H * C       C * Q**H
+                            SIDE = MagmaLeft     SIDE = MagmaRight
+    TRANS = MagmaNoTrans:   Q * C                C * Q
+    TRANS = MagmaTrans:     Q**H * C             C * Q**H
     @endverbatim
 
     where Q is a complex orthogonal matrix defined as the product of k
@@ -29,20 +29,20 @@
 
           Q = H(1) H(2) . . . H(k)
 
-    as returned by ZGEQRF. Q is of order M if SIDE = 'L' and of order N
-    if SIDE = 'R'.
+    as returned by ZGEQRF. Q is of order M if SIDE = MagmaLeft and of order N
+    if SIDE = MagmaRight.
 
     Arguments
     ---------
     @param[in]
-    side    CHARACTER*1
-      -     = 'L': apply Q or Q**H from the Left;
-      -     = 'R': apply Q or Q**H from the Right.
+    side    magma_side_t
+      -     = MagmaLeft:   apply Q or Q**H from the Left;
+      -     = MagmaRight:  apply Q or Q**H from the Right.
 
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N':  No transpose, apply Q;
-      -     = 'T':  Transpose, apply Q**H.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:  No transpose, apply Q;
+      -     = MagmaTrans:    Transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -56,8 +56,8 @@
     k       INTEGER
             The number of elementary reflectors whose product defines
             the matrix Q.
-            If SIDE = 'L', M >= K >= 0;
-            if SIDE = 'R', N >= K >= 0.
+            If SIDE = MagmaLeft,  M >= K >= 0;
+            if SIDE = MagmaRight, N >= K >= 0.
 
     @param[in]
     dA      COMPLEX_16 array on the GPU, dimension (LDDA,K)
@@ -69,8 +69,8 @@
     @param[in]
     ldda    INTEGER
             The leading dimension of the array DA.
-            If SIDE = 'L', LDDA >= max(1,M);
-            if SIDE = 'R', LDDA >= max(1,N).
+            If SIDE = MagmaLeft,  LDDA >= max(1,M);
+            if SIDE = MagmaRight, LDDA >= max(1,N).
 
     @param[in]
     tau     COMPLEX_16 array, dimension (K)
@@ -95,8 +95,8 @@
     @param[in]
     lwork   INTEGER
             The dimension of the array HWORK.
-            LWORK >= (M-K+NB)*(N+NB) + N*NB if SIDE = 'L', and
-            LWORK >= (N-K+NB)*(M+NB) + M*NB if SIDE = 'R',
+            LWORK >= (M-K+NB)*(N+NB) + N*NB if SIDE = MagmaLeft, and
+            LWORK >= (N-K+NB)*(M+NB) + M*NB if SIDE = MagmaRight,
             where NB is the given blocksize.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine

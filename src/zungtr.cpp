@@ -17,18 +17,18 @@
     product of n-1 elementary reflectors of order N, as returned by
     ZHETRD:
 
-    if UPLO = 'U', Q = H(n-1) . . . H(2) H(1),
+    if UPLO = MagmaUpper, Q = H(n-1) . . . H(2) H(1),
 
-    if UPLO = 'L', Q = H(1) H(2) . . . H(n-1).
+    if UPLO = MagmaLower, Q = H(1) H(2) . . . H(n-1).
 
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U': Upper triangle of A contains elementary reflectors
-                   from ZHETRD;
-      -     = 'L': Lower triangle of A contains elementary reflectors
-                   from ZHETRD.
+    uplo    magma_uplo_t
+      -     = MagmaUpper: Upper triangle of A contains elementary reflectors
+                          from ZHETRD;
+      -     = MagmaLower: Lower triangle of A contains elementary reflectors
+                          from ZHETRD.
 
     @param[in]
     n       INTEGER

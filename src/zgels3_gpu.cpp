@@ -22,9 +22,9 @@
     Arguments
     ---------
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N': the linear system involves A.
-            Only TRANS='N' is currently handled.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:   the linear system involves A.
+            Only TRANS=MagmaNoTrans is currently handled.
 
     @param[in]
     m       INTEGER

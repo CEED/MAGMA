@@ -28,7 +28,7 @@
     computed from the block diagonal of T.
     It does not modify T during the computation.
     
-    If trans = 'N', lambda is an eigenvalue for the lower 1x1 or 2x2 block,
+    If trans = MagmaNoTrans, lambda is an eigenvalue for the lower 1x1 or 2x2 block,
     and it solves
         ( [ That u      ] - lambda*I ) * x = 0,
         ( [ 0    lambda ]            )
@@ -36,7 +36,7 @@
     If the lower block is 1x1, lambda and x are real;
     if the lower block is 2x2, lambda and x are complex.
     
-    If trans = 'T', lambda is an eigenvalue for the upper 1x1 or 2x2 block,
+    If trans = MagmaTrans, lambda is an eigenvalue for the upper 1x1 or 2x2 block,
     and it solves
         ( [ lambda v^T  ] - lambda I )**T * x = 0,
         ( [ 0      That ]            )
@@ -47,10 +47,10 @@
     Arguments
     ---------
     @param[in]
-    trans   CHARACTER*1
+    trans   magma_trans_t
             Specifies the operation applied to T.
-      -     = 'N':  Solve (T - lambda*I)    * x = 0  (No transpose)
-      -     = 'T':  Solve (T - lambda*I)**T * x = 0  (Transpose)
+      -     = MagmaNoTrans:    Solve (T - lambda*I)    * x = 0  (No transpose)
+      -     = MagmaTrans:      Solve (T - lambda*I)**T * x = 0  (Transpose)
 
     @param[in]
     n       INTEGER
@@ -81,8 +81,8 @@
     @param[in,out]
     cnorm   (input) DOUBLE PRECISION array, dimension (N)
             CNORM(j) contains the norm of the off-diagonal part of the j-th column
-            of T.  If TRANS = 'N', CNORM(j) must be greater than or equal
-            to the infinity-norm, and if TRANS = 'T' or 'C', CNORM(j)
+            of T.  If TRANS = MagmaNoTrans, CNORM(j) must be greater than or equal
+            to the infinity-norm, and if TRANS = MagmaTrans or MagmaConjTrans, CNORM(j)
             must be greater than or equal to the 1-norm.
 
     @param[out]

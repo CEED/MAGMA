@@ -26,9 +26,9 @@
     transformation Q' * A * Q, and returns the matrices V and W which are
     needed to apply the transformation to the unreduced part of A.
 
-    If UPLO = 'U', ZLATRD reduces the last NB rows and columns of a
+    If UPLO = MagmaUpper, ZLATRD reduces the last NB rows and columns of a
     matrix, of which the upper triangle is supplied;
-    if UPLO = 'L', ZLATRD reduces the first NB rows and columns of a
+    if UPLO = MagmaLower, ZLATRD reduces the first NB rows and columns of a
     matrix, of which the lower triangle is supplied.
 
     This is an auxiliary routine called by ZHETRD.
@@ -36,11 +36,11 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is stored:
-      -     = 'U': Upper triangular
-      -     = 'L': Lower triangular
+      -     = MagmaUpper: Upper triangular
+      -     = MagmaLower: Lower triangular
 
     @param[in]
     n       INTEGER
@@ -52,20 +52,20 @@
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading n-by-n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
             On exit:
-      -     if UPLO = 'U', the last NB columns have been reduced to
+      -     if UPLO = MagmaUpper, the last NB columns have been reduced to
               tridiagonal form, with the diagonal elements overwriting
               the diagonal elements of A; the elements above the diagonal
               with the array TAU, represent the orthogonal matrix Q as a
               product of elementary reflectors;
-      -     if UPLO = 'L', the first NB columns have been reduced to
+      -     if UPLO = MagmaLower, the first NB columns have been reduced to
               tridiagonal form, with the diagonal elements overwriting
               the diagonal elements of A; the elements below the diagonal
               with the array TAU, represent the  orthogonal matrix Q as a
@@ -78,15 +78,15 @@
 
     @param[out]
     e       COMPLEX_16 array, dimension (N-1)
-            If UPLO = 'U', E(n-nb:n-1) contains the superdiagonal
+            If UPLO = MagmaUpper, E(n-nb:n-1) contains the superdiagonal
             elements of the last NB columns of the reduced matrix;
-            if UPLO = 'L', E(1:nb) contains the subdiagonal elements of
+            if UPLO = MagmaLower, E(1:nb) contains the subdiagonal elements of
             the first NB columns of the reduced matrix.
 
     @param[out]
     tau     COMPLEX_16 array, dimension (N-1)
             The scalar factors of the elementary reflectors, stored in
-            TAU(n-nb:n-1) if UPLO = 'U', and in TAU(1:nb) if UPLO = 'L'.
+            TAU(n-nb:n-1) if UPLO = MagmaUpper, and in TAU(1:nb) if UPLO = MagmaLower.
             See Further Details.
 
     @param[out]
@@ -100,7 +100,7 @@
 
     Further Details
     ---------------
-    If UPLO = 'U', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaUpper, the matrix Q is represented as a product of elementary
     reflectors
 
        Q = H(n) H(n-1) . . . H(n-nb+1).
@@ -113,7 +113,7 @@
     v(i:n) = 0 and v(i-1) = 1; v(1:i-1) is stored on exit in A(1:i-1,i),
     and tau in TAU(i-1).
 
-    If UPLO = 'L', the matrix Q is represented as a product of elementary
+    If UPLO = MagmaLower, the matrix Q is represented as a product of elementary
     reflectors
 
        Q = H(1) H(2) . . . H(nb).
@@ -134,7 +134,7 @@
     The contents of A on exit are illustrated by the following examples
     with n = 5 and nb = 2:
 
-    if UPLO = 'U':                       if UPLO = 'L':
+    if UPLO = MagmaUpper:                       if UPLO = MagmaLower:
 
       (  a   a   a   v4  v5 )              (  d                  )
       (      a   a   v4  v5 )              (  1   d              )

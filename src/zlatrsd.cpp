@@ -34,30 +34,30 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
+    uplo    magma_uplo_t
             Specifies whether the matrix A is upper or lower triangular.
-      -     = 'U':  Upper triangular
-      -     = 'L':  Lower triangular
+      -     = MagmaUpper:  Upper triangular
+      -     = MagmaLower:  Lower triangular
 
     @param[in]
-    trans   CHARACTER*1
+    trans   magma_trans_t
             Specifies the operation applied to A.
-      -     = 'N':  Solve (A - lambda*I)    * x = s*b  (No transpose)
-      -     = 'T':  Solve (A - lambda*I)**T * x = s*b  (Transpose)
-      -     = 'C':  Solve (A - lambda*I)**H * x = s*b  (Conjugate transpose)
+      -     = MagmaNoTrans:    Solve (A - lambda*I)    * x = s*b  (No transpose)
+      -     = MagmaTrans:      Solve (A - lambda*I)**T * x = s*b  (Transpose)
+      -     = MagmaConjTrans:  Solve (A - lambda*I)**H * x = s*b  (Conjugate transpose)
 
     @param[in]
-    diag    CHARACTER*1
+    diag    magma_diag_t
             Specifies whether or not the matrix A is unit triangular.
-      -     = 'N':  Non-unit triangular
-      -     = 'U':  Unit triangular
+      -     = MagmaNonUnit:  Non-unit triangular
+      -     = MagmaUnit:     Unit triangular
 
     @param[in]
-    normin  CHARACTER*1
+    normin  magma_bool_t
             Specifies whether CNORM has been set or not.
-      -     = 'Y':  CNORM contains the column norms on entry
-      -     = 'N':  CNORM is not set on entry.  On exit, the norms will
-                    be computed and stored in CNORM.
+      -     = MagmaTrue:   CNORM contains the column norms on entry
+      -     = MagmaFalse:  CNORM is not set on entry.  On exit, the norms will
+                           be computed and stored in CNORM.
 
     @param[in]
     n       INTEGER
@@ -65,13 +65,13 @@
 
     @param[in]
     A       COMPLEX*16 array, dimension (LDA,N)
-            The triangular matrix A.  If UPLO = 'U', the leading n by n
+            The triangular matrix A.  If UPLO = MagmaUpper, the leading n by n
             upper triangular part of the array A contains the upper
             triangular matrix, and the strictly lower triangular part of
-            A is not referenced.  If UPLO = 'L', the leading n by n lower
+            A is not referenced.  If UPLO = MagmaLower, the leading n by n lower
             triangular part of the array A contains the lower triangular
             matrix, and the strictly upper triangular part of A is not
-            referenced.  If DIAG = 'U', the diagonal elements of A are
+            referenced.  If DIAG = MagmaUnit, the diagonal elements of A are
             also not referenced and are assumed to be 1.
 
     @param[in]
@@ -96,12 +96,12 @@
     
     @param[in,out]
     cnorm   (input or output) DOUBLE PRECISION array, dimension (N)
-      -     If NORMIN = 'Y', CNORM is an input argument and CNORM(j)
+      -     If NORMIN = MagmaTrue, CNORM is an input argument and CNORM(j)
             contains the norm of the off-diagonal part of the j-th column
-            of A.  If TRANS = 'N', CNORM(j) must be greater than or equal
-            to the infinity-norm, and if TRANS = 'T' or 'C', CNORM(j)
+            of A.  If TRANS = MagmaNoTrans, CNORM(j) must be greater than or equal
+            to the infinity-norm, and if TRANS = MagmaTrans or MagmaConjTrans, CNORM(j)
             must be greater than or equal to the 1-norm.
-      -     If NORMIN = 'N', CNORM is an output argument and CNORM(j)
+      -     If NORMIN = MagmaFalse, CNORM is an output argument and CNORM(j)
             returns the 1-norm of the offdiagonal part of the j-th column
             of A.
 

@@ -17,12 +17,14 @@ magma_get_ztrsm_m_nb() { return 128; }
 /**
     Purpose
     -------
-    ZTRSM  solves one of the matrix equations
+    ZTRSM solves one of the matrix equations
        op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
     where alpha is a scalar, X and B are m by n matrices, A is a unit, or
-    non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+    non-unit, upper or lower triangular matrix and op( A ) is one of
 
-       op( A ) = A   or   op( A ) = A**T   or   op( A ) = conj( A**T ).
+       op( A ) = A      or
+       op( A ) = A**T   or
+       op( A ) = conj( A**T ).
 
     The matrix X is overwritten on B.
 
@@ -33,34 +35,33 @@ magma_get_ztrsm_m_nb() { return 128; }
             Number of GPUs to use.
 
     @param[in]
-    side    CHARACTER*1.
+    side    magma_side_t.
             On entry, SIDE specifies whether op( A ) appears on the left
             or right of X as follows:
-         -     = 'L' or 'l'   op( A )*X = alpha*B.
-         -     = 'R' or 'r'   X*op( A ) = alpha*B.
+         -     = MagmaLeft:        op( A )*X = alpha*B.
+         -     = MagmaRight:       X*op( A ) = alpha*B.
 
     @param[in]
-    uplo    CHARACTER*1.
+    uplo    magma_uplo_t.
             On entry, UPLO specifies whether the matrix A is an upper or
             lower triangular matrix as follows:
-         -     = 'U' or 'u'   A is an upper triangular matrix.
-         -     = 'L' or 'l'   A is a lower triangular matrix.
+         -     = MagmaUpper:   A is an upper triangular matrix.
+         -     = MagmaLower:   A is a lower triangular matrix.
 
     @param[in]
-    transa  CHARACTER*1.
+    transa  magma_trans_t.
             On entry, TRANSA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
-         -     = 'N' or 'n'   op( A ) = A.
-         -     = 'T' or 't'   op( A ) = A**T.
-         -     = 'C' or 'c'   op( A ) = conj( A**T ).
+         -     = MagmaNoTrans:     op( A ) = A.
+         -     = MagmaTrans:       op( A ) = A**T.
+         -     = MagmaConjTrans:   op( A ) = conj( A**T ).
 
     @param[in]
-    diag    CHARACTER*1.
+    diag    magma_diag_t.
             On entry, DIAG specifies whether or not A is unit triangular
             as follows:
-         -     = 'U' or 'u'   A is assumed to be unit triangular.
-         -     = 'N' or 'n'   A is not assumed to be unit
-                                   triangular.
+         -     = MagmaUnit:      A is assumed to be unit triangular.
+         -     = MagmaNonUnit:   A is not assumed to be unit triangular.
 
     @param[in]
     m       INTEGER.
@@ -69,46 +70,46 @@ magma_get_ztrsm_m_nb() { return 128; }
 
     @param[in]
     n       INTEGER.
-            On entry, N specifies the number of columns of B.  N must be
+            On entry, N specifies the number of columns of B. N must be
             at least zero.
 
     @param[in]
-    alpha   COMPLEX_16      .
-            On entry,  ALPHA specifies the scalar  alpha. When  alpha is
-            zero then  A is not referenced and  B need not be set before
+    alpha   COMPLEX_16.
+            On entry, ALPHA specifies the scalar alpha. When alpha is
+            zero then A is not referenced and B need not be set before
             entry.
 
     @param[in]
-    A       COMPLEX_16       array of DIMENSION ( LDA, k ), where k is m
-            when  SIDE = 'L' or 'l'  and is  n  when  SIDE = 'R' or 'r'.
-            Before entry  with  UPLO = 'U' or 'u',  the  leading  k by k
-            upper triangular part of the array  A must contain the upper
-            triangular matrix  and the strictly lower triangular part of
+    A       COMPLEX_16 array of DIMENSION ( LDA, k ), where k is m
+            when SIDE = MagmaLeft and is n when SIDE = MagmaRight.
+            Before entry with UPLO = MagmaUpper, the leading k by k
+            upper triangular part of the array A must contain the upper
+            triangular matrix and the strictly lower triangular part of
             A is not referenced.
-            Before entry  with  UPLO = 'L' or 'l',  the  leading  k by k
-            lower triangular part of the array  A must contain the lower
-            triangular matrix  and the strictly upper triangular part of
+            Before entry with UPLO = MagmaLower, the leading k by k
+            lower triangular part of the array A must contain the lower
+            triangular matrix and the strictly upper triangular part of
             A is not referenced.
-            Note that when  DIAG = 'U' or 'u',  the diagonal elements of
-            A  are not referenced either,  but are assumed to be  unity.
+            Note that when DIAG = MagmaUnit, the diagonal elements of
+            A are not referenced either, but are assumed to be unity.
 
     @param[in]
     lda     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
             in the calling (sub) program.
-            When  SIDE = 'L' or 'l' then LDA >= max( 1, m ),
-            when  SIDE = 'R' or 'r' then LDA >= max( 1, n ).
+            When SIDE = MagmaLeft  then LDA >= max( 1, m ),
+            when SIDE = MagmaRight then LDA >= max( 1, n ).
 
     @param[in,out]
-    B       COMPLEX_16       array of DIMENSION ( LDB, n ).
-            Before entry,  the leading  m by n part of the array  B must
-            contain  the  right-hand  side  matrix  B,  and  on exit  is
-            overwritten by the solution matrix  X.
+    B       COMPLEX_16 array of DIMENSION ( LDB, n ).
+            Before entry, the leading m by n part of the array B must
+            contain the right-hand side matrix B, and on exit is
+            overwritten by the solution matrix X.
 
     @param[in]
     ldb     INTEGER.
             On entry, LDB specifies the first dimension of B as declared
-            in  the  calling  (sub)  program.   LDB  must  be  at  least
+            in the calling (sub) program. LDB must be at least
             max( 1, m ).
 
     @ingroup magma_zblas3

@@ -18,36 +18,36 @@
     -------
     ZUNMTR overwrites the general complex M-by-N matrix C with
 
-                    SIDE = 'L'     SIDE = 'R'
-    TRANS = 'N':      Q * C          C * Q
-    TRANS = 'T':      Q**H * C       C * Q**H
+                    SIDE = MagmaLeft     SIDE = MagmaRight
+    TRANS = MagmaNoTrans:      Q * C          C * Q
+    TRANS = MagmaTrans:      Q**H * C       C * Q**H
 
     where Q is a complex orthogonal matrix of order nq, with nq = m if
-    SIDE = 'L' and nq = n if SIDE = 'R'. Q is defined as the product of
+    SIDE = MagmaLeft and nq = n if SIDE = MagmaRight. Q is defined as the product of
     nq-1 elementary reflectors, as returned by ZHETRD:
 
-    if UPLO = 'U', Q = H(nq-1) . . . H(2) H(1);
+    if UPLO = MagmaUpper, Q = H(nq-1) . . . H(2) H(1);
 
-    if UPLO = 'L', Q = H(1) H(2) . . . H(nq-1).
+    if UPLO = MagmaLower, Q = H(1) H(2) . . . H(nq-1).
 
     Arguments
     ---------
     @param[in]
-    side    CHARACTER*1
-      -     = 'L': apply Q or Q**H from the Left;
-      -     = 'R': apply Q or Q**H from the Right.
+    side    magma_side_t
+      -     = MagmaLeft:      apply Q or Q**H from the Left;
+      -     = MagmaRight:     apply Q or Q**H from the Right.
 
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U': Upper triangle of A contains elementary reflectors
+    uplo    magma_uplo_t
+      -     = MagmaUpper: Upper triangle of A contains elementary reflectors
                    from ZHETRD;
-      -     = 'L': Lower triangle of A contains elementary reflectors
+      -     = MagmaLower: Lower triangle of A contains elementary reflectors
                    from ZHETRD.
 
     @param[in]
-    trans   CHARACTER*1
-      -     = 'N':  No transpose, apply Q;
-      -     = 'T':  Transpose, apply Q**H.
+    trans   magma_trans_t
+      -     = MagmaNoTrans:    No transpose, apply Q;
+      -     = MagmaTrans:      Transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -59,21 +59,21 @@
 
     @param[in]
     dA      COMPLEX_16 array, dimension
-                                 (LDDA,M) if SIDE = 'L'
-                                 (LDDA,N) if SIDE = 'R'
+                                 (LDDA,M) if SIDE = MagmaLeft
+                                 (LDDA,N) if SIDE = MagmaRight
             The vectors which define the elementary reflectors, as
             returned by ZHETRD_GPU. On output the diagonal, the subdiagonal and the
-            upper part (UPLO='L') or lower part (UPLO='U') are destroyed.
+            upper part (UPLO=MagmaLower) or lower part (UPLO=MagmaUpper) are destroyed.
 
     @param[in]
     ldda    INTEGER
             The leading dimension of the array DA.
-            LDDA >= max(1,M) if SIDE = 'L'; LDDA >= max(1,N) if SIDE = 'R'.
+            LDDA >= max(1,M) if SIDE = MagmaLeft; LDDA >= max(1,N) if SIDE = MagmaRight.
 
     @param[in]
     tau     COMPLEX_16 array, dimension
-                                 (M-1) if SIDE = 'L'
-                                 (N-1) if SIDE = 'R'
+                                 (M-1) if SIDE = MagmaLeft
+                                 (N-1) if SIDE = MagmaRight
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZHETRD.
 
@@ -88,15 +88,15 @@
 
     @param[in]
     wA      (workspace) COMPLEX_16 array, dimension
-                                 (LDWA,M) if SIDE = 'L'
-                                 (LDWA,N) if SIDE = 'R'
+                                 (LDWA,M) if SIDE = MagmaLeft
+                                 (LDWA,N) if SIDE = MagmaRight
             The vectors which define the elementary reflectors, as
             returned by ZHETRD_GPU.
 
     @param[in]
     ldwa    INTEGER
             The leading dimension of the array wA.
-            LDWA >= max(1,M) if SIDE = 'L'; LDWA >= max(1,N) if SIDE = 'R'.
+            LDWA >= max(1,M) if SIDE = MagmaLeft; LDWA >= max(1,N) if SIDE = MagmaRight.
 
     @param[out]
     info    INTEGER

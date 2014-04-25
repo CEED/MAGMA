@@ -21,14 +21,14 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  A is upper triangular;
-      -     = 'L':  A is lower triangular.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  A is upper triangular;
+      -     = MagmaLower:  A is lower triangular.
 
     @param[in]
-    diag    CHARACTER*1
-      -     = 'N':  A is non-unit triangular;
-      -     = 'U':  A is unit triangular.
+    diag    magma_diag_t
+      -     = MagmaNonUnit:  A is non-unit triangular;
+      -     = MagmaUnit:     A is unit triangular.
 
     @param[in]
     n       INTEGER
@@ -36,13 +36,13 @@
 
     @param[in,out]
     dA      COMPLEX_16 array ON THE GPU, dimension (LDDA,N)
-            On entry, the triangular matrix A.  If UPLO = 'U', the
+            On entry, the triangular matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of the array dA contains
             the upper triangular matrix, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of the array dA contains
             the lower triangular matrix, and the strictly upper
-            triangular part of A is not referenced.  If DIAG = 'U', the
+            triangular part of A is not referenced.  If DIAG = MagmaUnit, the
             diagonal elements of A are also not referenced and are
             assumed to be 1.
             On exit, the (triangular) inverse of the original matrix, in

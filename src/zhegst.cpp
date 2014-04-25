@@ -35,11 +35,9 @@
             = 2 or 3: compute U*A*U**H or L**H*A*L.
     
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored and B is factored as
-                    U**H*U;
-      -     = 'L':  Lower triangle of A is stored and B is factored as
-                    L*L**H.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored and B is factored as U**H*U;
+      -     = MagmaLower:  Lower triangle of A is stored and B is factored as L*L**H.
     
     @param[in]
     n       INTEGER
@@ -47,10 +45,10 @@
     
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.

@@ -47,14 +47,14 @@
             = 3:  B*A*x = (lambda)*x
 
     @param[in]
-    jobz    CHARACTER*1
-      -     = 'N':  Compute eigenvalues only;
-      -     = 'V':  Compute eigenvalues and eigenvectors.
+    jobz    magma_vec_t
+      -     = MagmaNoVec:  Compute eigenvalues only;
+      -     = MagmaVec:    Compute eigenvalues and eigenvectors.
 
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangles of A and B are stored;
-      -     = 'L':  Lower triangles of A and B are stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangles of A and B are stored;
+      -     = MagmaLower:  Lower triangles of A and B are stored.
 
     @param[in]
     n       INTEGER
@@ -62,19 +62,19 @@
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA, N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of A contains the
-            upper triangular part of the matrix A.  If UPLO = 'L',
+            upper triangular part of the matrix A.  If UPLO = MagmaLower,
             the leading N-by-N lower triangular part of A contains
             the lower triangular part of the matrix A.
     \n
-            On exit, if JOBZ = 'V', then if INFO = 0, A contains the
+            On exit, if JOBZ = MagmaVec, then if INFO = 0, A contains the
             matrix Z of eigenvectors.  The eigenvectors are normalized
             as follows:
             if ITYPE = 1 or 2, Z**H*B*Z = I;
             if ITYPE = 3, Z**H*inv(B)*Z = I.
-            If JOBZ = 'N', then on exit the upper triangle (if UPLO='U')
-            or the lower triangle (if UPLO='L') of A, including the
+            If JOBZ = MagmaNoVec, then on exit the upper triangle (if UPLO=MagmaUpper)
+            or the lower triangle (if UPLO=MagmaLower) of A, including the
             diagonal, is destroyed.
 
     @param[in]
@@ -83,9 +83,9 @@
 
     @param[in,out]
     B       COMPLEX_16 array, dimension (LDB, N)
-            On entry, the Hermitian matrix B.  If UPLO = 'U', the
+            On entry, the Hermitian matrix B.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of B contains the
-            upper triangular part of the matrix B.  If UPLO = 'L',
+            upper triangular part of the matrix B.  If UPLO = MagmaLower,
             the leading N-by-N lower triangular part of B contains
             the lower triangular part of the matrix B.
     \n
@@ -108,9 +108,9 @@
     @param[in]
     lwork   INTEGER
             The length of the array WORK.
-            If N <= 1,                LWORK >= 1.
-            If JOBZ  = 'N' and N > 1, LWORK >= N + 1.
-            If JOBZ  = 'V' and N > 1, LWORK >= 2*N*nb + N**2.
+            If N <= 1,                      LWORK >= 1.
+            If JOBZ = MagmaNoVec and N > 1, LWORK >= N + 1.
+            If JOBZ = MagmaVec   and N > 1, LWORK >= 2*N*nb + N**2.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -125,9 +125,9 @@
     @param[in]
     lrwork  INTEGER
             The dimension of the array RWORK.
-            If N <= 1,                LRWORK >= 1.
-            If JOBZ  = 'N' and N > 1, LRWORK >= N.
-            If JOBZ  = 'V' and N > 1, LRWORK >= 1 + 5*N + 2*N**2.
+            If N <= 1,                      LRWORK >= 1.
+            If JOBZ = MagmaNoVec and N > 1, LRWORK >= N.
+            If JOBZ = MagmaVec   and N > 1, LRWORK >= 1 + 5*N + 2*N**2.
     \n
             If LRWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
@@ -142,9 +142,9 @@
     @param[in]
     liwork  INTEGER
             The dimension of the array IWORK.
-            If N <= 1,                LIWORK >= 1.
-            If JOBZ  = 'N' and N > 1, LIWORK >= 1.
-            If JOBZ  = 'V' and N > 1, LIWORK >= 3 + 5*N.
+            If N <= 1,                      LIWORK >= 1.
+            If JOBZ = MagmaNoVec and N > 1, LIWORK >= 1.
+            If JOBZ = MagmaVec   and N > 1, LIWORK >= 3 + 5*N.
     \n
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
@@ -157,11 +157,11 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
       -     > 0:  ZPOTRF or ZHEEVD returned an error code:
-               <= N:  if INFO = i and JOBZ = 'N', then the algorithm
+               <= N:  if INFO = i and JOBZ = MagmaNoVec, then the algorithm
                       failed to converge; i off-diagonal elements of an
                       intermediate tridiagonal form did not converge to
                       zero;
-                      if INFO = i and JOBZ = 'V', then the algorithm
+                      if INFO = i and JOBZ = MagmaVec, then the algorithm
                       failed to compute an eigenvalue while working on
                       the submatrix lying in rows and columns INFO/(N+1)
                       through mod(INFO,N+1);

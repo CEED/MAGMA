@@ -23,28 +23,28 @@
     Arguments
     ---------
     @param[in]
-    side    CHARACTER
-      -     = 'L': apply H or H' from the Left
-      -     = 'R': apply H or H' from the Right
+    side    magma_side_t
+      -     = MagmaLeft:      apply H or H' from the Left
+      -     = MagmaRight:     apply H or H' from the Right
 
     @param[in]
-    trans   CHARACTER
-      -     = 'N': apply H   (No transpose)
-      -     = 'C': apply H' (Conjugate transpose)
+    trans   magma_trans_t
+      -     = MagmaNoTrans:   apply H   (No transpose)
+      -     = MagmaConjTrans: apply H' (Conjugate transpose)
 
     @param[in]
-    direct  CHARACTER
+    direct  magma_direct_t
             Indicates how H is formed from a product of elementary
             reflectors
-      -     = 'F': H = H(1) H(2) . . . H(k) (Forward)
-      -     = 'B': H = H(k) . . . H(2) H(1) (Backward)
+      -     = MagmaForward:  H = H(1) H(2) . . . H(k) (Forward)
+      -     = MagmaBackward: H = H(k) . . . H(2) H(1) (Backward)
 
     @param[in]
-    storev  CHARACTER
+    storev  magma_storev_t
             Indicates how the vectors which define the elementary
             reflectors are stored:
-      -     = 'C': Columnwise
-      -     = 'R': Rowwise
+      -     = MagmaColumnwise: Columnwise
+      -     = MagmaRowwise:    Rowwise
 
     @param[in]
     m       INTEGER
@@ -61,17 +61,17 @@
 
     @param[in]
     dV      COMPLEX_16 array on the GPU, dimension
-                (LDV,K) if STOREV = 'C'
-                (LDV,M) if STOREV = 'R' and SIDE = 'L'
-                (LDV,N) if STOREV = 'R' and SIDE = 'R'
+                (LDV,K) if STOREV = MagmaColumnwise
+                (LDV,M) if STOREV = MagmaRowwise and SIDE = MagmaLeft
+                (LDV,N) if STOREV = MagmaRowwise and SIDE = MagmaRight
             The matrix V. See further details.
 
     @param[in]
     ldv     INTEGER
             The leading dimension of the array V.
-            If STOREV = 'C' and SIDE = 'L', LDV >= max(1,M);
-            if STOREV = 'C' and SIDE = 'R', LDV >= max(1,N);
-            if STOREV = 'R', LDV >= K.
+            If STOREV = MagmaColumnwise and SIDE = MagmaLeft, LDV >= max(1,M);
+            if STOREV = MagmaColumnwise and SIDE = MagmaRight, LDV >= max(1,N);
+            if STOREV = MagmaRowwise, LDV >= K.
 
     @param[in]
     dT      COMPLEX_16 array on the GPU, dimension (LDT,K)
@@ -97,8 +97,8 @@
     @param[in]
     ldwork  INTEGER
             The leading dimension of the array WORK.
-            If SIDE = 'L', LDWORK >= max(1,N);
-            if SIDE = 'R', LDWORK >= max(1,M);
+            If SIDE = MagmaLeft,  LDWORK >= max(1,N);
+            if SIDE = MagmaRight, LDWORK >= max(1,M);
 
     @param
     dworkvt (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
@@ -115,7 +115,8 @@
     k = 3.
     All elements including 0's and 1's are stored, unlike LAPACK.
 
-    DIRECT = 'F' and STOREV = 'C':         DIRECT = 'F' and STOREV = 'R':
+        DIRECT = MagmaForward and         DIRECT = MagmaForward and
+        STOREV = MagmaColumnwise:         STOREV = MagmaRowwise:
 
                  V = (  1  0  0 )                 V = (  1 v1 v1 v1 v1 )
                      ( v1  1  0 )                     (  0  1 v2 v2 v2 )
@@ -123,7 +124,8 @@
                      ( v1 v2 v3 )
                      ( v1 v2 v3 )
 
-    DIRECT = 'B' and STOREV = 'C':         DIRECT = 'B' and STOREV = 'R':
+        DIRECT = MagmaBackward and        DIRECT = MagmaBackward and 
+        STOREV = MagmaColumnwise:         STOREV = MagmaRowwise:
 
                  V = ( v1 v2 v3 )                 V = ( v1 v1  1  0  0 )
                      ( v1 v2 v3 )                     ( v2 v2 v2  1  0 )

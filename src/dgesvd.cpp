@@ -35,29 +35,28 @@
     Arguments
     ---------
     @param[in]
-    jobu    CHARACTER*1
+    jobu    magma_vec_t
             Specifies options for computing all or part of the matrix U:
-      -     = 'A':  all M columns of U are returned in array U:
-      -     = 'S':  the first min(m,n) columns of U (the left singular
-                    vectors) are returned in the array U;
-      -     = 'O':  the first min(m,n) columns of U (the left singular
-                    vectors) are overwritten on the array A;
-      -     = 'N':  no columns of U (no left singular vectors) are
-                    computed.
+      -     = MagmaAllVec:        all M columns of U are returned in array U:
+      -     = MagmaSomeVec:       the first min(m,n) columns of U (the left singular
+                                  vectors) are returned in the array U;
+      -     = MagmaOverwriteVec:  the first min(m,n) columns of U (the left singular
+                                  vectors) are overwritten on the array A;
+      -     = MagmaNoVec:         no columns of U (no left singular vectors) are
+                                  computed.
     
     @param[in]
-    jobvt   CHARACTER*1
-            Specifies options for computing all or part of the matrix
-            V**T:
-      -     = 'A':  all N rows of V**T are returned in the array VT;
-      -     = 'S':  the first min(m,n) rows of V**T (the right singular
-                    vectors) are returned in the array VT;
-      -     = 'O':  the first min(m,n) rows of V**T (the right singular
-                    vectors) are overwritten on the array A;
-      -     = 'N':  no rows of V**T (no right singular vectors) are
-                    computed.
+    jobvt   magma_vec_t
+            Specifies options for computing all or part of the matrix V**T:
+      -     = MagmaAllVec:        all N rows of V**T are returned in the array VT;
+      -     = MagmaSomeVec:       the first min(m,n) rows of V**T (the right singular
+                                  vectors) are returned in the array VT;
+      -     = MagmaOverwriteVec:  the first min(m,n) rows of V**T (the right singular
+                                  vectors) are overwritten on the array A;
+      -     = MagmaNoVec:         no rows of V**T (no right singular vectors) are
+                                  computed.
     \n
-            JOBVT and JOBU cannot both be 'O'.
+            JOBVT and JOBU cannot both be MagmaOverwriteVec.
     
     @param[in]
     m       INTEGER
@@ -71,14 +70,12 @@
     A       DOUBLE_PRECISION array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit,
-      -     if JOBU = 'O',  A is overwritten with the first min(m,n)
-                            columns of U (the left singular vectors,
-                            stored columnwise);
-      -     if JOBVT = 'O', A is overwritten with the first min(m,n)
-                            rows of V**T (the right singular vectors,
-                            stored rowwise);
-      -     if JOBU .ne. 'O' and JOBVT .ne. 'O', the contents of A
-                            are destroyed.
+      -     if JOBU = MagmaOverwriteVec,  A is overwritten with the first min(m,n)
+            columns of U (the left singular vectors, stored columnwise);
+      -     if JOBVT = MagmaOverwriteVec, A is overwritten with the first min(m,n)
+            rows of V**T (the right singular vectors, stored rowwise);
+      -     if JOBU != MagmaOverwriteVec and JOBVT != MagmaOverwriteVec,
+            the contents of A are destroyed.
     
     @param[in]
     lda     INTEGER
@@ -90,30 +87,30 @@
     
     @param[out]
     U       DOUBLE_PRECISION array, dimension (LDU,UCOL)
-            (LDU,M) if JOBU = 'A' or (LDU,min(M,N)) if JOBU = 'S'.
-      -     If JOBU = 'A', U contains the M-by-M orthogonal matrix U;
-      -     if JOBU = 'S', U contains the first min(m,n) columns of U
+            (LDU,M) if JOBU = MagmaAllVec or (LDU,min(M,N)) if JOBU = MagmaSomeVec.
+      -     If JOBU = MagmaAllVec, U contains the M-by-M orthogonal matrix U;
+      -     if JOBU = MagmaSomeVec, U contains the first min(m,n) columns of U
             (the left singular vectors, stored columnwise);
-      -     if JOBU = 'N' or 'O', U is not referenced.
+      -     if JOBU = MagmaNoVec or MagmaOverwriteVec, U is not referenced.
     
     @param[in]
     ldu     INTEGER
             The leading dimension of the array U.  LDU >= 1; if
-            JOBU = 'S' or 'A', LDU >= M.
+            JOBU = MagmaSomeVec or MagmaAllVec, LDU >= M.
     
     @param[out]
     VT      DOUBLE_PRECISION array, dimension (LDVT,N)
-      -     If JOBVT = 'A', VT contains the N-by-N orthogonal matrix
+      -     If JOBVT = MagmaAllVec, VT contains the N-by-N orthogonal matrix
             V**T;
-      -     if JOBVT = 'S', VT contains the first min(m,n) rows of
+      -     if JOBVT = MagmaSomeVec, VT contains the first min(m,n) rows of
             V**T (the right singular vectors, stored rowwise);
-      -     if JOBVT = 'N' or 'O', VT is not referenced.
+      -     if JOBVT = MagmaNoVec or MagmaOverwriteVec, VT is not referenced.
     
     @param[in]
     ldvt    INTEGER
             The leading dimension of the array VT.  LDVT >= 1;
-      -     if JOBVT = 'A', LDVT >= N;
-      -     if JOBVT = 'S', LDVT >= min(M,N).
+      -     if JOBVT = MagmaAllVec, LDVT >= N;
+      -     if JOBVT = MagmaSomeVec, LDVT >= min(M,N).
     
     @param[out]
     work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
