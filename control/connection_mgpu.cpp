@@ -97,6 +97,7 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
         }
     }
 
-    nbcmplx[0] = cmplxnb; 
+    nbcmplx[0] = cmplxnb;
+    free(deviceid); 
     return cmplxnb;
 }
