@@ -136,6 +136,7 @@ sub MakeRelease
     myCmd("perl -pi -e 's/VERSION_MINOR +[0-9]+/VERSION_MINOR $minor/' include/magma_types.h");
     myCmd("perl -pi -e 's/VERSION_MICRO +[0-9]+/VERSION_MICRO $micro/' include/magma_types.h");
     myCmd("perl -pi -e 's/VERSION_STAGE +.+/VERSION_STAGE \"$stage\"/' include/magma_types.h");
+    myCmd("perl -pi -e 's/PROJECT_NUMBER +=.*/PROJECT_NUMBER         = $major.$minor.$micro/' docs/Doxyfile");
 
     # Change the version and date in comments
     my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime;
@@ -187,6 +188,21 @@ sub MakeRelease
     chomp $DIRNAME;
     chomp $BASENAME;
     myCmd("(cd $DIRNAME && tar cvzf ${BASENAME}.tar.gz $BASENAME)");
+    
+    # Require recent doxygen, say >= 1.8.
+    # ICL machines has ancient versions of doxygen (1.4 and 1.6);
+    # the docs don't work at all.
+    my $doxygen = `doxygen --version`;
+    chomp $doxygen;
+    my($v) = $doxygen =~ m/^(\d+\.\d+)\.\d+$/;
+    my $doxygen_require = 1.8;
+    if ( $v < $doxygen_require ) {
+        print "\n\n\n" .
+              "=====================================================\n" .
+              "  WARNING: doxygen version $doxygen < $doxygen_require\n" .
+              "  The documentation may not be generated correctly.  \n" .
+              "=====================================================\n";
+    }
 }
 
 #sub MakeInstallerRelease {
