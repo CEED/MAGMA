@@ -24,7 +24,31 @@ my @files2delete = qw(
     cmake_modules
     contrib
     control/sizeptr
-    docs
+    
+    docs/dp-cpu.jpg
+    docs/dp-cpu.ps
+    docs/dp-gpu.jpg
+    docs/dp-gpu.ps
+    docs/gnuplots
+    docs/magma-v02.pdf
+    docs/magma.pdf
+    docs/magma.tex
+    docs/myplot
+    docs/o.gif
+    docs/o.jpeg
+    docs/o.jpg
+    docs/o.pdf
+    docs/sp-cpu.jpg
+    docs/sp-cpu.pdf
+    docs/sp-cpu.ps
+    docs/sp-gpu.jpg
+    docs/sp-gpu.ps
+    docs/Doxyfile-fast
+    docs/biblio.bib
+    docs/magma-performance
+    docs/magma-v02.tex
+    docs/output_err
+    
     include/Makefile
     magmablas/obsolete
     magmablas/zhemm_1gpu.cpp
@@ -34,6 +58,7 @@ my @files2delete = qw(
     multi-gpu-dynamic-deprecated
     quark
     
+    sparse-iter
     sparse-iter/blas/zmergeidr.cu
     sparse-iter/blas/zbcsrblockinfo.cu
     sparse-iter/blas/magma_z_mpksetup.cu
@@ -135,8 +160,8 @@ sub MakeRelease
     myCmd("make -j generation");
 
     # Compile the documentation
-    #print "Compile the documentation\n";
-    #system("make -C ./docs");
+    print "Compile the documentation\n";
+    system("make -C ./docs");
     myCmd("rm -f make.inc");
 
     # Remove non-required files (e.g., Makefile.gen)
