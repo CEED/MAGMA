@@ -167,7 +167,6 @@ int main( int argc, char** argv)
                 printf("%5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
                         (int) N, gpu_perf, gpu_time );
             }
-            fflush(0);
 
             for(j = 0; j < num_gpus; j++) {
                 magma_setdevice(j);
@@ -176,6 +175,7 @@ int main( int argc, char** argv)
             magma_setdevice(0);
             TESTING_FREE( h_A );
             TESTING_HOSTFREE( h_R );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

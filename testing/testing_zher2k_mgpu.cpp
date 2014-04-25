@@ -194,6 +194,10 @@ int main( int argc, char** argv)
                         magma_queue_destroy( streams[d][i] );
                     }
                 }
+                fflush( stdout );
+            }
+            if ( opts.niter > 1 ) {
+                printf( "\n" );
             }
         } // offset
         printf( "\n" );

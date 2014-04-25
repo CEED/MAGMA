@@ -72,8 +72,8 @@ int main( int argc, char** argv)
     printf("    N   norm   uplo    CPU GByte/s (ms)    GPU GByte/s (ms)    error   \n");
     printf("=======================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
-        for( int inorm = 0; inorm < 3; ++inorm ) {
-        for( int iuplo = 0; iuplo < 2; ++iuplo ) {
+      for( int inorm = 0; inorm < 3; ++inorm ) {
+      for( int iuplo = 0; iuplo < 2; ++iuplo ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             not_supported = ((arch < 200) &&
                 ( norm[inorm] == MagmaInfNorm ||
@@ -146,8 +146,13 @@ int main( int argc, char** argv)
             
             TESTING_FREE_DEV( d_A    );
             TESTING_FREE_DEV( d_work );
-        }}} // end iuplo, inorm, iter
-        printf( "\n" );
+            fflush( stdout );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
+        }
+      }} // end iuplo, inorm, iter
+      printf( "\n" );
     }
 
     TESTING_FINALIZE();

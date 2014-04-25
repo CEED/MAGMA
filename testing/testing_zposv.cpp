@@ -124,6 +124,7 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( h_B );
             TESTING_FREE_CPU( h_X );
             TESTING_FREE_CPU( work );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

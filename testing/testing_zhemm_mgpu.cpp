@@ -285,6 +285,10 @@ int main( int argc, char** argv)
                 magma_setdevice( 0 );
                 TESTING_FREE_DEV( dA2 );
             }
+            fflush( stdout );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
         }
       }  // offset
     }

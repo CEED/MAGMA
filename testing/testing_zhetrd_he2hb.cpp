@@ -370,6 +370,7 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( dT1 );
             
             /* TODO - not all memory has been freed inside loop */
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

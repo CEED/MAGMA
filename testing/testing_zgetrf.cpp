@@ -242,6 +242,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_PIN( h_A  );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

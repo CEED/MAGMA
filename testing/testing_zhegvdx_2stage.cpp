@@ -250,6 +250,7 @@ int main( int argc, char** argv)
             #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_FREE_PIN( rwork );
             #endif
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

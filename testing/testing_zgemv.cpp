@@ -140,6 +140,7 @@ int main(int argc, char **argv)
             TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dX );
             TESTING_FREE_DEV( dY );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

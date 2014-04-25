@@ -132,6 +132,7 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( d_A   );
             TESTING_FREE_DEV( dtau  );
             TESTING_FREE_DEV( dwork );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

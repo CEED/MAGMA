@@ -426,6 +426,7 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( d_ipiv );
             TESTING_FREE_DEV( d_A1 );
             TESTING_FREE_DEV( d_A2 );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

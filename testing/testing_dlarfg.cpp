@@ -103,6 +103,7 @@ int main( int argc, char** argv)
         
             TESTING_FREE_DEV( d_x   );
             TESTING_FREE_DEV( d_tau );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

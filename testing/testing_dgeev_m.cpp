@@ -379,6 +379,7 @@ int main( int argc, char** argv)
             TESTING_FREE_PIN( VL  );
             TESTING_FREE_PIN( VR  );
             TESTING_FREE_PIN( h_work );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

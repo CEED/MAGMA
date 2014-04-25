@@ -128,6 +128,7 @@ int main(int argc, char **argv)
             TESTING_FREE_CPU( h_X  );
             TESTING_FREE_CPU( work );
             TESTING_FREE_CPU( ipiv );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

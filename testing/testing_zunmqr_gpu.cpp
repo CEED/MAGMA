@@ -53,8 +53,9 @@ int main( int argc, char** argv )
     printf("    M     N     K   side   trans   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
     printf("===============================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
-        for( int iside = 0; iside < 2; ++iside ) {
-        for( int itran = 0; itran < 2; ++itran ) {
+      for( int iside = 0; iside < 2; ++iside ) {
+      for( int itran = 0; itran < 2; ++itran ) {
+        for( int iter = 0; iter < opts.niter; ++iter ) {        
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];
@@ -182,8 +183,13 @@ int main( int argc, char** argv )
             TESTING_FREE_DEV( dC );
             TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dT );
-        }}  // end iside, itran
-        printf( "\n" );
+            fflush( stdout );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
+        }
+      }}  // end iside, itran
+      printf( "\n" );
     }
     
     TESTING_FINALIZE();

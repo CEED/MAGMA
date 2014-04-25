@@ -192,6 +192,7 @@ int main(int argc, char **argv)
             TESTING_FREE_DEV( d_ipiv  );
             TESTING_FREE_DEV( d_WORKS );
             TESTING_FREE_DEV( d_WORKD );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

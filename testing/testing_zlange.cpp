@@ -113,6 +113,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE_DEV( d_A    );
             TESTING_FREE_DEV( d_work );
+            fflush( stdout );
         }} // end inorm, iter
         if ( opts.niter > 1 ) {
             printf( "\n" );

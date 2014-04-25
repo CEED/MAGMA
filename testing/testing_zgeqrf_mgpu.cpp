@@ -201,6 +201,7 @@ int main( int argc, char** argv )
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
             }
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

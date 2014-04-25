@@ -297,6 +297,7 @@ int main( int argc, char** argv)
             
             if ( opts.version != 2 )
                 TESTING_FREE_DEV( dT );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

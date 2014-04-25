@@ -54,18 +54,18 @@ int main( int argc, char** argv )
     printf("    M     N     K   storev   side   direct   trans    ||R||_F / ||HC||_F\n");
     printf("========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
-        M = opts.msize[itest];
-        N = opts.nsize[itest];
-        K = opts.ksize[itest];
-        if ( M < K || N < K || K <= 0 ) {
-            printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", (int) M, (int) N, (int) K );
-            continue;
-        }
-        for( int istor = 0; istor < 2; ++istor ) {
-        for( int iside = 0; iside < 2; ++iside ) {
-        for( int idir  = 0; idir  < 2; ++idir  ) {
-        for( int itran = 0; itran < 2; ++itran ) {
-            
+      M = opts.msize[itest];
+      N = opts.nsize[itest];
+      K = opts.ksize[itest];
+      if ( M < K || N < K || K <= 0 ) {
+          printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", (int) M, (int) N, (int) K );
+          continue;
+      }
+      for( int istor = 0; istor < 2; ++istor ) {
+      for( int iside = 0; iside < 2; ++iside ) {
+      for( int idir  = 0; idir  < 2; ++idir  ) {
+      for( int itran = 0; itran < 2; ++itran ) {
+        for( int iter = 0; iter < opts.niter; ++iter ) {            
             ldc = ((M+31)/32)*32;
             ldt = ((K+31)/32)*32;
             ldw = (side[iside] == MagmaLeft ? N : M);
@@ -170,8 +170,13 @@ int main( int argc, char** argv )
             TESTING_FREE_DEV( dV );
             TESTING_FREE_DEV( dT );
             TESTING_FREE_DEV( dW );
-        }}}}
-        printf( "\n" );
+            fflush( stdout );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
+        }
+      }}}}
+      printf( "\n" );
     }
     
     TESTING_FINALIZE();

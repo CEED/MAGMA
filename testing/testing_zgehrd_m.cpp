@@ -171,6 +171,7 @@ int main( int argc, char** argv)
             TESTING_FREE_PIN( h_work );
             
             TESTING_FREE_DEV( dT     );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

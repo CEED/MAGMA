@@ -227,6 +227,7 @@ int main( int argc, char** argv)
                 TESTING_FREE_CPU( h_Ainit );
                 TESTING_FREE_CPU( h_Binit );
             }
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

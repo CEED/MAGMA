@@ -138,6 +138,7 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( hBarray );
             TESTING_FREE_DEV( dAarray );
             TESTING_FREE_DEV( dBarray );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

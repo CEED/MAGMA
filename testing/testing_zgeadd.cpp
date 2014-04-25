@@ -107,6 +107,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_B );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
