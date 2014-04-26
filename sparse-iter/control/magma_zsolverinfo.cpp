@@ -515,6 +515,28 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     precond->M.row = NULL;
     precond->M.blockinfo = NULL;
 
+    precond->L.val = NULL;
+    precond->L.col = NULL;
+    precond->L.row = NULL;
+    precond->L.blockinfo = NULL;
+
+    precond->U.val = NULL;
+    precond->U.col = NULL;
+    precond->U.row = NULL;
+    precond->U.blockinfo = NULL;
+
+    precond->LD.val = NULL;
+    precond->LD.col = NULL;
+    precond->LD.row = NULL;
+    precond->LD.blockinfo = NULL;
+
+
+    precond->UD.val = NULL;
+    precond->UD.col = NULL;
+    precond->UD.row = NULL;
+    precond->UD.blockinfo = NULL;
+
+
     return MAGMA_SUCCESS;
 }
 
