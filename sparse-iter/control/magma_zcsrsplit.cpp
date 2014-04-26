@@ -56,7 +56,10 @@ magma_zcsrsplit(    magma_int_t bsize,
                     magma_z_sparse_matrix *D,
                     magma_z_sparse_matrix *R ){
 
-    if( A.storage_type == Magma_CSR && A.memory_location == Magma_CPU ){
+    if(  A.memory_location == Magma_CPU &&
+            (   A.storage_type == Magma_CSR ||
+                A.storage_type == Magma_CSRL ||
+                A.storage_type == Magma_CSRU ) ){
 
         magma_int_t i, k, j, nnz_diag, nnz_offd;
 
