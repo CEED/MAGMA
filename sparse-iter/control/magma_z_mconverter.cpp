@@ -163,14 +163,12 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     for( magma_int_t i=0; i<A.num_rows+1; i++){
         B->row[i] = A.row[i];
     }
-    return MAGMA_SUCCESS; 
-
-    for( lrow = 0; lrow < A.nnz; lrow++ ){
+    for( lrow = 0; lrow < A.num_rows; lrow++ ){
         B->row[lrow] = new_nnz;
         for( i=0; i<A.num_rows; i++ ){
             for( j=A.row[i]; j<A.row[i+1]; j++ ){
                 if( A.col[j] == lrow ){
-                    B->val[ new_nnz ] = A.val[ i ];
+                    B->val[ new_nnz ] = A.val[ j ];
                     B->col[ new_nnz ] = i;
                     new_nnz++; 
                 }
@@ -178,6 +176,61 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         }
     }
     B->row[ B->num_rows ] = new_nnz;
+
+    return MAGMA_SUCCESS;
+}
+
+magma_int_t 
+magma_z_csrtranspose2( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
+// for symmetric matrices: convert to csc using cusparse
+
+    magma_z_sparse_matrix A_d, B_d;
+
+    magma_z_mtransfer( A, &A_d, Magma_CPU, Magma_DEV );
+
+    magma_z_mtransfer( A, &B_d, Magma_CPU, Magma_DEV );
+
+
+    // CUSPARSE context //
+    cusparseHandle_t handle;
+    cusparseStatus_t cusparseStatus;
+    cusparseStatus = cusparseCreate(&handle);
+     if(cusparseStatus != 0)    printf("error in Handle.\n");
+
+
+    cusparseMatDescr_t descrA;
+    cusparseMatDescr_t descrB;
+    cusparseStatus = cusparseCreateMatDescr(&descrA);
+    cusparseStatus = cusparseCreateMatDescr(&descrB);
+     if(cusparseStatus != 0)    printf("error in MatrDescr.\n");
+
+    cusparseStatus =
+    cusparseSetMatType(descrA,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatType(descrB,CUSPARSE_MATRIX_TYPE_GENERAL);
+     if(cusparseStatus != 0)    printf("error in MatrType.\n");
+
+    cusparseStatus =
+    cusparseSetMatIndexBase(descrA,CUSPARSE_INDEX_BASE_ZERO);
+    cusparseSetMatIndexBase(descrB,CUSPARSE_INDEX_BASE_ZERO);
+     if(cusparseStatus != 0)    printf("error in IndexBase.\n");
+
+    cusparseStatus = 
+    cusparseZcsr2csc( handle, A.num_rows, A.num_rows, A.nnz,
+                     A_d.val, A_d.row, A_d.col, B_d.val, B_d.col, B_d.row,
+                     CUSPARSE_ACTION_NUMERIC, 
+                     CUSPARSE_INDEX_BASE_ZERO);
+     if(cusparseStatus != 0)    
+            printf("error in transpose: %d.\n", cusparseStatus);
+
+    cusparseDestroyMatDescr( descrA );
+    cusparseDestroyMatDescr( descrB );
+    cusparseDestroy( handle );
+
+    // end CUSPARSE context //
+
+    magma_z_mtransfer( B_d, B, Magma_DEV, Magma_CPU );
+    magma_z_mfree( &A_d );
+    magma_z_mfree( &B_d );
 
     return MAGMA_SUCCESS;
 }
@@ -361,7 +414,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                         ELL.col[i*maxrowlength+ELL_count[i]] = A.col[j];
                         ELL_count[i]++;
                         // insert the entry in the upper part
-                        ELL.val[A.col[j]*maxrowlength+ELL_count[A.col[j]]] = A.val[j];
+                        ELL.val[A.col[j]*maxrowlength+ELL_count[A.col[j]]] 
+                                                                    = A.val[j];
                         ELL.col[A.col[j]*maxrowlength+ELL_count[A.col[j]]] = i;
                         ELL_count[A.col[j]]++;
                     }
@@ -598,6 +652,29 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             return MAGMA_SUCCESS; 
         }
+        // CSR to COO
+        if( old_format == Magma_CSR && new_format == Magma_COO ){
+
+            magma_z_mconvert( A, B, Magma_CSR, Magma_CSR );
+            B->storage_type = Magma_COO;
+
+            magma_free_cpu( B->row );
+            magma_indexmalloc_cpu( &B->row, A.nnz );
+
+            for(magma_int_t i=0; i<A.num_rows; i++){
+                for(magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                        B->row[j] = i;   
+                }
+            }
+    
+            return MAGMA_SUCCESS; 
+        }
+        // CSRCSC to CSR
+        if( old_format == Magma_COO && new_format == Magma_CSR ){
+           // A.storage_type = Magma_CSR;
+          //  magma_z_mconvert( A, B, Magma_CSR, Magma_CSR );
+            return MAGMA_SUCCESS; 
+        }
         // CSR to CSRCSCL
         // CSRL format but with blockinfo containing the row
         if( old_format == Magma_CSR && new_format == Magma_CSRCSCL ){
@@ -658,21 +735,20 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         // CSR format but with blockinfo containing the row
         if( old_format == Magma_CSR && new_format == Magma_CSRCSCU ){
 
-            magma_z_sparse_matrix C, C2;
-            magma_z_csrtranspose( A, &C );
+            magma_z_sparse_matrix C2;
             C2.diagorder_type = Magma_VALUE;
             magma_z_mconvert( A, &C2, Magma_CSR, Magma_CSRL );
             // fill in information for B
             B->storage_type = Magma_CSRCSCU;
-            B->memory_location = C.memory_location;
-            B->num_rows = C.num_rows;
-            B->num_cols = C.num_cols;
+            B->memory_location = C2.memory_location;
+            B->num_rows = C2.num_rows;
+            B->num_cols = C2.num_cols;
             B->nnz = C2.nnz;
 
-            magma_zmalloc_cpu( &B->val, C.nnz );
+            magma_zmalloc_cpu( &B->val, C2.nnz );
             magma_indexmalloc_cpu( &B->row, (C2.num_rows+1) );
-            magma_indexmalloc_cpu( &B->col, C.nnz );
-            magma_indexmalloc_cpu( &B->blockinfo, C.nnz );
+            magma_indexmalloc_cpu( &B->col, C2.nnz );
+            magma_indexmalloc_cpu( &B->blockinfo, C2.nnz );
             for(magma_int_t i=0; i<C2.num_rows; i++){
                 magma_int_t t = 0;
                 for(magma_int_t j=C2.row[i]; j<C2.row[i+1]; j++){
@@ -685,7 +761,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             for( magma_int_t i=0; i<C2.num_rows+1; i++){
                 B->row[i] = C2.row[i];
             }
-            magma_z_mfree( &C );
             magma_z_mfree( &C2 );
 
             return MAGMA_SUCCESS; 
