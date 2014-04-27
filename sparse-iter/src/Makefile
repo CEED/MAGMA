@@ -31,6 +31,8 @@ ZSRC += \
 	zgmres.cpp		\
 	zjacobi.cpp		\
 	zpcg.cpp		\
+	zpbicgstab.cpp		\
+	zpgmres.cpp		\
 #	ziterref.cpp		\
 #	zcg_merge.cpp		\
 #	zgmres.cpp		\
@@ -67,6 +69,8 @@ ZSRC += \
 ZSRC += \
 	zbcsrlu.cpp		\
 	zpastix.cpp		\
+	zcuilu.cpp		\
+	zbailu.cpp		\
 #	zilu.cpp		\
 
 

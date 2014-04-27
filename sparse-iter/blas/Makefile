@@ -45,7 +45,7 @@ ZSRC := \
 	zpipelinedgmres.cu	\
 
 # asynchronous iterations
-ZSRC := \
+ZSRC += \
 	zaicc_chow_csr_s.cu	\
 	zailu_chow_csr_s.cu	\
 	zbajac_csr.cu		\

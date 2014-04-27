@@ -186,16 +186,16 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
     else if( precond->solver == Magma_ILU ){
         magma_z_vector tmp;
         magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
-        magma_zapplycuilu_l( b, &tmp, precond ); 
-        magma_zapplycuilu_r( tmp, x, precond );
+     //   magma_zapplycuilu_l( b, &tmp, precond ); 
+     //   magma_zapplycuilu_r( tmp, x, precond );
         magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
         magma_z_vector tmp;
         magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
-        magma_ztrisv_l_nu( precond->L, b, &tmp );
-        magma_ztrisv_r_nu( precond->L, tmp, x );
+       // magma_ztrisv_l_nu( precond->L, b, &tmp );
+       // magma_ztrisv_r_nu( precond->L, tmp, x );
         magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
