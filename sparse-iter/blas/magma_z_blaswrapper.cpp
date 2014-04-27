@@ -58,7 +58,11 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
     // DEV case
     if( A.memory_location == Magma_DEV ){
         if( A.num_cols == x.num_rows ){
-             if( A.storage_type == Magma_CSR ){
+             if( A.storage_type == Magma_CSR 
+                            || A.storage_type == Magma_CSRL 
+                            || A.storage_type == Magma_CSRU
+                            || A.storage_type == Magma_CSRCSCL
+                            || A.storage_type == Magma_CSRCSCU ){
                  //printf("using CSR kernel for SpMV: ");
                  magma_zgecsrmv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
                                  A.val, A.row, A.col, x.val, beta, y.val );
