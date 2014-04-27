@@ -39,8 +39,8 @@
     magma_z_sparse_matrix A                   input matrix A
     magma_z_vector b                          RHS b
     magma_z_vector *x                         solution approximation
-    magma_z_solver_par *solver_par       solver parameters
-    magma_z_preconditioner                    preconditioner
+    magma_z_solver_par *solver_par            solver parameters
+    magma_z_preconditioner *precond_par       preconditioner
 
     ========================================================================  */
 
@@ -60,8 +60,9 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_int_t dofs = A.num_rows;
 
     // GPU workspace
-    magma_z_vector r, p, q, h, dinv;
+    magma_z_vector r, rt, p, q, h, dinv;
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
+    magma_z_vinit( &rt, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &p, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &q, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &h, Magma_DEV, dofs, c_zero );
@@ -76,7 +77,8 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
 
     // preconditioner
-    magma_z_applyprecond( A, r, &h, precond_par );
+    magma_z_applyprecond_left( A, r, &rt, precond_par );
+    magma_z_applyprecond_right( A, rt, &h, precond_par );
 
     magma_zcopy( dofs, h.val, 1, p.val, 1 );                    // p = h
     nom =  MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) );          
@@ -111,7 +113,8 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);      // r = r - alpha q
 
         // preconditioner
-        magma_z_applyprecond( A, r, &h, precond_par );
+        magma_z_applyprecond_left( A, r, &rt, precond_par );
+        magma_z_applyprecond_right( A, rt, &h, precond_par );
 
         betanom = sqrt( MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) ) );   
                                                             // betanom = < r,h>
@@ -153,6 +156,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         solver_par->info = -1;
 
     magma_z_vfree(&r);
+    magma_z_vfree(&rt);
     magma_z_vfree(&p);
     magma_z_vfree(&q);
     magma_z_vfree(&h);
