@@ -10,8 +10,6 @@
 
 */
 #include "common_magma.h"
-#include "../../include/magmablas.h"
-#include "../include/magmasparse_types.h"
 #include "../include/magmasparse.h"
 
 
@@ -127,8 +125,17 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zjacobisetup_diagscal( A, &(precond->d) );
         return MAGMA_SUCCESS;
     }
-    if( precond->solver == Magma_PASTIX ){
+    else if( precond->solver == Magma_PASTIX ){
         magma_zpastixsetup( A, b, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ILU ){
+        magma_zcuilusetup( A, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ICC ){
+        //magma_zcuiccsetup( A, precond );
+        magma_zaiccsetup( A, precond );
         return MAGMA_SUCCESS;
     }
     else{
@@ -172,8 +179,24 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
         return MAGMA_SUCCESS;
     }
-    if( precond->solver == Magma_PASTIX ){
+    else if( precond->solver == Magma_PASTIX ){
         magma_zapplypastix( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ILU ){
+        magma_z_vector tmp;
+        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
+        magma_zapplycuilu_l( b, &tmp, precond ); 
+        magma_zapplycuilu_r( tmp, x, precond );
+        magma_z_vfree( &tmp );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ICC ){
+        magma_z_vector tmp;
+        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
+        magma_ztrisv_l_nu( precond->L, b, &tmp );
+        magma_ztrisv_r_nu( precond->L, tmp, x );
+        magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
     else{
@@ -182,3 +205,107 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
     }
 
 }
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+    Purpose
+    =======
+
+    For a given input matrix A and vectors x, y and the
+    preconditioner parameters, the respective left preconditioner
+    is applied. 
+    E.g. for Jacobi: the scaling-vetor, for ILU the left triangular solve...
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A         sparse matrix A    
+    magma_z_vector x                input vector x  
+    magma_z_vector y                input vector y      
+    magma_z_preconditioner precond  preconditioner
+
+    ========================================================================  */
+
+magma_int_t
+magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b, 
+                      magma_z_vector *x, magma_z_preconditioner *precond )
+{
+    if( precond->solver == Magma_JACOBI ){
+        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ILU ){
+        //magma_ztrisv_l( precond->L, b, x );
+        magma_zapplycuilu_l( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ICC ){
+        //magma_ztrisv_l_nu( precond->L, b, x );
+        //magma_zapplycuicc_l( b, x, precond );
+        magma_zapplyailu_l( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else{
+        printf( "error: preconditioner type not yet supported.\n" );
+        return MAGMA_ERR_NOT_SUPPORTED;
+    }
+
+}
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+    Purpose
+    =======
+
+    For a given input matrix A and vectors x, y and the
+    preconditioner parameters, the respective right-preconditioner
+    is applied. 
+    E.g. for Jacobi: the scaling-vetor, for ILU the right triangular solve...
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A         sparse matrix A    
+    magma_z_vector x                input vector x  
+    magma_z_vector y                input vector y      
+    magma_z_preconditioner precond  preconditioner
+
+    ========================================================================  */
+
+magma_int_t
+magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b, 
+                      magma_z_vector *x, magma_z_preconditioner *precond )
+{
+    if( precond->solver == Magma_JACOBI ){
+        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ILU ){
+        //magma_ztrisv_r( precond->U, b, x );
+        magma_zapplycuilu_r( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_ICC ){
+        //magma_ztrisv_r_nu( precond->U, b, x );
+        //magma_zapplycuicc_r( b, x, precond );
+        magma_zapplyailu_r( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else{
+        printf( "error: preconditioner type not yet supported.\n" );
+        return MAGMA_ERR_NOT_SUPPORTED;
+    }
+
+}
+
+
