@@ -26,16 +26,14 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
                             magmaDoubleComplex *valL, 
                             magma_index_t *rowptrL, 
                             magma_index_t *rowidxL, 
-                            magma_index_t *colidxL, 
-                            magmaDoubleComplex *valL_n,
+                            magma_index_t *colidxL,
                             magma_int_t Unum_rows, 
                             magma_int_t Unnz,  
                             magmaDoubleComplex *AU, 
                             magmaDoubleComplex *valU, 
                             magma_index_t *rowptrU, 
                             magma_index_t *rowidxU, 
-                            magma_index_t *colidxU, 
-                            magmaDoubleComplex *valU_n){
+                            magma_index_t *colidxU ){
 
     int i, j;
     int k = blockDim.x * blockIdx.x + threadIdx.x;
@@ -75,13 +73,12 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
                 iu++;
             }
         }
-
         // undo the last operation (it must be the last)
         s += sp;
-__syncthreads();
+        __syncthreads();
         // modify u entry
-        if (blockIdx.y == 0){
-            valL[k] =  s / valU[rowptrU[j+1]-1];}
+        if (blockIdx.y == 0)
+            valL[k] =  s / valU[rowptrU[j+1]-1];
         else{
             valU[k] = s;
         }
@@ -114,8 +111,7 @@ __syncthreads();
     The idea is according to Edmond Chow's presentation at SIAM 2014.
     The input format of the matrix is Magma_CSRCSCL and MagmaCSRCSCU for
     the lower and upper part. L is in CSRL, U is in CSRU, but column-major.
-    Every component of L and U is handled by one thread. Hence, we need to 
-    synchronize to avoid read/write accidents.
+    Every component of L and U is handled by one thread. 
 
     Arguments
     =========
@@ -132,9 +128,6 @@ magma_zailu_csr_s( magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix A_U,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U ){
-
-
-
     
     int blocksize1 = 256;
     int blocksize2 = 1;
@@ -143,25 +136,13 @@ magma_zailu_csr_s( magma_z_sparse_matrix A_L,
     int dimgrid2 = 2;
     int dimgrid3 = 1;
 
-    magmaDoubleComplex *val_Ln, *val_Un;
-  //  magma_zmalloc( &val_Ln, A_L.nnz);
-  //  magma_zmalloc( &val_Un, A_U.nnz);
-
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
     magma_zailu_csr_s_kernel<<< grid, block, 0, magma_stream >>>
-            ( A_L.num_rows, A_L.nnz,  A_L.val, L.val, L.row, L.blockinfo, L.col, val_Ln,
-              A_U.num_rows, A_U.nnz,  A_U.val, U.val, U.row, U.blockinfo, U.col, val_Un );
-
-  //  cudaMemcpy( L.val, val_Ln, A_L.nnz*sizeof( magmaDoubleComplex ), 
-           //                                         cudaMemcpyDeviceToDevice );
-
-   // cudaMemcpy( U.val, val_Un, A_U.nnz*sizeof( magmaDoubleComplex ), 
-      //                                              cudaMemcpyDeviceToDevice );
+        ( A_L.num_rows, A_L.nnz,  A_L.val, L.val, L.row, L.blockinfo, L.col, 
+          A_U.num_rows, A_U.nnz,  A_U.val, U.val, U.row, U.blockinfo, U.col );
 
 
-    cudaFree(val_Ln);
-    cudaFree(val_Un);
     return MAGMA_SUCCESS;
 }
 
