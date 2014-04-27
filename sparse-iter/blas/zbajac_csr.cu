@@ -100,7 +100,7 @@ magma_zbajac_csr_kernel(    int n,
 
         #pragma unroll
         for( i=start; i<end; i++ )
-             tmp += valR[i] * x[ colR[i] ];
+             v += valR[i] * x[ colR[i] ];
 
         v =  b[index] - v;
 
@@ -109,7 +109,7 @@ magma_zbajac_csr_kernel(    int n,
 
         #pragma unroll
         for( i=start; i<end; i++ )
-            v += valD[i] * x[ colD[i] ];
+            tmp += valD[i] * x[ colD[i] ];
 
         x[index] = ( v - tmp ) / (valD[start]); 
     }
