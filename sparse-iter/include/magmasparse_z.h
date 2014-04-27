@@ -108,6 +108,20 @@ magma_int_t
 magma_z_cucsrtranspose( magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B );
 
+magma_int_t 
+z_transpose_csr(        magma_int_t n_rows, 
+                        magma_int_t n_cols, 
+                        magma_int_t nnz,
+                        magmaDoubleComplex *val, 
+                        magma_index_t *row, 
+                        magma_index_t *col, 
+                        magma_int_t *new_n_rows, 
+                        magma_int_t *new_n_cols, 
+                        magma_int_t *new_nnz, 
+                        magmaDoubleComplex **new_val, 
+                        magma_index_t **new_row, 
+                        magma_index_t **new_col );
+
 magma_int_t
 magma_zcsrsplit(    magma_int_t bsize,
                     magma_z_sparse_matrix A,
@@ -244,19 +258,7 @@ print_z_csr_mtx(        magma_int_t n_row,
 
 
 
-magma_int_t 
-z_transpose_csr(        magma_int_t n_rows, 
-                        magma_int_t n_cols, 
-                        magma_int_t nnz,
-                        magmaDoubleComplex *val, 
-                        magma_index_t *row, 
-                        magma_index_t *col, 
-                        magma_int_t *new_n_rows, 
-                        magma_int_t *new_n_cols, 
-                        magma_int_t *new_nnz, 
-                        magmaDoubleComplex **new_val, 
-                        magma_index_t **new_row, 
-                        magma_index_t **new_col );
+
 
 magma_int_t 
 magma_z_mtranspose(     magma_z_sparse_matrix A, 
