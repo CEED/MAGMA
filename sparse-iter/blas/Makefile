@@ -31,9 +31,9 @@ ZSRC := \
 	zgesellcmmv.cu		\
 	zjacobisetup.cu		\
 	zlag2c_sparse.cu	\
-    zlobpcg_maxpy.cu    \
-    zlobpcg_shift.cu    \
-    zlobpcg_residuals.cu\
+	zlobpcg_maxpy.cu	\
+	zlobpcg_shift.cu	\
+	zlobpcg_residuals.cu	\
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\
@@ -43,6 +43,12 @@ ZSRC := \
 	zmgeelltmv.cu		\
 	zmgesellcmmv.cu		\
 	zpipelinedgmres.cu	\
+
+# asynchronous iterations
+ZSRC := \
+	zaicc_chow_csr_s.cu	\
+	zailu_chow_csr_s.cu	\
+	zbajac_csr.cu		\
 
 
 # Auxiliary routines

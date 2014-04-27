@@ -16,15 +16,15 @@ LIB += -lcusparse
 # utility functions
 ZSRC += \
 	testing_z_mv.cpp	\
-	testing_zdot.cpp	\
-	testing_z_multimv.cpp	\
-	testing_z_matrix_io.cpp	\
-    testing_ziluchow.cpp \
-    testing_ziluchowcsrcsc.cpp \
-    testing_ziccchowcsrcsc.cpp \
-    testing_ziluchow_cpu_csrcsc.cpp \
-    testing_ziluchow_multigpu.cpp   \
-    testing_ziluchowcsr_multigpu.cpp    \
+#	testing_zdot.cpp	\
+#	testing_z_multimv.cpp	\
+#	testing_z_matrix_io.cpp	\
+#    testing_ziluchow.cpp \
+#    testing_ziluchowcsrcsc.cpp \
+#    testing_ziccchowcsrcsc.cpp \
+#    testing_ziluchow_cpu_csrcsc.cpp \
+#    testing_ziluchow_multigpu.cpp   \
+#    testing_ziluchowcsr_multigpu.cpp    \
 #    testing_ziccchow.cpp \
 #	testing_zmgenerator.cpp	\
 #	testing_z_matrix_compressor.cpp	\

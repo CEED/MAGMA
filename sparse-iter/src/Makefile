@@ -42,7 +42,7 @@ ZSRC += \
 
 # Krylov space eigen-solvers
 ZSRC += \
-	zlobpcg3.cpp            \
+	zlobpcg3.cpp		\
 #	zlobpcg.cpp		\
 #	zlobpcg2.cpp            \
 	#zcgeig.cpp		\
@@ -66,7 +66,7 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zbcsrlu.cpp		\
-    zpastix.cpp     \
+	zpastix.cpp		\
 #	zilu.cpp		\
 
 
