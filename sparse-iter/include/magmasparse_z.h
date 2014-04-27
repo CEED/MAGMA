@@ -100,6 +100,14 @@ magma_z_csr_compressor( magmaDoubleComplex ** val,
                         magma_int_t *n,
                         magma_int_t *alignment);
 
+magma_int_t 
+magma_z_csrtranspose(   magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix *B );
+
+magma_int_t 
+magma_z_cucsrtranspose( magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix *B );
+
 magma_int_t
 magma_zcsrsplit(    magma_int_t bsize,
                     magma_z_sparse_matrix A,
@@ -343,6 +351,13 @@ magma_int_t
 magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
                   real_Double_t *res );
 
+magma_int_t 
+magma_znonlinres(   magma_z_sparse_matrix A, 
+                    magma_z_sparse_matrix L,
+                    magma_z_sparse_matrix U, 
+                    magma_z_sparse_matrix *LU, 
+                    real_Double_t *res );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -531,6 +546,9 @@ magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond );
 
 magma_int_t
+magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond );
+
+magma_int_t
 magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x, 
                     magma_z_preconditioner *precond );
 magma_int_t
@@ -541,7 +559,8 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
 // block-asynchronous iteration
 
 magma_int_t
-magma_zbajac_csr(   magma_z_sparse_matrix D,
+magma_zbajac_csr(   magma_int_t localiters,
+                    magma_z_sparse_matrix D,
                     magma_z_sparse_matrix R,
                     magma_z_vector b,
                     magma_z_vector *x );
