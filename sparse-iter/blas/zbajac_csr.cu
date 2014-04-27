@@ -111,7 +111,7 @@ magma_zbajac_csr_kernel(    int n,
         for( i=start; i<end; i++ )
             tmp += valD[i] * x[ colD[i] ];
 
-        x[index] = ( v - tmp ) / (valD[start]); 
+        x[index] = x[index] + ( v - tmp ) / (valD[start]); 
     }
 }
 
