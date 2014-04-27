@@ -103,6 +103,44 @@ zgesellptmv2d_kernel_4_ldg( int num_rows,
 // see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
+// SELLC SpMV kernel modified assigning one thread to each row - 1D kernel
+__global__ void 
+zgesellptmv2d_kernel_1( int num_rows, 
+                     int num_cols,
+                     int blocksize,
+                     int T,
+                     magmaDoubleComplex alpha, 
+                     magmaDoubleComplex *d_val, 
+                     magma_index_t *d_colind,
+                     magma_index_t *d_rowptr,
+                     magmaDoubleComplex* d_x,
+                     magmaDoubleComplex beta, 
+                     magmaDoubleComplex *d_y)
+{
+
+    // threads assigned to rows
+    int Idx = blockDim.x * blockIdx.x + threadIdx.x ;
+    int offset = d_rowptr[ blockIdx.x ];
+    int border = (d_rowptr[ blockIdx.x+1 ]-offset)/blocksize;
+    if(Idx < num_rows ){
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        for ( int n = 0; n < border; n++){ 
+            int col = d_colind [offset+ blocksize * n + threadIdx.x ];
+            magmaDoubleComplex val = d_val[offset+ blocksize * n + threadIdx.x];
+            if( val != 0){
+                  dot=dot+val*d_x[col];
+            }
+        }
+
+        d_y[ Idx ] = dot * alpha + beta * d_y [ Idx ];
+    }
+}
+
+
+// SELLP SpMV kernel
+// see paper by M. KREUTZER, G. HAGER, G WELLEIN, H. FEHSKE A. BISHOP
+// A UNIFIED SPARSE MATRIX DATA FORMAT 
+// FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning multiple threads to each row - 2D kernel
 __global__ void 
 zgesellptmv2d_kernel_4( int num_rows, 
@@ -799,7 +837,12 @@ magma_zgesellpmv(  magma_trans_t transA,
         cudaDestroyTextureObject(texdx);
 
     #else 
-        if( alignment == 4)
+        if( alignment == 1)
+            zgesellptmv2d_kernel_1<<< grid, block, Ms, magma_stream >>>
+            ( m, n, blocksize, alignment, alpha,
+                d_val, d_colind, d_rowptr, d_x, beta, d_y );
+
+        else if( alignment == 4)
             zgesellptmv2d_kernel_4<<< grid, block, Ms, magma_stream >>>
             ( m, n, blocksize, alignment, alpha,
                 d_val, d_colind, d_rowptr, d_x, beta, d_y );
