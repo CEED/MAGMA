@@ -22,9 +22,10 @@ ZSRC := \
 	magma_zgeneratematrix.cpp	\
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
-	z_transpose_csr.cpp	\
+	magma_ztranspose.cpp	\
     magma_z_chowutils.cpp   \
     magma_zp2p.cpp   \
+    magma_zcsrsplit.cpp   \
 
 
 SRC := \
