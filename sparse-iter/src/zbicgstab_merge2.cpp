@@ -182,11 +182,28 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
 
     if( solver_par->numiter < solver_par->maxiter){
         solver_par->info = 0;
-    }else if( solver_par->init_res > solver_par->final_res )
+    }else if( solver_par->init_res > solver_par->final_res ){
+        if( solver_par->verbose > 0 ){
+            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) betanom;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
         solver_par->info = -2;
-    else
+    }
+    else{
+        if( solver_par->verbose > 0 ){
+            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) betanom;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
         solver_par->info = -1;
-
+    }
     magma_z_vfree(&q);  // frees all vectors
 
     magma_free(d1);

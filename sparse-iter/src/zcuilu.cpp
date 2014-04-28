@@ -52,7 +52,7 @@ magma_int_t
 magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
         // copy matrix into preconditioner parameter
-            magma_z_mtransfer(A, &(precond->M), Magma_DEV, Magma_DEV);
+            magma_z_mtransfer(A, &(precond->M), A.memory_location, Magma_DEV);
 
 
 
@@ -378,7 +378,7 @@ magma_int_t
 magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_z_sparse_matrix hA, U;
-    magma_z_mtransfer( A, &hA, Magma_DEV, Magma_CPU );
+    magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
     U.diagorder_type = Magma_VALUE;
     magma_z_mconvert( hA, &U, Magma_CSR, Magma_CSRL);
 

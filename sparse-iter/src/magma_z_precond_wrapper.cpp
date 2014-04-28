@@ -131,11 +131,12 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
     }
     else if( precond->solver == Magma_ILU ){
         magma_zcuilusetup( A, precond );
+        //magma_zailusetup( A, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
-        //magma_zcuiccsetup( A, precond );
-        magma_zaiccsetup( A, precond );
+        magma_zcuiccsetup( A, precond );
+        //magma_zaiccsetup( A, precond );
         return MAGMA_SUCCESS;
     }
     else{
@@ -242,12 +243,13 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
     else if( precond->solver == Magma_ILU ){
         //magma_ztrisv_l( precond->L, b, x );
         magma_zapplycuilu_l( b, x, precond );
+        //magma_zapplyailu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
         //magma_ztrisv_l_nu( precond->L, b, x );
-        //magma_zapplycuicc_l( b, x, precond );
-        magma_zapplyailu_l( b, x, precond );
+        magma_zapplycuicc_l( b, x, precond );
+        //magma_zapplyailu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else{
@@ -287,18 +289,20 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
                       magma_z_vector *x, magma_z_preconditioner *precond )
 {
     if( precond->solver == Magma_JACOBI ){
-        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        //magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );    // x = b
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){
         //magma_ztrisv_r( precond->U, b, x );
         magma_zapplycuilu_r( b, x, precond );
+        //magma_zapplyailu_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
         //magma_ztrisv_r_nu( precond->U, b, x );
-        //magma_zapplycuicc_r( b, x, precond );
-        magma_zapplyailu_r( b, x, precond );
+        magma_zapplycuicc_r( b, x, precond );
+        //magma_zapplyailu_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else{

@@ -85,7 +85,8 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zmalloc_pinned( &h1, ldh );
 
     // GPU workspace
-    magma_z_vector r, q, q_t, z, z_t;
+    magma_z_vector r, q, q_t, z, z_t, t;
+    magma_z_vinit( &t, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &q, Magma_DEV, dofs*(ldh+1), c_zero );
     magma_z_vinit( &z, Magma_DEV, dofs*(ldh+1), c_zero );
@@ -93,9 +94,6 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     q_t.memory_location = Magma_DEV; 
     q_t.val = NULL; 
     q_t.num_rows = q_t.nnz = dofs;
-    z_t.memory_location = Magma_DEV; 
-    z_t.val = NULL; 
-    z_t.num_rows = z_t.nnz = dofs;
 
     magmaDoubleComplex *dy, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
@@ -140,13 +138,16 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             q_t.val = q(k-1);
             magmablasSetKernelStream(stream[0]);
             // preconditioner
-            magma_z_applyprecond( A, q_t, &z_t, precond_par );
-    printf("here 1 OK!\n");
-            magma_zcopy(dofs, z_t.val, 1, z(k-1), 1);                  
             //  z[k] = M^(-1) q(k)
+            magma_z_applyprecond_left( A, q_t, &t, precond_par );      
+            magma_z_applyprecond_right( A, t, &z_t, precond_par );     
+  
+            magma_zcopy(dofs, z_t.val, 1, z(k-1), 1);                  
+
+            // r = A q[k] 
             magma_z_spmv( c_one, A, z_t, c_zero, r );
-    printf("here 2 OK!\n");
-                 // r = A q[k] 
+
+
             if (solver_par->ortho == Magma_MGS ) {
                 // modified Gram-Schmidt
                 magmablasSetKernelStream(stream[0]);
@@ -288,11 +289,28 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     if( solver_par->numiter < solver_par->maxiter){
         solver_par->info = 0;
-    }else if( solver_par->init_res > solver_par->final_res )
+    }else if( solver_par->init_res > solver_par->final_res ){
+        if( solver_par->verbose > 0 ){
+            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) betanom;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
         solver_par->info = -2;
-    else
+    }
+    else{
+        if( solver_par->verbose > 0 ){
+            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) betanom;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
         solver_par->info = -1;
-
+    }
     // free pinned memory
     magma_free_pinned( H );
     magma_free_pinned( y );
@@ -301,6 +319,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // free GPU memory
     magma_free(dy); 
     if (dH != NULL ) magma_free(dH); 
+    magma_z_vfree(&t);
     magma_z_vfree(&r);
     magma_z_vfree(&q);
     magma_z_vfree(&z);
