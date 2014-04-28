@@ -15,7 +15,7 @@ LIB += -lcusparse
 # ----------
 # utility functions
 ZSRC += \
-	testing_z_mv.cpp	\
+#	testing_z_mv.cpp	\
 #	testing_zdot.cpp	\
 #	testing_z_multimv.cpp	\
 #	testing_z_matrix_io.cpp	\

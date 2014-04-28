@@ -18,9 +18,10 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
-#include "magma_lapack.h"
 #include "../include/magmasparse.h"
+#include "magma_lapack.h"
 #include "testings.h"
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- running magma_zlobpcg
