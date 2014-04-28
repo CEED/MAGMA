@@ -32,7 +32,7 @@ ZSRC += \
 # ----------
 # run utility functions
 ZSRC += \
-	run_zspmv.cpp	\
+#	run_zspmv.cpp	\
 
 # ----------
 # test Krylov space linear solvers
