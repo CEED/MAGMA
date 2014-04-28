@@ -22,26 +22,8 @@
 #include "../include/magmasparse.h"
 #include "testings.h"
 
-extern "C" magma_int_t
-magma_zlobpcg( magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
-               magmaDoubleComplex *blockX, double *evalues,
-               magmaDoubleComplex *dwork, magma_int_t ldwork,
-               magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_z_solver_par *solver_par, magma_int_t *info );
-
-extern "C" magma_int_t
-magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
-               magmaDoubleComplex *blockX, double *evalues,
-               magmaDoubleComplex *dwork, magma_int_t ldwork,
-               magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_z_solver_par *solver_par, magma_int_t *info );
-
-extern "C" magma_int_t
-magma_zlobpcg3( magma_z_sparse_matrix A,
-               magma_z_solver_par *solver_par );
-
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing magma_zlobpcg
+   -- running magma_zlobpcg
 */
 int main( int argc, char** argv)
 {
@@ -128,9 +110,7 @@ int main( int argc, char** argv)
 
         // copy matrix to GPU                                                     
         magma_z_mtransfer( A2, &dA, Magma_CPU, Magma_DEV);
-for(int ev=1; ev<3; ev+=16){
 
-solver_par.num_eigenvalues = ev;
         magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
                            // as the matrix size has influence on the EV-length
 
@@ -140,7 +120,7 @@ solver_par.num_eigenvalues = ev;
 
         // Find the blockSize smallest eigenvalues and corresponding eigen-vectors
         gpu_time = magma_wtime();
-        magma_zlobpcg3( dA, &solver_par );
+        magma_zlobpcg( dA, &solver_par );
         gpu_time = magma_wtime() - gpu_time;
 
         printf("Time (sec) = %7.2f\n", gpu_time);
@@ -149,8 +129,6 @@ solver_par.num_eigenvalues = ev;
 
 
         magma_zsolverinfo_free( &solver_par, &precond_par );
-
-}
 
         magma_z_mfree(     &dA    );
         magma_z_mfree(     &A2    );

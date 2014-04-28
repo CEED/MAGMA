@@ -372,7 +372,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
 */
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- MAGMA_SPARSE function definitions / Data on GPU
+   -- MAGMA_SPARSE solvers (Data on GPU)
 */
 
 magma_int_t 
@@ -480,7 +480,17 @@ magma_zlobpcg_maxpy(    magma_int_t num_rows,
                         magmaDoubleComplex *Y);
 
 /*/////////////////////////////////////////////////////////////////////////////
-    -- MAGMA_SPARSE preconditioners
+    -- MAGMA_SPARSE eigensolvers (Data on GPU)
+*/
+magma_int_t
+magma_zlobpcg(          magma_z_sparse_matrix A,
+                        magma_z_solver_par *solver_par );
+
+
+
+
+/*/////////////////////////////////////////////////////////////////////////////
+    -- MAGMA_SPARSE preconditioners (Data on GPU)
 */
 
 magma_int_t
