@@ -33,7 +33,6 @@ ZSRC += \
 	zpcg.cpp		\
 	zpbicgstab.cpp		\
 	zpgmres.cpp		\
-#	ziterref.cpp		\
 #	zcg_merge.cpp		\
 #	zgmres.cpp		\
 #	zpbicgstab.cpp		\
@@ -44,9 +43,7 @@ ZSRC += \
 
 # Krylov space eigen-solvers
 ZSRC += \
-	zlobpcg3.cpp		\
-#	zlobpcg.cpp		\
-#	zlobpcg2.cpp            \
+	zlobpcg.cpp		\
 	#zcgeig.cpp		\
 	#zlancsoz.cpp		\
 
