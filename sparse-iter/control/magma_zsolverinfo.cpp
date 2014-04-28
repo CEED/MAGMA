@@ -110,8 +110,17 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
                     "======#\n");
-            printf("#   BiCGStab performance analysis every %d iteration\n",
-                                                                             k);
+            if( solver_par->solver == Magma_BICGSTAB )
+                printf("#   BiCGStab performance analysis every %d iteration\n", 
+                                                                            k);
+            else if( solver_par->solver == Magma_PBICGSTAB ){
+                if( precond_par->solver == Magma_JACOBI )
+                        printf("#   Jacobi-BiCGStab performance analysis"
+                                " every %d iteration\n", k);
+                if( precond_par->solver == Magma_ILU )
+                        printf("#   ILU-BiCGStab performance analysis"
+                                " every %d iteration\n", k);
+            }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
@@ -177,13 +186,23 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
                 "======#\n");
-    }else if( solver_par->solver == Magma_GMRES ){
+    }else if( solver_par->solver == Magma_GMRES || 
+                        solver_par->solver == Magma_PGMRES ){
         if( solver_par->verbose > 0 ){
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
                     "======#\n");
-            printf("# GMRES-(%d) performance analysis"
-                   " every %d iteration\n",solver_par->restart, k);
+            if( solver_par->solver == Magma_GMRES )
+                printf("#   GMRES-(%d) performance analysis\n", 
+                                                    solver_par->restart);
+            else if( solver_par->solver == Magma_PGMRES ){
+                if( precond_par->solver == Magma_JACOBI )
+                        printf("#   Jacobi-GMRES-(%d) performance analysis\n",
+                                                solver_par->restart);
+                if( precond_par->solver == Magma_ILU )
+                        printf("#   ILU-GMRES-(%d) performance analysis\n",
+                                                solver_par->restart);
+            }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
