@@ -58,7 +58,7 @@ my @files2delete = qw(
     multi-gpu-dynamic-deprecated
     quark
     
-    sparse-iter/blas/zmergeidr.cu
+    sparse-iter/blas/zailu_chow_csr_c.cu
     sparse-iter/blas/zbcsrblockinfo.cu
     sparse-iter/blas/magma_z_mpksetup.cu
     sparse-iter/control/magma_z_mpksetup.cpp
