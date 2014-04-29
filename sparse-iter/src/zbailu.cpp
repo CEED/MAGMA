@@ -322,7 +322,10 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsrsv_analysis(cusparseHandle, 
         CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrL, 
-        precond->M.val, precond->M.row, precond->M.col, precond->cuinfoL );
+        precond->M.val, 
+        (const int *) precond->M.row, 
+        (const int *) precond->M.col, 
+        precond->cuinfoL );
      if(cusparseStatus != 0)    printf("error in analysis L.\n");
 
     cusparseDestroyMatDescr( descrL );
@@ -354,7 +357,10 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsrsv_analysis(cusparseHandle, 
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrU, 
-        precond->M.val, precond->M.row, precond->M.col, precond->cuinfoU );
+        precond->M.val, 
+        (const int *) precond->M.row, 
+        (const int *) precond->M.col, 
+        precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis U.\n");
 
     cusparseDestroyMatDescr( descrU );

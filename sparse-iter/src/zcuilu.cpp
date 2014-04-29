@@ -89,7 +89,8 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
             cusparseZcsrsv_analysis( cusparseHandle, 
                         CUSPARSE_OPERATION_NON_TRANSPOSE, 
                         precond->M.num_rows, precond->M.nnz, descrA,
-                        precond->M.val, precond->M.row, precond->M.col, 
+                        precond->M.val, (const int *) precond->M.row, 
+                                        (const int *) precond->M.col, 
                         precond->cuinfo); 
              if(cusparseStatus != 0)    printf("error in analysis.\n");
 
@@ -97,8 +98,8 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
             cusparseZcsrilu0( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                               precond->M.num_rows, descrA, 
                               precond->M.val, 
-                              precond->M.row, 
-                              precond->M.col, 
+                              (const int *) precond->M.row, 
+                              (const int *) precond->M.col, 
                               precond->cuinfo);
              if(cusparseStatus != 0)    printf("error in ILU.\n");
 
@@ -145,7 +146,10 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsrsv_analysis(cusparseHandle, 
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->L.num_rows, 
         precond->L.nnz, descrL, 
-        precond->L.val, precond->L.row, precond->L.col, precond->cuinfoL );
+        precond->L.val, 
+        (const int *) precond->L.row, 
+        (const int *) precond->L.col, 
+        precond->cuinfoL );
      if(cusparseStatus != 0)    printf("error in analysis.\n");
 
     cusparseDestroyMatDescr( descrL );
@@ -177,7 +181,10 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsrsv_analysis(cusparseHandle, 
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->U.num_rows, 
         precond->U.nnz, descrU, 
-        precond->U.val, precond->U.row, precond->U.col, precond->cuinfoU );
+        precond->U.val, 
+        (const int *) precond->U.row, 
+        (const int *) precond->U.col, 
+        precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis.\n");
 
     magma_z_mfree(&hA);
@@ -262,8 +269,8 @@ magma_zapplycuilu_l( magma_z_vector b, magma_z_vector *x,
                                     precond->L.num_rows, &one, 
                                     descrL,
                                     precond->L.val,
-                                    precond->L.row,
-                                    precond->L.col,
+                                    (const int *) precond->L.row,
+                                    (const int *) precond->L.col,
                                     precond->cuinfoL,
                                     b.val,
                                     x->val );
@@ -338,8 +345,8 @@ magma_zapplycuilu_r( magma_z_vector b, magma_z_vector *x,
                                     precond->U.num_rows, &one, 
                                     descrU,
                                     precond->U.val,
-                                    precond->U.row,
-                                    precond->U.col,
+                                    (const int *) precond->U.row,
+                                    (const int *) precond->U.col,
                                     precond->cuinfoU,
                                     b.val,
                                     x->val );
@@ -430,8 +437,8 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsric0( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                       precond->L.num_rows, descrA, 
                       precond->L.val, 
-                      precond->L.row, 
-                      precond->L.col, 
+                      (const int *) precond->L.row, 
+                      (const int *) precond->L.col, 
                       precond->cuinfo);
      if(cusparseStatus != 0)    printf("error in ICC.\n");
 
@@ -498,7 +505,10 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseZcsrsv_analysis(cusparseHandle, 
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrU, 
-        precond->M.val, precond->M.row, precond->M.col, precond->cuinfoU );
+        precond->M.val, 
+        (const int *) precond->M.row, 
+        (const int *) precond->M.col, 
+        precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis U.\n");
 
     cusparseDestroyMatDescr( descrL );
@@ -578,8 +588,8 @@ magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x,
                                     precond->M.num_rows, &one, 
                                     descrL,
                                     precond->M.val,
-                                    precond->M.row,
-                                    precond->M.col,
+                                    (const int *) precond->M.row,
+                                    (const int *) precond->M.col,
                                     precond->cuinfoL,
                                     b.val,
                                     x->val );
@@ -657,8 +667,8 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
                                     precond->M.num_rows, &one, 
                                     descrU,
                                     precond->M.val,
-                                    precond->M.row,
-                                    precond->M.col,
+                                    (const int *) precond->M.row,
+                                    (const int *) precond->M.col,
                                     precond->cuinfoU,
                                     b.val,
                                     x->val );
