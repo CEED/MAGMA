@@ -123,8 +123,8 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N ,
 
 __global__ void 
 magma_zlag2c_CSR_DENSE_kernel( int num_rows, int num_cols, 
-                               magmaDoubleComplex *Aval, magma_int_t *Arow, 
-                               magma_int_t *Acol, magmaFloatComplex *Bval ){
+                               magmaDoubleComplex *Aval, magma_index_t *Arow, 
+                               magma_index_t *Acol, magmaFloatComplex *Bval ){
 
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
@@ -154,8 +154,8 @@ magma_zlag2c_CSR_DENSE_kernel_1( int num_rows, int num_cols,
 
 __global__ void 
 magma_zlag2c_CSR_DENSE_kernel_2( int num_rows, int num_cols, 
-                               magmaDoubleComplex *Aval, magma_int_t *Arow, 
-                               magma_int_t *Acol, magmaFloatComplex *Bval ){
+                               magmaDoubleComplex *Aval, magma_index_t *Arow, 
+                               magma_index_t *Acol, magmaFloatComplex *Bval ){
 
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
