@@ -30,11 +30,9 @@
 #define A(i,j) A.val+((blockinfo(i,j)-1)*size_b*size_b)
 #define x(i) x->val+(i*size_b)
 
- #define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -87,6 +85,7 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
         magma_z_mtransfer( A, &B, Magma_DEV, Magma_CPU ); 
         magma_zbcsrlu( B,  b, x, solver_par );
         magma_z_mfree(&B);
+        return MAGMA_SUCCESS;
     }
     else{
 
@@ -181,7 +180,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
 
 
     // GPU stream
-    int num_streams = 16;
+    const int num_streams = 16;
     magma_queue_t stream[num_streams];
     for( i=0; i<num_streams; i++ )
         magma_queue_create( &stream[i] );

@@ -242,7 +242,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
   */        
             #if defined(PRECISION_z) || defined(PRECISION_d)
                 magma_dsetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
-            #else if defined(PRECISION_c) || defined(PRECISION_s)
+            #else
                 magma_ssetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
             #endif
 

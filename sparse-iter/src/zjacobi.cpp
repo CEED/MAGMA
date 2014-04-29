@@ -311,6 +311,7 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
     else if( b.memory_location == Magma_DEV ){
         // fill vector
         magma_zjacobisetup_vector_gpu( b.num_rows, b.val, d.val, c->val );
+        return MAGMA_SUCCESS;
     }
 
 
