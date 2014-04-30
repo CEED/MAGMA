@@ -80,7 +80,9 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
 
   // temporary 2-dimensional arrays valtemp/coltemp 
   // where val[i] is the array with the values of the i-th column of the matrix
-  magma_index_t nnztemp[n_rows];
+  magma_index_t *nnztemp;
+  magma_indexmalloc_cpu( &nnztemp, n_rows );
+  
   for( magma_int_t i=0; i<n_rows; i++ )
     nnztemp[i]=0;
   for( magma_int_t i=0; i<nnz; i++ )
@@ -132,6 +134,8 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
     fflush(stdout);
 */
 
+    magma_free_cpu( nnztemp );
+    
     return MAGMA_SUCCESS;
 }
 
