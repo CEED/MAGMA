@@ -189,7 +189,7 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
     exit(1);
   }
   
-  magma_int_t num_rows, num_cols, num_nonzeros;
+  magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
     exit(1);
   
@@ -765,7 +765,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     exit(1);
   }
   
-  magma_int_t num_rows, num_cols, num_nonzeros;
+  magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
     exit(1);
   
@@ -1061,7 +1061,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
     exit(1);
   }
   
-  magma_int_t num_rows, num_cols, num_nonzeros;
+  magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
     exit(1);
   
