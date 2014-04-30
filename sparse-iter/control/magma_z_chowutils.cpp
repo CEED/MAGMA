@@ -223,7 +223,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
         }
     }
 
-    magma_z_mfree( &LU );
+    magma_z_mfree( LU );
 
     (*res) =  sqrt((*res));
 
