@@ -73,7 +73,7 @@ magma_z_vinit(    magma_z_vector *x,
              x->val[i] = values; 
         return MAGMA_SUCCESS;  
     }
-    if( memory_location == Magma_DEV ){
+    else if( memory_location == Magma_DEV ){
         x->memory_location = Magma_DEV;
 
         magmaDoubleComplex *tmp;
@@ -93,6 +93,7 @@ magma_z_vinit(    magma_z_vector *x,
 
         return MAGMA_SUCCESS; 
     }
+    return MAGMA_SUCCESS; 
 }
 
 

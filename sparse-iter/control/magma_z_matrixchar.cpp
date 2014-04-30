@@ -54,8 +54,8 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
     if( A->memory_location == Magma_CPU ){
         // CSR  
         if( A->storage_type == Magma_CSR ){
-            magma_int_t i, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, A->num_rows);
+            magma_index_t i, *length, maxrowlength=0;
+            magma_indexmalloc_cpu( &length, A->num_rows);
 
             for( i=0; i<A->num_rows; i++ ){
                 length[i] = A->row[i+1]-A->row[i];
@@ -68,8 +68,9 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
         }
         // Dense
         else if( A->storage_type == Magma_DENSE ){
-            magma_int_t i, j, *length, maxrowlength=0;
-            magma_imalloc_cpu( &length, A->num_rows);
+            magma_int_t i, j, maxrowlength=0;
+            magma_index_t *length;
+            magma_indexmalloc_cpu( &length, A->num_rows);
 
             for( i=0; i<A->num_rows; i++ ){
                 length[i] = 0;
@@ -90,6 +91,7 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
         printf("error: matrix not on CPU.\n");
         return MAGMA_ERR_ALLOCATION;
     }
+    return MAGMA_SUCCESS; 
 }
 
 
@@ -120,7 +122,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
     if( A->memory_location == Magma_CPU ){
         // CSR  
         if( A->storage_type == Magma_CSR ){
-            magma_int_t i, j, tmp,  *dim, maxdim=0;
+            magma_index_t i, j, tmp,  *dim, maxdim=0;
             magma_indexmalloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
@@ -140,7 +142,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         }
         // Dense
         else if( A->storage_type == Magma_DENSE ){
-            magma_int_t i, j, tmp,  *dim, maxdim=0;
+            magma_index_t i, j, tmp,  *dim, maxdim=0;
             magma_indexmalloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
@@ -160,7 +162,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         }
         // ELLPACK
         else if( A->storage_type == Magma_ELLPACK ){
-            magma_int_t i, j, tmp,  *dim, maxdim=0;
+            magma_index_t i, j, tmp,  *dim, maxdim=0;
             magma_indexmalloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
@@ -189,4 +191,5 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         printf("error: matrix not on CPU.\n");
         return MAGMA_ERR_ALLOCATION;
     }
+    return MAGMA_SUCCESS; 
 }

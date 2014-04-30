@@ -53,10 +53,11 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         magma_z_cucsrtranspose( ACSR, &BCSR );
         magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type );
         
+        return MAGMA_SUCCESS;
     }
     else{
 
-        magma_int_t i, j, k, new_nnz=0, lrow, lcol;
+        magma_int_t i, j, new_nnz=0, lrow;
 
         // fill in information for B
         B->storage_type = Magma_CSR;
@@ -95,6 +96,7 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         return MAGMA_SUCCESS;
 
     }
+    return MAGMA_SUCCESS; 
 }
 
 
@@ -131,7 +133,8 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR );
         magma_z_cucsrtranspose( ACSR, &BCSR );
         magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type );
-        
+
+        return MAGMA_SUCCESS;
     }
     else{
 
@@ -185,6 +188,7 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
         return MAGMA_SUCCESS;
     }
+    return MAGMA_SUCCESS;
 }
 
 
@@ -208,14 +212,14 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     magma_int_t n_cols                  number of columns in input matrix
     magma_int_t nnz                     number of nonzeros in input matrix
     magmaDoubleComplex *val              value array of input matrix 
-    magma_int_t *row                     row pointer of input matrix
-    magma_int_t *col                     column indices of input matrix 
-    magma_int_t *new_n_rows              number of rows in transposed matrix
-    magma_int_t *new_n_cols              number of columns in transposed matrix
-    magma_int_t *new_nnz                 number of nonzeros in transposed matrix
+    magma_index_t *row                     row pointer of input matrix
+    magma_index_t *col                     column indices of input matrix 
+    magma_index_t *new_n_rows              number of rows in transposed matrix
+    magma_index_t *new_n_cols              number of columns in transposed matrix
+    magma_index_t *new_nnz                 number of nonzeros in transposed matrix
     magmaDoubleComplex **new_val         value array of transposed matrix 
-    magma_int_t **new_row                row pointer of transposed matrix
-    magma_int_t **new_col                column indices of transposed matrix
+    magma_index_t **new_row                row pointer of transposed matrix
+    magma_index_t **new_col                column indices of transposed matrix
 
     ========================================================================  */
 
@@ -225,9 +229,9 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
                                 magmaDoubleComplex *val, 
                                 magma_index_t *row, 
                                 magma_index_t *col, 
-                                magma_int_t *new_n_rows, 
-                                magma_int_t *new_n_cols, 
-                                magma_int_t *new_nnz, 
+                                magma_index_t *new_n_rows, 
+                                magma_index_t *new_n_cols, 
+                                magma_index_t *new_nnz, 
                                 magmaDoubleComplex **new_val, 
                                 magma_index_t **new_row, 
                                 magma_index_t **new_col ){
@@ -240,9 +244,9 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
   *new_nnz = nnz;
 
   magmaDoubleComplex ** valtemp;
-  magma_int_t ** coltemp;
+  magma_index_t ** coltemp;
   valtemp = (magmaDoubleComplex**)malloc((n_rows)*sizeof(magmaDoubleComplex*));
-  coltemp =(magma_int_t**)malloc((n_rows)*sizeof(magma_int_t*));
+  coltemp =(magma_index_t**)malloc((n_rows)*sizeof(magma_index_t*));
 
   // temporary 2-dimensional arrays valtemp/coltemp 
   // where val[i] is the array with the values of the i-th column of the matrix
@@ -255,7 +259,7 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
   for( magma_int_t i=0; i<n_rows; i++ ){
     valtemp[i] = 
         (magmaDoubleComplex*)malloc((nnztemp[i])*sizeof(magmaDoubleComplex));
-    coltemp[i] = (magma_int_t*)malloc(nnztemp[i]*sizeof(magma_int_t));
+    coltemp[i] = (magma_index_t*)malloc(nnztemp[i]*sizeof(magma_index_t));
   }
 
   for( magma_int_t i=0; i<n_rows; i++ )
@@ -271,8 +275,8 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
 
   //csr structure for transposed matrix
   *new_val = new magmaDoubleComplex[nnz];
-  *new_row = new magma_int_t[n_rows+1];
-  *new_col = new magma_int_t[nnz];
+  *new_row = new magma_index_t[n_rows+1];
+  *new_col = new magma_index_t[nnz];
 
   //fill the transposed csr structure
   magma_int_t nnztmp=0;
@@ -285,6 +289,7 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
     }
     (*new_row)[j+1]=nnztmp;
   }
+
 //usually the temporary memory should be freed afterwards
 //however, it does not work
 /*
@@ -296,6 +301,8 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
       printf("check9\n");
     fflush(stdout);
 */
+
+    return MAGMA_SUCCESS;
 }
 
 magma_int_t 
@@ -304,7 +311,8 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_CSR ){
             z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, 
-  &(B->num_rows), &(B->num_cols), &(B->nnz), &(B->val), &(B->row), &(B->col) );
+                                &(B->num_rows), &(B->num_cols), &(B->nnz), 
+                                &(B->val), &(B->row), &(B->col) );
             B->memory_location = Magma_CPU;
             B->storage_type = Magma_CSR;
         }
@@ -315,7 +323,9 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
             magma_z_mconvert( D, B, Magma_CSR, A.storage_type );
             magma_z_mfree(&C);
             magma_z_mfree(&D);
+
         }
+        return MAGMA_SUCCESS;   
     }
     else{
         magma_z_sparse_matrix C, D;
@@ -324,6 +334,7 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         magma_z_mtransfer( D, B, Magma_CPU, A.memory_location );
         magma_z_mfree(&C);
         magma_z_mfree(&D);
+        return MAGMA_SUCCESS;
     }
 
 }

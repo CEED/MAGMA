@@ -146,7 +146,6 @@ magma_zcsrsplit(    magma_int_t bsize,
             }
         }
         return MAGMA_SUCCESS; 
-
     }
     else{
         magma_z_sparse_matrix Ah, ACSR, DCSR, RCSR, Dh, Rh;
@@ -167,6 +166,8 @@ magma_zcsrsplit(    magma_int_t bsize,
         magma_z_mfree( &DCSR );
         magma_z_mfree( &Rh );
         magma_z_mfree( &RCSR );
+
+        return MAGMA_SUCCESS; 
     }
 }
 

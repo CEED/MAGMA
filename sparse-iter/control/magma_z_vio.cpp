@@ -56,7 +56,7 @@ magma_z_vvisu(      magma_z_vector x,
                     magma_int_t displaylength ){
 
     printf("visualize entries %d - %d of vector ", 
-                    offset, offset+displaylength, x);
+                    offset, offset+displaylength );
     fflush(stdout);  
     if( x.memory_location == Magma_CPU ){
         printf("located on CPU:\n");
@@ -64,8 +64,7 @@ magma_z_vvisu(      magma_z_vector x,
             printf("%f\n", MAGMA_Z_REAL(x.val[i]));
     return MAGMA_SUCCESS;
     }
-
-    if( x.memory_location == Magma_DEV ){
+    else if( x.memory_location == Magma_DEV ){
         printf("located on DEV:\n");
         magma_z_vector y;
         magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU);
@@ -74,7 +73,7 @@ magma_z_vvisu(      magma_z_vector x,
     free(y.val);
     return MAGMA_SUCCESS;
     }
-
+    return MAGMA_SUCCESS; 
 }   
 
 

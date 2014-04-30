@@ -195,9 +195,9 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   
   (*type) = Magma_CSR;
   (*location) = Magma_CPU;
-  (*n_row) = (magma_int_t) num_rows;
-  (*n_col) = (magma_int_t) num_cols;
-  (*nnz)   = (magma_int_t) num_nonzeros;
+  (*n_row) = (magma_index_t) num_rows;
+  (*n_col) = (magma_index_t) num_cols;
+  (*nnz)   = (magma_index_t) num_nonzeros;
 
   magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
@@ -218,13 +218,13 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
 
   if (mm_is_real(matcode) || mm_is_integer(matcode)){
     for(magma_int_t i = 0; i < *nnz; ++i){
-      magma_int_t ROW ,COL;
+      magma_index_t ROW ,COL;
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
       
-      coo_row[i] = (magma_int_t) ROW - 1; 
-      coo_col[i] = (magma_int_t) COL - 1;
+      coo_row[i] = (magma_index_t) ROW - 1; 
+      coo_col[i] = (magma_index_t) COL - 1;
       coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
     }
   } else {
@@ -239,27 +239,27 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
 
   if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
   printf("detected symmetric case\n");
-    magma_int_t off_diagonals = 0;
+    magma_index_t off_diagonals = 0;
     for(magma_int_t i = 0; i < *nnz; ++i){
       if(coo_row[i] != coo_col[i])
         ++off_diagonals;
     }
     
-    magma_int_t true_nonzeros = 2*off_diagonals + (*nnz - off_diagonals);
+    magma_index_t true_nonzeros = 2*off_diagonals + (*nnz - off_diagonals);
     
     
     printf("total number of nonzeros: %d\n",*nnz);
 
     
     
-    magma_int_t* new_row = 
+    magma_index_t* new_row = 
         (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
-    magma_int_t* new_col = 
+    magma_index_t* new_col = 
         (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
     magmaDoubleComplex* new_val = 
       (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ; 
     
-    magma_int_t ptr = 0;
+    magma_index_t ptr = 0;
     for(magma_int_t i = 0; i < *nnz; ++i) {
         if(coo_row[i] != coo_col[i]) {
         new_row[ptr] = coo_row[i];  
@@ -293,7 +293,7 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   } //end symmetric case
   
   magmaDoubleComplex tv;
-  magma_int_t ti;
+  magma_index_t ti;
   
   
   //If matrix is not in standard format, sorting is necessary
@@ -358,16 +358,16 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   // original code from  Nathan Bell and Michael Garland
   // the output CSR structure is NOT sorted!
 
-  for (magma_int_t i = 0; i < num_rows; i++)
+  for (magma_index_t i = 0; i < num_rows; i++)
     (*row)[i] = 0;
   
-  for (magma_int_t i = 0; i < *nnz; i++)
+  for (magma_index_t i = 0; i < *nnz; i++)
     (*row)[coo_row[i]]++;
   
   
   //cumsum the nnz per row to get Bp[]
   for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
-    magma_int_t temp = (*row)[i];
+    magma_index_t temp = (*row)[i];
     (*row)[i] = cumsum;
     cumsum += temp;
   }
@@ -375,8 +375,8 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   
   //write Aj,Ax into Bj,Bx
   for(magma_int_t i = 0; i < *nnz; i++){
-    magma_int_t row_  = coo_row[i];
-    magma_int_t dest = (*row)[row_];
+    magma_index_t row_  = coo_row[i];
+    magma_index_t dest = (*row)[row_];
     
     (*col)[dest] = coo_col[i];
     
@@ -394,9 +394,9 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   (*row)[*n_row]=*nnz;
      
 
-  for (magma_int_t k=0; k<*n_row; ++k)
-    for (magma_int_t i=(*row)[k]; i<(*row)[k+1]-1; ++i) 
-      for (magma_int_t j=(*row)[k]; j<(*row)[k+1]-1; ++j) 
+  for (magma_index_t k=0; k<*n_row; ++k)
+    for (magma_index_t i=(*row)[k]; i<(*row)[k+1]-1; ++i) 
+      for (magma_index_t j=(*row)[k]; j<(*row)[k+1]-1; ++j) 
 
       if ( (*col)[j] > (*col)[j+1] ){
 
@@ -421,6 +421,7 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
 
     write_z_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col, 
                      MagmaColMajor, filename );
+    return MAGMA_SUCCESS; 
 }
 
 
@@ -445,7 +446,7 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
     magmaDoubleComplex **val             value array of CSR  
     magma_index_t **row                  row pointer of CSR 
     magma_index_t **col                  column indices of CSR 
-    magma_int_t MajorType                Row or Column sort
+    magma_index_t MajorType                Row or Column sort
                                          default: 0 = RowMajor, 1 = ColMajor
     const char * filename                output filename for the matrix
 
@@ -482,12 +483,12 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     file<< "%%MatrixMarket matrix coordinate real general ColMajor" <<std::endl;
     file << new_n_row <<" "<< new_n_col <<" "<< new_nnz << std::endl;
    
-    magma_int_t i=0, j=0, rowindex=1;
+    magma_index_t i=0, j=0, rowindex=1;
 
     for(i=0; i<n_col; i++)
     {    
-      magma_int_t rowtemp1=(new_row)[i];
-      magma_int_t rowtemp2=(new_row)[i+1];
+      magma_index_t rowtemp1=(new_row)[i];
+      magma_index_t rowtemp2=(new_row)[i+1];
       for(j=0; j<rowtemp2-rowtemp1; j++)  
         file << ((new_col)[rowtemp1+j]+1) <<" "<< rowindex <<" "<< 
                         MAGMA_Z_REAL((new_val)[rowtemp1+j]) << std::endl;
@@ -504,12 +505,12 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     file<< "%%MatrixMarket matrix coordinate real general RowMajor" <<std::endl;
     file << n_row <<" "<< n_col <<" "<< nnz << std::endl;
    
-    magma_int_t i=0, j=0, rowindex=1;
+    magma_index_t i=0, j=0, rowindex=1;
 
     for(i=0; i<n_col; i++)
     {
-      magma_int_t rowtemp1=(*row)[i];
-      magma_int_t rowtemp2=(*row)[i+1];
+      magma_index_t rowtemp1=(*row)[i];
+      magma_index_t rowtemp2=(*row)[i+1];
       for(j=0; j<rowtemp2-rowtemp1; j++)  
         file << rowindex <<" "<< ((*col)[rowtemp1+j]+1) <<" "<< 
                         MAGMA_Z_REAL((*val)[rowtemp1+j]) << std::endl;
@@ -542,7 +543,7 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     magmaDoubleComplex **val             value array of CSR  
     magma_index_t **row                    row pointer of CSR 
     magma_index_t **col                    column indices of CSR
-    magma_int_t MajorType                Row or Column sort
+    magma_index_t MajorType                Row or Column sort
                                          default: 0 = RowMajor, 1 = ColMajor
 
     ========================================================================  */
@@ -572,12 +573,12 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
     cout<< "%%MatrixMarket matrix coordinate real general ColMajor" <<std::endl;
     cout << new_n_row <<" "<< new_n_col <<" "<< new_nnz << std::endl;
    
-    magma_int_t i=0, j=0, rowindex=1;
+    magma_index_t i=0, j=0, rowindex=1;
 
     for(i=0; i<n_col; i++)
     {    
-      magma_int_t rowtemp1=(new_row)[i];
-      magma_int_t rowtemp2=(new_row)[i+1];
+      magma_index_t rowtemp1=(new_row)[i];
+      magma_index_t rowtemp2=(new_row)[i+1];
       for(j=0; j<rowtemp2-rowtemp1; j++)  
         cout << ((new_col)[rowtemp1+j]+1) <<" "<< rowindex <<" "<< 
                         MAGMA_Z_REAL((new_val)[rowtemp1+j]) << std::endl;
@@ -588,12 +589,12 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
     cout<< "%%MatrixMarket matrix coordinate real general RowMajor" <<std::endl;
     cout << n_row <<" "<< n_col <<" "<< nnz << std::endl;
    
-    magma_int_t i=0, j=0, rowindex=1;
+    magma_index_t i=0, j=0, rowindex=1;
 
     for(i=0; i<n_col; i++)
     {
-      magma_int_t rowtemp1=(*row)[i];
-      magma_int_t rowtemp2=(*row)[i+1];
+      magma_index_t rowtemp1=(*row)[i];
+      magma_index_t rowtemp2=(*row)[i+1];
       for(j=0; j<rowtemp2-rowtemp1; j++)  
         cout<< rowindex <<" "<< (*col)[rowtemp1+j]+1 <<" "<< 
                         MAGMA_Z_REAL((*val)[rowtemp1+j]) <<endl;
@@ -638,12 +639,12 @@ magma_int_t print_z_csr(    magma_int_t n_row,
   cout << "Matrix in CSR format (row col val)" << endl;
   cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
    
-  magma_int_t i=0,j=0;
+  magma_index_t i=0,j=0;
 
   for(i=0; i<n_col; i++)
   {
-    magma_int_t rowtemp1=(*row)[i];
-    magma_int_t rowtemp2=(*row)[i+1];
+    magma_index_t rowtemp1=(*row)[i];
+    magma_index_t rowtemp2=(*row)[i+1];
     for(j=0; j<rowtemp2-rowtemp1; j++)  
       cout<< (rowtemp1+1) <<" "<< (*col)[rowtemp1+j]+1 <<" "<< 
             MAGMA_Z_REAL((*val)[rowtemp1+j]) <<endl;
@@ -675,8 +676,8 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
 {
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_DENSE ){
-            for( magma_int_t i=0; i<(A.num_rows); i++ ){
-              for( magma_int_t j=0; j<A.num_cols; j++ )
+            for( magma_index_t i=0; i<(A.num_rows); i++ ){
+              for( magma_index_t j=0; j<A.num_cols; j++ )
                 printf("%4.2f ", MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) );
                 //cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
               cout << endl;
@@ -770,9 +771,9 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   
   (A->storage_type) = Magma_CSR;
   (A->memory_location) = Magma_CPU;
-  (A->num_rows) = (magma_int_t) num_rows;
-  (A->num_cols) = (magma_int_t) num_cols;
-  (A->nnz)   = (magma_int_t) num_nonzeros;
+  (A->num_rows) = (magma_index_t) num_rows;
+  (A->num_cols) = (magma_index_t) num_cols;
+  (A->nnz)   = (magma_index_t) num_nonzeros;
 
   magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
@@ -793,14 +794,14 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
   if (mm_is_real(matcode) || mm_is_integer(matcode)){
     for(magma_int_t i = 0; i < A->nnz; ++i){
-      magma_int_t ROW ,COL;
+      magma_index_t ROW ,COL;
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
       if( VAL == 0 ) 
         csr_compressor=1;
-      coo_row[i] = (magma_int_t) ROW - 1; 
-      coo_col[i] = (magma_int_t) COL - 1;
+      coo_row[i] = (magma_index_t) ROW - 1; 
+      coo_col[i] = (magma_index_t) COL - 1;
       coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
     }
   } else {
@@ -817,21 +818,21 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
     A->sym = Magma_SYMMETRIC;
   //printf("detected symmetric case\n");
-    magma_int_t off_diagonals = 0;
+    magma_index_t off_diagonals = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i){
       if(coo_row[i] != coo_col[i])
         ++off_diagonals;
     }
-    magma_int_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
+    magma_index_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
       
     magmaDoubleComplex *new_val;
-    magma_int_t* new_row;
-    magma_int_t* new_col;
+    magma_index_t* new_row;
+    magma_index_t* new_col;
     magma_zmalloc_cpu( &new_val, true_nonzeros );
     magma_indexmalloc_cpu( &new_row, true_nonzeros );
     magma_indexmalloc_cpu( &new_col, true_nonzeros );
 
-    magma_int_t ptr = 0;
+    magma_index_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
         if(coo_row[i] != coo_col[i]) {
         new_row[ptr] = coo_row[i];  
@@ -864,7 +865,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   } //end symmetric case
   
   magmaDoubleComplex tv;
-  magma_int_t ti;
+  magma_index_t ti;
   
   
   //If matrix is not in standard format, sorting is necessary
@@ -929,16 +930,16 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   // original code from  Nathan Bell and Michael Garland
   // the output CSR structure is NOT sorted!
 
-  for (magma_int_t i = 0; i < num_rows; i++)
+  for (magma_index_t i = 0; i < num_rows; i++)
     (A->row)[i] = 0;
   
-  for (magma_int_t i = 0; i < A->nnz; i++)
+  for (magma_index_t i = 0; i < A->nnz; i++)
     (A->row)[coo_row[i]]++;
   
   
   //cumsum the nnz per row to get Bp[]
   for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
-    magma_int_t temp = (A->row)[i];
+    magma_index_t temp = (A->row)[i];
     (A->row)[i] = cumsum;
     cumsum += temp;
   }
@@ -946,8 +947,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   
   //write Aj,Ax into Bj,Bx
   for(magma_int_t i = 0; i < A->nnz; i++){
-    magma_int_t row_  = coo_row[i];
-    magma_int_t dest = (A->row)[row_];
+    magma_index_t row_  = coo_row[i];
+    magma_index_t dest = (A->row)[row_];
     
     (A->col)[dest] = coo_col[i];
     
@@ -968,9 +969,9 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   (A->row)[A->num_rows]=A->nnz;
      
 
-  for (magma_int_t k=0; k<A->num_rows; ++k)
-    for (magma_int_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
-      for (magma_int_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
+  for (magma_index_t k=0; k<A->num_rows; ++k)
+    for (magma_index_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
+      for (magma_index_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
 
       if ( (A->col)[j] > (A->col)[j+1] ){
 
@@ -1066,9 +1067,9 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   
   (A->storage_type) = Magma_CSR;
   (A->memory_location) = Magma_CPU;
-  (A->num_rows) = (magma_int_t) num_rows;
-  (A->num_cols) = (magma_int_t) num_cols;
-  (A->nnz)   = (magma_int_t) num_nonzeros;
+  (A->num_rows) = (magma_index_t) num_rows;
+  (A->num_cols) = (magma_index_t) num_cols;
+  (A->nnz)   = (magma_index_t) num_nonzeros;
 
   magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
@@ -1089,14 +1090,14 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
 
   if (mm_is_real(matcode) || mm_is_integer(matcode)){
     for(magma_int_t i = 0; i < A->nnz; ++i){
-      magma_int_t ROW ,COL;
+      magma_index_t ROW ,COL;
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
       if( VAL == 0 ) 
         csr_compressor=1;
-      coo_row[i] = (magma_int_t) ROW - 1; 
-      coo_col[i] = (magma_int_t) COL - 1;
+      coo_row[i] = (magma_index_t) ROW - 1; 
+      coo_col[i] = (magma_index_t) COL - 1;
       coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
     }
   } else {
@@ -1115,7 +1116,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   } //end symmetric case
   
   magmaDoubleComplex tv;
-  magma_int_t ti;
+  magma_index_t ti;
   
   
   //If matrix is not in standard format, sorting is necessary
@@ -1180,16 +1181,16 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   // original code from  Nathan Bell and Michael Garland
   // the output CSR structure is NOT sorted!
 
-  for (magma_int_t i = 0; i < num_rows; i++)
+  for (magma_index_t i = 0; i < num_rows; i++)
     (A->row)[i] = 0;
   
-  for (magma_int_t i = 0; i < A->nnz; i++)
+  for (magma_index_t i = 0; i < A->nnz; i++)
     (A->row)[coo_row[i]]++;
   
   
   //cumsum the nnz per row to get Bp[]
   for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
-    magma_int_t temp = (A->row)[i];
+    magma_index_t temp = (A->row)[i];
     (A->row)[i] = cumsum;
     cumsum += temp;
   }
@@ -1197,8 +1198,8 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   
   //write Aj,Ax into Bj,Bx
   for(magma_int_t i = 0; i < A->nnz; i++){
-    magma_int_t row_  = coo_row[i];
-    magma_int_t dest = (A->row)[row_];
+    magma_index_t row_  = coo_row[i];
+    magma_index_t dest = (A->row)[row_];
     
     (A->col)[dest] = coo_col[i];
     
@@ -1219,9 +1220,9 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   (A->row)[A->num_rows]=A->nnz;
      
 
-  for (magma_int_t k=0; k<A->num_rows; ++k)
-    for (magma_int_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
-      for (magma_int_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
+  for (magma_index_t k=0; k<A->num_rows; ++k)
+    for (magma_index_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
+      for (magma_index_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
 
       if ( (A->col)[j] > (A->col)[j+1] ){
 

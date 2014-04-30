@@ -59,14 +59,8 @@ magma_int_t
 magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
                   real_Double_t *res ){
 
-   // #ifdef PRECISION_d || #ifdef PRECISION_s 
-
-    magmaDoubleComplex tmp;
     real_Double_t tmp2;
-    magma_int_t i,j,k,l,m,n;
-    magma_int_t offset = B.num_rows * B.max_nnz_row;
-
-    magma_int_t bound;
+    magma_int_t i,j;
     
     for(i=0; i<A.num_rows; i++){
         for(j=A.row[i]; j<A.row[i+1]; j++){
@@ -75,17 +69,12 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
                                             - MAGMA_Z_REAL(B.val[j]) );
 
             (*res) = (*res) + tmp2* tmp2;
-            //printf("A.val %.2e  B.val %.2e\n", A.val[j], B.val[j]);
-
-        }
-        
-
+        }      
     }
 
     (*res) =  sqrt((*res));
 
- //   #endif
-
+    return MAGMA_SUCCESS; 
 }
 
 
@@ -121,9 +110,8 @@ magma_znonlinres(   magma_z_sparse_matrix A,
                     magma_z_sparse_matrix *LU, 
                     real_Double_t *res ){
 
-    magmaDoubleComplex tmp;
     real_Double_t tmp2;
-    magma_int_t i,j,k,l,m,n;
+    magma_int_t i,j,k,m;
 
     magma_z_sparse_matrix L_d, U_d, LU_d;
 
@@ -169,9 +157,9 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     // multiply L and U on the device
 
 
-    magma_int_t baseC, nnzC;
+    magma_int_t baseC;
     // nnzTotalDevHostPtr points to host memory
-    magma_index_t *nnzTotalDevHostPtr = &LU_d.nnz;
+    magma_index_t *nnzTotalDevHostPtr = (magma_index_t*) &LU_d.nnz;
     cusparseSetPointerMode(handle, CUSPARSE_POINTER_MODE_HOST);
     cudaMalloc((void**)&LU_d.row, sizeof(magma_index_t)*(L_d.num_rows+1));
     cusparseXcsrgemmNnz(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
@@ -215,7 +203,6 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     magma_z_mfree( &U_d );
     magma_z_mfree( &LU_d );
 
-    magma_int_t bound;
     // compute Frobenius norm of A-LU
     for(i=0; i<A.num_rows; i++){
         for(j=A.row[i]; j<A.row[i+1]; j++){
@@ -237,5 +224,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     }
 
     (*res) =  sqrt((*res));
+
+    return MAGMA_SUCCESS; 
 }
 

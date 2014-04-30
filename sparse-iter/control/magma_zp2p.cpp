@@ -70,13 +70,14 @@
 magma_int_t
 checkErrors(char *label)
 {
-  cudaThreadSynchronize();
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess)
-  {
-    char *e = (char*) cudaGetErrorString(err);
-    fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
-  }
+    cudaThreadSynchronize();
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+    {
+        char *e = (char*) cudaGetErrorString(err);
+        fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
+    }
+    return MAGMA_SUCCESS; 
 }
 
 
@@ -92,7 +93,7 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
     if (gpu_n < 2)
     {
         printf("Two or more Tesla(s) with (SM 2.0)"
-                        " class GPUs are required for %s.\n");
+                        " class GPUs are required for P2P.\n");
     }
 
     // Query device properties
@@ -137,7 +138,7 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
     if (can_access_peer_0_1 == 0 || can_access_peer_1_0 == 0)
     {
         printf("Two or more Tesla(s) with class"
-                " GPUs are required for %s to run.\n");
+                " GPUs are required for P2P to run.\n");
         printf("Support for UVA requires a Tesla with SM 2.0 capabilities.\n");
         printf("Peer to Peer access is not available between"
         " GPU%d <-> GPU%d, waiving test.\n", gpuid_tesla[i], gpuid_tesla[j]);
@@ -217,13 +218,13 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
 
 
     (cudaEventRecord(start_event, 0));
-    for (int i=0; i<100; i++)
+    for (int k=0; k<100; k++)
     {
         // With UVA we don't need to specify source and target devices, the
         // runtime figures this out by itself from the pointers
             
         // Ping-pong copy between GPUs
-        if (i % 2 == 0)
+        if (k % 2 == 0)
             (cudaMemcpy(g1, g0, buf_size, cudaMemcpyDefault));
         else
             (cudaMemcpy(g0, g1, buf_size, cudaMemcpyDefault));
