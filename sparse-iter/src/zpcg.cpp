@@ -60,7 +60,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_int_t dofs = A.num_rows;
 
     // GPU workspace
-    magma_z_vector r, rt, p, q, h, dinv;
+    magma_z_vector r, rt, p, q, h;
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &rt, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &p, Magma_DEV, dofs, c_zero );
@@ -70,7 +70,6 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // solver variables
     magmaDoubleComplex alpha, beta;
     double nom, nom0, r0, betanom, betanomsq, den;
-    magma_int_t i;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
@@ -81,7 +80,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_applyprecond_right( A, rt, &h, precond_par );
 
     magma_zcopy( dofs, h.val, 1, p.val, 1 );                    // p = h
-    nom =  MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) );          
+    nom =  betanom = MAGMA_Z_REAL( magma_zdotc(dofs, r.val, 1, h.val, 1) );          
     nom0 = magma_dznrm2( dofs, r.val, 1 );                                                 
     magma_z_spmv( c_one, A, p, c_zero, q );                     // q = A p
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.val, 1, q.val, 1) );// den = p dot q

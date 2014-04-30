@@ -105,7 +105,7 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
 
-    magma_z_sparse_matrix hA, dA, hAD, hADD, dAD, dADD, hL, hU;
+    magma_z_sparse_matrix hA, hL, hU;
 
     magma_z_mtransfer( precond->M, &hA, Magma_DEV, Magma_CPU );
 

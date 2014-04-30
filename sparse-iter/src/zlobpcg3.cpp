@@ -88,7 +88,7 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define gramB(    m, n)   (gramB     + (m) + (n)*ldgram)
 #define gevectors(m, n)   (gevectors + (m) + (n)*ldgram) 
 #define h_gramB(  m, n)   (h_gramB   + (m) + (n)*ldgram)
-
+/*
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose2( blockW, n,      X, m, m, n );        \
             magma_z_vector x, ax;                                       \
@@ -96,8 +96,15 @@ magma_zlobpcg3( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax );                           \
             magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
+}*/
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {              \
+        for(int k = 0; k<n; k++) {                                      \
+            magma_z_vector x, ax;                                       \
+            x.memory_location = Magma_DEV;  x.num_rows = m;  x.nnz = m;  x.val =  X+(k)*(m); \
+            ax.memory_location= Magma_DEV; ax.num_rows = m; ax.nnz = m; ax.val = AX+(k)*(m); \
+            magma_z_spmv(alpha, A, x, beta, ax );                       \
+        }                                                               \
 }
-
 
 
 

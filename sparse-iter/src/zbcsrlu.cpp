@@ -66,7 +66,6 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
 
     // prepare solver feedback
     solver_par->solver = Magma_BCSRLU;
-    magma_int_t iterblock = solver_par->verbose;
     real_Double_t t_lu1, t_lu = 0.0;
     real_Double_t t_lusv1, t_lusv = 0.0;
     double residual;
@@ -172,7 +171,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     // some useful variables
     magmaDoubleComplex one = MAGMA_Z_ONE;
     magmaDoubleComplex m_one = MAGMA_Z_NEG_ONE;
-    magma_int_t i,j,k, l, info;
+    magma_int_t i,j,k, info;
 
     cublasHandle_t handle;
     cudaSetDevice( 0 );
@@ -197,7 +196,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
                 // max number of blocks per column
 
     //complete fill-in
-    magma_imalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
+    magma_indexmalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
 
     for( k=0; k<r_blocks; k++){
         for( j=0; j<c_blocks; j++ ){
@@ -224,8 +223,8 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     }
     M->numblocks = num_blocks_tmp;
     magma_zmalloc( &M->val, size_b*size_b*(M->numblocks) );
-    magma_imalloc( &M->row, r_blocks+1 );
-    magma_imalloc( &M->col, M->numblocks );
+    magma_indexmalloc( &M->row, r_blocks+1 );
+    magma_indexmalloc( &M->col, M->numblocks );
 
     // Prepare A 
     magmaDoubleComplex **hA, **dA,  **hB, **dB, **hBL, **dBL, **hC, **dC;
@@ -288,9 +287,9 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
                                                         dA, dB, dC );
 
     num_blocks_tmp=0;
-    magma_int_t *cpu_row, *cpu_col;
-    magma_imalloc_cpu( &cpu_row, r_blocks+1 );
-    magma_imalloc_cpu( &cpu_col, M->numblocks );
+    magma_index_t *cpu_row, *cpu_col;
+    magma_indexmalloc_cpu( &cpu_row, r_blocks+1 );
+    magma_indexmalloc_cpu( &cpu_col, M->numblocks );
 
     num_blocks_tmp=0;
     for( i=0; i<c_blocks * r_blocks; i++ ){
@@ -315,8 +314,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     magma_free_cpu( cpu_row );
     magma_free_cpu( cpu_col );
 
-    magma_int_t ldda, lddb, lddc, ldwork, lwork;
-    magmaDoubleComplex tmp;
+    magma_int_t ldda, lddb, lddc, ldwork;
 
     ldda = size_b;//((size_b+31)/32)*32;
     lddb = size_b;//((size_b+31)/32)*32;

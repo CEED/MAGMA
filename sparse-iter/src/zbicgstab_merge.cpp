@@ -103,7 +103,7 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
 
     rho_new = magma_zdotc( dofs, r.val, 1, r.val, 1 );             // rho=<rr,r>
     nom = MAGMA_Z_REAL(magma_zdotc( dofs, r.val, 1, r.val, 1 ));    
-    nom0 = sqrt(nom);                                       // nom = || r ||                            
+    nom0 = betanom = sqrt(nom);                                 // nom = || r ||                            
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     beta = rho_new;
     solver_par->init_res = nom0;

@@ -71,10 +71,10 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                                 c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
-    magma_int_t i, j, k, m = 0, iter;
+    magma_int_t i, j, k, m = 0;
     magma_int_t restart = min( dofs-1, solver_par->restart );
     magma_int_t ldh = restart+1;
-    double nom, rNorm, RNorm, den, nom0, betanom, r0 = 0.;
+    double nom, rNorm, RNorm, nom0, betanom, r0 = 0.;
 
     // CPU workspace
     magma_setdevice(0);
@@ -111,7 +111,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
-    nom0 = magma_dznrm2( dofs, r.val, 1 );               //  nom0= || r||
+    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );     //  nom0= || r||
     nom = nom0  * nom0;
     solver_par->init_res = nom0;
     H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 

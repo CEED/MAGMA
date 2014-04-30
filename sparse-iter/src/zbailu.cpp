@@ -158,7 +158,7 @@ magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<5; k++)
+    for(int k=0; k<15; k++)
         magma_zbajac_csr( iters, precond->LD, precond->L, b, x );
            
     return MAGMA_SUCCESS;
@@ -191,7 +191,7 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<5; k++)
+    for(int k=0; k<15; k++)
         magma_zbajac_csr( iters, precond->UD, precond->U, b, x );
 
     return MAGMA_SUCCESS;

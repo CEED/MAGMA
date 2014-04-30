@@ -81,14 +81,12 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
     double nom, betanom, nom0, r0, den;
-    magma_int_t i;
-
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                   // r = b
     magma_zcopy( dofs, b.val, 1, rr.val, 1 );                  // rr = b
-    nom0 = magma_dznrm2( dofs, r.val, 1 );                      // nom = || r ||
+    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );           // nom = || r ||
     nom = nom0*nom0;
     rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;

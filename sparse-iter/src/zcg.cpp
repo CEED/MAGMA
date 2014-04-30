@@ -66,14 +66,13 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // solver variables
     magmaDoubleComplex alpha, beta;
     double nom, nom0, r0, betanom, betanomsq, den;
-    magma_int_t i;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
     magma_zcopy( dofs, b.val, 1, p.val, 1 );                    // p = b
-    nom0 = magma_dznrm2( dofs, r.val, 1 );           
-    nom = nom0 * nom0;                                          // nom = r' * r
+    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );           
+    nom  = nom0 * nom0;                                // nom = r' * r
     magma_z_spmv( c_one, A, p, c_zero, q );                     // q = A p
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.val, 1, q.val, 1) );// den = p dot q
     solver_par->init_res = nom0;

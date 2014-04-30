@@ -314,7 +314,7 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
         return MAGMA_SUCCESS;
     }
 
-
+    return MAGMA_SUCCESS;
 }
 
 

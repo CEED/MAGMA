@@ -85,7 +85,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
     magma_zcopy( dofs, b.val, 1, d.val, 1 );                    // d = b
-    nom0 = magma_dznrm2( dofs, r.val, 1 );               
+    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );               
     nom = nom0 * nom0;                                           // nom = r' * r
     magma_z_spmv( c_one, A, d, c_zero, z );                      // z = A d
     den = MAGMA_Z_REAL( magma_zdotc(dofs, d.val, 1, z.val, 1) ); // den = d'* z
