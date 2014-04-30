@@ -54,8 +54,8 @@ int mm_read_unsymmetric_sparse(const char *fname, magma_index_t *M_,
  
     if (mm_read_mtx_crd_size(f, &M, &N, &nz) !=0)
     {
-fprintf(stderr, "#read_unsymmetric_sparse(): could not parse matrix size.\n");
-return -1;
+        fprintf(stderr, "#read_unsymmetric_sparse(): could not parse matrix size.\n");
+        return -1;
     }
  
     *M_ = M;
@@ -461,8 +461,8 @@ char *mm_strdup(const char *s)
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
-    char *types[4];
-  char *mm_strdup(const char *);
+    const char *types[4];
+    char *mm_strdup(const char *);
     //int error =0;
 
     /* check for MTX type */

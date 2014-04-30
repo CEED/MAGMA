@@ -68,13 +68,13 @@
 // error checking 
 /////////////////////////////////////
 magma_int_t
-checkErrors(char *label)
+checkErrors(const char *label)
 {
     cudaThreadSynchronize();
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)
     {
-        char *e = (char*) cudaGetErrorString(err);
+        const char *e = cudaGetErrorString(err);
         fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
     }
     return MAGMA_SUCCESS; 

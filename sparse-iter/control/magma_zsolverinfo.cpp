@@ -260,7 +260,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# BCSRLU solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    exact final residual: %e\n", solver_par->final_res );
-        printf("#    runtime factorization: %4lf sec\n",
+        printf("#    runtime factorization: %4f sec\n",
                     solver_par->timing[0] );
         printf("#    runtime triangular solve: %.4f sec\n", 
                     solver_par->timing[1] );
