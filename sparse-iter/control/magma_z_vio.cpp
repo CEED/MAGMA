@@ -122,7 +122,7 @@ magma_z_vread(      magma_z_vector *x,
     x->memory_location = Magma_CPU;
     x->num_rows = length;
     
-    magma_int_t nnz, i=0;
+    magma_int_t nnz=0, i=0;
     string line;
     ifstream fin(filename);  
     getline(fin, line, '\n');  

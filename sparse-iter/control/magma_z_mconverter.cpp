@@ -1943,7 +1943,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
              return MAGMA_ERR_NOT_SUPPORTED;
         }
     }
-     
+    return MAGMA_SUCCESS;  
 }
 
 

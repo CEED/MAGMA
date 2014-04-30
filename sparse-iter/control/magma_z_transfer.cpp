@@ -226,7 +226,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            int num_threads = A.alignment * A.blocksize;
             int threads_per_row = A.alignment; 
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
@@ -267,8 +266,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
-            magma_int_t C = A.blocksize;
-            magma_int_t slices = A.numblocks;
             // memory allocation
             stat = cublasAlloc( A.nnz, sizeof( magmaDoubleComplex ), 
                                                 ( void** )&B->val );
@@ -488,7 +485,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
-            int num_threads = A.alignment*A.blocksize;
             int threads_per_row = A.alignment; 
             int rowlength = ( (int)((A.max_nnz_row+threads_per_row-1)
                                     /threads_per_row) ) * threads_per_row;
@@ -519,8 +515,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             B->numblocks = A.numblocks;
-            magma_int_t C = A.blocksize;
-            magma_int_t slices = A.numblocks;
 
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.nnz );
@@ -685,7 +679,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
-            int num_threads = A.alignment*A.blocksize;
             B->alignment = A.alignment;
             int threads_per_row = A.alignment; 
             // memory allocation
@@ -716,8 +709,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->alignment = A.alignment;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
-            magma_int_t C = A.blocksize;
-            magma_int_t slices = A.numblocks;
 
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.nnz );
@@ -957,7 +948,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
-            int num_threads = A.alignment*A.blocksize;
             int threads_per_row = A.alignment; 
             int rowlength = ( (int)((A.max_nnz_row+threads_per_row-1)
                                     /threads_per_row) ) * threads_per_row;
@@ -995,8 +985,6 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
-            magma_int_t C = A.blocksize;
-            magma_int_t slices = A.numblocks;
 
             // memory allocation
             stat = cublasAlloc( A.nnz, sizeof( magmaDoubleComplex ), 

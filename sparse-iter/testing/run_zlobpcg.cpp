@@ -42,12 +42,8 @@ int main( int argc, char** argv)
     int version = 0;
     
     magma_z_sparse_matrix A, B, dA;
-    magma_z_vector x, b;
     B.blocksize = 8;
     B.alignment = 8;
-    
-    magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
-    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
     B.storage_type = Magma_CSR;
     int i;
@@ -114,8 +110,6 @@ int main( int argc, char** argv)
 
         magma_zsolverinfo_init( &solver_par, &precond_par ); // inside the loop!
                            // as the matrix size has influence on the EV-length
-
-
 
         real_Double_t  gpu_time;
 

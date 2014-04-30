@@ -70,7 +70,7 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &z, Magma_DEV, dofs, c_zero );
 
     // solver variables
-    double nom, nom0, r0, den;
+    double nom, nom0, r0;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0

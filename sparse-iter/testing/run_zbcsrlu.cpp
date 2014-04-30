@@ -37,9 +37,8 @@ int main( int argc, char** argv)
     solver_par.verbose = 0;
     solver_par.version = 0;
     solver_par.num_eigenvalues = 0;
-    int format = 0;
 
-    magma_z_sparse_matrix A, B, B_d;
+    magma_z_sparse_matrix A, B;
     magma_z_vector x, b;
     
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);

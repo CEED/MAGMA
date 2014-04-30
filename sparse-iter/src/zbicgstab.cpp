@@ -72,8 +72,6 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
     double nom, betanom, nom0, r0, den;
-    magma_int_t i;
-
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0

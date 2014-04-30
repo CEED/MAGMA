@@ -495,7 +495,6 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     solver_par->verbose = 0;
     solver_par->info = 0;
 */
-    magma_int_t iterblock = solver_par->verbose;
     if( solver_par->verbose > 0 ){
         magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
                 * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
