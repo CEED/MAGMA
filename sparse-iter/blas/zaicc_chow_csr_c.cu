@@ -73,13 +73,13 @@ magma_zaic_csr_c_kernel( magma_int_t num_rows,
 
         // modify u entry
         if (i == j){
-            val_n[k] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);// MAGMA_Z_MAKE((double)i, 0.0);//MAGMA_Z_MAKE(sqrtf(abs(MAGMA_Z_REAL(s))), 0.0);
+            val[k] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);// MAGMA_Z_MAKE((double)i, 0.0);//MAGMA_Z_MAKE(sqrtf(abs(MAGMA_Z_REAL(s))), 0.0);
        // printf("process element %d at %d , %d , sqrt(%.2e -%.2e) = %.2e\n", k, i, j, A_val[k],  val[k] );
 //if( MAGMA_Z_REAL( val_n[k])> 10e+30)
     //    printf("error:large element:%.2e \n",  val_n[k]);
 }
         else{
-            val_n[k] =  s / val[iu-1]; //MAGMA_Z_MAKE((double)k, 0.0);//s / val[iu-1];
+            val[k] =  s / val[iu-1]; //MAGMA_Z_MAKE((double)k, 0.0);//s / val[iu-1];
 //if( MAGMA_Z_REAL(val[iu-1])< 0.0000000000000001 && MAGMA_Z_REAL(val[iu-1])> -0.0000000000000000000001)
    //     printf("error: division by zero!  %.2e\n",val[iu-1]);
 }
@@ -149,8 +149,8 @@ magma_zaic_csr_c( magma_z_sparse_matrix A,
     magma_zaic_csr_c_kernel<<< grid, block, 0, magma_stream >>>
             ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, A_CSR.blockinfo,  A_CSR.col, val_n );
 
-    cudaMemcpy( A_CSR.val, val_n, A.nnz*sizeof( magmaDoubleComplex ), 
-                                                    cudaMemcpyDeviceToDevice );
+  //  cudaMemcpy( A_CSR.val, val_n, A.nnz*sizeof( magmaDoubleComplex ), 
+    //                                                cudaMemcpyDeviceToDevice );
     cudaFree(val_n);
     return MAGMA_SUCCESS;
 }

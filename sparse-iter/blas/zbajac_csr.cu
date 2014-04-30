@@ -86,9 +86,8 @@ magma_zbajac_csr_kernel(    int n,
                             magmaDoubleComplex *b,                                
                             magmaDoubleComplex *x ){
 
-    int ind_diag =  blockIdx.x*blockDim.x;
     int index = blockIdx.x*blockDim.x+threadIdx.x;
-    int i, j, start, end;   
+    int i, start, end;   
 
     if(index<n){
         

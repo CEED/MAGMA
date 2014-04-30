@@ -13,6 +13,13 @@
 #include "../include/magmasparse_z.h"
 #include "../../include/magma.h"
 
+
+// includes CUDA
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include <cusparse_v2.h>
+#include "sm_32_intrinsics.h"
+
 // 512 is maximum number of threads for CUDA capability 1.x
 #define BLOCK_SIZE  64
 
@@ -24,15 +31,15 @@
 // every row is handled by one threadblock
 __global__ void 
 magma_zaic_csr_s_kernel( magma_int_t num_rows, 
-                         magma_int_t nnz,  
-                         magmaDoubleComplex *A_val, 
+                         magma_int_t nnz,
+                         const magmaDoubleComplex * __restrict__ A_val, 
                          magmaDoubleComplex *val,
                          magma_index_t *rowptr,
                          magma_index_t *rowidx, 
                          magma_index_t *colidx ){
 
     int i, j;
-    int k = blockDim.x * blockIdx.x + threadIdx.x;
+    int k = (blockDim.x * blockIdx.x + threadIdx.x);// % nnz;
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magmaDoubleComplex s, sp;
     int il, iu, jl, ju;
@@ -41,7 +48,12 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
     {     
         i = rowidx[k];
         j = colidx[k];
+
+#if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
+        s = __ldg( A_val+k );
+#else
         s = A_val[k];
+#endif
 
         il = rowptr[i];
         iu = rowptr[j];
