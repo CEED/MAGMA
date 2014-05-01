@@ -68,7 +68,7 @@
 // error checking 
 /////////////////////////////////////
 magma_int_t
-checkErrors(const char *label)
+magma_zcheckerr(const char *label)
 {
     cudaThreadSynchronize();
     cudaError_t err = cudaGetLastError();
@@ -159,11 +159,11 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
               (cudaDeviceEnablePeerAccess(gpuid_tesla[j], 0));
               (cudaSetDevice(gpuid_tesla[j]));
               (cudaDeviceEnablePeerAccess(gpuid_tesla[i], 0));
-           checkErrors("P2P");
+           magma_zcheckerr("P2P");
          }
      }
 
-   checkErrors("P2P successful");
+   magma_zcheckerr("P2P successful");
 
 
     // Enable peer access
@@ -352,7 +352,7 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
 
   }//end if-loop bandwidth_benchmark
 
-    checkErrors("P2P established");
+    magma_zcheckerr("P2P established");
 
     return MAGMA_SUCCESS;
 
