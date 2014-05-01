@@ -543,7 +543,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         if( old_format == Magma_CSR && new_format == Magma_CSRCSCL ){
 
             magma_z_sparse_matrix C;
-            C.diagorder_type = Magma_UNITY;
+            //C.diagorder_type = Magma_UNITY;
             magma_z_mconvert( A, &C, Magma_CSR, Magma_CSRL );
             // fill in information for B
             B->storage_type = Magma_CSRCSCL;
