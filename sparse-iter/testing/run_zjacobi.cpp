@@ -106,5 +106,6 @@ int main( int argc, char** argv)
     magma_zsolverinfo_free( &solver_par, &precond_par );
 
     TESTING_FINALIZE();
+
     return 0;
 }
