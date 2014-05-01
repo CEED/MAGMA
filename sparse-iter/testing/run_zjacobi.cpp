@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     magma_z_solver_par solver_par;
     magma_z_preconditioner precond_par;
     solver_par.maxiter = 1000;
-    solver_par.verbose;
+    solver_par.verbose = 0;
     solver_par.num_eigenvalues = 0;
     int format = 0;
     
