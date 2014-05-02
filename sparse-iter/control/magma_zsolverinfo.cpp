@@ -214,7 +214,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         }
         printf("#======================================================="
                 "======#\n");
-        printf("# GMRES-(%d) solver summary:\n", solver_par->restart);
+        printf("# GMRES-(%d) solver summary:\n", (int) solver_par->restart);
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 

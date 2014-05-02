@@ -137,7 +137,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                   magma_storage_t old_format, 
                   magma_storage_t new_format ){
 
-    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
     magmaDoubleComplex zero = MAGMA_Z_MAKE( 0.0, 0.0 );
 
     // check whether matrix on CPU
@@ -985,7 +984,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &val_tmp2, A.num_rows*A.max_nnz_row );
             magma_indexmalloc_cpu( &col_tmp2, A.num_rows*A.max_nnz_row );
             for( magma_int_t j=0;j<A.num_rows;j++ ){
-                magmaDoubleComplex diagval = A.val[j*A.max_nnz_row];
                 magma_index_t diagcol = A.col[j*A.max_nnz_row];
                 magma_int_t smaller = 0;
                 for( magma_int_t i=1;i<A.max_nnz_row;i++ ){

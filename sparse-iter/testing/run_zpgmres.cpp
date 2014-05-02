@@ -40,7 +40,6 @@ int main( int argc, char** argv)
     precond_par.solver = Magma_JACOBI;
     int precond = 0;
     int format = 0;
-    int version = 0;
     solver_par.restart = 30;
     solver_par.ortho = Magma_CGS;
     int ortho = 0;
