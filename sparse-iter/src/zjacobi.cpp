@@ -158,7 +158,7 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
                 diag.val[rowindex] = B.val[i];
                 if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
                     printf(" error: zero diagonal element in row %d!\n", 
-                                                                rowindex);
+                                                                (int) rowindex);
             }
         }
         for( i=start; i<end; i++ ){
@@ -244,7 +244,7 @@ magma_zjacobisetup_diagscal( magma_z_sparse_matrix A, magma_z_vector *d ){
                 diag.val[rowindex] = 1.0/B.val[i];
                 if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
                     printf(" error: zero diagonal element in row %d!\n", 
-                                                                rowindex);
+                                                                (int) rowindex);
             }
         }
     }
@@ -368,7 +368,7 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
                 diag.val[rowindex] = B.val[i];
                 if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
                     printf(" error: zero diagonal element in row %d!\n", 
-                                                                    rowindex);
+                                                               (int) rowindex);
             }
         }
         for( i=start; i<end; i++ ){

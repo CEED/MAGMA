@@ -91,7 +91,7 @@ int main( int argc, char** argv)
         }else 
             break;
     }
-    printf( "\n    usage: ./run_ziterref"
+    printf( "\n#    usage: ./run_ziterref"
         " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
@@ -99,10 +99,11 @@ int main( int argc, char** argv)
         " --preconditioner %d (0=Jacobi, 1=CG, 2=BiCGStab, 3=GMRES)"
         " [ --precond-maxiter %d --precond-tol %.2e"
         " --precond-restart %d ] ]"
-        " matrices \n\n", format, B.blocksize, B.alignment,
-        solver_par.verbose,
-        solver_par.maxiter, solver_par.epsilon, version,
-        precond_par.maxiter, precond_par.epsilon, precond_par.restart );
+        " matrices \n\n", format, (int) B.blocksize, (int) B.alignment,
+        (int) solver_par.verbose,
+        (int) solver_par.maxiter, solver_par.epsilon, version,
+        (int) precond_par.maxiter, precond_par.epsilon, 
+        (int) precond_par.restart );
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
 
@@ -110,8 +111,8 @@ int main( int argc, char** argv)
 
         magma_z_csr_mtx( &A,  argv[i]  ); 
 
-        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
-                                    ,A.num_rows,A.num_cols,A.nnz );
+        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
         magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );

@@ -56,7 +56,7 @@ magma_z_vvisu(      magma_z_vector x,
                     magma_int_t displaylength ){
 
     printf("visualize entries %d - %d of vector ", 
-                    offset, offset+displaylength );
+                    (int) offset, (int) (offset+displaylength) );
     fflush(stdout);  
     if( x.memory_location == Magma_CPU ){
         printf("located on CPU:\n");

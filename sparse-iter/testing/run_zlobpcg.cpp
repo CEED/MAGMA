@@ -79,24 +79,25 @@ int main( int argc, char** argv)
         } else
             break;
     }
-    printf( "\n    usage: ./run_zlobpcg"
+    printf( "\n#    usage: ./run_zlobpcg"
         " [ --format %d (0=CSR, 1=ELL, 2=ELLRT, 4=SELLP)"
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --preconditioner %d (0=Jacobi) "
         " --eigenvalues %d ]"
-        " matrices \n\n", format, B.blocksize, B.alignment,
-        solver_par.verbose,
-        solver_par.maxiter, solver_par.epsilon, precond,  
-        solver_par.num_eigenvalues);
+        " matrices \n\n", format, (int) B.blocksize, (int) B.alignment,
+        (int) solver_par.verbose,
+        (int) solver_par.maxiter, solver_par.epsilon, precond,  
+        (int) solver_par.num_eigenvalues);
 
     while(  i < argc ){
 
         magma_z_csr_mtx( &A,  argv[i]  ); 
 
-        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n\n"
-                                    ,A.num_rows,A.num_cols,A.nnz );
+        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+
         solver_par.ev_length = A.num_cols;
 
         magma_z_sparse_matrix A2;

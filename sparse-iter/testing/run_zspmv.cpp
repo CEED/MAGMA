@@ -62,7 +62,7 @@ int main( int argc, char** argv)
         }else
             break;
     }
-    printf( "\n    usage: ./run_zspmv"
+    printf( "\n#    usage: ./run_zspmv"
         " [ --blocksize %d --alignment %d (for SELLP) ]"
         " matrices \n\n", hA_SELLP.blocksize, hA_SELLP.alignment );
 
@@ -70,8 +70,8 @@ int main( int argc, char** argv)
 
         magma_z_csr_mtx( &hA,  argv[i]  ); 
 
-        printf( "\nmatrix info: %d-by-%d with %d nonzeros\n"
-                                    ,hA.num_rows,hA.num_cols,hA.nnz );
+        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 

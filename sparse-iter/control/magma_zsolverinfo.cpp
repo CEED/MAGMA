@@ -53,14 +53,15 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             printf("#======================================================="
                     "======#\n");
             if( solver_par->solver == Magma_CG )
-                printf("#   CG performance analysis every %d iteration\n", k);
+                printf("#   CG performance analysis every %d iteration\n", 
+                                                                    (int) k);
             else if( solver_par->solver == Magma_PCG ){
                 if( precond_par->solver == Magma_JACOBI )
                         printf("#   Jacobi-CG performance analysis"
-                                " every %d iteration\n", k);
+                                " every %d iteration\n", (int) k);
                 if( precond_par->solver == Magma_ICC )
                         printf("#   IC-CG performance analysis"
-                                " every %d iteration\n", k);
+                                " every %d iteration\n", (int) k);
 
             }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
@@ -68,14 +69,14 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# CG solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -86,20 +87,20 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             printf("#======================================================="
                     "======#\n");
             printf("#   CG (merged) performance analysis every %d iteration\n",
-                                                                             k);
+                                                                       (int) k);
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# CG (merged) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -112,28 +113,28 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     "======#\n");
             if( solver_par->solver == Magma_BICGSTAB )
                 printf("#   BiCGStab performance analysis every %d iteration\n", 
-                                                                            k);
+                                                             (int) k);
             else if( solver_par->solver == Magma_PBICGSTAB ){
                 if( precond_par->solver == Magma_JACOBI )
                         printf("#   Jacobi-BiCGStab performance analysis"
-                                " every %d iteration\n", k);
+                                " every %d iteration\n", (int) k);
                 if( precond_par->solver == Magma_ILU )
                         printf("#   ILU-BiCGStab performance analysis"
-                                " every %d iteration\n", k);
+                                " every %d iteration\n", (int) k);
             }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                  (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# BiCGStab solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -144,20 +145,20 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             printf("#======================================================="
                     "======#\n");
             printf("#   BiCGStab (merged) performance analysis"
-                   " every %d iteration\n", k);
+                   " every %d iteration\n", (int) k);
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                  (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# BiCGStab (merged) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -168,20 +169,20 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             printf("#======================================================="
                     "======#\n");
             printf("#   BiCGStab (merged2) performance analysis"
-                   " every %d iteration\n", k);
+                   " every %d iteration\n", (int) k);
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                  (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# BiCGStab (merged2) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -194,28 +195,28 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     "======#\n");
             if( solver_par->solver == Magma_GMRES )
                 printf("#   GMRES-(%d) performance analysis\n", 
-                                                    solver_par->restart);
+                                                 (int) solver_par->restart);
             else if( solver_par->solver == Magma_PGMRES ){
                 if( precond_par->solver == Magma_JACOBI )
                         printf("#   Jacobi-GMRES-(%d) performance analysis\n",
-                                                solver_par->restart);
+                                               (int) solver_par->restart);
                 if( precond_par->solver == Magma_ILU )
                         printf("#   ILU-GMRES-(%d) performance analysis\n",
-                                                solver_par->restart);
+                                               (int) solver_par->restart);
             }
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                 (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# GMRES-(%d) solver summary:\n", solver_par->restart);
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -226,20 +227,20 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
             printf("#======================================================="
                     "======#\n");
             printf("# Iterative Refinement performance analysis"
-                   " every %d iteration\n", k);
+                   " every %d iteration\n", (int) k);
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ){
                 printf("   %4d    ||    %e    ||    %f\n", 
-                            j*k, solver_par->res_vec[j], solver_par->timing[j]);
+                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
         printf("#======================================================="
                 "======#\n");
         printf("# Iterative Refinement solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -249,7 +250,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                 "======#\n");
         printf("# Jacobi solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
-        printf("#    iterations: %4d\n", (solver_par->numiter) );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="

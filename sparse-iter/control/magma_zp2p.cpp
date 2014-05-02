@@ -174,8 +174,8 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
     // Check that we got UVA on both devices
     printf("Checking GPU%d and GPU%d for UVA capabilities...\n", 
     gpuid_tesla[i], gpuid_tesla[j]);
-    const bool has_uva = (prop[gpuid_tesla[i]].unifiedAddressing && 
-                                prop[gpuid_tesla[j]].unifiedAddressing);
+    //const bool has_uva = (prop[gpuid_tesla[i]].unifiedAddressing && 
+    //                            prop[gpuid_tesla[j]].unifiedAddressing);
 
     printf("> %s (GPU%d) supports UVA: %s\n", prop[gpuid_tesla[i]].name, 
     gpuid_tesla[i], (prop[gpuid_tesla[i]].unifiedAddressing ? "Yes" : "No") );

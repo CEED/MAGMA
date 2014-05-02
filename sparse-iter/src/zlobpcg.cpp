@@ -363,7 +363,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             if ((condestG/condestGmean>2 && condestG>2) || condestG>8) {
                 // Steepest descent restart for stability
                 restart=1;
-                printf("restart at step #%d\n", iterationNumber);
+                printf("restart at step #%d\n", (int) iterationNumber);
             }
 
             // === assemble GramA; first, set it to I
@@ -475,7 +475,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                 // 
                 //  printf("Iteration %4d, CBS %4d, Residual: %10.7f\n",
                 //         iterationNumber, cBlockSize, res);
-                printf("%4d-%2d ", iterationNumber, cBlockSize); 
+                printf("%4d-%2d ", (int) iterationNumber, (int) cBlockSize); 
                 magma_dprint_gpu(1, n, residualNorms(0, iterationNumber), 1);
             }
 

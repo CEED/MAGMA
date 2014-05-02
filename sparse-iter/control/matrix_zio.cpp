@@ -212,7 +212,7 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
   assert( coo_val != NULL);
 
 
-  printf("Reading sparse matrix from file (%s):",filename);
+  printf("# Reading sparse matrix from file (%s):",filename);
   fflush(stdout);
 
 
@@ -248,7 +248,7 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
     magma_index_t true_nonzeros = 2*off_diagonals + (*nnz - off_diagonals);
     
     
-    printf("total number of nonzeros: %d\n",*nnz);
+    printf("total number of nonzeros: %d\n", (int) *nnz);
 
     
     
@@ -788,7 +788,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   assert( coo_val != NULL);
 
 
-  printf("Reading sparse matrix from file (%s):",filename);
+  printf("# Reading sparse matrix from file (%s):",filename);
   fflush(stdout);
 
 
@@ -1084,7 +1084,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   assert( coo_val != NULL);
 
 
-  printf("Reading sparse matrix from file (%s):",filename);
+  printf("# Reading sparse matrix from file (%s):",filename);
   fflush(stdout);
 
 
