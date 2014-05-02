@@ -286,7 +286,17 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         magma_z_sparse_matrix ACSR, BCSR;
         magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR );
         magma_z_cucsrtranspose( ACSR, &BCSR );
-        magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type );
+
+        if( A.storage_type == Magma_CSRL 
+                        || A.storage_type == Magma_CSRCSCL )
+            B->storage_type = Magma_CSRU;
+        else if( A.storage_type == Magma_CSRU 
+                        || A.storage_type == Magma_CSRCSCU )
+            B->storage_type = Magma_CSRL;
+        else
+            B->storage_type = A.storage_type;
+
+        magma_z_mconvert( BCSR, B, Magma_CSR, B->storage_type );
         magma_z_mfree( &ACSR );
         magma_z_mfree( &BCSR );
         return MAGMA_SUCCESS;
