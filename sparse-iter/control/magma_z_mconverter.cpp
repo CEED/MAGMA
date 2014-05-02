@@ -216,6 +216,11 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         if( ( old_format == Magma_CSRL  ) 
                                         && new_format == Magma_CSR ){
 
+            A.storage_type = Magma_CSR;
+            magma_z_mconvert( A, B, Magma_CSR, Magma_CSR);
+            A.storage_type = Magma_CSRL;
+
+/*
             magma_index_t i, j, k, *ELL_count;
 
             magma_int_t offdiags = 0, maxrowlength = 0, maxrowtmp = 0 ;
@@ -306,7 +311,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             magma_z_mfree( &ELL_sorted );
             magma_z_mfree( &ELL );
-            free( ELL_count );
+            free( ELL_count );*/
 
             return MAGMA_SUCCESS; 
         }
@@ -349,6 +354,11 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         if( ( old_format == Magma_CSRU  ) 
                                         && new_format == Magma_CSR ){
 
+            A.storage_type = Magma_CSR;
+            magma_z_mconvert( A, B, Magma_CSR, Magma_CSR);
+            A.storage_type = Magma_CSRL;
+
+/*
             magma_index_t i, j, k, *ELL_count;
 
             magma_int_t offdiags = 0, maxrowlength = 0, maxrowtmp = 0 ;
@@ -439,7 +449,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_z_mfree( &ELL_sorted );
             magma_z_mfree( &ELL );
             free( ELL_count );
-
+*/
             return MAGMA_SUCCESS; 
         }
         // CSR to CSRD (diagonal elements first)
