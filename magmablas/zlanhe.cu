@@ -856,12 +856,12 @@ magmablas_zlanhe(
     double res = 0;
     if ( inf_norm ) {
         zlanhe_inf( uplo, n, A, lda, dwork );
-        int i = cublasIdamax( n, dwork, 1 ) - 1;
+        int i = magma_idamax( n, dwork, 1 ) - 1;
         cudaMemcpy( &res, &dwork[i], sizeof(double), cudaMemcpyDeviceToHost );
     }
     else if ( max_norm ) {
         zlanhe_max( uplo, n, A, lda, dwork );
-        int i = cublasIdamax( n, dwork, 1 ) - 1;
+        int i = magma_idamax( n, dwork, 1 ) - 1;
         cudaMemcpy( &res, &dwork[i], sizeof(double), cudaMemcpyDeviceToHost );
     }
     return res;

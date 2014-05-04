@@ -154,7 +154,7 @@ magmablas_zlange(
     dim3 threads( 64 );
     dim3 grid( (m-1)/64 + 1 );
     zlange_inf_kernel<<< grid, threads, 0, magma_stream >>>( m, n, A, lda, dwork );
-    int i = cublasIdamax( m, dwork, 1 ) - 1;
+    int i = magma_idamax( m, dwork, 1 ) - 1;
     double res;
     cudaMemcpy( &res, &dwork[i], sizeof(double), cudaMemcpyDeviceToHost );
     return res;
