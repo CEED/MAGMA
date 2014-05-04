@@ -122,7 +122,7 @@ magma_zpotf2_gpu(
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 zlacgv(j, A(0, j), 1);
                 #endif
-                cublasZgemv( 'T', j, n-j-1,
+                magma_zgemv( MagmaTrans, j, n-j-1,
                              alpha, A(0, j+1), lda,
                                     A(0, j),   1,
                              beta,  A(j, j+1), lda); // cublas is better in upper case
