@@ -185,7 +185,7 @@ magmablas_sgemv_tesla(
                     (m, n, (n/gemv_bs)*gemv_bs, A, lda, x, y);
             }
             else {
-                cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
+                magma_sgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
             }
         }
         else {
@@ -193,7 +193,7 @@ magmablas_sgemv_tesla(
         }
     }
     else {
-        cublasSgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
+        magma_sgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
 

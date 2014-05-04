@@ -939,7 +939,7 @@ magmablas_chemv_tesla(
 
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper )
-        cublasChemv( lapacke_uplo_const(uplo), n, alpha, A, lda, x, incx, beta, y, incy);
+        magma_chemv( uplo, n, alpha, A, lda, x, incx, beta, y, incy);
     else {
         magmaFloatComplex *dwork;
         magma_int_t blocks = (n - 1)/thread_x + 1;
