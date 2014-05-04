@@ -317,7 +317,7 @@ void magmablas_dgemv(
         // call CUDA ARCH 1.x version
         // magmablas for [sd] precisions, cublas for [zc] precisions.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        cublasDgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy );
+        magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
         #else
         magmablas_dgemv_tesla( trans, m, n, alpha, A, lda, x, incx, beta, y, incy );
         #endif
@@ -331,7 +331,7 @@ void magmablas_dgemv(
 
     if ( trans == MagmaNoTrans ) {
         //if ( m >= 7000 && m <= 8000 )
-        //    cublasDgemv( lapacke_trans_const(trans), m, n, alpha, A, lda, x, incx, beta, y, incy);
+        //    magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
         //else
             magmablas_dgemvn_fermi(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
