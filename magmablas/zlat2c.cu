@@ -1024,7 +1024,7 @@ magmablas_zlat2c(
     *info = 0;
     mzlat2c( uplo, n, A, lda, SA, ldsa, info );
     /*
-      int val = cublasIdamax(n, WORK, 1);
+      int val = magma_idamax(n, WORK, 1);
       double retVal[1];
       cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
       return retVal[0];
