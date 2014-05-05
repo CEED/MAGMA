@@ -30,6 +30,7 @@ ZSRC += \
 	ziterref.cpp		\
 	zgmres.cpp		\
 	zjacobi.cpp		\
+	zbaiter.cpp 	\
 	zpcg.cpp		\
     zpbicgstab.cpp		\
     zpgmres.cpp		\

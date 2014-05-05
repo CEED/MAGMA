@@ -144,7 +144,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_int_t maxIterations = solver_par->maxiter;
 
     // === Set some constants & defaults ===
-    magmaDoubleComplex c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
 
     double *residualNorms, *condestGhistory, condestG;
     double *gevalues;

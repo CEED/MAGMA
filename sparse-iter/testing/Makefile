@@ -56,6 +56,7 @@ ZSRC += \
 	run_ziterref.cpp	\
 	run_zgmres.cpp	    \
 	run_zjacobi.cpp	    \
+	run_zbaiter.cpp	    \
 
 # ----------
 # run Krylov space eigen-solvers
