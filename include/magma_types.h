@@ -32,6 +32,7 @@
 // Similar to magma_int_t we declare magma_index_t used for row/column indices in sparse
 #if defined(MAGMA_ILP64) || defined(MKL_ILP64)
 typedef int64_t magma_int_t;
+typedef int magma_index_t;
 #else
 typedef int magma_int_t;
 #endif
@@ -438,7 +439,8 @@ typedef enum {
     Magma_PBICGSTAB    = 443,
     Magma_PASTIX       = 444,
     Magma_ILU          = 445,
-    Magma_ICC          = 446
+    Magma_ICC          = 446,
+    Magma_BAITER       = 447
 } magma_solver_type;
 
 typedef enum {
