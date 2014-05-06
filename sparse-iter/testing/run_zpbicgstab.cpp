@@ -66,7 +66,7 @@ int main( int argc, char** argv)
             switch( precond ) {
                 case 0: precond_par.solver = Magma_JACOBI; break;
                 case 1: precond_par.solver = Magma_ILU; break;
-                case 2: precond_par.solver = Magma_ICC; break;
+                case 2: precond_par.solver = Magma_AILU; break;
             }
 
         }else if ( strcmp("--version", argv[i]) == 0 ) {
@@ -89,7 +89,7 @@ int main( int argc, char** argv)
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --precond %d (0=Jacobi, 1=ILU, 2=ICC) ]"
+        " --precond %d (0=Jacobi, 1=ILU, 2=AILU) ]"
         " matrices \n\n", format, (int) B.blocksize, (int) B.alignment,
         (int) solver_par.verbose,
         (int) solver_par.maxiter, solver_par.epsilon, precond );

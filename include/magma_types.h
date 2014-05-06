@@ -440,15 +440,10 @@ typedef enum {
     Magma_PASTIX       = 444,
     Magma_ILU          = 445,
     Magma_ICC          = 446,
-    Magma_BAITER       = 447
+    Magma_AILU         = 447,
+    Magma_AICC         = 448,
+    Magma_BAITER       = 449
 } magma_solver_type;
-
-typedef enum {
-    Magma_DCOMPLEX     = 451,
-    Magma_FCOMPLEX     = 452,
-    Magma_DOUBLE       = 453,
-    Magma_FLOAT        = 454
-} magma_precision;
 
 typedef enum {
     Magma_CGS          = 461,
@@ -473,6 +468,12 @@ typedef enum {
     Magma_VALUE        = 494
 } magma_diagorder_t;
 
+typedef enum {
+    Magma_DCOMPLEX     = 501,
+    Magma_FCOMPLEX     = 502,
+    Magma_DOUBLE       = 503,
+    Magma_FLOAT        = 504
+} magma_precision;
 
 
 // When adding constants, remember to do these steps as appropriate:

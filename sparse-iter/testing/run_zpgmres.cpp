@@ -68,6 +68,7 @@ int main( int argc, char** argv)
             switch( precond ) {
                 case 0: precond_par.solver = Magma_JACOBI; break;
                 case 1: precond_par.solver = Magma_ILU; break;
+                case 2: precond_par.solver = Magma_AILU; break;
             }
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             B.blocksize = atoi( argv[++i] );
@@ -96,7 +97,7 @@ int main( int argc, char** argv)
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --precond %d (0=Jacobi, 1=ILU)" 
+        " --precond %d (0=Jacobi, 1=ILU, 2=AILU)" 
         " --ortho %d (0=CGS, 1=MGS, 2=FUSED_CGS) ]"
         " --restart %d"
         " ]"
