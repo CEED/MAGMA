@@ -58,9 +58,9 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
 #endif
 
         il = rowptrL[i];
-        iu = rowptrL[j];
+        iu = rowptrU[j];
 
-        while (il < rowptrL[i+1] && iu < rowptrL[j+1])
+        while (il < rowptrL[i+1] && iu < rowptrU[j+1])
         {
             sp = zero;
             jl = colidxL[il];
@@ -88,6 +88,7 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
         else{
             valU[k] = s;
         }
+
     }
 
 }// kernel 
@@ -115,8 +116,9 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
     
     This routine computes the ILU approximation of a matrix iteratively. 
     The idea is according to Edmond Chow's presentation at SIAM 2014.
-    The input format of the matrix is Magma_CSRCSCL and MagmaCSRCSCU for
-    the lower and upper part. L is in CSRL, U is in CSRU, but column-major.
+    The input format of the matrix is Magma_CSRCSCL for the upper and lower 
+    triangular parts. Note however, that we flip col and blockinfo for the 
+    U-part.
     Every component of L and U is handled by one thread. 
 
     Arguments
@@ -146,7 +148,7 @@ magma_zailu_csr_s( magma_z_sparse_matrix A_L,
     dim3 block( blocksize1, blocksize2, 1 );
     magma_zailu_csr_s_kernel<<< grid, block, 0, magma_stream >>>
         ( A_L.num_rows, A_L.nnz,  A_L.val, L.val, L.row, L.blockinfo, L.col, 
-          A_U.num_rows, A_U.nnz,  A_U.val, U.val, U.row, U.blockinfo, U.col );
+          A_U.num_rows, A_U.nnz,  A_U.val, U.val, U.row, U.col, U.blockinfo );
 
 
     return MAGMA_SUCCESS;
