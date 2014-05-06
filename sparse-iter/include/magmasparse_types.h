@@ -347,12 +347,12 @@ typedef struct magma_c_preconditioner{
 
     magma_solver_type       solver;
     magma_precision         format;
-    double                  epsilon;  
+    float                   epsilon;  
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
-    double                  init_res;
-    double                  final_res;
+    float                   init_res;
+    float                   final_res;
     magma_c_sparse_matrix   M;
     magma_c_sparse_matrix   L;
     magma_c_sparse_matrix   U;
@@ -407,12 +407,12 @@ typedef struct magma_s_preconditioner{
 
     magma_solver_type       solver;
     magma_precision         format;
-    double                  epsilon;  
+    float                   epsilon;  
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
-    double                  init_res;
-    double                  final_res;
+    float                   init_res;
+    float                   final_res;
     magma_s_sparse_matrix   M;
     magma_s_sparse_matrix   L;
     magma_s_sparse_matrix   U;
