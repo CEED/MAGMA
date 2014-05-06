@@ -26,20 +26,27 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
                             magmaDoubleComplex *valR, 
                             magma_index_t *rowR,
                             magma_index_t *colR, 
-                            magmaDoubleComplex *b,                                
+                            const magmaDoubleComplex * __restrict__ b,                            
                             magmaDoubleComplex *x ){
 
     int ind_diag =  blockIdx.x*blockDim.x;
     int index = blockIdx.x*blockDim.x+threadIdx.x;
     int i, j, start, end;   
 
+
     if(index<n){
     
         start=rowR[index];
         end  =rowR[index+1];
-        
+
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-        magmaDoubleComplex tmp = zero, v = zero; 
+        magmaDoubleComplex bl, tmp = zero, v = zero; 
+
+#if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
+        bl = __ldg( b+index );
+#else
+        bl = b[index];
+#endif
 
         #pragma unroll
         for( i=start; i<end; i++ )
@@ -52,7 +59,7 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
         for( i=start; i<end; i++ )
             tmp += valD[i] * x[ colD[i] ];
 
-        v =  b[index] - v;
+        v =  bl - v;
 
         /* add more local iterations */           
         __shared__ magmaDoubleComplex local_x[ BLOCKSIZE ];
@@ -92,7 +99,13 @@ magma_zbajac_csr_kernel(    int n,
     if(index<n){
         
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-        magmaDoubleComplex tmp = zero, v = zero; 
+        magmaDoubleComplex bl, tmp = zero, v = zero; 
+
+#if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
+        bl = __ldg( b+index );
+#else
+        bl = b[index];
+#endif
 
         start=rowR[index];
         end  =rowR[index+1];
@@ -101,7 +114,7 @@ magma_zbajac_csr_kernel(    int n,
         for( i=start; i<end; i++ )
              v += valR[i] * x[ colR[i] ];
 
-        v =  b[index] - v;
+        v =  bl - v;
 
         start=rowD[index];
         end  =rowD[index+1];
@@ -162,15 +175,19 @@ magma_zbajac_csr(   magma_int_t localiters,
 
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
-
-    if( localiters == 1 )
-    magma_zbajac_csr_kernel<<< grid, block, 0, magma_stream >>>
-        ( D.num_rows, D.val, D.row, D.col, 
-                        R.val, R.row, R.col, b.val, x->val );
-    else
-        magma_zbajac_csr_ls_kernel<<< grid, block, 0, magma_stream >>>
-        ( localiters, D.num_rows, D.val, D.row, D.col, 
-                        R.val, R.row, R.col, b.val, x->val );
+    if( R.nnz > 0 ){ 
+        if( localiters == 1 )
+        magma_zbajac_csr_kernel<<< grid, block, 0, magma_stream >>>
+            ( D.num_rows, D.val, D.row, D.col, 
+                            R.val, R.row, R.col, b.val, x->val );
+        else
+            magma_zbajac_csr_ls_kernel<<< grid, block, 0, magma_stream >>>
+            ( localiters, D.num_rows, D.val, D.row, D.col, 
+                            R.val, R.row, R.col, b.val, x->val );
+    }
+    else{
+        printf("error: all elements in diagonal block.\n");
+    }
 
     return MAGMA_SUCCESS;
 }
