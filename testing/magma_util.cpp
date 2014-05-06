@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 
 #include "testings.h"
+#include "common_magma.h"
 
 // --------------------
 // If condition is false, print error message and exit.
