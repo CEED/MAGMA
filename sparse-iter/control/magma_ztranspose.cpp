@@ -282,7 +282,7 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 // for symmetric matrices: convert to csc using cusparse
 
 
-    if( A.storage_type != Magma_CSR ){
+    if( A.storage_type != Magma_CSR && A.storage_type != Magma_CSRCSCU ){
         magma_z_sparse_matrix ACSR, BCSR;
         magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR );
         magma_z_cucsrtranspose( ACSR, &BCSR );

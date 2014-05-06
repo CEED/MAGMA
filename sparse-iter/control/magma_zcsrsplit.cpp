@@ -58,8 +58,8 @@ magma_zcsrsplit(    magma_int_t bsize,
 
     if(  A.memory_location == Magma_CPU &&
             (   A.storage_type == Magma_CSR ||
-                A.storage_type == Magma_CSRL ||
-                A.storage_type == Magma_CSRU ) ){
+                A.storage_type == Magma_CSRCSCL ||
+                A.storage_type == Magma_CSRCSCU ) ){
 
         magma_int_t i, k, j, nnz_diag, nnz_offd;
 

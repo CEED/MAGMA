@@ -255,6 +255,16 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
                 "======#\n");
+    }else if( solver_par->solver == Magma_BAITER ){
+        printf("#======================================================="
+                "======#\n");
+        printf("# Block-asynchronous iteration solver summary:\n");
+        printf("#    initial residual: %e\n", solver_par->init_res );
+        printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+                    solver_par->final_res, solver_par->runtime);
+        printf("#======================================================="
+                "======#\n");
     }else if( solver_par->solver == Magma_BCSRLU ){
         printf("#======================================================="
                 "======#\n");
