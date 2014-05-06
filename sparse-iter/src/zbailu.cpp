@@ -47,7 +47,6 @@
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-
     magma_z_sparse_matrix hA, hAL, hAU, dAL, dAU, hL, hU, 
                                         dL, dU, DL, RL, DU, RU;
 
@@ -55,7 +54,7 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
     hAL.storage_type = Magma_CSRCSCL;
     magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    hAU.storage_type = Magma_CSRCSCU;
+    hAU.storage_type = Magma_CSRCSCL;
     magma_z_mconvert( hA, &hAU, Magma_CSR, hAU.storage_type );
 
     magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
@@ -63,7 +62,6 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_z_mfree(&hAL);
     magma_z_mfree(&hAU);
-
 
     // scale initial guess
     #ifdef PRECISION_d
@@ -80,10 +78,8 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     hAL.storage_type = Magma_CSRCSCL;
     magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    hAU.storage_type = Magma_CSRCSCU;
+    hAU.storage_type = Magma_CSRCSCL;
     magma_z_mconvert( hA, &hAU, Magma_CSR, hAU.storage_type );
-
-    magma_z_mfree(&hA);
 
     magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hAU, &dU, Magma_CPU, Magma_DEV );
@@ -91,22 +87,29 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mfree(&hAL);
     magma_z_mfree(&hAU);
 
-    for(int i=0; i<3; i++){
+    for(int i=0; i<20; i++){
         magma_zailu_csr_s( dAL, dAU, dL, dU );
 
     }
-    magma_z_mtransfer( dL, &precond->M, Magma_DEV, Magma_DEV );
+
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
     magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
+
+    magma_z_LUmergein( hL, hU, &hA);
+    
+    magma_z_mtransfer( hA, &precond->M, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&dL);
     magma_z_mfree(&dU);
     magma_z_mfree(&dAL);
     magma_z_mfree(&dAU);
 
-
-    magma_z_mconvert(hL, &hAL, hL.storage_type, Magma_CSR);
-    magma_z_mconvert(hU, &hAU, hU.storage_type, Magma_CSR);
+    hAL.diagorder_type = Magma_UNITY;
+    magma_z_mconvert(hA, &hAL, Magma_CSR, Magma_CSRL);
+    hAL.storage_type = Magma_CSR;
+    magma_z_mconvert(hA, &hAU, Magma_CSR, Magma_CSRU);
+    hAU.storage_type = Magma_CSR;
+    magma_z_mfree(&hA);
 
     magma_z_mfree(&hL);
     magma_z_mfree(&hU);
@@ -120,8 +123,25 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( DU, &precond->UD, Magma_CPU, Magma_DEV );
 
-    magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( RU, &precond->U, Magma_CPU, Magma_DEV );
+    if( RL.nnz != 0 )
+        magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
+    else{ 
+        precond->L.nnz = 0;
+        precond->L.val = NULL;
+        precond->L.col = NULL;
+        precond->L.row = NULL;
+        precond->L.blockinfo = NULL;
+    }
+
+    if( RU.nnz != 0 )
+        magma_z_mtransfer( RU, &precond->U, Magma_CPU, Magma_DEV );
+    else{ 
+        precond->U.nnz = 0;
+        precond->L.val = NULL;
+        precond->L.col = NULL;
+        precond->L.row = NULL;
+        precond->L.blockinfo = NULL;
+    }
 
     magma_z_mfree(&DL);
     magma_z_mfree(&RL);
@@ -158,7 +178,7 @@ magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<15; k++)
+    for(int k=0; k<18; k++)
         magma_zbajac_csr( iters, precond->LD, precond->L, b, x );
            
     return MAGMA_SUCCESS;
@@ -191,7 +211,7 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<15; k++)
+    for(int k=0; k<18; k++)
         magma_zbajac_csr( iters, precond->UD, precond->U, b, x );
 
     return MAGMA_SUCCESS;
@@ -254,7 +274,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mfree(&hAL);
     magma_z_mfree(&hA);
 
-    for(int i=0; i<3; i++){
+    for(int i=0; i<10; i++){
         magma_zaic_csr_s( dAL, dL );
 
     }
@@ -269,8 +289,8 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_zcsrsplit( 256, hAL, &DL, &RL );
 
-    magma_z_mtransfer( DL, &precond->UD, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( RL, &precond->U, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&hL);
 
@@ -278,8 +298,8 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_zcsrsplit( 256, hL, &DL, &RL );
 
-    magma_z_mtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( DL, &precond->UD, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( RL, &precond->U, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&hAL);
     magma_z_mfree(&hL);

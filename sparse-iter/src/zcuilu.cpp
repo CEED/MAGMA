@@ -377,12 +377,12 @@ magma_zapplycuilu_r( magma_z_vector b, magma_z_vector *x,
 magma_int_t
 magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-    magma_z_sparse_matrix hA, U;
+    magma_z_sparse_matrix hA, U, hD, hR, hAt;
     magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
     U.diagorder_type = Magma_VALUE;
     magma_z_mconvert( hA, &U, Magma_CSR, Magma_CSRL);
 
-    magma_z_mtransfer(U, &(precond->L), Magma_CPU, Magma_DEV);
+    magma_z_mtransfer(U, &(precond->M), Magma_CPU, Magma_DEV);
 
     // CUSPARSE context //
     cusparseHandle_t cusparseHandle;
@@ -421,22 +421,21 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     cusparseStatus =
     cusparseZcsrsv_analysis( cusparseHandle, 
                 CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                precond->L.num_rows, precond->L.nnz, descrA,
-                precond->L.val, precond->L.row, precond->L.col, 
+                precond->M.num_rows, precond->M.nnz, descrA,
+                precond->M.val, precond->M.row, precond->M.col, 
                 precond->cuinfo); 
      if(cusparseStatus != 0)    printf("error in analysis IC.\n");
 
     cusparseStatus =
     cusparseZcsric0( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                      precond->L.num_rows, descrA, 
-                      precond->L.val, 
-                      precond->L.row, 
-                      precond->L.col, 
+                      precond->M.num_rows, descrA, 
+                      precond->M.val, 
+                      precond->M.row, 
+                      precond->M.col, 
                       precond->cuinfo);
      if(cusparseStatus != 0)    printf("error in ICC.\n");
 
-    magma_z_mtransfer( precond->L, &precond->U, Magma_DEV, Magma_DEV );
-    magma_z_mtransfer( precond->L, &precond->M, Magma_DEV, Magma_DEV );
+
 
     cusparseMatDescr_t descrL;
     cusparseStatus = cusparseCreateMatDescr(&descrL);
@@ -502,14 +501,38 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
      if(cusparseStatus != 0)    printf("error in analysis U.\n");
 
     cusparseDestroyMatDescr( descrL );
-
-    
+    cusparseDestroyMatDescr( descrA );
+    cusparseDestroy( cusparseHandle );
 
     magma_z_mfree(&U);
     magma_z_mfree(&hA);
 
-    cusparseDestroyMatDescr( descrA );
-    cusparseDestroy( cusparseHandle );
+
+    // to enable also the block-asynchronous iteration for the triangular solves
+    magma_z_mtransfer( precond->M, &hA, Magma_DEV, Magma_CPU );
+    hA.storage_type = Magma_CSR;
+
+    magma_zcsrsplit( 256, hA, &hD, &hR );
+
+    magma_z_mtransfer( hD, &precond->LD, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hR, &precond->L, Magma_CPU, Magma_DEV );
+
+    magma_z_mfree(&hD);
+    magma_z_mfree(&hR);
+
+    magma_z_cucsrtranspose(   hA, &hAt );
+
+    magma_zcsrsplit( 256, hAt, &hD, &hR );
+
+    magma_z_mtransfer( hD, &precond->UD, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hR, &precond->U, Magma_CPU, Magma_DEV );
+    
+    magma_z_mfree(&hD);
+    magma_z_mfree(&hR);
+    magma_z_mfree(&hA);
+    magma_z_mfree(&hAt);
+
+
     return MAGMA_SUCCESS;
 
 }
@@ -668,6 +691,8 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
     cusparseDestroy( cusparseHandle );
     magma_device_sync();
     return MAGMA_SUCCESS;
+
+
 
 }
 
