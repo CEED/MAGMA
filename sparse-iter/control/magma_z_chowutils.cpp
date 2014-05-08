@@ -120,9 +120,9 @@ magma_znonlinres(   magma_z_sparse_matrix A,
 
     magma_z_mtransfer( U, &LU_d, Magma_CPU, Magma_DEV ); 
 
-    cudaFree( LU_d.val );
-    cudaFree( LU_d.col );
-    cudaFree( LU_d.row );
+    magma_free( LU_d.val );
+    magma_free( LU_d.col );
+    magma_free( LU_d.row );
 
 
     // CUSPARSE context //

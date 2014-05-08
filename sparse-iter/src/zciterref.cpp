@@ -143,7 +143,7 @@ magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&z);
     magma_c_vfree(&rs);
     magma_c_vfree(&zs);
-    cudaFree( &(AS.val) );
+    magma_free( AS.val );
 
     return MAGMA_SUCCESS;
 }   /* magma_zcir */

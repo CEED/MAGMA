@@ -163,7 +163,7 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&c);
     magma_z_vfree(&d);
 
-    cudaFree( &(AS.val) );
+    magma_free( AS.val );
 
 
     return MAGMA_SUCCESS;

@@ -201,9 +201,9 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
     //magma_z_mvisu( *M );
 
 
-    cudaFree(inverse);
-    cudaFree(identity); 
-    cudaFree(zerom); 
+    magma_free(inverse);
+    magma_free(identity); 
+    magma_free(zerom); 
     
 
     //free(ipiv); 
