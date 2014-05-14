@@ -51,7 +51,7 @@
             The number of columns actually factorized.
 
     @param[in,out]
-    A       COMPLEX*16 array, dimension (LDA,N)
+    A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, block A(OFFSET+1:M,1:KB) is the triangular
             factor obtained and block A(1:OFFSET,1:N) has been
@@ -69,7 +69,7 @@
             permuted into position I in AP.
 
     @param[out]
-    tau     COMPLEX*16 array, dimension (KB)
+    tau     COMPLEX_16 array, dimension (KB)
             The scalar factors of the elementary reflectors.
 
     @param[in,out]
@@ -81,11 +81,11 @@
             The vector with the exact column norms.
 
     @param[in,out]
-    auxv    COMPLEX*16 array, dimension (NB)
+    auxv    COMPLEX_16 array, dimension (NB)
             Auxiliar vector.
 
     @param[in,out]
-    F       COMPLEX*16 array, dimension (LDF,NB)
+    F       COMPLEX_16 array, dimension (LDF,NB)
             Matrix F' = L*Y'*A.
 
     @param[in]

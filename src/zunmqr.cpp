@@ -23,10 +23,10 @@
     TRANS = MagmaConjTrans:   Q**H * C           C * Q**H
     @endverbatim
 
-    where Q is a complex orthogonal matrix defined as the product of k
+    where Q is a complex unitary matrix defined as the product of k
     elementary reflectors
 
-          Q = H(1) H(2) . . . H(k)
+        Q = H(1) H(2) . . . H(k)
 
     as returned by ZGEQRF. Q is of order M if SIDE = MagmaLeft and of order N
     if SIDE = MagmaRight.
@@ -255,12 +255,12 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
             zq_to_panel( MagmaUpper, ib, A(i,i), lda, T+ib*ib);
 
             if (left) {
-                /* H or H' is applied to C(i:m,1:n) */
+                /* H or H**H is applied to C(i:m,1:n) */
                 mi = m - i;
                 ic = i;
             }
             else {
-                /* H or H' is applied to C(1:m,i:n) */
+                /* H or H**H is applied to C(1:m,i:n) */
                 ni = n - i;
                 jc = i;
             }
@@ -270,7 +270,7 @@ magma_zunmqr(magma_side_t side, magma_trans_t trans,
             else
                 lddwork = mi;
 
-            /* Apply H or H'; First copy T to the GPU */
+            /* Apply H or H**H; First copy T to the GPU */
             magma_zsetmatrix( ib, ib, T, ib, dwork+nq_i*ib, ib );
             magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                               mi, ni, ib,

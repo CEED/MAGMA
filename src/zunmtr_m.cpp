@@ -22,7 +22,7 @@
     TRANS = MagmaNoTrans:      Q * C          C * Q
     TRANS = MagmaTrans:      Q**H * C       C * Q**H
 
-    where Q is a complex orthogonal matrix of order nq, with nq = m if
+    where Q is a complex unitary matrix of order nq, with nq = m if
     SIDE = MagmaLeft and nq = n if SIDE = MagmaRight. Q is defined as the product of
     nq-1 elementary reflectors, as returned by SSYTRD:
 

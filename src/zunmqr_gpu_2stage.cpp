@@ -25,7 +25,7 @@
     TRANS = MagmaTrans:      Q**H * C       C * Q**H
     @endverbatim
 
-    where Q is a complex orthogonal matrix defined as the product of k
+    where Q is a complex unitary matrix defined as the product of k
     elementary reflectors
 
         Q = H(1) H(2) . . . H(k)
