@@ -28,7 +28,7 @@
  * TREVC version 4 - blocked, multi-threaded  (MAGMA)
  * TREVC version 5 - blocked, multi-threaded, GPU (MAGMA)
  */
-#define TREVC_VERSION 3
+#define TREVC_VERSION 4
 
 /**
     Purpose
