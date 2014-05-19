@@ -390,6 +390,11 @@ typedef enum {
 } magma_range_t;
 
 typedef enum {
+    MagmaQ             = 322,  /* unmbr, ungbr */
+    MagmaP             = 323
+} magma_vect_t;
+
+typedef enum {
     MagmaForward       = 391,  /* larfb */
     MagmaBackward      = 392
 } magma_direct_t;

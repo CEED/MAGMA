@@ -24,7 +24,7 @@
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zunmqr
+   -- Testing zunmql
 */
 int main( int argc, char** argv )
 {
@@ -60,12 +60,12 @@ int main( int argc, char** argv )
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];
-            nb  = magma_get_zgeqrf_nb( m );
+            nb  = magma_get_zgeqlf_nb( m );
             ldc = m;
             // A is m x k (left) or n x k (right)
             mm = (side[iside] == MagmaLeft ? m : n);
             lda = mm;
-            gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
+            gflops = FLOPS_ZUNMQL( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
                 printf( "%5d %5d %5d   %4c   %5c   skipping because side=left and m < k\n",
@@ -75,14 +75,14 @@ int main( int argc, char** argv )
                 continue;
             }
             if ( side[iside] == MagmaRight && n < k ) {
-                printf( "%5d %5d %5d   %4c   %5c   skipping because side=right and n < k\n",
+                printf( "%5d %5d %5d  %4c   %5c   skipping because side=right and n < k\n",
                         (int) m, (int) n, (int) k,
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );
                 continue;
             }
             
-            // need at least 2*nb*nb for geqrf
+            // need at least 2*nb*nb for geqlf
             lwork_max = max( max( m*nb, n*nb ), 2*nb*nb );
             
             TESTING_MALLOC_CPU( C,   magmaDoubleComplex, ldc*n );
@@ -99,23 +99,23 @@ int main( int argc, char** argv )
             size = lda*k;
             lapackf77_zlarnv( &ione, ISEED, &size, A );
             
-            // compute QR factorization to get Householder vectors in A, tau
-            magma_zgeqrf( mm, k, A, lda, tau, W, lwork_max, &info );
+            // compute QL factorization to get Householder vectors in A, tau
+            magma_zgeqlf( mm, k, A, lda, tau, W, lwork_max, &info );
             if (info != 0)
-                printf("magma_zgeqrf returned error %d: %s.\n",
+                printf("magma_zgeqlf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
             cpu_time = magma_wtime();
-            lapackf77_zunmqr( lapack_side_const( side[iside] ), lapack_trans_const( trans[itran] ),
+            lapackf77_zunmql( lapack_side_const( side[iside] ), lapack_trans_const( trans[itran] ),
                               &m, &n, &k,
                               A, &lda, tau, C, &ldc, W, &lwork_max, &info );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
-                printf("lapackf77_zunmqr returned error %d: %s.\n",
+                printf("lapackf77_zunmql returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
             /* ====================================================================
@@ -123,24 +123,24 @@ int main( int argc, char** argv )
                =================================================================== */
             // query for workspace size
             lwork = -1;
-            magma_zunmqr( side[iside], trans[itran],
+            magma_zunmql( side[iside], trans[itran],
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
             if (info != 0)
-                printf("magma_zunmqr (lwork query) returned error %d: %s.\n",
+                printf("magma_zunmql (lwork query) returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max )
                 printf("invalid lwork %d, lwork_max %d\n", (int) lwork, (int) lwork_max );
             
             gpu_time = magma_wtime();
-            magma_zunmqr( side[iside], trans[itran],
+            magma_zunmql( side[iside], trans[itran],
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zunmqr returned error %d: %s.\n",
+                printf("magma_zunmql returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
                         
             /* =====================================================================

@@ -111,6 +111,7 @@ ZSRC += \
 	zgeqrf_ooc.cpp		\
 	zungqr.cpp		\
 	zungqr2.cpp		\
+	zunmlq.cpp		\
 	zunmql.cpp		\
 	zunmqr.cpp		\
 	\

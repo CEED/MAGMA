@@ -108,6 +108,8 @@ ZSRC += \
 	testing_zgeqlf.cpp	\
 	testing_zgeqrf.cpp	\
 	testing_zungqr.cpp	\
+	testing_zunmlq.cpp	\
+	testing_zunmql.cpp	\
 	testing_zunmqr.cpp	\
 	\
 	testing_zungqr_m.cpp	\
