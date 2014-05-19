@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    SGEQLF computes a QL factorization of a COMPLEX_16 M-by-N matrix A:
+    ZGEQLF computes a QL factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * L.
 
     Arguments
