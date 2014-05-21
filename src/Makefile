@@ -253,6 +253,7 @@ ZSRC += \
 	zgesvd.cpp		\
 	zgebrd.cpp		\
 	zlabrd_gpu.cpp		\
+	zunmbr.cpp		\
 
 
 # ------------------------------------------------------------

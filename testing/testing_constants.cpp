@@ -76,6 +76,9 @@ int main( int argc, char** argv )
     assert( lapack_range_const(  MagmaRangeV        )[0] == 'V' );
     assert( lapack_range_const(  MagmaRangeI        )[0] == 'I' );
 
+    assert( lapack_vect_const(   MagmaQ             )[0] == 'Q' );
+    assert( lapack_vect_const(   MagmaP             )[0] == 'P' );
+
     assert( lapack_direct_const( MagmaForward       )[0] == 'F' );
     assert( lapack_direct_const( MagmaBackward      )[0] == 'B' );
 
@@ -140,6 +143,9 @@ int main( int argc, char** argv )
     assert( lapacke_range_const(  MagmaRangeAll      ) == 'A' );
     assert( lapacke_range_const(  MagmaRangeV        ) == 'V' );
     assert( lapacke_range_const(  MagmaRangeI        ) == 'I' );
+
+    assert( lapacke_vect_const(   MagmaQ             ) == 'Q' );
+    assert( lapacke_vect_const(   MagmaP             ) == 'P' );
 
     assert( lapacke_direct_const( MagmaForward       ) == 'F' );
     assert( lapacke_direct_const( MagmaBackward      ) == 'B' );
@@ -206,6 +212,9 @@ int main( int argc, char** argv )
     assert( lapack_const( MagmaRangeV        )[0] == 'V' );
     assert( lapack_const( MagmaRangeI        )[0] == 'I' );
 
+    assert( lapack_const( MagmaQ             )[0] == 'Q' );
+    assert( lapack_const( MagmaP             )[0] == 'P' );
+
     assert( lapack_const( MagmaForward       )[0] == 'F' );
     assert( lapack_const( MagmaBackward      )[0] == 'B' );
 
@@ -270,6 +279,9 @@ int main( int argc, char** argv )
     assert( lapacke_const( MagmaRangeAll      ) == 'A' );
     assert( lapacke_const( MagmaRangeV        ) == 'V' );
     assert( lapacke_const( MagmaRangeI        ) == 'I' );
+
+    assert( lapacke_const( MagmaQ             ) == 'Q' );
+    assert( lapacke_const( MagmaP             ) == 'P' );
 
     assert( lapacke_const( MagmaForward       ) == 'F' );
     assert( lapacke_const( MagmaBackward      ) == 'B' );
@@ -379,6 +391,11 @@ int main( int argc, char** argv )
     assert( magma_range_const( 'v' )  == MagmaRangeV      );
     assert( magma_range_const( 'I' )  == MagmaRangeI      );
     assert( magma_range_const( 'i' )  == MagmaRangeI      );
+
+    assert( magma_vect_const( 'Q' )   == MagmaQ           );
+    assert( magma_vect_const( 'q' )   == MagmaQ           );
+    assert( magma_vect_const( 'P' )   == MagmaP           );
+    assert( magma_vect_const( 'p' )   == MagmaP           );
 
     assert( magma_direct_const( 'F' ) == MagmaForward     );
     assert( magma_direct_const( 'f' ) == MagmaForward     );

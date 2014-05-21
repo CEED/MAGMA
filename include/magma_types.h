@@ -552,6 +552,7 @@ magma_sym_t    magma_sym_const   ( char lapack_char );
 magma_pack_t   magma_pack_const  ( char lapack_char );
 magma_vec_t    magma_vec_const   ( char lapack_char );
 magma_range_t  magma_range_const ( char lapack_char );
+magma_vect_t   magma_vect_const  ( char lapack_char );
 magma_direct_t magma_direct_const( char lapack_char );
 magma_storev_t magma_storev_const( char lapack_char );
 
@@ -573,6 +574,7 @@ const char* lapack_sym_const   ( magma_sym_t    magma_const );
 const char* lapack_pack_const  ( magma_pack_t   magma_const );
 const char* lapack_vec_const   ( magma_vec_t    magma_const );
 const char* lapack_range_const ( magma_range_t  magma_const );
+const char* lapack_vect_const  ( magma_vect_t   magma_const );
 const char* lapack_direct_const( magma_direct_t magma_const );
 const char* lapack_storev_const( magma_storev_t magma_const );
 
@@ -589,6 +591,7 @@ static inline char lapacke_sym_const   ( magma_sym_t    magma_const ) { return *
 static inline char lapacke_pack_const  ( magma_pack_t   magma_const ) { return *lapack_pack_const  ( magma_const ); }
 static inline char lapacke_vec_const   ( magma_vec_t    magma_const ) { return *lapack_vec_const   ( magma_const ); }
 static inline char lapacke_range_const ( magma_range_t  magma_const ) { return *lapack_range_const ( magma_const ); }
+static inline char lapacke_vect_const  ( magma_vect_t   magma_const ) { return *lapack_vect_const  ( magma_const ); }
 static inline char lapacke_direct_const( magma_direct_t magma_const ) { return *lapack_direct_const( magma_const ); }
 static inline char lapacke_storev_const( magma_storev_t magma_const ) { return *lapack_storev_const( magma_const ); }
 
