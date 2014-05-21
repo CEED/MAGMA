@@ -130,8 +130,10 @@ int main( int argc, char** argv )
                 printf("magma_zunmql (lwork query) returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
-            if ( lwork < 0 || lwork > lwork_max )
-                printf("invalid lwork %d, lwork_max %d\n", (int) lwork, (int) lwork_max );
+            if ( lwork < 0 || lwork > lwork_max ) {
+                printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
+                lwork = lwork_max;
+            }
             
             gpu_time = magma_wtime();
             magma_zunmql( side[iside], trans[itran],
