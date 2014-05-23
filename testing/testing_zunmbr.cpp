@@ -72,11 +72,6 @@ int main( int argc, char** argv )
             nn  = (vect[ivect] == MagmaQ    ? k  : nq);
             lda = mm;
             
-//printf( "vect %c, side %c, m %d, n %d, k %d, lda %d, mm %d, nn %d, nq %d\n",
-//        lapacke_vect_const( vect[ivect] ),
-//        lapacke_side_const( side[iside] ),
-//        m, n, k, lda, mm, nn, nq );
-            
             // MBR calls either MQR or MLQ in various ways
             if ( vect[ivect] == MagmaQ ) {
                 if ( nq >= k ) {
@@ -115,7 +110,6 @@ int main( int argc, char** argv )
             // workspace for unmbr is m*nb or n*nb, depending on side
             lwork_max = (mm + nn)*nb;  //max( (mm + nn)*nb, max( m*nb, n*nb ));
             
-//printf( "alloc\n" ); fflush(0);
             TESTING_MALLOC_CPU( C,    magmaDoubleComplex, ldc*n );
             TESTING_MALLOC_CPU( R,    magmaDoubleComplex, ldc*n );
             TESTING_MALLOC_CPU( A,    magmaDoubleComplex, lda*nn );
@@ -125,7 +119,6 @@ int main( int argc, char** argv )
             TESTING_MALLOC_CPU( tauq, magmaDoubleComplex, min(mm,nn) );
             TESTING_MALLOC_CPU( taup, magmaDoubleComplex, min(mm,nn) );
             
-//printf( "zlarnv\n" ); fflush(0);
             // C is full, m x n
             size = ldc*n;
             lapackf77_zlarnv( &ione, ISEED, &size, C );
@@ -134,7 +127,6 @@ int main( int argc, char** argv )
             size = lda*nn;
             lapackf77_zlarnv( &ione, ISEED, &size, A );
             
-//printf( "zgebrd\n" ); fflush(0);
             // compute BRD factorization to get Householder vectors in A, tauq, taup
             lapackf77_zgebrd( &mm, &nn, A, &lda, d, e, tauq, taup, work, &lwork_max, &info );
             //magma_zgebrd( mm, nn, A, lda, d, e, tauq, taup, work, lwork_max, &info );
@@ -148,7 +140,6 @@ int main( int argc, char** argv )
                 tau = taup;
             }
             
-//printf( "lapackf77_zunmbr\n" ); fflush(0);
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
@@ -167,7 +158,6 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-//printf( "magma_zunmbr query\n" ); fflush(0);
             // query for workspace size
             lwork = -1;
             magma_zunmbr( vect[ivect], side[iside], trans[itran],
@@ -182,7 +172,6 @@ int main( int argc, char** argv )
                 lwork = lwork_max;
             }
             
-//printf( "magma_zunmbr\n" ); fflush(0);
             gpu_time = magma_wtime();
             magma_zunmbr( vect[ivect], side[iside], trans[itran],
                           m, n, k,
@@ -193,7 +182,6 @@ int main( int argc, char** argv )
                 printf("magma_zunmbr returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-//printf( "error\n" ); fflush(0);
             /* =====================================================================
                compute relative error |QC_magma - QC_lapack| / |QC_lapack|
                =================================================================== */
@@ -211,7 +199,6 @@ int main( int argc, char** argv )
                     error, (error < tol ? "ok" : "failed") );
             status |= ! (error < tol);
             
-//printf( "free\n" ); fflush(0);
             TESTING_FREE_CPU( C );
             TESTING_FREE_CPU( R );
             TESTING_FREE_CPU( A );
@@ -221,7 +208,6 @@ int main( int argc, char** argv )
             TESTING_FREE_CPU( taup );
             TESTING_FREE_CPU( tauq );
             fflush( stdout );
-//printf( "done\n" ); fflush(0);
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
