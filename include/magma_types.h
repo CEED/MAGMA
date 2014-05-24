@@ -424,7 +424,8 @@ typedef enum {
     Magma_CSRCSCL      = 425,
     Magma_CSRCSCU      = 426,
     Magma_CSRL         = 427,
-    Magma_CSRU         = 428
+    Magma_CSRU         = 428,
+    Magma_CSRCOO       = 429
 } magma_storage_t;
 
 

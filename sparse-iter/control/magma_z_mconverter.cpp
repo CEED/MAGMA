@@ -541,6 +541,28 @@ magma_z_mconvert( magma_z_sparse_matrix A,
     
             return MAGMA_SUCCESS; 
         }
+        // CSR to CSRCOO
+        if( old_format == Magma_CSR && new_format == Magma_CSRCOO ){
+
+            magma_z_mconvert( A, B, Magma_CSR, Magma_CSR );
+            B->storage_type = Magma_CSRCOO;
+
+            magma_indexmalloc_cpu( &B->rowidx, A.nnz );
+
+            for(magma_int_t i=0; i<A.num_rows; i++){
+                for(magma_int_t j=A.row[i]; j<A.row[i+1]; j++){
+                        B->rowidx[j] = i;   
+                }
+            }
+    
+            return MAGMA_SUCCESS; 
+        }
+        // CSRCOO to CSR
+        if( old_format == Magma_CSRCOO && new_format == Magma_CSR ){
+
+            magma_z_mconvert( A, B, Magma_CSR, Magma_CSR );
+            return MAGMA_SUCCESS; 
+        }
         // CSRCSC to CSR
         if( old_format == Magma_COO && new_format == Magma_CSR ){
            // A.storage_type = Magma_CSR;
