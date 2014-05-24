@@ -128,6 +128,10 @@ magma_zcsrsplit(    magma_int_t bsize,
                     magma_z_sparse_matrix *D,
                     magma_z_sparse_matrix *R );
 
+magma_int_t
+magma_zmscale(      magma_z_sparse_matrix *A, 
+                    magma_scale_t scaling );
+
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
                         magma_int_t offset, 
