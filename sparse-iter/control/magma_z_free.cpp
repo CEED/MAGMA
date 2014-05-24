@@ -156,18 +156,6 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
-        if(  A->storage_type == Magma_CSRCSCL ||
-             A->storage_type == Magma_CSRCSCU ){
-            free( A->val );
-            free( A->col );
-            free( A->row );
-            free( A->blockinfo );
-           // free( A->diag );
-            A->num_rows = 0;
-            A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
-        } 
         if(  A->storage_type == Magma_CSRCOO ){
             free( A->val );
             free( A->col );
@@ -307,39 +295,6 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
                 exit(0);
             }
             if( magma_free( A->col ) != MAGMA_SUCCESS ) {
-                printf("Memory Free Error.\n");  
-                return MAGMA_ERR_INVALID_PTR;
-                exit(0);
-            }
-
-            A->num_rows = 0;
-            A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
-        } 
-        if(  A->storage_type == Magma_CSRCSCL ||
-             A->storage_type == Magma_CSRCSCU ){
-            if( magma_free( A->val ) != MAGMA_SUCCESS ) {
-                printf("Memory Free Error.\n");  
-                return MAGMA_ERR_INVALID_PTR;
-                exit(0);
-            }
-       //     if( magma_free( A->diag ) != MAGMA_SUCCESS ) {
-         //       printf("Memory Free Error.\n");  
-         //       return MAGMA_ERR_INVALID_PTR;
-         //       exit(0);
-         //   }
-            if( magma_free( A->row ) != MAGMA_SUCCESS ) {
-                printf("Memory Free Error.\n");  
-                return MAGMA_ERR_INVALID_PTR;
-                exit(0);
-            }
-            if( magma_free( A->col ) != MAGMA_SUCCESS ) {
-                printf("Memory Free Error.\n");  
-                return MAGMA_ERR_INVALID_PTR;
-                exit(0);
-            }
-            if( magma_free( A->blockinfo ) != MAGMA_SUCCESS ) {
                 printf("Memory Free Error.\n");  
                 return MAGMA_ERR_INVALID_PTR;
                 exit(0);

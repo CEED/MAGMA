@@ -110,7 +110,7 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
     
     This routine computes the IC approximation of a matrix iteratively. 
     The idea is according to Edmond Chow's presentation at SIAM 2014.
-    The input format of the matrix is Magma_CSRCSCL. 
+    The input format of the matrix is Magma_CSRCOO. 
 
     Arguments
     =========
@@ -140,7 +140,7 @@ magma_zaic_csr_s( magma_z_sparse_matrix A,
     dim3 block( blocksize1, blocksize2, 1 );
     magma_zaic_csr_s_kernel<<< grid, block, 0, magma_stream >>>
             ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, 
-                                    A_CSR.blockinfo,  A_CSR.col );
+                                    A_CSR.rowidx,  A_CSR.col );
 
     return MAGMA_SUCCESS;
 }

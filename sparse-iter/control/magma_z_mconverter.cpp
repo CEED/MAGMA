@@ -212,7 +212,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->row[B->num_rows] = numzeros;
             return MAGMA_SUCCESS;             
         }
-        // CSRL/CSRCSCL to CSR
+   /*     // CSRL/CSRCSCL to CSR
         if( ( old_format == Magma_CSRL  ) 
                                         && new_format == Magma_CSR ){
 
@@ -313,8 +313,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_z_mfree( &ELL );
             free( ELL_count );*/
 
-            return MAGMA_SUCCESS; 
-        }
+      /*      return MAGMA_SUCCESS; 
+        }*/
         // CSR to CSRU
         if( old_format == Magma_CSR && new_format == Magma_CSRU ){
             // fill in information for B
@@ -569,7 +569,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
           //  magma_z_mconvert( A, B, Magma_CSR, Magma_CSR );
             return MAGMA_SUCCESS; 
         }
-        // CSR to CSRCSCL
+ /*       // CSR to CSRCSCL
         // CSRL format but with blockinfo containing the row
         if( old_format == Magma_CSR && new_format == Magma_CSRCSCL ){
 
@@ -660,7 +660,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             A.storage_type = Magma_CSRCSCU;
 
             return MAGMA_SUCCESS; 
-        }
+        }*/
         // CSR to ELLPACK    
         if( old_format == Magma_CSR && new_format == Magma_ELLPACK ){
             // fill in information for B
@@ -1873,21 +1873,18 @@ magma_z_LUmergein( magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U,
                    magma_z_sparse_matrix *B ){
 
-    if( (L.storage_type != Magma_CSRL &&
-        L.storage_type != Magma_CSRCSCL) ||
-        (U.storage_type != Magma_CSRL &&
-        U.storage_type != Magma_CSRCSCL &&
-        U.storage_type != Magma_CSRU &&
-        U.storage_type != Magma_CSRCSCU )  ){
-        printf("error: input type not supported.\n");
+    if( L.storage_type != Magma_CSRCOO ||
+        U.storage_type != Magma_CSRCOO   ){
+        printf("error: input type not supported: %d %d.\n", 
+                                L.storage_type, U.storage_type);
         exit(-1);
     }
     magma_int_t i,j,k;
 
-    if( (L.storage_type == Magma_CSRL) || (L.storage_type == Magma_CSRCSCL) )
+    if( (L.storage_type == Magma_CSRCOO) )
     {
         for(  i=0; i<L.nnz; i++){
-            magma_int_t lrow = L.blockinfo[ i ]; 
+            magma_int_t lrow = L.rowidx[ i ]; 
             magma_int_t lcol = L.col[ i ]; 
             magmaDoubleComplex lval = L.val[ i ];
             for( k=B->row[lrow]; k<B->row[lrow+1]; k++){
@@ -1898,23 +1895,10 @@ magma_z_LUmergein( magma_z_sparse_matrix L,
             }
         }
     }
-    if( U.storage_type == Magma_CSRCSCL ){
+    if( U.storage_type == Magma_CSRCOO ){
         for(  i=0; i<U.nnz; i++){
             magma_int_t lrow = U.col[ i ]; 
-            magma_int_t lcol = U.blockinfo[ i ]; 
-            magmaDoubleComplex lval = U.val[ i ];
-            for( k=B->row[lrow]; k<B->row[lrow+1]; k++){
-                if( B->col[ k ] == lcol ){
-                    B->val[ k ] = lval;
-                    break;
-                }
-            }
-        }
-    }
-    if( U.storage_type == Magma_CSRCSCU ){
-        for(  i=0; i<U.nnz; i++){
-            magma_int_t lrow = U.blockinfo[ i ]; 
-            magma_int_t lcol = U.col[ i ]; 
+            magma_int_t lcol = U.rowidx[ i ]; 
             magmaDoubleComplex lval = U.val[ i ];
             for( k=B->row[lrow]; k<B->row[lrow+1]; k++){
                 if( B->col[ k ] == lcol ){
@@ -1936,10 +1920,8 @@ magma_z_LUmerge( magma_z_sparse_matrix L,
                  magma_z_sparse_matrix U, 
                  magma_z_sparse_matrix *B ){
 
-    if( (L.storage_type != Magma_CSRL &&
-        L.storage_type != Magma_CSRCSCL) ||
-        (U.storage_type != Magma_CSRU &&
-        U.storage_type != Magma_CSRCSCU)  ){
+    if( (U.storage_type != Magma_CSRCOO &&
+        U.storage_type != Magma_CSRCOO) ){
         printf("error: input type not supported.\n");
         exit(-1);
     }
@@ -1961,7 +1943,7 @@ magma_z_LUmerge( magma_z_sparse_matrix L,
             }
         }
     }
-    if( U.storage_type == Magma_CSRCSCU ){
+    if( U.storage_type == Magma_CSRCOO ){
         for(  i=0; i<U.nnz; i++){
             magma_int_t lrow = U.blockinfo[ i ]; 
             magma_int_t lcol = U.col[ i ]; 

@@ -421,8 +421,6 @@ typedef enum {
     Magma_ELLD         = 422,
     Magma_ELLDD        = 423,
     Magma_CSRD         = 424,
-    Magma_CSRCSCL      = 425,
-    Magma_CSRCSCU      = 426,
     Magma_CSRL         = 427,
     Magma_CSRU         = 428,
     Magma_CSRCOO       = 429

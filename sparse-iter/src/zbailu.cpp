@@ -47,45 +47,26 @@
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-    magma_z_sparse_matrix hA, hAL, hAU, dAL, dAU, hL, hU, 
+    magma_z_sparse_matrix hA, hAL, hALCOO, hAU, dAL, dAU, hL, hU, 
                                         dL, dU, DL, RL, DU, RU;
 
-    // copy original matrix as CSRCSC to device
+    // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
-    hAL.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    hAU.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAU, Magma_CSR, hAU.storage_type );
-
-    magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hAU, &dAU, Magma_CPU, Magma_DEV );
-
-    magma_z_mfree(&hAL);
-    magma_z_mfree(&hAU);
 
     // scale initial guess
-    #ifdef PRECISION_d
-    for(magma_int_t z=0; z<hA.num_rows; z++){
-        real_Double_t s = 0.0;
-        for(magma_int_t f=hA.row[z]; f<hA.row[z+1]; f++)
-            s+= MAGMA_Z_REAL(hA.val[f])*MAGMA_Z_REAL(hA.val[f]);
-        s = 1.0/sqrt(   s  );
-        for(magma_int_t f=hA.row[z]; f<hA.row[z+1]; f++)
-            hA.val[f] = hA.val[f] * s ;
-           
-    }
-    #endif
+    magma_zmscale( &hA, Magma_UNITROW );
+    
+    magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
+    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
 
-    hAL.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    hAU.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAU, Magma_CSR, hAU.storage_type );
+    magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hALCOO, &dAU, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hALCOO, &dU, Magma_CPU, Magma_DEV );
 
-    magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hAU, &dU, Magma_CPU, Magma_DEV );
-
+    magma_z_mfree(&hALCOO);
     magma_z_mfree(&hAL);
-    magma_z_mfree(&hAU);
+    magma_z_mfree(&hA);
 
     for(int i=0; i<20; i++){
         magma_zailu_csr_s( dAL, dAU, dL, dU );
@@ -178,7 +159,7 @@ magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<18; k++)
+    for(int k=0; k<40; k++)
         magma_zbajac_csr( iters, precond->LD, precond->L, b, x );
            
     return MAGMA_SUCCESS;
@@ -211,7 +192,7 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond ){
 
     magma_int_t iters = 1;
-    for(int k=0; k<18; k++)
+    for(int k=0; k<40; k++)
         magma_zbajac_csr( iters, precond->UD, precond->U, b, x );
 
     return MAGMA_SUCCESS;
@@ -245,36 +226,26 @@ magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
-    magma_z_sparse_matrix hA, hAL, dAL, hL, dL, DL, RL;
+    magma_z_sparse_matrix hA, hAL, hALCOO, dAL, hL, dL, DL, RL;
 
-    // copy original matrix as CSRCSC to device
+
+
+    // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
 
-    hAL.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
-    magma_z_mfree(&hAL);
-
     // scale initial guess
-    #ifdef PRECISION_d
-    for(magma_int_t z=0; z<hA.num_rows; z++){
-        real_Double_t s = 0.0;
-        for(magma_int_t f=hA.row[z]; f<hA.row[z+1]; f++)
-            s+= MAGMA_Z_REAL(hA.val[f])*MAGMA_Z_REAL(hA.val[f]);
-        s = 1.0/sqrt(   s  );
-        for(magma_int_t f=hA.row[z]; f<hA.row[z+1]; f++)
-            hA.val[f] = hA.val[f] * s ;
-           
-    }
-    #endif
+    magma_zmscale( &hA, Magma_UNITROW );
 
-    hAL.storage_type = Magma_CSRCSCL;
-    magma_z_mconvert( hA, &hAL, Magma_CSR, hAL.storage_type );
-    magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
+
+    magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
+    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hALCOO);
     magma_z_mfree(&hAL);
     magma_z_mfree(&hA);
 
-    for(int i=0; i<10; i++){
+    for(int i=0; i<25; i++){
         magma_zaic_csr_s( dAL, dL );
 
     }
