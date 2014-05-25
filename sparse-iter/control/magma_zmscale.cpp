@@ -52,8 +52,12 @@ extern "C" magma_int_t
 magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
 
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
-        if( scaling == Magma_UNITROW ){
-            // scale to 
+        if( scaling == Magma_NOSCALE ){
+            // no scale
+            ;
+        }
+        else if( scaling == Magma_UNITROW ){
+            // scale to unit rownorm
             for( magma_int_t z=0; z<A->num_rows; z++ ){
                 magmaDoubleComplex s = MAGMA_Z_MAKE( 0.0, 0.0 );
                 for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ )
@@ -65,7 +69,7 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
             }
         }
         else if (scaling == Magma_UNITDIAG ){
-            // scale initial guess
+            // scale to unit diagonal
             for( magma_int_t z=0; z<A->num_rows; z++ ){
                 magmaDoubleComplex s = MAGMA_Z_MAKE( 0.0, 0.0 );
                 for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ ){

@@ -170,7 +170,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         if( old_format == Magma_CSR && new_format == Magma_CSRL ){
 
             // fill in information for B
-            B->storage_type = Magma_CSRL;
+            B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
@@ -318,11 +318,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         // CSR to CSRU
         if( old_format == Magma_CSR && new_format == Magma_CSRU ){
             // fill in information for B
-            B->storage_type = Magma_CSRU;
-            B->memory_location = A.memory_location;
-            B->num_rows = A.num_rows;
-            B->num_cols = A.num_cols;
-            B->diameter = A.diameter;
+            *B = A;
 
             magma_int_t numzeros=0;
             for( magma_int_t i=0; i<A.num_rows; i++){
