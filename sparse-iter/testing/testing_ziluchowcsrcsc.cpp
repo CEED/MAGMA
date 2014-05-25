@@ -175,7 +175,7 @@ int main( int argc, char** argv)
     //for(int matrix=4; matrix<5; matrix++){
     int num_vecs = 10;
 
-    magma_z_sparse_matrix hA, hAL, hALCOO, hAU,  hAUT, hAUCOO, hAcusparse, hA3U, hAtmp, dA, hAD, hADD, dAD, dADD, hLU, dAL, dAU, dL, dU, hL, hU, hAt;
+    magma_z_sparse_matrix hA, hAL, hALCOO, hAU,  hAUT, hAUCOO, hAcusparse, hA3U, hAtmp, dA, hAD, hADD, dAD, dADD, hLU, dAL, dAU, dL, dU, hL, hU, hAt, hUT, hUTCOO;
 
 
 // matrix from UFMC
@@ -295,13 +295,16 @@ int main( int argc, char** argv)
 
     magma_zfrobenius( hAtmp, hAcusparse, &res );
 
-    magma_znonlinres(   hA, hL, hU, &hLU, &nonlinres ); 
+    magma_z_cucsrtranspose(  hU, &hUT );
+
+    magma_znonlinres(   hA, hL, hUT, &hLU, &nonlinres ); 
 
     printf(" %d    %.2e   ",1* iters, t_chow);
     printf(" %.2e    %.4e    %.4e   \n", t_cusparse, res, nonlinres);
 
     magma_z_mfree(&hL);
     magma_z_mfree(&hU);
+    magma_z_mfree(&hUT);
 
     }
     magma_z_mfree(&hAtmp);
