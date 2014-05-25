@@ -480,8 +480,9 @@ typedef enum {
 } magma_precision;
 
 typedef enum {
-    Magma_UNITROW      = 511,
-    Magma_UNITDIAG     = 512,
+    Magma_NOSCALE      = 511,
+    Magma_UNITROW      = 512,
+    Magma_UNITDIAG     = 513
 } magma_scale_t;
 
 
