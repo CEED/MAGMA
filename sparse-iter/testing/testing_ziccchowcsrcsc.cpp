@@ -42,6 +42,20 @@ int main( int argc, char** argv)
     const char *filename[] =
     {
 
+            "/home/hanzt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
+            "/home/hanzt/sparse_matrices/mtx/ecology2.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
+            "/home/hanzt/sparse_matrices/mtx/G3_circuit.mtx", //          n:1585478 nnz:7660826 nnz/n:4 max_nnz_row:6 
+            "/home/hanzt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
+            "/home/hanzt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
+            "/home/hanzt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
+            "/home/hanzt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
+
+            "/home/hanzt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+            "/home/hanzt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+            "/home/hanzt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+            "/home/hanzt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+
+
 /*
    //         "/home/hanzt/sparse_matrices/mtx/A010.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
     //        "/home/hanzt/sparse_matrices/mtx/A013.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
@@ -352,11 +366,9 @@ for(int iters=0; iters<11; iters++){
 
 
     }
-
     magma_z_mfree(&dAD);
     magma_z_mfree(&hA);
     magma_z_mfree(&hAD);
-    magma_z_mfree(&hADD);
     magma_z_mfree(&hA3);
     magma_z_mfree(&dA);
 

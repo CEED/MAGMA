@@ -49,10 +49,8 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
         i = (blockIdx.y == 0 ) ? rowidxL[k] : rowidxU[k]  ;
         j = (blockIdx.y == 0 ) ? colidxL[k] : colidxU[k]  ;
 
-        s = (blockIdx.y == 0 ) ? AL[k] : AU[k] ;
-
 #if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
-        s = (blockIdx.y == 0 ) ? __ldg( AL+k ) : __ldg( AL+k );
+        s = (blockIdx.y == 0 ) ? __ldg( AL+k ) : __ldg( AU+k );
 #else
         s = (blockIdx.y == 0 ) ? AL[k] : AU[k] ;
 #endif

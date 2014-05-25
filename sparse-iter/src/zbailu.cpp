@@ -47,22 +47,32 @@
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-    magma_z_sparse_matrix hA, hAL, hALCOO, hAU, dAL, dAU, hL, hU, 
+    magma_z_sparse_matrix hA, hAL, hALCOO, hAU, hAUT, hAUCOO, dAL, dAU, hL, hU, 
                                         dL, dU, DL, RL, DU, RU;
 
     // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
 
+
+    // need only lower triangular
+    hAL.diagorder_type == Magma_UNITY;
     magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
     magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
-
     magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hALCOO, &dAU, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hALCOO, &dU, Magma_CPU, Magma_DEV );
+
+    // need only upper triangular
+    magma_z_mconvert( hA, &hAU, Magma_CSR, Magma_CSRU );
+    magma_z_cucsrtranspose(  hAU, &hAUT );
+    magma_z_mconvert( hAUT, &hAUCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mtransfer( hAUCOO, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hAUCOO, &dU, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&hALCOO);
     magma_z_mfree(&hAL);
+    magma_z_mfree(&hAUCOO);
+    magma_z_mfree(&hAUT);
+    magma_z_mfree(&hAU);
 
     for(int i=0; i<20; i++){
         magma_zailu_csr_s( dAL, dAU, dL, dU );
