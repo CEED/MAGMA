@@ -42,6 +42,8 @@ int main( int argc, char** argv)
     magma_z_vector x, b;
     B.blocksize = 8;
     B.alignment = 8;
+    int scale = 0;
+    magma_scale_t scaling = Magma_NOSCALE;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -57,6 +59,14 @@ int main( int argc, char** argv)
                 case 2: B.storage_type = Magma_ELLRT; break;
                 case 3: B.storage_type = Magma_SELLP; break;
             }
+        }else if ( strcmp("--mscale", argv[i]) == 0 ) {
+            scale = atoi( argv[++i] );
+            switch( scale ) {
+                case 0: scaling = Magma_NOSCALE; break;
+                case 1: scaling = Magma_UNITDIAG; break;
+                case 2: scaling = Magma_UNITROW; break;
+            }
+
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             B.blocksize = atoi( argv[++i] );
         }else if ( strcmp("--alignment", argv[i]) == 0 ) {
@@ -70,8 +80,10 @@ int main( int argc, char** argv)
     printf( "\n#    usage: ./run_zjacobi"
         " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
         " [ --blocksize %d --alignment %d ]"
+        " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " --maxiter %d ]"
         " matrices \n\n", format, (int) B.blocksize, (int) B.alignment,
+        (int) scale,
         (int) solver_par.maxiter);
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
@@ -82,6 +94,9 @@ int main( int argc, char** argv)
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+
+        // scale initial guess
+        magma_zmscale( &A, scaling );
 
         magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
