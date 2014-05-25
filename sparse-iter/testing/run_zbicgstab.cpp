@@ -39,6 +39,8 @@ int main( int argc, char** argv)
     solver_par.num_eigenvalues = 0;
     int format = 0;
     int version = 0;
+    int scale = 0;
+    magma_scale_t scaling = Magma_NOSCALE;
 
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
@@ -59,6 +61,14 @@ int main( int argc, char** argv)
                 case 2: B.storage_type = Magma_ELLRT; break;
                 case 3: B.storage_type = Magma_SELLP; break;
             }
+        }else if ( strcmp("--mscale", argv[i]) == 0 ) {
+            scale = atoi( argv[++i] );
+            switch( scale ) {
+                case 0: scaling = Magma_NOSCALE; break;
+                case 1: scaling = Magma_UNITDIAG; break;
+                case 2: scaling = Magma_UNITROW; break;
+            }
+
         }else if ( strcmp("--verbose", argv[i]) == 0 ) {
             solver_par.verbose = atoi( argv[++i] );
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
@@ -77,10 +87,12 @@ int main( int argc, char** argv)
     printf( "\n#    usage: ./run_zbicgstab"
         " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
         " [ --blocksize %d --alignment %d ]"
+        " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --version %d (0=basic, 1=merged, 2=merged2) ]"
         " matrices \n\n", format, (int) B.blocksize, (int) B.alignment,
+        (int) scale,
         (int) solver_par.verbose,
         (int) solver_par.maxiter, solver_par.epsilon, version );
 
@@ -92,6 +104,9 @@ int main( int argc, char** argv)
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+
+        // scale initial guess
+        magma_zmscale( &A, scaling );
 
         magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
