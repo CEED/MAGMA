@@ -53,9 +53,6 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
 
-    // scale initial guess
-    magma_zmscale( &hA, Magma_UNITROW );
-    
     magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
     magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
 
@@ -66,7 +63,6 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_z_mfree(&hALCOO);
     magma_z_mfree(&hAL);
-    magma_z_mfree(&hA);
 
     for(int i=0; i<20; i++){
         magma_zailu_csr_s( dAL, dAU, dL, dU );
@@ -77,7 +73,7 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
 
     magma_z_LUmergein( hL, hU, &hA);
-    
+
     magma_z_mtransfer( hA, &precond->M, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&dL);
@@ -233,12 +229,9 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
 
-    // scale initial guess
-    magma_zmscale( &hA, Magma_UNITROW );
-
-
     magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
     magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
+
     magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hALCOO);
