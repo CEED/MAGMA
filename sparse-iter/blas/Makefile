@@ -48,6 +48,7 @@ ZSRC := \
 ZSRC += \
 	zaicc_chow_csr_s.cu	\
 	zailu_chow_csr_s.cu	\
+	zailu_chow_csr_o.cu	\
 	zbajac_csr.cu		\
 
 

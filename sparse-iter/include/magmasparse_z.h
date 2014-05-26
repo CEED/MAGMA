@@ -1094,6 +1094,10 @@ magma_zailu_csr_s( magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix U );
 
 magma_int_t
+magma_zailu_csr_o( magma_z_sparse_matrix A,
+                   magma_z_sparse_matrix LU );
+
+magma_int_t
 magma_zailu_csr_s_gs( magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix A_U,
                    magma_z_sparse_matrix L,
