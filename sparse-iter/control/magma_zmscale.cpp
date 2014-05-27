@@ -51,25 +51,30 @@
 extern "C" magma_int_t
 magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
 
-    if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
+    if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSRCOO ){
         if( scaling == Magma_NOSCALE ){
             // no scale
             ;
         }
         else if( scaling == Magma_UNITROW ){
             // scale to unit rownorm
+            magmaDoubleComplex *tmp;
+            magma_zmalloc_cpu( &tmp, A->num_rows );
             for( magma_int_t z=0; z<A->num_rows; z++ ){
                 magmaDoubleComplex s = MAGMA_Z_MAKE( 0.0, 0.0 );
                 for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ )
                     s+= MAGMA_Z_REAL(A->val[f])*MAGMA_Z_REAL(A->val[f]);
-                s = MAGMA_Z_MAKE( 1.0/sqrt(  MAGMA_Z_REAL( s )  ), 0.0 );
-                for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ )
-                    A->val[f] = A->val[f] * s ;
-                   
+                tmp[z] = MAGMA_Z_MAKE( 1.0/sqrt(  MAGMA_Z_REAL( s )  ), 0.0 );                   
             }
+            for( magma_int_t z=0; z<A->nnz; z++ ){
+                A->val[z] = A->val[z] * tmp[A->col[z]] * tmp[A->rowidx[z]];
+            }
+            magma_free_cpu( tmp );
         }
         else if (scaling == Magma_UNITDIAG ){
             // scale to unit diagonal
+            magmaDoubleComplex *tmp;
+            magma_zmalloc_cpu( &tmp, A->num_rows );
             for( magma_int_t z=0; z<A->num_rows; z++ ){
                 magmaDoubleComplex s = MAGMA_Z_MAKE( 0.0, 0.0 );
                 for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ ){
@@ -78,10 +83,13 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
                 }
                 if( s == MAGMA_Z_MAKE( 0.0, 0.0 ) )
                     printf("error: zero diagonal element.\n");
-                for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ )
-                    A->val[f] = A->val[f] / s ;
+                tmp[z] = MAGMA_Z_MAKE( 1.0/sqrt(  MAGMA_Z_REAL( s )  ), 0.0 );    
                    
             }
+            for( magma_int_t z=0; z<A->nnz; z++ ){
+                A->val[z] = A->val[z] * tmp[A->col[z]] * tmp[A->rowidx[z]];
+            }
+            magma_free_cpu( tmp );
         }
         else
             printf( "error: scaling not supported\n" );
@@ -93,13 +101,13 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU );
-        magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSR );
+        magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO );
 
         magma_zmscale( &CSRA, scaling );
 
         magma_z_mfree( &hA );
         magma_z_mfree( A );
-        magma_z_mconvert( CSRA, &hA, Magma_CSR, A_storage );
+        magma_z_mconvert( CSRA, &hA, Magma_CSRCOO, A_storage );
         magma_z_mtransfer( hA, A, Magma_CPU, A_location );
         magma_z_mfree( &hA );
         magma_z_mfree( &CSRA );    
