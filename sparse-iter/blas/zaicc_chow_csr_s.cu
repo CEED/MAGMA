@@ -65,7 +65,7 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
             ju = colidx[iu];
 
             // avoid branching
-            sp = ( jl == ju ) ? valL[il] * valU[iu] : sp;
+            sp = ( jl == ju ) ? val[il] * val[iu] : sp;
             s = ( jl == ju ) ? s-sp : s;
             il = ( jl <= ju ) ? il+1 : il;
             iu = ( jl >= ju ) ? iu+1 : iu;
