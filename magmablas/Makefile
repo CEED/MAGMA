@@ -16,20 +16,18 @@ ZHDR := \
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
 	zcaxpycp.cu		\
-	zclaswp.cu		\
 	zgeadd.cu		\
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
 	dgemv_MLU.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
-	zlaset.cu		\
-	zlaqps2_gpu.cu		\
-	zlaqps3_gpu.cu		\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
+	zlaqps2_gpu.cu		\
+	zlaqps3_gpu.cu		\
 	zlarf.cu		\
 	zlarfbx.cu		\
 	zlarfx.cu		\
@@ -37,7 +35,9 @@ ZSRC := \
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
 	zlascl.cu		\
+	zlaset.cu		\
 	zlaswp.cu		\
+	zclaswp.cu		\
 	zlat2c.cu		\
 	dznrm2.cu		\
 	stream.cu		\
