@@ -53,6 +53,8 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
 
+    // in case using fill-in
+    magma_zilustruct( &hA, precond->levels);
 
     // need only lower triangular
     hAL.diagorder_type == Magma_UNITY;
