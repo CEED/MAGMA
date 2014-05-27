@@ -108,7 +108,7 @@ int main( int argc, char** argv )
             
             // workspace for gebrd is (mm + nn)*nb
             // workspace for unmbr is m*nb or n*nb, depending on side
-            lwork_max = (mm + nn)*nb;  //max( (mm + nn)*nb, max( m*nb, n*nb ));
+            lwork_max = max( (mm + nn)*nb, max( m*nb, n*nb ));
             
             TESTING_MALLOC_CPU( C,    magmaDoubleComplex, ldc*n );
             TESTING_MALLOC_CPU( R,    magmaDoubleComplex, ldc*n );
@@ -128,8 +128,8 @@ int main( int argc, char** argv )
             lapackf77_zlarnv( &ione, ISEED, &size, A );
             
             // compute BRD factorization to get Householder vectors in A, tauq, taup
-            lapackf77_zgebrd( &mm, &nn, A, &lda, d, e, tauq, taup, work, &lwork_max, &info );
-            //magma_zgebrd( mm, nn, A, lda, d, e, tauq, taup, work, lwork_max, &info );
+            //lapackf77_zgebrd( &mm, &nn, A, &lda, d, e, tauq, taup, work, &lwork_max, &info );
+            magma_zgebrd( mm, nn, A, lda, d, e, tauq, taup, work, lwork_max, &info );
             if (info != 0)
                 printf("magma_zgebrd returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
