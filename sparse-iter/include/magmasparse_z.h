@@ -133,6 +133,9 @@ magma_zmscale(      magma_z_sparse_matrix *A,
                     magma_scale_t scaling );
 
 magma_int_t 
+magma_zmsort(       magma_z_sparse_matrix *A );
+
+magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
                         magma_int_t offset, 
                         magma_int_t blocksize, 
