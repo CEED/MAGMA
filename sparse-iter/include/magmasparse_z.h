@@ -123,17 +123,21 @@ z_transpose_csr(        magma_int_t n_rows,
                         magma_index_t **new_col );
 
 magma_int_t
-magma_zcsrsplit(    magma_int_t bsize,
-                    magma_z_sparse_matrix A,
-                    magma_z_sparse_matrix *D,
-                    magma_z_sparse_matrix *R );
+magma_zcsrsplit(        magma_int_t bsize,
+                        magma_z_sparse_matrix A,
+                        magma_z_sparse_matrix *D,
+                        magma_z_sparse_matrix *R );
 
 magma_int_t
-magma_zmscale(      magma_z_sparse_matrix *A, 
-                    magma_scale_t scaling );
+magma_zmscale(          magma_z_sparse_matrix *A, 
+                        magma_scale_t scaling );
 
 magma_int_t 
-magma_zmsort(       magma_z_sparse_matrix *A );
+magma_zmsort(           magma_z_sparse_matrix *A );
+
+magma_int_t 
+magma_zilustruct(       magma_z_sparse_matrix *A,
+                        magma_int_t levels );
 
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 

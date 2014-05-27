@@ -202,7 +202,6 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     magma_z_mfree( &L_d );
     magma_z_mfree( &U_d );
     magma_z_mfree( &LU_d );
-    LU_d.storage_type = Magma_CSR;
 
     // compute Frobenius norm of A-LU
     for(i=0; i<A.num_rows; i++){
