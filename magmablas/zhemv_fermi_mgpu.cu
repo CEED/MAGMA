@@ -935,7 +935,7 @@ magmablas_zhemv_mgpu_offset(
     if ( arch < 200  ) {
         // --------------------
         // no CUDA ARCH 1.x version
-        fprintf( stderr, "%s not supported on CUDA arch 1.x", __func__ );
+        fprintf( stderr, "%s not supported on CUDA arch 1.x\n", __func__ );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
         
@@ -1026,7 +1026,7 @@ magmablas_zhemv2_mgpu_offset(
     if ( arch < 200  ) {
         // --------------------
         // no CUDA ARCH 1.x version
-        fprintf( stderr, "%s not supported on CUDA arch 1.x", __func__ );
+        fprintf( stderr, "%s not supported on CUDA arch 1.x\n", __func__ );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
         
@@ -1119,7 +1119,7 @@ magmablas_zhemv2_mgpu(
     if ( arch < 200  ) {
         // --------------------
         // no CUDA ARCH 1.x version
-        fprintf( stderr, "%s not supported on CUDA arch 1.x", __func__ );
+        fprintf( stderr, "%s not supported on CUDA arch 1.x\n", __func__ );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
     
