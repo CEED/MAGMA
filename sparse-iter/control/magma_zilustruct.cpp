@@ -64,9 +64,11 @@ magma_zilustruct( magma_z_sparse_matrix *A, magma_int_t levels ){
     
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
-        magma_int_t i,m;
+        magma_int_t i, j, k, m;
 
-        magma_z_sparse_matrix L, U, L_d, U_d, LU_d;
+        magma_z_sparse_matrix B, L, U, L_d, U_d, LU_d;
+
+        magma_z_mconvert( *A, &B, Magma_CSR, Magma_CSR );
 
         for( i=0; i<levels; i++ ){
 
@@ -159,7 +161,21 @@ magma_zilustruct( magma_z_sparse_matrix *A, magma_int_t levels ){
         }
 
         for( i=0; i<A->nnz; i++ )
-            A->val[i] = MAGMA_Z_MAKE( 1.0, 0.0 );
+            A->val[i] = MAGMA_Z_MAKE( (double)(0.0/A->nnz), 0.0 );
+
+        // take the original values as initial guess
+        for(i=0; i<A->num_rows; i++){
+            for(j=B.row[i]; j<B.row[i+1]; j++){
+                magma_index_t lcol = B.col[j];
+                for(k=A->row[i]; k<A->row[i+1]; k++){
+                    if( A->col[k] == lcol ){
+                        A->val[k] =  B.val[j];
+                    }
+                }
+            }
+        }
+        magma_z_mfree( &B );
+
 
         return MAGMA_SUCCESS;
     }
