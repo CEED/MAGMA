@@ -15,7 +15,6 @@ ZHDR := \
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
-	zauxiliary.cu		\
 	zcaxpycp.cu		\
 	zclaswp.cu		\
 	zgeadd.cu		\
@@ -24,6 +23,7 @@ ZSRC := \
 	dgemv_MLU.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
+	zlaset.cu		\
 	zlaqps2_gpu.cu		\
 	zlaqps3_gpu.cu		\
 	zlag2c.cu		\
