@@ -71,6 +71,14 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
             jl = colidxL[il];
             ju =  rowidxU[iu];
 
+
+            // avoid branching
+            sp = ( jl == ju ) ? valL[il] * valU[iu] : sp;
+            s = ( jl == ju ) ? s-sp : s;
+            il = ( jl <= ju ) ? il+1 : il;
+            iu = ( jl >= ju ) ? iu+1 : iu;
+
+/*
             if (jl < ju)
                 il++;
             else if (ju < jl)
@@ -83,6 +91,8 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
                 il++;
                 iu++;
             }
+
+*/
         }
         // undo the last operation (it must be the last)
         s += sp;
