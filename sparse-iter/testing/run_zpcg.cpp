@@ -38,9 +38,12 @@ int main( int argc, char** argv)
     solver_par.num_eigenvalues = 0;
     magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
+    precond_par.levels = 0;
     int precond = 0;
     int format = 0;
     int version = 0;
+    int scale = 0;
+    magma_scale_t scaling = Magma_NOSCALE;
     
     magma_z_sparse_matrix A, B, B_d;
     magma_z_vector x, b;
@@ -61,6 +64,14 @@ int main( int argc, char** argv)
                 case 2: B.storage_type = Magma_ELLRT; break;
                 case 3: B.storage_type = Magma_SELLP; break;
             }
+        }else if ( strcmp("--mscale", argv[i]) == 0 ) {
+            scale = atoi( argv[++i] );
+            switch( scale ) {
+                case 0: scaling = Magma_NOSCALE; break;
+                case 1: scaling = Magma_UNITDIAG; break;
+                case 2: scaling = Magma_UNITROW; break;
+            }
+
         }else if ( strcmp("--precond", argv[i]) == 0 ) {
             precond = atoi( argv[++i] );
             switch( precond ) {
@@ -81,18 +92,23 @@ int main( int argc, char** argv)
             solver_par.maxiter = atoi( argv[++i] );
         } else if ( strcmp("--tol", argv[i]) == 0 ) {
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
+        } else if ( strcmp("--levels", argv[i]) == 0 ) {
+            precond_par.levels = atoi( argv[++i] );
         } else
             break;
     }
     printf( "\n#    usage: ./run_zpcg"
         " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
+        " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " [ --blocksize %d --alignment %d ]"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --precond %d (0=Jacobi, 1=IC, 2=AIC) ]"
+        " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d ]) ]"
         " matrices \n\n", format, B.blocksize, B.alignment,
+        (int) scale,
         solver_par.verbose,
-        solver_par.maxiter, solver_par.epsilon, precond );
+        solver_par.maxiter, solver_par.epsilon, 
+        precond, (int) precond_par.levels );
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
 
@@ -102,6 +118,9 @@ int main( int argc, char** argv)
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+
+        // scale initial guess
+        magma_zmscale( &A, scaling );
 
         magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
