@@ -99,8 +99,8 @@ int main( int argc, char** argv)
     }
     printf( "\n#    usage: ./run_zpcg"
         " [ --format %d (0=CSR, 1=ELL 2=ELLRT, 3=SELLP)"
-        " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " [ --blocksize %d --alignment %d ]"
+        " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d ]) ]"
