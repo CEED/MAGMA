@@ -170,7 +170,7 @@ int main( int argc, char** argv)
     
     real_Double_t start, end;
 
-     for(int matrix=0; matrix<31; matrix++){
+     for(int matrix=0; matrix<7; matrix++){
     //for(int matrix=0; matrix<1; matrix++){
     //for(int matrix=4; matrix<5; matrix++){
     int num_vecs = 10;
@@ -184,14 +184,14 @@ int main( int argc, char** argv)
 
     magma_z_csr_mtx( &hA, filename[matrix] );
 
-    magma_zmscale( &hA, Magma_UNITROW );
+    magma_zmscale( &hA, Magma_UNITDIAG );
+
+    magma_zilustruct( &hA, 2);
 
     magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSR );
 
 
     real_Double_t FLOPS = 2.0*hA.nnz/1e9;
-
-
 
     magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV );
     
@@ -212,7 +212,7 @@ int main( int argc, char** argv)
 
         printf("#########################################################################\n");   
 
-        printf("# iters  sec(MAGMA)  sec(CUSPARSE)  avg res         min res       max res\n");   
+        printf("# iters  sec(MAGMA)  sec(CUSPARSE)  ||G - G*||_F     ||A-GG'||_F\n");   
 
 
             real_Double_t t_cusparse, t_chow;
@@ -266,8 +266,19 @@ int main( int argc, char** argv)
             magma_z_mtransfer( dA, &hAcusparse, Magma_DEV, Magma_CPU );
 
 
-    for(int iters=0; iters<21; iters++){
+    for(int iters=0; iters<31; iters++){
 
+
+
+    real_Double_t resavg = 0.0;
+    real_Double_t nonlinresavg = 0.0;
+    int numavg = 1;
+
+    //multiple runs
+    for(int z=0; z<numavg; z++){
+
+    real_Double_t res = 0.0;
+    real_Double_t nonlinres = 0.0;
 
     magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hALCOO, &dU, Magma_CPU, Magma_DEV );
@@ -290,23 +301,39 @@ int main( int argc, char** argv)
 
     magma_z_LUmergein( hL, hU, &hAtmp);
 
-    real_Double_t res = 0.0;
-    real_Double_t nonlinres = 0.0;
+
 
     magma_zfrobenius( hAtmp, hAcusparse, &res );
 
     magma_z_cucsrtranspose(  hU, &hUT );
 
     magma_znonlinres(   hA, hL, hUT, &hLU, &nonlinres ); 
+    /*
+    if( res != res ){
+        nonlinresavg += nonlinresavg/(i+1);
+        resavg += resavg/(i+1);
+    }
+    else{*/
+        nonlinresavg += nonlinres;
+        resavg += res;
+    //}
 
-    printf(" %d    %.2e   ",1* iters, t_chow);
-    printf(" %.2e    %.4e    %.4e   \n", t_cusparse, res, nonlinres);
 
     magma_z_mfree(&hL);
     magma_z_mfree(&hU);
     magma_z_mfree(&hUT);
 
-    }
+
+    }//multiple runs
+
+    nonlinresavg = nonlinresavg/numavg;
+    resavg = resavg/numavg;
+
+    printf(" %d    %.2e   ",1* iters, t_chow);
+    printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, nonlinresavg);
+
+    }// iters
+
     magma_z_mfree(&hAtmp);
     magma_z_mfree(&hAL);
     magma_z_mfree(&hALCOO);
