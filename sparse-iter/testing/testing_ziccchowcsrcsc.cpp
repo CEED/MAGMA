@@ -188,7 +188,7 @@ int main( int argc, char** argv)
     
     real_Double_t start, end;
 
-     for(int matrix=0; matrix<20; matrix++){
+     for(int matrix=0; matrix<7; matrix++){
     //for(int matrix=0; matrix<1; matrix++){
     //for(int matrix=4; matrix<5; matrix++){
     int num_vecs = 10;
@@ -201,7 +201,9 @@ int main( int argc, char** argv)
 
     magma_z_csr_mtx( &hA, filename[matrix] );
 
-    magma_zmscale( &hA, Magma_UNITROW );
+    magma_zmscale( &hA, Magma_UNITDIAG );
+
+    magma_zilustruct( &hA, 2);
 
     magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSRL );
     magma_z_mtransfer( hAtmp, &dA, Magma_CPU, Magma_DEV );
@@ -314,7 +316,7 @@ int main( int argc, char** argv)
             magma_z_mfree(&hAtmp);*/
 
 
-
+    magma_zmscale( &hAD, Magma_UNITROW );
 
 
 for(int iters=0; iters<11; iters++){
