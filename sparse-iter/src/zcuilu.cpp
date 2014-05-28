@@ -180,6 +180,8 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
         precond->U.val, precond->U.row, precond->U.col, precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis.\n");
 
+    cusparseDestroyMatDescr( descrU );
+
     magma_z_mfree(&hA);
     magma_z_mfree(&hL);
     magma_z_mfree(&hU);
