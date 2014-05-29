@@ -68,7 +68,7 @@ int main( int argc, char** argv )
             gflops = FLOPS_ZUNMLQ( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
-                printf( "%5d %5d %5d   %4c   %5c   skipping because side=left and m < k\n",
+                printf( "%5d %5d %5d   %4c   %5c   skipping because side=left  and m < k\n",
                         (int) m, (int) n, (int) k,
                         lapacke_side_const( side[iside] ),
                         lapacke_trans_const( trans[itran] ) );

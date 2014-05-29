@@ -45,12 +45,16 @@ int main(int argc, char **argv)
     printf("Epsilon(double): %8.6e\n"
            "Epsilon(single): %8.6e\n\n",
            lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
+    magma_int_t status = 0;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    //double tol = opts.tolerance * lapackf77_dlamch("E");
     
     nrhs = opts.nrhs;
     
+    printf("trans = %s\n", lapack_trans_const(opts.transA) );
     printf("    N  NRHS   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/(N*||A||)  Iter\n");
     printf("==========================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -200,5 +204,5 @@ int main(int argc, char **argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

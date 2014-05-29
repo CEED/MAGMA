@@ -58,6 +58,7 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
+    printf("uplo = %s\n", lapack_uplo_const(opts.uplo) );
     printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
     printf("===========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -159,10 +160,10 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e        %8.2e  %s\n", result[0]*eps, result[1]*eps,
+                printf("   %8.2e        %8.2e   %s\n", result[0]*eps, result[1]*eps,
                         ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "ok" : "failed")  );
-                status |= ! (result[0]*eps < tol);
-                status |= ! (result[1]*eps < tol);
+                status += ! (result[0]*eps < tol);
+                status += ! (result[1]*eps < tol);
             } else {
                 printf("     ---             ---\n");
             }

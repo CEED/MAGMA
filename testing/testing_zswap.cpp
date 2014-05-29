@@ -76,10 +76,11 @@ int main( int argc, char** argv)
     magma_int_t ione = 1;
     magma_int_t *ipiv, *ipiv2;
     magma_int_t *d_ipiv;
+    magma_int_t status = 0;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    
+
     magma_queue_t queue = 0;
     
     printf("            cublasZswap       zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n");
@@ -97,7 +98,7 @@ int main( int argc, char** argv)
             nb     = (opts.nb > 0 ? opts.nb : magma_get_zgetrf_nb( N ));
             // for each swap, does 2N loads and 2N stores
             gbytes = sizeof(magmaDoubleComplex) * 4.*N*nb / 1e9;
-            
+                        
             TESTING_MALLOC_PIN( h_A1, magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_A2, magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_R1, magmaDoubleComplex, lda*N );
@@ -169,7 +170,7 @@ int main( int argc, char** argv)
             check += (diff_matrix( N, N, h_A1, lda, h_R1, lda ) ||
                       diff_matrix( N, N, h_A2, lda, h_R2, lda ))*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * zswap, row-by-row (2 matrices)
              */
@@ -225,7 +226,7 @@ int main( int argc, char** argv)
             check += (diff_matrix( N, N, h_A1, lda, h_R1, lda ) ||
                       diff_matrix( N, N, h_A2, lda, h_R2, lda ))*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * zswapblk, blocked version (2 matrices)
              */
@@ -273,7 +274,7 @@ int main( int argc, char** argv)
             check += (diff_matrix( N, N, h_A1, lda, h_R1, lda ) ||
                       diff_matrix( N, N, h_A2, lda, h_R2, lda ))*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * zpermute_long (1 matrix)
              */
@@ -296,7 +297,7 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * LAPACK-style zlaswp (1 matrix)
              */
@@ -318,7 +319,7 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * LAPACK-style zlaswp (1 matrix) - d_ipiv on GPU
              */
@@ -341,7 +342,7 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * LAPACK-style zlaswpx (extended for row- and col-major) (1 matrix)
              */
@@ -380,7 +381,7 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
-            
+
             /* =====================================================================
              * Copy matrix.
              */
@@ -413,7 +414,8 @@ int main( int argc, char** argv)
                    row_perf6,
                    col_perf6,
                    cpu_perf,
-                   (check == 0 ? "ok" : "* failures") );
+                   (check == 0 ? "ok" : "* failed") );
+            status += ! (check == 0);
             
             TESTING_FREE_PIN( h_A1 );
             TESTING_FREE_PIN( h_A2 );
@@ -434,5 +436,5 @@ int main( int argc, char** argv)
     }
     
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

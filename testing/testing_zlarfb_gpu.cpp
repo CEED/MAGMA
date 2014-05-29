@@ -58,7 +58,7 @@ int main( int argc, char** argv )
       N = opts.nsize[itest];
       K = opts.ksize[itest];
       if ( M < K || N < K || K <= 0 ) {
-          printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", (int) M, (int) N, (int) K );
+          printf( "%5d %5d %5d   skipping because it requires M >= K, N >= K, K >= 0\n", (int) M, (int) N, (int) K );
           continue;
       }
       for( int istor = 0; istor < 2; ++istor ) {
@@ -153,12 +153,12 @@ int main( int argc, char** argv )
             size = ldc*N;
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
             error = lapackf77_zlange( "Fro", &M, &N, R, &ldc, work ) / error;
-            printf( "%5d %5d %5d      %c       %c       %c       %c      %8.2e  %s\n",
+            printf( "%5d %5d %5d      %c       %c       %c       %c      %8.2e   %s\n",
                     (int) M, (int) N, (int) K,
                     lapacke_storev_const(storev[istor]), lapacke_side_const(side[iside]),
                     lapacke_direct_const(direct[idir]), lapacke_trans_const(trans[itran]),
                    error, (error < tol ? "ok" : "failed") );
-            status |= ! (error < tol);
+            status += ! (error < tol);
             
             TESTING_FREE_CPU( C );
             TESTING_FREE_CPU( R );

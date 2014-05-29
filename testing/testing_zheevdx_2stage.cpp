@@ -213,7 +213,7 @@ int main( int argc, char** argv)
                                 &info);
                 info_solution = check_solution(N, w2, w1, eps);
               
-                if ( (info_solution == 0) & (info_ortho == 0) & (info_reduction == 0) ) {
+                if ( (info_solution == 0) && (info_ortho == 0) && (info_reduction == 0) ) {
                     printf("  ok\n");
                     //printf("***************************************************\n");
                     //printf(" ---- TESTING ZHEEVD ...................... PASSED !\n");
@@ -221,7 +221,7 @@ int main( int argc, char** argv)
                 }
                 else {
                     printf("  failed\n");
-                    status |= 1;
+                    status += 1;
                     //printf("************************************************\n");
                     //printf(" - TESTING ZHEEVD ... FAILED !\n");
                     //printf("************************************************\n");

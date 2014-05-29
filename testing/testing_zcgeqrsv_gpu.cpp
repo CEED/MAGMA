@@ -50,9 +50,12 @@ int main( int argc, char** argv)
     printf("Epsilon(double): %8.6e\n"
            "Epsilon(single): %8.6e\n\n",
            lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
+    magma_int_t status = 0;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    //double tol = opts.tolerance * lapackf77_dlamch("E");
     
     nrhs = opts.nrhs;
     
@@ -64,7 +67,7 @@ int main( int argc, char** argv)
             M = opts.msize[itest];
             N = opts.nsize[itest];
             if ( M < N ) {
-                printf( "skipping M=%d, N=%d because M < N is not yet supported.\n", (int) M, (int) N );
+                printf( "%5d %5d %5d   skipping because M < N is not yet supported.\n", (int) M, (int) N, (int) nrhs );
                 continue;
             }
             min_mn = min(M, N);
@@ -216,5 +219,5 @@ int main( int argc, char** argv)
     }
     
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

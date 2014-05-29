@@ -460,5 +460,7 @@ int main( int argc, char** argv )
     }
     
     TESTING_FINALIZE();
-    return 0;
+    
+    int status = (total_error != 0.);
+    return status;
 }
