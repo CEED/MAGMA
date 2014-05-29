@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     real_Double_t   gflopsF, gflopsS, gpu_perf, gpu_time;
     real_Double_t   gpu_perfdf, gpu_perfds;
     real_Double_t   gpu_perfsf, gpu_perfss;
-    double          Rnorm, Anorm;
+    double          error, Rnorm, Anorm;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
@@ -50,12 +50,12 @@ int main(int argc, char **argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
 
-    //double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     nrhs = opts.nrhs;
     
     printf("trans = %s\n", lapack_trans_const(opts.transA) );
-    printf("    N  NRHS   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/(N*||A||)  Iter\n");
+    printf("    N  NRHS   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  Iter   |b-Ax|/N|A|\n");
     printf("==========================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -116,6 +116,7 @@ int main(int argc, char **argv)
                                        h_X, &ldx,
                            &c_neg_one, h_B, &ldb);
             Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, h_workd);
+            error = Rnorm / (N*Anorm);
             
             //=====================================================================
             //                 Double Precision Factor
@@ -179,10 +180,11 @@ int main(int argc, char **argv)
                 printf("magma_cgetrs returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            printf("%5d %5d   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f   %8.2e   %3d\n",
+            printf("%5d %5d   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f     %4d   %8.2e   %s\n",
                    (int) N, (int) nrhs,
                    gpu_perfdf, gpu_perfds, gpu_perfsf, gpu_perfss, gpu_perf,
-                   Rnorm/(N*Anorm), (int) gesv_iter );
+                   (int) gesv_iter, error, (error < tol ? "ok" : "failed"));
+            status |= ! (error < tol);
             
             TESTING_FREE_CPU( h_A     );
             TESTING_FREE_CPU( h_B     );
