@@ -88,15 +88,17 @@ int main( int argc, char** argv)
     printf("==================================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            // each test is assigned one bit in the check bitmask, bit=1 is failure.
-            // shift keeps track of which bit is for current test
+            // For an N x N matrix, swap nb rows or nb columns using various methods.
+            // Each test is assigned one bit in the 'check' bitmask; bit=1 indicates failure.
+            // The variable 'shift' keeps track of which bit is for current test
             int shift = 1;
             int check = 0;
             N = opts.nsize[itest];
             lda    = N;
             ldda   = ((N+31)/32)*32;
             nb     = (opts.nb > 0 ? opts.nb : magma_get_zgetrf_nb( N ));
-            // for each swap, does 2N loads and 2N stores
+            nb     = min( N, nb );
+            // each swap does 2N loads and 2N stores, for nb swaps
             gbytes = sizeof(magmaDoubleComplex) * 4.*N*nb / 1e9;
                         
             TESTING_MALLOC_PIN( h_A1, magmaDoubleComplex, lda*N );
@@ -397,7 +399,7 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( queue ) - time;
             // copy reads 1 matrix and writes 1 matrix, so has half gbytes of swap
             row_perf6 = 0.5 * gbytes / time;
-            
+
             printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
                    (int) N, (int) nb,
                    row_perf0, ((check & 0x001) != 0 ? '*' : ' '),
