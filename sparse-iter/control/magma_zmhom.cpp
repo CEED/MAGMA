@@ -85,8 +85,6 @@ magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){
             magma_int_t bound = A.nnz;
             bound = ( (rblock+1)*b < A.num_rows ) ? 
                                             A.row[(rblock+1)*b] : A.nnz;
-            //printf("bound:%d\n", bound);
-            //for( i=A.row[rblock*b]; i<bound; i++){
             for( i=A.row[rblock*b]; i<bound; i++){
                 if( ( cblock*b <= A.col[i] && A.col[i] < (cblock+1)*b )
                         && 
@@ -100,31 +98,6 @@ magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){
         }// cblocks
         }// rblocks
         magma_setvector( A.nnz, sizeof(magma_index_t), p_h, 1, p, 1 );
-/*
-// debug
-        magma_getvector( A.nnz, sizeof(magma_index_t), p, 1, p_h, 1 );
-
-printf("A.nnz:%d\n", A.nnz);
-for(int z=A.nnz-10; z<A.nnz; z++)
-    printf("%d ", p_h[z]); 
-
-
-        magma_index_t *t1, *t2;
-        magma_indexmalloc_cpu( &t1, A.nnz );
-        magma_indexmalloc_cpu( &t2, A.nnz );
-for(int z=0; z<A.nnz; z++)
-    t1[z] = 0;
-for(int z=0; z<A.nnz; z++)
-    t1[p_h[z]]++;
-
-printf("\ndoubles:\n");
-for(int z=0; z<A.nnz; z++){
-    if( t1[z]>1 )
-    printf(" double entry %d\n", z);
-    }
-    
-printf("end\n");
-// debug*/
         magma_free_cpu( p_h );
         return MAGMA_SUCCESS; 
     }
