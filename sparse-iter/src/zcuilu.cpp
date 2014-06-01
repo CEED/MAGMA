@@ -382,7 +382,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_sparse_matrix hA, U, hD, hR, hAt;
     magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
     U.diagorder_type = Magma_VALUE;
-    magma_z_mconvert( hA, &U, Magma_CSR, Magma_CSRU);
+    magma_z_mconvert( hA, &U, Magma_CSR, Magma_CSRL);
 
     magma_z_mtransfer(U, &(precond->M), Magma_CPU, Magma_DEV);
 
@@ -410,7 +410,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
      if(cusparseStatus != 0)    printf("error in IndexBase.\n");
 
     cusparseStatus =
-    cusparseSetMatFillMode(descrA,CUSPARSE_FILL_MODE_UPPER);
+    cusparseSetMatFillMode(descrA,CUSPARSE_FILL_MODE_LOWER);
      if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
 
@@ -454,7 +454,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
      if(cusparseStatus != 0)    printf("error in IndexBase.\n");
 
     cusparseStatus =
-    cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_UPPER);
+    cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_LOWER);
      if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
 
@@ -463,7 +463,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     cusparseStatus =
     cusparseZcsrsv_analysis(cusparseHandle, 
-        CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows, 
+        CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrL, 
         precond->M.val, precond->M.row, precond->M.col, precond->cuinfoL );
      if(cusparseStatus != 0)    printf("error in analysis L.\n");
@@ -487,7 +487,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
      if(cusparseStatus != 0)    printf("error in IndexBase.\n");
 
     cusparseStatus =
-    cusparseSetMatFillMode(descrU,CUSPARSE_FILL_MODE_UPPER);
+    cusparseSetMatFillMode(descrU,CUSPARSE_FILL_MODE_LOWER);
      if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
     cusparseStatus = cusparseCreateSolveAnalysisInfo(&precond->cuinfoU); 
@@ -495,7 +495,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     cusparseStatus =
     cusparseZcsrsv_analysis(cusparseHandle, 
-        CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
+        CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrU, 
         precond->M.val, precond->M.row, precond->M.col, precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis U.\n");
@@ -590,14 +590,14 @@ magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x,
 
 
             cusparseStatus =
-            cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_UPPER);
+            cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_LOWER);
              if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
             // end CUSPARSE context //
 
             cusparseStatus =
             cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_TRANSPOSE, 
+                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                     precond->M.num_rows, &one, 
                                     descrL,
                                     precond->M.val,
@@ -664,7 +664,7 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
 
 
             cusparseStatus =
-            cusparseSetMatFillMode(descrU,CUSPARSE_FILL_MODE_UPPER);
+            cusparseSetMatFillMode(descrU,CUSPARSE_FILL_MODE_LOWER);
              if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
             cusparseStatus =
@@ -676,7 +676,7 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
 
             cusparseStatus =
             cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                    CUSPARSE_OPERATION_TRANSPOSE, 
                                     precond->M.num_rows, &one, 
                                     descrU,
                                     precond->M.val,
