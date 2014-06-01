@@ -39,6 +39,7 @@ int main( int argc, char** argv)
     magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     precond_par.levels = 0;
+    precond_par.sweeps = 10;
     int precond = 0;
     int format = 0;
     int version = 0;
@@ -94,6 +95,8 @@ int main( int argc, char** argv)
             sscanf( argv[++i], "%lf", &solver_par.epsilon );
         } else if ( strcmp("--levels", argv[i]) == 0 ) {
             precond_par.levels = atoi( argv[++i] );
+        }else if ( strcmp("--sweeps", argv[i]) == 0 ) {
+            precond_par.sweeps = atoi( argv[++i] );
         } else
             break;
     }
@@ -103,12 +106,12 @@ int main( int argc, char** argv)
         " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d ]) ]"
+        " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d --sweeps %d]) ]"
         " matrices \n\n", format, B.blocksize, B.alignment,
         (int) scale,
         solver_par.verbose,
         solver_par.maxiter, solver_par.epsilon, 
-        precond, (int) precond_par.levels );
+        precond, (int) precond_par.levels, (int) precond_par.sweeps );
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
 

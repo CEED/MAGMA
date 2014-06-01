@@ -322,6 +322,7 @@ typedef struct magma_z_preconditioner{
 
     magma_solver_type       solver;
     magma_int_t             levels;
+    magma_int_t             sweeps;
     magma_precision         format;
     double                  epsilon;  
     magma_int_t             maxiter;
@@ -352,6 +353,7 @@ typedef struct magma_c_preconditioner{
 
     magma_solver_type       solver;
     magma_int_t             levels;
+    magma_int_t             sweeps;
     magma_precision         format;
     float                   epsilon;  
     magma_int_t             maxiter;
@@ -383,6 +385,7 @@ typedef struct magma_d_preconditioner{
 
     magma_solver_type       solver;
     magma_int_t             levels;
+    magma_int_t             sweeps;
     magma_precision         format;
     double                  epsilon;  
     magma_int_t             maxiter;
@@ -414,6 +417,7 @@ typedef struct magma_s_preconditioner{
 
     magma_solver_type       solver;
     magma_int_t             levels;
+    magma_int_t             sweeps;
     magma_precision         format;
     float                   epsilon;  
     magma_int_t             maxiter;

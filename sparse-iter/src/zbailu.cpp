@@ -76,7 +76,7 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mfree(&hAUT);
     magma_z_mfree(&hAU);
 
-    for(int i=0; i<20; i++){
+    for(int i=0; i<precond->sweeps; i++){
         magma_zailu_csr_s( dAL, dAU, dL, dU );
 
     }
@@ -331,7 +331,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mfree(&hAL);
     magma_z_mfree(&hA);
 
-    for(int i=0; i<25; i++){
+    for(int i=0; i<precond->sweeps; i++){
         magma_zaic_csr_s( dAL, dL );
 
     }
@@ -342,6 +342,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_z_mconvert(hL, &hAL, hL.storage_type, Magma_CSR);
 
+    // for CUSPARSE
     magma_z_mtransfer( hAL, &precond->M, Magma_CPU, Magma_DEV );
 
     magma_zcsrsplit( 256, hAL, &DL, &RL );
@@ -380,7 +381,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
      if(cusparseStatus != 0)    printf("error in MatrType.\n");
 
     cusparseStatus =
-    cusparseSetMatDiagType (descrL, CUSPARSE_DIAG_TYPE_UNIT);
+    cusparseSetMatDiagType (descrL, CUSPARSE_DIAG_TYPE_NON_UNIT);
      if(cusparseStatus != 0)    printf("error in DiagType.\n");
 
     cusparseStatus =
@@ -397,7 +398,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     cusparseStatus =
     cusparseZcsrsv_analysis(cusparseHandle, 
-        CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows, 
+        CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrL, 
         precond->M.val, precond->M.row, precond->M.col, precond->cuinfoL );
      if(cusparseStatus != 0)    printf("error in analysis L.\n");
@@ -429,7 +430,7 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     cusparseStatus =
     cusparseZcsrsv_analysis(cusparseHandle, 
-        CUSPARSE_OPERATION_NON_TRANSPOSE, precond->M.num_rows, 
+        CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows, 
         precond->M.nnz, descrU, 
         precond->M.val, precond->M.row, precond->M.col, precond->cuinfoU );
      if(cusparseStatus != 0)    printf("error in analysis U.\n");
