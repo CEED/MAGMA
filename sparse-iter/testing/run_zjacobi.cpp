@@ -95,15 +95,18 @@ int main( int argc, char** argv)
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
-        // scale initial guess
+        // scale matrix
         magma_zmscale( &A, scaling );
-
-        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
-        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
         magma_z_mconvert( A, &B, Magma_CSR, B.storage_type );
         magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
 
+        // vectors and initial guess
+        magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, one );
+        magma_z_spmv( one, B_d, x, zero, b );                 //  b = A x
+        magma_z_vfree(&x);
+        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
         magma_zjacobi( B_d, b, &x, &solver_par );
 
