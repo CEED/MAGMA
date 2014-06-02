@@ -78,7 +78,7 @@ void magma_getvector_async_internal(
 // set  copies host to device
 // get  copies device to host
 // copy copies device to device
-// (with CUDA unified addressing, copy can be between same or different devices )
+// (with CUDA unified addressing, copy can be between same or different devices)
 // Add the function, file, and line for error-reporting purposes.
 
 #define magma_setmatrix(           m, n, elemSize, hA_src, lda, dB_dst, lddb ) \
@@ -137,6 +137,97 @@ void magma_copymatrix_async_internal(
     void       *dB_dst, magma_int_t lddb,
     magma_queue_t stream,
     const char* func, const char* file, int line );
+
+
+// ========================================
+// copying vectors - version for magma_int_t
+// TODO to make these truly type-safe, would need intermediate inline
+//      magma_i* functions that call the generic magma_* functions.
+//      Could do the same with magma_[sdcz]* set/get functions.
+
+#define magma_isetvector(          n,                      hx_src, incx, dy_dst, incy ) \
+        magma_setvector_internal(  n, sizeof(magma_int_t), hx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_igetvector(          n,                      dx_src, incx, hy_dst, incy ) \
+        magma_getvector_internal(  n, sizeof(magma_int_t), dx_src, incx, hy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_icopyvector(         n,                      dx_src, incx, dy_dst, incy ) \
+        magma_copyvector_internal( n, sizeof(magma_int_t), dx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_isetvector_async(          n,                      hx_src, incx, dy_dst, incy, queue ) \
+        magma_setvector_async_internal(  n, sizeof(magma_int_t), hx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_igetvector_async(          n,                      dx_src, incx, hy_dst, incy, queue ) \
+        magma_getvector_async_internal(  n, sizeof(magma_int_t), dx_src, incx, hy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_icopyvector_async(         n,                      dx_src, incx, dy_dst, incy, queue ) \
+        magma_copyvector_async_internal( n, sizeof(magma_int_t), dx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+
+// ========================================
+// copying sub-matrices - version for magma_int_t
+
+#define magma_isetmatrix(          m, n,                      hA_src, lda, dB_dst, lddb ) \
+        magma_setmatrix_internal(  m, n, sizeof(magma_int_t), hA_src, lda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
+
+#define magma_igetmatrix(          m, n,                      dA_src, ldda, hB_dst, ldb ) \
+        magma_getmatrix_internal(  m, n, sizeof(magma_int_t), dA_src, ldda, hB_dst, ldb, __func__, __FILE__, __LINE__ )
+
+#define magma_icopymatrix(         m, n,                      dA_src, ldda, dB_dst, lddb ) \
+        magma_copymatrix_internal( m, n, sizeof(magma_int_t), dA_src, ldda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
+
+#define magma_isetmatrix_async(          m, n,                      hA_src, lda, dB_dst, lddb, queue ) \
+        magma_setmatrix_async_internal(  m, n, sizeof(magma_int_t), hA_src, lda, dB_dst, lddb, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_igetmatrix_async(          m, n,                      dA_src, ldda, hB_dst, ldb, queue ) \
+        magma_getmatrix_async_internal(  m, n, sizeof(magma_int_t), dA_src, ldda, hB_dst, ldb, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_icopymatrix_async(         m, n,                      dA_src, ldda, dB_dst, lddb, queue ) \
+        magma_copymatrix_async_internal( m, n, sizeof(magma_int_t), dA_src, ldda, dB_dst, lddb, queue, __func__, __FILE__, __LINE__ )
+
+
+// ========================================
+// copying vectors - version for magma_index_t
+
+#define magma_index_setvector(     n,                        hx_src, incx, dy_dst, incy ) \
+        magma_setvector_internal(  n, sizeof(magma_index_t), hx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_index_getvector(     n,                        dx_src, incx, hy_dst, incy ) \
+        magma_getvector_internal(  n, sizeof(magma_index_t), dx_src, incx, hy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_index_copyvector(    n,                        dx_src, incx, dy_dst, incy ) \
+        magma_copyvector_internal( n, sizeof(magma_index_t), dx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+
+#define magma_index_setvector_async(     n,                        hx_src, incx, dy_dst, incy, queue ) \
+        magma_setvector_async_internal(  n, sizeof(magma_index_t), hx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_index_getvector_async(     n,                        dx_src, incx, hy_dst, incy, queue ) \
+        magma_getvector_async_internal(  n, sizeof(magma_index_t), dx_src, incx, hy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_index_copyvector_async(    n,                        dx_src, incx, dy_dst, incy, queue ) \
+        magma_copyvector_async_internal( n, sizeof(magma_index_t), dx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+
+
+// ========================================
+// copying sub-matrices - version for magma_index_t
+
+#define magma_index_setmatrix(     m, n,                        hA_src, lda, dB_dst, lddb ) \
+        magma_setmatrix_internal(  m, n, sizeof(magma_index_t), hA_src, lda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
+
+#define magma_index_getmatrix(     m, n,                        dA_src, ldda, hB_dst, ldb ) \
+        magma_getmatrix_internal(  m, n, sizeof(magma_index_t), dA_src, ldda, hB_dst, ldb, __func__, __FILE__, __LINE__ )
+
+#define magma_index_copymatrix(    m, n,                        dA_src, ldda, dB_dst, lddb ) \
+        magma_copymatrix_internal( m, n, sizeof(magma_index_t), dA_src, ldda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
+
+#define magma_index_setmatrix_async(     m, n,                        hA_src, lda, dB_dst, lddb, queue ) \
+        magma_setmatrix_async_internal(  m, n, sizeof(magma_index_t), hA_src, lda, dB_dst, lddb, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_index_getmatrix_async(     m, n,                        dA_src, ldda, hB_dst, ldb, queue ) \
+        magma_getmatrix_async_internal(  m, n, sizeof(magma_index_t), dA_src, ldda, hB_dst, ldb, queue, __func__, __FILE__, __LINE__ )
+
+#define magma_index_copymatrix_async(    m, n,                        dA_src, ldda, dB_dst, lddb, queue ) \
+        magma_copymatrix_async_internal( m, n, sizeof(magma_index_t), dA_src, ldda, dB_dst, lddb, queue, __func__, __FILE__, __LINE__ )
 
 #ifdef __cplusplus
 }
