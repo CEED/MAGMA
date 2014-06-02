@@ -149,9 +149,8 @@ magma_zaic_csr_c( magma_z_sparse_matrix A,
     magma_zaic_csr_c_kernel<<< grid, block, 0, magma_stream >>>
             ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, A_CSR.blockinfo,  A_CSR.col, val_n );
 
-  //  cudaMemcpy( A_CSR.val, val_n, A.nnz*sizeof( magmaDoubleComplex ), 
-    //                                                cudaMemcpyDeviceToDevice );
-    cudaFree(val_n);
+    //magma_zcopyvector( A.nnz, val_n, 1, A_CSR.val, 1 );
+    magma_free( val_n );
     return MAGMA_SUCCESS;
 }
 

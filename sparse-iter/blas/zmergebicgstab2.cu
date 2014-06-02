@@ -234,8 +234,7 @@ magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
     }
 
 
-    cudaMemcpy( skp, aux1, sizeof( magmaDoubleComplex ), 
-                                        cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( 1, aux1, 1, skp, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_alphakernel<<<Gs2, Bs2, 0>>>( skp );
@@ -511,10 +510,8 @@ magma_zbicgmerge_spmv2(
     }
 
 
-    cudaMemcpy( skp+6, aux1, sizeof( magmaDoubleComplex ), 
-                                    cudaMemcpyDeviceToDevice );
-    cudaMemcpy( skp+7, aux1+n, sizeof( magmaDoubleComplex ), 
-                                    cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( 1, aux1, 1, skp+6, 1 );
+    magma_zcopyvector( 1, aux1+n, 1, skp+7, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_omegakernel<<<Gs2, Bs2, 0>>>( skp );
@@ -709,10 +706,8 @@ magma_zbicgmerge_xrbeta(
     }
 
 
-    cudaMemcpy( skp+4, aux1, sizeof( magmaDoubleComplex ), 
-                                        cudaMemcpyDeviceToDevice );
-    cudaMemcpy( skp+5, aux1+n, sizeof( magmaDoubleComplex ), 
-                                        cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( 1, aux1, 1, skp+4, 1 );
+    magma_zcopyvector( 1, aux1+n, 1, skp+5, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zbicgstab_betakernel<<<Gs2, Bs2, 0>>>( skp );

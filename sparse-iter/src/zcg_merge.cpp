@@ -103,8 +103,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     skp_h[4]=tmp1; 
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
 
-    cudaMemcpy( skp, skp_h, 6*sizeof( magmaDoubleComplex ), 
-                                            cudaMemcpyHostToDevice );
+    magma_zsetvector( 6, skp_h, 1, skp, 1 );
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
@@ -137,7 +136,7 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zcgmerge_xrbeta( dofs, d1, d2, x->val, r.val, d.val, z.val, skp ); 
 
         // check stopping criterion (asynchronous copy)
-        cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+1, 1, 
+        magma_zgetvector_async( 1 , skp+1, 1, 
                                                     skp_h+1, 1, stream[1] );
         betanom = sqrt(MAGMA_Z_REAL(skp_h[1]));
 

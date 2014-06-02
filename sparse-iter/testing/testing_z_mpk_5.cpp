@@ -291,9 +291,9 @@ int main( int argc, char** argv)
                 magma_imalloc( &vecs_back_gpu[gpu], num_vecs_back[gpu] );
                 magma_imalloc( &add_rows_gpu[gpu], num_add_rows[gpu][sk-1] );
                 magma_imalloc( &add_vecs_gpu[gpu], num_add_vecs[gpu] );
-                cublasSetVector( num_add_rows[gpu][sk-1], sizeof( magma_int_t ), add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
-                cublasSetVector( num_add_vecs[gpu], sizeof( magma_int_t ), add_vecs[gpu], 1, add_vecs_gpu[gpu], 1 );
-                cublasSetVector( num_vecs_back[gpu], sizeof( magma_int_t ), vecs_back[gpu], 1, vecs_back_gpu[gpu], 1 ); 
+                magma_isetvector( num_add_rows[gpu][sk-1], add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
+                magma_isetvector( num_add_vecs[gpu], add_vecs[gpu], 1, add_vecs_gpu[gpu], 1 );
+                magma_isetvector( num_vecs_back[gpu], vecs_back[gpu], 1, vecs_back_gpu[gpu], 1 ); 
                 
             }
 
@@ -445,14 +445,14 @@ for( int noise=0; noise<100; noise++){
                 magma_zaxpy(hA.num_rows, one, du.val, 1, dv.val, 1);   
                 //printf("%d:\n",i);
                 //magma_z_vvisu(dv,0,7);
-                cudaMemcpy( du.val, dv.val, dA.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+                magma_zcopyvector( dA.num_rows, dv.val, 1, du.val, 1 );
             }
             
             //magma_z_vvisu(du, 0, 7);
-            cublasSetVector(hA.num_rows, sizeof(magmaDoubleComplex), ha.val, 1, dv.val, 1);
+            magma_zsetvector( hA.num_rows, ha.val, 1, dv.val, 1);
             //magma_z_vvisu(dv, 0, 7);
             magma_zaxpy(hA.num_rows, mone, dv.val, 1, du.val, 1);   
-            cublasGetVector(hA.num_rows, sizeof(magmaDoubleComplex), du.val, 1, hw.val, 1);
+            magma_zgetvector( hA.num_rows, du.val, 1, hw.val, 1);
 
             // printf("-------------------------------\n difference in components 0 -- 7:\n"); magma_z_vvisu(hw, 0, 7);
             for( i=0; i<hA.num_rows; i++){

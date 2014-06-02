@@ -116,8 +116,7 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
     skp_h[3]=rho_old; 
     skp_h[4]=rho_new; 
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
-    cudaMemcpy( skp, skp_h, 8*sizeof( magmaDoubleComplex ), 
-                                            cudaMemcpyHostToDevice );
+    magma_zsetvector( 8, skp_h, 1, skp, 1 );
 
     magma_z_spmv( c_one, A, r, c_zero, v );                     // z = A r
     den = MAGMA_Z_REAL( magma_zdotc(dofs, v.val, 1, r.val, 1) );// den = z dot r
@@ -155,7 +154,7 @@ magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b,
                                                     q(4), q(5), x->val, skp);  
 
         // check stopping criterion (asynchronous copy)
-        cublasGetVectorAsync(1 , sizeof( magmaDoubleComplex ), skp+5, 1, 
+        magma_zgetvector_async( 1 , skp+5, 1, 
                                                         skp_h+5, 1, stream[1] );
 
         betanom = sqrt(MAGMA_Z_REAL(skp_h[5]));

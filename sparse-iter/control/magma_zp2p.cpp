@@ -243,10 +243,10 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
     (cudaEventDestroy(start_event));
     (cudaEventDestroy(stop_event));
     (cudaSetDevice(gpuid_tesla[i]));
-    (cudaFree(g0));
+    (magma_free( g0) );
     (cudaSetDevice(gpuid_tesla[j]));
-    (cudaFree(g1));
-    (cudaFreeHost(h0));
+    (magma_free( g1) );
+    (magma_free_cpu( h0) );
 
     }
     }
@@ -334,11 +334,11 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
 
     for( int i =0; i<STREAM_COUNT; ++i ) {
         
-        cudaFreeHost(h_data_in[i]);
-        cudaFree(d_data_in[i]);
+        magma_free_cpu( h_data_in[i] );
+        magma_free( d_data_in[i] );
 
-        cudaFreeHost(h_data_out[i]);
-        cudaFree(d_data_out[i]);
+        magma_free_cpu( h_data_out[i] );
+        magma_free( d_data_out[i] );
         
         cudaStreamDestroy(stream[i]);
         cudaEventDestroy(cycleDone[i]);        

@@ -476,8 +476,7 @@ magma_zmdotc(       int n,
         else   { aux2 = d1; aux1 = d2; }
     }
     for( int j=0; j<k; j++){
-            cudaMemcpy( skp+j, aux1+j*n, sizeof( magmaDoubleComplex ), 
-                                    cudaMemcpyDeviceToDevice );
+            magma_zcopyvector( 1, aux1+j*n, 1, skp+j, 1 );
     }
 */
    
@@ -510,8 +509,7 @@ magma_zmdotc(       int n,
 
 
     for( int j=0; j<k; j++){
-            cudaMemcpy( skp+j, aux1+j*n, sizeof( magmaDoubleComplex ), 
-                            cudaMemcpyDeviceToDevice );
+            magma_zcopyvector( 1, aux1+j*n, 1, skp+j, 1 );
     }
 
     

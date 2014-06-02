@@ -184,8 +184,8 @@ magma_zailu_csr_s_debug( magma_z_sparse_matrix A_L,
         blockidx[idx2] = tmp;
     }*/
 
-    cublasSetVector( limit , sizeof( int ), blockidx, 1, d_blockidx, 1 );
- //   cublasGetVector( dimgrid1 , sizeof( int ), d_blockidx, 1, blockidx, 1 );
+    magma_setvector( limit , blockidx, 1, d_blockidx, 1 );
+ //   magma_getvector( dimgrid1 , d_blockidx, 1, blockidx, 1 );
    // printf(" %d %d %d\n", blockidx[0], blockidx[5], blockidx[7]);
     // backward engineering
 

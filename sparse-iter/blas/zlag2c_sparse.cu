@@ -42,7 +42,7 @@ magmaint_zlag2c_sparse(  int M, int N,
 
 
 extern "C" void 
-magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N , 
+magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N, 
                   const magmaDoubleComplex *A, magma_int_t lda, 
                   magmaFloatComplex *SA,       magma_int_t ldsa, 
                   magma_int_t *info ) 
@@ -175,7 +175,7 @@ extern "C" void
 magma_zlag2c_CSR_DENSE(       magma_z_sparse_matrix A, 
                               magma_c_sparse_matrix *B ){
 
-    cublasStatus stat;
+    magma_int_t stat;
 
     if( A.memory_location == Magma_DEV && A.storage_type == Magma_CSR){
         B->storage_type = Magma_DENSE;
@@ -183,9 +183,8 @@ magma_zlag2c_CSR_DENSE(       magma_z_sparse_matrix A,
         B->num_rows = A.num_rows;
         B->num_cols = A.num_cols;
         B->nnz = A.nnz;
-        stat = cublasAlloc( A.num_rows* A.num_cols, 
-                sizeof( magmaFloatComplex ), ( void** )&B->val );
-        if( ( int )stat != 0 ) 
+        stat = magma_cmalloc( &B->val, A.num_rows* A.num_cols );
+        if( stat != 0 ) 
         {printf("Memory Allocation Error converting matrix\n"); exit(0); }
         
         dim3 Bs( BLOCKSIZE );
@@ -202,7 +201,7 @@ extern "C" void
 magma_zlag2c_CSR_DENSE_alloc( magma_z_sparse_matrix A, 
                               magma_c_sparse_matrix *B ){
 
-    cublasStatus stat;
+    magma_int_t stat;
 
     if( A.memory_location == Magma_DEV && A.storage_type == Magma_CSR){
         B->storage_type = Magma_DENSE;
@@ -210,9 +209,8 @@ magma_zlag2c_CSR_DENSE_alloc( magma_z_sparse_matrix A,
         B->num_rows = A.num_rows;
         B->num_cols = A.num_cols;
         B->nnz = A.nnz;
-        stat = cublasAlloc( A.num_rows* A.num_cols, 
-                sizeof( magmaFloatComplex ), ( void** )&B->val );
-        if( ( int )stat != 0 ) 
+        stat = magma_cmalloc( &B->val, A.num_rows* A.num_cols );
+        if( stat != 0 ) 
         {printf("Memory Allocation Error converting matrix\n"); exit(0); }
         
         dim3 Bs( BLOCKSIZE );

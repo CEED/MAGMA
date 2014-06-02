@@ -158,8 +158,7 @@ magma_z_mpk_uncompspmv(  magma_int_t offset,
 
    dim3 grid( (num_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   cudaMemcpy( y+offset, x, blocksize*sizeof( magmaDoubleComplex ), 
-                                            cudaMemcpyDeviceToDevice );
+   magma_zcopyvector( blocksize, x, 1, y+offset, 1 );
 
    uncompress_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
                   ( num_add_rows, add_rows, x+blocksize, y );

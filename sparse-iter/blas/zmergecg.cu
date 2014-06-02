@@ -979,8 +979,7 @@ magma_zcgmerge_spmv1(
     }
 
 
-    cudaMemcpy( skp+4, aux1, sizeof( magmaDoubleComplex ), 
-                                            cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( 1, aux1, 1, skp+4, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zcg_rhokernel<<<Gs2, Bs2, 0>>>( skp );
@@ -1163,8 +1162,7 @@ magma_zcgmerge_xrbeta(
     }
 
 
-    cudaMemcpy( skp+1, aux1, sizeof( magmaDoubleComplex ), 
-                                                cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( 1, aux1, 1, skp+1, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zcg_alphabetakernel<<<Gs2, Bs2, 0>>>( skp );

@@ -283,7 +283,7 @@ magma_zapplypastix( magma_z_vector b, magma_z_vector *x,
 
         // fix that x is not allocated every time
         //  in case of many iterations, it might be faster to use
-        // cublasSetVector( ncol, sizeof( magmaDoubleComplex ), 
+        // magma_zsetvector( ncol, 
         //                                    b_h.val, 1, x->val, 1 );
         magma_z_vfree( x );
         magma_z_vtransfer( b_h, x, Magma_CPU, b.memory_location);

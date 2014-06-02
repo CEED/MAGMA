@@ -152,7 +152,7 @@ magma_zp1gmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     zz = MAGMA_Z_REAL(magma_zdotc(dofs, r.val, 1, r.val, 1));  
                     skp[k] = H(k+1,k) = MAGMA_Z_MAKE( sqrt(zz-tmp),0.);
 
-                    cublasSetVector( k+1 , sizeof( magmaDoubleComplex ), skp, 1, skp_d, 1 );
+                    magma_zsetvector( k+1 , skp, 1, skp_d, 1 );
 
                     magma_zp1gmres_mgs(dofs, k, skp_d, v.val, r.val);       // block orthogonalization      
                     magma_device_sync();

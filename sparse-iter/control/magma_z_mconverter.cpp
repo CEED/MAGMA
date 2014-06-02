@@ -220,7 +220,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_z_mconvert( A, B, Magma_CSR, Magma_CSR);
             A.storage_type = Magma_CSRL;
 
-/*
             magma_index_t i, j, k, *ELL_count;
 
             magma_int_t offdiags = 0, maxrowlength = 0, maxrowtmp = 0 ;
@@ -1384,11 +1383,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magmaDoubleComplex *transpose;
             magma_zmalloc( &transpose, size_b*size_b );
             for( magma_int_t i=0; i<B->numblocks; i++ ){
-                cudaMemcpy( transpose, B->val+i*size_b*size_b, 
-        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                magma_zsetvector( size_b*size_b, B->val+i*size_b*size_b, 1, transpose, 1 );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
-                cudaMemcpy( B->val+i*size_b*size_b, transpose, 
-        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+                magma_zgetvector( size_b*size_b, transpose, 1, B->val+i*size_b*size_b, 1 );
             }
             /*
             printf("blockinfo for blocksize %d:\n", size_b);
@@ -1477,11 +1474,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc( &transpose, size_b*size_b );
             magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
             for( magma_int_t i=0; i<A.numblocks; i++ ){
-                cudaMemcpy( transpose, A.val+i*size_b*size_b, 
-        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                magma_zsetvector( size_b*size_b, A.val+i*size_b*size_b, 1, transpose, 1 );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
-                cudaMemcpy( val_tmp2+i*size_b*size_b, transpose, 
-        size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+                magma_zgetvector( size_b*size_b, transpose, 1, val_tmp2+i*size_b*size_b, 1 );
             }
 
             // fill col and val
@@ -1642,10 +1637,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             if (NULL != nnzTotalDevHostPtr){
                 nnzb = *nnzTotalDevHostPtr;
             }else{
-                cudaMemcpy(&nnzb, B->row+mb, sizeof(int), 
-                                        cudaMemcpyDeviceToHost);
-                cudaMemcpy(&base, B->row  , sizeof(int), 
-                                        cudaMemcpyDeviceToHost);
+                magma_igetvector( 1, B->row+mb, 1, &nnzb, 1 );
+                magma_igetvector( 1, B->row, 1, &base, 1 );
                 nnzb -= base;
             }
             B->numblocks = nnzb; // number of blocks
@@ -1787,10 +1780,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_index_malloc( &B->row, B->nnz );
             magma_index_malloc( &B->col, B->nnz );
 
-            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
-                                                    cudaMemcpyDeviceToDevice );
-            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), 
-                                                    cudaMemcpyDeviceToDevice );
+            magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
+            magma_icopyvector( A.nnz, A.col, 1, B->col, 1 );
 
             // conversion using CUSPARSE
             cusparseXcsr2coo( cusparseHandle, A.row,
@@ -1822,10 +1813,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_index_malloc( &B->row, B->nnz );
             magma_index_malloc( &B->col, B->nnz );
 
-            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), 
-                                                    cudaMemcpyDeviceToDevice );
-            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), 
-                                                    cudaMemcpyDeviceToDevice );
+            magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
+            magma_icopyvector( A.nnz, A.col, 1, B->col, 1 );
 
             // conversion using CUSPARSE
             cusparseXcoo2csr( cusparseHandle, A.row,

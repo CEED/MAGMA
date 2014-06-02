@@ -51,7 +51,7 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
 
     magma_int_t i,j,k,l,info;
 
-    cublasStatus stat;
+    magma_int_t stat;
 
 
     // fill in information for B
@@ -69,17 +69,17 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
 
 
     // memory allocation
-    stat = cublasAlloc( size_b*size_b*A.numblocks, sizeof( magmaDoubleComplex ), ( void** )&M->val );
-    if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
-    stat = cublasAlloc(  r_blocks+1 , sizeof( magma_int_t ), ( void** )&M->row );
-    if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); } 
-    stat = cublasAlloc( A.numblocks, sizeof( magma_int_t ), ( void** )&M->col );
-    if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+    stat = magma_zmalloc( &M->val, size_b*size_b*A.numblocks );
+    if( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+    stat = magma_imalloc( &M->row, r_blocks + 1  );
+    if( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); } 
+    stat = magma_imalloc( &M->col, A.numblocks );
+    if( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
     magma_imalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
     // data transfer
-    cudaMemcpy( M->val, A.val, size_b*size_b*A.numblocks*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-    cudaMemcpy( M->row, A.row, (r_blocks+1)*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
-    cudaMemcpy( M->col, A.col, A.numblocks*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( size_b*size_b*A.numblocks, A.val, 1, M->val, 1 );
+    magma_icopyvector( (r_blocks+1), A.row, 1, M->row, 1 );
+    magma_icopyvector( A.numblocks, A.col, 1, M->col, 1 );
     for( magma_int_t i=0; i<r_blocks * c_blocks; i++ ){
         M->blockinfo[i] = A.blockinfo[i];
     }
@@ -89,8 +89,8 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
 
     magma_imalloc_cpu( &cpu_row, r_blocks+1 );
     magma_imalloc_cpu( &cpu_col, A.numblocks );
-    cublasGetVector( r_blocks+1, sizeof( magma_int_t ), A.row, 1, cpu_row, 1 );            
-    cublasGetVector(  A.numblocks, sizeof( magma_int_t ), A.col, 1, cpu_col, 1 );
+    magma_igetvector( r_blocks+1, A.row, 1, cpu_row, 1 );            
+    magma_igetvector( A.numblocks, A.col, 1, cpu_col, 1 );
 
 
     magma_int_t ldda, lddb, lddc, ldwork, lwork;
@@ -112,13 +112,13 @@ magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t 
         identity_cpu[i] = c_zero;
 
     magma_zmalloc( &zerom, size_b*ldda );
-    cublasSetVector( size_b*size_b , sizeof( magmaDoubleComplex )  , identity_cpu, 1, zerom, 1 ); 
+    magma_zsetvector( size_b*size_b, identity_cpu, 1, zerom, 1 ); 
 
     for( i=0; i<size_b; i++ )
         identity_cpu[i*(size_b+1)] = c_one;
 
     magma_zmalloc( &identity, size_b*ldda );
-    cublasSetVector( size_b*size_b , sizeof( magmaDoubleComplex )  , identity_cpu, 1, identity, 1 ); 
+    magma_zsetvector( size_b*size_b, identity_cpu, 1, identity, 1 ); 
 
 
     magmaDoubleComplex *dwork;
@@ -234,7 +234,7 @@ magma_zilu( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
 
     // set x = b
-    cudaMemcpy( x->val, b.val, A.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+    magma_zcopyvector( A.num_rows, b.val, 1, x->val, 1 );
 
 
     // now solve

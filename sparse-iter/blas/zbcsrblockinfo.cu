@@ -83,15 +83,15 @@ magma_zbcsrblockinfo5(  magma_int_t lustep,
 
         printf("dim grid: %d x %d", dimgrid, BLOCK_SIZE);
         magmaDoubleComplex **hAII;
-        magma_malloc((void **)&hAII, num_blocks*sizeof(magmaDoubleComplex *));
+        magma_malloc((void **)&hAII, num_blocks*sizeof(magmaDoubleComplex*));
 
         for(int i=0; i<num_blocks; i++){
            hAII[i] = val(lustep,lustep);
         }
-        cublasSetVector( num_blocks, sizeof(magmaDoubleComplex *), 
+        magma_setvector( num_blocks, sizeof(magmaDoubleComplex*), 
                                                             hAII, 1, AII, 1 );
 /*
-    cublasSetVector( 1, sizeof(magmaDoubleComplex *), address, 1, daddress, 1 );
+    magma_setvector( 1, sizeof(magmaDoubleComplex*), address, 1, daddress, 1 );
     zbcsrblockinfo5_kernel<<<dimGrid,dimBlock, 0, magma_stream >>>
                         ( num_blocks, daddress, AII );
 
