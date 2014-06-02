@@ -976,8 +976,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
-            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1 );
-           magma_icopyvector( A.numblocks+1, A.row, 1, B->row, 1 );
+            magma_index_copyvector( A.nnz,         A.col, 1, B->col, 1 );
+            magma_index_copyvector( A.numblocks+1, A.row, 1, B->row, 1 );
         }
         //BCSR-type
         if( A.storage_type == Magma_BCSR ){

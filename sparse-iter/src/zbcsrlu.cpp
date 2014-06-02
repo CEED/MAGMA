@@ -307,9 +307,8 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     cpu_row[r_blocks] = num_blocks_tmp;
     M->nnz = num_blocks_tmp;
 
-    magma_isetvector( r_blocks+1, cpu_row, 1, M->row, 1 );            
-    magma_isetvector( M->numblocks, cpu_col, 
-                                                               1, M->col, 1 );
+    magma_index_setvector( r_blocks+1,   cpu_row, 1, M->row, 1 );            
+    magma_index_setvector( M->numblocks, cpu_col, 1, M->col, 1 );
     magma_free_cpu( cpu_row );
     magma_free_cpu( cpu_col );
 

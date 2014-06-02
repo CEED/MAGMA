@@ -1637,8 +1637,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             if (NULL != nnzTotalDevHostPtr){
                 nnzb = *nnzTotalDevHostPtr;
             }else{
-                magma_igetvector( 1, B->row+mb, 1, &nnzb, 1 );
-                magma_igetvector( 1, B->row, 1, &base, 1 );
+                magma_index_getvector( 1, B->row+mb, 1, &nnzb, 1 );
+                magma_index_getvector( 1, B->row, 1, &base, 1 );
                 nnzb -= base;
             }
             B->numblocks = nnzb; // number of blocks
@@ -1781,7 +1781,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_index_malloc( &B->col, B->nnz );
 
             magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
-            magma_icopyvector( A.nnz, A.col, 1, B->col, 1 );
+            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1 );
 
             // conversion using CUSPARSE
             cusparseXcsr2coo( cusparseHandle, A.row,
@@ -1814,7 +1814,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_index_malloc( &B->col, B->nnz );
 
             magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
-            magma_icopyvector( A.nnz, A.col, 1, B->col, 1 );
+            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1 );
 
             // conversion using CUSPARSE
             cusparseXcoo2csr( cusparseHandle, A.row,

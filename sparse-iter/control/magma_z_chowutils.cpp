@@ -172,7 +172,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
         LU_d.nnz = *nnzTotalDevHostPtr;
     }else{
         magma_index_getvector( 1, LU_d.row+m, 1, &LU_d.nnz, 1 );
-        magma_index_getvector( 1, LU_d.row, 1, &baseC, 1 );
+        magma_index_getvector( 1, LU_d.row,   1, &baseC,    1 );
         LU_d.nnz -= baseC;
     }
     magma_index_malloc( &LU_d.col, LU_d.nnz );

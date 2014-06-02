@@ -133,7 +133,7 @@ magma_zcompact(
     zcompact_kernel<<< grid, threads, 0, magma_stream >>>(
             m, n, dA, ldda, dnorms, tol, active, active+n );
 
-    magma_igetvector( 1, active+n, 1, cBlock, 1 );
+    magma_index_getvector( 1, active+n, 1, cBlock, 1 );
 }
 
 /* ===================================================================== */
