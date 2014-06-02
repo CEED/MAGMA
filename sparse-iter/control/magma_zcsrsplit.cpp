@@ -89,12 +89,12 @@ magma_zcsrsplit(    magma_int_t bsize,
         R->nnz = nnz_offd;
 
         magma_zmalloc_cpu( &D->val, nnz_diag );
-        magma_indexmalloc_cpu( &D->row, A.num_rows+1 );
-        magma_indexmalloc_cpu( &D->col, nnz_diag );
+        magma_index_malloc_cpu( &D->row, A.num_rows+1 );
+        magma_index_malloc_cpu( &D->col, nnz_diag );
 
         magma_zmalloc_cpu( &R->val, nnz_offd );
-        magma_indexmalloc_cpu( &R->row, A.num_rows+1 );
-        magma_indexmalloc_cpu( &R->col, nnz_offd );
+        magma_index_malloc_cpu( &R->row, A.num_rows+1 );
+        magma_index_malloc_cpu( &R->col, nnz_offd );
 
         // Fill up the new sparse matrices  
         D->row[0] = 0;

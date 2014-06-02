@@ -55,7 +55,7 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
         // CSR  
         if( A->storage_type == Magma_CSR ){
             magma_index_t i, *length, maxrowlength=0;
-            magma_indexmalloc_cpu( &length, A->num_rows);
+            magma_index_malloc_cpu( &length, A->num_rows);
 
             for( i=0; i<A->num_rows; i++ ){
                 length[i] = A->row[i+1]-A->row[i];
@@ -70,7 +70,7 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
         else if( A->storage_type == Magma_DENSE ){
             magma_int_t i, j, maxrowlength=0;
             magma_index_t *length;
-            magma_indexmalloc_cpu( &length, A->num_rows);
+            magma_index_malloc_cpu( &length, A->num_rows);
 
             for( i=0; i<A->num_rows; i++ ){
                 length[i] = 0;
@@ -123,7 +123,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         // CSR  
         if( A->storage_type == Magma_CSR ){
             magma_index_t i, j, tmp,  *dim, maxdim=0;
-            magma_indexmalloc_cpu( &dim, A->num_rows);
+            magma_index_malloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
                 for( j=A->row[i]; j<A->row[i+1]; j++ ){
@@ -143,7 +143,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         // Dense
         else if( A->storage_type == Magma_DENSE ){
             magma_index_t i, j, tmp,  *dim, maxdim=0;
-            magma_indexmalloc_cpu( &dim, A->num_rows);
+            magma_index_malloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
                 for( j=0; j<A->num_cols; j++ ){
@@ -163,7 +163,7 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
         // ELLPACK
         else if( A->storage_type == Magma_ELLPACK ){
             magma_index_t i, j, tmp,  *dim, maxdim=0;
-            magma_indexmalloc_cpu( &dim, A->num_rows);
+            magma_index_malloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
                 for( j=i*A->max_nnz_row; j<(i+1)*A->max_nnz_row; j++ ){

@@ -81,7 +81,7 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
   // temporary 2-dimensional arrays valtemp/coltemp 
   // where val[i] is the array with the values of the i-th column of the matrix
   magma_index_t *nnztemp;
-  magma_indexmalloc_cpu( &nnztemp, n_rows );
+  magma_index_malloc_cpu( &nnztemp, n_rows );
   
   for( magma_int_t i=0; i<n_rows; i++ )
     nnztemp[i]=0;
@@ -223,8 +223,8 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         B->diameter = A.diameter;
 
         magma_zmalloc_cpu( &B->val, A.nnz );
-        magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
-        magma_indexmalloc_cpu( &B->col, A.nnz );
+        magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+        magma_index_malloc_cpu( &B->col, A.nnz );
 
         for( magma_int_t i=0; i<A.nnz; i++){
             B->val[i] = A.val[i];

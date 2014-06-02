@@ -66,7 +66,7 @@ magma_zmgenerator(  magma_int_t n,
     B.max_nnz_row = (2*offdiags+1);
 
     magma_zmalloc_cpu( &B.val, B.max_nnz_row*n );
-    magma_indexmalloc_cpu( &B.col, B.max_nnz_row*n );
+    magma_index_malloc_cpu( &B.col, B.max_nnz_row*n );
 
     for( int i=0; i<n; i++ ){ // stride over rows
         // stride over the number of nonzeros in each row

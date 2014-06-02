@@ -829,8 +829,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     magma_index_t* new_row;
     magma_index_t* new_col;
     magma_zmalloc_cpu( &new_val, true_nonzeros );
-    magma_indexmalloc_cpu( &new_row, true_nonzeros );
-    magma_indexmalloc_cpu( &new_col, true_nonzeros );
+    magma_index_malloc_cpu( &new_row, true_nonzeros );
+    magma_index_malloc_cpu( &new_col, true_nonzeros );
 
     magma_index_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
@@ -918,10 +918,10 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   magma_zmalloc_cpu( &A->val, A->nnz );
   assert((A->val) != NULL);
   
-  magma_indexmalloc_cpu( &A->col, A->nnz );
+  magma_index_malloc_cpu( &A->col, A->nnz );
   assert((A->col) != NULL);
   
-  magma_indexmalloc_cpu( &A->row, A->num_rows+1 );
+  magma_index_malloc_cpu( &A->row, A->num_rows+1 );
   assert((A->row) != NULL);
   
 
@@ -1169,10 +1169,10 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   magma_zmalloc_cpu( &A->val, A->nnz );
   assert((A->val) != NULL);
   
-  magma_indexmalloc_cpu( &A->col, A->nnz );
+  magma_index_malloc_cpu( &A->col, A->nnz );
   assert((A->col) != NULL);
   
-  magma_indexmalloc_cpu( &A->row, A->num_rows+1 );
+  magma_index_malloc_cpu( &A->row, A->num_rows+1 );
   assert((A->row) != NULL);
   
 

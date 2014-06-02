@@ -65,15 +65,15 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->storage_type = A.storage_type;
             B->memory_location = A.memory_location;
-            magma_indexmalloc_cpu( &B->row, A.num_rows+1 );
+            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
                 
             magma_int_t start = offset;
             magma_int_t end = offset + blocksize;
             //printf("local block size: %d offset: %d\n", blocksize, offset);
 
             magma_int_t *z1, *z2, i, j, count, num_new_nnz;
-            magma_indexmalloc_cpu( &z1, A.num_rows );
-            magma_indexmalloc_cpu( &z2, A.num_rows );
+            magma_index_malloc_cpu( &z1, A.num_rows );
+            magma_index_malloc_cpu( &z2, A.num_rows );
             for( i=0; i<A.num_rows; i++ )
                     z1[i] = 0;
             for( i=0; i<A.num_rows; i++ )
@@ -105,7 +105,7 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
             B->row[B->num_rows] = num_new_nnz;
             B->nnz = num_new_nnz;
             magma_zmalloc_cpu( &B->val, num_new_nnz );
-            magma_indexmalloc_cpu( &B->col, num_new_nnz );
+            magma_index_malloc_cpu( &B->col, num_new_nnz );
             // fill val and col pointer of B
             num_new_nnz = 0;
             for( j=0; j<A.num_rows; j++){
@@ -233,8 +233,8 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             magma_int_t end = offset + blocksize;
 
             magma_int_t *z1, *z2, i, j, count;
-            magma_indexmalloc_cpu( &z1, A.num_rows );
-            magma_indexmalloc_cpu( &z2, A.num_rows );
+            magma_index_malloc_cpu( &z1, A.num_rows );
+            magma_index_malloc_cpu( &z2, A.num_rows );
             for( i=0; i<A.num_rows; i++ )
                     z1[i] = 0;
             for( i=0; i<A.num_rows; i++ )
@@ -242,7 +242,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             for( i=start; i<end; i++ )
                     z1[i] = 1;
 
-            magma_indexmalloc_cpu( (num_add_rows), s );
+            magma_index_malloc_cpu( (num_add_rows), s );
             (*num_add_rows)[0] = 0;
 
             // determine the rows of A needed in local matrix B 
@@ -270,7 +270,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             }   
 
             // this part determines the additional rows needed
-            magma_indexmalloc_cpu( (add_rows), (*num_add_rows)[s-1] );
+            magma_index_malloc_cpu( (add_rows), (*num_add_rows)[s-1] );
             magma_int_t num_add_rows_glob = 0;
             for( count=1; count<s; count++ ){
                 for( i=0; i<start; i++){
@@ -309,7 +309,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                     (*num_add_vecs)++;
             }
             // this part determines the additional vector entries needed
-            magma_indexmalloc_cpu( (add_vecs), (*num_add_vecs) );
+            magma_index_malloc_cpu( (add_vecs), (*num_add_vecs) );
             (*num_add_vecs) = 0;
             for( i=0; i<start; i++){
                 if( z1[i] != 0 ){
@@ -400,7 +400,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
 
     magma_int_t i,j,k;
     magma_int_t *back_vecs_tmp;
-    magma_indexmalloc_cpu( &(back_vecs_tmp), A.num_rows );
+    magma_index_malloc_cpu( &(back_vecs_tmp), A.num_rows );
     for( i=0; i<A.num_rows; i++ )
         back_vecs_tmp[i] = 0;
 
@@ -416,7 +416,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
             if(  back_vecs_tmp[j] == 1 )
                 num_vecs_back[i]++;
         }
-        magma_indexmalloc_cpu( &(vecs_back[i]), (num_vecs_back[i]) );
+        magma_index_malloc_cpu( &(vecs_back[i]), (num_vecs_back[i]) );
     }
     
     // fill in the information into vecs_back
@@ -645,7 +645,7 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
             B->memory_location = A.memory_location;
             B->num_rows = blocksize + num_add_rows;
             B->num_cols = A.num_cols;
-            magma_indexmalloc_cpu( &B->row, B->num_rows+1 );
+            magma_index_malloc_cpu( &B->row, B->num_rows+1 );
             for( j=0; j<blocksize+1; j++ ){
                 (B->row)[n] = A.row[j+offset] - A.row[offset];
                 i = (B->row)[j];
@@ -659,7 +659,7 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
                 n++;
             }
             B->nnz = i;
-            magma_indexmalloc_cpu( &B->col, B->nnz );
+            magma_index_malloc_cpu( &B->col, B->nnz );
             magma_zmalloc_cpu( &B->val, B->nnz );
 
             for( j=A.row[offset]; j<A.row[offset+blocksize]; j++ ){

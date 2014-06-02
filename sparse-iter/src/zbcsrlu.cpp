@@ -196,7 +196,7 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
                 // max number of blocks per column
 
     //complete fill-in
-    magma_indexmalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
+    magma_index_malloc_cpu( &M->blockinfo, r_blocks * c_blocks );
 
     for( k=0; k<r_blocks; k++){
         for( j=0; j<c_blocks; j++ ){
@@ -223,8 +223,8 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
     }
     M->numblocks = num_blocks_tmp;
     magma_zmalloc( &M->val, size_b*size_b*(M->numblocks) );
-    magma_indexmalloc( &M->row, r_blocks+1 );
-    magma_indexmalloc( &M->col, M->numblocks );
+    magma_index_malloc( &M->row, r_blocks+1 );
+    magma_index_malloc( &M->col, M->numblocks );
 
     // Prepare A 
     magmaDoubleComplex **hA, **dA,  **hB, **dB, **hBL, **dBL, **hC, **dC;
@@ -288,8 +288,8 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
 
     num_blocks_tmp=0;
     magma_index_t *cpu_row, *cpu_col;
-    magma_indexmalloc_cpu( &cpu_row, r_blocks+1 );
-    magma_indexmalloc_cpu( &cpu_col, M->numblocks );
+    magma_index_malloc_cpu( &cpu_row, r_blocks+1 );
+    magma_index_malloc_cpu( &cpu_col, M->numblocks );
 
     num_blocks_tmp=0;
     for( i=0; i<c_blocks * r_blocks; i++ ){

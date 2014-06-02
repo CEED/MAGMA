@@ -77,7 +77,7 @@ magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){
         magma_int_t cblock, c_blocks = (A.num_cols+b-1)/b; 
 
         magma_index_t *p_h;
-        magma_indexmalloc_cpu( &p_h, A.nnz );
+        magma_index_malloc_cpu( &p_h, A.nnz );
 
         j=0;
         for( rblock=0; rblock<r_blocks; rblock++){
