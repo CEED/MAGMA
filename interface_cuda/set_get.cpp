@@ -87,6 +87,53 @@ void magma_getvector_async_internal(
     check_xerror( status, func, file, line );
 }
 
+// --------------------
+// TODO compare performance with cublasZcopy BLAS function.
+// But this implementation can handle any element size, not just [sdcz] precisions.
+extern "C"
+void magma_copyvector_internal(
+    magma_int_t n, magma_int_t elemSize,
+    void const* dx_src, magma_int_t incx,
+    void*       dy_dst, magma_int_t incy,
+    const char* func, const char* file, int line )
+{
+    if ( incx == 1 && incy == 1 ) {
+        cudaError_t status;
+        status = cudaMemcpy(
+            dy_dst,
+            dx_src,
+            n*elemSize, cudaMemcpyDeviceToDevice );
+        check_xerror( status, func, file, line );
+    }
+    else {
+        magma_copymatrix_internal(
+            1, n, elemSize, dx_src, incx, dy_dst, incy, func, file, line );
+    }
+}
+
+// --------------------
+extern "C"
+void magma_copyvector_async_internal(
+    magma_int_t n, magma_int_t elemSize,
+    void const* dx_src, magma_int_t incx,
+    void*       dy_dst, magma_int_t incy,
+    cudaStream_t stream,
+    const char* func, const char* file, int line )
+{
+    if ( incx == 1 && incy == 1 ) {
+        cudaError_t status;
+        status = cudaMemcpyAsync(
+            dy_dst,
+            dx_src,
+            n*elemSize, cudaMemcpyDeviceToDevice, stream );
+        check_xerror( status, func, file, line );
+    }
+    else {
+        magma_copymatrix_async_internal(
+            1, n, elemSize, dx_src, incx, dy_dst, incy, stream, func, file, line );
+    }
+}
+
 
 // ========================================
 // copying sub-matrices (contiguous columns)
