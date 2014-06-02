@@ -665,17 +665,17 @@ void magmablas_ztrsm_work(
 #define magma_zgetvector(           n, dx_src, incx, hy_dst, incy ) \
         magma_zgetvector_internal(  n, dx_src, incx, hy_dst, incy, __func__, __FILE__, __LINE__ )
 
+#define magma_zcopyvector(          n, dx_src, incx, dy_dst, incy ) \
+        magma_zcopyvector_internal( n, dx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+
 #define magma_zsetvector_async(           n, hx_src, incx, dy_dst, incy, queue ) \
         magma_zsetvector_async_internal(  n, hx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
 
 #define magma_zgetvector_async(           n, dx_src, incx, hy_dst, incy, queue ) \
         magma_zgetvector_async_internal(  n, dx_src, incx, hy_dst, incy, queue, __func__, __FILE__, __LINE__ )
 
-#define magma_zcopyvector_async(           n, dx_src, incx, dy_dst, incy, queue ) \
-        magma_zcopyvector_async_internal(  n, dx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
-
-#define magma_zcopyvector_async(           n, dx_src, incx, dy_dst, incy, queue ) \
-        magma_zcopyvector_async_internal(  n, dx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
+#define magma_zcopyvector_async(          n, dx_src, incx, dy_dst, incy, queue ) \
+        magma_zcopyvector_async_internal( n, dx_src, incx, dy_dst, incy, queue, __func__, __FILE__, __LINE__ )
 
 void magma_zsetvector_internal(
     magma_int_t n,
