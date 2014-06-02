@@ -179,6 +179,7 @@ typedef struct magma_z_solver_par{
     magma_int_t        numiter;
     double             init_res;
     double             final_res;
+    double             iter_res;
     real_Double_t      runtime;
     real_Double_t      *res_vec;
     real_Double_t      *timing;
@@ -216,6 +217,7 @@ typedef struct magma_c_solver_par{
     magma_int_t        numiter;
     float              init_res;
     float              final_res;
+    float              iter_res;
     real_Double_t      runtime;
     real_Double_t      *res_vec;
     real_Double_t      *timing;
@@ -253,6 +255,7 @@ typedef struct magma_d_solver_par{
     magma_int_t        numiter;
     double             init_res;
     double             final_res;
+    double             iter_res;
     real_Double_t      runtime;
     real_Double_t      *res_vec;
     real_Double_t      *timing;
@@ -290,6 +293,7 @@ typedef struct magma_s_solver_par{
     magma_int_t        numiter;
     float              init_res;
     float              final_res;
+    float              iter_res;
     real_Double_t      runtime;
     real_Double_t      *res_vec;
     real_Double_t      *timing;

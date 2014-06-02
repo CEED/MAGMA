@@ -119,7 +119,7 @@ int main( int argc, char** argv)
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
         if( version == 0 )
-            magma_zcg( B_d, b, &x, &solver_par );
+            magma_zcg_res( B_d, b, &x, &solver_par );
 
         else if ( version == 1 )
             magma_zcg_merge( B_d, b, &x, &solver_par );

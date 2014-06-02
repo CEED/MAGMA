@@ -270,6 +270,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
     magma_zresidual( A, b, *x, &residual );
+    solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 
     if( solver_par->numiter < solver_par->maxiter){

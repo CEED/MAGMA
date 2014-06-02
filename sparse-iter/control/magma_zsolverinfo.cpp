@@ -77,8 +77,9 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# CG solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
-                    solver_par->final_res, solver_par->runtime);
+                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
                 "======#\n");
     }else if( solver_par->solver == Magma_CGMERGE ){
@@ -101,6 +102,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# CG (merged) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -135,6 +137,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# BiCGStab solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -159,6 +162,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# BiCGStab (merged) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -183,6 +187,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# BiCGStab (merged2) solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="
@@ -217,6 +222,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
         printf("# GMRES-(%d) solver summary:\n", (int) solver_par->restart);
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
+        printf("#    iterative residual: %e\n", solver_par->iter_res );
         printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
                     solver_par->final_res, solver_par->runtime);
         printf("#======================================================="

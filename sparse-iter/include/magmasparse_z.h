@@ -401,6 +401,10 @@ magma_zcg(             magma_z_sparse_matrix A, magma_z_vector b,
                        magma_z_vector *x, magma_z_solver_par *solver_par );
 
 magma_int_t 
+magma_zcg_res(         magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_z_solver_par *solver_par );
+
+magma_int_t 
 magma_zcg_merge(       magma_z_sparse_matrix A, magma_z_vector b, 
                        magma_z_vector *x, magma_z_solver_par *solver_par );
 

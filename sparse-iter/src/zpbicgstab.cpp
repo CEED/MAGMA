@@ -80,7 +80,7 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
-    double nom, betanom, nom0, r0, den;
+    double nom, betanom, nom0, r0, den, res;
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
@@ -152,7 +152,7 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
         magma_zcopy( dofs, s.val, 1 , r.val, 1 );             // r=s
         magma_zaxpy( dofs, c_mone * omega, t.val, 1 , r.val, 1 ); // r=r-omega*t
-        betanom = magma_dznrm2( dofs, r.val, 1 );
+        res = betanom = magma_dznrm2( dofs, r.val, 1 );
 
         nom = betanom*betanom;
 
@@ -161,13 +161,13 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             magma_device_sync(); tempo2=magma_wtime();
             if( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
-                        = (real_Double_t) betanom;
+                        = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) tempo2-tempo1;
             }
         }
 
-        if ( betanom  < r0 ) {
+        if ( res/nom0  < solver_par->epsilon ) {
             break;
         }
     }
@@ -175,7 +175,8 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
     magma_zresidual( A, b, *x, &residual );
-    solver_par->final_res = (real_Double_t) betanom;//residual;
+    solver_par->final_res = residual;
+    solver_par->iter_res = res;
 
     if( solver_par->numiter < solver_par->maxiter){
         solver_par->info = 0;

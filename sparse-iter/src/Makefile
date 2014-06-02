@@ -23,6 +23,7 @@ INC += -g3
 # Krylov space linear solvers
 ZSRC += \
 	zcg.cpp			\
+	zcg_res.cpp			\
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\

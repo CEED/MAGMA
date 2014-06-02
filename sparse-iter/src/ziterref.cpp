@@ -123,6 +123,7 @@ magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     magma_zresidual( A, b, *x, &residual );
     solver_par->final_res = residual;
+    solver_par->iter_res = nom;
 
     if( solver_par->numiter < solver_par->maxiter){
         solver_par->info = 0;
