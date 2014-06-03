@@ -198,7 +198,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     cusparseDestroyMatDescr( descrLU );
     cusparseDestroy( handle );
 
-
+    LU_d.storage_type = Magma_CSR;
 
     magma_z_mtransfer(LU_d, LU, Magma_DEV, Magma_CPU);
     magma_z_mfree( &L_d );
