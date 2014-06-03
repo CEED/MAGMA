@@ -428,7 +428,10 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         precond->U.blockinfo = NULL;
     }
 
-    if( precond->solver == Magma_ILU ){
+    if( precond->solver == Magma_ILU ||
+        precond->solver == Magma_AILU ||
+        precond->solver == Magma_ICC||
+        precond->solver == Magma_AICC ){
         cusparseStatus_t cusparseStatus;
         cusparseStatus =
         cusparseDestroySolveAnalysisInfo( precond->cuinfo );
