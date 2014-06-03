@@ -434,9 +434,6 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         precond->solver == Magma_AICC ){
         cusparseStatus_t cusparseStatus;
         cusparseStatus =
-        cusparseDestroySolveAnalysisInfo( precond->cuinfo );
-         if(cusparseStatus != 0)    printf("error in info-free.\n");
-        cusparseStatus =
         cusparseDestroySolveAnalysisInfo( precond->cuinfoL );
          if(cusparseStatus != 0)    printf("error in info-free.\n");
         cusparseStatus =

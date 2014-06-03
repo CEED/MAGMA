@@ -103,7 +103,9 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
              if(cusparseStatus != 0)    printf("error in ILU.\n");
 
 
-
+            cusparseStatus =
+            cusparseDestroySolveAnalysisInfo( precond->cuinfo );
+             if(cusparseStatus != 0)    printf("error in info-free.\n");
 
     magma_z_sparse_matrix hA, hL, hU;
 
@@ -435,6 +437,11 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
                       precond->M.row, 
                       precond->M.col, 
                       precond->cuinfo);
+
+    cusparseStatus =
+    cusparseDestroySolveAnalysisInfo( precond->cuinfo );
+     if(cusparseStatus != 0)    printf("error in info-free.\n");
+
      if(cusparseStatus != 0)    printf("error in ICC.\n");
 
     cusparseMatDescr_t descrL;

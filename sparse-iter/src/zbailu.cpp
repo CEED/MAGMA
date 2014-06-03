@@ -47,11 +47,13 @@
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-    magma_z_sparse_matrix hA, hAL, hALCOO, hAU, hAUT, hAUCOO, dAL, dAU, hL, hU, 
-                                        dL, dU, DL, RL, DU, RU;
+    magma_z_sparse_matrix hAh, hA, hAL, hALCOO, hAU, hAUT, hAUCOO, dAL, dAU, 
+                                        hL, hU, dL, dU, DL, RL, DU, RU;
 
     // copy original matrix as CSRCOO to device
-    magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
+    magma_z_mtransfer(A, &hAh, A.memory_location, Magma_CPU);
+    magma_z_mconvert( hAh, &hA, hAh.storage_type, Magma_CSR );
+    magma_z_mfree(&hAh);
 
     // in case using fill-in
     magma_zilustruct( &hA, precond->levels);
@@ -312,12 +314,14 @@ magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
-    magma_z_sparse_matrix hA, hAL, hALCOO, dAL, hL, dL, DL, RL;
+    magma_z_sparse_matrix hAh, hA, hAL, hALCOO, dAL, hL, dL, DL, RL;
 
 
 
     // copy original matrix as CSRCOO to device
-    magma_z_mtransfer(A, &hA, A.memory_location, Magma_CPU);
+    magma_z_mtransfer(A, &hAh, A.memory_location, Magma_CPU);
+    magma_z_mconvert( hAh, &hA, hAh.storage_type, Magma_CSR );
+    magma_z_mfree(&hAh);
 
     // in case using fill-in
     magma_zilustruct( &hA, precond->levels);
