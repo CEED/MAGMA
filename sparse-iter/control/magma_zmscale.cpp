@@ -78,8 +78,11 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
             for( magma_int_t z=0; z<A->num_rows; z++ ){
                 magmaDoubleComplex s = MAGMA_Z_MAKE( 0.0, 0.0 );
                 for( magma_int_t f=A->row[z]; f<A->row[z+1]; f++ ){
-                    if( A->col[f]== z )
+                    if( A->col[f]== z ){
+                        // add some identity matrix
+                        //A->val[f] = A->val[f] +  MAGMA_Z_MAKE( 100000.0, 0.0 );
                         s = A->val[f];
+                    }
                 }
                 if( s == MAGMA_Z_MAKE( 0.0, 0.0 ) )
                     printf("error: zero diagonal element.\n");

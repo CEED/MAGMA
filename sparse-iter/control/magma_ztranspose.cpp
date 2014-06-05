@@ -345,7 +345,7 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
         // end CUSPARSE context //
 
-        magma_z_mtransfer( B_d, B, Magma_DEV, Magma_CPU );
+        magma_z_mtransfer( B_d, B, Magma_DEV, A.memory_location );
         magma_z_mfree( &A_d );
         magma_z_mfree( &B_d );
 

@@ -1824,7 +1824,15 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             return MAGMA_SUCCESS; 
         }
         else{
-            printf("error: format not supported.\n");
+            magma_z_sparse_matrix hA, hB;
+            magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
+            magma_z_mconvert( hA, &hB, old_format, new_format );
+            magma_z_mtransfer( hB, B, Magma_CPU, A.memory_location );
+            magma_z_mfree( &hA );
+            magma_z_mfree( &hB );   
+
+            printf("warning: format not supported on GPU. "
+                    "Conversion handled by CPU.\n");
             return MAGMA_ERR_NOT_SUPPORTED;
         }
     }
