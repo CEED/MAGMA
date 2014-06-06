@@ -101,10 +101,9 @@ magma_zcg_res( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
         magma_zaxpy(dofs,  alpha, p.val, 1, x->val, 1);     // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);      // r = r - alpha q
-        betanom = magma_dznrm2(dofs, r.val, 1);             // betanom = || r ||
+        res = betanom = magma_dznrm2(dofs, r.val, 1);       // betanom = || r ||
         betanomsq = betanom * betanom;                      // betanoms = r' * r
 
-        res = magma_dznrm2( dofs, r.val, 1 );
         if( solver_par->verbose > 0 ){
             magma_device_sync(); tempo2=magma_wtime();
             if( (solver_par->numiter)%solver_par->verbose==0 ) {
@@ -114,7 +113,6 @@ magma_zcg_res( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-
 
         if (  res/nom0  < solver_par->epsilon ) {
             break;
