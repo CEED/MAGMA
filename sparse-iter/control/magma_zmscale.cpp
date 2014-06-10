@@ -120,4 +120,37 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
 }
 
 
+extern "C" magma_int_t
+magma_zmdiagadd( magma_z_sparse_matrix *A, magmaDoubleComplex add ){
+
+    if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSRCOO ){
+        for( magma_int_t z=0; z<A->nnz; z++ ){
+            if( A->col[z]== A->rowidx[z] ){
+                // add some identity matrix
+                A->val[z] = A->val[z] +  add;
+            }
+        }
+    }
+    else{
+
+        magma_z_sparse_matrix hA, CSRA;
+        magma_storage_t A_storage = A->storage_type;
+        magma_location_t A_location = A->memory_location;
+        magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU );
+        magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO );
+
+        magma_zmdiagadd( &CSRA, add );
+
+        magma_z_mfree( &hA );
+        magma_z_mfree( A );
+        magma_z_mconvert( CSRA, &hA, Magma_CSRCOO, A_storage );
+        magma_z_mtransfer( hA, A, Magma_CPU, A_location );
+        magma_z_mfree( &hA );
+        magma_z_mfree( &CSRA );    
+
+        return MAGMA_SUCCESS; 
+    }
+}
+
+
 
