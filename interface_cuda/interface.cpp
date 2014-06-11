@@ -138,7 +138,7 @@ void magma_print_devices()
         if ( prop.major*100 + prop.minor*10 < MIN_CUDA_ARCH ) {
             printf("\n"
                    "==============================================================================\n"
-                   "WARNING: MAGMA was compiled only for higher CUDA capability %.1f and higher;\n"
+                   "WARNING: MAGMA was compiled only for CUDA capability %.1f and higher;\n"
                    "some routines will not run correctly!\n"
                    "==============================================================================\n\n",
                    MIN_CUDA_ARCH/100. );
