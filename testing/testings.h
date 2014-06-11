@@ -68,10 +68,11 @@ void flops_init();
     cublasHandle_t handle;                                                 \
     cudaSetDevice( 0 );                                                    \
     cublasCreate( &handle );                                               \
+    magma_print_devices();
 
 #define TESTING_FINALIZE()                                                 \
     cublasDestroy( handle );                                               \
-    magma_finalize();                                                      \
+    magma_finalize();
 
 #else // not CUBLAS_V2_H_
 
