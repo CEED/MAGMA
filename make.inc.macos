@@ -26,13 +26,18 @@ RANLIB    = ranlib
 
 # use -m32 to compile with 32-bit long & pointers.
 # use -m64 to compile with 64-bit long & pointers (lp64). int is still 32-bit.
-# currently, there are RUNTIME ERRORS with 64-bit on MacOS!
 # add -DNDEBUG to disable asserts and certain error checks.
-OPTS      = -Wall -m32 -O3 -DADD_
-F77OPTS   = -Wall -m32 -O3 -DADD_
-FOPTS     = -Wall -m32 -O3 -DADD_ -x f95-cpp-input
-NVOPTS    =       -m32 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
-LDOPTS    = -Wall -m32
+# MacOS veclib has a bug where some single precision functions return
+# a double precision result, for instance slange.
+# This is observed with -m64, but oddly not with -m32.
+# Adding -DLAPACK_RETURN_DOUBLE fixes the issue in include/magma_*lapack.h
+# nvcc on MacOS Mavericks (10.9) currently (June 2014) has an issue with
+# compiling -m32; use -m64.
+OPTS      = -Wall -m64 -O3 -DADD_ -DLAPACK_RETURN_DOUBLE 
+F77OPTS   = -Wall -m64 -O3 -DADD_ -DLAPACK_RETURN_DOUBLE 
+FOPTS     = -Wall -m64 -O3 -DADD_ -DLAPACK_RETURN_DOUBLE -x f95-cpp-input
+NVOPTS    =       -m64 -O3 -DADD_ -DLAPACK_RETURN_DOUBLE -Xcompiler -fno-strict-aliasing
+LDOPTS    = -Wall -m64
 
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 

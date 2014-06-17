@@ -18,6 +18,14 @@
 #include "magma_dlapack.h"
 #include "magma_slapack.h"
 
+// On MacOS, single-precision LAPACK routines return double.
+// This was a result of the f2c conversion of LAPACK.
+#ifdef LAPACK_RETURN_DOUBLE
+    #define return_float real_Double_t
+#else
+    #define return_float float;
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,8 +76,8 @@ long   lapackf77_lsame(  const char *ca, const char *cb );
 // NOT portable! Assumes particular Fortran string convention (Intel/gfortran).
 void   lapackf77_xerbla( const char *name, magma_int_t *info, magma_int_t name_len );
 
-float  lapackf77_slamch( const char *cmach );
-double lapackf77_dlamch( const char *cmach );
+return_float lapackf77_slamch( const char *cmach );
+double       lapackf77_dlamch( const char *cmach );
 
 // "small" (lowercase) defined as char on Windows (reported by MathWorks)
 void   lapackf77_slabad( float  *Small, float  *large );
@@ -121,11 +129,13 @@ void   lapackf77_slag2d( magma_int_t *m, magma_int_t *n,
                                double *A,  magma_int_t *lda,
                          magma_int_t *info );
 
-double lapackf77_dlapy2( const double *x, const double *y );
-float  lapackf77_slapy2( const float  *x, const float  *y );
+double       lapackf77_dlapy2( const double *x, const double *y );
+return_float lapackf77_slapy2( const float  *x, const float  *y );
 
 #ifdef __cplusplus
 }
 #endif
+
+#undef return_float
 
 #endif /* MAGMA_LAPACK_H */
