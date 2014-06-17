@@ -44,7 +44,7 @@ int main( int argc, char** argv )
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol = 2. * opts.tolerance * lapackf77_dlamch("E");
     
     // test all combinations of input parameters
     magma_side_t  side [] = { MagmaLeft,      MagmaRight   };
