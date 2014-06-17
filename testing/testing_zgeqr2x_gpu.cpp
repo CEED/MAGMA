@@ -61,7 +61,7 @@ int main( int argc, char** argv)
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M     = opts.msize[itest];
-            N     = opts.nsize[itest];
+            N     = min(128, opts.nsize[itest]);
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
