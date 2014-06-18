@@ -3,7 +3,7 @@
  *     Univ. of Tennessee, Knoxville
  *     Univ. of California, Berkeley
  *     Univ. of Colorado, Denver
- *     June 2012
+ *     @date
  *
  * @precisions normal z -> c d s
  *
