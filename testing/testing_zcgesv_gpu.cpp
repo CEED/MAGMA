@@ -184,7 +184,7 @@ int main(int argc, char **argv)
                    (int) N, (int) nrhs,
                    gpu_perfdf, gpu_perfds, gpu_perfsf, gpu_perfss, gpu_perf,
                    (int) gesv_iter, error, (error < tol ? "ok" : "failed"));
-            status |= ! (error < tol);
+            status += ! (error < tol);
             
             TESTING_FREE_CPU( h_A     );
             TESTING_FREE_CPU( h_B     );

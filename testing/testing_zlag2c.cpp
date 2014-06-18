@@ -107,7 +107,7 @@ int main( int argc, char** argv )
                     (int) m, (int) n,
                     cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                     serror, (serror == 0 ? "ok" : "failed") );
-            status |= ! (serror == 0);
+            status += ! (serror == 0);
             
             
             
@@ -148,7 +148,7 @@ int main( int argc, char** argv )
                     (int) m, (int) n,
                     cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                     error, (error == 0 ? "ok" : "failed") );
-            status |= ! (error == 0);
+            status += ! (error == 0);
             
             TESTING_FREE_CPU(  SA );
             TESTING_FREE_CPU(   A );
