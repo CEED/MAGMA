@@ -21,7 +21,7 @@
 #ifdef LAPACK_RETURN_DOUBLE
     #define return_double real_Double_t
 #else
-    #define return_double double;
+    #define return_double double
 #endif
 
 #ifdef __cplusplus

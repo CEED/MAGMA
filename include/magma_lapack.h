@@ -23,7 +23,7 @@
 #ifdef LAPACK_RETURN_DOUBLE
     #define return_float real_Double_t
 #else
-    #define return_float float;
+    #define return_float float
 #endif
 
 #ifdef __cplusplus
