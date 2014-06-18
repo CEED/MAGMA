@@ -906,6 +906,8 @@ INPUT                  = doxygen-modules.h \
 	../src/zungqr_gpu.cpp             \
 	../src/zungqr_m.cpp               \
 	../src/zungtr.cpp                 \
+	../src/zunmbr.cpp                 \
+	../src/zunmlq.cpp                 \
 	../src/zunmql.cpp                 \
 	../src/zunmql2_gpu.cpp            \
 	../src/zunmqr.cpp                 \
@@ -993,6 +995,7 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/zgemm_fermi.cu                 \
 	../magmablas/zgemm_fermi_kernels.h          \
 	../magmablas/zgemm_reduce.cu                \
+	../magmablas/zgemv_batched.cu           \
 	../magmablas/zgemv_fermi.cu                 \
 	../magmablas/zgeqr2.cu                      \
 	../magmablas/zgeqr2x_gpu-v4.cu              \
