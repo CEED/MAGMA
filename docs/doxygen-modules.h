@@ -351,6 +351,9 @@
                 @defgroup magma_zaux3 double-complex precision
             @}
 
+        @defgroup magma_aux     General auxiliary
+        @brief    General (non-matrix) auxiliary functions
+
         @defgroup magma_comm    Communication
         @brief    CPU to GPU communication
             @{
