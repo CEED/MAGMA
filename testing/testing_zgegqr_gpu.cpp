@@ -33,7 +33,9 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           e1, e2, e3, e4, e5, *work;
-    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE, one = MAGMA_Z_ONE, zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, *h_rwork, tmp[1];
 
     magmaDoubleComplex *d_A, *dwork, *ddA, *d_T;
@@ -80,8 +82,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
             TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
             
-            magmablas_zlaset( MagmaFull, N, N, ddA, N );
-            magmablas_zlaset( MagmaFull, N, N, d_T, N );
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, ddA, N );
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, d_T, N );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -121,11 +123,11 @@ int main( int argc, char** argv)
             magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
 
             // Regenerate R
-            // blasf77_zgemm("t", "n", &N, &N, &M, &one, h_R, &M, h_A, &M, &zero, h_work, &N); 
+            // blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_A, &M, &c_zero, h_work, &N); 
             
             //magma_zprint(N, N, h_work, N);
 
-            blasf77_ztrmm("r", "u", "n", "n", &M, &N, &one, h_rwork, &N, h_R, &M);
+            blasf77_ztrmm("r", "u", "n", "n", &M, &N, &c_one, h_rwork, &N, h_R, &M);
             blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
             e5 = lapackf77_zlange("i", &M, &N, h_R, &M, work) / 
             lapackf77_zlange("i", &M, &N, h_A, &lda, work);
@@ -150,16 +152,16 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                blasf77_zgemm("t", "n", &N, &N, &M, &one, h_R, &M, h_R, &M, &zero, h_work, &N);
+                blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_R, &M, &c_zero, h_work, &N);
                 for(int ii = 0; ii < N*N; ii += N+1 )
-                    h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
+                    h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
 
                 e1    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
                 e3    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
 
-                blasf77_zgemm("t", "n", &N, &N, &M, &one, h_A, &M, h_A, &M, &zero, h_work, &N);
+                blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
                 for(int ii = 0; ii < N*N; ii += N+1 )
-                    h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
+                    h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 e2    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
                 e4    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
 
