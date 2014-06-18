@@ -132,7 +132,7 @@ typedef struct {
 } zlaswpx_params_t;
 
 
-// Matrix A is stored row-wise in dA.
+// Matrix A is stored row or column-wise in dA.
 // Divide matrix A into block-columns of NTHREADS columns each.
 // Each GPU block processes one block-column of A.
 // Each thread goes down a column of A,
