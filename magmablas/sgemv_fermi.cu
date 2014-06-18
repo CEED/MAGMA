@@ -491,7 +491,7 @@ magmablas_sgemv(
         else if (trans == MagmaTrans || trans == MagmaConjTrans)
             magmablas_sgemvt_fermi(m, n, alpha, A, lda, x, beta, y);
         else
-            fprintf( stderr, "trans = %c is invalid\n", trans );
+            fprintf( stderr, "trans = %c is invalid\n", lapacke_trans_const(trans) );
     }
     else {
         magma_sgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);

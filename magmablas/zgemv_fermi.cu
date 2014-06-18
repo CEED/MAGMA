@@ -414,7 +414,7 @@ magmablas_zgemv(
             magmablas_zgemvc_fermi(m, n, alpha, A, lda, x, beta, y);
         }
         else {
-            fprintf( stderr, "trans = %c is invalid\n", trans );
+            fprintf( stderr, "trans = %c is invalid\n", lapacke_trans_const(trans) );
         }
     }
     else {
