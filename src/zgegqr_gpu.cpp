@@ -5,6 +5,7 @@
        Univ. of Colorado, Denver
        @date
 
+       @author Stan Tomov
        @precisions normal z -> s d c
 
 */
@@ -22,6 +23,7 @@
 
     On exit, if successful, the orthogonal vectors Q overwrite A
     and R is given in work (on the CPU memory).
+    The routine is designed for tall-and-skinny matrices: M >> N, N <= 128.
     
     This version uses normal equations and SVD in an iterative process that
     makes the computation numerically accurate.
@@ -29,29 +31,43 @@
     Arguments
     ---------
     @param[in]
+    ikind   INTEGER
+            Several versions are implemented indiceted by the ikind value:  
+            1:  This version uses normal equations and SVD in an iterative process 
+                that makes the computation numerically accurate.
+            2:  This version uses a standard LAPACK-based orthogonalization through
+                MAGMA's QR panel factorization (magma_zgeqr2x3_gpu) and magma_zungqr
+            3:  MGS
+            4.  Cholesky QR
+
+    @param[in]
     m       INTEGER
-            The number of rows of the matrix A.  M >= 0.
+            The number of rows of the matrix A.  m >= n >= 0.
 
     @param[in]
     n       INTEGER
-            The number of columns of the matrix A.  N >= 0.
+            The number of columns of the matrix A. 128 >= n >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the M-by-N matrix A.
-            On exit, the M-by-N matrix Q with orthogonal columns.
+    dA      COMPLEX_16 array on the GPU, dimension (ldda,n)
+            On entry, the m-by-n matrix A.
+            On exit, the m-by-n matrix Q with orthogonal columns.
 
     @param[in]
     ldda     INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,M).
+            The leading dimension of the array dA.  LDDA >= max(1,m).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
 
     @param
-    dwork   (GPU workspace) COMPLEX_16 array, dimension (N,N)
+    dwork   (GPU workspace) COMPLEX_16 array, dimension: 
+            n^2                    for ikind = 1
+            3 n^2 + min(m, n)      for ikind = 2 
+            0 (not used)           for ikind = 3
+            n^2                    for ikind = 4           
 
     @param[out]
-    work    (CPU workspace) COMPLEX_16 array, dimension 3n^2.
+    work    (CPU workspace) COMPLEX_16 array, dimension 3 n^2.
             On exit, work(1:n^2) holds the rectangular matrix R.
             Preferably, for higher performance, work should be in pinned memory.
  
@@ -61,8 +77,6 @@
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
 
-    Further Details
-    ---------------
 
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
@@ -78,9 +92,9 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
 
     /* check arguments */
     *info = 0;
-    if (m < 0) {
+    if (m < 0 || m < n) {
         *info = -1;
-    } else if (n < 0) {
+    } else if (n < 0 || n > 128) {
         *info = -2;
     } else if (ldda < max(1,m)) {
         *info = -4;
@@ -155,7 +169,11 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                 blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
             
             magma_zsetmatrix(n, n, VT, n, dwork, n);
+            #if defined(PRECISION_s) || defined(PRECISION_d)
+            magmablas_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+            #else
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+            #endif
             if (mins > 0.00001f)
                 cn = maxs/mins;
             
@@ -174,11 +192,13 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
         int             nb = n;
 
         magmaDoubleComplex *dtau = dwork + 2*n*n, *d_T = dwork, *ddA = dwork + n*n;
-        magmaDoubleComplex *tau  = work;
+        magmaDoubleComplex *tau  = work+n*n;
 
+        magmablas_zlaset( MagmaFull, n, n, d_T, n );
         magma_zgeqr2x3_gpu(&m, &n, dA, &ldda, dtau, d_T, ddA,
                            (double *)(dwork+min_mn+2*n*n), info);
         magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);
+        magma_zgetmatrix( n, n, ddA, n, work, n);
         magma_zungqr_gpu( m, n, n, dA, ldda, tau, d_T, nb, info );
         // ================== end of ikind == 2 ===================================================       
     }
