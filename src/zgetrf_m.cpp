@@ -35,45 +35,49 @@
     Arguments
     ---------
     @param[in]
-    m       INTEGER
-            The number of rows of the matrix A.  M >= 0.
+    num_gpus INTEGER
+             The number of GPUs.  num_gpus > 0.
 
     @param[in]
-    n       INTEGER
-            The number of columns of the matrix A.  N >= 0.
+    m        INTEGER
+             The number of rows of the matrix A.  M >= 0.
+
+    @param[in]
+    n        INTEGER
+             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the M-by-N matrix to be factored.
-            On exit, the factors L and U from the factorization
-            A = P*L*U; the unit diagonal elements of L are not stored.
+    A        COMPLEX_16 array, dimension (LDA,N)
+             On entry, the M-by-N matrix to be factored.
+             On exit, the factors L and U from the factorization
+             A = P*L*U; the unit diagonal elements of L are not stored.
     \n
-            Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using magma_malloc_pinned.
+             Higher performance is achieved if A is in pinned memory, e.g.
+             allocated using magma_malloc_pinned.
 
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A.  LDA >= max(1,M).
+    lda      INTEGER
+             The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
-    ipiv    INTEGER array, dimension (min(M,N))
-            The pivot indices; for 1 <= i <= min(M,N), row i of the
-            matrix was interchanged with row IPIV(i).
+    ipiv     INTEGER array, dimension (min(M,N))
+             The pivot indices; for 1 <= i <= min(M,N), row i of the
+             matrix was interchanged with row IPIV(i).
 
     @param[out]
-    info    INTEGER
-      -     = 0:  successful exit
-      -     < 0:  if INFO = -i, the i-th argument had an illegal value
-                  or another error occured, such as memory allocation failed.
-      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
-                  has been completed, but the factor U is exactly
-                  singular, and division by zero will occur if it is used
-                  to solve a system of equations.
+    info     INTEGER
+      -      = 0:  successful exit
+      -      < 0:  if INFO = -i, the i-th argument had an illegal value
+                   or another error occured, such as memory allocation failed.
+      -      > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                   has been completed, but the factor U is exactly
+                   singular, and division by zero will occur if it is used
+                   to solve a system of equations.
 
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n,
+magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                magmaDoubleComplex *A, magma_int_t lda,
                magma_int_t *ipiv, magma_int_t *info)
 {
@@ -89,7 +93,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n,
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *dAT[MagmaMaxGPUs], *dA[MagmaMaxGPUs], *dPT[MagmaMaxGPUs];
     magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[MagmaMaxGPUs], ldn_local;
-    magma_int_t        N, M, NB, NBk, I, d, num_gpus;
+    magma_int_t        N, M, NB, NBk, I, d, num_gpus0 = num_gpus;
     magma_int_t        ii, jj, h, offset, ib, rows, s;
     
     magma_queue_t stream[MagmaMaxGPUs][2];
