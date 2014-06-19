@@ -95,7 +95,7 @@ int main( int argc, char** argv)
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgeqrf returned error %d: %s.\n",
+                printf("magma_zgeqr2_gpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
             if ( opts.lapack ) {
