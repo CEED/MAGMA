@@ -118,31 +118,43 @@ int main( int argc, char** argv)
                 magmaDoubleComplex *h_W1, *h_W2, *h_W3;
                 double *h_RW, results[2];
 
-                TESTING_MALLOC_CPU( h_W1, magmaDoubleComplex, n2    ); // Q
-                TESTING_MALLOC_CPU( h_W2, magmaDoubleComplex, n2    ); // R
-                TESTING_MALLOC_CPU( h_W3, magmaDoubleComplex, lwork ); // WORK
-                TESTING_MALLOC_CPU( h_RW, double, M );  // RWORK
-                lapackf77_zlarnv( &ione, ISEED2, &n2, h_A );
-                lapackf77_zqrt02( &M, &N, &min_mn, h_A, h_R, h_W1, h_W2, &lda, tau, h_W3, &lwork,
-                                  h_RW, results );
-                results[0] *= eps;
-                results[1] *= eps;
+                if ( M >= N) {
+                    TESTING_MALLOC_CPU( h_W1, magmaDoubleComplex, n2    ); // Q
+                    TESTING_MALLOC_CPU( h_W2, magmaDoubleComplex, n2    ); // R
+                    TESTING_MALLOC_CPU( h_W3, magmaDoubleComplex, lwork ); // WORK
+                    TESTING_MALLOC_CPU( h_RW, double, M );  // RWORK
+                    lapackf77_zlarnv( &ione, ISEED2, &n2, h_A );
+                    lapackf77_zqrt02( &M, &N, &min_mn, h_A, h_R, h_W1, h_W2, &lda, tau, h_W3, &lwork,
+                                      h_RW, results );
+                    results[0] *= eps;
+                    results[1] *= eps;
 
-                if ( opts.lapack ) {
-                    printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                  %8.2e",
-                           (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0], results[1] );
-                } else {
-                    printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                  %8.2e",
-                           (int) M, (int) N, gpu_perf, gpu_time, results[0], results[1] );
+                    if ( opts.lapack ) {
+                        printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                  %8.2e",
+                               (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0], results[1] );
+                    } else {
+                        printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                  %8.2e",
+                               (int) M, (int) N, gpu_perf, gpu_time, results[0], results[1] );
+                    }
+                    // todo also check results[1] < tol?
+                    printf("   %s\n", (results[0] < tol ? "ok" : "failed"));
+                    status += ! (results[0] < tol);
+
+                    TESTING_FREE_CPU( h_W1 );
+                    TESTING_FREE_CPU( h_W2 );
+                    TESTING_FREE_CPU( h_W3 );
+                    TESTING_FREE_CPU( h_RW );
                 }
-                // todo also check results[1] < tol?
-                printf("   %s\n", (results[0] < tol ? "ok" : "failed"));
-                status += ! (results[0] < tol);
-
-                TESTING_FREE_CPU( h_W1 );
-                TESTING_FREE_CPU( h_W2 );
-                TESTING_FREE_CPU( h_W3 );
-                TESTING_FREE_CPU( h_RW );
+                else {
+                    if ( opts.lapack ) {
+                        printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   --- ",
+                               (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                    } else {
+                        printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    --- ",
+                               (int) M, (int) N, gpu_perf, gpu_time );
+                    }
+                    printf("  (error check only for M >= N)\n");
+                }
             }
             else if ( opts.check == 2 ) {
                 /* =====================================================================
