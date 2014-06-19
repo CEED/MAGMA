@@ -40,7 +40,7 @@ int main( int argc, char** argv)
 
     magmaDoubleComplex *d_A, *dwork, *ddA, *d_T;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
-    magma_int_t ione     = 1;
+    magma_int_t ione     = 1, ldwork;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
 
@@ -48,14 +48,22 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    //double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol, eps = lapackf77_dlamch("E");
+    tol = 10* opts.tolerance * eps;
     
-    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)        ||I-Q'Q||_F     ||I-Q'Q||_I     ||A-Q R||_I \n");
+    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)     ||I-Q'Q||_F / M   ||I-Q'Q||_I / M    ||A-Q R||_I \n");
+    printf("                                                        MAGMA / LAPACK    MAGMA / LAPACK\n");    
     printf("=====================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
             N = opts.nsize[itest];
+
+            if (N > 128) {
+                printf("This routine requires N <= 128. Setting N = 128\n");
+                N = 128;
+            }
+
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
@@ -68,6 +76,11 @@ int main( int argc, char** argv)
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             lwork = max(lwork, 3*N*N);
             
+            ldwork = N*N;
+            if (opts.version == 2) {
+                ldwork = 3*N*N + min_mn;
+            }
+
             TESTING_MALLOC_PIN( tau,    magmaDoubleComplex, min_mn );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             TESTING_MALLOC_PIN(h_rwork, magmaDoubleComplex, lwork  );            
@@ -78,7 +91,7 @@ int main( int argc, char** argv)
             
             TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( dtau,  magmaDoubleComplex, min_mn );
-            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, N*N    );
+            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
             TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
             TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
             
@@ -99,16 +112,8 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_sync_wtime( 0 );
-            if (opts.version == 2) {
-                int min_mn = min(M, N);
-                int     nb = N;
-
-                magmaDoubleComplex *dtau = dwork;
-                
-                magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, 
-                                   (double *)(dwork+min_mn), &info);
-                magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);  
-                magma_zungqr_gpu( M, N, N, d_A, ldda, tau, d_T, nb, &info );
+            if (opts.version >=0 && opts.version <= 4) {
+                magma_zgegqr_gpu( opts.version, M, N, d_A, ldda, dwork, h_rwork, &info );
             }
             else {
                 magma_zgegqr_gpu( 1, M, N, d_A, ldda, dwork, h_rwork, &info );
@@ -123,9 +128,8 @@ int main( int argc, char** argv)
             magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
 
             // Regenerate R
-            // blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_A, &M, &c_zero, h_work, &N); 
-            
-            //magma_zprint(N, N, h_work, N);
+            // blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_A, &M, &c_zero, h_rwork, &N);
+            // magma_zprint(N, N, h_work, N);
 
             blasf77_ztrmm("r", "u", "n", "n", &M, &N, &c_one, h_rwork, &N, h_R, &M);
             blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
@@ -156,18 +160,19 @@ int main( int argc, char** argv)
                 for(int ii = 0; ii < N*N; ii += N+1 )
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
 
-                e1    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
-                e3    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
+                e1    = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
+                e3    = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
                 blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
                 for(int ii = 0; ii < N*N; ii += N+1 )
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
-                e2    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
-                e4    = lapackf77_zlange("i", &N, &N, h_work, &N, work);
+                e2    = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
+                e4    = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2e/%7.2e  %7.2e/%7.2e  %7.2e\n",
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2e/%7.2e  %7.2e/%7.2e  %7.2e",
                        (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                        e1, e2, e3, e4, e5);
+                printf("  %s\n", (e1 < tol ? "ok" : "failed"));
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
