@@ -31,7 +31,7 @@
     n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    @param[in,out]
+    @param[in]
     A       COMPLEX_16 array, dimension (LDA,N), on the CPU host.
             The M-by-N matrix to be printed.
 
@@ -110,7 +110,7 @@ void magma_zprint( magma_int_t m, magma_int_t n, const magmaDoubleComplex *A, ma
     n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    @param[in,out]
+    @param[in]
     dA      COMPLEX_16 array, dimension (LDDA,N), on the GPU device.
             The M-by-N matrix to be printed.
 
@@ -142,6 +142,8 @@ void magma_zprint_gpu( magma_int_t m, magma_int_t n, const magmaDoubleComplex *d
     magmaDoubleComplex* A;
     magma_zmalloc_cpu( &A, lda*n );
     magma_zgetmatrix( m, n, dA, ldda, A, lda );
+    
     magma_zprint( m, n, A, lda );
+    
     magma_free_cpu( A );
 }
