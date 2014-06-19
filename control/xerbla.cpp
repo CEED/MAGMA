@@ -19,7 +19,7 @@
     @param[in]
     srname  CHAR*
             The name of the routine which called XERBLA.
-            In C/C++ it is convenient to use __func__.
+            In C/C++ it is convenient to use "__func__".
 
     @param[in]
     info    INTEGER

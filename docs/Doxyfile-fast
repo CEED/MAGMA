@@ -942,6 +942,7 @@ INPUT                  = doxygen-modules.h \
 	../control/magma_zf77.cpp              \
 	../control/magma_zf77pgi.cpp           \
 	../control/magma_zfortran.F90          \
+	../control/magma_znan_inf.cpp             \
 	../control/magmawinthread.cpp          \
 	../control/magmawinthread.h            \
 	../control/operators.h                 \
