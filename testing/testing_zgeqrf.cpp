@@ -80,6 +80,9 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
+            magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
+            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
@@ -156,8 +159,8 @@ int main( int argc, char** argv)
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, error );
                 }
-                printf("   %s\n", (error < tol ? "ok" : "failed"));
-                status += ! (error < tol);
+                printf("   %s\n", (error < 2 * tol ? "ok" : "failed"));
+                status += ! (error < 2 * tol);
             }
             else {
                 if ( opts.lapack ) {
