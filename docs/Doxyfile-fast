@@ -38,7 +38,7 @@ PROJECT_NAME           = "MAGMA"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 1.4
+PROJECT_NUMBER         = 1.5.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -58,7 +58,7 @@ PROJECT_LOGO           = magma-logo.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = doxygen
+OUTPUT_DIRECTORY       =
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -1043,6 +1043,94 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/ztrsm.cu                       \
 	../magmablas/ztrsm_work.cu                  \
 	../magmablas/ztrtri_kernel.cu               \
+	../sparse-iter/src/magma_z_precond_wrapper.cpp   \
+	../sparse-iter/src/zbailu.cpp                    \
+	../sparse-iter/src/zbaiter.cpp                   \
+	../sparse-iter/src/zbcsrlu.cpp                   \
+	../sparse-iter/src/zbicgstab.cpp                 \
+	../sparse-iter/src/zbicgstab_merge.cpp           \
+	../sparse-iter/src/zbicgstab_merge2.cpp          \
+	../sparse-iter/src/zcg.cpp                       \
+	../sparse-iter/src/zcg_merge.cpp                 \
+	../sparse-iter/src/zcg_res.cpp                   \
+	../sparse-iter/src/zciterref.cpp                 \
+	../sparse-iter/src/zcpbicgstab.cpp               \
+	../sparse-iter/src/zcpgmres.cpp                  \
+	../sparse-iter/src/zcpir.cpp                     \
+	../sparse-iter/src/zcuilu.cpp                    \
+	../sparse-iter/src/zgmres.cpp                    \
+	../sparse-iter/src/zgmres_pipe.cpp               \
+	../sparse-iter/src/zilu.cpp                      \
+	../sparse-iter/src/ziterref.cpp                  \
+	../sparse-iter/src/zjacobi.cpp                   \
+	../sparse-iter/src/zlobpcg.cpp                   \
+	../sparse-iter/src/zlobpcg2.cpp                  \
+	../sparse-iter/src/zlobpcg3.cpp                  \
+	../sparse-iter/src/zlobpcg_old.cpp               \
+	../sparse-iter/src/zorthomgs.cpp                 \
+	../sparse-iter/src/zp1gmres.cpp                  \
+	../sparse-iter/src/zpastix.cpp                   \
+	../sparse-iter/src/zpbicgstab.cpp                \
+	../sparse-iter/src/zpcg.cpp                      \
+	../sparse-iter/src/zpgmres.cpp                   \
+	../sparse-iter/src/zresidual.cpp                 \
+	../sparse-iter/control/magma_z_chowutils.cpp      \
+	../sparse-iter/control/magma_z_free.cpp           \
+	../sparse-iter/control/magma_z_init.cpp           \
+	../sparse-iter/control/magma_z_matrixchar.cpp     \
+	../sparse-iter/control/magma_z_mconverter.cpp     \
+	../sparse-iter/control/magma_z_mpksetup.cpp       \
+	../sparse-iter/control/magma_z_transfer.cpp       \
+	../sparse-iter/control/magma_z_vio.cpp            \
+	../sparse-iter/control/magma_zcsrsplit.cpp        \
+	../sparse-iter/control/magma_zgeneratematrix.cpp  \
+	../sparse-iter/control/magma_zilustruct.cpp       \
+	../sparse-iter/control/magma_zmhom.cpp            \
+	../sparse-iter/control/magma_zmscale.cpp          \
+	../sparse-iter/control/magma_zmsort.cpp           \
+	../sparse-iter/control/magma_zp2p.cpp             \
+	../sparse-iter/control/magma_zsolverinfo.cpp      \
+	../sparse-iter/control/magma_ztranspose.cpp       \
+	../sparse-iter/control/matrix_zio.cpp             \
+	../sparse-iter/control/mmio.cpp                   \
+	../sparse-iter/blas/clag2z_sparse.cu           \
+	../sparse-iter/blas/magma_clag2z.cpp           \
+	../sparse-iter/blas/magma_z_blaswrapper.cpp    \
+	../sparse-iter/blas/magma_z_mpksetup.cu        \
+	../sparse-iter/blas/magma_zbitflip.cu          \
+	../sparse-iter/blas/magma_zlag2c.cpp           \
+	../sparse-iter/blas/zaicc_chow_csr_c.cu        \
+	../sparse-iter/blas/zaicc_chow_csr_s.cu        \
+	../sparse-iter/blas/zailu_chow_csr_s.cu        \
+	../sparse-iter/blas/zailu_chow_csr_s_debug.cu  \
+	../sparse-iter/blas/zbajac_csr.cu              \
+	../sparse-iter/blas/zbcsrblockinfo.cu          \
+	../sparse-iter/blas/zbcsrcpy.cu                \
+	../sparse-iter/blas/zbcsrlugemm.cu             \
+	../sparse-iter/blas/zbcsrlupivloc.cu           \
+	../sparse-iter/blas/zbcsrswp.cu                \
+	../sparse-iter/blas/zbcsrtrsv.cu               \
+	../sparse-iter/blas/zcompact.cu                \
+	../sparse-iter/blas/zgecsrmv.cu                \
+	../sparse-iter/blas/zgeellmv.cu                \
+	../sparse-iter/blas/zgeellrtmv.cu              \
+	../sparse-iter/blas/zgeelltmv.cu               \
+	../sparse-iter/blas/zgesellcmmv.cu             \
+	../sparse-iter/blas/zgesellcmv.cu              \
+	../sparse-iter/blas/zjacobisetup.cu            \
+	../sparse-iter/blas/zlag2c_sparse.cu           \
+	../sparse-iter/blas/zlobpcg_maxpy.cu           \
+	../sparse-iter/blas/zlobpcg_residuals.cu       \
+	../sparse-iter/blas/zlobpcg_shift.cu           \
+	../sparse-iter/blas/zmdot.cu                   \
+	../sparse-iter/blas/zmergebicgstab.cu          \
+	../sparse-iter/blas/zmergebicgstab2.cu         \
+	../sparse-iter/blas/zmergecg.cu                \
+	../sparse-iter/blas/zmgecsrmv.cu               \
+	../sparse-iter/blas/zmgeellmv.cu               \
+	../sparse-iter/blas/zmgeelltmv.cu              \
+	../sparse-iter/blas/zmgesellcmmv.cu            \
+	../sparse-iter/blas/zpipelinedgmres.cu         \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
