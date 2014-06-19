@@ -42,6 +42,7 @@ ZSRC := \
 	testing_zlange.cpp	\
 	testing_zlanhe.cpp	\
 	testing_dlarfg.cpp	\
+	testing_znan_inf.cpp	\
 	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
 	testing_zsymmetrize_tiles.cpp	\
@@ -100,7 +101,6 @@ ZSRC += \
 	\
 	testing_zgeqrf_mgpu.cpp	\
 	testing_zgegqr_gpu.cpp  \
-
 
 # QR, CPU interface
 ZSRC += \

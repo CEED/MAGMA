@@ -11,6 +11,7 @@ MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
 ZSRC := \
+	magma_znan_inf.cpp	\
 	zpanel_to_q.cpp	\
 	zprint.cpp	\
 

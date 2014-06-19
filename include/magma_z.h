@@ -1048,6 +1048,21 @@ void magma_zprint_gpu( magma_int_t m, magma_int_t n, const magmaDoubleComplex *d
 void zpanel_to_q( magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
 void zq_to_panel( magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
 
+magma_int_t magma_znan_inf(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *cnt_nan,
+    magma_int_t *cnt_inf );
+
+magma_int_t magma_znan_inf_gpu(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_int_t *cnt_nan,
+    magma_int_t *cnt_inf );
+
+extern const magmaDoubleComplex MAGMA_Z_NAN;
+extern const magmaDoubleComplex MAGMA_Z_INF;
+
 #ifdef __cplusplus
 }
 #endif
