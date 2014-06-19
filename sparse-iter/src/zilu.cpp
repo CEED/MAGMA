@@ -21,26 +21,26 @@
 #define A(i,j) A.val+((blockinfo(i,j)-1)*size_b*size_b)
 #define x(i) x->val+(i*size_b)
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     ILU Preconditioner for a BCSR matrix A. 
     In the first approach we assume all diagonal blocks to be nonzero.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A (on DEV)
-    magma_z_sparse_matrix *M                  output matrix M approx. (LU)^{-1} (on DEV)
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A (on DEV)
 
-    =====================================================================  */
+    @param
+    m           magma_z_sparse_matrix*
+                output matrix M approx. (LU)^{-1} (on DEV)
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t *ipiv ){

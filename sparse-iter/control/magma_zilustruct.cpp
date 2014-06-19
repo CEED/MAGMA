@@ -36,26 +36,28 @@ using namespace std;
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     This routine computes the fill-in structure of an ILU(levels) factorization
     based on the successive multiplication of upper and lower triangular factors
     using the CUSPARSE library.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix *A             matrix in magma sparse matrix format
-    magma_int_t levels                   fill in level
+    @param
+    A           magma_z_sparse_matrix*
+                matrix in magma sparse matrix format
 
-    ========================================================================  */
+    @param
+    levels      magma_int_t
+                fill in level
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C"
 magma_int_t 

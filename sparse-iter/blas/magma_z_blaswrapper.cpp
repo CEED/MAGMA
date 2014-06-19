@@ -20,28 +20,35 @@
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and scalars alpha, beta
     the wrapper determines the suitable SpMV computing
               y = alpha * A * x + beta * y.  
     Arguments
-    =========
+    ---------
 
-    magmaDoubleComplex alpha      scalar alpha
-    magma_z_sparse_matrix A       sparse matrix A    
-    magma_z_vector x              input vector x  
+    @param
+    alpha       magmaDoubleComplex
+                scalar alpha
+
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
+
+    @param
+    x           magma_z_vector
+                input vector x  
+    \n
     magmaDoublComplex beta        scalar beta
-    magma_z_vector y              input vector y      
+    @param
+    y           magma_z_vector
+                input vector y      
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
@@ -196,30 +203,39 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and scalars alpha, beta
     the wrapper determines the suitable SpMV computing
               y = alpha * ( A - lambda I ) * x + beta * y.  
     Arguments
-    =========
+    ---------
 
-    magmaDoubleComplex alpha      scalar alpha
-    magma_z_sparse_matrix A       sparse matrix A   
-    magmaDoubleComplex alpha      scalar lambda 
-    magma_z_vector x              input vector x  
+    @param
+    alpha       magmaDoubleComplex
+                scalar alpha
+
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A   
+    \n
+    @param
+    alpha       magmaDoubleComplex
+                scalar lambda 
+
+    @param
+    x           magma_z_vector
+                input vector x  
+    \n
     magmaDoublComplex beta        scalar beta
-    magma_z_vector y              input vector y      
+    @param
+    y           magma_z_vector
+                input vector y      
 
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_spmv_shift( magmaDoubleComplex alpha, 

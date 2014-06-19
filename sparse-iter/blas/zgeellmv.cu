@@ -81,31 +81,51 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     This routine computes y = alpha *  A *  x + beta * y on the GPU.
     Input format is ELLPACK.
     
     Arguments
-    =========
+    ---------
 
-    magma_int_t m                   number of rows in A
-    magma_int_t n                   number of columns in A 
-    magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
-    magmaDoubleComplex *d_x         input vector x
-    magmaDoubleComplex beta         scalar multiplier
-    magmaDoubleComplex *d_y         input/output vector y
+    @param
+    m           magma_int_t
+                number of rows in A
 
-    ======================================================================    */
+    @param
+    n           magma_int_t
+                number of columns in A 
+
+    @param
+    alpha       magmaDoubleComplex
+                scalar multiplier
+
+    @param
+    d_val       magmaDoubleComplex*
+                array containing values of A in ELLPACK
+
+    @param
+    d_colind    magma_int_t*
+                columnindices of A in ELLPACK
+
+    @param
+    d_x         magmaDoubleComplex*
+                input vector x
+
+    @param
+    beta        magmaDoubleComplex
+                scalar multiplier
+
+    @param
+    d_y         magmaDoubleComplex*
+                input/output vector y
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zgeellmv(magma_trans_t transA,
@@ -131,32 +151,52 @@ magma_zgeellmv(magma_trans_t transA,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     This routine computes y = alpha *( A - lambda I ) * x + beta * y on the GPU.
     Input format is ELLPACK.
     It is the shifted version of the ELLPACK SpMV.
     
     Arguments
-    =========
+    ---------
 
-    magma_int_t m                   number of rows in A
-    magma_int_t n                   number of columns in A 
-    magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELLPACK
-    magma_int_t *d_colind           columnindices of A in ELLPACK
-    magmaDoubleComplex *d_x         input vector x
-    magmaDoubleComplex beta         scalar multiplier
-    magmaDoubleComplex *d_y         input/output vector y
+    @param
+    m           magma_int_t
+                number of rows in A
 
-    ======================================================================    */
+    @param
+    n           magma_int_t
+                number of columns in A 
+
+    @param
+    alpha       magmaDoubleComplex
+                scalar multiplier
+
+    @param
+    d_val       magmaDoubleComplex*
+                array containing values of A in ELLPACK
+
+    @param
+    d_colind    magma_int_t*
+                columnindices of A in ELLPACK
+
+    @param
+    d_x         magmaDoubleComplex*
+                input vector x
+
+    @param
+    beta        magmaDoubleComplex
+                scalar multiplier
+
+    @param
+    d_y         magmaDoubleComplex*
+                input/output vector y
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zgeellmv_shift( magma_trans_t transA,

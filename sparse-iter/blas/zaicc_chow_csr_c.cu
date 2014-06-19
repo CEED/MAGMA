@@ -99,14 +99,9 @@ magma_zaic_csr_c_kernel( magma_int_t num_rows,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     This routine computes the ILU approximation of a matrix iteratively. 
     The idea is according to Edmond Chow's presentation at SIAM 2014.
@@ -118,14 +113,27 @@ magma_zaic_csr_c_kernel( magma_int_t num_rows,
     is within the uper/lower triangle.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_rows            number of rows
-    magma_int_t num_vecs            number of vectors
-    magma_int_t shift               shift number
-    magmaDoubleComplex *x           input/output vector x
+    @param
+    num_rows    magma_int_t
+                number of rows
 
-    ======================================================================    */
+    @param
+    num_vecs    magma_int_t
+                number of vectors
+
+    @param
+    shift       magma_int_t
+                shift number
+
+    @param
+    x           magmaDoubleComplex*
+                input/output vector x
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zaic_csr_c( magma_z_sparse_matrix A,

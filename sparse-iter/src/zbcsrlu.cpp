@@ -38,27 +38,34 @@
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     LU decomposition and solution via triangular solves for a BCSR matrix A. 
     We assume all diagonal blocks to be nonzero.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   descriptor for matrix A
-    magma_z_vector b                          RHS b vector
-    magma_z_vector *x                         solution approximation
-    magma_z_solver_par *solver_par       solver parameters
+    @param
+    A           magma_z_sparse_matrix
+                descriptor for matrix A
 
-    ========================================================================  */
+    @param
+    b           magma_z_vector
+                RHS b vector
+
+    @param
+    x           magma_z_vector*
+                solution approximation
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b, 
@@ -142,26 +149,31 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     LU decomposition for a BCSR matrix A. 
     We assume all diagonal blocks to be nonzero.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A           input matrix A (on DEV)
-    magma_z_sparse_matrix *M          output matrix containing LU decomposition
-    magma_int_t *ipiv                 pivot vector
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A (on DEV)
 
-    ========================================================================  */
+    @param
+    m           magma_z_sparse_matrix*
+                output matrix containing LU decomposition
+
+    @param
+    ipiv        magma_int_t*
+                pivot vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M, 

@@ -329,28 +329,36 @@ zbcsr_gemm_kernel64(
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     For a Block-CSR ILU factorization, this routine updates all blocks in
     the trailing matrix.
     
     Arguments
-    =========
+    ---------
 
-    magma_int_t size_b              blocksize in BCSR
-    magma_int_t num_block_rows      number of block rows
-    magma_int_t kblocks             number of blocks in row
-    magma_int_t *ipiv               array containing pivots
+    @param
+    size_b      magma_int_t
+                blocksize in BCSR
+
+    @param
+    num_block_rowsmagma_int_t
+                number of block rows
+
+    @param
+    kblocks     magma_int_t
+                number of blocks in row
+
+    @param
+    ipiv        magma_int_t*
+                array containing pivots
+
     double *x           input/output vector x
 
-    ======================================================================    */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbcsrluegemm( magma_int_t size_b, 

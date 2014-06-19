@@ -40,18 +40,19 @@ magma_zbitflip_kernel( magmaDoubleComplex *d, int loc, int bit ){
 
 
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     This tool flips the bit 'bit' of the magmaDoubleComplex value d[ loc ]. 
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 
 

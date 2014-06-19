@@ -142,14 +142,9 @@ magma_zpipelined_scale( int n,
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Computes the correction term of the pipelined GMRES according to P. Ghysels 
     and scales and copies the new search direction
@@ -157,14 +152,27 @@ magma_zpipelined_scale( int n,
     Returns the vector v = r/ ( skp[k] - (sum_i=1^k skp[i]^2) ) .
 
     Arguments
-    =========
+    ---------
 
-    int n                             legth of v_i
-    int k                             # skp entries <v_i,r> ( without <r> )
-    magmaDoubleComplex *r             vector of length n
-    magmaDoubleComplex *v             vector of length n
+    @param
+    n           int
+                legth of v_i
 
-    ========================================================================  */
+    @param
+    k           int
+                # skp entries <v_i,r> ( without <r> )
+
+    @param
+    r           magmaDoubleComplex*
+                vector of length n
+
+    @param
+    v           magmaDoubleComplex*
+                vector of length n
+
+
+    @ingroup magmasparse_
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zcopyscale(   int n, 

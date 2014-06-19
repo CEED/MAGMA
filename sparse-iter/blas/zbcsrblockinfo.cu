@@ -39,31 +39,45 @@ zbcsrblockinfo5_kernel(
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     For a Block-CSR ILU factorization, this routine copies the filled blocks
     from the original matrix A and initializes the blocks that will later be 
     filled in the factorization process with zeros.
     
     Arguments
-    =========
+    ---------
 
 
-    magma_int_t size_b              blocksize in BCSR
-    magma_int_t num_blocks          number of nonzero blocks
-    magma_int_t num_zero_blocks     number of zero-blocks (will later be filled)
-    magmaDoubleComplex **Aval       pointers to the nonzero blocks in A
-    magmaDoubleComplex **Aval       pointers to the nonzero blocks in B
-    magmaDoubleComplex **Aval       pointers to the zero blocks in B
+    @param
+    size_b      magma_int_t
+                blocksize in BCSR
 
-    ======================================================================    */
+    @param
+    num_blocks  magma_int_t
+                number of nonzero blocks
+
+    @param
+    num_zero_blocksmagma_int_t
+                number of zero-blocks (will later be filled)
+
+    @param
+    Aval        magmaDoubleComplex**
+                pointers to the nonzero blocks in A
+
+    @param
+    Aval        magmaDoubleComplex**
+                pointers to the nonzero blocks in B
+
+    @param
+    Aval        magmaDoubleComplex**
+                pointers to the zero blocks in B
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbcsrblockinfo5(  magma_int_t lustep,

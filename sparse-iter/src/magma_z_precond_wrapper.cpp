@@ -15,28 +15,35 @@
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective preconditioner
     is chosen. It approximates x for A x = y.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A         sparse matrix A    
-    magma_z_vector x                input vector x  
-    magma_z_vector y                input vector y      
-    magma_z_preconditioner precond  preconditioner
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector
+                input vector x  
+
+    @param
+    y           magma_z_vector
+                input vector y      
+
+    @param
+    precond     magma_z_preconditioner
+                preconditioner
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
@@ -93,29 +100,36 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective preconditioner
     is preprocessed. 
-    E.g. for Jacobi: the scaling-vetor, for ILU the factorization...
+    E.g. for Jacobi: the scaling-vetor, for ILU the factorization.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A         sparse matrix A    
-    magma_z_vector x                input vector x  
-    magma_z_vector y                input vector y      
-    magma_z_preconditioner precond  preconditioner
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector
+                input vector x  
+
+    @param
+    y           magma_z_vector
+                input vector y      
+
+    @param
+    precond     magma_z_preconditioner
+                preconditioner
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b, 
@@ -156,29 +170,36 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective preconditioner
     is applied. 
-    E.g. for Jacobi: the scaling-vetor, for ILU the triangular solves...
+    E.g. for Jacobi: the scaling-vetor, for ILU the triangular solves.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A         sparse matrix A    
-    magma_z_vector x                input vector x  
-    magma_z_vector y                input vector y      
-    magma_z_preconditioner precond  preconditioner
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector
+                input vector x  
+
+    @param
+    y           magma_z_vector
+                input vector y      
+
+    @param
+    precond     magma_z_preconditioner
+                preconditioner
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b, 
@@ -216,29 +237,36 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective left preconditioner
     is applied. 
-    E.g. for Jacobi: the scaling-vetor, for ILU the left triangular solve...
+    E.g. for Jacobi: the scaling-vetor, for ILU the left triangular solve.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A         sparse matrix A    
-    magma_z_vector x                input vector x  
-    magma_z_vector y                input vector y      
-    magma_z_preconditioner precond  preconditioner
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector
+                input vector x  
+
+    @param
+    y           magma_z_vector
+                input vector y      
+
+    @param
+    precond     magma_z_preconditioner
+                preconditioner
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b, 
@@ -275,29 +303,36 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     For a given input matrix A and vectors x, y and the
     preconditioner parameters, the respective right-preconditioner
     is applied. 
-    E.g. for Jacobi: the scaling-vetor, for ILU the right triangular solve...
+    E.g. for Jacobi: the scaling-vetor, for ILU the right triangular solve.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A         sparse matrix A    
-    magma_z_vector x                input vector x  
-    magma_z_vector y                input vector y      
-    magma_z_preconditioner precond  preconditioner
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector
+                input vector x  
+
+    @param
+    y           magma_z_vector
+                input vector y      
+
+    @param
+    precond     magma_z_preconditioner
+                preconditioner
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b, 

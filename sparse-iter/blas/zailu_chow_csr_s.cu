@@ -110,14 +110,9 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     This routine computes the ILU approximation of a matrix iteratively. 
     The idea is according to Edmond Chow's presentation at SIAM 2014.
@@ -127,14 +122,26 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
     Every component of L and U is handled by one thread. 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A_L               input matrix L
-    magma_z_sparse_matrix A_U               input matrix U
-    magma_z_sparse_matrix L                 input/output matrix L
-    magma_z_sparse_matrix U                 input/output matrix U
+    @param
+    A_L         magma_z_sparse_matrix
+                input matrix L
 
-    ======================================================================    */
+    @param
+    A_U         magma_z_sparse_matrix
+                input matrix U
+
+    @param
+    L           magma_z_sparse_matrix
+                input/output matrix L
+
+    @param
+    U           magma_z_sparse_matrix
+                input/output matrix U
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zailu_csr_s( magma_z_sparse_matrix A_L,

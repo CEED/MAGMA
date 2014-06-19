@@ -55,32 +55,52 @@ zmgeelltmv_kernel( int num_rows,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     
     This routine computes Y = alpha *  A *  X + beta * Y for X and Y sets of 
     num_vec vectors on the GPU. Input format is ELL. 
     
     Arguments
-    =========
+    ---------
 
-    magma_int_t m                   number of rows in A
-    magma_int_t n                   number of columns in A 
+    @param
+    m           magma_int_t
+                number of rows in A
+
+    @param
+    n           magma_int_t
+                number of columns in A 
+    \n
     mama_int_t num_vecs             number of vectors
-    magmaDoubleComplex alpha        scalar multiplier
-    magmaDoubleComplex *d_val       array containing values of A in ELL
-    magma_int_t *d_colind           columnindices of A in ELL
-    magmaDoubleComplex *d_x         input vector x
-    magmaDoubleComplex beta         scalar multiplier
-    magmaDoubleComplex *d_y         input/output vector y
+    @param
+    alpha       magmaDoubleComplex
+                scalar multiplier
 
-    ======================================================================    */
+    @param
+    d_val       magmaDoubleComplex*
+                array containing values of A in ELL
+
+    @param
+    d_colind    magma_int_t*
+                columnindices of A in ELL
+
+    @param
+    d_x         magmaDoubleComplex*
+                input vector x
+
+    @param
+    beta        magmaDoubleComplex
+                scalar multiplier
+
+    @param
+    d_y         magmaDoubleComplex*
+                input/output vector y
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zmgeelltmv(  magma_trans_t transA,

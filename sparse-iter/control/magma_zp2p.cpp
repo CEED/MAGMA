@@ -23,27 +23,6 @@
 #include <cuda_profiler_api.h>
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
-    Purpose
-    =======
-
-    Initializes P2P communication between GPUs.
-
-    Arguments
-    =========
-
-    magma_int_t *bandwidth_benchmark        input: run the benchmark (1/0)
-    magma_int_t *num_gpus                   output: number of GPUs
-
-
-    ========================================================================  */
-
-
 #include <stdio.h>  
 #include <cuda.h>  
 #include <stdlib.h>
@@ -80,6 +59,27 @@ magma_zcheckerr(const char *label)
     return MAGMA_SUCCESS; 
 }
 
+
+/**
+    Purpose
+    -------
+
+    Initializes P2P communication between GPUs.
+
+    Arguments
+    ---------
+
+    @param
+    bandwidth_benchmarkmagma_int_t*
+                input: run the benchmark (1/0)
+
+    @param
+    num_gpus    magma_int_t*
+                output: number of GPUs
+
+
+    @ingroup magmasparse_
+    ********************************************************************/
 
 magma_int_t
 magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){

@@ -806,34 +806,63 @@ magma_zcg_rhokernel(
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges the first SpmV using different formats with the dot product 
     and the computation of rho
 
     Arguments
-    =========
+    ---------
 
-    magma_storage_t storage_t           matrix storage type
-    int n                               dimension n
-    int max_nnz_row                     for ELL/ELLRT
-    magmaDoubleComplex *d1              temporary vector
-    magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_val           matrix values
-    int *d_rowptr                       matrix row pointer
-    int *d_colind                       matrix column indices
-    magmaDoubleComplex *d_d             input vector d
-    magmaDoubleComplex *d_z             input vector z
-    magmaDoubleComplex *skp             array for parameters ( skp[3]=rho )
+    @param
+    storage_t   magma_storage_t
+                matrix storage type
 
-    ========================================================================  */
+    @param
+    n           int
+                dimension n
+
+    @param
+    max_nnz_row int
+                for ELL/ELLRT
+
+    @param
+    d1          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d2          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d_val       magmaDoubleComplex*
+                matrix values
+
+    @param
+    d_rowptr    int*
+                matrix row pointer
+
+    @param
+    d_colind    int*
+                matrix column indices
+
+    @param
+    d_d         magmaDoubleComplex*
+                input vector d
+
+    @param
+    d_z         magmaDoubleComplex*
+                input vector z
+
+    @param
+    skp         magmaDoubleComplex*
+                array for parameters ( skp[3]=rho )
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zcgmerge_spmv1(  
@@ -1098,33 +1127,59 @@ magma_zcg_d_kernel(
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges the update of r and x with the dot product and performs then 
     the update for the Krylov vector d
 
     Arguments
-    =========
+    ---------
 
-    int n                               dimension n
-    magmaDoubleComplex *d1              temporary vector
-    magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_x             input vector x
-    magmaDoubleComplex *d_r             input/output vector r
-    magmaDoubleComplex *d_p             input vector p
-    magmaDoubleComplex *d_s             input vector s
-    magmaDoubleComplex *d_t             input vector t
-    magmaDoubleComplex *d_x             output vector x
-    magmaDoubleComplex *skp             array for parameters
+    @param
+    n           int
+                dimension n
 
-    ========================================================================  */
+    @param
+    d1          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d2          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d_x         magmaDoubleComplex*
+                input vector x
+
+    @param
+    d_r         magmaDoubleComplex*
+                input/output vector r
+
+    @param
+    d_p         magmaDoubleComplex*
+                input vector p
+
+    @param
+    d_s         magmaDoubleComplex*
+                input vector s
+
+    @param
+    d_t         magmaDoubleComplex*
+                input vector t
+
+    @param
+    d_x         magmaDoubleComplex*
+                output vector x
+
+    @param
+    skp         magmaDoubleComplex*
+                array for parameters
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zcgmerge_xrbeta(  

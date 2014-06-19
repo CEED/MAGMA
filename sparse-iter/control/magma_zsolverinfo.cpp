@@ -24,24 +24,26 @@
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     Prints information about a previously called solver.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_solver_par *solver_par    structure containing all information
+    @param
+    solver_par  magma_z_solver_par*
+                structure containing all information
 
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zsolverinfo( magma_z_solver_par *solver_par, 
@@ -307,25 +309,27 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
 
 #include <assert.h>
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     Frees any memory assocoiated with the verbose mode of solver_par. The
     other values are set to default.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_solver_par *solver_par    structure containing all information
+    @param
+    solver_par  magma_z_solver_par*
+                structure containing all information
 
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zsolverinfo_free( magma_z_solver_par *solver_par, 

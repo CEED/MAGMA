@@ -19,14 +19,9 @@
 
 #define  q(i)     (q.val + (i)*dofs)
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Solves a system of linear equations
        A * X = B
@@ -36,15 +31,26 @@
     merging multiple operations into one kernel.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A
-    magma_z_vector b                          RHS b
-    magma_z_vector *x                         solution approximation
-    magma_z_solver_par *solver_par       solver parameters
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
 
-    =====================================================================  */
+    @param
+    b           magma_z_vector
+                RHS b
 
+    @param
+    x           magma_z_vector*
+                solution approximation
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
+    @ingroup magmasparse_zgesv
+    ********************************************************************/
 
 magma_int_t
 magma_zbicgstab_merge2( magma_z_sparse_matrix A, magma_z_vector b, 

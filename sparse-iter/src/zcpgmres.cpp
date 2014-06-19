@@ -21,14 +21,9 @@
 #define ATOLERANCE     10e-10
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Solves a system of linear equations
        A * X = B
@@ -37,15 +32,28 @@
     This is a GPU implementation of the GMRES method.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   descriptor for matrix A
-    magma_z_vector b                          RHS b vector
-    magma_z_vector *x                         solution approximation
-    magma_z_solver_par *solver_par       solver parameters
+    @param
+    A           magma_z_sparse_matrix
+                descriptor for matrix A
+
+    @param
+    b           magma_z_vector
+                RHS b vector
+
+    @param
+    x           magma_z_vector*
+                solution approximation
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
     magma_precond_parameters *precond_par     preconditioner parameters
 
-    =====================================================================  */
+    @ingroup magmasparse_gesv
+    ********************************************************************/
 
 magma_int_t
 magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  

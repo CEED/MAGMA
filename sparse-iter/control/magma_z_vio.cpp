@@ -27,27 +27,32 @@
 using namespace std;
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Visualizes part of a vector of type magma_z_vector.
     With input vector x , offset, displaylength the entries 
     offset - (offset + displaylength) of x are visualized.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_vector x                     vector to visualize
-    magma_int_t offset                   start inex of visualization
-    magma_int_t displaylength            number of entries to visualize       
+    @param
+    x           magma_z_vector
+                vector to visualize
 
-    ========================================================================  */
+    @param
+    offset      magma_int_t
+                start inex of visualization
+
+    @param
+    displaylengthmagma_int_t
+                number of entries to visualize       
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C"
 magma_int_t
@@ -79,27 +84,6 @@ magma_z_vvisu(      magma_z_vector x,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-    Purpose
-    =======
-
-    Reads in a double vector of length "length".
-
-    Arguments
-    =========
-
-    magma_z_vector x                     vector to read in
-    magma_int_t length                   length of vector
-    char filename                        file where vector is stored
-
-    ========================================================================  */
-
-
 // small helper function
 extern "C"
 double magma_zstring_to_double( const std::string& s )
@@ -112,6 +96,28 @@ double magma_zstring_to_double( const std::string& s )
 } 
 
 
+
+/**
+    Purpose
+    -------
+
+    Reads in a double vector of length "length".
+
+    Arguments
+    ---------
+
+    @param
+    x           magma_z_vector
+                vector to read in
+
+    @param
+    length      magma_int_t
+                length of vector
+
+    char filename                        file where vector is stored
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C"
 magma_int_t

@@ -36,28 +36,35 @@
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Prepares the Jacobi Iteration according to
        x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
        x^(k+1) =      c     -       M        * x^k.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A
-    magma_z_vector b                          RHS b
-    magma_z_sparse_matrix *M                  M = D^(-1) * (L+U)
-    magma_z_vector *c                         c = D^(-1) * b
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
 
-    ========================================================================  */
+    @param
+    b           magma_z_vector
+                RHS b
+
+    @param
+    m           magma_z_sparse_matrix*
+                M = D^(-1) * (L+U)
+
+    @param
+    c           magma_z_vector*
+                c = D^(-1) * b
+
+    @ingroup magmasparse_
+    ********************************************************************/
 
 magma_int_t
 magma_zpastixsetup( magma_z_sparse_matrix A, magma_z_vector b,
@@ -210,28 +217,35 @@ magma_zpastixsetup( magma_z_sparse_matrix A, magma_z_vector b,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Prepares the Jacobi Iteration according to
        x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
        x^(k+1) =      c     -       M        * x^k.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A
-    magma_z_vector b                          RHS b
-    magma_z_sparse_matrix *M                  M = D^(-1) * (L+U)
-    magma_z_vector *c                         c = D^(-1) * b
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
 
-    ========================================================================  */
+    @param
+    b           magma_z_vector
+                RHS b
+
+    @param
+    m           magma_z_sparse_matrix*
+                M = D^(-1) * (L+U)
+
+    @param
+    c           magma_z_vector*
+                c = D^(-1) * b
+
+    @ingroup magmasparse_
+    ********************************************************************/
 
 magma_int_t
 magma_zapplypastix( magma_z_vector b, magma_z_vector *x, 

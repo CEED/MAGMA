@@ -30,23 +30,21 @@ using namespace std;
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Sorts columns and rows for a matrix in COO or CSRCOO format. 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix *A             matrix in magma sparse matrix format
+    @param
+    A           magma_z_sparse_matrix*
+                matrix in magma sparse matrix format
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C"
 magma_int_t 

@@ -26,31 +26,34 @@
 using namespace std;
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Provides for a matrix A, a blocksize, an offset, 
     and a number of matrix powers s, the 
     local matrix B to needed by this processor for the matrix power kernel.
 
     Arguments
-    =========
+    ---------
 
     magma_sparse_matrix A                input matrix A
     magma_sparse_matrix *B               output matrix B
-    magma_int_t offset                   first row to compute
-    magma_int_t blocksize                number of rows to compute
-    magma_int_t s                        matrix powers
+    @param
+    offset      magma_int_t
+                first row to compute
 
-    ========================================================================  */
+    @param
+    blocksize   magma_int_t
+                number of rows to compute
+
+    @param
+    s           magma_int_t
+                matrix powers
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpksetup_one(  magma_z_sparse_matrix A, 
@@ -143,32 +146,38 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Provides for a matrix A, a number of processors num_procs, 
     and a distribution *offset, *blocksize and s a set of matrices B
     each containing the matrix rows to compute the matrix power kernel.
 
     Arguments
-    =========
+    ---------
 
     magma_sparse_matrix A                input matrix A
     magma_sparse_matrix B[MagmaMaxGPUs]  set of output matrices B
-    magma_int_t num_procs                number of processors
-    magma_int_t *offset                  array containing the offsets
-    magma_int_t *blocksize               array containing the chunk sizes
-    magma_int_t s                        matrix powers
+    @param
+    num_procs   magma_int_t
+                number of processors
 
-    ========================================================================  */
+    @param
+    offset      magma_int_t*
+                array containing the offsets
+
+    @param
+    blocksize   magma_int_t*
+                array containing the chunk sizes
+
+    @param
+    s           magma_int_t
+                matrix powers
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpksetup(  magma_z_sparse_matrix A, 
@@ -189,33 +198,50 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Provides for a matrix A, a blocksize, an offset, 
     and a number of matrix powers s, the number of additional rows 
     that are needed by this processor for the matrix power kernel.
 
     Arguments
-    =========
+    ---------
 
     magma_sparse_matrix A                input matrix A
-    magma_int_t offset                   first row to compute
-    magma_int_t blocksize                number of rows to compute
-    magma_int_t s                        matrix powers
-    magma_int_t **num_add_rows           number of additional rows for each s
-    magma_int_t *add_rows                array for additional rows ordered 
-                                                                according to s
-    magma_int_t *num_add_vecs            number of additional vector entries
-    magma_int_t *add_vecs                array for additional vector entries
+    @param
+    offset      magma_int_t
+                first row to compute
 
-    ========================================================================  */
+    @param
+    blocksize   magma_int_t
+                number of rows to compute
+
+    @param
+    s           magma_int_t
+                matrix powers
+
+    @param
+    num_add_rowsmagma_int_t**
+                number of additional rows for each s
+
+    @param
+    add_rows    magma_int_t*
+                array for additional rows ordered 
+    \n
+                                                                according to s
+    @param
+    num_add_vecsmagma_int_t*
+                number of additional vector entries
+
+    @param
+    add_vecs    magma_int_t*
+                array for additional vector entries
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpkinfo_one( magma_z_sparse_matrix A, 
@@ -349,14 +375,9 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Extension of magma_z_mpkinfo. The idea is to have an array containing 
     for all GPU sets which data is needed. Furthermore, it 
@@ -364,28 +385,48 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
     and a distribution *offset, *blocksize and s the number of 
     rows added to the different matrices.
 
-    num_add_vecs = [ GPU0 from Host, GPU1 from GPU0, GPU2 from GPU0 ...
-                     GPU0 from GPU1, GPU1 from Host, GPU2 from GPU0 ...
+    num_add_vecs = [ GPU0 from Host, GPU1 from GPU0, GPU2 from GPU0 .
+                     GPU0 from GPU1, GPU1 from Host, GPU2 from GPU0 .
                      ... ]
 
     add_vecs has the same structure, but instead of the number, the
     component indices are provided.
 
     Arguments
-    =========
+    ---------
 
     magma_sparse_matrix A                input matrix A
-    magma_int_t num_procs                number of processors
-    magma_int_t *offset                  array containing the offsets
-    magma_int_t *blocksize               array containing the chunk sizes
-    magma_int_t s                        matrix powers
-    magma_int_t *num_add_rows            output array: number of additional rows
-    magma_int_t *num_add_vecs            number of additional vector entries
-    magma_int_t *add_vecs                array for additional vector entries
+    @param
+    num_procs   magma_int_t
+                number of processors
 
-    ========================================================================  */
+    @param
+    offset      magma_int_t*
+                array containing the offsets
+
+    @param
+    blocksize   magma_int_t*
+                array containing the chunk sizes
+
+    @param
+    s           magma_int_t
+                matrix powers
+
+    @param
+    num_add_rowsmagma_int_t*
+                output array: number of additional rows
+
+    @param
+    num_add_vecsmagma_int_t*
+                number of additional vector entries
+
+    @param
+    add_vecs    magma_int_t*
+                array for additional vector entries
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpkback(  magma_z_sparse_matrix A, 
@@ -434,34 +475,49 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Provides for a matrix A, a number of processors num_procs, 
     and a distribution *offset, *blocksize and s the number of 
     rows added to the different matrices.
 
     Arguments
-    =========
+    ---------
 
     magma_sparse_matrix A                input matrix A
-    magma_int_t num_procs                number of processors
-    magma_int_t *offset                  array containing the offsets
-    magma_int_t *blocksize               array containing the chunk sizes
-    magma_int_t s                        matrix powers
-    magma_int_t *num_add_rows            output array: number of additional rows
-    magma_int_t *num_add_vecs            number of additional vector entries
-    magma_int_t *add_vecs                array for additional vector entries
+    @param
+    num_procs   magma_int_t
+                number of processors
 
-    ========================================================================  */
+    @param
+    offset      magma_int_t*
+                array containing the offsets
+
+    @param
+    blocksize   magma_int_t*
+                array containing the chunk sizes
+
+    @param
+    s           magma_int_t
+                matrix powers
+
+    @param
+    num_add_rowsmagma_int_t*
+                output array: number of additional rows
+
+    @param
+    num_add_vecsmagma_int_t*
+                number of additional vector entries
+
+    @param
+    add_vecs    magma_int_t*
+                array for additional vector entries
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpkinfo(   magma_z_sparse_matrix A, 
@@ -490,29 +546,35 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Packs for a given vector x and a key add_rows a compressed version
     where the add_rows are in consecutive order.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to pack
-    magma_int_t *add_rows                indices of elements to pack
-    magmaDoubleComplex *x                uncompressed input vector
-    magmaDoubleComplex *y                compressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to pack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_int_t*
+                indices of elements to pack
+
+    @param
+    x           magmaDoubleComplex*
+                uncompressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                compressed output vector
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpk_compress(    magma_int_t num_add_rows,
@@ -527,28 +589,34 @@ magma_z_mpk_compress(    magma_int_t num_add_rows,
     return MAGMA_SUCCESS; 
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Unpacks for a given vector x and a key add_rows the compressed version.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to pack
-    magma_int_t *add_rows                indices of elements to pack
-    magmaDoubleComplex *x                compressed input vector
-    magmaDoubleComplex *y                uncompressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to pack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_int_t*
+                indices of elements to pack
+
+    @param
+    x           magmaDoubleComplex*
+                compressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                uncompressed output vector
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpk_uncompress(  magma_int_t num_add_rows,
@@ -565,32 +633,44 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Unpacks for a given vector x and a key add_rows the compressed version.
     The selective version uncompresses only vectors within the area
     [ offset , offset+blocksize ]
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to pack
-    magma_int_t *add_rows                indices of elements to pack
-    magma_int_t offset                   lower bound of vector chunk
-    magma_int_t blocksize                number of locally computed elements
-    magmaDoubleComplex *x                compressed input vector
-    magmaDoubleComplex *y                uncompressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to pack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_int_t*
+                indices of elements to pack
+
+    @param
+    offset      magma_int_t
+                lower bound of vector chunk
+
+    @param
+    blocksize   magma_int_t
+                number of locally computed elements
+
+    @param
+    x           magmaDoubleComplex*
+                compressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                uncompressed output vector
 
 
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
@@ -610,27 +690,34 @@ magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Packs the local matrix for higher SpMV performance.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to pack
-    magma_int_t *add_rows                indices of elements to pack
-    magmaDoubleComplex *x                uncompressed input vector
-    magmaDoubleComplex *y                compressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to pack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_int_t*
+                indices of elements to pack
 
+    @param
+    x           magmaDoubleComplex*
+                uncompressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                compressed output vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,

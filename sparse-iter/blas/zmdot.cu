@@ -410,14 +410,9 @@ magma_zblockreduce_kernel_fast( int Gs,
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Computes the scalar product of a set of vectors v_i such that
 
@@ -426,17 +421,39 @@ magma_zblockreduce_kernel_fast( int Gs,
     Returns the vector skp.
 
     Arguments
-    =========
+    ---------
 
-    int n                           length of v_i and r
-    int k                           # vectors v_i
-    magmaDoubleComplex *v           v = (v_0 .. v_i.. v_k)
-    magmaDoubleComplex *r           r
-    magmaDoubleComplex *d1          workspace
-    magmaDoubleComplex *d2          workspace
-    magmaDoubleComplex *skp         vector[k] of scalar products (<v_i,r>...)
+    @param
+    n           int
+                length of v_i and r
 
-    ========================================================================  */
+    @param
+    k           int
+                # vectors v_i
+
+    @param
+    v           magmaDoubleComplex*
+                v = (v_0 .. v_i.. v_k)
+
+    @param
+    r           magmaDoubleComplex*
+                r
+
+    @param
+    d1          magmaDoubleComplex*
+                workspace
+
+    @param
+    d2          magmaDoubleComplex*
+                workspace
+
+    @param
+    skp         magmaDoubleComplex*
+                vector[k] of scalar products (<v_i,r>...)
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" int
 magma_zmdotc(       int n, 
@@ -518,14 +535,9 @@ magma_zmdotc(       int n,
    return MAGMA_SUCCESS;
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     This is an extension of the merged dot product above by chunking
     the set of vectors v_i such that the data always fits into cache.
@@ -537,17 +549,39 @@ magma_zmdotc(       int n,
     Returns the vector skp.
 
     Arguments
-    =========
+    ---------
 
-    int n                           length of v_i and r
-    int k                           # vectors v_i
-    magmaDoubleComplex *v           v = (v_0 .. v_i.. v_k)
-    magmaDoubleComplex *r           r
-    magmaDoubleComplex *d1          workspace
-    magmaDoubleComplex *d2          workspace
-    magmaDoubleComplex *skp         vector[k] of scalar products (<v_i,r>...)
+    @param
+    n           int
+                length of v_i and r
 
-    ========================================================================  */
+    @param
+    k           int
+                # vectors v_i
+
+    @param
+    v           magmaDoubleComplex*
+                v = (v_0 .. v_i.. v_k)
+
+    @param
+    r           magmaDoubleComplex*
+                r
+
+    @param
+    d1          magmaDoubleComplex*
+                workspace
+
+    @param
+    d2          magmaDoubleComplex*
+                workspace
+
+    @param
+    skp         magmaDoubleComplex*
+                vector[k] of scalar products (<v_i,r>...)
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" int
 magma_zgemvmdot(    int n, 

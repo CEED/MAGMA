@@ -172,30 +172,47 @@ magma_zbicgstab_alphakernel(
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges the first SpmV using CSR with the dot product 
     and the computation of alpha
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A             system matrix
-    magmaDoubleComplex *d1              temporary vector
-    magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_p             input vector p
-    magmaDoubleComplex *d_r             input vector r
-    magmaDoubleComplex *d_v             output vector v
-    magmaDoubleComplex *skp             array for parameters ( skp[0]=alpha )
+    @param
+    A           magma_z_sparse_matrix
+                system matrix
 
-    ========================================================================  */
+    @param
+    d1          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d2          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d_p         magmaDoubleComplex*
+                input vector p
+
+    @param
+    d_r         magmaDoubleComplex*
+                input vector r
+
+    @param
+    d_v         magmaDoubleComplex*
+                output vector v
+
+    @param
+    skp         magmaDoubleComplex*
+                array for parameters ( skp[0]=alpha )
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbicgmerge_spmv1(  magma_z_sparse_matrix A,
@@ -446,33 +463,59 @@ magma_zbicgstab_omegakernel(
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges the second SpmV using CSR with the dot product 
     and the computation of omega
 
     Arguments
-    =========
+    ---------
 
-    int n                               dimension n
-    int n                               dimension n
-    magmaDoubleComplex *d1              temporary vector
-    magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_val           matrix values
-    int *d_rowptr                       matrix row pointer
-    int *d_colind                       matrix column indices
-    magmaDoubleComplex *d_s             input vector s
-    magmaDoubleComplex *d_t             output vector t
-    magmaDoubleComplex *skp             array for parameters
+    @param
+    n           int
+                dimension n
 
-    ========================================================================  */
+    @param
+    n           int
+                dimension n
+
+    @param
+    d1          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d2          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d_val       magmaDoubleComplex*
+                matrix values
+
+    @param
+    d_rowptr    int*
+                matrix row pointer
+
+    @param
+    d_colind    int*
+                matrix column indices
+
+    @param
+    d_s         magmaDoubleComplex*
+                input vector s
+
+    @param
+    d_t         magmaDoubleComplex*
+                output vector t
+
+    @param
+    skp         magmaDoubleComplex*
+                array for parameters
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbicgmerge_spmv2(  
@@ -641,34 +684,63 @@ magma_zbicgstab_betakernel(
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges the second SpmV using CSR with the dot product 
     and the computation of omega
 
     Arguments
-    =========
+    ---------
 
-    int n                               dimension n
-    int n                               dimension n
-    magmaDoubleComplex *d1              temporary vector
-    magmaDoubleComplex *d2              temporary vector
-    magmaDoubleComplex *d_rr            input vector rr
-    magmaDoubleComplex *d_r             input/output vector r
-    magmaDoubleComplex *d_p             input vector p
-    magmaDoubleComplex *d_s             input vector s
-    magmaDoubleComplex *d_t             input vector t
-    magmaDoubleComplex *d_x             output vector x
-    magmaDoubleComplex *skp             array for parameters
+    @param
+    n           int
+                dimension n
 
-    ========================================================================  */
+    @param
+    n           int
+                dimension n
+
+    @param
+    d1          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d2          magmaDoubleComplex*
+                temporary vector
+
+    @param
+    d_rr        magmaDoubleComplex*
+                input vector rr
+
+    @param
+    d_r         magmaDoubleComplex*
+                input/output vector r
+
+    @param
+    d_p         magmaDoubleComplex*
+                input vector p
+
+    @param
+    d_s         magmaDoubleComplex*
+                input vector s
+
+    @param
+    d_t         magmaDoubleComplex*
+                input vector t
+
+    @param
+    d_x         magmaDoubleComplex*
+                output vector x
+
+    @param
+    skp         magmaDoubleComplex*
+                array for parameters
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbicgmerge_xrbeta(  

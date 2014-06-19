@@ -25,24 +25,25 @@
 #define PRECISION_z
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Prepares the ILU preconditioner via the asynchronous ILU iteration.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A
-    magma_z_preconditioner *precond           preconditioner parameters
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
 
-    ========================================================================  */
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
@@ -222,25 +223,29 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Performs the left triangular solves using the ILU preconditioner.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_vector b                        RHS
-    magma_z_vector *x                       vector to precondition
-    magma_z_preconditioner *precond         preconditioner parameters
+    @param
+    b           magma_z_vector
+                RHS
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector*
+                vector to precondition
+
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x, 
@@ -255,25 +260,29 @@ magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Performs the right triangular solves using the ILU preconditioner.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_vector b                        RHS
-    magma_z_vector *x                       vector to precondition
-    magma_z_preconditioner *precond         preconditioner parameters
+    @param
+    b           magma_z_vector
+                RHS
 
-    ========================================================================  */
+    @param
+    x           magma_z_vector*
+                vector to precondition
+
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x, 
@@ -291,24 +300,25 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Prepares the IC preconditioner via the asynchronous IC iteration.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A                   input matrix A
-    magma_z_preconditioner *precond           preconditioner parameters
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
 
-    ========================================================================  */
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){

@@ -44,14 +44,9 @@ magma_zcompactActive(magma_int_t m, magma_int_t n,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     Solves an eigenvalue problem
 
        A * X = evalues X
@@ -66,15 +61,21 @@ magma_zcompactActive(magma_int_t m, magma_int_t n,
     the different blocks. This allows to use texture also for large matrices.
 
     Arguments
-    =========
-    magma_z_sparse_matrix A                 input matrix A
-    magma_z_solver_par *solver_par          solver parameters
+    ---------
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
                                             make sure to fill:
                                             num_eigenvalues
                                             length_ev
-    =====================================================================  */
 
-
+    @ingroup magmasparse_zheev
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){

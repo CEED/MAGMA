@@ -25,28 +25,36 @@
 
 using namespace std;
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Copies a matrix from memory location src to memory location dst.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A              sparse matrix A
-    magma_z_sparse_matrix *B             copy of A
-    magma_location_t src                 original location A
-    magma_location_t dst                 location of the copy of A
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A
+
+    @param
+    B           magma_z_sparse_matrix*
+                copy of A
+
+    @param
+    src         magma_location_t
+                original location A
+
+    @param
+    dst         magma_location_t
+                location of the copy of A
+
    
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_mtransfer( magma_z_sparse_matrix A,
@@ -1064,28 +1072,36 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Copies a vector from memory location src to memory location dst.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_vector x              vector x
-    magma_z_vector *y             copy of x
-    magma_location_t src          original location x
-    magma_location_t dst          location of the copy of x
+    @param
+    x           magma_z_vector
+                vector x
+
+    @param
+    y           magma_z_vector*
+                copy of x
+
+    @param
+    src         magma_location_t
+                original location x
+
+    @param
+    dst         magma_location_t
+                location of the copy of x
+
    
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_z_vtransfer( magma_z_vector x,

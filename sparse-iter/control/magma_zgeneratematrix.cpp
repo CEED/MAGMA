@@ -24,30 +24,39 @@
 
 using namespace std;
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Generate a symmetric n x n CSR matrix for a stencil.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t n                        number of rows
-    magma_int_t offdiags                 number of offdiagonals 
-    magma_int_t *diag_offsets            array containing the offsets 
+    @param
+    n           magma_int_t
+                number of rows
+
+    @param
+    offdiags    magma_int_t
+                number of offdiagonals 
+
+    @param
+    diag_offsetsmagma_int_t*
+                array containing the offsets 
+
                                                 (length offsets+1)
-    magmaDoubleComplex  *diag_vals       array containing the values
+    @param
+    diag_vals   magmaDoubleComplex*
+                array containing the values
+
                                                 (length offsets+1)
-    magma_z_sparse matrix *A             matrix to generate   
+    @param
+    matrix      magma_z_sparse
+                *A             matrix to generate   
 
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C"
 magma_int_t

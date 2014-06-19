@@ -27,29 +27,27 @@
 using namespace std;
 
 
-magma_int_t 
-magma_zrowentries( magma_z_sparse_matrix *A ){
-
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Checks the maximal number of nonzeros in a row of matrix A. 
     Inserts the data into max_nnz_row.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix *A              sparse matrix     
+    @param
+    A           magma_z_sparse_matrix*
+                sparse matrix     
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
+magma_int_t 
+magma_zrowentries( magma_z_sparse_matrix *A )
+{
     // check whether matrix on CPU
     if( A->memory_location == Magma_CPU ){
         // CSR  
@@ -95,29 +93,25 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
 }
 
 
-
-magma_int_t 
-magma_zdiameter( magma_z_sparse_matrix *A ){
-
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Computes the diameter of a sparse matrix and stores the value in diameter.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix *A              sparse matrix     
+    @param
+    A           magma_z_sparse_matrix*
+                sparse matrix     
 
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
+magma_int_t 
+magma_zdiameter( magma_z_sparse_matrix *A )
+{
     // check whether matrix on CPU
     if( A->memory_location == Magma_CPU ){
         // CSR  

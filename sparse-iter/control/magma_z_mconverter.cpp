@@ -27,33 +27,47 @@
 using namespace std;
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Helper function to compress CSR containing zero-entries.
 
 
     Arguments
-    =========
+    ---------
 
-    magmaDoubleComplex ** val           input val pointer to compress
-    magma_int_t ** row                  input row pointer to modify
-    magma_int_t ** col                  input col pointer to compress
-    magmaDoubleComplex ** valn          output val pointer
-    magma_int_t ** rown                 output row pointer
-    magma_int_t ** coln                 output col pointer
-    magma_int_t *n                      number of rows in matrix
+    @param
+    val         magmaDoubleComplex**
+                input val pointer to compress
+
+    @param
+    row         magma_int_t**
+                input row pointer to modify
+
+    @param
+    col         magma_int_t**
+                input col pointer to compress
+
+    @param
+    valn        magmaDoubleComplex**
+                output val pointer
+
+    @param
+    rown        magma_int_t**
+                output row pointer
+
+    @param
+    coln        magma_int_t**
+                output col pointer
+
+    @param
+    n           magma_int_t*
+                number of rows in matrix
 
 
-
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_csr_compressor(             magmaDoubleComplex ** val, 
@@ -110,26 +124,34 @@ magma_z_csr_compressor(             magmaDoubleComplex ** val,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Converter between different sparse storage formats.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A              sparse matrix A    
-    magma_z_sparse_matrix *B             copy of A in new format      
-    magma_storage_t old_format           original storage format
-    magma_storage_t new_format           new storage format
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix A    
 
-    ========================================================================  */
+    @param
+    B           magma_z_sparse_matrix*
+                copy of A in new format      
+
+    @param
+    old_format  magma_storage_t
+                original storage format
+
+    @param
+    new_format  magma_storage_t
+                new storage format
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_mconvert( magma_z_sparse_matrix A, 
@@ -1840,26 +1862,30 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Merges an ILU factorization into one matrix.
     works only for the symmetric case!!!
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix L              sparse matrix L   
-    magma_z_sparse_matrix U              sparse matrix U
-    magma_z_sparse_matrix *B             output sparse matrix B
+    @param
+    L           magma_z_sparse_matrix
+                sparse matrix L   
 
-    ========================================================================  */
+    @param
+    U           magma_z_sparse_matrix
+                sparse matrix U
+
+    @param
+    B           magma_z_sparse_matrix*
+                output sparse matrix B
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_LUmergein( magma_z_sparse_matrix L, 

@@ -33,27 +33,29 @@ using namespace std;
 
 #define PRECISION_z
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Computes the Frobenius norm of the difference between the CSR matrices A 
     and B. They need to share the same sparsity pattern!
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A              sparse matrix in CSR
-    magma_z_sparse_matrix B              sparse matrix in CSR    
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix in CSR
+
+    @param
+    B           magma_z_sparse_matrix
+                sparse matrix in CSR    
+
     real_Double_t *res                   residual; 
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
@@ -79,29 +81,37 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Computes the nonlinear residual A- LU and returns the difference as
     well es the Frobenius norm of the difference
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A              input sparse matrix in CSR
-    magma_z_sparse_matrix L              input sparse matrix in CSR    
-    magma_z_sparse_matrix U              input sparse matrix in CSR    
-    magma_z_sparse_matrix U              output sparse matrix in A-LU in CSR    
+    @param
+    A           magma_z_sparse_matrix
+                input sparse matrix in CSR
+
+    @param
+    L           magma_z_sparse_matrix
+                input sparse matrix in CSR    
+
+    @param
+    U           magma_z_sparse_matrix
+                input sparse matrix in CSR    
+
+    @param
+    U           magma_z_sparse_matrix
+                output sparse matrix in A-LU in CSR    
+
     real_Double_t *res                   output residual; 
 
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_znonlinres(   magma_z_sparse_matrix A, 

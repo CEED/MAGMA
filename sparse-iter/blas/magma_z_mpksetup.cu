@@ -30,27 +30,35 @@ compress_kernel(         int num_add_rows,
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Packs a vector x using a key add_rows into the compressed version.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to unpack
-    magma_index_t *add_rows              indices of elements to unpack
-    magmaDoubleComplex *x                uncompressed input vector
-    magmaDoubleComplex *y                compressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to unpack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_index_t*
+                indices of elements to unpack
+
+    @param
+    x           magmaDoubleComplex*
+                uncompressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                compressed output vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 
 
@@ -82,27 +90,35 @@ uncompress_kernel(       int num_add_rows,
     }
 }
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Unpacks a compressed vector x and a key add_rows on the GPU.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_add_rows             number of elements to unpack
-    magma_index_t *add_rows              indices of elements to unpack
-    magmaDoubleComplex *x                compressed input vector
-    magmaDoubleComplex *y                uncompressed output vector
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to unpack
 
-    ========================================================================  */
+    @param
+    add_rows    magma_index_t*
+                indices of elements to unpack
+
+    @param
+    x           magmaDoubleComplex*
+                compressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                uncompressed output vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 
 
@@ -121,30 +137,44 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Distributes a compressed vector x after the SpMV using offset, 
                                                     blocksize and key.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t offset                   offset from 0
-    magma_int_t blocksize                number of elements handled by GPU
-    magma_int_t num_add_rows             number of elements to pack
-    magma_index_t *add_rows              indices of elements to pack
-    magmaDoubleComplex *x                compressed input vector
-    magmaDoubleComplex *y                uncompressed output vector
+    @param
+    offset      magma_int_t
+                offset from 0
 
-    ========================================================================  */
+    @param
+    blocksize   magma_int_t
+                number of elements handled by GPU
+
+    @param
+    num_add_rowsmagma_int_t
+                number of elements to pack
+
+    @param
+    add_rows    magma_index_t*
+                indices of elements to pack
+
+    @param
+    x           magmaDoubleComplex*
+                compressed input vector
+
+    @param
+    y           magmaDoubleComplex*
+                uncompressed output vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 
 

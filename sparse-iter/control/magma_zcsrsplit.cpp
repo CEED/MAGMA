@@ -24,31 +24,40 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     Splits a CSR matrix into two matrices, one containing the diagonal blocks
     with the diagonal element stored first, one containing the rest of the 
     original matrix.
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t blocksize               size of the diagonal blocks
-    magma_z_sparse_matrix A             CSR input matrix
-    magma_z_sparse_matrix *D            CSR matrix containing diagonal blocks
-    magma_z_sparse_matrix *R            CSR matrix containing rest
+    @param
+    blocksize   magma_int_t
+                size of the diagonal blocks
 
-    ========================================================================  */
+    @param
+    A           magma_z_sparse_matrix
+                CSR input matrix
 
+    @param
+    d           magma_z_sparse_matrix*
+                CSR matrix containing diagonal blocks
 
+    @param
+    R           magma_z_sparse_matrix*
+                CSR matrix containing rest
 
+    @ingroup magmasparse_s
+    ********************************************************************/
 
 magma_int_t
 magma_zcsrsplit(    magma_int_t bsize,

@@ -26,14 +26,14 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     Takes a matrix and a blocksize b to generate a homomorphism that
     orders the matrix entries according to the subdomains of size b x b.
@@ -56,16 +56,23 @@
     a c b d e h f g i j    
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A          input/output matrix 
-    magma_int_t b                    blocksize
-    magma_index_t *p                 homomorphism vector containing the indices
+    @param
+    A           magma_z_sparse_matrix
+                input/output matrix 
 
-    ========================================================================  */
+    @param
+    b           magma_int_t
+                blocksize
+
+    @param
+    p           magma_index_t*
+                homomorphism vector containing the indices
 
 
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){

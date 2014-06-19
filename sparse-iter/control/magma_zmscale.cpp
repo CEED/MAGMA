@@ -26,27 +26,31 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-/*  -- MAGMA (version 1.1) --
+/** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
     Purpose
-    =======
+    -------
 
     Scales a matrix.
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix *A         input/output matrix 
-    magma_scale_t scaling            scaling type (unit rownorm / unit diagonal)
+    @param
+    A           magma_z_sparse_matrix*
+                input/output matrix 
 
-    ========================================================================  */
+    @param
+    scaling     magma_scale_t
+                scaling type (unit rownorm / unit diagonal)
 
 
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){

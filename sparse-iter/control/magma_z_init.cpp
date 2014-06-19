@@ -32,27 +32,35 @@ using namespace std;
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Initialize a magma_z_vector.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_vector x                     vector to initialize   
-    magma_location_t memory_location     memory for vector 
-    magma_int_t num_rows                 desired length of vector      
-    magmaDoubleComplex values            entries in vector
+    @param
+    x           magma_z_vector
+                vector to initialize   
 
-    ========================================================================  */
+    @param
+    memory_locationmagma_location_t
+                memory for vector 
+
+    @param
+    num_rows    magma_int_t
+                desired length of vector      
+
+    @param
+    values      magmaDoubleComplex
+                entries in vector
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_vinit(    magma_z_vector *x, 

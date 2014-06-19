@@ -16,35 +16,39 @@
 
 #define  X(i)     (X + (i)*num_rows)
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     This routine orthogonalizes a set of vectors stored in a n x m - matrix X
     in column major:
 
         / x1[0] x2[0] x3[0] \
         | x1[1] x2[1] x3[1] |
-    X = | x1[2] x2[2] x3[2] | = x1[0] x1[1] x1[2] x1[3] x1[4] x2[1] x2[2] ..
+    X = | x1[2] x2[2] x3[2] | = x1[0] x1[1] x1[2] x1[3] x1[4] x2[1] x2[2] .
         | x1[3] x2[3] x3[3] |
         \ x1[4] x2[4] x3[4] /
 
     This routine performs a modified Gram-Schmidt orthogonalization.
     
     Arguments
-    =========
+    ---------
 
-    magma_int_t num_rows            number of rows
-    magma_int_t num_vecs            number of vectors
-    magmaDoubleComplex *X           input/output vector-block/matrix X
+    @param
+    num_rows    magma_int_t
+                number of rows
 
-    ========================================================================  */
+    @param
+    num_vecs    magma_int_t
+                number of vectors
 
+    @param
+    X           magmaDoubleComplex*
+                input/output vector-block/matrix X
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t
 magma_zorthomgs(        magma_int_t num_rows,

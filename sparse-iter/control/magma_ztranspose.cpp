@@ -23,35 +23,67 @@
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Transposes a matrix stored in CSR format.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_int_t n_rows                  number of rows in input matrix
-    magma_int_t n_cols                  number of columns in input matrix
-    magma_int_t nnz                     number of nonzeros in input matrix
-    magmaDoubleComplex *val              value array of input matrix 
-    magma_index_t *row                     row pointer of input matrix
-    magma_index_t *col                     column indices of input matrix 
-    magma_index_t *new_n_rows              number of rows in transposed matrix
-    magma_index_t *new_n_cols              number of columns in transposed matrix
-    magma_index_t *new_nnz                 number of nonzeros in transposed matrix
-    magmaDoubleComplex **new_val         value array of transposed matrix 
-    magma_index_t **new_row                row pointer of transposed matrix
-    magma_index_t **new_col                column indices of transposed matrix
+    @param
+    n_rows      magma_int_t
+                number of rows in input matrix
 
-    ========================================================================  */
+    @param
+    n_cols      magma_int_t
+                number of columns in input matrix
+
+    @param
+    nnz         magma_int_t
+                number of nonzeros in input matrix
+
+    @param
+    val         magmaDoubleComplex*
+                value array of input matrix 
+
+    @param
+    row         magma_index_t*
+                row pointer of input matrix
+
+    @param
+    col         magma_index_t*
+                column indices of input matrix 
+
+    @param
+    new_n_rows  magma_index_t*
+                number of rows in transposed matrix
+
+    @param
+    new_n_cols  magma_index_t*
+                number of columns in transposed matrix
+
+    @param
+    new_nnz     magma_index_t*
+                number of nonzeros in transposed matrix
+
+    @param
+    new_val     magmaDoubleComplex**
+                value array of transposed matrix 
+
+    @param
+    new_row     magma_index_t**
+                row pointer of transposed matrix
+
+    @param
+    new_col     magma_index_t**
+                column indices of transposed matrix
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t z_transpose_csr(    magma_int_t n_rows, 
                                 magma_int_t n_cols, 
@@ -175,28 +207,26 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Helper function to transpose CSR matrix.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A             input matrix (CSR)
-    magma_z_sparse_matrix *B            output matrix (CSR)
+    @param
+    A           magma_z_sparse_matrix
+                input matrix (CSR)
 
+    @param
+    B           magma_z_sparse_matrix*
+                output matrix (CSR)
 
-
-    ========================================================================  */
-
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
@@ -254,28 +284,27 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 }
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
 
     Helper function to transpose CSR matrix. 
     Using the CUSPARSE CSR2CSC function.
 
 
     Arguments
-    =========
+    ---------
 
-    magma_z_sparse_matrix A             input matrix (CSR)
-    magma_z_sparse_matrix *B            output matrix (CSR)
+    @param
+    A           magma_z_sparse_matrix
+                input matrix (CSR)
 
+    @param
+    B           magma_z_sparse_matrix*
+                output matrix (CSR)
 
-
-    ========================================================================  */
+    @ingroup magmasparse_z
+    ********************************************************************/
 
 magma_int_t 
 magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){

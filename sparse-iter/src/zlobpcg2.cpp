@@ -34,22 +34,9 @@ magma_zcompactActive(magma_int_t m, magma_int_t n,
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A, 
-               magmaDoubleComplex *blockX, double *evalues,
-               magmaDoubleComplex *dwork, magma_int_t ldwork, 
-               magmaDoubleComplex *hwork, magma_int_t lwork,
-               magma_z_solver_par *solver_par,
-               magma_int_t *info )
-{
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
-    =======
+    -------
     Solves an eigenvalue problem
 
        A * X = evalues X
@@ -60,9 +47,19 @@ magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A,
     This is a GPU implementation of the LOBPCG method.
 
     Arguments
-    =========
+    ---------
 
-    =====================================================================  */
+    @ingroup magmasparse_zheev
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zlobpcg2(magma_int_t m, magma_int_t n, magma_z_sparse_matrix A, 
+               magmaDoubleComplex *blockX, double *evalues,
+               magmaDoubleComplex *dwork, magma_int_t ldwork, 
+               magmaDoubleComplex *hwork, magma_int_t lwork,
+               magma_z_solver_par *solver_par,
+               magma_int_t *info )
+{
 
 #define  residualNorms(i,iter)  ( residualNorms + (i) + (iter)*n )
 #define magmablas_swap(x, y)    { pointer = x; x = y; y = pointer; }
