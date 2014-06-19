@@ -33,7 +33,6 @@ int main( int argc, char** argv)
     magmaDoubleComplex *hA, *dA;
     //magma_int_t ione     = 1;
     //magma_int_t ISEED[4] = {0,0,0,1};
-    //magma_int_t size;
     magma_int_t M, N, lda, ldda, size;
     magma_int_t status = 0;
     
@@ -44,7 +43,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M     = opts.msize[itest];
             N     = opts.nsize[itest];
-            lda   = N;
+            lda   = M;
             ldda  = ((M + 31)/32)*32;
             size  = lda*N;
 
