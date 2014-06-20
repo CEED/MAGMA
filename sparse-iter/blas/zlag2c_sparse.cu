@@ -88,7 +88,7 @@ magmaint_zlag2c_sparse(  int M, int N,
 
     @ingroup magmasparse_zaux
     ********************************************************************/
-extern "C" void 
+extern "C" magma_int_t 
 magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N, 
                   const magmaDoubleComplex *A, magma_int_t lda, 
                   magmaFloatComplex *SA,       magma_int_t ldsa, 
@@ -129,6 +129,8 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N,
     magmaint_zlag2c_sparse<<< grid, BLOCKSIZE, 0, magma_stream >>>
                                         ( M, N, A, SA ) ; 
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
+    
+    return MAGMA_SUCCESS;
 }
 
 

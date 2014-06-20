@@ -455,7 +455,7 @@ magma_zblockreduce_kernel_fast( int Gs,
     @ingroup magmasparse_zblas
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zmdotc(       int n, 
                     int k, 
                     magmaDoubleComplex *v, 
@@ -529,9 +529,6 @@ magma_zmdotc(       int n,
             magma_zcopyvector( 1, aux1+j*n, 1, skp+j, 1 );
     }
 
-    
-
-
    return MAGMA_SUCCESS;
 }
 
@@ -583,7 +580,7 @@ magma_zmdotc(       int n,
     @ingroup magmasparse_z
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zgemvmdot(    int n, 
                     int k, 
                     magmaDoubleComplex *v, 
