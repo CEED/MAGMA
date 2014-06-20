@@ -46,8 +46,8 @@ kernel_zgemvn_batched(
     {
         for(int j=0; j < n ; j++)
         {
-           res += A[tx]*buff[j];
-           A += lda;
+            res += A[tx]*buff[j];
+            A += lda;
         }
   
         y[tx*incy] = alpha * res + y[tx*incy] * beta;
@@ -56,8 +56,8 @@ kernel_zgemvn_batched(
 }
 
 /*
-   Matrix Non-transpose Vector Multiplication
-   y := alpha*A*x + beta*y,
+    Matrix Non-transpose Vector Multiplication
+    y := alpha*A*x + beta*y,
 */
 extern "C"
 void magmablas_zgemvn_batched(
@@ -158,8 +158,8 @@ kernel_zgemvt_batched(
 }
 
 /*
-   Matrix Transpose Vector Multiplication
-   y := alpha*A'*x + beta*y,
+    Matrix Transpose Vector Multiplication
+    y := alpha*A'*x + beta*y,
 */
 
 extern "C"
@@ -259,8 +259,8 @@ kernel_zgemvc_batched(
 }
 
 /*
-   Matrix Conjugate Transpose Vector Multiplication
-   y := alpha*conjg(A')*x + beta*y,
+    Matrix Conjugate Transpose Vector Multiplication
+    y := alpha*conjg(A')*x + beta*y,
 */
 
 extern "C"
