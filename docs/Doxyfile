@@ -739,6 +739,7 @@ INPUT                  = doxygen-modules.h \
 	../control              \
 	../magmablas            \
 	../sparse/src           \
+	../sparse-iter/src      \
 	../sparse-iter/control  \
 	../sparse-iter/blas     \
 
