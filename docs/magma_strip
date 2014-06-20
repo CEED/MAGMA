@@ -5,5 +5,5 @@
 #
 # -0777 slurps whole files; see 'man perlrun'
 
-s/^ +Arguments *\n +[-=]{2,}$/\n/m;
-s/^ +Purpose *\n +[-=]{2,}$/\n/m;
+s/^ +Arguments *\n +[-=]{2,}$/\n/gm;
+s/^ +Purpose *\n +[-=]{2,}$/\n/gm;
