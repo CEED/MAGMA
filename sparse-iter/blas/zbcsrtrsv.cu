@@ -28,16 +28,28 @@
     ---------
 
     @param
-    r_blocks    magma_int_t
-                number of blocks
+    uplo        magma_uplo_t
+                upper/lower fill structure
 
+    @param
+    r_blocks    magma_int_t
+                number of blocks in row
+                
+    @param
+    c_blocks    magma_int_t
+                number of blocks in column    
+                
     @param
     size_b      magma_int_t
                 blocksize in BCSR
+ 
+    @param
+    A           magmaDoubleComplex*
+                upper/lower factor
 
     @param
-    ipiv        magma_int_t*
-                array containing pivots
+    blockinfo   magma_int_t*
+                array containing matrix information
 
     @param
     x           magmaDoubleComplex*

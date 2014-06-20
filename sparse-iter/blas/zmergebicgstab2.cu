@@ -474,12 +474,8 @@ magma_zbicgstab_omegakernel(
     ---------
 
     @param
-    n           int
-                dimension n
-
-    @param
-    n           int
-                dimension n
+    A           magma_z_sparse_matrix
+                input matrix 
 
     @param
     d1          magmaDoubleComplex*
@@ -488,18 +484,6 @@ magma_zbicgstab_omegakernel(
     @param
     d2          magmaDoubleComplex*
                 temporary vector
-
-    @param
-    d_val       magmaDoubleComplex*
-                matrix values
-
-    @param
-    d_rowptr    int*
-                matrix row pointer
-
-    @param
-    d_colind    int*
-                matrix column indices
 
     @param
     d_s         magmaDoubleComplex*
@@ -699,10 +683,6 @@ magma_zbicgstab_betakernel(
                 dimension n
 
     @param
-    n           int
-                dimension n
-
-    @param
     d1          magmaDoubleComplex*
                 temporary vector
 
@@ -711,27 +691,27 @@ magma_zbicgstab_betakernel(
                 temporary vector
 
     @param
-    d_rr        magmaDoubleComplex*
+    rr        magmaDoubleComplex*
                 input vector rr
 
     @param
-    d_r         magmaDoubleComplex*
+    r         magmaDoubleComplex*
                 input/output vector r
 
     @param
-    d_p         magmaDoubleComplex*
+    p         magmaDoubleComplex*
                 input vector p
 
     @param
-    d_s         magmaDoubleComplex*
+    s         magmaDoubleComplex*
                 input vector s
 
     @param
-    d_t         magmaDoubleComplex*
+    t         magmaDoubleComplex*
                 input vector t
 
     @param
-    d_x         magmaDoubleComplex*
+    x         magmaDoubleComplex*
                 output vector x
 
     @param

@@ -185,7 +185,10 @@ extern __shared__ magmaDoubleComplex shared[];
     
     Arguments
     ---------
-    const char *transA                  transpose info for matrix (not needed)
+
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
     @param
     m           magma_int_t
                 number of rows 

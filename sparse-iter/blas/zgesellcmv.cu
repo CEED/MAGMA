@@ -69,7 +69,7 @@ zgesellcmv_kernel(   int num_rows,
 
     @param
     transA      magma_trans_t
-                transpose A?
+                transposition parameter for A
 
     @param
     m           magma_int_t

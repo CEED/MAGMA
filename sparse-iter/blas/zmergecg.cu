@@ -817,16 +817,8 @@ magma_zcg_rhokernel(
     ---------
 
     @param
-    storage_t   magma_storage_t
-                matrix storage type
-
-    @param
-    n           int
-                dimension n
-
-    @param
-    max_nnz_row int
-                for ELL/ELLRT
+    A           magma_z_sparse_matrix
+                input matrix 
 
     @param
     d1          magmaDoubleComplex*
@@ -835,18 +827,6 @@ magma_zcg_rhokernel(
     @param
     d2          magmaDoubleComplex*
                 temporary vector
-
-    @param
-    d_val       magmaDoubleComplex*
-                matrix values
-
-    @param
-    d_rowptr    int*
-                matrix row pointer
-
-    @param
-    d_colind    int*
-                matrix column indices
 
     @param
     d_d         magmaDoubleComplex*
@@ -1158,21 +1138,12 @@ magma_zcg_d_kernel(
                 input/output vector r
 
     @param
-    d_p         magmaDoubleComplex*
-                input vector p
+    d_d         magmaDoubleComplex*
+                input vector d
 
     @param
-    d_s         magmaDoubleComplex*
-                input vector s
-
-    @param
-    d_t         magmaDoubleComplex*
-                input vector t
-
-    @param
-    d_x         magmaDoubleComplex*
-                output vector x
-
+    d_z         magmaDoubleComplex*
+                input vector z
     @param
     skp         magmaDoubleComplex*
                 array for parameters

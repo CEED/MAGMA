@@ -91,7 +91,11 @@ zgeelltmv_kernel_shift( int num_rows,
     
     Arguments
     ---------
-
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
+                
     @param
     m           magma_int_t
                 number of rows in A
@@ -162,6 +166,10 @@ magma_zgeelltmv(   magma_trans_t transA,
     ---------
 
     @param
+    transA      magma_trans_t
+                transposition parameter for A    
+
+    @param
     m           magma_int_t
                 number of rows in A
 
@@ -192,6 +200,18 @@ magma_zgeelltmv(   magma_trans_t transA,
     @param
     beta        magmaDoubleComplex
                 scalar multiplier
+                
+    @param
+    offset      magma_int_t 
+                in case not the main diagonal is scaled
+                
+    @param
+    blocksize   magma_int_t 
+                in case of processing multiple vectors  
+                
+    @param
+    add_rows    magma_int_t*
+                in case the matrixpowerskernel is used
 
     @param
     d_y         magmaDoubleComplex*

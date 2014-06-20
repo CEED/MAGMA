@@ -41,17 +41,19 @@
     @param
     x           magma_z_vector
                 input vector x  
-    \n
-    magmaDoublComplex beta        scalar beta
+                
+    @param
+    beta        magmaDoubleComplex
+                scalar beta
     @param
     y           magma_z_vector
-                input vector y      
+                output vector y      
 
     @ingroup magmasparse_z
     ********************************************************************/
 
 magma_int_t
-magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
+magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                 magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y )
 {
     if( A.memory_location != x.memory_location || 
@@ -220,19 +222,34 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
     @param
     A           magma_z_sparse_matrix
                 sparse matrix A   
-    \n
+
     @param
-    alpha       magmaDoubleComplex
+    lambda      magmaDoubleComplex
                 scalar lambda 
 
     @param
     x           magma_z_vector
                 input vector x  
-    \n
-    magmaDoublComplex beta        scalar beta
+
+    @param
+    beta        magmaDoubleComplex
+                scalar beta   
+                
+    @param
+    offset      magma_int_t 
+                in case not the main diagonal is scaled
+                
+    @param
+    blocksize   magma_int_t 
+                in case of processing multiple vectors  
+                
+    @param
+    add_rows    magma_int_t*
+                in case the matrixpowerskernel is used
+                
     @param
     y           magma_z_vector
-                input vector y      
+                output vector y    
 
     @ingroup magmasparse_z
     ********************************************************************/

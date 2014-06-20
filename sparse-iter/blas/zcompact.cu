@@ -95,18 +95,18 @@ zcompactactive_kernel(
             The leading dimension of the array dA.  LDDA >= max(1,M).
     
     @param[in]
-    DNORMS  DOUBLE PRECISION array, dimension N
+    dnorms  DOUBLE PRECISION array, dimension N
             The norms of the N vectors in dA
 
     @param[in]
-    TOL     DOUBLE PRECISON
+    tol     DOUBLE PRECISON
             The tolerance value used in the criteria to compact or not.
 
     @param[out]
-    ACTIVE  INTEGER array, dimension N
+    active  INTEGER array, dimension N
             A mask of 1s and 0s showing if a vector remains or has been removed
 
-    CBLOCK  (output)
+    cBlock  (output)
             The number of vectors that remain in dA (i.e., with norms > tol).
 
     @ingroup magmasparse_z
@@ -172,7 +172,7 @@ magma_zcompact(
             The leading dimension of the array dA.  LDDA >= max(1,M).
 
     @param[in]
-    ACTIVE  INTEGER array, dimension N
+    active  INTEGER array, dimension N
             A mask of 1s and 0s showing if a vector remains or has been removed
 
     @ingroup magmasparse_z

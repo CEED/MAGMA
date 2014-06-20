@@ -50,6 +50,10 @@ zvjacobisetup_gpu(  int num_rows,
     ---------
 
     @param
+    num_rows    magma_int_t
+                number of rows
+                
+    @param
     b           magma_z_vector
                 RHS b
 
@@ -113,6 +117,10 @@ zjacobidiagscal_kernel(  int num_rows,
     Arguments
     ---------
 
+    @param
+    num_rows    magma_int_t
+                number of rows
+                
     @param
     b           magma_z_vector
                 RHS b

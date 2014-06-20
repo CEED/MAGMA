@@ -733,7 +733,7 @@ zgesellptmv2d_kernel_32_tex( int num_rows,
 
     @param
     transA      magma_trans_t
-                transpose A?
+                transposition parameter for A
 
     @param
     m           magma_int_t

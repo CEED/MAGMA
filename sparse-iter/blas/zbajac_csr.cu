@@ -151,7 +151,7 @@ magma_zbajac_csr_kernel(    int n,
                 number of local Jacobi-like updates
 
     @param
-    d           magma_z_sparse_matrix
+    D           magma_z_sparse_matrix
                 input matrix with diagonal blocks
 
     @param

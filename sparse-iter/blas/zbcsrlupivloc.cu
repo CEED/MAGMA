@@ -85,18 +85,20 @@ zbcsrlupivloc_kernel(
     ---------
 
     @param
-    r_blocks    magma_int_t
-                number of blocks
-
-    @param
     size_b      magma_int_t
                 blocksize in BCSR
+    
+    @param
+    kblocks     magma_int_t
+                number of blocks
+                
+    @param
+    dA          magmaDoubleComplex**
+                matrix in BCSR
 
     @param
     ipiv        magma_int_t*
                 array containing pivots
-
-    double *x                       input/output vector x
 
     @ingroup magmasparse_z
     ********************************************************************/

@@ -90,7 +90,11 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     
     Arguments
     ---------
-
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
+                
     @param
     m           magma_int_t
                 number of rows in A
@@ -98,6 +102,10 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     @param
     n           magma_int_t
                 number of columns in A 
+                
+    @param
+    nnz_per_row magma_int_t
+                number of elements in the longest row 
 
     @param
     alpha       magmaDoubleComplex
@@ -161,6 +169,10 @@ magma_zgeellmv(magma_trans_t transA,
     
     Arguments
     ---------
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
 
     @param
     m           magma_int_t
@@ -169,7 +181,10 @@ magma_zgeellmv(magma_trans_t transA,
     @param
     n           magma_int_t
                 number of columns in A 
-
+    @param
+    nnz_per_row magma_int_t
+                number of elements in the longest row 
+                
     @param
     alpha       magmaDoubleComplex
                 scalar multiplier
@@ -189,6 +204,18 @@ magma_zgeellmv(magma_trans_t transA,
     @param
     beta        magmaDoubleComplex
                 scalar multiplier
+                
+    @param
+    offset      magma_int_t 
+                in case not the main diagonal is scaled
+                
+    @param
+    blocksize   magma_int_t 
+                in case of processing multiple vectors  
+                
+    @param
+    add_rows    magma_int_t*
+                in case the matrixpowerskernel is used
 
     @param
     d_y         magmaDoubleComplex*

@@ -59,12 +59,8 @@ magma_zbicgmerge1_kernel(
                 dimension n
 
     @param
-    beta        magmaDoubleComplex
-                scalar 
-
-    @param
-    omega       magmaDoubleComplex
-                scalar
+    skp         magmaDoubleComplex*
+                set of scalar parameters
 
     @param
     v           magmaDoubleComplex*
@@ -133,8 +129,8 @@ magma_zbicgmerge2_kernel(
                 dimension n
 
     @param
-    alpha       magmaDoubleComplex
-                scalar 
+    skp         magmaDoubleComplex*
+                set of scalar parameters
 
     @param
     r           magmaDoubleComplex*
@@ -213,12 +209,8 @@ magma_zbicgmerge3_kernel(
                 dimension n
 
     @param
-    alpha       magmaDoubleComplex
-                scalar 
-
-    @param
-    omega       magmaDoubleComplex
-                scalar 
+    skp         magmaDoubleComplex*
+                set of scalar parameters
 
     @param
     p           magmaDoubleComplex*

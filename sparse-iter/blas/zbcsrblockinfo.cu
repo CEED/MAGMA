@@ -52,28 +52,32 @@ zbcsrblockinfo5_kernel(
 
 
     @param
-    size_b      magma_int_t
-                blocksize in BCSR
+    lustep      magma_int_t
+                lustep
 
     @param
     num_blocks  magma_int_t
                 number of nonzero blocks
 
     @param
-    num_zero_blocksmagma_int_t
-                number of zero-blocks (will later be filled)
+    c_blocks    magma_int_t
+                number of column-blocks
+                
+    @param
+    size_b      magma_int_t
+                blocksize
+                
+    @param
+    blockinfo   magma_int_t*
+                block filled? location?
 
     @param
-    Aval        magmaDoubleComplex**
+    val         magmaDoubleComplex*
                 pointers to the nonzero blocks in A
 
     @param
-    Aval        magmaDoubleComplex**
-                pointers to the nonzero blocks in B
-
-    @param
-    Aval        magmaDoubleComplex**
-                pointers to the zero blocks in B
+    AII         magmaDoubleComplex**
+                pointers to the respective nonzero blocks in B
 
 
     @ingroup magmasparse_z

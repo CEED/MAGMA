@@ -80,7 +80,7 @@ zbcsrvalzro_kernel(
                 number of nonzero blocks
 
     @param
-    num_zero_blocksmagma_int_t
+    num_zblocks magma_int_t
                 number of zero-blocks (will later be filled)
 
     @param
@@ -102,7 +102,7 @@ zbcsrvalzro_kernel(
 extern "C" magma_int_t
 magma_zbcsrvalcpy(  magma_int_t size_b, 
                     magma_int_t num_blocks, 
-                    magma_int_t num_zero_blocks, 
+                    magma_int_t num_zblocks, 
                     magmaDoubleComplex **Aval, 
                     magmaDoubleComplex **Bval,
                     magmaDoubleComplex **Bval2 ){
@@ -114,7 +114,7 @@ magma_zbcsrvalcpy(  magma_int_t size_b,
         // the upper block-number the kernels can handle is 65535*65535
         int dimgrid1 = 65535;
         int dimgrid2 = (num_blocks+65535-1)/65535;
-        int dimgrid3 = (num_zero_blocks+65535-1)/65535;
+        int dimgrid3 = (num_zblocks+65535-1)/65535;
         dim3 dimGrid( dimgrid2, dimgrid1, 1 );
 
         zbcsrvalcpy_kernel<<<dimGrid,dimBlock, 0, magma_stream >>>
@@ -123,7 +123,7 @@ magma_zbcsrvalcpy(  magma_int_t size_b,
         dim3 dimGrid2( dimgrid3, dimgrid1, 1 );
 
         zbcsrvalzro_kernel<<<dimGrid2,dimBlock, 0, magma_stream >>>
-                            ( size_b, num_zero_blocks, Bval2 );
+                            ( size_b, num_zblocks, Bval2 );
 
         return MAGMA_SUCCESS;
 

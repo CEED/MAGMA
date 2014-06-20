@@ -134,11 +134,11 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
 
     @param
     L           magma_z_sparse_matrix
-                input/output matrix L
+                input/output matrix L containing the ILU approximation
 
     @param
     U           magma_z_sparse_matrix
-                input/output matrix U
+                input/output matrix U containing the ILU approximation
 
     @ingroup magmasparse_z
     ********************************************************************/

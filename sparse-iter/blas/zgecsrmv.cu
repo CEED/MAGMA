@@ -84,7 +84,11 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
     
     Arguments
     ---------
-
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
+                
     @param
     m           magma_int_t
                 number of rows in A
@@ -155,6 +159,10 @@ magma_zgecsrmv(     magma_trans_t transA,
     
     Arguments
     ---------
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
 
     @param
     m           magma_int_t
@@ -193,9 +201,20 @@ magma_zgecsrmv(     magma_trans_t transA,
                 scalar multiplier
 
     @param
-    d_y         magmaDoubleComplex*
-                input/output vector y
-
+    offset      magma_int_t 
+                in case not the main diagonal is scaled
+                
+    @param
+    blocksize   magma_int_t 
+                in case of processing multiple vectors  
+                
+    @param
+    add_rows    magma_int_t*
+                in case the matrixpowerskernel is used
+                
+    @param
+    y           magmaDoubleComplex*
+                output vector y  
 
     @ingroup magmasparse_z
     ********************************************************************/

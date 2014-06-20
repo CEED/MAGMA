@@ -118,20 +118,12 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
     ---------
 
     @param
-    A_L         magma_z_sparse_matrix
-                input matrix L
+    A           magma_z_sparse_matrix
+                input matrix A - initial guess (lower triangular)
 
     @param
-    A_U         magma_z_sparse_matrix
-                input matrix U
-
-    @param
-    L           magma_z_sparse_matrix
-                input/output matrix L
-
-    @param
-    U           magma_z_sparse_matrix
-                input/output matrix U
+    A_CSR       magma_z_sparse_matrix
+                input/output matrix containing the IC approximation
 
     @ingroup magmasparse_z
     ********************************************************************/

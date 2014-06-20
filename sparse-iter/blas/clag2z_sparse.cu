@@ -56,11 +56,11 @@ magmaint_clag2z_sparse(  int M, int N,
     Arguments
     ---------
     @param[in]
-    m       INTEGER
+    M       INTEGER
             The number of lines of the matrix A.  M >= 0.
     
     @param[in]
-    n       INTEGER
+    N       INTEGER
             The number of columns of the matrix A.  N >= 0.
     
     @param[in]

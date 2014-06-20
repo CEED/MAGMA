@@ -344,7 +344,7 @@ zbcsr_gemm_kernel64(
                 blocksize in BCSR
 
     @param
-    num_block_rowsmagma_int_t
+    num_brows   magma_int_t
                 number of block rows
 
     @param
@@ -352,17 +352,23 @@ zbcsr_gemm_kernel64(
                 number of blocks in row
 
     @param
-    ipiv        magma_int_t*
-                array containing pivots
-
-    double *x           input/output vector x
+    dA          magmaDoubleComplex**
+                input blocks of matrix A
+                
+    @param
+    dB          magmaDoubleComplex**
+                input blocks of matrix B
+                
+    @param
+    dC          magmaDoubleComplex**
+                output blocks of matrix C
 
     @ingroup magmasparse_z
     ********************************************************************/
 
 extern "C" magma_int_t
 magma_zbcsrluegemm( magma_int_t size_b, 
-                    magma_int_t num_block_rows,
+                    magma_int_t num_brows,
                     magma_int_t kblocks,
                     magmaDoubleComplex **dA,  
                     magmaDoubleComplex **dB,  
@@ -382,7 +388,7 @@ magma_zbcsrluegemm( magma_int_t size_b,
 
     dim3 threads( 64, 4 );
 
-    dim3 grid(1, 1, num_block_rows);
+    dim3 grid(1, 1, num_brows);
     zbcsr_gemm_kernel64<<< grid, threads, 0, magma_stream >>>( 
                   size_b, size_b, kblocks, dA, dB, dC );
 

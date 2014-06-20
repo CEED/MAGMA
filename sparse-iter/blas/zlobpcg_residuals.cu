@@ -109,7 +109,7 @@ magmablas_dznrm2_kernel( int m, magmaDoubleComplex *da, int ldda, double *dxnorm
     This routine computes for Block-LOBPCG, the set of residuals. 
                             R = Ax - x evalues
     It replaces:
-    for(int i=0; i<n; i++){
+    for(int i=0; i < n; i++){
         magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i],0),blockX+i*m,1,blockR+i*m,1);
     }
     The memory layout of x is:
@@ -130,14 +130,22 @@ magmablas_dznrm2_kernel( int m, magmaDoubleComplex *da, int ldda, double *dxnorm
     @param
     num_vecs    magma_int_t
                 number of vectors
+                
+    @param
+    evalues     double*
+                array of eigenvalues/approximations
 
     @param
-    shift       magma_int_t
-                shift number
+    X           magmaDoubleComplex*
+                block of eigenvector approximations
+                
+    @param
+    R           magmaDoubleComplex*
+                block of residuals
 
     @param
-    x           magmaDoubleComplex*
-                input/output vector x
+    res         double*
+                array of residuals
 
 
     @ingroup magmasparse_z
