@@ -188,6 +188,10 @@ magma_zgeellmv(magma_trans_t transA,
     @param
     alpha       magmaDoubleComplex
                 scalar multiplier
+                
+    @param
+    lambda      magmaDoubleComplex
+                scalar multiplier
 
     @param
     d_val       magmaDoubleComplex*

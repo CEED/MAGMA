@@ -105,8 +105,9 @@ zcompactactive_kernel(
     @param[out]
     active  INTEGER array, dimension N
             A mask of 1s and 0s showing if a vector remains or has been removed
-
-    cBlock  (output)
+            
+    @param[out]
+    cBlock  magma_index_t*
             The number of vectors that remain in dA (i.e., with norms > tol).
 
     @ingroup magmasparse_z

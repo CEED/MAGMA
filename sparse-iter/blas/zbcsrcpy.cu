@@ -88,11 +88,11 @@ zbcsrvalzro_kernel(
                 pointers to the nonzero blocks in A
 
     @param
-    Aval        magmaDoubleComplex**
+    Bval        magmaDoubleComplex**
                 pointers to the nonzero blocks in B
 
     @param
-    Aval        magmaDoubleComplex**
+    Bval2        magmaDoubleComplex**
                 pointers to the zero blocks in B
 
 

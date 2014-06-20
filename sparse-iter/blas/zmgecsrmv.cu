@@ -62,6 +62,10 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
     
     Arguments
     ---------
+    
+    @param
+    transA      magma_trans_t
+                transposition parameter for A
 
     @param
     m           magma_int_t
@@ -70,8 +74,10 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
     @param
     n           magma_int_t
                 number of columns in A 
-    \n
-    mama_int_t num_vecs             number of vectors
+                
+    @param
+    num_vecs    mama_int_t
+                number of vectors
     @param
     alpha       magmaDoubleComplex
                 scalar multiplier

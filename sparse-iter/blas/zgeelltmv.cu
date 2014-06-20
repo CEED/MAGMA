@@ -103,6 +103,10 @@ zgeelltmv_kernel_shift( int num_rows,
     @param
     n           magma_int_t
                 number of columns in A 
+                
+    @param
+    nnz_per_row magma_int_t
+                number of elements in the longest row 
 
     @param
     alpha       magmaDoubleComplex
@@ -176,6 +180,10 @@ magma_zgeelltmv(   magma_trans_t transA,
     @param
     n           magma_int_t
                 number of columns in A 
+                
+    @param
+    nnz_per_row magma_int_t
+                number of elements in the longest row 
 
     @param
     alpha       magmaDoubleComplex

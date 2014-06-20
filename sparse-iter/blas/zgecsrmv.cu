@@ -177,7 +177,7 @@ magma_zgecsrmv(     magma_trans_t transA,
                 scalar multiplier
 
     @param
-    alpha       magmaDoubleComplex
+    lambda      magmaDoubleComplex
                 scalar multiplier
 
     @param
@@ -213,7 +213,7 @@ magma_zgecsrmv(     magma_trans_t transA,
                 in case the matrixpowerskernel is used
                 
     @param
-    y           magmaDoubleComplex*
+    d_y         magmaDoubleComplex*
                 output vector y  
 
     @ingroup magmasparse_z
