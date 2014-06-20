@@ -59,6 +59,7 @@ my @files2delete = qw(
     quark
     
     sparse-iter/blas/zailu_chow_csr_c.cu
+    sparse-iter/blas/zaicc_chow_csr_c.cu
     sparse-iter/blas/zbcsrblockinfo.cu
     sparse-iter/blas/magma_z_mpksetup.cu
     sparse-iter/blas/zailu_chow_csr_s_debug.cu
