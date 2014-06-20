@@ -72,7 +72,11 @@ void magma_zprint( magma_int_t m, magma_int_t n, const magmaDoubleComplex *A, ma
     for( int i = 0; i < m; ++i ) {
         for( int j = 0; j < n; ++j ) {
             if ( MAGMA_Z_EQUAL( *A(i,j), c_zero )) {
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                printf( "   0.              " );
+#else
                 printf( "   0.    " );
+#endif
             }
             else {
 #if defined(PRECISION_z) || defined(PRECISION_c)
