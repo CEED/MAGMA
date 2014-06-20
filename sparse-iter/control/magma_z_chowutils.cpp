@@ -51,8 +51,10 @@ using namespace std;
     @param
     B           magma_z_sparse_matrix
                 sparse matrix in CSR    
-
-    real_Double_t *res                   residual; 
+                
+    @param
+    res         real_Double_t* 
+                residual 
 
     @ingroup magmasparse_z
     ********************************************************************/
@@ -105,10 +107,12 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
                 input sparse matrix in CSR    
 
     @param
-    U           magma_z_sparse_matrix
+    LU          magma_z_sparse_matrix*
                 output sparse matrix in A-LU in CSR    
 
-    real_Double_t *res                   output residual; 
+    @param
+    res         real_Double_t* 
+                residual 
 
     @ingroup magmasparse_z
     ********************************************************************/

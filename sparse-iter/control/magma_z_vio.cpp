@@ -32,8 +32,8 @@ using namespace std;
     -------
 
     Visualizes part of a vector of type magma_z_vector.
-    With input vector x , offset, displaylength the entries 
-    offset - (offset + displaylength) of x are visualized.
+    With input vector x , offset, visulen, the entries 
+    offset - (offset +  visulen) of x are visualized.
 
     Arguments
     ---------
@@ -47,7 +47,7 @@ using namespace std;
                 start inex of visualization
 
     @param
-    displaylengthmagma_int_t
+    visulen     magma_int_t
                 number of entries to visualize       
 
 
@@ -58,14 +58,14 @@ extern "C"
 magma_int_t
 magma_z_vvisu(      magma_z_vector x, 
                     magma_int_t offset, 
-                    magma_int_t displaylength ){
+                    magma_int_t  visulen ){
 
     printf("visualize entries %d - %d of vector ", 
-                    (int) offset, (int) (offset+displaylength) );
+                    (int) offset, (int) (offset + visulen) );
     fflush(stdout);  
     if( x.memory_location == Magma_CPU ){
         printf("located on CPU:\n");
-        for( magma_int_t i=offset; i<offset+displaylength; i++ )
+        for( magma_int_t i=offset; i<offset + visulen; i++ )
             printf("%f\n", MAGMA_Z_REAL(x.val[i]));
     return MAGMA_SUCCESS;
     }
@@ -73,7 +73,7 @@ magma_z_vvisu(      magma_z_vector x,
         printf("located on DEV:\n");
         magma_z_vector y;
         magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU);
-        for( magma_int_t i=offset; i<offset+displaylength; i++ )
+        for( magma_int_t i=offset; i<offset +  visulen; i++ )
             printf("%f\n", MAGMA_Z_REAL(y.val[i]));
     free(y.val);
     return MAGMA_SUCCESS;
@@ -113,8 +113,9 @@ double magma_zstring_to_double( const std::string& s )
     @param
     length      magma_int_t
                 length of vector
-
-    char filename                        file where vector is stored
+    @param
+    filename    char*
+                file where vector is stored
 
     @ingroup magmasparse_z
     ********************************************************************/

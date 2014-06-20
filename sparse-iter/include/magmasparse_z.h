@@ -97,8 +97,7 @@ magma_z_csr_compressor( magmaDoubleComplex ** val,
                         magmaDoubleComplex ** valn, 
                         magma_index_t ** rown, 
                         magma_index_t ** coln, 
-                        magma_int_t *n,
-                        magma_int_t *alignment);
+                        magma_int_t *n );
 
 magma_int_t 
 magma_z_csrtranspose(   magma_z_sparse_matrix A, 

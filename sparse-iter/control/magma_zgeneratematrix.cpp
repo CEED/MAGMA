@@ -42,7 +42,7 @@ using namespace std;
                 number of offdiagonals 
 
     @param
-    diag_offsetsmagma_int_t*
+    diag_offset magma_int_t*
                 array containing the offsets 
 
                                                 (length offsets+1)
@@ -52,8 +52,8 @@ using namespace std;
 
                                                 (length offsets+1)
     @param
-    matrix      magma_z_sparse
-                *A             matrix to generate   
+    A           magma_z_sparse_matrix*
+                matrix to generate   
 
     @ingroup magmasparse_z
     ********************************************************************/

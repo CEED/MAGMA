@@ -41,7 +41,7 @@
     ---------
 
     @param
-    blocksize   magma_int_t
+    bsize       magma_int_t
                 size of the diagonal blocks
 
     @param
@@ -49,7 +49,7 @@
                 CSR input matrix
 
     @param
-    d           magma_z_sparse_matrix*
+    D           magma_z_sparse_matrix*
                 CSR matrix containing diagonal blocks
 
     @param

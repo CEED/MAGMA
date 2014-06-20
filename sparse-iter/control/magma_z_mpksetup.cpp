@@ -413,11 +413,15 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                 matrix powers
 
     @param
-    num_add_rowsmagma_int_t*
+    num_addvecs magma_int_t*
+                output array: number of additional rows
+                
+    @param
+    num_addvecs magma_int_t*
                 output array: number of additional rows
 
     @param
-    num_add_vecsmagma_int_t*
+    num_addvec smagma_int_t*
                 number of additional vector entries
 
     @param
@@ -434,7 +438,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                    magma_int_t *offset, 
                    magma_int_t *blocksize, 
                    magma_int_t s,
-                   magma_int_t *num_add_vecs,
+                   magma_int_t *num_addvecs,
                    magma_index_t **add_vecs,
                    magma_int_t *num_vecs_back,
                    magma_index_t **vecs_back ){
@@ -504,11 +508,11 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                 matrix powers
 
     @param
-    num_add_rowsmagma_int_t*
+    num_addrows magma_int_t*
                 output array: number of additional rows
 
     @param
-    num_add_vecsmagma_int_t*
+    num_addvecs magma_int_t*
                 number of additional vector entries
 
     @param
@@ -525,9 +529,9 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
                    magma_int_t *offset, 
                    magma_int_t *blocksize, 
                    magma_int_t s,
-                   magma_index_t **num_add_rows,
+                   magma_index_t **num_addrows,
                    magma_index_t **add_rows,
-                   magma_int_t *num_add_vecs,
+                   magma_int_t *num_addvecs,
                    magma_index_t **add_vecs,
                    magma_int_t *num_vecs_back,
                    magma_index_t **vecs_back ){
@@ -557,7 +561,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    num_addrows magma_int_t
                 number of elements to pack
 
     @param
@@ -577,7 +581,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
     ********************************************************************/
 
 magma_int_t 
-magma_z_mpk_compress(    magma_int_t num_add_rows,
+magma_z_mpk_compress(    magma_int_t num_addrows,
                          magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
@@ -645,11 +649,11 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    num_addvecs magma_int_t
                 number of elements to pack
 
     @param
-    add_rows    magma_int_t*
+    add_vecs    magma_int_t*
                 indices of elements to pack
 
     @param
@@ -673,12 +677,12 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
     ********************************************************************/
 
 magma_int_t 
-magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
-                         magma_index_t *add_vecs,
-                         magma_int_t offset,
-                         magma_int_t blocksize,
-                         magmaDoubleComplex *x,
-                         magmaDoubleComplex *y ){
+magma_z_mpk_uncompress_sel(     magma_int_t num_addvecs,
+                                magma_index_t *add_vecs,
+                                magma_int_t offset,
+                                magma_int_t blocksize,
+                                magmaDoubleComplex *x,
+                                magmaDoubleComplex *y ){
 
     for(magma_int_t i=0; i<num_add_vecs; i++){
         if( ( offset <= add_vecs[i] ) && ( add_vecs[i] < offset+blocksize) )
@@ -700,7 +704,7 @@ magma_z_mpk_uncompress_sel(    magma_int_t num_add_vecs,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    num_addrows magma_int_t
                 number of elements to pack
 
     @param
