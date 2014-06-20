@@ -363,7 +363,7 @@ zbcsr_gemm_kernel64(
     dC          magmaDoubleComplex**
                 output blocks of matrix C
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

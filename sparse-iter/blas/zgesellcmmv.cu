@@ -784,7 +784,7 @@ zgesellptmv2d_kernel_32_tex( int num_rows,
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t

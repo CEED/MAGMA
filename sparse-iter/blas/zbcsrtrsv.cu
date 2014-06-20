@@ -56,7 +56,7 @@
                 input/output vector x
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

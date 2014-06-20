@@ -452,7 +452,7 @@ magma_zblockreduce_kernel_fast( int Gs,
                 vector[k] of scalar products (<v_i,r>...)
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" int

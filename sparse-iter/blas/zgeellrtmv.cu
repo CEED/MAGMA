@@ -238,7 +238,7 @@ extern __shared__ magmaDoubleComplex shared[];
                 threads assigned to each row
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t

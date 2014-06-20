@@ -412,6 +412,50 @@
                 @defgroup magmasparse_zsyev double-complex precision
             @}
         @}
+
+        @defgroup sparse_precond    Sparse preconditioner
+        @brief    Preconditioner for solving \f$ Ax = \lambda x \f$
+        @{
+            @defgroup sparse_gepr      Non-symmetric preconditioner
+            @brief    Preconditioner for \f$ Ax = \lambda x \f$ for non-symmetric \f$ A \f$
+            @{
+                @defgroup magmasparse_sgepr single precision
+                @defgroup magmasparse_dgepr double precision
+                @defgroup magmasparse_cgepr single-complex precision
+                @defgroup magmasparse_zgepr double-complex precision
+            @}
+            
+            @defgroup sparse_sypr      Symmetric preconditioner
+            @brief    Preconditioner for \f$ Ax = \lambda x \f$ for symmetric \f$ A \f$
+            @{
+                @defgroup magmasparse_ssypr single precision
+                @defgroup magmasparse_dsypr double precision
+                @defgroup magmasparse_csypr single-complex precision
+                @defgroup magmasparse_zsypr double-complex precision
+            @}
+        @}
+
+        @defgroup sparse_gpukernels    GPU kernels for sparse LA
+        @brief    Preconditioner for solving \f$ Ax = \lambda x \f$
+        @{
+            @defgroup sparse_gegpuk  GPU kernels for non-symmetric sparse LA  
+            @brief    GPU kernels for Non-symmetric sparse LA
+            @{
+                @defgroup magmasparse_sgegpuk single precision
+                @defgroup magmasparse_dgegpuk double precision
+                @defgroup magmasparse_cgegpuk single-complex precision
+                @defgroup magmasparse_zgegpuk double-complex precision
+            @}
+            
+            @defgroup sparse_sygpuk  GPU kernels for symmetric sparse LA
+            @brief    GPU kernels for symmetric sparse LA
+            @{
+                @defgroup magmasparse_ssgpuk single precision
+                @defgroup magmasparse_dsgpuk double precision
+                @defgroup magmasparse_csgpuk single-complex precision
+                @defgroup magmasparse_zsgpuk double-complex precision
+            @}
+        @}
         
         @defgroup sparse_blas          Sparse BLAS
             @{

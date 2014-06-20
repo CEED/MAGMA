@@ -171,7 +171,7 @@ magma_zpipelined_scale( int n,
                 vector of length n
 
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t

@@ -65,7 +65,7 @@ zvjacobisetup_gpu(  int num_rows,
     c           magma_z_vector*
                 c = D^(-1) * b
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

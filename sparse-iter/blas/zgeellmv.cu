@@ -132,7 +132,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -226,7 +226,7 @@ magma_zgeellmv(magma_trans_t transA,
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t

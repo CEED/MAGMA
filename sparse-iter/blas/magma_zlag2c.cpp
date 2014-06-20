@@ -41,7 +41,7 @@
     y           magma_c_vector*
                 output vector descriptor
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

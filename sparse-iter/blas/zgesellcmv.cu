@@ -120,7 +120,7 @@ zgesellcmv_kernel(   int num_rows,
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t

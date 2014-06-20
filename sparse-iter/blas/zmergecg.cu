@@ -841,7 +841,7 @@ magma_zcg_rhokernel(
                 array for parameters ( skp[3]=rho )
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsygpuk
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -1149,7 +1149,7 @@ magma_zcg_d_kernel(
                 array for parameters
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsygpuk
     ********************************************************************/
 
 extern "C" magma_int_t

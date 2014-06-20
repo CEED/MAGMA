@@ -211,7 +211,7 @@ magma_zbicgstab_alphakernel(
                 array for parameters ( skp[0]=alpha )
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -498,7 +498,7 @@ magma_zbicgstab_omegakernel(
                 array for parameters
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -719,7 +719,7 @@ magma_zbicgstab_betakernel(
                 array for parameters
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

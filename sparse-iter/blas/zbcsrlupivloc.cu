@@ -100,7 +100,7 @@ zbcsrlupivloc_kernel(
     ipiv        magma_int_t*
                 array containing pivots
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

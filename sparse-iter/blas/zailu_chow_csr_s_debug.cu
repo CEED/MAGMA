@@ -150,7 +150,7 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
     U           magma_z_sparse_matrix
                 input/output matrix U
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

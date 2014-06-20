@@ -73,7 +73,7 @@ magma_zlobpcg_maxpy_kernel( magma_int_t num_rows,
                 input/output vector Y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

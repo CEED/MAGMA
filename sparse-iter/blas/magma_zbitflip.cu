@@ -51,7 +51,7 @@ magma_zbitflip_kernel( magmaDoubleComplex *d, int loc, int bit ){
 
     This tool flips the bit 'bit' of the magmaDoubleComplex value d[ loc ]. 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 

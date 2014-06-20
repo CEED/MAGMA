@@ -110,7 +110,7 @@ zcompactactive_kernel(
     cBlock  magma_index_t*
             The number of vectors that remain in dA (i.e., with norms > tol).
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" void

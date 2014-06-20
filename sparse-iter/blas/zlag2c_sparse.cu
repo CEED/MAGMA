@@ -86,7 +86,7 @@ magmaint_zlag2c_sparse(  int M, int N,
                   overflow threshold, in this case, the content
                   of SA in exit is unspecified.
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 extern "C" void 
 magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N, 

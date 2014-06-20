@@ -75,7 +75,7 @@ magma_zbicgmerge1_kernel(
                 input/output p
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" int
@@ -145,7 +145,7 @@ magma_zbicgmerge2_kernel(
                 input/output s
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" int
@@ -233,7 +233,7 @@ magma_zbicgmerge3_kernel(
                 input/output r
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" int
@@ -309,7 +309,7 @@ magma_zbicgmerge4_kernel_3(
                 vector with parameters
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" int

@@ -251,7 +251,7 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
     y           magma_z_vector
                 output vector y    
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

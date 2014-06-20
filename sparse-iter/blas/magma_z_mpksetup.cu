@@ -57,7 +57,7 @@ compress_kernel(         int num_add_rows,
                 compressed output vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 

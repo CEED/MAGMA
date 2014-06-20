@@ -45,7 +45,7 @@ using namespace std;
     y           magma_z_vector*
                 output vector descriptor
 
-    @ingroup magmasparse_c
+    @ingroup magmasparse_caux
     ********************************************************************/
 
 magma_int_t
@@ -98,7 +98,7 @@ magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
     B           magma_z_sparse_matrix*
                 output matrix descriptor
 
-    @ingroup magmasparse_c
+    @ingroup magmasparse_caux
     ********************************************************************/
 
 magma_int_t

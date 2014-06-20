@@ -140,7 +140,7 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
     U           magma_z_sparse_matrix
                 input/output matrix U containing the ILU approximation
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

@@ -88,7 +88,7 @@ magmaint_clag2z_sparse(  int M, int N,
                   overflow threshold, in this case, the content
                   of SA in exit is unspecified.
 
-    @ingroup magmasparse_c
+    @ingroup magmasparse_caux
     ********************************************************************/
 
 extern "C" void 

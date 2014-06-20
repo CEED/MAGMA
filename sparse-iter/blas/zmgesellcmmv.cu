@@ -1201,7 +1201,7 @@ zmgesellptmv_kernel_32_3D_texb( int num_rows,
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t

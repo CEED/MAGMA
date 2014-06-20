@@ -68,7 +68,7 @@ magma_zlobpcg_shift_kernel( magma_int_t num_rows, magma_int_t num_vecs,
                 input/output vector x
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t

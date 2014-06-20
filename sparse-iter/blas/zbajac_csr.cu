@@ -168,7 +168,7 @@ magma_zbajac_csr_kernel(    int n,
 
     
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

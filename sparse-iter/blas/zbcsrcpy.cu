@@ -96,7 +96,7 @@ zbcsrvalzro_kernel(
                 pointers to the zero blocks in B
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

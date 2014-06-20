@@ -126,7 +126,7 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
                 input/output vector y
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -216,7 +216,7 @@ magma_zgecsrmv(     magma_trans_t transA,
     d_y         magmaDoubleComplex*
                 output vector y  
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
