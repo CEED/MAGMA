@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -0777 -p
+#!/usr/bin/perl -0777 -p
 #
 # Used as INPUT_FILTER in Doxyfile to strips out "Arguments" and "Purpose"
 # from MAGMA docs, as doxygen provides its own sections.
