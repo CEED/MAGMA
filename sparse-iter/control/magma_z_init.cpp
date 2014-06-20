@@ -59,7 +59,7 @@ using namespace std;
                 entries in vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 

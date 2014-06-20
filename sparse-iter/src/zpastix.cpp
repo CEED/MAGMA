@@ -40,9 +40,7 @@
     Purpose
     -------
 
-    Prepares the Jacobi Iteration according to
-       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
-       x^(k+1) =      c     -       M        * x^k.
+    Prepares the PASTIX solver
 
     Arguments
     ---------
@@ -56,14 +54,10 @@
                 RHS b
 
     @param
-    m           magma_z_sparse_matrix*
-                M = D^(-1) * (L+U)
+    precond     magma_z_preconditioner*
+                preconditioner parameter
 
-    @param
-    c           magma_z_vector*
-                c = D^(-1) * b
-
-    @ingroup magmasparse_
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 magma_int_t
@@ -221,10 +215,8 @@ magma_zpastixsetup( magma_z_sparse_matrix A, magma_z_vector b,
     Purpose
     -------
 
-    Prepares the Jacobi Iteration according to
-       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
-       x^(k+1) =      c     -       M        * x^k.
-
+    Applies the PASTIX LU
+    
     Arguments
     ---------
 
@@ -237,12 +229,8 @@ magma_zpastixsetup( magma_z_sparse_matrix A, magma_z_vector b,
                 RHS b
 
     @param
-    m           magma_z_sparse_matrix*
-                M = D^(-1) * (L+U)
-
-    @param
-    c           magma_z_vector*
-                c = D^(-1) * b
+    precond     magma_z_preconditioner*
+                preconditioner parameter
 
     @ingroup magmasparse_
     ********************************************************************/

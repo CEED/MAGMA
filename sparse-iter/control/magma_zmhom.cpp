@@ -71,7 +71,7 @@
                 homomorphism vector containing the indices
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t

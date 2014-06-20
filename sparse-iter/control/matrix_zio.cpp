@@ -39,10 +39,19 @@ using namespace std;
 
     Arguments
     ---------
-
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
+    
+    @param
+    n_row       magma_int_t*     
+                number of rows in matrix
+                
+    @param
+    n_col       magma_int_t*     
+                number of columns in matrix
+                
+    @param
+    nnz         magma_int_t*     
+                number of nonzeros in matrix
+                
     @param
     val         magmaDoubleComplex**
                 value array of CSR output 
@@ -55,9 +64,11 @@ using namespace std;
     col         magma_index_t**
                 column indices of CSR output
 
-    const char * filename                filname of the binary matrix
+    @param
+    filename    const char*
+                filname of the mtx matrix
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -137,10 +148,27 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
 
     Arguments
     ---------
-
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
+    
+    @param
+    type        magma_storage_t* 
+                storage type of matrix
+                
+    @param
+    location    magma_location_t*     
+                location of matrix
+                
+    @param
+    n_row       magma_int_t*     
+                number of rows in matrix
+                
+    @param
+    n_col       magma_int_t*     
+                number of columns in matrix
+                
+    @param
+    nnz         magma_int_t*     
+                number of nonzeros in matrix
+                
     @param
     val         magmaDoubleComplex**
                 value array of CSR output 
@@ -153,9 +181,11 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
     col         magma_index_t**
                 column indices of CSR output
 
-    const char * filename                filname of the mtx matrix
+    @param
+    filename    const char*
+                filname of the mtx matrix
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -444,9 +474,18 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
     Arguments
     ---------
 
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
+    @param
+    n_row       magma_int_t*     
+                number of rows in matrix
+                
+    @param
+    n_col       magma_int_t*     
+                number of columns in matrix
+                
+    @param
+    nnz         magma_int_t*     
+                number of nonzeros in matrix
+                
     @param
     val         magmaDoubleComplex**
                 value array of CSR  
@@ -462,11 +501,13 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
     @param
     MajorType   magma_index_t
                 Row or Column sort
+                default: 0 = RowMajor, 1 = ColMajor
 
-                                         default: 0 = RowMajor, 1 = ColMajor
-    const char * filename                output filename for the matrix
+    @param
+    filename    const char*
+                output-filname of the mtx matrix
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -549,9 +590,18 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     Arguments
     ---------
 
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
+    @param
+    n_row       magma_int_t*     
+                number of rows in matrix
+                
+    @param
+    n_col       magma_int_t*     
+                number of columns in matrix
+                
+    @param
+    nnz         magma_int_t*     
+                number of nonzeros in matrix
+                
     @param
     val         magmaDoubleComplex**
                 value array of CSR  
@@ -567,10 +617,9 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     @param
     MajorType   magma_index_t
                 Row or Column sort
+                default: 0 = RowMajor, 1 = ColMajor
 
-                                         default: 0 = RowMajor, 1 = ColMajor
-
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -638,10 +687,19 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
 
     Arguments
     ---------
-
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
+    
+    @param
+    n_row       magma_int_t*     
+                number of rows in matrix
+                
+    @param
+    n_col       magma_int_t*     
+                number of columns in matrix
+                
+    @param
+    nnz         magma_int_t*     
+                number of nonzeros in matrix
+                
     @param
     val         magmaDoubleComplex**
                 value array of CSR  
@@ -655,7 +713,7 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
                 column indices of CSR 
 
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -696,7 +754,7 @@ magma_int_t print_z_csr(    magma_int_t n_row,
     A           magma_z_sparse_matrix
                 sparse matrix in Magma_CSR format
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -753,9 +811,11 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
     A           magma_z_sparse_matrix*
                 matrix in magma sparse matrix format
 
-    const char * filename                filname of the mtx matrix
+    @param
+    filename    const char*
+                filname of the mtx matrix
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -1052,9 +1112,11 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     A           magma_z_sparse_matrix*
                 matrix in magma sparse matrix format
 
-    const char * filename                filname of the mtx matrix
+    @param
+    filename    const char*
+                filname of the mtx matrix
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"

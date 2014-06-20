@@ -66,7 +66,7 @@ using namespace std;
                 number of rows in matrix
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -149,7 +149,7 @@ magma_z_csr_compressor(             magmaDoubleComplex ** val,
                 new storage format
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -1883,7 +1883,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
     B           magma_z_sparse_matrix*
                 output sparse matrix B
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 

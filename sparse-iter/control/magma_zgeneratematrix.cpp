@@ -55,7 +55,7 @@ using namespace std;
     A           magma_z_sparse_matrix*
                 matrix to generate   
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"

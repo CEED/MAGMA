@@ -49,7 +49,7 @@
                 scaling type (unit rownorm / unit diagonal)
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -123,6 +123,31 @@ magma_zmscale( magma_z_sparse_matrix *A, magma_scale_t scaling ){
     }
 }
 
+
+/** -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    -------
+
+    Adds a multiple of the Identity matrix to a matrix: A = A+add * I
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix*
+                input/output matrix 
+
+    @param
+    add         magmaDoubleComplex
+                scaling for the identity matrix
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zmdiagadd( magma_z_sparse_matrix *A, magmaDoubleComplex add ){

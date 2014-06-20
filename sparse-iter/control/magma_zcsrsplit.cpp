@@ -56,7 +56,7 @@
     R           magma_z_sparse_matrix*
                 CSR matrix containing rest
 
-    @ingroup magmasparse_s
+    @ingroup magmasparse_saux
     ********************************************************************/
 
 magma_int_t

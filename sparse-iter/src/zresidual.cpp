@@ -40,7 +40,7 @@
                 return residual
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

@@ -51,7 +51,7 @@ using namespace std;
                 number of entries to visualize       
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
@@ -117,7 +117,7 @@ double magma_zstring_to_double( const std::string& s )
     filename    char*
                 file where vector is stored
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"

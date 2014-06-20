@@ -25,8 +25,8 @@
     Purpose
     -------
 
-    ILU Preconditioner for a BCSR matrix A. 
-    In the first approach we assume all diagonal blocks to be nonzero.
+    LU for a BCSR matrix A. 
+    We assume all diagonal blocks to be nonzero.
 
     Arguments
     ---------
@@ -39,7 +39,7 @@
     m           magma_z_sparse_matrix*
                 output matrix M approx. (LU)^{-1} (on DEV)
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 magma_int_t

@@ -42,7 +42,7 @@ using namespace std;
     A           magma_z_sparse_matrix*
                 sparse matrix     
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -107,7 +107,7 @@ magma_zrowentries( magma_z_sparse_matrix *A )
     A           magma_z_sparse_matrix*
                 sparse matrix     
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 magma_int_t 
 magma_zdiameter( magma_z_sparse_matrix *A )

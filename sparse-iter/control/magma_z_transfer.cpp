@@ -53,7 +53,7 @@ using namespace std;
 
    
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -1100,7 +1100,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
 
    
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

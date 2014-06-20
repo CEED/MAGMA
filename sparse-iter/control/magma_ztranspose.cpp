@@ -82,7 +82,7 @@
                 column indices of transposed matrix
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t z_transpose_csr(    magma_int_t n_rows, 
@@ -225,7 +225,7 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     B           magma_z_sparse_matrix*
                 output matrix (CSR)
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -303,7 +303,7 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     B           magma_z_sparse_matrix*
                 output matrix (CSR)
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 

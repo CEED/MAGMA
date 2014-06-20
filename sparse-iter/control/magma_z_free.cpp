@@ -46,7 +46,7 @@ using namespace std;
     x           magma_z_vector*
                 vector to free    
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -91,7 +91,7 @@ magma_z_vfree( magma_z_vector *x ){
     A           magma_z_sparse_matrix*
                 matrix to free    
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 

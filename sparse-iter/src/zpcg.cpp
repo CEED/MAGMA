@@ -51,7 +51,7 @@
     precond_par magma_z_preconditioner*
                 preconditioner
 
-    @ingroup magmasparse_c
+    @ingroup magmasparse_zsysv
     ********************************************************************/
 
 magma_int_t

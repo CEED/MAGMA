@@ -45,7 +45,7 @@
     precond_par magma_z_preconditioner*
                 structure containing all preconditioner information
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -319,7 +319,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
                 structure containing all preconditioner information                
                 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -511,7 +511,7 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
                 structure containing all preconditioner information                
                 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

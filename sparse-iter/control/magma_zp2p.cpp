@@ -70,7 +70,7 @@ magma_zcheckerr(const char *label)
     ---------
 
     @param
-    bandwidth_benchmarkmagma_int_t*
+    bw_bmark    magma_int_t*
                 input: run the benchmark (1/0)
 
     @param
@@ -78,11 +78,11 @@ magma_zcheckerr(const char *label)
                 output: number of GPUs
 
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
-magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
+magma_z_initP2P ( magma_int_t *bw_bmark, magma_int_t *num_gpus ){
 
 
     // Number of GPUs
@@ -187,7 +187,7 @@ magma_z_initP2P ( magma_int_t *bandwidth_benchmark, magma_int_t *num_gpus ){
 
 
 
-  if(*bandwidth_benchmark==1){
+  if(*bw_bmark==1){
 
 
     // P2P memcopy() benchmark

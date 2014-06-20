@@ -53,7 +53,7 @@
 
     magma_precond_parameters *precond_par     parameters for inner solver
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zsysv
     ********************************************************************/
 
 magma_int_t

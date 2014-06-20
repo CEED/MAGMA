@@ -48,7 +48,7 @@
     solver_par  magma_z_solver_par*
                 solver parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsysv
     ********************************************************************/
 
 magma_int_t

@@ -46,7 +46,7 @@
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgepr
     ********************************************************************/
 
 magma_int_t
@@ -224,7 +224,7 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgepr
     ********************************************************************/
 
 magma_int_t
@@ -307,7 +307,7 @@ magma_zapplycuilu_l( magma_z_vector b, magma_z_vector *x,
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgepr
     ********************************************************************/
 
 magma_int_t
@@ -385,7 +385,7 @@ magma_zapplycuilu_r( magma_z_vector b, magma_z_vector *x,
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsypr
     ********************************************************************/
 
 magma_int_t
@@ -577,7 +577,7 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsypr
     ********************************************************************/
 
 magma_int_t
@@ -659,7 +659,7 @@ magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x,
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zsypr
     ********************************************************************/
 
 magma_int_t

@@ -64,7 +64,7 @@
     solver_par  magma_z_solver_par*
                 solver parameters
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 magma_int_t
@@ -172,7 +172,7 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
                 pivot vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 magma_int_t
@@ -466,7 +466,38 @@ magma_zbcsrlutrf( magma_z_sparse_matrix A, magma_z_sparse_matrix *M,
 }   /* magma_zbcsrlusv */
 
 
+/**
+    Purpose
+    -------
 
+    LU solve for a BCSR matrix A. 
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix
+                input matrix A (on DEV)
+                
+    @param
+    b           magma_z_vector
+                RHS (on DEV)
+                
+    @param
+    x           magma_z_vector
+                solution (on DEV)
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
+    @param
+    ipiv        magma_int_t*
+                pivot vector
+
+
+    @ingroup magmasparse_zgesv
+    ********************************************************************/
 
 magma_int_t
 magma_zbcsrlusv( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  

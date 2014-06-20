@@ -47,7 +47,7 @@
                 input/output vector-block/matrix X
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

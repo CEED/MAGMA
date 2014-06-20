@@ -156,11 +156,11 @@ magma_zpipelined_scale( int n,
 
     @param
     n           int
-                legth of v_i
+                length of v_i
 
     @param
     k           int
-                # skp entries <v_i,r> ( without <r> )
+                # skp entries v_i^T * r ( without r )
 
     @param
     r           magmaDoubleComplex*
@@ -169,6 +169,10 @@ magma_zpipelined_scale( int n,
     @param
     v           magmaDoubleComplex*
                 vector of length n
+                
+    @param  
+    skp         magmaDoubleComplex*
+                array of parameters
 
 
     @ingroup magmasparse_zaux

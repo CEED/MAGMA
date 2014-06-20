@@ -56,7 +56,7 @@ using namespace std;
                 fill in level
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"

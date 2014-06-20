@@ -52,7 +52,7 @@ using namespace std;
                 matrix powers
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -176,7 +176,7 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
                 matrix powers
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -520,7 +520,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                 array for additional vector entries
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -577,7 +577,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
                 compressed output vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -619,7 +619,7 @@ magma_z_mpk_compress(    magma_int_t num_addrows,
                 uncompressed output vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -673,7 +673,7 @@ magma_z_mpk_uncompress(  magma_int_t num_add_rows,
                 uncompressed output vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -720,7 +720,7 @@ magma_z_mpk_uncompress_sel(     magma_int_t num_addvecs,
                 compressed output vector
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

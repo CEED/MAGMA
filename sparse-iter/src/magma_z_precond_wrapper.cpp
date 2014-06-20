@@ -42,7 +42,7 @@
     precond     magma_z_preconditioner
                 preconditioner
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -128,7 +128,7 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
     precond     magma_z_preconditioner
                 preconditioner
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -198,7 +198,7 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
     precond     magma_z_preconditioner
                 preconditioner
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -265,7 +265,7 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
     precond     magma_z_preconditioner
                 preconditioner
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t
@@ -331,7 +331,7 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
     precond     magma_z_preconditioner
                 preconditioner
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t

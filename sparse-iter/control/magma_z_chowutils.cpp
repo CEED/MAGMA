@@ -114,7 +114,7 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
     res         real_Double_t* 
                 residual 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
