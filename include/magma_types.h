@@ -446,7 +446,8 @@ typedef enum {
     Magma_ICC          = 446,
     Magma_AILU         = 447,
     Magma_AICC         = 448,
-    Magma_BAITER       = 449
+    Magma_BAITER       = 449,
+    Magma_LOBPCG       = 450
 } magma_solver_type;
 
 typedef enum {
