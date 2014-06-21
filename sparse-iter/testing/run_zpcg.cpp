@@ -107,10 +107,10 @@ int main( int argc, char** argv)
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
         " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d --sweeps %d]) ]"
-        " matrices \n\n", format, B.blocksize, B.alignment,
-        (int) scale,
-        solver_par.verbose,
-        solver_par.maxiter, solver_par.epsilon, 
+        " matrices \n\n", format, (int)B.blocksize, (int)B.alignment,
+        scale,
+        (int)solver_par.verbose,
+        (int)solver_par.maxiter, solver_par.epsilon, 
         precond, (int) precond_par.levels, (int) precond_par.sweeps );
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
