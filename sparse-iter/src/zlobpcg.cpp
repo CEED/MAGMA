@@ -105,6 +105,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 //**************************************************************
 
     // Memory allocation for the eigenvectors, eigenvalues, and workspace
+    solver_par->solver = Magma_LOBPCG;
     magma_int_t m = A.num_rows;
     magma_int_t n =(solver_par->num_eigenvalues);
     magmaDoubleComplex *blockX = solver_par->eigenvectors;

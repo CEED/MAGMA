@@ -541,7 +541,7 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
         solver_par->timing = NULL;
     }  
 
-    if( solver_par->num_eigenvalues > 0 ){
+    if( solver_par->solver == Magma_LOBPCG ){
         magma_dmalloc_cpu( &solver_par->eigenvalues , 
                                 3*solver_par->num_eigenvalues );
 
