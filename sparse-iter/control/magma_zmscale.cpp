@@ -159,6 +159,7 @@ magma_zmdiagadd( magma_z_sparse_matrix *A, magmaDoubleComplex add ){
                 A->val[z] = A->val[z] +  add;
             }
         }
+        return MAGMA_SUCCESS; 
     }
     else{
 
