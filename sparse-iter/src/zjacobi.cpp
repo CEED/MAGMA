@@ -182,7 +182,7 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
         }
     }
     magma_z_csr_compressor(&B.val, &B.row, &B.col, 
-                           &C.val, &C.row, &C.col, &B.num_rows, &B.num_rows);  
+                           &C.val, &C.row, &C.col, &B.num_rows );  
     C.num_rows = B.num_rows;
     C.num_cols = B.num_cols;
     C.memory_location = B.memory_location;
@@ -407,7 +407,7 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     }
 
     magma_z_csr_compressor(&B.val, &B.row, &B.col, 
-                           &C.val, &C.row, &C.col, &B.num_rows, &B.num_rows);  
+                           &C.val, &C.row, &C.col, &B.num_rows );  
 
     C.num_rows = B.num_rows;
     C.num_cols = B.num_cols;
