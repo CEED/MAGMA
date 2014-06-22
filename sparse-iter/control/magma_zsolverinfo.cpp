@@ -326,6 +326,10 @@ magma_int_t
 magma_zsolverinfo_free( magma_z_solver_par *solver_par, 
                         magma_z_preconditioner *precond_par ){
 
+    solver_par->init_res = 0.0;
+    solver_par->iter_res = 0.0;
+    solver_par->final_res = 0.0;
+
     if( solver_par->res_vec != NULL ){
         magma_free_cpu( solver_par->res_vec );
         solver_par->res_vec = NULL;
@@ -422,7 +426,6 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         magma_free_cpu( precond_par->U.blockinfo );
         precond_par->U.blockinfo = NULL;
     }
-
     if( precond_par->solver == Magma_ILU ||
         precond_par->solver == Magma_AILU ||
         precond_par->solver == Magma_ICC||
@@ -486,6 +489,8 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         magma_free_cpu( precond_par->UD.blockinfo );
         precond_par->UD.blockinfo = NULL;
     }
+
+    precond_par->solver = Magma_NONE;
     return MAGMA_SUCCESS;
 }
 
@@ -564,6 +569,7 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     }  
 
     precond_par->d.val = NULL;
+
     precond_par->M.val = NULL;
     precond_par->M.col = NULL;
     precond_par->M.row = NULL;

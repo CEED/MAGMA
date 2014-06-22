@@ -337,8 +337,8 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&z_t);
 
     // free GPU streams and events
-    //magma_queue_destroy( stream[0] );
-    //magma_queue_destroy( stream[1] );
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_event_destroy( event[0] );
     magmablasSetKernelStream(NULL);
 
