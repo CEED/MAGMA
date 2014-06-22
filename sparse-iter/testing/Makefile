@@ -79,6 +79,10 @@ ZSRC += \
 ZSRC += \
 	run_zlaplacesolver.cpp		    \
 
+# run tester for all solvers on laplace problem
+ZSRC += \
+	run_zalltests.cpp		    \
+
 
 
 # ----------
