@@ -41,6 +41,7 @@ ZSRC := \
 	testing_zlag2c.cpp	\
 	testing_zlange.cpp	\
 	testing_zlanhe.cpp	\
+	testing_zlaset_band.cpp \
 	testing_dlarfg.cpp	\
 	testing_znan_inf.cpp	\
 	testing_zprint.cpp	\

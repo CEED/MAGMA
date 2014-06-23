@@ -219,88 +219,224 @@ double cpu_gpu_zdiff(
     return res;
 }
 
-/* ////////////////////////////////////////////////////////////////////////////
- -- GPU kernel for setting 0 in the nb-1 upper subdiagonals and 1 in the diagonal
-    @author Raffaele Solca
- */
-__global__ void zsetdiag1subdiag0_L(int k, magmaDoubleComplex *A, int lda)
-{
 
-    int nb = blockDim.x;
-    int ibx = blockIdx.x * nb;
+
+#define LASET_BAND_NB 64
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- GPU kernel for setting the k-1 super-diagonals to OFFDIAG
+    and the main diagonal to DIAG.
+    Divides matrix into min( ceil((m+k-1)/nb), ceil(n/nb) ) block-columns,
+    with k threads in each block.
+    Each thread iterates across one diagonal.
+    Thread k-1 does the main diagonal, thread k-2 the first super-diagonal, etc.
     
-    int ind = ibx + threadIdx.x + 1;
+      block 0           block 1
+      0                           => skip above matrix
+      1 0                         => skip above matrix
+      2 1 0                       => skip above matrix
+    [ 3 2 1 0         |         ]
+    [   3 2 1 0       |         ]
+    [     3 2 1 0     |         ]
+    [       3 2 1 0   |         ]
+    [         3 2 1 0 |         ]
+    [           3 2 1 | 0       ]
+    [             3 2 | 1 0     ]
+    [               3 | 2 1 0   ]
+    [                 | 3 2 1 0 ]
+    [                 |   3 2 1 ]
+                      |     3 2   => skip below matrix
+                              3   => skip below matrix
     
-    A += ind - nb + __mul24((ibx), lda);
+    Thread assignment for m=10, n=12, k=4, nb=8. Each column is done in parallel.
     
-    magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-    if (threadIdx.x == nb-1)
-        tmp = MAGMA_Z_ONE;
+    @author Raffaele Solca
+    @author Mark Gates
+ */
+__global__
+void zlaset_band_upper(
+    int m, int n,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *A, int lda)
+{
+    int k   = blockDim.x;
+    int ibx = blockIdx.x * LASET_BAND_NB;
+    int ind = ibx + threadIdx.x - k + 1;
+    
+    A += ind + ibx*lda;
+    
+    magmaDoubleComplex value = offdiag;
+    if (threadIdx.x == k-1)
+        value = diag;
 
     #pragma unroll
-    for (int i=0; i < nb; i++) {
-        if (ibx+i < k && ind + i  >= nb) {
-            A[i*(lda+1)] = tmp;
+    for (int j=0; j < LASET_BAND_NB; j++) {
+        if (ibx + j < n && ind + j >= 0 && ind + j < m) {
+            A[j*(lda+1)] = value;
         }
     }
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
- -- GPU kernel for setting 0 in the nb-1 lower subdiagonals and 1 in the diagonal
+ -- GPU kernel for setting the k-1 sub-diagonals to OFFDIAG
+    and the main diagonal to DIAG.
+    Divides matrix into min( ceil(m/nb), ceil(n/nb) ) block-columns,
+    with k threads in each block.
+    Each thread iterates across one diagonal.
+    Thread 0 does the main diagonal, thread 1 the first sub-diagonal, etc.
+    
+      block 0           block 1
+    [ 0               |         ]
+    [ 1 0             |         ]
+    [ 2 1 0           |         ]
+    [ 3 2 1 0         |         ]
+    [   3 2 1 0       |         ]
+    [     3 2 1 0     |         ]
+    [       3 2 1 0   |         ]
+    [         3 2 1 0 |         ]
+    [           3 2 1 | 0       ]
+    [             3 2 | 1 0     ]
+    [               3 | 2 1 0   ]
+    [                   3 2 1 0 ]
+    [                     3 2 1 ]
+                            3 2   => skip below matrix
+                              3   => skip below matrix
+    
+    Thread assignment for m=13, n=12, k=4, nb=8. Each column is done in parallel.
+    
     @author Raffaele Solca
+    @author Mark Gates
  */
 
-__global__ void zsetdiag1subdiag0_U(int k, magmaDoubleComplex *A, int lda)
+__global__
+void zlaset_band_lower(
+    int m, int n,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *A, int lda)
 {
-    int nb = blockDim.x;
-    int ibx = blockIdx.x * nb;
-    
+    //int k   = blockDim.x;
+    int ibx = blockIdx.x * LASET_BAND_NB;
     int ind = ibx + threadIdx.x;
     
-    A += ind + __mul24((ibx), lda);
+    A += ind + ibx*lda;
     
-    magmaDoubleComplex tmp = MAGMA_Z_ZERO;
+    magmaDoubleComplex value = offdiag;
     if (threadIdx.x == 0)
-        tmp = MAGMA_Z_ONE;
-
+        value = diag;
+    
     #pragma unroll
-    for (int i=0; i < nb; i++) {
-        if (ibx+i < k && ind + i < k) {
-            A[i*(lda+1)] = tmp;
+    for (int j=0; j < LASET_BAND_NB; j++) {
+        if (ibx + j < n && ind + j < m) {
+            A[j*(lda+1)] = value;
         }
     }
 }
 
-/* ////////////////////////////////////////////////////////////////////////////
- -- Set 1s in the diagonal and 0s in the nb-1 lower (UPLO='U') or
-    upper (UPLO='L') subdiagonals.
-    stream and no stream interfaces
-    @author Raffaele Solca
- */
-extern "C" void
-magmablas_zsetdiag1subdiag0_stream(
-    magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda, magma_queue_t stream)
-{
-    dim3 threads(nb, 1, 1);
-    dim3 grid((k-1)/nb+1);
-    if (k > lda)
-        fprintf(stderr, "wrong second argument of zsetdiag1subdiag0");
-    if (uplo == MagmaLower)
-        zsetdiag1subdiag0_L<<< grid, threads, 0, stream >>> (k, A, lda);
-    else if (uplo == MagmaUpper) {
-        zsetdiag1subdiag0_U<<< grid, threads, 0, stream >>> (k, A, lda);
-    }
-    else
-        fprintf(stderr, "wrong first argument of zsetdiag1subdiag0");
+
+/**
+    Purpose
+    -------
+    ZLASET_BAND_STREAM initializes the main diagonal of dA to DIAG,
+    and the K-1 sub- or super-diagonals to OFFDIAG.
     
-    return;
+    This is the same as ZLASET_BAND, but adds stream argument.
+    
+    Arguments
+    ---------
+    
+    @param[in]
+    uplo    magma_uplo_t
+            Specifies the part of the matrix dA to be set.
+      -     = MagmaUpper:      Upper triangular part
+      -     = MagmaLower:      Lower triangular part
+    
+    @param[in]
+    m       INTEGER
+            The number of rows of the matrix dA.  M >= 0.
+    
+    @param[in]
+    n       INTEGER
+            The number of columns of the matrix dA.  N >= 0.
+    
+    @param[in]
+    k       INTEGER
+            The number of diagonals to set, including the main diagonal.  K >= 0.
+            Currently, K <= 1024 due to CUDA restrictions (max. number of threads per block).
+    
+    @param[in]
+    OFFDIAG COMPLEX_16
+            Off-diagonal elements in the band are set to OFFDIAG.
+    
+    @param[in]
+    DIAG    COMPLEX_16
+            All the main diagonal elements are set to DIAG.
+    
+    @param[in]
+    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+            The M-by-N matrix dA.
+            If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
+            if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
+            On exit, A(i,j) = ALPHA, 1 <= i <= m, 1 <= j <= n where i != j, abs(i-j) < k;
+                     A(i,i) = BETA , 1 <= i <= min(m,n)
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1,M).
+    
+    @param[in]
+    stream  magma_queue_t
+            Stream to execute ZLASET in.
+    
+    @author Raffaele Solca
+    @author Mark Gates
+    
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zlaset_band_stream(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_queue_t stream)
+{
+    magma_int_t info = 0;
+    if ( uplo != MagmaLower && uplo != MagmaUpper )
+        info = -1;
+    else if ( m < 0 )
+        info = -2;
+    else if ( n < 0 )
+        info = -3;
+    else if ( k < 0 || k > 1024 )
+        info = -4;
+    else if ( ldda < max(1,m) )
+        info = -6;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
+    if (uplo == MagmaUpper) {
+        dim3 threads( min(k,n) );
+        dim3 grid( (min(m+k-1,n) - 1)/LASET_BAND_NB + 1 );
+        zlaset_band_upper<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+    }
+    else if (uplo == MagmaLower) {
+        dim3 threads( min(k,m) );
+        dim3 grid( (min(m,n) - 1)/LASET_BAND_NB + 1 );
+        zlaset_band_lower<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+    }
 }
 
+
+/**
+    @see magmablas_zlaset_band_stream
+    @ingroup magma_zaux2
+    ********************************************************************/
 extern "C" void
-magmablas_zsetdiag1subdiag0(
-    magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda)
+magmablas_zlaset_band(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *dA, magma_int_t ldda)
 {
-    magmablas_zsetdiag1subdiag0_stream(uplo, k, nb, A, lda, magma_stream);
+    magmablas_zlaset_band_stream(uplo, m, n, k, offdiag, diag, dA, ldda, magma_stream);
 }

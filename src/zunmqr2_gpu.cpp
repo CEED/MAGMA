@@ -117,6 +117,9 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
     /* Allocate work space on the GPU */
     magmaDoubleComplex *dwork;
 
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    
     magma_int_t wa_offset, dc_offset, i__4, lddwork;
     magma_int_t i;
     magmaDoubleComplex t[2*4160]        /* was [65][64] */;
@@ -137,11 +140,11 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
     if (left) {
         nq = m;
         nw = n;
-        magma_zmalloc( &dwork, (n + 64)*64 );
+        magma_zmalloc( &dwork, (n + 64)*64 );  // TODO after checking args, else memory leak!
     } else {
         nq = n;
         nw = m;
-        magma_zmalloc( &dwork, (m + 64)*64 );
+        magma_zmalloc( &dwork, (m + 64)*64 );  // TODO after checking args, else memory leak!
     }
     if (! left && side != MagmaRight) {
         *info = -1;
@@ -197,7 +200,10 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         ic = 1;
     }
 
-    magmablas_zsetdiag1subdiag0(MagmaLower, k, nb, dA, ldda);
+    // set nb-1 super-diagonals to 0, and diagonal to 1.
+    // This way we can copy V directly to the GPU,
+    // with the upper triangle parts already set to identity.
+    magmablas_zlaset_band( MagmaUpper, k, k, nb, c_zero, c_one, dA, ldda );
 
     // for i=i1 to i2 by step
     for (i = i1; (step < 0 ? i >= i2 : i <= i2); i += step) {
@@ -206,9 +212,8 @@ magma_zunmqr2_gpu(magma_side_t side, magma_trans_t trans,
         /* Form the triangular factor of the block reflector
            H = H(i) H(i+1) . . . H(i+ib-1) */
         i__4 = nq - i + 1;
-        lapackf77_zlarft("F", "C", &i__4, &ib, &wA[i + i*ldwa], &ldwa,
-                         &tau[i], t, &ib);
-
+        lapackf77_zlarft("Forward", "Columnwise", &i__4, &ib,
+                         &wA[i + i*ldwa], &ldwa, &tau[i], t, &ib);
 
         if (left) {
             /* H or H' is applied to C(i:m,1:n) */

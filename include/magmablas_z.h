@@ -35,12 +35,14 @@ void zzero_nbxnb_block(
     magma_int_t nb,
     magmaDoubleComplex_ptr dA, magma_int_t ldda );
 
-void magmablas_zsetdiag1subdiag0_stream(
-    magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
+void magmablas_zlaset_band_stream(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *A, magma_int_t lda, magma_queue_t stream);
 
-void magmablas_zsetdiag1subdiag0(
-    magma_uplo_t uplo, magma_int_t k, magma_int_t nb,
+void magmablas_zlaset_band(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *A, magma_int_t lda);
 
 // see also zlaswp
