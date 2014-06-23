@@ -13,14 +13,20 @@ include $(MAGMA_DIR)/Makefile.internal
 
 # print CUDA architectures being compiled
 # (if this goes in Makefile.internal, it gets printed for each sub-dir)
-ifneq ($(findstring Tesla, $(GPU_TARGET)),)
-    $(info compile for CUDA arch 1.x (Tesla))
+ifneq ($(findstring sm10, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 1.0 (Tesla))
 endif
-ifneq ($(findstring Fermi, $(GPU_TARGET)),)
+ifneq ($(findstring sm13, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 1.3 (Tesla))
+endif
+ifneq ($(findstring sm20, $(GPU_TARGET)),)
     $(info compile for CUDA arch 2.x (Fermi))
 endif
-ifneq ($(findstring Kepler, $(GPU_TARGET)),)
-    $(info compile for CUDA arch 3.x (Kepler))
+ifneq ($(findstring sm30, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 3.0 (Kepler))
+endif
+ifneq ($(findstring sm35, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 3.5 (Kepler))
 endif
 
 
