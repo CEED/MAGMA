@@ -42,44 +42,44 @@ extern "C" {
 #endif
 
 RETURN_FLOAT
-       sdot_(   const int *n,
-                const float *x, const int *incx,
-                const float *y, const int *incy );
+       sdot_(   const magma_int_t *n,
+                const float *x, const magma_int_t *incx,
+                const float *y, const magma_int_t *incy );
                 
 RETURN_FLOAT    
-       snrm2_(  const int *n,
-                const float *x, const int *incx );
+       snrm2_(  const magma_int_t *n,
+                const float *x, const magma_int_t *incx );
 
 /*
 RETURN_FLOAT
        slange_( const char *norm,
-                const int *m, const int *n,
-                const float *A, const int *lda,
+                const magma_int_t *m, const magma_int_t *n,
+                const float *A, const magma_int_t *lda,
                 float *work );
 
 RETURN_FLOAT
        slansy_( const char *norm, const char* uplo,
-                const int *n,
-                const float *A, const int *lda,
+                const magma_int_t *n,
+                const float *A, const magma_int_t *lda,
                 float *work );
 */
 
-double ddot_(   const int *n,
-                const double *x, const int *incx,
-                const double *y, const int *incy );
+double ddot_(   const magma_int_t *n,
+                const double *x, const magma_int_t *incx,
+                const double *y, const magma_int_t *incy );
 
-double dnrm2_(  const int *n,
-                const double *x, const int *incx );
+double dnrm2_(  const magma_int_t *n,
+                const double *x, const magma_int_t *incx );
 
 /*
 double dlange_( const char *norm,
-                const int *m, const int *n,
-                const double *A, const int *lda,
+                const magma_int_t *m, const magma_int_t *n,
+                const double *A, const magma_int_t *lda,
                 double *work );
 
 double dlansy_( const char *norm, const char* uplo,
-                const int *n,
-                const double *A, const int *lda,
+                const magma_int_t *n,
+                const double *A, const magma_int_t *lda,
                 double *work );
 */
 
@@ -90,7 +90,7 @@ double dlansy_( const char *norm, const char* uplo,
 // ------------------------------------------------------------
 // call matrix norms {s,d}lan{ge,sy}.
 // return value, to check that the call stack isn't messed up.
-float test( int m, int n )
+float test( magma_int_t m, magma_int_t n )
 {
 #define sA(i,j) (sA + (i) + (j)*lda)
 #define dA(i,j) (dA + (i) + (j)*lda)
@@ -101,27 +101,27 @@ float test( int m, int n )
     double *dA, *dwork;
     double dnorm_one, dnorm_inf, dnorm_fro, dnorm_max;
     
-    const int ione = 1;
-    int lda = MAX(m,n);
+    const magma_int_t ione = 1;
+    magma_int_t lda = MAX(m,n);
     
     sA    = (float*)  malloc( lda*n * sizeof(float)  );
     dA    = (double*) malloc( lda*n * sizeof(double) );
     swork = (float*)  malloc( m     * sizeof(float)  );
     dwork = (double*) malloc( m     * sizeof(double) );
     
-    for( int j = 0; j < n; ++j ) {
-    for( int i = 0; i < lda; ++i ) {
+    for( magma_int_t j = 0; j < n; ++j ) {
+    for( magma_int_t i = 0; i < lda; ++i ) {
         double tmp = rand() / (double)(RAND_MAX);
         *sA(i,j) = tmp;
         *dA(i,j) = tmp;
     }}
     
     double error;
-    int status;
+    magma_int_t status;
     
     // can repeat multiple times, but shows same results every time
     status = 0;
-    for( int i=0; i < 1; ++i ) {
+    for( magma_int_t i=0; i < 1; ++i ) {
         snorm_one = sdot_(  &m, sA, &ione, sA, &ione );
         dnorm_one = ddot_(  &m, dA, &ione, dA, &ione );
         snorm_fro = snrm2_( &m, sA, &ione );
@@ -137,7 +137,7 @@ float test( int m, int n )
     printf( "\n" );
     
     status = 0;
-    for( int i=0; i < 1; ++i ) {
+    for( magma_int_t i=0; i < 1; ++i ) {
         snorm_one = slange_( "one", &m, &n, sA, &lda, swork );
         snorm_inf = slange_( "inf", &m, &n, sA, &lda, swork );
         snorm_max = slange_( "max", &m, &n, sA, &lda, swork );
@@ -162,7 +162,7 @@ float test( int m, int n )
     printf( "\n" );
     
     status = 0;
-    for( int i=0; i < 1; ++i ) {
+    for( magma_int_t i=0; i < 1; ++i ) {
         snorm_one = slansy_( "one", "up", &n, sA, &lda, swork );
         snorm_inf = slansy_( "inf", "up", &n, sA, &lda, swork );
         snorm_max = slansy_( "max", "up", &n, sA, &lda, swork );
@@ -193,8 +193,8 @@ float test( int m, int n )
 // ------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    int m = 100;
-    int n = m;
+    magma_int_t m = 100;
+    magma_int_t n = m;
     if ( argc > 1 ) {
         n = atoi( argv[1] );
     }
@@ -206,7 +206,7 @@ int main( int argc, char** argv )
             sizeof(void*), sizeof(RETURN_FLOAT) );
     
     // can repeat multiple times, but shows same results every time
-    for( int i=0; i < 1; ++i ) {
+    for( magma_int_t i=0; i < 1; ++i ) {
         value = test( m, n );
         printf( "value %.4f\n\n", value );
     }
