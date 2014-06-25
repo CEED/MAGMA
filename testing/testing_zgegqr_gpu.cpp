@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, *h_rwork, tmp[1];
 
-    magmaDoubleComplex *d_A, *dwork, *ddA, *d_T;
+    magmaDoubleComplex *d_A, *dwork;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
     magma_int_t ione     = 1, ldwork;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -92,11 +92,6 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( dtau,  magmaDoubleComplex, min_mn );
             TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
-            TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
-            TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
-            
-            magmablas_zlaset( MagmaFull, N, N, ddA, N );
-            magmablas_zlaset( MagmaFull, N, N, d_T, N );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -190,8 +185,6 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( d_A   );
             TESTING_FREE_DEV( dtau  );
             TESTING_FREE_DEV( dwork );
-            TESTING_FREE_DEV( ddA   );
-            TESTING_FREE_DEV( d_T   );
 
             fflush( stdout );
         }
