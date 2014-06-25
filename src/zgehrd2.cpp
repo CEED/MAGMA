@@ -163,37 +163,35 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         return *info;
     }
 
-    magmaDoubleComplex *da;
-    if (MAGMA_SUCCESS != magma_zmalloc( &da, N*ldda + 2*N*nb + nb*nb )) {
+    magmaDoubleComplex *dA;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, N*ldda + 2*N*nb + nb*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    
-    magmaDoubleComplex *d_A    = da;
-    magmaDoubleComplex *d_work = da + (N+nb)*ldda;
+    magmaDoubleComplex *d_work = dA + (N+nb)*ldda;
 
-    magma_int_t i__;
+    magma_int_t i;
 
-    magmaDoubleComplex *t, *d_t;
-    magma_zmalloc_cpu( &t, nb*nb );
-    if ( t == NULL ) {
-        magma_free( da );
+    magmaDoubleComplex *T, *dT;
+    magma_zmalloc_cpu( &T, nb*nb );
+    if ( T == NULL ) {
+        magma_free( dA );
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
-    d_t = d_work + nb * ldda;
+    dT = d_work + nb * ldda;
 
-    zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
+    zzero_nbxnb_block(nb, dA+N*ldda, ldda);
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
-    for (i__ = 1; i__ < ilo; ++i__)
-        tau[i__] = c_zero;
+    for (i = 1; i < ilo; ++i)
+        tau[i] = c_zero;
 
-    for (i__ = max(1,ihi); i__ < n; ++i__)
-        tau[i__] = c_zero;
+    for (i = max(1,ihi); i < n; ++i)
+        tau[i] = c_zero;
 
-    for (i__=0; i__ < nb*nb; i__ += 4)
-        t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = c_zero;
+    for (i=0; i < nb*nb; i += 4)
+        T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
 
     nbmin = 2;
     iws = 1;
@@ -219,54 +217,54 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     if (nb < nbmin || nb >= nh) {
         /* Use unblocked code below */
-        i__ = ilo;
+        i = ilo;
     }
     else {
         /* Use blocked code */
         /* Copy the matrix to the GPU */
-        magma_zsetmatrix( N, N-ilo+1, A+(ilo-1)*(lda), lda, d_A, ldda );
+        magma_zsetmatrix( N, N-ilo+1, A+(ilo-1)*(lda), lda, dA, ldda );
         
-        for (i__ = ilo; i__ < ihi - nb; i__ += nb) {
+        for (i = ilo; i < ihi - nb; i += nb) {
             /* Computing MIN */
-            ib = min(nb, ihi - i__);
+            ib = min(nb, ihi - i);
             
             /*   Reduce columns i:i+ib-1 to Hessenberg form, returning the
                  matrices V and T of the block reflector H = I - V*T*V'
                  which performs the reduction, and also the matrix Y = A*V*T */
             
             /*   Get the current panel (no need for the 1st iteration) */
-            magma_zgetmatrix( ihi-i__+1, ib,
-                              d_A + (i__ - ilo)*ldda + i__ - 1, ldda,
-                              A   + (i__ -  1 )*lda  + i__ - 1, lda );
+            magma_zgetmatrix( ihi-i+1, ib,
+                              dA + (i - ilo)*ldda + i - 1, ldda,
+                              A   + (i -  1 )*lda  + i - 1, lda );
             
-            magma_zlahr2(ihi, i__, ib,
-                         d_A + (i__ - ilo)*ldda,
-                         d_A + N*ldda + 1,
-                         A   + (i__ -   1 )*(lda), lda,
-                         &tau[i__], t, nb, work, ldwork);
+            magma_zlahr2(ihi, i, ib,
+                         dA + (i - ilo)*ldda,
+                         dA + N*ldda + 1,
+                         A   + (i -   1 )*(lda), lda,
+                         &tau[i], T, nb, work, ldwork);
             
             /* Copy T from the CPU to D_T on the GPU */
-            magma_zsetmatrix( nb, nb, t, nb, d_t, nb );
+            magma_zsetmatrix( nb, nb, T, nb, dT, nb );
             
-            magma_zlahru(n, ihi, i__ - 1, ib,
-                         A   + (i__ -  1 )*(lda), lda,
-                         d_A + (i__ - ilo)*ldda,
-                         d_A + (i__ - ilo)*ldda + i__ - 1,
-                         d_A + N*ldda, d_t, d_work);
+            magma_zlahru(n, ihi, i - 1, ib,
+                         A   + (i -  1 )*(lda), lda,
+                         dA + (i - ilo)*ldda,
+                         dA + (i - ilo)*ldda + i - 1,
+                         dA + N*ldda, dT, d_work);
         }
     }
 
     /* Use unblocked code to reduce the rest of the matrix */
     if (!(nb < nbmin || nb >= nh)) {
-        magma_zgetmatrix( n, n-i__+1,
-                          d_A+ (i__-ilo)*ldda, ldda,
-                          A  + (i__-1)*(lda),  lda );
+        magma_zgetmatrix( n, n-i+1,
+                          dA+ (i-ilo)*ldda, ldda,
+                          A  + (i-1)*(lda),  lda );
     }
-    lapackf77_zgehd2(&n, &i__, &ihi, A, &lda, &tau[1], work, &iinfo);
+    lapackf77_zgehd2(&n, &i, &ihi, A, &lda, &tau[1], work, &iinfo);
     work[0] = MAGMA_Z_MAKE( iws, 0 );
     
-    magma_free( da );
-    magma_free_cpu(t);
+    magma_free( dA );
+    magma_free_cpu( T );
 
     return *info;
 } /* magma_zgehrd2 */
