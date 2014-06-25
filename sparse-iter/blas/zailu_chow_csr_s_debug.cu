@@ -25,6 +25,7 @@ __global__ void
 magma_zailu_csr_s_debug_kernel(   int *blockidx,
                             magma_int_t Lnum_rows, 
                             magma_int_t Lnnz,  
+                            magma_index_t *p,
                             const magmaDoubleComplex * __restrict__ AL, 
                             magmaDoubleComplex *valL, 
                             magma_index_t *rowptrL, 
@@ -38,8 +39,8 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
                             magma_index_t *rowidxU, 
                             magma_index_t *colidxU ){
 
-    int i, j;
-    int k = blockDim.x * blockIdx.x + threadIdx.x ;
+    int i, j, k;
+    int z = blockDim.x * blockIdx.x + threadIdx.x ;
 
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magmaDoubleComplex s, sp;
@@ -48,10 +49,12 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
     //curandState_t state;
     //curand_init(&state);
     //int blockidx = curand(&state) % (gridDim.x);
-    k = blockidx[blockIdx.x+gridDim.x * blockIdx.z] * blockDim.x + threadIdx.x ;
+    //k = blockidx[blockIdx.x+gridDim.x * blockIdx.z] * blockDim.x + threadIdx.x ;
 
-    if (k < Lnnz )
-    {     
+    if (z < Lnnz )
+    { 
+        k=z;    
+        k = p[z]; // use the matrix hom for higher data locality
 
         i = (blockIdx.y%2 == 0 ) ? rowidxL[k] : rowidxU[k]  ;
         j = (blockIdx.y%2 == 0 ) ? colidxL[k] : colidxU[k]  ;
@@ -61,6 +64,8 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
 #else
         s = (blockIdx.y%2 == 0 ) ? AL[k] : AU[k] ;
 #endif
+
+        if ( MAGMA_Z_REAL(s) != 0.0 ){
 
         il = rowptrL[i];
         iu = rowptrU[j];
@@ -79,6 +84,7 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
             iu = ( jl >= ju ) ? iu+1 : iu;
 
 /*
+
             if (jl < ju)
                 il++;
             else if (ju < jl)
@@ -91,9 +97,13 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
                 il++;
                 iu++;
             }
-
+           // if( il == rowptrL[i+1] || iu == rowptrU[j+1])
+             //   break;
 */
+
+
         }
+
         // undo the last operation (it must be the last)
         s += sp;
         __syncthreads();
@@ -106,6 +116,8 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
 
     }
 
+    }
+
 }// kernel 
 
 
@@ -114,13 +126,32 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
 
 
 
+__global__ void 
+magma_z_debug_kernel( int n, int *p, int *q ){
+    int z = blockDim.x * blockIdx.x + threadIdx.x ;
+    int k;
+
+    if (z < n )
+    {     
+        k=z;
+        k = p[z];
+        if( k>n )
+            printf("error: k for %d = %d \n.", z, k);
+        q[k] = p[z];
+    }
+}
 
 
 
 
 
 
-/**
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
     Purpose
     -------
     
@@ -154,11 +185,12 @@ magma_zailu_csr_s_debug_kernel(   int *blockidx,
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zailu_csr_s_debug( magma_z_sparse_matrix A_L,
+magma_zailu_csr_s_debug( magma_index_t *p,
+                   magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix A_U,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U ){
-    
+
     int blocksize1 = 256;
     int blocksize2 = 1;
 
@@ -172,11 +204,11 @@ magma_zailu_csr_s_debug( magma_z_sparse_matrix A_L,
     // backward engineering
     int limit = dimgrid1*dimgrid3;
     int *blockidx, *d_blockidx;
-    magma_imalloc_cpu( &blockidx, limit );
-    magma_imalloc( &d_blockidx, limit );
-    for(int i=0; i< limit; i++)
-     //   blockidx[i] = i%dimgrid1;
-        blockidx[i] = rand()%dimgrid1;    //rand
+   //magma_imalloc_cpu( &blockidx, limit );
+    //magma_imalloc( &d_blockidx, limit );
+    //for(int i=0; i< limit; i++)
+    //    blockidx[i] = i%dimgrid1;
+    //    blockidx[i] = rand()%dimgrid1;    //rand
         //blockidx[i] = dimgrid1-1-i%dimgrid1;       //backward
 /*
 
@@ -191,20 +223,28 @@ magma_zailu_csr_s_debug( magma_z_sparse_matrix A_L,
         blockidx[idx2] = tmp;
     }*/
 
-    magma_setvector( limit , blockidx, 1, d_blockidx, 1 );
- //   magma_getvector( dimgrid1 , d_blockidx, 1, blockidx, 1 );
+    //cublasSetVector( limit , sizeof( int ), blockidx, 1, d_blockidx, 1 );
+ //   cublasGetVector( dimgrid1 , sizeof( int ), d_blockidx, 1, blockidx, 1 );
    // printf(" %d %d %d\n", blockidx[0], blockidx[5], blockidx[7]);
     // backward engineering
 
     cudaFuncSetCacheConfig(magma_zailu_csr_s_debug_kernel, cudaFuncCachePreferL1);
 
     magma_zailu_csr_s_debug_kernel<<< grid, block, 0, magma_stream >>>
-        ( d_blockidx, A_L.num_rows, A_L.nnz,  A_L.val, L.val, L.row, L.rowidx, L.col, 
+        ( d_blockidx, A_L.num_rows, A_L.nnz,  p, A_L.val, L.val, L.row, L.rowidx, L.col, 
           A_U.num_rows, A_U.nnz,  A_U.val, U.val, U.row, U.col, U.rowidx );
+/*
+        magma_index_t *t1, *t2;
+        magma_indexmalloc( &t1, A_L.nnz );
+            cudaMemcpy( t1, p, 
+                A_L.nnz*sizeof( magma_index_t ), cudaMemcpyDeviceToDevice );
+magma_z_debug_kernel<<< grid, block, 0, magma_stream >>>( A_L.nnz, p, t1 );
 
+    magma_free( t1 );
+*/
     // backward engineering
-    magma_free_cpu( blockidx );
-    magma_free( d_blockidx );
+    //magma_free_cpu( blockidx );
+    //magma_free( d_blockidx );
     // backward engineering
 
     return MAGMA_SUCCESS;
