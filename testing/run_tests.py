@@ -289,6 +289,7 @@ aux = (
 	                                 
 	'./testing_zlarfg                -c' + n,
 	'./testing_zlaset                -c' + mn,
+	'./testing_zlaset_band           -c' + mn,
 	'./testing_znan_inf              -c' + mn,
 	'./testing_zprint                -c -N 10 -N 5,100 -N 100,5',
 	                                 
@@ -532,7 +533,7 @@ svd = (
 	
 	'./testing_zgesvd    -UN -VN -c' + mn,
 	'./testing_zgesvd    -US -VS -c' + mn,
-	'./testing_zgesvd    -UO -VO -c' + mn,
+	'./testing_zgesvd    -UO -VS -c' + mn,
 	'./testing_zgesvd    -UA -VA -c' + mn,
 	
 	'./testing_zgebrd            -c' + mn,

@@ -192,7 +192,7 @@ magma_zlahr2_m(
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
         magmablasSetKernelStream( data->streams[d] );
-        magmablas_zlaset( MagmaUpperLower, nb, nb, dV(d,k,0), ldv );
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV(d,k,0), ldv );
     }
     
     // set all Y=0

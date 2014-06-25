@@ -41,14 +41,16 @@ ZSRC := \
 	testing_zlag2c.cpp	\
 	testing_zlange.cpp	\
 	testing_zlanhe.cpp	\
-	testing_zlaset_band.cpp \
 	testing_dlarfg.cpp	\
+	testing_zlaset.cpp	\
+	testing_zlaset_band.cpp	\
 	testing_znan_inf.cpp	\
 	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
 	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
+	testing_veclib.cpp	\
 
 # ----------
 # Cholesky, GPU interface

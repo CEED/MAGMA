@@ -172,7 +172,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         return *info;
     }
     magmaDoubleComplex *d_work = dA + (N+nb)*ldda;
-
+    
     magma_int_t i;
 
     magmaDoubleComplex *T, *dT;
@@ -184,7 +184,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
     dT = d_work + nb * ldda;
 
-    zzero_nbxnb_block(nb, dA+N*ldda, ldda);
+    magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dA(0,N), ldda );
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
     for (i = 1; i < ilo; ++i)

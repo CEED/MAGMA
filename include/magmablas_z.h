@@ -22,28 +22,6 @@ extern "C" {
   /*
    * Interface to clean
    */
-double cpu_gpu_zdiff(
-    magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex    *hA, magma_int_t lda,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda );
-
-// see also zlaset
-void zzero_32x32_block(
-    magmaDoubleComplex_ptr dA, magma_int_t ldda );
-
-void zzero_nbxnb_block(
-    magma_int_t nb,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda );
-
-void magmablas_zlaset_band_stream(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *A, magma_int_t lda, magma_queue_t stream);
-
-void magmablas_zlaset_band(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *A, magma_int_t lda);
 
 // see also zlaswp
 // ipiv gets updated
@@ -414,11 +392,25 @@ void magmablas_zlascl(
 
 void magmablas_zlaset(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex_ptr dA, magma_int_t ldda );
 
-void magmablas_zlaset_identity(
-    magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda );
+void magmablas_zlaset_stream(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_queue_t stream);
+
+void magmablas_zlaset_band(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *A, magma_int_t lda);
+
+void magmablas_zlaset_band_stream(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_queue_t stream);
 
 void magmablas_zlaswp(
     magma_int_t n,

@@ -204,7 +204,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
 
     // zero first block of V, which is lower triangular
-    zzero_nbxnb_block(nb, dV, ldda);
+    magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda );
 
     // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
     for (i = 0; i < ilo; ++i)
@@ -215,7 +215,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     for (i=0; i < nb*nb; i += 4)
         T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
-    magmablas_zlaset( MagmaFull, nb, n, dT, nb );
+    magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb );
 
     // If not enough workspace, use unblocked code
     if ( lwork < iws ) {
