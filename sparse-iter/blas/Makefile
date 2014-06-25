@@ -47,13 +47,16 @@ ZSRC := \
 # asynchronous iterations
 ZSRC += \
 	zaicc_chow_csr_s.cu	\
+	zaicc_chow_csr_a.cu	\
 	zailu_chow_csr_s.cu	\
+	zailu_chow_csr_a.cu	\
 	zbajac_csr.cu		\
 
 
 # Auxiliary routines
 ZSRC += \
 	zcompact.cu		\
+	mtools_zsymmetrize.cu		\
 
 -include Makefile.local
 -include Makefile.src
