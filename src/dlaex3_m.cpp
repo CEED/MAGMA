@@ -198,11 +198,11 @@ magma_dlaex3_m(magma_int_t nrgpu,
                magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
                magma_int_t* info )
 {
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+#define Q(i_,j_) (Q + (i_) + (j_)*ldq)
 
 #define dQ2(id)    (dwork[id])
-#define dS(id, ii) (dwork[id] + n2*n2_loc +(ii)* (n2*nb))
-#define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
+#define dS(id, ii) (dwork[id] + n2*n2_loc + (ii)*(n2*nb))
+#define dQ(id, ii) (dwork[id] + n2*n2_loc +    2*(n2*nb) + (ii)*(n2_loc*nb))
 
     if (nrgpu == 1) {
         magma_setdevice(0);

@@ -133,7 +133,7 @@ magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
              double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
              double* dwork, magma_int_t* info)
 {
-#define Z(ix, iy) (Z + (ix) + ldz * (iy))
+#define Z(i_,j_) (Z + (i_) + (j_)*ldz)
 
     double d_zero = 0.;
     double d_one  = 1.;

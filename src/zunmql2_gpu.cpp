@@ -114,26 +114,26 @@ magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
                   magmaDoubleComplex *wA, magma_int_t ldwa,
                   magma_int_t *info)
 {
+    #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
+    #define dC(i_,j_) (dC + (i_) + (j_)*lddc)
+    #define wA(i_,j_) (wA + (i_) + (j_)*ldwa)
+    
     /* Allocate work space on the GPU */
     magmaDoubleComplex *dwork;
-    magma_zmalloc( &dwork, 2*(m + 64)*64 );  // TODO do AFTER checking args! else memory leak.
+    magma_zmalloc( &dwork, 2*(m + 64)*64 );
 
-    magma_int_t wa_offset, dc_offset, i__4;
-    
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     
-    magma_int_t i;
+    magma_int_t i, i__4;
     magmaDoubleComplex T[2*4160]        /* was [65][64] */;
     magma_int_t i1, i2, step, ib, nb, mi, ni, nq, nw;
     magma_int_t ldwork;
     int left, notran;
 
-    wa_offset = 1 + ldwa;
-    wA -= wa_offset;
+    wA -= 1 + ldwa;
+    dC -= 1 + lddc;
     --tau;
-    dc_offset = 1 + lddc;
-    dC -= dc_offset;
 
     *info  = 0;
     left   = (side == MagmaLeft);
@@ -213,7 +213,7 @@ magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
            H = H(i+ib-1) . . . H(i+1) H(i) */
         i__4 = nq - k + i + ib - 1;
         lapackf77_zlarft("Backward", "Columnwise", &i__4, &ib,
-                         &wA[i * ldwa + 1], &ldwa, &tau[i], T, &ib);
+                         wA(1,i), &ldwa, &tau[i], T, &ib);
     
         if (left) {
             /* H or H' is applied to C(1:m-k+i+ib-1,1:n) */
@@ -226,11 +226,11 @@ magma_zunmql2_gpu(magma_side_t side, magma_trans_t trans,
         
         /* Apply H or H'; First copy T to the GPU */
         magma_zsetmatrix( ib, ib, T, ib, dwork+i__4*ib, ib );
-        magma_zlarfb_gpu( side, trans, MagmaBackward, MagmaColumnwise,
-                          mi, ni, ib,
-                          &dA[(i-1) * ldda], ldda, dwork+i__4*ib, ib,
-                          &dC[1+lddc], lddc,
-                          dwork+i__4*ib + ib*ib, ldwork );
+        magma_zlarfb_gpu(side, trans, MagmaBackward, MagmaColumnwise,
+                         mi, ni, ib,
+                         dA(0,i-1), ldda, dwork+i__4*ib, ib,  // dA using 0-based indices here
+                         dC(1,1), lddc,
+                         dwork+i__4*ib + ib*ib, ldwork);
     }
 
     magma_free( dwork );

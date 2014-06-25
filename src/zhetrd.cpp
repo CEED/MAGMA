@@ -197,7 +197,7 @@ magma_zhetrd(magma_uplo_t uplo, magma_int_t n,
         return *info;
     }
 
-    magmaDoubleComplex *dwork = dA + (n)*ldda;
+    magmaDoubleComplex *dwork = dA + n*ldda;
 
     if (n < 2048)
         nx = n;

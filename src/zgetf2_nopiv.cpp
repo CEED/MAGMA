@@ -62,19 +62,19 @@ magma_zgetf2_nopiv(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    #define A(i_,j_) (A + (i_) + (j_)*lda)
+    
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione = 1;
 
-    magma_int_t a_dim1, a_offset, min_mn, i__2, i__3;
+    magma_int_t min_mn, i__2, i__3;
     magmaDoubleComplex z__1;
     magma_int_t i, j;
     double sfmin;
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    A -= a_offset;
+    A -= 1 + lda;
 
     /* Function Body */
     *info = 0;
@@ -100,20 +100,18 @@ magma_zgetf2_nopiv(
     min_mn = min(m,n);
     for (j = 1; j <= min_mn; ++j) {
         /* Test for singularity. */
-        i__2 = j + j * a_dim1;
-        if ( ! MAGMA_Z_EQUAL(A[i__2], c_zero)) {
+        if ( ! MAGMA_Z_EQUAL( *A(j,j), c_zero)) {
             /* Compute elements J+1:M of J-th column. */
             if (j < m) {
-                if (MAGMA_Z_ABS(A[j + j * a_dim1]) >= sfmin) {
+                if (MAGMA_Z_ABS( *A(j,j) ) >= sfmin) {
                     i__2 = m - j;
-                    z__1 = MAGMA_Z_DIV(c_one, A[j + j * a_dim1]);
-                    blasf77_zscal(&i__2, &z__1, &A[j + 1 + j * a_dim1], &ione);
+                    z__1 = MAGMA_Z_DIV(c_one, *A(j,j));
+                    blasf77_zscal(&i__2, &z__1, A(j+1,j), &ione);
                 }
                 else {
                     i__2 = m - j;
                     for (i = 1; i <= i__2; ++i) {
-                        i__3 = j + i + j * a_dim1;
-                        A[i__3] = MAGMA_Z_DIV(A[j + i + j * a_dim1], A[j + j*a_dim1]);
+                        *A(j+i,j) = MAGMA_Z_DIV( *A(j+i,j), *A(j,j) );
                     }
                 }
             }
@@ -127,9 +125,9 @@ magma_zgetf2_nopiv(
             i__2 = m - j;
             i__3 = n - j;
             blasf77_zgeru( &i__2, &i__3, &c_neg_one,
-                           &A[j + 1 + j * a_dim1], &ione,
-                           &A[j + (j+1) * a_dim1], &lda,
-                           &A[j + 1 + (j+1) * a_dim1], &lda);
+                           A(j+1,j),   &ione,
+                           A(j,j+1),   &lda,
+                           A(j+1,j+1), &lda);
         }
     }
 

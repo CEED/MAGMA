@@ -134,7 +134,7 @@ magma_dlaex1(magma_int_t n, double* d, double* Q, magma_int_t ldq,
              magma_range_t range, double vl, double vu,
              magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+#define Q(i_,j_) (Q + (i_) + (j_)*ldq)
 
     magma_int_t coltyp, i, idlmda;
     magma_int_t indx, indxc, indxp;

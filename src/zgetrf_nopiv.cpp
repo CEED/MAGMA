@@ -62,15 +62,15 @@ magma_zgetrf_nopiv(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
+    #define A(i_,j_) (A + (i_) + (j_)*lda)
+    
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
-    magma_int_t a_dim1, a_offset, min_mn, i__3, i__4;
+    magma_int_t min_mn, i__3, i__4;
     magma_int_t j, jb, nb, iinfo;
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    A -= a_offset;
+    A -= 1 + lda;
 
     /* Function Body */
     *info = 0;
@@ -96,7 +96,7 @@ magma_zgetrf_nopiv(
     min_mn = min(m,n);
     if (nb <= 1 || nb >= min_mn) {
         /* Use unblocked code. */
-        magma_zgetf2_nopiv( m, n, &A[a_offset], lda, info );
+        magma_zgetf2_nopiv( m, n, A(1,1), lda, info );
     }
     else {
         /* Use blocked code. */
@@ -106,13 +106,13 @@ magma_zgetrf_nopiv(
             /* Factor diagonal and subdiagonal blocks and test for exact
                singularity. */
             i__3 = m - j + 1;
-            //magma_zgetf2_nopiv( i__3, jb, &A[j + j * a_dim1], lda, &iinfo );
+            //magma_zgetf2_nopiv( i__3, jb, A(j,j), lda, &iinfo );
 
             i__3 -= jb;
-            magma_zgetf2_nopiv( jb, jb, &A[j + j * a_dim1], lda, &iinfo );
-            blasf77_ztrsm("R", "U", "N", "N", &i__3, &jb, &c_one,
-                          &A[j + j * a_dim1], &lda,
-                          &A[j + jb + j * a_dim1], &lda);
+            magma_zgetf2_nopiv( jb, jb, A(j,j), lda, &iinfo );
+            blasf77_ztrsm( "R", "U", "N", "N", &i__3, &jb, &c_one,
+                           A(j,j),    &lda,
+                           A(j+jb,j), &lda );
             
             /* Adjust INFO */
             if (*info == 0 && iinfo > 0)
@@ -121,16 +121,19 @@ magma_zgetrf_nopiv(
             if (j + jb <= n) {
                 /* Compute block row of U. */
                 i__3 = n - j - jb + 1;
-                blasf77_ztrsm("Left", "Lower", "No transpose", "Unit", &jb, &i__3,
-                       &c_one, &A[j + j * a_dim1], &lda, &A[j + (j+jb)*a_dim1], &lda);
+                blasf77_ztrsm( "Left", "Lower", "No transpose", "Unit",
+                               &jb, &i__3, &c_one,
+                               A(j,j),    &lda,
+                               A(j,j+jb), &lda );
                 if (j + jb <= m) {
                     /* Update trailing submatrix. */
                     i__3 = m - j - jb + 1;
                     i__4 = n - j - jb + 1;
-                    blasf77_zgemm("No transpose", "No transpose", &i__3, &i__4, &jb,
-                           &c_neg_one, &A[j + jb + j * a_dim1], &lda,
-                           &A[j + (j + jb) * a_dim1], &lda, &c_one,
-                           &A[j + jb + (j + jb) * a_dim1], &lda);
+                    blasf77_zgemm( "No transpose", "No transpose",
+                                   &i__3, &i__4, &jb, &c_neg_one,
+                                   A(j+jb,j),    &lda,
+                                   A(j,j+jb),    &lda, &c_one,
+                                   A(j+jb,j+jb), &lda );
                 }
             }
         }

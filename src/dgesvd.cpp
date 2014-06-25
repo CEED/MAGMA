@@ -158,6 +158,10 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
              double *work, magma_int_t lwork,
              magma_int_t *info )
 {
+    #define A(i_,j_)  (A  + (i_) + (j_)*lda)
+    #define U(i_,j_)  (U  + (i_) + (j_)*ldu)
+    #define VT(i_,j_) (VT + (i_) + (j_)*ldvt)
+    
     const char* jobu_  = lapack_vec_const( jobu  );
     const char* jobvt_ = lapack_vec_const( jobvt );
     
@@ -303,7 +307,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                 
                 // Zero out below R
                 lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                 &A[1], &lda);
+                                 A(1,0), &lda);
                 ie = 1;
                 itauq = ie + n;
                 itaup = itauq + n;
@@ -433,12 +437,12 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                         chunk = min(m - i + 1,ldwrku);
                         blasf77_dgemm("N", "N", &chunk, &n, &n,
-                                      &c_one,  &A[i-1], &lda,
+                                      &c_one,  A(i-1,0), &lda,
                                                &work[ir], &ldwrkr,
                                       &c_zero, &work[iu], &ldwrku);
                         lapackf77_dlacpy("F", &chunk, &n,
                                          &work[iu], &ldwrku,
-                                         &A[i-1], &lda);
+                                         A(i-1,0), &lda);
                     }
                 }
                 else {
@@ -514,7 +518,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                      VT, &ldvt);
                     if (n > 1) {
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &VT[1], &ldvt);
+                                         VT(1,0), &ldvt);
                     }
                     
                     // Generate Q in A
@@ -574,12 +578,12 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                         chunk = min(m - i + 1,ldwrku);
                         blasf77_dgemm("N", "N", &chunk, &n, &n,
-                                      &c_one,  &A[i-1], &lda,
+                                      &c_one,  A(i-1,0), &lda,
                                                &work[ir], &ldwrkr,
                                       &c_zero, &work[iu], &ldwrku);
                         lapackf77_dlacpy("F", &chunk, &n,
                                          &work[iu], &ldwrku,
-                                         &A[i-1], &lda);
+                                         A(i-1,0), &lda);
                     }
                 }
                 else {
@@ -599,7 +603,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                      VT, &ldvt);
                     if (n > 1) {
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &VT[1], &ldvt);
+                                         VT(1,0), &ldvt);
                     }
                     
                     // Generate Q in A
@@ -763,7 +767,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out below R in A
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &A[1], &lda);
+                                         A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (Workspace: need 4*N, prefer 3*N + 2*N*NB)
@@ -933,7 +937,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out below R in A
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &A[1], &lda);
+                                         A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (Workspace: need 4*N, prefer 3*N + 2*N*NB)
@@ -1090,7 +1094,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                          VT, &ldvt);
                         if (n > 1) {
                             lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                             &VT[1], &ldvt);
+                                             VT(1,0), &ldvt);
                         }
                         ie = itau;
                         itauq = ie + n;
@@ -1252,7 +1256,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out below R in A
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &A[1], &lda);
+                                         A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (Workspace: need 4*N, prefer 3*N + 2*N*NB)
@@ -1425,7 +1429,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out below R in A
                         lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                         &A[1], &lda);
+                                         A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (Workspace: need 4*N, prefer 3*N + 2*N*NB)
@@ -1589,7 +1593,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                          VT, &ldvt);
                         if (n > 1) {
                             lapackf77_dlaset("L", &n_1, &n_1, &c_zero, &c_zero,
-                                             &VT[1], &ldvt);
+                                             VT(1,0), &ldvt);
                         }
                         ie = itau;
                         itauq = ie + n;
@@ -1760,7 +1764,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                 
                 // Zero out above L
                 lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                 &A[lda], &lda);
+                                 A(0,1), &lda);
                 ie = 1;
                 itauq = ie + m;
                 itaup = itauq + m;
@@ -1889,11 +1893,11 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         blk = min(n - i + 1,chunk);
                         blasf77_dgemm("N", "N", &m, &blk, &m,
                                       &c_one,  &work[ir], &ldwrkr,
-                                               &A[(i-1)*lda], &lda,
+                                               A(0,i-1), &lda,
                                       &c_zero, &work[iu], &ldwrku);
                         lapackf77_dlacpy("F", &m, &blk,
                                          &work[iu], &ldwrku,
-                                         &A[(i-1)*lda], &lda);
+                                         A(0,i-1), &lda);
                     }
                 }
                 else {
@@ -1970,7 +1974,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                      A, &lda,
                                      U, &ldu);
                     lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                     &U[ldu], &ldu);
+                                     U(0,1), &ldu);
                     
                     // Generate Q in A
                     // (Workspace: need M*M + 2*M, prefer M*M + M + M*NB)
@@ -2024,11 +2028,11 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         blk = min(n - i + 1,chunk);
                         blasf77_dgemm("N", "N", &m, &blk, &m,
                                       &c_one,  &work[ir], &ldwrkr,
-                                               &A[(i-1)*lda], &lda,
+                                               A(0,i-1), &lda,
                                       &c_zero, &work[iu], &ldwrku);
                         lapackf77_dlacpy("F", &m, &blk,
                                          &work[iu], &ldwrku,
-                                         &A[(i-1)*lda], &lda);
+                                         A(0,i-1), &lda);
                     }
                 }
                 else {
@@ -2046,7 +2050,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                      A, &lda,
                                      U, &ldu);
                     lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                     &U[ldu], &ldu);
+                                     U(0,1), &ldu);
                     
                     // Generate Q in A
                     // (Workspace: need 2*M, prefer M + M*NB)
@@ -2192,7 +2196,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out above L in A
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &A[lda], &lda);
+                                         A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (Workspace: need 4*M, prefer 3*M + 2*M*NB)
@@ -2345,7 +2349,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out above L in A
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &A[lda], &lda);
+                                         A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (Workspace: need 4*M, prefer 3*M + 2*M*NB)
@@ -2487,7 +2491,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                          A, &lda,
                                          U, &ldu);
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &U[ldu], &ldu);
+                                         U(0,1), &ldu);
                         ie = itau;
                         itauq = ie + m;
                         itaup = itauq + m;
@@ -2634,7 +2638,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out above L in A
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &A[lda], &lda);
+                                         A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (Workspace: need 4*M, prefer 3*M + 2*M*NB)
@@ -2793,7 +2797,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Zero out above L in A
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &A[lda], &lda);
+                                         A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (Workspace: need 4*M, prefer 3*M + 2*M*NB)
@@ -2943,7 +2947,7 @@ magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                                          A, &lda,
                                          U, &ldu);
                         lapackf77_dlaset("U", &m_1, &m_1, &c_zero, &c_zero,
-                                         &U[ldu], &ldu);
+                                         U(0,1), &ldu);
                         ie = itau;
                         itauq = ie + m;
                         itaup = itauq + m;

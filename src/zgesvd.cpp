@@ -157,6 +157,10 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
              double *rwork,
              magma_int_t *info )
 {
+    #define A(i_,j_)  (A  + (i_) + (j_)*lda)
+    #define U(i_,j_)  (U  + (i_) + (j_)*ldu)
+    #define VT(i_,j_) (VT + (i_) + (j_)*ldvt)
+    
     const char* jobu_  = lapack_vec_const( jobu  );
     const char* jobvt_ = lapack_vec_const( jobvt );
     
@@ -299,7 +303,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                 lapackf77_zgeqrf(&m, &n, A, &lda, &work[itau], &work[iwork], &lwork2, &ierr);
                 
                 // Zero out below R
-                lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[1], &lda);
+                lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, A(1,0), &lda);
                 ie = 1;
                 itauq = 1;
                 itaup = itauq + n;
@@ -411,8 +415,8 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // (RWorkspace: 0)
                     for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                         chunk = min(m - i + 1, ldwrku);
-                        blasf77_zgemm("N", "N", &chunk, &n, &n, &c_one, &A[i-1], &lda, &work[ir], &ldwrkr, &c_zero, &work[iu], &ldwrku);
-                        lapackf77_zlacpy("F", &chunk, &n, &work[iu], &ldwrku, &A[i-1], &lda);
+                        blasf77_zgemm("N", "N", &chunk, &n, &n, &c_one, A(i-1,0), &lda, &work[ir], &ldwrkr, &c_zero, &work[iu], &ldwrku);
+                        lapackf77_zlacpy("F", &chunk, &n, &work[iu], &ldwrku, A(i-1,0), &lda);
                     }
                 }
                 else {
@@ -480,7 +484,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // Copy R to VT, zeroing out below it
                     lapackf77_zlacpy("U", &n, &n, A, &lda, VT, &ldvt);
                     if (n > 1) {
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &VT[1], &ldvt);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, VT(1,0), &ldvt);
                     }
                     
                     // Generate Q in A
@@ -530,8 +534,8 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // (RWorkspace: 0)
                     for (i = 1; (ldwrku < 0 ? i >= m : i <= m); i += ldwrku) {
                         chunk = min(m - i + 1, ldwrku);
-                        blasf77_zgemm("N", "N", &chunk, &n, &n, &c_one, &A[i-1], &lda, &work[ir], &ldwrkr, &c_zero, &work[iu], &ldwrku);
-                        lapackf77_zlacpy("F", &chunk, &n, &work[iu], &ldwrku, &A[i-1], &lda);
+                        blasf77_zgemm("N", "N", &chunk, &n, &n, &c_one, A(i-1,0), &lda, &work[ir], &ldwrkr, &c_zero, &work[iu], &ldwrku);
+                        lapackf77_zlacpy("F", &chunk, &n, &work[iu], &ldwrku, A(i-1,0), &lda);
                     }
                 }
                 else {
@@ -548,7 +552,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // Copy R to VT, zeroing out below it
                     lapackf77_zlacpy("U", &n, &n, A, &lda, VT, &ldvt);
                     if (n > 1) {
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &VT[1], &ldvt);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, VT(1,0), &ldvt);
                     }
                     
                     // Generate Q in A
@@ -684,7 +688,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + n;
                         
                         // Zero out below R in A
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[1], &lda);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (CWorkspace: need 3*N, prefer 2*N + 2*N*NB)
@@ -825,7 +829,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + n;
                         
                         // Zero out below R in A
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[1], &lda);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (CWorkspace: need 3*N, prefer 2*N + 2*N*NB)
@@ -953,7 +957,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         // Copy R to VT, zeroing out below it
                         lapackf77_zlacpy("U", &n, &n, A, &lda, VT, &ldvt);
                         if (n > 1) {
-                            lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &VT[1], &ldvt);
+                            lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, VT(1,0), &ldvt);
                         }
                         ie = 1;
                         itauq = itau;
@@ -1087,7 +1091,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + n;
                         
                         // Zero out below R in A
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[1], &lda);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (CWorkspace: need 3*N, prefer 2*N + 2*N*NB)
@@ -1230,7 +1234,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + n;
                         
                         // Zero out below R in A
-                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &A[1], &lda);
+                        lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, A(1,0), &lda);
                         
                         // Bidiagonalize R in A
                         // (CWorkspace: need 3*N, prefer 2*N + 2*N*NB)
@@ -1362,7 +1366,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         // Copy R from A to VT, zeroing out below it
                         lapackf77_zlacpy("U", &n, &n, A, &lda, VT, &ldvt);
                         if (n > 1) {
-                            lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, &VT[1], &ldvt);
+                            lapackf77_zlaset("L", &n_1, &n_1, &c_zero, &c_zero, VT(1,0), &ldvt);
                         }
                         ie = 1;
                         itauq = itau;
@@ -1514,7 +1518,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                 lapackf77_zgelqf(&m, &n, A, &lda, &work[itau], &work[iwork], &lwork2, &ierr);
                 
                 // Zero out above L
-                lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[lda], &lda);
+                lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, A(0,1), &lda);
                 ie = 1;
                 itauq = 1;
                 itaup = itauq + m;
@@ -1629,8 +1633,8 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // (RWorkspace: 0)
                     for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
                         blk = min(n - i + 1, chunk);
-                        blasf77_zgemm("N", "N", &m, &blk, &m, &c_one, &work[ir], &ldwrkr, &A[(i-1)*lda], &lda, &c_zero, &work[iu], &ldwrku);
-                        lapackf77_zlacpy("F", &m, &blk, &work[iu], &ldwrku, &A[(i-1)*lda], &lda);
+                        blasf77_zgemm("N", "N", &m, &blk, &m, &c_one, &work[ir], &ldwrkr, A(0,i-1), &lda, &c_zero, &work[iu], &ldwrku);
+                        lapackf77_zlacpy("F", &m, &blk, &work[iu], &ldwrku, A(0,i-1), &lda);
                     }
                 }
                 else {
@@ -1700,7 +1704,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     
                     // Copy L to U, zeroing about above it
                     lapackf77_zlacpy("L", &m, &m, A, &lda, U, &ldu);
-                    lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &U[ldu], &ldu);
+                    lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, U(0,1), &ldu);
                     
                     // Generate Q in A
                     // (CWorkspace: need M*M + 2*M, prefer M*M + M + M*NB)
@@ -1747,8 +1751,8 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     // (RWorkspace: 0)
                     for (i = 1; (chunk < 0 ? i >= n : i <= n); i += chunk) {
                         blk = min(n - i + 1, chunk);
-                        blasf77_zgemm("N", "N", &m, &blk, &m, &c_one, &work[ir], &ldwrkr, &A[(i-1)*lda], &lda, &c_zero, &work[iu], &ldwrku);
-                        lapackf77_zlacpy("F", &m, &blk, &work[iu], &ldwrku, &A[(i-1)*lda], &lda);
+                        blasf77_zgemm("N", "N", &m, &blk, &m, &c_one, &work[ir], &ldwrkr, A(0,i-1), &lda, &c_zero, &work[iu], &ldwrku);
+                        lapackf77_zlacpy("F", &m, &blk, &work[iu], &ldwrku, A(0,i-1), &lda);
                     }
                 }
                 else {
@@ -1764,7 +1768,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                     
                     // Copy L to U, zeroing out above it
                     lapackf77_zlacpy("L", &m, &m, A, &lda, U, &ldu);
-                    lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &U[ldu], &ldu);
+                    lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, U(0,1), &ldu);
                     
                     // Generate Q in A
                     // (CWorkspace: need 2*M, prefer M + M*NB)
@@ -1896,7 +1900,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + m;
                         
                         // Zero out above L in A
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[lda], &lda);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (CWorkspace: need 3*M, prefer 2*M + 2*M*NB)
@@ -2033,7 +2037,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + m;
                         
                         // Zero out above L in A
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[lda], &lda);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (CWorkspace: need 3*M, prefer 2*M + 2*M*NB)
@@ -2157,7 +2161,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Copy L to U, zeroing out above it
                         lapackf77_zlacpy("L", &m, &m, A, &lda, U, &ldu);
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &U[ldu], &ldu);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, U(0,1), &ldu);
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + m;
@@ -2286,7 +2290,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + m;
                         
                         // Zero out above L in A
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[lda], &lda);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (CWorkspace: need 3*M, prefer 2*M + 2*M*NB)
@@ -2424,7 +2428,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         iwork = itaup + m;
                         
                         // Zero out above L in A
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &A[lda], &lda);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, A(0,1), &lda);
                         
                         // Bidiagonalize L in A
                         // (CWorkspace: need 3*M, prefer 2*M + 2*M*NB)
@@ -2551,7 +2555,7 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
                         
                         // Copy L to U, zeroing out above it
                         lapackf77_zlacpy("L", &m, &m, A, &lda, U, &ldu);
-                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, &U[ldu], &ldu);
+                        lapackf77_zlaset("U", &m_1, &m_1, &c_zero, &c_zero, U(0,1), &ldu);
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + m;

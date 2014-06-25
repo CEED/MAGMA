@@ -39,40 +39,40 @@
              The number of GPUs.  num_gpus > 0.
 
     @param[in]
-    m        INTEGER
-             The number of rows of the matrix A.  M >= 0.
+    m       INTEGER
+            The number of rows of the matrix A.  M >= 0.
 
     @param[in]
-    n        INTEGER
-             The number of columns of the matrix A.  N >= 0.
+    n       INTEGER
+            The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A        COMPLEX_16 array, dimension (LDA,N)
-             On entry, the M-by-N matrix to be factored.
-             On exit, the factors L and U from the factorization
-             A = P*L*U; the unit diagonal elements of L are not stored.
+    A       COMPLEX_16 array, dimension (LDA,N)
+            On entry, the M-by-N matrix to be factored.
+            On exit, the factors L and U from the factorization
+            A = P*L*U; the unit diagonal elements of L are not stored.
     \n
-             Higher performance is achieved if A is in pinned memory, e.g.
-             allocated using magma_malloc_pinned.
+            Higher performance is achieved if A is in pinned memory, e.g.
+            allocated using magma_malloc_pinned.
 
     @param[in]
-    lda      INTEGER
-             The leading dimension of the array A.  LDA >= max(1,M).
+    lda     INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
     @param[out]
-    ipiv     INTEGER array, dimension (min(M,N))
-             The pivot indices; for 1 <= i <= min(M,N), row i of the
-             matrix was interchanged with row IPIV(i).
+    ipiv    INTEGER array, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
+            matrix was interchanged with row IPIV(i).
 
     @param[out]
-    info     INTEGER
-      -      = 0:  successful exit
-      -      < 0:  if INFO = -i, the i-th argument had an illegal value
-                   or another error occured, such as memory allocation failed.
-      -      > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
-                   has been completed, but the factor U is exactly
-                   singular, and division by zero will occur if it is used
-                   to solve a system of equations.
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+                  or another error occured, such as memory allocation failed.
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                  has been completed, but the factor U is exactly
+                  singular, and division by zero will occur if it is used
+                  to solve a system of equations.
 
     @ingroup magma_zgesv_comp
     ********************************************************************/
@@ -298,7 +298,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
         /* calling magma-gpu interface to panel-factorize the big panel */
         if ( M > I ) {
-            //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &A[I*lda], lda,
+            //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
             //                   (magma_queue_t **)stream, &iinfo);
             magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                                stream, &iinfo);
@@ -382,7 +382,7 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
         k1 = 1+I+NB;
         k2 = minmn;
         incx = 1;
-        lapackf77_zlaswp(&NB, &A[I*lda], &lda, &k1, &k2, ipiv, &incx);
+        lapackf77_zlaswp(&NB, A(0,I), &lda, &k1, &k2, ipiv, &incx);
     }
 
     return *info;
@@ -419,7 +419,7 @@ magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t e
         incx = 1;
         k1 = 1+I+nb;
         k2 = minmn;
-        lapackf77_zlaswp(&nb, &A[I*lda], &lda, &k1, &k2, ipiv, &incx);
+        lapackf77_zlaswp(&nb, A(0,I), &lda, &k1, &k2, ipiv, &incx);
     }
 
     return MAGMA_SUCCESS;

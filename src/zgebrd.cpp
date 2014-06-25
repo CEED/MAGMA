@@ -203,7 +203,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    dwork = dA + (n)*ldda;
+    dwork = dA + n*ldda;
 
     ldwrkx = m;
     ldwrky = n;

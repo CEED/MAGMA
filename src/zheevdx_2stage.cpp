@@ -189,6 +189,9 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
                      magma_int_t *iwork, magma_int_t liwork,
                      magma_int_t *info)
 {
+    #define A( i_,j_) (A  + (i_) + (j_)*lda)
+    #define A2(i_,j_) (A2 + (i_) + (j_)*lda2)
+    
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -387,13 +390,13 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     memset(A2, 0, n*lda2*sizeof(magmaDoubleComplex));
 
     for (magma_int_t j = 0; j < n-nb; j++) {
-        cblas_zcopy(nb+1, &A[j*(lda+1)], 1, &A2[j*lda2], 1);
-        memset(&A[j*(lda+1)], 0, (nb+1)*sizeof(magmaDoubleComplex));
-        A[nb + j*(lda+1)] = c_one;
+        cblas_zcopy(nb+1, A(j,j), 1, A2(0,j), 1);
+        memset(A(j,j), 0, (nb+1)*sizeof(magmaDoubleComplex));
+        *A(nb+j,j) = c_one;
     }
     for (magma_int_t j = 0; j < nb; j++) {
-        cblas_zcopy(nb-j, &A[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
-        memset(&A[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(magmaDoubleComplex));
+        cblas_zcopy(nb-j, A(j+n-nb,j+n-nb), 1, A2(0,j+n-nb), 1);
+        memset(A(j+n-nb,j+n-nb), 0, (nb-j)*sizeof(magmaDoubleComplex));
     }
 
     timer_stop( time );

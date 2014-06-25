@@ -116,7 +116,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
                magma_range_t range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
-#define Q(ix, iy) (Q + (ix) + ldq*(iy))
+#define Q(i_,j_) (Q + (i_) + (j_)*ldq)
 
     magma_int_t ione = 1;
     magma_range_t range2;
