@@ -139,6 +139,12 @@ magma_zmhom(            magma_z_sparse_matrix A,
                         magma_int_t b,  
                         magma_index_t *p );
 
+magma_int_t
+magma_zmhom_fd(         magma_z_sparse_matrix A, 
+                        magma_int_t n,
+                        magma_int_t b,  
+                        magma_index_t *p );
+
 magma_int_t 
 magma_zilustruct(       magma_z_sparse_matrix *A,
                         magma_int_t levels );
@@ -379,6 +385,11 @@ magma_znonlinres(   magma_z_sparse_matrix A,
                     magma_z_sparse_matrix U, 
                     magma_z_sparse_matrix *LU, 
                     real_Double_t *res );
+
+magma_int_t 
+magma_zinitguess(   magma_z_sparse_matrix A, 
+                    magma_z_sparse_matrix *L,
+                    magma_z_sparse_matrix *U );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
@@ -630,6 +641,11 @@ magma_z_spmv_shift(     magmaDoubleComplex alpha,
                         magma_int_t blocksize,
                         magma_index_t *add_vecs, 
                         magma_z_vector y );
+
+magma_int_t
+magma_zcuspmm(          magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix B, 
+                        magma_z_sparse_matrix *AB );
 
 magma_int_t
 magma_z_precond(        magma_z_sparse_matrix A, 
