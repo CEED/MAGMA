@@ -247,3 +247,87 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     return MAGMA_SUCCESS; 
 }
 
+
+
+/**
+    Purpose
+    -------
+
+    Computes an initial guess for the iterative ILU/IC
+
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix
+                sparse matrix in CSR
+
+    @param
+    B           magma_z_sparse_matrix*
+                sparse matrix in CSR    
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+magma_int_t 
+magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_sparse_matrix *U ){
+
+    magma_z_sparse_matrix hAL, hAU, hAUT, hALCOO, hAUCOO, dAL, dAU, dALU, hALU, hD, dD, dL, hL;
+    magma_int_t i,j;
+
+    // need only lower triangular
+    hAL.diagorder_type == Magma_UNITY;
+    magma_z_mconvert( A, &hAL, Magma_CSR, Magma_CSRL );
+    //magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
+
+    // need only upper triangular
+    magma_z_mconvert( A, &hAU, Magma_CSR, Magma_CSRU );
+    //magma_z_cucsrtranspose(  hAU, &hAUT );
+    //magma_z_mconvert( hAU, &hAUCOO, Magma_CSR, Magma_CSRCOO );
+
+    magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hAU, &dAU, Magma_CPU, Magma_DEV );
+
+    magma_zcuspmm( dAL, dAU, &dALU );
+
+    magma_z_mtransfer( dALU, &hALU, Magma_DEV, Magma_CPU );
+
+    // generate diagonal matrix 
+    magma_int_t offdiags = 0;
+    magma_index_t *diag_offset;
+    magmaDoubleComplex *diag_vals;
+    magma_zmalloc_cpu( &diag_vals, offdiags+1 );
+    magma_index_malloc_cpu( &diag_offset, offdiags+1 );
+    diag_offset[0] = 0;
+    diag_vals[0] = MAGMA_Z_MAKE( 1.0, 0.0 );
+    magma_zmgenerator( hALU.num_rows, offdiags, diag_offset, diag_vals, &hD );
+    
+    for(i=0; i<hALU.num_rows; i++){
+        for(j=hALU.row[i]; j<hALU.row[i+1]; j++){
+            if( hALU.col[j] == i ){
+                //printf("%d %d  %d == %d -> %f   -->", i, j, hALU.col[j], i, hALU.val[j]);
+                hD.val[i] = MAGMA_Z_MAKE(
+                        1.0 / sqrt(fabs(MAGMA_Z_REAL(hALU.val[j])))  , 0.0 );
+                //printf("insert %f at %d\n", hD.val[i], i);
+            }
+        }      
+    }
+
+    magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV );
+    magma_zcuspmm( dAL, dD, &dL );
+    magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
+
+    magma_z_mconvert( hL, L, Magma_CSR, Magma_CSRCOO );
+
+    magma_z_mfree( &hAL);
+    magma_z_mfree( &hAU);
+    magma_z_mfree( &hALU);
+    magma_z_mfree( &dALU);
+    magma_z_mfree( &hD);
+    magma_z_mfree( &dD);
+
+    return MAGMA_SUCCESS; 
+}
+
