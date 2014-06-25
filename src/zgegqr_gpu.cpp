@@ -86,8 +86,10 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dwork, magmaDoubleComplex *work,
                   magma_int_t *info )
 {
-    magma_int_t i = 0, j, k, n2 = n*n, ione = 1;
-    magmaDoubleComplex zero = MAGMA_Z_ZERO, one = MAGMA_Z_ONE;
+    magma_int_t i = 0, j, k, n2 = n*n;
+    magma_int_t ione = 1;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     double cn = 200., mins, maxs;
 
     /* check arguments */
@@ -137,7 +139,7 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
         do {
             i++;
             
-            magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+            magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, c_one, dA, ldda, dA, ldda, c_zero, dwork, n );
             magma_zgetmatrix(n, n, dwork, n, G, n);
             
 #if defined(PRECISION_s) || defined(PRECISION_d)
@@ -166,13 +168,13 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
             if (i == 1)
                 blasf77_zcopy(&n2, VT, &ione, R, &ione);
             else
-                blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
+                blasf77_ztrmm("l", "u", "n", "n", &n, &n, &c_one, VT, &n, R, &n);
             
             magma_zsetmatrix(n, n, VT, n, dwork, n);
             #if defined(PRECISION_s) || defined(PRECISION_d)
-            magmablas_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+            magmablas_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, c_one, dwork, n, dA, ldda);
             #else
-            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, c_one, dwork, n, dA, ldda);
             #endif
             if (mins > 0.00001f)
                 cn = maxs/mins;
@@ -222,11 +224,11 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
     }
     else if (ikind == 4) {
         // ================== Cholesky QR       ===================================================
-        magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+        magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, c_one, dA, ldda, dA, ldda, c_zero, dwork, n );
         magma_zgetmatrix(n, n, dwork, n, work, n);
         lapackf77_zpotrf("u", &n, work, &n, info);
         magma_zsetmatrix(n, n, work, n, dwork, n);
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, one, dwork, n, dA, ldda);
+        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, c_one, dwork, n, dA, ldda);
         // ================== end of ikind == 4 ===================================================
     }
              
