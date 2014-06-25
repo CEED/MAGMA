@@ -75,7 +75,7 @@ if ( not opts.small and not opts.med and not opts.large ):
 
 # default if no groups given is all groups
 if ( not opts.blas and not opts.aux  and
-     not opts.chol and not opts.lu   and not opts.qr   and
+	 not opts.chol and not opts.lu   and not opts.qr   and
 	 not opts.syev and not opts.geev and not opts.svd ):
 	opts.blas = True
 	opts.aux  = True
@@ -163,6 +163,9 @@ mnk    = n + tall + wide + mnk
 # problems
 # these match the order in the Makefile,
 # except in some cases the "d" version isn't required here
+#
+# problems beginning with # are marked as disabled;
+# the reason should be given in a comment afterward the item.
 
 tests = []
 
@@ -199,7 +202,7 @@ blas = (
 	
 	# lower/upper
 	'./testing_zsymv  -L             -c' + n,
-	#'./testing_zsymv  -U             -c' + n,   # upper not implemented
+	'#./testing_zsymv  -U             -c' + n,   # upper not implemented
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
 	'./testing_ztrmm  -SL -L    -DN  -c' + mn,   # cublas only
@@ -234,25 +237,25 @@ blas = (
 	'./testing_ztrmv      -U -C -DU  -c' + n,    # cublas only
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
-	#'./testing_ztrsm  -SL -L    -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -L    -DU  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -L -C -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -L -C -DU  -c' + mn,  # has issues
-	#                                            # has issues
-	#'./testing_ztrsm  -SL -U    -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -U    -DU  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -U -C -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SL -U -C -DU  -c' + mn,  # has issues
-	#                                            # has issues
-	#'./testing_ztrsm  -SR -L    -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -L    -DU  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -L -C -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -L -C -DU  -c' + mn,  # has issues
-	#                                            # has issues
-	#'./testing_ztrsm  -SR -U    -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -U    -DU  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -U -C -DN  -c' + mn,  # has issues
-	#'./testing_ztrsm  -SR -U -C -DU  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -L    -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -L    -DU  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -L -C -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -L -C -DU  -c' + mn,  # has issues
+	
+	'#./testing_ztrsm  -SL -U    -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -U    -DU  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -U -C -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SL -U -C -DU  -c' + mn,  # has issues
+	
+	'#./testing_ztrsm  -SR -L    -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -L    -DU  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -L -C -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -L -C -DU  -c' + mn,  # has issues
+	
+	'#./testing_ztrsm  -SR -U    -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -U    -DU  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -U -C -DN  -c' + mn,  # has issues
+	'#./testing_ztrsm  -SR -U -C -DU  -c' + mn,  # has issues
 	
 	# lower/upper, no-trans/conj-trans, non-unit/unit diag
 	'./testing_ztrsv      -L    -DN  -c' + n,    # cublas only
@@ -368,8 +371,8 @@ qr = (
 	'./testing_zgelqf_gpu        -c' + mn,
 	'./testing_zgels_gpu         -c' + mn,
 	'./testing_zgels3_gpu        -c' + mn,
-	#'./testing_zgegqr_gpu        -c' + mn,  # fails badly
-	#'./testing_zgeqp3_gpu        -c' + mn,  # fails badly
+	'#./testing_zgegqr_gpu        -c' + mn,  # fails badly
+	'#./testing_zgeqp3_gpu        -c' + mn,  # fails badly
 	'./testing_zgeqr2_gpu        -c' + mn,
 	'./testing_zgeqr2x_gpu       -c' + mn,
 	'./testing_zgeqrf_gpu        -c' + mn,
@@ -396,10 +399,10 @@ if ( opts.qr ):
 # ----------
 # symmetric eigenvalues, GPU interface
 syev = (
-	# lower/upper, no-vectors/vectors
-   #'./testing_zheevd_gpu  -L -JN -c' + n,  # does dsyevd_gpu  # -c implies -JV
+	# no-vectors/vectors, lower/upper
+	'#./testing_zheevd_gpu  -L -JN -c' + n,  # does dsyevd_gpu  # -c implies -JV
+	'#./testing_zheevd_gpu  -U -JN -c' + n,  # does dsyevd_gpu  # -c implies -JV
 	'./testing_zheevd_gpu  -L -JV -c' + n,  # does dsyevd_gpu
-   #'./testing_zheevd_gpu  -U -JN -c' + n,  # does dsyevd_gpu  # -c implies -JV
 	'./testing_zheevd_gpu  -U -JV -c' + n,  # does dsyevd_gpu
 	
 	'./testing_zhetrd_gpu  -L     -c' + n,
@@ -410,9 +413,9 @@ syev = (
 	
 # ----------
 # symmetric eigenvalues, CPU interface
-   #'./testing_zheevd      -L -JN -c' + n,  # does dsyevd  # -c implies -JV
+	'#./testing_zheevd      -L -JN -c' + n,  # does dsyevd  # -c implies -JV
+	'#./testing_zheevd      -U -JN -c' + n,  # does dsyevd  # -c implies -JV
 	'./testing_zheevd      -L -JV -c' + n,  # does dsyevd
-   #'./testing_zheevd      -U -JN -c' + n,  # does dsyevd  # -c implies -JV
 	'./testing_zheevd      -U -JV -c' + n,  # does dsyevd
 	
 	'./testing_zhetrd      -L     -c' + n,
@@ -421,85 +424,85 @@ syev = (
 # ----------
 # symmetric eigenvalues, 2-stage
 	'./testing_zhetrd_he2hb   -L -c' + n,
-	'./testing_zhetrd_he2hb   -U -c' + n,
+	'#./testing_zhetrd_he2hb   -U -c' + n,      # upper not implemented
 	
-   #'./testing_zheevdx_2stage -L -JN -c' + n,  # -c implies -JV
+	'#./testing_zheevdx_2stage -L -JN -c' + n,  # -c implies -JV
+	'#./testing_zheevdx_2stage -U -JN -c' + n,  # -c implies -JV
 	'./testing_zheevdx_2stage -L -JV -c' + n,
-   #'./testing_zheevdx_2stage -U -JN -c' + n,  # -c implies -JV
-	'./testing_zheevdx_2stage -U -JV -c' + n,
+	'#./testing_zheevdx_2stage -U -JV -c' + n,  # upper not implemented
 	
 	'./testing_zhetrd_he2hb_mgpu -L -c' + n,
-	'./testing_zhetrd_he2hb_mgpu -U -c' + n,
+	'#./testing_zhetrd_he2hb_mgpu -U -c' + n,   # upper not implemented
 	
 # ----------
 # generalized symmetric eigenvalues
-	# lower/upper, no-vector/vector, itypes
-	#'./testing_zhegvd   -L -JN --itype 1 -c' + n,  # does dsygvd  # -c implies -JV
-	#'./testing_zhegvd   -L -JN --itype 2 -c' + n,  # does dsygvd  # -c implies -JV
-	#'./testing_zhegvd   -L -JN --itype 3 -c' + n,  # does dsygvd  # -c implies -JV
+	# no-vector/vector, lower/upper, itypes
+	'#./testing_zhegvd   -L -JN --itype 1 -c' + n,  # does dsygvd  # -c implies -JV
+	'#./testing_zhegvd   -L -JN --itype 2 -c' + n,  # does dsygvd  # -c implies -JV
+	'#./testing_zhegvd   -L -JN --itype 3 -c' + n,  # does dsygvd  # -c implies -JV
+	
+	'#./testing_zhegvd   -U -JN --itype 1 -c' + n,  # does dsygvd  # -c implies -JV
+	'#./testing_zhegvd   -U -JN --itype 2 -c' + n,  # does dsygvd  # -c implies -JV
+	'#./testing_zhegvd   -U -JN --itype 3 -c' + n,  # does dsygvd  # -c implies -JV
 	
 	'./testing_zhegvd   -L -JV --itype 1 -c' + n,  # does dsygvd
 	'./testing_zhegvd   -L -JV --itype 2 -c' + n,  # does dsygvd
 	'./testing_zhegvd   -L -JV --itype 3 -c' + n,  # does dsygvd
-	
-	#'./testing_zhegvd   -U -JN --itype 1 -c' + n,  # does dsygvd  # -c implies -JV
-	#'./testing_zhegvd   -U -JN --itype 2 -c' + n,  # does dsygvd  # -c implies -JV
-	#'./testing_zhegvd   -U -JN --itype 3 -c' + n,  # does dsygvd  # -c implies -JV
 	
 	'./testing_zhegvd   -U -JV --itype 1 -c' + n,  # does dsygvd
 	'./testing_zhegvd   -U -JV --itype 2 -c' + n,  # does dsygvd
 	'./testing_zhegvd   -U -JV --itype 3 -c' + n,  # does dsygvd
 	
 	# lower/upper, no-vector/vector, itypes
-	#'./testing_zhegvd_m -L -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvd_m -L -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvd_m -L -JN --itype 3 -c' + n,  # -c implies -JV
+	'#./testing_zhegvd_m -L -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvd_m -L -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvd_m -L -JN --itype 3 -c' + n,  # -c implies -JV
+	
+	'#./testing_zhegvd_m -U -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvd_m -U -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvd_m -U -JN --itype 3 -c' + n,  # -c implies -JV
 	
 	'./testing_zhegvd_m -L -JV --itype 1 -c' + n,
 	'./testing_zhegvd_m -L -JV --itype 2 -c' + n,
 	'./testing_zhegvd_m -L -JV --itype 3 -c' + n,
 	
-	#'./testing_zhegvd_m -U -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvd_m -U -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvd_m -U -JN --itype 3 -c' + n,  # -c implies -JV
-	
-	'./testing_zhegvd_m -U -JV --itype 1 -c' + n,
-	'./testing_zhegvd_m -U -JV --itype 2 -c' + n,
-	'./testing_zhegvd_m -U -JV --itype 3 -c' + n,
+	'#./testing_zhegvd_m -U -JV --itype 1 -c' + n,  # upper not implemented
+	'#./testing_zhegvd_m -U -JV --itype 2 -c' + n,  # upper not implemented
+	'#./testing_zhegvd_m -U -JV --itype 3 -c' + n,  # upper not implemented
 	
 	# lower/upper, no-vector/vector, itypes
-	#'./testing_zhegvdx  -L -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx  -L -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx  -L -JN --itype 3 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx  -L -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx  -L -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx  -L -JN --itype 3 -c' + n,  # -c implies -JV
+	
+	'#./testing_zhegvdx  -U -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx  -U -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx  -U -JN --itype 3 -c' + n,  # -c implies -JV
 	
 	'./testing_zhegvdx  -L -JV --itype 1 -c' + n,
 	'./testing_zhegvdx  -L -JV --itype 2 -c' + n,
 	'./testing_zhegvdx  -L -JV --itype 3 -c' + n,
-	
-	#'./testing_zhegvdx  -U -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx  -U -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx  -U -JN --itype 3 -c' + n,  # -c implies -JV
 	
 	'./testing_zhegvdx  -U -JV --itype 1 -c' + n,
 	'./testing_zhegvdx  -U -JV --itype 2 -c' + n,
 	'./testing_zhegvdx  -U -JV --itype 3 -c' + n,
 	
 	# lower/upper, no-vector/vector, itypes
-	#'./testing_zhegvdx_2stage -L -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx_2stage -L -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx_2stage -L -JN --itype 3 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx_2stage -L -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx_2stage -L -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx_2stage -L -JN --itype 3 -c' + n,  # -c implies -JV
+	
+	'#./testing_zhegvdx_2stage -U -JN --itype 1 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx_2stage -U -JN --itype 2 -c' + n,  # -c implies -JV
+	'#./testing_zhegvdx_2stage -U -JN --itype 3 -c' + n,  # -c implies -JV
 	
 	'./testing_zhegvdx_2stage -L -JV --itype 1 -c' + n,
 	'./testing_zhegvdx_2stage -L -JV --itype 2 -c' + n,
 	'./testing_zhegvdx_2stage -L -JV --itype 3 -c' + n,
 	
-	#'./testing_zhegvdx_2stage -U -JN --itype 1 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx_2stage -U -JN --itype 2 -c' + n,  # -c implies -JV
-	#'./testing_zhegvdx_2stage -U -JN --itype 3 -c' + n,  # -c implies -JV
-	
-	'./testing_zhegvdx_2stage -U -JV --itype 1 -c' + n,
-	'./testing_zhegvdx_2stage -U -JV --itype 2 -c' + n,
-	'./testing_zhegvdx_2stage -U -JV --itype 3 -c' + n,
+	'#./testing_zhegvdx_2stage -U -JV --itype 1 -c' + n,  # upper not implemented
+	'#./testing_zhegvdx_2stage -U -JV --itype 2 -c' + n,  # upper not implemented
+	'#./testing_zhegvdx_2stage -U -JV --itype 3 -c' + n,  # upper not implemented
 )
 if ( opts.syev ):
 	tests += syev
@@ -620,15 +623,30 @@ for test in tests:
 			continue
 		start = None
 		
+		# check for disabled tests
+		disabled = False
+		m = re.search( '^#(\S*)( .*-c)?', test2 )
+		if ( m ):
+			disabled = True
+			cmd = m.group(1)
+			flags = m.group(2) or ''
+		else:
+			m = re.search( '^(\S*)( .*-c)?', test2 )
+			if ( m ):
+				cmd = m.group(1)
+				flags = m.group(2) or ''
+			else:
+				print "***** test didn't match pattern!\n", test2
+				continue
+		# end
+		
 		# skip tests not in args, or duplicates, or non-existing
-		m = re.search( '^./(\w*)( .*-c)?', test2 )
-		cmd = m.group(1)
-		flags = m.group(2) or ''
 		if (    (args and not cmd in args)
 		     or (not os.path.exists( cmd ))
 		     or (not opts.all and seen.has_key( cmd ))
 		     or (seen2.has_key( test2 )) ):
 			continue
+		# end
 		seen[cmd]    = True
 		seen2[test2] = True
 		
@@ -648,6 +666,12 @@ for test in tests:
 			
 			sys.stderr.write( '%-40s' % (cmd + flags) )
 			sys.stderr.flush()
+			
+			if ( disabled ):
+				sys.stderr.write( '  ** test disabled\n' )
+				go = False
+				continue
+			# end
 			
 			if ( make ):
 				m = 'make lib ' + cmd
