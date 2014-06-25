@@ -89,12 +89,20 @@ magma_int_t magma_zgesv ( magma_int_t n, magma_int_t nrhs,
                           magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
                           magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info);
 
+magma_int_t
+      magma_zgetf2_nopiv( magma_int_t m, magma_int_t n,
+                          magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info);
+
 magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, magmaDoubleComplex *A,
                           magma_int_t lda, magma_int_t *ipiv,
                           magma_int_t *info);
 
 magma_int_t magma_zgetrf2(magma_int_t m, magma_int_t n, magmaDoubleComplex *a,
                           magma_int_t lda, magma_int_t *ipiv, magma_int_t *info);
+
+magma_int_t
+      magma_zgetrf_nopiv( magma_int_t m, magma_int_t n,
+                          magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info);
 
 #ifdef REAL
 magma_int_t magma_zlaln2( magma_int_t trans, magma_int_t na, magma_int_t nw,
