@@ -230,9 +230,10 @@ magma_zgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
         // Return required workspace in WORK(1)
         nb = magma_get_zgesvd_nb(n);
         minwrk = (m + n)*nb + 2*minmn;
-        // multiply by 1+eps to ensure length gets rounded up,
+        
+        // multiply by 1+eps (in Double!) to ensure length gets rounded up,
         // if it cannot be exactly represented in floating point.
-        double one_eps = 1. + lapackf77_dlamch("Epsilon");
+        real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
         work[0] = MAGMA_Z_MAKE( minwrk * one_eps, 0 );
         if ( !lquery && (lwork < minwrk) ) {
             *info = -13;

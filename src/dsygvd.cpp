@@ -221,9 +221,10 @@ magma_dsygvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t
         lwmin  = 2*n + n*nb;
         liwmin = 1;
     }
-    // multiply by 1+eps to ensure length gets rounded up,
+    
+    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
     // if it cannot be exactly represented in floating point.
-    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
     work[0]  = lwmin * one_eps;
     iwork[0] = liwmin;
 

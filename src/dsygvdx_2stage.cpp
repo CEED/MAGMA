@@ -271,7 +271,9 @@ magma_dsygvdx_2stage(magma_int_t itype, magma_vec_t jobz, magma_range_t range, m
         liwmin = 1;
     }
 
-    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
+    // if it cannot be exactly represented in floating point.
+    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
     work[0] = lwmin * one_eps;
     iwork[0] = liwmin;
 
