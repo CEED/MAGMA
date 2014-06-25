@@ -19,7 +19,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_stranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
-    if (MAGMA_SUCCESS != magma_smalloc(&dAT, (m)*(n)) )		\
+    if (MAGMA_SUCCESS != magma_smalloc(&dAT, (m)*(n)) )         \
       return MAGMA_ERR_DEVICE_ALLOC;                            \
     magmablas_stranspose2( dAT, ldda, dA, ldda, m, n );         \
   }
@@ -37,7 +37,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_dtranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
-    if (MAGMA_SUCCESS != magma_dmalloc(&dAT, (m)*(n)))		\
+    if (MAGMA_SUCCESS != magma_dmalloc(&dAT, (m)*(n)))          \
       return MAGMA_ERR_DEVICE_ALLOC;                            \
     magmablas_dtranspose2( dAT, ldda, dA, ldda, m, n );         \
   }
@@ -55,7 +55,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_ctranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
-    if (MAGMA_SUCCESS != magma_cmalloc(&dAT, (m)*(n)))		\
+    if (MAGMA_SUCCESS != magma_cmalloc(&dAT, (m)*(n)))          \
       return MAGMA_ERR_DEVICE_ALLOC;                            \
     magmablas_ctranspose2( dAT, ldda, dA, ldda, m, n );         \
   }
@@ -73,7 +73,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_ztranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
-    if (MAGMA_SUCCESS != magma_zmalloc(&dAT, (m)*(n)))		\
+    if (MAGMA_SUCCESS != magma_zmalloc(&dAT, (m)*(n)))          \
       return MAGMA_ERR_DEVICE_ALLOC;                            \
     magmablas_ztranspose2( dAT, ldda, dA, ldda, m, n );         \
   }
