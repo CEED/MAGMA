@@ -145,7 +145,7 @@ int main( int argc, char** argv)
 
             if (info != 0) {
                 printf("magma_zgeqr2x_gpu version %d returned error %d: %s.\n",
-                       opts.version, (int) info, magma_strerror( info ));
+                       (int) opts.version, (int) info, magma_strerror( info ));
             } 
             else {
                 if ( opts.check ) {

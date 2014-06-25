@@ -141,10 +141,10 @@ int main( int argc, char** argv)
                    && ( c_gpu_inf == cnt_inf );
             
             printf( "%4c %5d %5d   %10d + %-10d   %10d + %-10d   %10d + %-10d  %s\n",
-                    lapacke_uplo_const( uplo[iuplo] ), M, N,
-                    c_cpu_nan, c_cpu_inf,
-                    c_gpu_nan, c_gpu_inf,
-                    cnt_nan, cnt_inf,
+                    lapacke_uplo_const( uplo[iuplo] ), (int) M, (int) N,
+                    (int) c_cpu_nan, (int) c_cpu_inf,
+                    (int) c_gpu_nan, (int) c_gpu_inf,
+                    (int) cnt_nan,   (int) cnt_inf,
                     (ok ? "ok" : "failed"));
             status += ! ok;
             

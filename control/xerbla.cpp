@@ -32,5 +32,5 @@ extern "C"
 void magma_xerbla(const char *srname , magma_int_t info)
 {
     fprintf( stderr, "On entry to %s, parameter %d had an illegal value\n",
-             srname, info );
+             srname, (int) info );
 }
