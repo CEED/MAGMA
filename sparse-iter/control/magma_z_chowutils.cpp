@@ -317,6 +317,20 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
 
     magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV );
     magma_zcuspmm( dAL, dD, &dL );
+
+    // check for diagonal = 1
+    magma_z_sparse_matrix dLt, dLL, LL;
+    magma_z_cucsrtranspose(  dL, &dLt );
+    magma_zcuspmm( dL, dLt, &dLL );
+    magma_z_mtransfer( dLL, &LL, Magma_DEV, Magma_CPU );
+    for(i=0; i<100; i++){//hALU.num_rows; i++){
+        for(j=hALU.row[i]; j<hALU.row[i+1]; j++){
+            if( hALU.col[j] == i ){
+                printf("%d %d -> %f   -->", i, i, LL.val[j]);
+            }
+        }      
+    }
+
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
 
     magma_z_mconvert( hL, L, Magma_CSR, Magma_CSRCOO );
