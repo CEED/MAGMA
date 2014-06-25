@@ -278,13 +278,13 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
     magma_int_t i,j;
 
     // need only lower triangular
-    hAL.diagorder_type == Magma_UNITY;
+    hAL.diagorder_type == Magma_VALUE;
     magma_z_mconvert( A, &hAL, Magma_CSR, Magma_CSRL );
     //magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
 
     // need only upper triangular
-    magma_z_mconvert( A, &hAU, Magma_CSR, Magma_CSRU );
-    //magma_z_cucsrtranspose(  hAU, &hAUT );
+    //magma_z_mconvert( A, &hAU, Magma_CSR, Magma_CSRU );
+    magma_z_cucsrtranspose(  hAL, &hAU );
     //magma_z_mconvert( hAU, &hAUCOO, Magma_CSR, Magma_CSRCOO );
 
     magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
@@ -316,8 +316,8 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
     }
 
     magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV );
-    magma_zcuspmm( dAL, dD, &dL );
-
+    magma_zcuspmm( dD, dAL, &dL );
+/*
     // check for diagonal = 1
     magma_z_sparse_matrix dLt, dLL, LL;
     magma_z_cucsrtranspose(  dL, &dLt );
@@ -330,7 +330,7 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
             }
         }      
     }
-
+*/
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
 
     magma_z_mconvert( hL, L, Magma_CSR, Magma_CSRCOO );
