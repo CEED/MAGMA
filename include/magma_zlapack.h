@@ -16,14 +16,6 @@
 
 #define COMPLEX
 
-// On MacOS, single-precision LAPACK routines return double.
-// This was a result of the f2c conversion of LAPACK.
-#ifdef LAPACK_RETURN_DOUBLE
-    #define return_double real_Double_t
-#else
-    #define return_double double
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -631,24 +623,20 @@ void   lapackf77_zlahef( const char *uplo,
                          magmaDoubleComplex *work, const magma_int_t *ldwork,
                          magma_int_t *info );
 
-return_double
-       lapackf77_zlange( const char *norm,
+double lapackf77_zlange( const char *norm,
                          const magma_int_t *m, const magma_int_t *n,
                          const magmaDoubleComplex *A, const magma_int_t *lda,
                          double *work );
 
-return_double
-       lapackf77_zlanhe( const char *norm, const char *uplo,
+double lapackf77_zlanhe( const char *norm, const char *uplo,
                          const magma_int_t *n,
                          const magmaDoubleComplex *A, const magma_int_t *lda,
                          double *work );
 
-return_double
-       lapackf77_zlanht( const char *norm, const magma_int_t *n,
+double lapackf77_zlanht( const char *norm, const magma_int_t *n,
                          const double *d, const magmaDoubleComplex *e );
 
-return_double
-       lapackf77_zlansy( const char *norm, const char *uplo,
+double lapackf77_zlansy( const char *norm, const char *uplo,
                          const magma_int_t *n,
                          const magmaDoubleComplex *A, const magma_int_t *lda,
                          double *work );
@@ -968,15 +956,13 @@ void   lapackf77_dlaln2( const magma_int_t *ltrans,
                          double *x, const magma_int_t *ldx,
                          double *scale, double *xnorm, magma_int_t *info );
 
-return_double
-       lapackf77_dlamc3( double *a, double *b );
+double lapackf77_dlamc3( double *a, double *b );
 
 void   lapackf77_dlamrg( magma_int_t *n1, magma_int_t *n2,
                          double *a,
                          magma_int_t *dtrd1, magma_int_t *dtrd2, magma_int_t *index );
 
-return_double
-       lapackf77_dlapy3( double *x, double *y, double *z );
+double lapackf77_dlapy3( double *x, double *y, double *z );
 
 void   lapackf77_dlaed2( magma_int_t *k, magma_int_t *n, magma_int_t *cutpnt,
                          double *d, double *q, magma_int_t *ldq, magma_int_t *indxq,
@@ -1109,7 +1095,6 @@ void   lapackf77_zlarfx( const char *side, const magma_int_t *m, const magma_int
                          magmaDoubleComplex *C, const magma_int_t *ldc,
                          magmaDoubleComplex *work );
 
-// being in magma/testing/lin, this doesn't need return_double fix
 double lapackf77_zqpt01( const magma_int_t *m, const magma_int_t *n, const magma_int_t *k,
                          magmaDoubleComplex *A,
                          magmaDoubleComplex *Af, const magma_int_t *lda,
@@ -1137,6 +1122,5 @@ void   lapackf77_zlatms( magma_int_t *m, magma_int_t *n,
 #endif
 
 #undef COMPLEX
-#undef return_double
 
 #endif /* MAGMA_ZLAPACK_H */
