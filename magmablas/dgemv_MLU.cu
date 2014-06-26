@@ -107,6 +107,19 @@ magmablas_dgemv_MLU(
     const double *x,
     double *y )
 {
+    magma_int_t info = 0;
+    if ( m < 0 )
+        info = -1;
+    else if ( n < 0 )
+        info = -2;
+    else if ( lda < m )
+        info = -4;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
     magma_int_t blocks = (m - 1)/num_threads + 1;
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);

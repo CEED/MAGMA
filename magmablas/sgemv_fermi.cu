@@ -131,7 +131,7 @@ sgemvn_kernel2_fermi(
     y       REAL array of dimension n.
             On exit Y = alpha A X.
 
-    @ingroup magma_sblas2
+    @ingroup magma_sblas2_internal
     ********************************************************************/
 extern "C" void
 magmablas_sgemvn_fermi(
@@ -384,7 +384,7 @@ magmablas_sgemvt2_fermi(
     y       REAL array of dimension n.
             On exit Y = alpha A^T X.
 
-    @ingroup magma_sblas2
+    @ingroup magma_sblas2_internal
     ********************************************************************/
 extern "C" void
 magmablas_sgemvt_fermi(
@@ -416,6 +416,7 @@ magmablas_sgemvt_fermi(
             follows:
       -     = MagmaNoTrans:    y := alpha*A  *x + beta*y
       -     = MagmaTrans:      y := alpha*A^T*x + beta*y
+      -     = MagmaConjTrans:  y := alpha*A^T*x + beta*y
 
     @param[in]
     m       INTEGER
@@ -470,6 +471,25 @@ magmablas_sgemv(
     float beta,
     float       *y, magma_int_t incy)
 {
+    magma_int_t info = 0;
+    if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
+        info = -1;
+    else if ( m < 0 )
+        info = -2;
+    else if ( n < 0 )
+        info = -3;
+    else if ( lda < m )
+        info = -6;
+    else if ( incx == 0 )
+        info = -8;
+    else if ( incy == 0 )
+        info = -11;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200  ) {
         // --------------------
