@@ -61,12 +61,16 @@
                 input/output matrix 
 
     @param
+    n           magma_int_t
+                nodes in one dimension
+
+    @param
     b           magma_int_t
                 blocksize
 
     @param
-    p           magma_index_t*
-                homomorphism vector containing the indices
+    B           magma_z_sparse_matrix*
+                new matrix filled with new indices
 
 
     @ingroup magmasparse_z
@@ -75,18 +79,17 @@
 extern "C" magma_int_t
 magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_z_sparse_matrix *B ){
 
-if( A.memory_location == Magma_CPU ){
+if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         
         magma_int_t entry, i, j, k, l;
-        magma_int_t rblock, r_blocks = (A.num_rows+b-1)/b;
-        magma_int_t cblock, c_blocks = (A.num_cols+b-1)/b; 
-
-        magma_index_t *p_h;
-        magma_index_malloc_cpu( &p_h, A.num_rows );
+        magma_z_mtransfer( A, B, Magma_CPU, Magma_CPU );
 
 //magma_z_mvisu(A);
 
 
+/*
+        magma_index_t *p_h;
+        magma_index_malloc_cpu( &p_h, A.num_rows );
         magma_int_t count=0;
         for( magma_int_t i=0; i<n; i+=b){
         for( magma_int_t j=0; j<n; j+=b){
@@ -113,9 +116,58 @@ if( A.memory_location == Magma_CPU ){
         }// row
         }// i
         }// p
+*/
+        magma_index_t *p_h;
+        magma_index_malloc_cpu( &p_h, A.nnz );
+
+        magma_int_t count=0;
+        for( magma_int_t i=0; i<n; i+=b){
+        for( magma_int_t j=0; j<n; j+=b){
+        for( magma_int_t k=0; k<n; k+=b){
+
+            for(magma_int_t b1=0; b1<b; b1++){
+            for(magma_int_t b2=0; b2<b; b2++){
+            for(magma_int_t b3=0; b3<b; b3++){
+                magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
+                magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
+                                            A.row[row+1] : A.nnz;
+                //printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
+                for( entry=A.row[row]; entry<bound; entry++){
+                    p_h[count] = entry;
+                    count++;
+                }
+            }
+            }
+            }
 
 
-        magma_int_t count=0, rowcount=0;
+        }// row
+        }// i
+        }// p
+
+/*
+        for(int i=0; i<A.nnz; i++)
+            p_h[i] = i;
+*/
+        int limit=A.nnz;
+/*
+
+        for(int i=0; i< limit; i++){
+            int idx1 = rand()%limit;
+            int idx2 = rand()%limit;
+            int tmp = p_h[idx1];
+            p_h[idx1] = p_h[idx2];
+            p_h[idx2] = tmp;
+        }*/
+
+        for( i=0; i<A.nnz; i++ ){
+                B->val[p_h[i]] = A.val[i];
+                B->col[p_h[i]] = A.col[i];
+                B->rowidx[p_h[i]] = A.rowidx[i];
+        }
+/*
+        count = 0;
+        magma_int_t rowcount = 0;
         for( magma_int_t i=0; i<n; i+=b){
         for( magma_int_t j=0; j<n; j+=b){
         for( magma_int_t k=0; k<n; k+=b){
@@ -127,9 +179,8 @@ if( A.memory_location == Magma_CPU ){
                 magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
                                             A.row[row+1] : A.nnz;
                 
-                p_h[count] = row;
-                B->row[rowcount] = count;
-                //printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
+                //B->row[rowcount] = count;
+                printf("row: %d-> %d\n",row, p_h[row] );
                 for( entry=A.row[row]; entry<bound; entry++){
                     B->val[count] = A.val[entry];
                     B->col[count] = p_h[A.col[entry]];
@@ -145,13 +196,14 @@ if( A.memory_location == Magma_CPU ){
         }// row
         }// i
         }// p
-        B->row[rowcount] = count;
+        //B->row[rowcount] = count;*/
 
 
-  //  for(i=0; i<A.nnz; i++)
-  //  printf("%d \n", p_h[i]);
+   //for(i=0; i<100; i++)
+    //printf("%d \n", p_h[i]);
         //magma_setvector( A.nnz, sizeof(magma_index_t), p_h, 1, p, 1 );
         magma_free_cpu( p_h );
+
         return MAGMA_SUCCESS; 
     }
     else{
@@ -160,7 +212,7 @@ if( A.memory_location == Magma_CPU ){
         magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
         magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO );
 
-        magma_zmhom( CSRA, b, p );
+        magma_zmreorder( CSRA, n, b, B );
 
         magma_z_mfree( &hA );
         magma_z_mfree( &CSRA );    
