@@ -107,7 +107,7 @@ magmablas_clag2z(
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        //return *info;
+        return; //*info;
     }
 
     /* quick return */

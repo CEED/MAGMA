@@ -113,7 +113,7 @@ magmablas_zlag2c( magma_int_t m, magma_int_t n,
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        //return *info;
+        return; //*info;
     }
 
     /* quick return */
