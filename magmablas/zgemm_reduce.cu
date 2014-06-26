@@ -124,6 +124,25 @@ magmablas_zgemm_reduce(
     magmaDoubleComplex beta,
     magmaDoubleComplex *d_C, magma_int_t ldc )
 {
+    magma_int_t info = 0;
+    if ( m < 0 )
+        info = -1;
+    else if ( n < 0 )
+        info = -2;
+    else if ( k < 0 )
+        info = -3;
+    else if ( lda < m )
+        info = -6;
+    else if ( ldb < k )
+        info = -8;
+    else if ( ldc < m )
+        info = -11;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200  ) {
         // --------------------
