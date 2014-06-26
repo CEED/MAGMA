@@ -127,10 +127,10 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     magma_int_t nb = magma_get_zgehrd_nb(n);
-    magma_int_t N = n, ldda = n;
+    magma_int_t ldda = n;
 
     magma_int_t ib;
-    magma_int_t nh, iws;
+    magma_int_t i, nh, iws;
     magma_int_t nbmin, iinfo;
     magma_int_t ldwork;
     magma_int_t lquery;
@@ -166,37 +166,6 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         return *info;
     }
 
-    magmaDoubleComplex *dA;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dA, N*ldda + 2*N*nb + nb*nb )) {
-        *info = MAGMA_ERR_DEVICE_ALLOC;
-        return *info;
-    }
-    magmaDoubleComplex *d_work = dA + (N+nb)*ldda;
-    
-    magma_int_t i;
-
-    magmaDoubleComplex *T, *dT;
-    magma_zmalloc_cpu( &T, nb*nb );
-    if ( T == NULL ) {
-        magma_free( dA );
-        *info = MAGMA_ERR_HOST_ALLOC;
-        return *info;
-    }
-    dT = d_work + nb * ldda;
-
-    magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dA(0,N), ldda );
-
-    /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
-    for (i = 1; i < ilo; ++i)
-        tau[i] = c_zero;
-
-    for (i = max(1,ihi); i < n; ++i)
-        tau[i] = c_zero;
-
-    assert( nb % 4 == 0 );
-    for (i=0; i < nb*nb; i += 4)
-        T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
-
     nbmin = 2;
     iws = 1;
     if (nb > 1 && nb < nh) {
@@ -225,8 +194,37 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
     else {
         /* Use blocked code */
+        magmaDoubleComplex *dA;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda + 2*n*nb + nb*nb )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+        magmaDoubleComplex *d_work = dA + (n+nb)*ldda;
+        
+        magmaDoubleComplex *T, *dT;
+        magma_zmalloc_cpu( &T, nb*nb );
+        if ( T == NULL ) {
+            magma_free( dA );
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
+        dT = d_work + nb * ldda;
+    
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dA(0,n), ldda );
+    
+        /* Set elements 1:ILO-1 and IHI:n-1 of TAU to zero */
+        for (i = 1; i < ilo; ++i)
+            tau[i] = c_zero;
+    
+        for (i = max(1,ihi); i < n; ++i)
+            tau[i] = c_zero;
+    
+        assert( nb % 4 == 0 );
+        for (i=0; i < nb*nb; i += 4)
+            T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
+            
         /* Copy the matrix to the GPU */
-        magma_zsetmatrix( N, N-ilo+1, A(0,ilo-1), lda, dA, ldda );
+        magma_zsetmatrix( n, n-ilo+1, A(0,ilo-1), lda, dA, ldda );
         
         for (i = ilo; i < ihi - nb; i += nb) {
             /* Computing MIN */
@@ -243,7 +241,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             
             magma_zlahr2( ihi, i, ib,
                           dA(0,i-ilo),
-                          dA(1,N),
+                          dA(1,n),
                           A(0,i-1), lda,
                           &tau[i], T, nb, work, ldwork );
             
@@ -254,21 +252,20 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                           A(0,i-1), lda,
                           dA(0,i-ilo),
                           dA(i-1,i-ilo),
-                          dA(0,N), dT, d_work );
+                          dA(0,n), dT, d_work );
         }
-    }
-
-    /* Use unblocked code to reduce the rest of the matrix */
-    if (!(nb < nbmin || nb >= nh)) {
+        
         magma_zgetmatrix( n, n-i+1,
                           dA(0,i-ilo), ldda,
                           A(0,i-1),  lda );
+        
+        magma_free( dA );
+        magma_free_cpu( T );
     }
+
+    /* Use unblocked code to reduce the rest of the matrix */
     lapackf77_zgehd2(&n, &i, &ihi, A, &lda, &tau[1], work, &iinfo);
     work[0] = MAGMA_Z_MAKE( iws, 0 );
-    
-    magma_free( dA );
-    magma_free_cpu(T);
 
     return *info;
 } /* magma_zgehrd2 */

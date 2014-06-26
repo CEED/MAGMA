@@ -133,8 +133,8 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
              magmaDoubleComplex *dT,
              magma_int_t *info)
 {
-    #define  A( i, j ) ( A + (i) + (j)*lda)
-    #define dA( i, j ) (dA + (i) + (j-ilo)*ldda)
+    #define  A(i_,j_) ( A + (i_) + (j_)*lda)
+    #define dA(i_,j_) (dA + (i_) + (j_ - ilo)*ldda)
 
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -142,7 +142,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     magma_int_t nb = magma_get_zgehrd_nb(n);
     magma_int_t ldda = n;  // assumed in zlahru
 
-    magma_int_t nh, iws;
+    magma_int_t i, nh, iws;
     magma_int_t iinfo;
     magma_int_t ldwork;
     magma_int_t lquery;
@@ -180,43 +180,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         return *info;
     }
 
-    // GPU workspace is:
-    //   nb*ldda for dwork for zlahru
-    //   nb*ldda for dV
-    //   n*ldda  for dA
-    magmaDoubleComplex *dwork;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*nb*ldda + n*ldda )) {
-        *info = MAGMA_ERR_DEVICE_ALLOC;
-        return *info;
-    }
-    magmaDoubleComplex *dV = dwork + nb*ldda;
-    magmaDoubleComplex *dA = dwork + nb*ldda*2;
-    ldwork = n;
-
-    magma_int_t i;
-
-    magmaDoubleComplex *T, *dTi;
-    magma_zmalloc_cpu( &T, nb*nb );
-    if ( T == NULL ) {
-        magma_free( dwork );
-        *info = MAGMA_ERR_HOST_ALLOC;
-        return *info;
-    }
-
-    // zero first block of V, which is lower triangular
-    magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda );
-
-    // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
-    for (i = 0; i < ilo; ++i)
-        tau[i] = c_zero;
-
-    for (i = max(0,ihi-1); i < n-1; ++i)
-        tau[i] = c_zero;
-
-    for (i=0; i < nb*nb; i += 4)
-        T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
-    magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb );
-
     // If not enough workspace, use unblocked code
     if ( lwork < iws ) {
         nb = 1;
@@ -228,6 +191,43 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
     else {
         // Use blocked code
+        
+        // GPU workspace is:
+        //   nb*ldda for dwork for zlahru
+        //   nb*ldda for dV
+        //   n*ldda  for dA
+        magmaDoubleComplex *dwork;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*nb*ldda + n*ldda )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+        magmaDoubleComplex *dV = dwork + nb*ldda;
+        magmaDoubleComplex *dA = dwork + nb*ldda*2;
+        ldwork = n;
+    
+        magmaDoubleComplex *T, *dTi;
+        magma_zmalloc_cpu( &T, nb*nb );
+        if ( T == NULL ) {
+            magma_free( dwork );
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
+    
+        // zero first block of V, which is lower triangular
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda );
+    
+        // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
+        for (i = 0; i < ilo; ++i)
+            tau[i] = c_zero;
+    
+        for (i = max(0,ihi-1); i < n-1; ++i)
+            tau[i] = c_zero;
+        
+        assert( nb % 4 == 0 );
+        for (i=0; i < nb*nb; i += 4)
+            T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
+        magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb );
+        
         // Copy the matrix to the GPU
         magma_zsetmatrix( n, n-ilo, A(0,ilo), lda, dA, ldda );
         
@@ -263,6 +263,9 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         magma_zgetmatrix( n, n-i,
                           dA(0,i), ldda,
                           A (0,i), lda );
+        
+        magma_free( dwork );
+        magma_free_cpu( T );
     }
 
     // Use unblocked code to reduce the rest of the matrix
@@ -270,9 +273,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     i += 1;
     lapackf77_zgehd2(&n, &i, &ihi, A, &lda, tau, work, &iinfo);
     work[0] = MAGMA_Z_MAKE( iws, 0 );
-    
-    magma_free( dwork );
-    magma_free_cpu( T );
 
     return *info;
 } /* magma_zgehrd */
