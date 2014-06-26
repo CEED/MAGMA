@@ -152,14 +152,19 @@ magma_int_t magma_zlatrsd(magma_uplo_t uplo, magma_trans_t trans,
 #endif
 
 magma_int_t magma_zlahr2( magma_int_t m, magma_int_t n, magma_int_t nb,
-                          magmaDoubleComplex *da, magmaDoubleComplex *dv, magmaDoubleComplex *a,
-                          magma_int_t lda, magmaDoubleComplex *tau, magmaDoubleComplex *t,
-                          magma_int_t ldt, magmaDoubleComplex *y, magma_int_t ldy);
+                          magmaDoubleComplex *dA, magma_int_t ldda,
+                          magmaDoubleComplex *dV, magma_int_t lddv,
+                          magmaDoubleComplex *A,  magma_int_t lda,
+                          magmaDoubleComplex *tau,
+                          magmaDoubleComplex *T,  magma_int_t ldt,
+                          magmaDoubleComplex *Y,  magma_int_t ldy);
 
 magma_int_t magma_zlahru( magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
-                          magmaDoubleComplex *a, magma_int_t lda,
-                          magmaDoubleComplex *da, magmaDoubleComplex *y,
-                          magmaDoubleComplex *v, magmaDoubleComplex *t,
+                          magmaDoubleComplex *A,  magma_int_t lda,
+                          magmaDoubleComplex *dA, magma_int_t ldda,
+                          magmaDoubleComplex *dY, magma_int_t lddy,
+                          magmaDoubleComplex *dV, magma_int_t lddv,
+                          magmaDoubleComplex *dT,
                           magmaDoubleComplex *dwork);
 
 magma_int_t magma_zposv ( magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
