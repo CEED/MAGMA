@@ -20,7 +20,72 @@
 
 // every row is handled by one threadblock
 __global__ void 
-magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows, 
+magma_zailu_csr_a_kernel(   magma_int_t num_rows, 
+                            magma_int_t nnz,  
+                            magma_index_t *rowidxA, 
+                            magma_index_t *colidxA,
+                            const magmaDoubleComplex * __restrict__ A, 
+                            magma_index_t *rowptrL, 
+                            magma_index_t *colidxL, 
+                            magmaDoubleComplex *valL, 
+                            magma_index_t *rowptrU, 
+                            magma_index_t *rowidxU, 
+                            magmaDoubleComplex *valU ){
+
+    int i, j;
+    int k = blockDim.x * blockIdx.x + threadIdx.x;
+
+    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
+    magmaDoubleComplex s, sp;
+    int il, iu, jl, ju;
+
+
+    if (k < nnz)
+    {     
+
+        i = rowidxA[k];
+        j = colidxA[k];
+
+#if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
+        s =  __ldg( A+k );
+#else
+        s =  A[k];
+#endif
+
+        il = rowptrL[i];
+        iu = rowptrU[j];
+
+        while (il < rowptrL[i+1] && iu < rowptrU[j+1])
+        {
+            sp = zero;
+            jl = colidxL[il];
+            ju = rowidxU[iu];
+
+            // avoid branching
+            sp = ( jl == ju ) ? valL[il] * valU[iu] : sp;
+            s = ( jl == ju ) ? s-sp : s;
+            il = ( jl <= ju ) ? il+1 : il;
+            iu = ( jl >= ju ) ? iu+1 : iu;
+
+        }
+        // undo the last operation (it must be the last)
+        s += sp;
+        __syncthreads();
+        // modify u entry
+        if ( i>j )
+            valL[il-1] =  s / valU[rowptrU[j+1]-1];
+        else{
+            valU[iu-1] = s;
+        }
+
+    }
+
+}// kernel 
+
+/*
+// every row is handled by one threadblock
+__global__ void 
+magma_zailu_csr_a_kernel(   magma_int_t Lnum_rows, 
                             magma_int_t Lnnz,  
                             magma_index_t *rowidxAL, 
                             magma_index_t *colidxAL,
@@ -84,6 +149,7 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
     }
 
 }// kernel 
+*/
 
 
 
@@ -131,25 +197,23 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zailu_csr_a( magma_z_sparse_matrix A_L,
-                   magma_z_sparse_matrix A_U,
+magma_zailu_csr_a( magma_z_sparse_matrix A,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U ){
     
     int blocksize1 = 256;
     int blocksize2 = 1;
 
-    int dimgrid1 = ( A_L.nnz + blocksize1 -1 ) / blocksize1;
-    int dimgrid2 = 2;
+    int dimgrid1 = ( A.nnz + blocksize1 -1 ) / blocksize1;
+    int dimgrid2 = 1;
     int dimgrid3 = 1;
 
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
-    magma_zailu_csr_s_kernel<<< grid, block, 0, magma_stream >>>
-        ( A_L.num_rows, A_L.nnz, 
-          A_L.rowidx, A_L.col, A_L.val, 
+    magma_zailu_csr_a_kernel<<< grid, block, 0, magma_stream >>>
+        ( A.num_rows, A.nnz, 
+          A.rowidx, A.col, A.val, 
           L.row, L.col, L.val, 
-          A_U.rowidx, A_U.col, A_U.val, 
           U.row, U.col, U.val );
 
 

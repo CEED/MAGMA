@@ -36,7 +36,8 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
                          magmaDoubleComplex *val,
                          magma_index_t *rowptr,
                          magma_index_t *rowidx, 
-                         magma_index_t *colidx ){
+                         magma_index_t *colidx,
+                         magmaDoubleComplex *A2 ){
 
     int i, j;
     int k = (blockDim.x * blockIdx.x + threadIdx.x);// % nnz;
@@ -90,9 +91,9 @@ magma_zaic_csr_s_kernel( magma_int_t num_rows,
 
         // modify entry
         if (i == j)
-            val[k] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);
+            A2[k] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);
         else
-            val[k] =  s / val[rowptr[j+1]-1];
+            A2[k] =  s / val[rowptr[j+1]-1];
     }
 
 }// kernel 
@@ -135,18 +136,28 @@ magma_zaic_csr_s( magma_z_sparse_matrix A,
 
 
     
-    int blocksize1 = 256;
+    int blocksize1 = 1;
     int blocksize2 = 1;
 
     int dimgrid1 = ( A.nnz + blocksize1 -1 ) / blocksize1;
     int dimgrid2 = 1;
     int dimgrid3 = 1;
 
+    magma_z_vector A2;
+
+
+            // init DEV vectors
+    magma_z_vinit( &A2, Magma_DEV, A.nnz, MAGMA_Z_ONE );    
+
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
     magma_zaic_csr_s_kernel<<< grid, block, 0, magma_stream >>>
             ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, 
-                                    A_CSR.rowidx,  A_CSR.col );
+                                    A_CSR.rowidx,  A_CSR.col, A2.val );
+
+    magma_zcopy( A.nnz, A2.val, 1, A_CSR.val, 1 );                            // rr = b
+
+    magma_z_vfree(&A2);
 
     return MAGMA_SUCCESS;
 }

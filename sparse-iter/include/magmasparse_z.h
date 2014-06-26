@@ -395,6 +395,9 @@ magma_zinitguess(   magma_z_sparse_matrix A,
                     magma_z_sparse_matrix *L,
                     magma_z_sparse_matrix *U );
 
+magma_int_t
+magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_z_sparse_matrix *B );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -1143,8 +1146,7 @@ magma_zailu_csr_s( magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix U );
 
 magma_int_t
-magma_zailu_csr_a( magma_z_sparse_matrix A_L,
-                   magma_z_sparse_matrix A_U,
+magma_zailu_csr_a( magma_z_sparse_matrix A,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U );
 
