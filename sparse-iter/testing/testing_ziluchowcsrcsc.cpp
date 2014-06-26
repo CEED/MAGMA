@@ -41,14 +41,16 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
+           // "/home/hanzt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
 
-            "/home/hanzt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
+            "/home/hanzt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
+            "/home/hanzt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
             "/home/hanzt/sparse_matrices/mtx/ecology2.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
             "/home/hanzt/sparse_matrices/mtx/G3_circuit.mtx", //          n:1585478 nnz:7660826 nnz/n:4 max_nnz_row:6 
             "/home/hanzt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
-            "/home/hanzt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
-            "/home/hanzt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
-            "/home/hanzt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
+            "/home/hanzt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
+           // "/home/hanzt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
+
 
 
 
@@ -170,23 +172,23 @@ int main( int argc, char** argv)
     
     real_Double_t start, end;
 
-     for(int matrix=0; matrix<7; matrix++){
+     for(int matrix=0; matrix<6; matrix++){
     //for(int matrix=0; matrix<1; matrix++){
     //for(int matrix=4; matrix<5; matrix++){
     int num_vecs = 10;
-
+printf("\n");
     magma_z_sparse_matrix hA, hAL, hALCOO, hAU,  hAUT, hAUCOO, hAcusparse, hA3U, hAtmp, dA, hAD, hADD, dAD, dADD, hLU, dAL, dAU, dL, dU, hL, hU, hAt, hUT, hUTCOO;
 
 
 // matrix from UFMC
     
-    printf("#  ");
+   // printf("#  ");
 
     magma_z_csr_mtx( &hA, filename[matrix] );
 
     magma_zmscale( &hA, Magma_UNITDIAG );
 
-    magma_zilustruct( &hA, 2);
+   // magma_zilustruct( &hA, 0);
 
     magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSR );
 
@@ -194,6 +196,11 @@ int main( int argc, char** argv)
     real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
     magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV );
+
+
+    magma_z_sparse_matrix hACSRCOO, dAinitguess;
+    magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
     
     // need only lower triangular
     hAL.diagorder_type == Magma_UNITY;
@@ -208,11 +215,11 @@ int main( int argc, char** argv)
     magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hAUCOO, &dAU, Magma_CPU, Magma_DEV );
 
-        printf("# average over 100 runs - blocksize 256 shift 1 \n");
+   //     printf("# average over 100 runs - blocksize 256 shift 1 \n");
 
-        printf("#########################################################################\n");   
+     //   printf("#########################################################################\n");   
 
-        printf("# iters  sec(MAGMA)  sec(CUSPARSE)  ||G - G*||_F     ||A-GG'||_F\n");   
+       // printf("# iters  sec(MAGMA)  sec(CUSPARSE)  ||G - G*||_F     ||A-GG'||_F\n");   
 
 
             real_Double_t t_cusparse, t_chow;
@@ -287,7 +294,7 @@ int main( int argc, char** argv)
     magma_device_sync(); start = magma_wtime(); 
 
     for(int i=0; i<iters; i++){
-        magma_zailu_csr_s( dAL, dAU, dL, dU );
+        magma_zailu_csr_a( dAL, dL, dU );
     }
 
     magma_device_sync(); end = magma_wtime();
@@ -295,12 +302,15 @@ int main( int argc, char** argv)
 
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
     magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
+//printf("\n L:\n");
+  //  magma_z_mvisu(hL);
+//printf("\n\n\n U:\n");
+ //   magma_z_mvisu(hU);printf("\n\n");
 
     magma_z_mfree(&dL);
     magma_z_mfree(&dU);
 
     magma_z_LUmergein( hL, hU, &hAtmp);
-
 
 
     magma_zfrobenius( hAtmp, hAcusparse, &res );
@@ -329,6 +339,9 @@ int main( int argc, char** argv)
     nonlinresavg = nonlinresavg/numavg;
     resavg = resavg/numavg;
 
+//printf(" %.2e  ",nonlinresavg);
+
+
     printf(" %d    %.2e   ",1* iters, t_chow);
     printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, nonlinresavg);
 
@@ -342,6 +355,8 @@ int main( int argc, char** argv)
     magma_z_mfree(&hAUCOO);
     magma_z_mfree(&hAcusparse);
     magma_z_mfree(&dA);
+    magma_z_mfree(&hACSRCOO);
+    magma_z_mfree(&dAinitguess);
 
 }
 
