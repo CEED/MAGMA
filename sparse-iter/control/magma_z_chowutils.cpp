@@ -127,6 +127,175 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     real_Double_t tmp2;
     magma_int_t i,j,k,m;
 
+    magma_z_sparse_matrix L_d, U_d, LU_d, A_t;
+
+    magma_z_mtransfer( L, &L_d, Magma_CPU, Magma_DEV ); 
+    magma_z_mtransfer( U, &U_d, Magma_CPU, Magma_DEV ); 
+
+    magma_z_mtransfer( U, &LU_d, Magma_CPU, Magma_DEV ); 
+
+    magma_z_mtransfer( A, &A_t, Magma_CPU, Magma_CPU ); 
+
+    magma_free( LU_d.val );
+    magma_free( LU_d.col );
+    magma_free( LU_d.row );
+
+
+    // CUSPARSE context //
+    cusparseHandle_t handle;
+    cusparseStatus_t cusparseStatus;
+    cusparseStatus = cusparseCreate(&handle);
+     if(cusparseStatus != 0)    printf("error in Handle.\n");
+
+
+    cusparseMatDescr_t descrL;
+    cusparseMatDescr_t descrU;
+    cusparseMatDescr_t descrLU;
+    cusparseStatus = cusparseCreateMatDescr(&descrL);
+    cusparseStatus = cusparseCreateMatDescr(&descrU);
+    cusparseStatus = cusparseCreateMatDescr(&descrLU);
+     if(cusparseStatus != 0)    printf("error in MatrDescr.\n");
+
+    cusparseStatus =
+    cusparseSetMatType(descrL,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatType(descrU,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatType(descrLU,CUSPARSE_MATRIX_TYPE_GENERAL);
+     if(cusparseStatus != 0)    printf("error in MatrType.\n");
+
+    cusparseStatus =
+    cusparseSetMatIndexBase(descrL,CUSPARSE_INDEX_BASE_ZERO);
+    cusparseSetMatIndexBase(descrU,CUSPARSE_INDEX_BASE_ZERO);
+    cusparseSetMatIndexBase(descrLU,CUSPARSE_INDEX_BASE_ZERO);
+     if(cusparseStatus != 0)    printf("error in IndexBase.\n");
+
+    // end CUSPARSE context //
+
+    // multiply L and U on the device
+
+
+    magma_int_t baseC;
+    // nnzTotalDevHostPtr points to host memory
+    magma_index_t *nnzTotalDevHostPtr = (magma_index_t*) &LU_d.nnz;
+    cusparseSetPointerMode(handle, CUSPARSE_POINTER_MODE_HOST);
+    magma_index_malloc( &LU_d.row, (L_d.num_rows + 1) );
+    cusparseXcsrgemmNnz(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                L_d.num_rows, L_d.num_rows, L_d.num_rows, 
+                                descrL, L_d.nnz, L_d.row, L_d.col,
+                                descrU, U_d.nnz, U_d.row, U_d.col,
+                                descrLU, LU_d.row, nnzTotalDevHostPtr );
+    if (NULL != nnzTotalDevHostPtr){
+        LU_d.nnz = *nnzTotalDevHostPtr;
+    }else{
+        // workaround as nnz and base C are magma_int_t 
+        magma_index_t base_t, nnz_t; 
+        magma_index_getvector( 1, LU_d.row+m, 1, &nnz_t, 1 );
+        magma_index_getvector( 1, LU_d.row,   1, &base_t,    1 );
+        LU_d.nnz = (magma_int_t) nnz_t;
+        baseC = (magma_int_t) base_t;
+        LU_d.nnz -= baseC;
+    }
+    magma_index_malloc( &LU_d.col, LU_d.nnz );
+    magma_zmalloc( &LU_d.val, LU_d.nnz );
+    cusparseZcsrgemm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    L_d.num_rows, L_d.num_rows, L_d.num_rows,
+                    descrL, L_d.nnz,
+                    L_d.val, L_d.row, L_d.col,
+                    descrU, U_d.nnz,
+                    U_d.val, U_d.row, U_d.col,
+                    descrLU,
+                    LU_d.val, LU_d.row, LU_d.col);
+
+
+
+    cusparseDestroyMatDescr( descrL );
+    cusparseDestroyMatDescr( descrU );
+    cusparseDestroyMatDescr( descrLU );
+    cusparseDestroy( handle );
+
+    LU_d.storage_type = Magma_CSR;
+
+    magma_z_mtransfer(LU_d, LU, Magma_DEV, Magma_CPU);
+    magma_z_mfree( &L_d );
+    magma_z_mfree( &U_d );
+    magma_z_mfree( &LU_d );
+
+    // compute Frobenius norm of A-LU
+    for(i=0; i<A.num_rows; i++){
+        for(j=A.row[i]; j<A.row[i+1]; j++){
+            magma_index_t lcol = A.col[j];
+            magmaDoubleComplex newval = MAGMA_Z_MAKE(0.0, 0.0);
+            for(k=LU->row[i]; k<LU->row[i+1]; k++){
+                if( LU->col[k] == lcol ){
+                    newval = MAGMA_Z_MAKE(
+                        MAGMA_Z_REAL( LU->val[k] )- MAGMA_Z_REAL( A.val[j] )
+                                                , 0.0 );
+                }
+            }
+            A_t.val[j] = newval;
+        }
+    }
+
+    for(i=0; i<A.num_rows; i++){
+        for(j=A.row[i]; j<A.row[i+1]; j++){
+            tmp2 = (real_Double_t) fabs( MAGMA_Z_REAL(A_t.val[j]) );
+            (*res) = (*res) + tmp2* tmp2;
+        }
+    }
+
+    magma_z_mfree( LU );
+    magma_z_mfree( &A_t );
+
+    (*res) =  sqrt((*res));
+
+    return MAGMA_SUCCESS; 
+}
+
+/**
+    Purpose
+    -------
+
+    Computes the ILU residual A- LU and returns the difference as
+    well es the Frobenius norm of the difference
+
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix
+                input sparse matrix in CSR
+
+    @param
+    L           magma_z_sparse_matrix
+                input sparse matrix in CSR    
+
+    @param
+    U           magma_z_sparse_matrix
+                input sparse matrix in CSR    
+
+    @param
+    LU          magma_z_sparse_matrix*
+                output sparse matrix in A-LU in CSR    
+
+    @param
+    res         real_Double_t* 
+                residual 
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+magma_int_t 
+magma_zilures(   magma_z_sparse_matrix A, 
+                    magma_z_sparse_matrix L,
+                    magma_z_sparse_matrix U, 
+                    magma_z_sparse_matrix *LU, 
+                    real_Double_t *res ){
+
+    real_Double_t tmp2;
+    magma_int_t i,j,k,m;
+
     magma_z_sparse_matrix L_d, U_d, LU_d;
 
     magma_z_mtransfer( L, &L_d, Magma_CPU, Magma_DEV ); 
