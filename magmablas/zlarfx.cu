@@ -114,6 +114,12 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
               *(T+blockIdx.x) = MAGMA_Z_CNJG(z__1);
         }
     }
+    else // Make last column of T zero
+    {
+       if (blockIdx.x<=it)
+          *(T+blockIdx.x) = MAGMA_Z_ZERO;
+    }
+
 }
 
 //==============================================================================

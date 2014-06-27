@@ -45,8 +45,9 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
   
     if ( i == 0 ) {
         xnorm = *dxnorm;
-        if ( xnorm == 0 ) {
+        if ( xnorm == 0 || n == 1) {
             *dtau = MAGMA_Z_ZERO;
+            *dA   = *dx0;
         }
         else {
 
