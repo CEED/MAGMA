@@ -31,7 +31,7 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N matrix A.
             On exit, the upper triangle of the array contains the
             min(M,N)-by-N upper trapezoidal matrix R; the elements below
@@ -40,8 +40,8 @@
             reflectors.
 
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A. LDA >= max(1,M).
+    ldda    INTEGER
+            The leading dimension of the array A. LDDA >= max(1,M).
 
     @param[in,out]
     jpvt    INTEGER array, dimension (N)
@@ -56,7 +56,7 @@
             The scalar factors of the elementary reflectors.
 
     @param[out]
-    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    dwork   (workspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
             On exit, if INFO=0, WORK(1) returns the optimal LWORK.
 
     @param[in]
@@ -97,15 +97,15 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
-                  magmaDoubleComplex *A, magma_int_t lda,
+                  magmaDoubleComplex *dA, magma_int_t ldda,
                   magma_int_t *jpvt, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *work, magma_int_t lwork,
+                  magmaDoubleComplex *dwork, magma_int_t lwork,
                   #ifdef COMPLEX
                   double *rwork,
                   #endif
                   magma_int_t *info )
 {
-#define  A(i, j) (A     + (i) + (j)*(lda ))
+#define  A(i, j) (dA     + (i) + (j)*(ldda ))
 
     magma_int_t ione = 1;
 
@@ -120,7 +120,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         *info = -1;
     } else if (n < 0) {
         *info = -2;
-    } else if (lda < max(1,m)) {
+    } else if (ldda < max(1,m)) {
         *info = -4;
     }
     
@@ -135,7 +135,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
             lwkopt += 2*n;
             #endif
         }
-        //work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+        //dwork[0] = MAGMA_Z_MAKE( lwkopt, 0. );
 
         if (lwork < lwkopt && ! lquery) {
             *info = -8;
@@ -153,7 +153,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         return *info;
 
     #ifdef REAL
-    double *rwork = work + (n + 1)*nb;
+    double *rwork = dwork + (n + 1)*nb;
     #endif
     magmaDoubleComplex   *df;
     if (MAGMA_SUCCESS != magma_zmalloc( &df, (n+1)*nb )) {
@@ -188,12 +188,12 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
            remaining columns.
     if (nfxd > 0) {
         na = min(m,nfxd);
-        lapackf77_zgeqrf(&m, &na, A, &lda, tau, work, &lwork, info);
+        lapackf77_zgeqrf(&m, &na, A, &lda, tau, dwork, &lwork, info);
         if (na < n) {
             n_j = n - na;
             lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &m, &n_j, &na,
                               A, &lda, tau, A(0, na), &lda,
-                              work, &lwork, info );
+                              dwork, &lwork, info );
         }
     }*/
     
@@ -213,7 +213,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         }*/
 
         /* Initialize partial column norms. */
-        magmablas_dznrm2_cols(sm, sn, A(nfxd,nfxd), lda, &rwork[nfxd]);
+        magmablas_dznrm2_cols(sm, sn, A(nfxd,nfxd), ldda, &rwork[nfxd]);
 #if defined(PRECISION_d) || defined(PRECISION_z)
         magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
 #else
@@ -253,9 +253,9 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                 //magma_zlaqps_gpu    // this is a cpp-file
                 magma_zlaqps2_gpu   // this is a cuda-file
                     ( m, n_j, j, jb, &fjb,
-                      A (0, j), lda,
+                      A (0, j), ldda,
                       &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
-                      work,
+                      dwork,
                       &df[jb],   n_j );
                 
                 j += fjb;  /* fjb is actual number of columns factored */
@@ -271,10 +271,10 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                                   A (j,j), lda );
             }
             lapackf77_zlaqp2(&m, &n_j, &j, A(0, j), &lda, &jpvt[j],
-                             &tau[j], &rwork[j], &rwork[n+j], work );
+                             &tau[j], &rwork[j], &rwork[n+j], dwork );
         }*/
     }
-    //work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+    //dwork[0] = MAGMA_Z_MAKE( lwkopt, 0. );
     magma_free(df);
 
     return *info;
