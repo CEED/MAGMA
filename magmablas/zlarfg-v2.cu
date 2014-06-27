@@ -33,6 +33,7 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
     if( n <= 0 ) {
 #endif
         *dtau = MAGMA_Z_ZERO;
+        *dAkk = *dx0;
         return;
     }
 
@@ -76,9 +77,11 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
         if ( xnorm != 0 && j < n-1)
             dx[j] = MAGMA_Z_MUL(dxi, scale);
 
-    } else
+    } else {
         *dtau = MAGMA_Z_ZERO;
+        *dAkk = *dx0; 
     }
+}
 
 
 /*
