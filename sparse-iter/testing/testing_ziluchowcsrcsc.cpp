@@ -215,11 +215,11 @@ printf("\n");
     magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hAUCOO, &dAU, Magma_CPU, Magma_DEV );
 
-   //     printf("# average over 100 runs - blocksize 256 shift 1 \n");
+        printf("# average over 100 runs - blocksize 256 shift 1 \n");
 
-     //   printf("#########################################################################\n");   
+        printf("#########################################################################\n");   
 
-       // printf("# iters  sec(MAGMA)  sec(CUSPARSE)  ||G - G*||_F     ||A-GG'||_F\n");   
+        printf("# iters  sec(MAGMA)  sec(CUSPARSE)  ||G - G*||_F     nonlinear-res      ILU-res\n");   
 
 
             real_Double_t t_cusparse, t_chow;
@@ -279,6 +279,7 @@ printf("\n");
 
     real_Double_t resavg = 0.0;
     real_Double_t nonlinresavg = 0.0;
+    real_Double_t iluresavg = 0.0;
     int numavg = 1;
 
     //multiple runs
@@ -286,6 +287,7 @@ printf("\n");
 
     real_Double_t res = 0.0;
     real_Double_t nonlinres = 0.0;
+    real_Double_t ilures = 0.0;
 
     magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hALCOO, &dU, Magma_CPU, Magma_DEV );
@@ -294,7 +296,8 @@ printf("\n");
     magma_device_sync(); start = magma_wtime(); 
 
     for(int i=0; i<iters; i++){
-        magma_zailu_csr_a( dAL, dL, dU );
+        magma_zailu_csr_a( dAinitguess, dL, dU );
+        //magma_zailu_csr_s( dAL, dAU, dL, dU );
     }
 
     magma_device_sync(); end = magma_wtime();
@@ -318,6 +321,8 @@ printf("\n");
     magma_z_cucsrtranspose(  hU, &hUT );
 
     magma_znonlinres(   hA, hL, hUT, &hLU, &nonlinres ); 
+
+    magma_zilures(   hA, hL, hUT, &hLU, &ilures ); 
     /*
     if( res != res ){
         nonlinresavg += nonlinresavg/(i+1);
@@ -326,6 +331,7 @@ printf("\n");
     else{*/
         nonlinresavg += nonlinres;
         resavg += res;
+        iluresavg += ilures;
     //}
 
 
@@ -338,12 +344,12 @@ printf("\n");
 
     nonlinresavg = nonlinresavg/numavg;
     resavg = resavg/numavg;
-
+    iluresavg = iluresavg/numavg;
 //printf(" %.2e  ",nonlinresavg);
 
 
     printf(" %d    %.2e   ",1* iters, t_chow);
-    printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, nonlinresavg);
+    printf(" %.2e    %.4e    %.4e   %.4e\n", t_cusparse, resavg, nonlinresavg, iluresavg);
 
     }// iters
 
