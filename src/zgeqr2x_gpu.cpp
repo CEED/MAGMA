@@ -26,7 +26,7 @@
     submatrices of R.
 
     This version implements the right-looking QR.
-    A hard-coded requirement for N is to be <= 128. For larger N one
+    A hard-coded requirement for N is to be <= min(M, 128). For larger N one
     should use a blocking QR version.
 
     Arguments
@@ -37,7 +37,7 @@
 
     @param[in]
     n       INTEGER
-            The number of columns of the matrix A. 0 <= N <= 128.
+            The number of columns of the matrix A. 0 <= N <= min(M, 128).
 
     @param[in,out]
     dA      COMPLEX_16 array, dimension (LDA,N)
@@ -110,7 +110,7 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
     *info = 0;
     if (*m < 0) {
         *info = -1;
-    } else if (*n < 0 || *n > 128) {
+    } else if (*n < 0 || *n > min(*m, 128)) {
         *info = -2;
     } else if (*ldda < max(1,*m)) {
         *info = -4;
