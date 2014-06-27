@@ -74,7 +74,15 @@ magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
 }
 
 //==============================================================================
-
+/*  ----------------------------------------------------------------------------- 
+    Call 
+        magma_zgemv_kernel3<<< n, BLOCK_SIZE>>>(m, V, ldv, c, dwork, tau)
+    to compute
+        ZGEMV( "Conjugate transpose", m, n, -tau[0], V, ldv, c, 1, zero, dwork, 1)
+        and to set c[0] to 1.
+    i.e., 
+        work = -tau[0] V' c
+    ----------------------------------------------------------------------------- */
 __global__ void
 magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv, magmaDoubleComplex *c,
                     magmaDoubleComplex *dwork, magmaDoubleComplex *tau)
