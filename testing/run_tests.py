@@ -10,9 +10,8 @@
 # By default, it runs all testers, pausing between each one.
 # At the pause, typing "m" re-makes and re-runs that tester,
 # while typing enter goes to the next tester.
-# The --batch option avoids pausing between testers.
 # By default, only one combination of input parameters is tested, in most cases.
-# The --all option runs all combinations of input parameters (uplo, trans, etc.).
+# The --first option runs only the first combination of input parameters (uplo, trans, etc.).
 #
 # The --start option skips all testers before the given one, then continues
 # with testers from there.
@@ -40,16 +39,20 @@ import sys
 import time
 
 import subprocess
-from subprocess import PIPE
+from subprocess import PIPE, STDOUT
 
 from optparse import OptionParser
+
+# on a TTY screen, stop after each test for user input
+# when redirected to file ("batch mode"), don't stop
+batch = not sys.stdout.isatty()
 
 parser = OptionParser()
 parser.add_option('-p', '--precisions', action='store',      dest='precisions', help='run given precisions (initials, e.g., "sd" for single and double)', default='sdcz')
 parser.add_option(      '--start',      action='store',      dest='start',      help='start with given routine; useful if run is interupted')
-parser.add_option(      '--all',        action='store_true', dest='all',        help='run all combinations of options. Otherwise, only the first options for each routine are tested.')
-parser.add_option(      '--batch',      action='store_true', dest='batch',      help='run without interactive prompts')
+parser.add_option(      '--first',      action='store_true', dest='first',      help='run only the first combination of options for each tester')
 parser.add_option(      '--memcheck',   action='store_true', dest='memcheck',   help='run with cuda-memcheck (slow)')
+parser.add_option(      '--tol',        action='store',      dest='tol',        help='set tolerance')
 
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
@@ -111,6 +114,7 @@ if opts.small:
 	)
 if opts.med:
 	n +=  ' -N 510  -N 511  -N 512  -N 513  -N 514 --range 100:900:100'
+	n_sm = n
 if opts.large:
 	n +=  ' --range 1000:4000:1000'
 
@@ -423,8 +427,8 @@ syev = (
 	
 # ----------
 # symmetric eigenvalues, 2-stage
-	'./testing_zhetrd_he2hb   -L -c' + n,
-	'#./testing_zhetrd_he2hb   -U -c' + n,      # upper not implemented
+	'#./testing_zhetrd_he2hb   -L -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage
+	'#./testing_zhetrd_he2hb   -U -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage, upper not implemented
 	
 	'#./testing_zheevdx_2stage -L -JN -c' + n,  # -c implies -JV
 	'#./testing_zheevdx_2stage -U -JN -c' + n,  # -c implies -JV
@@ -576,17 +580,13 @@ def substitute( txt, pfrom, pto ):
 # ----------------------------------------------------------------------
 def run( cmd ):
 	words = re.split( ' +', cmd )
-	p = subprocess.Popen( words, bufsize=1, stdout=PIPE, stderr=PIPE )
+	# stdout & stderr are merged
+	p = subprocess.Popen( words, bufsize=1, stdout=PIPE, stderr=STDOUT )
 	
 	failures = 0
 	for line in p.stdout:
 		print line.rstrip()
-		if re.search( 'fail|exit|memory mapping error|CUDA runtime error', line ):
-			failures += 1
-	
-	for line in p.stderr:
-		print line.rstrip()
-		if re.search( 'fail|exit|memory mapping error|CUDA runtime error', line ):
+		if re.search( 'fail|exit|memory mapping error|CUDA runtime error|illegal value', line ):
 			failures += 1
 	
 	err = p.wait()
@@ -614,6 +614,9 @@ for test in tests:
 	
 	make = False
 	for p in opts.precisions:
+		if ( opts.tol ):
+			test += ' --tolerance ' + opts.tol
+		
 		test2 = substitute( test, 'z', p )
 		test2 = re.sub( '  +', ' ', test2 )  # compress spaces
 		
@@ -623,31 +626,29 @@ for test in tests:
 			continue
 		start = None
 		
-		# check for disabled tests
+		# extract command "./testing_foo" and flags
+		# (arguments through -c, excluding -N, --range) from the test
+		# also check for disabled tests (beginning with #)
 		disabled = False
-		m = re.search( '^#(\S*)( .*-c)?', test2 )
+		m = re.search( '^(#?)\./(\S*)( .*-c)?', test2 )
 		if ( m ):
-			disabled = True
-			cmd = m.group(1)
-			flags = m.group(2) or ''
+			disabled = m.group(1)
+			cmd      = m.group(2)
+			flags    = m.group(3) or ''
 		else:
-			m = re.search( '^(\S*)( .*-c)?', test2 )
-			if ( m ):
-				cmd = m.group(1)
-				flags = m.group(2) or ''
-			else:
-				print "***** test didn't match pattern!\n", test2
-				continue
+			print "** Internal error; test didn't match pattern! should be: ./testing_foo ... -c ...\n", test2
+			continue
 		# end
 		
 		# skip tests not in args, or duplicates, or non-existing
 		if (    (args and not cmd in args)
 		     or (not os.path.exists( cmd ))
-		     or (not opts.all and seen.has_key( cmd ))
+		     or (opts.first and seen.has_key( cmd ))
 		     or (seen2.has_key( test2 )) ):
 			continue
 		# end
-		seen[cmd]    = True
+		if ( not disabled ):
+			seen[cmd] = True
 		seen2[test2] = True
 		
 		if ( opts.memcheck ):
@@ -657,6 +658,8 @@ for test in tests:
 		while( go ):
 			if pause > 0:
 				time.sleep( pause )
+				pause = 0
+			# end
 			
 			print
 			print '*'*100
@@ -697,7 +700,7 @@ for test in tests:
 				sys.stderr.write( '  ok\n' )
 			# end
 			
-			if ( opts.batch ):
+			if ( batch ):
 				# sleep couple seconds to allow it to cool off some between tests
 				pause = min( t, 2. )
 				go = False
