@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol = 10. * opts.tolerance * lapackf77_dlamch("E");
     
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
@@ -66,6 +66,11 @@ int main( int argc, char** argv)
             if (N > 128) {
                 printf("This routine requires N <= 128. Setting N = 128\n");
                 N = 128;
+            }
+
+            if (M < N) {
+                printf("This routine requires M >= N. Setting M = N\n");
+                M = N;
             }
 
             min_mn = min(M, N);
@@ -177,7 +182,7 @@ int main( int argc, char** argv)
                 
                     error = lapackf77_zlange("M", &M, &N, h_A, &lda, work);
                     blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-                    error = lapackf77_zlange("M", &M, &N, h_R, &lda, work) / error;
+                    error = lapackf77_zlange("M", &M, &N, h_R, &lda, work) / (N * error);
      
                     // Check if T is the same
                     magma_zgetmatrix( N, N, d_T, N, h_T, N );
