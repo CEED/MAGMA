@@ -569,7 +569,7 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
     /* Recomputation of difficult columns. */
     if( lsticc > 0 ) {
-        printf( " -- recompute dnorms --\n" );
+        // printf( " -- recompute dnorms --\n" );
         //magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,rk+1), lda,
         //                       &vn1[rk+1], &vn2[rk+1], dlsticcs);
        
