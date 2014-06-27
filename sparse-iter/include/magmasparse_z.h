@@ -391,6 +391,13 @@ magma_znonlinres(   magma_z_sparse_matrix A,
                     real_Double_t *res );
 
 magma_int_t 
+magma_zilures(      magma_z_sparse_matrix A, 
+                    magma_z_sparse_matrix L,
+                    magma_z_sparse_matrix U, 
+                    magma_z_sparse_matrix *LU, 
+                    real_Double_t *res );
+
+magma_int_t 
 magma_zinitguess(   magma_z_sparse_matrix A, 
                     magma_z_sparse_matrix *L,
                     magma_z_sparse_matrix *U );
