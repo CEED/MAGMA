@@ -29,7 +29,7 @@
     #elif defined(UPCASE)
         #define FORTRAN_NAME(lcname, UCNAME)  UCNAME
     #else
-        #error Define one of ADD_, NOCHANGE, or UPCASE (in make.inc, or in your CFLAGS) for how Fortran functions are name mangled. If using CMake, it should define MAGMA_GLOBAL.
+        #error "One of ADD_, NOCHANGE, or UPCASE must be defined to set how Fortran functions are name mangled. For example, in MAGMA, add -DADD_ to OPTS in make.inc. If using CMake, it defines MAGMA_GLOBAL instead."
     #endif
 #endif
 

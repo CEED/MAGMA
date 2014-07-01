@@ -157,7 +157,7 @@ typedef double real_Double_t;
     #define MAGMA_C_CNJG(a)       conj(a)
     #define MAGMA_C_SSCALE(v,t,s) ((v) = (t)/(s))
 #else
-    #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. This typically happens in Makefile.internal."
+    #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. For example, add -DHAVE_CUBLAS to CFLAGS, or #define HAVE_CUBLAS before #include <magma.h>. In MAGMA, this happens in Makefile.internal."
 #endif
 
 #define MAGMA_Z_EQUAL(a,b)        (MAGMA_Z_REAL(a)==MAGMA_Z_REAL(b) && MAGMA_Z_IMAG(a)==MAGMA_Z_IMAG(b))
