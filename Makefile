@@ -120,6 +120,14 @@ install: lib dir
 # Better solution would be to use non-recursive make, so make knows all the
 # objects in each subdirectory, or use libtool, or put rules for, e.g., the
 # control directory in src/Makefile (as done in src/CMakeLists.txt)
+
+fpic = $(and $(findstring -fPIC, $(OPTS)), \
+             $(findstring -fPIC, $(FOPTS)), \
+             $(findstring -fPIC, $(F77OPTS)), \
+             $(findstring -fPIC, $(NVOPTS)))
+
+ifneq ($(fpic),)
+
 LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
 
 shared: lib
@@ -130,3 +138,10 @@ $(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
 	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)
+
+else
+shared:
+	@echo "Error: 'make shared' requires OPTS, F77OPTS, FOPTS, and NVOPTS to have -fPIC."
+	@echo "Please edit your make.inc file. See make.inc.mkl-shared for an example."
+	@echo "After updating make.inc, please 'make clean', then 'make shared', then 'make testing'."
+endif

@@ -37,8 +37,8 @@ MAGMA README FILE
       setenv ATLASDIR  /opt/atlas
       setenv LAPACKDIR /opt/LAPACK
   
-  Creating a shared library requires adding the -fPIC option. This is
-  demonstrated in make.inc.mkl-shared.
+  Creating a shared library requires adding the -fPIC option in make.inc to
+  OPTS, FOPTS, F77OPTS, and NVOPTS. This is demonstrated in make.inc.mkl-shared.
   
   After proper modification of the make.inc file, running:
   
