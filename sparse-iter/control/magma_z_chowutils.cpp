@@ -458,10 +458,17 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
 
     magma_z_mtransfer( hAL, &dAL, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hAU, &dAU, Magma_CPU, Magma_DEV );
+    magma_z_mfree( &hAL);
+    magma_z_mfree( &hAU);
 
     magma_zcuspmm( dAL, dAU, &dALU );
 
     magma_z_mtransfer( dALU, &hALU, Magma_DEV, Magma_CPU );
+
+
+    magma_z_mfree( &dAU);
+    magma_z_mfree( &dALU);
+
 
     // generate diagonal matrix 
     magma_int_t offdiags = 0;
@@ -472,6 +479,8 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
     diag_offset[0] = 0;
     diag_vals[0] = MAGMA_Z_MAKE( 1.0, 0.0 );
     magma_zmgenerator( hALU.num_rows, offdiags, diag_offset, diag_vals, &hD );
+    magma_z_mfree( &hALU);
+
     
     for(i=0; i<hALU.num_rows; i++){
         for(j=hALU.row[i]; j<hALU.row[i+1]; j++){
@@ -484,8 +493,20 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
         }      
     }
 
+
     magma_z_mtransfer( hD, &dD, Magma_CPU, Magma_DEV );
+    magma_z_mfree( &hD);
+
+  //  magma_z_mvisu(dD);
     magma_zcuspmm( dD, dAL, &dL );
+    //magma_z_mvisu(dD);
+    //magma_z_mvisu(dAL);
+    //magma_z_mvisu(dL);
+    magma_z_mfree( &dAL);
+    magma_z_mfree( &dD);
+
+
+
 /*
     // check for diagonal = 1
     magma_z_sparse_matrix dLt, dLL, LL;
@@ -502,14 +523,11 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
 */
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
 
+
     magma_z_mconvert( hL, L, Magma_CSR, Magma_CSRCOO );
 
-    magma_z_mfree( &hAL);
-    magma_z_mfree( &hAU);
-    magma_z_mfree( &hALU);
-    magma_z_mfree( &dALU);
-    magma_z_mfree( &hD);
-    magma_z_mfree( &dD);
+    magma_z_mfree( &dL);
+    magma_z_mfree( &hL);
 
     return MAGMA_SUCCESS; 
 }
