@@ -340,7 +340,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                -----------------------------------------------------------------   */
 
             // === assemble GramB; first, set it to I
-            magmablas_zlaset_identity(ldgram, ldgram, gramB, ldgram);
+            magmablas_zlaset(MagmaFull, ldgram, ldgram, c_zero, c_one, gramB, ldgram);  // identity
 
             if (!restart) {
                 magma_zgemm(MagmaConjTrans, MagmaNoTrans, cBlockSize, n, m,
@@ -369,7 +369,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             }
 
             // === assemble GramA; first, set it to I
-            magmablas_zlaset_identity(ldgram, ldgram, gramA, ldgram);
+            magmablas_zlaset(MagmaFull, ldgram, ldgram, c_zero, c_one, gramA, ldgram);  // identity
 
             magma_zgemm(MagmaConjTrans, MagmaNoTrans, cBlockSize, n, m,
                         c_one, blockR, m, blockAX, m, c_zero, gramA(n,0), ldgram);
