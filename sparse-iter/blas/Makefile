@@ -56,7 +56,6 @@ ZSRC += \
 # Auxiliary routines
 ZSRC += \
 	zcompact.cu		\
-	mtools_zsymmetrize.cu		\
 
 -include Makefile.local
 -include Makefile.src
