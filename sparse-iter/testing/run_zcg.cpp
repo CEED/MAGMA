@@ -120,7 +120,6 @@ int main( int argc, char** argv)
 
         if( version == 0 )
             magma_zcg_res( B_d, b, &x, &solver_par );
-
         else if ( version == 1 )
             magma_zcg_merge( B_d, b, &x, &solver_par );
 

@@ -39,7 +39,6 @@ int main( int argc, char** argv)
     precond_par.solver = Magma_JACOBI;
     int precond = 0;
     int format = 0;
-    int version = 0;
     int scale = 0;
     magma_scale_t scaling = Magma_NOSCALE;
     
@@ -72,8 +71,6 @@ int main( int argc, char** argv)
                 case 0: precond_par.solver = Magma_JACOBI; break;
             }
 
-        }else if ( strcmp("--version", argv[i]) == 0 ) {
-            version = atoi( argv[++i] );
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             B.blocksize = atoi( argv[++i] );
         }else if ( strcmp("--alignment", argv[i]) == 0 ) {
