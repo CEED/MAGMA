@@ -52,37 +52,6 @@ void magmablas_zgemv_tesla(
     magmaDoubleComplex beta,
     magmaDoubleComplex *y, magma_int_t incy );
 
-// for tesla, z is not available, and chemv doesn't have _work interface
-void magmablas_zhemv_tesla(
-    magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex alpha,
-    const magmaDoubleComplex *dA, magma_int_t lda,
-    const magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex *dy, magma_int_t incy );
-
-//void magmablas_zhemv_tesla_work(
-//    magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex alpha,
-//    const magmaDoubleComplex *dA, magma_int_t lda,
-//    const magmaDoubleComplex *dx, magma_int_t incx,
-//    magmaDoubleComplex beta,
-//    magmaDoubleComplex *dy, magma_int_t incy,
-//    magmaDoubleComplex *dwork, magma_int_t lwork );
-
-void magmablas_zsymv_tesla(
-    magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex alpha,
-    const magmaDoubleComplex *dA, magma_int_t lda,
-    const magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex *dy, magma_int_t incy );
-
-void magmablas_zsymv_tesla_work(
-    magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex alpha,
-    const magmaDoubleComplex *dA, magma_int_t lda,
-    const magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex *dy, magma_int_t incy,
-    magmaDoubleComplex *dwork, magma_int_t lwork );
-
 #ifdef __cplusplus
 }
 #endif

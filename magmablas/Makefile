@@ -20,6 +20,7 @@ ZSRC := \
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
 	dgemv_MLU.cu		\
+	zhemv.cu                \
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
 	zlag2c.cu		\
@@ -44,6 +45,7 @@ ZSRC := \
 	zswap.cu		\
 	zswapblk.cu		\
 	zswapdblk.cu		\
+	zsymv.cu                \
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
 	ssyr2k.cu		\
@@ -70,9 +72,6 @@ ZSRC += \
 	\
 	sgemv_tesla.cu		\
 	dgemv_tesla.cu		\
-	\
-	chemv_tesla.cu		\
-	csymv_tesla.cu		\
 
 # Fermi-specific (CUDA arch 2.x) codes
 ZSRC += \
@@ -81,10 +80,6 @@ ZSRC += \
 	sgemv_fermi.cu		\
 	dgemv_fermi.cu		\
 	zgemv_fermi.cu		\
-	\
-	zhemv_fermi.cu		\
-	zsymv_fermi.cu		\
-	#cgemv_fermi.cu		\
 
 # multi-GPU
 ZSRC += \
