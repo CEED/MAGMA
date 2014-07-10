@@ -118,11 +118,11 @@ int main( int argc, char** argv)
         magma_z_vfree(&x);
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-        if( version == 0 )
+        if( version == 0 )  // standard
             magma_zbicgstab( B_d, b, &x, &solver_par );
-        else if ( version == 1 )
+        else if ( version == 1 )    // merged with SpMV isolated
             magma_zbicgstab_merge( B_d, b, &x, &solver_par );
-        else if ( version == 2 )
+        else if ( version == 2 ) // merged SpMV (works only for CSR)
             magma_zbicgstab_merge2( B_d, b, &x, &solver_par );
 
         magma_zsolverinfo( &solver_par, &precond_par );
