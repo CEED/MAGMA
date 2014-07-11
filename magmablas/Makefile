@@ -48,7 +48,6 @@ ZSRC := \
 	zsymv.cu                \
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
-	ssyr2k.cu		\
 	ztranspose.cu		\
 	ztranspose-v2.cu	\
 	ztranspose_inplace.cu	\
