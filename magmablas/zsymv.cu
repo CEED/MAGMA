@@ -24,7 +24,11 @@
 
 
 /*******************************************************************************
-    Lower case, any size n
+    Lower case, compute block multiply, work = A*x, for any size n:
+    
+    [ A11*x1   A12*x2             A13*x3                    ]   [ A11 A12 A13 ]   [ x1 ]
+    [  ---    (A21*x1 + A22*x2)   A23*x3                    ] = [ A21 A22 A23 ] * [ x2 ]
+    [  ---      ---              (A31*x1 + A32*x2 + A33*x3) ]   [ A31 A32 A33 ]   [ x3 ]
     
     Uses a 64x4 thread block.
     For     diagonal tiles, covers a 64x64 tile using three 32x32 tiles (plus one gets transposed).
@@ -35,8 +39,8 @@
     last valid row of A, which multiple threads will read.
     Extra rows are ignored when saving results to work.
     Columns past the right edge are explicitly ignored when loading.
-    x values past the bottom are set to zero.
-    Thus, extra columns are zeroed when multiplying.
+    x values past the bottom are set to zero, thus, extra columns are zeroed
+    when multiplying.
     ********************************************************************/
 __global__ void
 zsymv_kernel_L(
@@ -217,10 +221,9 @@ zsymv_kernel_L(
     // move to off-diag 32x32 block
     A -= half_NB_X*lda;  // A is A(blk_ind + NB/2 + tx2, blk_ind + ty2)
 
-    // load 32x32 block of A into rA, 4 elements per thread
+    // load 32x32 block of A into sA,
     // as four 32x8 sections one after another:
     // columns 0:7, then 8:15, then 16:23, then 24:31
-    // thread (tx2,ty2) has A(tx2, ty2 : 8 : ty2+24) in rA
     if ( partial ) {
         if ( tx2 + half_NB_X >= partial ) {
             A = A - (tx2 + half_NB_X) + (partial - 1);
@@ -228,7 +231,7 @@ zsymv_kernel_L(
         #pragma unroll
         for(int j=0; j < half_NB_X; j += 8) {
             if ( ty2+j < partial ) {
-                rA[j/8] = A[j*lda];
+                sA32(tx2, ty2 + j) = A[j*lda];
             }
         }
         if ( tx2 + half_NB_X >= partial ) {
@@ -238,23 +241,20 @@ zsymv_kernel_L(
     else {
         #pragma unroll
         for(int j=0; j < half_NB_X; j += 8) {
-            rA[j/8] = A[j*lda];
+            sA32(tx2, ty2 + j) = A[j*lda];
         }
-    }
-
-    // (1) multiply 32x32 block
-    //     each thread does partial row rA(tx2, ty2 : 8 : ty2+24)
-    // (2) store transposed block
-    psum = MAGMA_Z_ZERO;
-    #pragma unroll
-    for(int j=0; j < 4; j++) {
-        psum += rA[j] * sx[j*8 + ty2];
-        sA32(tx2, ty2 + j*8) = rA[j];
     }
     __syncthreads();
 
-    // multiply transposed 32x32 block
-    // each thread does partial row sA(...) TODO
+    // multiply 32x32 block (below diag)
+    psum = MAGMA_Z_ZERO;
+    #pragma unroll
+    for(int j=0; j < 4; j++) {
+        psum += sA32(tx2, ty2 + j*8) * sx[j*8 + ty2];
+    }
+    //__syncthreads();  // no sync needed here
+
+    // multiply transposed 32x32 block (above diag)
     psum2 = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
@@ -308,31 +308,29 @@ zsymv_kernel_L(
     const int tx4 = td % quarter_NB_X;
     const int ty4 = td / quarter_NB_X;
 
-    work += blk_ind + tx4;  // work is work(blk_ind + tx4)
+    work += blk*lda + tx4;  // work is work(tx4, blk)
     
     for(int blk2=0; blk2 < blk; ++blk2) {
         // load 64x1 block x(blk2_ind + 0:63) into sx2
-        // note since this is left of diagonal block, x cannot be partial
+        // since this block is left of diagonal, x cannot be partial rows
         if ( ty == 0 ) {
             sx2[tx] = x[blk2*NB_X*incx];
         }
         __syncthreads();
 
-        // TODO beneficial to unroll? doubtful. especially when I add if-then
-        #pragma unroll
         for( int k=0; k < 4; k++ ) {
             // load 64x16 block of A into rA, 4 elements per thread,
             // as four 64x4 sections in parallel:
             // columns 0,4,8,12; then 1,5,9,13; then 2,6,10,14; then 3,7,11,15
-            // note since this is left of diagonal block, there cannot be partial columns
+            // since this block is left of diagonal, it cannot be partial columns
             #pragma unroll
             for(int j=0; j < 4; j++) {
                 rA[j] = A[j*lda];
             }
 
             // 1) multiply 64x16 block A * x2
-            //    each thread does partial row rA(tx, ty*4 : ty*4 + 3)
-            // 2) multiply transposed 16x64 block A**T * x,
+            //    each thread does partial row rA(tx + 16*k, ty*4 + 16*k : ty*4 + 3 + 16*k)
+            // 2) multiply transposed 16x64 block A**H * x,
             //    storing each product Aji*xi to sA(j,i)
             #pragma unroll
             for(int j=0; j < 4; j++) {
@@ -367,7 +365,8 @@ zsymv_kernel_L(
         __syncthreads();
         
         // sum up partial row sums and store final total to workspace
-        // ty4 < 4 is same as ty == 0
+        // thread (tx4,ty4) where ty4 < 4 sums row tx4 + ty4*16
+        // since this is the transposed block above the diagonal, it cannot be partial rows
         if ( ty4 < 4 ) {
             int k = ty4*quarter_NB_X;
             psum2 = sA16(tx4,  0 + k) + sA16(tx4,  1 + k)
@@ -378,7 +377,7 @@ zsymv_kernel_L(
                   + sA16(tx4, 10 + k) + sA16(tx4, 11 + k)
                   + sA16(tx4, 12 + k) + sA16(tx4, 13 + k)
                   + sA16(tx4, 14 + k) + sA16(tx4, 15 + k);
-            work[k + blk2*lda] = psum2;
+            work[blk2*NB_X + k] = psum2;  // store at work( blk2*NB_X + tx4 + ty4*16, blk )
         }
         __syncthreads();
     }
@@ -393,15 +392,34 @@ zsymv_kernel_L(
     // sum up final total for row tx
     if ( ty == 0 && (partial == 0 || tx < partial) ) {
         total = sA16(0, tx) + sA16(1, tx) + sA16(2, tx) + sA16(3, tx);
-        work[0 + lda*blk] = total;
+        work[blk*NB_X] = total;  // store at work( blk*NB_X + tx, blk )
     }
-#endif
+#endif  /* PRECISION_[sdc] || (__CUDA_ARCH__ >= 200) */
 }
 
 
 /**************************************************************
- *    Lower case, sum up final results
- */
+    Lower case, sum up final results
+    
+    On input:
+           [ A11*x1   A12*x2             A13*x3                    ]
+    work = [  ---    (A21*x1 + A22*x2)   A23*x3                    ]
+           [  ---      ---              (A31*x1 + A32*x2 + A33*x3) ]
+    
+    On output:
+              [ A11*x1 + A12*x2 + A13*x3 ]
+    y = alpha*[ A11*x1 + A22*x2 + A23*x3 ] + beta*y
+              [ A21*x1 + A22*x2 + A33*x3 ]
+    
+    
+    Previously:
+           [ A11*x1    ---                                         ]
+    work = [ A12*x2  (A21*x1 + A22*x2)    ---                      ]
+           [ A13*x3   A23*x3            (A31*x1 + A32*x2 + A33*x3) ]
+    which doesn't work as well because A13*x3 has 64 rows,
+    while A31*x1 has only n % NB rows. This is why it used to need
+    lwork = lda*(blocks + 1) instead of lda*blocks.
+    ********************************************************************/
 __global__ void
 zsymv_kernel_L_sum(
     int n, magmaDoubleComplex alpha,
@@ -411,17 +429,17 @@ zsymv_kernel_L_sum(
     magmaDoubleComplex * __restrict__ work )
 {
     int tx  = threadIdx.x;
-    int ind = blockIdx.x * NB_X + tx;
-    magmaDoubleComplex Ax;
-
-    Ax = MAGMA_Z_ZERO;
-    work += ind + lda * blockIdx.x;
-
-    for(int i = blockIdx.x*NB_X; i < n; i += NB_X) {
-        Ax += work[0];
-        work += NB_X;
-    }
+    int blk = blockIdx.x;
+    int blk_ind = blk * NB_X;
+    int ind     = blk_ind + tx;
+    
     if ( ind < n ) {
+        work += ind + blk*lda;
+        magmaDoubleComplex Ax = MAGMA_Z_ZERO;
+        for(int i = blk_ind; i < n; i += NB_X) {
+            Ax += work[0];
+            work += lda;
+        }
         y[ind * incy] = beta*y[ind * incy] + alpha*Ax;
     }
 }
@@ -583,7 +601,7 @@ magmablas_zsymv_work(
     int upper = (uplo == MagmaUpper);
 
     magma_int_t blocks = (n - 1)/NB_X + 1;
-    magma_int_t lwmin  = lda * (blocks + 1);
+    magma_int_t lwmin  = lda*blocks;
 
     /*
      * Test the input parameters.
@@ -769,7 +787,7 @@ magmablas_zsymv(
     else {
         magmaDoubleComplex *dwork;
         magma_int_t blocks = (n - 1)/NB_X + 1;
-        magma_int_t lwork  = lda * (blocks + 1);
+        magma_int_t lwork  = lda*blocks;
 
         // TODO deal with error
         magma_zmalloc( &dwork, lwork );
