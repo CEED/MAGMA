@@ -1300,6 +1300,8 @@ ssyr2k_kernel_odd_special(
 }
 
 /**
+    @deprecated
+    
     Purpose
     -------
     SSYR2K performs one of the symmetric rank 2k operations
@@ -1311,7 +1313,7 @@ ssyr2k_kernel_odd_special(
     and A and B are n by k matrices in the first case and k by n
     matrices in the second case.
 
-    This implementation is for UPLO == 'L' and TRANS == 'N'.
+    This implementation is for UPLO == MagmaLower and TRANS == MagmaNoTrans.
 
     Assumptions
     -----------
@@ -1321,40 +1323,156 @@ ssyr2k_kernel_odd_special(
     We always request the blocking size to be divisible by at least 16.
 
     This kernel goes to about 300 GFlop/s on the GTX280.
+    
+    Arguments
+    ---------
+    @param[in]
+    uplo    magma_uplo_t
+            On entry, UPLO specifies whether the upper or lower
+            triangular part of the array C is to be referenced as
+            follows:
+      -        MagmaUpper   Only the upper triangular part of C is referenced.
+      -        MagmaLower   Only the lower triangular part of C is referenced. -- not implemented.
+            \n
+            Only MagmaLower is implemented.
+   
+    @param[in]
+    trans   magma_trans_t
+            On entry, TRANS specifies the operation to be performed as
+            follows:
+      -        TRANS = MagmaNoTrans     C := alpha*A*B**T + alpha*B*A**T + beta*C.
+      -        TRANS = MagmaTrans       C := alpha*A**T*B + alpha*B**T*A + beta*C. -- not implemented.
+      -        TRANS = MagmaConjTrans   C := alpha*A**T*B + alpha*B**T*A + beta*C. -- not implemented.
+            \n
+            Only MagmaNoTrans is implemented.
+
+    @param[in]
+    n       INTEGER
+            On entry, N specifies the order of the matrix C. N must be
+            at least zero.
+   
+    @param[in]
+    k       INTEGER
+            On entry with TRANS = MagmaNoTrans, K specifies the number
+            of columns of the matrices A and B, and on entry with
+            TRANS = MagmaTrans or MagmaConjTrans, K specifies the number
+            of rows of the matrices A and B. K must be at least zero.
+            \n
+            Assumption: k must be divisible by 8.
+   
+    @param[in]
+    alpha   REAL
+            On entry, ALPHA specifies the scalar alpha.
+   
+    @param[in]
+    A       A is REAL array of DIMENSION ( LDA, ka ), where ka is
+            k when TRANS = MagmaNoTrans, and is n otherwise.
+            Before entry with TRANS = MagmaNoTrans, the leading n by k
+            part of the array A must contain the matrix A, otherwise
+            the leading k by n part of the array A must contain the
+            matrix A.
+   
+    @param[in]
+    lda     INTEGER
+            On entry, LDA specifies the first dimension of A as declared
+            in the calling (sub) program. When TRANS = MagmaNoTrans
+            then LDA must be at least max( 1, n ), otherwise LDA must
+            be at least max( 1, k ).
+            \n
+            Assumption: lda must be divisible by 32.
+   
+    @param[in]
+    B       REAL array of DIMENSION ( LDB, kb ), where kb is
+            k when TRANS = MagmaNoTrans, and is n otherwise.
+            Before entry with TRANS = MagmaNoTrans, the leading n by k
+            part of the array B must contain the matrix B, otherwise
+            the leading k by n part of the array B must contain the
+            matrix B.
+   
+    @param[in]
+    ldb     INTEGER
+            On entry, LDB specifies the first dimension of B as declared
+            in the calling (sub) program. When TRANS = MagmaNoTrans
+            then LDB must be at least max( 1, n ), otherwise LDB must
+            be at least max( 1, k ).
+            \n
+            Assumption: ldb must be divisible by 32.
+   
+    @param[in]
+    BETA    REAL
+            On entry, BETA specifies the scalar beta.
+
+    @param[in,out]
+    C       REAL array of DIMENSION ( LDC, n ).
+            Before entry with UPLO = MagmaUpper, the leading n by n
+            upper triangular part of the array C must contain the upper
+            triangular part of the symmetric matrix and the strictly
+            lower triangular part of C is not referenced. On exit, the
+            upper triangular part of the array C is overwritten by the
+            upper triangular part of the updated matrix.
+            \n
+            Before entry with UPLO = MagmaLower, the leading n by n
+            lower triangular part of the array C must contain the lower
+            triangular part of the symmetric matrix and the strictly
+            upper triangular part of C is not referenced. On exit, the
+            lower triangular part of the array C is overwritten by the
+            lower triangular part of the updated matrix.
+   
+    @param[in]
+    LDC     INTEGER
+            On entry, LDC specifies the first dimension of C as declared
+            in the calling (sub) program. LDC must be at least max( 1, n ).
 
     @ingroup magma_sblas3
     ********************************************************************/
 extern "C" void
 magmablas_ssyr2k(
-    magma_uplo_t uplo, magma_trans_t trans, magma_int_t m, magma_int_t k,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
     float alpha,
     const float *A, magma_int_t lda,
     const float *B, magma_int_t ldb,
     float beta,
     float *C, magma_int_t ldc)
 {
-    magma_int_t in = m / block_M;
+    // only uplo=Lower && trans=NoTrans implemented.
+    magma_int_t info = 0;
+    if ( uplo != MagmaLower )  /*&& uplo != MagmaUpper*/
+        info = -1;
+    else if ( trans != MagmaNoTrans )  /*&& trans != MagmaTrans && trans != MagmaConjTrans*/
+        info = -2;
+    else if ( n < 0 )
+        info = -3;
+    else if ( k < 0 || k % 8 != 0 )
+        info = -4;
+    else if ( (trans == MagmaNoTrans ? lda < n : lda < k) || (lda % 32 != 0) )
+        info = -7;
+    else if ( (trans == MagmaNoTrans ? ldb < n : lda < k) || (ldb % 32 != 0) )
+        info = -9;
+    else if ( ldc < n )
+        info = -12;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
+    magma_int_t in = n / block_M;
     magma_int_t flag = 1;
     if ( lda >= 1024 && lda % 256 == 0 )
         flag = 1; // It was kept to reorder the GPUs internal scheduling of thread blocks.
     
-    if ( uplo != MagmaLower || trans != MagmaNoTrans ) {
-        fprintf( stderr, "%s: only Lower NoTrans implemented\n", __func__ );
-        return;
-    }
-    
-    if ( m % block_M == 0 ) {
+    if ( n % block_M == 0 ) {
         if ( in & 1 ) {
             dim3 grid( in, (in/2 + 1));
             dim3 threads( thread_x, thread_y );
             ssyr2k_kernel_odd_special<<< grid, threads, 0, magma_stream >>>
-                (flag, C, A, B, m, in/2, k, lda, ldb, ldc, alpha, beta);
+                (flag, C, A, B, n, in/2, k, lda, ldb, ldc, alpha, beta);
         }
         else {
             dim3 grid( in + 1, (in/2));
             dim3 threads( thread_x, thread_y );
             ssyr2k_kernel_even_special<<< grid, threads, 0, magma_stream >>>
-                (flag, C, A, B, m, in/2, k, lda, ldb, ldc, alpha, beta);
+                (flag, C, A, B, n, in/2, k, lda, ldb, ldc, alpha, beta);
         }
     }
     else {
@@ -1363,13 +1481,13 @@ magmablas_ssyr2k(
             dim3 grid( in, (in/2 + 1));
             dim3 threads( thread_x, thread_y );
             ssyr2k_kernel_odd_generic<<< grid, threads, 0, magma_stream >>>
-                (C, A, B, m, in/2, k, lda, ldb, ldc, alpha, beta);
+                (C, A, B, n, in/2, k, lda, ldb, ldc, alpha, beta);
         }
         else {
             dim3 grid( in + 1, (in/2));
             dim3 threads( thread_x, thread_y );
             ssyr2k_kernel_even_generic<<< grid, threads, 0, magma_stream >>>
-                (C, A, B, m, in/2, k, lda, ldb, ldc, alpha, beta);
+                (C, A, B, n, in/2, k, lda, ldb, ldc, alpha, beta);
         }
     }
 }
