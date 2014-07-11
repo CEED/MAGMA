@@ -586,7 +586,7 @@ def run( cmd ):
 	failures = 0
 	for line in p.stdout:
 		print line.rstrip()
-		if re.search( 'fail|exit|memory mapping error|CUDA runtime error|illegal value', line ):
+		if re.search( 'fail|exit|memory mapping error|CUDA runtime error|illegal value|ERROR SUMMARY: [1-9]', line ):
 			failures += 1
 	
 	err = p.wait()
