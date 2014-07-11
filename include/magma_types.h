@@ -315,7 +315,8 @@ typedef enum {
 typedef enum {
     MagmaNoTrans       = 111,
     MagmaTrans         = 112,
-    MagmaConjTrans     = 113
+    MagmaConjTrans     = 113,
+    Magma_ConjTrans    = MagmaConjTrans   /* for those rare occasions where we don't want MagmaConjTrans to convert to MagmaTrans in precision generation */
 } magma_trans_t;
 
 typedef enum {
