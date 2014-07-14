@@ -176,7 +176,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
 
         if ( order == MagmaRowMajor ) {
             magma_zsetmatrix( m, n, hA, ldha, dwork, lddwork );
-            magmablas_ztranspose( dA, ldda, dwork, lddwork, m, n );
+            magmablas_ztranspose( m, n, dwork, lddwork, dA, ldda );
         } else {
             magma_zsetmatrix( m, n, hA, ldha, dA, ldda );
         }
@@ -198,7 +198,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
 
             if ( i > 0 ) {
                 // download i-th panel
-                magmablas_ztranspose( dwork, maxm, AT(0, i), ldda, sb, m );
+                magmablas_ztranspose( sb, m, AT(0,i), ldda, dwork, maxm );
                 magma_zgetmatrix( m, sb, dwork, maxm, hA(0, i), ldha );
 
                 // make sure that gpu queue is empty
@@ -250,7 +250,7 @@ magma_zgetrf_incpiv_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magm
 #endif
             // upload i-th panel
             magma_zsetmatrix( rows, sb, hA(i, i), ldha, dwork, cols );
-            magmablas_ztranspose( AT(i,i), ldda, dwork, cols, rows, sb);
+            magmablas_ztranspose( rows, sb, dwork, cols, AT(i,i), ldda );
 
             // do the small non-parallel computations
             if ( s > (i+1) ) {

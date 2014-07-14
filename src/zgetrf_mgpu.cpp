@@ -170,7 +170,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             magma_queue_create( &streaml[i][1] );
             
             magmablasSetKernelStream(streaml[i][1]);
-            magmablas_ztranspose2( d_lAT[i], lddat, d_lA[i], ldda, m, n_local[i] );
+            magmablas_ztranspose( m, n_local[i], d_lA[i], ldda, d_lAT[i], lddat );
         }
         for (i=0; i < num_gpus; i++) {
             magma_setdevice(i);
@@ -202,7 +202,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             magma_setdevice(d);
             
             /* save on output */
-            magmablas_ztranspose2( d_lA[d], ldda, d_lAT[d], lddat, n_local[d], m );
+            magmablas_ztranspose( n_local[d], m, d_lAT[d], lddat, d_lA[d], ldda );
             magma_device_sync();
             magma_free( d_lAT[d]   );
             magma_free( d_panel[d] );

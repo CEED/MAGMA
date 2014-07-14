@@ -141,7 +141,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
             return *info;
         }
         
-        magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
+        magmablas_ztranspose( m, n, dA, lda, dAT, ldat );
     }
     
     magma_zgeqrf2_gpu(n, m, dAT, ldat, tau, &iinfo);
@@ -150,7 +150,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
         magmablas_ztranspose_inplace( m, dAT, ldat );
     }
     else {
-        magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
+        magmablas_ztranspose( n, m, dAT, ldat, dA, lda );
         magma_free( dAT );
     }
 

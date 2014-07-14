@@ -239,7 +239,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                 magma_queue_wait_event( stream[d][0], event[d][0] );
                 
                 /* transpose */
-                magmablas_ztranspose2( dPT(d,0,0), nb, dA[d], maxm-offset, M-offset, nbi);
+                magmablas_ztranspose( M-offset, nbi, dA[d], maxm-offset, dPT(d,0,0), nb );
             }
             
             /* applying the pivot from the previous big-panel */
@@ -272,7 +272,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                         magma_queue_wait_event( stream[d][0], event[d][(1+jj/nb)%2] );
                         
                         /* transpose next column */
-                        magmablas_ztranspose2( dPT(d,0,(1+jj/nb)%2), nb, dA[d], rows-nb, M-ii-nb, nb);
+                        magmablas_ztranspose( M-ii-nb, nb, dA[d], rows-nb, dPT(d,0,(1+jj/nb)%2), nb );
                     }
                     
                     /* update with the block column */

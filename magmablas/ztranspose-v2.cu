@@ -8,201 +8,175 @@
        @precisions normal z -> s d c
 
        @author Stan Tomov
+       @author Mark Gates
 */
 #include "common_magma.h"
+//#include "commonblas.h"
+
 #define PRECISION_z
-#include "commonblas.h"
 
-__global__ void ztranspose3_32( magmaDoubleComplex       *B, int ldb, 
-                                const magmaDoubleComplex *A, int lda,
-                                int m, int m32, int n, int n32)
-{
-    __shared__ magmaDoubleComplex sA[32][ZSIZE_1SHARED+1];
-
-    int inx = threadIdx.x;
-    int iny = threadIdx.y;
-    int ibx = blockIdx.x*32;
-    int iby = blockIdx.y*32;
-
-    A += ibx + inx + __mul24( iby + iny, lda );
-    B += iby + inx + __mul24( ibx + iny, ldb );
-
-    int t2 = iby+iny;
-    if (ibx+inx < m) {
-        if (t2   < n) {
-            sA[iny+0][inx] = A[0*lda];
-            if (t2+ 8 < n) {
-                sA[iny+8][inx] = A[8*lda];
-                if (t2 + 16 < n) {
-                    sA[iny+16][inx] = A[16*lda];
-                    if (t2 + 24 < n) {
-                        sA[iny+24][inx] = A[24*lda];
-                    }
-                }
-            }
-        }
-    }
-    __syncthreads();
-
-#if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
-    t2 = ibx + iny;
-    if (iby + inx < n) {
-        if (t2 < m) {
-            B[0*ldb] = sA[inx][iny+0];
-            if (t2 + 8 < m) {
-                B[8*ldb] = sA[inx][iny+8];
-                if (t2 + 16 < m) {
-                    B[16*ldb] = sA[inx][iny+16];
-                    if (t2 + 24 < m) {
-                        B[24*ldb] = sA[inx][iny+24];
-                    }
-                }
-            }
-        }
-    }
-#else /* defined(PRECISION_z) */
-    if (iby + inx < n) {
-        if (ibx + iny < m) {
-            B[0*ldb] = sA[inx][iny+0];
-            if (ibx + iny + 8 < m) {
-                B[8*ldb] = sA[inx][iny+8];
-            }
-        }                
-        if (iby + inx + 16 < n) {
-            if (ibx + iny < m) {
-                B[0*ldb+16] = sA[inx+16][iny+0];
-                if (ibx + iny + 8 < m) {
-                    B[8*ldb+16] = sA[inx+16][iny+8];
-                }
-            }
-        }
-    }
-    
-    __syncthreads();
-    A += ZSIZE_1SHARED;
-    B += __mul24( 16, ldb );
-
-    sA[iny+ 0][inx] = A[ 0*lda];
-    sA[iny+ 8][inx] = A[ 8*lda];
-    sA[iny+16][inx] = A[16*lda];
-    sA[iny+24][inx] = A[24*lda];
-
-    __syncthreads();
-
-    if (iby + inx < n) {
-        if (ibx + iny + 16 < m) {
-            B[0*ldb] = sA[inx][iny+0];
-            if (ibx + iny + 24 < m) {
-                B[8*ldb] = sA[inx][iny+8];
-            }
-        }                
-        if (iby + inx + 16 < n) {
-            if (ibx + iny + 16 < m) {
-                B[0*ldb+16] = sA[inx+16][iny+0];
-                if (ibx + iny + 24 < m) {
-                    B[8*ldb+16] = sA[inx+16][iny+8];
-                }
-            }
-        }
-    }
+#if defined(PRECISION_z)
+    #define NX 16
+#else
+    #define NX 32
 #endif
 
-}
+#define NB 32
+#define NY 8
 
 
+// tile M-by-N matrix with ceil(M/NB) by ceil(N/NB) tiles sized NB-by-NB.
+// uses NX-by-NY threads, where NB/NX, NB/NY, NX/NY evenly.
+// subtile each NB-by-NB tile with (NB/NX) subtiles sized NX-by-NB
+// for each subtile
+//     load NX-by-NB subtile transposed from A into sA, as (NB/NY) blocks sized NX-by-NY
+//     save NB-by-NX subtile from sA into AT,   as (NB/NX)*(NX/NY) blocks sized NX-by-NY
+//     A  += NX
+//     AT += NX*ldat
+//
+// e.g., with NB=32, NX=32, NY=8 ([sdc] precisions)
+//     load 32x32 subtile as 4   blocks of 32x8 columns: (A11  A12  A13  A14 )
+//     save 32x32 subtile as 1*4 blocks of 32x8 columns: (AT11 AT12 AT13 AT14)
+//
+// e.g., with NB=32, NX=16, NY=8 (z precision)
+//     load 16x32 subtile as 4   blocks of 16x8 columns: (A11  A12  A13  A14)
+//     save 32x16 subtile as 2*2 blocks of 16x8 columns: (AT11 AT12)
+//                                                       (AT21 AT22)
+__global__ void
+ztranspose_kernel(
+    int m, int n,
+    const magmaDoubleComplex *A, int lda,
+    magmaDoubleComplex *AT,      int ldat)
+{
+    __shared__ magmaDoubleComplex sA[NB][NX+1];
 
-__global__ void ztranspose2_32( magmaDoubleComplex       *B, int ldb, 
-                                const magmaDoubleComplex *A, int lda, 
-                                int m, int m32, int n, int n32)
-{        
-    __shared__ magmaDoubleComplex sA[32][ZSIZE_1SHARED+1];
+    int tx  = threadIdx.x;
+    int ty  = threadIdx.y;
+    int ibx = blockIdx.x*NB;
+    int iby = blockIdx.y*NB;
+    int i, j;
     
-    int inx = threadIdx.x;
-    int iny = threadIdx.y;
-    int ibx = blockIdx.x*32;
-    int iby = blockIdx.y*32;
+    A  += ibx + tx + (iby + ty)*lda;
+    AT += iby + tx + (ibx + ty)*ldat;
     
-    int dx, dy;
-    if (ibx+32 < m)
-       dx = 0;
-    else
-       dx = m32;
-
-    if (iby+32 < n)
-       dy = 0;
-    else
-       dy = n32;
-
-    A += ibx + inx - dx + __mul24( iby + iny - dy, lda );
-    B += iby + inx - dy + __mul24( ibx + iny - dx, ldb );
-    
-    sA[iny+0][inx] = A[0*lda];
-    sA[iny+8][inx] = A[8*lda];
-    sA[iny+16][inx] = A[16*lda];
-    sA[iny+24][inx] = A[24*lda];
-    
-    __syncthreads();
+    #pragma unroll
+    for( int tile=0; tile < NB/NX; ++tile ) {
+        // load NX-by-NB subtile transposed from A into sA
+        i = ibx + tx + tile*NX;
+        j = iby + ty;
+        if (i < m) {
+            #pragma unroll
+            for( int j2=0; j2 < NB; j2 += NY ) {
+                if (j + j2 < n) {
+                    sA[ty + j2][tx] = A[j2*lda];
+                }
+            }
+        }
+        __syncthreads();
         
-#if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
-    B[ 0*ldb] = sA[inx][iny+0];
-    B[ 8*ldb] = sA[inx][iny+8];
-    B[16*ldb] = sA[inx][iny+16];
-    B[24*ldb] = sA[inx][iny+24];
-#else /* defined(PRECISION_z) */
-    B[0*ldb]    = sA[inx][iny+0];
-    B[8*ldb]    = sA[inx][iny+8];
-    B[0*ldb+16] = sA[inx+16][iny+0];
-    B[8*ldb+16] = sA[inx+16][iny+8];
-    
-    __syncthreads();
-    A += ZSIZE_1SHARED;
-    B += __mul24( 16, ldb );
-    
-    sA[iny+ 0][inx] = A[ 0*lda];
-    sA[iny+ 8][inx] = A[ 8*lda];
-    sA[iny+16][inx] = A[16*lda];
-    sA[iny+24][inx] = A[24*lda];
-    
-    __syncthreads();
-    
-    B[0*ldb]    = sA[inx   ][iny+0];
-    B[8*ldb]    = sA[inx   ][iny+8];
-    B[0*ldb+16] = sA[inx+16][iny+0];
-    B[8*ldb+16] = sA[inx+16][iny+8];
-#endif
-} 
-
-//
-//        m, n - dimensions in the source (input) matrix
-//             This version transposes for general m, n .
-//             Note that ldi >= m and ldo >= n.
-//
-extern "C" void 
-magmablas_ztranspose2(magmaDoubleComplex       *odata, magma_int_t ldo, 
-                      const magmaDoubleComplex *idata, magma_int_t ldi, 
-                      magma_int_t m, magma_int_t n )
-{
-    /* Quick return */
-    if ( (m == 0) || (n == 0) )
-        return;
-
-    dim3 threads( ZSIZE_1SHARED, 8, 1 );
-    dim3 grid( (m+31)/32, (n+31)/32, 1 );
-    ztranspose3_32<<< grid, threads, 0, magma_stream >>>(
-        odata, ldo, idata, ldi, m, (32-m%32)%32, n, (32-n%32)%32 );
+        // save NB-by-NX subtile from sA into AT
+        i = iby + tx;
+        j = ibx + ty + tile*NX;
+        #pragma unroll
+        for( int i2=0; i2 < NB; i2 += NX ) {
+            if (i + i2 < n) {
+                #pragma unroll
+                for( int j2=0; j2 < NX; j2 += NY ) {
+                    if (j + j2 < m) {
+                        AT[i2 + j2*ldat] = sA[tx + i2][ty + j2];
+                    }
+                }
+            }
+        }
+        __syncthreads();
+        
+        // move to next subtile
+        A  += NX;
+        AT += NX*ldat;
+    }
 }
 
+
+/**
+    Purpose
+    -------
+    ztranspose_stream copies and transposes a matrix dA to matrix dAT.
+    
+    Same as ztranspose, but adds stream argument.
+        
+    Arguments
+    ---------
+    @param[in]
+    m       INTEGER
+            The number of rows of the matrix dA.  M >= 0.
+    
+    @param[in]
+    n       INTEGER
+            The number of columns of the matrix dA.  N >= 0.
+    
+    @param[in]
+    dA      COMPLEX_16 array, dimension (LDDA,N)
+            The M-by-N matrix dA.
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA.  LDDA >= M.
+    
+    @param[in]
+    dAT     COMPLEX_16 array, dimension (LDDA,N)
+            The N-by-M matrix dAT.
+    
+    @param[in]
+    lddat   INTEGER
+            The leading dimension of the array dAT.  LDDAT >= N.
+    
+    @param[in]
+    stream  magma_queue_t
+            Stream to execute in.
+    
+    @ingroup magma_zaux2
+    ********************************************************************/
 extern "C" void
-magmablas_ztranspose2s(magmaDoubleComplex       *odata, magma_int_t ldo,
-                       const magmaDoubleComplex *idata, magma_int_t ldi,
-                       magma_int_t m, magma_int_t n, magma_queue_t stream )
+magmablas_ztranspose_stream(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *dA,  magma_int_t ldda,
+    magmaDoubleComplex       *dAT, magma_int_t lddat, magma_queue_t stream )
 {
+    magma_int_t info = 0;
+    if ( m < 0 )
+        info = -1;
+    else if ( n < 0 )
+        info = -2;
+    else if ( ldda < m )
+        info = -4;
+    else if ( lddat < n )
+        info = -6;
+    
+    if ( info != 0 ) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
     /* Quick return */
     if ( (m == 0) || (n == 0) )
         return;
 
-    dim3 threads( ZSIZE_1SHARED, 8, 1 );
-    dim3 grid( (m+31)/32, (n+31)/32, 1 );
-    ztranspose3_32<<< grid, threads, 0, stream >>>(
-        odata, ldo, idata, ldi, m, (32-m%32)%32, n, (32-n%32)%32 );
+    dim3 threads( NX, NY );
+    dim3 grid( (m+NB-1)/NB, (n+NB-1)/NB );
+    ztranspose_kernel<<< grid, threads, 0, stream >>>
+        ( m, n, dA, ldda, dAT, lddat );
+}
+
+
+/**
+    @see magmablas_ztranspose_stream
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_ztranspose(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *dA,  magma_int_t ldda,
+    magmaDoubleComplex       *dAT, magma_int_t lddat )
+{
+    magmablas_ztranspose_stream( m, n, dA, ldda, dAT, lddat, magma_stream );
 }

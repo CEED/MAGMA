@@ -56,10 +56,6 @@ magmablas_zsetmatrix_transpose_mgpu(
                                dB(d, id), lddb, 
                                stream[d][id] );
 
-       magmablasSetKernelStream(stream[d][id]);
-       magmablas_ztranspose2(dAT(d, j_local), ldda, 
-                             dB(d, id),       lddb, 
-                             m, ib);
+       magmablas_ztranspose_stream( m, ib, dB(d,id), lddb, dAT(d,j_local), ldda, stream[d][id] );
     }
 }
-
