@@ -80,7 +80,7 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
             The number of rows of the matrix dA.  M >= 0.
     
     @param[in,out]
-    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             The m by m matrix dA.
     
     @param[in]

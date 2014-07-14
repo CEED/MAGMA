@@ -90,7 +90,7 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
             The number of rows & columns of each square block of dA.  M >= 0.
     
     @param[in,out]
-    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             The matrix dA. N = m + nstride*(ntile-1).
     
     @param[in]

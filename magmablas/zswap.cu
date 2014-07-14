@@ -28,9 +28,9 @@ typedef struct {
 
 __global__ void magmagpu_zswap( magmagpu_zswap_params_t params )
 {
-    unsigned int x = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
-    unsigned int offset1 = __mul24( x, params.lda1);
-    unsigned int offset2 = __mul24( x, params.lda2);
+    unsigned int x = threadIdx.x + blockDim.x*blockIdx.x;
+    unsigned int offset1 = x*params.lda1;
+    unsigned int offset2 = x*params.lda2;
     if( x < params.n )
     {
         magmaDoubleComplex *A1  = params.A1 + offset1;

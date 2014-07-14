@@ -10,11 +10,8 @@
 */
 #include "common_magma.h"
 
-//#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 512
-//#else
-//   #define BLOCK_SIZE 768
-//#endif
+// 512 is maximum number of threads for CUDA capability 1.x
+#define BLOCK_SIZE 512
 
 __global__ void 
 magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt,

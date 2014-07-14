@@ -130,63 +130,6 @@ void zlaset_upper(
 /**
     Purpose
     -------
-    ZLASET initializes a 2-D array A to DIAG on the diagonal and
-    OFFDIAG on the off-diagonals.
-    
-    Arguments
-    ---------
-    
-    @param[in]
-    uplo    magma_uplo_t
-            Specifies the part of the matrix dA to be set.
-      -     = MagmaUpper:      Upper triangular part
-      -     = MagmaLower:      Lower triangular part
-            Otherwise:         All of the matrix dA is set.
-    
-    @param[in]
-    m       INTEGER
-            The number of rows of the matrix dA.  M >= 0.
-    
-    @param[in]
-    n       INTEGER
-            The number of columns of the matrix dA.  N >= 0.
-    
-    @param[in]
-    offdiag COMPLEX_16
-            The scalar OFFDIAG. (In LAPACK this is called ALPHA.)
-    
-    @param[in]
-    diag    COMPLEX_16
-            The scalar DIAG. (In LAPACK this is called BETA.)
-    
-    @param[in]
-    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
-            The m by n matrix dA.
-            If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
-            if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
-            On exit, A(i,j) = OFFDIAG, 1 <= i <= m, 1 <= j <= n, i != j;
-                     A(i,i) = DIAG,    1 <= i <= min(m,n)
-    
-    @param[in]
-    ldda    INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,M).
-    
-
-    @ingroup magma_zaux2
-    ********************************************************************/
-extern "C"
-void magmablas_zlaset(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *dA, magma_int_t ldda )
-{
-    magmablas_zlaset_stream( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
-}
-
-
-/**
-    Purpose
-    -------
     ZLASET_STREAM initializes a 2-D array A to DIAG on the diagonal and
     OFFDIAG on the off-diagonals.
     
@@ -218,7 +161,7 @@ void magmablas_zlaset(
             The scalar DIAG. (In LAPACK this is called BETA.)
     
     @param[in]
-    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             The M-by-N matrix dA.
             If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
             if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
@@ -272,6 +215,19 @@ void magmablas_zlaset_stream(
         zlaset_full <<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
 }
 
+
+/**
+    @see magmablas_zlaset_stream
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C"
+void magmablas_zlaset(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex offdiag, magmaDoubleComplex diag,
+    magmaDoubleComplex *dA, magma_int_t ldda )
+{
+    magmablas_zlaset_stream( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
+}
 
 
 #define LASET_BAND_NB 64
@@ -417,15 +373,15 @@ void zlaset_band_lower(
             Currently, K <= 1024 due to CUDA restrictions (max. number of threads per block).
     
     @param[in]
-    OFFDIAG COMPLEX_16
+    offdiag COMPLEX_16
             Off-diagonal elements in the band are set to OFFDIAG.
     
     @param[in]
-    DIAG    COMPLEX_16
+    diag    COMPLEX_16
             All the main diagonal elements are set to DIAG.
     
     @param[in]
-    dA      COMPLEX DOUBLE PRECISION array, dimension (LDDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             The M-by-N matrix dA.
             If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
             if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
