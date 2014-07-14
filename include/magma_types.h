@@ -13,6 +13,12 @@
 #include <assert.h>
 
 
+// each implementation of MAGMA defines HAVE_* appropriately.
+#if ! defined(HAVE_CUBLAS) && ! defined(HAVE_clAmdBlas) && ! defined(HAVE_MIC)
+#define HAVE_CUBLAS
+#endif
+
+
 // ========================================
 // C99 standard defines __func__. Some older compilers use __FUNCTION__.
 // Note __func__ in C99 is not a macro, so ifndef __func__ doesn't work.

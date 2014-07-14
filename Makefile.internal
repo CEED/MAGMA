@@ -80,8 +80,8 @@ endif
 ifeq ($(NV_COMP),)
     $(error GPU_TARGET, currently $(GPU_TARGET), must contain one or more of Tesla, Fermi, Kepler, or sm{10,13,20,30,35}. Please edit your make.inc file)
 endif
-NVOPTS += -DHAVE_CUBLAS $(NV_SM) $(NV_COMP)
-OPTS   += -DHAVE_CUBLAS -DMIN_CUDA_ARCH=$(MIN_ARCH)
+NVOPTS += $(NV_SM) $(NV_COMP)
+OPTS   += -DMIN_CUDA_ARCH=$(MIN_ARCH)
 
 
 LIBEXT = $(LIBDIR) $(LIB)
