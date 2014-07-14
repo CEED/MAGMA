@@ -48,7 +48,7 @@ ZSRC := \
 	zsymv.cu                \
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
-	ztranspose-v2.cu	\
+	ztranspose.cu		\
 	ztranspose_inplace.cu	\
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
