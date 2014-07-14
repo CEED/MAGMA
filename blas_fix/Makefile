@@ -63,9 +63,10 @@ OBJ := $(addsuffix .o, $(basename $(SRC)))
 .PHONY: all clean cleanall
 
 .DEFAULT_GOAL := all
-all: libblas_fix.a
 
-libblas_fix.a: $(OBJ)
+all: $(BLAS_FIX)
+
+$(BLAS_FIX): $(OBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $^
 	$(RANLIB) $@
 

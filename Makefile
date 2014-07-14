@@ -88,17 +88,28 @@ cleanall:
 cleanall2:
 	@echo
 
-dir:
+# filter out MAGMA-specific options for pkg-config
+INSTALL_OPTS := $(filter-out \
+	-DMAGMA_SETAFFINITY -DMAGMA_WITH_ACML -DMAGMA_WITH_MKL -DUSE_FLOCK \
+	-DMIN_CUDA_ARCH=100 -DMIN_CUDA_ARCH=200 -DMIN_CUDA_ARCH=300 \
+	-fno-strict-aliasing -fPIC -O0 -O1 -O2 -O3 -pedantic -stdc++98 \
+	-Wall -Wno-long-long, $(OPTS))
+
+INSTALL_LDOPTS := $(filter-out \
+	-fPIC -Wall -Xlinker -zmuldefs, $(LDOPTS))
+
+install_dirs:
 	mkdir -p $(prefix)
 	mkdir -p $(prefix)/include
 	mkdir -p $(prefix)/lib
 	mkdir -p $(prefix)/lib/pkgconfig
 
-install: lib dir
+install: lib install_dirs
 	# MAGMA
 	cp $(MAGMA_DIR)/include/*.h  $(prefix)/include
 	cp $(LIBMAGMA)               $(prefix)/lib
 	-cp $(LIBMAGMA_SO)           $(prefix)/lib
+	-cp $(BLAS_FIX)              $(prefix)/lib
 	# QUARK
 	# cp $(QUARKDIR)/include/quark.h             $(prefix)/include
 	# cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
@@ -106,11 +117,11 @@ install: lib dir
 	# cp $(QUARKDIR)/include/icl_list.h          $(prefix)/include
 	# cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
 	# pkgconfig
-	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc.in | \
-	    sed -e s:@INSTALL_PREFIX@:"$(prefix)": | \
-	    sed -e s:@INCLUDES@:"$(INC)":          | \
-	    sed -e s:@LIBEXT@:"$(LIBEXT)":         | \
-	    sed -e s:@MAGMA_REQUIRED@::              \
+	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc.in         | \
+	    sed -e s:@INSTALL_PREFIX@:"$(prefix)":         | \
+	    sed -e s:@CFLAGS@:"$(INSTALL_OPTS) $(INC)":    | \
+	    sed -e s:@LIBS@:"$(INSTALL_LDOPTS) $(LIBEXT)": | \
+	    sed -e s:@MAGMA_REQUIRED@::                      \
 	    > $(prefix)/lib/pkgconfig/magma.pc
 
 # ========================================
@@ -126,9 +137,9 @@ fpic = $(and $(findstring -fPIC, $(OPTS)), \
              $(findstring -fPIC, $(F77OPTS)), \
              $(findstring -fPIC, $(NVOPTS)))
 
-ifneq ($(fpic),)
-
 LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
+
+ifneq ($(fpic),)
 
 shared: lib
 	$(MAKE) $(LIBMAGMA_SO)

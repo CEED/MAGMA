@@ -6,8 +6,8 @@ includedir=${prefix}/include
 Name: magma
 Description: Matrix Algebra on GPU and Multicore Architectures
 Version: 0.0.0
-Cflags: -I${includedir} @INCLUDES@
-Libs: -L${libdir} -lmagma @LIBEXT@
+Cflags: -I${includedir} @CFLAGS@
+Libs: -L${libdir} -lmagma @LIBS@
 Libs.private:
 Requires: @MAGMA_REQUIRED@
 Requires.private:
