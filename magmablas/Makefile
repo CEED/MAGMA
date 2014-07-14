@@ -32,7 +32,7 @@ ZSRC := \
 	zlarf.cu		\
 	zlarfbx.cu		\
 	zlarfx.cu		\
-	dlarfg.cu		\
+	zlarfg.cu		\
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
 	zlascl.cu		\

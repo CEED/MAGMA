@@ -384,6 +384,11 @@ double magmablas_zlansy(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDouble_ptr dwork );
 
+void magmablas_zlarfg(
+    magma_int_t n,
+    magmaDoubleComplex *dalpha, magmaDoubleComplex *dx, magma_int_t incx,
+    magmaDoubleComplex *dtau );
+
 void magmablas_zlascl(
     magma_type_t type, magma_int_t kl, magma_int_t ku,
     double cfrom, double cto,
@@ -439,9 +444,6 @@ void magmablas_zsymmetrize_tiles(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride );
 
-void magma_zlarfg(
-    magma_int_t n, magmaDoubleComplex *alpha,
-    magmaDoubleComplex *x, magma_int_t incx, magmaDoubleComplex *tau );
 
 void magma_zlarfg_gpu(
     magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
