@@ -18,19 +18,46 @@
     ---------
     @param[in]
     srname  CHAR*
-            The name of the routine which called XERBLA.
+            The name of the subroutine that called XERBLA.
             In C/C++ it is convenient to use "__func__".
 
     @param[in]
-    info    INTEGER
-            The position of the invalid parameter in the parameter list
-            of the calling routine.
+    minfo   INTEGER
+            Note minfo's sign is opposite info's normal sign.
+            
+            Normally:
+            - minfo > 0: The position of the invalid parameter
+                         in the parameter list of the calling routine.
+            
+            These conditions are also reported, but normally code should not
+            call xerbla for these runtime errors:
+            - minfo <  0:          Function-specific error.
+            - minfo >= -MAGMA_ERR: Pre-defined MAGMA error, such as malloc failure.
+            - minfo == 0:          No error.
 
     @ingroup magma_aux
     ********************************************************************/
 extern "C"
-void magma_xerbla(const char *srname , magma_int_t info)
+void magma_xerbla(const char *srname , magma_int_t minfo)
 {
-    fprintf( stderr, "On entry to %s, parameter %d had an illegal value\n",
-             srname, (int) info );
+    // the first 3 cases are unusual for calling xerbla;
+    // normally runtime errors are passed back in info.
+    if ( minfo < 0 ) {
+        fprintf( stderr, "Error in %s, function-specific error (info = %d)\n",
+                 srname, (int) -minfo );
+    }
+    else if ( minfo == 0 ) {
+        fprintf( stderr, "No error, why is %s calling xerbla? (info = %d)\n",
+                 srname, (int) -minfo );
+    }
+    else if ( minfo >= -MAGMA_ERR ) {
+        fprintf( stderr, "Error in %s, %s (info = %d)\n",
+                 srname, magma_strerror(-minfo), (int) -minfo );
+    }
+    else {
+        // this is the normal case for calling xerbla;
+        // invalid parameter values are usually logic errors, not runtime errors.
+        fprintf( stderr, "On entry to %s, parameter %d had an illegal value (info = %d)\n",
+                 srname, (int) minfo, (int) -minfo );
+    }
 }

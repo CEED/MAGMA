@@ -223,10 +223,31 @@ void test_num_threads()
 
 
 ////////////////////////////////////////////////////////////////////////////
+void test_xerbla()
+{
+    magma_int_t info;
+    info = -MAGMA_ERR_DEVICE_ALLOC;  magma_xerbla( __func__, -(info) );
+    info = -MAGMA_ERR_HOST_ALLOC;    magma_xerbla( __func__, -(info) );
+    info = -MAGMA_ERR;               magma_xerbla( __func__, -(info) );
+    info =  3;                       magma_xerbla( __func__, -(info) );
+    info =  2;                       magma_xerbla( __func__, -(info) );
+    info =  1;                       magma_xerbla( __func__, -(info) );
+    info =  0;                       magma_xerbla( __func__, -(info) );
+    info = -1;                       magma_xerbla( __func__, -(info) );
+    info = -2;                       magma_xerbla( __func__, -(info) );
+    info = -3;                       magma_xerbla( __func__, -(info) );
+    info = MAGMA_ERR;                magma_xerbla( __func__, -(info) );
+    info = MAGMA_ERR_HOST_ALLOC;     magma_xerbla( __func__, -(info) );
+    info = MAGMA_ERR_DEVICE_ALLOC;   magma_xerbla( __func__, -(info) );
+}
+
+
+////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv )
 {
     test_num_gpus();
     test_num_threads();
+    test_xerbla();
     
     if ( gFailures > 0 ) {
         printf( "\n%d tests failed.\n", gFailures );
