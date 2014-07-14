@@ -63,6 +63,6 @@ BLAS_FIX  = $(MAGMA_DIR)/lib/libblas_fix.a
 
 blas_fix:
 	@echo "======================================== BLAS fix for MacOS"
-	( cd blas_fix       && $(MAKE) )
+	( cd $(MAGMA_DIR)/blas_fix && $(MAKE) )
 
 lib: blas_fix
