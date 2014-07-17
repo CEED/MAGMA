@@ -211,6 +211,7 @@ typedef struct magma_opts
     int lapack;
     int warmup;
     int all;
+    int verbose;
     
     // lapack flags
     magma_uplo_t    uplo;
