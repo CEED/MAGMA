@@ -33,7 +33,9 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
         __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
         magmaDoubleComplex lsum;
 
-        /*  w := v' * C  */
+        /* NOTE HERE C is the C at position C(i, 0) 
+         * if blockIdx.x<it it performs the V(i:n,i)' * V(i:n,1:i-1)' used for computing T
+         * if blockIdx.x>it it perform  w := v' * C  */
         lsum = MAGMA_Z_ZERO;
         for( int j = i; j < m; j += BLOCK_SIZE ){
             if (j==0){
