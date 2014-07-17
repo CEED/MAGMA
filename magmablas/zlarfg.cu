@@ -10,7 +10,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include "operators.h"
 #include "magma_templates.h"
 
 #define COMPLEX
