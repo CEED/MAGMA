@@ -25,6 +25,7 @@ ZSRC := \
 	testing_ztrmv.cpp	\
 	testing_ztrsm.cpp	\
 	testing_ztrsv.cpp	\
+	testing_ztrtri_diag.cpp	\
 	\
 	testing_zhemm_mgpu.cpp	\
 	testing_zhemv_mgpu.cpp	\

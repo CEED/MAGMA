@@ -11,7 +11,14 @@ MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR := \
-	commonblas_z.h
+	commonblas_z.h		\
+	ztrtri.h		\
+
+# additional dependencies
+strtri_diag.o: strtri.h
+dtrtri_diag.o: dtrtri.h
+ctrtri_diag.o: ctrtri.h
+ztrtri_diag.o: ztrtri.h
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
@@ -53,7 +60,9 @@ ZSRC := \
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
 	ztrsm.cu		\
-	ztrtri_kernel.cu	\
+	ztrtri_diag.cu		\
+	ztrtri_lower.cu		\
+	ztrtri_upper.cu		\
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
