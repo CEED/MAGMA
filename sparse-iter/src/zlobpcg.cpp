@@ -91,12 +91,12 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define h_gramB(  m, n)   (h_gramB   + (m) + (n)*ldgram)
 
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
-            magmablas_ztranspose2( blockW, n,      X, m, m, n );        \
+            magmablas_ztranspose( m, n, X, m, blockW, n );        	\
             magma_z_vector x, ax;                                       \
             x.memory_location = Magma_DEV;  x.num_rows = m*n;  x.nnz = m*n;  x.val = blockW; \
             ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax );                           \
-            magmablas_ztranspose2(      X, m, blockW, n, n, m );            \
+            magmablas_ztranspose( n, m, blockW, n, X, m );            		\
 }
 
 
