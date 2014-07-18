@@ -37,7 +37,7 @@ void zgeadd(
     #define A(i_, j_) (A + (i_) + (j_)*lda)
     #define B(i_, j_) (B + (i_) + (j_)*ldb)
     
-    const int ione = 1;
+    const magma_int_t ione = 1;
     
     for( int j=0; j < n; ++j ) {
         blasf77_zaxpy( &m, &alpha, A(0,j), &ione, B(0,j), &ione );
