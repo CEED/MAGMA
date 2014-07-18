@@ -379,7 +379,10 @@ qr = (
 	'./testing_zgelqf_gpu        -c' + mn,
 	'./testing_zgels_gpu         -c' + mn,
 	'./testing_zgels3_gpu        -c' + mn,
-	'#./testing_zgegqr_gpu        -c' + mn,  # fails badly
+	'./testing_zgegqr_gpu --version 1 -c' + mn,
+	'./testing_zgegqr_gpu --version 2 -c' + mn,
+	'./testing_zgegqr_gpu --version 3 -c' + mn,
+	'./testing_zgegqr_gpu --version 4 -c' + mn,
 	'#./testing_zgeqp3_gpu        -c' + mn,  # fails badly
 	'./testing_zgeqr2_gpu        -c' + mn,
 	'./testing_zgeqr2x_gpu       -c' + mn,
@@ -431,8 +434,8 @@ syev = (
 	
 # ----------
 # symmetric eigenvalues, 2-stage
-	'#./testing_zhetrd_he2hb   -L -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage
-	'#./testing_zhetrd_he2hb   -U -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage, upper not implemented
+	#'./testing_zhetrd_he2hb   -L -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage
+	#'./testing_zhetrd_he2hb   -U -c' + n,      # NOT hetrd_he2hb -- callsy heevdx_2stage, upper not implemented
 	
 	'#./testing_zheevdx_2stage -L -JN -c' + n,  # -c implies -JV
 	'#./testing_zheevdx_2stage -U -JN -c' + n,  # -c implies -JV
@@ -675,7 +678,7 @@ for test in tests:
 			sys.stderr.flush()
 			
 			if ( disabled ):
-				sys.stderr.write( '  ** test disabled\n' )
+				sys.stderr.write( '  (disabled)\n' )
 				go = False
 				continue
 			# end
