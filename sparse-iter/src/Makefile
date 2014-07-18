@@ -23,7 +23,7 @@ INC += -g3
 # Krylov space linear solvers
 ZSRC += \
 	zcg.cpp			\
-	zcg_res.cpp			\
+	zcg_res.cpp		\
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
@@ -31,10 +31,10 @@ ZSRC += \
 	ziterref.cpp		\
 	zgmres.cpp		\
 	zjacobi.cpp		\
-	zbaiter.cpp 	\
+	zbaiter.cpp 	        \
 	zpcg.cpp		\
-    zpbicgstab.cpp		\
-    zpgmres.cpp		\
+        zpbicgstab.cpp		\
+        zpgmres.cpp		\
 #	ziterref.cpp		\
 #	zcg_merge.cpp		\
 #	zgmres.cpp		\
@@ -68,9 +68,9 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zbcsrlu.cpp		\
-    zcuilu.cpp		\
-    zbailu.cpp		\
-    zpastix.cpp     \
+    	zcuilu.cpp		\
+    	zbailu.cpp		\
+    	zpastix.cpp     	\
 #	zilu.cpp		\
 
 
