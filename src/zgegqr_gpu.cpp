@@ -13,6 +13,11 @@
 
 #define PRECISION_z
 
+// === Define what BLAS to use ============================================
+//#if defined(PRECISION_s) || defined(PRECISION_d)
+    #define magma_ztrsm magmablas_ztrsm
+//#endif
+// === End defining what BLAS to use ======================================
 
 /**
     Purpose
@@ -171,11 +176,7 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                 blasf77_ztrmm("l", "u", "n", "n", &n, &n, &c_one, VT, &n, R, &n);
             
             magma_zsetmatrix(n, n, VT, n, dwork, n);
-            #if defined(PRECISION_s) || defined(PRECISION_d)
-            magmablas_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, c_one, dwork, n, dA, ldda);
-            #else
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit, m, n, c_one, dwork, n, dA, ldda);
-            #endif
             if (mins > 0.00001f)
                 cn = maxs/mins;
             
