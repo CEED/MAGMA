@@ -11,9 +11,9 @@
 #include "common_magma.h"
 #include "trace.h"
 
-/* === Define what BLAS to use ============================================ */
 #define PRECISION_z
 
+/* === Define what BLAS to use ============================================ */
 #if defined(PRECISION_s) || defined(PRECISION_d)
 //#define ZTRSM_WORK
 #endif
