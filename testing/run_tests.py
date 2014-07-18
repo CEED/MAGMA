@@ -184,7 +184,7 @@ blas = (
 	'./testing_zgemm  -l -NC         -c' + mnk,
 	'./testing_zgemm  -l -CN         -c' + mnk,
 	'./testing_zgemm  -l -CC         -c' + mnk,
-	                                 
+	
 	'./testing_zgemv                 -c' + mn,
 	'./testing_zgemv  -C             -c' + mn,
 	
@@ -241,25 +241,25 @@ blas = (
 	'./testing_ztrmv      -U -C -DU  -c' + n,    # cublas only
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
-	'#./testing_ztrsm  -SL -L    -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -L    -DU  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -L -C -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -L -C -DU  -c' + mn,  # has issues
+	'./testing_ztrsm  -SL -L    -DN  -c' + mn,
+	'./testing_ztrsm  -SL -L    -DU  -c' + mn,
+	'./testing_ztrsm  -SL -L -C -DN  -c' + mn,
+	'./testing_ztrsm  -SL -L -C -DU  -c' + mn,
 	
-	'#./testing_ztrsm  -SL -U    -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -U    -DU  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -U -C -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SL -U -C -DU  -c' + mn,  # has issues
+	'./testing_ztrsm  -SL -U    -DN  -c' + mn,
+	'./testing_ztrsm  -SL -U    -DU  -c' + mn,
+	'./testing_ztrsm  -SL -U -C -DN  -c' + mn,
+	'./testing_ztrsm  -SL -U -C -DU  -c' + mn,
 	
-	'#./testing_ztrsm  -SR -L    -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -L    -DU  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -L -C -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -L -C -DU  -c' + mn,  # has issues
+	'./testing_ztrsm  -SR -L    -DN  -c' + mn,
+	'./testing_ztrsm  -SR -L    -DU  -c' + mn,
+	'./testing_ztrsm  -SR -L -C -DN  -c' + mn,
+	'./testing_ztrsm  -SR -L -C -DU  -c' + mn,
 	
-	'#./testing_ztrsm  -SR -U    -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -U    -DU  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -U -C -DN  -c' + mn,  # has issues
-	'#./testing_ztrsm  -SR -U -C -DU  -c' + mn,  # has issues
+	'./testing_ztrsm  -SR -U    -DN  -c' + mn,
+	'./testing_ztrsm  -SR -U    -DU  -c' + mn,
+	'./testing_ztrsm  -SR -U -C -DN  -c' + mn,
+	'./testing_ztrsm  -SR -U -C -DU  -c' + mn,
 	
 	# lower/upper, no-trans/conj-trans, non-unit/unit diag
 	'./testing_ztrsv      -L    -DN  -c' + n,    # cublas only
@@ -271,6 +271,10 @@ blas = (
 	'./testing_ztrsv      -U    -DU  -c' + n,    # cublas only
 	'./testing_ztrsv      -U -C -DN  -c' + n,    # cublas only
 	'./testing_ztrsv      -U -C -DU  -c' + n,    # cublas only
+	
+	# lower/upper
+	'./testing_ztrtri_diag        -L -c' + n,
+	'./testing_ztrtri_diag        -U -c' + n,
 	
 	'./testing_zblas                 -c' + mnk,  # cublas only
 )
@@ -289,25 +293,25 @@ aux = (
 	'./testing_zlacpy_batched        -c' + mn,   # TODO implement uplo
 	'./testing_zlag2c                -c' + mn,
 	'./testing_zlange                -c' + mn,
-	                                 
-	# lower/upper                    
+	
+	# lower/upper
 	'./testing_zlanhe -L             -c' + n,
 	'./testing_zlanhe -U             -c' + n,
-	                                 
+	
 	'./testing_zlarfg                -c' + n,
 	'./testing_zlaset                -c' + mn,
 	'./testing_zlaset_band           -c' + mn,
 	'./testing_znan_inf              -c' + mn,
 	'./testing_zprint                -c -N 10 -N 5,100 -N 100,5',
-	                                 
-	# lower/upper                    
+	
+	# lower/upper
 	'./testing_zsymmetrize -L        -c' + n,
 	'./testing_zsymmetrize -U        -c' + n,
-	                                 
-	# lower/upper                    
+	
+	# lower/upper
 	'./testing_zsymmetrize_tiles -L  -c' + n,
 	'./testing_zsymmetrize_tiles -U  -c' + n,
-	                                 
+	
 	'./testing_zswap                 -c' + n,
 	'./testing_ztranspose            -c' + mn,
 )
