@@ -1,6 +1,6 @@
 /**
  *
- * @file magmawinthread.h
+ * magmawinthread.h
  *
  *  This file handles the mapping from pthreads calls to windows threads.
  *  MAGMA is a software package provided by Univ. of Tennessee,
