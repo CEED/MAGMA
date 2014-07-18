@@ -91,6 +91,9 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dwork, magmaDoubleComplex *work,
                   magma_int_t *info )
 {
+    #define work(i_,j_) (work + (i_) + (j_)*n)
+    #define dA(i_,j_)   (dA   + (i_) + (j_)*ldda)
+    
     magma_int_t i = 0, j, k, n2 = n*n;
     magma_int_t ione = 1;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -99,12 +102,14 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
 
     /* check arguments */
     *info = 0;
-    if (m < 0 || m < n) {
+    if (ikind < 1 || ikind > 4) {
         *info = -1;
-    } else if (n < 0 || n > 128) {
+    } else if (m < 0 || m < n) {
         *info = -2;
+    } else if (n < 0 || n > 128) {
+        *info = -3;
     } else if (ldda < max(1,m)) {
-        *info = -4;
+        *info = -5;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -192,7 +197,7 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
     else if (ikind == 2) {
         // ================== LAPACK based      ===================================================
         magma_int_t min_mn = min(m, n);
-        int             nb = n;
+        magma_int_t nb = n;
 
         magmaDoubleComplex *dtau = dwork + 2*n*n, *d_T = dwork, *ddA = dwork + n*n;
         magmaDoubleComplex *tau  = work+n*n;
@@ -207,8 +212,6 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
     }
     else if (ikind == 3) {
         // ================== MGS               ===================================================
-        #define work(i,j) (work + (i) + (j)*n)
-        #define dA(  i,j) (dA   + (i) + (j)*ldda)
         for(magma_int_t j = 0; j<n; j++){
             for(magma_int_t i = 0; i<j; i++){
                 *work(i, j) = magma_zdotc(m, dA(0,i), 1, dA(0,j), 1);
