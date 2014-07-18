@@ -232,8 +232,10 @@ ZSRC += \
 	ztrevc3.cpp		\
 	ztrevc3_mt.cpp		\
 	zunghr.cpp		\
-	lapack_dtrevc3.f	\
-	lapack_ztrevc3.f	\
+
+# use ztrevc3 and ztrevc3_mt instead
+	#lapack_dtrevc3.f	\
+	#lapack_ztrevc3.f	\
 
 # non-symmetric eigenvalues, multi-GPU
 ZSRC += \
