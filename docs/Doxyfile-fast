@@ -982,11 +982,9 @@ INPUT                  = doxygen-modules.h \
 	../control/zpanel_to_q.cpp             \
 	../control/zprint.cpp                  \
 	../magmablas/cgemm_fermi_kernels.h          \
-	../magmablas/chemv_tesla.cu                 \
 	../magmablas/clag2z.cu                      \
 	../magmablas/commonblas.h                   \
 	../magmablas/commonblas_z.h                 \
-	../magmablas/csymv_tesla.cu                 \
 	../magmablas/dgemm_fermi_kernels.h          \
 	../magmablas/dgemm_tesla.cu                 \
 	../magmablas/dgemm_tesla_N_N.cu             \
@@ -1000,14 +998,13 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/dgemv_MLU.cu                   \
 	../magmablas/dgemv_fermi.cu                 \
 	../magmablas/dgemv_tesla.cu                 \
-	../magmablas/dlarfg.cu                      \
 	../magmablas/dznrm2.cu                      \
 	../magmablas/gemm_stencil.cu                \
 	../magmablas/gemm_stencil_defs.h            \
+	../magmablas/magma_templates.h              \
 	../magmablas/sgemm_fermi_kernels.h          \
 	../magmablas/sgemv_fermi.cu                 \
 	../magmablas/sgemv_tesla.cu                 \
-	../magmablas/ssyr2k.cu                      \
 	../magmablas/stream.cu                      \
 	../magmablas/zbcyclic.cu                    \
 	../magmablas/zcaxpycp.cu                    \
@@ -1028,7 +1025,7 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/zhemm_1gpu_old.cpp             \
 	../magmablas/zhemm_mgpu.cpp                 \
 	../magmablas/zhemm_mgpu_spec.cpp            \
-	../magmablas/zhemv_fermi.cu                 \
+	../magmablas/zhemv.cu                       \
 	../magmablas/zhemv_fermi_mgpu.cu            \
 	../magmablas/zhemv_fermi_mgpu_32.cu         \
 	../magmablas/zher2k_mgpu.cpp                \
@@ -1044,6 +1041,7 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/zlarf.cu                       \
 	../magmablas/zlarfbx.cu                     \
 	../magmablas/zlarfg-v2.cu                   \
+	../magmablas/zlarfg.cu                      \
 	../magmablas/zlarfgx-v2.cu                  \
 	../magmablas/zlarfx.cu                      \
 	../magmablas/zlascl.cu                      \
@@ -1058,14 +1056,16 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/zswapdblk.cu                   \
 	../magmablas/zsymmetrize.cu                 \
 	../magmablas/zsymmetrize_tiles.cu           \
-	../magmablas/zsymv_fermi.cu                 \
-	../magmablas/ztranspose-v2.cu               \
+	../magmablas/zsymv.cu                       \
 	../magmablas/ztranspose.cu                  \
 	../magmablas/ztranspose_inplace.cu          \
 	../magmablas/ztrsm.cu                       \
-	../magmablas/ztrsm_work.cu                  \
-	../magmablas/ztrtri_kernel.cu               \
+	../magmablas/ztrtri.h                       \
+	../magmablas/ztrtri_diag.cu                 \
+	../magmablas/ztrtri_lower.cu                \
+	../magmablas/ztrtri_upper.cu                \
 	../sparse-iter/src/magma_z_precond_wrapper.cpp   \
+	../sparse-iter/src/magma_zcuspmm.cpp             \
 	../sparse-iter/src/zbailu.cpp                    \
 	../sparse-iter/src/zbaiter.cpp                   \
 	../sparse-iter/src/zbcsrlu.cpp                   \
@@ -1108,6 +1108,7 @@ INPUT                  = doxygen-modules.h \
 	../sparse-iter/control/magma_zgeneratematrix.cpp  \
 	../sparse-iter/control/magma_zilustruct.cpp       \
 	../sparse-iter/control/magma_zmhom.cpp            \
+	../sparse-iter/control/magma_zmreorder.cpp        \
 	../sparse-iter/control/magma_zmscale.cpp          \
 	../sparse-iter/control/magma_zmsort.cpp           \
 	../sparse-iter/control/magma_zp2p.cpp             \
@@ -1121,8 +1122,10 @@ INPUT                  = doxygen-modules.h \
 	../sparse-iter/blas/magma_z_mpksetup.cu        \
 	../sparse-iter/blas/magma_zbitflip.cu          \
 	../sparse-iter/blas/magma_zlag2c.cpp           \
+	../sparse-iter/blas/zaicc_chow_csr_a.cu        \
 	../sparse-iter/blas/zaicc_chow_csr_c.cu        \
 	../sparse-iter/blas/zaicc_chow_csr_s.cu        \
+	../sparse-iter/blas/zailu_chow_csr_a.cu        \
 	../sparse-iter/blas/zailu_chow_csr_s.cu        \
 	../sparse-iter/blas/zailu_chow_csr_s_debug.cu  \
 	../sparse-iter/blas/zbajac_csr.cu              \
