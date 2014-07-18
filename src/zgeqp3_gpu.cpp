@@ -105,7 +105,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                   #endif
                   magma_int_t *info )
 {
-#define  A(i, j) (dA     + (i) + (j)*(ldda ))
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
 
     magma_int_t ione = 1;
 
@@ -168,7 +168,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     for (j = 0; j < n; ++j) {
         if (jpvt[j] != 0) {
             if (j != nfxd) {
-                blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
+                blasf77_zswap(&m, dA(0, j), &ione, dA(0, nfxd), &ione);  // TODO: matrix not on CPU!
                 jpvt[j]    = jpvt[nfxd];
                 jpvt[nfxd] = j + 1;
             }
@@ -192,7 +192,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         if (na < n) {
             n_j = n - na;
             lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &m, &n_j, &na,
-                              A, &lda, tau, A(0, na), &lda,
+                              A, &lda, tau, dA(0, na), &lda,
                               dwork, &lwork, info );
         }
     }*/
@@ -208,19 +208,19 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
             
             // Set the original matrix to the GPU
             magma_zsetmatrix_async( m, sn,
-                                    A (0,j), lda,
+                                     A(0,j), lda,
                                     dA(0,j), ldda, stream[0] );
         }*/
 
         /* Initialize partial column norms. */
-        magmablas_dznrm2_cols(sm, sn, A(nfxd,nfxd), ldda, &rwork[nfxd]);
+        magmablas_dznrm2_cols(sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd]);
 #if defined(PRECISION_d) || defined(PRECISION_z)
         magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
 #else
         magma_scopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
 #endif
         /*for (j = nfxd; j < n; ++j) {
-            rwork[j] = cblas_dznrm2(sm, A(nfxd, j), ione);
+            rwork[j] = cblas_dznrm2(sm, dA(nfxd, j), ione);
             rwork[n + j] = rwork[j];
         }*/
         
@@ -242,18 +242,18 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                     // Get panel to the CPU
                     magma_zgetmatrix( m-j, jb,
                                       dA(j,j), ldda,
-                                      A (j,j), lda );
+                                       A(j,j), lda );
                     
                     // Get the rows
                     magma_zgetmatrix( jb, n_j - jb,
                                       dA(j,j + jb), ldda,
-                                      A (j,j + jb), lda );
+                                       A(j,j + jb), lda );
                 }*/
 
                 //magma_zlaqps_gpu    // this is a cpp-file
                 magma_zlaqps2_gpu   // this is a cuda-file
                     ( m, n_j, j, jb, &fjb,
-                      A (0, j), ldda,
+                      dA(0, j), ldda,
                       &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
                       dwork,
                       &df[jb],   n_j );
@@ -268,9 +268,9 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
             if (j > nfxd) {
                 magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
-                                  A (j,j), lda );
+                                   A(j,j), lda );
             }
-            lapackf77_zlaqp2(&m, &n_j, &j, A(0, j), &lda, &jpvt[j],
+            lapackf77_zlaqp2(&m, &n_j, &j, dA(0, j), &lda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], dwork );
         }*/
     }
