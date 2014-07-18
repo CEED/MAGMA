@@ -54,9 +54,8 @@ int main( int argc, char** argv )
 
     real_Double_t   gflops, magma_perf, magma_time=0;  //, cpu_perf=0, cpu_time=0;
     double          magma_error, norm_invA, work[1];
-    magma_int_t N, info;
-    magma_int_t sizeA;
-    magma_int_t lda, ldda;
+    magma_int_t N, lda, ldda, info;
+    magma_int_t jb, nb, nblock, sizeA, size_inv;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t *ipiv;
@@ -74,7 +73,7 @@ int main( int argc, char** argv )
     const char *uplo_ = lapack_uplo_const(opts.uplo);
 
     // this is the NB hard coded into ztrtri_diag.
-    int nb = 128;
+    nb = 128;
     
     printf("uplo = %s, diag = %s\n",
            lapack_uplo_const(opts.uplo), lapack_diag_const(opts.diag) );
@@ -85,13 +84,13 @@ int main( int argc, char** argv )
             N = opts.nsize[itest];
             lda = N;
             ldda = ((lda+31)/32)*32;
-            int nblock = (N+nb-1)/nb;
+            nblock = (N+nb-1)/nb;
             gflops = nblock * FLOPS_ZTRTRI( nb ) / 1e9;
             
             TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, lda*N );
             TESTING_MALLOC_CPU( ipiv,   magma_int_t,        N     );
             
-            int size_inv = nblock*nb*nb;
+            size_inv = nblock*nb*nb;
             TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( d_dinvA, magmaDoubleComplex, size_inv );
             TESTING_MALLOC_CPU( h_dinvA, magmaDoubleComplex, size_inv );
@@ -148,7 +147,7 @@ int main( int argc, char** argv )
                 magma_error = 0;
                 norm_invA   = 0;
                 for( int i=0; i < N; i += nb ) {
-                    int jb = min( nb, N-i );
+                    jb = min( nb, N-i );
                     zgeadd( jb, jb, c_neg_one, h_A(i, i), lda, h_dinvA(0, i), nb );
                     magma_error = max( magma_error, lapackf77_zlantr( "M", uplo_, MagmaNonUnitStr, &jb, &jb, h_dinvA(0, i), &nb,  work ));
                     norm_invA   = max( norm_invA,   lapackf77_zlantr( "M", uplo_, MagmaNonUnitStr, &jb, &jb, h_A(i, i),     &lda, work ));
