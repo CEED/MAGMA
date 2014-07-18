@@ -35,6 +35,7 @@ int main( int argc, char** argv)
     solver_par.maxiter = 1000;
     solver_par.verbose = 0;
     solver_par.num_eigenvalues = 32;
+    solver_par.solver = Magma_LOBPCG;
     magma_z_preconditioner precond_par;
     precond_par.solver = Magma_JACOBI;
     int precond = 0;
