@@ -155,7 +155,7 @@ magma_zaic_csr_c( magma_z_sparse_matrix A,
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
     magma_zaic_csr_c_kernel<<< grid, block, 0, magma_stream >>>
-            ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, A_CSR.blockinfo,  A_CSR.col, val_n );
+            ( A.num_rows, A.nnz,  A.val, A_CSR.val, A_CSR.row, A_CSR.rowidx,  A_CSR.col, val_n );
 
     //magma_zcopyvector( A.nnz, val_n, 1, A_CSR.val, 1 );
     magma_free( val_n );
