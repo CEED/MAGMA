@@ -132,7 +132,7 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
         hwork[0] = c_one;
         return *info;
     }
-    lddwork= k;
+    lddwork = k;
 
     /* B := Q' * B */
     magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans,
@@ -144,11 +144,11 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     }
 
     /* Solve R*X = B(1:n,:)
-       1. Move the block diagonal submatrices from dT to R
+       1. Move the (k-1)/nb block diagonal submatrices from dT to R
        2. Solve
        3. Restore the data format moving data from R back to dT
     */
-    magmablas_zswapdblk(k, nb, dA(0,0), ldda, 1, dT(0), nb, 0);
+    magmablas_zswapdblk(k-1, nb, dA(0,0), ldda, 1, dT(0), nb, 0);
     if ( nrhs == 1 ) {
         magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                     n, dA(0,0), ldda, dB, 1);
@@ -156,7 +156,7 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
         magma_ztrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                     n, nrhs, c_one, dA(0,0), ldda, dB, lddb);
     }
-    magmablas_zswapdblk(k, nb, dT(0), nb, 0, dA(0,0), ldda, 1);
+    magmablas_zswapdblk(k-1, nb, dT(0), nb, 0, dA(0,0), ldda, 1);
 
     return *info;
 }
