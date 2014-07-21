@@ -742,6 +742,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
                        &B->val, &B->row, &B->col, &B->num_rows );  
+            B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }        
