@@ -562,7 +562,15 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
 
-/**
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
     Purpose
     -------
 
@@ -588,88 +596,6 @@ magma_zcuiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 magma_int_t
 magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x, 
-                    magma_z_preconditioner *precond ){
-
-            magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0);
-
-            // CUSPARSE context //
-            cusparseHandle_t cusparseHandle;
-            cusparseStatus_t cusparseStatus;
-            cusparseStatus = cusparseCreate(&cusparseHandle);
-             if(cusparseStatus != 0)    printf("error in Handle.\n");
-
-
-            cusparseMatDescr_t descrL;
-            cusparseStatus = cusparseCreateMatDescr(&descrL);
-             if(cusparseStatus != 0)    printf("error in MatrDescr.\n");
-
-            cusparseStatus =
-            cusparseSetMatType(descrL,CUSPARSE_MATRIX_TYPE_TRIANGULAR);
-             if(cusparseStatus != 0)    printf("error in MatrType.\n");
-
-            cusparseStatus =
-            cusparseSetMatDiagType (descrL, CUSPARSE_DIAG_TYPE_NON_UNIT);
-             if(cusparseStatus != 0)    printf("error in DiagType.\n");
-
-            cusparseStatus =
-            cusparseSetMatIndexBase(descrL,CUSPARSE_INDEX_BASE_ZERO);
-             if(cusparseStatus != 0)    printf("error in IndexBase.\n");
-
-
-            cusparseStatus =
-            cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_LOWER);
-             if(cusparseStatus != 0)    printf("error in fillmode.\n");
-
-            // end CUSPARSE context //
-
-            cusparseStatus =
-            cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                    precond->M.num_rows, &one, 
-                                    descrL,
-                                    precond->M.val,
-                                    precond->M.row,
-                                    precond->M.col,
-                                    precond->cuinfoL,
-                                    b.val,
-                                    x->val );
-             if(cusparseStatus != 0)   printf("error in L triangular solve:%d.\n", precond->cuinfoL );
-
-
-    cusparseDestroyMatDescr( descrL );
-    cusparseDestroy( cusparseHandle );
-    magma_device_sync();
-    return MAGMA_SUCCESS;
-
-}
-
-
-/**
-    Purpose
-    -------
-
-    Performs the right triangular solves using the ICC preconditioner.
-
-    Arguments
-    ---------
-
-    @param
-    b           magma_z_vector
-                RHS
-
-    @param
-    x           magma_z_vector*
-                vector to precondition
-
-    @param
-    precond     magma_z_preconditioner*
-                preconditioner parameters
-
-    @ingroup magmasparse_zsypr
-    ********************************************************************/
-
-magma_int_t
-magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x, 
                     magma_z_preconditioner *precond ){
 
             magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0);
@@ -707,7 +633,7 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
 
             cusparseStatus =
             cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_TRANSPOSE, 
+                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                     precond->M.num_rows, &one, 
                                     descrU,
                                     precond->M.val,
@@ -716,7 +642,7 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
                                     precond->cuinfoU,
                                     b.val,
                                     x->val );
-             if(cusparseStatus != 0)   printf("error in U triangular solve:%d.\n", precond->cuinfoU );
+             if(cusparseStatus != 0)   printf("error in L triangular solve:%d.\n", precond->cuinfoL );
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
@@ -730,7 +656,91 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
 
 
 
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
 
+    Purpose
+    -------
+
+    Performs the right triangular solves using the ICC preconditioner.
+
+    Arguments
+    ---------
+
+    @param
+    b           magma_z_vector
+                RHS
+
+    @param
+    x           magma_z_vector*
+                vector to precondition
+
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_zsypr
+    ********************************************************************/
+
+magma_int_t
+magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond ){
+
+            magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0);
+
+            // CUSPARSE context //
+            cusparseHandle_t cusparseHandle;
+            cusparseStatus_t cusparseStatus;
+            cusparseStatus = cusparseCreate(&cusparseHandle);
+             if(cusparseStatus != 0)    printf("error in Handle.\n");
+
+
+            cusparseMatDescr_t descrL;
+            cusparseStatus = cusparseCreateMatDescr(&descrL);
+             if(cusparseStatus != 0)    printf("error in MatrDescr.\n");
+
+            cusparseStatus =
+            cusparseSetMatType(descrL,CUSPARSE_MATRIX_TYPE_TRIANGULAR);
+             if(cusparseStatus != 0)    printf("error in MatrType.\n");
+
+            cusparseStatus =
+            cusparseSetMatDiagType (descrL, CUSPARSE_DIAG_TYPE_NON_UNIT);
+             if(cusparseStatus != 0)    printf("error in DiagType.\n");
+
+            cusparseStatus =
+            cusparseSetMatIndexBase(descrL,CUSPARSE_INDEX_BASE_ZERO);
+             if(cusparseStatus != 0)    printf("error in IndexBase.\n");
+
+
+            cusparseStatus =
+            cusparseSetMatFillMode(descrL,CUSPARSE_FILL_MODE_LOWER);
+             if(cusparseStatus != 0)    printf("error in fillmode.\n");
+
+            // end CUSPARSE context //
+
+            cusparseStatus =
+            cusparseZcsrsv_solve(   cusparseHandle, 
+                                    CUSPARSE_OPERATION_TRANSPOSE, 
+                                    precond->M.num_rows, &one, 
+                                    descrL,
+                                    precond->M.val,
+                                    precond->M.row,
+                                    precond->M.col,
+                                    precond->cuinfoL,
+                                    b.val,
+                                    x->val );
+             if(cusparseStatus != 0)   printf("error in U triangular solve:%d.\n", precond->cuinfoU );
+
+
+    cusparseDestroyMatDescr( descrL );
+    cusparseDestroy( cusparseHandle );
+    magma_device_sync();
+    return MAGMA_SUCCESS;
+
+}
 
 
 
