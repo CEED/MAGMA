@@ -394,6 +394,7 @@ aux = (
 	('testing_zlanhe',  '-U             -c',  n,    ''),
 	
 	('testing_zlarfg',                 '-c',  n,    ''),
+	('testing_zlascl',                 '-c',  mn,   ''),
 	('testing_zlaset',                 '-c',  mn,   ''),
 	('testing_zlaset_band',            '-c',  mn,   ''),
 	('testing_znan_inf',               '-c',  mn,   ''),
