@@ -348,6 +348,24 @@ void magmablas_zgemv_batched(
     magmaDoubleComplex beta, magmaDoubleComplex **y_array,  magma_int_t incy, 
     magma_int_t batchCount)
 {       
+    magma_int_t info = 0;
+    if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
+        info = -1;
+    else if ( m < 0 )
+        info = -2;
+    else if ( n < 0 )
+        info = -3;
+    else if ( lda < m )
+        info = -6;
+    else if ( incx == 0 )
+        info = -8;
+    else if ( incy == 0 )
+        info = -11;
+
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
 
     if ( trans == MagmaNoTrans ) {
 
