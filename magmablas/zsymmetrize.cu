@@ -93,12 +93,22 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
 extern "C" void
 magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
 {
-    //printf( "m %d, grid %d, threads %d\n", m, grid.x, threads.x );
+    magma_int_t info = 0;
+    if ( uplo != MagmaLower && uplo != MagmaUpper )
+        info = -1;
+    else if ( m < 0 )
+        info = -2;
+    else if ( ldda < max(1,m) )
+        info = -4;
+    
+    if ( info != 0 ) {
+        magma_xerbla( __func__, -(info) );
+        return;
+    }
+    
     if ( m == 0 )
         return;
     
-    assert( m >= 0 );
-    assert( ldda >= m );
     
     dim3 threads( NB );
     dim3 grid( (m + NB - 1)/NB );
@@ -106,11 +116,7 @@ magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA,
     if ( uplo == MagmaUpper ) {
         zsymmetrize_upper<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
     }
-    else if ( uplo == MagmaLower ) {
-        zsymmetrize_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
-    }
     else {
-        printf( "uplo has illegal value\n" );
-        exit(1);
+        zsymmetrize_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
     }
 }
