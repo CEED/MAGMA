@@ -81,9 +81,10 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             // warmup
-            magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
-
-            magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
+            if ( opts.warmup ) {
+                magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
+                magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
+            }
             
             /* ====================================================================
                Performs operation using MAGMA
