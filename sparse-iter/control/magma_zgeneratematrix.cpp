@@ -212,23 +212,6 @@ magma_zm_27stencil(  magma_int_t n,
         magma_index_t l_bound = i*n;
         magma_index_t u_bound = (i+1)*n;
         for( k=hA.row[row]; k<hA.row[row+1]; k++){
-            //if( (hA.col[k] < l_bound || hA.col[k] >= u_bound) &&  )
-     /*       if( hA.col[k] == row-1 ||
-                hA.col[k] == row+1 ||
-                hA.col[k] == row-n-1 ||
-                hA.col[k] == row-n+1 ||
-                hA.col[k] == row-+n-1 ||
-                hA.col[k] == row+n+1 ||
-                hA.col[k] == row-n*n+n-1 ||
-                hA.col[k] == row-n*n+n+1 ||
-                hA.col[k] == row+n*n-n-1 ||
-                hA.col[k] == row+n*n-n+1 ||
-                hA.col[k] == row-n*n-n-1 ||
-                hA.col[k] == row-n*n-n+1 ||
-                hA.col[k] == row+n*n+n-1 ||
-                hA.col[k] == row+n*n+n+1 )
-                    
-                    hA.val[k] = MAGMA_Z_MAKE( 0.0, 0.0 );*/
 
             if((hA.col[k] == row-1 ||
                 hA.col[k] == row-n-1 ||

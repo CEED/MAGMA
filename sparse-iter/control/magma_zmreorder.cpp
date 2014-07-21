@@ -82,25 +82,23 @@ magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t a,
 
 if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         
-        magma_int_t entry, i, j, k, l;
+        magma_index_t entry;
         magma_z_mtransfer( A, B, Magma_CPU, Magma_CPU );
 
         magma_index_t *p;
-        magma_index_malloc_cpu( &p, A.nnz );
+        magma_index_malloc_cpu( &p, A.num_rows );
 
         magma_int_t countn=0;
-        for( magma_int_t i=0; i<n; i+=a){
-        for( magma_int_t j=0; j<n; j+=b){
-        for( magma_int_t k=0; k<n; k+=c){
+        for( magma_index_t i=0; i<n; i+=a){
+        for( magma_index_t j=0; j<n; j+=b){
+        for( magma_index_t k=0; k<n; k+=c){
 
-            for(magma_int_t b1=0; b1<a; b1++){
-            for(magma_int_t b2=0; b2<b; b2++){
-            for(magma_int_t b3=0; b3<c; b3++){
+            for(magma_index_t b1=0; b1<a; b1++){
+            for(magma_index_t b2=0; b2<b; b2++){
+            for(magma_index_t b3=0; b3<c; b3++){
                     entry = (i+b1)*n*n+(j+b2)*n+(k+b3);
                     p[countn] = entry;
-
-
-         //           printf("p[%d]=%d\n",countn, entry);
+                    //printf("p[%d]=%d\n",countn, entry);
                     countn++;
 
             }
@@ -108,13 +106,13 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
             }
 
 
-        }// row
         }// i
-        }// p
+        }// j
+        }// k
         countn = 0;
-        for( i=0; i<A.num_rows; i++ ){
+        for( magma_index_t i=0; i<A.num_rows; i++ ){
 
-                for( j=A.row[p[i]]; j<A.row[p[i]+1]; j++ ){
+                for( magma_index_t j=A.row[p[i]]; j<A.row[p[i]+1]; j++ ){
        //         printf("j: %d\n", j);
                     B->val[countn] = A.val[j];
                     B->col[countn] = A.col[j];
@@ -123,26 +121,33 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
                 }
         }
 
-        for( i=0; i<A.nnz; i++ ){
-            //    printf("B[%d]:  %d  %d  %f\n",i, B->rowidx[i], B->col[i], B->val[i]);
-        }
-
-
-
-   /*             magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
-                magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
-                                            A.row[row+1] : A.num_rows;
-                printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
-                for( entry=A.row[row]; entry<bound; entry++){
-                    p_h[count] = entry;
-                    count++;
-                }*/
-
-
-
         magma_free_cpu( p );
 
+/*
+            // print the reordering
+            magma_z_sparse_matrix Z;
+            Z.storage_type = Magma_DENSE;
+            Z.memory_location = A.memory_location;
+            Z.num_rows = A.num_rows;
+            Z.num_cols = A.num_cols;
+            Z.nnz = A.nnz;
 
+            // conversion
+            magma_zmalloc_cpu( &Z.val, A.num_rows*A.num_cols );
+
+            for( magma_int_t i=0; i<(A.num_rows)*(A.num_cols); i++){
+                Z.val[i] = MAGMA_Z_MAKE(0., 0.);
+            }
+
+            for(magma_int_t i=0; i<A.nnz; i++ ){
+                    Z.val[ B->rowidx[i] * (B->num_cols) + B->col[i] ] =  
+                                            MAGMA_Z_MAKE( (double) i, 0.0 );
+            }
+            magma_z_mvisu( Z );
+
+            magma_z_mfree( &Z );
+            // end print the reordering
+*/
 
         
         return MAGMA_SUCCESS; 

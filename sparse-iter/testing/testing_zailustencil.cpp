@@ -48,8 +48,8 @@ int main( int argc, char** argv)
         //                      matrix generator                          //
         //################################################################//
 
- /*   // generate matrix of desired structure and size (3d 27-point stencil)
-    int n=64;   // size is n*n*n
+    // generate matrix of desired structure and size (3d 27-point stencil)
+   /* int n=4;   // size is n*n*n
     magma_int_t nn = n*n*n;
     magma_int_t offdiags = 13;
     magma_index_t *diag_offset;
@@ -85,9 +85,44 @@ int main( int argc, char** argv)
     diag_vals[11] = MAGMA_Z_MAKE( -1.0, 0.0 );
     diag_vals[12] = MAGMA_Z_MAKE( -1.0, 0.0 );
     diag_vals[13] = MAGMA_Z_MAKE( -1.0, 0.0 );
-    magma_zmgenerator( nn, offdiags, diag_offset, diag_vals, &hA );*/
+    magma_zmgenerator( nn, offdiags, diag_offset, diag_vals, &hA );
 
-    int n=64;
+    // now set some entries to zero (boundary...)
+    for(int  i=0; i<n*n; i++ ){
+    for(int  j=0; j<n; j++ ){
+        magma_index_t row = i*n+j;
+        magma_index_t l_bound = i*n;
+        magma_index_t u_bound = (i+1)*n;
+        for(int  k=hA.row[row]; k<hA.row[row+1]; k++){
+
+            if((hA.col[k] == row-1 ||
+                hA.col[k] == row-n-1 ||
+                hA.col[k] == row+n-1 ||
+                hA.col[k] == row-n*n+n-1 ||
+                hA.col[k] == row+n*n-n-1 ||
+                hA.col[k] == row-n*n-1 ||
+                hA.col[k] == row+n*n-1 ||
+                hA.col[k] == row-n*n-n-1 ||
+                hA.col[k] == row+n*n+n-1 ) && (row+1)%n == 1 )
+                    
+                    hA.val[k] = MAGMA_Z_MAKE( 0.0, 0.0 );
+
+            if((hA.col[k] == row+1 ||
+                hA.col[k] == row-n+1 ||
+                hA.col[k] == row+n+1 ||
+                hA.col[k] == row-n*n+n+1 ||
+                hA.col[k] == row+n*n-n+1 ||
+                hA.col[k] == row-n*n+1 ||
+                hA.col[k] == row+n*n+1 ||
+                hA.col[k] == row-n*n-n+1 ||
+                hA.col[k] == row+n*n+n+1 ) && (row)%n ==n-1 )
+                    
+                    hA.val[k] = MAGMA_Z_MAKE( 0.0, 0.0 );
+        }
+        
+    }
+    }*/
+    int n=4;
     magma_zm_27stencil(  n, &hA );
 
         //################################################################//
@@ -169,7 +204,6 @@ int main( int argc, char** argv)
     magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
     int blocksize = 2;
     magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
-
     magma_z_mtransfer( hAinitguess, &dAinitguess, Magma_CPU, Magma_DEV );
 
     // need only lower triangular
