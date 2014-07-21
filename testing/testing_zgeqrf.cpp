@@ -76,7 +76,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
             
             /* Initialize the matrix */
-            for ( int j=0; j<4; j++ ) ISEED2[j] = ISEED[j]; // saving seeds
+            for ( int j=0; j<4; j++ )
+                ISEED2[j] = ISEED[j]; // saving seeds
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
