@@ -367,6 +367,8 @@ void magmablas_zgemv_batched(
         return;  //info;
     }
 
+    if(m==0 || n ==0 ) return;
+
     if ( trans == MagmaNoTrans ) {
 
         magmablas_zgemvn_batched(m, n, alpha, A_array, lda, x_array, incx, beta, y_array, incy, batchCount);
