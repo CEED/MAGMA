@@ -156,7 +156,7 @@
     1, and scale to 0, and a non-trivial solution to A*x = 0 is found.
 
     Similarly, a row-wise scheme is used to solve A**T *x = b  or
-    A**H *x = b.  The basic algorithm for A upper triangular is
+    A**H *x = b.  The basic algorithm for upper triangular A is:
 
          for j = 1, ..., n
               x(j) := ( b(j) - A[1:j-1,j]' * x[1:j-1] ) / A(j,j)
