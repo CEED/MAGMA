@@ -90,7 +90,7 @@
 #
 # What tests are run
 # ------------------
-# The --blas, --aux, --chol, --lu, --qr, --syev, --geev, --svd options run
+# The --blas, --aux, --chol, --lu, --qr, --syev, --sygv, --geev, --svd options run
 # particular sets of tests. By default, all tests are run.
 #
 # The --start option skips all testers before the given one, then continues
@@ -157,6 +157,7 @@ parser.add_option(      '--chol',       action='store_true', dest='chol',       
 parser.add_option(      '--lu',         action='store_true', dest='lu',         help='run LU factorization & solver tests')
 parser.add_option(      '--qr',         action='store_true', dest='qr',         help='run QR factorization & solver (gels) tests')
 parser.add_option(      '--syev',       action='store_true', dest='syev',       help='run symmetric eigenvalue tests')
+parser.add_option(      '--sygv',       action='store_true', dest='sygv',       help='run generalized symmetric eigenvalue tests')
 parser.add_option(      '--geev',       action='store_true', dest='geev',       help='run non-symmetric eigenvalue tests')
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
 
@@ -172,13 +173,14 @@ if ( not opts.small and not opts.med and not opts.large ):
 # default if no groups given is all groups
 if ( not opts.blas and not opts.aux  and
 	 not opts.chol and not opts.lu   and not opts.qr   and
-	 not opts.syev and not opts.geev and not opts.svd ):
+	 not opts.syev and not opts.sygv and not opts.geev and not opts.svd ):
 	opts.blas = True
 	opts.aux  = True
 	opts.chol = True
 	opts.lu   = True
 	opts.qr   = True
 	opts.syev = True
+	opts.sygv = True
 	opts.geev = True
 	opts.svd  = True
 # end
@@ -542,9 +544,13 @@ syev = (
 	                               
 	('testing_zhetrd_he2hb_mgpu',   '-L -c',  n,    ''),
 	('#testing_zhetrd_he2hb_mgpu',  '-U -c',  n,    'upper not implemented'),
-	
+)
+if ( opts.syev ):
+	tests += syev
+
 # ----------
 # generalized symmetric eigenvalues
+sygv = (
 	# no-vector/vector, lower/upper, itypes
 	#('testing_zhegvd',          '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd',          '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
@@ -613,8 +619,8 @@ syev = (
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 2 -c',  n,  'upper not implemented'),
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 3 -c',  n,  'upper not implemented'),
 )
-if ( opts.syev ):
-	tests += syev
+if ( opts.sygv ):
+	tests += sygv
 
 # ----------
 # non-symmetric eigenvalues
