@@ -175,6 +175,11 @@ magma_ztrsm_m(
         info = 11;
     }
 
+    // alpha = 0 case not done
+    if (MAGMA_Z_REAL(alpha) == 0. && MAGMA_Z_IMAG(alpha) == 0.) {
+        info = MAGMA_ERR_NOT_IMPLEMENTED;
+    }
+
     if (info != 0) {
         magma_xerbla( __func__, -(info) );
         return info;
@@ -219,13 +224,6 @@ magma_ztrsm_m(
         magma_queue_create( &stream[igpu][0] );
         magma_queue_create( &stream[igpu][1] );
         magma_queue_create( &stream[igpu][2] );
-    }
-
-    // alpha = 0 case;
-    if (MAGMA_Z_REAL(alpha) == 0. && MAGMA_Z_IMAG(alpha) == 0.) {
-        printf("ztrsm_m: alpha = 0 not implemented\n");
-        exit(-1);
-        return info;
     }
 
     if (lside) {

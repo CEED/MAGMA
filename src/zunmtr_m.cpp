@@ -171,6 +171,10 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
     if (*info == 0) {
         work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
+    
+    if (upper) {
+        *info = MAGMA_ERR_NOT_IMPLEMENTED;
+    }
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -197,8 +201,7 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
     if (upper) {
         /* Q was determined by a call to SSYTRD with UPLO = 'U' */
         i__2 = nq - 1;
-        printf("zunmtr_m upper case not implemented");
-        exit(-1);
+        // TODO: upper case is not yet implemented -- see above
         //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, A(0,1), &lda,
         //                 tau, C, &ldc, work, &lwork, &iinfo);
         //magma_zunmql_m(nrgpu, side, trans, mi, ni, i__2, A(0,1), lda, tau,
