@@ -166,7 +166,11 @@ ztrtri_diag_kernel_upper(
     magma_diag_t diag, int n, const magmaDoubleComplex *A, int lda, magmaDoubleComplex *d_invA);
 
 __global__ void
-triple_zgemm16_upper(
+triple_zgemm16_part1_upper(
+    int n, const magmaDoubleComplex *Ain, int lda, magmaDoubleComplex *d_invA, int jb, int npages);
+
+__global__ void
+triple_zgemm16_part2_upper(
     int n, const magmaDoubleComplex *Ain, int lda, magmaDoubleComplex *d_invA, int jb, int npages);
 
 __global__ void

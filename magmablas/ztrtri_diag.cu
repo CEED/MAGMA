@@ -140,10 +140,11 @@ magmablas_ztrtri_diag_stream(
             int npages = (n + kb - 1)/kb;
             dim3 threads( (jb <= 32 ? jb/4 : 16), 4 );
             dim3 grid( jb/(threads.x*threads.y), npages*(jb/16) );  // emulate 3D grid: NX * (NY*npages), for CUDA ARCH 1.x
-        
+            
             switch (jb) {
                 case 16:
-                    triple_zgemm16_upper<<< grid, threads, 0, stream >>>( n, dA, ldda, d_dinvA, jb, npages );
+                    triple_zgemm16_part1_upper<<< grid, threads, 0, stream >>>( n, dA, ldda, d_dinvA, jb, npages );
+                    triple_zgemm16_part2_upper<<< grid, threads, 0, stream >>>( n, dA, ldda, d_dinvA, jb, npages );
                     break;
                 case 32:
                     triple_zgemm32_part1_upper<<< grid, threads, 0, stream >>>( n, dA, ldda, d_dinvA, jb, npages );

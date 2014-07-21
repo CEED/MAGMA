@@ -126,6 +126,9 @@ ztrtri_diag_kernel_lower(
     the right. This makes a single check easy to do.
     
     B is stored in workspace that is a full multiple of NB x NB; no checks needed.
+    
+    We split this into part1 & part2 to synchronize all blocks and make sure
+    that writes to B12 are observed by all blocks.
 */
 
 /*
@@ -174,7 +177,7 @@ triple_zgemm16_part1_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // TODO this won't coalesce, will it? unless NX=32 (or maybe 16 with doubles, or 8 with double-complex)
@@ -290,7 +293,7 @@ triple_zgemm16_part2_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -393,7 +396,7 @@ triple_zgemm32_part1_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
         
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -497,7 +500,7 @@ triple_zgemm32_part2_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -600,7 +603,7 @@ triple_zgemm64_part1_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -704,7 +707,7 @@ triple_zgemm64_part2_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -816,7 +819,7 @@ triple_zgemm_above64_part1_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
@@ -920,7 +923,7 @@ triple_zgemm_above64_part2_lower(
         // compute NT x 16 block of C
         // each thread computes one 1x16 row, C(id,0:15)
         magmaDoubleComplex rC[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        magmaDoubleComplex rA[4];
+        magmaDoubleComplex rA[4]  = {0, 0, 0, 0};
 
         do {
             // load 16 x 16 block of B using NX x 4 threads
