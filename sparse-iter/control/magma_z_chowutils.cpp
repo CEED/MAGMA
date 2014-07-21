@@ -87,7 +87,7 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
     Purpose
     -------
 
-    Computes the nonlinear residual A- LU and returns the difference as
+    Computes the nonlinear residual A - LU and returns the difference as
     well es the Frobenius norm of the difference
 
 
@@ -256,7 +256,7 @@ magma_znonlinres(   magma_z_sparse_matrix A,
     Purpose
     -------
 
-    Computes the ILU residual A- LU and returns the difference as
+    Computes the ILU residual A - LU and returns the difference as
     well es the Frobenius norm of the difference
 
 

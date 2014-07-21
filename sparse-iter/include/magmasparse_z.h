@@ -367,6 +367,10 @@ magma_zmgenerator(  magma_int_t n,
                     magma_z_sparse_matrix *A );
 
 magma_int_t
+magma_zm_27stencil(  magma_int_t n,
+                     magma_z_sparse_matrix *A );
+
+magma_int_t
 magma_zsolverinfo(  magma_z_solver_par *solver_par, 
                     magma_z_preconditioner *precond_par );
 
@@ -401,9 +405,15 @@ magma_int_t
 magma_zinitguess(   magma_z_sparse_matrix A, 
                     magma_z_sparse_matrix *L,
                     magma_z_sparse_matrix *U );
+magma_int_t 
+magma_zmreorder( magma_z_sparse_matrix A, 
+                    magma_int_t n, 
+                    magma_int_t a, 
+                    magma_int_t b, 
+                    magma_int_t c, 
+                    magma_z_sparse_matrix *B );
 
-magma_int_t
-magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_z_sparse_matrix *B );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU

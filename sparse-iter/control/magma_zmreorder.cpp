@@ -77,37 +77,32 @@
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_z_sparse_matrix *B ){
+magma_zmreorder( magma_z_sparse_matrix A, magma_int_t n, magma_int_t a,
+                 magma_int_t b, magma_int_t c, magma_z_sparse_matrix *B ){
 
 if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         
         magma_int_t entry, i, j, k, l;
         magma_z_mtransfer( A, B, Magma_CPU, Magma_CPU );
 
-//magma_z_mvisu(A);
+        magma_index_t *p;
+        magma_index_malloc_cpu( &p, A.nnz );
 
-
-/*
-        magma_index_t *p_h;
-        magma_index_malloc_cpu( &p_h, A.num_rows );
-        magma_int_t count=0;
-        for( magma_int_t i=0; i<n; i+=b){
+        magma_int_t countn=0;
+        for( magma_int_t i=0; i<n; i+=a){
         for( magma_int_t j=0; j<n; j+=b){
-        for( magma_int_t k=0; k<n; k+=b){
+        for( magma_int_t k=0; k<n; k+=c){
 
-            for(magma_int_t b1=0; b1<b; b1++){
+            for(magma_int_t b1=0; b1<a; b1++){
             for(magma_int_t b2=0; b2<b; b2++){
-            for(magma_int_t b3=0; b3<b; b3++){
-                magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
-                magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
-                                            A.row[row+1] : A.nnz;
+            for(magma_int_t b3=0; b3<c; b3++){
+                    entry = (i+b1)*n*n+(j+b2)*n+(k+b3);
+                    p[countn] = entry;
 
-                p_h[row] = count;
-                //printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
-                for( entry=A.row[row]; entry<bound; entry++){
-                    p_h[entry] = count;
-                    count++;
-                }
+
+         //           printf("p[%d]=%d\n",countn, entry);
+                    countn++;
+
             }
             }
             }
@@ -116,94 +111,40 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         }// row
         }// i
         }// p
-*/
-        magma_index_t *p_h;
-        magma_index_malloc_cpu( &p_h, A.nnz );
+        countn = 0;
+        for( i=0; i<A.num_rows; i++ ){
 
-        magma_int_t count=0;
-        for( magma_int_t i=0; i<n; i+=b){
-        for( magma_int_t j=0; j<n; j+=b){
-        for( magma_int_t k=0; k<n; k+=b){
+                for( j=A.row[p[i]]; j<A.row[p[i]+1]; j++ ){
+       //         printf("j: %d\n", j);
+                    B->val[countn] = A.val[j];
+                    B->col[countn] = A.col[j];
+                    B->rowidx[countn] = A.rowidx[j];
+                    countn++;
+                }
+        }
 
-            for(magma_int_t b1=0; b1<b; b1++){
-            for(magma_int_t b2=0; b2<b; b2++){
-            for(magma_int_t b3=0; b3<b; b3++){
-                magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
+        for( i=0; i<A.nnz; i++ ){
+            //    printf("B[%d]:  %d  %d  %f\n",i, B->rowidx[i], B->col[i], B->val[i]);
+        }
+
+
+
+   /*             magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
                 magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
-                                            A.row[row+1] : A.nnz;
-                //printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
+                                            A.row[row+1] : A.num_rows;
+                printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
                 for( entry=A.row[row]; entry<bound; entry++){
                     p_h[count] = entry;
                     count++;
-                }
-            }
-            }
-            }
+                }*/
 
 
-        }// row
-        }// i
-        }// p
 
-/*
-        for(int i=0; i<A.nnz; i++)
-            p_h[i] = i;
-*/
-        int limit=A.nnz;
-/*
-
-        for(int i=0; i< limit; i++){
-            int idx1 = rand()%limit;
-            int idx2 = rand()%limit;
-            int tmp = p_h[idx1];
-            p_h[idx1] = p_h[idx2];
-            p_h[idx2] = tmp;
-        }*/
-
-        for( i=0; i<A.nnz; i++ ){
-                B->val[p_h[i]] = A.val[i];
-                B->col[p_h[i]] = A.col[i];
-                B->rowidx[p_h[i]] = A.rowidx[i];
-        }
-/*
-        count = 0;
-        magma_int_t rowcount = 0;
-        for( magma_int_t i=0; i<n; i+=b){
-        for( magma_int_t j=0; j<n; j+=b){
-        for( magma_int_t k=0; k<n; k+=b){
-
-            for(magma_int_t b1=0; b1<b; b1++){
-            for(magma_int_t b2=0; b2<b; b2++){
-            for(magma_int_t b3=0; b3<b; b3++){
-                magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
-                magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
-                                            A.row[row+1] : A.nnz;
-                
-                //B->row[rowcount] = count;
-                printf("row: %d-> %d\n",row, p_h[row] );
-                for( entry=A.row[row]; entry<bound; entry++){
-                    B->val[count] = A.val[entry];
-                    B->col[count] = p_h[A.col[entry]];
-                    B->rowidx[count] = p_h[A.rowidx[entry]];
-                    count++;
-                }
-                rowcount++;
-            }
-            }
-            }
+        magma_free_cpu( p );
 
 
-        }// row
-        }// i
-        }// p
-        //B->row[rowcount] = count;*/
 
-
-   //for(i=0; i<100; i++)
-    //printf("%d \n", p_h[i]);
-        //magma_setvector( A.nnz, sizeof(magma_index_t), p_h, 1, p, 1 );
-        magma_free_cpu( p_h );
-
+        
         return MAGMA_SUCCESS; 
     }
     else{
@@ -212,7 +153,7 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
         magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO );
 
-        magma_zmreorder( CSRA, n, b, B );
+        magma_zmreorder( CSRA, n, a, b, c, B );
 
         magma_z_mfree( &hA );
         magma_z_mfree( &CSRA );    
