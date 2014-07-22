@@ -43,6 +43,7 @@ ZSRC := \
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
 	zlascl.cu		\
+	zlascl2.cu		\
 	zlaset.cu		\
 	zlaswp.cu		\
 	zclaswp.cu		\
