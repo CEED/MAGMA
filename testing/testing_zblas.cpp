@@ -449,6 +449,7 @@ int main( int argc, char** argv )
         magma_free( dB  );
         magma_free( dC1 );
         magma_free( dC2 );
+        fflush( stdout );
     }
     
     if ( total_error != 0. ) {

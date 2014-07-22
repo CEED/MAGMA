@@ -704,7 +704,11 @@ def run( cmd ):
 	okay  = 0
 	fail  = 0
 	error = 0
-	for line in p.stdout:
+	# read unbuffered ("for line in p.stdout" will buffer)
+	while True:
+		line = p.stdout.readline()
+		if not line:
+			break
 		print line.rstrip()
 		if re.search( r'\bok *$', line ):
 			okay += 1

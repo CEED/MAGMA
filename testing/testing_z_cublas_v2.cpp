@@ -108,6 +108,7 @@ int main( int argc, char** argv )
             magma_free_cpu( A );
             magma_free_cpu( B );
             magma_free_cpu( C );
+            fflush( stdout );
         }
     }
     
