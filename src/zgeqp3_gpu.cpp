@@ -168,7 +168,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     for (j = 0; j < n; ++j) {
         if (jpvt[j] != 0) {
             if (j != nfxd) {
-                blasf77_zswap(&m, dA(0, j), &ione, dA(0, nfxd), &ione);  // TODO: matrix not on CPU!
+                blasf77_zswap(&m, dA(0, j), &ione, dA(0, nfxd), &ione);  // TODO: ERROR, matrix not on CPU!
                 jpvt[j]    = jpvt[nfxd];
                 jpvt[nfxd] = j + 1;
             }
@@ -188,11 +188,11 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
            remaining columns.
     if (nfxd > 0) {
         na = min(m,nfxd);
-        lapackf77_zgeqrf(&m, &na, A, &lda, tau, dwork, &lwork, info);
+        lapackf77_zgeqrf(&m, &na, dA, &ldda, tau, dwork, &lwork, info);
         if (na < n) {
             n_j = n - na;
             lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &m, &n_j, &na,
-                              A, &lda, tau, dA(0, na), &lda,
+                              dA, &ldda, tau, dA(0, na), &ldda,
                               dwork, &lwork, info );
         }
     }*/
@@ -270,7 +270,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                                   dA(j,j), ldda,
                                    A(j,j), lda );
             }
-            lapackf77_zlaqp2(&m, &n_j, &j, dA(0, j), &lda, &jpvt[j],
+            lapackf77_zlaqp2(&m, &n_j, &j, dA(0, j), &ldda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], dwork );
         }*/
     }
