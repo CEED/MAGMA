@@ -38,7 +38,7 @@
        A * X = B
     where A is a complex sparse matrix stored in the GPU memory.
     X and B are complex vectors stored on the GPU memory. 
-    This is a GPU implementation of the right-preconditioned GMRES method.
+    This is a GPU implementation of the GMRES method allowing for faults.
 
     Arguments
     ---------
