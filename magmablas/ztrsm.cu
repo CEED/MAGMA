@@ -121,10 +121,6 @@
     @param
     dX      (workspace) size m*n, on device.
 
-    @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
-
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C"

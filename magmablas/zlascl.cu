@@ -100,11 +100,11 @@ zlascl_upper(int m, int n, double mul, magmaDoubleComplex* A, int lda)
             CFROM must be nonzero. CFROM and CTO must not be NAN.
 
     \param[in]
-    M       INTEGER
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
     \param[in]
-    N       INTEGER
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
     \param[in,out]
