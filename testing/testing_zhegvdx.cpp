@@ -27,7 +27,6 @@
 
 #define PRECISION_z
 
-#define absv(v1) ((v1)>0? (v1): -(v1))
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
@@ -211,9 +210,9 @@ int main( int argc, char** argv)
                 
                 temp1 = temp2 = 0;
                 for(int j=0; j < m2; j++) {
-                    temp1 = max(temp1, absv(w1[j]));
-                    temp1 = max(temp1, absv(w2[j]));
-                    temp2 = max(temp2, absv(w1[j]-w2[j]));
+                    temp1 = max(temp1, fabs(w1[j]));
+                    temp1 = max(temp1, fabs(w2[j]));
+                    temp2 = max(temp2, fabs(w1[j]-w2[j]));
                 }
                 result[1] = temp2 / (((double)m2)*temp1);
             }

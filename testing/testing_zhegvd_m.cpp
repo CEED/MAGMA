@@ -23,13 +23,9 @@
 // includes, project
 #include "magma.h"
 #include "magma_lapack.h"
-
-#define PRECISION_z
-
-
 #include "testings.h"
 
-#define absv(v1) ((v1)>0? (v1): -(v1))
+#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvd
@@ -234,9 +230,9 @@ int main( int argc, char** argv)
                 double temp1 = 0;
                 double temp2 = 0;
                 for(int j=0; j<N; j++) {
-                    temp1 = max(temp1, absv(w1[j]));
-                    temp1 = max(temp1, absv(w2[j]));
-                    temp2 = max(temp2, absv(w1[j]-w2[j]));
+                    temp1 = max(temp1, fabs(w1[j]));
+                    temp1 = max(temp1, fabs(w2[j]));
+                    temp2 = max(temp2, fabs(w1[j]-w2[j]));
                 }
                 double result2 = temp2 / (((double)N)*temp1);
 
