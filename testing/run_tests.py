@@ -381,7 +381,7 @@ if ( opts.blas ):
 # ----------
 # auxiliary
 aux = (
-	('testing_auxiliary',              '-c',  '',   ''),
+	#('testing_auxiliary',             '-c',  '',   ''),  # run_tests misinterprets output as errors
 	('testing_constants',              '-c',  '',   ''),
 	('testing_parse_opts',             '-c',  '',   ''),
 	('testing_zgeadd',                 '-c',  mn,   ''),
