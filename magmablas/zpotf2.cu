@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include "common_magma.h"
-#include "magmablas.h"
 
 #define PRECISION_z
 
@@ -125,7 +124,7 @@ magma_zpotf2_gpu(
                 magma_zgemv( MagmaTrans, j, n-j-1,
                              alpha, A(0, j+1), lda,
                                     A(0, j),   1,
-                             beta,  A(j, j+1), lda); // cublas is better in upper case
+                             beta,  A(j, j+1), lda);
 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 zlacgv(j, A(0, j), 1);
@@ -141,10 +140,10 @@ magma_zpotf2_gpu(
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 zlacgv(j, A(j, 0), lda);
                 #endif
-                magmablas_zgemv( MagmaNoTrans, n-j-1, j,
-                                 alpha, A(j+1, 0), lda,
-                                        A(j,0),    lda,
-                                 beta,  A(j+1, j), 1 );// magmablas is better in lower case
+                magma_zgemv( MagmaNoTrans, n-j-1, j,
+                             alpha, A(j+1, 0), lda,
+                                    A(j,0),    lda,
+                             beta,  A(j+1, j), 1 );
 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 zlacgv(j, A(j, 0), lda);
