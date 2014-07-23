@@ -988,9 +988,9 @@ magma_int_t magma_zunmtr_gpu( magma_side_t side, magma_uplo_t uplo, magma_trans_
                               magma_int_t *info);
 
 magma_int_t magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
-                              magmaDoubleComplex *A, magma_int_t lda,
+                              magmaDoubleComplex *dA, magma_int_t ldda,
                               magma_int_t *jpvt, magmaDoubleComplex *tau,
-                              magmaDoubleComplex *work, magma_int_t lwork,
+                              magmaDoubleComplex *dwork, magma_int_t lwork,
                               #ifdef COMPLEX
                               double *rwork,
                               #endif
