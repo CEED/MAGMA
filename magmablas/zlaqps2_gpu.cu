@@ -170,10 +170,10 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             }
             #endif*/
 
-            magmablas_zgemv( MagmaNoTrans, m-rk, k,
-                             c_neg_one, A(rk, 0), lda,
-                                        F(k,  0), ldf,
-                             c_one,     A(rk, k), ione );
+            magma_zgemv( MagmaNoTrans, m-rk, k,
+                         c_neg_one, A(rk, 0), lda,
+                                    F(k,  0), ldf,
+                         c_one,     A(rk, k), ione );
 
             /*#if (defined(PRECISION_c) || defined(PRECISION_z))
             for (j = 0; j < k; ++j) {
@@ -195,10 +195,10 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            Compute  F(K+1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) on the GPU */
         if (k < n-1 || k > 0 ) magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
         if (k < n-1) {
-            magmablas_zgemv( MagmaConjTrans, m-rk, n-k-1,
-                         tauk,   A( rk,  k+1 ), lda,
-                                 A( rk,  k   ), 1,
-                         c_zero, F( k+1, k   ), 1 );
+            magma_zgemv( MagmaConjTrans, m-rk, n-k-1,
+                     tauk,   A( rk,  k+1 ), lda,
+                             A( rk,  k   ), 1,
+                     c_zero, F( k+1, k   ), 1 );
         }
         
         /* Incremental updating of F:
@@ -208,19 +208,19 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            so, F is (updated A)*V */
         if (k > 0) {
             /*z__1 = MAGMA_Z_NEGATE( tauk );
-            magmablas_zgemv( MagmaConjTrans, m-rk, k,
-                             z__1,   A(rk, 0), lda,
-                                     A(rk, k), ione,
-                             c_zero, auxv, ione );*/
+            magma_zgemv( MagmaConjTrans, m-rk, k,
+                         z__1,   A(rk, 0), lda,
+                                 A(rk, k), ione,
+                         c_zero, auxv, ione );*/
 
             magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, A(rk, 0), lda,
                                                                       A(rk, k), auxv, tau+k);
 
             /* I think we only need stricly lower-triangular part */
-            magmablas_zgemv( MagmaNoTrans, n-k-1, k,
-                             c_one, F(k+1,0), ldf,
-                                    auxv,     ione,
-                             c_one, F(k+1,k), ione );
+            magma_zgemv( MagmaNoTrans, n-k-1, k,
+                         c_one, F(k+1,0), ldf,
+                                auxv,     ione,
+                         c_one, F(k+1,k), ione );
         }
         
         /* Update the current row of A:

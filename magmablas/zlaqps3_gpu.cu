@@ -442,7 +442,7 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            Compute  F(K+1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) on the GPU */
         if (k < n-1) {
             magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
-            magmablas_zgemv( MagmaConjTrans, m-rk, n,
+            magma_zgemv( MagmaConjTrans, m-rk, n,
                          tauk,   A( rk,  0 ), lda,
                                  A( rk,  k   ), 1,
                          c_zero, auxv, 1 );
