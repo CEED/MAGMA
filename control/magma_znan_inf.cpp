@@ -180,7 +180,7 @@ magma_int_t magma_znan_inf(
     n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    @param[in,out]
+    @param[in]
     dA      COMPLEX_16 array, dimension (LDDA,N), on the GPU device.
             The M-by-N matrix to be printed.
 

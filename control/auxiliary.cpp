@@ -44,7 +44,7 @@ void magma_version( magma_int_t* major, magma_int_t* minor, magma_int_t* micro )
       -        -1:  if unknown.
 
     @author Mark Gates
-    @ingroup magma_aux
+    @ingroup magma_util
     ********************************************************************/
 extern "C"
 magma_int_t magma_is_devptr( const void* A )

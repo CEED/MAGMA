@@ -55,7 +55,7 @@ magma_queue_t magma_stream = 0;
     stream  magma_queue_t
             The CUDA stream.
 
-    @ingroup magma_s
+    @ingroup magma_util
     ********************************************************************/
 extern "C"
 cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
@@ -77,7 +77,7 @@ cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
     stream  magma_queue_t
             The CUDA stream.
 
-    @ingroup magma_s
+    @ingroup magma_util
     ********************************************************************/
 extern "C"
 cublasStatus_t magmablasGetKernelStream( magma_queue_t *stream )
