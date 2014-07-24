@@ -205,8 +205,7 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
 
     double d_one = MAGMA_D_ONE;
 
-    double *dA;
-    double *dB;
+    double *dA=NULL, *dB=NULL;
     magma_int_t ldda = n;
     magma_int_t lddb = n;
 
@@ -284,15 +283,15 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-        return 0;
+        return *info;
     }
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     if (n <= 128) {
@@ -309,9 +308,10 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
         return *info;
     }
 
-    // TODO fix memory leak
     if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &dB, n*lddb )) {
+        magma_free( dA );
+        magma_free( dB );
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -419,5 +419,5 @@ magma_dsygvdx(magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_up
         magma_free( dB );
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dsygvd */
