@@ -396,13 +396,12 @@ void magmablas_ztrsm(
     if ( d_dinvA == NULL || dX == NULL ) {
         info = MAGMA_ERR_DEVICE_ALLOC;
         magma_xerbla( __func__, -(info) );
-        goto cleanup;
+    }
+    else {
+        magmablas_ztrsm_work( side, uplo, transA, diag, m, n, alpha,
+                              dA, ldda, dB, lddb, 1, d_dinvA, dX );
     }
 
-    magmablas_ztrsm_work( side, uplo, transA, diag, m, n, alpha,
-                          dA, ldda, dB, lddb, 1, d_dinvA, dX );
-
-cleanup:
     magma_free( d_dinvA );
     magma_free( dX );
 }
