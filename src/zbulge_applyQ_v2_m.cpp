@@ -65,13 +65,13 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
 
     /* Quick return */
     if ( NE == 0 ) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
     if ( N == 0 ) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
     if ( NB == 0 ) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
     /* ==========================================
      * some infos for developer
@@ -474,7 +474,7 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
 
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
-    return MAGMA_SUCCESS;
+    return *info;
 }
 #undef V
 #undef T

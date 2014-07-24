@@ -186,7 +186,7 @@ magma_zlahr2_m(
 
     // Function Body
     if (n <= 1)
-        return 0;
+        return *info;
     
     // zero out current top block of V on all GPUs
     for( d = 0; d < ngpu; ++d ) {
@@ -416,5 +416,5 @@ magma_zlahr2_m(
         magma_zsetmatrix_async( nb, nb, T, nb, dTi(d),      nb,   data->streams[d] );
     }
 
-    return 0;
+    return *info;
 } /* magma_zlahr2 */

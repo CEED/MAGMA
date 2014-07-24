@@ -100,7 +100,6 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     magma_event_t  event[MagmaMaxGPUs][2];
 
     *info = 0;
-
     if (m < 0)
         *info = -1;
     else if (n < 0)
@@ -368,8 +367,10 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
     else if (lda < max(1,m))
         *info = -4;
 
-    if (*info != 0)
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return *info;
+    }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
@@ -405,11 +406,11 @@ magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t e
         *info = -4;
 
     if (*info != 0)
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -422,7 +423,7 @@ magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t e
         lapackf77_zlaswp(&nb, A(0,I), &lda, &k1, &k2, ipiv, &incx);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_piv */
 
 

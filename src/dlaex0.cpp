@@ -125,7 +125,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
 
     // Quick return if possible
     if (n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     smlsiz = magma_get_smlsize_divideconquer();
 
@@ -174,7 +174,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
             *info = (submat+1)*(n+1) + submat + matsiz;
             printf("info: %d\n", (int) *info);
-            return MAGMA_SUCCESS;
+            return *info;
         }
         k = 1;
         for (j = submat; j < iwork[i]; ++j) {
@@ -220,7 +220,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
 
             if (*info != 0) {
                 *info = (submat+1)*(n+1) + submat + matsiz;
-                return MAGMA_SUCCESS;
+                return *info;
             }
             iwork[i/2]= iwork[i+1];
         }
@@ -241,5 +241,5 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
     blasf77_dcopy(&n, work, &ione, d, &ione);
     lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, Q, &ldq );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dlaex0 */

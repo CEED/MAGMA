@@ -170,5 +170,5 @@ magma_zlahru_m(
                      c_one,     dA(d, k, dknb), ldda );
     }
         
-    return 0;
+    return info;
 }

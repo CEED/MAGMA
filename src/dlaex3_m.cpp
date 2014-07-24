@@ -209,7 +209,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
         magma_dlaex3(k, n, n1, d, Q, ldq, rho,
                      dlamda, Q2, indx, ctot, w, s, indxq,
                      *dwork, range, vl, vu, il, iu, info );
-        return MAGMA_SUCCESS;
+        return *info;
     }
     double d_one  = 1.;
     double d_zero = 0.;
@@ -254,12 +254,12 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
     if (*info != 0) {
         magma_xerbla(__func__, -(*info));
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     // Quick return if possible
     if (k == 0)
-        return MAGMA_SUCCESS;
+        return *info;
     /*
      Modify values DLAMDA(i) to make sure all DLAMDA(i)-DLAMDA(j) can
      be computed with high relative accuracy (barring over/underflow).
@@ -356,7 +356,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             // If the zero finder fails, the computation is terminated.
             if (iinfo != 0) {
 #pragma omp critical (info)
-                *info=iinfo;
+                *info = iinfo;
                 break;
             }
         }
@@ -446,7 +446,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
         }
     }
     if (*info != 0)
-        return MAGMA_SUCCESS; //??????
+        return *info;
 
     timer_stop( time );
     timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
@@ -470,7 +470,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             *info=iinfo;
     }
     if (*info != 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     //Prepare the INDXQ sorting permutation.
     magma_int_t nk = n - k;
@@ -680,5 +680,5 @@ magma_dlaex3_m(magma_int_t nrgpu,
     timer_stop( time );
     timer_printf( "gemms = %6.2f\n", time );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dlaed3_m */

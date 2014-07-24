@@ -149,8 +149,9 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Function Body */
+    magma_int_t info = 0;
     if (m <= 0 || n <= 0) {
-        return MAGMA_SUCCESS;
+        return info;
     }
     //internal variable
     magma_int_t ldwvt = m > n ?  k : m;
@@ -265,5 +266,5 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
         }
     }
 
-    return MAGMA_SUCCESS;
+    return info;
 } /* magma_zlarfb */

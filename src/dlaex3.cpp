@@ -264,12 +264,12 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     if (*info != 0) {
         magma_xerbla(__func__, -(*info));
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     // Quick return if possible
     if (k == 0)
-        return MAGMA_SUCCESS;
+        return *info;
     /*
      Modify values DLAMDA(i) to make sure all DLAMDA(i)-DLAMDA(j) can
      be computed with high relative accuracy (barring over/underflow).
@@ -414,7 +414,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         }
     }
     if (*info != 0)
-        return MAGMA_SUCCESS; //??????
+        return *info;
 
     timer_stop( time );
     timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
@@ -438,7 +438,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
             *info=iinfo;
     }
     if (*info != 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     //Prepare the INDXQ sorting permutation.
     magma_int_t nk = n - k;
@@ -535,5 +535,5 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     timer_stop( time );
     timer_printf( "gemms = %6.2f\n", time );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dlaex3 */

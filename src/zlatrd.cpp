@@ -177,14 +177,19 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex alpha;
     magmaDoubleComplex *f;
 
+    // TODO check arguments
+    magma_int_t info = 0;
     if (n <= 0) {
-        return 0;
+        return info;
     }
 
     magma_queue_t stream;
     magma_queue_create( &stream );
     magma_zmalloc_cpu( &f, n );
-    assert( f != NULL );  // TODO return error, or allocate outside zlatrd
+    if ( f == NULL ) {
+        info = MAGMA_ERR_HOST_ALLOC;
+        return info;
+    }
 
     if (uplo == MagmaUpper) {
         /* Reduce last NB columns of upper triangle */
@@ -336,5 +341,5 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_free_cpu( f );
     magma_queue_destroy( stream );
 
-    return 0;
+    return info;
 } /* magma_zlatrd */

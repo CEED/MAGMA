@@ -202,15 +202,15 @@ magma_zhetrd_mgpu(
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return 0;
+        return *info;
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = c_one;
-        return 0;
+        return *info;
     }
 
     magmaDoubleComplex *dA[MagmaMaxGPUs];
@@ -474,7 +474,7 @@ magma_zhetrd_mgpu(
     printf( " Time in ZHEMV : %.2e seconds\n",mv_time );
     printf( " Time in ZHER2K: %.2e seconds\n",up_time );
 #endif
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zhetrd */
 
 
@@ -525,7 +525,7 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
     }
     magma_setdevice(0);
     
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 extern "C" void

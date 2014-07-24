@@ -139,6 +139,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     const char* side_  = lapack_side_const( side );
     const char* trans_ = lapack_trans_const( trans );
 
+    // TODO fix memory leak (alloc after argument checks)
     magma_int_t nb = 128;
     magmaDoubleComplex *T;
     magma_zmalloc_pinned(&T, nb*nb);
@@ -235,9 +236,8 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
         if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], ldw )) {
-            magma_xerbla( __func__, -(*info) );
             *info = MAGMA_ERR_DEVICE_ALLOC;
-
+            magma_xerbla( __func__, -(*info) );
             return *info;
         }
         magma_queue_create( &stream[igpu][0] );
@@ -334,6 +334,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 //                                   C(0, i*nb_l), ldc, stream[igpu][0] );
         }
     } else {
+        // TODO fix memory leak T, dw, event, stream
         fprintf(stderr, "The case (side == right) is not implemented\n");
         *info = MAGMA_ERR_NOT_IMPLEMENTED;
         magma_xerbla( __func__, -(*info) );

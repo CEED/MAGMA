@@ -200,5 +200,6 @@ magma_zlahru(
                  c_neg_one, dwork,    ldda,
                             dY,       nb,
                  c_one,     dA(k,nb), ldda );
-    return 0;
+    
+    return info;
 }

@@ -212,18 +212,17 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info));
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     } else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     // Quick return if possible
-
     if (n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
     if (n == 1) {
         *Z = 1.;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* determine the number of threads *///not needed here to be checked Azzam
@@ -249,7 +248,7 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
         if (orgnrm == 0) {
             work[0]  = lwmin;
             iwork[0] = liwmin;
-            return MAGMA_SUCCESS;
+            return *info;
         }
 
         eps = lapackf77_dlamch( "Epsilon" );
@@ -287,7 +286,7 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
                     magma_dlaex0_m( nrgpu, m, &d[start], &e[start], Z(start, start), ldz, work, iwork, MagmaRangeAll, vl, vu, il, iu, info);
 
                     if ( *info != 0) {
-                        return MAGMA_SUCCESS;
+                        return *info;
                     }
 
                     // Scale Back
@@ -334,7 +333,7 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
             magma_dlaex0_m(nrgpu, n, d, e, Z, ldz, work, iwork, range, vl, vu, il, iu, info);
 
             if ( *info != 0) {
-                return MAGMA_SUCCESS;
+                return *info;
             }
 
             // Scale Back
@@ -345,5 +344,5 @@ magma_dstedx_m(magma_int_t nrgpu, magma_range_t range, magma_int_t n, double vl,
     work[0]  = lwmin;
     iwork[0] = liwmin;
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dstedx_m */

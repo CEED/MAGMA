@@ -163,7 +163,7 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
     
     /* Function Body */
     if (m <= 0 || n <= 0) {
-        return MAGMA_SUCCESS;
+        return info;
     }
 
     // opposite of trans
@@ -240,5 +240,5 @@ magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct,
                      c_one,     dC,    ldc);
     }
 
-    return MAGMA_SUCCESS;
+    return info;
 } /* magma_zlarfb */

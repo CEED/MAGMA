@@ -143,7 +143,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
 
     // Quick return if possible
     if (n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     //workspace dimension for nrgpu > 1
     size_t tmp = (n-1)/2+1;
@@ -156,14 +156,14 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
         magma_setdevice(igpu);
         if (nrgpu == 1) {
             if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], 3*n*(n/2 + 1) )) {
-                *info = -15;
-                return MAGMA_ERR_DEVICE_ALLOC;
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
             }
         }
         else {
             if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], tmp )) {
-                *info = -15;
-                return MAGMA_ERR_DEVICE_ALLOC;
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
             }
         }
         magma_queue_create( &stream[igpu][0] );
@@ -219,7 +219,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
             *info = (submat+1)*(n+1) + submat + matsiz;
             printf("info: %d\n", (int) *info);
-            return MAGMA_SUCCESS;
+            return *info;
         }
         k = 1;
         for (j = submat; j < iwork[i]; ++j) {
@@ -267,7 +267,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
 
             if (*info != 0) {
                 *info = (submat+1)*(n+1) + submat + matsiz;
-                return MAGMA_SUCCESS;
+                return *info;
             }
             iwork[i/2]= iwork[i+1];
         }
@@ -298,5 +298,5 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
 
     magma_setdevice(gpu_b);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dlaex0 */
