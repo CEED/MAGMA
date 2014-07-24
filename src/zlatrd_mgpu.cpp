@@ -150,7 +150,7 @@
 
     @ingroup magma_zheev_aux
     ********************************************************************/
-extern "C" double
+extern "C" magma_int_t
 magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                   magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
                   magmaDoubleComplex *A,  magma_int_t lda,
@@ -173,7 +173,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
 #define dW(id, i, j)  (dW[(id)] + (j)          *lddw + (i))
 #define dW1(id, i, j) (dW[(id)] + ((j)+nb)     *lddw + (i))
 
-    double mv_time = 0.0;
+    //double mv_time = 0.0;
     magma_int_t i;
 #ifndef MAGMABLAS_ZHEMV_MGPU
     magma_int_t loffset = nb0*((offset/nb0)/num_gpus);
@@ -194,10 +194,17 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
 
     magmaDoubleComplex *dx2[MagmaMaxGPUs];
     magmaDoubleComplex *f;
-    magma_zmalloc_cpu( &f, n );
 
+    // TODO check arguments
+    magma_int_t info = 0;
     if (n <= 0) {
-        return 0;
+        return info;
+    }
+    
+    magma_zmalloc_cpu( &f, n );
+    if ( f == NULL ) {
+        info = MAGMA_ERR_HOST_ALLOC;
+        return info;
     }
 
 //#define PROFILE_SYMV
@@ -417,7 +424,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
                 magmablas_zhemv_sync(num_gpus, k, i_n, work, W(i+1,i), stream );
 #ifdef PROFILE_SYMV
                 cudaEventElapsedTime(&etime, start, stop);
-                mv_time += (etime/1000.0);
+                //mv_time += (etime/1000.0);
                 times[1+(i_n/(n0/10))] += (etime/1000.0);
 #endif
                 trace_cpu_start( 0, "axpy", "axpy" );
@@ -460,7 +467,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, magma_uplo_t uplo,
     }
     magma_free_cpu(f);
 
-    return mv_time;
+    return info;
 } /* magma_zlatrd_mgpu */
 
 #undef A

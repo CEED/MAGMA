@@ -163,7 +163,7 @@ magma_zhetrd_mgpu(
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     double  d_one = MAGMA_D_ONE;
-    double mv_time = 0.0;
+    //double mv_time = 0.0;
 #ifdef PROFILE_SY2RK
     double up_time = 0.0;
 #endif
@@ -181,7 +181,6 @@ magma_zhetrd_mgpu(
     int upper = (uplo == MagmaUpper);
     lquery = (lwork == -1);
     if (! upper && uplo != MagmaLower) {
-        printf( " uplo = %c\n",uplo );
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -380,8 +379,6 @@ magma_zhetrd_mgpu(
                 magma_setdevice(0);
             }
             
-            
-            mv_time +=
             magma_zlatrd_mgpu(num_gpus, uplo, n, n-i, ib, nb,
                               A(i, i), lda, &e[i],
                               &tau[i], work, ldwork,
@@ -469,10 +466,10 @@ magma_zhetrd_mgpu(
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
 #ifdef PROFILE_SY2RK
-    printf( " n=%d nb=%d\n",n,nb );
-    printf( " Time in ZLARFG: %.2e seconds\n",times[0] );
-    printf( " Time in ZHEMV : %.2e seconds\n",mv_time );
-    printf( " Time in ZHER2K: %.2e seconds\n",up_time );
+    printf( " n=%d nb=%d\n", n, nb );
+    printf( " Time in ZLARFG: %.2e seconds\n", times[0] );
+    //printf( " Time in ZHEMV : %.2e seconds\n", mv_time );
+    printf( " Time in ZHER2K: %.2e seconds\n", up_time );
 #endif
     return *info;
 } /* magma_zhetrd */
