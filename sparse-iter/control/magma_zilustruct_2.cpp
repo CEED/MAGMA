@@ -36,7 +36,7 @@ using namespace std;
 
 
 #include <stdlib.h>
-#include "mex.h"
+//#include "mex.h"
 
 /******************************************************************************
  * ILU mex function from MATLAB:
@@ -45,25 +45,21 @@ using namespace std;
  *****************************************************************************/
 
 #define MIN(x,y) ((x)<(y) ? (x) : (y))
+#define mwIndex magma_index_t
 
 void shell_sort(
-  const int n,
-  int x[]);
+  const magma_int_t n,
+  magma_int_t x[]);
 
 void symbolic_ilu(
-  const int levinc,
-  const int n,
-  int *nzl,
-  int *nzu,
-  const mwIndex ia[], const mwIndex ja[],
-  mwIndex ial[], mwIndex jal[],
-  mwIndex iau[], mwIndex jau[]);
+  const magma_int_t levinc,
+  const magma_int_t n,
+  magma_int_t *nzl,
+  magma_int_t *nzu,
+  const mwIndex *ia, const mwIndex *ja,
+  mwIndex *ial, mwIndex *jal,
+  mwIndex *iau, mwIndex *jau);
 
-void numeric_rilu(
-  const int n,
-  const mwIndex ia[], const mwIndex ja[], const double a[],
-  mwIndex ial[], mwIndex jal[], double al[],
-  mwIndex iau[], mwIndex jau[], double au[], double omega);
 
 /******************************************************************************
  *
@@ -71,47 +67,25 @@ void numeric_rilu(
  *
  *****************************************************************************/
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
+void mexFunction(magma_int_t nlhs, magma_int_t n, magmaDoubleComplex omega,
+                 magma_int_t levfill, magma_int_t storage,
+                magma_index_t * ial, magma_index_t *jal, magmaDoubleComplex *al,
+                magma_index_t * iau, magma_index_t *jau, magmaDoubleComplex *au,
+                magma_int_t nrhs,
+                magma_index_t * ia, magma_index_t *ja, magmaDoubleComplex *a ){
+
     /* matrix is stored in CSC format, 0-based */
 
-    int n;
-    mwIndex *ia, *ja, *ial, *jal, *iau, *jau;
-    double *a, *al, *au;
-    int levfill, storage, nzl, nzu, ret;
-    double omega;
+    magma_int_t nzl, nzu, ret;
 
-    if (nrhs < 4)
-        mexErrMsgTxt("ilu mex function called with bad number of arguments");
-
-     n = mxGetN(prhs[0]);
-    ia = mxGetJc(prhs[0]);
-    ja = mxGetIr(prhs[0]);
-     a = mxGetPr(prhs[0]);
-
-    levfill = (int)    *mxGetPr(prhs[1]);
-    omega   = (double) *mxGetPr(prhs[2]);
-    storage = (int)    *mxGetPr(prhs[3]);
+    
     nzl = storage;
     nzu = storage;
 
-    plhs[1] = mxCreateSparse(n, n, storage, 0);
-    plhs[0] = mxCreateSparse(n, n, storage, 0);
-
-    /* change order of L and U, since the mex code is row-oriented */
-    ial = mxGetJc(plhs[1]);
-    jal = mxGetIr(plhs[1]);
-     al = mxGetPr(plhs[1]);
-    iau = mxGetJc(plhs[0]);
-    jau = mxGetIr(plhs[0]);
-     au = mxGetPr(plhs[0]);
 
     /* the following will fail and return to matlab if insufficient storage */
     symbolic_ilu(levfill, n, &nzl, &nzu, ia, ja, ial, jal, iau, jau);
 
-    /* the following assumes that the rows are sorted */
-    /* the symbolic routine above assures this */
-    numeric_rilu(n, ia, ja, a, ial, jal, al, iau, jau, au, omega);
 }
 
 /* shell sort
@@ -120,10 +94,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 */
 
 void shell_sort(
-  const int n,
-  int x[])
+  const magma_int_t n, magma_index_t *x)
 {
-    int m, max, j, k, itemp;
+    magma_int_t m, max, j, k, itemp;
 
     m = n/2;
 
@@ -146,44 +119,61 @@ void shell_sort(
 
 /*
 // symbolic level ILU
-// factors into separate upper and lower parts
+// factors magma_int_to separate upper and lower parts
 // sorts the entries in each row of A by index
 // assumes no zero rows
 */
 
 void symbolic_ilu(
-  const int levfill,                 /* level of fill */
-  const int n,                       /* order of matrix */
-  int *nzl,                          /* input-output */
-  int *nzu,                          /* input-output */
-  const mwIndex ia[], const mwIndex ja[],    /* input */
-  mwIndex ial[], mwIndex jal[],              /* output lower factor structure */
-  mwIndex iau[], mwIndex jau[])              /* output upper factor structure */
+  const magma_int_t levfill,                 /* level of fill */
+  const magma_int_t n,                       /* order of matrix */
+  magma_int_t *nzl,                          /* input-output */
+  magma_int_t *nzu,                          /* input-output */
+  const mwIndex *ia, const mwIndex *ja,    /* input */
+  mwIndex *ial, mwIndex *jal,              /* output lower factor structure */
+  mwIndex *iau, mwIndex *jau)              /* output upper factor structure */
 {
-    int i;
-    int *lnklst = mxCalloc(n, sizeof(int));
-    int *curlev = mxCalloc(n, sizeof(int));
-    int *levels = mxCalloc(*nzu, sizeof(int));
-    int *iwork = mxCalloc(n, sizeof(int));
+    magma_int_t i;
+    magma_index_t *lnklst; 
+    magma_index_t *curlev;
+    magma_index_t *levels;
+    magma_index_t *iwork;
 
-    int knzl = 0;
-    int knzu = 0;
+    magma_index_malloc_cpu( &lnklst, n );
+    magma_index_malloc_cpu( &curlev, n );
+    magma_index_malloc_cpu( &levels, *nzu );
+    magma_index_malloc_cpu( &iwork, n );
+
+    for(magma_int_t t=0; t<n; t++){
+        lnklst[t] = 0;
+        curlev[t] = 0;
+        iwork[t] = 0;
+    }
+
+    for(magma_int_t t=0; t<*nzu; t++){
+        levels[t] = 0;
+    }
+
+    magma_int_t knzl = 0;
+    magma_int_t knzu = 0;
 
     ial[0] = 0;
     iau[0] = 0;
 
     for (i=0; i<n; i++)
     {
-        int first, next, j;
+
+     //   printf("check line %d\n", i);
+        magma_int_t first, next, j;
 
         /* copy column indices of row into workspace and sort them */
 
-        int len = ia[i+1] - ia[i];
+        magma_int_t len = ia[i+1] - ia[i];
         next = 0;
         for (j=ia[i]; j<ia[i+1]; j++)
             iwork[next++] = ja[j];
         shell_sort(len, iwork);
-
+     //   printf("check2 line %d\n", i);
         /* construct implied linked list for row */
 
         first = iwork[0];
@@ -194,19 +184,21 @@ void symbolic_ilu(
             lnklst[iwork[j]] = iwork[j+1];
             curlev[iwork[j]] = 0;
         }
-
+       // printf("check3 line %d iwork[len-1]:%d\n", i, iwork[len-1]);
         lnklst[iwork[len-1]] = n;
         curlev[iwork[len-1]] = 0;
 
         /* merge with rows in U */
-
+       // printf("check4 line %d lnklst[iwork[len-1]]:%d\n", i, lnklst[iwork[len-1]]);
         next = first;
+       // printf("next:%d (!<) first:%d\n", next, i);
         while (next < i)
         {
-            int oldlst = next;
-            int nxtlst = lnklst[next];
-            int row = next;
-            int ii;
+          //  printf("check line %d while %d\n", i, next);
+            magma_int_t oldlst = next;
+            magma_int_t nxtlst = lnklst[next];
+            magma_int_t row = next;
+            magma_int_t ii;
 
             /* scan row */
 
@@ -215,7 +207,7 @@ void symbolic_ilu(
                 if (jau[ii] < nxtlst)
                 {
                     /* new fill-in */
-                    int newlev = curlev[row] + levels[ii] + 1;
+                    magma_int_t newlev = curlev[row] + levels[ii] + 1;
                     if (newlev <= levfill)
                     {
                         lnklst[oldlst]  = jau[ii];
@@ -227,7 +219,7 @@ void symbolic_ilu(
                 }
                 else if (jau[ii] == nxtlst)
                 {
-            int newlev;
+            magma_int_t newlev;
                     oldlst = nxtlst;
                     nxtlst = lnklst[oldlst];
                     newlev = curlev[row] + levels[ii] + 1;
@@ -243,135 +235,65 @@ void symbolic_ilu(
             next = lnklst[next];
         }
         
-        /* gather the pattern into L and U */
-
+        /* gather the pattern magma_int_to L and U */
+       // printf("check line5 %d\n", i);
         next = first;
         while (next < i)
         {
             if (knzl >= *nzl)
         {
-            mexPrintf("ILU: STORAGE parameter value %d too small.\n", *nzl);
-                mexErrMsgTxt("Increase STORAGE parameter.");
+            printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
+                printf("Increase STORAGE parameter.");
         }
             jal[knzl++] = next;
             next = lnklst[next];
         }
         ial[i+1] = knzl;
-
+      //  printf("check line6 %d\n", i);
         if (next != i)
         {
-        mexErrMsgTxt("ILU structurally singular.\n");
+        printf("ILU structurally singular.\n");
         /*
             assert(knzu < *nzu);
             levels[knzu] = 2*n;
             jau[knzu++] = i;
         */
         }
-
+      //  printf("check line7 %d\n", i);
+           //                 printf("next:%d  n:%d \n", next, n);
         while (next < n)
         {
             if (knzu >= *nzu)
         {
-            mexPrintf("ILU: STORAGE parameter value %d too small.\n", *nzu);
-                mexErrMsgTxt("Increase STORAGE parameter.");
+            printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
+                printf("Increase STORAGE parameter.");
         }
+                   // printf("1 knzu:%d  next:%d \n", knzu, next );
             levels[knzu] = curlev[next];
+                  //  printf("2 knzu:%d  next:%d \n", knzu, next );
             jau[knzu++] = next;
+                  //  printf("3 knzu:%d  next:%d \n", knzu, next );
             next = lnklst[next];
+                  //  printf("4 next:%d  n:%d \n", next, n);
         }
         iau[i+1] = knzu;
     }
 
-    mxFree(lnklst);
-    mxFree(curlev);
-    mxFree(levels);
-    mxFree(iwork);
+    magma_free_cpu(lnklst);
+    magma_free_cpu(curlev);
+    magma_free_cpu(levels);
+    magma_free_cpu(iwork);
 
     *nzl = knzl;
     *nzu = knzu;
+
+   // printf("ende\n");
 
 #if 0
     cout << "Actual nnz for ILU: " << *nzl + *nzu << endl;
 #endif
 }
 
-/*
-// assumes diag is first element in U
-*/
-
-void numeric_rilu(
-  const int n, 
-  const mwIndex ia[], const mwIndex ja[], const double a[],
-  mwIndex ial[], mwIndex jal[], double al[],
-  mwIndex iau[], mwIndex jau[], double au[], double omega)
-{
-    int i, k, kk, id, idd;
-    double mult, modif;
-
-    double *row = mxCalloc(n, sizeof(double));
-    int *marker = mxCalloc(n, sizeof(int));
-
-    for (i=0; i<n; i++)
-    {
-        row[i] = 0.0;
-        marker[i] = 0;
-    }
-
-    for (i=0; i<n; i++)
-    {
-        /* scatter row of A */
-        for (k=ia[i]; k<ia[i+1]; k++)
-            row[ja[k]] = a[k];
-
-        /* scatter data structure of L and U */
-        for (k=ial[i]; k<ial[i+1]; k++)
-            marker[jal[k]] = 1;
-        for (k=iau[i]; k<iau[i+1]; k++)
-            marker[jau[k]] = 1;
-        
-        modif = 0.0;
-
-        /* eliminate the elements in L in order */
-        for (k=ial[i]; k<ial[i+1]; k++)
-        {
-            id = jal[k];
-            mult = row[id] / au[iau[id]];
-            row[id] = mult;
-
-            for (kk=iau[id]+1; kk<iau[id+1]; kk++)
-            {
-                idd = jau[kk];
-                if (marker[idd])
-                    row[idd] -= mult*au[kk];
-                else
-                    modif -= mult*au[kk];
-            }
-        }
-
-        /* gather resulting rows in L and U */
-        for (k=ial[i]; k<ial[i+1]; k++)
-        {
-            al[k] = row[jal[k]];
-            row[jal[k]] = 0.0;
-            marker[jal[k]] = 0;
-        }
-        for (k=iau[i]; k<iau[i+1]; k++)
-        {
-            au[k] = row[jau[k]];
-            row[jau[k]] = 0.0;
-            marker[jau[k]] = 0;
-        }
-
-        /* modified */
-        au[iau[i]] += omega*modif;
-#if 0
-        printf("pivot: %e\n",  au[iau[i]]);
-#endif
-    }
-
-    mxFree(marker);
-    mxFree(row);
-}
 
 
 /**
@@ -391,7 +313,7 @@ void numeric_rilu(
                 matrix in magma sparse matrix format
 
     @param
-    levels      magma_int_t
+    levels      magma_magma_int_t_t
                 fill in level
 
 
@@ -399,7 +321,7 @@ void numeric_rilu(
     ********************************************************************/
 
 extern "C"
-magma_int_t 
+magma_int_t
 magma_zilustruct_2( magma_z_sparse_matrix *A, magma_int_t levels ){
 
     
@@ -412,25 +334,60 @@ magma_zilustruct_2( magma_z_sparse_matrix *A, magma_int_t levels ){
         magma_z_mconvert( B, &L, Magma_CSR, Magma_CSRL );
         magma_z_mconvert( B, &U, Magma_CSR, Magma_CSRL );
 
+        magma_int_t num_lnnz = 1000;
+        magma_int_t num_unnz = 1000;
+/*
+        magma_free_cpu( L.row );
+        magma_free_cpu( L.col );
+        magma_free_cpu( L.val );
+        magma_free_cpu( U.row );
+        magma_free_cpu( U.col );
+        magma_free_cpu( U.val );
+*/
 
-void symbolic_ilu( levels, A.num_rows, &L.nnz, &U.nnz, B.row, B.col, L.row, L.col, U.row, U.col ); 
-  const int levfill,                 /* level of fill */
-  const int n,                       /* order of matrix */
-  int *nzl,                          /* input-output */
-  int *nzu,                          /* input-output */
-  const mwIndex ia[], const mwIndex ja[],    /* input */
-  mwIndex ial[], mwIndex jal[],              /* output lower factor structure */
-  mwIndex iau[], mwIndex jau[])              /* output upper factor structure */
+        magma_free_cpu( L.col );
+        magma_free_cpu( U.col );
+        magma_index_malloc_cpu( &L.col, num_lnnz );
+        magma_index_malloc_cpu( &U.col, num_unnz );
 
+        symbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, L.row, L.col, U.row, U.col ); 
+
+        L.nnz = num_lnnz;
+        U.nnz = num_unnz;
+    
         magma_zmalloc_cpu( &L.val, L.nnz );
         magma_zmalloc_cpu( &U.val, U.nnz );
 
-        magma_z_mfree( A );
+        for( magma_int_t i=0; i<L.nnz; i++ )
+            L.val[i] = MAGMA_Z_MAKE( 1.0, 0.0 );
+
+        for( magma_int_t i=0; i<U.nnz; i++ )
+            U.val[i] = MAGMA_Z_MAKE( 1.0, 0.0 );
+
+        //printf(" L info: n:%d nnz:%d format:%d location:%d\n", L.num_rows, L.nnz, L.storage_type, L.memory_location );
+        //for(int z=0; z<L.num_rows; z++)
+          //  printf("%d  ", L.row[z]);
+        
+         printf("\n\n\nL:\n");
+         magma_z_mvisu( L );
+
+         printf("\n\n\nU:\n");
+         magma_z_mvisu( U );
+
+
+        magma_free_cpu( A->row );
+        magma_free_cpu( A->col );
+        magma_free_cpu( A->val );
+
         magma_z_LUmergein( L, U, A);
 
-        magma_z_mfree( L );
-        magma_z_mfree( U );
-        magma_z_mfree( B );
+         printf("\n\n\nA:\n");
+         magma_z_mvisu( *A );
+
+
+        magma_z_mfree( &L );
+        magma_z_mfree( &U );
+        magma_z_mfree( &B );
 
         return MAGMA_SUCCESS;
     }
