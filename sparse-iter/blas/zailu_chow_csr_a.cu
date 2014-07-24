@@ -99,12 +99,8 @@ magma_zailu_csr_a_kernel(   magma_int_t num_rows,
     ---------
 
     @param
-    A_L         magma_z_sparse_matrix
-                input matrix L
-
-    @param
-    A_U         magma_z_sparse_matrix
-                input matrix U
+    A           magma_z_sparse_matrix
+                input matrix A determing initial guess & processing order
 
     @param
     L           magma_z_sparse_matrix

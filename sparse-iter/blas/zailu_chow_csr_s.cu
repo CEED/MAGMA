@@ -63,7 +63,18 @@ magma_zailu_csr_s_kernel(   magma_int_t Lnum_rows,
             sp = zero;
             jl = colidxL[il];
             ju =  rowidxU[iu];
+/*
+            //sp = ( jl == ju ) ? valL[il] * valU[iu] : sp;
+            int lmu = jl-ju;
+            int uml = ju-jl;
+            int l = ((lmu) >> 31) & 0x01;
+            int g = ((uml) >> 31) & 0x01;
+            int e = ((~((lmu)|(uml))) >> 31) & 0x01;
+            il += (e | l); 
+            iu += (e | g);
+            //s -= e*sp;
 
+*/
             // avoid branching
             sp = ( jl == ju ) ? valL[il] * valU[iu] : sp;
             s = ( jl == ju ) ? s-sp : s;

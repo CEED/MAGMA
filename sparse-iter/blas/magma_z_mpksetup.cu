@@ -41,7 +41,7 @@ compress_kernel(         int num_add_rows,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    n_add_rows  magma_int_t
                 number of elements to unpack
 
     @param
@@ -63,15 +63,15 @@ compress_kernel(         int num_add_rows,
 
 
 extern "C" int
-magma_z_mpk_compress_gpu(   magma_int_t num_add_rows,
+magma_z_mpk_compress_gpu(   magma_int_t n_add_rows,
                          magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
-   dim3 grid( (num_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+   dim3 grid( (n_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
    compress_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( num_add_rows, add_rows, x, y );
+                  ( n_add_rows, add_rows, x, y );
 
     return MAGMA_SUCCESS; 
 }
@@ -101,7 +101,7 @@ uncompress_kernel(       int num_add_rows,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    n_add_rows  magma_int_t
                 number of elements to unpack
 
     @param
@@ -123,15 +123,15 @@ uncompress_kernel(       int num_add_rows,
 
 
 extern "C" int
-magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
+magma_z_mpk_uncompress_gpu(   magma_int_t n_add_rows,
                          magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
-   dim3 grid( (num_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+   dim3 grid( (n_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
    uncompress_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( num_add_rows, add_rows, x, y );
+                  ( n_add_rows, add_rows, x, y );
 
     return MAGMA_SUCCESS; 
 }
@@ -157,7 +157,7 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
                 number of elements handled by GPU
 
     @param
-    num_add_rowsmagma_int_t
+    n_add_rows  magma_int_t
                 number of elements to pack
 
     @param
@@ -181,17 +181,17 @@ magma_z_mpk_uncompress_gpu(   magma_int_t num_add_rows,
 extern "C" int
 magma_z_mpk_uncompspmv(  magma_int_t offset,
                          magma_int_t blocksize,
-                         magma_int_t num_add_rows,
+                         magma_int_t n_add_rows,
                          magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
-   dim3 grid( (num_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+   dim3 grid( (n_add_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
    magma_zcopyvector( blocksize, x, 1, y+offset, 1 );
 
    uncompress_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( num_add_rows, add_rows, x+blocksize, y );
+                  ( n_add_rows, add_rows, x+blocksize, y );
 
     return MAGMA_SUCCESS; 
 }
