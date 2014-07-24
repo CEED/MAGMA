@@ -164,13 +164,17 @@ magma_zbcsrlu( magma_z_sparse_matrix A, magma_z_vector b,
                 input matrix A (on DEV)
 
     @param
-    m           magma_z_sparse_matrix*
+    M           magma_z_sparse_matrix*
                 output matrix containing LU decomposition
 
     @param
     ipiv        magma_int_t*
                 pivot vector
 
+    @param
+    version     magma_int_t
+                0 -> batched
+                1 -> custom-designed kernel
 
     @ingroup magmasparse_zgesv
     ********************************************************************/

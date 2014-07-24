@@ -31,12 +31,12 @@
                 sparse matrix A    
 
     @param
-    x           magma_z_vector
-                input vector x  
+    b           magma_z_vector
+                input vector b     
 
     @param
-    y           magma_z_vector
-                input vector y      
+    x           magma_z_vector*
+                output vector x        
 
     @param
     precond     magma_z_preconditioner
@@ -114,14 +114,10 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
 
     @param
     A           magma_z_sparse_matrix
-                sparse matrix A    
+                sparse matrix A     
 
     @param
-    x           magma_z_vector
-                input vector x  
-
-    @param
-    y           magma_z_vector
+    b           magma_z_vector
                 input vector y      
 
     @param
@@ -187,12 +183,12 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
                 sparse matrix A    
 
     @param
-    x           magma_z_vector
-                input vector x  
+    b           magma_z_vector
+                input vector b     
 
     @param
-    y           magma_z_vector
-                input vector y      
+    x           magma_z_vector*
+                output vector x     
 
     @param
     precond     magma_z_preconditioner
@@ -254,12 +250,12 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
                 sparse matrix A    
 
     @param
-    x           magma_z_vector
-                input vector x  
+    b           magma_z_vector
+                input vector b     
 
     @param
-    y           magma_z_vector
-                input vector y      
+    x           magma_z_vector*
+                output vector x     
 
     @param
     precond     magma_z_preconditioner
@@ -321,12 +317,12 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
                 sparse matrix A    
 
     @param
-    x           magma_z_vector
-                input vector x  
+    b           magma_z_vector
+                input vector b     
 
     @param
-    y           magma_z_vector
-                input vector y      
+    x           magma_z_vector*
+                output vector x  
 
     @param
     precond     magma_z_preconditioner

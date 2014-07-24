@@ -50,7 +50,9 @@
     solver_par  magma_z_solver_par*
                 solver parameters
 
-    magma_precond_parameters *precond_par     parameters for inner solver
+    @param
+    precond_par magma_precond_parameters *    
+                parameters for inner solver
 
     @ingroup magmasparse_zgesv
     ********************************************************************/

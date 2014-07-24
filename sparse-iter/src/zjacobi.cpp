@@ -135,7 +135,7 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 RHS b
 
     @param
-    m           magma_z_sparse_matrix*
+    M           magma_z_sparse_matrix*
                 M = D^(-1) * (L+U)
 
     @param
@@ -356,7 +356,7 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
                 RHS b
 
     @param
-    m           magma_z_sparse_matrix*
+    M           magma_z_sparse_matrix*
                 M = D^(-1) * (L+U)
 
     @param
@@ -454,7 +454,7 @@ magma_zjacobisetup( magma_z_sparse_matrix A, magma_z_vector b,
     ---------
 
     @param
-    m           magma_z_sparse_matrix
+    M           magma_z_sparse_matrix
                 input matrix M = D^(-1) * (L+U)
 
     @param

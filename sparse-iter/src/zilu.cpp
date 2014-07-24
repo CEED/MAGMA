@@ -36,8 +36,12 @@
                 input matrix A (on DEV)
 
     @param
-    m           magma_z_sparse_matrix*
+    M           magma_z_sparse_matrix*
                 output matrix M approx. (LU)^{-1} (on DEV)
+
+    @param
+    ipiv        magma_int_t* 
+                pivoting vector
 
     @ingroup magmasparse_zgesv
     ********************************************************************/
