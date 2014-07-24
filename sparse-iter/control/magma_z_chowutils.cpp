@@ -433,7 +433,11 @@ magma_zilures(   magma_z_sparse_matrix A,
                 sparse matrix in CSR
 
     @param
-    B           magma_z_sparse_matrix*
+    L           magma_z_sparse_matrix*
+                sparse matrix in CSR 
+
+    @param
+    U           magma_z_sparse_matrix*
                 sparse matrix in CSR    
 
 

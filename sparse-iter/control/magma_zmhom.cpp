@@ -172,6 +172,9 @@ magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){
                 input/output matrix 
 
     @param
+    n           dimension of the blocks
+
+    @param
     b           magma_int_t
                 blocksize
 
@@ -209,7 +212,7 @@ magma_zmhom_fd( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_ind
                 magma_int_t row=(i+b1)*n*n+(j+b2)*n+(k+b3);
                 magma_int_t bound = ( (row+1) < A.num_rows+1 ) ? 
                                             A.row[row+1] : A.nnz;
-                //printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
+                printf("row: %d+(%d+%d)*%d+%d=%d\n",(i+b1)*n*n,j,b2,n,(k+b3), row);
                 for( entry=A.row[row]; entry<bound; entry++){
                     p_h[count] = entry;
                     count++;

@@ -138,20 +138,6 @@ magma_zmgenerator(  magma_int_t n,
                 number of rows
 
     @param
-    offdiags    magma_int_t
-                number of offdiagonals 
-
-    @param
-    diag_offset magma_int_t*
-                array containing the offsets 
-
-                                                (length offsets+1)
-    @param
-    diag_vals   magmaDoubleComplex*
-                array containing the values
-
-                                                (length offsets+1)
-    @param
     A           magma_z_sparse_matrix*
                 matrix to generate   
 

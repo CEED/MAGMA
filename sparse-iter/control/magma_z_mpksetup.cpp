@@ -37,8 +37,14 @@ using namespace std;
     Arguments
     ---------
 
-    magma_sparse_matrix A                input matrix A
-    magma_sparse_matrix *B               output matrix B
+    @param
+    A           magma_sparse_matrix 
+                input matrix A
+
+    @param
+    B           magma_sparse_matrix* 
+                output matrix B
+
     @param
     offset      magma_int_t
                 first row to compute
@@ -157,8 +163,14 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
     Arguments
     ---------
 
-    magma_sparse_matrix A                input matrix A
-    magma_sparse_matrix B[MagmaMaxGPUs]  set of output matrices B
+    @param
+    A           magma_sparse_matrix 
+                input matrix A
+
+    @param
+    B           magma_sparse_matrix* 
+                output matrix B
+
     @param
     num_procs   magma_int_t
                 number of processors
@@ -209,7 +221,10 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     Arguments
     ---------
 
-    magma_sparse_matrix A                input matrix A
+    @param
+    A           magma_sparse_matrix 
+                input matrix A
+
     @param
     offset      magma_int_t
                 first row to compute
@@ -223,20 +238,19 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
                 matrix powers
 
     @param
-    num_add_rowsmagma_int_t**
+    n_add_rows  magma_int_t**
                 number of additional rows for each s
 
     @param
-    add_rows    magma_int_t*
-                array for additional rows ordered 
-    \n
-                                                                according to s
+    add_rows    magma_int_t**
+                array for additional rows ordered according to s
+
     @param
-    num_add_vecsmagma_int_t*
+    n_add_vecs  magma_int_t*
                 number of additional vector entries
 
     @param
-    add_vecs    magma_int_t*
+    add_vecs    magma_int_t**
                 array for additional vector entries
 
 
@@ -248,9 +262,9 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                      magma_int_t offset, 
                      magma_int_t blocksize, 
                      magma_int_t s,    
-                     magma_index_t **num_add_rows,
+                     magma_index_t **n_add_rows,
                      magma_index_t **add_rows,
-                     magma_int_t *num_add_vecs,
+                     magma_int_t *n_add_vecs,
                      magma_index_t **add_vecs ){
 
     if( A.memory_location == Magma_CPU ){
@@ -268,8 +282,8 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             for( i=start; i<end; i++ )
                     z1[i] = 1;
 
-            magma_index_malloc_cpu( (num_add_rows), s );
-            (*num_add_rows)[0] = 0;
+            magma_index_malloc_cpu( (n_add_rows), s );
+            (*n_add_rows)[0] = 0;
 
             // determine the rows of A needed in local matrix B 
             for( count=1; count<s; count++ ){
@@ -284,31 +298,31 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                         z1[i] = z2[i]; 
                 }  
 
-                (*num_add_rows)[count] = 0;
+                (*n_add_rows)[count] = 0;
                 for( i=0; i<start; i++){
                     if( z1[i] != 0 )
-                        (*num_add_rows)[count]++;
+                        (*n_add_rows)[count]++;
                 }
                 for( i=end; i<A.num_rows; i++){
                     if( z1[i] != 0 )
-                        (*num_add_rows)[count]++;
+                        (*n_add_rows)[count]++;
                 }
             }   
 
             // this part determines the additional rows needed
-            magma_index_malloc_cpu( (add_rows), (*num_add_rows)[s-1] );
-            magma_int_t num_add_rows_glob = 0;
+            magma_index_malloc_cpu( (add_rows), (*n_add_rows)[s-1] );
+            magma_int_t n_add_rows_glob = 0;
             for( count=1; count<s; count++ ){
                 for( i=0; i<start; i++){
                     if( z1[i] == count ){
-                        (*add_rows)[num_add_rows_glob] = i;
-                        (num_add_rows_glob)++;
+                        (*add_rows)[n_add_rows_glob] = i;
+                        (n_add_rows_glob)++;
                     }
                 }
                 for( i=end; i<A.num_rows; i++){
                     if( z1[i] == count ){
-                        (*add_rows)[num_add_rows_glob] = i;
-                        (num_add_rows_glob)++;
+                        (*add_rows)[n_add_rows_glob] = i;
+                        (n_add_rows_glob)++;
 
                     }
                 }  
@@ -325,28 +339,28 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                 if( z1[i] != 0 || z2[i] != 0 )
                     z1[i] = 1; 
             }  
-            (*num_add_vecs) = 0;
+            (*n_add_vecs) = 0;
             for( i=0; i<start; i++){
                 if( z1[i] != 0 )
-                    (*num_add_vecs)++;
+                    (*n_add_vecs)++;
             }
             for( i=end; i<A.num_rows; i++){
                 if( z1[i] != 0 )
-                    (*num_add_vecs)++;
+                    (*n_add_vecs)++;
             }
             // this part determines the additional vector entries needed
-            magma_index_malloc_cpu( (add_vecs), (*num_add_vecs) );
-            (*num_add_vecs) = 0;
+            magma_index_malloc_cpu( (add_vecs), (*n_add_vecs) );
+            (*n_add_vecs) = 0;
             for( i=0; i<start; i++){
                 if( z1[i] != 0 ){
-                    (*add_vecs)[(*num_add_vecs)] = i;
-                    (*num_add_vecs)++;
+                    (*add_vecs)[(*n_add_vecs)] = i;
+                    (*n_add_vecs)++;
                 }
             }
             for( i=end; i<A.num_rows; i++){
                 if( z1[i] != 0 ){
-                    (*add_vecs)[(*num_add_vecs)] = i;
-                    (*num_add_vecs)++;
+                    (*add_vecs)[(*n_add_vecs)] = i;
+                    (*n_add_vecs)++;
                 }
             }  
 
@@ -359,7 +373,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             magma_z_sparse_matrix C;
             magma_z_mconvert( A, &C, A.storage_type, Magma_CSR );
             magma_z_mpkinfo_one(  C, offset, blocksize, s, 
-                    num_add_rows, add_rows, num_add_vecs, add_vecs );
+                    n_add_rows, add_rows, n_add_vecs, add_vecs );
             magma_z_mfree(&C);
         }
     }
@@ -367,7 +381,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
         magma_z_sparse_matrix C;
         magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU );
         magma_z_mpkinfo_one(  C, offset, blocksize, s, 
-                    num_add_rows, add_rows, num_add_vecs, add_vecs );
+                    n_add_rows, add_rows, n_add_vecs, add_vecs );
         magma_z_mfree(&C);
     }
 
@@ -385,7 +399,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
     and a distribution *offset, *blocksize and s the number of 
     rows added to the different matrices.
 
-    num_add_vecs = [ GPU0 from Host, GPU1 from GPU0, GPU2 from GPU0 .
+    n_add_vecs = [ GPU0 from Host, GPU1 from GPU0, GPU2 from GPU0 .
                      GPU0 from GPU1, GPU1 from Host, GPU2 from GPU0 .
                      ... ]
 
@@ -395,7 +409,10 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
     Arguments
     ---------
 
-    magma_sparse_matrix A                input matrix A
+    @param
+    A           magma_sparse_matrix 
+                input matrix A
+
     @param
     num_procs   magma_int_t
                 number of processors
@@ -417,15 +434,15 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                 output array: number of additional rows
                 
     @param
-    num_addvecs magma_int_t*
+    add_vecs    magma_int_t**
                 output array: number of additional rows
 
     @param
-    num_addvec smagma_int_t*
+    num_vecs_b  magma_int_t*
                 number of additional vector entries
 
     @param
-    add_vecs    magma_int_t*
+    vecs_back   magma_int_t**
                 array for additional vector entries
 
 
@@ -440,7 +457,7 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                    magma_int_t s,
                    magma_int_t *num_addvecs,
                    magma_index_t **add_vecs,
-                   magma_int_t *num_vecs_back,
+                   magma_int_t *num_vecs_b,
                    magma_index_t **vecs_back ){
 
     magma_int_t i,j,k;
@@ -451,17 +468,17 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
 
     // determine components to copy back
     for( i=0; i<num_procs; i++ ){
-        for( j=0; j<num_add_vecs[i]; j++ ){
+        for( j=0; j<n_add_vecs[i]; j++ ){
             back_vecs_tmp[add_vecs[i][j]] = 1;
         }
     }
     for( i=0; i<num_procs; i++ ){
-        num_vecs_back[i] = 0;
+        num_vecs_b[i] = 0;
         for( j=offset[i]; j<offset[i]+blocksize[i]; j++ ){
             if(  back_vecs_tmp[j] == 1 )
-                num_vecs_back[i]++;
+                num_vecs_b[i]++;
         }
-        magma_index_malloc_cpu( &(vecs_back[i]), (num_vecs_back[i]) );
+        magma_index_malloc_cpu( &(vecs_back[i]), (num_vecs_b[i]) );
     }
     
     // fill in the information into vecs_back
@@ -490,7 +507,10 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
     Arguments
     ---------
 
-    magma_sparse_matrix A                input matrix A
+    @param
+    A           magma_sparse_matrix 
+                input matrix A
+
     @param
     num_procs   magma_int_t
                 number of processors
@@ -508,15 +528,19 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                 matrix powers
 
     @param
-    num_addrows magma_int_t*
+    num_addvecs magma_int_t*
+                output array: number of additional rows
+                
+    @param
+    add_vecs    magma_int_t**
                 output array: number of additional rows
 
     @param
-    num_addvecs magma_int_t*
+    num_vecs_b  magma_int_t*
                 number of additional vector entries
 
     @param
-    add_vecs    magma_int_t*
+    vecs_back   magma_int_t**
                 array for additional vector entries
 
 
@@ -533,17 +557,17 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
                    magma_index_t **add_rows,
                    magma_int_t *num_addvecs,
                    magma_index_t **add_vecs,
-                   magma_int_t *num_vecs_back,
+                   magma_int_t *num_vecs_b,
                    magma_index_t **vecs_back ){
 
     for(int procs=0; procs<num_procs; procs++){
         magma_z_mpkinfo_one( A, offset[procs], blocksize[procs], s, 
-            &num_add_rows[procs], &add_rows[procs], 
-            &num_add_vecs[procs], &add_vecs[procs] ); 
+            &n_add_rows[procs], &add_rows[procs], 
+            &n_add_vecs[procs], &add_vecs[procs] ); 
     }
 
     magma_z_mpkback( A, num_procs, offset, blocksize, s, 
-                num_add_vecs, add_vecs, num_vecs_back, vecs_back );
+                n_add_vecs, add_vecs, num_vecs_b, vecs_back );
 
     return MAGMA_SUCCESS; 
 }
@@ -586,7 +610,7 @@ magma_z_mpk_compress(    magma_int_t num_addrows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
-    for(magma_int_t i=0; i<num_add_rows; i++){
+    for(magma_int_t i=0; i<n_add_rows; i++){
         y[i] = x[ add_rows[i] ];
     }
 
@@ -603,7 +627,7 @@ magma_z_mpk_compress(    magma_int_t num_addrows,
     ---------
 
     @param
-    num_add_rowsmagma_int_t
+    n_add_rows  magma_int_t
                 number of elements to pack
 
     @param
@@ -623,12 +647,12 @@ magma_z_mpk_compress(    magma_int_t num_addrows,
     ********************************************************************/
 
 magma_int_t 
-magma_z_mpk_uncompress(  magma_int_t num_add_rows,
+magma_z_mpk_uncompress(  magma_int_t n_add_rows,
                          magma_index_t *add_rows,
                          magmaDoubleComplex *x,
                          magmaDoubleComplex *y ){
 
-    for(magma_int_t i=0; i<num_add_rows; i++){
+    for(magma_int_t i=0; i<n_add_rows; i++){
         y[add_rows[i]] = x[ i ];
     }
 
@@ -684,7 +708,7 @@ magma_z_mpk_uncompress_sel(     magma_int_t num_addvecs,
                                 magmaDoubleComplex *x,
                                 magmaDoubleComplex *y ){
 
-    for(magma_int_t i=0; i<num_add_vecs; i++){
+    for(magma_int_t i=0; i<n_add_vecs; i++){
         if( ( offset <= add_vecs[i] ) && ( add_vecs[i] < offset+blocksize) )
             y[add_vecs[i]] = x[ i ];
     }
@@ -728,13 +752,13 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
                              magma_z_sparse_matrix *B,
                              magma_int_t offset,
                              magma_int_t blocksize,
-                             magma_int_t num_add_rows,
+                             magma_int_t n_add_rows,
                              magma_index_t *add_rows ){
     if( A.storage_type==Magma_CSR && A.memory_location==Magma_CPU ){
             int i=0,j,n=0,nnz=0;
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
-            B->num_rows = blocksize + num_add_rows;
+            B->num_rows = blocksize + n_add_rows;
             B->num_cols = A.num_cols;
             magma_index_malloc_cpu( &B->row, B->num_rows+1 );
             for( j=0; j<blocksize+1; j++ ){
@@ -744,7 +768,7 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
             }
 
 
-            for( j=0; j<num_add_rows; j++ ){
+            for( j=0; j<n_add_rows; j++ ){
                 i += A.row[add_rows[j]+1] - A.row[add_rows[j]];
                 (B->row)[n] = i;
                 n++;
@@ -759,7 +783,7 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
                 nnz++;
             }
 
-            for( j=0; j<num_add_rows; j++ ){
+            for( j=0; j<n_add_rows; j++ ){
                 for( i=A.row[add_rows[j]]; i<A.row[add_rows[j]+1]; i++){
                     B->col[nnz] = A.col[i];
                     B->val[nnz] = A.val[i];
