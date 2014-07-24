@@ -111,7 +111,7 @@ magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
     
     magmaDoubleComplex *dwork;
 
-    magma_int_t i, i1, i2, step, ib, ic, jc, mi, ni, nq, nw, ret;
+    magma_int_t i, i1, i2, step, ib, ic, jc, mi, ni, nq, nw;
     int left, notran;
     //magma_int_t lwkopt;
 
@@ -191,18 +191,11 @@ magma_zunmqr_gpu_2stages(magma_side_t side, magma_trans_t trans,
             ni = n - i;
             jc = i;
         }
-        // TODO use info instead of ret, so info & return value always agree.
-        ret = magma_zlarfb_gpu( MagmaLeft, trans, MagmaForward, MagmaColumnwise,
-                               mi, ni, ib, dA(i,i), ldda, dT+i*nb, nb,
-                               dC(ic,jc), lddc, dwork, nw);
-
-        if ( ret != MAGMA_SUCCESS ) {
-            magma_free(dwork);
-            return ret;
-        }
+        magma_zlarfb_gpu( MagmaLeft, trans, MagmaForward, MagmaColumnwise,
+                          mi, ni, ib, dA(i,i), ldda, dT+i*nb, nb,
+                          dC(ic,jc), lddc, dwork, nw );
     }
     
-    // TODO fix free(dwork) memory leak
-
-    return MAGMA_SUCCESS;
+    magma_free( dwork );
+    return *info;
 } /* magma_zunmqr_gpu_2stages */
