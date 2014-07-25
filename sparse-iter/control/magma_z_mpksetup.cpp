@@ -528,12 +528,20 @@ magma_z_mpkback(  magma_z_sparse_matrix A,
                 matrix powers
 
     @param
+    num_addrows magma_int_t*
+                input array: number of additional rows
+                
+    @param
+    add_rows    magma_int_t**
+                input array: number of additional rows
+                
+    @param
     num_addvecs magma_int_t*
-                output array: number of additional rows
+                output array: number of additional vecs
                 
     @param
     add_vecs    magma_int_t**
-                output array: number of additional rows
+                output array: number of additional vecs
 
     @param
     num_vecs_b  magma_int_t*
@@ -728,21 +736,27 @@ magma_z_mpk_uncompress_sel(     magma_int_t num_addvecs,
     ---------
 
     @param
-    num_addrows magma_int_t
+    A           magma_sparse_matrix 
+                input matrix A
+                
+    @param
+    B           magma_sparse_matrix*
+                output matrices B
+                
+    @param
+    offset      magma_int_t    
+                offset
+    @param
+    blocksize   magma_int_t    
+                blocksize of the matrix-slices
+                
+    @param
+    n_add_rows  magma_int_t
                 number of elements to pack
 
     @param
     add_rows    magma_int_t*
                 indices of elements to pack
-
-    @param
-    x           magmaDoubleComplex*
-                uncompressed input vector
-
-    @param
-    y           magmaDoubleComplex*
-                compressed output vector
-
 
     @ingroup magmasparse_zaux
     ********************************************************************/

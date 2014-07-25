@@ -35,23 +35,12 @@
     Purpose
     -------
 
-    Takes a matrix and a reordering scheme such that the output mat
+    Takes a matrix obtained from a 3D FE discretization, and reorders it
+    by restructuring the node numbering with 3D blocks of size a x b x c.
+    the resulting matrix has some row-blocks reordered. Rows related 
+    to spatially nearby nodes (within one of these blocks) are then also
+    close in the matrix.
 
-    example:
-
-        / a 0 0 b 0 \
-        | 0 c 0 d 0 |
-     A= | 0 e f g 0 |       b = 2
-        | h 0 0 0 0 |
-        \ i j 0 0 0 /
-
-    will generate the projection:
-    
-    0 2 1 3 4 7 8 9 10 11
-    
-    according to
-    
-    a c b d e h f g i j    
 
     Arguments
     ---------
@@ -65,8 +54,16 @@
                 nodes in one dimension
 
     @param
+    a           magma_int_t
+                blocksize x-discretization direction
+
+    @param
     b           magma_int_t
-                blocksize
+                blocksize y-discretization direction
+
+    @param
+    c           magma_int_t
+                blocksize z-discretization direction
 
     @param
     B           magma_z_sparse_matrix*
