@@ -159,14 +159,14 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_R, &M, &c_zero, h_work, &N);
+                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_R, &M, h_R, &M, &c_zero, h_work, &N);
                 for(int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }
                 e1 = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
                 e3 = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
-                blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
+                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
                 for(int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }
