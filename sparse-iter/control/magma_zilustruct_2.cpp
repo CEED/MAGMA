@@ -300,21 +300,27 @@ void symbolic_ilu(
     Purpose
     -------
 
-    This routine computes the fill-in structure of an ILU(levels) factorization
-    based on the successive multiplication of upper and lower triangular factors
-    using the CUSPARSE library.
-    The code is written by Edmond Chow (Georgia Tech).
+    This routine performs a symbolic ILU factorization.
+    The algorithm is taken from an implementation written by Edmond Chow.
 
     Arguments
     ---------
 
     @param
-    A           magma_z_sparse_matrix*
+    A           magma_z_sparse_matrix
                 matrix in magma sparse matrix format
 
     @param
     levels      magma_magma_int_t_t
                 fill in level
+
+    @param
+    L           magma_z_sparse_matrix*
+                output lower triangular matrix in magma sparse matrix format
+
+    @param
+    U           magma_z_sparse_matrix*
+                output upper triangular matrix in magma sparse matrix format
 
 
     @ingroup magmasparse_zaux
@@ -322,71 +328,75 @@ void symbolic_ilu(
 
 extern "C"
 magma_int_t
-magma_zilustruct_2( magma_z_sparse_matrix *A, magma_int_t levels ){
+magma_zsymbilu( magma_z_sparse_matrix A, magma_int_t levels, 
+                    magma_z_sparse_matrix *L, magma_z_sparse_matrix *U ){
 
     
-    if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
+    if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSR ){
 
-        magma_z_sparse_matrix B, L, U, L_d, U_d, LU_d;
+        magma_z_sparse_matrix B;
 
-        magma_z_cucsrtranspose( *A, &B );
+        //magma_z_cucsrtranspose( A, &B );
 
-        magma_z_mconvert( B, &L, Magma_CSR, Magma_CSRL );
-        magma_z_mconvert( B, &U, Magma_CSR, Magma_CSRL );
 
-        magma_int_t num_lnnz = 1000;
-        magma_int_t num_unnz = 1000;
-/*
-        magma_free_cpu( L.row );
-        magma_free_cpu( L.col );
-        magma_free_cpu( L.val );
-        magma_free_cpu( U.row );
-        magma_free_cpu( U.col );
-        magma_free_cpu( U.val );
-*/
+        magma_z_mtransfer( A, &B, Magma_CPU, Magma_CPU );
 
-        magma_free_cpu( L.col );
-        magma_free_cpu( U.col );
-        magma_index_malloc_cpu( &L.col, num_lnnz );
-        magma_index_malloc_cpu( &U.col, num_unnz );
+        magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
+        magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );
 
-        symbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, L.row, L.col, U.row, U.col ); 
+        magma_int_t num_lnnz = B.nnz*10;
+        magma_int_t num_unnz = B.nnz*10;
 
-        L.nnz = num_lnnz;
-        U.nnz = num_unnz;
+        magma_free_cpu( L->col );
+        magma_free_cpu( U->col );
+        magma_index_malloc_cpu( &L->col, num_lnnz );
+        magma_index_malloc_cpu( &U->col, num_unnz );
+
+        symbolic_ilu( levels, A.num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
+                                            L->row, L->col, U->row, U->col ); 
+
+        L->nnz = num_lnnz;
+        U->nnz = num_unnz;
     
-        magma_zmalloc_cpu( &L.val, L.nnz );
-        magma_zmalloc_cpu( &U.val, U.nnz );
+        magma_zmalloc_cpu( &L->val, L->nnz );
+        magma_zmalloc_cpu( &U->val, U->nnz );
 
-        for( magma_int_t i=0; i<L.nnz; i++ )
-            L.val[i] = MAGMA_Z_MAKE( 1.0, 0.0 );
+        for( magma_int_t i=0; i<L->nnz; i++ )
+            L->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
-        for( magma_int_t i=0; i<U.nnz; i++ )
-            U.val[i] = MAGMA_Z_MAKE( 1.0, 0.0 );
+        for( magma_int_t i=0; i<U->nnz; i++ )
+            U->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
-        //printf(" L info: n:%d nnz:%d format:%d location:%d\n", L.num_rows, L.nnz, L.storage_type, L.memory_location );
-        //for(int z=0; z<L.num_rows; z++)
-          //  printf("%d  ", L.row[z]);
-        
+        // take the original values as initial guess for L
+        for(magma_int_t i=0; i<L->num_rows; i++){
+            for(magma_int_t j=B.row[i]; j<B.row[i+1]; j++){
+                magma_index_t lcol = B.col[j];
+                for(magma_int_t k=L->row[i]; k<L->row[i+1]; k++){
+                    if( L->col[k] == lcol ){
+                        L->val[k] =  B.val[j];
+                    }
+                }
+            }
+        }
+
+        // take the original values as initial guess for U
+        for(magma_int_t i=0; i<U->num_rows; i++){
+            for(magma_int_t j=B.row[i]; j<B.row[i+1]; j++){
+                magma_index_t lcol = B.col[j];
+                for(magma_int_t k=U->row[i]; k<U->row[i+1]; k++){
+                    if( U->col[k] == lcol ){
+                        U->val[k] =  B.val[j];
+                    }
+                }
+            }
+        }
+
          printf("\n\n\nL:\n");
-         magma_z_mvisu( L );
+         magma_z_mvisu( *L );
 
          printf("\n\n\nU:\n");
-         magma_z_mvisu( U );
+         magma_z_mvisu( *U );
 
-
-        magma_free_cpu( A->row );
-        magma_free_cpu( A->col );
-        magma_free_cpu( A->val );
-
-        magma_z_LUmergein( L, U, A);
-
-         printf("\n\n\nA:\n");
-         magma_z_mvisu( *A );
-
-
-        magma_z_mfree( &L );
-        magma_z_mfree( &U );
         magma_z_mfree( &B );
 
         return MAGMA_SUCCESS;
@@ -394,17 +404,17 @@ magma_zilustruct_2( magma_z_sparse_matrix *A, magma_int_t levels ){
     else{
 
         magma_z_sparse_matrix hA, CSRCOOA;
-        magma_storage_t A_storage = A->storage_type;
-        magma_location_t A_location = A->memory_location;
-        magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU );
+        magma_storage_t A_storage = A.storage_type;
+        magma_location_t A_location = A.memory_location;
+        magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
         magma_z_mconvert( hA, &CSRCOOA, hA.storage_type, Magma_CSR );
 
-        magma_zilustruct( &CSRCOOA, levels );
+        magma_zsymbilu( CSRCOOA, levels, L, U );
 
         magma_z_mfree( &hA );
-        magma_z_mfree( A );
+        magma_z_mfree( &A );
         magma_z_mconvert( CSRCOOA, &hA, Magma_CSR, A_storage );
-        magma_z_mtransfer( hA, A, Magma_CPU, A_location );
+        magma_z_mtransfer( hA, &A, Magma_CPU, A_location );
         magma_z_mfree( &hA );
         magma_z_mfree( &CSRCOOA );    
 
