@@ -317,7 +317,7 @@ magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x,
     precond     magma_z_preconditioner*
                 preconditioner parameters
 
-    @ingroup magmasparse_zsypr
+    @ingroup magmasparse_zhepr
     ********************************************************************/
 
 magma_int_t

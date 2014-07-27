@@ -52,7 +52,7 @@
     precond_par magma_z_preconditioner*
                 preconditioner
 
-    @ingroup magmasparse_zposv
+    @ingroup magmasparse_zhesv
     ********************************************************************/
 
 magma_int_t

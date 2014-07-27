@@ -27,7 +27,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a hermetian matrix.
     This is a GPU implementation of the mixed precision
     Iterative Refinement method featuring a Jacobi smoother after the
     low precision inner solver.
@@ -53,7 +53,7 @@
 
     magma_precond_parameters *precond_par     parameters for inner solver
 
-    @ingroup magmasparse_zsysv
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 magma_int_t

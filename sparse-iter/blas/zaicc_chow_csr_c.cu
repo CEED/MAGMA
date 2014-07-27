@@ -132,7 +132,7 @@ magma_zaic_csr_c_kernel( magma_int_t num_rows,
                 input/output vector x
 
 
-    @ingroup magmasparse_zsgpuk
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t

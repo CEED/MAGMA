@@ -127,7 +127,7 @@ magma_zaic_csr_a_kernel(    magma_int_t n,
     A_CSR       magma_z_sparse_matrix
                 input/output matrix containing the IC approximation
 
-    @ingroup magmasparse_zsygpuk
+    @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t
