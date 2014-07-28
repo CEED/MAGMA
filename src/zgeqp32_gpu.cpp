@@ -213,11 +213,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
 
         /* Initialize partial column norms. */
         magmablas_dznrm2_cols(sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd]);
-#if defined(PRECISION_d) || defined(PRECISION_z)
         magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
-#else
-        magma_scopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
-#endif
         /*for (j = nfxd; j < n; ++j) {
             rwork[j] = cblas_dznrm2(sm, dA(nfxd, j), ione);
             rwork[n + j] = rwork[j];
