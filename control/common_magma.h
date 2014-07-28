@@ -60,7 +60,7 @@
 
 #include "magma.h"
 #include "magma_lapack.h"
-#include "operators.h"
+#include "magma_operators.h"
 #include "transpose.h"
 #include "magma_threadsetting.h"
 

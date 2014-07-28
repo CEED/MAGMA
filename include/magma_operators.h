@@ -31,6 +31,15 @@ __host__ __device__ static inline magmaFloatComplex  conj(const magmaFloatComple
 __host__ __device__ static inline double             conj(const double             &x) { return x; }
 __host__ __device__ static inline float              conj(const float              &x) { return x; }
 
+__host__ __device__ static inline double fabs(const magmaDoubleComplex &x) { return MAGMA_Z_ABS(x); }
+__host__ __device__ static inline float  fabs(const magmaFloatComplex  &x) { return MAGMA_C_ABS(x); }
+__host__ __device__ static inline float  fabs(const float              &x) { return MAGMA_S_ABS(x); }
+
+__host__ __device__ static inline double abs1(const magmaDoubleComplex &x) { return MAGMA_Z_ABS1(x); }
+__host__ __device__ static inline float  abs1(const magmaFloatComplex  &x) { return MAGMA_C_ABS1(x); }
+__host__ __device__ static inline double abs1(const double             &x) { return MAGMA_D_ABS1(x); }
+__host__ __device__ static inline float  abs1(const float              &x) { return MAGMA_S_ABS1(x); }
+
 
 /*************************************************************
  *              magmaDoubleComplex
