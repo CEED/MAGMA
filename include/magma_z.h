@@ -105,7 +105,7 @@ magma_int_t
                           magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info);
 
 #ifdef REAL
-magma_int_t magma_zlaln2( magma_int_t trans, magma_int_t na, magma_int_t nw,
+magma_int_t magma_dlaln2( magma_int_t trans, magma_int_t na, magma_int_t nw,
                           double smin, double ca, const double *a, magma_int_t lda,
                           double d1, double d2, const double *b, magma_int_t ldb,
                           double wr, double wi, double *x, magma_int_t ldx,
@@ -431,18 +431,18 @@ magma_int_t magma_zstedx( magma_range_t range, magma_int_t n, double vl, double 
 
 #ifdef REAL
 // only applicable to real [sd] precisions
-magma_int_t magma_zlaex0( magma_int_t n, double *d, double *e, double *q, magma_int_t ldq,
+magma_int_t magma_dlaex0( magma_int_t n, double *d, double *e, double *q, magma_int_t ldq,
                           double *work, magma_int_t *iwork, double *dwork,
                           magma_range_t range, double vl, double vu,
                           magma_int_t il, magma_int_t iu, magma_int_t *info);
 
-magma_int_t magma_zlaex1( magma_int_t n, double *d, double *q, magma_int_t ldq,
+magma_int_t magma_dlaex1( magma_int_t n, double *d, double *q, magma_int_t ldq,
                           magma_int_t *indxq, double rho, magma_int_t cutpnt,
                           double *work, magma_int_t *iwork, double *dwork,
                           magma_range_t range, double vl, double vu,
                           magma_int_t il, magma_int_t iu, magma_int_t *info);
 
-magma_int_t magma_zlaex3( magma_int_t k, magma_int_t n, magma_int_t n1, double *d,
+magma_int_t magma_dlaex3( magma_int_t k, magma_int_t n, magma_int_t n1, double *d,
                           double *q, magma_int_t ldq, double rho,
                           double *dlamda, double *q2, magma_int_t *indx,
                           magma_int_t *ctot, double *w, double *s, magma_int_t *indxq,
