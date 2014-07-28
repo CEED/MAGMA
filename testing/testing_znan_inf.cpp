@@ -109,8 +109,8 @@ int main( int argc, char** argv)
                 total = cnt_nan + cnt_inf;
             }
             
-            //printf( "nan %g + %gi\n", MAGMA_Z_REAL( magma_znan ), MAGMA_Z_REAL( magma_znan ) );
-            //printf( "inf %g + %gi\n", MAGMA_Z_REAL( magma_zinf ), MAGMA_Z_REAL( magma_zinf ) );
+            //printf( "nan %g + %gi\n", MAGMA_Z_REAL( MAGMA_Z_NAN ), MAGMA_Z_REAL( MAGMA_Z_NAN ) );
+            //printf( "inf %g + %gi\n", MAGMA_Z_REAL( MAGMA_Z_INF ), MAGMA_Z_REAL( MAGMA_Z_INF ) );
             //magma_zprint( M, N, hA, lda );
             
             magma_zsetmatrix( M, N, hA, lda, dA, ldda );
