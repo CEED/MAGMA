@@ -67,6 +67,10 @@ int main( int argc, char** argv)
 
     
     magma_z_csr_mtx( &hA, filename[matrix] );
+
+    // scale to unit diagonal
+    magma_zmscale( &hA, Magma_UNITDIAG );
+
     real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
     printf("# iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
@@ -136,20 +140,25 @@ int main( int argc, char** argv)
 
     // reorder the matrix determining the update processing order
     magma_z_sparse_matrix hACSRCOO, hAinitguess, dAinitguess;
-    magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
 
-    // scale to unit diagonal
-    magma_zmscale( &hACSRCOO, Magma_UNITDIAG );
+
+    // possibility to increase fill-in in ILU-(m)
+    int levels = 1; //ILU-m levels
+    magma_zsymbilu( &hA, levels, &hAL, &hAU ); 
+    magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
 
     int blocksize = 1;
   //  magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
 
     magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
-
+/*
     // need only lower triangular
     hAL.diagorder_type == Magma_UNITY;
     magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
     magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
+*/
+    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mconvert( hAU, &hAUCOO, Magma_CSR, Magma_CSRCOO );
 
 
         //################################################################//
@@ -169,8 +178,8 @@ int main( int argc, char** argv)
         real_Double_t ilures = 0.0;
 
         // transfer the factor L and U
-        magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
-        magma_z_mtransfer( hALCOO, &dU, Magma_CPU, Magma_DEV );
+        magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
+        magma_z_mtransfer( hAU, &dU, Magma_CPU, Magma_DEV );
 
         // iterative ILU embedded in timing
         magma_device_sync(); start = magma_wtime(); 
@@ -179,7 +188,7 @@ int main( int argc, char** argv)
         }
         magma_device_sync(); end = magma_wtime();
         t_chow = end-start;
-
+printf("here\n");
         // check the residuals
         magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
         magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
@@ -212,7 +221,9 @@ int main( int argc, char** argv)
     // free all memory
     magma_z_mfree(&hAtmp);
     magma_z_mfree(&hAL);
+    magma_z_mfree(&hAU);
     magma_z_mfree(&hALCOO);
+    magma_z_mfree(&hAUCOO);
     magma_z_mfree(&hAcusparse);
     magma_z_mfree(&dA);
 

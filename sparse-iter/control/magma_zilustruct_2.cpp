@@ -328,18 +328,18 @@ void symbolic_ilu(
 
 extern "C"
 magma_int_t
-magma_zsymbilu( magma_z_sparse_matrix A, magma_int_t levels, 
+magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels, 
                     magma_z_sparse_matrix *L, magma_z_sparse_matrix *U ){
 
     
-    if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSR ){
+    if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
         magma_z_sparse_matrix B;
 
         //magma_z_cucsrtranspose( A, &B );
 
 
-        magma_z_mtransfer( A, &B, Magma_CPU, Magma_CPU );
+        magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU );
 
         magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
         magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );
@@ -352,7 +352,7 @@ magma_zsymbilu( magma_z_sparse_matrix A, magma_int_t levels,
         magma_index_malloc_cpu( &L->col, num_lnnz );
         magma_index_malloc_cpu( &U->col, num_unnz );
 
-        symbolic_ilu( levels, A.num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
+        symbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
                                             L->row, L->col, U->row, U->col ); 
 
         L->nnz = num_lnnz;
@@ -391,30 +391,47 @@ magma_zsymbilu( magma_z_sparse_matrix A, magma_int_t levels,
             }
         }
 
-         printf("\n\n\nL:\n");
-         magma_z_mvisu( *L );
-
-         printf("\n\n\nU:\n");
-         magma_z_mvisu( *U );
-
         magma_z_mfree( &B );
+
+        // fill A with the new structure;
+        magma_free_cpu( A->col );
+        magma_free_cpu( A->val );
+        magma_index_malloc_cpu( &A->col, L->nnz+U->nnz );
+        magma_zmalloc_cpu( &A->val, L->nnz+U->nnz );
+        A->nnz = L->nnz+U->nnz ;
+    
+        magma_int_t z = 0;
+        for(magma_int_t i=0; i<A->num_rows; i++){
+            A->row[i] = z;
+            for(magma_int_t j=L->row[i]; j<L->row[i+1]; j++){
+                A->col[z] = L->col[j];
+                A->val[z] = L->val[j];
+                z++;
+            }
+            for(magma_int_t j=U->row[i]; j<U->row[i+1]; j++){
+                A->col[z] = U->col[j];
+                A->val[z] = U->val[j];
+                z++;
+            }
+        }
+        A->row[A->num_rows] = z;
 
         return MAGMA_SUCCESS;
     }
     else{
 
         magma_z_sparse_matrix hA, CSRCOOA;
-        magma_storage_t A_storage = A.storage_type;
-        magma_location_t A_location = A.memory_location;
-        magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU );
+        magma_storage_t A_storage = A->storage_type;
+        magma_location_t A_location = A->memory_location;
+        magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU );
         magma_z_mconvert( hA, &CSRCOOA, hA.storage_type, Magma_CSR );
 
-        magma_zsymbilu( CSRCOOA, levels, L, U );
+        magma_zsymbilu( &CSRCOOA, levels, L, U );
 
         magma_z_mfree( &hA );
-        magma_z_mfree( &A );
+        magma_z_mfree( A );
         magma_z_mconvert( CSRCOOA, &hA, Magma_CSR, A_storage );
-        magma_z_mtransfer( hA, &A, Magma_CPU, A_location );
+        magma_z_mtransfer( hA, A, Magma_CPU, A_location );
         magma_z_mfree( &hA );
         magma_z_mfree( &CSRCOOA );    
 

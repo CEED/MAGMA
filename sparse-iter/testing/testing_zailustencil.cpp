@@ -122,7 +122,7 @@ int main( int argc, char** argv)
         
     }
     }*/
-    int n=4;
+    int n=64;
     magma_zm_27stencil(  n, &hA );
 
         //################################################################//
@@ -202,7 +202,7 @@ int main( int argc, char** argv)
     // reorder the matrix determining the update processing order
     magma_z_sparse_matrix hACSRCOO, hAinitguess, dAinitguess;
     magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
-    int blocksize = 2;
+    int blocksize = 4;
     magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
     magma_z_mtransfer( hAinitguess, &dAinitguess, Magma_CPU, Magma_DEV );
 
@@ -235,7 +235,9 @@ int main( int argc, char** argv)
         // iterative ILU embedded in timing
         magma_device_sync(); start = magma_wtime(); 
         for(int i=0; i<iters; i++){
+cudaProfilerStart();
             magma_zailu_csr_a( dAinitguess, dL, dU );
+cudaProfilerStop();
         }
         magma_device_sync(); end = magma_wtime();
         t_chow = end-start;
