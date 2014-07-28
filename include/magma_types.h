@@ -38,7 +38,6 @@
 // Similar to magma_int_t we declare magma_index_t used for row/column indices in sparse
 #if defined(MAGMA_ILP64) || defined(MKL_ILP64)
 typedef int64_t magma_int_t;
-typedef int magma_index_t;
 #else
 typedef int magma_int_t;
 #endif
