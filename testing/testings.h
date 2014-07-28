@@ -68,7 +68,7 @@ void flops_init();
     cublasHandle_t handle;                                                 \
     cudaSetDevice( 0 );                                                    \
     cublasCreate( &handle );                                               \
-    magma_print_devices();
+    magma_print_environment();
 
 #define TESTING_FINALIZE()                                                 \
     cublasDestroy( handle );                                               \
@@ -84,7 +84,7 @@ void flops_init();
         magma_finalize();                                                  \
         exit(-1);                                                          \
     }                                                                      \
-    magma_print_devices();
+    magma_print_environment();
 
 
 #define TESTING_FINALIZE()                                                 \
@@ -109,7 +109,7 @@ void flops_init();
         }                                                                  \
     }                                                                      \
     magma_setdevice(0);                                                    \
-    magma_print_devices();                                                 \
+    magma_print_environment();                                             \
 }
 
 

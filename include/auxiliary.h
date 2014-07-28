@@ -38,7 +38,7 @@ void magma_indices_1D_bcyclic( magma_int_t nb, magma_int_t ngpu, magma_int_t dev
                                magma_int_t j0, magma_int_t j1,
                                magma_int_t* dj0, magma_int_t* dj1 );
 
-void magma_print_devices();
+void magma_print_environment();
 
 void swp2pswp(magma_trans_t trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv);
 

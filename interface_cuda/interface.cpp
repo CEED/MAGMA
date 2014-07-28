@@ -81,7 +81,7 @@ magma_int_t magma_finalize()
 // --------------------
 // Print the available GPU devices. Used in testing.
 extern "C"
-void magma_print_devices()
+void magma_print_environment()
 {
     magma_int_t major, minor, micro;
     magma_version( &major, &minor, &micro );
