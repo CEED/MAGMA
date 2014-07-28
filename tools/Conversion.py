@@ -37,11 +37,11 @@ try:
         for (i, row) in enumerate( subs[key] ):
             for (j, sub) in enumerate( row ):
                 try:
-                    sub = sub.replace('\*', '*')
-                    sub = sub.replace('\\b', '')
-                    if key != 'tracing':
-                        sub = sub.replace('\(', '(')
-                        sub = sub.replace('\)', ')')
+                    sub = sub.replace( r'\b', ''  )
+                    sub = sub.replace( r'\*', '*' )
+                    sub = sub.replace( r'\(', '(' )
+                    sub = sub.replace( r'\)', ')' )
+                    sub = sub.replace( r'\.', '.' )
                 except:
                     pass
                 subs_replace[key][i][j] = sub
