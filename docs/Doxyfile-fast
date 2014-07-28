@@ -756,7 +756,9 @@ WARN_LOGFILE           = output_err
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = doxygen-modules.h \
+INPUT                  = \
+	doxygen-modules.h       \
+	documentation.txt       \
 	../src/dbulge_aux.cpp             \
 	../src/dgeev.cpp                  \
 	../src/dgeev_m.cpp                \
@@ -888,9 +890,6 @@ INPUT                  = doxygen-modules.h \
 	../src/zlaqps_gpu.cpp             \
 	../src/zlarfb_gpu.cpp             \
 	../src/zlarfb_gpu_gemm.cpp        \
-	../src/zlarfb_gpu_gemm1.cpp       \
-	../src/zlarfb_gpu_gemm2.cpp       \
-	../src/zlarfb_gpu_gemm3.cpp       \
 	../src/zlatrd.cpp                 \
 	../src/zlatrd2.cpp                \
 	../src/zlatrd_mgpu.cpp            \
@@ -982,6 +981,13 @@ INPUT                  = doxygen-modules.h \
 	../control/xerbla.cpp                  \
 	../control/zpanel_to_q.cpp             \
 	../control/zprint.cpp                  \
+	../interface_cuda/alloc.cpp                      \
+	../interface_cuda/blas_z.cpp                     \
+	../interface_cuda/error.cpp                      \
+	../interface_cuda/error.h                        \
+	../interface_cuda/interface.cpp                  \
+	../interface_cuda/set_get.cpp                    \
+	../interface_cuda/zset_get.cpp                   \
 	../magmablas/cgemm_fermi_kernels.h          \
 	../magmablas/clag2z.cu                      \
 	../magmablas/commonblas.h                   \
@@ -1046,6 +1052,7 @@ INPUT                  = doxygen-modules.h \
 	../magmablas/zlarfgx-v2.cu                  \
 	../magmablas/zlarfx.cu                      \
 	../magmablas/zlascl.cu                      \
+	../magmablas/zlascl2.cu                     \
 	../magmablas/zlaset.cu                      \
 	../magmablas/zlaswp.cu                      \
 	../magmablas/zlat2c.cu                      \
@@ -1082,6 +1089,7 @@ INPUT                  = doxygen-modules.h \
 	../sparse-iter/src/zcpir.cpp                     \
 	../sparse-iter/src/zcuilu.cpp                    \
 	../sparse-iter/src/zgmres.cpp                    \
+	../sparse-iter/src/zgmres_fault.cpp               \
 	../sparse-iter/src/zgmres_pipe.cpp               \
 	../sparse-iter/src/zilu.cpp                      \
 	../sparse-iter/src/ziterref.cpp                  \
@@ -1108,6 +1116,7 @@ INPUT                  = doxygen-modules.h \
 	../sparse-iter/control/magma_zcsrsplit.cpp        \
 	../sparse-iter/control/magma_zgeneratematrix.cpp  \
 	../sparse-iter/control/magma_zilustruct.cpp       \
+	../sparse-iter/control/magma_zilustruct_2.cpp         \
 	../sparse-iter/control/magma_zmhom.cpp            \
 	../sparse-iter/control/magma_zmreorder.cpp        \
 	../sparse-iter/control/magma_zmscale.cpp          \

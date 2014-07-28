@@ -756,9 +756,12 @@ WARN_LOGFILE           = output_err
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = doxygen-modules.h \
+INPUT                  = \
+	doxygen-modules.h       \
+	documentation.txt       \
 	../src                  \
 	../control              \
+	../interface_cuda       \
 	../magmablas            \
 	../sparse-iter/src      \
 	../sparse-iter/control  \
