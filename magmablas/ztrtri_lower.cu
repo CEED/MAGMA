@@ -200,25 +200,25 @@ triple_zgemm16_part1_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -315,25 +315,25 @@ triple_zgemm16_part2_lower(
                 rA[3] = A[3*lda];
 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -418,25 +418,25 @@ triple_zgemm32_part1_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
             
             // move to next block of A and B
@@ -522,25 +522,25 @@ triple_zgemm32_part2_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -625,25 +625,25 @@ triple_zgemm64_part1_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -729,25 +729,25 @@ triple_zgemm64_part2_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -841,25 +841,25 @@ triple_zgemm_above64_part1_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
@@ -945,25 +945,25 @@ triple_zgemm_above64_part2_lower(
                 rA[3] = A[3*lda];
                 
                 // axpy:  C(id,:) += A(id,k) * B(k,:) for k=0, ..., 15
-                daxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
-                daxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
-                daxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
-                daxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
+                zaxpy16( rA[0], &sB[ 0][0], rC );  rA[0] = A[ 4*lda];
+                zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
+                zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
+                zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
     
-                daxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
-                daxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
-                daxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
-                daxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
+                zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
+                zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
+                zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];
+                zaxpy16( rA[3], &sB[ 7][0], rC );  rA[3] = A[11*lda];
     
-                daxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
-                daxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
-                daxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
-                daxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
+                zaxpy16( rA[0], &sB[ 8][0], rC );  rA[0] = A[12*lda];
+                zaxpy16( rA[1], &sB[ 9][0], rC );  rA[1] = A[13*lda];
+                zaxpy16( rA[2], &sB[10][0], rC );  rA[2] = A[14*lda];
+                zaxpy16( rA[3], &sB[11][0], rC );  rA[3] = A[15*lda];
     
-                daxpy16( rA[0], &sB[12][0], rC );
-                daxpy16( rA[1], &sB[13][0], rC );
-                daxpy16( rA[2], &sB[14][0], rC );
-                daxpy16( rA[3], &sB[15][0], rC );
+                zaxpy16( rA[0], &sB[12][0], rC );
+                zaxpy16( rA[1], &sB[13][0], rC );
+                zaxpy16( rA[2], &sB[14][0], rC );
+                zaxpy16( rA[3], &sB[15][0], rC );
             }
 
             // move to next block of A and B
