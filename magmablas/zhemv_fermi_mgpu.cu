@@ -967,7 +967,7 @@ magmablas_zhemv_mgpu_offset(
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper ) {
         fprintf( stderr, "Upper case is not implemented on multi GPUs\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        return MAGMA_ERR_NOT_IMPLEMENTED;
     }
     else {
         magma_int_t blocks = (n - 1)/thread_x + 1;
@@ -1058,7 +1058,7 @@ magmablas_zhemv2_mgpu_offset(
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper ) {
         fprintf( stderr, "Upper case is not implemented on multi GPUs\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        return MAGMA_ERR_NOT_IMPLEMENTED;
     }
     else {
         magma_int_t blocks = (n - 1)/thread_x + 1;
@@ -1151,7 +1151,7 @@ magmablas_zhemv2_mgpu(
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper ) {
         fprintf( stderr, "Upper case is not implemented on multi GPUs\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        return MAGMA_ERR_NOT_IMPLEMENTED;
     }
     else {
         magma_int_t blocks = (n - 1)/thread_x + 1;
@@ -1159,7 +1159,7 @@ magmablas_zhemv2_mgpu(
 
         if ( lwork < lwmin ) {
             fprintf( stderr, "Not enough work space in %s: passed %d, required %d\n",
-                   __func__, (int) lwork, (int) lwmin);
+                     __func__, (int) lwork, (int) lwmin);
             return -12;
         }
         if ( nb != 64 ) {

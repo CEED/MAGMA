@@ -591,7 +591,7 @@ magmablas_zsymv_work(
     if ( arch < 200 ) {
         //magma_zsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
         //return MAGMA_SUCCESS;
-        fprintf(stderr, "%s: %s\n", __func__, "not implemented on CUDA ARCH 1.x");
+        fprintf(stderr, "%s: %s\n", __func__, "not supported on CUDA ARCH 1.x");
         return MAGMA_ERR_NOT_SUPPORTED;
     }
 #endif
@@ -636,7 +636,7 @@ magmablas_zsymv_work(
     if ( upper ) {
         //magma_zsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy);
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
-        info = MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_IMPLEMENTED;
     }
     else {
         magmablas_zsymv_L(n, alpha, A, lda, x, incx, beta, y, incy, dwork);
@@ -742,7 +742,7 @@ magmablas_zsymv(
     if ( arch < 200 ) {
         //magma_zsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy );
         //return MAGMA_SUCCESS;
-        fprintf(stderr, "%s: %s\n", __func__, "not implemented on CUDA ARCH 1.x");
+        fprintf(stderr, "%s: %s\n", __func__, "not supported on CUDA ARCH 1.x");
         return MAGMA_ERR_NOT_SUPPORTED;
     }
 #endif
@@ -782,7 +782,7 @@ magmablas_zsymv(
     if ( upper ) {
         //magma_zsymv( uplo, n, alpha, A, lda, x, incx, beta, y, incy);
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
-        info = MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_IMPLEMENTED;
     }
     else {
         magmaDoubleComplex *dwork;
