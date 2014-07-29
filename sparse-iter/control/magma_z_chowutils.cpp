@@ -56,7 +56,7 @@ using namespace std;
     res         real_Double_t* 
                 residual 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -64,15 +64,20 @@ magma_zfrobenius( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
                   real_Double_t *res ){
 
     real_Double_t tmp2;
-    magma_int_t i,j;
+    magma_int_t i,j,k;
+    *res = 0.0;
     
     for(i=0; i<A.num_rows; i++){
         for(j=A.row[i]; j<A.row[i+1]; j++){
+            magma_index_t localcol = A.col[j];
+            for( k=B.row[i]; k<B.row[i+1]; k++){
+                if(B.col[k] == localcol){
+                    tmp2 = (real_Double_t) fabs( MAGMA_Z_REAL(A.val[j] )
+                                                    - MAGMA_Z_REAL(B.val[k]) );
 
-            tmp2 = (real_Double_t) fabs( MAGMA_Z_REAL(A.val[j] )
-                                            - MAGMA_Z_REAL(B.val[j]) );
-
-            (*res) = (*res) + tmp2* tmp2;
+                    (*res) = (*res) + tmp2* tmp2;
+                }
+            }
         }      
     }
 
@@ -296,10 +301,43 @@ magma_zilures(   magma_z_sparse_matrix A,
     real_Double_t tmp2;
     magma_int_t i,j,k,m;
 
-    magma_z_sparse_matrix L_d, U_d, LU_d;
+    magma_z_sparse_matrix LL, L_d, U_d, LU_d;
 
-    magma_z_mtransfer( L, &L_d, Magma_CPU, Magma_DEV ); 
+    if( L.row[1]==1 ){        // lower triangular with unit diagonal
+        //printf("L lower triangular.\n");
+        LL.diagorder_type = Magma_UNITY;
+        magma_z_mconvert( L, &LL, Magma_CSR, Magma_CSRL );
+    }
+    else if( L.row[1]==0 ){ // strictly lower triangular
+        //printf("L strictly lower triangular.\n");
+        magma_z_mtransfer( L, &LL, Magma_CPU, Magma_CPU );
+        magma_free_cpu( LL.col );
+        magma_free_cpu( LL.val );
+        LL.nnz = L.nnz+L.num_rows;
+        magma_zmalloc_cpu( &LL.val, LL.nnz );
+        magma_index_malloc_cpu( &LL.col, LL.nnz );
+        magma_int_t z=0;
+        for( magma_int_t i=0; i<L.num_rows; i++){
+            LL.row[i] = z;
+            for( magma_int_t j=L.row[i]; j<L.row[i+1]; j++){
+                LL.val[z] = L.val[j];
+                LL.col[z] = L.col[j];
+                z++;
+            }
+            // add unit diagonal
+            LL.val[z] = MAGMA_Z_MAKE(1.0, 0.0);
+            LL.col[z] = i;
+            z++;
+        }
+        LL.row[LL.num_rows] = z;
+    }
+    else{
+        printf("error: L neither lower nor strictly lower triangular!\n");
+    }
+
+    magma_z_mtransfer( LL, &L_d, Magma_CPU, Magma_DEV ); 
     magma_z_mtransfer( U, &U_d, Magma_CPU, Magma_DEV ); 
+    magma_z_mfree( &LL );
 
     magma_z_mtransfer( U, &LU_d, Magma_CPU, Magma_DEV ); 
 
@@ -441,7 +479,7 @@ magma_zilures(   magma_z_sparse_matrix A,
                 sparse matrix in CSR    
 
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zaux
     ********************************************************************/
 
 magma_int_t 
@@ -535,4 +573,69 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
 
     return MAGMA_SUCCESS; 
 }
+
+
+
+
+/**
+    Purpose
+    -------
+
+    Checks for a lower triangular matrix whether it is strictly lower triangular
+    and in the negative case adds a unit diagonal.
+
+
+    Arguments
+    ---------
+
+    @param
+    L           magma_z_sparse_matrix*
+                sparse matrix in CSR
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+magma_int_t 
+magma_zmLdiagadd( magma_z_sparse_matrix *L ){
+
+    magma_z_sparse_matrix LL;
+
+    if( L->row[1]==1 ){        // lower triangular with unit diagonal
+        //printf("L lower triangular.\n");
+        LL.diagorder_type = Magma_UNITY;
+        magma_z_mconvert( *L, &LL, Magma_CSR, Magma_CSRL );
+    }
+    else if( L->row[1]==0 ){ // strictly lower triangular
+        //printf("L strictly lower triangular.\n");
+        magma_z_mtransfer( *L, &LL, Magma_CPU, Magma_CPU );
+        magma_free_cpu( LL.col );
+        magma_free_cpu( LL.val );
+        LL.nnz = L->nnz+L->num_rows;
+        magma_zmalloc_cpu( &LL.val, LL.nnz );
+        magma_index_malloc_cpu( &LL.col, LL.nnz );
+        magma_int_t z=0;
+        for( magma_int_t i=0; i<L->num_rows; i++){
+            LL.row[i] = z;
+            for( magma_int_t j=L->row[i]; j<L->row[i+1]; j++){
+                LL.val[z] = L->val[j];
+                LL.col[z] = L->col[j];
+                z++;
+            }
+            // add unit diagonal
+            LL.val[z] = MAGMA_Z_MAKE(1.0, 0.0);
+            LL.col[z] = i;
+            z++;
+        }
+        LL.row[LL.num_rows] = z;
+    }
+    else{
+        printf("error: L neither lower nor strictly lower triangular!\n");
+    }
+    magma_z_mfree( L );
+    magma_z_mtransfer(LL, L, Magma_CPU, Magma_CPU );
+    magma_z_mfree( &LL );
+
+    return MAGMA_SUCCESS; 
+}
+
 

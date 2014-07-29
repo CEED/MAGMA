@@ -153,6 +153,21 @@ magma_int_t
 magma_zilustruct(       magma_z_sparse_matrix *A,
                         magma_int_t levels );
 
+magma_int_t
+magma_zsymbilu(         magma_z_sparse_matrix *A, 
+                        magma_int_t levels,
+                        magma_z_sparse_matrix *L,
+                        magma_z_sparse_matrix *U );
+
+magma_int_t
+magma_zmlumerge(        magma_z_sparse_matrix L, 
+                        magma_z_sparse_matrix U,
+                        magma_z_sparse_matrix *A);
+
+magma_int_t
+magma_zmLdiagadd(       magma_z_sparse_matrix *L );
+
+
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
                         magma_int_t offset, 

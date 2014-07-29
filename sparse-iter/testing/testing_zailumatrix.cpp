@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     real_Double_t start, end;
     real_Double_t t_cusparse, t_chow;
 
-    magma_z_sparse_matrix hA, hAL, hALCOO, hAU,  hAUT, hAUCOO, hAcusparse, hAtmp, dA, hLU, dL, dU, hL, hU, hUT;
+    magma_z_sparse_matrix hA, hAL, hALCOO, hAU,  hAUt, hAUCOO, hAcusparse, hAtmp, dA, hLU, dL, dU, hL, hU, hUT;
 
 
         //################################################################//
@@ -63,17 +63,15 @@ int main( int argc, char** argv)
             "/mnt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
             "/mnt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
     };
-    for(int matrix=0; matrix<10; matrix=matrix+1){
+    for(int matrix=0; matrix<15; matrix=matrix+1){
 
-    
+    printf("\n\n\n\n\n");
     magma_z_csr_mtx( &hA, filename[matrix] );
 
     // scale to unit diagonal
-    magma_zmscale( &hA, Magma_UNITDIAG );
+    //magma_zmscale( &hA, Magma_UNITDIAG );
 
     real_Double_t FLOPS = 2.0*hA.nnz/1e9;
-
-    printf("# iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
 
 
         //################################################################//
@@ -136,29 +134,44 @@ int main( int argc, char** argv)
         //                  end cuSPARSE reference ILU                    //
         //################################################################//
 
-    magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSR );
-
     // reorder the matrix determining the update processing order
-    magma_z_sparse_matrix hACSRCOO, hAinitguess, dAinitguess;
+    magma_z_sparse_matrix hAcopy, hACSRCOO, hAinitguess, dAinitguess;
 
 
+
+    magma_z_mtransfer( hA, &hAcopy, Magma_CPU, Magma_CPU );
+
+    // ---------------- iteration matrices ------------------- //
     // possibility to increase fill-in in ILU-(m)
-    int levels = 1; //ILU-m levels
-    magma_zsymbilu( &hA, levels, &hAL, &hAU ); 
-    magma_z_mconvert( hA, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
 
-    int blocksize = 1;
-  //  magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
+    //ILU-m levels
+    for( int levels = 0; levels < 3; levels++){ //ILU-m levels
+    magma_zsymbilu( &hAcopy, levels, &hAL, &hAUt ); 
+    printf("\n#================================================================================#\n");
+    printf("# ILU-(m)  #nnz  iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
+    // add a unit diagonal to L for the algorithm
+    magma_zmLdiagadd( &hAL ); 
 
-    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
+    // transpose U for the algorithm
+    magma_z_cucsrtranspose(  hAUt, &hAU );
+    magma_z_mfree( &hAUt );
+    // scale to unit diagonal
+    //magma_zmscale( &hAU, Magma_UNITDIAG );
+
+
 /*
     // need only lower triangular
+    magma_z_mfree(&hAL);
     hAL.diagorder_type == Magma_UNITY;
     magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
-    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
 */
-    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
-    magma_z_mconvert( hAU, &hAUCOO, Magma_CSR, Magma_CSRCOO );
+
+    // ---------------- initial guess ------------------- //
+    magma_z_mconvert( hAcopy, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
+    int blocksize = 1;
+  //  magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
+    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hACSRCOO);
 
 
         //################################################################//
@@ -170,7 +183,7 @@ int main( int argc, char** argv)
     // take average results for residuals
     real_Double_t resavg = 0.0;
     real_Double_t iluresavg = 0.0;
-    int numavg = 1;
+    int nnz, numavg = 1;
     //multiple runs
     for(int z=0; z<numavg; z++){
 
@@ -188,44 +201,55 @@ int main( int argc, char** argv)
         }
         magma_device_sync(); end = magma_wtime();
         t_chow = end-start;
-printf("here\n");
+
         // check the residuals
         magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
         magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
+        magma_z_cucsrtranspose(  hU, &hUT );
+
         magma_z_mfree(&dL);
         magma_z_mfree(&dU);
-        magma_z_LUmergein( hL, hU, &hAtmp);
+
+        magma_zmlumerge( hL, hUT, &hAtmp);
         // frobenius norm of error
-        magma_zfrobenius( hAtmp, hAcusparse, &res );
-        magma_z_cucsrtranspose(  hU, &hUT );
+        magma_zfrobenius( hAcusparse, hAtmp, &res );
+
         // ilu residual
         magma_zilures(   hA, hL, hUT, &hLU, &ilures ); 
- 
+
         iluresavg += ilures;
         resavg += res;
+        nnz = hAtmp.nnz;
 
         magma_z_mfree(&hL);
         magma_z_mfree(&hU);
         magma_z_mfree(&hUT);
+        magma_z_mfree(&hAtmp);
+
+
+
 
     }//multiple runs
 
     iluresavg = iluresavg/numavg;
     resavg = resavg/numavg;
 
-    printf(" %d       %d        %.2e   ",1* iters, blocksize, t_chow);
+    printf(" %d      %d      %d       %d        %.2e   ",
+                              levels, nnz, 1* iters, blocksize, t_chow);
     printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, iluresavg);
 
     }// iters
+    printf("#================================================================================#\n");
+    }// levels
 
     // free all memory
-    magma_z_mfree(&hAtmp);
     magma_z_mfree(&hAL);
+    //magma_z_mfree(&hAU);
     magma_z_mfree(&hAU);
-    magma_z_mfree(&hALCOO);
-    magma_z_mfree(&hAUCOO);
     magma_z_mfree(&hAcusparse);
     magma_z_mfree(&dA);
+    magma_z_mfree(&hA);
+    magma_z_mfree(&hAcopy);
 
     }// multiple matrices
 
