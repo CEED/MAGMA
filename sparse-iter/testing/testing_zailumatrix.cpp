@@ -50,26 +50,25 @@ int main( int argc, char** argv)
     const char *filename[] =
     {
 
-            "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
-            "/mnt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
-            "/mnt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
-            "/mnt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
-            "/mnt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
+           // "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+           // "/mnt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+           // "/mnt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+           // "/mnt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
             "/mnt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
             "/mnt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
             "/mnt/sparse_matrices/mtx/ecology2.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
             "/mnt/sparse_matrices/mtx/G3_circuit.mtx", //          n:1585478 nnz:7660826 nnz/n:4 max_nnz_row:6 
+            "/mnt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
             "/mnt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
             "/mnt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
-            "/mnt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
     };
-    for(int matrix=0; matrix<15; matrix=matrix+1){
+    for(int matrix=0; matrix<7; matrix=matrix+1){
 
     printf("\n\n\n\n\n");
     magma_z_csr_mtx( &hA, filename[matrix] );
 
     // scale to unit diagonal
-    //magma_zmscale( &hA, Magma_UNITDIAG );
+    magma_zmscale( &hA, Magma_UNITDIAG );
 
     real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
@@ -168,7 +167,7 @@ int main( int argc, char** argv)
 
     // ---------------- initial guess ------------------- //
     magma_z_mconvert( hAcopy, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
-    int blocksize = 1;
+    int blocksize = 31;
   //  magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
     magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hACSRCOO);
@@ -178,7 +177,7 @@ int main( int argc, char** argv)
         //                        iterative ILU                           //
         //################################################################//
     // number of AILU sweeps
-    for(int iters=0; iters<10; iters++){
+    for(int iters=0; iters<3; iters++){
 
     // take average results for residuals
     real_Double_t resavg = 0.0;
