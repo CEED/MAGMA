@@ -247,6 +247,7 @@ int main( int argc, char** argv)
     magma_z_mfree(&hAU);
     magma_z_mfree(&hAcusparse);
     magma_z_mfree(&dA);
+    magma_z_mfree(&dAinitguess);
     magma_z_mfree(&hA);
     magma_z_mfree(&hAcopy);
 
