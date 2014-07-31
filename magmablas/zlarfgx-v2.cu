@@ -40,16 +40,21 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
         dxi = dx[j];
   
     if ( i == 0 ) {
-        xnorm = *dxnorm;
-        if ( xnorm == 0 || n == 1) {
+         xnorm = *dxnorm;
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+        double alpha = *dx0;
+        double alphai = MAGMA_Z_ZERO;
+#else
+        magmaDoubleComplex alpha = *dx0;
+        double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+#endif
+        if ( (xnorm == 0 && alphai == MAGMA_Z_ZERO ) || n == 1 ) {
             *dtau = MAGMA_Z_ZERO;
             *dA   = *dx0;
         }
         else {
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-            double alpha = *dx0;
-
             // no need to compute the norm as it is passed as input
             double beta  = xnorm; // sqrt( alpha*alpha + xnorm*xnorm );
             beta  = -copysign( beta, alpha );
@@ -57,15 +62,12 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
             // todo: deal with badly scaled vectors (see lapack's larfg)
             if (j==0){
                 *dtau = (beta - alpha) / beta;
-                //*dx0  = 1.;
+                //*dx0  = 1.; //cannot be done here because raise condition all threadblock need to read it for alpha
                 *dA   = beta;  
             }
 
             scale = 1. / (alpha - beta);
 #else
-            magmaDoubleComplex alpha = *dx0;
-            double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
-
             // no need to compute the norm as it is passed as input
             double beta  = xnorm; // sqrt( alphar*alphar + alphai*alphai + xnorm*xnorm );
             beta  = -copysign( beta, alphar );
@@ -73,7 +75,7 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
             // todo: deal with badly scaled vectors (see lapack's larfg)
             if (j==0){
                 *dtau = MAGMA_Z_MAKE((beta - alphar)/beta, -alphai/beta);
-                //*dx0  = MAGMA_Z_MAKE(  1., 0.);
+                //*dx0  = MAGMA_Z_MAKE(  1., 0.); //cannot be done here because raise condition all threadblock need to read it for alpha
                 *dA   = MAGMA_Z_MAKE(beta, 0.);
             }            
 
