@@ -48,63 +48,61 @@
 magma_int_t
 magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
-    magma_z_sparse_matrix hAh, hA, hAL, hALCOO, hAU, hAUT, hAUCOO, dAL, dAU, 
-                                        hL, hU, dL, dU, DL, RL, DU, RU;
+    magma_z_sparse_matrix hAh, hA, hL, hU, hAcopy, hAL, hAU, hAUt, hUT, hAtmp,
+                        hACSRCOO, dAinitguess, dL, dU, DL, RL, DU, RU;
 
     // copy original matrix as CSRCOO to device
     magma_z_mtransfer(A, &hAh, A.memory_location, Magma_CPU);
     magma_z_mconvert( hAh, &hA, hAh.storage_type, Magma_CSR );
     magma_z_mfree(&hAh);
 
+    magma_z_mtransfer( hA, &hAcopy, Magma_CPU, Magma_CPU );
+
     // in case using fill-in
-    magma_zilustruct( &hA, precond->levels);
+    magma_zsymbilu( &hAcopy, precond->levels, &hAL, &hAUt ); 
+    // add a unit diagonal to L for the algorithm
+    magma_zmLdiagadd( &hAL ); 
+    // transpose U for the algorithm
+    magma_z_cucsrtranspose(  hAUt, &hAU );
+    magma_z_mfree( &hAUt );
 
-    // need only lower triangular
-    hAL.diagorder_type == Magma_UNITY;
-    magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
-    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
-    magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hALCOO, &dAU, Magma_CPU, Magma_DEV );
+    // ---------------- initial guess ------------------- //
+    magma_z_mconvert( hAcopy, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hACSRCOO);
+    magma_z_mfree(&hAcopy);
 
-    // need only upper triangular
-    magma_z_mconvert( hA, &hAU, Magma_CSR, Magma_CSRU );
-    magma_z_cucsrtranspose(  hAU, &hAUT );
-    magma_z_mconvert( hAUT, &hAUCOO, Magma_CSR, Magma_CSRCOO );
-    magma_z_mtransfer( hAUCOO, &dL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hAUCOO, &dU, Magma_CPU, Magma_DEV );
-
-    magma_z_mfree(&hALCOO);
+    // transfer the factor L and U
+    magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hAU, &dU, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hAL);
-    magma_z_mfree(&hAUCOO);
-    magma_z_mfree(&hAUT);
     magma_z_mfree(&hAU);
 
     for(int i=0; i<precond->sweeps; i++){
-        magma_zailu_csr_s( dAL, dAU, dL, dU );
-
+        magma_zailu_csr_a( dAinitguess, dL, dU );
     }
 
     magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
     magma_z_mtransfer( dU, &hU, Magma_DEV, Magma_CPU );
-
-    magma_z_LUmergein( hL, hU, &hA);
-
-    magma_z_mtransfer( hA, &precond->M, Magma_CPU, Magma_DEV );
+    magma_z_cucsrtranspose(  hU, &hUT );
 
     magma_z_mfree(&dL);
     magma_z_mfree(&dU);
-    magma_z_mfree(&dAL);
-    magma_z_mfree(&dAU);
-
-    hAL.diagorder_type = Magma_UNITY;
-    magma_z_mconvert(hA, &hAL, Magma_CSR, Magma_CSRL);
-    hAL.storage_type = Magma_CSR;
-    magma_z_mconvert(hA, &hAU, Magma_CSR, Magma_CSRU);
-    hAU.storage_type = Magma_CSR;
-    magma_z_mfree(&hA);
+    magma_z_mfree(&hU);
+    magma_zmlumerge( hL, hUT, &hAtmp);
 
     magma_z_mfree(&hL);
-    magma_z_mfree(&hU);
+    magma_z_mfree(&hUT);
+
+    magma_z_mtransfer( hAtmp, &precond->M, Magma_CPU, Magma_DEV );
+
+    hAL.diagorder_type = Magma_UNITY;
+    magma_z_mconvert(hAtmp, &hAL, Magma_CSR, Magma_CSRL);
+    hAL.storage_type = Magma_CSR;
+    magma_z_mconvert(hAtmp, &hAU, Magma_CSR, Magma_CSRU);
+    hAU.storage_type = Magma_CSR;
+
+    magma_z_mfree(&hAtmp);
 
     magma_zcsrsplit( 256, hAL, &DL, &RL );
     magma_zcsrsplit( 256, hAU, &DU, &RU );
@@ -116,7 +114,8 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mtransfer( hAL, &precond->L, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( hAU, &precond->U, Magma_CPU, Magma_DEV );
 
-    // for ba-solve uncomment this
+
+    //-- for ba-solve uncomment this
 /*
     if( RL.nnz != 0 )
         magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
@@ -138,6 +137,8 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
         precond->L.blockinfo = NULL;
     }
 */
+    //-- for ba-solve uncomment this
+
     magma_z_mfree(&hAL);
     magma_z_mfree(&hAU);
     magma_z_mfree(&DL);

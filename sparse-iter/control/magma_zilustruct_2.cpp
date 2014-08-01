@@ -340,8 +340,8 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
         magma_z_mtransfer( *A, &A_copy, Magma_CPU, Magma_CPU );
         magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU );
 
-        // scale to unit diagonal
-        magma_zmscale( &B, Magma_UNITDIAG );
+        // possibility to scale to unit diagonal
+        //magma_zmscale( &B, Magma_UNITDIAG );
 
         magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
         magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );

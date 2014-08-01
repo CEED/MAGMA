@@ -478,6 +478,11 @@ magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
                        magma_z_solver_par *solver_par );
 
 magma_int_t
+magma_zbicgstab_detailedtiming(       
+                       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_z_solver_par *solver_par );
+
+magma_int_t
 magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b, 
                        magma_z_vector *x, magma_z_solver_par *solver_par );
 
