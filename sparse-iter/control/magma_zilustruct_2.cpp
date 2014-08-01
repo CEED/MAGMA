@@ -335,12 +335,13 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
     
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
-        magma_z_sparse_matrix B;
+        magma_z_sparse_matrix A_copy, B;
 
-        //magma_z_cucsrtranspose( A, &B );
-
-
+        magma_z_mtransfer( *A, &A_copy, Magma_CPU, Magma_CPU );
         magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU );
+
+        // scale to unit diagonal
+        magma_zmscale( &B, Magma_UNITDIAG );
 
         magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
         magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );
@@ -368,7 +369,7 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
         for( magma_int_t i=0; i<U->nnz; i++ )
             U->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
-        // take the original values as initial guess for L
+        // take the original values (scaled) as initial guess for L
         for(magma_int_t i=0; i<L->num_rows; i++){
             for(magma_int_t j=B.row[i]; j<B.row[i+1]; j++){
                 magma_index_t lcol = B.col[j];
@@ -380,7 +381,7 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
             }
         }
 
-        // take the original values as initial guess for U
+        // take the original values (scaled) as initial guess for U
         for(magma_int_t i=0; i<U->num_rows; i++){
             for(magma_int_t j=B.row[i]; j<B.row[i+1]; j++){
                 magma_index_t lcol = B.col[j];
@@ -416,6 +417,18 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
             }
         }
         A->row[A->num_rows] = z;
+        // reset the values of A to the original entries
+        for(magma_int_t i=0; i<A->num_rows; i++){
+            for(magma_int_t j=A_copy.row[i]; j<A_copy.row[i+1]; j++){
+                magma_index_t lcol = A_copy.col[j];
+                for(magma_int_t k=A->row[i]; k<A->row[i+1]; k++){
+                    if( A->col[k] == lcol ){
+                        A->val[k] =  A_copy.val[j];
+                    }
+                }
+            }
+        }
+        magma_z_mfree( &A_copy );
 
         return MAGMA_SUCCESS;
     }
