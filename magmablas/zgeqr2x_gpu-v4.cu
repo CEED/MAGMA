@@ -161,6 +161,7 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
             /*   Apply H' to A(:,i) from the left                           */    
             if ( i-b > 0){
+                /* Compute the (i-1)th column of T */                
                 magma_zgemv_kernel3<<< i-1, BLOCK_SIZE, 0, magma_stream >>>( *m-i+1, da_ref(i-1,0), *ldda,
                                                     da_ref(i-1, i-1), work, dtau+i-1);
                 magma_ztrmv_kernel2<<< i-1, i-1, 0, magma_stream >>>( dt_ref(0,0), k, work,
@@ -195,20 +196,8 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
             if (i==0){
               magmaDoubleComplex tt = MAGMA_Z_ONE;
               magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, dt_ref(0,0), 1);
-              magma_zsetmatrix(1,1, &tt,1, da_ref(i, i),1);
+              magma_zsetmatrix_async(1,1, &tt,1, da_ref(i, i),1, magma_stream);
             }
-/*
-            else
-             {
-                // Compute the i-th column of T.
-                //   Set da_ref(i, i) = 1.                                    
-                magma_zgemv_kernel3<<< i, BLOCK_SIZE, 0, magma_stream >>>( *m-i, da_ref(i,0), *ldda, 
-                                          da_ref(i, i), work, dtau+i);
-                magma_ztrmv_kernel2<<< i, i, 0, magma_stream          >>>( dt_ref(0,0), k, work, 
-                                                          dt_ref(0,i), dtau+i);
-              }
-*/
-
         }
         magma_zgemv_kernel3<<< i-1, BLOCK_SIZE, 0, magma_stream >>>( *m-i+1, da_ref(i-1,0), *ldda,
                                                     da_ref(i-1, i-1), work, dtau+i-1);
