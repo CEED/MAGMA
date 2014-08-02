@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     const char *filename[] =
     {
 
-           // "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+            "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
@@ -167,7 +167,7 @@ int main( int argc, char** argv)
 
     // ---------------- initial guess ------------------- //
     magma_z_mconvert( hAcopy, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
-    int blocksize = 31;
+    int blocksize = 1;
   //  magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
     magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hACSRCOO);
@@ -177,7 +177,7 @@ int main( int argc, char** argv)
         //                        iterative ILU                           //
         //################################################################//
     // number of AILU sweeps
-    for(int iters=0; iters<3; iters++){
+    for(int iters=0; iters<31; iters++){
 
     // take average results for residuals
     real_Double_t resavg = 0.0;
@@ -243,7 +243,6 @@ int main( int argc, char** argv)
 
     // free all memory
     magma_z_mfree(&hAL);
-    //magma_z_mfree(&hAU);
     magma_z_mfree(&hAU);
     magma_z_mfree(&hAcusparse);
     magma_z_mfree(&dA);
