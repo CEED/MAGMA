@@ -325,7 +325,7 @@ magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
-    magma_z_sparse_matrix hAh, hA, hAL, hALCOO, dAL, hL, dL, DL, RL;
+    magma_z_sparse_matrix hAh, hA, hAtmp, hAL, hLt, hAUt, hACSRCOO, dAinitguess, dL, DL, RL;
 
 
 
@@ -335,27 +335,32 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mfree(&hAh);
 
     // in case using fill-in
-    magma_zilustruct( &hA, precond->levels);
+    magma_zsymbilu( &hA, precond->levels, &hAL, &hAUt ); 
 
-    magma_z_mconvert( hA, &hAL, Magma_CSR, Magma_CSRL );
-    magma_z_mconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
-
-    magma_z_mtransfer( hALCOO, &dAL, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( hALCOO, &dL, Magma_CPU, Magma_DEV );
-    magma_z_mfree(&hALCOO);
-    magma_z_mfree(&hAL);
+    // need only lower triangular
+    magma_z_mfree(&hAUt);
+    magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSRL );
     magma_z_mfree(&hA);
 
+    // add a unit diagonal to L for the algorithm
+    magma_zmLdiagadd( &hAL ); 
+
+    // ---------------- initial guess ------------------- //
+    magma_z_mconvert( hAtmp, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
+    magma_z_mfree(&hAtmp);
+    int blocksize = 1;
+    //magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
+    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hACSRCOO);
+    magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hAL);
+
     for(int i=0; i<precond->sweeps; i++){
-        magma_zaic_csr_s( dAL, dL );
-
+        magma_zaic_csr_a( dAinitguess, dL );
     }
-    magma_z_mtransfer( dL, &hL, Magma_DEV, Magma_CPU );
-
+    magma_z_mtransfer( dL, &hAL, Magma_DEV, Magma_CPU );
     magma_z_mfree(&dL);
-    magma_z_mfree(&dAL);
-
-    magma_z_mconvert(hL, &hAL, hL.storage_type, Magma_CSR);
+    magma_z_mfree(&dAinitguess);
 
     // for CUSPARSE
     magma_z_mtransfer( hAL, &precond->M, Magma_CPU, Magma_DEV );
@@ -365,17 +370,16 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     magma_z_mtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
 
-    magma_z_mfree(&hL);
+    // for asynchronous iteration also need U
+    magma_z_cucsrtranspose(   hAL, &hLt );
 
-    magma_z_cucsrtranspose(   hAL, &hL );
-
-    magma_zcsrsplit( 256, hL, &DL, &RL );
+    magma_zcsrsplit( 256, hLt, &DL, &RL );
 
     magma_z_mtransfer( DL, &precond->UD, Magma_CPU, Magma_DEV );
     magma_z_mtransfer( RL, &precond->U, Magma_CPU, Magma_DEV );
 
     magma_z_mfree(&hAL);
-    magma_z_mfree(&hL);
+    magma_z_mfree(&hLt);
 
     magma_z_mfree(&DL);
     magma_z_mfree(&RL);
