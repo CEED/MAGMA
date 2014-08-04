@@ -383,6 +383,7 @@ if ( opts.blas ):
 aux = (
 	#('testing_auxiliary',             '-c',  '',   ''),  # run_tests misinterprets output as errors
 	('testing_constants',              '-c',  '',   ''),
+	('testing_operators',              '-c',  '',   ''),
 	('testing_parse_opts',             '-c',  '',   ''),
 	('testing_zgeadd',                 '-c',  mn,   ''),
 	('testing_zgeadd_batched',         '-c',  mn,   ''),
@@ -697,7 +698,8 @@ def substitute( txt, pfrom, pto ):
 # error  is count of indications of other errors (exit, CUDA error, etc.).
 # status is exit status of the command.
 def run( cmd ):
-	words = re.split( ' +', cmd )
+	words = re.split( ' +', cmd.strip() )
+	
 	# stdout & stderr are merged
 	p = subprocess.Popen( words, bufsize=1, stdout=PIPE, stderr=STDOUT )
 	
