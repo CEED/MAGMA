@@ -9,7 +9,6 @@
 
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 #define PRECISION_z
 #define COMPLEX
@@ -215,7 +214,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         magmablas_dznrm2_cols(sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd]);
         magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
         /*for (j = nfxd; j < n; ++j) {
-            rwork[j] = cblas_dznrm2(sm, dA(nfxd, j), ione);
+            rwork[j] = magma_cblas_dznrm2( sm, dA(nfxd,j), ione );
             rwork[n + j] = rwork[j];
         }*/
         

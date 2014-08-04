@@ -11,7 +11,6 @@
 */
 #include "common_magma.h"
 #include "timer.h"
-#include <cblas.h>
 
 #define PRECISION_d
 
@@ -400,24 +399,24 @@ magma_dgeev(
         /* Normalize left eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
             if ( wi[i] == 0. ) {
-                scl = 1. / cblas_dnrm2( n, VL(0,i), 1 );
-                cblas_dscal( n, scl, VL(0,i), 1 );
+                scl = 1. / magma_cblas_dnrm2( n, VL(0,i), 1 );
+                blasf77_dscal( &n, &scl, VL(0,i), &ione );
             }
             else if ( wi[i] > 0. ) {
-                d__1 = cblas_dnrm2( n, VL(0,i),   1 );
-                d__2 = cblas_dnrm2( n, VL(0,i+1), 1 );
+                d__1 = magma_cblas_dnrm2( n, VL(0,i),   1 );
+                d__2 = magma_cblas_dnrm2( n, VL(0,i+1), 1 );
                 scl = 1. / lapackf77_dlapy2( &d__1, &d__2 );
-                cblas_dscal( n, scl, VL(0,i),   1 );
-                cblas_dscal( n, scl, VL(0,i+1), 1 );
+                blasf77_dscal( &n, &scl, VL(0,i), &ione );
+                blasf77_dscal( &n, &scl, VL(0,i+1), &ione );
                 for (k = 0; k < n; ++k) {
                     /* Computing 2nd power */
                     d__1 = *VL(k,i);
                     d__2 = *VL(k,i+1);
                     work[iwrk + k] = d__1*d__1 + d__2*d__2;
                 }
-                k = cblas_idamax( n, &work[iwrk], 1 );
+                k = blasf77_idamax( &n, &work[iwrk], &ione ) - 1;  // subtract 1; k is 0-based
                 lapackf77_dlartg( VL(k,i), VL(k,i+1), &cs, &sn, &r );
-                cblas_drot( n, VL(0,i), 1, VL(0,i+1), 1, cs, sn );
+                blasf77_drot( &n, VL(0,i), &ione, VL(0,i+1), &ione, &cs, &sn );
                 *VL(k,i+1) = 0.;
             }
         }
@@ -432,24 +431,24 @@ magma_dgeev(
         /* Normalize right eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
             if ( wi[i] == 0. ) {
-                scl = 1. / cblas_dnrm2( n, VR(0,i), 1 );
-                cblas_dscal( n, scl, VR(0,i), 1 );
+                scl = 1. / magma_cblas_dnrm2( n, VR(0,i), 1 );
+                blasf77_dscal( &n, &scl, VR(0,i), &ione );
             }
             else if ( wi[i] > 0. ) {
-                d__1 = cblas_dnrm2( n, VR(0,i),   1 );
-                d__2 = cblas_dnrm2( n, VR(0,i+1), 1 );
+                d__1 = magma_cblas_dnrm2( n, VR(0,i),   1 );
+                d__2 = magma_cblas_dnrm2( n, VR(0,i+1), 1 );
                 scl = 1. / lapackf77_dlapy2( &d__1, &d__2 );
-                cblas_dscal( n, scl, VR(0,i),   1 );
-                cblas_dscal( n, scl, VR(0,i+1), 1 );
+                blasf77_dscal( &n, &scl, VR(0,i), &ione );
+                blasf77_dscal( &n, &scl, VR(0,i+1), &ione );
                 for (k = 0; k < n; ++k) {
                     /* Computing 2nd power */
                     d__1 = *VR(k,i);
                     d__2 = *VR(k,i+1);
                     work[iwrk + k] = d__1*d__1 + d__2*d__2;
                 }
-                k = cblas_idamax( n, &work[iwrk], 1 );
+                k = blasf77_idamax( &n, &work[iwrk], &ione ) - 1;  // subtract 1; k is 0-based
                 lapackf77_dlartg( VR(k,i), VR(k,i+1), &cs, &sn, &r );
-                cblas_drot( n, VR(0,i), 1, VR(0,i+1), 1, cs, sn );
+                blasf77_drot( &n, VR(0,i), &ione, VR(0,i+1), &ione, &cs, &sn );
                 *VR(k,i+1) = 0.;
             }
         }

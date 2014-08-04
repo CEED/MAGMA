@@ -13,7 +13,6 @@
 */
 #include "common_magma.h"
 
-#include <cblas.h>
 #include <assert.h>
 
 #define PRECISION_z
@@ -257,11 +256,7 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                 
                 blasf77_zscal(&i, &tau[i - 1], W(0, iw), &ione);
                 
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                cblas_zdotc_sub( i, W(0,iw), ione, A(0,i), ione, &value );
-                #else
-                value = cblas_zdotc( i, W(0,iw), ione, A(0,i), ione );
-                #endif
+                value = magma_cblas_zdotc( i, W(0,iw), ione, A(0,i), ione );
                 alpha = tau[i - 1] * -0.5f * value;
                 blasf77_zaxpy(&i, &alpha, A(0, i), &ione,
                               W(0, iw), &ione);
@@ -327,11 +322,7 @@ magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                               W(0, i), &ione, &c_one, W(i+1, i), &ione);
                 blasf77_zscal(&i_n, &tau[i], W(i+1,i), &ione);
                 
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                cblas_zdotc_sub( i_n, W(i+1,i), ione, A(i+1,i), ione, &value );
-                #else
-                value = cblas_zdotc( i_n, W(i+1,i), ione, A(i+1,i), ione );
-                #endif
+                value = magma_cblas_zdotc( i_n, W(i+1,i), ione, A(i+1,i), ione );
                 alpha = tau[i] * -0.5f * value;
                 blasf77_zaxpy(&i_n, &alpha, A(i+1, i), &ione, W(i+1,i), &ione);
             }

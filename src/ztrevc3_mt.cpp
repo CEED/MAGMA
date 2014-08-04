@@ -10,7 +10,6 @@
        
        @precisions normal z -> c
 */
-#include <cblas.h>
 #include "queue.hpp"
 #include "timer.h"
 
@@ -380,7 +379,7 @@ magma_int_t magma_ztrevc3_mt(
     // part of T to control overflow in triangular solver.
     rwork[0] = 0.;
     for( j=1; j < n; ++j ) {
-        rwork[j] = cblas_dzasum( j, T(0,j), ione );
+        rwork[j] = magma_cblas_dzasum( j, T(0,j), ione );
     }
 
     // launch threads -- each single-threaded MKL

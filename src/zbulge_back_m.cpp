@@ -15,7 +15,6 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
-#include <cblas.h>
 
 #ifdef MAGMA_SETAFFINITY
 #include "affinity.h"

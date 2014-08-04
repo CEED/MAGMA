@@ -16,7 +16,6 @@
 
 #include "common_magma.h"
 #include "timer.h"
-#include <cblas.h>
 
 extern "C" {
 
@@ -404,7 +403,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                 for (j = ib; j < ie; ++j) {
                     for (i = 0; i < k; ++i)
                         s[id*k + i] = w[i] / *Q(i,j);
-                    temp = cblas_dnrm2( k, s+id*k, 1);
+                    temp = magma_cblas_dnrm2( k, s+id*k, 1 );
                     for (i = 0; i < k; ++i) {
                         magma_int_t iii = indx[i] - 1;
                         *Q(i,j) = s[id*k + iii] / temp;
@@ -488,7 +487,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         for (j = iil-1; j < iiu; ++j) {
             for (i = 0; i < k; ++i)
                 s[i] = w[i] / *Q(i,j);
-            temp = cblas_dnrm2( k, s, 1);
+            temp = magma_cblas_dnrm2( k, s, 1 );
             for (i = 0; i < k; ++i) {
                 magma_int_t iii = indx[i] - 1;
                 *Q(i,j) = s[iii] / temp;

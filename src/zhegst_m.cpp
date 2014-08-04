@@ -11,7 +11,6 @@
        @precisions normal z -> s d c
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 
 static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_col, magma_int_t ldda,

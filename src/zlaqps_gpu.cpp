@@ -9,7 +9,6 @@
 
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 #define PRECISION_z
 
@@ -140,9 +139,8 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         rk = offset + k;
         
         /* Determine ith pivot column and swap if necessary */
-        // Fortran: pvt, k, idamax are all 1-based; subtract 1 from k.
-        // C:       pvt, k, idamax are all 0-based; don't subtract 1.
-        pvt = k - 1 + magma_idamax( n-k, &vn1[k], ione );
+        // subtract 1 from Fortran/CUBLAS idamax; pvt, k are 0-based.
+        pvt = k + magma_idamax( n-k, &vn1[k], ione ) - 1;
         
         if (pvt != k) {
             /*if (pvt >= nb) {
@@ -441,12 +439,12 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));
         i__1 = m - rk - 1;
         if (lsticc <= nb)
-            vn1[lsticc] = cblas_dznrm2(i__1, A(rk + 1, lsticc), ione);
+            vn1[lsticc] = magma_cblas_dznrm2( i__1, A(rk+1,lsticc), ione );
         else {
             // Where is the data, CPU or GPU ?
             double r1, r2;
             
-            r1 = cblas_dznrm2(nb-k, A(rk + 1, lsticc), ione);
+            r1 = magma_cblas_dznrm2( nb-k, A(rk+1,lsticc), ione );
             r2 = magma_dznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
             
             vn1[lsticc] = magma_dsqrt(r1*r1+r2*r2);

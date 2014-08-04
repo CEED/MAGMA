@@ -16,7 +16,6 @@
 #include <math.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
-#include <cblas.h>
 
 // includes, project
 #include "flops.h"
@@ -217,10 +216,10 @@ int main( int argc, char** argv)
                 for( int j = 0; j < N; ++j ) {
                     tnrm = 1.;
                     if (w1i[j] == 0.)
-                        tnrm = cblas_dnrm2(N, &VR[j*lda], ione);
+                        tnrm = magma_cblas_dnrm2( N, &VR[j*lda], ione );
                     else if (w1i[j] > 0.)
-                        tnrm = magma_dlapy2( cblas_dnrm2(N, &VR[j    *lda], ione),
-                                             cblas_dnrm2(N, &VR[(j+1)*lda], ione) );
+                        tnrm = magma_dlapy2( magma_cblas_dnrm2( N, &VR[j*lda],     ione ),
+                                             magma_cblas_dnrm2( N, &VR[(j+1)*lda], ione ));
                     
                     result[2] = max( result[2], min( ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp ));
                     
@@ -248,10 +247,10 @@ int main( int argc, char** argv)
                 for( int j = 0; j < N; ++j ) {
                     tnrm = 1.;
                     if (w1i[j] == 0.)
-                        tnrm = cblas_dnrm2(N, &VL[j*lda], ione);
+                        tnrm = magma_cblas_dnrm2( N, &VL[j*lda], ione );
                     else if (w1i[j] > 0.)
-                        tnrm = magma_dlapy2( cblas_dnrm2(N, &VL[j    *lda], ione),
-                                             cblas_dnrm2(N, &VL[(j+1)*lda], ione) );
+                        tnrm = magma_dlapy2( magma_cblas_dnrm2( N, &VL[j*lda],     ione ),
+                                             magma_cblas_dnrm2( N, &VL[(j+1)*lda], ione ));
                     
                     result[3] = max( result[3], min( ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp ));
                     

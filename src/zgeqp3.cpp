@@ -7,10 +7,10 @@
   
        @precisions normal z -> c d s
 
+       @author Mitch Horton
 */
 
 #include "common_magma.h"
-#include <cblas.h>
 
 #define PRECISION_z
 #define COMPLEX
@@ -223,7 +223,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
 
         /* Initialize partial column norms. */
         for (j = nfxd; j < n; ++j) {
-            rwork[j] = cblas_dznrm2(sm, A(nfxd, j), ione);
+            rwork[j] = magma_cblas_dznrm2( sm, A(nfxd,j), ione );
             rwork[n + j] = rwork[j];
         }
         

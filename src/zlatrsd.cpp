@@ -10,7 +10,6 @@
        Making s,d precisions requires fixing dot call.
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 /**
     Purpose
@@ -271,13 +270,13 @@ magma_int_t magma_zlatrsd(
             /* A is upper triangular. */
             cnorm[0] = 0.;
             for( j = 1; j < n; ++j ) {
-                cnorm[j] = cblas_dzasum( j, A(0,j), ione );
+                cnorm[j] = magma_cblas_dzasum( j, A(0,j), ione );
             }
         }
         else {
             /* A is lower triangular. */
             for( j = 0; j < n-1; ++j ) {
-                cnorm[j] = cblas_dzasum( n-(j+1), A(j+1,j), ione );
+                cnorm[j] = magma_cblas_dzasum( n-(j+1), A(j+1,j), ione );
             }
             cnorm[n-1] = 0.;
         }
@@ -575,10 +574,10 @@ L110:
                 /* If the scaling needed for A in the dot product is 1, */
                 /* call ZDOTU to perform the dot product. */
                 if ( upper ) {
-                    cblas_zdotu_sub( j, A(0,j), ione, &x[0], ione,  &csumj );
+                    csumj = magma_cblas_zdotu( j, A(0,j), ione, &x[0], ione );
                 }
                 else if ( j < n-1 ) {
-                    cblas_zdotu_sub( n-(j+1), A(j+1,j), ione, &x[j + 1], ione, &csumj );
+                    csumj = magma_cblas_zdotu( n-(j+1), A(j+1,j), ione, &x[j+1], ione );
                 }
             }
             else {
@@ -693,10 +692,10 @@ L160:
                 /* If the scaling needed for A in the dot product is 1, */
                 /* call ZDOTC to perform the dot product. */
                 if ( upper ) {
-                    cblas_zdotc_sub( j, A(0,j), ione, &x[0], ione, &csumj );
+                    csumj = magma_cblas_zdotc( j, A(0,j), ione, &x[0], ione );
                 }
                 else if ( j < n-1 ) {
-                    cblas_zdotc_sub( n-(j+1), A(j+1,j), ione, &x[j + 1], ione, &csumj );
+                    csumj = magma_cblas_zdotc( n-(j+1), A(j+1,j), ione, &x[j+1], ione );
                 }
             }
             else {

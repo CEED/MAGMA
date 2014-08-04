@@ -17,7 +17,6 @@
 #include "magma_bulge.h"
 #include "magma_dbulge.h"
 
-#include <cblas.h>
 
 #define PRECISION_z
 
@@ -195,6 +194,7 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     double smlnum;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
+    magma_int_t len;
 
     double* dwork;
 
@@ -360,12 +360,14 @@ magma_dsyevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     memset(A2, 0, n*lda2*sizeof(double));
 
     for (magma_int_t j = 0; j < n-nb; j++) {
-        cblas_dcopy(nb+1, A(j,j), 1, A2(0,j), 1);
+        len = nb+1;
+        blasf77_dcopy( &len, A(j,j), &ione, A2(0,j), &ione );
         memset(A(j,j), 0, (nb+1)*sizeof(double));
         *A(nb+j,j) = d_one;
     }
     for (magma_int_t j = 0; j < nb; j++) {
-        cblas_dcopy(nb-j, A(j+n-nb,j+n-nb), 1, A2(0,j+n-nb), 1);
+        len = nb-j;
+        blasf77_dcopy( &len, A(j+n-nb,j+n-nb), &ione, A2(0,j+n-nb), &ione );
         memset(A(j+n-nb,j+n-nb), 0, (nb-j)*sizeof(double));
     }
 

@@ -9,7 +9,6 @@
        @precisions normal d -> s
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 // Version 1 is LAPACK dlaln2. This is not thread safe.
 // Version 2 is MAGMA  dlaln2, which is exactly the same, but thread safe.
@@ -457,7 +456,7 @@ magma_int_t magma_dlaqtrsd(
                     }
 
                     len = j-1;
-                    *x(j,0) -= cblas_ddot( len, T(1,j), ione, x(1,0), ione );
+                    *x(j,0) -= magma_cblas_ddot( len, T(1,j), ione, x(1,0), ione );
 
                     // Solve [ T(j,j)-wr ]**T * x = b
                     #if VERSION == 1
@@ -495,8 +494,8 @@ magma_int_t magma_dlaqtrsd(
                     }
 
                     len = j-1;
-                    *x(j,  0) -= cblas_ddot( len, T(1,j  ), ione, x(1,0), ione );
-                    *x(j+1,0) -= cblas_ddot( len, T(1,j+1), ione, x(1,0), ione );
+                    *x(j,  0) -= magma_cblas_ddot( len, T(1,j),   ione, x(1,0), ione );
+                    *x(j+1,0) -= magma_cblas_ddot( len, T(1,j+1), ione, x(1,0), ione );
 
                     // Solve
                     // [T(j,j)-wr   T(j,j+1)     ]**T * x = scale*( WORK1 )
@@ -583,8 +582,8 @@ magma_int_t magma_dlaqtrsd(
                     }
 
                     len = j-2;
-                    *x(j,0) -= cblas_ddot( len, T(2,j), ione, x(2,0), ione );
-                    *x(j,1) -= cblas_ddot( len, T(2,j), ione, x(2,1), ione );
+                    *x(j,0) -= magma_cblas_ddot( len, T(2,j), ione, x(2, 0), ione );
+                    *x(j,1) -= magma_cblas_ddot( len, T(2,j), ione, x(2, 1), ione );
 
                     // Solve [ T(j,j)-(wr-i*wi) ]*(W11+i*W12)= WK+i*WK2
                     tmp = -wi;
@@ -626,10 +625,10 @@ magma_int_t magma_dlaqtrsd(
                     }
 
                     len = j-2;
-                    *x(j,  0) -= cblas_ddot( len, T(2,j  ), ione, x(2,0), ione );
-                    *x(j,  1) -= cblas_ddot( len, T(2,j  ), ione, x(2,1), ione );
-                    *x(j+1,0) -= cblas_ddot( len, T(2,j+1), ione, x(2,0), ione );
-                    *x(j+1,1) -= cblas_ddot( len, T(2,j+1), ione, x(2,1), ione );
+                    *x(j,  0) -= magma_cblas_ddot( len, T(2,j),   ione, x(2,0), ione );
+                    *x(j,  1) -= magma_cblas_ddot( len, T(2,j),   ione, x(2,1), ione );
+                    *x(j+1,0) -= magma_cblas_ddot( len, T(2,j+1), ione, x(2,0), ione );
+                    *x(j+1,1) -= magma_cblas_ddot( len, T(2,j+1), ione, x(2,1), ione );
 
                     // Solve 2-by-2 complex linear equation
                     // [ (T(j,j)   T(j,j+1)  )**T - (wr-i*wi)*i ]*W = scale*B

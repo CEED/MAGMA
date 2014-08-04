@@ -10,7 +10,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include <cblas.h>
 
 #define PRECISION_z
 
@@ -360,20 +359,20 @@ magma_zgeev_m(
 
         /* Normalize left eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
-            scl = 1. / cblas_dznrm2( n, VL(0,i), 1 );
-            cblas_zdscal( n, scl, VL(0,i), 1 );
+            scl = 1. / magma_cblas_dznrm2( n, VL(0,i), 1 );
+            blasf77_zdscal( &n, &scl, VL(0,i), &ione );
             for (k = 0; k < n; ++k) {
                 /* Computing 2nd power */
                 d__1 = MAGMA_Z_REAL( *VL(k,i) );
                 d__2 = MAGMA_Z_IMAG( *VL(k,i) );
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
-            k = cblas_idamax( n, &rwork[irwork], 1 );
+            k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
             z__2 = MAGMA_Z_CNJG( *VL(k,i) );
             d__1 = magma_dsqrt( rwork[irwork + k] );
             MAGMA_Z_DSCALE( z__1, z__2, d__1 );
             tmp = z__1;
-            cblas_zscal( n, CBLAS_SADDR(tmp), VL(0,i), 1 );
+            blasf77_zscal( &n, &tmp, VL(0,i), &ione );
             d__1 = MAGMA_Z_REAL( *VL(k,i) );
             z__1 = MAGMA_Z_MAKE( d__1, 0 );
             *VL(k,i) = z__1;
@@ -389,20 +388,20 @@ magma_zgeev_m(
 
         /* Normalize right eigenvectors and make largest component real */
         for (i = 0; i < n; ++i) {
-            scl = 1. / cblas_dznrm2( n, VR(0,i), 1 );
-            cblas_zdscal( n, scl, VR(0,i), 1 );
+            scl = 1. / magma_cblas_dznrm2( n, VR(0,i), 1 );
+            blasf77_zdscal( &n, &scl, VR(0,i), &ione );
             for (k = 0; k < n; ++k) {
                 /* Computing 2nd power */
                 d__1 = MAGMA_Z_REAL( *VR(k,i) );
                 d__2 = MAGMA_Z_IMAG( *VR(k,i) );
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
-            k = cblas_idamax( n, &rwork[irwork], 1 );
+            k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
             z__2 = MAGMA_Z_CNJG( *VR(k,i) );
             d__1 = magma_dsqrt( rwork[irwork + k] );
             MAGMA_Z_DSCALE( z__1, z__2, d__1 );
             tmp = z__1;
-            cblas_zscal( n, CBLAS_SADDR(tmp), VR(0,i), 1 );
+            blasf77_zscal( &n, &tmp, VR(0,i), &ione );
             d__1 = MAGMA_Z_REAL( *VR(k,i) );
             z__1 = MAGMA_Z_MAKE( d__1, 0 );
             *VR(k,i) = z__1;
