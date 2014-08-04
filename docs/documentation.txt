@@ -14,8 +14,8 @@ The goal of the MAGMA project is to create a new generation of linear algebra
 libraries that achieves the fastest possible time to an accurate solution on
 heterogeneous architectures, starting with current multicore + multi-GPU
 systems. To address the complex challenges stemming from these systems'
-heterogeneity, massive parallelism, and the gap in compute power vs. CPU-GPU
-communication speeds, MAGMA's research is based on the idea that optimal
+heterogeneity, massive parallelism, and the gap between compute speed and CPU-GPU
+communication speed, MAGMA's research is based on the idea that optimal
 software solutions will themselves have to hybridize, combining the strengths of
 different algorithms within a single framework. Building on this idea, the goal
 is to design linear algebra algorithms and frameworks for hybrid multicore and
@@ -48,6 +48,7 @@ algorithm is used. Also included is MAGMA BLAS, a complementary to CUBLAS routin
 - M. Faverge  (INRIA)
 - M. Gates    (UT Knoxville)
 - A. Haidar   (UT Knoxville)
+- M. Horton   (UT Knoxville)
 - J. Kurzak   (UT Knoxville)
 - J. Langou   (UC Denver)
 - H. Ltaief   (KAUST)
@@ -200,19 +201,19 @@ Starred * routines are not yet implemented in MAGMA.
 Name                                                                                   |  Description
 -----------                                                                            |  -----------
 : **Triangular factorizations** :                                                      |  **Description**
-\ref magma_dgetrf "getrf", \ref magma_dpotrf "potrf"                                   |  triangular factorization (LU, Cholesky)
-\ref magma_dgetrs "getrs", \ref magma_dpotrs "potrs"                                   |  triangular forward and back solve
-\ref magma_dgetri "getri", \ref magma_dpotri "potri"                                   |  triangular inverse
-\ref magma_dgetf2 "getf2", \ref magma_dpotf2 "potf2"                                   |  panel triangular factorization (BLAS-2)
+\ref magma_dgetrf     "getrf", \ref magma_dpotrf     "potrf"                           |  triangular factorization (LU, Cholesky)
+\ref magma_dgetrs_gpu "getrs", \ref magma_dpotrs_gpu "potrs"                           |  triangular forward and back solve
+\ref magma_dgetri_gpu "getri", \ref magma_dpotri     "potri"                           |  triangular inverse
+\ref magma_dgetf2_gpu "getf2", \ref magma_dpotf2_gpu "potf2"                           |  panel triangular factorization (BLAS-2)
 . **Orthogonal factorizations**                                                        |  **Description**
 ge{\ref magma_dgeqrf "qrf", \ref magma_dgeqlf "qlf",  \ref magma_dgelqf "lqf",  rqf*}  |  QR, QL, LQ, RQ factorization
 \ref magma_dgeqp3 "geqp3"                                                              |  QR with column pivoting (BLAS-3)
 or{\ref magma_dormqr "mqr", \ref magma_dormql "mql",  \ref magma_dormlq "mlq",  mrq*}  |  multiply by Q after factorization (real)
-un{\ref magma_dunmqr "mqr", \ref magma_dunmql "mql",  \ref magma_dunmlq "mlq",  mrq*}  |  multiply by Q after factorization (complex)
+un{\ref magma_zunmqr "mqr", \ref magma_zunmql "mql",  \ref magma_zunmlq "mlq",  mrq*}  |  multiply by Q after factorization (complex)
 or{\ref magma_dorgqr "gqr", gql*, glq*, grq*}                                          |  generate Q after factorization (real)
-un{\ref magma_dungqr "gqr", gql*, glq*, grq*}                                          |  generate Q after factorization (complex)
+un{\ref magma_zungqr "gqr", gql*, glq*, grq*}                                          |  generate Q after factorization (complex)
 . **Eigenvalue & SVD**                                                                 |  **Description**
-\ref magma_dgeqr2 "geqr2"                                                              |  panel QR factorization (BLAS-2)
+\ref magma_dgeqr2_gpu "geqr2"                                                          |  panel QR factorization (BLAS-2)
 \ref magma_dgehrd "gehrd"                                                              |  Hessenberg  reduction (in geev)
 \ref magma_dsytrd "sytrd", \ref magma_zhetrd "hetrd"                                   |  tridiagonal reduction (in syev, heev)
 \ref magma_dgebrd "gebrd"                                                              |  bidiagonal  reduction (in gesvd)
@@ -246,8 +247,8 @@ Name                     |  Description
 \ref magma_damax "amax"  |  vector max-norm
 \ref magma_dasum "asum"  |  vector one-norm
 \ref magma_ddot  "dot"   |  dot product (real), x^T y
-\ref magma_ddotu "dotu"  |  dot product (complex), unconjugated, x^T y
-\ref magma_ddotc "dotc"  |  dot product (complex), conjugated,   x^H y
+\ref magma_zdotu "dotu"  |  dot product (complex), unconjugated, x^T y
+\ref magma_zdotc "dotc"  |  dot product (complex), conjugated,   x^H y
 
 BLAS-2: matrix-vector operations
 ---------------------------------
@@ -297,8 +298,8 @@ Name                                     |  Description
 \ref magmablas_dlansy "lansy"            |  norm, symmetric matrix
 \ref magmablas_dlanhe "lanhe"            |  norm, Hermitian matrix
 \ref magmablas_dlantr "lantr"            |  norm, triangular matrix
-\ref magmablas_dlag2  "lag2"             |  convert general    matrix from one precision to another (e.g., dlag2s is double to single)
-\ref magmablas_dlat2  "lat2"             |  convert triangular matrix from one precision to another
+\ref magmablas_dlag2s "lag2"             |  convert general    matrix from one precision to another (e.g., dlag2s is double to single)
+\ref magmablas_dlat2s "lat2"             |  convert triangular matrix from one precision to another
 \ref magmablas_dlarf  "larf"             |  apply    Householder elementary reflector
 \ref magmablas_dlarfg "larfg"            |  generate Householder elementary reflector
 \ref magmablas_dlarfb "larfb"            |  apply      block Householder elementary reflector
@@ -344,7 +345,7 @@ Name                               |  Description
 
 
 ********************************************************************************
-@page types         Data types
+@page types         Data types & complex numbers
 
 Integers
 ---------------------------------
@@ -411,9 +412,9 @@ exceptions to these.
 Typically, the order of arguments is:
 - options (uplo, etc.)
 - matrix sizes (m, n, k, etc.),
-- input matrices
-- output matrices
-- workspaces
+- input matrices & vectors (A, lda, x, incx, etc.)
+- output matrices & vectors
+- workspaces (work, lwork, etc.)
 - info error code
 
 LAPACK and MAGMA use column-major matrices. For matrix X with dimension
@@ -437,6 +438,21 @@ are coalesced. One formula to do this (relying on floored integer division) is:
 On the CPU, it is often beneficial to ensure that the leading dimension
 is **not** a multiple of the page size (often 4 KiB), to minimize TLB misses.
 
+For vectors, incx is the increment or stride between elements of vector x. In
+all cases, incx != 0. In most cases, if incx < 0, then the vector is indexed in
+reverse order, for instance, using Matlab notation,
+
+    incx =  1   means   x( 1 : 1 : n     )
+    incx =  2   means   x( 1 : 2 : 2*n-1 )
+
+while
+
+    incx = -1   means   x( n     : -1 : 1 )
+    incx = -2   means   x( 2*n-1 : -2 : 1 )
+
+For several routines (amax, amin, asum, nrm2, scal), the order is irrelevant,
+so negative incx are not allowed; incx > 0.
+
 
 ********************************************************************************
 @page constants     Constants
@@ -445,8 +461,8 @@ The most common constants are those defined for BLAS routines:
 
 - enum { MagmaNoTrans, MagmaTrans, MagmaConjTrans } magma_order_t
 
-  Whether a matrix is transposed or not. For a real matrix, Trans and ConjTrans
-  have the same meaning.
+  Whether a matrix is not transposed, transposed, or conjugate-transposed.
+  For a real matrix, Trans and ConjTrans have the same meaning.
 
 - enum { MagmaLower, MagmaUpper, MagmaFull } magma_uplo_t
 
@@ -473,19 +489,19 @@ Here, curly braces { } group similar constants.
 
 Name                              |  Description
 -----------                       |  -----------
-magma_bool_const   ( character )  |  Map 'N', 'Y'      to MagmaTrue, MagmaFalse
-magma_order_const  ( character )  |  Map 'R', 'C'      to MagmaRowMajor, MagmaColMajor
-magma_trans_const  ( character )  |  Map 'N', 'T', 'C' to MagmaNoTrans, MagmaTrans, MagmaConjTrans
-magma_uplo_const   ( character )  |  Map 'L', 'U'      to MagmaLower, MagmaUpper
-magma_diag_const   ( character )  |  Map 'N', 'U'      to MagmaNonUnit, MagmaUnit
-magma_side_const   ( character )  |  Map 'L', 'R'      to MagmaLeft, MagmaRight
-magma_norm_const   ( character )  |  Map 'O', '1', '2', 'F', 'E', 'I', 'M' to Magma{One, Two, Frobenius, Inf, Max}Norm
-magma_dist_const   ( character )  |  Map 'U', 'S', 'N' to MagmaDist{Uniform, Symmetric, Normal}
-magma_vec_const    ( character )  |  Map 'V', 'N', 'I', 'A', 'S', 'O' to MagmaVec, Magma{No, I, All, Some, Overwrite}Vec
-magma_range_const  ( character )  |  Map 'A', 'V', 'I' to MagmaRange{All, V, I}
-magma_vect_const   ( character )  |  Map 'Q', 'P'      to MagmaQ, MagmaP
-magma_direct_const ( character )  |  Map 'F', 'B'      to MagmaForward, MagmaBackward
-magma_storev_const ( character )  |  Map 'C', 'R'      to MagmaColumnwise, MagmaRowwise
+magma_bool_const   ( character )  |  Map 'N', 'Y'      \n to MagmaTrue, MagmaFalse
+magma_order_const  ( character )  |  Map 'R', 'C'      \n to MagmaRowMajor, MagmaColMajor
+magma_trans_const  ( character )  |  Map 'N', 'T', 'C' \n to MagmaNoTrans, MagmaTrans, MagmaConjTrans
+magma_uplo_const   ( character )  |  Map 'L', 'U'      \n to MagmaLower, MagmaUpper
+magma_diag_const   ( character )  |  Map 'N', 'U'      \n to MagmaNonUnit, MagmaUnit
+magma_side_const   ( character )  |  Map 'L', 'R'      \n to MagmaLeft, MagmaRight
+magma_norm_const   ( character )  |  Map 'O', '1', '2', 'F', 'E', 'I', 'M' \n to Magma{One, Two, Frobenius, Inf, Max}Norm
+magma_dist_const   ( character )  |  Map 'U', 'S', 'N' \n to MagmaDist{Uniform, Symmetric, Normal}
+magma_vec_const    ( character )  |  Map 'V', 'N', 'I', 'A', 'S', 'O' \n to MagmaVec, Magma{No, I, All, Some, Overwrite}Vec
+magma_range_const  ( character )  |  Map 'A', 'V', 'I' \n to MagmaRange{All, V, I}
+magma_vect_const   ( character )  |  Map 'Q', 'P'      \n to MagmaQ, MagmaP
+magma_direct_const ( character )  |  Map 'F', 'B'      \n to MagmaForward, MagmaBackward
+magma_storev_const ( character )  |  Map 'C', 'R'      \n to MagmaColumnwise, MagmaRowwise
 
 
 To convert MAGMA to LAPACK constants:
@@ -500,32 +516,32 @@ To convert MAGMA to Nvidia's CUBLAS constants:
 
 Function                                           |  Description
 -----------                                        |  -----------
-cublasOperation_t    cublas_trans_const ( trans )  |  Map MagmaNoTrans, MagmaTrans, MagmaConjTrans to CUBLAS_OP_N, CUBLAS_OP_T, CUBLAS_OP_C
-cublasFillMode_t     cublas_uplo_const  ( uplo  )  |  Map MagmaLower,   MagmaUpper to CUBLAS_FILL_MODE_LOWER, CUBLAS_FILL_MODE_UPPER
-cublasDiagType_t     cublas_diag_const  ( diag  )  |  Map MagmaNonUnit, MagmaUnit  to CUBLAS_DIAG_NON_UNIT,   CUBLAS_DIAG_UNIT
-cublasSideMode_t     cublas_side_const  ( side  )  |  Map MagmaLeft,    MagmaRight to CUBLAS_SIDE_LEFT,       CUBLAS_SIDE_Right
+cublasOperation_t    cublas_trans_const ( trans )  |  Map MagmaNoTrans, MagmaTrans, MagmaConjTrans \n to CUBLAS_OP_N, CUBLAS_OP_T, CUBLAS_OP_C
+cublasFillMode_t     cublas_uplo_const  ( uplo  )  |  Map MagmaLower,   MagmaUpper \n to CUBLAS_FILL_MODE_LOWER, CUBLAS_FILL_MODE_UPPER
+cublasDiagType_t     cublas_diag_const  ( diag  )  |  Map MagmaNonUnit, MagmaUnit  \n to CUBLAS_DIAG_NON_UNIT,   CUBLAS_DIAG_UNIT
+cublasSideMode_t     cublas_side_const  ( side  )  |  Map MagmaLeft,    MagmaRight \n to CUBLAS_SIDE_LEFT,       CUBLAS_SIDE_Right
 
 
 To convert MAGMA to AMD's clBlas constants:
 
 Function                                           |  Description
 -----------                                        |  -----------
-clAmdBlasOrder       amdblas_order_const( order )  |  Map MagmaRowMajor, MagmaColMajor to clAmdBlasRowMajor, clAmdBlasColumnMajor
-clAmdBlasTranspose   amdblas_trans_const( trans )  |  Map MagmaNoTrans,  MagmaTrans, MagmaConjTrans to clAmdBlasNoTrans, clAmdBlasTrans, clAmdBlasConjTrans
-clAmdBlasUplo        amdblas_uplo_const ( uplo  )  |  Map MagmaLower,    MagmaUpper    to clAmdBlasLower,    clAmdBlasUpper
-clAmdBlasDiag        amdblas_diag_const ( diag  )  |  Map MagmaNonUnit,  MagmaUnit     to clAmdBlasNonUnit,  clAmdBlasUnit
-clAmdBlasSide        amdblas_side_const ( side  )  |  Map MagmaLeft,     MagmaRight    to clAmdBlasLeft,     clAmdBlasRight
+clAmdBlasOrder       amdblas_order_const( order )  |  Map MagmaRowMajor, MagmaColMajor \n to clAmdBlasRowMajor, clAmdBlasColumnMajor
+clAmdBlasTranspose   amdblas_trans_const( trans )  |  Map MagmaNoTrans,  MagmaTrans, MagmaConjTrans \n to clAmdBlasNoTrans, clAmdBlasTrans, clAmdBlasConjTrans
+clAmdBlasUplo        amdblas_uplo_const ( uplo  )  |  Map MagmaLower,    MagmaUpper    \n to clAmdBlasLower,    clAmdBlasUpper
+clAmdBlasDiag        amdblas_diag_const ( diag  )  |  Map MagmaNonUnit,  MagmaUnit     \n to clAmdBlasNonUnit,  clAmdBlasUnit
+clAmdBlasSide        amdblas_side_const ( side  )  |  Map MagmaLeft,     MagmaRight    \n to clAmdBlasLeft,     clAmdBlasRight
 
 
 To convert MAGMA to CBLAS constants:
 
 Function                                           |  Description
 -----------                                        |  -----------
-enum CBLAS_ORDER     cblas_order_const  ( order )  |  Map MagmaRowMajor, MagmaColMajor to CblasRowMajor, CblasColMajor
-enum CBLAS_TRANSPOSE cblas_trans_const  ( trans )  |  Map MagmaNoTrans,  MagmaTrans, MagmaConjTrans to CblasNoTrans, CblasTrans, CblasConjTrans
-enum CBLAS_UPLO      cblas_uplo_const   ( uplo  )  |  Map MagmaLower,    MagmaUpper    to CblasLower,    CblasUpper
-enum CBLAS_DIAG      cblas_diag_const   ( diag  )  |  Map MagmaNonUnit,  MagmaUnit     to CblasNonUnit,  CblasUnit
-enum CBLAS_SIDE      cblas_side_const   ( side  )  |  Map MagmaLeft,     MagmaRight    to CblasLeft,     CblasRight
+enum CBLAS_ORDER     cblas_order_const  ( order )  |  Map MagmaRowMajor, MagmaColMajor \n to CblasRowMajor, CblasColMajor
+enum CBLAS_TRANSPOSE cblas_trans_const  ( trans )  |  Map MagmaNoTrans,  MagmaTrans, MagmaConjTrans \n to CblasNoTrans, CblasTrans, CblasConjTrans
+enum CBLAS_UPLO      cblas_uplo_const   ( uplo  )  |  Map MagmaLower,    MagmaUpper    \n to CblasLower,    CblasUpper
+enum CBLAS_DIAG      cblas_diag_const   ( diag  )  |  Map MagmaNonUnit,  MagmaUnit     \n to CblasNonUnit,  CblasUnit
+enum CBLAS_SIDE      cblas_side_const   ( side  )  |  Map MagmaLeft,     MagmaRight    \n to CblasLeft,     CblasRight
 
 
 ********************************************************************************
