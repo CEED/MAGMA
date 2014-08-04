@@ -17,8 +17,13 @@ include $(MAGMA_DIR)/Makefile.internal
 # in ZSRC, despite the name.
 
 # ----------
-# Cholesky, GPU interface
+# BLAS wrappers
 ZSRC := \
+	cblas_z.cpp		\
+
+# ----------
+# Cholesky, GPU interface
+ZSRC += \
 	zcposv_gpu.cpp		\
 	\
 	zposv_gpu.cpp		\

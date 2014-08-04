@@ -633,7 +633,7 @@ cublasSideMode_t     cublas_side_const  ( magma_side_t  side  );
 // --------------------
 // Convert MAGMA constants to CBLAS constants.
 #if defined(HAVE_CBLAS)
-#include "cblas.h"
+#include <cblas.h>
 enum CBLAS_ORDER     cblas_order_const  ( magma_order_t order );
 enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t trans );
 enum CBLAS_UPLO      cblas_uplo_const   ( magma_uplo_t  uplo  );
