@@ -11,7 +11,6 @@
 */
 #include "common_magma.h"
 #include "../include/magmasparse.h"
-#include <cblas.h>
 #include <assert.h>
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )

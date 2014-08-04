@@ -17,7 +17,6 @@
 #include "../include/magmasparse.h"
 #include "trace.h"
 
-#include <cblas.h>
 
 #define PRECISION_z
 
@@ -179,12 +178,7 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     }
 
                     //  compute H[k+1][k] = sqrt(q[k-1] . q[k-1]) 
-                    #if defined(PRECISION_z) || defined(PRECISION_c)
-                    cblas_zdotc_sub( k-1, &H(1,k-1), 1, &H(1,k-1), 1, &alpha );
-                    H(k,k-1) -= alpha;
-                    #else
-                    H(k,k-1) -= cblas_zdotc( k-1, &H(1,k-1), 1, &H(1,k-1), 1 );
-                    #endif
+                    H(k,k-1) -= magma_cblas_zdotc( k-1, &H(1,k-1), 1, &H(1,k-1), 1 );
                     H(k,k-1)  = MAGMA_Z_MAKE( sqrt( MAGMA_Z_REAL(H(k,k-1))), 0 );
                     magma_zsetvector_async(1, &H(1,k), 1, dH(1,k), 1, stream[0]);
                     if (k == 1) {
@@ -211,7 +205,7 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     // compute z[k] = A q[k-1]
                     if ( k+1 <= (solver_par->restart+1)  ) {
                          #ifdef  ORTHO_Z_ON_CPU
-                         cblas_zscal(dofs, CBLAS_SADDR(alpha), hZ(k), 1);                     
+                         blasf77_zscal( &dofs, &alpha, hZ(k), &ione );                     
                          magma_zsetvector_async(dofs, hZ(k), 1, z(k), 1, stream[0]);
                          lapackf77_zlacpy("F", &dofs, &ione, hZ(k), &dofs, hQ(k), &dofs);
                          #else
@@ -236,7 +230,7 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     alpha = 1./H(k,k-1);
                     trace_cpu_start( 0, "gemv", "gemvQ" );
                     blasf77_zgemv("NoTrans", &dofs, &i, &c_mone, hQ(0), &dofs, &H(1,k-1), &ione, &c_one, hQ(k-1), &ione);
-                    cblas_zscal(dofs, CBLAS_SADDR(alpha), hQ(k-1), 1);                     
+                    blasf77_zscal( &dofs, &alpha, hQ(k-1), &ione );                     
                     trace_cpu_end( 0 );
                     #ifdef ENABLE_TIMER
                     t_cpu += magma_wtime()-t_orth2;
@@ -252,11 +246,7 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 {
                     /*     Minimization of  || b-Ax ||  in H_k       */ 
                     for (i=1; i<=k; i++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        cblas_zdotc_sub( i+1, &H(1,k), 1, &H(1,i), 1, &HH(k,i) );
-                        #else
-                        HH(k,i) = cblas_zdotc(i+1, &H(1,k), 1, &H(1,i), 1);
-                        #endif
+                        HH(k,i) = magma_cblas_zdotc( i+1, &H(1,k), 1, &H(1,i), 1 );
                     }
                     
                     h1[k] = H(1,k)*H(1,0);

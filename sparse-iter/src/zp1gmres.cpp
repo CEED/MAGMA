@@ -16,7 +16,6 @@
 #include "common_magma.h"
 #include "../include/magmasparse.h"
 
-#include <cblas.h>
 
 #define PRECISION_z
 
@@ -171,11 +170,7 @@ magma_zp1gmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             for(k=1; k<(solver_par->restart)+1; k++){
                     /*     Minimization of  || b-Ax ||  in H_k       */ 
                     for (i=1; i<=k; i++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        cblas_zdotc_sub( i+1, &H(1,k), 1, &H(1,i), 1, &HH(k,i) );
-                        #else
-                        HH(k,i) = cblas_zdotc(i+1, &H(1,k), 1, &H(1,i), 1);
-                        #endif
+                        HH(k,i) = magma_cblas_zdotc( i+1, &H(1,k), 1, &H(1,i), 1 );
                     }
                     
                     h1[k] = H(1,k)*H(1,0);
