@@ -339,21 +339,18 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     // need only lower triangular
     magma_z_mfree(&hAUt);
+    magma_z_mfree(&hAL);
     magma_z_mconvert( hA, &hAtmp, Magma_CSR, Magma_CSRL );
     magma_z_mfree(&hA);
 
-    // add a unit diagonal to L for the algorithm
-    magma_zmLdiagadd( &hAL ); 
-
     // ---------------- initial guess ------------------- //
     magma_z_mconvert( hAtmp, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
-    magma_z_mfree(&hAtmp);
     int blocksize = 1;
     //magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
     magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hACSRCOO);
-    magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
-    magma_z_mfree(&hAL);
+    magma_z_mtransfer( hAtmp, &dL, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hAtmp);
 
     for(int i=0; i<precond->sweeps; i++){
         magma_zaic_csr_a( dAinitguess, dL );
