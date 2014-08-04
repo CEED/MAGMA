@@ -141,8 +141,8 @@ magma_zgeev(
     #define VL(i,j)  (VL + (i) + (j)*ldvl)
     #define VR(i,j)  (VR + (i) + (j)*ldvr)
     
-    magma_int_t c_one  = 1;
-    magma_int_t c_zero = 0;
+    const magma_int_t ione  = 1;
+    const magma_int_t izero = 0;
     
     double d__1, d__2;
     magmaDoubleComplex tmp;
@@ -225,7 +225,7 @@ magma_zgeev(
         cscale = bignum;
     }
     if (scalea) {
-        lapackf77_zlascl( "G", &c_zero, &c_zero, &anrm, &cscale, &n, &n, A, &lda, &ierr );
+        lapackf77_zlascl( "G", &izero, &izero, &anrm, &cscale, &n, &n, A, &lda, &ierr );
     }
 
     /* Balance the matrix
@@ -417,12 +417,12 @@ CLEANUP:
         // converged eigenvalues, stored in WR[i+1:n] and WI[i+1:n] for i = INFO
         magma_int_t nval = n - (*info);
         magma_int_t ld   = max( nval, 1 );
-        lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &nval, &c_one, W + (*info), &ld, &ierr );
+        lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, W + (*info), &ld, &ierr );
         if (*info > 0) {
             // first ilo columns were already upper triangular,
             // so the corresponding eigenvalues are also valid.
             nval = ilo - 1;
-            lapackf77_zlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &nval, &c_one, W, &n, &ierr );
+            lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, W, &n, &ierr );
         }
     }
 

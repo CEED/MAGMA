@@ -137,8 +137,8 @@ magma_dgeev_m(
     #define VL(i,j)  (VL + (i) + (j)*ldvl)
     #define VR(i,j)  (VR + (i) + (j)*ldvr)
     
-    magma_int_t c_one = 1;
-    magma_int_t c_zero = 0;
+    const magma_int_t ione  = 1;
+    const magma_int_t izero = 0;
     
     double d__1, d__2;
     double r, cs, sn, scl;
@@ -227,7 +227,7 @@ magma_dgeev_m(
         cscale = bignum;
     }
     if (scalea) {
-        lapackf77_dlascl( "G", &c_zero, &c_zero, &anrm, &cscale, &n, &n, A, &lda, &ierr );
+        lapackf77_dlascl( "G", &izero, &izero, &anrm, &cscale, &n, &n, A, &lda, &ierr );
     }
 
     /* Balance the matrix
@@ -412,16 +412,12 @@ CLEANUP:
     if (scalea) {
         i__1 = n - (*info);
         i__2 = max( n - (*info), 1 );
-        lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                          wr + (*info), &i__2, &ierr );
-        lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                          wi + (*info), &i__2, &ierr );
+        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wr + (*info), &i__2, &ierr );
+        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wi + (*info), &i__2, &ierr );
         if (*info > 0) {
             i__1 = ilo - 1;
-            lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                              wr, &n, &ierr );
-            lapackf77_dlascl( "G", &c_zero, &c_zero, &cscale, &anrm, &i__1, &c_one,
-                              wi, &n, &ierr );
+            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wr, &n, &ierr );
+            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wi, &n, &ierr );
         }
     }
 
