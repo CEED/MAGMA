@@ -368,14 +368,9 @@ magma_zgeev_m(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
-            z__2 = MAGMA_Z_CNJG( *VL(k,i) );
-            d__1 = magma_dsqrt( rwork[irwork + k] );
-            MAGMA_Z_DSCALE( z__1, z__2, d__1 );
-            tmp = z__1;
+            tmp = MAGMA_Z_CNJG( *VL(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             blasf77_zscal( &n, &tmp, VL(0,i), &ione );
-            d__1 = MAGMA_Z_REAL( *VL(k,i) );
-            z__1 = MAGMA_Z_MAKE( d__1, 0 );
-            *VL(k,i) = z__1;
+            *VL(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VL(k,i) ), 0 );
         }
     }
 
@@ -397,14 +392,9 @@ magma_zgeev_m(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
-            z__2 = MAGMA_Z_CNJG( *VR(k,i) );
-            d__1 = magma_dsqrt( rwork[irwork + k] );
-            MAGMA_Z_DSCALE( z__1, z__2, d__1 );
-            tmp = z__1;
+            tmp = MAGMA_Z_CNJG( *VR(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             blasf77_zscal( &n, &tmp, VR(0,i), &ione );
-            d__1 = MAGMA_Z_REAL( *VR(k,i) );
-            z__1 = MAGMA_Z_MAKE( d__1, 0 );
-            *VR(k,i) = z__1;
+            *VR(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VR(k,i) ), 0 );
         }
     }
 
