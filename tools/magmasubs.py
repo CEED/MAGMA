@@ -486,9 +486,9 @@ subs = {
     ('scnrm2',            'dznrm2',             'cccccccc', 'zzzzzzzz' ),
     
     ]
+    + title( blas )    # Titlecase, for cublas, before lowercase (e.g., for Zdrot)
     + blas             # lowercase
     + upper( blas )    # uppercase
-    + title( blas )    # Titlecase, for cublas
     + lapack           # lowercase
     + upper( lapack )  # uppercase
     + [
