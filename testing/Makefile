@@ -31,9 +31,6 @@ ZSRC := \
 	testing_zhemv_mgpu.cpp	\
 	testing_zher2k_mgpu.cpp	\
 	\
-	testing_auxiliary.cpp	\
-	testing_constants.cpp	\
-	testing_parse_opts.cpp	\
 	testing_zblas.cpp	\
 	testing_zgeadd.cpp	\
 	testing_zgeadd_batched.cpp	\
@@ -53,6 +50,11 @@ ZSRC := \
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
 	testing_veclib.cpp	\
+	\
+	testing_auxiliary.cpp	\
+	testing_constants.cpp	\
+	testing_operators.cpp	\
+	testing_parse_opts.cpp	\
 
 # ----------
 # Cholesky, GPU interface
