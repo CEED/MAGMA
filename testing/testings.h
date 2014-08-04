@@ -176,6 +176,8 @@ void magma_smake_hpd( magma_int_t N, float*              A, magma_int_t lda );
 
 void magma_assert( bool condition, const char* msg, ... );
 
+void magma_assert_warn( bool condition, const char* msg, ... );
+
 #define MAX_NTEST 1000
 
 typedef struct magma_opts
