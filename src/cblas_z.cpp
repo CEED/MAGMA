@@ -54,7 +54,7 @@
             The n element vector x of dimension (1 + (n-1)*incx).
 
     @param[in]
-    incx    Stride between consecutive elements of dx. incx > 0.
+    incx    Stride between consecutive elements of x. incx > 0.
 
     @ingroup magma_zblas1
 */
@@ -70,21 +70,14 @@ double magma_cblas_dzasum(
 /** Returns 2-norm of vector x. Avoids unnecesary over/underflow.
 
     @param[in]
-    n       Number of elements in vector x and y. n >= 0.
+    n       Number of elements in vector x. n >= 0.
 
     @param[in]
     x       COMPLEX_16 array on CPU host.
             The n element vector x of dimension (1 + (n-1)*incx).
 
     @param[in]
-    incx    Stride between consecutive elements of dx. incx > 0.
-
-    @param[in]
-    y       COMPLEX_16 array on CPU host.
-            The n element vector y of dimension (1 + (n-1)*incy).
-
-    @param[in]
-    incy    Stride between consecutive elements of dy. incy > 0.
+    incx    Stride between consecutive elements of x. incx > 0.
 
     @ingroup magma_zblas1
 */
@@ -107,7 +100,7 @@ double magma_cblas_dznrm2(
             The n element vector x of dimension (1 + (n-1)*incx).
 
     @param[in]
-    incx    Stride between consecutive elements of dx. incx > 0.
+    incx    Stride between consecutive elements of x. incx > 0.
 
     @param[in]
     y       COMPLEX_16 array on CPU host.
@@ -145,7 +138,7 @@ magmaDoubleComplex magma_cblas_zdotc(
             The n element vector x of dimension (1 + (n-1)*incx).
 
     @param[in]
-    incx    Stride between consecutive elements of dx. incx > 0.
+    incx    Stride between consecutive elements of x. incx > 0.
 
     @param[in]
     y       COMPLEX_16 array on CPU host.
