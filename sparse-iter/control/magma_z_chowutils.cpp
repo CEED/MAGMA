@@ -576,6 +576,58 @@ magma_zinitguess( magma_z_sparse_matrix A, magma_z_sparse_matrix *L, magma_z_spa
 
 
 
+/**
+    Purpose
+    -------
+
+    Using the iterative approach of computing ILU factorizations with increasing
+    fill-in, it takes the input matrix A, containing the approximate factors,
+    ( L and U as well )
+    computes a matrix with one higher level of fill-in, inserts the original
+    approximation as initial guess, and provides the factors L and U also
+    filled with the scaled initial guess.
+
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix*
+                sparse matrix in CSR
+
+    @param
+    L           magma_z_sparse_matrix*
+                sparse matrix in CSR 
+
+    @param
+    U           magma_z_sparse_matrix*
+                sparse matrix in CSR    
+
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+magma_int_t 
+magma_zinitrecursiveLU( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
+
+    magma_int_t i,j,k;
+
+    for(i=0; i<A.num_rows; i++){
+        for(j=B->row[i]; j<B->row[i+1]; j++){
+            B->val[j] = MAGMA_Z_MAKE(0.0, 0.0);
+            magma_index_t localcol = B->col[j];
+            for( k=A.row[i]; k<A.row[i+1]; k++){
+                if(A.col[k] == localcol){
+                    B->val[j] = A.val[k];
+                }
+            }
+        }      
+    }
+
+    return MAGMA_SUCCESS; 
+}
+
+
 
 /**
     Purpose
@@ -627,6 +679,7 @@ magma_zmLdiagadd( magma_z_sparse_matrix *L ){
             z++;
         }
         LL.row[LL.num_rows] = z;
+        LL.nnz = z;
     }
     else{
         printf("error: L neither lower nor strictly lower triangular!\n");

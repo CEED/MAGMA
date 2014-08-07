@@ -346,8 +346,8 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
         magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
         magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );
 
-        magma_int_t num_lnnz = B.nnz*10;
-        magma_int_t num_unnz = B.nnz*10;
+        magma_int_t num_lnnz = (levels > 0 ) ? B.nnz/2*(levels+2) : B.nnz;
+        magma_int_t num_unnz = (levels > 0 ) ? B.nnz/2*(levels+2) : B.nnz;
 
         magma_free_cpu( L->col );
         magma_free_cpu( U->col );
@@ -356,19 +356,17 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
 
         symbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
                                             L->row, L->col, U->row, U->col ); 
-
         L->nnz = num_lnnz;
         U->nnz = num_unnz;
-    
+        magma_free_cpu( L->val );
+        magma_free_cpu( U->val );
         magma_zmalloc_cpu( &L->val, L->nnz );
         magma_zmalloc_cpu( &U->val, U->nnz );
-
         for( magma_int_t i=0; i<L->nnz; i++ )
             L->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
         for( magma_int_t i=0; i<U->nnz; i++ )
             U->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
-
         // take the original values (scaled) as initial guess for L
         for(magma_int_t i=0; i<L->num_rows; i++){
             for(magma_int_t j=B.row[i]; j<B.row[i+1]; j++){
@@ -392,9 +390,7 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
                 }
             }
         }
-
         magma_z_mfree( &B );
-
         // fill A with the new structure;
         magma_free_cpu( A->col );
         magma_free_cpu( A->val );

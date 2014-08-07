@@ -43,9 +43,10 @@ magma_zailu_csr_a_kernel(   magma_int_t num_rows,
     if (k < nnz)
     {     
 
+         
         i = rowidxA[k];
         j = colidxA[k];
-
+//for( int l=0; l<1; l++){
 #if (__CUDA_ARCH__ >= 350) && (defined(PRECISION_d) || defined(PRECISION_s))
         s =  __ldg( A+k );
 #else
@@ -78,6 +79,7 @@ magma_zailu_csr_a_kernel(   magma_int_t num_rows,
             valU[iu-1] = s;
         }
 
+//    }
     }
 
 }// kernel 
@@ -118,7 +120,7 @@ magma_zailu_csr_a( magma_z_sparse_matrix A,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U ){
     
-    int blocksize1 = 256;
+    int blocksize1 = 64;
     int blocksize2 = 1;
 
     int dimgrid1 = ( A.nnz + blocksize1 -1 ) / blocksize1;

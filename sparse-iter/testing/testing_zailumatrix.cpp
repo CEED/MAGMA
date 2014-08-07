@@ -49,8 +49,9 @@ int main( int argc, char** argv)
         //################################################################//
     const char *filename[] =
     {
+//"/mnt/sparse_matrices/mtx/s3dkq4m2.mtx",
 
-            "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
+  //          "/mnt/sparse_matrices/mtx/Trefethen_20.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
@@ -62,7 +63,7 @@ int main( int argc, char** argv)
             "/mnt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
             "/mnt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
     };
-    for(int matrix=0; matrix<7; matrix=matrix+1){
+    for(int matrix=0; matrix<1; matrix=matrix+1){
 
     printf("\n\n\n\n\n");
     magma_z_csr_mtx( &hA, filename[matrix] );
@@ -144,10 +145,10 @@ int main( int argc, char** argv)
     // possibility to increase fill-in in ILU-(m)
 
     //ILU-m levels
-    for( int levels = 0; levels < 3; levels++){ //ILU-m levels
+    for( int levels = 0; levels < 1; levels++){ //ILU-m levels
     magma_zsymbilu( &hAcopy, levels, &hAL, &hAUt ); 
-    printf("\n#================================================================================#\n");
-    printf("# ILU-(m)  #nnz  iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
+    printf("\n#=========================================================================================#\n");
+    printf("# ILU-(m)  #n       #nnz       iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
     // add a unit diagonal to L for the algorithm
     magma_zmLdiagadd( &hAL ); 
 
@@ -177,7 +178,7 @@ int main( int argc, char** argv)
         //                        iterative ILU                           //
         //################################################################//
     // number of AILU sweeps
-    for(int iters=0; iters<31; iters++){
+    for(int iters=1; iters<2; iters++){
 
     // take average results for residuals
     real_Double_t resavg = 0.0;
@@ -233,12 +234,12 @@ int main( int argc, char** argv)
     iluresavg = iluresavg/numavg;
     resavg = resavg/numavg;
 
-    printf(" %d      %d      %d       %d        %.2e   ",
-                              levels, nnz, 1* iters, blocksize, t_chow);
+    printf(" %d      %d      %d      %d       %d        %.2e   ",
+                              levels, hA.num_rows, nnz, 1* iters, blocksize, t_chow);
     printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, iluresavg);
 
     }// iters
-    printf("#================================================================================#\n");
+    printf("\n#=========================================================================================#\n");
     }// levels
 
     // free all memory

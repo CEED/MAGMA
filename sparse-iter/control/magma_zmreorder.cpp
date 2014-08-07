@@ -168,3 +168,147 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    -------
+
+    Takes a matrix obtained from a 3D FE discretization, and reorders it
+    by restructuring the node numbering with 3D blocks of size a x b x c.
+    the resulting matrix has some row-blocks reordered. Rows related 
+    to spatially nearby nodes (within one of these blocks) are then also
+    close in the matrix.
+
+
+    Arguments
+    ---------
+
+    @param
+    A           magma_z_sparse_matrix
+                input/output matrix 
+
+    @param
+    n           magma_int_t
+                nodes in one dimension
+
+    @param
+    a           magma_int_t
+                blocksize x-discretization direction
+
+    @param
+    b           magma_int_t
+                blocksize y-discretization direction
+
+    @param
+    c           magma_int_t
+                blocksize z-discretization direction
+
+    @param
+    B           magma_z_sparse_matrix*
+                new matrix filled with new indices
+
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zmreorder2( magma_z_sparse_matrix A, magma_int_t n, magma_int_t a,
+                 magma_int_t b, magma_int_t c, magma_z_sparse_matrix *B ){
+
+if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
+        
+        B->storage_type = A.storage_type;
+        B->diagorder_type = A.diagorder_type;
+        B->memory_location = Magma_CPU;
+        B->num_rows = A.num_rows;
+        B->num_cols = A.num_cols;
+   
+        magma_index_t i,j,k=0,entry;
+        magma_index_malloc_cpu( &B->col, A.nnz*10 );
+        magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+        magma_index_malloc_cpu( &B->rowidx, A.nnz*10 );
+        magma_zmalloc_cpu( &B->val, A.nnz*10 );
+        
+    
+
+        for( i=0; i<n; i++ ){
+            B->row[i] = k;
+        for( j=0; j<A.nnz; j++ ){
+            if(     abs(i-A.col[j]) == 0  ||
+                    abs(i-A.col[j]) == 1  ||
+                    abs(i-A.col[j]) == n-1  ||
+                    abs(i-A.col[j]) == n  ||
+                    abs(i-A.col[j]) == n+1  ||
+                    abs(i-A.col[j]) == n*n-n-1  ||
+                    abs(i-A.col[j]) == n*n-n  ||
+                    abs(i-A.col[j]) == n*n-n+1  ||
+                    abs(i-A.col[j]) == n*n-1  ||
+                    abs(i-A.col[j]) == n*n  ||
+                    abs(i-A.col[j]) == n*n+1  ||
+                    abs(i-A.col[j]) == n*n+n-1  ||
+                    abs(i-A.col[j]) == n*n+n  ||
+                    abs(i-A.col[j]) == n*n+n+1  ||
+                    abs(i-A.rowidx[j]) == 0  ||
+                    abs(i-A.rowidx[j]) == 1  ||
+                    abs(i-A.rowidx[j]) == n-1  ||
+                    abs(i-A.rowidx[j]) == n  ||
+                    abs(i-A.rowidx[j]) == n+1  ||
+                    abs(i-A.rowidx[j]) == n*n-n-1  ||
+                    abs(i-A.rowidx[j]) == n*n-n  ||
+                    abs(i-A.rowidx[j]) == n*n-n+1  ||
+                    abs(i-A.rowidx[j]) == n*n-1  ||
+                    abs(i-A.rowidx[j]) == n*n  ||
+                    abs(i-A.rowidx[j]) == n*n+1  ||
+                    abs(i-A.rowidx[j]) == n*n+n-1  ||
+                    abs(i-A.rowidx[j]) == n*n+n  ||
+                    abs(i-A.rowidx[j]) == n*n+n+1  ){
+
+                B->col[k] = A.col[j];
+                B->rowidx[k] = A.rowidx[j];
+                B->val[k] = A.val[j];
+
+                //printf("A.nnz:%d i:%d  k: %d<%d (%d %d) %f\n", A.nnz, i, k, A.nnz*3, B->rowidx[k], B->col[k], B->val[k]);
+                k++;
+            }
+
+        }
+        }
+        B->nnz = k;
+        B->row[n+1] = k;
+
+    printf("B.nnz/A.nnz: %d / %d = %d\n", B->nnz, A.nnz,  B->nnz/A.nnz);
+
+        return MAGMA_SUCCESS; 
+    }
+}
+
+
+
+
+
