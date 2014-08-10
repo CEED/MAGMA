@@ -57,11 +57,13 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
            __syncthreads();
 
            /* Adjust the rest of the column norms */
+           /*
            if (i==0){
              double temp = MAGMA_Z_ABS( dc[0] ) / xnorm[blockIdx.x-it-1];
              temp = (temp + 1.) * (1. - temp);
              xnorm[blockIdx.x-it-1] = xnorm[blockIdx.x-it-1] * sqrt(temp); 
            }
+           */
         }
         else
         {
