@@ -43,7 +43,9 @@
             2:  This version uses a standard LAPACK-based orthogonalization through
                 MAGMA's QR panel factorization (magma_zgeqr2x3_gpu) and magma_zungqr
             3:  MGS
-            4.  Cholesky QR
+            4.  Cholesky QR [ Note: this method uses the normal equations which 
+                                    squares the condition number of A, therefore 
+                                    ||I - Q'Q|| < O(eps cond(A)^2)               ]
 
     @param[in]
     m       INTEGER
@@ -67,7 +69,7 @@
     @param
     dwork   (GPU workspace) COMPLEX_16 array, dimension: 
             n^2                    for ikind = 1
-            3 n^2 + min(m, n)      for ikind = 2 
+            3 n^2 + min(m, n) + 2  for ikind = 2 
             0 (not used)           for ikind = 3
             n^2                    for ikind = 4           
 
