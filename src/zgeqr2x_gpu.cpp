@@ -122,10 +122,11 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
+    // magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
+        magmablas_dznrm2_cols(*m-i, 1, dA(i,i), *ldda, dnorm+i);
         magma_zlarfgx_gpu(*m-i, dA(i, i), dA(min(i+1,*m), i), dtau+i, dnorm+i,
                           ddA + i + i*(*n), i);
         
