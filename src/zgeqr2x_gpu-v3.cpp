@@ -161,7 +161,7 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
+    // magmablas_dznrm2_cols(*m, k, dA(0,0), *ldda, dnorm);
 
     for (int b=0; b < k; b += BLOCK_SIZE) {
         for (i = b; i < min(k, b+BLOCK_SIZE); ++i) {
@@ -171,8 +171,9 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                                   dT+b+b*k, k, dA(b, i), work);
 
             /*   Adjust the dnorm[i] to hold the norm of A(i:m,i)           */
-            if ( i > 0 )
-                magmablas_dznrm2_adjust(i, dnorm+i, dA(0, i));
+            //if ( i > 0 )
+            //    magmablas_dznrm2_adjust(i, dnorm+i, dA(0, i));
+            magmablas_dznrm2_cols(*m-i, 1, dA(i,i), *ldda, dnorm+i, magma_stream);
             
             /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i)
                 1. 1 is not yet put on the diagonal of A
