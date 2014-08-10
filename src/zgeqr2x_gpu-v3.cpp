@@ -173,7 +173,7 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
             /*   Adjust the dnorm[i] to hold the norm of A(i:m,i)           */
             //if ( i > 0 )
             //    magmablas_dznrm2_adjust(i, dnorm+i, dA(0, i));
-            magmablas_dznrm2_cols(*m-i, 1, dA(i,i), *ldda, dnorm+i, magma_stream);
+            magmablas_dznrm2_cols(*m-i, 1, dA(i,i), *ldda, dnorm+i);
             
             /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i)
                 1. 1 is not yet put on the diagonal of A
