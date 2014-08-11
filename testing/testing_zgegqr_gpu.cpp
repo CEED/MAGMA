@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     
     // versions 1...4 are valid
     if (opts.version < 1 || opts.version > 4) {
-        printf("Unknown version %d; exiting\n", opts.version );
+        printf("Unknown version %d; exiting\n", (int) opts.version );
         return -1;
     }
     
