@@ -117,8 +117,8 @@ int main( int argc, char** argv )
             lapackf77_zlarnv( &ione, ISEED, &size,  A );
             lapackf77_clarnv( &ione, ISEED, &size, SA );
             
-            magma_zsetmatrix( n, n, A,  lda, dA,  ldda );
-            magma_csetmatrix( n, n, SA, lda, dSA, ldda );
+            magma_zsetmatrix( m, n, A,  lda, dA,  ldda );
+            magma_csetmatrix( m, n, SA, lda, dSA, ldda );
             
             /* =====================================================================
                Performs operation using LAPACK clag2z
