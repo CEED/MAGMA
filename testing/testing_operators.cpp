@@ -50,8 +50,8 @@ int main( int argc, char** argv)
 
     std::complex<double> za3, zb3, zc3;
     std::complex<float>  ca3, cb3, cc3;
-    double               da3, db3, dc3;
-    float                sa3, sb3, sc3;
+    double               da3;  //, db3, dc3;
+    float                sa3;  //, sb3, sc3;
     bool                 eq3;
 
     magma_opts opts;
