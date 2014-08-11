@@ -281,9 +281,9 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,*kb), lda,
                                &vn1[*kb], lsticcs);
 #if defined(PRECISION_d) || defined(PRECISION_z)
-        magma_dcopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb);
+        magma_dcopymatrix( n-*kb, 1, &vn1[*kb], n, &vn2[*kb], n);
 #else   
-        magma_scopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb);
+        magma_scopymatrix( n-*kb, 1, &vn1[*kb], n, &vn2[*kb], n);
 #endif  
     }
     magma_free(lsticcs);
