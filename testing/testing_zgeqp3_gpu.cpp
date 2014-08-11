@@ -83,6 +83,13 @@ int main( int argc, char** argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+
+            /* Make h_A low rank */
+            int nn = N/2;
+            if (nn > 0) {
+                lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nn, h_A, &lda, 
+                                  h_A + nn*lda, &lda ); 
+            }
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
             /* =====================================================================
@@ -118,9 +125,9 @@ int main( int argc, char** argv)
             /* call gpu-interface */
             gpu_time = magma_wtime();
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, lwork, drwork, &info);
+            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, drwork, &info);
             #else
-            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, lwork, &info);
+            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, &info);
             #endif
             gpu_time = magma_wtime() - gpu_time;
             
