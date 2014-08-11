@@ -116,16 +116,6 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     
     nb = magma_get_zgeqp3_nb(min(m, n));
     minmn = min(m,n);
-    if (*info == 0) {
-        if (minmn == 0) {
-            lwkopt = 1;
-        } else {
-            lwkopt = (n + 1)*nb;
-            #ifdef REAL
-            lwkopt += 2*n;
-            #endif
-        }
-    }
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
