@@ -45,6 +45,7 @@ ZSRC := \
 	zlascl.cu		\
 	zlascl2.cu		\
 	zlaset.cu		\
+	zlaset_band.cu		\
 	zlaswp.cu		\
 	zclaswp.cu		\
 	zlat2c.cu		\
