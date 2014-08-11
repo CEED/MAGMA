@@ -54,8 +54,7 @@ int main( int argc, char** argv)
         return -1;
     }
     
-    double tol, eps = lapackf77_dlamch("E");
-    tol = 10* opts.tolerance * eps;
+    double tol = 10. * opts.tolerance * lapackf77_dlamch("E");
     
     printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)      ||I-Q'Q||_F / M     ||I-Q'Q||_I / M    ||A-Q R||_I\n");
     printf("                                                        MAGMA  /  LAPACK    MAGMA  /  LAPACK\n");
