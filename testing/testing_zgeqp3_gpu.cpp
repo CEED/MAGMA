@@ -36,7 +36,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work;
     magmaDoubleComplex *d_A, *dtau, *d_work;
     magma_int_t *jpvt;
-    magma_int_t M, N, n2, lda, lwork, j, info, min_mn, nb;
+    magma_int_t M, N, K, n2, lda, lwork, j, info, min_mn, nb;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
@@ -52,6 +52,13 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
             N = opts.nsize[itest];
+            K = opts.ksize[itest];
+            if ( M < K || N < K || K <= 0 ) {
+                printf( "%5d %5d %5d   skipping because zgeqp3 requires M >= K, N >= K, K(the rank) >= 0\n",
+                        (int) M, (int) N, (int) K );
+                continue;
+            }           
+ 
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
@@ -82,14 +89,14 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( d_work, magmaDoubleComplex, lwork  );
             
             /* Initialize the matrix */
-            lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            lapackf77_zlarnv( &ione, ISEED, &n2, h_R );
 
-            /* Make h_A low rank */
-            int nn = N/2;
-            if (nn > 0) {
-                lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nn, h_A, &lda, 
-                                  h_A + nn*lda, &lda ); 
-            }
+            /* Make h_A of rank K */
+            magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1., 0. );
+            magmaDoubleComplex beta  = MAGMA_Z_MAKE(  0., 0. );
+            blasf77_zgemm("N", "N", &M, &N, &K, &alpha, h_R, &lda, h_R, &lda, 
+                          &beta, h_A, &lda); 
+
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
             /* =====================================================================
