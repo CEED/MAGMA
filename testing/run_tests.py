@@ -387,7 +387,7 @@ aux = (
 	('testing_parse_opts',             '-c',  '',   ''),
 	('testing_zgeadd',                 '-c',  mn,   ''),
 	('testing_zgeadd_batched',         '-c',  mn,   ''),
-	('testing_zlacpy',                 '-c',  mn,   'TODO implement uplo'),
+	('testing_zlacpy',                 '-c',  mn,   ''),
 	('testing_zlacpy_batched',         '-c',  mn,   'TODO implement uplo'),
 	('testing_zlag2c',                 '-c',  mn,   ''),
 	('testing_zlange',                 '-c',  mn,   ''),
@@ -400,6 +400,7 @@ aux = (
 	('testing_zlascl',                 '-c',  mn,   ''),
 	('testing_zlaset',                 '-c',  mn,   ''),
 	('testing_zlaset_band',            '-c',  mn,   ''),
+	('testing_zlat2c',                 '-c',  n,    ''),
 	('testing_znan_inf',               '-c',  mn,   ''),
 	('testing_zprint',                 '-c',  '-N 10 -N 5,100 -N 100,5',  ''),
 	

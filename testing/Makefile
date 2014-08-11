@@ -43,6 +43,7 @@ ZSRC := \
 	testing_zlascl.cpp	\
 	testing_zlaset.cpp	\
 	testing_zlaset_band.cpp	\
+	testing_zlat2c.cpp	\
 	testing_znan_inf.cpp	\
 	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
