@@ -205,7 +205,7 @@ magmablas_zlacpy_stream(
         return;
     
     dim3 threads( BLK_X );
-    dim3 grid( (m + BLK_X - 1)/BLK_X, (m + BLK_Y - 1)/BLK_Y );
+    dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
     
     if ( uplo == MagmaLower ) {
         zlacpy_lower<<< grid, threads, 0, stream >>> ( m, n, dA, ldda, dB, lddb );
