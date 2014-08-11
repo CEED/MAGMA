@@ -49,6 +49,7 @@ ZSRC := \
 	zlaswp.cu		\
 	zclaswp.cu		\
 	zlat2c.cu		\
+	clat2z.cu		\
 	dznrm2.cu		\
 	stream.cu		\
 	zswap.cu		\
