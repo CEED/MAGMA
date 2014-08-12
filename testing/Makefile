@@ -221,6 +221,9 @@ all: $(EXE)
 lib:
 	cd .. && $(MAKE) lib
 
+shared:
+	cd .. && $(MAKE) shared
+
 # depend on header
 $(ALLOBJ): testings.h
 
