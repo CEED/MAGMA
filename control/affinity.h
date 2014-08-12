@@ -44,7 +44,7 @@ private:
 };
 
 #else
-#error "Affinity requires Linux glibc version >= 2.3.3, which isn't available. Remove -DMAGMA_SETAFFINITY from OPTS in make.inc."
+#error "Affinity requires Linux glibc version >= 2.3.3, which isn't available. Remove -DMAGMA_SETAFFINITY from CFLAGS in make.inc."
 #endif
 
 #endif  // MAGMA_SETAFFINITY

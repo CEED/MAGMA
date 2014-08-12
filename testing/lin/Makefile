@@ -270,28 +270,28 @@ xlintsts : $(ALINTST) $(SLINTST) $(SCLNTST) ../fortran.o $(TMGLIB)
 	$(FORT) $(ALINTST) $(SCLNTST) $(SLINTST) \
 	$(TMGLIB) -o xlintsts \
 	../fortran.o \
-	$(LDOPTS) -L$(MAGMA_DIR)/lib -lmagma \
+	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) $(LIB) 
 
 xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) ../fortran.o $(TMGLIB)
 	$(FORT) $(ALINTST) $(SCLNTST) $(CLINTST) \
 	$(TMGLIB) -o xlintstc \
 	../fortran.o \
-	$(LDOPTS) -L$(MAGMA_DIR)/lib -lmagma \
+	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) $(LIB) 
  
 xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) ../fortran.o $(TMGLIB)
 	$(FORT) $(ALINTST) $(DLINTST) $(DZLNTST) \
 	$(TMGLIB) -o xlintstd \
 	../fortran.o \
-	$(LDOPTS) -L$(MAGMA_DIR)/lib -lmagma \
+	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) $(LIB) 
  
 xlintstz : $(ALINTST) $(ZLINTST) $(DZLNTST) ../fortran.o $(TMGLIB)
 	$(FORT) $(ALINTST) $(DZLNTST) $(ZLINTST) \
 	$(TMGLIB) -o xlintstz \
 	../fortran.o \
-	$(LDOPTS) -L$(MAGMA_DIR)/lib -lmagma \
+	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) $(LIB) 
  
 $(ALINTST): $(FRC)
@@ -314,16 +314,16 @@ cleanall: clean
 # These are handled by generic %.o: %.f rule in Makefile.internal
 #schkaa.o: schkaa.f
 #	cp $(MAGMA_DIR)/control/magma.mod . 
-#	$(FORT) $(F77OPTS) -c $< -o $@
+#	$(FORT) $(FFLAGS) -c $< -o $@
 #
 #dchkaa.o: dchkaa.f
-#	$(FORT) $(F77OPTS) -c $< -o $@
+#	$(FORT) $(FFLAGS) -c $< -o $@
 #
 #cchkaa.o: cchkaa.f
-#	$(FORT) $(F77OPTS) -c $< -o $@
+#	$(FORT) $(FFLAGS) -c $< -o $@
 #
 #zchkaa.o: zchkaa.f
-#	$(FORT) $(F77OPTS) -c $< -o $@
+#	$(FORT) $(FFLAGS) -c $< -o $@
 
 ../fortran.o:
 	cd .. && $(MAKE) fortran.o

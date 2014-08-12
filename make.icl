@@ -2,4 +2,5 @@
 # special make rules for internal ICL use only
 #
 
-OPTS += -DUSE_FLOCK
+#CFLAGS   += -DUSE_FLOCK
+#CXXFLAGS += -DUSE_FLOCK

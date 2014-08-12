@@ -78,7 +78,7 @@ using sh/bash:
     CUDADIR=/usr/local/cuda
     source /opt/intel/composer/bin/compilervars.sh intel64
 
-To compile shared library, first add -fPIC to OPTS, FOPTS, etc. in make.inc;
+To compile shared library, first add -fPIC to CFLAGS, FFLAGS, etc. in make.inc;
 see example in make.inc.mkl-shared. Then:
 
     make shared
