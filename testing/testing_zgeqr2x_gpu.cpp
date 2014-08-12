@@ -64,13 +64,14 @@ int main( int argc, char** argv)
             N     = opts.nsize[itest];
 
             if (N > 128) {
-                printf("This routine requires N <= 128. Setting N = 128\n");
-                N = 128;
+                printf("%5d %5d   skipping because zgeqr2x requires N <= 128\n",
+                        (int) M, (int) N);
+                continue;
             }
-
             if (M < N) {
-                printf("This routine requires M >= N. Setting M = N\n");
-                M = N;
+                printf("%5d %5d   skipping because zgeqr2x requires M >= N\n",
+                        (int) M, (int) N);
+                continue;
             }
 
             min_mn = min(M, N);
