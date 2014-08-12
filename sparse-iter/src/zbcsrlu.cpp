@@ -13,13 +13,11 @@
 #include <cuda_runtime_api.h>
 #include <cublas_v2.h>  // include before magma.h
 
-#include "magma.h"
-#include "magma_lapack.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
-//#include "common_magma.h"
+#include "common_magma.h"
 #include "../include/magmasparse.h"
 
 #define PRECISION_z
@@ -29,10 +27,6 @@
 #define M(i,j) M->val+((Mblockinfo(i,j)-1)*size_b*size_b)
 #define A(i,j) A.val+((blockinfo(i,j)-1)*size_b*size_b)
 #define x(i) x->val+(i*size_b)
-
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )

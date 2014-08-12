@@ -21,8 +21,6 @@
 #include "../../include/magma.h"
 #include "../include/mmio.h"
 #include "common_magma.h"
-#include <cuda.h>
-//#include <cusparse_v2.h>
 
 using namespace std;
 

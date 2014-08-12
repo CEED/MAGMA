@@ -3,16 +3,12 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
 
 */
-
-#include "magma_lapack.h"
-#include "common_magma.h"
-#include "../include/magmasparse.h"
 
 #include <assert.h>
 
@@ -24,7 +20,6 @@
 
 
 #include <stdio.h>  
-#include <cuda.h>  
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
@@ -35,6 +30,10 @@
 /////////////////////////////////////
 #include <cuda_runtime.h>
 #include <cublas.h>
+
+#include "magma_lapack.h"
+#include "common_magma.h"
+#include "../include/magmasparse.h"
 
 // includes, project
 #include "magma.h"
