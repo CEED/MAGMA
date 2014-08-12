@@ -746,6 +746,13 @@ void magma_zher(
     @param[in]
     incx    Stride between consecutive elements of dx. incx != 0.
 
+    @param[in]
+    dy      COMPLEX_16 array on GPU device.
+            The n element vector y of dimension (1 + (n-1)*incy).
+
+    @param[in]
+    incy    Stride between consecutive elements of dy. incy != 0.
+
     @param[in,out]
     dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).
             The n-by-n matrix A, on GPU device.
@@ -789,9 +796,6 @@ void magma_zher2(
 
     @param[in]
     n       Number of rows and columns of A. n >= 0.
-
-    @param[in]
-    alpha   Scalar \f$ \alpha \f$
 
     @param[in]
     dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).
@@ -842,9 +846,6 @@ void magma_ztrmv(
 
     @param[in]
     n       Number of rows and columns of A. n >= 0.
-
-    @param[in]
-    alpha   Scalar \f$ \alpha \f$
 
     @param[in]
     dA      COMPLEX_16 array of dimension (ldda,n), ldda >= max(1,n).

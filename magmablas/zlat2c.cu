@@ -188,6 +188,10 @@ void zlat2c_upper(
       -     = 1:  an entry of the matrix A is greater than the COMPLEX
                   overflow threshold, in this case, the content
                   of SA on exit is unspecified.
+    
+    @param[in]
+    stream  magma_queue_t
+            Stream to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/
