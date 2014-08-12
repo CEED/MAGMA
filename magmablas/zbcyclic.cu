@@ -10,9 +10,9 @@
        @precisions normal z -> s d c
 */
 #include "common_magma.h"
-#include "commonblas.h"
 
 #define PRECISION_z
+
 
 //===========================================================================
 // Set a matrix from CPU to multi-GPUs in 1D column block cyclic distribution.

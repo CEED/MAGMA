@@ -112,8 +112,7 @@ ZSRC += \
 -include Makefile.local
 -include Makefile.src
 
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-	commonblas.h
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 

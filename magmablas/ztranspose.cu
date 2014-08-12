@@ -11,7 +11,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-//#include "commonblas.h"
 
 #define PRECISION_z
 

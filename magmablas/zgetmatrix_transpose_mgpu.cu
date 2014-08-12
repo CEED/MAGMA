@@ -9,8 +9,9 @@
        @author Ichitaro Yamazaki
 */
 #include "common_magma.h"
+
 #define PRECISION_z
-#include "commonblas.h"
+
 
 //
 //    m, n - dimensions in the output (ha) matrix.

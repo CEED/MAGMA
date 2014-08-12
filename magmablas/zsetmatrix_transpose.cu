@@ -9,8 +9,8 @@
 
 */
 #include "common_magma.h"
+
 #define PRECISION_z
-#include "commonblas.h"
 
 
 //
