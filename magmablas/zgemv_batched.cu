@@ -322,17 +322,31 @@ void magmablas_zgemvc_batched(
 
     @param[in]
     x_array x = x_array[i]
-            x: COMPLEX*16 array of dimension n.
+            x: COMPLEX*16 array of dimension.
+            n if trans == MagmaNoTrans.
+            m if trans == MagmaTrans or MagmaConjTrans.
 
+    @param[in]
+    incx    INTEGER.
+            incx specifies the increment for the elments of x.
+            incx must not be zero.
+    
     @param[in]
     beta    DOUBLE PRECISION.
             On entry, BETA specifies the scalar beta.
 
     @param[out]
     y_array y = y_array[i]:       
-            y: COMPLEX*16 array of dimension n.
             On exit y = alpha opt(A) x + beta y.
+            y: COMPLEX*16 array of dimension.
+            m if trans == MagmaNoTrans.
+            n if trans == MagmaTrans or MagmaConjTrans.
 
+    @param[in]
+    incy    INTEGER.
+            incy specifies the increment for the elments of y.
+            incy must not be zero.
+    
     @param[in]
     batchCount INTEGER
             number of pointers contained in A_array, x_array and y_array.
