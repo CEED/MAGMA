@@ -64,7 +64,7 @@ algorithm is used. Also included is MAGMA BLAS, a complementary to CUBLAS routin
 ********************************************************************************
 @page installing    Installing MAGMA
 
-Create a file make.inc, using one of examples as a template.
+First, create a file make.inc, using one of the examples as a template.
 Set environment variables for where external packages are installed,
 either in your .cshrc/.bashrc file, or in the make.inc file itself.
 For instance, to specify where CUDA and Intel MKL are installed, using csh:
@@ -77,6 +77,15 @@ using sh/bash:
 
     CUDADIR=/usr/local/cuda
     source /opt/intel/composer/bin/compilervars.sh intel64
+
+If you do not have a Fortran compiler, comment out FORT. MAGMA's Fortran 90
+interface and Fortran testers will not be built. Also, many testers will not
+be able to check their results -- they will print an error message, e.g.:
+
+    magma/testing> ./testing_dgehrd -N 100 -c
+    ...
+    Cannot check results: dhst01_ unavailable, since there was no Fortran compiler.
+      100     ---   (  ---  )      0.70 (   0.00)   0.00e+00        0.00e+00   ok
 
 To compile shared library, first add -fPIC to CFLAGS, FFLAGS, etc. in make.inc;
 see example in make.inc.mkl-shared. Then:

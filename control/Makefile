@@ -65,9 +65,16 @@ SRC += \
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f90=.o)
-ALLOBJ := $(ALLOBJ:.F90=.o)
-ALLOBJ := $(ALLOBJ:.f=.o)
+ALLOBJ := $(filter %.o, $(ALLOBJ))
+
+FOBJ   := $(ALLSRC:.f90=.o)
+FOBJ   := $(FOBJ:.F90=.o)
+FOBJ   := $(FOBJ:.f=.o)
+FOBJ   := $(filter %.o, $(FOBJ))
+
+ifneq ($(FORT),no_fortran)
+    ALLOBJ += $(FOBJ)
+endif
 
 .PHONY: all clean cleanall
 
@@ -77,7 +84,7 @@ all: $(LIBMAGMA)
 $(LIBMAGMA): $(ALLOBJ) stamp
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
-	cp *.mod ../include
+	-cp *.mod ../include
 
 # this forces LIBMAGMA to be archived
 stamp: $(ALLOBJ)

@@ -27,6 +27,7 @@ PGIFORTRAN      ?= 0
 GPU_TARGET      ?= Tesla Fermi Kepler
 LIBMAGMA        ?= $(MAGMA_DIR)/lib/libmagma.a
 LIBMAGMA_SPARSE ?= $(MAGMA_DIR)/lib/libmagma_sparse.a
+FORT            ?= no_fortran
 
 prefix ?= /usr/local/magma
 

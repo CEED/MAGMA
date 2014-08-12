@@ -188,7 +188,9 @@ else
 		testing_zgetrf_f.f90
 endif
 
-ZSRC += $(ZSRCF)
+ifneq ($(FORT),no_fortran)
+	ZSRC += $(ZSRCF)
+endif
 
 
 # ------------------------------------------------------------
