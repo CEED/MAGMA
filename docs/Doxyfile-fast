@@ -759,6 +759,7 @@ WARN_LOGFILE           = output_err
 INPUT                  = \
 	doxygen-modules.h       \
 	documentation.txt       \
+	../src/cblas_z.cpp                \
 	../src/dbulge_aux.cpp             \
 	../src/dgeev.cpp                  \
 	../src/dgeev_m.cpp                \
@@ -966,7 +967,6 @@ INPUT                  = \
 	../control/magma_znan_inf.cpp             \
 	../control/magmawinthread.cpp          \
 	../control/magmawinthread.h            \
-	../control/operators.h                 \
 	../control/pthread_barrier.cpp         \
 	../control/pthread_barrier.h           \
 	../control/queue.cpp                   \
@@ -990,6 +990,7 @@ INPUT                  = \
 	../interface_cuda/zset_get.cpp                   \
 	../magmablas/cgemm_fermi_kernels.h          \
 	../magmablas/clag2z.cu                      \
+	../magmablas/clat2z.cu                      \
 	../magmablas/commonblas.h                   \
 	../magmablas/commonblas_z.h                 \
 	../magmablas/dgemm_fermi_kernels.h          \
@@ -1054,6 +1055,7 @@ INPUT                  = \
 	../magmablas/zlascl.cu                      \
 	../magmablas/zlascl2.cu                     \
 	../magmablas/zlaset.cu                      \
+	../magmablas/zlaset_band.cu                 \
 	../magmablas/zlaswp.cu                      \
 	../magmablas/zlat2c.cu                      \
 	../magmablas/zpotf2.cu                      \
@@ -1118,6 +1120,7 @@ INPUT                  = \
 	../sparse-iter/control/magma_zilustruct.cpp       \
 	../sparse-iter/control/magma_zilustruct_2.cpp         \
 	../sparse-iter/control/magma_zmhom.cpp            \
+	../sparse-iter/control/magma_zmlumerge.cpp            \
 	../sparse-iter/control/magma_zmreorder.cpp        \
 	../sparse-iter/control/magma_zmscale.cpp          \
 	../sparse-iter/control/magma_zmsort.cpp           \
