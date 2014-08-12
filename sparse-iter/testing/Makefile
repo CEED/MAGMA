@@ -161,13 +161,13 @@ cleanall: clean cleanexe
 
 testing_% : testing_%.o
 	echo $(LIB)
-	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
+	$(CXX) $(LDFLAGS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 run_% : run_%.o
-	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
+	$(CXX) $(LDFLAGS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)

@@ -75,7 +75,7 @@ shared: lib
 
 $(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.o
 	@echo ======================================== libmagma_sparse.so
-	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SPARSE_SO) $^ \
+	$(CC) $(LDFLAGS) -shared -o $(LIBMAGMA_SPARSE_SO) $^ \
 	-L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
