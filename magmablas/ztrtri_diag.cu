@@ -20,7 +20,7 @@
 
 
 /**
-    Inverts the NB x NB diagonal blocks.
+    Inverts the NB x NB diagonal blocks of a triangular matrix.
     This routine is used in ztrsm.
     
     Same as ztrtri_diag, but adds stream argument.
@@ -89,6 +89,21 @@ magmablas_ztrtri_diag_stream(
     magmaDoubleComplex *d_dinvA,
     magma_queue_t stream)
 {
+    magma_int_t info = 0;
+    if (uplo != MagmaLower && uplo != MagmaUpper)
+        info = -1;
+    else if (diag != MagmaNonUnit && diag != MagmaUnit)
+        info = -2;
+    else if (n < 0)
+        info = -3;
+    else if (ldda < n)
+        info = -5;
+
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info
+    }
+    
     int nblocks = (n + IB - 1)/IB;
 
     cudaMemset( d_dinvA, 0, ((n+NB-1)/NB)*NB*NB * sizeof(magmaDoubleComplex) );
