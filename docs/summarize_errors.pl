@@ -8,6 +8,7 @@
 use strict;
 
 my $file     = '';
+my $func     = '';
 my @notfound = ();
 my @notdoc   = ();
 my $notdoc   = 0;
@@ -27,7 +28,7 @@ EOT
 sub output
 {
 	$count += 1;
-	print "$file\n";
+	print "$file: $func()\n";
 	if ( @notfound ) {
 		print "    not found:      ", join( ", ", @notfound ), "\n";
 	}
@@ -51,32 +52,36 @@ sub pathsplit
 
 
 # --------------------------------------------------
-my $filename = shift || 'output_err';
-open( FILE, $filename ) or die( $! );
+my $errfile = shift || 'output_err';
+open( FILE, $errfile ) or die( $! );
 while( <FILE> ) {
 	if ( $notdoc and m/^ +parameter '(\w+)'/ ) {
 		#print "$.: param\n";
 		push @notdoc, $1;
 	}
-	elsif ( m/^(\S+):\d+: warning: argument '(\w+)' of command \@param is not found.*/ ) {
+	elsif ( m/^(\S+):\d+: warning: argument '(\w+)' of command \@param is not found in the argument list of (\w+)/ ) {
 		#print "$.: not found\n";
 		my $path = $1;
 		my $arg  = $2;
+		my $newfunc = $3;
 		my ($dir, $newfile) = pathsplit( $path );
-		if ( $newfile ne $file ) {
+		if ( $newfile ne $file or $newfunc ne $func ) {
 			output();
 			$file = $newfile;
+			$func = $newfunc;
 		}
 		push @notfound, $arg;
 		$notdoc = 0;
 	}
-	elsif ( m/^(\S+):\d+: warning: The following parameters of .* are not documented:/ ) {
+	elsif ( m/^(\S+):\d+: warning: The following parameters of (\w+).* are not documented:/ ) {
 		#print "$.: not doc\n";
 		my $path = $1;
+		my $newfunc = $2;
 		my ($dir, $newfile) = pathsplit( $path );
-		if ( $newfile ne $file ) {
+		if ( $newfile ne $file or $newfunc ne $func ) {
 			output();
 			$file = $newfile;
+			$func = $newfunc;
 		}
 		$notdoc = 1;
 	}
