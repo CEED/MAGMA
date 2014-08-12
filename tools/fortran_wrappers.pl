@@ -64,6 +64,7 @@ my %constants = (
 	'magma_pack_t'       => 'pack'   ,
 	'magma_vec_t'        => 'vec'    ,
 	'magma_range_t'      => 'range'  ,
+	'magma_vect_t'       => 'vect'   ,
 	'magma_direct_t'     => 'direct' ,
 	'magma_storev_t'     => 'storev' ,
 	'magma_order_t'      => 'order'  ,
@@ -240,6 +241,10 @@ s/^#.*//mg;
 # strip out lines we don't want to copy
 s/void \wpanel_to_q.*\n//;
 s/void \wq_to_panel.*\n//;
+
+# strip out extern consts
+s/extern const .*;\n//g;
+
 
 while( $_ ) {
 	if ( m/(.*?)^(magma_err_t|magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
