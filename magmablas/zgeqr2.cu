@@ -117,10 +117,7 @@ magma_zgeqr2_gpu(
             }
         }
 
-        if (n >= m)
-           magma_zcopymatrix( 1, k-1, Aks, 1, dA(0, 0), ldda+1 );
-        else
-           magma_zcopymatrix( 1, k, Aks, 1, dA(0, 0), ldda+1 );
+        magma_zcopymatrix( 1, k, Aks, 1, dA(0, 0), ldda+1 );
     }
     
     magma_free(Aks);
