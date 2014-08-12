@@ -66,7 +66,8 @@ magma_zilustruct( magma_z_sparse_matrix *A, magma_int_t levels ){
     
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
-        magma_int_t i, j, k, m;
+        // TODO what is m suppose to be?
+        magma_int_t i, j, k, m=0;
 
         magma_z_sparse_matrix B, L, U, L_d, U_d, LU_d;
 

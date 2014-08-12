@@ -96,7 +96,7 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
                         precond->M.num_rows, precond->M.nnz, descrA,
                         precond->M.val, precond->M.row, precond->M.col, 
                         precond->cuinfo); 
-             if(cusparseStatus != 0)    printf("error in analysis:%d\n", precond->cuinfo);
+             if(cusparseStatus != 0)    printf("error in analysis:%p\n", precond->cuinfo);
 
             cusparseStatus =
             cusparseZcsrilu0( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
@@ -105,7 +105,7 @@ magma_zcuilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
                               precond->M.row, 
                               precond->M.col, 
                               precond->cuinfo);
-             if(cusparseStatus != 0)    printf("error in ILU:%d\n", precond->cuinfo);
+             if(cusparseStatus != 0)    printf("error in ILU:%p\n", precond->cuinfo);
 
 
             cusparseStatus =
@@ -642,7 +642,7 @@ magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x,
                                     precond->cuinfoL,
                                     b.val,
                                     x->val );
-             if(cusparseStatus != 0)   printf("error in L triangular solve:%d.\n", precond->cuinfoL );
+             if(cusparseStatus != 0)   printf("error in L triangular solve:%p.\n", precond->cuinfoL );
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
@@ -732,7 +732,7 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
                                     precond->cuinfoU,
                                     b.val,
                                     x->val );
-             if(cusparseStatus != 0)   printf("error in U triangular solve:%d.\n", precond->cuinfoU );
+             if(cusparseStatus != 0)   printf("error in U triangular solve:%p.\n", precond->cuinfoU );
 
 
     cusparseDestroyMatDescr( descrU );

@@ -241,7 +241,7 @@ extern "C" magma_int_t
 magma_zmreorder2( magma_z_sparse_matrix A, magma_int_t n, magma_int_t a,
                  magma_int_t b, magma_int_t c, magma_z_sparse_matrix *B ){
 
-if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
+    if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
         
         B->storage_type = A.storage_type;
         B->diagorder_type = A.diagorder_type;
@@ -259,56 +259,49 @@ if( A.memory_location == Magma_CPU && A.storage_type == Magma_CSRCOO ){
 
         for( i=0; i<n; i++ ){
             B->row[i] = k;
-        for( j=0; j<A.nnz; j++ ){
-            if(     abs(i-A.col[j]) == 0  ||
-                    abs(i-A.col[j]) == 1  ||
-                    abs(i-A.col[j]) == n-1  ||
-                    abs(i-A.col[j]) == n  ||
-                    abs(i-A.col[j]) == n+1  ||
-                    abs(i-A.col[j]) == n*n-n-1  ||
-                    abs(i-A.col[j]) == n*n-n  ||
-                    abs(i-A.col[j]) == n*n-n+1  ||
-                    abs(i-A.col[j]) == n*n-1  ||
-                    abs(i-A.col[j]) == n*n  ||
-                    abs(i-A.col[j]) == n*n+1  ||
-                    abs(i-A.col[j]) == n*n+n-1  ||
-                    abs(i-A.col[j]) == n*n+n  ||
-                    abs(i-A.col[j]) == n*n+n+1  ||
-                    abs(i-A.rowidx[j]) == 0  ||
-                    abs(i-A.rowidx[j]) == 1  ||
-                    abs(i-A.rowidx[j]) == n-1  ||
-                    abs(i-A.rowidx[j]) == n  ||
-                    abs(i-A.rowidx[j]) == n+1  ||
-                    abs(i-A.rowidx[j]) == n*n-n-1  ||
-                    abs(i-A.rowidx[j]) == n*n-n  ||
-                    abs(i-A.rowidx[j]) == n*n-n+1  ||
-                    abs(i-A.rowidx[j]) == n*n-1  ||
-                    abs(i-A.rowidx[j]) == n*n  ||
-                    abs(i-A.rowidx[j]) == n*n+1  ||
-                    abs(i-A.rowidx[j]) == n*n+n-1  ||
-                    abs(i-A.rowidx[j]) == n*n+n  ||
-                    abs(i-A.rowidx[j]) == n*n+n+1  ){
-
-                B->col[k] = A.col[j];
-                B->rowidx[k] = A.rowidx[j];
-                B->val[k] = A.val[j];
-
-                //printf("A.nnz:%d i:%d  k: %d<%d (%d %d) %f\n", A.nnz, i, k, A.nnz*3, B->rowidx[k], B->col[k], B->val[k]);
-                k++;
+            for( j=0; j<A.nnz; j++ ){
+                if(     abs(i-A.col[j]) == 0           ||
+                        abs(i-A.col[j]) == 1           ||
+                        abs(i-A.col[j]) == n-1         ||
+                        abs(i-A.col[j]) == n           ||
+                        abs(i-A.col[j]) == n+1         ||
+                        abs(i-A.col[j]) == n*n-n-1     ||
+                        abs(i-A.col[j]) == n*n-n       ||
+                        abs(i-A.col[j]) == n*n-n+1     ||
+                        abs(i-A.col[j]) == n*n-1       ||
+                        abs(i-A.col[j]) == n*n         ||
+                        abs(i-A.col[j]) == n*n+1       ||
+                        abs(i-A.col[j]) == n*n+n-1     ||
+                        abs(i-A.col[j]) == n*n+n       ||
+                        abs(i-A.col[j]) == n*n+n+1     ||
+                        abs(i-A.rowidx[j]) == 0        ||
+                        abs(i-A.rowidx[j]) == 1        ||
+                        abs(i-A.rowidx[j]) == n-1      ||
+                        abs(i-A.rowidx[j]) == n        ||
+                        abs(i-A.rowidx[j]) == n+1      ||
+                        abs(i-A.rowidx[j]) == n*n-n-1  ||
+                        abs(i-A.rowidx[j]) == n*n-n    ||
+                        abs(i-A.rowidx[j]) == n*n-n+1  ||
+                        abs(i-A.rowidx[j]) == n*n-1    ||
+                        abs(i-A.rowidx[j]) == n*n      ||
+                        abs(i-A.rowidx[j]) == n*n+1    ||
+                        abs(i-A.rowidx[j]) == n*n+n-1  ||
+                        abs(i-A.rowidx[j]) == n*n+n    ||
+                        abs(i-A.rowidx[j]) == n*n+n+1  ){
+            
+                    B->col[k] = A.col[j];
+                    B->rowidx[k] = A.rowidx[j];
+                    B->val[k] = A.val[j];
+            
+                    //printf("A.nnz:%d i:%d  k: %d<%d (%d %d) %f\n", A.nnz, i, k, A.nnz*3, B->rowidx[k], B->col[k], B->val[k]);
+                    k++;
+                }
             }
-
-        }
         }
         B->nnz = k;
         B->row[n+1] = k;
 
-    printf("B.nnz/A.nnz: %d / %d = %d\n", B->nnz, A.nnz,  B->nnz/A.nnz);
-
-        return MAGMA_SUCCESS; 
+        printf("B.nnz/A.nnz: %d / %d = %d\n", B->nnz, A.nnz,  B->nnz/A.nnz);
     }
+    return MAGMA_SUCCESS; 
 }
-
-
-
-
-

@@ -1900,7 +1900,7 @@ magma_z_LUmergein( magma_z_sparse_matrix L,
     }
     magma_int_t i,j,k;
 
-    if( (L.storage_type == Magma_CSRCOO) )
+    if( L.storage_type == Magma_CSRCOO )
     {
         for(  i=0; i<L.nnz; i++){
             magma_int_t lrow = L.rowidx[ i ]; 

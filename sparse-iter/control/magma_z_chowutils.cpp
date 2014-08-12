@@ -129,8 +129,9 @@ magma_znonlinres(   magma_z_sparse_matrix A,
                     magma_z_sparse_matrix *LU, 
                     real_Double_t *res ){
 
+    // TODO what is m suppose to be?
     real_Double_t tmp2;
-    magma_int_t i,j,k,m;
+    magma_int_t i,j,k,m=0;
 
     magma_z_sparse_matrix L_d, U_d, LU_d, A_t;
 
@@ -298,8 +299,9 @@ magma_zilures(   magma_z_sparse_matrix A,
                     magma_z_sparse_matrix *LU, 
                     real_Double_t *res ){
 
+    // TODO what is m suppose to be?
     real_Double_t tmp2;
-    magma_int_t i,j,k,m;
+    magma_int_t i,j,k,m=0;
 
     magma_z_sparse_matrix LL, L_d, U_d, LU_d;
 
