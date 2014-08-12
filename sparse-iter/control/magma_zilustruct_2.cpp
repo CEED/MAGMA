@@ -305,11 +305,10 @@ void symbolic_ilu(
 
     Arguments
     ---------
-
     @param
     A           magma_z_sparse_matrix*
                 matrix in magma sparse matrix format containing the original 
-                matrix on input, and L\U on output
+                matrix on input, and L,U on output
 
     @param
     levels      magma_magma_int_t_t
