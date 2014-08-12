@@ -250,20 +250,20 @@ cleanall: clean cleanexe
 
 ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
-	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@
+	$(FORT) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 else
 testing_%.o : testing_%.f90
-	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@
+	$(FORT) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
-	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
+	$(FORT) $(LDFLAGS) $< $(FOBJ) -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 testing_% : testing_%.o
-	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
+	$(CC) $(LDFLAGS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
@@ -272,12 +272,12 @@ testing_% : testing_%.o
 # These two files are provided by cuda
 # CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
 #
-fortran.o : OPTS += -DCUBLAS_GFORTRAN
+fortran.o : CFLAGS += -DCUBLAS_GFORTRAN
 fortran.o : $(CUDADIR)/src/fortran.c
-	$(CC) $(OPTS) $(INC_MAGMA) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
-	$(CC) $(OPTS) $(INC_MAGMA) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # keep intermediate object files, to speed up re-compiling when library changes
 .SECONDARY: $(ALLOBJ)
