@@ -55,7 +55,7 @@ INC       = -I$(CUDADIR)/include
 # ========================================
 # replace single & single-complex BLAS functions with reference versions.
 # (i.e., functions that return float; subroutines do not need a fix.)
-LIB      := -lblas_fix $(LIB)
+LIB      := -L$(MAGMA_DIR)/lib -lblas_fix $(LIB)
 
 BLAS_FIX  = $(MAGMA_DIR)/lib/libblas_fix.a
 
