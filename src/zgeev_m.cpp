@@ -137,7 +137,6 @@ magma_zgeev_m(
     const magma_int_t izero = 0;
     
     double d__1, d__2;
-    magmaDoubleComplex z__1, z__2;
     magmaDoubleComplex tmp;
     double scl;
     double dum[1], eps;
