@@ -17,6 +17,7 @@
 #GPU_TARGET ?= Tesla Fermi Kepler
 
 CC        = gcc
+CXX       = g++
 NVCC      = nvcc
 FORT      = pgfortran
 
@@ -26,11 +27,11 @@ RANLIB    = ranlib
 
 NOMAIN    = -Mnomain
 
-OPTS      = -O0 -DADD_ -m64
-F77OPTS   = -O0 -DADD_ -m64
-FOPTS     = -O0 -DADD_ -m64
-NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -DADD_
-LDOPTS    = -fPIC
+CFLAGS    = -O0 -DADD_ -m64
+FFLAGS    = -O0 -DADD_ -m64
+F90FLAGS  = -O0 -DADD_ -m64
+NVCCFLAGS = --compiler-options -fno-strict-aliasing -DUNIX -DADD_
+LDFLAGS   = -fPIC
 
 LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
 

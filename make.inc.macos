@@ -17,6 +17,7 @@
 #GPU_TARGET ?= Tesla Fermi Kepler
 
 CC        = gcc
+CXX       = g++
 NVCC      = nvcc
 FORT      = gfortran
 
@@ -35,11 +36,11 @@ RANLIB    = ranlib
 # See BLAS_FIX below.
 # Alternatively, don't link with the veclib/accelerate framework;
 # use a different BLAS and LAPACK library.
-OPTS      = -Wall -m64 -O3 -DADD_
-F77OPTS   = -Wall -m64 -O3 -DADD_
-FOPTS     = -Wall -m64 -O3 -DADD_ -x f95-cpp-input
-NVOPTS    =       -m64 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
-LDOPTS    = -Wall -m64
+CFLAGS    = -Wall -m64 -O3 -DADD_
+FFLAGS    = -Wall -m64 -O3 -DADD_
+F90FLAGS  = -Wall -m64 -O3 -DADD_ -x f95-cpp-input
+NVCCFLAGS =       -m64 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
+LDFLAGS   = -Wall -m64
 
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 
