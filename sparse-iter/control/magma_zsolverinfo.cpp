@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -24,12 +24,7 @@
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 
@@ -296,12 +291,7 @@ magma_zsolverinfo( magma_z_solver_par *solver_par,
 }
 
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 
@@ -494,12 +484,7 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
     return MAGMA_SUCCESS;
 }
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 

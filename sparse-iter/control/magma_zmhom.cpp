@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -25,12 +25,7 @@
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 
@@ -134,12 +129,7 @@ magma_zmhom( magma_z_sparse_matrix A, magma_int_t b, magma_index_t *p ){
 
 
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 
@@ -248,12 +238,7 @@ magma_zmhom_fd( magma_z_sparse_matrix A, magma_int_t n, magma_int_t b, magma_ind
 
 
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 

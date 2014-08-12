@@ -146,12 +146,7 @@ magma_z_debug_kernel( int n, int *p, int *q ){
 
 
 
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
+/**
     Purpose
     -------
     

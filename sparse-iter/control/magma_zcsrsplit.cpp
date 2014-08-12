@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -22,12 +22,7 @@
 #include <cuda_profiler_api.h>
 
 
-/** -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
+/**
     Purpose
     -------
 
