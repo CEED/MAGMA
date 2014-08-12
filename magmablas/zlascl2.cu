@@ -81,11 +81,11 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
             Other formats that LAPACK supports, MAGMA does not currently support.
 
     \param[in]
-    M       INTEGER
+    m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
     \param[in]
-    N       INTEGER
+    n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
     \param[in]
