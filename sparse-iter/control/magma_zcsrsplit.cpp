@@ -21,8 +21,6 @@
 #include <cusparse_v2.h>
 #include <cuda_profiler_api.h>
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
 
 /** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

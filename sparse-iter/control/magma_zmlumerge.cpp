@@ -24,7 +24,6 @@
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
 /** -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

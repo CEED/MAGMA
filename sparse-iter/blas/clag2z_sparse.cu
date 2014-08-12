@@ -18,7 +18,6 @@
 #define PRECISION_z
 #define blksize 512
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
 // TODO get rid of global variable!
 __device__ int flag = 0; 
