@@ -23,7 +23,11 @@
 #include <ctype.h>
 
 #include <cuda_runtime_api.h>
+
+// if file included <cublas_v2.h> first, don't include <cublas.h>
+#ifndef CUBLAS_V2_H_
 #include <cublas.h>
+#endif
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 
