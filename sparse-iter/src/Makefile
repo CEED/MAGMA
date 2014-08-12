@@ -98,9 +98,13 @@ ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
 
 all: $(LIBMAGMA_SPARSE)
 
-$(LIBMAGMA_SPARSE): $(ALLOBJ)
+$(LIBMAGMA_SPARSE): $(ALLOBJ) stamp
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
+
+# this forces LIBMAGMA to be archived
+stamp: $(ALLHDR) $(ALLOBJ)
+	touch $@
 
 clean:
 	rm -f *.o *~ *.linkinfo

@@ -49,9 +49,13 @@ ALLOBJ := $(ALLOBJ:.F90=.o)
 
 all: $(LIBMAGMA_SPARSE)
 
-$(LIBMAGMA_SPARSE): $(ALLOBJ)
+$(LIBMAGMA_SPARSE): $(ALLOBJ) stamp
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
+
+# this forces LIBMAGMA to be archived
+stamp: $(ALLHDR) $(ALLOBJ)
+	touch $@
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr
