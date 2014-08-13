@@ -161,10 +161,9 @@ magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b,
 
         magma_zmdotc( dofs, 2, q.val+4*dofs, t.val, d1, d2, skp+6 );
         magma_zbicgmerge4(  2, skp );
-        magma_zbicgmerge3( dofs, skp, p.val, s.val,     // x=x+alpha*p+omega*s
-                            t.val, x->val, r.val );     // r=s-omega*t
-        magma_zmdotc( dofs, 2, q.val, r.val, d1, d2, skp+4);
-        magma_zbicgmerge4(  3, skp );
+
+        magma_zbicgmerge_xrbeta( dofs, d1, d2, q.val, r.val, p.val, 
+                                                    s.val, t.val, x->val, skp);  
 
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+5, 1, 
