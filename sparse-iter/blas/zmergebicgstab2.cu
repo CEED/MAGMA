@@ -12,7 +12,7 @@
 #include "common_magma.h"
 #include "../include/magmasparse.h"
 
-#define BLOCK_SIZE 512
+#define BLOCK_SIZE 256
 
 #define PRECISION_z
 

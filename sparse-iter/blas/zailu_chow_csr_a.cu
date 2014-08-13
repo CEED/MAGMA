@@ -120,7 +120,7 @@ magma_zailu_csr_a( magma_z_sparse_matrix A,
                    magma_z_sparse_matrix L,
                    magma_z_sparse_matrix U ){
     
-    int blocksize1 = 64;
+    int blocksize1 = 256;
     int blocksize2 = 1;
 
     int dimgrid1 = ( A.nnz + blocksize1 -1 ) / blocksize1;
