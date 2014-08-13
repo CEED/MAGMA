@@ -168,8 +168,9 @@ int main(int argc, char **argv)
             TESTING_FREE_CPU( A );
             TESTING_FREE_CPU( X );
             TESTING_FREE_CPU( Y );
-            TESTING_FREE_CPU( Ycublas );
-            TESTING_FREE_CPU( Ymagma  );
+            TESTING_FREE_CPU( Ycublas  );
+            TESTING_FREE_CPU( Yatomics );
+            TESTING_FREE_CPU( Ymagma   );
             
             TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dX );
