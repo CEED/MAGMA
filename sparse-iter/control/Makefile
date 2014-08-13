@@ -32,6 +32,7 @@ ZSRC := \
     magma_zilustruct_2.cpp   \
     magma_zmhom.cpp   \
 	magma_zmreorder.cpp	\
+	magma_zmlumerge.cpp	\
 
 SRC := \
 	mmio.cpp		\

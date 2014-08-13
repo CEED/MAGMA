@@ -244,6 +244,7 @@ void symbolic_ilu(
         {
             printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
                 printf("Increase STORAGE parameter.");
+                    exit(-1);
         }
             jal[knzl++] = next;
             next = lnklst[next];
@@ -267,6 +268,7 @@ void symbolic_ilu(
         {
             printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
                 printf("Increase STORAGE parameter.");
+                    exit(-1);
         }
                    // printf("1 knzu:%d  next:%d \n", knzu, next );
             levels[knzu] = curlev[next];
@@ -345,8 +347,8 @@ magma_zsymbilu( magma_z_sparse_matrix *A, magma_int_t levels,
         magma_z_mconvert( B, L, Magma_CSR, Magma_CSR );
         magma_z_mconvert( B, U, Magma_CSR, Magma_CSR );
 
-        magma_int_t num_lnnz = (levels > 0 ) ? B.nnz/2*(levels+2) : B.nnz;
-        magma_int_t num_unnz = (levels > 0 ) ? B.nnz/2*(levels+2) : B.nnz;
+        magma_int_t num_lnnz = (levels > 0 ) ? B.nnz/2*(2*levels+50) : B.nnz;
+        magma_int_t num_unnz = (levels > 0 ) ? B.nnz/2*(2*levels+50) : B.nnz;
 
         magma_free_cpu( L->col );
         magma_free_cpu( U->col );
