@@ -232,3 +232,75 @@ magma_zm_27stencil(  magma_int_t n,
     return MAGMA_SUCCESS;
 }   
 
+
+
+/**
+    Purpose
+    -------
+
+    Generate a 5-point stencil for a 2D FD discretization.
+
+    Arguments
+    ---------
+
+    @param
+    n           magma_int_t
+                number of rows
+
+    @param
+    A           magma_z_sparse_matrix*
+                matrix to generate   
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+extern "C"
+magma_int_t
+magma_zm_5stencil(  magma_int_t n,
+                    magma_z_sparse_matrix *A ){
+
+    magma_int_t i,j,k;
+    magma_z_sparse_matrix hA;
+    
+    // generate matrix of desired structure and size (2d 5-point stencil)
+    magma_int_t nn = n*n;
+    magma_int_t offdiags = 2;
+    magma_index_t *diag_offset;
+    magmaDoubleComplex *diag_vals;
+    magma_zmalloc_cpu( &diag_vals, offdiags+1 );
+    magma_index_malloc_cpu( &diag_offset, offdiags+1 );
+    diag_offset[0] = 0;
+    diag_offset[1] = 1;
+    diag_offset[2] = n;
+
+    diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
+    diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
+    diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
+    magma_zmgenerator( nn, offdiags, diag_offset, diag_vals, &hA );
+
+    // now set some entries to zero (boundary...)
+    for( i=0; i<n; i++ ){
+    for( j=0; j<n; j++ ){
+        magma_index_t row = i*n+j;
+        magma_index_t l_bound = i*n;
+        magma_index_t u_bound = (i+1)*n;
+        for( k=hA.row[row]; k<hA.row[row+1]; k++){
+
+            if((hA.col[k] == row-1 ) && (row+1)%n == 1 )
+                    
+                    hA.val[k] = MAGMA_Z_MAKE( 0.0, 0.0 );
+
+            if((hA.col[k] == row+1 ) && (row)%n ==n-1 )
+                    
+                    hA.val[k] = MAGMA_Z_MAKE( 0.0, 0.0 );
+        }
+        
+    }
+    }
+
+    magma_z_mconvert( hA, A, Magma_CSR, Magma_CSR );
+    magma_z_mfree( &hA );
+
+    return MAGMA_SUCCESS;
+}   
+
