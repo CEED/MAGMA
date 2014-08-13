@@ -131,30 +131,25 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 input matrix A
 
     @param
-    b           magma_z_vector
-                RHS b
-
-    @param
     M           magma_z_sparse_matrix*
                 M = D^(-1) * (L+U)
 
     @param
     d           magma_z_vector*
-                vector with diagonal elements
+                vector with diagonal elements of A
 
     @ingroup magmasparse_z
     ********************************************************************/
 
 magma_int_t
-magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b, 
+magma_zjacobisetup_matrix( magma_z_sparse_matrix A, 
                     magma_z_sparse_matrix *M, magma_z_vector *d ){
 
     magma_int_t i;
 
     magma_z_sparse_matrix A_h1, A_h2, B, C;
-    magma_z_vector diag, b_h;
+    magma_z_vector diag;
     magma_z_vinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO );
-    magma_z_vtransfer( b, &b_h, A.memory_location, Magma_CPU);
 
     if( A.storage_type != Magma_CSR){
         magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU);
@@ -206,7 +201,6 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
     magma_z_mfree( &C ); 
 
     magma_z_vfree( &diag);
-    magma_z_vfree( &b_h);
  
     return MAGMA_SUCCESS;
 }
@@ -480,18 +474,24 @@ magma_zjacobiiter( magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                             c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = M.num_rows;
-    magma_z_vector t;
+    magma_z_vector t, swap;
     magma_z_vinit( &t, Magma_DEV, dofs, c_zero );
 
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ){
         magma_z_spmv( c_mone, M, *x, c_zero, t );                // t = - M * x
         magma_zaxpy( dofs, c_one , c.val, 1 , t.val, 1 );        // t = t + c
-        magma_zcopy( dofs, t.val, 1 , x->val, 1 );               // x = t
+
+        // swap so that x again contains solution, and y is ready to be used
+        swap = *x;
+        *x = t;
+        t = swap;        
+        //magma_zcopy( dofs, t.val, 1 , x->val, 1 );               // x = t
     }
 
-    magma_z_vfree(&t);
+    magma_z_vfree( &t );
 
     return MAGMA_SUCCESS;
 }   /* magma_zjacobiiter */
+
 

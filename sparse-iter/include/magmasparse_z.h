@@ -386,6 +386,10 @@ magma_zm_27stencil(  magma_int_t n,
                      magma_z_sparse_matrix *A );
 
 magma_int_t
+magma_zm_5stencil(  magma_int_t n,
+                     magma_z_sparse_matrix *A );
+
+magma_int_t
 magma_zsolverinfo(  magma_z_solver_par *solver_par, 
                     magma_z_preconditioner *precond_par );
 
@@ -420,8 +424,30 @@ magma_int_t
 magma_zinitguess(   magma_z_sparse_matrix A, 
                     magma_z_sparse_matrix *L,
                     magma_z_sparse_matrix *U );
+
 magma_int_t 
-magma_zmreorder( magma_z_sparse_matrix A, 
+magma_zinitrecursiveLU( magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix *B );
+
+
+magma_int_t 
+magma_zmreorder3d(  magma_z_sparse_matrix A, 
+                    magma_int_t n, 
+                    magma_int_t a, 
+                    magma_int_t b, 
+                    magma_int_t c, 
+                    magma_z_sparse_matrix *B );
+
+magma_int_t 
+magma_zmreorder2d(  magma_z_sparse_matrix A, 
+                    magma_int_t n, 
+                    magma_int_t a, 
+                    magma_int_t b, 
+                    magma_z_sparse_matrix *B );
+
+
+magma_int_t 
+magma_zmreorder2( magma_z_sparse_matrix A, 
                     magma_int_t n, 
                     magma_int_t a, 
                     magma_int_t b, 
@@ -595,7 +621,6 @@ magma_zjacobisetup(     magma_z_sparse_matrix A,
                         magma_z_vector *c );
 magma_int_t
 magma_zjacobisetup_matrix(  magma_z_sparse_matrix A, 
-                            magma_z_vector b, 
                             magma_z_sparse_matrix *M, 
                             magma_z_vector *d );
 magma_int_t
@@ -656,10 +681,10 @@ magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond );
 
 magma_int_t
-magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x, 
+magma_zapplyiicc_l( magma_z_vector b, magma_z_vector *x, 
                     magma_z_preconditioner *precond );
 magma_int_t
-magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x, 
+magma_zapplyiicc_r( magma_z_vector b, magma_z_vector *x, 
                     magma_z_preconditioner *precond );
 
 
@@ -1192,6 +1217,12 @@ magma_zailu_csr_a( magma_z_sparse_matrix A,
                    magma_z_sparse_matrix U );
 
 magma_int_t
+magma_zailu_csr_a_debug( magma_int_t localiters, 
+                   magma_z_sparse_matrix A,
+                   magma_z_sparse_matrix L,
+                   magma_z_sparse_matrix U );
+
+magma_int_t
 magma_zailu_csr_s_debug( magma_index_t *p,
                    magma_z_sparse_matrix A_L,
                    magma_z_sparse_matrix A_U,
@@ -1234,6 +1265,11 @@ magma_ztrisv_r_nu( magma_z_sparse_matrix A,
 
 magma_int_t 
 mtools_zsymmetrize( magma_z_sparse_matrix *A );
+
+
+magma_int_t 
+magma_ztestkernel( magma_int_t n );
+
 
  
 #ifdef __cplusplus

@@ -224,79 +224,6 @@ magma_zailusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 }
 
 
-/**
-    Purpose
-    -------
-
-    Performs the left triangular solves using the ILU preconditioner.
-
-    Arguments
-    ---------
-
-    @param
-    b           magma_z_vector
-                RHS
-
-    @param
-    x           magma_z_vector*
-                vector to precondition
-
-    @param
-    precond     magma_z_preconditioner*
-                preconditioner parameters
-
-    @ingroup magmasparse_zgepr
-    ********************************************************************/
-
-magma_int_t
-magma_zapplyailu_l( magma_z_vector b, magma_z_vector *x, 
-                    magma_z_preconditioner *precond ){
-
-    magma_int_t iters = 1;
-    for(int k=0; k<40; k++)
-        magma_zbajac_csr( iters, precond->LD, precond->L, b, x );
-           
-    return MAGMA_SUCCESS;
-
-}
-
-
-/**
-    Purpose
-    -------
-
-    Performs the right triangular solves using the ILU preconditioner.
-
-    Arguments
-    ---------
-
-    @param
-    b           magma_z_vector
-                RHS
-
-    @param
-    x           magma_z_vector*
-                vector to precondition
-
-    @param
-    precond     magma_z_preconditioner*
-                preconditioner parameters
-
-    @ingroup magmasparse_zgepr
-    ********************************************************************/
-
-magma_int_t
-magma_zapplyailu_r( magma_z_vector b, magma_z_vector *x, 
-                    magma_z_preconditioner *precond ){
-
-    magma_int_t iters = 1;
-    for(int k=0; k<40; k++)
-        magma_zbajac_csr( iters, precond->UD, precond->U, b, x );
-
-    return MAGMA_SUCCESS;
-
-}
-
 
 
 
@@ -325,7 +252,7 @@ magma_int_t
 magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
 
-    magma_z_sparse_matrix hAh, hA, hAtmp, hAL, hLt, hAUt, hACSRCOO, dAinitguess, dL, DL, RL;
+    magma_z_sparse_matrix hAh, hA, hAtmp, hAL, hLt, hAUt, hALt, hM, hMSELL, hACSRCOO, dAinitguess, dL;
 
 
 
@@ -362,24 +289,69 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     // for CUSPARSE
     magma_z_mtransfer( hAL, &precond->M, Magma_CPU, Magma_DEV );
 
-    magma_zcsrsplit( 256, hAL, &DL, &RL );
 
-    magma_z_mtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( RL, &precond->L, Magma_CPU, Magma_DEV );
 
-    // for asynchronous iteration also need U
-    magma_z_cucsrtranspose(   hAL, &hLt );
 
-    magma_zcsrsplit( 256, hLt, &DL, &RL );
 
-    magma_z_mtransfer( DL, &precond->UD, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( RL, &precond->U, Magma_CPU, Magma_DEV );
+    // Jacobi setup
+    magma_zjacobisetup_matrix( precond->M, &precond->L, &precond->d );
+    
 
+    // for Jacobi, we also need U
+    magma_z_cucsrtranspose(   hAL, &hALt );
+    magma_z_vector d_h;
+    magma_zjacobisetup_matrix( hALt, &hM, &d_h );
+
+    magma_z_mtransfer( hM, &precond->U, Magma_CPU, Magma_DEV );
+
+    magma_z_mfree(&hM);
+
+    magma_z_vfree(&d_h);
+
+
+
+//try to be faster using SELL-P
+/*
+    magma_z_vector d_h;
+    magma_zjacobisetup_matrix( hAL, &hM, &d_h );
+    hMSELL.blocksize = 64;
+    hMSELL.alignment = 4;
+    magma_z_mconvert( hM, &hMSELL, Magma_CSR, Magma_SELLP );
+    magma_z_mtransfer( hMSELL, &precond->L, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hMSELL);
+    magma_z_mfree(&hM);
+    magma_z_vfree(&d_h);
+
+    // for Jacobi, we also need U
+    magma_z_cucsrtranspose(   hAL, &hALt );
+    magma_zjacobisetup_matrix( hALt, &hM, &d_h );
+    hMSELL.blocksize = 8;
+    hMSELL.alignment = 4;
+    magma_z_mconvert( hM, &hMSELL, Magma_CSR, Magma_SELLP );
+    magma_z_mtransfer( hMSELL, &precond->U, Magma_CPU, Magma_DEV );
+    magma_z_vtransfer( d_h, &precond->d, Magma_CPU, Magma_DEV );
+    magma_z_mfree(&hM);
+    magma_z_mfree(&hMSELL);
+    magma_z_vfree(&d_h);
+*/
+
+
+
+
+/*
+printf("\nM:\n");
+   magma_z_mvisu( precond->M);
+printf("\nL:\n");
+   magma_z_mvisu( precond->L);
+printf("\nU:\n");
+   magma_z_mvisu( precond->U);
+
+
+printf("\nd:\n");
+    magma_z_vvisu(precond->d, 0, hAL.num_rows);
+*/
     magma_z_mfree(&hAL);
-    magma_z_mfree(&hLt);
-
-    magma_z_mfree(&DL);
-    magma_z_mfree(&RL);
+    magma_z_mfree(&hALt);
 
 
     // CUSPARSE context //
@@ -453,6 +425,105 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
+
+    return MAGMA_SUCCESS;
+
+}
+
+
+/**
+    Purpose
+    -------
+
+    Performs the left triangular solves using the IC preconditioner via Jacobi.
+
+    Arguments
+    ---------
+
+    @param
+    b           magma_z_vector
+                RHS
+
+    @param
+    x           magma_z_vector*
+                vector to precondition
+
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_zgepr
+    ********************************************************************/
+
+magma_int_t
+magma_zapplyiicc_l( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond ){
+
+    magma_int_t dofs = precond->L.num_rows;
+    magma_z_solver_par jacobiiter_par;
+    jacobiiter_par.maxiter = precond->maxiter;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magma_z_vector c;
+    magma_z_vinit( &c, Magma_DEV, dofs, c_zero );
+
+    // compute c = D^{-1}b
+    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, c.val); 
+    // copy c as initial guess to x
+    magma_zcopy( dofs, c.val, 1 , x->val, 1 ); 
+
+    // Jacobi iterator
+    magma_zjacobiiter(  precond->L, c, x, &jacobiiter_par ); 
+
+    magma_z_vfree( &c );
+
+    return MAGMA_SUCCESS;
+
+}
+
+
+/**
+    Purpose
+    -------
+
+    Performs the right triangular solves using the IC preconditioner via Jacobi.
+
+    Arguments
+    ---------
+
+    @param
+    b           magma_z_vector
+                RHS
+
+    @param
+    x           magma_z_vector*
+                vector to precondition
+
+    @param
+    precond     magma_z_preconditioner*
+                preconditioner parameters
+
+    @ingroup magmasparse_zgepr
+    ********************************************************************/
+
+magma_int_t
+magma_zapplyiicc_r( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond ){
+
+    magma_int_t dofs = precond->U.num_rows;
+    magma_z_solver_par jacobiiter_par;
+    jacobiiter_par.maxiter = precond->maxiter;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magma_z_vector c;
+    magma_z_vinit( &c, Magma_DEV, dofs, c_zero );
+    // compute c = D^{-1}b
+    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, c.val); 
+    // copy c as initial guess to x
+    magma_zcopy( dofs, c.val, 1 , x->val, 1 );                          
+
+    // Jacobi iterator
+    magma_zjacobiiter(  precond->U, c, x, &jacobiiter_par ); 
+
+    magma_z_vfree( &c );
 
     return MAGMA_SUCCESS;
 
