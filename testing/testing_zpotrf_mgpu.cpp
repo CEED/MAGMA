@@ -122,6 +122,10 @@ int main( int argc, char** argv )
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
+            for( int dev=0; dev < ngpu; dev++ ){
+                magma_setdevice( dev );
+                magma_device_sync();
+            }
             if ( opts.lapack ) {
                 error = lapackf77_zlange("f", &N, &N, h_A, &lda, work );
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
