@@ -27,6 +27,10 @@
     Arguments
     ---------
     @param[in]
+    num_gpus INTEGER
+            The number of GPUs to be used for the factorization.
+
+    @param[in]
     uplo    magma_uplo_t
       -     = MagmaUpper:  Upper triangle of dA is stored;
       -     = MagmaLower:  Lower triangle of dA is stored.
@@ -36,21 +40,24 @@
             The order of the matrix dA.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the Hermitian matrix dA.  If UPLO = MagmaUpper, the leading
-            N-by-N upper triangular part of dA contains the upper
-            triangular part of the matrix dA, and the strictly lower
-            triangular part of dA is not referenced.  If UPLO = MagmaLower, the
-            leading N-by-N lower triangular part of dA contains the lower
-            triangular part of the matrix dA, and the strictly upper
-            triangular part of dA is not referenced.
+    d_lA    COMPLEX_16 array of pointers on the GPU, dimension (num_gpus)
+            On entry, the Hermitian matrix dA distributed over GPUs
+            (d_lA[d] points to the local matrix on the d-th GPU).
+            It is distributed in 1D block column or row cyclic (with the
+            block size of nb) if UPLO = MagmaUpper or MagmaLower, respectively.
+            If UPLO = MagmaUpper, the leading N-by-N upper triangular 
+            part of dA contains the upper triangular part of the matrix dA, 
+            and the strictly lower triangular part of dA is not referenced.  
+            If UPLO = MagmaLower, the leading N-by-N lower triangular part 
+            of dA contains the lower triangular part of the matrix dA, and 
+            the strictly upper triangular part of dA is not referenced.
     \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization dA = U**H * U or dA = L * L**H.
 
     @param[in]
     ldda     INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,N).
+            The leading dimension of the array d_lA. LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
 

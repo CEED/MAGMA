@@ -40,14 +40,17 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array on the GPU, dimension (LDDA,N).
-            On entry, the M-by-N matrix to be factored.
+    d_lA    COMPLEX_16 array of pointers on the GPU, dimension (num_gpus).
+            On entry, the M-by-N matrix A distributed over GPUs 
+            (d_lA[d] points to the local matrix on d-th GPU). 
+            It uses 1D block column cyclic format with the block size of nb,
+            and each local matrix is stored by column.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
     ldda     INTEGER
-            The leading dimension of the array A.  LDDA >= max(1,M).
+            The leading dimension of the array d_lA.  LDDA >= max(1,M).
 
     @param[out]
     ipiv    INTEGER array, dimension (min(M,N))
