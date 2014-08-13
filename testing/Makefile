@@ -188,9 +188,7 @@ else
 		testing_zgetrf_f.f90
 endif
 
-ifneq ($(FORT),no_fortran)
-	ZSRC += $(ZSRCF)
-endif
+ZSRC += $(ZSRCF)
 
 
 # ------------------------------------------------------------
@@ -200,9 +198,16 @@ endif
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f90=.o)
-ALLOBJ := $(ALLOBJ:.F90=.o)
-ALLOBJ := $(ALLOBJ:.cuf=.o)
+ALLOBJ := $(filter %.o, $(ALLOBJ))
+
+FOBJS  := $(ALLSRC:.f90=.o)
+FOBJS  := $(FOBJS:.F90=.o)
+FOBJS  := $(FOBJS:.cuf=.o)
+FOBJS  := $(filter %.o, $(FOBJS))
+
+ifneq ($(FORT),no_fortran)
+    ALLOBJ += $(FOBJS)
+endif
 
 TESTS  := $(filter testing_%,$(ALLOBJ))
 EXE    := $(TESTS:.o=)
