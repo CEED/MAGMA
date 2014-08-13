@@ -23,12 +23,6 @@
     magma_cblas_dznrm2 / dnrm2
     magma_cblas_zdotc  / ddot
     magma_cblas_zdotu  / ddot
-    
-    magma_cblas_izamax - remove?
-    magma_cblas_drot   - remove?
-    magma_cblas_zcopy  - remove?
-    magma_cblas_zdscal - remove?
-    magma_cblas_zscal  - remove?
 
 */
 
@@ -63,7 +57,7 @@ double magma_cblas_dzasum(
     magma_int_t n,
     const magmaDoubleComplex *x, magma_int_t incx )
 {
-    return cublasDzasum( n, x, incx );
+    return cblas_dzasum( n, x, incx );
 }
 
 // --------------------
@@ -86,7 +80,7 @@ double magma_cblas_dznrm2(
     magma_int_t n,
     const magmaDoubleComplex *x, magma_int_t incx )
 {
-    return cublasDznrm2( n, x, incx );
+    return cblas_dznrm2( n, x, incx );
 }
 
 // --------------------
