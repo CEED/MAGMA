@@ -282,7 +282,7 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC || 
-            ( precond->solver == Magma_AICC && precond->maxiter == 0) ){
+            ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
         //magma_zapplycuilu_l( b, x, precond );
         magma_zapplycuicc_l( b, x, precond );
         return MAGMA_SUCCESS;
@@ -350,7 +350,7 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC || 
-            ( precond->solver == Magma_AICC && precond->maxiter == 0) ){
+            ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
         magma_zapplycuicc_r( b, x, precond );
 //        magma_zapplycuilu_r( b, x, precond );
         return MAGMA_SUCCESS;
