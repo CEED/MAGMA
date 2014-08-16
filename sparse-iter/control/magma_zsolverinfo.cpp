@@ -336,10 +336,17 @@ magma_zsolverinfo_free( magma_z_solver_par *solver_par,
         magma_free_cpu( solver_par->eigenvalues );
         solver_par->eigenvalues = NULL;
     }
-
     if( precond_par->d.val != NULL ){
         magma_free( precond_par->d.val );
         precond_par->d.val = NULL;
+    }
+    if( precond_par->work1.val != NULL ){
+        magma_free( precond_par->work1.val );
+        precond_par->work1.val = NULL;
+    }
+    if( precond_par->work2.val != NULL ){
+        magma_free( precond_par->work2.val );
+        precond_par->work2.val = NULL;
     }
     if( precond_par->M.val != NULL ){
         if ( precond_par->M.memory_location == Magma_DEV )
@@ -554,6 +561,8 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     }  
 
     precond_par->d.val = NULL;
+    precond_par->work1.val = NULL;
+    precond_par->work2.val = NULL;
 
     precond_par->M.val = NULL;
     precond_par->M.col = NULL;

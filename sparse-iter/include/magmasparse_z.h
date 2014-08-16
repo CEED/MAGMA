@@ -635,6 +635,13 @@ magma_zjacobiiter(      magma_z_sparse_matrix M,
                         magma_z_solver_par *solver_par );
 
 magma_int_t
+magma_zjacobiiter_precond(      
+                        magma_z_sparse_matrix M, 
+                        magma_z_vector *x,  
+                        magma_z_solver_par *solver_par, 
+                        magma_z_preconditioner *precond );
+
+magma_int_t
 magma_zilusetup(        magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *M,
                         magma_int_t *ipiv );
@@ -985,7 +992,8 @@ magma_int_t
 magma_zjacobisetup_vector_gpu( int num_rows, 
                                magmaDoubleComplex *b, 
                                magmaDoubleComplex *d, 
-                               magmaDoubleComplex *c);
+                               magmaDoubleComplex *c,
+                               magmaDoubleComplex *x );
 
 magma_int_t
 magma_zjacobi_diagscal(         int num_rows, 

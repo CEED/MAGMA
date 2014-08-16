@@ -322,7 +322,11 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
     }
     else if( b.memory_location == Magma_DEV ){
         // fill vector
-        magma_zjacobisetup_vector_gpu( b.num_rows, b.val, d.val, c->val );
+        magma_z_vector tmp;
+        magma_z_vinit( &tmp, Magma_DEV, b.num_rows, MAGMA_Z_ZERO );
+        magma_zjacobisetup_vector_gpu( 
+                    b.num_rows, b.val, d.val, c->val, tmp.val );
+        magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
 
@@ -495,3 +499,62 @@ magma_zjacobiiter( magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,
 }   /* magma_zjacobiiter */
 
 
+
+/**
+    Purpose
+    -------
+
+    Iterates the solution approximation according to
+       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
+       x^(k+1) =      c     -       M        * x^k.
+
+    Arguments
+    ---------
+
+    @param
+    M           magma_z_sparse_matrix
+                input matrix M = D^(-1) * (L+U)
+
+    @param
+    c           magma_z_vector
+                c = D^(-1) * b
+
+    @param
+    x           magma_z_vector*
+                iteration vector x
+
+    @param
+    solver_par  magma_z_solver_par*
+                solver parameters
+
+    @param
+    solver_par  magma_z_precond_par*
+                precond parameters
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+magma_int_t
+magma_zjacobiiter_precond( magma_z_sparse_matrix M, magma_z_vector *x, 
+            magma_z_solver_par *solver_par, magma_z_preconditioner *precond ){
+
+    // local variables
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                            c_mone = MAGMA_Z_NEG_ONE;
+    magma_int_t dofs = M.num_rows;
+    magma_z_vector swap;
+
+    for( magma_int_t i=0; i<solver_par->maxiter; i++ ){
+        magma_z_spmv( c_mone, M, *x, c_zero, precond->work2 );   // t = - M * x
+        magma_zaxpy( dofs, c_one , 
+                precond->work1.val, 1 , precond->work2.val, 1 ); // t = t + c
+
+        // swap so that x again contains solution, and y is ready to be used
+        swap = *x;
+        *x = precond->work2;
+        precond->work2 = swap;        
+        //magma_zcopy( dofs, t.val, 1 , x->val, 1 );               // x = t
+    }
+
+    return MAGMA_SUCCESS;
+}   /* magma_zjacobiiter */

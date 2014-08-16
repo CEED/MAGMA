@@ -289,13 +289,8 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
     // for CUSPARSE
     magma_z_mtransfer( hAL, &precond->M, Magma_CPU, Magma_DEV );
 
-
-
-
-
     // Jacobi setup
-    magma_zjacobisetup_matrix( precond->M, &precond->L, &precond->d );
-    
+    magma_zjacobisetup_matrix( precond->M, &precond->L, &precond->d );    
 
     // for Jacobi, we also need U
     magma_z_cucsrtranspose(   hAL, &hALt );
@@ -308,6 +303,9 @@ magma_zaiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond ){
 
     magma_z_vfree(&d_h);
 
+    // and the workspace for the preconditioner
+    magma_z_vinit( &precond->work1, Magma_DEV, A.num_rows, MAGMA_Z_ZERO );
+    magma_z_vinit( &precond->work2, Magma_DEV, A.num_rows, MAGMA_Z_ZERO );
 
 
 //try to be faster using SELL-P
@@ -462,19 +460,15 @@ magma_zapplyiicc_l( magma_z_vector b, magma_z_vector *x,
     magma_int_t dofs = precond->L.num_rows;
     magma_z_solver_par jacobiiter_par;
     jacobiiter_par.maxiter = precond->maxiter;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
-    magma_z_vector c;
-    magma_z_vinit( &c, Magma_DEV, dofs, c_zero );
 
-    // compute c = D^{-1}b
-    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, c.val); 
+    // compute c = D^{-1}b and copy c as initial guess to x
+    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, 
+                                                precond->work1.val, x->val); 
     // copy c as initial guess to x
-    magma_zcopy( dofs, c.val, 1 , x->val, 1 ); 
+    //magma_zcopy( dofs, c.val, 1 , x->val, 1 );                      
 
     // Jacobi iterator
-    magma_zjacobiiter(  precond->L, c, x, &jacobiiter_par ); 
-
-    magma_z_vfree( &c );
+    magma_zjacobiiter_precond( precond->L, x, &jacobiiter_par, precond ); 
 
     return MAGMA_SUCCESS;
 
@@ -512,18 +506,15 @@ magma_zapplyiicc_r( magma_z_vector b, magma_z_vector *x,
     magma_int_t dofs = precond->U.num_rows;
     magma_z_solver_par jacobiiter_par;
     jacobiiter_par.maxiter = precond->maxiter;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
-    magma_z_vector c;
-    magma_z_vinit( &c, Magma_DEV, dofs, c_zero );
-    // compute c = D^{-1}b
-    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, c.val); 
+
+    // compute c = D^{-1}b and copy c as initial guess to x
+    magma_zjacobisetup_vector_gpu( dofs, b.val, precond->d.val, 
+                                                precond->work1.val, x->val); 
     // copy c as initial guess to x
-    magma_zcopy( dofs, c.val, 1 , x->val, 1 );                          
+    //magma_zcopy( dofs, c.val, 1 , x->val, 1 );                      
 
     // Jacobi iterator
-    magma_zjacobiiter(  precond->U, c, x, &jacobiiter_par ); 
-
-    magma_z_vfree( &c );
+    magma_zjacobiiter_precond( precond->U, x, &jacobiiter_par, precond ); 
 
     return MAGMA_SUCCESS;
 

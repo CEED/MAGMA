@@ -23,12 +23,14 @@ __global__ void
 zvjacobisetup_gpu(  int num_rows, 
                     magmaDoubleComplex *b, 
                     magmaDoubleComplex *d, 
-                    magmaDoubleComplex *c){
+                    magmaDoubleComplex *c,
+                    magmaDoubleComplex *x){
 
     int row = blockDim.x * blockIdx.x + threadIdx.x ;
 
     if(row < num_rows ){
         c[row] = b[row] / d[row];
+        x[row] = c[row];
     }
 }
 
@@ -72,12 +74,13 @@ extern "C" magma_int_t
 magma_zjacobisetup_vector_gpu(  int num_rows, 
                                 magmaDoubleComplex *b, 
                                 magmaDoubleComplex *d, 
-                                magmaDoubleComplex *c){
+                                magmaDoubleComplex *c,
+                                magmaDoubleComplex *x ){
 
 
    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   zvjacobisetup_gpu<<< grid, BLOCK_SIZE, 0 >>>( num_rows, b, d, c );
+   zvjacobisetup_gpu<<< grid, BLOCK_SIZE, 0 >>>( num_rows, b, d, c, x );
 
    return MAGMA_SUCCESS;
 }
