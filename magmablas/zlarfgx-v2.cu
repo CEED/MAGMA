@@ -44,11 +44,13 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
 #if (defined(PRECISION_s) || defined(PRECISION_d))
         double alpha = *dx0;
         double alphai = MAGMA_Z_ZERO;
+        if ( (xnorm == 0 && alphai == MAGMA_Z_ZERO ) || n == 1 )
 #else
         magmaDoubleComplex alpha = *dx0;
         double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+        if ( (xnorm == 0 && alphai == MAGMA_Z_ZERO ) || n == 0 )
 #endif
-        if ( (xnorm == 0 && alphai == MAGMA_Z_ZERO ) || n == 1 ) {
+        {
             *dtau = MAGMA_Z_ZERO;
             *dA   = *dx0;
         }
