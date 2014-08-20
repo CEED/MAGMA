@@ -112,8 +112,7 @@ magma_zgeqr2_gpu(
 
             if (n-i-1 > 0) {
                /* Apply H(i)' to A(i:m,i+1:n) from the left */
-               magma_zlarf_gpu(m-i, n-i-1, dA(i, i), dtau+i, dA(i, i+1), ldda,
-                               dwork);
+               magma_zlarf_gpu(m-i, n-i-1, dA(i, i), dtau+i, dA(i, i+1), ldda);
             }
         }
 
