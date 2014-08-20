@@ -26,7 +26,6 @@ ZSRC += \
 	zcg_res.cpp		\
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
-	zbicgstab_detailedtiming.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
 	ziterref.cpp		\
@@ -37,16 +36,6 @@ ZSRC += \
 	zpgmres.cpp	\
  	zpbicgstab.cpp		\
 	zbaiter.cpp		\
-	zcg_exactres.cpp			\
-	zgmres_fault.cpp	\
-#ziterref.cpp		\
-#	zcg_merge.cpp		\
-#	zgmres.cpp		\
-#	zpbicgstab.cpp		\
-#	zpgmres.cpp		\
-#	zgmres_pipe.cpp		\
-#	zilucg.cpp		\
-#	zilugmres.cpp		\
 
 # Krylov space eigen-solvers
 ZSRC += \
@@ -72,10 +61,8 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zbcsrlu.cpp		\
-	zcuilu.cpp		\
-	zbailu.cpp		\
 	zpastix.cpp     	\
-#	zilu.cpp		\
+
 
 
 # orthogonalization schemes
