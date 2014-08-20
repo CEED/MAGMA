@@ -19,7 +19,7 @@
     -------
     ZHETRD reduces a complex Hermitian matrix A to real symmetric
     tridiagonal form T by an orthogonal similarity transformation:
-    Q\*\*H * A * Q = T.
+    Q**H * A * Q = T.
 
     Arguments
     ---------
@@ -189,7 +189,7 @@ magma_zhetrd_mgpu(
     } else if (lwork < nb*n && ! lquery) {
         *info = -9;
     } else if ( num_streams > 2 ) {
-        *info = 2;
+        *info = 2;  // TODO fix
     }
 
     /* Determine the block size. */
@@ -212,6 +212,11 @@ magma_zhetrd_mgpu(
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     magmaDoubleComplex *dA[MagmaMaxGPUs];
     magmaDoubleComplex *dwork[MagmaMaxGPUs];
 
@@ -461,8 +466,10 @@ magma_zhetrd_mgpu(
         magma_free(dy[did]);
         magma_free(dwork2[did]);
     }
-    magma_setdevice(0);
     magma_free_pinned(hwork);
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
+    
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
 #ifdef PROFILE_SY2RK
@@ -481,6 +488,9 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
               magmaDoubleComplex **dA, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
 {
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     magma_int_t k;
     if (uplo == MagmaLower) {
         /* go through each block-column */
@@ -520,7 +530,7 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
         magma_setdevice(k);
         magma_queue_sync(stream[k][0]);
     }
-    magma_setdevice(0);
+    magma_setdevice( orig_dev );
     
     return *info;
 }
@@ -541,6 +551,11 @@ magma_zher2k_mgpu(
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+offset)/nb)%num_gpus;
@@ -634,7 +649,10 @@ magma_zher2k_mgpu(
 
     for( id=0; id < num_gpus; id++ ) {
         magma_setdevice(id);
-        for( kk=0; kk < num_streams; kk++ ) magma_queue_sync(stream[id][kk]);
-        magmablasSetKernelStream(NULL);
+        for( kk=0; kk < num_streams; kk++ ) {
+            magma_queue_sync(stream[id][kk]);
+        }
     }
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 }

@@ -109,6 +109,11 @@ magma_zlahru_m(
         return info;
     }
     
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
         magmablasSetKernelStream( data->streams[d] );
@@ -169,6 +174,9 @@ magma_zlahru_m(
                                 dY(d, 0, 0),    nb,
                      c_one,     dA(d, k, dknb), ldda );
     }
-        
+    
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
+    
     return info;
 }

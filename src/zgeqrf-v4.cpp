@@ -133,6 +133,9 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     ldda    = ((m+31)/32)*32;
 
     magma_int_t  n_local[MagmaMaxGPUs];
@@ -172,6 +175,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         magma_setdevice(i);
         magma_free( da[i] );
     }
+    magma_setdevice( orig_dev );
 
     return *info;
 } /* magma_zgeqrf4 */

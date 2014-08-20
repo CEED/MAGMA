@@ -188,6 +188,11 @@ magma_zlahr2_m(
     if (n <= 1)
         return *info;
     
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     // zero out current top block of V on all GPUs
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
@@ -416,5 +421,8 @@ magma_zlahr2_m(
         magma_zsetmatrix_async( nb, nb, T, nb, dTi(d),      nb,   data->streams[d] );
     }
 
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
+    
     return *info;
 } /* magma_zlahr2 */

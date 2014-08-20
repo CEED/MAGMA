@@ -101,6 +101,9 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     if (num_gpus == 1 && ((nb <= 1) || (nb >= n)) ) {
         /*  Use unblocked code. */
         magma_setdevice(0);
@@ -159,16 +162,16 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 magma_queue_sync( stream[d][j] );
                 magma_queue_destroy( stream[d][j] );
             }
-            magmablasSetKernelStream(NULL);
             
             for( j=0; j < 5; j++ )
                 magma_event_destroy( event[d][j] );
             
             magma_free( dwork[d] );
         }
-        magma_setdevice(0);
         magma_free_pinned( work );
     } /* end of not lapack */
 
+    magma_setdevice( orig_dev );
+    
     return *info;
 } /* magma_zpotrf_mgpu */

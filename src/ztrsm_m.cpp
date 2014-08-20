@@ -143,8 +143,11 @@ magma_ztrsm_m(
     magma_int_t info;
     magma_int_t k, j, kb, jb;
     magma_int_t ldda, dima, lddb, dimb;
-    int gpu_b;
-    magma_getdevice(&gpu_b);
+    
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
 
     lside = (side == MagmaLeft);
     if (lside) {
@@ -806,15 +809,14 @@ magma_ztrsm_m(
 
     for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
-        magmablasSetKernelStream(NULL);
         magma_queue_sync( stream[igpu][2] );
         magma_queue_destroy( stream[igpu][0] );
         magma_queue_destroy( stream[igpu][1] );
         magma_queue_destroy( stream[igpu][2] );
         magma_free( dw[igpu] );
     }
-
-    magma_setdevice(gpu_b);
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 
     return info;
 } /* magma_ztrsm_m */

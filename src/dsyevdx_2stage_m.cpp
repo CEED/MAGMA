@@ -286,6 +286,9 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     timer_printf("using %d parallel_threads\n", (int) parallel_threads);
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
@@ -492,5 +495,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
     work[0]  = lwmin * one_eps;
     iwork[0] = liwmin;
 
+    magma_setdevice( orig_dev );
+    
     return *info;
 } /* magma_zheevdx_2stage */

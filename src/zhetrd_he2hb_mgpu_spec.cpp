@@ -201,9 +201,14 @@ magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-    magma_int_t threads = magma_get_lapack_numthreads();
-    magma_int_t mklth   = min(threads,16);
-    magma_set_lapack_numthreads(mklth);
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+
+    // limit to 16 threads
+    magma_int_t orig_threads = magma_get_lapack_numthreads();
+    magma_set_lapack_numthreads( min(orig_threads,16) );
 
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
     magma_int_t nbcmplx=0;
@@ -211,12 +216,6 @@ magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     #ifdef ENABLE_DEBUG
     printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n", nbcmplx);
     #endif
-
-
-    magma_device_t cdev;
-    magma_getdevice( &cdev );
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
 
     magmaDoubleComplex *dspace[MagmaMaxGPUs];
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dworkbis[MagmaMaxGPUs];
@@ -508,10 +507,10 @@ magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_free_pinned(workngpu[ngpu]);
     magma_free_cpu(worktest);
 
-    magma_setdevice( cdev );
-    magmablasSetKernelStream( cstream );
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
+    magma_set_lapack_numthreads( orig_threads );
 
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
-    magma_set_lapack_numthreads(threads);
     return *info;
 } /* magma_zhetrd_he2hb_mgpu_spec */

@@ -88,8 +88,8 @@ magma_zbulge_applyQ_v2(magma_side_t side,
 
     // Initialize streaming and events
     magma_device_sync();
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
 
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
@@ -394,7 +394,7 @@ magma_zbulge_applyQ_v2(magma_side_t side,
 
 
     magma_device_sync();
-    magmablasSetKernelStream(cstream);
+    magmablasSetKernelStream( orig_stream );
     magma_event_destroy( myevent[0] );
     magma_event_destroy( myevent[1] );
     magma_queue_destroy( stream[0] );

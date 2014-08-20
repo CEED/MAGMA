@@ -125,13 +125,9 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
     magma_int_t submat, subpbs, tlvls;
     double* dw[MagmaMaxGPUs];
     magma_queue_t stream [MagmaMaxGPUs][2];
-    int gpu_b;
-    magma_getdevice(&gpu_b);
 
     // Test the input parameters.
-
     *info = 0;
-
     if ( n < 0 )
         *info = -1;
     else if ( ldq < max(1, n) )
@@ -145,7 +141,10 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
     if (n == 0)
         return *info;
 
-    //workspace dimension for nrgpu > 1
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
+    // workspace dimension for nrgpu > 1
     size_t tmp = (n-1)/2+1;
     if (nrgpu > 1) {
         size_t tmp2 = (tmp-1) / (nrgpu/2) + 1;
@@ -296,7 +295,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
         magma_free( dw[igpu] );
     }
 
-    magma_setdevice(gpu_b);
+    magma_setdevice( orig_dev );
 
     return *info;
 } /* magma_dlaex0 */

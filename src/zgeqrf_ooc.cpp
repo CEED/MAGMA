@@ -124,9 +124,13 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         magma_xerbla( __func__, -(*info) );
         return *info;
     }
-    else if (lquery)
+    else if (lquery) {
         return *info;
+    }
 
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* Check how much memory do we have */
     size_t freeMem, totalMem;
     cudaMemGetInfo( &freeMem, &totalMem );
@@ -220,5 +224,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     magma_queue_destroy( stream[1] );
     magma_free( dA );
 
+    magmablasSetKernelStream( orig_stream );
+    
     return *info;
 } /* magma_zgeqrf_ooc */

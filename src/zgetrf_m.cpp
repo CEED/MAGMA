@@ -19,7 +19,7 @@
     ZGETRF_m computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.  This version does not
     require work space on the GPU passed as input. GPU memory is allocated
-    in the routine. The matrix may not fit entirely in the GPU memory.
+    in the routine. The matrix may exceed the GPU memory.
 
     The factorization has the form
        A = P * L * U
@@ -116,6 +116,11 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     if (m == 0 || n == 0)
         return *info;
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
     maxm = ((m  + 31)/32)*32;
@@ -217,7 +222,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
-                magmablasSetKernelStream(NULL);
+            magmablasSetKernelStream(NULL);
             }
             time_set += timer_stop( time );
     
@@ -294,7 +299,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
-                magmablasSetKernelStream(NULL);
+            magmablasSetKernelStream(NULL);
             }
     
             /* calling magma-gpu interface to panel-factorize the big panel */
@@ -323,7 +328,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
-                magmablasSetKernelStream(NULL);
+            magmablasSetKernelStream(NULL);
             }
             time_get += timer_stop( time );
         } /* end of for */
@@ -346,10 +351,9 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             magma_event_destroy( event[d][1] );
             magma_queue_destroy( stream[d][0] );
             magma_queue_destroy( stream[d][1] );
-            magmablasSetKernelStream(NULL);
         }
-        magma_setdevice(0);
-    
+        magma_setdevice( orig_dev );
+        magmablasSetKernelStream( orig_stream );
     }
     if ( *info >= 0 )
         magma_zgetrf_piv(m, n, NB, A, lda, ipiv, info);

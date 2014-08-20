@@ -691,9 +691,9 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
         magma_free( d_dinvA[d] );
         magma_free( d_x[d] );
 #endif
-        magmablasSetKernelStream(NULL);
     }
-    magma_setdevice(0);
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 
     return *info;
 } /* magma_zpotrf_mgpu */
@@ -715,6 +715,9 @@ magma_zhtodpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
               magmaDoubleComplex *dwork[], magma_int_t ldda,
               magma_queue_t stream[][3], magma_int_t *info)
 {
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     magma_int_t k;
     if (uplo == MagmaUpper) {
         magma_int_t j, jj, jb, mj;
@@ -762,7 +765,7 @@ magma_zhtodpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
         magma_setdevice(k);
         magma_queue_sync( stream[k][0] );
     }
-    magma_setdevice(0);
+    magma_setdevice( orig_dev );
 
     return *info;
 }
@@ -774,6 +777,9 @@ magma_zdtohpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
               magmaDoubleComplex *dwork[], magma_int_t ldda,
               magma_queue_t stream[][3], magma_int_t *info)
 {
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    
     magma_int_t k;
     if (uplo == MagmaUpper) {
         magma_int_t j, jj, jb, mj;
@@ -822,7 +828,7 @@ magma_zdtohpo(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma_int_
         magma_setdevice(k);
         magma_queue_sync( stream[k][0] );
     }*/
-    magma_setdevice(0);
+    magma_setdevice( orig_dev );
 
     return *info;
 }

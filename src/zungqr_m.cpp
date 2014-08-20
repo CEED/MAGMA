@@ -116,11 +116,14 @@ magma_zungqr_m(
     }
     
     magma_int_t di, dn;
-    int dpanel;
+    magma_int_t dpanel;
 
-    int ngpu = magma_num_gpus();
-    int doriginal;
-    magma_getdevice( &doriginal );
+    magma_int_t ngpu = magma_num_gpus();
+    
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
     
     // Allocate memory on GPUs for A and workspaces
     magma_int_t ldda    = ((m + 31) / 32) * 32;
@@ -278,15 +281,12 @@ magma_zungqr_m(
 CLEANUP:
     for( int d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( NULL );
         magma_free( dA[d] );
-        dA[d] = NULL;
-        if ( stream[d] != NULL ) {
-            magma_queue_destroy( stream[d] );
-        }
+        magma_queue_destroy( stream[d] );
     }
     magma_free_cpu( work );
-    magma_setdevice( doriginal );
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
     
     return *info;
 } /* magma_zungqr */

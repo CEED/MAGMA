@@ -195,15 +195,18 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     magmaDoubleComplex *dA;
     if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n + 2*nb)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
-    magma_int_t threads = magma_get_lapack_numthreads();
-    magma_int_t mklth   = min(threads,16);
-    magma_set_lapack_numthreads(mklth);
+    // limit to 16 threads
+    magma_int_t orig_threads = magma_get_lapack_numthreads();
+    magma_set_lapack_numthreads( min(orig_threads,16) );
 
     /* Use the first panel of dA as work space */
     magmaDoubleComplex *dwork = dA + n*ldda;
@@ -423,9 +426,9 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magma_queue_destroy( stream[1] );
     magma_free( dA );
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
-    magmablasSetKernelStream( 0 );
-    
-    magma_set_lapack_numthreads(threads);
+
+    magmablasSetKernelStream( orig_stream );    
+    magma_set_lapack_numthreads( orig_threads );
 
     return *info;
 } /* magma_zhetrd_he2hb */

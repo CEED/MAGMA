@@ -250,7 +250,6 @@ magma_dlaex3_m(magma_int_t nrgpu,
         }
     }
 
-
     if (*info != 0) {
         magma_xerbla(__func__, -(*info));
         return *info;
@@ -259,6 +258,12 @@ magma_dlaex3_m(magma_int_t nrgpu,
     // Quick return if possible
     if (k == 0)
         return *info;
+
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /*
      Modify values DLAMDA(i) to make sure all DLAMDA(i)-DLAMDA(j) can
      be computed with high relative accuracy (barring over/underflow).
@@ -665,7 +670,6 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 magma_free_pinned( hwQ[0][igpu] );
 #endif
                 magma_setdevice(igpu);
-                magmablasSetKernelStream(NULL);
                 magma_queue_sync( stream[igpu][0] );
                 magma_queue_sync( stream[igpu][1] );
             }
@@ -679,5 +683,8 @@ magma_dlaex3_m(magma_int_t nrgpu,
     timer_stop( time );
     timer_printf( "gemms = %6.2f\n", time );
 
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
+    
     return *info;
 } /* magma_dlaed3_m */

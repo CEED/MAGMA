@@ -146,14 +146,16 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     //printf("calling zunmqr_m with nb=%d\n", (int) nb);
 
     magmaDoubleComplex* dw[MagmaMaxGPUs];
-    magma_queue_t stream [MagmaMaxGPUs][2];
+    magma_queue_t stream [MagmaMaxGPUs][2], current_stream;
     magma_event_t  event [MagmaMaxGPUs][2];
 
     magma_int_t ind_c;
-
-    magma_int_t igpu = 0;
-    int gpu_b;
-    magma_getdevice(&gpu_b);
+    magma_device_t igpu;
+    
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
 
     *info = 0;
 
@@ -386,15 +388,14 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 
     for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
-        magmablasSetKernelStream(NULL);
         magma_event_destroy( event[igpu][0] );
         magma_event_destroy( event[igpu][1] );
         magma_queue_destroy( stream[igpu][0] );
         magma_queue_destroy( stream[igpu][1] );
         magma_free( dw[igpu] );
     }
-
-    magma_setdevice(gpu_b);
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 
     return *info;
 } /* magma_zunmqr */

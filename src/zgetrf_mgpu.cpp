@@ -117,6 +117,11 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
         magma_free_cpu(work);
     } else {
         /* Use hybrid blocked code. */
+        magma_device_t orig_dev;
+        magma_getdevice( &orig_dev );
+        magma_queue_t orig_stream;
+        magmablasGetKernelStream( &orig_stream );
+        
         maxm = ((m + 31)/32)*32;
         if ( num_gpus > ceil((double)n/nb) ) {
             printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) num_gpus );
@@ -211,9 +216,9 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             magma_free( d_panel[d] );
             magma_queue_destroy( streaml[d][0] );
             magma_queue_destroy( streaml[d][1] );
-            magmablasSetKernelStream(NULL);
         } /* end of for d=1,..,num_gpus */
-        magma_setdevice(0);
+        magma_setdevice( orig_dev );
+        magmablasSetKernelStream( orig_stream );
         magma_free_pinned( work );
     }
         

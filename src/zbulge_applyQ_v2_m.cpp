@@ -88,10 +88,10 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
 
     // Initialize streaming and events
     magma_device_sync();
-    magma_device_t cdev;
-    magma_getdevice( &cdev );
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
 
     magma_int_t  nbevents =2, nstream=2;
     magma_queue_t streams[MagmaMaxGPUs][20];
@@ -471,8 +471,8 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, magma_side_t side,
         }
     }
 
-    magma_setdevice( cdev );
-    magmablasSetKernelStream( cstream );
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
     return *info;
 }
 #undef V

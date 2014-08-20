@@ -136,6 +136,11 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* Use hybrid blocked code. */
     maxm  = ((m + block_size-1)/block_size)*block_size;
 
@@ -425,9 +430,9 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         magma_setdevice(d);
         magma_queue_sync( stream[d][0] );
         magma_queue_sync( stream[d][1] );
-        magmablasSetKernelStream(NULL);
     }
-    magma_setdevice(0);
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
     
     timer_start( time );
     timer_printf("\n Performance %f GFlop/s\n", FLOPS_ZGETRF(m,n) / 1e9 / time );

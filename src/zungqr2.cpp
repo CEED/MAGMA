@@ -104,6 +104,9 @@ magma_zungqr2(magma_int_t m, magma_int_t n, magma_int_t k,
         return *info;
     }
 
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     // first kk columns are handled by blocked method.
     // ki is start of 2nd-to-last block
     if ((nb > 1) && (nb < k)) {
@@ -216,10 +219,11 @@ magma_zungqr2(magma_int_t m, magma_int_t n, magma_int_t k,
                           dA(0, 0), ldda, A(0, 0), lda);
     }
 
-    magmablasSetKernelStream( NULL );
     magma_queue_destroy( stream );
     magma_free( dA );
     magma_free_cpu( work );
 
+    magmablasSetKernelStream( orig_stream );
+    
     return *info;
 } /* magma_zungqr */

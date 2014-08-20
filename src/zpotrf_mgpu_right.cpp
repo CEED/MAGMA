@@ -21,6 +21,7 @@ magma_zherk_mgpu(
     double beta,
     magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
     magma_int_t num_streams, magma_queue_t stream[][10]);
+
 extern "C" void
 magma_zherk_mgpu2(
     magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
@@ -123,6 +124,11 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
         magma_xerbla( __func__, -(*info) );
         return *info;
     }
+
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
 
     nb = magma_get_zpotrf_nb(n);
 
@@ -490,16 +496,16 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
         for( d = 0; d < num_gpus; d++ ) {
             magma_setdevice(d);
             for( j=0; j < num_streams; j++ ) {
-                if ( stream[d][j] != NULL ) magma_queue_destroy( stream[d][j] );
+                magma_queue_destroy( stream[d][j] );
             }
             magma_free( d_lP[d] );
-            magmablasSetKernelStream(NULL);
         }
-        magma_setdevice(0);
     } // end of not lapack
 
     // free workspace
     magma_free_pinned( panel );
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 
     return *info;
 } /* magma_zpotrf_mgpu_right */
@@ -522,6 +528,11 @@ magma_zherk_mgpu(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+offset)/nb)%num_gpus;
@@ -578,12 +589,14 @@ magma_zherk_mgpu(
         }
     }
 
-    for( id=0; id < num_gpus; id++ ) {
-        magma_setdevice(id);
-        //for( kk=0; kk < num_streams; kk++ ) magma_queue_sync(stream[id][kk]);
-        magmablasSetKernelStream(NULL);
-    }
-    magma_setdevice(0);
+    // TODO why not sync?
+    //for( id=0; id < num_gpus; id++ ) {
+    //    magma_setdevice(id);
+    //    //for( kk=0; kk < num_streams; kk++ )
+    //    //    magma_queue_sync(stream[id][kk]);
+    //}
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 }
 
 
@@ -604,6 +617,11 @@ magma_zherk_mgpu2(
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+offset)/nb)%num_gpus;
@@ -653,10 +671,12 @@ magma_zherk_mgpu2(
         }
     }
 
-    for( id=0; id < num_gpus; id++ ) {
-        magma_setdevice(id);
-        //for( kk=0; kk < num_streams; kk++ ) magma_queue_sync(stream[id][kk]);
-        magmablasSetKernelStream(NULL);
-    }
-    magma_setdevice(0);
+    // TODO: why not sync?
+    //for( id=0; id < num_gpus; id++ ) {
+    //    magma_setdevice(id);
+    //    //for( kk=0; kk < num_streams; kk++ )
+    //    //    magma_queue_sync(stream[id][kk]);
+    //}
+    magma_setdevice( orig_dev );
+    magmablasSetKernelStream( orig_stream );
 }
