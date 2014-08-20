@@ -124,10 +124,12 @@ zlascl_upper(int m, int n, double mul, magmaDoubleComplex* A, int lda)
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlascl(magma_type_t type, magma_int_t kl, magma_int_t ku,
-                 double cfrom, double cto,
-                 magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info )
+magmablas_zlascl_q(
+    magma_type_t type, magma_int_t kl, magma_int_t ku,
+    double cfrom, double cto,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info,
+    magma_queue_t queue )
 {
     *info = 0;
     if ( type != MagmaLower && type != MagmaUpper && type != MagmaFull )
@@ -197,15 +199,30 @@ magmablas_zlascl(magma_type_t type, magma_int_t kl, magma_int_t ku,
         }
         
         if (type == MagmaLower) {
-            zlascl_lower <<< grid, threads, 0, magma_stream >>> (m, n, mul, dA, ldda);
+            zlascl_lower <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
         }
         else if (type == MagmaUpper) {
-            zlascl_upper <<< grid, threads, 0, magma_stream >>> (m, n, mul, dA, ldda);
+            zlascl_upper <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
         }
         else if (type == MagmaFull) {
-            zlascl_full  <<< grid, threads, 0, magma_stream >>> (m, n, mul, dA, ldda);
+            zlascl_full  <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
         }
      
         cnt += 1;
     }
+}
+
+
+/**
+    @see magmablas_zlascl_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zlascl(
+    magma_type_t type, magma_int_t kl, magma_int_t ku,
+    double cfrom, double cto,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info )
+{
+    magmablas_zlascl_q( type, kl, ku, cfrom, cto, m, n, dA, ldda, info, magma_stream );
 }

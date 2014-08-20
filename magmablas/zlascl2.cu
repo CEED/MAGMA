@@ -67,7 +67,7 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
 /**
     Purpose
     -------
-    ZLASCL2 scales the M by N complex matrix A by the real diagonal matrix dD. 
+    ZLASCL2 scales the M by N complex matrix A by the real diagonal matrix dD.
     TYPE specifies that A may be full, upper triangular, lower triangular.
 
     Arguments
@@ -109,8 +109,10 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlascl2(magma_type_t type, magma_int_t m, magma_int_t n,
-                 const double *dD, magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info )
+magmablas_zlascl2_q(
+    magma_type_t type, magma_int_t m, magma_int_t n,
+    const double *dD, magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info,
+    magma_queue_t queue )
 {
     *info = 0;
     if ( type != MagmaLower && type != MagmaUpper && type != MagmaFull )
@@ -131,13 +133,25 @@ magmablas_zlascl2(magma_type_t type, magma_int_t m, magma_int_t n,
     dim3 threads( NB );
     
     if (type == MagmaLower) {
-        zlascl2_lower <<< grid, threads, 0, magma_stream >>> (m, n, dD, dA, ldda);
+        zlascl2_lower <<< grid, threads, 0, queue >>> (m, n, dD, dA, ldda);
     }
     else if (type == MagmaUpper) {
-        zlascl2_upper <<< grid, threads, 0, magma_stream >>> (m, n, dD, dA, ldda);
+        zlascl2_upper <<< grid, threads, 0, queue >>> (m, n, dD, dA, ldda);
     }
     else if (type == MagmaFull) {
-        zlascl2_full  <<< grid, threads, 0, magma_stream >>> (m, n, dD, dA, ldda);
+        zlascl2_full  <<< grid, threads, 0, queue >>> (m, n, dD, dA, ldda);
     }
-     
+}
+
+
+/**
+    @see magmablas_zlascl2_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zlascl2(
+    magma_type_t type, magma_int_t m, magma_int_t n,
+    const double *dD, magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info )
+{
+    magmablas_zlascl2_q( type, m, n, dD, dA, ldda, info, magma_stream );
 }

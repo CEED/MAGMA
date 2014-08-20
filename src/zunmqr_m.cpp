@@ -146,7 +146,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
     //printf("calling zunmqr_m with nb=%d\n", (int) nb);
 
     magmaDoubleComplex* dw[MagmaMaxGPUs];
-    magma_queue_t stream [MagmaMaxGPUs][2], current_stream;
+    magma_queue_t stream [MagmaMaxGPUs][2];
     magma_event_t  event [MagmaMaxGPUs][2];
 
     magma_int_t ind_c;
@@ -284,7 +284,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
                                        A(i, i),                 lda,
                                        dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0] );
                 // set upper triangular part of dA to identity
-                magmablas_zlaset_band_stream( MagmaUpper, kb, kb, kb, c_zero, c_one, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0] );
+                magmablas_zlaset_band_q( MagmaUpper, kb, kb, kb, c_zero, c_one, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][0] );
             }
 
             /* Form the triangular factor of the block reflector

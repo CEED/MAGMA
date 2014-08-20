@@ -89,7 +89,7 @@ void zlag2c_kernel(
     ZLAG2C checks that all the entries of A are between -RMAX and
     RMAX. If not, the conversion is aborted and a flag is raised.
     
-    This is the same as ZLAG2C, but adds stream argument.
+    This is the same as ZLAG2C, but adds queue argument.
         
     Arguments
     ---------
@@ -127,18 +127,18 @@ void zlag2c_kernel(
                   of SA on exit is unspecified.
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlag2c_stream(
+magmablas_zlag2c_q(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *A, magma_int_t lda,
     magmaFloatComplex *SA,       magma_int_t ldsa,
     magma_int_t *info,
-    magma_queue_t stream )
+    magma_queue_t queue )
 {
     *info = 0;
     if ( m < 0 )
@@ -166,14 +166,14 @@ magmablas_zlag2c_stream(
     dim3 grid( (m+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
-    zlag2c_kernel<<< grid, threads, 0, stream >>>( m, n, A, lda, SA, ldsa, rmax );
+    zlag2c_kernel<<< grid, threads, 0, queue >>>( m, n, A, lda, SA, ldsa, rmax );
     
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
 
 
 /**
-    @see magmablas_zlag2c_stream
+    @see magmablas_zlag2c_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -183,5 +183,5 @@ magmablas_zlag2c(
     magmaFloatComplex *SA,       magma_int_t ldsa,
     magma_int_t *info )
 {
-    magmablas_zlag2c_stream( m, n, A, lda, SA, ldsa, info, magma_stream );
+    magmablas_zlag2c_q( m, n, A, lda, SA, ldsa, info, magma_stream );
 }

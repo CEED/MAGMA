@@ -125,7 +125,7 @@ void zlaset_band_lower(
     ZLASET_BAND_STREAM initializes the main diagonal of dA to DIAG,
     and the K-1 sub- or super-diagonals to OFFDIAG.
     
-    This is the same as ZLASET_BAND, but adds stream argument.
+    This is the same as ZLASET_BAND, but adds queue argument.
     
     Arguments
     ---------
@@ -170,16 +170,16 @@ void zlaset_band_lower(
             The leading dimension of the array dA.  LDDA >= max(1,M).
     
     @param[in]
-    stream  magma_queue_t
+    queue   magma_queue_t
             Stream to execute ZLASET in.
     
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlaset_band_stream(
+magmablas_zlaset_band_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *dA, magma_int_t ldda, magma_queue_t stream)
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_queue_t queue)
 {
     magma_int_t info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper )
@@ -201,18 +201,18 @@ magmablas_zlaset_band_stream(
     if (uplo == MagmaUpper) {
         dim3 threads( min(k,n) );
         dim3 grid( (min(m+k-1,n) - 1)/NB + 1 );
-        zlaset_band_upper<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_band_upper<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
 }
     else if (uplo == MagmaLower) {
         dim3 threads( min(k,m) );
         dim3 grid( (min(m,n) - 1)/NB + 1 );
-        zlaset_band_lower<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_band_lower<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
     }
 }
 
 
 /**
-    @see magmablas_zlaset_band_stream
+    @see magmablas_zlaset_band_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -221,5 +221,5 @@ magmablas_zlaset_band(
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *dA, magma_int_t ldda)
 {
-    magmablas_zlaset_band_stream(uplo, m, n, k, offdiag, diag, dA, ldda, magma_stream);
+    magmablas_zlaset_band_q(uplo, m, n, k, offdiag, diag, dA, ldda, magma_stream);
 }

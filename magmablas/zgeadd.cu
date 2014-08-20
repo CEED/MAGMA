@@ -93,11 +93,12 @@ void zgeadd_full(
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zgeadd(
+magmablas_zgeadd_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
     const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    magmaDoubleComplex       *dB, magma_int_t lddb,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -120,6 +121,21 @@ magmablas_zgeadd(
     dim3 threads( BLK_X );
     dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
     
-    zgeadd_full<<< grid, threads, 0, magma_stream >>>
+    zgeadd_full<<< grid, threads, 0, queue >>>
         ( m, n, alpha, dA, ldda, dB, lddb );
+}
+
+
+/**
+    @see magmablas_zgeadd_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zgeadd(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex       *dB, magma_int_t lddb )
+{
+    magmablas_zgeadd_q( m, n, alpha, dA, ldda, dB, lddb, magma_stream );
 }

@@ -14,8 +14,8 @@ magma_queue_t magma_stream = 0;
 /**
     Purpose
     -------
-    magmablasSetKernelStream sets the CUDA stream that all MAGMA BLAS and
-    CUBLAS routines use.
+    magmablasSetKernelStream sets the CUDA stream that MAGMA BLAS and
+    CUBLAS (v1) routines use (unless explicitly given a stream).
     
     In a multi-threaded application, be careful to avoid race conditions
     when using this. For instance, if calls are executed in this order:
@@ -68,7 +68,7 @@ cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
 /**
     Purpose
     -------
-    magmablasGetKernelStream gets the CUDA stream that all MAGMA BLAS
+    magmablasGetKernelStream gets the CUDA stream that MAGMA BLAS
     routines use.
 
     Arguments

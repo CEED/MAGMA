@@ -190,18 +190,18 @@ void zlat2c_upper(
                   of SA on exit is unspecified.
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlat2c_stream(
+magmablas_zlat2c_q(
     magma_uplo_t uplo, magma_int_t n,
     const magmaDoubleComplex *A, magma_int_t lda,
     magmaFloatComplex *SA,       magma_int_t ldsa,
-    magma_queue_t stream,
-    magma_int_t *info )
+    magma_int_t *info,
+    magma_queue_t queue )
 {
     *info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper )
@@ -230,16 +230,16 @@ magmablas_zlat2c_stream(
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
     if (uplo == MagmaLower)
-        zlat2c_lower<<< grid, threads, 0, stream >>> (n, A, lda, SA, ldsa, rmax);
+        zlat2c_lower<<< grid, threads, 0, queue >>> (n, A, lda, SA, ldsa, rmax);
     else if (uplo == MagmaUpper)
-        zlat2c_upper<<< grid, threads, 0, stream >>> (n, A, lda, SA, ldsa, rmax);
+        zlat2c_upper<<< grid, threads, 0, queue >>> (n, A, lda, SA, ldsa, rmax);
     
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
 
 
 /**
-    @see magmablas_zlat2c_stream
+    @see magmablas_zlat2c_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -249,5 +249,5 @@ magmablas_zlat2c(
     magmaFloatComplex *SA,       magma_int_t ldsa,
     magma_int_t *info )
 {
-    magmablas_zlat2c_stream( uplo, n, A, lda, SA, ldsa, magma_stream, info );
+    magmablas_zlat2c_q( uplo, n, A, lda, SA, ldsa, info, magma_stream );
 }

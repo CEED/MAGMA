@@ -11,12 +11,14 @@ MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR := \
-	magma_z.h	\
-	magma_zc.h	\
-	magmablas_z.h	\
-	magmablas_zc.h	\
-	magma_zlapack.h	\
-	magma_zbulge.h	\
+	magma_z.h		\
+	magma_zc.h		\
+	magmablas_z.h		\
+	magmablas_zc.h		\
+	magmablas_z_q.h		\
+	magmablas_zc_q.h	\
+	magma_zlapack.h		\
+	magma_zbulge.h		\
 	magma_zbulgeinc.h	\
 	magma_zgehrd_m.h	\
 

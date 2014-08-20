@@ -96,18 +96,18 @@ void clag2z_kernel(
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
     
     @ingroup magma_caux2
     ********************************************************************/
 extern "C" void
-magmablas_clag2z_stream(
+magmablas_clag2z_q(
     magma_int_t m, magma_int_t n,
     const magmaFloatComplex *SA, magma_int_t ldsa,
     magmaDoubleComplex       *A, magma_int_t lda,
     magma_int_t *info,
-    magma_queue_t stream)
+    magma_queue_t queue)
 {
     *info = 0;
     if ( m < 0 )
@@ -131,12 +131,12 @@ magmablas_clag2z_stream(
 
     dim3 threads( BLK_X );
     dim3 grid( (m+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
-    clag2z_kernel<<< grid, threads, 0, stream >>> ( m, n, SA, ldsa, A, lda );
+    clag2z_kernel<<< grid, threads, 0, queue >>> ( m, n, SA, ldsa, A, lda );
 }
 
 
 /**
-    @see magmablas_clag2z_stream
+    @see magmablas_clag2z_q
     @ingroup magma_caux2
     ********************************************************************/
 extern "C" void
@@ -146,5 +146,5 @@ magmablas_clag2z(
     magmaDoubleComplex       *A, magma_int_t lda,
     magma_int_t *info)
 {
-    magmablas_clag2z_stream( m, n, SA, ldsa, A, lda, info, magma_stream );
+    magmablas_clag2z_q( m, n, SA, ldsa, A, lda, info, magma_stream );
 }

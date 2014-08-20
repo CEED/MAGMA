@@ -44,27 +44,48 @@ zaxpycp_kernel(
 }
 
 
+// ----------------------------------------------------------------------
 // adds   x += r (including conversion to double)  --and--
 // copies w = b
+extern "C" void
+magmablas_zcaxpycp_q(
+    magma_int_t m, magmaFloatComplex *r, magmaDoubleComplex *x,
+    const magmaDoubleComplex *b, magmaDoubleComplex *w,
+    magma_queue_t queue )
+{
+    dim3 threads( NB );
+    dim3 grid( (m + NB - 1)/NB );
+    zcaxpycp_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b, w );
+}
+
+
 extern "C" void
 magmablas_zcaxpycp(
     magma_int_t m, magmaFloatComplex *r, magmaDoubleComplex *x,
     const magmaDoubleComplex *b, magmaDoubleComplex *w)
 {
-    dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
-    zcaxpycp_kernel <<< grid, threads, 0, magma_stream >>> ( m, r, x, b, w );
+    magmablas_zcaxpycp_q( m, r, x, b, w, magma_stream );
 }
 
 
+// ----------------------------------------------------------------------
 // adds   x += r  --and--
 // copies r = b
+extern "C" void
+magmablas_zaxpycp_q(
+    magma_int_t m, magmaDoubleComplex *r, magmaDoubleComplex *x,
+    const magmaDoubleComplex *b,
+    magma_queue_t queue )
+{
+    dim3 threads( NB );
+    dim3 grid( (m + NB - 1)/NB );
+    zaxpycp_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b );
+}
+
 extern "C" void
 magmablas_zaxpycp(
     magma_int_t m, magmaDoubleComplex *r, magmaDoubleComplex *x,
     const magmaDoubleComplex *b)
 {
-    dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
-    zaxpycp_kernel <<< grid, threads, 0, magma_stream >>> ( m, r, x, b );
+    magmablas_zaxpycp_q( m, r, x, b, magma_stream );
 }

@@ -99,12 +99,13 @@ zgeadd_batched_kernel(
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zgeadd_batched(
+magmablas_zgeadd_batched_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
     const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
     magmaDoubleComplex              **dBarray, magma_int_t lddb,
-    magma_int_t batchCount )
+    magma_int_t batchCount,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -129,6 +130,23 @@ magmablas_zgeadd_batched(
     dim3 threads( NB );
     dim3 grid( (m + NB - 1)/NB, batchCount );
         
-    zgeadd_batched_kernel<<< grid, threads, 0, magma_stream >>>(
+    zgeadd_batched_kernel<<< grid, threads, 0, queue >>>(
         m, n, alpha, dAarray, ldda, dBarray, lddb );
+}
+
+
+/**
+    @see magmablas_zgeadd_batched_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zgeadd_batched(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
+    magmaDoubleComplex              **dBarray, magma_int_t lddb,
+    magma_int_t batchCount )
+{
+    magmablas_zgeadd_batched_q(
+        m, n, alpha, dAarray, ldda, dBarray, lddb, batchCount, magma_stream );
 }

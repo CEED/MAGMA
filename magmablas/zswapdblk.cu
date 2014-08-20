@@ -91,9 +91,11 @@ zswapdblk_kernel( int nb,
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void 
-magmablas_zswapdblk(magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t inca,
-                    magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t incb )
+magmablas_zswapdblk_q(
+    magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t inca,
+    magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t incb,
+    magma_queue_t queue )
 {
     magma_int_t nblocks = n / nb;
     
@@ -118,8 +120,22 @@ magmablas_zswapdblk(magma_int_t n, magma_int_t nb,
     }
 
     if ( nblocks > 0 ) {
-        zswapdblk_kernel<<< nblocks, nb, 0, magma_stream >>>
+        zswapdblk_kernel<<< nblocks, nb, 0, queue >>>
             ( nb, dA, ldda, inca,
                   dB, lddb, incb );
     }
+}
+
+
+/**
+    @see magmablas_zswapdblk_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void 
+magmablas_zswapdblk(
+    magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t inca,
+    magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t incb )
+{
+    magmablas_zswapdblk_q( n, nb, dA, ldda, inca, dB, lddb, incb, magma_stream );
 }

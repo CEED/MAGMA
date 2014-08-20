@@ -134,7 +134,7 @@ void zlacpy_upper(
     ZLACPY_STREAM copies all or part of a two-dimensional matrix dA to another
     matrix dB.
     
-    This is the same as ZLACPY, but adds stream argument.
+    This is the same as ZLACPY, but adds queue argument.
     
     Arguments
     ---------
@@ -174,17 +174,17 @@ void zlacpy_upper(
             The leading dimension of the array dB.  LDDB >= max(1,M).
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlacpy_stream(
+magmablas_zlacpy_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *dA, magma_int_t ldda,
     magmaDoubleComplex       *dB, magma_int_t lddb,
-    magma_queue_t stream )
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -208,19 +208,19 @@ magmablas_zlacpy_stream(
     dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
     
     if ( uplo == MagmaLower ) {
-        zlacpy_lower<<< grid, threads, 0, stream >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_lower<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
     else if ( uplo == MagmaUpper ) {
-        zlacpy_upper<<< grid, threads, 0, stream >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_upper<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
     else {
-        zlacpy_full <<< grid, threads, 0, stream >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_full <<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
 }
 
 
 /**
-    @see magmablas_zlacpy_stream
+    @see magmablas_zlacpy_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -229,5 +229,5 @@ magmablas_zlacpy(
     const magmaDoubleComplex *dA, magma_int_t ldda,
     magmaDoubleComplex       *dB, magma_int_t lddb )
 {
-    magmablas_zlacpy_stream( uplo, m, n, dA, ldda, dB, lddb, magma_stream );
+    magmablas_zlacpy_q( uplo, m, n, dA, ldda, dB, lddb, magma_stream );
 }

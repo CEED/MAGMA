@@ -52,7 +52,7 @@ magmablas_zgetmatrix_transpose_mgpu(
        magma_setdevice(d);
 
        ib = min(n-j, nb);
-       magmablas_ztranspose_stream( ib, m, dAT(d,j_local), ldda, dB(d,id), lddb, stream[d][id] );
+       magmablas_ztranspose_q( ib, m, dAT(d,j_local), ldda, dB(d,id), lddb, stream[d][id] );
        magma_zgetmatrix_async( m, ib,
                                dB(d, id), lddb,
                                A(j),      lda, 

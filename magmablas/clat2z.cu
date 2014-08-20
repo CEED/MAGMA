@@ -140,18 +140,18 @@ void clat2z_upper(
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
     
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_clat2z_stream(
+magmablas_clat2z_q(
     magma_uplo_t uplo, magma_int_t n,
     const magmaFloatComplex *SA, magma_int_t ldsa,
     magmaDoubleComplex      *A,  magma_int_t lda,
     magma_int_t *info,
-    magma_queue_t stream )
+    magma_queue_t queue )
 {
     *info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper )
@@ -177,14 +177,14 @@ magmablas_clat2z_stream(
     dim3 grid( (n+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
     
     if (uplo == MagmaLower)
-        clat2z_lower<<< grid, threads, 0, stream >>> (n, SA, ldsa, A, lda);
+        clat2z_lower<<< grid, threads, 0, queue >>> (n, SA, ldsa, A, lda);
     else if (uplo == MagmaUpper)                                         
-        clat2z_upper<<< grid, threads, 0, stream >>> (n, SA, ldsa, A, lda);
+        clat2z_upper<<< grid, threads, 0, queue >>> (n, SA, ldsa, A, lda);
 }
 
 
 /**
-    @see magmablas_clat2z_stream
+    @see magmablas_clat2z_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -194,5 +194,5 @@ magmablas_clat2z(
     magmaDoubleComplex      *A,  magma_int_t lda,
     magma_int_t *info )
 {
-    magmablas_clat2z_stream( uplo, n, SA, ldsa, A, lda, info, magma_stream );
+    magmablas_clat2z_q( uplo, n, SA, ldsa, A, lda, info, magma_stream );
 }

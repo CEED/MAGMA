@@ -12,6 +12,8 @@
 
 #define NB 64
 
+// TODO check precision, as in zlag2c?
+
 __global__ void
 zclaswp_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA, int m, const magma_int_t *ipiv)
 {
@@ -58,50 +60,70 @@ zclaswp_inv_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA,
 /**
     Purpose
     -------
-    Row i of A is cast to single precision in row ipiv[i] of SA, for 0 <= i < M.
+    Row i of  A is cast to single precision in row ipiv[i] of SA (incx > 0), or
+    row i of SA is cast to double precision in row ipiv[i] of  A (incx < 0),
+    for 0 <= i < M.
 
     @param[in]
     n       INTEGER.
             On entry, N specifies the number of columns of the matrix A.
-    
-    @param[in]
+
+    @param[in,out]
     A       DOUBLE PRECISION array on the GPU, dimension (LDA,N)
             On entry, the M-by-N matrix to which the row interchanges will be applied.
-    
+            TODO update docs
+
     @param[in]
     lda     INTEGER.
             LDA specifies the leading dimension of A.
-    
-    @param[out]
+
+    @param[in,out]
     SA      REAL array on the GPU, dimension (LDA,N)
             On exit, the single precision, permuted matrix.
+            TODO update docs
         
     @param[in]
     m       The number of rows to be interchanged.
-    
+
     @param[in]
     ipiv    INTEGER array on the GPU, dimension (M)
             The vector of pivot indices. Row i of A is cast to single 
             precision in row ipiv[i] of SA, for 0 <= i < m. 
-    
+
     @param[in]
     incx    INTEGER
-            If IPIV is negative, the pivots are applied in reverse 
-            order, otherwise in straight-forward order.
+            If INCX is negative, the pivots are applied in reverse order,
+            otherwise in straight-forward order.
 
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zclaswp( magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-                   magmaFloatComplex *SA, magma_int_t m,
-                   const magma_int_t *ipiv, magma_int_t incx )
+magmablas_zclaswp_q(
+    magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
+    magmaFloatComplex *SA, magma_int_t m,
+    const magma_int_t *ipiv, magma_int_t incx,
+    magma_queue_t queue )
 {
     int blocks = (m - 1)/NB + 1;
     dim3 grid(blocks, 1, 1);
     dim3 threads(NB, 1, 1);
 
     if (incx >= 0)
-        zclaswp_kernel<<< grid, threads, 0, magma_stream >>>(n, A, lda, SA, m, ipiv);
+        zclaswp_kernel<<< grid, threads, 0, queue >>>(n, A, lda, SA, m, ipiv);
     else
-        zclaswp_inv_kernel<<< grid, threads, 0, magma_stream >>>(n, A, lda, SA, m, ipiv);
+        zclaswp_inv_kernel<<< grid, threads, 0, queue >>>(n, A, lda, SA, m, ipiv);
+}
+
+
+/**
+    @see magmablas_zclaswp_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zclaswp(
+    magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
+    magmaFloatComplex *SA, magma_int_t m,
+    const magma_int_t *ipiv, magma_int_t incx )
+{
+    magmablas_zclaswp_q( n, A, lda, SA, m, ipiv, incx, magma_stream );
 }

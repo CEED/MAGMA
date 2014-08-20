@@ -114,8 +114,10 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zsymmetrize_tiles( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
-                             magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
+magmablas_zsymmetrize_tiles_q(
+    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_int_t ntile, magma_int_t mstride, magma_int_t nstride,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper )
@@ -146,9 +148,22 @@ magmablas_zsymmetrize_tiles( magma_uplo_t uplo, magma_int_t m, magmaDoubleComple
     
     //printf( "m %d, grid %d x %d, threads %d\n", m, grid.x, grid.y, threads.x );
     if ( uplo == MagmaUpper ) {
-        zsymmetrize_tiles_upper<<< grid, threads, 0, magma_stream >>>( m, dA, ldda, mstride, nstride );
+        zsymmetrize_tiles_upper<<< grid, threads, 0, queue >>>( m, dA, ldda, mstride, nstride );
     }
     else {
-        zsymmetrize_tiles_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda, mstride, nstride );
+        zsymmetrize_tiles_lower<<< grid, threads, 0, queue >>>( m, dA, ldda, mstride, nstride );
     }
+}
+
+
+/**
+    @see magmablas_zsymmetrize_tiles_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zsymmetrize_tiles(
+    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
+{
+    magmablas_zsymmetrize_tiles_q( uplo, m, dA, ldda, ntile, mstride, nstride, magma_stream );
 }

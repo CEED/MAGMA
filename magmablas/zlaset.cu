@@ -20,7 +20,7 @@
     Each block has BLK_X threads.
     Each thread loops across one row, updating BLK_Y entries.
 
-    Code similar to zlacpy, zlag2c, clag2z.
+    Code similar to zlacpy, zlag2c, clag2z, zgeadd.
 */
 __global__
 void zlaset_full(
@@ -139,7 +139,7 @@ void zlaset_upper(
     ZLASET_STREAM initializes a 2-D array A to DIAG on the diagonal and
     OFFDIAG on the off-diagonals.
     
-    This is the same as ZLASET, but adds stream argument.
+    This is the same as ZLASET, but adds queue argument.
     
     Arguments
     ---------
@@ -179,17 +179,17 @@ void zlaset_upper(
             The leading dimension of the array dA.  LDDA >= max(1,M).
     
     @param[in]
-    stream  magma_queue_t
-            Stream to execute in.
+    queue   magma_queue_t
+            Queue to execute in.
     
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C"
-void magmablas_zlaset_stream(
+void magmablas_zlaset_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *dA, magma_int_t ldda,
-    magma_queue_t stream)
+    magma_queue_t queue)
 {
     magma_int_t info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper && uplo != MagmaFull )
@@ -214,16 +214,16 @@ void magmablas_zlaset_stream(
     dim3 grid( (m-1)/BLK_X + 1, (n-1)/BLK_Y + 1 );
     
     if (uplo == MagmaLower)
-        zlaset_lower<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_lower<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
     else if (uplo == MagmaUpper)
-        zlaset_upper<<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_upper<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
     else
-        zlaset_full <<< grid, threads, 0, stream >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_full <<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
 }
 
 
 /**
-    @see magmablas_zlaset_stream
+    @see magmablas_zlaset_q
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C"
@@ -232,5 +232,5 @@ void magmablas_zlaset(
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *dA, magma_int_t ldda )
 {
-    magmablas_zlaset_stream( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
+    magmablas_zlaset_q( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
 }

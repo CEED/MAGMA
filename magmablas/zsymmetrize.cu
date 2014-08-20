@@ -91,7 +91,9 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
+magmablas_zsymmetrize_q(
+    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( uplo != MagmaLower && uplo != MagmaUpper )
@@ -114,9 +116,21 @@ magmablas_zsymmetrize( magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA,
     dim3 grid( (m + NB - 1)/NB );
     
     if ( uplo == MagmaUpper ) {
-        zsymmetrize_upper<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
+        zsymmetrize_upper<<< grid, threads, 0, queue >>>( m, dA, ldda );
     }
     else {
-        zsymmetrize_lower<<< grid, threads, 0, magma_stream >>>( m, dA, ldda );
+        zsymmetrize_lower<<< grid, threads, 0, queue >>>( m, dA, ldda );
     }
+}
+
+
+/**
+    @see magmablas_zsymmetrize_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" void
+magmablas_zsymmetrize(
+    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
+{
+    magmablas_zsymmetrize_q( uplo, m, dA, ldda, magma_stream );
 }
