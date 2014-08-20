@@ -38,7 +38,6 @@ ZSRC := \
 	zlarf.cu		\
 	zlarfbx.cu		\
 	zlarfx.cu		\
-	zlarfg_work.cu		\
 	zlarfg.cu		\
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
