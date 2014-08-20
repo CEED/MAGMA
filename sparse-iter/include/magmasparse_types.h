@@ -457,9 +457,67 @@ typedef struct magma_s_preconditioner{
 }magma_s_preconditioner;
 
 
+//##############################################################################
+//
+//              opts for the testers
+//
+//##############################################################################
 
+typedef struct magma_zopts{
 
+    magma_z_solver_par      solver_par;
+    magma_z_preconditioner  precond_par;
+    magma_storage_t         input_format;
+    int                     blocksize;
+    int                     alignment;
+    magma_storage_t         output_format;
+    magma_location_t        input_location;
+    magma_location_t        output_location;
+    magma_scale_t           scaling;
 
+}magma_zopts;
+
+typedef struct magma_copts{
+
+    magma_c_solver_par      solver_par;
+    magma_c_preconditioner  precond_par;
+    magma_storage_t         input_format;
+    int                     blocksize;
+    int                     alignment;
+    magma_storage_t         output_format;
+    magma_location_t        input_location;
+    magma_location_t        output_location;
+    magma_scale_t           scaling;
+
+}magma_copts;
+
+typedef struct magma_dopts{
+
+    magma_d_solver_par      solver_par;
+    magma_d_preconditioner  precond_par;
+    magma_storage_t         input_format;
+    int                     blocksize;
+    int                     alignment;
+    magma_storage_t         output_format;
+    magma_location_t        input_location;
+    magma_location_t        output_location;
+    magma_scale_t           scaling;
+
+}magma_dopts;
+
+typedef struct magma_sopts{
+
+    magma_s_solver_par      solver_par;
+    magma_s_preconditioner  precond_par;
+    magma_storage_t         input_format;
+    int                     blocksize;
+    int                     alignment;
+    magma_storage_t         output_format;
+    magma_location_t        input_location;
+    magma_location_t        output_location;
+    magma_scale_t           scaling;
+
+}magma_sopts;
 
 #ifdef __cplusplus
 }

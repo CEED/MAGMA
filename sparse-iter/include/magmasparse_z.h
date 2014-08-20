@@ -62,6 +62,12 @@ extern "C" {
 */
 
 
+magma_int_t
+magma_zparse_opts(      int argc, 
+                        char** argv, 
+                        magma_zopts *opts, 
+                        int *matrices );
+
 magma_int_t 
 read_z_csr_from_binary( magma_int_t* n_row, 
                         magma_int_t* n_col, 

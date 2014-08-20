@@ -13,6 +13,7 @@ include $(MAGMA_DIR)/Makefile.internal
 INC += -I../include
 
 ZSRC := \
+    magma_zutil_sparse.cpp  \
 	magma_z_free.cpp	\
 	magma_z_init.cpp	\
 	magma_z_matrixchar.cpp	\
