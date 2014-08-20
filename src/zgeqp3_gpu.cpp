@@ -55,12 +55,18 @@
             The scalar factors of the elementary reflectors.
 
     @param[out]
-    dwork   (workspace) COMPLEX_16 array on the GPU, dimension dim:
-            For [sd]geqp3, dim >= (N+1)*NB + 2*N;
-            for [cz]geqp3, dim >= (N+1)*NB,
+    dwork   (workspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
+            On exit, if INFO=0, WORK(1) returns the optimal LWORK.
+
+    @param[in]
+    lwork   INTEGER
+            The dimension of the array WORK.
+            For [sd]geqp3, LWORK >= (N+1)*NB + 2*N;
+            for [cz]geqp3, LWORK >= (N+1)*NB,
             where NB is the optimal blocksize.
-            Note: unlike in the CPU interface of this routine, there is no
-                  lwork argument to query for optimal workspace.
+    \n
+            Note: unlike the CPU interface of this routine, the GPU interface
+            does not support a workspace query.
 
     @param
     rwork   (workspace, for [cz]geqp3 only) DOUBLE PRECISION array, dimension (2*N)
@@ -90,7 +96,7 @@ extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dA, magma_int_t ldda,
                   magma_int_t *jpvt, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *dwork, 
+                  magmaDoubleComplex *dwork, magma_int_t lwork,
                   #ifdef COMPLEX
                   double *rwork,
                   #endif
@@ -103,7 +109,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     //magma_int_t na;
     magma_int_t n_j;
     magma_int_t j, jb, nb, sm, sn, fjb, nfxd, minmn;
-    magma_int_t topbmn, sminmn;
+    magma_int_t topbmn, sminmn, lwkopt;
     
     *info = 0;
     if (m < 0) {
@@ -116,6 +122,19 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     
     nb = magma_get_zgeqp3_nb(min(m, n));
     minmn = min(m,n);
+    if (*info == 0) {
+        if (minmn == 0) {
+            lwkopt = 1;
+        } else {
+            lwkopt = (n + 1)*nb;
+            #ifdef REAL
+            lwkopt += 2*n;
+            #endif
+        }
+        if (lwork < lwkopt) {
+            *info = -8;
+        }
+    }
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
