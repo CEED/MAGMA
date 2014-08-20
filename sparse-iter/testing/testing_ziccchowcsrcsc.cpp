@@ -188,12 +188,12 @@ int main( int argc, char** argv)
     
     real_Double_t start, end;
 
-     for(int matrix=0; matrix<7; matrix++){
+     for(int matrix=6; matrix<7; matrix++){
     //for(int matrix=0; matrix<1; matrix++){
     //for(int matrix=4; matrix<5; matrix++){
     int num_vecs = 10;
 
-    magma_z_sparse_matrix hA, hA2, hA2t, hLU, hA3, hAtmp, dA, hAD, hADD, dAD, dADD;
+    magma_z_sparse_matrix hA, hA2, hA2t, hLU, hA3, hAtmp, dA, hAD, hADD, hADDt, dAD, dADD;
 
 
 // matrix from UFMC
@@ -214,6 +214,8 @@ int main( int argc, char** argv)
     magma_z_mconvert( hAtmp, &hAD, Magma_CSR, Magma_CSRCOO );
 
     magma_z_mtransfer( hAD, &dAD, Magma_CPU, Magma_DEV );
+
+    //magma_zinitguess( hAD, &hADD, &hADDt );
 
 
 //magma_z_mvisu( hA );
@@ -319,10 +321,10 @@ int main( int argc, char** argv)
     magma_zmscale( &hAD, Magma_UNITROW );
 
 
-for(int iters=0; iters<11; iters++){
+for(int iters=0; iters<31; iters++){
 
 
-    magma_z_mtransfer( hAD, &dADD, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( hADD, &dADD, Magma_CPU, Magma_DEV );
 
    // magma_z_mvisu( hA );
   //  printf("\n");

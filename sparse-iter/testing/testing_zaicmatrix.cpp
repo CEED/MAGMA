@@ -62,7 +62,7 @@ int main( int argc, char** argv)
             "/mnt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
             "/mnt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
     };
-    for(int matrix=0; matrix<7; matrix=matrix+1){
+    for(int matrix=8; matrix<11; matrix=matrix+1){
 
     printf("\n\n\n\n\n");
     magma_z_csr_mtx( &hA, filename[matrix] );
@@ -149,7 +149,7 @@ int main( int argc, char** argv)
     // possibility to increase fill-in in ILU-(m)
 
     //ILU-m levels
-    for( int levels = 0; levels < 3; levels++){ //ILU-m levels
+    for( int levels = 0; levels < 1; levels++){ //ILU-m levels
     magma_zsymbilu( &hAcopy, levels, &hAL, &hAUt ); 
 
     // need only lower triangular
@@ -186,7 +186,7 @@ int main( int argc, char** argv)
         real_Double_t res = 0.0;
         real_Double_t ilures = 0.0;
 
-        // transfer the factor L and U
+        // transfer the factor L
         magma_z_mtransfer( hAL, &dL, Magma_CPU, Magma_DEV );
 
         // iterative ILU embedded in timing

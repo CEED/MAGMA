@@ -40,6 +40,7 @@ int main( int argc, char** argv)
     precond_par.solver = Magma_JACOBI;
     precond_par.levels = 0;
     precond_par.sweeps = 10;
+    precond_par.maxiter = 10;
     int precond = 0;
     int format = 0;
     int version = 0;
@@ -97,6 +98,8 @@ int main( int argc, char** argv)
             precond_par.levels = atoi( argv[++i] );
         }else if ( strcmp("--sweeps", argv[i]) == 0 ) {
             precond_par.sweeps = atoi( argv[++i] );
+        }else if ( strcmp("--piters", argv[i]) == 0 ) {
+            precond_par.maxiter = atoi( argv[++i] );
         } else
             break;
     }
@@ -106,12 +109,14 @@ int main( int argc, char** argv)
         " --mscale %d (0=no, 1=unitdiag, 2=unitrownrm)"
         " --verbose %d (0=summary, k=details every k iterations)"
         " --maxiter %d --tol %.2e"
-        " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d --sweeps %d]) ]"
+        " --precond %d (0=Jacobi, 1=IC, 2=AIC [ --levels %d --sweeps %d"
+        " --piters %d ]) ]"
         " matrices \n\n", format, (int)B.blocksize, (int)B.alignment,
         scale,
         (int)solver_par.verbose,
         (int)solver_par.maxiter, solver_par.epsilon, 
-        precond, (int) precond_par.levels, (int) precond_par.sweeps );
+        precond, (int) precond_par.levels, (int) precond_par.sweeps,
+        (int) precond_par.maxiter );
 
     magma_zsolverinfo_init( &solver_par, &precond_par );
 
@@ -130,9 +135,9 @@ int main( int argc, char** argv)
 
         // vectors and initial guess
         magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
-        magma_z_vinit( &x, Magma_DEV, A.num_cols, one );
-        magma_z_spmv( one, B_d, x, zero, b );                 //  b = A x
-        magma_z_vfree(&x);
+        //magma_z_vinit( &x, Magma_DEV, A.num_cols, one );
+        //magma_z_spmv( one, B_d, x, zero, b );                 //  b = A x
+        //magma_z_vfree(&x);
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
         magma_z_precondsetup( B_d, b, &precond_par );

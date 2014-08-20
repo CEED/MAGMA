@@ -53,6 +53,29 @@ int main( int argc, char** argv)
      "/home/hanzt/sparse_matrices/mtx/inline_1.mtx",
      "/home/hanzt/sparse_matrices/mtx/ldoor.mtx",
 */
+
+            "/home/hanzt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
+            "/home/hanzt/sparse_matrices/mtx/ecology2.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
+            "/home/hanzt/sparse_matrices/mtx/G3_circuit.mtx", //          n:1585478 nnz:7660826 nnz/n:4 max_nnz_row:6 
+            "/home/hanzt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
+            "/home/hanzt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
+            "/home/hanzt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
+            "/home/hanzt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
+
+            "/home/hanzt/sparse_matrices/mtx/A010.mtx", //            6400  &  1000 & 6.40e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A013.mtx", //            14365  &  2197 & 6.54e+00                  0
+            "/home/hanzt/sparse_matrices/mtx/A016.mtx", //            27136  &  4096 & 6.62e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A020.mtx", //            53600  &  8000 & 6.70e+00                    0      
+            "/home/hanzt/sparse_matrices/mtx/A025.mtx", //            105625  &  15625 & 6.76e+00                    0            
+            "/home/hanzt/sparse_matrices/mtx/A032.mtx", //            223232  &  32768 & 6.81e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A040.mtx", //            438400  &  64000 & 6.85e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A050.mtx", //            860000  &  125000 & 6.88e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A063.mtx", //            1726515  &  250047 & 6.90e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A080.mtx", //            3545600  &  512000 & 6.92e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A100.mtx", //            6940000  &  1000000 & 6.94e+00                    0            
+            "/home/hanzt/sparse_matrices/mtx/A126.mtx", //            13907376  &  2000376 & 6.95e+00                    0
+            "/home/hanzt/sparse_matrices/mtx/A159.mtx", //            27986067  &  4019679 & 6.96e+00                    0
+
      "/home/hanzt/sparse_matrices/mtx/webbase-1M.mtx",
             "/home/hanzt/sparse_matrices/mtx/thermal1.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
             "/home/hanzt/sparse_matrices/mtx/apache1.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
@@ -61,19 +84,6 @@ int main( int argc, char** argv)
             "/home/hanzt/sparse_matrices/mtx/minsurfo.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
        //     "/home/hanzt/sparse_matrices/mtx/bloweybq.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
             "/home/hanzt/sparse_matrices/mtx/Pres_Poisson.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-
-            "/home/hanzt/sparse_matrices/mtx/A010.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A013.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A016.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A020.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0      
-            "/home/hanzt/sparse_matrices/mtx/A025.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0            
-            "/home/hanzt/sparse_matrices/mtx/A032.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A040.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A050.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A063.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A080.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
-            "/home/hanzt/sparse_matrices/mtx/A100.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0            
-            "/home/hanzt/sparse_matrices/mtx/A126.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
 
 
      "test_matrices/Trefethen_20.mtx",       // 0
@@ -150,7 +160,7 @@ printf("conversion to SELLP successful.\n");
   //  magma_z_mconvert( A, &C, Magma_CSR, Magma_ELL);
 printf("conversion to ELL successful.\n");
 
-    printf("n:%d nnz:%d nnz/n:%d max_nnz_row:%d SELLP-storage:%d overhead:  %.4e\n", A.num_rows, A.nnz, A.nnz/A.num_rows, B.max_nnz_row, B.nnz,
+    printf("n:%d nnz:%d nnz/n:%.4e max_nnz_row:%d SELLP-storage:%d overhead:  %.4e\n", A.num_rows, A.nnz, (double)A.nnz/(double)A.num_rows, B.max_nnz_row, B.nnz,
 ((double)B.nnz-(double)A.nnz)/((double)B.nnz)*100.0);
    printf("%d  &  %d & %.2e\n", A.nnz, A.num_rows, (double)A.nnz/(double)A.num_rows );
 int nnzellpack = 0;//A.num_rows * C.max_nnz_row;

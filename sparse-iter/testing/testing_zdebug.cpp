@@ -79,7 +79,7 @@ magma_setdevice(2);
     double start, end;
 
    // for(int matrix=16; matrix<20; matrix++){
-    for(int matrix=2; matrix<3; matrix++){
+    for(int matrix=0; matrix<1; matrix++){
    // for(int matrix=4; matrix<11; matrix++){
     int num_vecs = 10;
 
@@ -88,40 +88,15 @@ magma_setdevice(2);
 
 
 
-    magma_z_sparse_matrix hA, hA2, hA3, dA, hAD, hADD, dAD, dADD, M, hM, hL, hU, dL, dU, hF, hG, hI, hJ, D, R, dD, dR;
+    magma_z_sparse_matrix hA, hA2, hA3, dA, hAD, hADD, dAD, dADD, M, hM, hL, hU, dL, dU, hF, hG, hI, hJ, D, R, dD, dR, L, U;
 
+   //     magma_z_csr_mtx( &hA, filename[matrix] ); 
 
-
-    magma_z_csr_mtx( &hA, filename[matrix] );
-
-    magma_z_vector x, x1, x2, b;
-        magma_z_vinit( &b, Magma_DEV, hA.num_cols, one );
-        magma_z_vinit( &x, Magma_DEV, hA.num_cols, zero );
-        magma_z_vinit( &x1, Magma_DEV, hA.num_cols, zero );
-        magma_z_vinit( &x2, Magma_DEV, hA.num_cols, zero );
-
-
-    
-    magma_zcsrsplit( 256, hA, &D, &R );
-
-        magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV );
-        magma_z_mtransfer( D, &dD, Magma_CPU, Magma_DEV );
-        magma_z_mtransfer( R, &dR, Magma_CPU, Magma_DEV );
-
-
-    real_Double_t res;
-
-    magma_zresidual( dA,  b, x, &res );
-
-    printf("res before: %.2e\n", res);
-
-    for(int k=0; k<100; k++)
-        magma_zbajac_csr( dD, dR, b, &x );
-
-    magma_zresidual( dA,  b, x, &res );
-
-    printf("res after: %.2e\n", res);
-
+       // int n=4;
+     magma_ztestkernel( 10000000 );
+   // magma_zm_27stencil(  n, &hA );
+//magma_z_mconvert( hA, &hA3, Magma_CSR, Magma_CSRCOO);
+  //  magma_zmreorder2(hA3, hA.num_rows, 1,1,1,&hA2);
 }
 
 

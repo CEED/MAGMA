@@ -123,7 +123,7 @@ int main( int argc, char** argv)
         else if ( version == 1 )    // merged with SpMV isolated
             magma_zbicgstab_merge( B_d, b, &x, &solver_par );
         else if ( version == 2 ) // merged SpMV (works only for CSR)
-            magma_zbicgstab_merge2( B_d, b, &x, &solver_par );
+            magma_zbicgstab_detailedtiming( B_d, b, &x, &solver_par );
 
         magma_zsolverinfo( &solver_par, &precond_par );
 

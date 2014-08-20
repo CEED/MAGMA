@@ -122,8 +122,10 @@ int main( int argc, char** argv)
         
     }
     }*/
-    int n=64;
-    magma_zm_27stencil(  n, &hA );
+    int n=1000;
+    magma_zm_5stencil(  n, &hA );
+
+   // write_z_csrtomtx( hA, "/mnt/sparse_matrices/mtx/Laplace_2D_1000_5pt.mtx" );
 
         //################################################################//
         //                  end matrix generator                          //
@@ -206,10 +208,10 @@ int main( int argc, char** argv)
     // possibility to increase fill-in in ILU-(m)
 
     //ILU-m levels
-    for( int levels = 0; levels < 8; levels++){ //ILU-m levels
-    magma_zsymbilu( &hAcopy, levels, &hAL, &hAUt ); 
+    for( int levels = 0; levels < 1; levels++){ //ILU-m levels
+    magma_zsymbilu( &hAcopy, 0, &hAL, &hAUt ); 
     printf("\n#================================================================================#\n");
-    printf("# ILU-(m)  #nnz  iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
+    printf("# inner_iters  #nnz  iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
     // add a unit diagonal to L for the algorithm
     magma_zmLdiagadd( &hAL ); 
 
@@ -229,11 +231,11 @@ int main( int argc, char** argv)
 
     // ---------------- initial guess ------------------- //
     magma_z_mconvert( hAcopy, &hACSRCOO, Magma_CSR, Magma_CSRCOO );
-    int blocksize = 4;
-    magma_zmreorder( hACSRCOO, n, blocksize, blocksize, blocksize, &hAinitguess );
-    magma_z_mtransfer( hACSRCOO, &dAinitguess, Magma_CPU, Magma_DEV );
+    int blocksize = 8;
+    magma_zmreorder2d( hACSRCOO, n, blocksize, blocksize, &hAinitguess );
+    magma_z_mtransfer( hAinitguess, &dAinitguess, Magma_CPU, Magma_DEV );
     magma_z_mfree(&hACSRCOO);
-
+    magma_z_mfree(&hAinitguess);
 
         //################################################################//
         //                        iterative ILU                           //
@@ -259,6 +261,7 @@ int main( int argc, char** argv)
         magma_device_sync(); start = magma_wtime(); 
         for(int i=0; i<iters; i++){
 cudaProfilerStart();
+//            magma_zailu_csr_a_debug( 1, dAinitguess, dL, dU );
             magma_zailu_csr_a( dAinitguess, dL, dU );
 cudaProfilerStop();
         }

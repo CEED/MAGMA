@@ -35,7 +35,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    for( magma_int_t n=100000; n<100001; n+=1000 ){
+
 
 
         printf("#================================================================================================================================================\n");
@@ -48,7 +48,9 @@ int main( int argc, char** argv)
 
 
 
-    for( magma_int_t num_vecs=1; num_vecs<17; num_vecs+=1 ){
+    for( magma_int_t num_vecs=5; num_vecs<6; num_vecs+=1 ){
+
+    for( magma_int_t n=10000; n<100000001; n=n+10000 ){
            
             magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
             magma_z_vector a,b,c,x, y, z, skp;
@@ -68,7 +70,7 @@ int main( int argc, char** argv)
 
 
             magma_z_vinit( &a, Magma_DEV, n*num_vecs, one );
-            magma_z_vinit( &b, Magma_DEV, n, one );
+            magma_z_vinit( &b, Magma_DEV, num_vecs, one );
             int min_ten = min(num_vecs, 15);
             magma_z_vinit( &x, Magma_DEV, min_ten*n, one );
             magma_z_vinit( &y, Magma_DEV, min_ten*n, one );
@@ -118,10 +120,10 @@ int main( int argc, char** argv)
             magma_device_sync(); mdot1=magma_wtime();
             #endif
             for( int h=0; h<iters; h++){
-                magma_zmdotc( n, num_vecs, a.val, b.val, x.val, y.val, skp.val );
-                //magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
-                //magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
-                //magma_zmdotc( n, 1, a.val, b.val, x.val, y.val, skp.val );
+                //magma_zmdotc( n, num_vecs, a.val, b.val, x.val, y.val, skp.val );
+                magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
+                magma_zmdotc( n, 2, a.val, b.val, x.val, y.val, skp.val );
+                magma_zmdotc( n, 1, a.val, b.val, x.val, y.val, skp.val );
                 //h++;
             }
             #ifdef ENABLE_TIMER

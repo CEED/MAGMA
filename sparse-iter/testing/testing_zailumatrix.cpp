@@ -55,16 +55,20 @@ int main( int argc, char** argv)
            // "/mnt/sparse_matrices/mtx/Trefethen_200.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_2000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
            // "/mnt/sparse_matrices/mtx/Trefethen_20000.mtx", //        n:19 nnz:147 nnz/n:7 max_nnz_row:9                            4
-            "/mnt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
+         //   "/mnt/sparse_matrices/mtx/af_shell3.mtx", //           n:504855 nnz:17562051 nnz/n:34 max_nnz_row:40     
             "/mnt/sparse_matrices/mtx/apache2.mtx", //             n:715176 nnz:4817870 nnz/n:6 max_nnz_row:8 
             "/mnt/sparse_matrices/mtx/ecology2.mtx", //            n:999999 nnz:4995991 nnz/n:4 max_nnz_row:5                    0
             "/mnt/sparse_matrices/mtx/G3_circuit.mtx", //          n:1585478 nnz:7660826 nnz/n:4 max_nnz_row:6 
             "/mnt/sparse_matrices/mtx/offshore.mtx", //            n:259789 nnz:4242673 nnz/n:16 max_nnz_row:31 
             "/mnt/sparse_matrices/mtx/parabolic_fem.mtx", //       n:525825 nnz:3674625 nnz/n:6 max_nnz_row:7
             "/mnt/sparse_matrices/mtx/thermal2.mtx", //            n:1228045 nnz:8580313 nnz/n:6 max_nnz_row:11 
+            "/mnt/sparse_matrices/mtx/Laplace_2D_1000_5pt.mtx",//
+            "/mnt/sparse_matrices/mtx/Laplace_3D_64_27pt.mtx",
     };
-    for(int matrix=0; matrix<1; matrix=matrix+1){
+    for(int matrix=0; matrix<8; matrix=matrix+1){
+   
 
+    //magma_z_csr_mtx( &hA,  argv[matrix]  ); 
     printf("\n\n\n\n\n");
     magma_z_csr_mtx( &hA, filename[matrix] );
 
@@ -139,13 +143,15 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mtransfer( hA, &hAcopy, Magma_CPU, Magma_CPU );
+
 
     // ---------------- iteration matrices ------------------- //
     // possibility to increase fill-in in ILU-(m)
 
     //ILU-m levels
     for( int levels = 0; levels < 1; levels++){ //ILU-m levels
+    //{int levels = atoi( argv[1]);
+    magma_z_mtransfer( hA, &hAcopy, Magma_CPU, Magma_CPU );
     magma_zsymbilu( &hAcopy, levels, &hAL, &hAUt ); 
     printf("\n#=========================================================================================#\n");
     printf("# ILU-(m)  #n       #nnz       iters  blocksize  t_chow   t_cusparse     error        ILUres \n");
@@ -178,7 +184,7 @@ int main( int argc, char** argv)
         //                        iterative ILU                           //
         //################################################################//
     // number of AILU sweeps
-    for(int iters=1; iters<2; iters++){
+    for(int iters=0; iters<40; iters+=5){
 
     // take average results for residuals
     real_Double_t resavg = 0.0;
@@ -197,7 +203,9 @@ int main( int argc, char** argv)
         // iterative ILU embedded in timing
         magma_device_sync(); start = magma_wtime(); 
         for(int i=0; i<iters; i++){
+cudaProfilerStart();
             magma_zailu_csr_a( dAinitguess, dL, dU );
+cudaProfilerStop();
         }
         magma_device_sync(); end = magma_wtime();
         t_chow = end-start;
@@ -233,12 +241,15 @@ int main( int argc, char** argv)
 
     iluresavg = iluresavg/numavg;
     resavg = resavg/numavg;
-
+/*
     printf(" %d      %d      %d      %d       %d        %.2e   ",
                               levels, hA.num_rows, nnz, 1* iters, blocksize, t_chow);
     printf(" %.2e    %.4e    %.4e   \n", t_cusparse, resavg, iluresavg);
+*/
 
+    printf(" %.2e  &  ", iluresavg);    
     }// iters
+    magma_z_mfree(&hAcopy);
     printf("\n#=========================================================================================#\n");
     }// levels
 
@@ -249,7 +260,7 @@ int main( int argc, char** argv)
     magma_z_mfree(&dA);
     magma_z_mfree(&dAinitguess);
     magma_z_mfree(&hA);
-    magma_z_mfree(&hAcopy);
+
 
     }// multiple matrices
 
