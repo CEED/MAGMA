@@ -20,8 +20,7 @@ ZSRC += \
 		testing_zailumatrix_ILUincrease.cpp        \
 		testing_zaicmatrix.cpp        \
 		testing_zfault_gmres.cpp        \
-	testing_z_mv.cpp	\
-	testing_zdot.cpp	\
+		testing_zdot.cpp	\
 #	testing_z_multimv.cpp	\
 #	testing_z_matrix_io.cpp	\
 #    testing_ziluchow.cpp \
