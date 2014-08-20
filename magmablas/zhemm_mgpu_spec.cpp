@@ -205,10 +205,10 @@ void magmablas_zhemm_mgpu_spec(
                         if(gmaster!=-1){ //complex is active
                             //printf     ("                    device %d from cmplx %d is sending to master %d on cmplx %d block of size %d event %d\n",dev,cmplxid,gmaster,k,mycolsize,redevents[dev][gmaster*ngpu+dev]);
                             magma_queue_wait_event(streams[ dev ][ gmaster ], redevents[dev][dev*ngpu+dev]);
-                            cudaMemcpy2DAsync(&dwork[gmaster][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
-                                         &dwork[dev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
-                                         mycolsize*sizeof(magmaDoubleComplex), n,
-                                         cudaMemcpyDeviceToDevice, streams[dev][gmaster]);
+                            magma_zcopymatrix_async(
+                                mycolsize, n,
+                                &dwork[dev    ][maxgsize*dev], mycolsize,
+                                &dwork[gmaster][maxgsize*dev], mycolsize, streams[dev][gmaster] );
                             magma_event_record(redevents[dev][gmaster*ngpu+dev], streams[dev][gmaster]);
                         }
                     }
@@ -225,10 +225,10 @@ void magmablas_zhemm_mgpu_spec(
                     if((lcdev!=dev)&&(lccolsize>0)){
                         //printf     ("                    device %d from cmplx %d is sending internal to dev %d block of size %d event %d\n",dev,cmplxid,lcdev,mycolsize,redevents[dev][lcdev*ngpu+dev]);
                         magma_queue_wait_event(streams[ dev ][ lcdev ], redevents[dev][dev*ngpu+dev]);
-                        cudaMemcpy2DAsync(&dwork[lcdev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
-                                         &dwork[dev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
-                                         mycolsize*sizeof(magmaDoubleComplex), n,
-                                         cudaMemcpyDeviceToDevice, streams[dev][lcdev]);
+                        magma_zcopymatrix_async(
+                            mycolsize, n,
+                            &dwork[dev  ][maxgsize*dev], mycolsize,
+                            &dwork[lcdev][maxgsize*dev], mycolsize, streams[dev][lcdev] );
                         magma_event_record(redevents[dev][lcdev*ngpu+dev], streams[dev][lcdev]);
                     }
                 }
@@ -268,10 +268,10 @@ void magmablas_zhemm_mgpu_spec(
                                 lccolsize     = gpuisactive[lcdev];
                                 if((lcdev!=masterdev)&&(lccolsize>0)){
                                     //printf("                    Master %d on cmplx %d waiting on event %d is distributing internal results of %d to lcdev %d block of size %d event %d\n", masterdev,cmplxid,redevents[gdev][masterdev*ngpu+gdev],gdev,lcdev,gcolsize,redevents[masterdev][lcdev*ngpu+gdev]);
-                                    cudaMemcpy2DAsync(&dwork[lcdev][maxgsize*gdev], gcolsize*sizeof(magmaDoubleComplex),
-                                                    &dwork[masterdev][maxgsize*gdev], gcolsize*sizeof(magmaDoubleComplex),
-                                                    gcolsize*sizeof(magmaDoubleComplex), n,
-                                                    cudaMemcpyDeviceToDevice, streams[masterdev][gdev]);
+                                    magma_zcopymatrix_async(
+                                        gcolsize, n,
+                                        &dwork[masterdev][maxgsize*gdev], gcolsize,
+                                        &dwork[lcdev    ][maxgsize*gdev], gcolsize, streams[masterdev][gdev] );
                                     magma_event_record(redevents[masterdev][lcdev*ngpu+gdev], streams[masterdev][gdev]);
                                 }
                             }
@@ -408,7 +408,7 @@ void magmablas_zhemm_mgpu_spec(
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        cudaDeviceSynchronize();
+        magma_device_sync();
     }
 
     // put back the input gpu and its input stream 

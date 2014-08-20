@@ -254,7 +254,7 @@ return;
         if(ngpu==1){
             // NOTE THAT because the COL gemm write dC below the diagonal (i) 
             // and the ROW GEMM write dC from 0 to diag-1, so they could 
-            // run in parallel on diferent stream. 
+            // run in parallel on different streams. 
             // 
             // NO NO NO because
             // it might happen that col finished i and strated i+1 while row still at i    
@@ -349,7 +349,7 @@ return;
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        cudaDeviceSynchronize();
+        magma_device_sync();
     }
 */
     //*******************************
@@ -382,10 +382,10 @@ return;
                         // wait the geadd of my ROW and COL GEMM is done
                         magma_queue_wait_event(streams[ dev ][ 0 ], redevents[dev][0]);
                         // sending to the master of my complex
-                        cudaMemcpy2DAsync(&dwork2[masterdev][maxgsize*dev], m*sizeof(magmaDoubleComplex),
-                                          &dC[dev][0], lddc*sizeof(magmaDoubleComplex),
-                                          m*sizeof(magmaDoubleComplex), n,
-                                          cudaMemcpyDeviceToDevice, streams[dev][0]);
+                        magma_zcopymatrix_async(
+                            m, n,
+                            &dC[dev][0], lddc,
+                            &dwork2[masterdev][maxgsize*dev], m, streams[dev][0] );
                         magma_event_record(redevents[dev][masterdev], streams[dev][0]);
                     } // end I am not the masterdev
                 }// end if mycolsize>0
@@ -395,7 +395,7 @@ return;
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        cudaDeviceSynchronize();
+        magma_device_sync();
     }
 */
 
@@ -445,10 +445,10 @@ return;
                          //Now both re the same.
                         //printf("             master %d from cmplx %d sending to other master %d on cmplx %d \n", masterdev, cmplxid, gmaster, k);
                         magma_queue_wait_event(streams[ masterdev ][ gmaster ], redevents[masterdev][masterdev]);
-                        cudaMemcpy2DAsync(&dwork2[gmaster][maxgsize*masterdev], m*sizeof(magmaDoubleComplex),
-                                          &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
-                                          m*sizeof(magmaDoubleComplex), n,
-                                          cudaMemcpyDeviceToDevice, streams[masterdev][gmaster]);
+                        magma_zcopymatrix_async(
+                            m, n,
+                            &dC[masterdev][0], lddc,
+                            &dwork2[gmaster][maxgsize*masterdev], m, streams[masterdev][gmaster] );
                         magma_event_record(redevents[masterdev][gmaster], streams[masterdev][gmaster]);
                         magma_event_record(redevents[masterdev][masterdev], streams[masterdev][gmaster]);
                       } // end of gmaster!=-1
@@ -460,7 +460,7 @@ return;
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        cudaDeviceSynchronize();
+        magma_device_sync();
     }
 */
     //printf("=======================================================================\n");
@@ -508,10 +508,10 @@ return;
                     // to make it parallel put stream lcdev instead of stream 0
                     //printf("             master %d broadcasting local to %d  \n", masterdev, lcdev);
                     magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev]);
-                    cudaMemcpy2DAsync(&dC[lcdev][0], lddc*sizeof(magmaDoubleComplex),
-                                      &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
-                                      m*sizeof(magmaDoubleComplex), n,
-                                      cudaMemcpyDeviceToDevice, streams[masterdev][0]);
+                    magma_zcopymatrix_async(
+                        m, n,
+                        &dC[masterdev][0], lddc,
+                        &dC[lcdev][0],     lddc, streams[masterdev][0] );
                     magma_event_record(redevents[masterdev][lcdev], streams[masterdev][0]);
                 }
             }// for l=1:myngpu
@@ -521,7 +521,7 @@ return;
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        cudaDeviceSynchronize();
+        magma_device_sync();
     }
 */
 
