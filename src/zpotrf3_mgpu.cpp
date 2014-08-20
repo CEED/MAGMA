@@ -100,28 +100,6 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
     magmaDoubleComplex *dlpanel;
     magma_int_t n_local[MagmaMaxGPUs], ldpanel;
     const magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
-#if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
-    /* used by ztrsm_work */
-    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    int trsm_nb = 128;
-    int trsm_n = trsm_nb*((nb+trsm_nb-1)/trsm_nb);
-    magmaDoubleComplex *d_dinvA[MagmaMaxGPUs];
-    magmaDoubleComplex *d_x[MagmaMaxGPUs];
-    #define dinvA(d,j) &(d_dinvA[(d)][(j)*trsm_nb*trsm_n])
-    #define dx(d,j) &(d_x[(d)][(j)*nb*m])
-    /*
-     * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE
-     */
-    for( d=0; d < num_gpus; d++ ) {
-        magma_setdevice(d);
-        if ( (MAGMA_SUCCESS != magma_zmalloc( &d_dinvA[d], 2*trsm_nb*trsm_n )) ||
-             (MAGMA_SUCCESS != magma_zmalloc( &d_x[d],     2*nb*(upper ? n : m) )) ) {
-            *info = MAGMA_ERR_DEVICE_ALLOC;
-            return *info;
-        }
-    }
-    magma_setdevice(0);
-#endif
     
     *info = 0;
     if (! upper && uplo != MagmaLower) {
@@ -138,6 +116,35 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
         return *info;
     }
 
+    magma_device_t orig_dev;
+    magma_getdevice( &orig_dev );
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+    
+#if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
+    /* used by ztrsm_work */
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    int trsm_nb = 128;
+    int trsm_n = trsm_nb*((nb+trsm_nb-1)/trsm_nb);
+    magmaDoubleComplex *d_dinvA[MagmaMaxGPUs];
+    magmaDoubleComplex *d_x[MagmaMaxGPUs];
+    #define dinvA(d,j) &(d_dinvA[(d)][(j)*trsm_nb*trsm_n])
+    #define dx(d,j) &(d_x[(d)][(j)*nb*m])
+    /*
+     * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE
+     */
+    // TODO free memory on failure.
+    for( d=0; d < num_gpus; d++ ) {
+        magma_setdevice(d);
+        if ( (MAGMA_SUCCESS != magma_zmalloc( &d_dinvA[d], 2*trsm_nb*trsm_n )) ||
+             (MAGMA_SUCCESS != magma_zmalloc( &d_x[d],     2*nb*(upper ? n : m) )) ) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+    }
+    magma_setdevice(0);
+#endif
+    
     /* initialization */
     for( d=0; d < num_gpus; d++ ) {
         /* local-n and local-ld */
