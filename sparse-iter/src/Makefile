@@ -26,16 +26,20 @@ ZSRC += \
 	zcg_res.cpp		\
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
+	zbicgstab_detailedtiming.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
 	ziterref.cpp		\
-	zgmres.cpp		\
 	zjacobi.cpp		\
 	zbaiter.cpp 	        \
 	zpcg.cpp		\
-        zpbicgstab.cpp		\
-        zpgmres.cpp		\
-#	ziterref.cpp		\
+ 	zgmres.cpp	\
+	zpgmres.cpp	\
+ 	zpbicgstab.cpp		\
+	zbaiter.cpp		\
+	zcg_exactres.cpp			\
+	zgmres_fault.cpp	\
+#ziterref.cpp		\
 #	zcg_merge.cpp		\
 #	zgmres.cpp		\
 #	zpbicgstab.cpp		\
@@ -68,9 +72,9 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zbcsrlu.cpp		\
-    	zcuilu.cpp		\
-    	zbailu.cpp		\
-    	zpastix.cpp     	\
+	zcuilu.cpp		\
+	zbailu.cpp		\
+	zpastix.cpp     	\
 #	zilu.cpp		\
 
 
@@ -84,6 +88,7 @@ ZSRC += \
 # Wrappers, tools etc
 ZSRC += \
 	magma_z_precond_wrapper.cpp \
+    magma_zcuspmm.cpp   \
 	zresidual.cpp		\
 
 

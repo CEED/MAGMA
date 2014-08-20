@@ -81,7 +81,7 @@ magma_zgmres_fault( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x
 
     // error parameters
     magma_int_t f1=10; // every f-th inner loop the orthogonalization fails
-    magma_int_t f2=1; // every f-th inner loop the orthogonalization fails
+    magma_int_t f2=100; // every f-th inner loop the orthogonalization fails
     magmaDoubleComplex perturbation = MAGMA_Z_MAKE(1.0e+15, 0.0);
 
     // CPU workspace
