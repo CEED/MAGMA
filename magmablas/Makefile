@@ -26,8 +26,7 @@ ZSRC := \
 	zgeadd.cu		\
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
-	dgemv_MLU.cu		\
-	zhemv.cu                \
+	zhemv.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
 	zlag2c.cu		\
@@ -55,7 +54,7 @@ ZSRC := \
 	zswap.cu		\
 	zswapblk.cu		\
 	zswapdblk.cu		\
-	zsymv.cu                \
+	zsymv.cu		\
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
 	ztranspose.cu		\
