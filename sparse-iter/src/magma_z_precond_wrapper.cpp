@@ -148,15 +148,6 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zcuiccsetup( A, precond );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_AILU ){
-        magma_zailusetup( A, precond );
-        return MAGMA_SUCCESS;
-    }
-    else if( precond->solver == Magma_AICC ){
-        //magma_zailusetup( A, precond );
-        magma_zaiccsetup( A, precond );
-        return MAGMA_SUCCESS;
-    }
     else{
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
@@ -276,20 +267,8 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zapplycuilu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_AILU ){
-        magma_zapplycuilu_l( b, x, precond );
-        //magma_zapplyailu_l( b, x, precond );
-        return MAGMA_SUCCESS;
-    }
-    else if( precond->solver == Magma_ICC || 
-            ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
-        //magma_zapplycuilu_l( b, x, precond );
+    else if( precond->solver == Magma_ICC ){
         magma_zapplycuicc_l( b, x, precond );
-        return MAGMA_SUCCESS;
-    }
-    else if( precond->solver == Magma_AICC ){
-        magma_zapplyiicc_l( b, x, precond );
-       // magma_zapplycuicc_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else{
@@ -344,20 +323,9 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zapplycuilu_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_AILU ){
-        //magma_zapplyailu_r( b, x, precond );
-        magma_zapplycuilu_r( b, x, precond );
-        return MAGMA_SUCCESS;
-    }
     else if( precond->solver == Magma_ICC || 
             ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
         magma_zapplycuicc_r( b, x, precond );
-//        magma_zapplycuilu_r( b, x, precond );
-        return MAGMA_SUCCESS;
-    }
-    else if( precond->solver == Magma_AICC ){
-        magma_zapplyiicc_r( b, x, precond );
-//       magma_zapplycuicc_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else{
