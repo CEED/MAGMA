@@ -136,14 +136,30 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 2: opts->scaling = Magma_UNITROW; break;
             }
 
+        }else if ( strcmp("--solver", argv[i]) == 0 ) {
+            info = atoi( argv[++i] );
+            switch( info ) {
+                case 0: opts->solver_par.solver = Magma_CG; break;
+                case 1: opts->solver_par.solver = Magma_CGMERGE; break;
+                case 2: opts->solver_par.solver = Magma_BICGSTAB; break;
+                case 3: opts->solver_par.solver = Magma_BICGSTABMERGE; break;
+                case 4: opts->solver_par.solver = Magma_JACOBI; break;
+                case 5: opts->solver_par.solver = Magma_GMRES; break;
+                case 6: opts->solver_par.solver = Magma_ITEREF; break;
+                case 7: opts->solver_par.solver = Magma_LOBPCG; break;
+                case 8: opts->solver_par.solver = Magma_PCG; break;
+                case 9: opts->solver_par.solver = Magma_PBICGSTAB; break;
+                case 10: opts->solver_par.solver = Magma_PGMRES; break;
+                case 11: opts->solver_par.solver = Magma_BAITER break;
+            }
         }else if ( strcmp("--precond", argv[i]) == 0 ) {
             info = atoi( argv[++i] );
             switch( info ) {
-                case 0: opts->precond_par.solver = Magma_JACOBI; break;
-                case 1: opts->precond_par.solver = Magma_ILU; break;
-                case 2: opts->precond_par.solver = Magma_ICC; break;
-            }
+                case 0: opts->precond_par.solver = Magma_NONE; break;
+                case 1: opts->precond_par.solver = Magma_JACOBI; break;
+                case 2: opts->precond_par.solver = Magma_ILU; break;
 
+            }
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             opts->blocksize = atoi( argv[++i] );
         }else if ( strcmp("--alignment", argv[i]) == 0 ) {
