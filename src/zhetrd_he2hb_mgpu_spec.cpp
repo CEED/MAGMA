@@ -293,14 +293,6 @@ magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                                         dA(idev, i, di+1), ldda,
                                         A ( i, i), lda, streams[ idev ][ nstream-1 ] );
               
-                /*
-                magma_device_sync();
-                cudaMemcpy2DAsync(A(i,i), lda*sizeof(magmaDoubleComplex),
-                                 dA(idev,i,di+1), ldda*sizeof(magmaDoubleComplex),
-                                 (pm+pn)*sizeof(magmaDoubleComplex), pn,
-                                 cudaMemcpyDeviceToHost, streams[ idev ][ nstream-1 ]);
-                */
-
                 //magma_setdevice( 0 );
                 //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old);
                 // compute ZHER2K_MGPU
@@ -510,7 +502,7 @@ magma_zhetrd_he2hb_mgpu_spec( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         magma_free( dspace[dev]);
         magma_free_pinned(workngpu[dev]);
         for( magma_int_t e = 0; e < nbevents; ++e ) {
-            cudaEventDestroy(redevents[dev][e]);
+            magma_event_destroy( redevents[dev][e] );
         }
     }
     magma_free_pinned(workngpu[ngpu]);

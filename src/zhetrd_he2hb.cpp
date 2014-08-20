@@ -226,7 +226,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magmablasSetKernelStream( stream[0] );
     magma_event_t Pupdate_event;
     cudaEventCreateWithFlags(&Pupdate_event,cudaEventDisableTiming);
-    //cudaEventCreate(&Pupdate_event);
+    //magma_event_create(&Pupdate_event);
 
 
     if (upper) {
@@ -262,7 +262,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
 
                  trace_gpu_start( 0, 1, "get", "get panel" );
                  //magma_queue_sync( stream[0] );
-                 cudaStreamWaitEvent(stream[1], Pupdate_event, 0);
+                 magma_queue_wait_event(stream[1], Pupdate_event);  //, 0);
                  magma_zgetmatrix_async( (pm+pn), pn,
                                          dA( i, i), ldda,
                                          A ( i, i), lda, stream[1] );
@@ -385,7 +385,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                              dA(indi, indj), ldda, c_one,
                              dA(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
-                 cudaEventRecord(Pupdate_event, stream[0]);
+                 magma_event_record(Pupdate_event, stream[0]);
              }
              else {
                  /* no look-ahead as this is last iteration */
@@ -418,7 +418,7 @@ magma_zhetrd_he2hb( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     
     trace_finalize( "zhetrd_he2hb.svg", "trace.css" );
 
-    cudaEventDestroy(Pupdate_event);
+    magma_event_destroy( Pupdate_event );
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
     magma_free( dA );

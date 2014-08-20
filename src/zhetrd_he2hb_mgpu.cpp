@@ -279,7 +279,7 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                  zpanel_to_q(MagmaUpper, pn-1, A(i, i+1), lda, work);
 
                  // find the device who own the panel then send it to the CPU.
-                // below a -1 was added and then a -1 was done on di because of the fortran indexing
+                 // below a -1 was added and then a -1 was done on di because of the fortran indexing
                  iblock = ((i-1) / distblk) / ngpu;          // local block id
                  di     = iblock*distblk + (i-1)%distblk;     // local index in parent matrix
                  idev   = ((i-1) / distblk) % ngpu;          // device with this block
@@ -293,18 +293,9 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
                                          dA(idev, i, di+1), ldda,
                                          A( i, i), lda, streams[ idev ][ nstream-1 ] );
                
-                 /*
-                 magma_device_sync();
-                 cudaMemcpy2DAsync(A(i,i), lda*sizeof(magmaDoubleComplex),
-                                  dA(idev,i,di+1), ldda*sizeof(magmaDoubleComplex),
-                                  (pm+pn)*sizeof(magmaDoubleComplex), pn,
-                                  cudaMemcpyDeviceToHost, streams[ idev ][ nstream-1 ]);
-
-                 */
-
                  //magma_setdevice( 0 );
                  //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old);
-                // compute ZHER2K_MGPU
+                 // compute ZHER2K_MGPU
                  magmablas_zher2k_mgpu2(
                       MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old,
                       c_neg_one, dv, pm_old, pn_old,
@@ -510,7 +501,7 @@ magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
         magma_free( dspace[dev]);
         magma_free_pinned(workngpu[dev]);
         for( magma_int_t e = 0; e < nbevents; ++e ) {
-            cudaEventDestroy(redevents[dev][e]);
+            magma_event_destroy( redevents[dev][e] );
         }
     }
     magma_free_pinned(workngpu[ngpu]);

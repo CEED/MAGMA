@@ -177,7 +177,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
         }
         for (i=0; i < num_gpus; i++) {
             magma_setdevice(i);
-            cudaStreamSynchronize(streaml[i][0]);
+            magma_queue_sync(streaml[i][0]);
             magmablasSetKernelStream(NULL);
         }
         magma_setdevice(0);
