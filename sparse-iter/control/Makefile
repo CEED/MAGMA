@@ -23,16 +23,9 @@ ZSRC := \
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
 	magma_ztranspose.cpp	\
-    magma_z_chowutils.cpp   \
     magma_zp2p.cpp   \
     magma_zcsrsplit.cpp   \
     magma_zmscale.cpp   \
-    magma_zmsort.cpp   \
-    magma_zilustruct.cpp   \
-    magma_zilustruct_2.cpp   \
-    magma_zmhom.cpp   \
-	magma_zmreorder.cpp	\
-	magma_zmlumerge.cpp	\
 
 SRC := \
 	mmio.cpp		\
