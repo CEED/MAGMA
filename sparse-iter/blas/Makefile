@@ -51,11 +51,13 @@ ZSRC += \
 	zailu_chow_csr_s.cu	\
 	zailu_chow_csr_a.cu	\
 	zbajac_csr.cu		\
+	zailu_chow_csr_a_debug.cu	\
 
 
 # Auxiliary routines
 ZSRC += \
 	zcompact.cu		\
+	magma_zmemreader.cu		\
 
 -include Makefile.local
 -include Makefile.src
