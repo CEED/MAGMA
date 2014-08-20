@@ -380,6 +380,12 @@ magma_zlobpcg_res(      magma_int_t num_rows,
                         magmaDoubleComplex *R, 
                         double *res );
 
+magma_int_t
+magma_zlobpcg_maxpy(    magma_int_t num_rows,
+                        magma_int_t num_vecs, 
+                        magmaDoubleComplex *X,
+                        magmaDoubleComplex *Y);
+
 
 /*/////////////////////////////////////////////////////////////////////////////
     -- MAGMA_SPARSE eigensolvers (Data on GPU)

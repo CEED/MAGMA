@@ -18,6 +18,7 @@ ZSRC := \
 	magma_z_blaswrapper.cpp	\
 	magma_clag2z.cpp	\
 	magma_zlag2c.cpp	\
+	zbajac_csr.cu		\
 	zbcsrswp.cu		\
 	zbcsrtrsv.cu		\
 	zbcsrcpy.cu		\
@@ -33,6 +34,7 @@ ZSRC := \
 	zlag2c_sparse.cu	\
 	zlobpcg_shift.cu	\
 	zlobpcg_residuals.cu	\
+	zlobpcg_maxpy.cu	\
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\

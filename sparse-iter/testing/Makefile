@@ -15,12 +15,6 @@ LIB += -lcusparse
 # ----------
 # utility functions
 ZSRC += \
-        testing_zailustencil.cpp        \
-		testing_zailumatrix.cpp        \
-		testing_zailumatrix_ILUincrease.cpp        \
-		testing_zaicmatrix.cpp        \
-		testing_zfault_gmres.cpp        \
-		testing_zdot.cpp	\
 #	testing_z_multimv.cpp	\
 #	testing_z_matrix_io.cpp	\
 #    testing_ziluchow.cpp \
@@ -67,7 +61,7 @@ ZSRC += \
 # ----------
 # run Krylov space eigen-solvers
 ZSRC += \
-#	run_zlobpcg.cpp     \
+	run_zlobpcg.cpp     \
 
 # ----------
 # test Krylov space eigen-solvers
@@ -119,7 +113,7 @@ ZSRC += \
 
 # debugging
 ZSRC += \
-	testing_zdebug.cpp	\
+#	testing_zdebug.cpp	\
 #   testing_spmvELLRT.cpp \
 #	testing_zcdebug.cpp	\
 
