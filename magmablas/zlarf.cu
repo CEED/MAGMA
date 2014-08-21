@@ -23,34 +23,34 @@
 //==============================================================================
 
 __global__
-void magma_zlarf_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                         magmaDoubleComplex *c, int ldc )
+void magma_zlarf_kernel( int m, const magmaDoubleComplex *dv, const magmaDoubleComplex *dtau,
+                         magmaDoubleComplex *dc, int lddc )
 {
-    if ( !MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) ) {
+    if ( !MAGMA_Z_EQUAL(*dtau, MAGMA_Z_ZERO) ) {
         const int tx = threadIdx.x;
-        magmaDoubleComplex *dc = c + blockIdx.x * ldc;
+        dc = dc + blockIdx.x * lddc;
 
         __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
-        magmaDoubleComplex lsum;
+        magmaDoubleComplex tmp;
 
         /* perform  w := v' * C  */
         if (tx==0)
-            lsum = dc[0]; //since V[0] should be one
+            tmp = dc[0]; //since V[0] should be one
         else
-            lsum = MAGMA_Z_ZERO;
+            tmp = MAGMA_Z_ZERO;
         for( int j = tx+1; j < m; j += BLOCK_SIZE ){
-            lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
+            tmp += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
         }
-        sum[tx] = lsum;
+        sum[tx] = tmp;
         magma_sum_reduce< BLOCK_SIZE >( tx, sum );
 
         /*  C := C - v * w  */
         __syncthreads();
-        magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
+        tmp = - MAGMA_Z_CNJG(*dtau) * sum[0];
         for( int j = m-tx-1; j>0 ; j -= BLOCK_SIZE )
-             dc[j] += z__1 * v[j];
+             dc[j] += tmp * dv[j];
 
-        if(tx==0) dc[0] += z__1;
+        if(tx==0) dc[0] += tmp;
     }
 }
 
@@ -58,14 +58,14 @@ void magma_zlarf_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
 //==============================================================================
 
 __global__
-void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                           magmaDoubleComplex *c, int ldc )
+void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComplex *dtau,
+                           magmaDoubleComplex *dc, int lddc )
 {
-    if ( ! MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) ) {
+    if ( ! MAGMA_Z_EQUAL(*dtau, MAGMA_Z_ZERO) ) {
         const int i = threadIdx.x, col= threadIdx.y;
 
         for( int k = col; k < n; k += BLOCK_SIZEy ) {
-            magmaDoubleComplex *dc = c + k * ldc;
+            dc = dc + k * lddc;
     
             __shared__ magmaDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
             magmaDoubleComplex lsum;
@@ -76,19 +76,19 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *v, magmaDoubleCompl
                 if (j==0)
                    lsum += MAGMA_Z_MUL( MAGMA_Z_ONE, dc[j] );
                 else
-                   lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
+                   lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
             }
             sum[i][col] = lsum;
             magma_sum_reduce_2d< BLOCK_SIZEx, BLOCK_SIZEy+1 >( i, col, sum );
     
             /*  C := C - v * w  */
             __syncthreads();
-            magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0][col];
+            magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*dtau) * sum[0][col];
             for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZEx ) {
                  if (j==0)
                     dc[j] += z__1;
                  else
-                    dc[j] += z__1 * v[j];
+                    dc[j] += z__1 * dv[j];
             }
         }
     }
@@ -109,13 +109,13 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *v, magmaDoubleCompl
     This routine uses only one SM (block).
  */
 extern "C" void
-magma_zlarf_sm(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-               magmaDoubleComplex *c, int ldc)
+magma_zlarf_sm(magma_int_t m, magma_int_t n, magmaDoubleComplex *dv, magmaDoubleComplex *dtau,
+               magmaDoubleComplex *dc, magma_int_t lddc)
 {
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
 
-    magma_zlarf_smkernel<<< blocks, threads, 0, magma_stream >>>( m, n, v, tau, c, ldc );
+    magma_zlarf_smkernel<<< blocks, threads, 0, magma_stream >>>( m, n, dv, dtau, dc, lddc );
 }
 //==============================================================================
 /*
@@ -133,17 +133,17 @@ magma_zlarf_sm(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
 extern "C" magma_int_t
 magma_zlarf_gpu(
     magma_int_t m,  magma_int_t n,
-    magmaDoubleComplex *v, magmaDoubleComplex *tau,
-    magmaDoubleComplex *c,  magma_int_t ldc)
+    const magmaDoubleComplex *dv, const magmaDoubleComplex *dtau,
+    magmaDoubleComplex *dc,  magma_int_t lddc)
 {
     dim3 grid( n, 1, 1 );
     dim3 threads( BLOCK_SIZE );
     if ( n>0 ){
-        magma_zlarf_kernel<<< grid, threads, 0, magma_stream >>>( m, v, tau, c, ldc);
+        magma_zlarf_kernel<<< grid, threads, 0, magma_stream >>>( m, dv, dtau, dc, lddc);
     }
 
     // The computation can be done on 1 SM with the following routine.
-    // magma_zlarf_sm(m, n, v, tau, c, ldc);
+    // magma_zlarf_sm(m, n, dv, dtau, dc, lddc);
 
     return MAGMA_SUCCESS;
 }
