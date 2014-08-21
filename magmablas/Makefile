@@ -26,6 +26,7 @@ ZSRC := \
 	zgeadd.cu		\
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
+	zgemv_conjv.cu          \
 	zhemv.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
