@@ -25,8 +25,8 @@ magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
         return MAGMA_SUCCESS;
 
     // W = C^H V
-    // magma_zgemm( MagmaConjTrans, MagmaNoTrans,
-    magmablas_zgemm_reduce(
+    magma_zgemm( MagmaConjTrans, MagmaNoTrans,
+    //magmablas_zgemm_reduce(
                            n, k, m,
                            c_one,  dC,    ldc,
                            dV,    ldv,
