@@ -133,12 +133,12 @@ magmablas_zpermute_long3( magmaDoubleComplex *dAT, magma_int_t lda,
     \param[in]
     k1       INTEGER
              The first element of IPIV for which a row interchange will
-             be done. (One based index.)
+             be done. (Fortran one-based index: 1 <= k1 <= n.)
     
     \param[in]
     k2       INTEGER
              The last element of IPIV for which a row interchange will
-             be done. (One based index.)
+             be done. (Fortran one-based index: 1 <= k2 <= n.)
     
     \param[in]
     ipiv     INTEGER array, on CPU, dimension (K2*abs(INCI))
@@ -169,9 +169,9 @@ magmablas_zlaswp_q(
     magma_int_t info = 0;
     if ( n < 0 )
         info = -1;
-    else if ( k1 < 0 || k1 >= lda )
+    else if ( k1 < 1 || k1 > n )
         info = -4;
-    else if ( k2 < 0 || k2 >= lda || k2 < k1 )
+    else if ( k2 < 1 || k2 > n )
         info = -5;
     else if ( inci <= 0 )
         info = -7;
