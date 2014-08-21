@@ -518,6 +518,13 @@ void magmablas_zgemv_batched(
     magmaDoubleComplex **dy_array, magma_int_t incy,
     magma_int_t batchCount);
 
+void magmablas_zgemv_conjv(
+    magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t lda,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy, magma_int_t incy);
+
 magma_int_t magmablas_zhemv(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
