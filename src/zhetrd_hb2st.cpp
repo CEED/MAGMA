@@ -32,77 +32,64 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class magma_zbulge_data {
-
-public:
-
-    magma_zbulge_data(magma_int_t threads_num_, magma_int_t n_, magma_int_t nb_, magma_int_t nbtiles_,
-                      magma_int_t grsiz_, magma_int_t Vblksiz_, magma_int_t compT_,
-                      magmaDoubleComplex *A_, magma_int_t lda_, magmaDoubleComplex *V_, magma_int_t ldv_, magmaDoubleComplex *TAU_,
-                      magmaDoubleComplex *T_, magma_int_t ldt_, volatile magma_int_t* prog_)
-    :
-    threads_num(threads_num_),
-    n(n_),
-    nb(nb_),
-    nbtiles(nbtiles_),
-    grsiz(grsiz_),
-    Vblksiz(Vblksiz_),
-    compT(compT_),
-    A(A_),
-    lda(lda_),
-    V(V_),
-    ldv(ldv_),
-    TAU(TAU_),
-    T(T_),
-    ldt(ldt_),
-    prog(prog_)
-    {
-        pthread_barrier_init(&barrier, NULL, threads_num);
-    }
-
-    ~magma_zbulge_data()
-    {
-        pthread_barrier_destroy(&barrier);
-    }
-
-    const magma_int_t threads_num;
-    const magma_int_t n;
-    const magma_int_t nb;
-    const magma_int_t nbtiles;
-    const magma_int_t grsiz;
-    const magma_int_t Vblksiz;
-    const magma_int_t compT;
-    magmaDoubleComplex* const A;
-    const magma_int_t lda;
-    magmaDoubleComplex* const V;
-    const magma_int_t ldv;
-    magmaDoubleComplex* const TAU;
-    magmaDoubleComplex* const T;
-    const magma_int_t ldt;
+typedef struct magma_zbulge_data_s {
+     magma_int_t threads_num;
+     magma_int_t n;
+     magma_int_t nb;
+     magma_int_t nbtiles;
+     magma_int_t grsiz;
+     magma_int_t Vblksiz;
+     magma_int_t compT;
+    magmaDoubleComplex* A;
+    magma_int_t lda;
+    magmaDoubleComplex* V;
+    magma_int_t ldv;
+    magmaDoubleComplex* TAU;
+    magmaDoubleComplex* T;
+    magma_int_t ldt;
     volatile magma_int_t *prog;
     pthread_barrier_t barrier;
+} magma_zbulge_data;
 
-private:
+void magma_zbulge_data_init(magma_zbulge_data *zbulge_data_S, magma_int_t
+        threads_num_, magma_int_t n_, magma_int_t nb_, magma_int_t nbtiles_,
+        magma_int_t grsiz_, magma_int_t Vblksiz_, magma_int_t compT_,
+        magmaDoubleComplex *A_, magma_int_t lda_, magmaDoubleComplex *V_,
+        magma_int_t ldv_, magmaDoubleComplex *TAU_, magmaDoubleComplex *T_,
+        magma_int_t ldt_, volatile magma_int_t* prog_)
+{
+    zbulge_data_S->threads_num = threads_num_;
+    zbulge_data_S->n = n_;
+    zbulge_data_S->nb = nb_;
+    zbulge_data_S->nbtiles = nbtiles_;
+    zbulge_data_S->grsiz = grsiz_;
+    zbulge_data_S->Vblksiz = Vblksiz_;
+    zbulge_data_S->compT = compT_;
+    zbulge_data_S->A = A_;
+    zbulge_data_S->lda = lda_;
+    zbulge_data_S->V = V_;
+    zbulge_data_S->ldv= ldv_;
+    zbulge_data_S->TAU = TAU_;
+    zbulge_data_S->T = T_;
+    zbulge_data_S->ldt = ldt_;
+    zbulge_data_S->prog = prog_;
 
-    magma_zbulge_data(magma_zbulge_data& data); // disable copy
-};
-
-class magma_zbulge_id_data {
-
-public:
-
-    magma_zbulge_id_data()
-    : id(-1), data(NULL)
-    {}
-
-    magma_zbulge_id_data(magma_int_t id_, magma_zbulge_data* data_)
-    : id(id_), data(data_)
-    {}
-
+    pthread_barrier_init(&(zbulge_data_S->barrier), NULL, zbulge_data_S->threads_num);
+}
+void magma_zbulge_data_destroy(magma_zbulge_data *zbulge_data_S)
+{
+    pthread_barrier_destroy(&(zbulge_data_S->barrier));
+}
+typedef struct magma_zbulge_id_data_s {
     magma_int_t id;
     magma_zbulge_data* data;
-};
+} magma_zbulge_id_data;
 
+void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id_, magma_zbulge_data* data_)
+{
+    id_data->id = id_; 
+    id_data->data = data_;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -214,7 +201,8 @@ magma_zhetrd_hb2st(
     magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
     pthread_attr_t thread_attr;
 
-    magma_zbulge_data data_bulge(threads, n, nb, nbtiles, INgrsiz, Vblksiz, compT,
+    magma_zbulge_data data_bulge;
+    magma_zbulge_data_init(&data_bulge, threads, n, nb, nbtiles, INgrsiz, Vblksiz, compT,
                                  A, lda, V, ldv, TAU, T, ldt, prog);
 
     // Set one thread per core
@@ -229,10 +217,10 @@ magma_zhetrd_hb2st(
 
     // Launch threads
     for (magma_int_t thread = 1; thread < threads; thread++) {
-        arg[thread] = magma_zbulge_id_data(thread, &data_bulge);
+        magma_zbulge_id_data_init(&(arg[thread]), thread, &data_bulge);
         pthread_create(&thread_id[thread], &thread_attr, magma_zhetrd_hb2st_parallel_section, &arg[thread]);
     }
-    arg[0] = magma_zbulge_id_data(0, &data_bulge);
+    magma_zbulge_id_data_init(&(arg[0]), 0, &data_bulge);
     magma_zhetrd_hb2st_parallel_section(&arg[0]);
 
     // Wait for completion
@@ -469,7 +457,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 #endif
 #endif
 
-    return NULL;
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
