@@ -31,6 +31,7 @@
 #include <cblas.h>
 
 #include "magma.h"
+#include "magma_operators.h"
 
 #define COMPLEX
 
@@ -111,13 +112,32 @@ magmaDoubleComplex magma_cblas_zdotc(
     const magmaDoubleComplex *x, magma_int_t incx,
     const magmaDoubleComplex *y, magma_int_t incy )
 {
-    #ifdef COMPLEX
-    magmaDoubleComplex value;
-    cblas_zdotc_sub( n, x, incx, y, incy, &value );
+    // after too many issues with MKL and other BLAS, just write our own dot product!
+    magmaDoubleComplex value = MAGMA_Z_ZERO;
+    magma_int_t i;
+    if ( incx == 1 && incy == 1 ) {
+        for( i=0; i < n; ++i ) {
+            value += conj( x[i] ) * y[i];
+        }
+    }
+    else {
+        magma_int_t ix=0, iy=0;
+        if ( incx < 0 ) { ix = (-n + 1)*incx + 1; }
+        if ( incy < 0 ) { iy = (-n + 1)*incy + 1; }
+        for( magma_int_t i=0; i < n; ++i ) {
+            value += conj( x[ix] ) * y[iy];
+            ix += incx;
+            iy += incy;
+        }
+    }
     return value;
-    #else
-    return cblas_zdotc( n, x, incx, y, incy );
-    #endif
+    //#ifdef COMPLEX
+    //magmaDoubleComplex value;
+    //cblas_zdotc_sub( n, x, incx, y, incy, &value );
+    //return value;
+    //#else
+    //return cblas_zdotc( n, x, incx, y, incy );
+    //#endif
 }
 
 #ifdef COMPLEX
@@ -149,13 +169,32 @@ magmaDoubleComplex magma_cblas_zdotu(
     const magmaDoubleComplex *x, magma_int_t incx,
     const magmaDoubleComplex *y, magma_int_t incy )
 {
-    #ifdef COMPLEX
-    magmaDoubleComplex value;
-    cblas_zdotu_sub( n, x, incx, y, incy, &value );
+    // after too many issues with MKL and other BLAS, just write our own dot product!
+    magmaDoubleComplex value = MAGMA_Z_ZERO;
+    magma_int_t i;
+    if ( incx == 1 && incy == 1 ) {
+        for( i=0; i < n; ++i ) {
+            value += x[i] * y[i];
+        }
+    }
+    else {
+        magma_int_t ix=0, iy=0;
+        if ( incx < 0 ) { ix = (-n + 1)*incx + 1; }
+        if ( incy < 0 ) { iy = (-n + 1)*incy + 1; }
+        for( magma_int_t i=0; i < n; ++i ) {
+            value += x[ix] * y[iy];
+            ix += incx;
+            iy += incy;
+        }
+    }
     return value;
-    #else
-    return cblas_zdotu( n, x, incx, y, incy );
-    #endif
+    //#ifdef COMPLEX
+    //magmaDoubleComplex value;
+    //cblas_zdotu_sub( n, x, incx, y, incy, &value );
+    //return value;
+    //#else
+    //return cblas_zdotu( n, x, incx, y, incy );
+    //#endif
 }
 #endif
 
