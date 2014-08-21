@@ -485,8 +485,14 @@ qr = (
 	('testing_zgegqr_gpu', '--version 3 -c',  mn,   ''),
 	('testing_zgegqr_gpu', '--version 4 -c',  mn,   ''),
 	                                                
-	('#testing_zgeqp3_gpu',            '-c',  mn,   'crashes'),
+	('testing_zgeqp3_gpu',             '-c',  mn,   'crashes'),
 	('testing_zgeqr2_gpu',             '-c',  mn,   ''),
+	
+	('testing_zgeqr2x_gpu', '--version 1 -c', mn,   ''),
+	('testing_zgeqr2x_gpu', '--version 2 -c', mn,   ''),
+	('testing_zgeqr2x_gpu', '--version 3 -c', mn,   ''),
+	('testing_zgeqr2x_gpu', '--version 4 -c', mn,   ''),
+	
 	('testing_zgeqr2x_gpu',            '-c',  mn,   ''),
 	('testing_zgeqrf_gpu',             '-c',  mn,   ''),
 	('testing_zlarfb_gpu',             '-c',  mnk,  ''),
