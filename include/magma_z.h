@@ -760,8 +760,7 @@ magma_int_t magma_zgetrf2_mgpu(magma_int_t num_gpus,
                                magmaDoubleComplex *d_lAP[], magmaDoubleComplex *a, magma_int_t lda,
                                magma_queue_t streaml[][2], magma_int_t *info);
 
-magma_int_t
-      magma_zgetrf_nopiv_gpu( magma_int_t m, magma_int_t n,
+magma_int_t magma_zgetrf_nopiv_gpu( magma_int_t m, magma_int_t n,
                               magmaDoubleComplex *dA, magma_int_t ldda,
                               magma_int_t *info);
 
@@ -806,8 +805,10 @@ magma_int_t magma_zlaqps3_gpu(
     magmaDoubleComplex *auxv,
     magmaDoubleComplex *dF, magma_int_t lddf);
 
-magma_int_t magma_zlarf_gpu(  magma_int_t m, magma_int_t n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                              magmaDoubleComplex *c, magma_int_t ldc, double *xnorm);
+magma_int_t magma_zlarf_gpu(
+    magma_int_t m,  magma_int_t n,
+    const magmaDoubleComplex *dv, const magmaDoubleComplex *dtau,
+    magmaDoubleComplex *dc,  magma_int_t lddc);
 
 magma_int_t magma_zlarfb_gpu( magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
                               magma_int_t m, magma_int_t n, magma_int_t k,
