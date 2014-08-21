@@ -1365,14 +1365,13 @@ subroutine magmaf_zlaqps3_gpu( m, n, offset, nb, kb, A, lda, jpvt, tau, vn1, vn2
     integer          :: lddf
 end subroutine magmaf_zlaqps3_gpu
 
-subroutine magmaf_zlarf_gpu( m, n, v, tau, c, ldc, xnorm )
+subroutine magmaf_zlarf_gpu( m, n, dv, dtau, dc, lddc )
     integer          :: m
     integer          :: n
-    complex*16       :: v(*)
-    complex*16       :: tau(*)
-    complex*16       :: c(*)
-    integer          :: ldc
-    double precision :: xnorm(*)
+    magma_devptr_t   :: dv
+    magma_devptr_t   :: dtau
+    magma_devptr_t   :: dc
+    integer          :: lddc
 end subroutine magmaf_zlarf_gpu
 
 subroutine magmaf_zlarfb_gpu( side, trans, direct, storev, m, n, k, dv, ldv, dt, ldt, dc,  &

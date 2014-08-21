@@ -1718,17 +1718,15 @@ void magmaf_zlaqps3_gpu(
 #define magmaf_zlarf_gpu FORTRAN_NAME( magmaf_zlarf_gpu, MAGMAF_ZLARF_GPU )
 void magmaf_zlarf_gpu(
     magma_int_t *m, magma_int_t *n,
-    magmaDoubleComplex *v,
-    magmaDoubleComplex *tau,
-    magmaDoubleComplex *c, magma_int_t *ldc,
-    double *xnorm )
+    devptr_t *dv,
+    devptr_t *dtau,
+    devptr_t *dc, magma_int_t *lddc )
 {
     magma_zlarf_gpu(
         *m, *n,
-        v,
-        tau,
-        c, *ldc,
-        xnorm );
+        magma_zdevptr(dv),
+        magma_zdevptr(dtau),
+        magma_zdevptr(dc), *lddc );
 }
 
 #define magmaf_zlarfb_gpu FORTRAN_NAME( magmaf_zlarfb_gpu, MAGMAF_ZLARFB_GPU )
