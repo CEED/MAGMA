@@ -132,9 +132,9 @@ int main( int argc, char** argv)
             /* call gpu-interface */
             gpu_time = magma_wtime();
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, drwork, &info);
+            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, lwork, drwork, &info);
             #else
-            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, &info);
+            magma_zgeqp3_gpu(M, N, d_A, lda, jpvt, dtau, d_work, lwork, &info);
             #endif
             gpu_time = magma_wtime() - gpu_time;
             
