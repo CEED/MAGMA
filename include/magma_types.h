@@ -309,11 +309,13 @@ typedef enum {
     MagmaColMajor      = 102
 } magma_order_t;
 
+// Magma_ConjTrans is an alias for those rare occasions (zlarfb, zun*, zher*k)
+// where we want Magma_ConjTrans to convert to MagmaTrans in precision generation.
 typedef enum {
     MagmaNoTrans       = 111,
     MagmaTrans         = 112,
     MagmaConjTrans     = 113,
-    Magma_ConjTrans    = MagmaConjTrans   /* for those rare occasions where we don't want MagmaConjTrans to convert to MagmaTrans in precision generation */
+    Magma_ConjTrans    = MagmaConjTrans
 } magma_trans_t;
 
 typedef enum {

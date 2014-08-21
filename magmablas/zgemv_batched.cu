@@ -159,7 +159,7 @@ kernel_zgemvt_batched(
 
 /*
     Matrix Transpose Vector Multiplication
-    y := alpha*A'*x + beta*y,
+    y := alpha* A**T *x + beta*y,
 */
 
 extern "C"
@@ -260,7 +260,7 @@ kernel_zgemvc_batched(
 
 /*
     Matrix Conjugate Transpose Vector Multiplication
-    y := alpha*conjg(A')*x + beta*y,
+    y := alpha* A**H *x + beta*y,
 */
 
 extern "C"

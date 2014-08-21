@@ -150,7 +150,7 @@ void magmablas_ztrsm_work(
         info = -1;
     } else if ( uplo != MagmaUpper && uplo != MagmaLower ) {
         info = -2;
-    } else if ( transA != MagmaNoTrans && transA != MagmaTrans && transA != Magma_ConjTrans ) {
+    } else if ( transA != MagmaNoTrans && transA != MagmaTrans && transA != MagmaConjTrans ) {
         info = -3;
     } else if ( diag != MagmaUnit && diag != MagmaNonUnit ) {
         info = -4;
@@ -362,7 +362,7 @@ void magmablas_ztrsm(
         info = -1;
     } else if ( uplo != MagmaUpper && uplo != MagmaLower ) {
         info = -2;
-    } else if ( transA != MagmaNoTrans && transA != MagmaTrans && transA != Magma_ConjTrans ) {
+    } else if ( transA != MagmaNoTrans && transA != MagmaTrans && transA != MagmaConjTrans ) {
         info = -3;
     } else if ( diag != MagmaUnit && diag != MagmaNonUnit ) {
         info = -4;

@@ -143,9 +143,9 @@ magmablas_zgemm(
     magmaDoubleComplex *d_C, magma_int_t ldc )
 {
     magma_int_t info = 0;
-    if      ( TRANSA != MagmaNoTrans && TRANSA != MagmaTrans && TRANSA != Magma_ConjTrans )
+    if      ( TRANSA != MagmaNoTrans && TRANSA != MagmaTrans && TRANSA != MagmaConjTrans )
         info = -1;
-    else if ( TRANSB != MagmaNoTrans && TRANSB != MagmaTrans && TRANSB != Magma_ConjTrans )
+    else if ( TRANSB != MagmaNoTrans && TRANSB != MagmaTrans && TRANSB != MagmaConjTrans )
         info = -2;
     else if ( m < 0 )
         info = -3;

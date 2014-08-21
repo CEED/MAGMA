@@ -126,9 +126,9 @@ magmablas_dgemm_tesla(
     double *C, magma_int_t ldc )
 {
     magma_int_t info = 0;
-    if      ( transA != MagmaNoTrans && transA != MagmaTrans && transA != Magma_ConjTrans )
+    if      ( transA != MagmaNoTrans && transA != MagmaTrans && transA != MagmaConjTrans )
         info = -1;
-    else if ( transB != MagmaNoTrans && transB != MagmaTrans && transB != Magma_ConjTrans )
+    else if ( transB != MagmaNoTrans && transB != MagmaTrans && transB != MagmaConjTrans )
         info = -2;
     else if ( m < 0 )
         info = -3;

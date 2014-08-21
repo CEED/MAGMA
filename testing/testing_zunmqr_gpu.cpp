@@ -47,8 +47,8 @@ int main( int argc, char** argv )
     double tol = 2. * opts.tolerance * lapackf77_dlamch("E");
     
     // test all combinations of input parameters
-    magma_side_t  side [] = { MagmaLeft,      MagmaRight   };
-    magma_trans_t trans[] = { MagmaConjTrans, MagmaNoTrans };
+    magma_side_t  side [] = { MagmaLeft,       MagmaRight   };
+    magma_trans_t trans[] = { Magma_ConjTrans, MagmaNoTrans };
 
     printf("    M     N     K   side   trans   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
     printf("===============================================================================================\n");

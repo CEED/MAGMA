@@ -325,7 +325,6 @@ subs = {
     # ----- Text
     ('symmetric',                 'hermitian',              ),
     ('symmetric',                 'Hermitian',              ),
-    ('\*\*T',                     '\*\*H',                  ),
     
     # ----- CBLAS
     ('',                          'CBLAS_SADDR'             ),
@@ -345,8 +344,10 @@ subs = {
     ('magma_sdgetrs',             'magma_czgetrs'           ),
     
     # ----- Constants
-    ('CblasTrans',                'CblasConjTrans'          ),
-    ('MagmaTrans',                'MagmaConjTrans'          ),
+    # see note in "normal" section about ConjTrans
+    #('CblasTrans',                'CblasConjTrans'          ),
+    #('MagmaTrans',                'MagmaConjTrans'          ),
+    ('MagmaTrans',                 'Magma_ConjTrans'         ),
     
     ]
     + blas_mixed             # lowercase
@@ -420,7 +421,6 @@ subs = {
     # ----- Text
     ('symmetric',      'symmetric',      'hermitian',      'hermitian'       ),
     ('symmetric',      'symmetric',      'Hermitian',      'Hermitian'       ),
-    (r'\*\*T',        r'\*\*T',         r'\*\*H',         r'\*\*H'           ),
     ('%f',             '%lf',            '%f',             '%lf'             ),  # for scanf
     
     # ----- CBLAS
@@ -448,7 +448,10 @@ subs = {
     ('SCODELETS',      'DCODELETS',      'CCODELETS',      'ZCODELETS'       ),
     ('sgeadd',         'dgeadd',         'cgeadd',         'zgeadd'          ),
     ('sgecfi',         'dgecfi',         'cgecfi',         'zgecfi'          ),
-    ('sget',           'dget',           'cget',           'zget'            ),
+    ('sgetmatrix',     'dgetmatrix',     'cgetmatrix',     'zgetmatrix'      ),
+    ('sgetvector',     'dgetvector',     'cgetvector',     'zgetvector'      ),
+    ('sgetmatrix',     'dgetmatrix',     'sgetmatrix',     'dgetmatrix'      ),
+    ('sgetvector',     'dgetvector',     'sgetvector',     'dgetvector'      ),
     ('sgetrl',         'dgetrl',         'cgetrl',         'zgetrl'          ),
     ('slocality',      'dlocality',      'clocality',      'zlocality'       ),
     ('smalloc',        'dmalloc',        'cmalloc',        'zmalloc'         ),
@@ -472,9 +475,14 @@ subs = {
     ('szero',          'dzero',          'czero',          'zzero'           ),
     
     # ----- Constants
-    ('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
-    ('MagmaTrans',     'MagmaTrans',     'MagmaConjTrans', 'MagmaConjTrans'  ),
-    ('PlasmaTrans',    'PlasmaTrans',    'PlasmaConjTrans','PlasmaConjTrans' ),
+    # Do not convert ConjTrans to Trans, since in most cases ConjTrans
+    # must be a valid option to real-precision function.
+    # E.g., dgemm( ConjTrans, ConjTrans, ... ) is valid.
+    # Only for zlarfb, zun*, zher*k, convert it using special Magma_ConjTrans alias    
+    #('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
+    #('MagmaTrans',     'MagmaTrans',     'MagmaConjTrans', 'MagmaConjTrans'  ),
+    #('PlasmaTrans',    'PlasmaTrans',    'PlasmaConjTrans','PlasmaConjTrans' ),
+    ('MagmaTrans',     'MagmaTrans',     'Magma_ConjTrans', 'Magma_ConjTrans'  ),
     
     # ----- special cases for d -> s that need complex (e.g., testing_dgeev)
     # c/z precisions are effectively disabled for these rules

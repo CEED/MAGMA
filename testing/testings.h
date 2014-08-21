@@ -60,6 +60,7 @@ void flops_init();
  * Macros to handle error checking.
  */
 
+// ----------------------------------------
 #ifdef CUBLAS_V2_H_
 
 #define TESTING_INIT()                                                     \
@@ -74,6 +75,7 @@ void flops_init();
     cublasDestroy( handle );                                               \
     magma_finalize();
 
+// ----------------------------------------
 #else // not CUBLAS_V2_H_
 
 #define TESTING_INIT()                                                     \
@@ -92,6 +94,7 @@ void flops_init();
     cublasShutdown();
 
 #endif // not CUBLAS_V2_H_
+// ----------------------------------------
 
 
 #define TESTING_INIT_MGPU()                                                \

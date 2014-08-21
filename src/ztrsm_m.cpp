@@ -24,7 +24,7 @@ magma_get_ztrsm_m_nb() { return 128; }
 
        op( A ) = A      or
        op( A ) = A**T   or
-       op( A ) = conj( A**T ).
+       op( A ) = A**H.
 
     The matrix X is overwritten on B.
 
@@ -54,7 +54,7 @@ magma_get_ztrsm_m_nb() { return 128; }
             the matrix multiplication as follows:
          -     = MagmaNoTrans:     op( A ) = A.
          -     = MagmaTrans:       op( A ) = A**T.
-         -     = MagmaConjTrans:   op( A ) = conj( A**T ).
+         -     = MagmaConjTrans:   op( A ) = A**H.
 
     @param[in]
     diag    magma_diag_t.

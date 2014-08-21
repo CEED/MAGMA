@@ -20,9 +20,9 @@
     ZUNMQR overwrites the general complex M-by-N matrix C with
 
     @verbatim
-                    SIDE = MagmaLeft     SIDE = MagmaRight
-    TRANS = MagmaNoTrans:      Q * C          C * Q
-    TRANS = MagmaTrans:      Q**H * C       C * Q**H
+                                SIDE = MagmaLeft    SIDE = MagmaRight
+    TRANS = MagmaNoTrans:       Q * C               C * Q
+    TRANS = Magma_ConjTrans:    Q**H * C            C * Q**H
     @endverbatim
 
     where Q is a complex unitary matrix defined as the product of k
@@ -47,7 +47,7 @@
     @param[in]
     trans   magma_trans_t
       -     = MagmaNoTrans:    No transpose, apply Q;
-      -     = MagmaTrans:      Transpose, apply Q**H.
+      -     = Magma_ConjTrans: Conjugate transpose, apply Q**H.
 
     @param[in]
     m       INTEGER
@@ -176,7 +176,7 @@ magma_zunmqr_m(magma_int_t nrgpu, magma_side_t side, magma_trans_t trans,
 
     if (! left && side != MagmaRight) {
         *info = -1;
-    } else if (! notran && trans != MagmaTrans) {
+    } else if (! notran && trans != Magma_ConjTrans) {
         *info = -2;
     } else if (m < 0) {
         *info = -3;

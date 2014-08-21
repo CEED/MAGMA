@@ -26,9 +26,9 @@ void magmablas_zherk_gpu(
     
     if(trans==MagmaNoTrans){
         transA = MagmaNoTrans;
-        transB = MagmaConjTrans;
+        transB = Magma_ConjTrans;
     }else{
-        transA = MagmaConjTrans;
+        transA = Magma_ConjTrans;
         transB = MagmaNoTrans;
     }
 

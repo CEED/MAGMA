@@ -14,7 +14,7 @@
 /**
     Purpose
     -------
-    ZLARFB applies a complex block reflector H or its transpose H' to a
+    ZLARFB applies a complex block reflector H or its transpose H^H to a
     COMPLEX_16 m by n matrix C, from the left.
     
     __Note that this function assumes__ that the upper part of dV is 0
@@ -24,13 +24,13 @@
     ---------
     @param[in]
     side    magma_side_t
-      -     = MagmaLeft:      apply H or H' from the Left
-      -     = MagmaRight:     apply H or H' from the Right
+      -     = MagmaLeft:      apply H or H^H from the Left
+      -     = MagmaRight:     apply H or H^H from the Right
 
     @param[in]
     trans   magma_trans_t
-      -     = MagmaNoTrans:   apply H   (No transpose)
-      -     = MagmaConjTrans: apply H' (Conjugate transpose)
+      -     = MagmaNoTrans:    apply H   (No transpose)
+      -     = Magma_ConjTrans: apply H^H (Conjugate transpose)
 
     @param[in]
     direct  magma_direct_t
@@ -85,7 +85,7 @@
     @param[in,out]
     dC      COMPLEX_16 array on the GPU, dimension (LDC,N)
             On entry, the m by n matrix C.
-            On exit, C is overwritten by H*C, or H'*C, or C*H, or C*H'.
+            On exit, C is overwritten by H*C, or H^H*C, or C*H, or C*H^H.
 
     @param[in]
     ldc     INTEGER
@@ -164,7 +164,7 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
     // opposite of trans
     magma_trans_t transt;
     if (trans == MagmaNoTrans)
-        transt = MagmaConjTrans;
+        transt = Magma_ConjTrans;
     else
         transt = MagmaNoTrans;
     
@@ -179,20 +179,20 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
     magma_trans_t notransV, transV;
     if (storev == MagmaColumnwise) {
         notransV = MagmaNoTrans;
-        transV   = MagmaConjTrans;
+        transV   = Magma_ConjTrans;
     }
     else {
-        notransV = MagmaConjTrans;
+        notransV = Magma_ConjTrans;
         transV   = MagmaNoTrans;
     }
 
     if ( side == MagmaLeft ) {
-        // Form H C or H' C
+        // Form H C or H^H C
         // Comments assume H C.
-        // When forming H' C, T gets transposed via transt for m >= n or by trans for m < n.
+        // When forming H^H C, T gets transposed via transt for m >= n or by trans for m < n.
         
         // W = V' C
-        magma_zgemm( MagmaConjTrans, notransV,
+        magma_zgemm( Magma_ConjTrans,notransV,
                      k, n, m,
                      c_one,  dV,    ldv,
                              dC,    ldc,
@@ -227,9 +227,9 @@ magma_zlarfb_gpu_gemm( magma_side_t side, magma_trans_t trans, magma_direct_t di
         }
     }
     else {
-        // Form C H or C H'
+        // Form C H or C H^H
         // Comments assume C H.
-        // When forming C H', T gets transposed via trans.
+        // When forming C H^H, T gets transposed via trans.
         
         // W = C V
         magma_zgemm( MagmaNoTrans, notransV,
