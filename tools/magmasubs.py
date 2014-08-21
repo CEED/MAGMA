@@ -430,7 +430,8 @@ subs = {
     # ----- Complex numbers
     # \b regexp here avoids conjugate -> conjfugate, and fabs -> fabsf -> fabsff.
     # The \b is deleted from replacement strings.
-    ('',               '',               'conjf',         r'conj\b'          ),
+    # conj() is overloaded now; don't substitute.
+    #('',               '',               'conjf',         r'conj\b'          ),
     ('fabsf',         r'\bfabs\b',       'cabsf',          'cabs'            ),
     ('',               '',               'cuCrealf',       'cuCreal'         ),
     ('',               '',               'cuCimagf',       'cuCimag'         ),
