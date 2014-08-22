@@ -119,7 +119,7 @@
 
     @param[out]
     work    (workspace) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK[1] returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER
@@ -144,7 +144,7 @@
                    prefer  LWORK >= y*y + max( 3*y + max( (2*y)*nb, 3*y*y + 4*y ), y + x*nb );
                 otherwise, LWORK >=            3*y + max( (x+y)*nb, 3*y*y + 4*y ).
     \n
-            If LWORK = -1 but other input arguments are legal, WORK[1]
+            If LWORK = -1 but other input arguments are legal, WORK[0]
             returns the optimal LWORK.
 
     @param
@@ -1233,7 +1233,7 @@ magma_int_t magma_dgesdd(
         }
     }
 
-    /* Return optimal workspace in WORK[1] */
+    /* Return optimal workspace in WORK[0] */
     work[1] = (double) maxwrk;
 
     return *info;

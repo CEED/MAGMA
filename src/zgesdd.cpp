@@ -119,7 +119,7 @@
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (MAX(1,lwork))
-            On exit, if INFO = 0, WORK[1] returns the optimal lwork.
+            On exit, if INFO = 0, WORK[0] returns the optimal lwork.
 
     @param[in]
     lwork   INTEGER
@@ -145,7 +145,7 @@
                 otherwise, LWORK >=       2*y +      (x+y)*nb.
       \n
             If lwork = -1, a workspace query is assumed.  The optimal
-            size for the WORK array is calculated and stored in WORK[1],
+            size for the WORK array is calculated and stored in WORK[0],
             and no other work except argument checking is performed.
 
     @param
@@ -1823,7 +1823,7 @@ magma_int_t magma_zgesdd(
         }
     }
 
-    /* Return optimal workspace in WORK[1] */
+    /* Return optimal workspace in WORK[0] */
     work[1] = MAGMA_Z_MAKE( maxwrk, 0 );
 
     return *info;

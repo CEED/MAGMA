@@ -101,7 +101,7 @@
 
     @param[out]
     work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER
@@ -118,7 +118,7 @@
 
     @param[out]
     iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
     @param[in]
     liwork  INTEGER

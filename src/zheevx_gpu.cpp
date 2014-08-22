@@ -147,7 +147,7 @@
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (LWORK)
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER
@@ -457,7 +457,7 @@ magma_zheevx_gpu(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma
         }
     }
     
-    /* Set WORK(1) to optimal complex workspace size. */
+    /* Set WORK[0] to optimal complex workspace size. */
     work[1] = MAGMA_Z_MAKE( lopt, 0 );
     
     return *info;

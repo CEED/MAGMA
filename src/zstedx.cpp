@@ -76,7 +76,7 @@
 
     @param[out]
     rwork   (workspace) DOUBLE PRECISION array, dimension (LRWORK)
-            On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
+            On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
     @param[in]
     lrwork  INTEGER
@@ -94,7 +94,7 @@
 
     @param[out]
     iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
     @param[in]
     liwork  INTEGER

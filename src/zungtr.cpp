@@ -51,7 +51,7 @@
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (LWORK)
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER

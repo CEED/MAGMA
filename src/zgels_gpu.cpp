@@ -59,7 +59,7 @@
 
     @param[out]
     hwork   (workspace) COMPLEX_16 array, dimension MAX(1,LWORK).
-            On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, HWORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER

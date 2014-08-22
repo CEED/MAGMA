@@ -325,7 +325,7 @@ magma_zunmqr_gpu(magma_side_t side, magma_trans_t trans,
 
     // TODO: zgeqrs_gpu ASSUMES that hwork contains the last block of A and C.
     // That needs to be fixed, but until then, don't modify hwork[0] here.
-    // In LAPACK: On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
+    // In LAPACK: On exit, if INFO = 0, HWORK[0] returns the optimal LWORK.
     //hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
 } /* magma_zunmqr_gpu */

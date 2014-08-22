@@ -97,7 +97,7 @@
 
     @param[out]
     work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[out]
     work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))

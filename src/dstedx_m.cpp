@@ -90,7 +90,7 @@ magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* 
     @param[out]
     work    (workspace) DOUBLE PRECISION array,
                                            dimension (LWORK)
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER
@@ -107,7 +107,7 @@ magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* 
 
     @param[out]
     iwork   (workspace) INTEGER array, dimension (MAX(1,LIWORK))
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
     @param[in]
     liwork  INTEGER
