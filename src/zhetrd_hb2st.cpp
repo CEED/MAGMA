@@ -15,6 +15,7 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
+//#include <cblas.h>
 
 #ifdef MAGMA_SETAFFINITY
 #include "affinity.h"
@@ -33,13 +34,13 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct magma_zbulge_data_s {
-     magma_int_t threads_num;
-     magma_int_t n;
-     magma_int_t nb;
-     magma_int_t nbtiles;
-     magma_int_t grsiz;
-     magma_int_t Vblksiz;
-     magma_int_t compT;
+    magma_int_t threads_num;
+    magma_int_t n;
+    magma_int_t nb;
+    magma_int_t nbtiles;
+    magma_int_t grsiz;
+    magma_int_t Vblksiz;
+    magma_int_t compT;
     magmaDoubleComplex* A;
     magma_int_t lda;
     magmaDoubleComplex* V;
@@ -51,28 +52,28 @@ typedef struct magma_zbulge_data_s {
     pthread_barrier_t barrier;
 } magma_zbulge_data;
 
-void magma_zbulge_data_init(magma_zbulge_data *zbulge_data_S, magma_int_t
-        threads_num_, magma_int_t n_, magma_int_t nb_, magma_int_t nbtiles_,
-        magma_int_t grsiz_, magma_int_t Vblksiz_, magma_int_t compT_,
-        magmaDoubleComplex *A_, magma_int_t lda_, magmaDoubleComplex *V_,
-        magma_int_t ldv_, magmaDoubleComplex *TAU_, magmaDoubleComplex *T_,
-        magma_int_t ldt_, volatile magma_int_t* prog_)
+void magma_zbulge_data_init(magma_zbulge_data *zbulge_data_S, 
+        magma_int_t threads_num, magma_int_t n, magma_int_t nb, magma_int_t nbtiles,
+        magma_int_t grsiz, magma_int_t Vblksiz, magma_int_t compT,
+        magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V,
+        magma_int_t ldv, magmaDoubleComplex *TAU, magmaDoubleComplex *T,
+        magma_int_t ldt, volatile magma_int_t* prog)
 {
-    zbulge_data_S->threads_num = threads_num_;
-    zbulge_data_S->n = n_;
-    zbulge_data_S->nb = nb_;
-    zbulge_data_S->nbtiles = nbtiles_;
-    zbulge_data_S->grsiz = grsiz_;
-    zbulge_data_S->Vblksiz = Vblksiz_;
-    zbulge_data_S->compT = compT_;
-    zbulge_data_S->A = A_;
-    zbulge_data_S->lda = lda_;
-    zbulge_data_S->V = V_;
-    zbulge_data_S->ldv= ldv_;
-    zbulge_data_S->TAU = TAU_;
-    zbulge_data_S->T = T_;
-    zbulge_data_S->ldt = ldt_;
-    zbulge_data_S->prog = prog_;
+    zbulge_data_S->threads_num = threads_num;
+    zbulge_data_S->n = n;
+    zbulge_data_S->nb = nb;
+    zbulge_data_S->nbtiles = nbtiles;
+    zbulge_data_S->grsiz = grsiz;
+    zbulge_data_S->Vblksiz = Vblksiz;
+    zbulge_data_S->compT = compT;
+    zbulge_data_S->A = A;
+    zbulge_data_S->lda = lda;
+    zbulge_data_S->V = V;
+    zbulge_data_S->ldv= ldv;
+    zbulge_data_S->TAU = TAU;
+    zbulge_data_S->T = T;
+    zbulge_data_S->ldt = ldt;
+    zbulge_data_S->prog = prog;
 
     pthread_barrier_init(&(zbulge_data_S->barrier), NULL, zbulge_data_S->threads_num);
 }
@@ -85,10 +86,10 @@ typedef struct magma_zbulge_id_data_s {
     magma_zbulge_data* data;
 } magma_zbulge_id_data;
 
-void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id_, magma_zbulge_data* data_)
+void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id, magma_zbulge_data* data)
 {
-    id_data->id = id_; 
-    id_data->data = data_;
+    id_data->id = id; 
+    id_data->data = data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,9 +191,9 @@ magma_zhetrd_hb2st(
     memset(TAU, 0, blkcnt*Vblksiz*sizeof(magmaDoubleComplex));
     memset(V,   0, blkcnt*ldv*Vblksiz*sizeof(magmaDoubleComplex));
 
-    magma_int_t* prog;
+    volatile magma_int_t* prog;
     magma_malloc_cpu((void**) &prog, (2*nbtiles+threads+10)*sizeof(magma_int_t));
-    memset(prog, 0, (2*nbtiles+threads+10)*sizeof(magma_int_t));
+    memset((void *) prog, 0, (2*nbtiles+threads+10)*sizeof(magma_int_t));
 
     magma_zbulge_id_data* arg;
     magma_malloc_cpu((void**) &arg, threads*sizeof(magma_zbulge_id_data));
@@ -237,7 +238,8 @@ magma_zhetrd_hb2st(
 
     magma_free_cpu(thread_id);
     magma_free_cpu(arg);
-    magma_free_cpu(prog);
+    magma_free_cpu((void *) prog);
+    magma_zbulge_data_destroy(&data_bulge);
 
     magma_set_lapack_numthreads(mklth);
     /*================================================
