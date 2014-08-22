@@ -248,7 +248,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
     cpu_set_t old_set, new_set;
 
     //store current affinity
-    CPU_ZERO(&old_set)
+    CPU_ZERO(&old_set);
     sched_getaffinity( 0, sizeof(old_set), &old_set);
     //set new affinity
     // bind threads
