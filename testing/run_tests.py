@@ -640,7 +640,7 @@ geev = (
 	('testing_zgeev_m',        '-RN -LN -c',  n,    ''),
 	('testing_zgeev_m',        '-RV -LV -c',  n,    ''),
 	                                                
-	('testing_zgehrd',                 '-c',  n,    ''),	
+	('testing_zgehrd',                 '-c',  n,    ''),
 	('testing_zgehrd_m',               '-c',  n,    ''),
 )
 if ( opts.geev ):
@@ -682,6 +682,7 @@ subs = (
 	('',              'testing_ds',  '',              'testing_zc'),
 	('testing_s',     'testing_d',   'testing_c',     'testing_z' ),
 	('lansy',         'lansy',       'lanhe',         'lanhe'     ),
+	('blas_s',        'blas_d',      'blas_c',        'blas_z'    ),
 )
 
 # ----------

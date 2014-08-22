@@ -17,7 +17,6 @@
 #include <string.h>
 #include <math.h>
 #include <cuda_runtime_api.h>
-#include <cublas_v2.h>
 #include <cblas.h>
 
 // make sure that asserts are enabled
@@ -97,18 +96,15 @@ int main( int argc, char** argv )
 {
     TESTING_INIT();
     
-    real_Double_t   gflops, t_m, t_c, t_l;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    //real_Double_t   t_m, t_c, t_f;
     magma_int_t ione = 1;
     
     magmaDoubleComplex  *A, *B;
-    magmaDoubleComplex alpha = MAGMA_Z_MAKE( 0.5, 0.1 );
-    magmaDoubleComplex beta  = MAGMA_Z_MAKE( 0.7, 0.2 );
-    double work[1], diff, error;
+    double diff, error;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t m, n, k, size, len, maxn, ld, info;
-    magmaDoubleComplex x2_m, x2_c, x2_f;  // complex x for magma, cblas, fortran blas respectively
-    double x_m, x_c, x_f, e;  // x for magma, cblas, fortran blas respectively
+    magma_int_t m, n, k, size, maxn, ld;
+    magmaDoubleComplex x2_m, x2_c;  // complex x for magma, cblas/fortran blas respectively
+    double x_m, x_c;  // x for magma, cblas/fortran blas respectively
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -117,7 +113,10 @@ int main( int argc, char** argv )
     double tol = opts.tolerance * lapackf77_dlamch("E");
     gTol = tol;
     
-    printf( "Diff  compares MAGMA wrapper        to CBLAS and BLAS function; should be exactly 0.\n"
+    printf( "!! Calling these CBLAS and Fortran BLAS sometimes crashes (segfault), which !!\n"
+            "!! is why we use wrappers. It does not necesarily indicate a bug in MAGMA.  !!\n"
+            "\n"
+            "Diff  compares MAGMA wrapper        to CBLAS and BLAS function; should be exactly 0.\n"
             "Error compares MAGMA implementation to CBLAS and BLAS function; should be ~ machine epsilon.\n"
             "\n" );
     
@@ -171,8 +170,8 @@ int main( int argc, char** argv )
                 x_c = cblas_dzasum( m, A(0,j), incx );
                 diff += fabs( x_m - x_c );
                 
-                x_f = blasf77_dzasum( &m, A(0,j), &incx );
-                diff += fabs( x_m - x_f );
+                x_c = blasf77_dzasum( &m, A(0,j), &incx );
+                error += fabs( (x_m - x_c) / (m*x_c) );
             }
             output( "dzasum", diff, error );
             total_diff  += diff;
@@ -190,8 +189,8 @@ int main( int argc, char** argv )
                 x_c = cblas_dznrm2( m, A(0,j), incx );
                 diff += fabs( x_m - x_c );
                 
-                x_f = blasf77_dznrm2( &m, A(0,j), &incx );
-                diff += fabs( x_m - x_f );
+                x_c = blasf77_dznrm2( &m, A(0,j), &incx );
+                error += fabs( (x_m - x_c) / (m*x_c) );
             }
             output( "dznrm2", diff, error );
             total_diff  += diff;
@@ -206,16 +205,21 @@ int main( int argc, char** argv )
             // MAGMA implementation, not just wrapper
             x2_m = magma_cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
             
-            #ifdef COMPLEX
-            cblas_zdotc_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
-            #else
-            x2_c = cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
+            // crashes on MKL 11.1.2, ILP64
+            #if ! defined( MAGMA_WITH_MKL )
+                #ifdef COMPLEX
+                cblas_zdotc_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
+                #else
+                x2_c = cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
+                #endif
+                error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
             #endif
-            error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
             
-            // crashes (on MacOS)
-            //x2_f = blasf77_zdotc( &m, A(0,j), &incx, B(0,j), &incy );
-            //error += fabs( x2_m - x2_f ) / fabs( m*x2_f );
+            // crashes on MacOS 10.9
+            #if ! defined( __APPLE__ )
+                x2_c = blasf77_zdotc( &m, A(0,j), &incx, B(0,j), &incy );
+                error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
+            #endif
         }
         output( "zdotc", diff, error );
         total_diff  += diff;
@@ -230,21 +234,35 @@ int main( int argc, char** argv )
             // MAGMA implementation, not just wrapper
             x2_m = magma_cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
             
-            #ifdef COMPLEX
-            cblas_zdotu_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
-            #else
-            x2_c = cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
+            // crashes on MKL 11.1.2, ILP64
+            #if ! defined( MAGMA_WITH_MKL )
+                #ifdef COMPLEX
+                cblas_zdotu_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
+                #else
+                x2_c = cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
+                #endif
+                error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
             #endif
-            error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
             
-            // crashes (on MacOS)
-            //x2_f = blasf77_zdotu( &m, A(0,j), &incx, B(0,j), &incy );
-            //error += fabs( x2_m - x2_f ) / fabs( m*x2_f );
+            // crashes on MacOS 10.9
+            #if ! defined( __APPLE__ )
+                x2_c = blasf77_zdotu( &m, A(0,j), &incx, B(0,j), &incy );
+                error += fabs( x2_m - x2_c ) / fabs( m*x2_c );
+            #endif
         }
         output( "zdotu", diff, error );
         total_diff  += diff;
         total_error += error;
         
+        // tell user about disabled functions
+        #if defined( MAGMA_WITH_MKL )
+            printf( "cblas_zdotc and cblas_zdotu disabled with MKL (segfaults)\n" );
+        #endif
+        
+        #if defined( __APPLE__ )
+            printf( "blasf77_zdotc and blasf77_zdotu disabled on MacOS (segfaults)\n" );
+        #endif
+            
         // cleanup
         magma_free_pinned( A );
         magma_free_pinned( B );
