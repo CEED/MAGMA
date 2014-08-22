@@ -109,7 +109,7 @@
     lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                      LWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + N * (NB + 1).
+            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + N + N*NB.
             If JOBZ = MagmaVec   and N > 1, LWORK >= LQ2 + 2*N + N**2.
             where LQ2 is the size needed to store the Q2 matrix
             and is returned by magma_bulge_get_lq2.
@@ -265,11 +265,11 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_int_t lq2 = magma_zbulge_get_lq2(n, parallel_threads);
 
     if (wantz) {
-        lwmin = lq2 + 2 * n + n * n;
-        lrwmin = 1 + 5 * n + 2 * n * n;
-        liwmin = 5 * n + 3;
+        lwmin  = lq2 + 2*n + n*n;
+        lrwmin = 1 + 5*n + 2*n*n;
+        liwmin = 5*n + 3;
     } else {
-        lwmin = lq2 + n * (nb + 1);
+        lwmin  = lq2 + n + n*nb;
         lrwmin = n;
         liwmin = 1;
     }
@@ -361,7 +361,7 @@ magma_zheevdx_2stage(magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
     magma_int_t indV2   = indTAU2+ blkcnt*Vblksiz;
     magma_int_t indtau1 = indV2  + blkcnt*ldv*Vblksiz;
     magma_int_t indwrk  = indtau1+ n;
-    //magma_int_t indwk2  = indwrk + n * n;
+    //magma_int_t indwk2  = indwrk + n*n;
     magma_int_t llwork = lwork - indwrk;
     //magma_int_t llwrk2 = lwork - indwk2;
     magma_int_t inde = 0;

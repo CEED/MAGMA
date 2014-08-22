@@ -148,12 +148,12 @@ ZSRC += \
 
 # generalized symmetric eigenvalues
 ZSRC += \
-	testing_dsygvd.cpp	\
 	testing_zhegvd.cpp	\
 	testing_zhegvd_m.cpp	\
 	testing_zhegvdx.cpp	\
 	testing_zhegvdx_2stage.cpp	\
 	testing_zhegvdx_2stage_m.cpp	\
+
 # ----------
 # non-symmetric eigenvalues
 ZSRC += \

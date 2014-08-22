@@ -77,10 +77,10 @@ int main( int argc, char** argv)
             n2     = N*N;
             nb     = magma_get_zhetrd_nb(N);
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            lwork  = 2*N*nb + N*N;
-            lrwork = 1 + 5*N +2*N*N;
+                lwork  = max( N + N*nb, 2*N + N*N );
+                lrwork = 1 + 5*N +2*N*N;
             #else
-            lwork  = 1 + 6*N*nb + 2* N*N;
+                lwork  = max( 2*N + N*nb, 1 + 6*N + 2*N*N );
             #endif
             liwork = 3 + 5*N;
 

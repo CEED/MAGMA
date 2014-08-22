@@ -5,8 +5,8 @@
        Univ. of Colorado, Denver
        @date
 
-       @author Stan Tomov
        @author Raffaele Solca
+       @author Stan Tomov
        @author Azzam Haidar
 
        @precisions normal d -> s
@@ -55,7 +55,7 @@
             The order of the matrices A and B.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA, N)
+    A       DOUBLE PRECISION array, dimension (LDA, N)
             On entry, the symmetric matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = MagmaLower,
@@ -76,7 +76,7 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[in,out]
-    B       COMPLEX_16 array, dimension (LDB, N)
+    B       DOUBLE PRECISION array, dimension (LDB, N)
             On entry, the symmetric matrix B.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of B contains the
             upper triangular part of the matrix B.  If UPLO = MagmaLower,
@@ -96,11 +96,7 @@
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
-    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
-
-    @param[out]
-    work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
+    work    (workspace) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]

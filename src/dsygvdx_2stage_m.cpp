@@ -138,7 +138,7 @@
     lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                      LWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + N * (NB + 2).
+            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + 2*N + N*NB.
             If JOBZ = MagmaVec   and N > 1, LWORK >= LQ2 + 1 + 6*N + 2*N**2.
             where LQ2 is the size needed to store the Q2 matrix
             and is returned by magma_bulge_get_lq2.
@@ -260,10 +260,10 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
     magma_int_t lq2 = magma_dbulge_get_lq2(n, parallel_threads);
 
     if (wantz) {
-        lwmin = lq2 + 1 + 6*n + 2*n*n;
+        lwmin  = lq2 + 1 + 6*n + 2*n*n;
         liwmin = 3 + 5*n;
     } else {
-        lwmin = n * (nb + 2);
+        lwmin  = 2*n + n*nb;
         liwmin = 1;
     }
 

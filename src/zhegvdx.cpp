@@ -146,7 +146,7 @@
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
     @param[out]
-    rwork   (workspace) DOUBLE PRECISION array, dimension (LRWORK)
+    rwork   (workspace) DOUBLE PRECISION array, dimension (MAX(1,LRWORK))
             On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
     @param[in]

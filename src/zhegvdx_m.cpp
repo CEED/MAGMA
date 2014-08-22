@@ -138,8 +138,9 @@
     lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                      LWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LWORK >= N + 1.
-            If JOBZ = MagmaVec   and N > 1, LWORK >= 2*N*nb + N**2.
+            If JOBZ = MagmaNoVec and N > 1, LWORK >= N + N*NB.
+            If JOBZ = MagmaVec   and N > 1, LWORK >= max( N + N*NB, 2*N + N**2 ).
+            NB can be obtained through magma_get_zhetrd_nb(N).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -277,7 +278,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, magma_ra
         liwmin = 1;
     }
     else if ( wantz ) {
-        lwmin  = 2*n + n*n;
+        lwmin  = max( n + n*nb, 2*n + n*n );
         lrwmin = 1 + 5*n + 2*n*n;
         liwmin = 3 + 5*n;
     }

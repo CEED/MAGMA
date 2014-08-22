@@ -62,7 +62,7 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA, N)
+    A       DOUBLE PRECISION array, dimension (LDA, N)
             On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = MagmaLower,
@@ -106,14 +106,14 @@
             If INFO = 0, the required m eigenvalues in ascending order.
 
     @param[out]
-    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
+    work    (workspace) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
     lwork   INTEGER
             The length of the array WORK.
             If N <= 1,                      LWORK >= 1.
-            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + N * (NB + 2).
+            If JOBZ = MagmaNoVec and N > 1, LWORK >= LQ2 + 2*N + N*NB.
             If JOBZ = MagmaVec   and N > 1, LWORK >= LQ2 + 1 + 6*N + 2*N**2.
             where LQ2 is the size needed to store the Q2 matrix
             and is returned by magma_bulge_get_lq2.
@@ -249,7 +249,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, magma_vec_t jobz, magma_range_t range,
         lwmin  = lq2 + 1 + 6*n + 2*n*n;
         liwmin = 5*n + 3;
     } else {
-        lwmin  = lq2 + n*(nb + 1);
+        lwmin  = lq2 + 2*n + n*nb;
         liwmin = 1;
     }
 

@@ -8,7 +8,7 @@
     @author Raffaele Solca
     @author Azzam Haidar
 
-    @precisions normal z -> c
+    @precisions normal z -> c d s
 
 */
 
@@ -25,6 +25,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvd
@@ -72,15 +73,21 @@ int main( int argc, char** argv)
             lda    = N;
             n2     = N*lda;
             nb     = magma_get_zhetrd_nb(N);
-            lwork  = 2*N*nb + N*N;
-            lrwork = 1 + 5*N +2*N*N;
+            #if defined(PRECISION_z) || defined(PRECISION_c)
+                lwork  = max( N + N*nb, 2*N + N*N );
+                lrwork = 1 + 5*N +2*N*N;
+            #else
+                lwork  = max( 2*N + N*nb, 1 + 6*N + 2*N*N );
+            #endif
             liwork = 3 + 5*N;
 
             TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex,  n2     );
             TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex,  n2     );
             TESTING_MALLOC_CPU( w1,     double,              N      );
             TESTING_MALLOC_CPU( w2,     double,              N      );
+            #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_MALLOC_CPU( rwork,  double,              lrwork );
+            #endif
             TESTING_MALLOC_CPU( iwork,  magma_int_t,         liwork );
             
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex,  n2     );
@@ -102,7 +109,9 @@ int main( int argc, char** argv)
                 magma_zhegvd( opts.itype, opts.jobz, opts.uplo,
                               N, h_R, lda, h_S, lda, w1,
                               h_work, lwork,
+                              #if defined(PRECISION_z) || defined(PRECISION_c)
                               rwork, lrwork,
+                              #endif
                               iwork, liwork,
                               &info );
                 if (info != 0)
@@ -120,7 +129,9 @@ int main( int argc, char** argv)
             magma_zhegvd( opts.itype, opts.jobz, opts.uplo,
                           N, h_R, lda, h_S, lda, w1,
                           h_work, lwork,
+                          #if defined(PRECISION_z) || defined(PRECISION_c)
                           rwork, lrwork,
+                          #endif
                           iwork, liwork,
                           &info );
             gpu_time = magma_wtime() - gpu_time;
@@ -143,6 +154,10 @@ int main( int argc, char** argv)
                 double temp1, temp2;
                 //magmaDoubleComplex *tau;
                 
+                #if defined(PRECISION_d) || defined(PRECISION_s)
+                double *rwork = h_work + N*N;
+                #endif
+
                 if ( opts.itype == 1 || opts.itype == 2 ) {
                     lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_S, &lda);
                     blasf77_zgemm("N", "C", &N, &N, &N, &c_one, h_R, &lda, h_R, &lda, &c_zero, h_work, &N);
@@ -197,7 +212,9 @@ int main( int argc, char** argv)
                 magma_zhegvd( opts.itype, MagmaNoVec, opts.uplo,
                               N, h_R, lda, h_S, lda, w2,
                               h_work, lwork,
+                              #if defined(PRECISION_z) || defined(PRECISION_c)
                               rwork, lrwork,
+                              #endif
                               iwork, liwork,
                               &info );
                 if (info != 0)
@@ -221,7 +238,9 @@ int main( int argc, char** argv)
                 lapackf77_zhegvd( &opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
                                   &N, h_A, &lda, h_B, &lda, w2,
                                   h_work, &lwork,
+                                  #if defined(PRECISION_z) || defined(PRECISION_c)
                                   rwork, &lrwork,
+                                  #endif
                                   iwork, &liwork,
                                   &info );
                 cpu_time = magma_wtime() - cpu_time;
@@ -265,7 +284,9 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( h_B    );
             TESTING_FREE_CPU( w1     );
             TESTING_FREE_CPU( w2     );
+            #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_FREE_CPU( rwork  );
+            #endif
             TESTING_FREE_CPU( iwork  );
             
             TESTING_FREE_PIN( h_R    );
