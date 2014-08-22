@@ -373,7 +373,8 @@ blas = (
 	('testing_ztrtri_diag',         '-L -c',  n,    ''),
 	('testing_ztrtri_diag',         '-U -c',  n,    ''),
 	
-	('#testing_zblas',                 '-c',  mnk,  'takes long time; cublas only'),
+	('#testing_blas_z',                '-c',  mnk,  'takes long time; cublas only'),
+	('testing_cblas_z',                '-c',  n,    ''),
 )
 if ( opts.blas ):
 	tests += blas

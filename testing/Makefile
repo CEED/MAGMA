@@ -31,7 +31,8 @@ ZSRC := \
 	testing_zhemv_mgpu.cpp	\
 	testing_zher2k_mgpu.cpp	\
 	\
-	testing_zblas.cpp	\
+	testing_blas_z.cpp	\
+	testing_cblas_z.cpp	\
 	testing_zgeadd.cpp	\
 	testing_zgeadd_batched.cpp	\
 	testing_zlacpy.cpp	\
