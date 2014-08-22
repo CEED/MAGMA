@@ -3,7 +3,7 @@ This file is processed with Doxygen. See docs/html/index.html for formatted vers
 /**
 
 ********************************************************************************
-@mainpage MAGMA
+@mainpage MAGMA User Guide
 
 Univ. of Tennessee, Knoxville \n
 Univ. of California, Berkeley \n
@@ -109,9 +109,14 @@ the MAGMA header files in \$(prefix)/include. It also installs
 @page testing       Running tests
 
 The testing directory includes tests of most MAGMA functions. These are
-useful as examples, but they do contain additional testing features that
+useful as examples, though they contain additional testing features that
 your application does not need, or would do differently. The \ref example "example"
 directory has a simple example without all this additional framework.
+
+See the \ref run_tests.py file to run a standard set of test sizes and options.
+Currentyl, nearly all the tests pass with --tol 100. With the default tolerance,
+usually 30, some tests will signal false negatives, where the test is okay but
+just slightly above the accuracy tolerance check.
 
 
 ********************************************************************************
@@ -197,6 +202,7 @@ Name                                                                            
 \ref magma_dgels_driver  "gels"                                                                    |  least squares solve, AX = B
 \ref magma_dgeev_driver  "geev",  \ref magma_dsyev_driver "syev",  \ref magma_zheev_driver "heev"  |  eigenvalue solver, AX = X Lambda
 \ref magma_dsyev_driver  "syevd", \ref magma_zheev_driver "heevd"                                  |  eigenvalue solver using divide & conquer
+\ref magma_dsygv_driver  "sygvd", \ref magma_zhegv_driver "hegvd"                                  |  generalized eigenvalue solver, AX = BX Lambda
 \ref magma_dgesvd_driver "gesvd"                                                                   |  singular value decomposition (SVD), A = U Sigma V^H
 \ref magma_dgesvd_driver "gesdd"                                                                   |  SVD using divide & conquer
 
@@ -213,7 +219,7 @@ Name                                                                            
 \ref magma_dgetrf     "getrf", \ref magma_dpotrf     "potrf"                           |  triangular factorization (LU, Cholesky)
 \ref magma_dgetrs_gpu "getrs", \ref magma_dpotrs_gpu "potrs"                           |  triangular forward and back solve
 \ref magma_dgetri_gpu "getri", \ref magma_dpotri     "potri"                           |  triangular inverse
-\ref magma_dgetf2_gpu "getf2", \ref magma_dpotf2_gpu "potf2"                           |  panel triangular factorization (BLAS-2)
+\ref magma_dgetf2_gpu "getf2", \ref magma_dpotf2_gpu "potf2"                           |  triangular panel factorization (BLAS-2)
 . **Orthogonal factorizations**                                                        |  **Description**
 ge{\ref magma_dgeqrf "qrf", \ref magma_dgeqlf "qlf",  \ref magma_dgelqf "lqf",  rqf*}  |  QR, QL, LQ, RQ factorization
 \ref magma_dgeqp3 "geqp3"                                                              |  QR with column pivoting (BLAS-3)
@@ -221,8 +227,8 @@ or{\ref magma_dormqr "mqr", \ref magma_dormql "mql",  \ref magma_dormlq "mlq",  
 un{\ref magma_zunmqr "mqr", \ref magma_zunmql "mql",  \ref magma_zunmlq "mlq",  mrq*}  |  multiply by Q after factorization (complex)
 or{\ref magma_dorgqr "gqr", gql*, glq*, grq*}                                          |  generate Q after factorization (real)
 un{\ref magma_zungqr "gqr", gql*, glq*, grq*}                                          |  generate Q after factorization (complex)
+\ref magma_dgeqr2_gpu "geqr2"                                                          |  QR panel factorization (BLAS-2)
 . **Eigenvalue & SVD**                                                                 |  **Description**
-\ref magma_dgeqr2_gpu "geqr2"                                                          |  panel QR factorization (BLAS-2)
 \ref magma_dgehrd "gehrd"                                                              |  Hessenberg  reduction (in geev)
 \ref magma_dsytrd "sytrd", \ref magma_zhetrd "hetrd"                                   |  tridiagonal reduction (in syev, heev)
 \ref magma_dgebrd "gebrd"                                                              |  bidiagonal  reduction (in gesvd)

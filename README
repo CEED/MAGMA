@@ -38,7 +38,7 @@ MAGMA README FILE
       setenv LAPACKDIR /opt/LAPACK
   
   Creating a shared library requires adding the -fPIC option in make.inc to
-  OPTS, FOPTS, F77OPTS, and NVOPTS. This is demonstrated in make.inc.mkl-shared.
+  CFLAGS, FFLAGS, F90FLAGS, and NVCCFLAGS. This is demonstrated in make.inc.mkl-shared.
   
   After proper modification of the make.inc file, running:
   
