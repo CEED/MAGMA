@@ -36,15 +36,19 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
-    double *rwork, *w1, *w2;
+    double *w1, *w2;
     double result[4] = {0};
     magma_int_t *iwork;
-    magma_int_t N, n2, info, nb, lwork, liwork, lda, lrwork;
+    magma_int_t N, n2, info, nb, lwork, liwork, lda;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double d_one         =  1.;
     double d_neg_one     = -1.;
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork;
+    magma_int_t lrwork;
+    #endif
     //double d_ten         = 10.;
     //magma_int_t izero    = 0;
     magma_int_t ione     = 1;
