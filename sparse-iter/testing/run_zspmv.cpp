@@ -67,7 +67,7 @@ int main( int argc, char** argv)
         " matrices \n\n", hA_SELLP.blocksize, hA_SELLP.alignment );
 
     while(  i < argc ){
-
+printf("check1\n");
         magma_z_csr_mtx( &hA,  argv[i]  ); 
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
@@ -76,7 +76,7 @@ int main( int argc, char** argv)
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
         magma_z_vector hx, hy, dx, dy;
-
+printf("check2\n");
         // init CPU vectors
         magma_z_vinit( &hx, Magma_CPU, hA.num_rows, one );
         magma_z_vinit( &hy, Magma_CPU, hA.num_rows, zero );
@@ -99,7 +99,7 @@ int main( int argc, char** argv)
         printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
         free(pntre);
-
+printf("check3\n");
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
         // SpMV on GPU (CSR)

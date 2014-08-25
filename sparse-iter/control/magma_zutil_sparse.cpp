@@ -33,7 +33,7 @@
 
 // --------------------
 const char *usage_sparse_short =
-"Usage: %s [options] [-h|--help]\n\n";
+"Usage: %s [options] [-h|--help]  matrices\n\n";
 
 const char *usage_sparse =
 "Options are:\n"
@@ -58,7 +58,7 @@ const char *usage_sparse =
 "               7   preconditioned GMRES\n"
 "               8   LOBPCG\n"
 "               9   Iter. Refinement\n"
-"               10  Jcobi\n"
+"               10  Jacobi\n"
 "               11  Block-asynchronous Iteration\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               0   no preconditioner\n"

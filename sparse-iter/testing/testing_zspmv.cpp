@@ -38,7 +38,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- running zspmv
+   -- testing sparse matrix vector product
 */
 int main( int argc, char** argv)
 {
