@@ -16,6 +16,7 @@ LIB += -lcusparse
 # utility functions
 ZSRC += \
     testing_zmatrix.cpp     \
+    testing_zsolver.cpp     \
 #	magma_zutil_sparse.cpp	\
 #	testing_z_multimv.cpp	\
 #	testing_z_matrix_io.cpp	\
