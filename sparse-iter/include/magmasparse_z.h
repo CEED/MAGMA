@@ -137,6 +137,11 @@ magma_int_t
 magma_zmscale(          magma_z_sparse_matrix *A, 
                         magma_scale_t scaling );
 
+magma_int_t 
+magma_zmdiff(           magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix B, 
+                        real_Double_t *res );
+
 magma_int_t
 magma_zmdiagadd(        magma_z_sparse_matrix *A, 
                         magmaDoubleComplex add );

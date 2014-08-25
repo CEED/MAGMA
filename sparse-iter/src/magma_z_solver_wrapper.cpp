@@ -37,8 +37,8 @@
                 output vector x        
 
     @param
-    precond     magma_z_preconditioner
-                preconditioner
+    zopts     magma_zopts
+              options for solver and preconditioner
 
     @ingroup magmasparse_zaux
     ********************************************************************/
