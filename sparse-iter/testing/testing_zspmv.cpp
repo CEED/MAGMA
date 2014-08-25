@@ -62,7 +62,7 @@ int main( int argc, char** argv)
         }else
             break;
     }
-    printf( "\n#    usage: ./testing_zspmv"
+    printf( "\n#    usage: ./run_zspmv"
         " [ --blocksize %d --alignment %d (for SELLP) ]"
         " matrices \n\n", hA_SELLP.blocksize, hA_SELLP.alignment );
 
@@ -85,10 +85,12 @@ int main( int argc, char** argv)
         magma_z_vinit( &dx, Magma_DEV, hA.num_rows, one );
         magma_z_vinit( &dy, Magma_DEV, hA.num_rows, zero );
 
+/*
         // calling MKL with CSR
         pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
         pntre[0] = 0;
         for (j=0; j<hA.num_rows; j++ ) pntre[j] = hA.row[j+1];
+
         start = magma_wtime(); 
         for (j=0; j<10; j++ )
         mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, 
@@ -99,6 +101,7 @@ int main( int argc, char** argv)
         printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
         free(pntre);
+*/
 
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
