@@ -47,7 +47,6 @@ const char *usage_sparse =
 "               0   no scaling\n"
 "               1   symmetric scaling to unit diagonal\n"
 "               2   scaling tu unit row-norm\n"
-/*
 " --solver      Possibility to choose a solver:\n"
 "               0   CG\n"
 "               1   merged CG\n"
@@ -61,8 +60,6 @@ const char *usage_sparse =
 "               9   Iter. Refinement\n"
 "               10  Jcobi\n"
 "               11  Block-asynchronous Iteration\n"
-*/
-
 " --precond x   Possibility to choose a preconditioner:\n"
 "               0   no preconditioner\n"
 "               1   Jacobi\n"
@@ -99,6 +96,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
     opts->solver_par.version = 0;
     opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_JACOBI;
+    opts->solver_par.solver = Magma_CG;
     
     printf( usage_sparse_short, argv[0] );
     
