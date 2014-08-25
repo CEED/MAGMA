@@ -15,7 +15,7 @@ LIB += -lcusparse
 # ----------
 # utility functions
 ZSRC += \
-	magma_zutil_sparse.cpp	\
+#	magma_zutil_sparse.cpp	\
 #	testing_z_multimv.cpp	\
 #	testing_z_matrix_io.cpp	\
 #    testing_ziluchow.cpp \
@@ -52,6 +52,7 @@ ZSRC += \
 # ----------
 # run Krylov space linear solvers
 ZSRC += \
+	run_zsolver.cpp     \
 	run_zcg.cpp		    \
 	run_zbicgstab.cpp	\
 	run_ziterref.cpp	\
