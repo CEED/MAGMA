@@ -174,6 +174,8 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
 magma_int_t 
 magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
+        magma_z_cucsrtranspose( A, B );
+/*
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_CSR ){
             z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, 
@@ -203,6 +205,8 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         return MAGMA_SUCCESS;
     }
 
+*/
+    return MAGMA_SUCCESS;
 }
 
 

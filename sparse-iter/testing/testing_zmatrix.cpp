@@ -38,7 +38,7 @@ int main( int argc, char** argv)
 
 
     real_Double_t res;
-    magma_z_sparse_matrix A, B, B_d, A2;
+    magma_z_sparse_matrix A, AT, A2, B, B_d;
 
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
@@ -53,15 +53,22 @@ int main( int argc, char** argv)
         // scale matrix
         magma_zmscale( &A, zopts.scaling );
 
+        // transpose
+        magma_z_mtranspose( A, &AT );
+
         // convert, copy back and forth to check everything works
-        magma_z_mconvert( A, &B, Magma_CSR, zopts.output_format );
+        magma_z_mconvert( AT, &B, Magma_CSR, zopts.output_format );
+        magma_z_mfree(&AT); 
         magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
         magma_z_mfree(&B);
         magma_z_mtransfer( B_d, &B, Magma_DEV, Magma_CPU );
         magma_z_mfree(&B_d);
-        magma_z_mconvert( B, &A2, zopts.output_format,Magma_CSR );      
+        magma_z_mconvert( B, &AT, zopts.output_format,Magma_CSR );      
         magma_z_mfree(&B);
 
+        // transpose back
+        magma_z_mtranspose( AT, &A2 );
+        magma_z_mfree(&AT); 
         magma_zmdiff( A, A2, &res);
         printf(" ||A-B||_F = %f\n", res);
 
