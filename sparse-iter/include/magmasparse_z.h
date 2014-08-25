@@ -510,6 +510,10 @@ magma_z_precond(        magma_z_sparse_matrix A,
                         magma_z_preconditioner precond );
 
 magma_int_t
+magma_z_solver(         magma_z_sparse_matrix A, magma_z_vector b, 
+                        magma_z_vector *x, magma_zopts *zopts );
+
+magma_int_t
 magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b, 
                       magma_z_preconditioner *precond );
 
