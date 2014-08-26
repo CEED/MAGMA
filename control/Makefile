@@ -36,8 +36,8 @@ SRC := \
 	magma_threadsetting.cpp	\
 	magmawinthread.cpp	\
 	pthread_barrier.cpp	\
-	queue.cpp		\
 	strlcpy.cpp		\
+	thread_queue.cpp	\
 	timer.cpp		\
 	trace.cpp		\
 	xerbla.cpp		\

@@ -10,7 +10,7 @@
        
        @precisions normal z -> c
 */
-#include "queue.hpp"
+#include "thread_queue.hpp"
 #include "timer.h"
 
 #include "common_magma.h"  // after thread.hpp, so max, min are defined
@@ -386,7 +386,7 @@ magma_int_t magma_ztrevc3_mt(
     magma_int_t nthread = magma_get_parallel_numthreads();
     magma_int_t lapack_nthread = magma_get_lapack_numthreads();
     magma_set_lapack_numthreads( 1 );
-    magma_queue queue;
+    magma_thread_queue queue;
     queue.launch( nthread );
     //printf( "nthread %d, %d\n", nthread, lapack_nthread );
     
