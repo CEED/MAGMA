@@ -245,7 +245,9 @@ $(LIBLAPACKTEST):
 
 $(EXE): $(LIBMAGMA) $(LIBLAPACKTEST) $(LIBTEST)
 
-clean:
+clean: cleanobj cleanexe
+
+cleanobj:
 	cd lin    && $(MAKE) clean
 	cd matgen && $(MAKE) clean
 	rm -f *.o *~ $(LIBTEST)
