@@ -98,9 +98,11 @@ ZSRC += \
 ZSRC += \
 	testing_zcgeqrsv_gpu.cpp	\
 	\
+	testing_zgegqr_gpu.cpp	\
 	testing_zgelqf_gpu.cpp	\
 	testing_zgels_gpu.cpp	\
 	testing_zgels3_gpu.cpp	\
+	testing_zgeqp3_gpu.cpp	\
 	testing_zgeqr2_gpu.cpp	\
 	testing_zgeqr2x_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp	\
@@ -109,12 +111,12 @@ ZSRC += \
 	testing_zunmqr_gpu.cpp	\
 	\
 	testing_zgeqrf_mgpu.cpp	\
-	testing_zgegqr_gpu.cpp  \
 
 # QR, CPU interface
 ZSRC += \
 	testing_zgelqf.cpp	\
 	testing_zgeqlf.cpp	\
+	testing_zgeqp3.cpp	\
 	testing_zgeqrf.cpp	\
 	testing_zungqr.cpp	\
 	testing_zunmlq.cpp	\
@@ -122,9 +124,6 @@ ZSRC += \
 	testing_zunmqr.cpp	\
 	\
 	testing_zungqr_m.cpp	\
-	\
-	testing_zgeqp3.cpp	\
-	testing_zgeqp3_gpu.cpp	\
 
 # ----------
 # symmetric eigenvalues, GPU interface
@@ -160,9 +159,9 @@ ZSRC += \
 ZSRC += \
 	testing_dgeev.cpp	\
 	testing_zgeev.cpp	\
-	testing_zgehrd.cpp	\
 	testing_dgeev_m.cpp	\
 	testing_zgeev_m.cpp	\
+	testing_zgehrd.cpp	\
 	testing_zgehrd_m.cpp	\
 
 # ----------

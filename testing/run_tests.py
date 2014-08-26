@@ -31,7 +31,7 @@
 #       testing_sgetrf_mgpu -c2                   ok
 #       testing_sgesv -c                          ok
 #       testing_sgetrf -c2                        ok
-#       
+#
 #       ****************************************************************************************************
 #       summary
 #       ****************************************************************************************************
@@ -57,8 +57,8 @@
 #           3     1     ---   (  ---  )      0.00 (   0.00)   8.99e-09   ok
 #       ...
 #         ok
-#       [enter to continue; M to make and re-run] 
-#       
+#       [enter to continue; M to make and re-run]
+#
 #       ****************************************************************************************************
 #       ./testing_sgetri_gpu -c --range 1:20:1 ...
 #       ****************************************************************************************************
@@ -66,7 +66,7 @@
 #       % CUDA runtime 6000, driver 6000. MAGMA not compiled with OpenMP.
 #       % device 0: GeForce GT 750M, 925.5 MHz clock, 2047.6 MB memory, capability 3.0
 #       Usage: ./testing_sgetri_gpu [options] [-h|--help]
-#       
+#
 #           N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / (N*||A||_F)
 #       =================================================================
 #           1      0.00 (   0.00)      0.00 (   0.00)   6.87e+01   failed
@@ -74,10 +74,10 @@
 #           3      0.01 (   0.00)      0.00 (   0.00)   1.12e+00   failed
 #       ...
 #         ** 45 tests failed
-#       [enter to continue; M to make and re-run] 
-#       
+#       [enter to continue; M to make and re-run]
+#
 #       ...
-#       
+#
 #       ****************************************************************************************************
 #       summary
 #       ****************************************************************************************************
@@ -110,9 +110,9 @@
 #
 # The -s/--small, -m/--medium, -l/--large options control what sizes are tested,
 # the default being all three sets.
-# -s are small  tests, N < 300
-# -m are medium tests, N < 1000
-# -l are large  tests, N > 1000
+#       -s/--small  does small  tests, N < 300.
+#       -m/--medium does medium tests, N < 1000.
+#       -l/--large  does large  tests, N > 1000.
 # For example, running small and medium tests:
 #
 #       ./run_tests.py -s -m
@@ -267,6 +267,10 @@ mnk    = n + tall + wide + mnk
 #
 # These match the order in the Makefile,
 # except in some cases the "d" version from the Makefile isn't required here
+# To compare with Makefile:
+# grep '^\s+testing_\w+' Makefile >! a
+# grep "\('#?testing_\w\w+" run_tests.py | perl -pe "s/#?\('#?//; s/',.*/.cpp \\/;" | uniq > ! b
+# diff -w a b
 
 tests = []
 
@@ -373,6 +377,13 @@ blas = (
 	('testing_ztrtri_diag',         '-L -c',  n,    ''),
 	('testing_ztrtri_diag',         '-U -c',  n,    ''),
 	
+	('testing_zhemm_mgpu',          '-L -c',  n,    ''),
+	('testing_zhemm_mgpu',          '-U -c',  n,    ''),
+	('testing_zhemv_mgpu',          '-L -c',  n,    ''),
+	('testing_zhemv_mgpu',          '-U -c',  n,    ''),
+	('testing_zher2k_mgpu',         '-L -c',  n,    ''),
+	('testing_zher2k_mgpu',         '-U -c',  n,    ''),
+	
 	('#testing_blas_z',                '-c',  mnk,  'takes long time; cublas only'),
 	('testing_cblas_z',                '-c',  n,    ''),
 )
@@ -382,10 +393,6 @@ if ( opts.blas ):
 # ----------
 # auxiliary
 aux = (
-	#('testing_auxiliary',             '-c',  '',   ''),  # run_tests misinterprets output as errors
-	('testing_constants',              '-c',  '',   ''),
-	('testing_operators',              '-c',  '',   ''),
-	('testing_parse_opts',             '-c',  '',   ''),
 	('testing_zgeadd',                 '-c',  mn,   ''),
 	('testing_zgeadd_batched',         '-c',  mn,   ''),
 	('testing_zlacpy',                 '-c',  mn,   ''),
@@ -415,6 +422,11 @@ aux = (
 	
 	('testing_zswap',                  '-c',  n,    ''),
 	('testing_ztranspose',             '-c',  mn,   ''),
+	
+	#('testing_auxiliary',             '-c',  '',   ''),  # run_tests misinterprets output as errors
+	('testing_constants',              '-c',  '',   ''),
+	('testing_operators',              '-c',  '',   ''),
+	('testing_parse_opts',             '-c',  '',   ''),
 )
 if ( opts.aux ):
 	tests += aux
@@ -424,30 +436,30 @@ if ( opts.aux ):
 chol = (
 	('testing_zcposv_gpu',       '-L    -c',  n,    ''),
 	('testing_zcposv_gpu',       '-U    -c',  n,    ''),
-	                                               
+	
 	('testing_zposv_gpu',        '-L    -c',  n,    ''),
 	('testing_zposv_gpu',        '-U    -c',  n,    ''),
-	                                               
+	
 	('testing_zpotrf_gpu',       '-L   -c2',  n,    ''),
 	('testing_zpotrf_gpu',       '-U   -c2',  n,    ''),
-	                            
+	
 	('testing_zpotf2_gpu',       '-L    -c',  n + tall,  ''),
 	('testing_zpotf2_gpu',       '-U    -c',  n + tall,  ''),
-	                            
+	
 	('testing_zpotri_gpu',       '-L    -c',  n,    ''),
 	('testing_zpotri_gpu',       '-U    -c',  n,    ''),
-	                                               
+	
 	('testing_zpotrf_mgpu',      '-L    -c',  n,    ''),
 	('testing_zpotrf_mgpu',      '-U    -c',  n,    ''),
-	                                               
-# ----------                                       
-# Cholesky, CPU interface                          
+	
+# ----------
+# Cholesky, CPU interface
 	('testing_zposv',            '-L    -c',  n,    ''),
 	('testing_zposv',            '-U    -c',  n,    ''),
-	                                               
+	
 	('testing_zpotrf',           '-L    -c',  n,    ''),
 	('testing_zpotrf',           '-U    -c',  n,    ''),
-	                                               
+	
 	('testing_zpotri',           '-L    -c',  n,    ''),
 	('testing_zpotri',           '-U    -c',  n,    ''),
 )
@@ -477,15 +489,16 @@ if ( opts.lu ):
 # TODO qrf uses  -c2 ?
 qr = (
 	('testing_zcgeqrsv_gpu',           '-c',  mn,   ''),
-	('testing_zgelqf_gpu',             '-c',  mn,   ''),
-	('testing_zgels_gpu',              '-c',  mn,   ''),
-	('testing_zgels3_gpu',             '-c',  mn,   ''),
-	                                                
+	
 	('testing_zgegqr_gpu', '--version 1 -c',  mn,   ''),
 	('testing_zgegqr_gpu', '--version 2 -c',  mn,   ''),
 	('testing_zgegqr_gpu', '--version 3 -c',  mn,   ''),
 	('testing_zgegqr_gpu', '--version 4 -c',  mn,   ''),
-	                                                
+	
+	('testing_zgelqf_gpu',             '-c',  mn,   ''),
+	('testing_zgels_gpu',              '-c',  mn,   ''),
+	('testing_zgels3_gpu',             '-c',  mn,   ''),
+	
 	('testing_zgeqp3_gpu',             '-c',  mn,   'crashes'),
 	('testing_zgeqr2_gpu',             '-c',  mn,   ''),
 	
@@ -499,9 +512,9 @@ qr = (
 	('testing_zungqr_gpu',             '-c',  mnk,  ''),
 	('testing_zunmqr_gpu',             '-c',  mnk,  ''),
 	('testing_zgeqrf_mgpu',            '-c',  mn,   ''),
-	                                                
-# ----------                                        
-# QR, CPU interface                                 
+	
+# ----------
+# QR, CPU interface
 	('testing_zgelqf',                 '-c',  mn,   ''),
 	('testing_zgeqlf',                 '-c',  mn,   ''),
 	('testing_zgeqp3',                 '-c',  mn,   ''),
@@ -515,43 +528,42 @@ qr = (
 if ( opts.qr ):
 	tests += qr
 
-# ----------                                   
+# ----------
 # symmetric eigenvalues, GPU interface
 syev = (
 	# no-vectors/vectors, lower/upper
+	#('testing_dsyevd_gpu',              '',  n,    ''),  # covered by zheevd_gpu
 	#('testing_zheevd_gpu',     '-L -JN -c',  n,    '-c implies -JV'),
 	#('testing_zheevd_gpu',     '-U -JN -c',  n,    '-c implies -JV'),
 	('testing_zheevd_gpu',      '-L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',      '-U -JV -c',  n,    ''),
-	                                                
+	
 	('testing_zhetrd_gpu',      '-L     -c',  n,    ''),
 	('testing_zhetrd_gpu',      '-U     -c',  n,    ''),
-	                                                
+	
 	('testing_zhetrd_mgpu',     '-L     -c',  n,    ''),
 	('testing_zhetrd_mgpu',     '-U     -c',  n,    ''),
 	
 # ----------
 # symmetric eigenvalues, CPU interface
+	#('testing_dsyevd',                  '',  n,    ''),  # covered by zheevd
 	#('testing_zheevd',         '-L -JN -c',  n,    '-c implies -JV'),
 	#('testing_zheevd',         '-U -JN -c',  n,    '-c implies -JV'),
 	('testing_zheevd',          '-L -JV -c',  n,    ''),
 	('testing_zheevd',          '-U -JV -c',  n,    ''),
-	                                                 
+	
 	('testing_zhetrd',          '-L     -c',  n,    ''),
 	('testing_zhetrd',          '-U     -c',  n,    ''),
 	
-# ----------                                         
-# symmetric eigenvalues, 2-stage        
+# ----------
+# symmetric eigenvalues, 2-stage
 	#('testing_zhetrd_he2hb',       '-L -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage'),
 	#('testing_zhetrd_he2hb',       '-U -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage. upper not implemented'),
-	                                    
+	
 	#('testing_zheevdx_2stage', '-L -JN -c',  n,    '-c implies -JV'),
 	#('testing_zheevdx_2stage', '-U -JN -c',  n,    '-c implies -JV'),
 	('testing_zheevdx_2stage',  '-L -JV -c',  n,    ''),
 	('#testing_zheevdx_2stage', '-U -JV -c',  n,    'upper not implemented'),
-	                               
-	('testing_zhetrd_he2hb_mgpu',   '-L -c',  n,    ''),
-	('#testing_zhetrd_he2hb_mgpu',  '-U -c',  n,    'upper not implemented'),
 )
 if ( opts.syev ):
 	tests += syev
@@ -563,15 +575,15 @@ sygv = (
 	#('testing_zhegvd',          '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd',          '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd',          '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	                                                     
+	
 	#('testing_zhegvd',          '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd',          '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd',          '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
-	                                                     
+	
 	('testing_zhegvd',           '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JV --itype 3 -c',  n,  ''),
-	                                                         
+	
 	('testing_zhegvd',           '-U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvd',           '-U -JV --itype 3 -c',  n,  ''),
@@ -580,7 +592,7 @@ sygv = (
 	#('testing_zhegvd_m',        '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd_m',        '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd_m',        '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	                             
+	
 	#('testing_zhegvd_m',        '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd_m',        '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvd_m',        '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
@@ -597,7 +609,7 @@ sygv = (
 	#('testing_zhegvdx',         '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx',         '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx',         '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	                             
+	
 	#('testing_zhegvdx',         '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx',         '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx',         '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
@@ -605,7 +617,7 @@ sygv = (
 	('testing_zhegvdx',          '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JV --itype 3 -c',  n,  ''),
-	                                                         
+	
 	('testing_zhegvdx',          '-U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JV --itype 3 -c',  n,  ''),
@@ -614,7 +626,7 @@ sygv = (
 	#('testing_zhegvdx_2stage',  '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx_2stage',  '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx_2stage',  '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	                             
+	
 	#('testing_zhegvdx_2stage',  '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx_2stage',  '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
 	#('testing_zhegvdx_2stage',  '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
@@ -626,6 +638,23 @@ sygv = (
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 1 -c',  n,  'upper not implemented'),
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 2 -c',  n,  'upper not implemented'),
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 3 -c',  n,  'upper not implemented'),
+	
+	# lower/upper, no-vector/vector, itypes
+	#('testing_zhegvdx_2stage_m', '-L -JN --itype 1 -c', n,  '-c implies -JV'),
+	#('testing_zhegvdx_2stage_m', '-L -JN --itype 2 -c', n,  '-c implies -JV'),
+	#('testing_zhegvdx_2stage_m', '-L -JN --itype 3 -c', n,  '-c implies -JV'),
+	
+	#('testing_zhegvdx_2stage_m', '-U -JN --itype 1 -c', n,  '-c implies -JV'),
+	#('testing_zhegvdx_2stage_m', '-U -JN --itype 2 -c', n,  '-c implies -JV'),
+	#('testing_zhegvdx_2stage_m', '-U -JN --itype 3 -c', n,  '-c implies -JV'),
+	
+	('testing_zhegvdx_2stage_m',  '-L -JV --itype 1 -c', n,  ''),
+	('testing_zhegvdx_2stage_m',  '-L -JV --itype 2 -c', n,  ''),
+	('testing_zhegvdx_2stage_m',  '-L -JV --itype 3 -c', n,  ''),
+	
+	('#testing_zhegvdx_2stage_m', '-U -JV --itype 1 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage_m', '-U -JV --itype 2 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage_m', '-U -JV --itype 3 -c', n,  'upper not implemented'),
 )
 if ( opts.sygv ):
 	tests += sygv
@@ -634,12 +663,14 @@ if ( opts.sygv ):
 # non-symmetric eigenvalues
 geev = (
 	# right & left no-vector/vector; not all combos are tested here
+	#('testing_dgeev',                   '',  n,    ''),  # covered by testing_zgeev
 	('testing_zgeev',          '-RN -LN -c',  n,    ''),
 	('testing_zgeev',          '-RV -LV -c',  n,    ''),
-	                                                
+	
+	#('testing_dgeev_m',                 '',  n,    ''),  # covered by testing_zgeev_m
 	('testing_zgeev_m',        '-RN -LN -c',  n,    ''),
 	('testing_zgeev_m',        '-RV -LV -c',  n,    ''),
-	                                                
+	
 	('testing_zgehrd',                 '-c',  n,    ''),
 	('testing_zgehrd_m',               '-c',  n,    ''),
 )
@@ -656,12 +687,12 @@ svd = (
 	('testing_zgesdd',         '-US     -c',  mn,   ''),
 	('testing_zgesdd',         '-UO     -c',  mn,   ''),
 	('testing_zgesdd',         '-UA     -c',  mn,   ''),
-	                                                
+	
 	('testing_zgesvd',         '-UN -VN -c',  mn,   ''),
 	('testing_zgesvd',         '-US -VS -c',  mn,   ''),
 	('testing_zgesvd',         '-UO -VS -c',  mn,   ''),
 	('testing_zgesvd',         '-UA -VA -c',  mn,   ''),
-	                                                
+	
 	('testing_zgebrd',                 '-c',  mn,   ''),
 	('testing_zunmbr',                 '-c',  mnk,  ''),
 )
