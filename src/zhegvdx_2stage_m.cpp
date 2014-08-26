@@ -389,6 +389,24 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu,
             } else {
                 trans = MagmaConjTrans;
             }
+            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu --- \n");
+            magmaDoubleComplex *dA=NULL, *dB=NULL;
+            magma_int_t ldda = n;
+            magma_int_t lddb = n;
+            
+            if (MAGMA_SUCCESS != magma_zmalloc( &dB, n*lddb ) ) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
+            }
+            if (MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda ) ) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
+            }
+            magma_zsetmatrix( n, n, B, ldb, dB, lddb );
+            magma_zsetmatrix( n, n, A, lda, dA, ldda );
+            magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
+                        n, n, c_one, dB, lddb, dA, ldda);
+            magma_zgetmatrix( n, n, dA, ldda, A, lda );
 
             //magma_ztrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, B, ldb, A, lda);
         }

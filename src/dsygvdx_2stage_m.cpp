@@ -357,7 +357,24 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, magma_vec_t jobz, m
             }
 
             //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, B, ldb, A, lda);
-        }
+            printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu --- \n");
+            double *dA=NULL, *dB=NULL;
+            magma_int_t ldda = n;
+            magma_int_t lddb = n;
+            
+            if (MAGMA_SUCCESS != magma_dmalloc( &dB, n*lddb ) ) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
+            }
+            if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda ) ) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
+            }
+            magma_dsetmatrix( n, n, B, ldb, dB, lddb );
+            magma_dsetmatrix( n, n, A, lda, dA, ldda );
+            magma_dtrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
+                        n, n, d_one, dB, lddb, dA, ldda);
+            magma_dgetmatrix( n, n, dA, ldda, A, lda );        }
 
         timer_stop( time );
         timer_printf( "time dtrsm/mm + getmatrix = %6.2f\n", time );
