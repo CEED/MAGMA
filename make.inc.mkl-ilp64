@@ -29,7 +29,7 @@ RANLIB    = ranlib
 # Compiling with -std=c++98 -pedantic finds non-standard things like variable length arrays
 CFLAGS    = -O3 -DADD_ -Wall -fno-strict-aliasing -fopenmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DMKL_ILP64
 CFLAGS   += -pedantic -Wno-long-long
-CFLAGS   += -Werror  # uncomment to ensure all warnings are dealt with
+#CFLAGS   += -Werror  # uncomment to ensure all warnings are dealt with
 CXXFLAGS := $(CFLAGS) -std=c++98
 CFLAGS   += -std=c99
 FFLAGS    = -O3 -DADD_ -Wall -fdefault-integer-8
