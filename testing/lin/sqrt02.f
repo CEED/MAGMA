@@ -89,7 +89,7 @@
       EXTERNAL           SLAMCH, SLANGE, SLANSY
 *     ..
 *     .. External Subroutines ..
-      EXTERNAL           SGEMM, SLACPY, SLASET, SORGQR, SSYRK
+      EXTERNAL           XERBLA, SGEMM, SLACPY, SLASET, SORGQR, SSYRK
 *     ..
 *     .. Intrinsic Functions ..
       INTRINSIC          MAX, REAL

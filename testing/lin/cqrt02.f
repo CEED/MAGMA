@@ -89,7 +89,7 @@
       EXTERNAL           CLANGE, CLANSY, SLAMCH
 *     ..
 *     .. External Subroutines ..
-      EXTERNAL           CGEMM, CHERK, CLACPY, CLASET, CUNGQR
+      EXTERNAL           XERBLA, CGEMM, CHERK, CLACPY, CLASET, CUNGQR
 *     ..
 *     .. Intrinsic Functions ..
       INTRINSIC          CMPLX, MAX, REAL

@@ -89,7 +89,7 @@
       EXTERNAL           DLAMCH, DLANGE, DLANSY
 *     ..
 *     .. External Subroutines ..
-      EXTERNAL           DGEMM, DLACPY, DLASET, DORGQR, DSYRK
+      EXTERNAL           XERBLA, DGEMM, DLACPY, DLASET, DORGQR, DSYRK
 *     ..
 *     .. Intrinsic Functions ..
       INTRINSIC          DBLE, MAX

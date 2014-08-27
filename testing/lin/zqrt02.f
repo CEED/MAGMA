@@ -89,7 +89,7 @@
       EXTERNAL           DLAMCH, ZLANGE, ZLANSY
 *     ..
 *     .. External Subroutines ..
-      EXTERNAL           ZGEMM, ZHERK, ZLACPY, ZLASET, ZUNGQR
+      EXTERNAL           XERBLA, ZGEMM, ZHERK, ZLACPY, ZLASET, ZUNGQR
 *     ..
 *     .. Intrinsic Functions ..
       INTRINSIC          DBLE, DCMPLX, MAX
