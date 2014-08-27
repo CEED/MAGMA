@@ -10,6 +10,7 @@
        @author Mark Gates
 */
 #include "common_magma.h"
+#include "timer.h"
 
 #define PRECISION_d
 
@@ -21,6 +22,15 @@
  * Version5 - Multi-GPU magma_zgehrd_m with T on CPU, multi-GPU magma_zunghr_m
  */
 #define Version5
+
+/*
+ * TREVC version 1 - LAPACK
+ * TREVC version 2 - new blocked LAPACK
+ * TREVC version 3 - blocked, single-threaded (MAGMA)
+ * TREVC version 4 - blocked, multi-threaded  (MAGMA)
+ * TREVC version 5 - blocked, multi-threaded, GPU (MAGMA)
+ */
+#define TREVC_VERSION 4
 
 /**
     Purpose
@@ -105,7 +115,8 @@
 
     @param[in]
     lwork   INTEGER
-            The dimension of the array WORK.  LWORK >= (1+nb)*N.
+            The dimension of the array WORK.  LWORK >= (2+nb)*N.
+            For optimal performance, LWORK >= (2+2*nb)*N.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -144,10 +155,15 @@ magma_dgeev_m(
     double dum[1], eps;
     double anrm, cscale, bignum, smlnum;
     magma_int_t i, k, ilo, ihi;
-    magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, i__1, i__2, nb;
-    magma_int_t scalea, minwrk, lquery, wantvl, wantvr, select[1];
+    magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, nb;
+    magma_int_t scalea, minwrk, optwrk, lquery, wantvl, wantvr, select[1];
     
-    const char* side_  = NULL;
+    magma_side_t side = MagmaRight;
+    
+    magma_timer_t time_total=0, time_gehrd=0, time_unghr=0, time_hseqr=0, time_trevc=0, time_sum=0;
+    magma_flops_t flop_total=0, flop_gehrd=0, flop_unghr=0, flop_hseqr=0, flop_trevc=0, flop_sum=0;
+    timer_start( time_total );
+    flops_start( flop_total );
     
     *info = 0;
     lquery = (lwork == -1);
@@ -170,8 +186,9 @@ magma_dgeev_m(
     /* Compute workspace */
     nb = magma_get_dgehrd_nb( n );
     if (*info == 0) {
-        minwrk = (2+nb)*n;
-        work[0] = MAGMA_D_MAKE( (double) minwrk, 0. );
+        minwrk = (2 +   nb)*n;
+        optwrk = (2 + 2*nb)*n;
+        work[0] = MAGMA_D_MAKE( (double) optwrk, 0. );
         
         if (lwork < minwrk && ! lquery) {
             *info = -13;
@@ -230,16 +247,20 @@ magma_dgeev_m(
     }
 
     /* Balance the matrix
-     * (Workspace: need N) */
+     * (Workspace: need N)
+     *  - this space is reserved until after gebak */
     ibal = 0;
     lapackf77_dgebal( "B", &n, A, &lda, &ilo, &ihi, &work[ibal], &ierr );
 
     /* Reduce to upper Hessenberg form
-     * (Workspace: need 3*N, prefer 2*N + N*NB) */
+     * (Workspace: need 3*N, prefer 2*N + N*NB)
+     *  - including N reserved for gebal/gebak, unused by dgehrd */
     itau = ibal + n;
     iwrk = itau + n;
     liwrk = lwork - iwrk;
 
+    timer_start( time_gehrd );
+    flops_start( flop_gehrd );
     #if defined(Version1)
         // Version 1 - LAPACK
         lapackf77_dgehrd( &n, &ilo, &ihi, A, &lda,
@@ -247,9 +268,9 @@ magma_dgeev_m(
     #elif defined(Version2)
         // Version 2 - LAPACK consistent HRD
         magma_dgehrd2( n, ilo, ihi, A, lda,
-                       &work[itau], &work[iwrk], &liwrk, &ierr );
+                       &work[itau], &work[iwrk], liwrk, &ierr );
     #elif defined(Version3)
-        // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored,
+        // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored,
         magma_dgehrd( n, ilo, ihi, A, lda,
                       &work[itau], &work[iwrk], liwrk, dT, &ierr );
     #elif defined(Version4) || defined(Version5)
@@ -258,76 +279,102 @@ magma_dgeev_m(
                         &work[itau], &work[iwrk], liwrk, T, &ierr );
         magma_dsetmatrix( nb, n, T, nb, dT, nb );
     #endif
+    time_sum += timer_stop( time_gehrd );
+    flop_sum += flops_stop( flop_gehrd );
 
     if (wantvl) {
         /* Want left eigenvectors
          * Copy Householder vectors to VL */
-        side_ = "Left";
-        lapackf77_dlacpy( MagmaLowerStr, &n, &n,
-                          A, &lda, VL, &ldvl );
+        side = MagmaLeft;
+        lapackf77_dlacpy( MagmaLowerStr, &n, &n, A, &lda, VL, &ldvl );
 
         /* Generate orthogonal matrix in VL
-         * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
+         * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB)
+         *  - including N reserved for gebal/gebak, unused by dorghr */
+        timer_start( time_unghr );
+        flops_start( flop_unghr );
         #if defined(Version1) || defined(Version2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, VL, &ldvl, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(Version3) || defined(Version4)
-            // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+            // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_dorghr( n, ilo, ihi, VL, ldvl, &work[itau], dT, nb, &ierr );
         #elif defined(Version5)
             // Version 5 - Multi-GPU, T on host
             magma_dorghr_m( n, ilo, ihi, VL, ldvl, &work[itau], T, nb, &ierr );
         #endif
+        time_sum += timer_stop( time_unghr );
+        flop_sum += flops_stop( flop_unghr );
 
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         /* Perform QR iteration, accumulating Schur vectors in VL
-         * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
+         * (Workspace: need N+1, prefer N+HSWORK (see comments) )
+         *  - including N reserved for gebal/gebak, unused by dhseqr */
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, wr, wi,
                           VL, &ldvl, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
 
         if (wantvr) {
             /* Want left and right eigenvectors
              * Copy Schur vectors to VR */
-            side_ = "Both";
+            side = MagmaBothSides;
             lapackf77_dlacpy( "F", &n, &n, VL, &ldvl, VR, &ldvr );
         }
     }
     else if (wantvr) {
         /* Want right eigenvectors
          * Copy Householder vectors to VR */
-        side_ = "Right";
+        side = MagmaRight;
         lapackf77_dlacpy( "L", &n, &n, A, &lda, VR, &ldvr );
 
         /* Generate orthogonal matrix in VR
-         * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
+         * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB)
+         *  - including N reserved for gebal/gebak, unused by dorghr */
+        timer_start( time_unghr );
+        flops_start( flop_unghr );
         #if defined(Version1) || defined(Version2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, VR, &ldvr, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(Version3) || defined(Version4)
-            // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+            // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_dorghr( n, ilo, ihi, VR, ldvr, &work[itau], dT, nb, &ierr );
         #elif defined(Version5)
             // Version 5 - Multi-GPU, T on host
             magma_dorghr_m( n, ilo, ihi, VR, ldvr, &work[itau], T, nb, &ierr );
         #endif
+        time_sum += timer_stop( time_unghr );
+        flop_sum += flops_stop( flop_unghr );
 
         /* Perform QR iteration, accumulating Schur vectors in VR
-         * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
+         * (Workspace: need N+1, prefer N+HSWORK (see comments) )
+         *  - including N reserved for gebal/gebak, unused by dhseqr */
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, wr, wi,
                           VR, &ldvr, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
     }
     else {
         /* Compute eigenvalues only
-         * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
+         * (Workspace: need N+1, prefer N+HSWORK (see comments) )
+         *  - including N reserved for gebal/gebak, unused by dhseqr */
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, wr, wi,
                           VR, &ldvr, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
     }
 
     /* If INFO > 0 from DHSEQR, then quit */
@@ -335,12 +382,34 @@ magma_dgeev_m(
         goto CLEANUP;
     }
 
+    timer_start( time_trevc );
+    flops_start( flop_trevc );
     if (wantvl || wantvr) {
         /* Compute left and/or right eigenvectors
-         * (Workspace: need 4*N) */
-        lapackf77_dtrevc( side_, "B", select, &n, A, &lda, VL, &ldvl,
+         * (Workspace: need 4*N, prefer (2 + 2*nb)*N)
+         *  - including N reserved for gebal/gebak, unused by dtrevc */
+        liwrk = lwork - iwrk;
+        #if TREVC_VERSION == 1
+        lapackf77_dtrevc( lapack_side_const(side), "B", select, &n, A, &lda, VL, &ldvl,
                           VR, &ldvr, &n, &nout, &work[iwrk], &ierr );
+        #elif TREVC_VERSION == 2
+        lapackf77_dtrevc3( lapack_side_const(side), "B", select, &n, A, &lda, VL, &ldvl,
+                           VR, &ldvr, &n, &nout, &work[iwrk], &liwrk, &ierr );
+        #elif TREVC_VERSION == 3
+        magma_dtrevc3( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                       VR, ldvr, n, &nout, &work[iwrk], liwrk, &ierr );
+        #elif TREVC_VERSION == 4
+        magma_dtrevc3_mt( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                          VR, ldvr, n, &nout, &work[iwrk], liwrk, &ierr );
+        #elif TREVC_VERSION == 5
+        magma_dtrevc3_mt_gpu( side, MagmaBacktransVec, select, n, A, lda, VL, ldvl,
+                              VR, ldvr, n, &nout, &work[iwrk], liwrk, &ierr );
+        #else
+        #error Unknown TREVC_VERSION
+        #endif
     }
+    time_sum += timer_stop( time_trevc );
+    flop_sum += flops_stop( flop_trevc );
 
     if (wantvl) {
         /* Undo balancing of left eigenvectors
@@ -409,14 +478,17 @@ magma_dgeev_m(
 CLEANUP:
     /* Undo scaling if necessary */
     if (scalea) {
-        i__1 = n - (*info);
-        i__2 = max( n - (*info), 1 );
-        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wr + (*info), &i__2, &ierr );
-        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wi + (*info), &i__2, &ierr );
+        // converged eigenvalues, stored in wr[i+1:n] and wi[i+1:n] for i = INFO
+        magma_int_t nval = n - (*info);
+        magma_int_t ld = max( nval, 1 );
+        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, wr + (*info), &ld, &ierr );
+        lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, wi + (*info), &ld, &ierr );
         if (*info > 0) {
-            i__1 = ilo - 1;
-            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wr, &n, &ierr );
-            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &i__1, &ione, wi, &n, &ierr );
+            // first ilo columns were already upper triangular,
+            // so the corresponding eigenvalues are also valid.
+            nval = ilo - 1;
+            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, wr, &n, &ierr );
+            lapackf77_dlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, wi, &n, &ierr );
         }
     }
 
@@ -426,6 +498,15 @@ CLEANUP:
     #if defined(Version4) || defined(Version5)
     magma_free_cpu( T );
     #endif
+    
+    timer_stop( time_total );
+    flops_stop( flop_total );
+    timer_printf( "dgeev times n %5d, gehrd %7.3f, unghr %7.3f, hseqr %7.3f, trevc %7.3f, total %7.3f, sum %7.3f\n",
+                  (int) n, time_gehrd, time_unghr, time_hseqr, time_trevc, time_total, time_sum );
+    timer_printf( "dgeev flops n %5d, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7lld\n",
+                  (int) n, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_total, flop_sum );
+    
+    work[0] = MAGMA_D_MAKE( (double) optwrk, 0. );
     
     return *info;
 } /* magma_dgeev */
