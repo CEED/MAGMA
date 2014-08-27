@@ -486,7 +486,6 @@ if ( opts.lu ):
 
 # ----------
 # QR and least squares, GPU interface
-# TODO qrf uses  -c2 ?
 qr = (
 	('testing_zcgeqrsv_gpu',           '-c',  mn,   ''),
 	
@@ -499,7 +498,7 @@ qr = (
 	('testing_zgels_gpu',              '-c',  mn,   ''),
 	('testing_zgels3_gpu',             '-c',  mn,   ''),
 	
-	('testing_zgeqp3_gpu',             '-c',  mn,   'crashes'),
+	('testing_zgeqp3_gpu',             '-c',  mn,   ''),
 	('testing_zgeqr2_gpu',             '-c',  mn,   ''),
 	
 	('testing_zgeqr2x_gpu', '--version 1 -c', mn,   ''),
@@ -507,18 +506,21 @@ qr = (
 	('testing_zgeqr2x_gpu', '--version 3 -c', mn,   ''),
 	('testing_zgeqr2x_gpu', '--version 4 -c', mn,   ''),
 	
-	('testing_zgeqrf_gpu',             '-c',  mn,   ''),
+	('testing_zgeqrf_gpu', '--version 1 -c2', mn,   ''),
+	('testing_zgeqrf_gpu', '--version 2 -c2', mn,   ''),
+	('testing_zgeqrf_gpu', '--version 3 -c2', mn,   ''),
+	
 	('testing_zlarfb_gpu',             '-c',  mnk,  ''),
 	('testing_zungqr_gpu',             '-c',  mnk,  ''),
 	('testing_zunmqr_gpu',             '-c',  mnk,  ''),
-	('testing_zgeqrf_mgpu',            '-c',  mn,   ''),
+	('testing_zgeqrf_mgpu',           '-c2',  mn,   ''),
 	
 # ----------
 # QR, CPU interface
 	('testing_zgelqf',                 '-c',  mn,   ''),
 	('testing_zgeqlf',                 '-c',  mn,   ''),
 	('testing_zgeqp3',                 '-c',  mn,   ''),
-	('testing_zgeqrf',                 '-c',  mn,   ''),
+	('testing_zgeqrf',                '-c2',  mn,   ''),
 	('testing_zungqr',                 '-c',  mnk,  ''),
 	('testing_zunmlq',                 '-c',  mnk,  ''),
 	('testing_zunmql',                 '-c',  mnk,  ''),
