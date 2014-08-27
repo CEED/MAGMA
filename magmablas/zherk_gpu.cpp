@@ -9,7 +9,6 @@
        @author Azzam Haidar 
 */
 #include "common_magma.h"
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
 extern "C"
 void magmablas_zherk_gpu(
