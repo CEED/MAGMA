@@ -27,16 +27,16 @@ zgemv_conjv_kernel(
     A += ind;
 
     if ( ind < m ) {
-       magmaDoubleComplex res = MAGMA_Z_ZERO;
-    
-       #pragma unroll
-       for( int i=0; i < n; i ++ ) {
+        magmaDoubleComplex res = MAGMA_Z_ZERO;
+        
+        #pragma unroll
+        for( int i=0; i < n; i ++ ) {
             res += A[0] * MAGMA_Z_CNJG(x[0]);
             A += lda;
             x += incx;
-       }
-
-       y[ind*incy] = alpha * res + beta * y[ind*incy];
+        }
+        
+        y[ind*incy] = alpha * res + beta * y[ind*incy];
     }
 }
 
@@ -60,25 +60,25 @@ zgemv_conjv_kernel(
     @param[in]
     n       INTEGER
             On entry, n specifies the number of columns of the matrix A
- 
+
     @param[in]
     alpha   COMPLEX_16
             On entry, ALPHA specifies the scalar alpha.
 
     @param[in]
     A       COMPLEX_16 array of dimension ( LDA, n ) on the GPU.
-   
+
     @param[in]
     lda     INTEGER
             LDA specifies the leading dimension of A.
 
     @param[in]
     x       COMPLEX_16 array of dimension n
-     
+
     @param[in]
     incx    Specifies the increment for the elements of X.
             INCX must not be zero.
-  
+
     @param[in]
     beta    DOUBLE REAL
             On entry, BETA specifies the scalar beta. When BETA is
@@ -91,7 +91,7 @@ zgemv_conjv_kernel(
     incy    Specifies the increment for the elements of Y.
             INCY must not be zero.
 
-    @ingroup magma_dzlas2
+    @ingroup magma_zblas2
     ********************************************************************/
 extern "C" void
 magmablas_zgemv_conjv(
@@ -107,7 +107,7 @@ magmablas_zgemv_conjv(
     else if ( n < 0 )
         info = -2;
     else if ( lda < m )
-        info = -3;
+        info = -5;
     else if ( incx == 0 )
         info = -7;
     else if ( incy == 0 )
