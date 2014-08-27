@@ -141,7 +141,7 @@ F90FLAGS += $(PTROPT)
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -E $< -o $@
 
 %.i: %.h
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -E $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -E $< -o $@
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
