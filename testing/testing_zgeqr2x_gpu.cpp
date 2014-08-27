@@ -56,6 +56,7 @@ int main( int argc, char** argv)
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
+    printf("version %d\n", (int) opts.version );
     printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R||_F/||A||_F  ||R_T||\n");
     printf("=============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
