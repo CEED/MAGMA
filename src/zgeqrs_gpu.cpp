@@ -138,7 +138,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     }
 
     /* B := Q' * B */
-    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans,
+    magma_zunmqr_gpu( MagmaLeft, Magma_ConjTrans,
                       m, nrhs, n,
                       dA(0,0), ldda, tau,
                       dB, lddb, hwork, lwork, dT, nb, info );
