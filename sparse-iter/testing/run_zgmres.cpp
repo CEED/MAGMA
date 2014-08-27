@@ -19,7 +19,7 @@
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 #include "testings.h"
 
 

@@ -13,7 +13,7 @@
 #include <time.h>
 
 #include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 #include <assert.h>
 

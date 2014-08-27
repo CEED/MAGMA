@@ -111,7 +111,7 @@ endif
 # INC is all external include directories (CUDA, MKL, etc.).
 # It is used for external programs that link with MAGMA, e.g., via pkgconfig.
 # CPPFLAGS adds internal MAGMA directories needed to compile MAGMA itself.
-CPPFLAGS = $(INC) -I$(MAGMA_DIR)/include -I$(MAGMA_DIR)/control
+CPPFLAGS = $(INC) -I$(MAGMA_DIR)/include -I$(MAGMA_DIR)/control -I$(MAGMA_DIR)/sparse-iter/include
 
 # Define the pointer size for fortran compilation
 PTRFILE = $(MAGMA_DIR)/control/sizeptr.c

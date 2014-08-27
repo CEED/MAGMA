@@ -24,7 +24,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Debugging file

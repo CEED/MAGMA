@@ -26,9 +26,9 @@
 #include <errno.h>
 #include <sys/stat.h>
 // includes, project
-#include "../include/magmasparse_z.h"
-#include "../../include/magma.h"
-#include "../include/mmio.h"
+#include "magmasparse_z.h"
+#include "magma.h"
+#include "mmio.h"
 
 
 // --------------------

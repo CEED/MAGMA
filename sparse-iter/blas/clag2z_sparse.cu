@@ -9,10 +9,10 @@
 
 */
 #include "common_magma.h"
-#include "../include/magmasparse_z.h"
-#include "../include/magmasparse_zc.h"
-#include "../../include/magma.h"
-#include "../include/mmio.h"
+#include "magmasparse_z.h"
+#include "magmasparse_zc.h"
+#include "magma.h"
+#include "mmio.h"
 #include "common_magma.h"
 
 #define PRECISION_z

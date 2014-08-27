@@ -18,7 +18,7 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
 

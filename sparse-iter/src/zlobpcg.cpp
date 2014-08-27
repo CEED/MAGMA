@@ -16,7 +16,7 @@
 #include <time.h>
 
 #include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 #include "trace.h"
 #include "magmablas.h"     
 

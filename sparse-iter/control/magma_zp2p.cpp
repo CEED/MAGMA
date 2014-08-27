@@ -33,11 +33,11 @@
 
 #include "magma_lapack.h"
 #include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 // includes, project
 #include "magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 #define BLOCK_SIZE 512
 #define STREAM_COUNT 4

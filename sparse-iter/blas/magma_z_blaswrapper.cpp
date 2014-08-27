@@ -13,9 +13,9 @@
 //#include <cusparse_v2.h>
 
 #include "common_magma.h"
-#include "../../include/magmablas.h"
-#include "../include/magmasparse_types.h"
-#include "../include/magmasparse.h"
+#include "magmablas.h"
+#include "magmasparse_types.h"
+#include "magmasparse.h"
 
 
 

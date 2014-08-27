@@ -17,9 +17,9 @@
 #include <ostream>
 #include <assert.h>
 #include <stdio.h>
-#include "../include/magmasparse_z.h"
-#include "../../include/magma.h"
-#include "../include/mmio.h"
+#include "magmasparse_z.h"
+#include "magma.h"
+#include "mmio.h"
 
 
 

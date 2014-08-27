@@ -10,8 +10,8 @@
 */
 
 #include "common_magma.h"
-#include "../include/magmasparse_z.h"
-#include "../../include/magma.h"
+#include "magmasparse_z.h"
+#include "magma.h"
 
 
 #define PRECISION_z

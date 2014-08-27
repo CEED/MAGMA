@@ -10,7 +10,7 @@
 
 */
 #include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 #define BLOCK_SIZE 512
 

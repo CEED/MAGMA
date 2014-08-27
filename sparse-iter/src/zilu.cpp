@@ -11,7 +11,7 @@
 */
 
 #include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "magmasparse.h"
 
 #define RTOLERANCE     10e-16
 #define ATOLERANCE     10e-16
