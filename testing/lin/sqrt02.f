@@ -131,7 +131,7 @@
 *
 *     Generate the first n columns of the matrix Q
 *
-      SRNAMT = 'SORGQR'
+**      SRNAMT = 'SORGQR'
       CALL SORGQR( M, N, K, Q, LDA, TAU, WORK, LWORK, INFO )
 *
 *     Copy R(1:n,1:k)
