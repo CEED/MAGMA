@@ -11,7 +11,6 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 //#include "trace.h"
-#include <assert.h>
 
 extern "C"
 void magmablas_zhemm_mgpu_spec(

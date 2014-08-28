@@ -9,7 +9,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include <assert.h>
 
 #define NB 64
 

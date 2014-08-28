@@ -14,7 +14,6 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "trace.h"
-#include <assert.h>
 
 /**
     Purpose

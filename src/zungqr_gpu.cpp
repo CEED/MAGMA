@@ -10,8 +10,6 @@
        @author Stan Tomov
        @author Mark Gates
 */
-#include <assert.h>
-
 #include "common_magma.h"
 
 /**

@@ -19,7 +19,6 @@
 */
 #include "common_magma.h"
 #include "commonblas_z.h"
-#include <assert.h>
 
 #define PRECISION_z
 

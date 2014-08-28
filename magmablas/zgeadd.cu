@@ -9,7 +9,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include <assert.h>
 
 #define BLK_X 64
 #define BLK_Y 32

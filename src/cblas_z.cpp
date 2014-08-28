@@ -25,13 +25,9 @@
     magma_cblas_zdotu  / ddot
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
 #include <cblas.h>
 
-#include "magma.h"
-#include "magma_operators.h"
+#include "common_magma.h"
 
 #define COMPLEX
 

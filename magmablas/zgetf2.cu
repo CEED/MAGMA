@@ -7,8 +7,6 @@
 
        @precisions normal z -> s d c
 */
-
-#include <stdio.h>
 #include "common_magma.h"
 
 #define PRECISION_z

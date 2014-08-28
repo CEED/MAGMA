@@ -4,8 +4,10 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
+       
+       @author Stan Tomov
 
-       @precisions normal z -> d c s
+       @precisions normal z -> s d c
 */
 #include "common_magma.h"
 #include "commonblas_z.h"
