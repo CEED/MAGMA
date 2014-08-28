@@ -215,6 +215,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
                             ldpanel = ldda;
                             // the GPU owns the row from start, and no need of synch.
                             //magma_queue_wait_event( stream[d][stream2], event[d][0] ); // rows arrived at gpu
+                            magma_queue_wait_event( stream[d][stream2], event[d][4] ); // wait for look-ahead trsm to finish
                         } else {
                             dlpanel = dlP(d,nb,0,buf);
                             ldpanel = lddp;
@@ -468,6 +469,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t m, magma
                         if ( d == id ) {
                             dlpanel = dlA(d, nb*j_local, 0);
                             ldpanel = ldda;
+                            magma_queue_wait_event( stream[d][stream2], event[d][4] ); // wait for look-ahead trsm to finish
                         } else {
                             dlpanel = dlPT(d,0,nb,buf);
                             ldpanel = nb;
