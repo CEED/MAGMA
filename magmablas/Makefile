@@ -85,9 +85,6 @@ ZSRC += \
 # Fermi-specific (CUDA arch 2.x) codes
 ZSRC += \
 	zgemm_fermi.cu		\
-	\
-	sgemv_fermi.cu		\
-	dgemv_fermi.cu		\
 	zgemv_fermi.cu		\
 
 # multi-GPU
