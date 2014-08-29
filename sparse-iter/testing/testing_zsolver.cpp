@@ -45,6 +45,12 @@ int main( int argc, char** argv)
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
 
+    if ( zopts.solver_par.solver != Magma_PCG &&
+         zopts.solver_par.solver != Magma_PGMRES &&
+         zopts.solver_par.solver != Magma_PBICGSTAB &&
+         zopts.solver_par.solver != Magma_ITERREF )
+    zopts.precond_par.solver = Magma_NONE;
+
     magma_zsolverinfo_init( &zopts.solver_par, &zopts.precond_par );
 
     while(  i < argc ){
