@@ -1245,10 +1245,8 @@ void magmaf_dgelqf_gpu(
 
 #define magmaf_dgeqr2x_gpu FORTRAN_NAME( magmaf_dgeqr2x_gpu, MAGMAF_DGEQR2X_GPU )
 void magmaf_dgeqr2x_gpu(
-    magma_int_t *m,
-    magma_int_t *n,
-    devptr_t *dA,
-    magma_int_t *ldda,
+    magma_int_t *m, magma_int_t *n,
+    devptr_t *dA, magma_int_t *ldda,
     devptr_t *dtau,
     devptr_t *dT,
     devptr_t *ddA,
@@ -1256,10 +1254,8 @@ void magmaf_dgeqr2x_gpu(
     magma_int_t *info )
 {
     magma_dgeqr2x_gpu(
-        m,
-        n,
-        magma_ddevptr(dA),
-        ldda,
+        *m, *n,
+        magma_ddevptr(dA), *ldda,
         magma_ddevptr(dtau),
         magma_ddevptr(dT),
         magma_ddevptr(ddA),
@@ -1269,10 +1265,8 @@ void magmaf_dgeqr2x_gpu(
 
 #define magmaf_dgeqr2x2_gpu FORTRAN_NAME( magmaf_dgeqr2x2_gpu, MAGMAF_DGEQR2X2_GPU )
 void magmaf_dgeqr2x2_gpu(
-    magma_int_t *m,
-    magma_int_t *n,
-    devptr_t *dA,
-    magma_int_t *ldda,
+    magma_int_t *m, magma_int_t *n,
+    devptr_t *dA, magma_int_t *ldda,
     devptr_t *dtau,
     devptr_t *dT,
     devptr_t *ddA,
@@ -1280,10 +1274,8 @@ void magmaf_dgeqr2x2_gpu(
     magma_int_t *info )
 {
     magma_dgeqr2x2_gpu(
-        m,
-        n,
-        magma_ddevptr(dA),
-        ldda,
+        *m, *n,
+        magma_ddevptr(dA), *ldda,
         magma_ddevptr(dtau),
         magma_ddevptr(dT),
         magma_ddevptr(ddA),
@@ -1293,10 +1285,8 @@ void magmaf_dgeqr2x2_gpu(
 
 #define magmaf_dgeqr2x3_gpu FORTRAN_NAME( magmaf_dgeqr2x3_gpu, MAGMAF_DGEQR2X3_GPU )
 void magmaf_dgeqr2x3_gpu(
-    magma_int_t *m,
-    magma_int_t *n,
-    devptr_t *dA,
-    magma_int_t *ldda,
+    magma_int_t *m, magma_int_t *n,
+    devptr_t *dA, magma_int_t *ldda,
     devptr_t *dtau,
     devptr_t *dT,
     devptr_t *ddA,
@@ -1304,10 +1294,8 @@ void magmaf_dgeqr2x3_gpu(
     magma_int_t *info )
 {
     magma_dgeqr2x3_gpu(
-        m,
-        n,
-        magma_ddevptr(dA),
-        ldda,
+        *m, *n,
+        magma_ddevptr(dA), *ldda,
         magma_ddevptr(dtau),
         magma_ddevptr(dT),
         magma_ddevptr(ddA),
@@ -1317,10 +1305,8 @@ void magmaf_dgeqr2x3_gpu(
 
 #define magmaf_dgeqr2x4_gpu FORTRAN_NAME( magmaf_dgeqr2x4_gpu, MAGMAF_DGEQR2X4_GPU )
 void magmaf_dgeqr2x4_gpu(
-    magma_int_t *m,
-    magma_int_t *n,
-    devptr_t *dA,
-    magma_int_t *ldda,
+    magma_int_t *m, magma_int_t *n,
+    devptr_t *dA, magma_int_t *ldda,
     devptr_t *dtau,
     devptr_t *dT,
     devptr_t *ddA,
@@ -1328,10 +1314,8 @@ void magmaf_dgeqr2x4_gpu(
     magma_int_t *info, magma_queue_t *stream )
 {
     magma_dgeqr2x4_gpu(
-        m,
-        n,
-        magma_ddevptr(dA),
-        ldda,
+        *m, *n,
+        magma_ddevptr(dA), *ldda,
         magma_ddevptr(dtau),
         magma_ddevptr(dT),
         magma_ddevptr(ddA),

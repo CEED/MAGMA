@@ -1013,9 +1013,9 @@ end subroutine magmaf_sgelqf_gpu
 
 subroutine magmaf_sgeqr2x_gpu( m, n, dA, ldda, dtau, dT, ddA, dwork, info )
     integer          :: m
-    integer          :: n(*)
+    integer          :: n
     magma_devptr_t   :: dA
-    integer          :: ldda(*)
+    integer          :: ldda
     magma_devptr_t   :: dtau
     magma_devptr_t   :: dT
     magma_devptr_t   :: ddA
@@ -1025,9 +1025,9 @@ end subroutine magmaf_sgeqr2x_gpu
 
 subroutine magmaf_sgeqr2x2_gpu( m, n, dA, ldda, dtau, dT, ddA, dwork, info )
     integer          :: m
-    integer          :: n(*)
+    integer          :: n
     magma_devptr_t   :: dA
-    integer          :: ldda(*)
+    integer          :: ldda
     magma_devptr_t   :: dtau
     magma_devptr_t   :: dT
     magma_devptr_t   :: ddA
@@ -1037,9 +1037,9 @@ end subroutine magmaf_sgeqr2x2_gpu
 
 subroutine magmaf_sgeqr2x3_gpu( m, n, dA, ldda, dtau, dT, ddA, dwork, info )
     integer          :: m
-    integer          :: n(*)
+    integer          :: n
     magma_devptr_t   :: dA
-    integer          :: ldda(*)
+    integer          :: ldda
     magma_devptr_t   :: dtau
     magma_devptr_t   :: dT
     magma_devptr_t   :: ddA
@@ -1049,9 +1049,9 @@ end subroutine magmaf_sgeqr2x3_gpu
 
 subroutine magmaf_sgeqr2x4_gpu( m, n, dA, ldda, dtau, dT, ddA, dwork, info, stream )
     integer          :: m
-    integer          :: n(*)
+    integer          :: n
     magma_devptr_t   :: dA
-    integer          :: ldda(*)
+    integer          :: ldda
     magma_devptr_t   :: dtau
     magma_devptr_t   :: dT
     magma_devptr_t   :: ddA
