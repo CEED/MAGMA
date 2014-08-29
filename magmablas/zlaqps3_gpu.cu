@@ -136,7 +136,7 @@ void magma_zscale_kernel(int n, magmaDoubleComplex* dx0,
 
 extern "C"
 __global__ void
-magma_zgemv_kernel1(int m, magmaDoubleComplex *tau, const magmaDoubleComplex * __restrict__ V, int ldv,
+magma_zgemv_kernel1_conflict(int m, magmaDoubleComplex *tau, const magmaDoubleComplex * __restrict__ V, int ldv,
                     const magmaDoubleComplex * __restrict__ c,
                     magmaDoubleComplex *dwork)
 {
