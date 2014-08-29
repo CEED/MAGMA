@@ -136,7 +136,7 @@ fpic = $(and $(findstring -fPIC, $(CFLAGS)),   \
              $(findstring -fPIC, $(CXXFLAGS)), \
              $(findstring -fPIC, $(FFLAGS)),   \
              $(findstring -fPIC, $(F90FLAGS)), \
-             $(findstring -fPIC, $(NVFLAGS)))
+             $(findstring -fPIC, $(NVCCFLAGS)))
 
 LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
 
@@ -153,7 +153,7 @@ $(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
 
 else
 shared:
-	@echo "Error: 'make shared' requires CFLAGS, CXXFLAGS, FFLAGS, F90FLAGS, and NVFLAGS to have -fPIC."
+	@echo "Error: 'make shared' requires CFLAGS, CXXFLAGS, FFLAGS, F90FLAGS, and NVCCFLAGS to have -fPIC."
 	@echo "Please edit your make.inc file. See make.inc.mkl-shared for an example."
 	@echo "After updating make.inc, please 'make clean', then 'make shared', then 'make testing'."
 endif
