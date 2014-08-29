@@ -286,7 +286,9 @@ blas = (
 	('testing_zgemm',   '-l -CN         -c',  mnk,  ''),
 	('testing_zgemm',   '-l -CC         -c',  mnk,  ''),
 	
+	# no-trans/trans/conj-trans
 	('testing_zgemv',                  '-c',  mn,   ''),
+	('testing_zgemv',   '-T             -c',  mn,   ''),
 	('testing_zgemv',   '-C             -c',  mn,   ''),
 	
 	# lower/upper
