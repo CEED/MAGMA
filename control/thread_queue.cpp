@@ -1,7 +1,15 @@
-#include <stdio.h>
-#include <string.h>
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+       @author Mark Gates
+*/
 
 #include "thread_queue.hpp"
+#include "common_magma.h"  // after thread_queue.hpp
 
 // If err, prints error and throws exception.
 static void check( int err )

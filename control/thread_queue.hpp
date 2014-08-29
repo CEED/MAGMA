@@ -1,3 +1,13 @@
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+
+       @author Mark Gates
+*/
+
 #ifndef MAGMA_THREAD_HPP
 #define MAGMA_THREAD_HPP
 
