@@ -47,43 +47,51 @@
 
 magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
-                 magma_z_vector *x, magma_z_preconditioner precond )
+                 magma_z_vector *x, magma_z_preconditioner *precond )
 {
 // set up precond parameters as solver parameters   
     magma_z_solver_par psolver_par;
-    psolver_par.epsilon = precond.epsilon;
-    psolver_par.maxiter = precond.maxiter;
-    psolver_par.restart = precond.restart;
+    psolver_par.epsilon = precond->epsilon;
+    psolver_par.maxiter = precond->maxiter;
+    psolver_par.restart = precond->restart;
+    psolver_par.verbose = 0;
    
-    if( precond.solver == Magma_CG ){
+    if( precond->solver == Magma_CG ){
 // printf( "start CG preconditioner with epsilon: %f and maxiter: %d: ", 
 //                            psolver_par.epsilon, psolver_par.maxiter );
         magma_zcg( A, b, x, &psolver_par );
 // printf( "done.\n" );
         return MAGMA_SUCCESS;
     }
-    if( precond.solver == Magma_GMRES ){
+    if( precond->solver == Magma_GMRES ){
 // printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: ", 
 //                               psolver_par.epsilon, psolver_par.maxiter );
         magma_zgmres( A, b, x, &psolver_par );
 // printf( "done.\n" );
         return MAGMA_SUCCESS;
     }
-    if( precond.solver == Magma_BICGSTAB ){
+    if( precond->solver == Magma_BICGSTAB ){
 // printf( "start BICGSTAB preconditioner with epsilon: %f and maxiter: %d: ", 
 //                                  psolver_par.epsilon, psolver_par.maxiter );
         magma_zbicgstab( A, b, x, &psolver_par );
 // printf( "done.\n");
         return MAGMA_SUCCESS;
     }
-    if( precond.solver == Magma_JACOBI ){
+    if( precond->solver == Magma_JACOBI ){
 // printf( "start JACOBI preconditioner with epsilon: %f and maxiter: %d: ", 
 //                                  psolver_par.epsilon, psolver_par.maxiter );
         magma_zjacobi( A, b, x, &psolver_par );
 // printf( "done.\n");
         return MAGMA_SUCCESS;
     }
-    if( precond.solver == Magma_NONE ){
+    if( precond->solver == Magma_BAITER ){
+// printf( "start BAITER preconditioner with epsilon: %f and maxiter: %d: ", 
+//                                  psolver_par.epsilon, psolver_par.maxiter );
+        magma_zbaiter( A, b, x, &psolver_par );
+// printf( "done.\n");
+        return MAGMA_SUCCESS;
+    }
+    if( precond->solver == Magma_NONE ){
         return MAGMA_SUCCESS;
     }
     else{

@@ -57,7 +57,7 @@ const char *usage_sparse =
 "               6   GMRES\n"
 "               7   preconditioned GMRES\n"
 "               8   LOBPCG\n"
-"               9   Iter. Refinement\n"
+"               9   Iterative Refinement\n"
 "               10  Jacobi\n"
 "               11  Block-asynchronous Iteration\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
@@ -65,6 +65,12 @@ const char *usage_sparse =
 "               0   no preconditioner\n"
 "               1   Jacobi\n"
 "               2   ILU/IC\n"
+"                   For Iterative Refinement also possible: \n"
+"                   3   CG\n"
+"                   4   BiCGSTAB\n"
+"                   5   GMRES\n"
+"                   6   Block-asynchronous Iteration\n"
+"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"               
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
@@ -98,6 +104,9 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
     opts->solver_par.restart = 30;
     opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_JACOBI;
+    opts->precond_par.epsilon = 0.01;
+    opts->precond_par.maxiter = 100;
+    opts->precond_par.restart = 10;
     opts->solver_par.solver = Magma_CG;
     
     printf( usage_sparse_short, argv[0] );
@@ -150,8 +159,14 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 0: opts->precond_par.solver = Magma_NONE; break;
                 case 1: opts->precond_par.solver = Magma_JACOBI; break;
                 case 2: opts->precond_par.solver = Magma_ILU; break;
+                case 3: opts->precond_par.solver = Magma_CG; break;
+                case 4: opts->precond_par.solver = Magma_BICGSTAB; break;
+                case 5: opts->precond_par.solver = Magma_GMRES; break;
+                case 6: opts->precond_par.solver = Magma_BAITER; break;
 
             }
+        } else if ( strcmp("--ptol", argv[i]) == 0 ) {
+            sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
         }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
             opts->blocksize = atoi( argv[++i] );
         }else if ( strcmp("--alignment", argv[i]) == 0 ) {
