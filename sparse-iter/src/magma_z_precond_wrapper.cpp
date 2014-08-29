@@ -83,6 +83,9 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
 // printf( "done.\n");
         return MAGMA_SUCCESS;
     }
+    if( precond.solver == Magma_NONE ){
+        return MAGMA_SUCCESS;
+    }
     else{
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
@@ -136,8 +139,10 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
-//        magma_zcuilusetup( A, precond );
         magma_zcuiccsetup( A, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_NONE ){
         return MAGMA_SUCCESS;
     }
     else{
@@ -208,6 +213,10 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
         magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
+    else if( precond->solver == Magma_NONE ){
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
+        return MAGMA_SUCCESS;
+    }
     else{
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
@@ -261,6 +270,10 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
     }
     else if( precond->solver == Magma_ICC ){
         magma_zapplycuicc_l( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_NONE ){
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
         return MAGMA_SUCCESS;
     }
     else{
@@ -318,6 +331,10 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
     else if( precond->solver == Magma_ICC || 
             ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
         magma_zapplycuicc_r( b, x, precond );
+        return MAGMA_SUCCESS;
+    }
+    else if( precond->solver == Magma_NONE ){
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
         return MAGMA_SUCCESS;
     }
     else{
