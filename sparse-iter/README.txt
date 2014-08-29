@@ -53,6 +53,20 @@ when executing "./run_xsolver -h".
 
  Some options are:
 
+ --solver      Possibility to choose a solver
+               0   CG
+               1   merged CG
+               2   preconditioned CG
+               3   BiCGSTAB
+               4   merged BiCGSTAB
+               5   preconditioned BiCGSTAB
+               6   GMRES
+               7   preconditioned GMRES
+               8   LOBPCG
+               9   Iterative Refinement
+               10  Jacobi
+               11  Block-asynchronous Iteration
+
 "--verbose k"
     k = 0 : solver is run in production mode, no additional characteristics 
             monitored
@@ -62,8 +76,7 @@ when executing "./run_xsolver -h".
 "--format k"
     k = 0 : CSR
     k = 1 : ELLPACK
-    k = 2 : ELLPACKRT
-    k = 3 : SELLP
+    k = 2 : SELLP
 
 "--blocksize k"
     for Magma_ELLPACKRT: denotes the number of rows in one slice of the matrix
@@ -89,14 +102,16 @@ when executing "./run_xsolver -h".
     k : Krylov subspace restart number for GMRES-(k)
 
 
-"--scale k"
+"--mscale k"
+   k = 0 no scaling
    k = 1 scale symmetrically to unit diagonal
    k = 2 scale to unit rownorm
 
 "--preconditioner k"
     k = 0 : Jacobi
     k = 1 : ILU/IC
-    k = 2 : iterative ILU/IC
+    k = 2 : iterative ILU(0)/IC(0)
+    Other preconditiners are only available for the Iterative Refinement.
 
 "--ev k"
     k : number of egenvalue/eigenvectors to compute

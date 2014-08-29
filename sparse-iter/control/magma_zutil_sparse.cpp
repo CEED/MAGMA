@@ -64,7 +64,7 @@ const char *usage_sparse =
 " --precond x   Possibility to choose a preconditioner:\n"
 "               0   no preconditioner\n"
 "               1   Jacobi\n"
-"               2   ILU/IC\n"
+"               2   ILU(0) / IC(0)\n"
 "                   For Iterative Refinement also possible: \n"
 "                   3   CG\n"
 "                   4   BiCGSTAB\n"
