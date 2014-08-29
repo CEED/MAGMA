@@ -80,7 +80,6 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     double nom, rNorm, RNorm, nom0, betanom, r0 = 0.;
 
     // CPU workspace
-    magma_setdevice(0);
     magmaDoubleComplex *H, *HH, *y, *h1;
     magma_zmalloc_pinned( &H, (ldh+1)*ldh );
     magma_zmalloc_pinned( &y, ldh );
