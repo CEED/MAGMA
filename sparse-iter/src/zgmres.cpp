@@ -131,18 +131,15 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
                                                     solver_par->numiter++ ){
-        //magma_zcopy(dofs, r.val, 1, q(0), 1);       //  q[0]    = 1.0/||r||
-        //magma_zscal(dofs, 1./H(1,0), q(0), 1);      //  (to be fused)
 
         for(k=1; k<=restart; k++) {
 
         magma_zcopy(dofs, r.val, 1, q(k-1), 1);       //  q[0]    = 1.0/||r||
-        magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);      //  (to be fused)
+        magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);    //  (to be fused)
 
             q_t.val = q(k-1);
             //magmablasSetKernelStream(stream[0]);
-            magma_z_spmv( c_one, A, q_t, c_zero, r );
-                 // r = A q[k] 
+            magma_z_spmv( c_one, A, q_t, c_zero, r ); //  r = A q[k] 
     //            if (solver_par->ortho == Magma_MGS ) {
                 // modified Gram-Schmidt
                 //magmablasSetKernelStream(stream[0]);
@@ -152,16 +149,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            
                        //  r = r - H(i,k) q[i]
                 }
-                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );
-
-                      //  H(k+1,k) = sqrt(r . r) 
-                if (k < restart) {
-  //magma_zcopy(dofs, r.val, 1, q(k), 1);                  
-                        //q[k] = 1.0/H[k][k-1] r
-  //    magma_zscal(dofs, 1./H(k+1,k), q(k), 1);               
-                        //(to be fused)   
-                 }
-
+                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); // H(k+1,k) = ||r|| 
 
 //            } 
 /*else if (solver_par->ortho == Magma_FUSED_CGS ) {
@@ -240,8 +228,6 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     for (m=i+1; m<=k; m++){
                         HH(k,m) -= HH(k,i) * HH(m,i) * HH(i,i);
                     }
-                    //HH(k,k) -= HH(k,i) * HH(k,i) / HH(i,i);
-                    //HH(k,i) = HH(k,i)/HH(i,i);
                     h1[k] -= h1[i] * HH(k,i);   
                 }    
             }
