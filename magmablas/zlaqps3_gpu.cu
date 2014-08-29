@@ -134,32 +134,6 @@ void magma_zscale_kernel(int n, magmaDoubleComplex* dx0,
 }
 
 
-extern "C"
-__global__ void
-magma_zgemv_kernel1_conflict(int m, magmaDoubleComplex *tau, const magmaDoubleComplex * __restrict__ V, int ldv,
-                    const magmaDoubleComplex * __restrict__ c,
-                    magmaDoubleComplex *dwork)
-{
-        const int i = threadIdx.x;
-        const magmaDoubleComplex *dV = V + (blockIdx.x) * ldv;
-
-        __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
-        magmaDoubleComplex lsum;
-
-        /*  lsum := v' * C  */
-        lsum = MAGMA_Z_ZERO;
-        for( int j = i; j < m; j += BLOCK_SIZE )
-           lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), c[j] );
-
-        sum[i] = lsum;
-        magma_sum_reduce< BLOCK_SIZE >( i, sum );
-
-        __syncthreads();
-        if (i==0)
-           dwork [blockIdx.x] = (*tau)*sum[0];
-}
-
-
 #define BLOCK_SIZE2 192
 #if (defined(PRECISION_z) || defined(PRECISION_d))
   #define TOL 1.e-8
