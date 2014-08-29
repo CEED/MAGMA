@@ -10,16 +10,12 @@
 */
 
 #include "common_magma.h"
+#include "commonblas_z.h"
 #include "magma_templates.h"
 
 #define PRECISION_z
 
 #define BLOCK_SIZE 512
-
-
-__global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
-                                    magmaDoubleComplex *c, magmaDoubleComplex *dwork,
-                                    magmaDoubleComplex *tau);
 
 
 /* --------------------------------------------------------------------------- */
@@ -138,6 +134,7 @@ void magma_zscale_kernel(int n, magmaDoubleComplex* dx0,
 }
 
 
+extern "C"
 __global__ void
 magma_zgemv_kernel1(int m, magmaDoubleComplex *tau, const magmaDoubleComplex * __restrict__ V, int ldv,
                     const magmaDoubleComplex * __restrict__ c,

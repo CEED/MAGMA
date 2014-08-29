@@ -127,24 +127,23 @@ int main( int argc, char** argv)
             gpu_time = magma_sync_wtime(0);
     
             if (opts.version == 1)
-                magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
             else if (opts.version == 2)
-                magma_zgeqr2x2_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x2_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
             else if (opts.version == 3)
-                magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x3_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
             else {
+                printf( "call magma_zgeqr2x4_gpu\n" );
                 /*
                   Going through NULL stream is faster
                   Going through any stream is slower
                   Doing two streams in parallel is slower than doing them sequentially
                   Queuing happens on the NULL stream - user defined buffers are smaller?
                 */
-                magma_zgeqr2x4_gpu(&M, &N,  d_A, &ldda, dtau, d_T, ddA, dwork, &info, NULL);
-                /*
-                magma_zgeqr2x4_gpu(&M, &N,  d_A, &ldda, dtau, d_T, ddA, dwork, &info, stream[1]);
-                magma_zgeqr2x4_gpu(&M, &N, d_A2, &ldda,dtau2,d_T2,ddA2,dwork2, &info, stream[0]);
-                */
-                //magma_zgeqr2x4_gpu(&M, &N, d_A2, &ldda,dtau2,d_T2,ddA2,dwork2, &info, NULL);
+                magma_zgeqr2x4_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info, NULL);
+                //magma_zgeqr2x4_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info, stream[1]);
+                //magma_zgeqr2x4_gpu(M, N, d_A2, ldda, dtau2, d_T2, ddA2, dwork2, &info, stream[0]);
+                //magma_zgeqr2x4_gpu(M, N, d_A2, ldda, dtau2, d_T2, ddA2, dwork2, &info, NULL);
                 //gflops *= 2;
             }
             gpu_time = magma_sync_wtime(0) - gpu_time;

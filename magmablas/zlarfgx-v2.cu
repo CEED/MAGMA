@@ -9,18 +9,13 @@
 
 */
 #include "common_magma.h"
+#include "commonblas_z.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
 #define BLOCK_SIZE 512
 
 #define PRECISION_z
 
-__global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv, 
-                                    magmaDoubleComplex *c, magmaDoubleComplex *dwork,
-                                    magmaDoubleComplex *tau);
-__global__ void magma_ztrmv_kernel(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *v);
-__global__ void magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt, 
-                                    magmaDoubleComplex *v, magmaDoubleComplex *y, magmaDoubleComplex *tau);
 
 //==============================================================================
 

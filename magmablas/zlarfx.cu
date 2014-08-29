@@ -9,6 +9,7 @@
 
 */
 #include "common_magma.h"
+#include "commonblas_z.h"
 #include "magma_templates.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
@@ -81,7 +82,7 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
 }
 
 //==============================================================================
-
+extern "C"
 __global__
 void magma_ztrmv_kernel(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t)
 {
@@ -101,6 +102,7 @@ void magma_ztrmv_kernel(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex
    t[tx] = res;
 }
 
+extern "C"
 __global__
 void magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t, 
                          magmaDoubleComplex *y, magmaDoubleComplex *tau)
@@ -123,7 +125,7 @@ void magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt, magmaDoubleComple
 }
 
 //==============================================================================
-
+extern "C"
 __global__
 void magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t, magmaDoubleComplex *y)
 {

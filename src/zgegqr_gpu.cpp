@@ -205,7 +205,7 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
         magmaDoubleComplex *tau  = work+n*n;
 
         magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, d_T, n );
-        magma_zgeqr2x3_gpu(&m, &n, dA, &ldda, dtau, d_T, ddA,
+        magma_zgeqr2x3_gpu(m, n, dA, ldda, dtau, d_T, ddA,
                            (double *)(dwork+min_mn+2*n*n), info);
         magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);
         magma_zgetmatrix( n, n, ddA, n, work, n);

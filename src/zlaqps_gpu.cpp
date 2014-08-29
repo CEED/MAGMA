@@ -13,6 +13,8 @@
 #define PRECISION_z
 
 /**
+    @deprecated
+    
     Purpose
     -------
     ZLAQPS computes a step of QR factorization with column pivoting

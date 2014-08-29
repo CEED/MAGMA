@@ -9,6 +9,7 @@
 
 */
 #include "common_magma.h"
+#include "commonblas_z.h"
 #include "magma_templates.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
@@ -148,7 +149,7 @@ magmablas_dznrm2_sm(
 }
 
 //==============================================================================
-
+extern "C"
 __global__ void
 magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c)
 {
