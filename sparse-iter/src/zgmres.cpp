@@ -75,7 +75,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                                                 c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
     magma_int_t i, j, k, m = 0;
-    magma_int_t restart = min( dofs-1, solver_par->restart );
+    magma_int_t restart = 32; //min( dofs-1, solver_par->restart );
     magma_int_t ldh = restart+1;
     double nom, rNorm, RNorm, nom0, betanom, r0 = 0.;
 
@@ -116,8 +116,8 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->init_res = nom0;
     H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 
     magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
-    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
-        r0 = ATOLERANCE;
+    if ( (r0 = nom0 * RTOLERANCE ) < ATOLERANCE ) 
+        r0 = solver_par->epsilon;
     if ( nom < r0 )
         return MAGMA_SUCCESS;
 
@@ -131,8 +131,8 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
                                                     solver_par->numiter++ ){
-        magma_zcopy(dofs, r.val, 1, q(0), 1);       //  q[0]    = 1.0/||r||
-        magma_zscal(dofs, 1./H(1,0), q(0), 1);      //  (to be fused)
+        //magma_zcopy(dofs, r.val, 1, q(0), 1);       //  q[0]    = 1.0/||r||
+        //magma_zscal(dofs, 1./H(1,0), q(0), 1);      //  (to be fused)
 
         for(k=1; k<=restart; k++) {
 
@@ -143,7 +143,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             //magmablasSetKernelStream(stream[0]);
             magma_z_spmv( c_one, A, q_t, c_zero, r );
                  // r = A q[k] 
-            if (solver_par->ortho == Magma_MGS ) {
+    //            if (solver_par->ortho == Magma_MGS ) {
                 // modified Gram-Schmidt
                 //magmablasSetKernelStream(stream[0]);
                 for (i=1; i<=k; i++) {
@@ -156,14 +156,15 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
                       //  H(k+1,k) = sqrt(r . r) 
                 if (k < restart) {
-                        magma_zcopy(dofs, r.val, 1, q(k), 1);                  
+  //magma_zcopy(dofs, r.val, 1, q(k), 1);                  
                         //q[k] = 1.0/H[k][k-1] r
-                        magma_zscal(dofs, 1./H(k+1,k), q(k), 1);               
+  //    magma_zscal(dofs, 1./H(k+1,k), q(k), 1);               
                         //(to be fused)   
                  }
 
 
-            } /*else if (solver_par->ortho == Magma_FUSED_CGS ) {
+//            } 
+/*else if (solver_par->ortho == Magma_FUSED_CGS ) {
                 // fusing zgemv with dznrm2 in classical Gram-Schmidt
                 magmablasSetKernelStream(stream[0]);
                 magma_zcopy(dofs, r.val, 1, q(k), 1);  
@@ -228,15 +229,15 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             for (i=1; i<=k; i++) {
                 HH(k,i) = magma_cblas_zdotc( i+1, &H(1,k), 1, &H(1,i), 1 );
             }
-//	HH(k,i) = MAGMA_Z_ZERO;
-//	for (j=1; j<=i+1; j++)
-//	  HH(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL(HH(k,i)) + MAGMA_Z_REAL(H(j,k)) * MAGMA_Z_REAL(H(j,i)), 0.0);
+//HH(k,i) = MAGMA_Z_ZERO;
+//for (j=1; j<=i+1; j++)
+//  HH(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL(HH(k,i)) + MAGMA_Z_REAL(H(j,k)) * MAGMA_Z_REAL(H(j,i)), 0.0);
 //      } 
             h1[k] = H(1,k)*H(1,0); 
             if (k != 1){
                 for (i=1; i<k; i++) {
                     HH(k,i) = HH(k,i)/HH(i,i);//
-                    for (m=i+1; m<k; m++){
+                    for (m=i+1; m<=k; m++){
                         HH(k,m) -= HH(k,i) * HH(m,i) * HH(i,i);
                     }
                     //HH(k,k) -= HH(k,i) * HH(k,i) / HH(i,i);
