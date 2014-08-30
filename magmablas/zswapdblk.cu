@@ -88,6 +88,10 @@ zswapdblk_kernel( int nb,
     incb    INTEGER
             The row increment between diagonal blocks of dB. incb >= 0. See inca.
     
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void 

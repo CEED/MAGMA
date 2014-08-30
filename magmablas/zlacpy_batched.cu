@@ -102,6 +102,9 @@ zlacpy_batched_kernel(
             The number of matrices to add; length of dAarray and dBarray.
             batchCount >= 0.
     
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/

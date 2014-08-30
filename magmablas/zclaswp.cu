@@ -94,6 +94,10 @@ zclaswp_inv_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA,
     incx    INTEGER
             If INCX is negative, the pivots are applied in reverse order,
             otherwise in straight-forward order.
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/

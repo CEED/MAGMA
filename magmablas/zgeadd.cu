@@ -88,6 +88,9 @@ void zgeadd_full(
     lddb    INTEGER
             The leading dimension of the array dB.  LDDB >= max(1,M).
     
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/

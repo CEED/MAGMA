@@ -86,6 +86,9 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
     ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
     
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/

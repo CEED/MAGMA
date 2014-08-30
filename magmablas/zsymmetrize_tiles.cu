@@ -109,6 +109,10 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
     @param[in]
     nstride INTEGER
             Column offset from start of one block to start of next block. nstride >= 0.
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/

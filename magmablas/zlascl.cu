@@ -120,6 +120,10 @@ zlascl_upper(int m, int n, double mul, magmaDoubleComplex* A, int lda)
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value.
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux2
     ********************************************************************/
