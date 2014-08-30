@@ -246,6 +246,7 @@ add_library( lapacktest ${testing_lin_ALLSRC} )
 # compile each tester
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY testing )
 include( ${CMAKE_SOURCE_DIR}/testing/CMake )
+list( REMOVE_ITEM testing_ALLSRC ${TEST_SRC} )
 foreach( TEST ${testing_ALLSRC} )
 	string( REGEX REPLACE "\\.(cpp|f90|F90)" "" EXE ${TEST} )
 	string( REGEX REPLACE "testing/" "" EXE ${EXE} )
