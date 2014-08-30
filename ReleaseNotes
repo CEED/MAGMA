@@ -24,6 +24,7 @@ Sparse routines have recently been added as a beta release, in the sparse-iter
 directory. We would appreciate any feedback that you may have on them.
 
  1.5.0
+       - final:  Aug   30, 2014
        - beta 3: July  18, 2014
        - beta 2: May   30, 2014
        - beta 1: April 25, 2014
