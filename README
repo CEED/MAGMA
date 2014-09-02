@@ -2,6 +2,8 @@
 MAGMA README FILE
 ==================
 
+* Further documentation is provided in docs/html/index.html.
+
 * To INSTALL MAGMA, modify the make.inc file to indicate where 
   CUDA, CPU BLAS, and LAPACK are installed on your system. Examples are given
   in make.inc.mkl-*, make.inc.acml, make.inc.atlas, and make.inc.macos
