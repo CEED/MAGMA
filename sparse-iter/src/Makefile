@@ -77,6 +77,7 @@ ZSRC += \
 	magma_z_precond_wrapper.cpp \
 	magma_z_solver_wrapper.cpp \
     magma_zcuspmm.cpp   \
+    magma_zcuspaxpy.cpp   \
 	zresidual.cpp		\
 
 

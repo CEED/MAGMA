@@ -23,6 +23,7 @@ ZSRC += \
 ZSRC += \
     testing_zdot.cpp        \
     testing_zspmv.cpp       \
+    testing_zmadd.cpp     \
 
 # ----------
 # low level LA operations
