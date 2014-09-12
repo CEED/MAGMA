@@ -20,9 +20,9 @@
 __global__ void
 zgemv_conjv_kernel(
     int m, int n, magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr __restrict__ A, int lda,
-    magmaDoubleComplex_const_ptr __restrict__ x, int incx, magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr       __restrict__ y, int incy)
+    const magmaDoubleComplex * __restrict__ A, int lda,
+    const magmaDoubleComplex * __restrict__ x, int incx, magmaDoubleComplex beta,
+    magmaDoubleComplex *       __restrict__ y, int incy)
 {
     int ind = blockIdx.x*num_threads + threadIdx.x;
     
