@@ -9,14 +9,20 @@
        @precisions normal z -> s d c
 
 */
+#include <limits>
+
 #include "common_magma.h"
 
 #define COMPLEX
 
 
-const magmaDoubleComplex MAGMA_Z_NAN = MAGMA_Z_MAKE( 0./0., 0./0. );
-const magmaDoubleComplex MAGMA_Z_INF = MAGMA_Z_MAKE( 1./0., 1./0. );
+const magmaDoubleComplex MAGMA_Z_NAN
+    = MAGMA_Z_MAKE( std::numeric_limits<double>::quiet_NaN(),
+                    std::numeric_limits<double>::quiet_NaN() );
 
+const magmaDoubleComplex MAGMA_Z_INF
+    = MAGMA_Z_MAKE( std::numeric_limits<double>::infinity(),
+                    std::numeric_limits<double>::infinity() );
 
 /** @return true if either real(x) or imag(x) is NAN. */
 inline bool magma_z_isnan( magmaDoubleComplex x )
