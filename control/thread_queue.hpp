@@ -11,10 +11,9 @@
 #ifndef MAGMA_THREAD_HPP
 #define MAGMA_THREAD_HPP
 
-#include <pthread.h>
 #include <queue>
 
-#include "magma.h"
+#include "common_magma.h"
 
 
 // ---------------------------------------------
