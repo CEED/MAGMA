@@ -56,11 +56,14 @@ extern "C"
 magma_int_t magma_init()
 {
     if ( g_magma_devices == NULL ) {
-        check_error( cudaGetDeviceCount( &g_magma_devices_cnt ));
+        cudaError_t err;
+        err = cudaGetDeviceCount( &g_magma_devices_cnt );
+        check_error( err );
         g_magma_devices = (struct magma_device*) malloc( g_magma_devices_cnt * sizeof(struct magma_device) );
         for( int i = 0; i < g_magma_devices_cnt; ++i ) {
             cudaDeviceProp prop;
-            check_error( cudaGetDeviceProperties( &prop, i ));
+            err = cudaGetDeviceProperties( &prop, i );
+            check_error( err );
             g_magma_devices[i].memory = prop.totalGlobalMem;
             g_magma_devices[i].cuda_arch  = prop.major*100 + prop.minor*10;
         }
@@ -89,8 +92,11 @@ void magma_print_environment()
             (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100. );
     
     int cuda_runtime, cuda_driver;
-    check_error( cudaDriverGetVersion( &cuda_driver ));
-    check_error( cudaRuntimeGetVersion( &cuda_runtime ));
+    cudaError_t err;
+    err = cudaDriverGetVersion( &cuda_driver );
+    check_error( err );
+    err = cudaRuntimeGetVersion( &cuda_runtime );
+    check_error( err );
     printf( "CUDA runtime %d, driver %d. ", cuda_runtime, cuda_driver );
     
 #if defined(_OPENMP)
@@ -123,10 +129,12 @@ void magma_print_environment()
     printf( "\n" );
     
     int ndevices;
-    check_error( cudaGetDeviceCount( &ndevices ));
+    err = cudaGetDeviceCount( &ndevices );
+    check_error( err );
     for( int idevice = 0; idevice < ndevices; idevice++ ) {
         cudaDeviceProp prop;
-        check_error( cudaGetDeviceProperties( &prop, idevice ));
+        err = cudaGetDeviceProperties( &prop, idevice );
+        check_error( err );
         printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
                 idevice,
                 prop.name,
@@ -158,7 +166,9 @@ extern "C"
 magma_int_t magma_getdevice_arch()
 {
     int dev;
-    check_error( cudaGetDevice( &dev ));
+    cudaError_t err;
+    err = cudaGetDevice( &dev );
+    check_error( err );
     if ( g_magma_devices == NULL || dev < 0 || dev >= g_magma_devices_cnt ) {
         fprintf( stderr, "Error in %s: MAGMA not initialized (call magma_init() first) or bad device\n", __func__ );
         return 0;
@@ -276,7 +286,9 @@ extern "C"
 void magma_event_destroy( magma_event_t event )
 {
     if ( event != NULL ) {
-        check_error( cudaEventDestroy( event ));
+        cudaError_t err;
+        err = cudaEventDestroy( event );
+        check_error( err );
     }
 }
 
