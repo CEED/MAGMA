@@ -10,7 +10,7 @@
        @precisions normal d -> s
 */
 #include "common_magma.h"
-#include "timer.h"
+#include "magma_timer.h"
 
 /**
     Purpose

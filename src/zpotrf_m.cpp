@@ -10,7 +10,7 @@
 */
 #include "common_magma.h"
 #include "../testing/flops.h"
-#include "timer.h"
+#include "magma_timer.h"
 
 /**
     Purpose

@@ -13,7 +13,7 @@
 
 */
 #include "common_magma.h"
-#include "timer.h"
+#include "magma_timer.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
 

@@ -11,7 +11,7 @@
        @precisions normal d -> s
 */
 #include "thread_queue.hpp"
-#include "timer.h"
+#include "magma_timer.h"
 
 #include "common_magma.h"  // after thread.hpp, so max, min are defined
 

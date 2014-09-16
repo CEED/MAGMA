@@ -10,7 +10,7 @@
        
        @precisions normal z -> c
 */
-#include "timer.h"
+#include "magma_timer.h"
 
 #include "common_magma.h"
 

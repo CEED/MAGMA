@@ -34,11 +34,11 @@ SRC := \
 	constants.cpp		\
 	get_nb.cpp		\
 	magma_threadsetting.cpp	\
+	magma_timer.cpp		\
 	magmawinthread.cpp	\
 	pthread_barrier.cpp	\
 	strlcpy.cpp		\
 	thread_queue.cpp	\
-	timer.cpp		\
 	trace.cpp		\
 	xerbla.cpp		\
 

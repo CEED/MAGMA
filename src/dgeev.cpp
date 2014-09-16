@@ -10,7 +10,7 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include "timer.h"
+#include "magma_timer.h"
 
 #define PRECISION_d
 
