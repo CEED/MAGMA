@@ -115,7 +115,7 @@ def main():
     
     if options.out_print:
         # print output files
-        print ' '.join(c.files_out)
+        print '\t' + ' \\\n\t'.join(c.files_out)
     
     if options.out_clean:
         # clean generated files
