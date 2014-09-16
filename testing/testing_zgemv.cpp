@@ -106,7 +106,7 @@ int main(int argc, char **argv)
             magma_time = magma_sync_wtime( 0 ) - magma_time;
             magma_perf = gflops / magma_time;
             
-            magma_zgetvector( Ym, dY, incx, Ymagma, incx );
+            magma_zgetvector( Ym, dY, incy, Ymagma, incy );
             
             /* =====================================================================
                Performs operation using CPU BLAS
