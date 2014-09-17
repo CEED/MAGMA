@@ -136,7 +136,7 @@ cleanall: clean
 	rm -f $(LIBMAGMA)
 
 # extra include dependencies
-zgemm_fermi.o: zgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-cgemm_fermi.o: cgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-dgemm_fermi.o: dgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
-sgemm_fermi.o: sgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+zgemm_fermi.o: zgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+cgemm_fermi.o: cgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+dgemm_fermi.o: dgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+sgemm_fermi.o: sgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h

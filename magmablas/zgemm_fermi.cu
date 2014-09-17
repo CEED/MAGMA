@@ -14,8 +14,12 @@
        [zcds]gemm_fermi.cu          defines the CPU driver.
        [zcds]gemm_fermi_kernels.h   defines the block sizes for each precision.
        gemm_stencil_defs.h          defines types and functions for precision-independent code.
-       gemm_stencil.cu              defines the GPU kernel. It gets included
-                                    multiple times, once for each transpose version.
+       
+       These files are included multiple times, once for each transpose version.
+       gemm_stencil.cuh             defines the GPU kernel (device function).
+       gemm_kernel.cuh              defines the GPU kernel (global function).
+       
+       The batched version uses gemm_kernel_batched.cuh instead of gemm_kernel.cuh.
 */
 #include "common_magma.h"
 #include "commonblas_z.h"
@@ -307,8 +311,10 @@ magmablas_zgemm(
             (int)offsetA, (int)offsetB );
     }
 
-    cudaUnbindTexture( tex_ref_A );
-    cudaUnbindTexture( tex_ref_B );
+    #ifdef TEXTURE_1D
+        cudaUnbindTexture( tex_ref_A );
+        cudaUnbindTexture( tex_ref_B );
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

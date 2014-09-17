@@ -9,23 +9,40 @@
        @author Stan Tomov
        @author Mark Gates
 
-       [zcds]gemm_fermi.cu          defines the CPU driver.
-       [zcds]gemm_fermi_kernels.h   defines the block sizes for each precision.
-       gemm_stencil_defs.h          defines types and functions for precision-independent code.
-       gemm_stencil.cu              defines the GPU kernel. It gets included
-                                    multiple times, once for each transpose version.
+       See [zcds]gemm_fermi.cu for description of related files.
 */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// reset variables from previous includes of this file.
+#undef TRANS_A
+#undef TRANS_B
+#undef CONJ_A
+#undef CONJ_B
+
+#undef BLK_M
+#undef BLK_N
+
+#undef THR_M
+#undef THR_N
+
+#undef kernel_name_
+#undef kernel_name
+
+#undef devfunc_name_
+#undef devfunc_name
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if   (version == trans_nn)
   #define kernel_name_(p)  p ## gemm_kernel_fermi_nn
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_nn
   #define BLK_M BLK_M_nn
   #define BLK_N BLK_N_nn
 
 #elif (version == trans_nt)
   #define TRANS_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_nt
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_nt
   #define BLK_M BLK_M_nt
   #define BLK_N BLK_N_nt
 
@@ -33,12 +50,14 @@
   #define TRANS_B
   #define CONJ_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_nc
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_nc
   #define BLK_M BLK_M_nc
   #define BLK_N BLK_N_nc
 
 #elif (version == trans_tn)
   #define TRANS_A
   #define kernel_name_(p)  p ## gemm_kernel_fermi_tn
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_tn
   #define BLK_M BLK_M_tn
   #define BLK_N BLK_N_tn
 
@@ -46,6 +65,7 @@
   #define TRANS_A
   #define TRANS_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_tt
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_tt
   #define BLK_M BLK_M_tt
   #define BLK_N BLK_N_tt
 
@@ -54,6 +74,7 @@
   #define TRANS_B
   #define CONJ_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_tc
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_tc
   #define BLK_M BLK_M_tc
   #define BLK_N BLK_N_tc
 
@@ -61,6 +82,7 @@
   #define TRANS_A
   #define CONJ_A
   #define kernel_name_(p)  p ## gemm_kernel_fermi_cn
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_cn
   #define BLK_M BLK_M_cn
   #define BLK_N BLK_N_cn
 
@@ -69,6 +91,7 @@
   #define CONJ_A
   #define TRANS_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_ct
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_ct
   #define BLK_M BLK_M_ct
   #define BLK_N BLK_N_ct
 
@@ -78,6 +101,7 @@
   #define TRANS_B
   #define CONJ_B
   #define kernel_name_(p)  p ## gemm_kernel_fermi_cc
+  #define devfunc_name_(p) p ## gemm_devfunc_fermi_cc
   #define BLK_M BLK_M_cc
   #define BLK_N BLK_N_cc
 
@@ -86,6 +110,7 @@
 // need a second macro in order to expand precision;
 // see http://gcc.gnu.org/onlinedocs/cpp/Argument-Prescan.html
 #define kernel_name(p) kernel_name_(p)
+#define devfunc_name(p) devfunc_name_(p)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,8 +119,8 @@
 #define THR_N ( BLK_N / DIM_Y )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" __global__
-void kernel_name(precision) (
+extern "C" __device__
+void devfunc_name(precision) (
     int M, int N, int K,
     const FloatingPoint_t* __restrict__ A, int LDA,
     const FloatingPoint_t* __restrict__ B, int LDB,
@@ -389,34 +414,3 @@ void kernel_name(precision) (
     }
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#undef TRANS_A
-#undef TRANS_B
-#undef CONJ_A
-#undef CONJ_B
-
-#undef BLK_M
-#undef BLK_N
-
-/*
-#undef BLK_K
-
-#undef DIM_X
-#undef DIM_Y
-
-#undef DIM_XA
-#undef DIM_YA
-
-#undef DIM_XB
-#undef DIM_YB
-*/
-
-#undef version
-
-#undef THR_M
-#undef THR_N
-
-#undef kernel_name_
-#undef kernel_name
