@@ -176,14 +176,14 @@ void devfunc_name(precision) (
         #endif
     #else
         #ifdef TRANS_A
-            FloatingPoint_t *offs_dA = A + blx*BLK_M*LDA + idyA*LDA + idxA;
+            const FloatingPoint_t *offs_dA = A + blx*BLK_M*LDA + idyA*LDA + idxA;
         #else
-            FloatingPoint_t *offs_dA = A + blx*BLK_M     + idyA*LDA + idxA;
+            const FloatingPoint_t *offs_dA = A + blx*BLK_M     + idyA*LDA + idxA;
         #endif
         #ifdef TRANS_B
-            FloatingPoint_t *offs_dB = B + bly*BLK_N     + idyB*LDB + idxB;
+            const FloatingPoint_t *offs_dB = B + bly*BLK_N     + idyB*LDB + idxB;
         #else
-            FloatingPoint_t *offs_dB = B + bly*BLK_N*LDB + idyB*LDB + idxB;
+            const FloatingPoint_t *offs_dB = B + bly*BLK_N*LDB + idyB*LDB + idxB;
         #endif
     #endif
 
