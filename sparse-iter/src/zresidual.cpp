@@ -14,6 +14,9 @@
 
 #include <assert.h>
 
+#define  r(i)  r.val+i*dofs
+#define  b(i)  b.val+i*dofs
+
 /**
     Purpose
     -------
