@@ -52,19 +52,37 @@ magma_zresidual( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector x,
                                             mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
     
+    if( A.num_rows == b.num_rows ){
+        magma_z_vector r;
+        magma_z_vinit( &r, Magma_DEV, A.num_rows, zero );
+
+        magma_z_spmv( one, A, x, zero, r );                   // r = A x
+        magma_zaxpy(dofs, mone, b.val, 1, r.val, 1);          // r = r - b
+        *res =  magma_dznrm2(dofs, r.val, 1);            // res = ||r||
+        //               /magma_dznrm2(dofs, b.val, 1);               /||b||
+        //printf( "relative residual: %e\n", *res );
+
+        magma_z_vfree(&r);
+    }else if(b.num_rows%A.num_rows== 0 ){
+        magma_int_t num_vecs = b.num_rows/A.num_rows;
+
+        magma_z_vector r;
+        magma_z_vinit( &r, Magma_DEV, b.num_rows, zero );
+
+        magma_z_spmv( one, A, x, zero, r );                   // r = A x
+
+        for( magma_int_t i=0; i<num_vecs; i++){
+            magma_zaxpy(dofs, mone, b(i), 1, r(i), 1);   // r = r - b
+            res[i] =  magma_dznrm2(dofs, r(i), 1);        // res = ||r||
+        }
+        //               /magma_dznrm2(dofs, b.val, 1);               /||b||
+        //printf( "relative residual: %e\n", *res );
+
+        magma_z_vfree(&r);
+    }else{
+        printf("error: dimensions do not match.\n");
+    }
     
-    magma_z_vector r;
-    magma_z_vinit( &r, Magma_DEV, A.num_rows, zero );
-
-    magma_z_spmv( one, A, x, zero, r );                   // r = A x
-    magma_zaxpy(dofs, mone, b.val, 1, r.val, 1);          // r = r - b
-    *res =  magma_dznrm2(dofs, r.val, 1);            // res = ||r||
-    //               /magma_dznrm2(dofs, b.val, 1);               /||b||
-    //printf( "relative residual: %e\n", *res );
-
-    magma_z_vfree(&r);
-
     return MAGMA_SUCCESS;
 }
-
 
