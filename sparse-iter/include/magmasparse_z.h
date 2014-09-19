@@ -325,6 +325,11 @@ magma_zpcg(            magma_z_sparse_matrix A, magma_z_vector b,
                        magma_z_preconditioner *precond_par );
 
 magma_int_t
+magma_zbpcg(           magma_z_sparse_matrix A, magma_z_vector b, 
+                       magma_z_vector *x, magma_z_solver_par *solver_par, 
+                       magma_z_preconditioner *precond_par );
+
+magma_int_t
 magma_zpbicgstab(      magma_z_sparse_matrix A, magma_z_vector b, 
                        magma_z_vector *x, magma_z_solver_par *solver_par, 
                        magma_z_preconditioner *precond_par );
