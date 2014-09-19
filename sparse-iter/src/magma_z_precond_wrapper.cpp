@@ -198,7 +198,7 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
                       magma_z_vector *x, magma_z_preconditioner *precond )
 {
     if( precond->solver == Magma_JACOBI ){
-        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_PASTIX ){
@@ -269,7 +269,7 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
                       magma_z_vector *x, magma_z_preconditioner *precond )
 {
     if( precond->solver == Magma_JACOBI ){
-        magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
+        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){

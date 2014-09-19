@@ -774,11 +774,12 @@ magma_zjacobisetup_vector_gpu( int num_rows,
                                magma_z_vector c,
                                magma_z_vector *x );
 
+
 magma_int_t
 magma_zjacobi_diagscal(         int num_rows, 
-                                magmaDoubleComplex *b, 
-                                magmaDoubleComplex *d, 
-                                magmaDoubleComplex *c);
+                                magma_z_vector d, 
+                                magma_z_vector b, 
+                                magma_z_vector *c);
 
 magma_int_t
 magma_zjacobisetup_diagscal( magma_z_sparse_matrix A, magma_z_vector *d );

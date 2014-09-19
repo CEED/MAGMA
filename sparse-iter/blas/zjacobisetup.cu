@@ -101,7 +101,8 @@ magma_zjacobisetup_vector_gpu(  int num_rows,
 
 
 __global__ void 
-zjacobidiagscal_kernel(  int num_rows, 
+zjacobidiagscal_kernel(  int num_rows,
+                         int num_vecs, 
                     magmaDoubleComplex *b, 
                     magmaDoubleComplex *d, 
                     magmaDoubleComplex *c){
@@ -109,7 +110,8 @@ zjacobidiagscal_kernel(  int num_rows,
     int row = blockDim.x * blockIdx.x + threadIdx.x ;
 
     if(row < num_rows ){
-        c[row] = b[row] * d[row];
+        for( int i=0; i<num_vecs; i++)
+            c[row+i*num_rows] = b[row+i*num_rows] * d[row];
     }
 }
 
@@ -151,14 +153,15 @@ zjacobidiagscal_kernel(  int num_rows,
 
 extern "C" magma_int_t
 magma_zjacobi_diagscal(         int num_rows, 
-                                magmaDoubleComplex *b, 
-                                magmaDoubleComplex *d, 
-                                magmaDoubleComplex *c){
+                                magma_z_vector d, 
+                                magma_z_vector b, 
+                                magma_z_vector *c){
 
 
    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+   int num_vecs = b.num_rows/num_rows;
 
-   zjacobidiagscal_kernel<<< grid, BLOCK_SIZE, 0 >>>( num_rows, b, d, c );
+   zjacobidiagscal_kernel<<< grid, BLOCK_SIZE, 0 >>>( num_rows, num_vecs, b.val, d.val, c->val );
 
    return MAGMA_SUCCESS;
 }
