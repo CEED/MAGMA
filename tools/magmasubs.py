@@ -529,6 +529,7 @@ subs = {
     ('sbicgstab',      'dbicgstab',      'cbicgstab',      'zbicgstab',      ),
 
     ('spcg',           'dpcg',           'cpcg',           'zpcg',           ),
+    ('sbpcg',          'dbpcg',          'cbpcg',          'zbpcg',          ),
     ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab',     ),
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
     ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
