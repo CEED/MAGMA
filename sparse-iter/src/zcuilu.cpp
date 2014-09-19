@@ -33,7 +33,7 @@
     Purpose
     -------
 
-    Prepares the ILU preconditioner via the asynchronous ILU iteration.
+    Prepares the ILU preconditioner via the cuSPARSE.
 
     Arguments
     ---------
@@ -269,19 +269,22 @@ magma_zapplycuilu_l( magma_z_vector b, magma_z_vector *x,
              if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
             // end CUSPARSE context //
+            magma_int_t dofs = precond->U.num_rows;
+            for(magma_int_t i=0; i<b.num_rows/dofs; i++){
 
-            cusparseStatus =
-            cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                    precond->L.num_rows, &one, 
-                                    descrL,
-                                    precond->L.val,
-                                    precond->L.row,
-                                    precond->L.col,
-                                    precond->cuinfoL,
-                                    b.val,
-                                    x->val );
-             if(cusparseStatus != 0)   printf("error in L triangular solve.\n");
+                cusparseStatus =
+                cusparseZcsrsv_solve(   cusparseHandle, 
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                        precond->L.num_rows, &one, 
+                                        descrL,
+                                        precond->L.val,
+                                        precond->L.row,
+                                        precond->L.col,
+                                        precond->cuinfoL,
+                                        b.val+i*dofs,
+                                        x->val+i*dofs );
+                 if(cusparseStatus != 0)   printf("error in L triangular solve.\n");
+            }
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
@@ -349,19 +352,23 @@ magma_zapplycuilu_r( magma_z_vector b, magma_z_vector *x,
              if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
             // end CUSPARSE context //
+            magma_int_t dofs = precond->U.num_rows;
+            for(magma_int_t i=0; i<b.num_rows/dofs; i++){
 
-            cusparseStatus =
-            cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                    precond->U.num_rows, &one, 
-                                    descrU,
-                                    precond->U.val,
-                                    precond->U.row,
-                                    precond->U.col,
-                                    precond->cuinfoU,
-                                    b.val,
-                                    x->val );
-             if(cusparseStatus != 0)   printf("error in L triangular solve.\n");
+                cusparseStatus =
+                cusparseZcsrsv_solve(   cusparseHandle, 
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                        precond->U.num_rows, &one, 
+                                        descrU,
+                                        precond->U.val,
+                                        precond->U.row,
+                                        precond->U.col,
+                                        precond->cuinfoU,
+                                        b.val+i*dofs,
+                                        x->val+i*dofs );
+                 if(cusparseStatus != 0)   printf("error in L triangular solve.\n");
+
+             }
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
@@ -377,7 +384,7 @@ magma_zapplycuilu_r( magma_z_vector b, magma_z_vector *x,
     Purpose
     -------
 
-    Prepares the IC preconditioner via the asynchronous iteration.
+    Prepares the IC preconditioner via cuSPARSE.
 
     Arguments
     ---------
@@ -625,19 +632,22 @@ magma_zapplycuicc_l( magma_z_vector b, magma_z_vector *x,
 
 
             // end CUSPARSE context //
+            magma_int_t dofs = precond->M.num_rows;
+            for(magma_int_t i=0; i<b.num_rows/dofs; i++){
 
-            cusparseStatus =
-            cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                    precond->M.num_rows, &one, 
-                                    descrL,
-                                    precond->M.val,
-                                    precond->M.row,
-                                    precond->M.col,
-                                    precond->cuinfoL,
-                                    b.val,
-                                    x->val );
-             if(cusparseStatus != 0)   printf("error in L triangular solve:%p.\n", precond->cuinfoL );
+                cusparseStatus =
+                cusparseZcsrsv_solve(   cusparseHandle, 
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                        precond->M.num_rows, &one, 
+                                        descrL,
+                                        precond->M.val,
+                                        precond->M.row,
+                                        precond->M.col,
+                                        precond->cuinfoL,
+                                        b.val+i*dofs,
+                                        x->val+i*dofs );
+                 if(cusparseStatus != 0)   printf("error in L triangular solve:%p.\n", precond->cuinfoL );
+            }
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
@@ -710,19 +720,22 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
              if(cusparseStatus != 0)    printf("error in fillmode.\n");
 
             // end CUSPARSE context //
+            magma_int_t dofs = precond->M.num_rows;
+            for(magma_int_t i=0; i<b.num_rows/dofs; i++){
 
-            cusparseStatus =
-            cusparseZcsrsv_solve(   cusparseHandle, 
-                                    CUSPARSE_OPERATION_TRANSPOSE, 
-                                    precond->M.num_rows, &one, 
-                                    descrU,
-                                    precond->M.val,
-                                    precond->M.row,
-                                    precond->M.col,
-                                    precond->cuinfoU,
-                                    b.val,
-                                    x->val );
-             if(cusparseStatus != 0)   printf("error in U triangular solve:%p.\n", precond->cuinfoU );
+                cusparseStatus =
+                cusparseZcsrsv_solve(   cusparseHandle, 
+                                        CUSPARSE_OPERATION_TRANSPOSE, 
+                                        precond->M.num_rows, &one, 
+                                        descrU,
+                                        precond->M.val,
+                                        precond->M.row,
+                                        precond->M.col,
+                                        precond->cuinfoU,
+                                        b.val+i*dofs,
+                                        x->val+i*dofs );
+                 if(cusparseStatus != 0)   printf("error in U triangular solve:%p.\n", precond->cuinfoU );
+            }
 
 
     cusparseDestroyMatDescr( descrU );
