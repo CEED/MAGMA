@@ -325,7 +325,7 @@ magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d,
         magma_z_vector tmp;
         magma_z_vinit( &tmp, Magma_DEV, b.num_rows, MAGMA_Z_ZERO );
         magma_zjacobisetup_vector_gpu( 
-                    b.num_rows, b.val, d.val, c->val, tmp.val );
+                    b.num_rows, b, d, *c, &tmp );
         magma_z_vfree( &tmp );
         return MAGMA_SUCCESS;
     }
@@ -542,11 +542,13 @@ magma_zjacobiiter_precond( magma_z_sparse_matrix M, magma_z_vector *x,
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                             c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = M.num_rows;
+    magma_int_t num_vecs = x->num_rows / dofs;
     magma_z_vector swap;
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ){
         magma_z_spmv( c_mone, M, *x, c_zero, precond->work2 );   // t = - M * x
-        magma_zaxpy( dofs, c_one , 
+
+        magma_zaxpy( num_vecs*dofs, c_one , 
                 precond->work1.val, 1 , precond->work2.val, 1 ); // t = t + c
 
         // swap so that x again contains solution, and y is ready to be used
