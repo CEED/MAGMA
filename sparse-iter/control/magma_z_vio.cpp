@@ -148,3 +148,48 @@ magma_z_vread(      magma_z_vector *x,
 
 
 
+/**
+    Purpose
+    -------
+
+    Reads in a sparse vector-block stored in COO format.
+
+    Arguments
+    ---------
+
+    @param
+    x           magma_z_vector
+                vector to read in
+
+    @param
+    filename    char*
+                file where vector is stored
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+extern "C"
+magma_int_t
+magma_z_vspread(      magma_z_vector *x, 
+                      char ** filename ){
+
+    magma_z_sparse_matrix A,B;
+    magma_int_t entry=0;
+
+     //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
+    magma_z_csr_mtx( &A,  filename[0]  ); 
+    magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE );
+    magma_z_vinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO );
+    for(magma_int_t i=0; i<A.num_cols; i++){
+        for(magma_int_t j=0; j<A.num_rows; j++){
+            x->val[i*A.num_rows+j] = B.val[ entry ];
+            entry++;     
+        }
+    }
+    magma_z_mfree( &A );
+    magma_z_mfree( &B );
+
+    return MAGMA_SUCCESS;
+}   
+
+
