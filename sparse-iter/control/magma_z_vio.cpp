@@ -182,7 +182,7 @@ magma_z_vspread(      magma_z_vector *x,
     magma_z_vinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO );
     for(magma_int_t i=0; i<A.num_cols; i++){
         for(magma_int_t j=0; j<A.num_rows; j++){
-            x->val[i*A.num_rows+j] = B.val[ entry ];
+            x->val[i*A.num_rows+j] = B.val[ i+j*A.num_rows ];
             entry++;     
         }
     }
