@@ -119,7 +119,7 @@
 #define THR_N ( BLK_N / DIM_Y )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" __device__
+extern "C" static __device__
 void devfunc_name(precision) (
     int M, int N, int K,
     const FloatingPoint_t* __restrict__ A, int LDA,

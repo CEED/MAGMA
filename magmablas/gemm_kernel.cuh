@@ -12,7 +12,7 @@
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" __global__
+extern "C" static __global__
 void kernel_name(precision)(
     int M, int N, int K,
     const FloatingPoint_t* __restrict__ A, int LDA,
