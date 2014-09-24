@@ -24,7 +24,7 @@ typedef long long magma_flops_t;
     
     #if defined(HAVE_PAPI)
         #include <papi.h>
-        extern int gPAPI_flops_set;  // defined in testing_util.cpp
+        extern int gPAPI_flops_set;  // defined in testing/magma_util.cpp
     #endif
 #endif
 
@@ -69,7 +69,7 @@ static inline magma_timer_t timer_stop( magma_timer_t &t )
 
 
 // ------------------------------------------------------------
-// see gPAPI_flops_set in testing/testing_util.cpp
+// see gPAPI_flops_set in testing/magma_util.cpp
 
 // Set flops counter to current flops.
 // If ENABLE_TIMER and HAVE_PAPI are not both defined, does nothing.
