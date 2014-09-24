@@ -29,7 +29,6 @@ ZSRC := \
 	zgemv_conjv.cu          \
 	zhemv.cu		\
 	zlacpy.cu		\
-	zlacpy_batched.cu	\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
