@@ -164,7 +164,7 @@ void zlacpy_kernel_upper(
 __global__
 void zlacpy_kernel_batched_full(
     int m, int n,
-    magmaDoubleComplex **dAarray, int ldda,
+    magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
@@ -174,7 +174,7 @@ void zlacpy_kernel_batched_full(
 __global__
 void zlacpy_kernel_batched_lower(
     int m, int n,
-    magmaDoubleComplex **dAarray, int ldda,
+    magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
@@ -184,7 +184,7 @@ void zlacpy_kernel_batched_lower(
 __global__
 void zlacpy_kernel_batched_upper(
     int m, int n,
-    magmaDoubleComplex **dAarray, int ldda,
+    magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
@@ -355,8 +355,8 @@ magmablas_zlacpy(
 extern "C" void
 magmablas_zlacpy_batched_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex **dAarray, magma_int_t ldda,
-    magmaDoubleComplex **dBarray, magma_int_t lddb,
+    magmaDoubleComplex const * const *dAarray, magma_int_t ldda,
+    magmaDoubleComplex              **dBarray, magma_int_t lddb,
     magma_int_t batchCount, magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -401,8 +401,8 @@ magmablas_zlacpy_batched_q(
 extern "C" void
 magmablas_zlacpy_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex **dAarray, magma_int_t ldda,
-    magmaDoubleComplex **dBarray, magma_int_t lddb,
+    magmaDoubleComplex const * const *dAarray, magma_int_t ldda,
+    magmaDoubleComplex              **dBarray, magma_int_t lddb,
     magma_int_t batchCount )
 {
     magmablas_zlacpy_batched_q( uplo, m, n, dAarray, ldda, dBarray, lddb, batchCount, magma_stream );

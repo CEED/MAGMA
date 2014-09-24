@@ -80,8 +80,8 @@ void magmablas_zlacpy_q(
 
 void magmablas_zlacpy_batched_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex **dAarray, magma_int_t ldda,
-    magmaDoubleComplex **dBarray, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr  const *dAarray, magma_int_t ldda,
+    magmaDoubleComplex_ptr              *dBarray, magma_int_t lddb,
     magma_int_t batchCount, 
     magma_queue_t queue );
 
