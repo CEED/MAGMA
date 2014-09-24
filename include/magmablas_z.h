@@ -351,8 +351,8 @@ void magmablas_zlacpy(
 
 void magmablas_zlacpy_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_const_ptr  const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex_ptr              *dBarray, magma_int_t lddb,
+    magmaDoubleComplex **dAarray, magma_int_t ldda,
+    magmaDoubleComplex **dBarray, magma_int_t lddb,
     magma_int_t batchCount );
 
 double magmablas_zlange(
@@ -377,6 +377,11 @@ void magmablas_zlarfg(
     magma_int_t n,
     magmaDoubleComplex *dalpha, magmaDoubleComplex *dx, magma_int_t incx,
     magmaDoubleComplex *dtau );
+
+void magmablas_zlarfg_work(
+    magma_int_t n,
+    magmaDoubleComplex* dalpha, magmaDoubleComplex* dx, magma_int_t incx,
+    magmaDoubleComplex* dtau, magmaDoubleComplex* dwork );
 
 void magmablas_zlascl(
     magma_type_t type, magma_int_t kl, magma_int_t ku,
@@ -1011,6 +1016,8 @@ void magma_ztrsm(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
+
+
 
 #ifdef __cplusplus
 }
