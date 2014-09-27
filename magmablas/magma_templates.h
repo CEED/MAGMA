@@ -153,17 +153,17 @@ __device__ void
 magma_sum_reduce_3d( int i, int j, int k, T x[m0][m1][m2] )
 {
     __syncthreads();
-    if ( m2 > 1024 ) { if ( i < 1024 && i + 1024 < m2 ) { x[i][j][k] += x[i+1024][j][k]; }  __syncthreads(); }
-    if ( m2 >  512 ) { if ( i <  512 && i +  512 < m2 ) { x[i][j][k] += x[i+ 512][j][k]; }  __syncthreads(); }
-    if ( m2 >  256 ) { if ( i <  256 && i +  256 < m2 ) { x[i][j][k] += x[i+ 256][j][k]; }  __syncthreads(); }
-    if ( m2 >  128 ) { if ( i <  128 && i +  128 < m2 ) { x[i][j][k] += x[i+ 128][j][k]; }  __syncthreads(); }
-    if ( m2 >   64 ) { if ( i <   64 && i +   64 < m2 ) { x[i][j][k] += x[i+  64][j][k]; }  __syncthreads(); }
-    if ( m2 >   32 ) { if ( i <   32 && i +   32 < m2 ) { x[i][j][k] += x[i+  32][j][k]; }  __syncthreads(); }
-    if ( m2 >   16 ) { if ( i <   16 && i +   16 < m2 ) { x[i][j][k] += x[i+  16][j][k]; }  __syncthreads(); }
-    if ( m2 >    8 ) { if ( i <    8 && i +    8 < m2 ) { x[i][j][k] += x[i+   8][j][k]; }  __syncthreads(); }
-    if ( m2 >    4 ) { if ( i <    4 && i +    4 < m2 ) { x[i][j][k] += x[i+   4][j][k]; }  __syncthreads(); }
-    if ( m2 >    2 ) { if ( i <    2 && i +    2 < m2 ) { x[i][j][k] += x[i+   2][j][k]; }  __syncthreads(); }
-    if ( m2 >    1 ) { if ( i <    1 && i +    1 < m2 ) { x[i][j][k] += x[i+   1][j][k]; }  __syncthreads(); }
+    if ( m0 > 1024 ) { if ( i < 1024 && i + 1024 < m2 ) { x[i][j][k] += x[i+1024][j][k]; }  __syncthreads(); }
+    if ( m0 >  512 ) { if ( i <  512 && i +  512 < m2 ) { x[i][j][k] += x[i+ 512][j][k]; }  __syncthreads(); }
+    if ( m0 >  256 ) { if ( i <  256 && i +  256 < m2 ) { x[i][j][k] += x[i+ 256][j][k]; }  __syncthreads(); }
+    if ( m0 >  128 ) { if ( i <  128 && i +  128 < m2 ) { x[i][j][k] += x[i+ 128][j][k]; }  __syncthreads(); }
+    if ( m0 >   64 ) { if ( i <   64 && i +   64 < m2 ) { x[i][j][k] += x[i+  64][j][k]; }  __syncthreads(); }
+    if ( m0 >   32 ) { if ( i <   32 && i +   32 < m2 ) { x[i][j][k] += x[i+  32][j][k]; }  __syncthreads(); }
+    if ( m0 >   16 ) { if ( i <   16 && i +   16 < m2 ) { x[i][j][k] += x[i+  16][j][k]; }  __syncthreads(); }
+    if ( m0 >    8 ) { if ( i <    8 && i +    8 < m2 ) { x[i][j][k] += x[i+   8][j][k]; }  __syncthreads(); }
+    if ( m0 >    4 ) { if ( i <    4 && i +    4 < m2 ) { x[i][j][k] += x[i+   4][j][k]; }  __syncthreads(); }
+    if ( m0 >    2 ) { if ( i <    2 && i +    2 < m2 ) { x[i][j][k] += x[i+   2][j][k]; }  __syncthreads(); }
+    if ( m0 >    1 ) { if ( i <    1 && i +    1 < m2 ) { x[i][j][k] += x[i+   1][j][k]; }  __syncthreads(); }
 }
 // end sum_reduce_3d
 
