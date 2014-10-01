@@ -125,13 +125,13 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     
     if ( (r0[0] = nom[0] * solver_par->epsilon) < ATOLERANCE ) 
         r0[0] = ATOLERANCE;
-    if ( nom[0] < r0[0] )
-        return MAGMA_SUCCESS;
     // check positive definite
     if (den[0] <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         return -100;
     }
+    if ( nom[0] < r0[0] )
+        return MAGMA_SUCCESS;
 
     //Chronometry
     real_Double_t tempo1, tempo2;

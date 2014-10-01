@@ -128,12 +128,12 @@ magma_z_vread(      magma_z_vector *x,
     
     x->memory_location = Magma_CPU;
     x->num_rows = length;
-    
+    magma_zmalloc_cpu( &x->val, length );
     magma_int_t nnz=0, i=0;
     string line;
     ifstream fin(filename);  
     getline(fin, line, '\n');  
-    while(!(fin.eof()))  // eof() is 'true' at the end of data
+    while( i<length )  // eof() is 'true' at the end of data
     {
         getline(fin, line, '\n');
         if( magma_zstring_to_double(line) != 0 )
@@ -145,6 +145,7 @@ magma_z_vread(      magma_z_vector *x,
     x->nnz = nnz;
     return MAGMA_SUCCESS;
 }   
+
 
 
 
@@ -171,13 +172,13 @@ magma_z_vread(      magma_z_vector *x,
 extern "C"
 magma_int_t
 magma_z_vspread(      magma_z_vector *x, 
-                      char ** filename ){
+                      const char * filename ){
 
     magma_z_sparse_matrix A,B;
     magma_int_t entry=0;
 
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
-    magma_z_csr_mtx( &A,  filename[0]  ); 
+    magma_z_csr_mtx( &A,  filename  ); 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE );
     magma_z_vinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO );
     for(magma_int_t i=0; i<A.num_cols; i++){

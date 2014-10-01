@@ -231,7 +231,7 @@ magma_z_vread(          magma_z_vector *x,
 
 magma_int_t
 magma_z_vspread(        magma_z_vector *x, 
-                        char ** filename );
+                        const char * filename );
 
 magma_int_t
 magma_z_mvisu(          magma_z_sparse_matrix A );
