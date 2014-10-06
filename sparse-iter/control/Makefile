@@ -26,6 +26,7 @@ ZSRC := \
 	magma_ztranspose.cpp	\
     magma_zp2p.cpp   \
     magma_zcsrsplit.cpp   \
+    magma_zmcsrcompressor.cpp   \
     magma_zmscale.cpp   \
     magma_zmdiff.cpp  \
 

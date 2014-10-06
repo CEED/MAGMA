@@ -53,6 +53,9 @@ int main( int argc, char** argv)
         // scale matrix
         magma_zmscale( &A, zopts.scaling );
 
+        // remove nonzeros in matrix
+        magma_zmcsrcompressor( &A );
+
         // transpose
         magma_z_mtranspose( A, &AT );
 
