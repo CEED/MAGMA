@@ -124,7 +124,7 @@
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C"
-void magmablas_ztrsm_work(
+void magmablas_ztrsm_outofplace(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
@@ -337,11 +337,28 @@ void magmablas_ztrsm_work(
             }
         }
     }
+}
 
+/**
+    @see magmablas_ztrsm_outofplace
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C"
+void magmablas_ztrsm_work(
+    magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex* dA, magma_int_t ldda,
+    magmaDoubleComplex* dB, magma_int_t lddb,
+    magma_int_t flag,
+    magmaDoubleComplex* d_dinvA, magmaDoubleComplex *dX)
+{
+
+    magmablas_ztrsm_outofplace( side, uplo, transA, diag, m, n, alpha,
+                              dA, ldda, dB, lddb, 1, d_dinvA, dX );
     // copy X to B
     magmablas_zlacpy( MagmaFull, m, n, dX, m, dB, lddb );
 }
-
 
 /**
     @see magmablas_ztrsm_work

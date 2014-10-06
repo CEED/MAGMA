@@ -651,6 +651,13 @@ void magmablas_ztrsm_work(
     magmaDoubleComplex_ptr       db, magma_int_t lddb,
     magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
 
+void magmablas_ztrsm_outofplace(
+    magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       db, magma_int_t lddb,
+    magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
 
   /*
    * Wrappers for platform independence.
