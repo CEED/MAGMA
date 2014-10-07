@@ -42,8 +42,8 @@ magma_zmcsrgpu_kernel1( int num_rows,
         int end = A_rowptr[ row+1 ];
         for( j=start; j<end; j++ ){
             if( A_val[j] != zero ){
-                B_val[new_location] = A_val[j];
-                B_colind[new_location] = A_colind[j];
+       //         B_val[new_location] = A_val[j];
+       //         B_colind[new_location] = A_colind[j];
                 new_location++;
             } 
         }
@@ -77,21 +77,30 @@ magma_zmcsrgpu_kernel2( int num_rows,
 __global__ void 
 magma_zmcsrgpu_kernel3( int num_rows,  
                  magmaDoubleComplex *B_val, 
+                 magma_index_t *B_rowptr, 
                  magma_index_t *B_colind,
+                 magma_index_t *B2_rowptr, 
                  magmaDoubleComplex *A_val, 
                  magma_index_t *A_rowptr, 
                  magma_index_t *A_colind
                                             ){
 
     int row = blockIdx.x*blockDim.x+threadIdx.x;
-    int j;
-
+    int j, new_location;
+    
     if(row<num_rows){
-        int start = A_rowptr[ row ];
-        int end = A_rowptr[ row+1 ];
+    new_location = A_rowptr[ row ];
+        int start = B2_rowptr[ row ];
+        int end = B2_rowptr[ row+1 ];
+        magmaDoubleComplex zero = MAGMA_Z_ZERO;
         for( j=start; j<end; j++ ){
-                A_val[ j ] = B_val[ j ];
-                A_colind[ j ] = B_colind[ j ];
+            if( A_val[j] != zero ){
+                B_val[new_location] = A_val[j];
+                B_colind[new_location] = A_colind[j];
+                new_location++;
+            } 
+               // A_val[ j ] = B_val[ j ];
+               // A_colind[ j ] = B_colind[ j ];
         }
     }
 }
@@ -120,17 +129,16 @@ magma_zmcsrcompressor_gpu( magma_z_sparse_matrix *A ){
     if( A->memory_location == Magma_DEV && A->storage_type == Magma_CSR ){
 
         magma_int_t stat;
-        magma_z_sparse_matrix B;
+        magma_z_sparse_matrix B, B2;
 
-        stat = magma_zmalloc( &B.val, A->nnz );
-        if( stat != 0 )
-        {printf("Memory Allocation Error for B\n"); exit(0); }
         stat = magma_index_malloc( &B.row, A->num_rows + 1 );
         if( stat != 0 )
         {printf("Memory Allocation Error for B\n"); exit(0); }
-        stat = magma_index_malloc( &B.col, A->nnz );
+
+        stat = magma_index_malloc( &B2.row, A->num_rows + 1 );
         if( stat != 0 )
-        {printf("Memory Allocation Error for B\n"); exit(0); }
+        {printf("Memory Allocation Error for B2\n"); exit(0); }
+        magma_index_copyvector( (A->num_rows+1), A->row, 1, B2.row, 1 );
 
         dim3 grid1( (A->num_rows+BLOCK_SIZE1-1)/BLOCK_SIZE1, 1, 1);  
 
@@ -149,24 +157,27 @@ magma_zmcsrcompressor_gpu( magma_z_sparse_matrix *A ){
         A->nnz = (magma_int_t) cputmp[0];
 
         // reallocate with right size
-        magma_free( A->col );
-        magma_free( A->val );
-        stat = magma_zmalloc( &A->val, A->nnz );
+        stat = magma_zmalloc( &B.val, A->nnz );
         if( stat != 0 )
             {printf("Memory Allocation Error for A\n"); exit(0); }
-        stat = magma_index_malloc( &A->col, A->nnz );
+        stat = magma_index_malloc( &B.col, A->nnz );
         if( stat != 0 )
             {printf("Memory Allocation Error for A\n"); exit(0); }
 
 
         // copy correct values back
         magma_zmcsrgpu_kernel3<<< grid1, BLOCK_SIZE1, 0, magma_stream >>>
-                ( A->num_rows, B.val, B.col, A->val, A->row, A->col );
+                ( A->num_rows, B.val, B.row, B.col, B2.row, A->val, A->row, A->col );
 
+        magma_free( A->col );
+        magma_free( A->val );
+    A->col = B.col;
+    A->val = B.val;
 
         magma_free( B.row );
-        magma_free( B.col );
-        magma_free( B.val );
+        magma_free( B2.row );
+       // magma_free( B.col );
+       // magma_free( B.val );
 
         return MAGMA_SUCCESS; 
     }
