@@ -49,6 +49,7 @@ ZSRC := \
 # Auxiliary routines
 ZSRC += \
 	zcompact.cu		\
+	magma_zmcsrcompressor_gpu.cu		\
 
 
 -include Makefile.local

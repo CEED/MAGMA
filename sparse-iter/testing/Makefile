@@ -16,6 +16,7 @@ LIB += -lcusparse
 # utility functions
 ZSRC += \
     testing_zmatrix.cpp     \
+    testing_zmcompressor.cpp     \
 
 
 # ----------

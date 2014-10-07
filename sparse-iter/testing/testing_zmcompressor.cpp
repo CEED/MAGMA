@@ -34,6 +34,7 @@ int main( int argc, char** argv)
     magma_zopts zopts;
 
     int i=1;
+    double start, end;
     magma_zparse_opts( argc, argv, &zopts, &i);
 
 
@@ -54,20 +55,30 @@ int main( int argc, char** argv)
         magma_zmscale( &A, zopts.scaling );
 
         // remove nonzeros in matrix
-        magma_zmcsrcompressor( &A );
-
+        magma_device_sync(); start = magma_wtime(); 
+        for (int j=0; j<10; j++)
+            magma_zmcsrcompressor( &A );
+        magma_device_sync(); end = magma_wtime(); 
+        printf( " > MAGMA CPU: %.2e seconds.\n", (end-start)/10 );
         // transpose
         magma_z_mtranspose( A, &AT );
 
         // convert, copy back and forth to check everything works
-        magma_z_mconvert( AT, &B, Magma_CSR, zopts.output_format );
+        magma_z_mconvert( AT, &B, Magma_CSR, Magma_CSR );
         magma_z_mfree(&AT); 
         magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV );
         magma_z_mfree(&B);
-        magma_zmcsrcompressor_gpu( &B_d );
+
+        magma_device_sync(); start = magma_wtime(); 
+        for (int j=0; j<10; j++)
+            magma_zmcsrcompressor_gpu( &B_d );
+        magma_device_sync(); end = magma_wtime(); 
+        printf( " > MAGMA GPU: %.2e seconds.\n", (end-start)/10 );
+
+
         magma_z_mtransfer( B_d, &B, Magma_DEV, Magma_CPU );
         magma_z_mfree(&B_d);
-        magma_z_mconvert( B, &AT, zopts.output_format,Magma_CSR );      
+        magma_z_mconvert( B, &AT, Magma_CSR, Magma_CSR );      
         magma_z_mfree(&B);
 
         // transpose back
