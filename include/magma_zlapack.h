@@ -283,18 +283,18 @@ void blasf77_zsyrk(  const char *uplo, const char *trans,
                      const magmaDoubleComplex *beta,
                            magmaDoubleComplex *C, const magma_int_t *ldc );
 
-void blasf77_zrotg(  magmaDoubleComplex* ca, const magmaDoubleComplex* cb,
-                     double* c, magmaDoubleComplex* s );
+void blasf77_zrotg(  magmaDoubleComplex *ca, const magmaDoubleComplex *cb,
+                     double *c, magmaDoubleComplex *s );
                      
-void blasf77_zrot(   const magma_int_t* n,
-                     magmaDoubleComplex* x, const magma_int_t* incx,
-                     magmaDoubleComplex* y, const magma_int_t* incy,
-                     const double* c, const magmaDoubleComplex* s );
+void blasf77_zrot(   const magma_int_t *n,
+                     magmaDoubleComplex *x, const magma_int_t *incx,
+                     magmaDoubleComplex *y, const magma_int_t *incy,
+                     const double *c, const magmaDoubleComplex *s );
                      
-void blasf77_zdrot(  const magma_int_t* n,
-                     magmaDoubleComplex* x, const magma_int_t* incx,
-                     magmaDoubleComplex* y, const magma_int_t* incy,
-                     const double* c, const double* s );
+void blasf77_zdrot(  const magma_int_t *n,
+                     magmaDoubleComplex *x, const magma_int_t *incx,
+                     magmaDoubleComplex *y, const magma_int_t *incy,
+                     const double *c, const double *s );
 
 void blasf77_ztrmm(  const char *side, const char *uplo, const char *transa, const char *diag,
                      const magma_int_t *m, const magma_int_t *n,
@@ -347,7 +347,7 @@ magmaDoubleComplex magma_cblas_zdotu(
  * LAPACK functions (alphabetical order)
  */
 #ifdef REAL
-void   lapackf77_dbdsdc( const char *uplo, const char* compq,
+void   lapackf77_dbdsdc( const char *uplo, const char *compq,
                          const magma_int_t *n,
                          double *d, double *e,
                          double *U,  const magma_int_t *ldu,

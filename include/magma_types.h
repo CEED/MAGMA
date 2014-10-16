@@ -87,11 +87,7 @@ typedef double real_Double_t;
     #define MAGMA_C_CNJG(a)       cuConjf(a)
     
 #elif defined(HAVE_clAmdBlas)
-    #if defined(__APPLE__) || defined(__MACOSX)
-    #include "my_amdblas.h"
-    #else
     #include <clAmdBlas.h>
-    #endif
     
     typedef cl_command_queue  magma_queue_t;
     typedef cl_event          magma_event_t;
@@ -262,7 +258,7 @@ typedef double real_Double_t;
 
 // ----------------------------------------
 #define MAGMA_VERSION_MAJOR 1
-#define MAGMA_VERSION_MINOR 4
+#define MAGMA_VERSION_MINOR 5
 #define MAGMA_VERSION_MICRO 0
 
 // stage is "svn", "beta#", "rc#" (release candidate), or blank ("") for final release
