@@ -15,10 +15,6 @@
 #include <math.h>
 #include <assert.h>
 
-#ifdef HAVE_CUBLAS
-#include <cublas.h>
-#endif
-
 // includes, project
 #include "magma.h"
 #include "magma_lapack.h"
@@ -58,8 +54,8 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magmaDoubleComplex *h_A1, *h_A2;
-    magmaDoubleComplex_ptr d_A1, d_A2;
     magmaDoubleComplex *h_R1, *h_R2;
+    magmaDoubleComplex_ptr d_A1, d_A2;
     
     // row-major and column-major performance
     real_Double_t row_perf0, col_perf0;
@@ -77,7 +73,7 @@ int main( int argc, char** argv)
     magma_int_t N, lda, ldda, nb, j;
     magma_int_t ione = 1;
     magma_int_t *ipiv, *ipiv2;
-    magma_int_t *d_ipiv;
+    magmaInt_ptr d_ipiv;
     magma_int_t status = 0;
     
     magma_opts opts;

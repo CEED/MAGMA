@@ -79,8 +79,10 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
-            magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            if ( opts.warmup ) {
+                magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
+                lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            }
 
             /* ====================================================================
                Performs operation using MAGMA

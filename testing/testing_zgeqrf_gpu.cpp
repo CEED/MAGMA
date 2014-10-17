@@ -29,7 +29,8 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     double           error, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *h_A, *d_A, *h_R, *tau, *dT, *h_work, tmp[1];
+    magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
+    magmaDoubleComplex_ptr d_A, dT;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn, nb, size;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1}, ISEED2[4];
@@ -189,7 +190,8 @@ int main( int argc, char** argv)
                    Check the result by solving linear system -- only versions 1 & 3, M >= N
                    =================================================================== */
                 magma_int_t lwork;
-                magmaDoubleComplex *x, *b, *d_B, *hwork;
+                magmaDoubleComplex *x, *b, *hwork;
+                magmaDoubleComplex_ptr d_B;
                 const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
                 const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
                 const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

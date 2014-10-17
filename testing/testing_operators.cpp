@@ -8,6 +8,7 @@
        @author Mark Gates
 */
 
+// includes, system
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +16,7 @@
 
 #include <complex>
 
-#include "flops.h"
+// includes, project
 #include "magma.h"
 #include "magma_lapack.h"
 #include "magma_operators.h"

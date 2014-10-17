@@ -9,7 +9,10 @@
 */
 #include <stdio.h>
 
+// include cublas before magma.h, to get v2
+#ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
+#endif
 
 #include "magma.h"
 
@@ -33,7 +36,7 @@ int main( int argc, char** argv )
 {
     gStatus = 0;
     int s;
-    
+
     // ------------------------------------------------------------
     s = gStatus;
     check( lapack_bool_const(   MagmaFalse         )[0] == 'N' );
