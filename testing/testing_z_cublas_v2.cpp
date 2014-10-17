@@ -16,8 +16,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef HAVE_CUBLAS
 #include <cuda_runtime_api.h>
 #include <cublas_v2.h>  // include before magma.h
+#endif
 
 #include "magma.h"
 #include "magma_lapack.h"

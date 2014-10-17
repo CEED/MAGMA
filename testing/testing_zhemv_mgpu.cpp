@@ -12,8 +12,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+#ifdef HAVE_CUBLAS
 #include <cuda_runtime_api.h>
 #include <cublas_v2.h>
+#endif
 
 #include "flops.h"
 #include "magma.h"

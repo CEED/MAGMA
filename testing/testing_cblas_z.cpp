@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
+
 #include <cblas.h>
 
 // make sure that asserts are enabled
