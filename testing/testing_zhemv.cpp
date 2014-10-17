@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
     magmaDoubleComplex *A, *X, *Y, *Yatomics, *Ycublas, *Ymagma;
-    magmaDoubleComplex *dA, *dX, *dY, *dwork;
+    magmaDoubleComplex_ptr dA, dX, dY, dwork;
     magma_int_t status = 0;
     
     magma_opts opts;

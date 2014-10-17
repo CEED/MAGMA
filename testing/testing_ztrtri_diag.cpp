@@ -59,7 +59,7 @@ int main( int argc, char** argv )
     magma_int_t *ipiv;
 
     magmaDoubleComplex *h_A, *h_dinvA;
-    magmaDoubleComplex *d_A, *d_dinvA;
+    magmaDoubleComplex_ptr d_A, d_dinvA;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t status = 0;
     

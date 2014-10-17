@@ -36,7 +36,7 @@ int main( int argc, char** argv )
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t nb, ldc, lda, lwork, lwork_max, dt_size;
     magmaDoubleComplex *C, *R, *A, *W, *tau;
-    magmaDoubleComplex *dC, *dA, *dT;
+    magmaDoubleComplex_ptr dC, dA, dT;
     magma_int_t status = 0;
     
     magma_opts opts;

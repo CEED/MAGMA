@@ -35,7 +35,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *h_work, tmp[1];
-    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex_ptr d_A, d_B;
     magma_int_t M, N, size, nrhs, lda, ldb, ldda, lddb, min_mn, max_mn, nb, info;
     magma_int_t lworkgpu, lhwork;
     magma_int_t ione     = 1;

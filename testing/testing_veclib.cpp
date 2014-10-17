@@ -98,7 +98,7 @@ float test( magma_int_t m, magma_int_t n )
     float  *sA, *swork;
     float  snorm_one, snorm_inf, snorm_fro, snorm_max;
     
-    double *dA, *dwork;
+    magmaDouble_ptr dA, dwork;
     double dnorm_one, dnorm_inf, dnorm_fro, dnorm_max;
     
     const magma_int_t ione = 1;

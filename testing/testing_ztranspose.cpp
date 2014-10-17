@@ -33,7 +33,7 @@ int main( int argc, char** argv)
     double           error, error2, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_R;
-    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex_ptr d_A, d_B;
     magma_int_t M, N, size, lda, ldda, ldb, lddb;
     magma_int_t ione     = 1;
     magma_int_t status = 0;

@@ -29,7 +29,7 @@ int main( int argc, char** argv )
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *work;
-    magmaDoubleComplex *d_A, *dwork;
+    magmaDoubleComplex_ptr d_A, dwork;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t N, n2, lda, ldda, info, lwork, ldwork;
     magma_int_t ione     = 1;

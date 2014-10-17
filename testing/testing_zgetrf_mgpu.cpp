@@ -155,7 +155,7 @@ int main( int argc, char** argv )
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     double           error;
     magmaDoubleComplex *h_A;
-    magmaDoubleComplex *d_lA[ MagmaMaxGPUs ];
+    magmaDoubleComplex_ptr d_lA[ MagmaMaxGPUs ];
     magma_int_t *ipiv;
     magma_int_t M, N, n2, lda, ldda, n_local, ngpu;
     magma_int_t info, min_mn, nb, ldn_local;

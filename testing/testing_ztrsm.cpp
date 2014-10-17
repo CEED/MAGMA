@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t *ipiv;
 
     magmaDoubleComplex *h_A, *h_B, *h_Bcublas, *h_Bmagma, *h_Blapack, *h_X;
-    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex_ptr d_A, d_B;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );

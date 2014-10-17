@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           error, work[1];
     magmaDoubleComplex *hA, *hR, *hR2, *hV, *hW;
-    magmaDoubleComplex *dV[MagmaMaxGPUs], *dW[MagmaMaxGPUs], *dA[MagmaMaxGPUs];
+    magmaDoubleComplex_ptr dV[MagmaMaxGPUs], dW[MagmaMaxGPUs], dA[MagmaMaxGPUs];
     magma_int_t n, k, size, lda, ldda, nb, ngpu, nstream;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};

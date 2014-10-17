@@ -41,8 +41,8 @@ int main( int argc, char** argv)
     real_Double_t    gpu_perf2=0., gpu_time2=0.;
     double           error=0., errorbis=0., work[1];
     magmaDoubleComplex *hA, *hX, *hB, *hR;
-    magmaDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs], *dB[MagmaMaxGPUs], *dwork[MagmaMaxGPUs], *hwork[MagmaMaxGPUs+1];
-    magmaDoubleComplex *dA2;
+    magmaDoubleComplex_ptr dA[MagmaMaxGPUs], dX[MagmaMaxGPUs], dB[MagmaMaxGPUs], dwork[MagmaMaxGPUs], hwork[MagmaMaxGPUs+1];
+    magmaDoubleComplex_ptr dA2;
     magma_int_t M, N, size, lda, ldda, msize, nb, nstream;
     magma_int_t ione     = 1;
     magma_int_t iseed[4] = {0,0,0,1};

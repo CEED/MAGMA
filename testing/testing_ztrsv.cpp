@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     magma_int_t *ipiv;
 
     magmaDoubleComplex *h_A, *h_b, *h_x, *h_xcublas;
-    magmaDoubleComplex *d_A, *d_x;
+    magmaDoubleComplex_ptr d_A, d_x;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t status = 0;
     

@@ -43,11 +43,11 @@ int main(int argc, char **argv)
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );  // MAGMA_Z_ONE;
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );  // MAGMA_Z_ZERO;
     magmaDoubleComplex *A, *X, *Y[MagmaMaxGPUs], *Ycublas, *Ymagma;
-    magmaDoubleComplex *dA, *dX[MagmaMaxGPUs], *dY[MagmaMaxGPUs], *d_lA[MagmaMaxGPUs], *dYcublas;
+    magmaDoubleComplex_ptr dA, dX[MagmaMaxGPUs], dY[MagmaMaxGPUs], d_lA[MagmaMaxGPUs], dYcublas;
 
     //magma_queue_t stream[MagmaMaxGPUs][10];
     magmaDoubleComplex *C_work;
-    magmaDoubleComplex *dC_work[MagmaMaxGPUs];
+    magmaDoubleComplex_ptr dC_work[MagmaMaxGPUs];
     magma_int_t     status = 0;
     
     magma_opts opts;

@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
-    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex_ptr d_A, d_B;
     magma_int_t *ipiv;
     magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB;
     magma_int_t ione     = 1;

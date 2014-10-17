@@ -32,7 +32,7 @@ int main( int argc, char** argv)
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work;
-    magmaDoubleComplex *d_A, *dtau, *d_work;
+    magmaDoubleComplex_ptr d_A, dtau, d_work;
     magma_int_t *jpvt;
     magma_int_t M, N, K, n2, lda, lwork, j, info, min_mn, nb;
     magma_int_t ione     = 1;
@@ -71,7 +71,8 @@ int main( int argc, char** argv)
                 lwork = max( lwork, M*N + N );
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            double *drwork, *rwork;
+            double *rwork;
+            magmaDouble_ptr drwork;
             TESTING_MALLOC_DEV( drwork, double, 2*N + (N+1)*nb);
             TESTING_MALLOC_CPU( rwork,  double, 2*N );
             #endif

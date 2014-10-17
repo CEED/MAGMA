@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
-    magmaDoubleComplex *d_A, *d_B, *d_X, *d_WORKD;
+    magmaDoubleComplex_ptr d_A, d_B, d_X, d_WORKD;
     magmaFloatComplex  *d_As, *d_Bs, *d_WORKS;
     double          *h_workd;
     magma_int_t *h_ipiv, *d_ipiv;

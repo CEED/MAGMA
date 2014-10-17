@@ -35,7 +35,7 @@ int main( int argc, char** argv)
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double      work[1], error;
     magmaDoubleComplex *h_A, *h_R;
-    magmaDoubleComplex *d_lA[4] = {NULL, NULL, NULL, NULL};
+    magmaDoubleComplex_ptr d_lA[4] = {NULL, NULL, NULL, NULL};
     magma_int_t N, n2, lda, ldda, info;
     magma_int_t j, k, num_gpus0 = 1, num_gpus;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

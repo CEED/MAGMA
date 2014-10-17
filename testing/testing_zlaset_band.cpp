@@ -35,7 +35,7 @@ int main( int argc, char** argv)
     double           error, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_R;
-    magmaDoubleComplex *d_A;
+    magmaDoubleComplex_ptr d_A;
     magmaDoubleComplex offdiag = MAGMA_Z_MAKE( 1.2000, 6.7000 );
     magmaDoubleComplex diag    = MAGMA_Z_MAKE( 3.1415, 2.7183 );
     magma_int_t M, N, nb, cnt, size, lda, ldb, ldda;

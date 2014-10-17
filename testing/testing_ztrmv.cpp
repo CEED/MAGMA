@@ -43,7 +43,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     
     magmaDoubleComplex *h_A, *h_x, *h_xcublas;
-    magmaDoubleComplex *d_A, *d_x;
+    magmaDoubleComplex_ptr d_A, d_x;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t status = 0;
     

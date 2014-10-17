@@ -32,7 +32,7 @@ int main( int argc, char** argv )
     double           error, work[1];
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
-    magmaDoubleComplex *d_lA[ MagmaMaxGPUs ];
+    magmaDoubleComplex_ptr d_lA[ MagmaMaxGPUs ];
     magma_int_t M, N, n2, lda, ldda, n_local, ngpu;
     magma_int_t info, min_mn, nb, lhwork;
     magma_int_t ione     = 1;

@@ -71,7 +71,7 @@ int main( int argc, char** argv)
 
     nstream = max(3, opts.ngpu+2);
     magma_queue_t streams[MagmaMaxGPUs][20];
-    magmaDoubleComplex *da[MagmaMaxGPUs], *dT1[MagmaMaxGPUs];
+    magmaDoubleComplex_ptr da[MagmaMaxGPUs], dT1[MagmaMaxGPUs];
     if ((distblk == 0) || (distblk < opts.nb))
         distblk = max(256, opts.nb);
     printf("voici ngpu %d distblk %d NB %d nstream %d\n ",
@@ -125,7 +125,7 @@ int main( int argc, char** argv)
                =================================================================== */
             /* Copy the matrix to the GPU */
             magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, da, ldda, opts.ngpu, distblk);
-            //magmaDoubleComplex *dabis;
+            //magmaDoubleComplex_ptr dabis;
             //TESTING_MALLOC_DEV( dabis,  magmaDoubleComplex, ldda*N );
             //magma_zsetmatrix(N, N, h_R, lda, dabis, ldda);
 

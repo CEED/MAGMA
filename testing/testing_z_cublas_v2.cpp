@@ -33,7 +33,7 @@ int main( int argc, char** argv )
     cublasCreate( &handle );
     
     magmaDoubleComplex *A, *B, *C;
-    magmaDoubleComplex *dA, *dB, *dC;
+    magmaDoubleComplex_ptr dA, dB, dC;
     double error, work[1];
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

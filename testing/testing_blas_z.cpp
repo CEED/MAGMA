@@ -52,7 +52,7 @@ int main( int argc, char** argv )
     magma_side_t  side [] = { MagmaLeft, MagmaRight };
     
     magmaDoubleComplex  *A,  *B,  *C,   *C2, *LU;
-    magmaDoubleComplex *dA, *dB, *dC1, *dC2;
+    magmaDoubleComplex_ptr dA, dB, dC1, dC2;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE( 0.5, 0.1 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( 0.7, 0.2 );
     double dalpha = 0.6;

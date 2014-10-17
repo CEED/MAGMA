@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     
     magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma, *h_Ccublas;
-    magmaDoubleComplex *d_A, *d_B, *d_C;
+    magmaDoubleComplex_ptr d_A, d_B, d_C;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );

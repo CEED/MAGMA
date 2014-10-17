@@ -80,7 +80,7 @@ int main( int argc, char** argv )
             TESTING_MALLOC_CPU( T, magmaDoubleComplex, ldt*K );
             TESTING_MALLOC_CPU( W, magmaDoubleComplex, ldw*K );
             
-            magmaDoubleComplex *dC, *dV, *dT, *dW;
+            magmaDoubleComplex_ptr dC, dV, dT, dW;
             TESTING_MALLOC_DEV( dC, magmaDoubleComplex, ldc*N );
             TESTING_MALLOC_DEV( dV, magmaDoubleComplex, ldv*K );
             TESTING_MALLOC_DEV( dT, magmaDoubleComplex, ldt*K );

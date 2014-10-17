@@ -44,7 +44,7 @@ int main( int argc, char** argv )
     magmaFloatComplex   *SA, *SR;
     magmaDoubleComplex   *A,  *R;
     magmaFloatComplex  *dSA;
-    magmaDoubleComplex  *dA;
+    magmaDoubleComplex_ptr dA;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );

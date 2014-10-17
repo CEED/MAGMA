@@ -58,7 +58,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     magmaDoubleComplex *h_A1, *h_A2;
-    magmaDoubleComplex *d_A1, *d_A2;
+    magmaDoubleComplex_ptr d_A1, d_A2;
     magmaDoubleComplex *h_R1, *h_R2;
     
     // row-major and column-major performance
