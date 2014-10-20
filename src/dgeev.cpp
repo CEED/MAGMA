@@ -37,10 +37,10 @@
     eigenvalues and, optionally, the left and/or right eigenvectors.
 
     The right eigenvector v(j) of A satisfies
-                     A * v(j) = lambda(j) * v(j)
+        A * v(j) = lambda(j) * v(j)
     where lambda(j) is its eigenvalue.
     The left eigenvector u(j) of A satisfies
-                  u(j)**T * A = lambda(j) * u(j)**T
+        u(j)**T * A = lambda(j) * u(j)**T
     where u(j)**T denotes the transpose of u(j).
 
     The computed eigenvectors are normalized to have Euclidean norm
@@ -207,7 +207,7 @@ magma_dgeev(
     }
     
     #if defined(VERSION3)
-    double *dT;
+    magmaDouble_ptr dT;
     if (MAGMA_SUCCESS != magma_dmalloc( &dT, nb*n )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
