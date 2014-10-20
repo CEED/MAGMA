@@ -482,6 +482,7 @@ magma_zhetrd_mgpu(
 } /* magma_zhetrd */
 
 
+// ----------------------------------------------------------------------
 extern "C" magma_int_t
 magma_zhtodhe(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *A, magma_int_t lda,
@@ -535,6 +536,8 @@ magma_zhtodhe(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb
     return *info;
 }
 
+
+// ----------------------------------------------------------------------
 extern "C" void
 magma_zher2k_mgpu(
     magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
