@@ -11,7 +11,6 @@
 #include "common_magma.h"
 #include "trace.h"
 
-#define get_time magma_wtime
 
 extern "C" void
 magma_zherk_mgpu(
@@ -197,7 +196,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             crosspoint = n;
 
             #if defined (ENABLE_TIMER)
-            real_Double_t tget = get_time(), tset = 0.0, ttot = 0.0;
+            real_Double_t tget = magma_wtime(), tset = 0.0, ttot = 0.0;
             #endif
             if ( n > nb ) {
                 // send first panel to cpu
@@ -213,7 +212,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 magma_setdevice(d);
                 magma_device_sync();
             }
-            tget = get_time()-tget;
+            tget = magma_wtime()-tget;
             #endif
 
             // Compute the Cholesky factorization A = L*L'
@@ -236,7 +235,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 magma_queue_sync( stream[id][0] );
                 if (j > 0 && prevtrsmrows > crosspoint) {
                     #if defined (ENABLE_TIMER)
-                    tcnp = get_time();
+                    tcnp = magma_wtime();
                     #endif
 
                     tmpprevpanel = ((blkid - 1) % 2) == 0 ? tmppanel0 : tmppanel1;
@@ -248,13 +247,13 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                             &z_one,      tmppanel(j), &ldpanel );
 
                     #if defined (ENABLE_TIMER)
-                    tcnp = get_time() - tcnp;
+                    tcnp = magma_wtime() - tcnp;
                     ttot_cnp += tcnp;
                     #endif
                 }
 
                 #if defined (ENABLE_TIMER)
-                tcchol = get_time();
+                tcchol = magma_wtime();
                 #endif
                 lapackf77_zpotrf(MagmaLowerStr, &nb, tmppanel(j), &ldpanel, info);
                 if (*info != 0) {
@@ -263,9 +262,9 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 }
 
                 #if defined (ENABLE_TIMER)
-                tcchol = get_time() - tcchol;
+                tcchol = magma_wtime() - tcchol;
                 ttot_cchol += tcchol;
-                tctrsm = get_time();
+                tctrsm = magma_wtime();
                 #endif
 
                 trsmrows = rows - nb;
@@ -278,9 +277,9 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 }
 
                 #if defined (ENABLE_TIMER)
-                tctrsm = get_time() - tctrsm;
+                tctrsm = magma_wtime() - tctrsm;
                 ttot_ctrsm += tctrsm;
-                tctm = get_time();
+                tctm = magma_wtime();
                 #endif
 
                 d = (id + 1) % num_gpus;
@@ -313,7 +312,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 }
 
                 #if defined (ENABLE_TIMER)
-                tctm = get_time() - tctm;
+                tctm = magma_wtime() - tctm;
                 ttot_ctm += tctm;
                 #endif
 
@@ -326,7 +325,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         magma_int_t j_local2 = (j + nb) / (nb * num_gpus) * nb;
                         if (trsmrows <= crosspoint) {
                             #if defined (ENABLE_TIMER)
-                            tmnp = get_time();
+                            tmnp = magma_wtime();
                             #endif
 
                             // do gemm on look ahead panel
@@ -358,7 +357,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
 
                             #if defined (ENABLE_TIMER)
                             magma_device_sync();
-                            tmnp = get_time() - tmnp;
+                            tmnp = magma_wtime() - tmnp;
                             ttot_mnp += tmnp;
                             #endif
                         }
@@ -389,7 +388,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         }
 
                         #if defined (ENABLE_TIMER)
-                        for( d=0; d < num_gpus; d++ ) therk[d] = get_time();
+                        for( d=0; d < num_gpus; d++ ) therk[d] = magma_wtime();
                         #endif
 
                         //magmablasSetKernelStream(stream[d]);
@@ -410,7 +409,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         for( d=0; d < num_gpus; d++ ) {
                             magma_setdevice(d);
                             magma_device_sync();
-                            therk[d] = get_time() - therk[d];
+                            therk[d] = magma_wtime() - therk[d];
                             ttot_herk[d] += therk[d];
                         }
                         #endif
@@ -478,13 +477,13 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 
                 magma_setdevice(id);
                 #if defined (ENABLE_TIMER)
-                tset = get_time();
+                tset = magma_wtime();
                 #endif
                 magma_zgetmatrix(rows, rows, dlA(id, j, j_local), ldda, panel(j), ldpanel);
                 lapackf77_zpotrf(MagmaLowerStr, &rows, panel(j), &ldpanel, info);
                 magma_zsetmatrix(rows, rows, panel(j), ldpanel, dlA(id, j, j_local), ldda);
                 #if defined (ENABLE_TIMER)
-                tset = get_time() - tset;
+                tset = magma_wtime() - tset;
                 #endif
             }
             #if defined (ENABLE_TIMER)
