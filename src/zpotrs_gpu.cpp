@@ -59,9 +59,10 @@
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrs_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
+magma_zpotrs_gpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, magma_int_t *info)
 {
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 

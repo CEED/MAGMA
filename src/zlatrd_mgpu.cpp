@@ -150,20 +150,21 @@
     @ingroup magma_zheev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_zlatrd_mgpu(magma_int_t ngpu, magma_uplo_t uplo,
-                  magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
-                  magmaDoubleComplex *A,  magma_int_t lda,
-                  double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *W,   magma_int_t ldw,
-                  magmaDoubleComplex **dA, magma_int_t ldda, magma_int_t offset,
-                  magmaDoubleComplex **dW, magma_int_t lddw,
-                  magmaDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
-                  magma_int_t k,
-                  magmaDoubleComplex *dx[MagmaMaxGPUs],
-                  magmaDoubleComplex *dy[MagmaMaxGPUs],
-                  magmaDoubleComplex *work,
-                  magma_queue_t stream[][10],
-                  double *times)
+magma_zlatrd_mgpu(
+    magma_int_t ngpu, magma_uplo_t uplo,
+    magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
+    magmaDoubleComplex *A,  magma_int_t lda,
+    double *e, magmaDoubleComplex *tau,
+    magmaDoubleComplex *W,          magma_int_t ldw,
+    magmaDoubleComplex_ptr dA[],    magma_int_t ldda, magma_int_t offset,
+    magmaDoubleComplex_ptr dW[],    magma_int_t lddw,
+    magmaDoubleComplex_ptr dwork[], magma_int_t ldwork,
+    magma_int_t k,
+    magmaDoubleComplex_ptr dx[],
+    magmaDoubleComplex_ptr dy[],
+    magmaDoubleComplex *work,
+    magma_queue_t stream[][10],
+    double *times)
 {
 #define A(i, j) (A + (j)*lda + (i))
 #define W(i, j) (W + (j)*ldw + (i))
@@ -476,17 +477,19 @@ magma_zlatrd_mgpu(magma_int_t ngpu, magma_uplo_t uplo,
 #undef dW1
 
 
+// ----------------------------------------------------------------------
 extern "C" magma_int_t
-magmablas_zhemv_mgpu( magma_int_t ngpu, magma_int_t k, magma_uplo_t uplo,
-                      magma_int_t n, magma_int_t nb,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex **dA, magma_int_t ldda, magma_int_t offset,
-                      magmaDoubleComplex **dx, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex **dy, magma_int_t incy,
-                      magmaDoubleComplex **dwork, magma_int_t ldwork,
-                      magmaDoubleComplex *work, magmaDoubleComplex *W,
-                      magma_queue_t stream[][10] )
+magmablas_zhemv_mgpu(
+    magma_int_t ngpu, magma_int_t k, magma_uplo_t uplo,
+    magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_ptr dA[],    magma_int_t ldda, magma_int_t offset,
+    magmaDoubleComplex_ptr dx[],    magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy[],    magma_int_t incy,
+    magmaDoubleComplex_ptr dwork[], magma_int_t ldwork,
+    magmaDoubleComplex *work, magmaDoubleComplex *W,
+    magma_queue_t stream[][10] )
 {
 #define dX(id, i)    (dx[(id)]+incx*(i))
 #define dY(id, i, j) (dy[(id)]+incy*(i)+n*(j))
@@ -695,10 +698,13 @@ magmablas_zhemv_mgpu( magma_int_t ngpu, magma_int_t k, magma_uplo_t uplo,
     return 0;
 }
 
+
+// ----------------------------------------------------------------------
 extern "C" magma_int_t
-magmablas_zhemv_sync( magma_int_t ngpu, magma_int_t k,
-                      magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *W,
-                      magma_queue_t stream[][10] )
+magmablas_zhemv_sync(
+    magma_int_t ngpu, magma_int_t k,
+    magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *W,
+    magma_queue_t stream[][10] )
 {
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t ione = 1;

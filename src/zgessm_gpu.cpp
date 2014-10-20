@@ -70,12 +70,13 @@
     @ingroup magma_zgesv_tile
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
-                  magma_int_t *ipiv,
-                  magmaDoubleComplex *dL1, magma_int_t lddl1,
-                  magmaDoubleComplex *dL,  magma_int_t lddl,
-                  magmaDoubleComplex *dA,  magma_int_t ldda,
-                  magma_int_t *info)
+magma_zgessm_gpu(
+    magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
+    magma_int_t *ipiv,
+    magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
+    magmaDoubleComplex_ptr dL,  magma_int_t lddl,
+    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
+    magma_int_t *info)
 {
 #define AT(i,j) (dAT + (i)*ldda + (j)      )
 #define L(i,j)  (dL  + (i)      + (j)*lddl )
@@ -85,7 +86,7 @@ magma_zgessm_gpu( magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     int i, s, sb;
-    magmaDoubleComplex *dAT;
+    magmaDoubleComplex_ptr dAT;
 
     /* Check arguments */
     *info = 0;

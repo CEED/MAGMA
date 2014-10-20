@@ -70,10 +70,11 @@
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgeqrf2_mgpu( magma_int_t ngpu, magma_int_t m, magma_int_t n,
-                    magmaDoubleComplex **dlA, magma_int_t ldda,
-                    magmaDoubleComplex *tau,
-                    magma_int_t *info )
+magma_zgeqrf2_mgpu(
+    magma_int_t ngpu, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dlA[], magma_int_t ldda,
+    magmaDoubleComplex *tau,
+    magma_int_t *info )
 {
     #define dlA(dev, i, j)   (dlA[dev] + (i) + (j)*(ldda))
     #define hpanel(i)        (hpanel + (i))

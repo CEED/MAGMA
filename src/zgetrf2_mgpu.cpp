@@ -67,7 +67,7 @@
             up to a multiple of 32 and nb is the block size.
 
     @param (workspace)
-    w       COMPLEX_16 array, dimension (ngpu*nb*maxm).
+    W       COMPLEX_16 array, dimension (ngpu*nb*maxm).
             It is used to store panel on CPU.
 
     @param[in]
@@ -92,14 +92,16 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf2_mgpu(magma_int_t ngpu,
-         magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-         magmaDoubleComplex *d_lAT[], magma_int_t lddat, magma_int_t *ipiv,
-         magmaDoubleComplex *d_lAP[], magmaDoubleComplex *w, magma_int_t ldw,
-         magma_queue_t stream[][2], magma_int_t *info)
+magma_zgetrf2_mgpu(
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
+    magmaDoubleComplex_ptr d_lAT[], magma_int_t lddat, magma_int_t *ipiv,
+    magmaDoubleComplex_ptr d_lAP[],
+    magmaDoubleComplex *W, magma_int_t ldw,
+    magma_queue_t stream[][2], magma_int_t *info)
 {
 #define dAT(id,i,j)  (d_lAT[(id)] + ((offset)+(i)*nb)*lddat + (j)*nb)
-#define W(j) (w+((j)%ngpu)*nb*ldw)
+#define W(j) (W + ((j)%ngpu)*nb*ldw)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;

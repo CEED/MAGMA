@@ -82,13 +82,14 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zcgetrs_gpu(magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
-                  magmaFloatComplex  *dA, magma_int_t ldda,
-                  magma_int_t        *dipiv,
-                  magmaDoubleComplex *dB, magma_int_t lddb,
-                  magmaDoubleComplex *dX, magma_int_t lddx,
-                  magmaFloatComplex  *dSX,
-                  magma_int_t *info)
+magma_zcgetrs_gpu(
+    magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
+    magmaFloatComplex_ptr  dA, magma_int_t ldda,
+    magmaInt_ptr        dipiv,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr dX, magma_int_t lddx,
+    magmaFloatComplex_ptr dSX,
+    magma_int_t *info)
 {
     magmaFloatComplex c_one = MAGMA_C_ONE;
     int notran = (trans == MagmaNoTrans);

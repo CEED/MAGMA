@@ -76,13 +76,14 @@
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrf3_mgpu(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   magmaDoubleComplex *d_lA[],  magma_int_t ldda,
-                   magmaDoubleComplex *d_lP[],  magma_int_t lddp,
-                   magmaDoubleComplex *A,       magma_int_t lda, magma_int_t h,
-                   magma_queue_t stream[][3], magma_event_t event[][5],
-                   magma_int_t *info )
+magma_zpotrf3_mgpu(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+    magmaDoubleComplex_ptr d_lA[],  magma_int_t ldda,
+    magmaDoubleComplex_ptr d_lP[],  magma_int_t lddp,
+    magmaDoubleComplex *A,          magma_int_t lda, magma_int_t h,
+    magma_queue_t stream[][3], magma_event_t event[][5],
+    magma_int_t *info )
 {
 #define Alo(i, j)  (A +             ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
 #define Aup(i, j)  (A + (nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
@@ -708,14 +709,16 @@ magma_zpotrf3_mgpu(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int
 
 
 #define A(i, j)  (A +(j)*lda  + (i))
-#define dA(d, i, j) (dwork[(d)]+(j)*ldda + (i))
+#define dA(d, i, j) (dA[(d)]+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhtodpo(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-              magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-              magmaDoubleComplex *A,       magma_int_t lda,
-              magmaDoubleComplex *dwork[], magma_int_t ldda,
-              magma_queue_t stream[][3], magma_int_t *info)
+magma_zhtodpo(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+    magmaDoubleComplex    *A,    magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t stream[][3],
+    magma_int_t *info)
 {
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
@@ -773,11 +776,13 @@ magma_zhtodpo(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
 }
 
 extern "C" magma_int_t
-magma_zdtohpo(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-              magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
-              magmaDoubleComplex *A,       magma_int_t lda,
-              magmaDoubleComplex *dwork[], magma_int_t ldda,
-              magma_queue_t stream[][3], magma_int_t *info)
+magma_zdtohpo(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
+    magmaDoubleComplex    *A,    magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t stream[][3],
+    magma_int_t *info)
 {
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );

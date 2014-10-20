@@ -91,17 +91,21 @@
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgeqr2x2_gpu(magma_int_t m, magma_int_t n, magmaDoubleComplex *dA,
-                  magma_int_t ldda, magmaDoubleComplex *dtau,
-                  magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
-                  double *dwork, magma_int_t *info)
+magma_zgeqr2x2_gpu(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dtau,
+    magmaDoubleComplex_ptr dT,
+    magmaDoubleComplex_ptr ddA,
+    magmaDouble_ptr dwork,
+    magma_int_t *info)
 {
     #define dA(i_,j_) (dA + (j_)*(ldda) + (i_))
     
     magma_int_t i, k;
     
     magmaDoubleComplex *work = (magmaDoubleComplex *)dwork;
-    double *dnorm = dwork + 4*(n);
+    magmaDouble_ptr dnorm = dwork + 4*(n);
 
 
     *info = 0;

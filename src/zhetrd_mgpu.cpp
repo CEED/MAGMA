@@ -483,11 +483,13 @@ magma_zhetrd_mgpu(
 
 
 // ----------------------------------------------------------------------
+// TODO info is unused
 extern "C" magma_int_t
-magma_zhtodhe(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-              magmaDoubleComplex *A, magma_int_t lda,
-              magmaDoubleComplex **dA, magma_int_t ldda,
-              magma_queue_t stream[][10], magma_int_t *info)
+magma_zhtodhe(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex     *A,   magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t stream[][10], magma_int_t *info)
 {
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
@@ -542,14 +544,14 @@ extern "C" void
 magma_zher2k_mgpu(
     magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
-    magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
     magma_int_t num_streams, magma_queue_t stream[][10])
 {
-#define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
-#define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
-#define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
+#define dB1(id, i, j) (dB[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
+#define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;

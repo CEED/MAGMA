@@ -56,8 +56,10 @@
     @ingroup magma_zposv_aux
     ***************************************************************************/
 extern "C" magma_int_t
-magma_zlauum_gpu(magma_uplo_t uplo, magma_int_t n,
-                 magmaDoubleComplex  *dA, magma_int_t ldda, magma_int_t *info)
+magma_zlauum_gpu(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_int_t *info)
 {
 #define dA(i, j) (dA + (j)*ldda + (i))
 

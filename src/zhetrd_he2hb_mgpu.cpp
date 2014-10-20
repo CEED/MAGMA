@@ -137,15 +137,16 @@
     @ingroup magma_zheev_2stage
     ********************************************************************/
 extern "C" magma_int_t
-magma_zhetrd_he2hb_mgpu( magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *A, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk,
-                    magma_queue_t streams[][20], magma_int_t nstream,
-                    magma_int_t *info)
+magma_zhetrd_he2hb_mgpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magmaDoubleComplex_ptr dAmgpu[], magma_int_t ldda,
+    magmaDoubleComplex_ptr dTmgpu[], magma_int_t lddt,
+    magma_int_t ngpu, magma_int_t distblk,
+    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_int_t *info)
 {
     #define A(a_1,a_2)        ( A  + ((a_2)-1)*( lda) + (a_1)-1)
     #define tau_ref(a_1)      (tau + (a_1)-1)

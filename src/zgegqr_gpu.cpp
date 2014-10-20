@@ -88,10 +88,11 @@
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
-                  magmaDoubleComplex *dA,   magma_int_t ldda,
-                  magmaDoubleComplex *dwork, magmaDoubleComplex *work,
-                  magma_int_t *info )
+magma_zgegqr_gpu(
+    magma_int_t ikind, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA,   magma_int_t ldda,
+    magmaDoubleComplex_ptr dwork, magmaDoubleComplex *work,
+    magma_int_t *info )
 {
     #define work(i_,j_) (work + (i_) + (j_)*n)
     #define dA(i_,j_)   (dA   + (i_) + (j_)*ldda)
@@ -201,7 +202,9 @@ magma_zgegqr_gpu( magma_int_t ikind, magma_int_t m, magma_int_t n,
         magma_int_t min_mn = min(m, n);
         magma_int_t nb = n;
 
-        magmaDoubleComplex *dtau = dwork + 2*n*n, *d_T = dwork, *ddA = dwork + n*n;
+        magmaDoubleComplex_ptr dtau = dwork + 2*n*n;
+        magmaDoubleComplex_ptr d_T  = dwork;
+        magmaDoubleComplex_ptr ddA  = dwork + n*n;
         magmaDoubleComplex *tau  = work+n*n;
 
         magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, d_T, n );

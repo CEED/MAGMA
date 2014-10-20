@@ -65,9 +65,10 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf_gpu(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *ipiv,
+    magma_int_t *info)
 {
     #define dAT(i,j) (dAT + (i)*nb*lddat + (j)*nb)
 

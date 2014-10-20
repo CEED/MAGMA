@@ -70,10 +70,11 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_mgpu(magma_int_t ngpu,
-                 magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex **d_lA, magma_int_t ldda,
-                 magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf_mgpu(
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr d_lA[], magma_int_t ldda, magma_int_t *ipiv,
+    magma_int_t *info)
 {
     magma_int_t nb, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;

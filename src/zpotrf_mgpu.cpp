@@ -72,8 +72,10 @@
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrf_mgpu(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
-                  magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
+magma_zpotrf_mgpu(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_ptr d_lA[], magma_int_t ldda,
+    magma_int_t *info)
 {
     magma_int_t     j, nb, d, lddp, h;
     const char* uplo_ = lapack_uplo_const( uplo );

@@ -79,13 +79,15 @@
     @ingroup magma_zgels_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgels3_gpu( magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                  magmaDoubleComplex *dA,    magma_int_t ldda,
-                  magmaDoubleComplex *dB,    magma_int_t lddb,
-                  magmaDoubleComplex *hwork, magma_int_t lwork,
-                  magma_int_t *info)
+magma_zgels3_gpu(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr dA,    magma_int_t ldda,
+    magmaDoubleComplex_ptr dB,    magma_int_t lddb,
+    magmaDoubleComplex *hwork, magma_int_t lwork,
+    magma_int_t *info)
 {
-    magmaDoubleComplex *dT, *tau;
+    magmaDoubleComplex_ptr dT;
+    magmaDoubleComplex *tau;
     magma_int_t k;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);

@@ -79,9 +79,11 @@
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zhegst_gpu(magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
+magma_zhegst_gpu(
+    magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magma_int_t *info)
 {
 #define A(i, j) (w + (j)*lda + (i))
 #define B(i, j) (w + nb*lda + (j)*ldb + (i))

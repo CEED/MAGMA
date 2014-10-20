@@ -12,25 +12,6 @@
 #include "trace.h"
 
 
-extern "C" void
-magma_zherk_mgpu(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
-    double alpha,
-    magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
-    double beta,
-    magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10]);
-
-extern "C" void
-magma_zherk_mgpu2(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
-    double alpha,
-    magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
-    double beta,
-    magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10]);
-
-
 /**
     Purpose
     -------
@@ -88,8 +69,10 @@ magma_zherk_mgpu2(
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrf_mgpu_right(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
-                        magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info )
+magma_zpotrf_mgpu_right(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_ptr d_lA[], magma_int_t ldda,
+    magma_int_t *info )
 {
     #define dlA(id, i, j)  (d_lA[(id)] + (j) * ldda + (i))
     #define dlP(id, i, j)  (d_lP[(id)] + (j) * ldda + (i))
@@ -514,13 +497,13 @@ extern "C" void
 magma_zherk_mgpu(
     magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
-    magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
-    magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
     magma_int_t num_streams, magma_queue_t stream[][10])
 {
-#define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
-#define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
+#define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
@@ -603,13 +586,13 @@ extern "C" void
 magma_zherk_mgpu2(
     magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
-    magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
-    magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
     magma_int_t num_streams, magma_queue_t stream[][10])
 {
-#define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
-#define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
+#define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
