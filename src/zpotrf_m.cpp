@@ -291,9 +291,6 @@ magma_zpotrf_m(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             
             /* factor the big panel */
             h  = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
-            // using two streams
-            //magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb,
-            //                   dwork, NB, dt, ldda, A, lda, h, stream, event, &iinfo);
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb,
                                dwork, NB, dt, ldda, A, lda, h, stream, event, &iinfo);
@@ -415,9 +412,6 @@ magma_zpotrf_m(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             
             /* factor the big panel */
             h = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
-            // using two streams
-            //magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb,
-            //                   dwork, lddla, dt, ldda, A, lda, h, stream, event, &iinfo);
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb,
                                dwork, lddla, dt, ldda, A, lda, h, stream, event, &iinfo);

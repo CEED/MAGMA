@@ -140,16 +140,10 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             return *info;
         }
         if (upper) {
-            /* with two streams */
-            //magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,
-            //                   h, stream, event, info);
             /* with three streams */
             magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,
                                h, stream, event, info);
         } else {
-            /* with two streams */
-            //magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h,
-            //                   h, stream, event, info);
             /* with three streams */
             magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h,
                                h, stream, event, info);
