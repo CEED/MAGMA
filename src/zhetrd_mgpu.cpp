@@ -24,91 +24,91 @@
     Arguments
     ---------
     @param[in]
-    num_gpus INTEGER
-             The number of GPUs.  num_gpus > 0.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     num_streams INTEGER
-             The number of GPU streams used for update.  10 >= num_streams > 0.
+            The number of GPU streams used for update.  10 >= num_streams > 0.
 
     @param[in]
-    uplo     magma_uplo_t
-      -      = MagmaUpper:  Upper triangle of A is stored;
-      -      = MagmaLower:  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
-    n        INTEGER
-             The order of the matrix A.  N >= 0.
+    n       INTEGER
+            The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    A        COMPLEX_16 array, dimension (LDA,N)
-             On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
-             N-by-N upper triangular part of A contains the upper
-             triangular part of the matrix A, and the strictly lower
-             triangular part of A is not referenced.  If UPLO = MagmaLower, the
-             leading N-by-N lower triangular part of A contains the lower
-             triangular part of the matrix A, and the strictly upper
-             triangular part of A is not referenced.
-             On exit, if UPLO = MagmaUpper, the diagonal and first superdiagonal
-             of A are overwritten by the corresponding elements of the
-             tridiagonal matrix T, and the elements above the first
-             superdiagonal, with the array TAU, represent the orthogonal
-             matrix Q as a product of elementary reflectors; if UPLO
-             = MagmaLower, the diagonal and first subdiagonal of A are over-
-             written by the corresponding elements of the tridiagonal
-             matrix T, and the elements below the first subdiagonal, with
-             the array TAU, represent the orthogonal matrix Q as a product
-             of elementary reflectors. See Further Details.
+    A       COMPLEX_16 array, dimension (LDA,N)
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
+            N-by-N upper triangular part of A contains the upper
+            triangular part of the matrix A, and the strictly lower
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
+            leading N-by-N lower triangular part of A contains the lower
+            triangular part of the matrix A, and the strictly upper
+            triangular part of A is not referenced.
+            On exit, if UPLO = MagmaUpper, the diagonal and first superdiagonal
+            of A are overwritten by the corresponding elements of the
+            tridiagonal matrix T, and the elements above the first
+            superdiagonal, with the array TAU, represent the orthogonal
+            matrix Q as a product of elementary reflectors; if UPLO
+            = MagmaLower, the diagonal and first subdiagonal of A are over-
+            written by the corresponding elements of the tridiagonal
+            matrix T, and the elements below the first subdiagonal, with
+            the array TAU, represent the orthogonal matrix Q as a product
+            of elementary reflectors. See Further Details.
 
     @param[in]
-    lda      INTEGER
-             The leading dimension of the array A.  LDA >= max(1,N).
+    lda     INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
-    d        COMPLEX_16 array, dimension (N)
-             The diagonal elements of the tridiagonal matrix T:
-             D(i) = A(i,i).
+    d       COMPLEX_16 array, dimension (N)
+            The diagonal elements of the tridiagonal matrix T:
+            D(i) = A(i,i).
  
     @param[out]
-    e        COMPLEX_16 array, dimension (N-1)
-             The off-diagonal elements of the tridiagonal matrix T:
-             E(i) = A(i,i+1) if UPLO = MagmaUpper, E(i) = A(i+1,i) if UPLO = MagmaLower.
+    e       COMPLEX_16 array, dimension (N-1)
+            The off-diagonal elements of the tridiagonal matrix T:
+            E(i) = A(i,i+1) if UPLO = MagmaUpper, E(i) = A(i+1,i) if UPLO = MagmaLower.
 
     @param[out]
-    tau      COMPLEX_16 array, dimension (N-1)
-             The scalar factors of the elementary reflectors (see Further
-             Details).
+    tau     COMPLEX_16 array, dimension (N-1)
+            The scalar factors of the elementary reflectors (see Further
+            Details).
 
     @param[out]
-    work     (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
-             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
+    work    (workspace) COMPLEX_16 array, dimension (MAX(1,LWORK))
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]
-    lwork    INTEGER
-             The dimension of the array WORK.  LWORK >= 1.
-             For optimum performance LWORK >= N*NB, where NB is the
-             optimal blocksize.
+    lwork   INTEGER
+            The dimension of the array WORK.  LWORK >= 1.
+            For optimum performance LWORK >= N*NB, where NB is the
+            optimal blocksize.
     \n
-             If LWORK = -1, then a workspace query is assumed; the routine
-             only calculates the optimal size of the WORK array, returns
-             this value as the first entry of the WORK array, and no error
-             message related to LWORK is issued by XERBLA.
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
     @param[out]
-    info     INTEGER
-      -      = 0:  successful exit
-      -      < 0:  if INFO = -i, the i-th argument had an illegal value
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
     Further Details
     ---------------
     If UPLO = MagmaUpper, the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(n-1) . . . H(2) H(1).
+        Q = H(n-1) . . . H(2) H(1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(i+1:n) = 0 and v(i) = 1; v(1:i-1) is stored on exit in
@@ -117,11 +117,11 @@
     If UPLO = MagmaLower, the matrix Q is represented as a product of elementary
     reflectors
 
-       Q = H(1) H(2) . . . H(n-1).
+        Q = H(1) H(2) . . . H(n-1).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i) = 0 and v(i+1) = 1; v(i+2:n) is stored on exit in A(i+2:n,i),
@@ -132,11 +132,11 @@
 
     if UPLO = MagmaUpper:                if UPLO = MagmaLower:
 
-      (  d   e   v2  v3  v4 )              (  d                  )
-      (      d   e   v3  v4 )              (  e   d              )
-      (          d   e   v4 )              (  v1  e   d          )
-      (              d   e  )              (  v1  v2  e   d      )
-      (                  d  )              (  v1  v2  v3  e   d  )
+        (  d   e   v2  v3  v4 )              (  d                  )
+        (      d   e   v3  v4 )              (  e   d              )
+        (          d   e   v4 )              (  v1  e   d          )
+        (              d   e  )              (  v1  v2  e   d      )
+        (                  d  )              (  v1  v2  v3  e   d  )
 
     where d and e denote diagonal and off-diagonal elements of T, and vi
     denotes an element of the vector defining H(i).
@@ -145,7 +145,7 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
-    magma_int_t num_gpus, magma_int_t num_streams, magma_uplo_t uplo, magma_int_t n,
+    magma_int_t ngpu, magma_int_t num_streams, magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     double *d, double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *work, magma_int_t lwork,
@@ -232,9 +232,9 @@ magma_zhetrd_mgpu(
     magma_event_create( &stop  );
 #endif
     ldda = lda;
-    ln = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
+    ln = ((nb*(1+n/(nb*ngpu))+31)/32)*32;
     ldwork2 = (1+ n / nb + (n % nb != 0)) * ldda;
-    for( did=0; did < num_gpus; did++ ) {
+    for( did=0; did < ngpu; did++ ) {
         magma_setdevice(did);
         // TODO fix memory leak
         if ( MAGMA_SUCCESS != magma_zmalloc(&dA[did],     ln*ldda+3*lddwork*nb) ||
@@ -257,8 +257,8 @@ magma_zhetrd_mgpu(
     }
     magma_setdevice(0);
     // TODO fix memory leak dwork2
-    if ( MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, num_streams*num_gpus*n ) ) {
-        for( i=0; i < num_gpus; i++ ) {
+    if ( MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, num_streams*ngpu*n ) ) {
+        for( i=0; i < ngpu; i++ ) {
             magma_setdevice(i);
             magma_free(dA[i]);
             magma_free(dx[i]);
@@ -276,7 +276,7 @@ magma_zhetrd_mgpu(
     if (upper) {
         /* Copy the matrix to the GPU */
         if (1 <= n-nx) {
-            magma_zhtodhe(num_gpus, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
+            magma_zhtodhe(ngpu, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
         }
 
         /*  Reduce the upper triangle of A.
@@ -284,8 +284,8 @@ magma_zhetrd_mgpu(
         for (i = nb*((n-1)/nb); i >= nx; i -= nb) {
             ib = min(nb, n-i);
 
-            ii  = nb*(i/(nb*num_gpus));
-            did = (i/nb)%num_gpus;
+            ii  = nb*(i/(nb*ngpu));
+            did = (i/nb)%ngpu;
 
             /* wait for the next panel */
             if (i != nb*((n-1)/nb)) {
@@ -293,7 +293,7 @@ magma_zhetrd_mgpu(
                 magma_queue_sync(stream[did][0]);
             }
 
-            magma_zlatrd_mgpu(num_gpus, uplo, n, i+ib, ib, nb,
+            magma_zlatrd_mgpu(ngpu, uplo, n, i+ib, ib, nb,
                               A(0, 0), lda, e, tau,
                               work, ldwork,
                               dA, ldda, 0,
@@ -302,7 +302,7 @@ magma_zhetrd_mgpu(
                               1, dx, dy, hwork,
                               stream, times);
 
-            magma_zher2k_mgpu(num_gpus, MagmaUpper, MagmaNoTrans, nb, i, ib,
+            magma_zher2k_mgpu(ngpu, MagmaUpper, MagmaNoTrans, nb, i, ib,
                          c_neg_one, dwork, i+ib, 0,
                          d_one,     dA,    ldda, 0,
                          num_streams, stream);
@@ -311,8 +311,8 @@ magma_zhetrd_mgpu(
             if (i-nb >= nx ) {
                 ib = min(nb, n-(i-nb));
                 
-                ii  = nb*((i-nb)/(nb*num_gpus));
-                did = ((i-nb)/nb)%num_gpus;
+                ii  = nb*((i-nb)/(nb*ngpu));
+                did = ((i-nb)/nb)%ngpu;
                 magma_setdevice(did);
                 
                 magma_zgetmatrix_async( (i-nb)+ib, ib,
@@ -335,8 +335,8 @@ magma_zhetrd_mgpu(
             if (1 <= n-nx) { /* else A is already on CPU */
                 for (i=0; i < nx; i += nb) {
                     ib = min(nb, n-i);
-                    ii  = nb*(i/(nb*num_gpus));
-                    did = (i/nb)%num_gpus;
+                    ii  = nb*(i/(nb*ngpu));
+                    did = (i/nb)%ngpu;
                 
                     magma_setdevice(did);
                     magma_zgetmatrix_async( nx, ib,
@@ -346,7 +346,7 @@ magma_zhetrd_mgpu(
                 }
             }
             
-            for( did=0; did < num_gpus; did++ ) {
+            for( did=0; did < ngpu; did++ ) {
                 magma_setdevice(did);
                 magma_queue_sync(stream[did][0]);
             }
@@ -355,18 +355,18 @@ magma_zhetrd_mgpu(
         }
     }
     else {
-        trace_init( 1, num_gpus, num_streams, (CUstream_st**)stream );
+        trace_init( 1, ngpu, num_streams, (CUstream_st**)stream );
         /* Copy the matrix to the GPU */
         if (1 <= n-nx) {
-            magma_zhtodhe(num_gpus, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
+            magma_zhtodhe(ngpu, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
         }
 
         /* Reduce the lower triangle of A */
         for (i = 0; i < n-nx; i += nb) {
             ib = min(nb, n-i);
 
-            ii  = nb*(i/(nb*num_gpus));
-            did = (i/nb)%num_gpus;
+            ii  = nb*(i/(nb*ngpu));
+            did = (i/nb)%ngpu;
             /* Reduce columns i:i+ib-1 to tridiagonal form and form the
                matrix W which is needed to update the unreduced part of
                the matrix */
@@ -384,7 +384,7 @@ magma_zhetrd_mgpu(
                 magma_setdevice(0);
             }
             
-            magma_zlatrd_mgpu(num_gpus, uplo, n, n-i, ib, nb,
+            magma_zlatrd_mgpu(ngpu, uplo, n, n-i, ib, nb,
                               A(i, i), lda, &e[i],
                               &tau[i], work, ldwork,
                               dA, ldda, i,
@@ -401,7 +401,7 @@ magma_zhetrd_mgpu(
             }
             magma_event_record(start, 0);
 #endif
-            magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib,
+            magma_zher2k_mgpu(ngpu, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib,
                          c_neg_one, dwork, n-i, ib,
                          d_one, dA, ldda, i+ib, num_streams, stream);
 #ifdef PROFILE_SY2RK
@@ -426,8 +426,8 @@ magma_zhetrd_mgpu(
             if ( i > 0 ) {
                 for (; i < n; i += nb) {
                     ib = min(nb, n-i);
-                    ii  = nb*(i/(nb*num_gpus));
-                    did = (i/nb)%num_gpus;
+                    ii  = nb*(i/(nb*ngpu));
+                    did = (i/nb)%ngpu;
                 
                     magma_setdevice(did);
                     magma_zgetmatrix_async( i_n, ib,
@@ -435,7 +435,7 @@ magma_zhetrd_mgpu(
                                              A(iii, i),       lda,
                                             stream[did][0] );
                 }
-                for( did=0; did < num_gpus; did++ ) {
+                for( did=0; did < ngpu; did++ ) {
                     magma_setdevice(did);
                     magma_queue_sync(stream[did][0]);
                 }
@@ -455,7 +455,7 @@ magma_zhetrd_mgpu(
 #endif
 
     trace_finalize( "zhetrd.svg", "trace.css" );
-    for( did=0; did < num_gpus; did++ ) {
+    for( did=0; did < ngpu; did++ ) {
         magma_setdevice(did);
         for( kk=0; kk < num_streams; kk++ )
             magma_queue_sync(stream[did][kk]);
@@ -483,7 +483,7 @@ magma_zhetrd_mgpu(
 
 
 extern "C" magma_int_t
-magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+magma_zhtodhe(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *A, magma_int_t lda,
               magmaDoubleComplex **dA, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
@@ -496,8 +496,8 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
         for (j=0; j < n; j += nb) {
-            jj =  j/(nb*num_gpus);
-            k  = (j/nb)%num_gpus;
+            jj =  j/(nb*ngpu);
+            k  = (j/nb)%ngpu;
             
             jb = min(nb, (n-j));
             mj = n-j;
@@ -513,8 +513,8 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
         for (j=0; j < n; j += nb) {
-            jj =  j/(nb*num_gpus);
-            k  = (j/nb)%num_gpus;
+            jj =  j/(nb*ngpu);
+            k  = (j/nb)%ngpu;
             
             jb = min(nb, (n-j));
             mj = j+jb;
@@ -526,7 +526,7 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
                                     stream[k][0] );
         }
     }
-    for( k=0; k < num_gpus; k++ ) {
+    for( k=0; k < ngpu; k++ ) {
         magma_setdevice(k);
         magma_queue_sync(stream[k][0]);
     }
@@ -537,7 +537,7 @@ magma_zhtodhe(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n, magma_int_
 
 extern "C" void
 magma_zher2k_mgpu(
-    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -558,13 +558,13 @@ magma_zher2k_mgpu(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%num_gpus;
-        kk = (i/(nb*num_gpus))%num_streams;
+        id = ((i+offset)/nb)%ngpu;
+        kk = (i/(nb*ngpu))%num_streams;
         magma_setdevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*num_gpus));
+        ii = nb*((i+offset)/(nb*ngpu));
 
         /* zher2k on diagonal block */
         trace_gpu_start( id, kk, "syr2k", "syr2k" );
@@ -578,13 +578,13 @@ magma_zher2k_mgpu(
     /* off-diagonal update */
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
-            kk = (i/(nb*num_gpus))%num_streams;
+            id = ((i+offset)/nb)%ngpu;
+            kk = (i/(nb*ngpu))%num_streams;
             magma_setdevice(id);
             magmablasSetKernelStream(stream[id][kk]);
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k,
                         alpha, dB1(id, 0, 0 ), lddb,
                                dB(id,  i, 0 ), lddb,
@@ -593,13 +593,13 @@ magma_zher2k_mgpu(
     }
     else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
-            kk = (i/(nb*num_gpus))%num_streams;
+            id = ((i+offset)/nb)%ngpu;
+            kk = (i/(nb*ngpu))%num_streams;
             magma_setdevice(id);
             magmablasSetKernelStream(stream[id][kk]);
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             n1 = n-i-ib;
             
             // zgemm on off-diagonal blocks
@@ -614,13 +614,13 @@ magma_zher2k_mgpu(
 
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
-            kk = (i/(nb*num_gpus))%num_streams;
+            id = ((i+offset)/nb)%ngpu;
+            kk = (i/(nb*ngpu))%num_streams;
             magma_setdevice(id);
             magmablasSetKernelStream(stream[id][kk]);
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k,
                         alpha, dB( id, 0, 0 ), lddb,
                                dB1(id, i, 0 ), lddb,
@@ -628,13 +628,13 @@ magma_zher2k_mgpu(
         }
     } else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
-            kk = (i/(nb*num_gpus))%num_streams;
+            id = ((i+offset)/nb)%ngpu;
+            kk = (i/(nb*ngpu))%num_streams;
             magma_setdevice(id);
             magmablasSetKernelStream(stream[id][kk]);
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             n1 = n-i-ib;
             
             /* zgemm on off-diagonal blocks */
@@ -647,7 +647,7 @@ magma_zher2k_mgpu(
         }
     }
 
-    for( id=0; id < num_gpus; id++ ) {
+    for( id=0; id < ngpu; id++ ) {
         magma_setdevice(id);
         for( kk=0; kk < num_streams; kk++ ) {
             magma_queue_sync(stream[id][kk]);

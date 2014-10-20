@@ -33,8 +33,8 @@
     Arguments
     ---------
     @param[in]
-    nrgpu   INTEGER
-            Number of GPUs to use.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     side    magma_side_t
@@ -115,7 +115,7 @@
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
+magma_zunmtr_m(magma_int_t ngpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
                magma_int_t m, magma_int_t n,
                magmaDoubleComplex *A,    magma_int_t lda,
                magmaDoubleComplex *tau,
@@ -204,7 +204,7 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
         // TODO: upper case is not yet implemented -- see above
         //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, A(0,1), &lda,
         //                 tau, C, &ldc, work, &lwork, &iinfo);
-        //magma_zunmql_m(nrgpu, side, trans, mi, ni, i__2, A(0,1), lda, tau,
+        //magma_zunmql_m(ngpu, side, trans, mi, ni, i__2, A(0,1), lda, tau,
         //               C, ldc, work, lwork, &iinfo);
     }
     else {
@@ -217,7 +217,7 @@ magma_zunmtr_m(magma_int_t nrgpu, magma_side_t side, magma_uplo_t uplo, magma_tr
             i2 = 1;
         }
         i__2 = nq - 1;
-        magma_zunmqr_m(nrgpu, side, trans, mi, ni, i__2, A(1,0), lda, tau,
+        magma_zunmqr_m(ngpu, side, trans, mi, ni, i__2, A(1,0), lda, tau,
                        C(i1,i2), ldc, work, lwork, &iinfo);
     }
 

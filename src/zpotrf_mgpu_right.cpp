@@ -14,7 +14,7 @@
 
 extern "C" void
 magma_zherk_mgpu(
-    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -23,7 +23,7 @@ magma_zherk_mgpu(
 
 extern "C" void
 magma_zherk_mgpu2(
-    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -56,7 +56,7 @@ magma_zherk_mgpu2(
             The order of the matrix dA.  N >= 0.
 
     @param[in,out]
-    d_lA    COMPLEX_16 array of pointers on the GPU, dimension (num_gpus)
+    d_lA    COMPLEX_16 array of pointers on the GPU, dimension (ngpu)
             On entry, the Hermitian matrix dA distributed over GPUs
             (dl_A[d] points to the local matrix on the d-th GPU).  
             It is distributed in 1D block column or row cyclic (with the
@@ -88,7 +88,7 @@ magma_zherk_mgpu2(
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
+magma_zpotrf_mgpu_right(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
                         magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info )
 {
     #define dlA(id, i, j)  (d_lA[(id)] + (j) * ldda + (i))
@@ -147,12 +147,12 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
         lapackf77_zpotrf( uplo_, &n, panel, &ldpanel, info);
         magma_zsetmatrix( n, n, panel, ldpanel, dlA(0, 0, 0), ldda );
     } else {
-        for( d = 0; d < num_gpus; d++ ) {
+        for( d = 0; d < ngpu; d++ ) {
             // local-n and local-ld
-            n_local[d] = ((n / nb) / num_gpus) * nb;
-            if (d < (n / nb) % num_gpus)
+            n_local[d] = ((n / nb) / ngpu) * nb;
+            if (d < (n / nb) % ngpu)
                 n_local[d] += nb;
-            else if (d == (n / nb) % num_gpus)
+            else if (d == (n / nb) % ngpu)
                 n_local[d] += n % nb;
 
             magma_setdevice(d);
@@ -184,11 +184,11 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             printf( " === not supported, yet ===\n" );
         } else {
             blkid = -1;
-            if (num_gpus == 4)
+            if (ngpu == 4)
                 crosspoint = n;
-            else if (num_gpus == 3)
+            else if (ngpu == 3)
                 crosspoint = n;
-            else if (num_gpus == 2)
+            else if (ngpu == 2)
                 crosspoint = 20160;
             else
                 crosspoint = 0;
@@ -208,7 +208,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         stream[0][0] );
             }
             #if defined (ENABLE_TIMER)
-            for( d=0; d < num_gpus; d++ ) {
+            for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_device_sync();
             }
@@ -224,11 +224,11 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 blkid += 1;
                 tmppanel = (blkid % 2 == 0) ? tmppanel0 : tmppanel1;
                 // Set the gpu number that holds the current panel
-                id = (j / nb) % num_gpus;
+                id = (j / nb) % ngpu;
                 magma_setdevice(id);
 
                 // Set the local index where the current panel is
-                j_local = j / (nb * num_gpus) * nb;
+                j_local = j / (nb * ngpu) * nb;
                 
                 rows = n - j;
                 // Wait for the panel on cpu
@@ -282,9 +282,9 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                 tctm = magma_wtime();
                 #endif
 
-                d = (id + 1) % num_gpus;
+                d = (id + 1) % ngpu;
                 // send current panel to gpus
-                for (ngpu = 0; ngpu < num_gpus; ngpu++, d = (d + 1) % num_gpus ) {
+                for (ngpu = 0; ngpu < ngpu; ngpu++, d = (d + 1) % ngpu ) {
                     magma_int_t myrows = 0;
                     magma_int_t row_offset = 0;
                     if ( d == id ) {
@@ -305,8 +305,8 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                     }
                 }
                 /* make sure panel is on GPUs */
-                d = (id + 1) % num_gpus;
-                for (ngpu = 0; ngpu < num_gpus; ngpu++, d = (d + 1) % num_gpus ) {
+                d = (id + 1) % ngpu;
+                for (ngpu = 0; ngpu < ngpu; ngpu++, d = (d + 1) % ngpu ) {
                     magma_setdevice(d);
                     magma_queue_sync( stream[d][0] );
                 }
@@ -320,9 +320,9 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                     magma_int_t offset = 0;
                     magma_int_t row_offset = 0;
                     if (j + nb + nb < n) {
-                        d = (id + 1) % num_gpus;
+                        d = (id + 1) % ngpu;
                         magma_setdevice(d);
-                        magma_int_t j_local2 = (j + nb) / (nb * num_gpus) * nb;
+                        magma_int_t j_local2 = (j + nb) / (nb * ngpu) * nb;
                         if (trsmrows <= crosspoint) {
                             #if defined (ENABLE_TIMER)
                             tmnp = magma_wtime();
@@ -379,7 +379,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
 
                     if (n - offset > 0) {
                         // syrk on multiple gpu
-                        for (d = 0; d < num_gpus; d++ ) {
+                        for (d = 0; d < ngpu; d++ ) {
                             if ( d == id ) {
                                 dlpanels[d] = dlA(d, j + nb + row_offset, j_local);
                             } else {
@@ -388,7 +388,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         }
 
                         #if defined (ENABLE_TIMER)
-                        for( d=0; d < num_gpus; d++ ) therk[d] = magma_wtime();
+                        for( d=0; d < ngpu; d++ ) therk[d] = magma_wtime();
                         #endif
 
                         //magmablasSetKernelStream(stream[d]);
@@ -400,13 +400,13 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                         #else
                         magma_zherk_mgpu2
                         #endif
-                                        (num_gpus, MagmaLower, MagmaNoTrans,
+                                        (ngpu, MagmaLower, MagmaNoTrans,
                                          nb, n - offset, nb,
                                          m_one, dlpanels, ldda, 0,
                                          one,   d_lA,     ldda, offset,
                                          num_streams, stream );
                         #if defined (ENABLE_TIMER)
-                        for( d=0; d < num_gpus; d++ ) {
+                        for( d=0; d < ngpu; d++ ) {
                             magma_setdevice(d);
                             magma_device_sync();
                             therk[d] = magma_wtime() - therk[d];
@@ -430,13 +430,13 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
                             therk[0], therk[1], therk[2], therk[3], // syrk
                             tctm, // copy panel to GPU
                             tmnp, // lookahead on GPU
-                            (id + 1) % num_gpus,
+                            (id + 1) % ngpu,
                             (tcnp+tcchol+tctrsm+therk[0]+therk[1]+therk[2]+tctm+tmnp));
                     fflush(0);
                     #endif
                 }
             }
-            for( d = 0; d < num_gpus; d++ ) {
+            for( d = 0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 for( id=0; id < num_streams; id++ ) {
                     magma_queue_sync( stream[d][id] );
@@ -470,10 +470,10 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
             // cholesky for the last block
             if (j < n && *info == 0) {
                 rows = n - j;
-                id = (j / nb) % num_gpus;
+                id = (j / nb) % ngpu;
 
                 // Set the local index where the current panel is
-                j_local = j / (nb * num_gpus) * nb;
+                j_local = j / (nb * ngpu) * nb;
                 
                 magma_setdevice(id);
                 #if defined (ENABLE_TIMER)
@@ -492,7 +492,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
         } // end of else not upper
 
         // clean up
-        for( d = 0; d < num_gpus; d++ ) {
+        for( d = 0; d < ngpu; d++ ) {
             magma_setdevice(d);
             for( j=0; j < num_streams; j++ ) {
                 magma_queue_destroy( stream[d][j] );
@@ -512,7 +512,7 @@ magma_zpotrf_mgpu_right(magma_int_t num_gpus, magma_uplo_t uplo, magma_int_t n,
 
 extern "C" void
 magma_zherk_mgpu(
-    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -534,11 +534,11 @@ magma_zherk_mgpu(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%num_gpus;
+        id = ((i+offset)/nb)%ngpu;
         kk = STREAM_ID( i+offset );
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*num_gpus));
+        ii = nb*((i+offset)/(nb*ngpu));
 
         /* zher2k on diagonal block */
         magma_setdevice(id);
@@ -553,11 +553,11 @@ magma_zherk_mgpu(
     /* off-diagonal update */
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
+            id = ((i+offset)/nb)%ngpu;
             kk = STREAM_ID( i+offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
 
             magma_setdevice(id);
             magmablasSetKernelStream(stream[id][kk]);
@@ -569,11 +569,11 @@ magma_zherk_mgpu(
     }
     else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
+            id = ((i+offset)/nb)%ngpu;
             kk = STREAM_ID( i+offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             n1 = n-i-ib;
 
             /* zgemm on off-diagonal blocks */
@@ -589,7 +589,7 @@ magma_zherk_mgpu(
     }
 
     // TODO why not sync?
-    //for( id=0; id < num_gpus; id++ ) {
+    //for( id=0; id < ngpu; id++ ) {
     //    magma_setdevice(id);
     //    //for( kk=0; kk < num_streams; kk++ )
     //    //    magma_queue_sync(stream[id][kk]);
@@ -601,7 +601,7 @@ magma_zherk_mgpu(
 
 extern "C" void
 magma_zherk_mgpu2(
-    magma_int_t num_gpus, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
     double beta,
@@ -623,20 +623,20 @@ magma_zherk_mgpu2(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%num_gpus;
+        id = ((i+offset)/nb)%ngpu;
         kk = STREAM_ID( i+offset );
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*num_gpus));
+        ii = nb*((i+offset)/(nb*ngpu));
     }
 
     if (uplo == MagmaUpper) {
         for( i=0; i < n; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
+            id = ((i+offset)/nb)%ngpu;
             kk = STREAM_ID( i+offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             n1 = i+ib;
 
             magma_setdevice(id);
@@ -651,11 +651,11 @@ magma_zherk_mgpu2(
     }
     else {
         for( i=0; i < n; i += nb ) {
-            id = ((i+offset)/nb)%num_gpus;
+            id = ((i+offset)/nb)%ngpu;
             kk = STREAM_ID( i+offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*num_gpus));
+            ii = nb*((i+offset)/(nb*ngpu));
             n1 = n-i;
 
             magma_setdevice(id);
@@ -671,7 +671,7 @@ magma_zherk_mgpu2(
     }
 
     // TODO: why not sync?
-    //for( id=0; id < num_gpus; id++ ) {
+    //for( id=0; id < ngpu; id++ ) {
     //    magma_setdevice(id);
     //    //for( kk=0; kk < num_streams; kk++ )
     //    //    magma_queue_sync(stream[id][kk]);

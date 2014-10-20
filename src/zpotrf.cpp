@@ -113,17 +113,17 @@ magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
     if ( n == 0 )
         return *info;
 
-    magma_int_t num_gpus = magma_num_gpus();
-    if ( num_gpus > 1 ) {
+    magma_int_t ngpu = magma_num_gpus();
+    if ( ngpu > 1 ) {
         /* call multiple-GPU interface  */
-        return magma_zpotrf_m(num_gpus, uplo, n, A, lda, info);
+        return magma_zpotrf_m(ngpu, uplo, n, A, lda, info);
     }
 
     ldda = ((n+31)/32)*32;
     
     if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
         /* alloc failed so call the non-GPU-resident version */
-        return magma_zpotrf_m(num_gpus, uplo, n, A, lda, info);
+        return magma_zpotrf_m(ngpu, uplo, n, A, lda, info);
     }
 
     /* Define user stream if current stream is NULL */

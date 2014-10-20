@@ -35,12 +35,12 @@ class magma_zapplyQ_m_data {
 
 public:
 
-    magma_zapplyQ_m_data(magma_int_t nrgpu_, magma_int_t threads_num_, magma_int_t n_, magma_int_t ne_, magma_int_t n_gpu_,
+    magma_zapplyQ_m_data(magma_int_t ngpu_, magma_int_t threads_num_, magma_int_t n_, magma_int_t ne_, magma_int_t n_gpu_,
                          magma_int_t nb_, magma_int_t Vblksiz_, magmaDoubleComplex *E_, magma_int_t lde_,
                          magmaDoubleComplex *V_, magma_int_t ldv_, magmaDoubleComplex *TAU_,
                          magmaDoubleComplex *T_, magma_int_t ldt_)
     :
-    nrgpu(nrgpu_),
+    ngpu(ngpu_),
     threads_num(threads_num_),
     n(n_),
     ne(ne_),
@@ -67,7 +67,7 @@ public:
     {
         pthread_barrier_destroy(&barrier);
     }
-    const magma_int_t nrgpu;
+    const magma_int_t ngpu;
     const magma_int_t threads_num;
     const magma_int_t n;
     const magma_int_t ne;
@@ -107,7 +107,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" magma_int_t
-magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo,
+magma_zbulge_back_m(magma_int_t ngpu, magma_uplo_t uplo,
                         magma_int_t n, magma_int_t nb,
                         magma_int_t ne, magma_int_t Vblksiz,
                         magmaDoubleComplex *Z, magma_int_t ldz,
@@ -133,7 +133,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo,
 
     double perf_temp= .85;
     double perf_temp2= perf_temp;
-    for (magma_int_t itmp=1; itmp < nrgpu; ++itmp)
+    for (magma_int_t itmp=1; itmp < ngpu; ++itmp)
         perf_temp2 *= perf_temp;
     magma_int_t gpu_cpu_perf = magma_get_zbulge_gcperf();
     if (threads > 1) {
@@ -162,7 +162,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo,
         #ifdef ENABLE_DEBUG
         printf("---> calling GPU + CPU(if N_CPU > 0) to apply V2 to Z with NE %d     N_GPU %d   N_CPU %d\n",ne, n_gpu, ne-n_gpu);
         #endif
-        magma_zapplyQ_m_data data_applyQ(nrgpu, threads, n, ne, n_gpu, nb, Vblksiz, Z, ldz, V, ldv, TAU, T, ldt);
+        magma_zapplyQ_m_data data_applyQ(ngpu, threads, n, ne, n_gpu, nb, Vblksiz, Z, ldz, V, ldv, TAU, T, ldt);
 
         magma_zapplyQ_m_id_data* arg;
         magma_malloc_cpu((void**) &arg, threads*sizeof(magma_zapplyQ_m_id_data));
@@ -201,7 +201,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_uplo_t uplo,
          *  use only GPU
          *==========================*/
     } else {
-        magma_zbulge_applyQ_v2_m(nrgpu, MagmaLeft, ne, n, nb, Vblksiz, Z, ldz, V, ldv, T, ldt, info);
+        magma_zbulge_applyQ_v2_m(ngpu, MagmaLeft, ne, n, nb, Vblksiz, Z, ldz, V, ldv, T, ldt, info);
         magma_device_sync();
     }
 
@@ -217,7 +217,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
     magma_int_t my_core_id     = ((magma_zapplyQ_m_id_data*)arg) -> id;
     magma_zapplyQ_m_data* data = ((magma_zapplyQ_m_id_data*)arg) -> data;
 
-    magma_int_t nrgpu          = data -> nrgpu;
+    magma_int_t ngpu          = data -> ngpu;
     magma_int_t allcores_num   = data -> threads_num;
     magma_int_t n              = data -> n;
     magma_int_t ne             = data -> ne;
@@ -279,7 +279,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
         timeQgpu = magma_wtime();
         #endif
 
-        magma_zbulge_applyQ_v2_m(nrgpu, MagmaLeft, n_gpu, n, nb, Vblksiz, E, lde, V, ldv, T, ldt, &info);
+        magma_zbulge_applyQ_v2_m(ngpu, MagmaLeft, n_gpu, n, nb, Vblksiz, E, lde, V, ldv, T, ldt, &info);
         magma_device_sync();
 
         #ifdef ENABLE_TIMER

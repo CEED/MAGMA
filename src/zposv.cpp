@@ -79,7 +79,7 @@ magma_zposv(
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
-    magma_int_t num_gpus, ldda, lddb;
+    magma_int_t ngpu, ldda, lddb;
 
     *info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower )
@@ -103,9 +103,9 @@ magma_zposv(
     }
 
     /* If single-GPU and allocation suceeds, use GPU interface. */
-    num_gpus = magma_num_gpus();
+    ngpu = magma_num_gpus();
     magmaDoubleComplex *dA, *dB;
-    if ( num_gpus > 1 ) {
+    if ( ngpu > 1 ) {
         goto CPU_INTERFACE;
     }
     ldda = ((n+31)/32)*32;

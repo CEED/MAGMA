@@ -115,10 +115,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t ld
         maxdim = max(maxm, maxn);
 
         /* set number of GPUs */
-        magma_int_t num_gpus = magma_num_gpus();
-        if ( num_gpus > 1 ) {
+        magma_int_t ngpu = magma_num_gpus();
+        if ( ngpu > 1 ) {
             /* call multi-GPU non-GPU-resident interface  */
-            magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
+            magma_zgetrf_m(ngpu, m, n, A, lda, ipiv, info);
             return *info;
         }
 
@@ -127,20 +127,20 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t ld
         cudaMemGetInfo( &freeMem, &totalMem );
         freeMem /= sizeof(magmaDoubleComplex);
 
-        int h = 1+(2+num_gpus), num_gpus2 = num_gpus;
+        int h = 1+(2+ngpu), ngpu2 = ngpu;
         int NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
         const char* ngr_nb_char = getenv("MAGMA_NGR_NB");
         if ( ngr_nb_char != NULL )
             NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 
-        if ( num_gpus > ceil((double)NB/nb) ) {
-            num_gpus2 = (int)ceil((double)NB/nb);
-            h = 1+(2+num_gpus2);
+        if ( ngpu > ceil((double)NB/nb) ) {
+            ngpu2 = (int)ceil((double)NB/nb);
+            h = 1+(2+ngpu2);
             NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
         }
-        if ( num_gpus2*NB < n ) {
+        if ( ngpu2*NB < n ) {
             /* require too much memory, so call non-GPU-resident version */
-            magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
+            magma_zgetrf_m(ngpu, m, n, A, lda, ipiv, info);
             return *info;
         }
 
@@ -150,7 +150,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t ld
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                 /* alloc failed so call non-GPU-resident version */
-                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
+                magma_zgetrf_m(ngpu, m, n, A, lda, ipiv, info);
                 return *info;
             }
             da = dA + nb*maxm;
@@ -165,7 +165,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t ld
             // if very rectangular, allocate dA and dAT and transpose out-of-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                 /* alloc failed so call non-GPU-resident version */
-                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
+                magma_zgetrf_m(ngpu, m, n, A, lda, ipiv, info);
                 return *info;
             }
             da = dA + nb*maxm;
@@ -175,7 +175,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t ld
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                 /* alloc failed so call non-GPU-resident version */
                 magma_free( dA );
-                magma_zgetrf_m(num_gpus, m, n, A, lda, ipiv, info);
+                magma_zgetrf_m(ngpu, m, n, A, lda, ipiv, info);
                 return *info;
             }
 

@@ -32,8 +32,8 @@
     Arguments
     ---------
     @param[in]
-    nrgpu   INTEGER
-            Number of GPUs to use.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     jobz    magma_vec_t
@@ -128,7 +128,7 @@
     @ingroup magma_dsyev_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
+magma_dsyevd_m(magma_int_t ngpu, magma_vec_t jobz, magma_uplo_t uplo,
                magma_int_t n,
                double *A, magma_int_t lda,
                double *w,
@@ -273,7 +273,7 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
     magma_timer_t time=0;
     timer_start( time );
 
-    magma_dsytrd_mgpu(nrgpu, 1, uplo, n, A, lda, w, &work[inde],
+    magma_dsytrd_mgpu(ngpu, 1, uplo, n, A, lda, w, &work[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );
@@ -301,7 +301,7 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
 
         magma_free( dwork );
 #else
-        magma_dstedx_m(nrgpu, MagmaRangeAll, n, 0., 0., 0, 0, w, &work[inde],
+        magma_dstedx_m(ngpu, MagmaRangeAll, n, 0., 0., 0, 0, w, &work[inde],
                        &work[indwrk], n, &work[indwk2],
                        llwrk2, iwork, liwork, info);
 #endif
@@ -310,7 +310,7 @@ magma_dsyevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
         timer_printf( "time dstedc = %6.2f\n", time );
         timer_start( time );
 
-        magma_dormtr_m(nrgpu, MagmaLeft, uplo, MagmaNoTrans, n, n, A, lda, &work[indtau],
+        magma_dormtr_m(ngpu, MagmaLeft, uplo, MagmaNoTrans, n, n, A, lda, &work[indtau],
                        &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
 
         lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, A, &lda);

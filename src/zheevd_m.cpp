@@ -34,8 +34,8 @@
     Arguments
     ---------
     @param[in]
-    nrgpu   INTEGER
-            Number of GPUs to use.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     jobz    magma_vec_t
@@ -148,7 +148,7 @@
     @ingroup magma_zheev_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
+magma_zheevd_m(magma_int_t ngpu, magma_vec_t jobz, magma_uplo_t uplo,
                magma_int_t n,
                magmaDoubleComplex *A, magma_int_t lda,
                double *w,
@@ -312,7 +312,7 @@ magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
     magma_timer_t time=0;
     timer_start( time );
 
-    magma_zhetrd_mgpu(nrgpu, 1, uplo, n, A, lda, w, &rwork[inde],
+    magma_zhetrd_mgpu(ngpu, 1, uplo, n, A, lda, w, &rwork[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );
@@ -340,7 +340,7 @@ magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
 
         magma_free( dwork );
 #else
-        magma_zstedx_m(nrgpu, MagmaRangeAll, n, 0, 0, 0, 0, w, &rwork[inde],
+        magma_zstedx_m(ngpu, MagmaRangeAll, n, 0, 0, 0, 0, w, &rwork[inde],
                        &work[indwrk], n, &rwork[indrwk],
                        llrwk, iwork, liwork, info);
 #endif
@@ -349,7 +349,7 @@ magma_zheevd_m(magma_int_t nrgpu, magma_vec_t jobz, magma_uplo_t uplo,
         timer_printf( "time zstedc = %6.2f\n", time );
         timer_start( time );
 
-        magma_zunmtr_m(nrgpu, MagmaLeft, uplo, MagmaNoTrans, n, n, A, lda, &work[indtau],
+        magma_zunmtr_m(ngpu, MagmaLeft, uplo, MagmaNoTrans, n, n, A, lda, &work[indtau],
                        &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
 
         lapackf77_zlacpy("A", &n, &n, &work[indwrk], &n, A, &lda);

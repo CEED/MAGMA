@@ -14,7 +14,7 @@
 
 extern "C" {
 
-magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* Q, magma_int_t ldq,
+magma_int_t magma_dlaex1_m(magma_int_t ngpu, magma_int_t n, double* d, double* Q, magma_int_t ldq,
                            magma_int_t* indxq, double rho, magma_int_t cutpnt,
                            double* work, magma_int_t* iwork, double** dwork,
                            magma_queue_t stream[MagmaMaxGPUs][2],
@@ -34,8 +34,8 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
     Arguments
     ---------
     @param[in]
-    nrgpu   INTEGER
-            Number of GPUs to use.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     n       INTEGER
@@ -111,7 +111,7 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
+magma_dlaex0_m(magma_int_t ngpu, magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
                double* work, magma_int_t* iwork,
                magma_range_t range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
@@ -144,16 +144,16 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
     
-    // workspace dimension for nrgpu > 1
+    // workspace dimension for ngpu > 1
     size_t tmp = (n-1)/2+1;
-    if (nrgpu > 1) {
-        size_t tmp2 = (tmp-1) / (nrgpu/2) + 1;
+    if (ngpu > 1) {
+        size_t tmp2 = (tmp-1) / (ngpu/2) + 1;
         tmp = tmp * tmp2 + 2 * magma_get_dlaex3_m_nb()*(tmp + tmp2);
     }
 
-    for (igpu = 0; igpu < nrgpu; ++igpu) {
+    for (igpu = 0; igpu < ngpu; ++igpu) {
         magma_setdevice(igpu);
-        if (nrgpu == 1) {
+        if (ngpu == 1) {
             if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], 3*n*(n/2 + 1) )) {
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
@@ -259,7 +259,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
                 // We need all the eigenvectors if it is not last step
                 range2 = MagmaRangeAll;
 
-            magma_dlaex1_m(nrgpu, matsiz, &d[submat], Q(submat, submat), ldq,
+            magma_dlaex1_m(ngpu, matsiz, &d[submat], Q(submat, submat), ldq,
                            &iwork[indxq+submat], e[submat+msd2-1], msd2,
                            work, &iwork[subpbs], dw, stream,
                            range2, vl, vu, il, iu, info);
@@ -288,7 +288,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* Q
     blasf77_dcopy(&n, work, &ione, d, &ione);
     lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, Q, &ldq );
 
-    for (igpu = 0; igpu < nrgpu; ++igpu) {
+    for (igpu = 0; igpu < ngpu; ++igpu) {
         magma_setdevice(igpu);
         magma_queue_destroy( stream[igpu][0] );
         magma_queue_destroy( stream[igpu][1] );

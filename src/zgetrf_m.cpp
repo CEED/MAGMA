@@ -35,8 +35,8 @@
     Arguments
     ---------
     @param[in]
-    num_gpus INTEGER
-             The number of GPUs.  num_gpus > 0.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     m       INTEGER
@@ -77,7 +77,7 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
+magma_zgetrf_m(magma_int_t ngpu, magma_int_t m, magma_int_t n,
                magmaDoubleComplex *A, magma_int_t lda,
                magma_int_t *ipiv, magma_int_t *info)
 {
@@ -93,7 +93,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *dAT[MagmaMaxGPUs], *dA[MagmaMaxGPUs], *dPT[MagmaMaxGPUs];
     magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[MagmaMaxGPUs], ldn_local;
-    magma_int_t        N, M, NB, NBk, I, d, num_gpus0 = num_gpus;
+    magma_int_t        N, M, NB, NBk, I, d, ngpu0 = ngpu;
     magma_int_t        ii, jj, h, offset, ib, rows, s;
     
     magma_queue_t stream[MagmaMaxGPUs][2];
@@ -131,21 +131,21 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     freeMem /= sizeof(magmaDoubleComplex);
     
     /* number of columns in the big panel */
-    h = 1+(2+num_gpus0);
+    h = 1+(2+ngpu0);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     const char* ngr_nb_char = getenv("MAGMA_NGR_NB");
     if ( ngr_nb_char != NULL )
         NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
     //NB = 5*max(nb,32);
 
-    if ( num_gpus0 > ceil((double)NB/nb) ) {
-        num_gpus = (int)ceil((double)NB/nb);
-        h = 1+(2+num_gpus);
+    if ( ngpu0 > ceil((double)NB/nb) ) {
+        ngpu = (int)ceil((double)NB/nb);
+        h = 1+(2+ngpu);
         NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     } else {
-        num_gpus = num_gpus0;
+        ngpu = ngpu0;
     }
-    if ( num_gpus*NB >= n ) {
+    if ( ngpu*NB >= n ) {
         #ifdef CHECK_ZGETRF_OOC
         printf( "      * still fit in GPU memory.\n" );
         #endif
@@ -154,7 +154,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         #ifdef CHECK_ZGETRF_OOC
         printf( "      * don't fit in GPU memory.\n" );
         #endif
-        NB = num_gpus*NB;
+        NB = ngpu*NB;
         NB = max( nb, (NB / nb) * nb); /* making sure it's devisable by nb (x64) */
     }
 
@@ -171,13 +171,13 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
         /* allocate memory on GPU to store the big panel */
         timer_start( time_alloc );
-        n_local[0] = (NB/nb)/num_gpus;
-        if ( NB%(nb*num_gpus) != 0 )
+        n_local[0] = (NB/nb)/ngpu;
+        if ( NB%(nb*ngpu) != 0 )
             n_local[0]++;
         n_local[0] *= nb;
         ldn_local = ((n_local[0]+31)/32)*32;
     
-        for( d=0; d < num_gpus; d++ ) {
+        for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
             if (MAGMA_SUCCESS != magma_zmalloc( &dA[d], (ldn_local+h*nb)*maxm )) {
                 *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -199,26 +199,26 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             s = min( max(m-I,0), N )/nb; /* number of small block-columns in this big panel */
     
             maxm = ((M + 31)/32)*32;
-            if ( num_gpus0 > ceil((double)N/nb) ) {
-                num_gpus = (int)ceil((double)N/nb);
+            if ( ngpu0 > ceil((double)N/nb) ) {
+                ngpu = (int)ceil((double)N/nb);
             } else {
-                num_gpus = num_gpus0;
+                ngpu = ngpu0;
             }
     
-            for( d=0; d < num_gpus; d++ ) {
-                n_local[d] = ((N/nb)/num_gpus)*nb;
-                if (d < (N/nb)%num_gpus)
+            for( d=0; d < ngpu; d++ ) {
+                n_local[d] = ((N/nb)/ngpu)*nb;
+                if (d < (N/nb)%ngpu)
                     n_local[d] += nb;
-                else if (d == (N/nb)%num_gpus)
+                else if (d == (N/nb)%ngpu)
                     n_local[d] += N%nb;
             }
             ldn_local = ((n_local[0]+31)/32)*32;
             
             /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
             timer_start( time );
-            magmablas_zsetmatrix_transpose_mgpu(num_gpus, stream, A(0,I), lda,
+            magmablas_zsetmatrix_transpose_mgpu(ngpu, stream, A(0,I), lda,
                                                 dAT, ldn_local, dA, maxm, M, N, nb);
-            for( d=0; d < num_gpus; d++ ) {
+            for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
@@ -232,7 +232,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             for( offset = 0; offset < min(m,I); offset += NB ) {
                 NBk = min( m-offset, NB );
                 /* start sending the first tile from the previous big-panels to gpus */
-                for( d=0; d < num_gpus; d++ ) {
+                for( d=0; d < ngpu; d++ ) {
                     magma_setdevice(d);
                     nbi  = min( nb, NBk );
                     magma_zsetmatrix_async( (M-offset), nbi,
@@ -249,7 +249,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                 }
                 
                 /* applying the pivot from the previous big-panel */
-                for( d=0; d < num_gpus; d++ ) {
+                for( d=0; d < ngpu; d++ ) {
                     magma_setdevice(d);
                     magmablasSetKernelStream(stream[d][1]);
                     magmablas_zpermute_long3( dAT(d,0,0), ldn_local, ipiv, NBk, offset );
@@ -260,7 +260,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                     ii   = offset+jj;
                     rows = maxm - ii;
                     nbi  = min( nb, NBk-jj );
-                    for( d=0; d < num_gpus; d++ ) {
+                    for( d=0; d < ngpu; d++ ) {
                         magma_setdevice(d);
                         
                         /* wait for a block-column on GPU */
@@ -295,7 +295,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                     } /* end of for each block-columns in a big-panel */
                 }
             } /* end of for each previous big-panels */
-            for( d=0; d < num_gpus; d++ ) {
+            for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
@@ -304,9 +304,9 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     
             /* calling magma-gpu interface to panel-factorize the big panel */
             if ( M > I ) {
-                //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
+                //magma_zgetrf1_mgpu(ngpu, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                 //                   (magma_queue_t **)stream, &iinfo);
-                magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
+                magma_zgetrf2_mgpu(ngpu, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                                    stream, &iinfo);
                 if ( iinfo < 0 ) {
                     *info = iinfo;
@@ -323,8 +323,8 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     
             /* download the current big panel to CPU */
             timer_start( time );
-            magmablas_zgetmatrix_transpose_mgpu(num_gpus, stream, dAT, ldn_local, A(0,I), lda, dA, maxm, M, N, nb);
-            for( d=0; d < num_gpus; d++ ) {
+            magmablas_zgetmatrix_transpose_mgpu(ngpu, stream, dAT, ldn_local, A(0,I), lda, dA, maxm, M, N, nb);
+            for( d=0; d < ngpu; d++ ) {
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
@@ -344,7 +344,7 @@ magma_zgetrf_m(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         timer_printf(" Performance %f GFlop/s, %f seconds with    dtoh\n",              flops / (time_comp + time_get),    time_comp + time_get    );
         timer_printf(" Performance %f GFlop/s, %f seconds without memory-allocation\n", flops / (time_total - time_alloc), time_total - time_alloc );
     
-        for( d=0; d < num_gpus0; d++ ) {
+        for( d=0; d < ngpu0; d++ ) {
             magma_setdevice(d);
             magma_free( dA[d] );
             magma_event_destroy( event[d][0] );

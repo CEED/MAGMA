@@ -52,8 +52,8 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     Arguments
     ---------
     @param[in]
-    nrgpu   INTEGER
-            Number of GPUs to use.
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
 
     @param[in]
     k       INTEGER
@@ -140,8 +140,8 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
             if NRGPU = 1 the dimension of the first workspace
             should be (3*N*N/2+3*N)
             otherwise the NRGPU workspaces should have the size
-            ceil((N-N1) * (N-N1) / floor(nrgpu/2)) +
-            NB * ((N-N1) + (N-N1) / floor(nrgpu/2))
+            ceil((N-N1) * (N-N1) / floor(ngpu/2)) +
+            NB * ((N-N1) + (N-N1) / floor(ngpu/2))
     
     @param
     stream  (device stream) magma_queue_t array,
@@ -188,7 +188,7 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex3_m(magma_int_t nrgpu,
+magma_dlaex3_m(magma_int_t ngpu,
                magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                double* Q, magma_int_t ldq, double rho,
                double* dlamda, double* Q2, magma_int_t* indx,
@@ -203,7 +203,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #define dS(id, ii) (dwork[id] + n2*n2_loc + (ii)*(n2*nb))
 #define dQ(id, ii) (dwork[id] + n2*n2_loc +    2*(n2*nb) + (ii)*(n2_loc*nb))
 
-    if (nrgpu == 1) {
+    if (ngpu == 1) {
         magma_setdevice(0);
         magma_dlaex3(k, n, n1, d, Q, ldq, rho,
                      dlamda, Q2, indx, ctot, w, s, indxq,
@@ -297,14 +297,14 @@ magma_dlaex3_m(magma_int_t nrgpu,
     iq2 = n1 * n12;
     lq2 = iq2 + n2 * n23;
 
-    n1_loc = (n1-1) / (nrgpu/2) + 1;
-    n2_loc = (n2-1) / (nrgpu/2) + 1;
+    n1_loc = (n1-1) / (ngpu/2) + 1;
+    n2_loc = (n2-1) / (ngpu/2) + 1;
 
     nb = magma_get_dlaex3_m_nb();
 
     if (n1 >= magma_get_dlaex3_m_k()) {
 #ifdef CHECK_CPU
-        for (igpu = 0; igpu < nrgpu; ++igpu) {
+        for (igpu = 0; igpu < ngpu; ++igpu) {
             magma_dmalloc_pinned( &(hwS[0][igpu]), n2*nb );
             magma_dmalloc_pinned( &(hwS[1][igpu]), n2*nb );
             magma_dmalloc_pinned( &(hwQ2[igpu]), n2*n2_loc );
@@ -312,7 +312,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             magma_dmalloc_pinned( &(hwQ[1][igpu]), n2_loc*nb );
         }
 #endif
-        for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+        for (igpu = 0; igpu < ngpu-1; igpu += 2) {
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
 #ifdef CHECK_CPU
             lapackf77_dlacpy("A", &ni_loc[igpu], &n12, Q2+n1_loc*(igpu/2), &n1, hQ2(igpu), &n1_loc);
@@ -563,7 +563,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
         else {
             //use the gpus
             ib = min(nb, rk);
-            for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+            for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                 if (n23 != 0) {
                     magma_setdevice(igpu+1);
                     magma_dsetmatrix_async( n23, ib,
@@ -583,7 +583,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 ind = (i/nb)%2;
                 if (i+nb < rk) {
                     ib2 = min(nb, rk - i - nb);
-                    for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+                    for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                         if (n23 != 0) {
                             magma_setdevice(igpu+1);
                             magma_dsetmatrix_async( n23, ib2,
@@ -600,7 +600,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 }
 
                 // Ensure that the data is copied on gpu since we will overwrite it.
-                for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+                for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                     if (n23 != 0) {
 #ifdef CHECK_CPU
                         lapackf77_dlacpy("A", &n23, &ib, Q(ctot[0],iil-1+i), &ldq, hS(igpu+1,ind), &n23);
@@ -616,7 +616,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                         magma_queue_sync( stream[igpu][ind] );
                     }
                 }
-                for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+                for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                     if (n23 != 0) {
 #ifdef CHECK_CPU
                         blasf77_dgemm("N", "N", &ni_loc[igpu+1], &ib, &n23, &d_one, hQ2(igpu+1), &n2_loc,
@@ -644,7 +644,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #endif
                     }
                 }
-                for (igpu = 0; igpu < nrgpu-1; igpu += 2) {
+                for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                     if (n23 != 0) {
                         magma_setdevice(igpu+1);
                         magma_dgetmatrix( ni_loc[igpu+1], ib, dQ(igpu+1, ind), n2_loc,
@@ -661,7 +661,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                     }
                 }
             }
-            for (igpu = 0; igpu < nrgpu; ++igpu) {
+            for (igpu = 0; igpu < ngpu; ++igpu) {
 #ifdef CHECK_CPU
                 magma_free_pinned( hwS[1][igpu] );
                 magma_free_pinned( hwS[0][igpu] );
