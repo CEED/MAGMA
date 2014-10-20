@@ -34,6 +34,7 @@ ZSRC += \
 	ztrtri_gpu.cpp		\
 	\
 	zpotrf_mgpu.cpp		\
+	zpotrf_mgpu_right.cpp	\
 	zpotrf3_mgpu.cpp	\
 
 # Cholesky, CPU interface
