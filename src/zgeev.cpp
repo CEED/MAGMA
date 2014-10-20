@@ -184,7 +184,7 @@ magma_zgeev(
     nb = magma_get_zgehrd_nb( n );
     if (*info == 0) {
         minwrk = (1+  nb)*n;
-        minwrk = (1+2*nb)*n;
+        optwrk = (1+2*nb)*n;
         work[0] = MAGMA_Z_MAKE( optwrk, 0 );
 
         if (lwork < minwrk && ! lquery) {
