@@ -108,7 +108,7 @@ magma_zpotrf_mgpu_right(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
     magma_int_t j, nb, d, id, j_local, blkid, crosspoint, prevj, prevtrsmrows, num_streams = 5;
     magmaDoubleComplex *panel, *tmppanel0, *tmppanel1, *tmppanel, *tmpprevpanel;
     magmaDoubleComplex *d_lP[MagmaMaxGPUs], *dlpanel, *dlpanels[MagmaMaxGPUs];
-    magma_int_t rows, trsmrows, ngpu, n_local[MagmaMaxGPUs], ldpanel;
+    magma_int_t rows, trsmrows, igpu, n_local[MagmaMaxGPUs], ldpanel;
     magma_queue_t stream[MagmaMaxGPUs][10];
 
     *info = 0;
@@ -284,7 +284,7 @@ magma_zpotrf_mgpu_right(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
 
                 d = (id + 1) % ngpu;
                 // send current panel to gpus
-                for (ngpu = 0; ngpu < ngpu; ngpu++, d = (d + 1) % ngpu ) {
+                for (igpu = 0; igpu < ngpu; igpu++, d = (d + 1) % ngpu ) {
                     magma_int_t myrows = 0;
                     magma_int_t row_offset = 0;
                     if ( d == id ) {
@@ -306,7 +306,7 @@ magma_zpotrf_mgpu_right(magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
                 }
                 /* make sure panel is on GPUs */
                 d = (id + 1) % ngpu;
-                for (ngpu = 0; ngpu < ngpu; ngpu++, d = (d + 1) % ngpu ) {
+                for (igpu = 0; igpu < ngpu; igpu++, d = (d + 1) % ngpu ) {
                     magma_setdevice(d);
                     magma_queue_sync( stream[d][0] );
                 }
