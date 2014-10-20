@@ -390,11 +390,11 @@ magma_int_t magma_ztrevc3_mt(
     queue.launch( nthread );
     //printf( "nthread %d, %d\n", nthread, lapack_nthread );
     
-    // NB = N/thread, rounded up to multiple of 16,
+    // gemm_nb = N/thread, rounded up to multiple of 16,
     // but avoid multiples of page size, e.g., 512*8 bytes = 4096.
-    magma_int_t NB = magma_int_t( ceil( ceil( ((double)n) / nthread ) / 16. ) * 16. );
-    if ( NB % 512 == 0 ) {
-        NB += 32;
+    magma_int_t gemm_nb = magma_int_t( ceil( ceil( ((double)n) / nthread ) / 16. ) * 16. );
+    if ( gemm_nb % 512 == 0 ) {
+        gemm_nb += 32;
     }
     
     magma_timer_t time_total=0, time_trsv=0, time_gemm=0, time_gemv=0, time_trsv_sum=0, time_gemm_sum=0, time_gemv_sum=0;
@@ -493,8 +493,8 @@ magma_int_t magma_ztrevc3_mt(
                     n2  = ki+nb-iv+1;
                     
                     // split gemm into multiple tasks, each doing one block row
-                    for( i=0; i < n; i += NB ) {
-                        magma_int_t ib = min( NB, n-i );
+                    for( i=0; i < n; i += gemm_nb ) {
+                        magma_int_t ib = min( gemm_nb, n-i );
                         queue.push_task( new zgemm_task(
                             MagmaNoTrans, MagmaNoTrans, ib, nb2, n2, c_one,
                             VR(i,0), ldvr,
@@ -614,8 +614,8 @@ magma_int_t magma_ztrevc3_mt(
                     n2 = n-(ki+1)+iv;
                     
                     // split gemm into multiple tasks, each doing one block row
-                    for( i=0; i < n; i += NB ) {
-                        magma_int_t ib = min( NB, n-i );
+                    for( i=0; i < n; i += gemm_nb ) {
+                        magma_int_t ib = min( gemm_nb, n-i );
                         queue.push_task( new zgemm_task(
                             MagmaNoTrans, MagmaNoTrans, ib, iv, n2, c_one,
                             VL(i,ki-iv+1), ldvl,
