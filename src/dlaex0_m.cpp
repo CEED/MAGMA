@@ -12,19 +12,6 @@
 #include "common_magma.h"
 #include "magma_timer.h"
 
-extern "C" {
-
-magma_int_t magma_dlaex1_m(magma_int_t ngpu, magma_int_t n, double* d, double* Q, magma_int_t ldq,
-                           magma_int_t* indxq, double rho, magma_int_t cutpnt,
-                           double* work, magma_int_t* iwork, double** dwork,
-                           magma_queue_t stream[MagmaMaxGPUs][2],
-                           magma_range_t range, double vl, double vu,
-                           magma_int_t il, magma_int_t iu, magma_int_t* info);
-
-magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
-
-}  // end extern "C"
-
 /**
     Purpose
     -------
@@ -111,10 +98,14 @@ magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex0_m(magma_int_t ngpu, magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
-               double* work, magma_int_t* iwork,
-               magma_range_t range, double vl, double vu,
-               magma_int_t il, magma_int_t iu, magma_int_t* info)
+magma_dlaex0_m(
+    magma_int_t ngpu,
+    magma_int_t n, double *d, double *e,
+    double *Q, magma_int_t ldq,
+    double *work, magma_int_t *iwork,
+    magma_range_t range, double vl, double vu,
+    magma_int_t il, magma_int_t iu,
+    magma_int_t *info)
 {
 #define Q(i_,j_) (Q + (i_) + (j_)*ldq)
 
@@ -123,7 +114,7 @@ magma_dlaex0_m(magma_int_t ngpu, magma_int_t n, double* d, double* e, double* Q,
     magma_int_t curlvl, i, indxq;
     magma_int_t igpu, j, k, matsiz, msd2, smlsiz;
     magma_int_t submat, subpbs, tlvls;
-    double* dw[MagmaMaxGPUs];
+    double *dw[MagmaMaxGPUs];
     magma_queue_t stream [MagmaMaxGPUs][2];
 
     // Test the input parameters.

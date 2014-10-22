@@ -146,12 +146,13 @@
     @ingroup magma_zheev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_zlatrd(magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-             magmaDoubleComplex *A,  magma_int_t lda,
-             double *e, magmaDoubleComplex *tau,
-             magmaDoubleComplex *W,  magma_int_t ldw,
-             magmaDoubleComplex *dA, magma_int_t ldda,
-             magmaDoubleComplex *dW, magma_int_t lddw)
+magma_zlatrd(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex *A,  magma_int_t lda,
+    double *e, magmaDoubleComplex *tau,
+    magmaDoubleComplex *W,  magma_int_t ldw,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dW, magma_int_t lddw)
 {
 #define A(i, j) (A + (j)*lda + (i))
 #define W(i, j) (W + (j)*ldw + (i))

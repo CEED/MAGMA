@@ -60,7 +60,8 @@
 extern "C" magma_int_t
 magma_zgetf2_nopiv(
     magma_int_t m, magma_int_t n,
-    magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
     #define A(i_,j_) (A + (i_) + (j_)*lda)
     

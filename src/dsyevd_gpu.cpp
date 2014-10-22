@@ -16,6 +16,8 @@
 #include "common_magma.h"
 #include "magma_timer.h"
 
+#define REAL
+
 /**
     Purpose
     -------

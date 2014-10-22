@@ -72,8 +72,10 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-             magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf(
+    magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *ipiv,
+    magma_int_t *info)
 {
 #define dAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
 

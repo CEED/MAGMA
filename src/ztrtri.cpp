@@ -62,8 +62,10 @@
     @ingroup magma_zgesv_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_ztrtri(magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+magma_ztrtri(
+    magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
     #define  A(i, j) ( A + (i) + (j)*lda )
     #define dA(i, j) (dA + (i) + (j)*ldda)

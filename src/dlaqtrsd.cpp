@@ -93,10 +93,11 @@
     ********************************************************************/
 extern "C"
 magma_int_t magma_dlaqtrsd(
-    magma_trans_t trans,
-    magma_int_t n, const double *T, magma_int_t ldt,
-    double *x, magma_int_t ldx,
-    const double *cnorm, magma_int_t *info)
+    magma_trans_t trans, magma_int_t n,
+    const double *T, magma_int_t ldt,
+    double *x,       magma_int_t ldx,
+    const double *cnorm,
+    magma_int_t *info)
 {
 #define T(i,j)  (T + (i) + (j)*ldt)
 #define x(i,j)  (x + (i) + (j)*ldx)

@@ -91,10 +91,12 @@
     @ingroup magma_zgeqrf_tile
     ********************************************************************/
 extern "C" magma_int_t
-magma_ztsqrt_gpu(magma_int_t *m, magma_int_t *n,
-                 magmaDoubleComplex *A1, magmaDoubleComplex *A2, magma_int_t  *lda,
-                 magmaDoubleComplex *tau, magmaDoubleComplex *work,
-                 magma_int_t *lwork, magmaDoubleComplex *dwork, magma_int_t *info )
+magma_ztsqrt_gpu(
+    magma_int_t *m, magma_int_t *n,
+    magmaDoubleComplex *A1, magmaDoubleComplex *A2, magma_int_t  *lda,
+    magmaDoubleComplex *tau, magmaDoubleComplex *work,
+    magma_int_t *lwork, magmaDoubleComplex *dwork,
+    magma_int_t *info )
 {
     #define A1(a_1,a_2) (A1 + (a_2)*(*lda) + (a_1))
     #define A2(a_1,a_2) (A2 + (a_2)*(*lda) + (a_1))

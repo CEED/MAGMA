@@ -88,9 +88,12 @@ static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaD
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zhegst_m(magma_int_t ngpu, magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-               magmaDoubleComplex *A, magma_int_t lda,
-               magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
+magma_zhegst_m(
+    magma_int_t ngpu,
+    magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *B, magma_int_t ldb,
+    magma_int_t *info)
 {
 #define A(i, j) (A + (j)*nb*lda + (i)*nb)
 #define B(i, j) (B + (j)*nb*ldb + (i)*nb)

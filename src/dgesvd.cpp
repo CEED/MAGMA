@@ -13,6 +13,7 @@
 #include "common_magma.h"
 
 #define PRECISION_d
+#define REAL
 
 // Version 1 - LAPACK
 // Version 2 - MAGMA
@@ -151,12 +152,16 @@
     @ingroup magma_dgesvd_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_dgesvd(magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
-             double *A,    magma_int_t lda, double *s,
-             double *U,    magma_int_t ldu,
-             double *VT,   magma_int_t ldvt,
-             double *work, magma_int_t lwork,
-             magma_int_t *info )
+magma_dgesvd(
+    magma_vec_t jobu, magma_vec_t jobvt, magma_int_t m, magma_int_t n,
+    double *A,    magma_int_t lda, double *s,
+    double *U,    magma_int_t ldu,
+    double *VT,   magma_int_t ldvt,
+    double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
+    magma_int_t *info )
 {
     #define A(i_,j_)  (A  + (i_) + (j_)*lda)
     #define U(i_,j_)  (U  + (i_) + (j_)*ldu)

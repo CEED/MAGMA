@@ -71,7 +71,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqrf2_mgpu(
-    magma_int_t ngpu, magma_int_t m, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr dlA[], magma_int_t ldda,
     magmaDoubleComplex *tau,
     magma_int_t *info )

@@ -52,8 +52,10 @@
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotri(magma_uplo_t uplo, magma_int_t n,
-              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+magma_zpotri(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
     /* Local variables */
     *info = 0;

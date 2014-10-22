@@ -17,8 +17,8 @@
 #include "magma_bulge.h"
 #include "magma_dbulge.h"
 
-
 #define PRECISION_d
+#define REAL
 
 /**
     Purpose
@@ -164,14 +164,19 @@
     @ingroup magma_dsyev_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_dsyevdx_2stage_m(magma_int_t ngpu, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
-                       magma_int_t n,
-                       double *A, magma_int_t lda,
-                       double vl, double vu, magma_int_t il, magma_int_t iu,
-                       magma_int_t *m, double *w,
-                       double *work, magma_int_t lwork,
-                       magma_int_t *iwork, magma_int_t liwork,
-                       magma_int_t *info)
+magma_dsyevdx_2stage_m(
+    magma_int_t ngpu,
+    magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
+    magma_int_t n,
+    double *A, magma_int_t lda,
+    double vl, double vu, magma_int_t il, magma_int_t iu,
+    magma_int_t *m, double *w,
+    double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork, magma_int_t lrwork,
+    #endif
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
     #define A(i_,j_)  (A  + (i_) + (j_)*lda)
     #define A2(i_,j_) (A2 + (i_) + (j_)*lda2)

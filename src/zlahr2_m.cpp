@@ -131,7 +131,7 @@ magma_zlahr2_m(
     magmaDoubleComplex *tau,
     magmaDoubleComplex *T, magma_int_t ldt,
     magmaDoubleComplex *Y, magma_int_t ldy,
-    struct zgehrd_data* data )
+    struct zgehrd_data *data )
 {
     #define  A(  i, j ) ( A + (i) + (j)*lda)
     #define  Y(  i, j ) ( Y + (i) + (j)*ldy)

@@ -16,6 +16,9 @@
 #include "magma_bulge.h"
 #include "magma_dbulge.h"
 
+#define PRECISION_d
+#define REAL
+
 /**
     Purpose
     -------
@@ -197,11 +200,19 @@
     @ingroup magma_dsygv_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_dsygvdx_2stage_m(magma_int_t ngpu, magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
-                       double *A, magma_int_t lda, double *B, magma_int_t ldb,
-                       double vl, double vu, magma_int_t il, magma_int_t iu,
-                       magma_int_t *m, double *w, double *work, magma_int_t lwork,
-                       magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+magma_dsygvdx_2stage_m(
+    magma_int_t ngpu,
+    magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
+    double *A, magma_int_t lda,
+    double *B, magma_int_t ldb,
+    double vl, double vu, magma_int_t il, magma_int_t iu,
+    magma_int_t *m, double *w,
+    double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork, magma_int_t lrwork,
+    #endif
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
     const char* uplo_  = lapack_uplo_const( uplo  );
     const char* jobz_  = lapack_vec_const( jobz  );

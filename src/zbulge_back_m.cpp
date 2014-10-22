@@ -25,9 +25,12 @@
 
 static void *magma_zapplyQ_m_parallel_section(void *arg);
 
-static void magma_ztile_bulge_applyQ(magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
-                                     magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
-                                     magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt);
+static void magma_ztile_bulge_applyQ(
+    magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+    magmaDoubleComplex *E, magma_int_t lde,
+    magmaDoubleComplex *V, magma_int_t ldv,
+    magmaDoubleComplex *TAU,
+    magmaDoubleComplex *T, magma_int_t ldt);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -107,14 +110,16 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" magma_int_t
-magma_zbulge_back_m(magma_int_t ngpu, magma_uplo_t uplo,
-                        magma_int_t n, magma_int_t nb,
-                        magma_int_t ne, magma_int_t Vblksiz,
-                        magmaDoubleComplex *Z, magma_int_t ldz,
-                        magmaDoubleComplex *V, magma_int_t ldv,
-                        magmaDoubleComplex *TAU,
-                        magmaDoubleComplex *T, magma_int_t ldt,
-                        magma_int_t* info)
+magma_zbulge_back_m(
+    magma_int_t ngpu,
+    magma_uplo_t uplo,
+    magma_int_t n, magma_int_t nb,
+    magma_int_t ne, magma_int_t Vblksiz,
+    magmaDoubleComplex *Z, magma_int_t ldz,
+    magmaDoubleComplex *V, magma_int_t ldv,
+    magmaDoubleComplex *TAU,
+    magmaDoubleComplex *T, magma_int_t ldt,
+    magma_int_t* info)
 {
     magma_int_t threads = magma_get_parallel_numthreads();
     magma_int_t mklth   = magma_get_lapack_numthreads();
@@ -332,9 +337,13 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)     &(T[(m)])
-static void magma_ztile_bulge_applyQ(magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
-                                     magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
-                                     magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt)//, magma_int_t* info)
+static void magma_ztile_bulge_applyQ(
+    magma_int_t core_id, magma_side_t side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+    magmaDoubleComplex *E, magma_int_t lde,
+    magmaDoubleComplex *V, magma_int_t ldv,
+    magmaDoubleComplex *TAU,
+    magmaDoubleComplex *T, magma_int_t ldt)
+    //, magma_int_t* info)
 {
     //%===========================
     //%   local variables

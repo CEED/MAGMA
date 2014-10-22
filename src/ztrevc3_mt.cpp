@@ -15,6 +15,7 @@
 
 #include "common_magma.h"  // after thread.hpp, so max, min are defined
 
+#define COMPLEX
 
 // ---------------------------------------------
 // stores arguments and executes call to zlatrsd (on CPU)
@@ -24,11 +25,11 @@ public:
     magma_zlatrsd_task(
         magma_uplo_t in_uplo, magma_trans_t in_trans, magma_diag_t in_diag, magma_bool_t in_normin,
         magma_int_t in_n,
-        const magmaDoubleComplex* in_T, magma_int_t in_ldt,
+        const magmaDoubleComplex *in_T, magma_int_t in_ldt,
         magmaDoubleComplex  in_lambda,
-        magmaDoubleComplex* in_x, //magma_int_t in_incx,
-        magmaDoubleComplex* in_scale,
-        double* in_cnorm
+        magmaDoubleComplex *in_x, //magma_int_t in_incx,
+        magmaDoubleComplex *in_scale,
+        double *in_cnorm
     ):
         uplo  ( in_uplo   ),
         trans ( in_trans  ),
@@ -65,13 +66,13 @@ private:
     magma_diag_t  diag;
     magma_bool_t  normin;
     magma_int_t   n;
-    const magmaDoubleComplex* T;
+    const magmaDoubleComplex *T;
     magma_int_t   ldt;
     magmaDoubleComplex lambda;
-    magmaDoubleComplex* x;
-    magmaDoubleComplex* scale;
+    magmaDoubleComplex *x;
+    magmaDoubleComplex *scale;
     //magma_int_t   incx;
-    double* cnorm;
+    double *cnorm;
 };
 
 
@@ -86,10 +87,10 @@ public:
         magma_trans_t in_transA, magma_trans_t in_transB,
         magma_int_t in_m, magma_int_t in_n, magma_int_t in_k,
         magmaDoubleComplex  in_alpha,
-        const magmaDoubleComplex* in_A, magma_int_t in_lda,
-        const magmaDoubleComplex* in_B, magma_int_t in_ldb,
+        const magmaDoubleComplex *in_A, magma_int_t in_lda,
+        const magmaDoubleComplex *in_B, magma_int_t in_ldb,
         magmaDoubleComplex  in_beta,
-        magmaDoubleComplex* in_C, magma_int_t in_ldc
+        magmaDoubleComplex *in_C, magma_int_t in_ldc
     ):
         transA( in_transA ),
         transB( in_transB ),
@@ -119,12 +120,12 @@ private:
     magma_int_t   n;
     magma_int_t   k;
     magmaDoubleComplex        alpha;
-    const magmaDoubleComplex* A;
+    const magmaDoubleComplex *A;
     magma_int_t   lda;
-    const magmaDoubleComplex* B;
+    const magmaDoubleComplex *B;
     magma_int_t   ldb;
     magmaDoubleComplex        beta;
-    magmaDoubleComplex*       C;
+    magmaDoubleComplex       *C;
     magma_int_t   ldc;
 };
 
@@ -278,7 +279,10 @@ magma_int_t magma_ztrevc3_mt(
     magmaDoubleComplex *VR, magma_int_t ldvr,
     magma_int_t mm, magma_int_t *mout,
     magmaDoubleComplex *work, magma_int_t lwork,
-    double *rwork, magma_int_t *info )
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
+    magma_int_t *info )
 {
     #define  T(i,j)  ( T + (i) + (j)*ldt )
     #define VL(i,j)  (VL + (i) + (j)*ldvl)

@@ -118,7 +118,8 @@ magma_zcgeqrsv_gpu(
     magmaDoubleComplex_ptr dA,  magma_int_t ldda,
     magmaDoubleComplex_ptr dB,  magma_int_t lddb,
     magmaDoubleComplex_ptr dX,  magma_int_t lddx,
-    magma_int_t *iter, magma_int_t *info)
+    magma_int_t *iter,
+    magma_int_t *info)
 {
     #define dB(i,j)     (dB + (i) + (j)*lddb)
     #define dX(i,j)     (dX + (i) + (j)*lddx)

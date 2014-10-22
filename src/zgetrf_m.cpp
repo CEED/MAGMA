@@ -77,9 +77,11 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t ngpu, magma_int_t m, magma_int_t n,
-               magmaDoubleComplex *A, magma_int_t lda,
-               magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf_m(
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
+    magma_int_t *info)
 {
 #define     A(i,j) (A      + (j)*lda + (i))
 #define dAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
@@ -361,9 +363,12 @@ magma_zgetrf_m(magma_int_t ngpu, magma_int_t m, magma_int_t n,
 } /* magma_zgetrf_m */
 
 
+// ----------------------------------------------------------------------
 extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
-                 magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf_piv(
+    magma_int_t m, magma_int_t n, magma_int_t NB,
+    magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
+    magma_int_t *info)
 {
     magma_int_t I, k1, k2, incx, minmn;
     *info = 0;
@@ -397,9 +402,12 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
 } /* magma_zgetrf_piv */
 
 
+// ----------------------------------------------------------------------
 extern "C" magma_int_t
-magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t end,
-                  magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf2_piv(
+    magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t end,
+    magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
+    magma_int_t *info)
 {
     magma_int_t I, k1, k2, nb, incx, minmn;
 

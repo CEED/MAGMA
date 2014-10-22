@@ -13,6 +13,7 @@
 #include "magma_timer.h"
 
 #define PRECISION_d
+#define REAL
 
 /*
  * Version1 - LAPACK              (lapack_zgehrd and lapack_zunghr)
@@ -138,10 +139,17 @@ extern "C" magma_int_t
 magma_dgeev_m(
     magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
     double *A, magma_int_t lda,
+    #ifdef COMPLEX
+    double *w,
+    #else
     double *wr, double *wi,
+    #endif
     double *VL, magma_int_t ldvl,
     double *VR, magma_int_t ldvr,
     double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
     magma_int_t *info )
 {
     #define VL(i,j)  (VL + (i) + (j)*ldvl)

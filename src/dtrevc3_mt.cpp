@@ -15,6 +15,7 @@
 
 #include "common_magma.h"  // after thread.hpp, so max, min are defined
 
+#define REAL
 
 // ---------------------------------------------
 // stores arguments and executes call to dlaqtrsd (on CPU)
@@ -23,9 +24,9 @@ class magma_dlaqtrsd_task: public magma_task
 public:
     magma_dlaqtrsd_task(
         magma_trans_t in_trans, magma_int_t in_n,
-        const double* in_T, magma_int_t in_ldt,
-        double*       in_x, magma_int_t in_incx,
-        const double* in_cnorm
+        const double *in_T, magma_int_t in_ldt,
+        double       *in_x, magma_int_t in_incx,
+        const double *in_cnorm
     ):
         trans( in_trans ),
         n    ( in_n     ),
@@ -48,11 +49,11 @@ public:
 private:
     magma_trans_t trans;
     magma_int_t   n;
-    const double* T;
+    const double *T;
     magma_int_t   ldt;
-    double*       x;
+    double       *x;
     magma_int_t   incx;
-    const double* cnorm;
+    const double *cnorm;
 };
 
 
@@ -67,10 +68,10 @@ public:
         magma_trans_t in_transA, magma_trans_t in_transB,
         magma_int_t in_m, magma_int_t in_n, magma_int_t in_k,
         double  in_alpha,
-        const double* in_A, magma_int_t in_lda,
-        const double* in_B, magma_int_t in_ldb,
+        const double *in_A, magma_int_t in_lda,
+        const double *in_B, magma_int_t in_ldb,
         double  in_beta,
-        double* in_C, magma_int_t in_ldc
+        double *in_C, magma_int_t in_ldc
     ):
         transA( in_transA ),
         transB( in_transB ),
@@ -100,12 +101,12 @@ private:
     magma_int_t   n;
     magma_int_t   k;
     double        alpha;
-    const double* A;
+    const double *A;
     magma_int_t   lda;
-    const double* B;
+    const double *B;
     magma_int_t   ldb;
     double        beta;
-    double*       C;
+    double       *C;
     magma_int_t   ldc;
 };
 
@@ -262,14 +263,17 @@ private:
 extern "C"
 magma_int_t magma_dtrevc3_mt(
     magma_side_t side, magma_vec_t howmany,
-    magma_int_t* select,  // logical in fortran
+    magma_int_t *select,  // logical in fortran
     magma_int_t n,
-    double* T,  magma_int_t ldt,
-    double* VL, magma_int_t ldvl,
-    double* VR, magma_int_t ldvr,
-    magma_int_t mm, magma_int_t* mout,
-    double* work, magma_int_t lwork,
-    magma_int_t* info )
+    double *T,  magma_int_t ldt,
+    double *VL, magma_int_t ldvl,
+    double *VR, magma_int_t ldvr,
+    magma_int_t mm, magma_int_t *mout,
+    double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
+    magma_int_t *info )
 {
 #define T(i,j)  (T  + (i) + (j)*ldt)
 #define VL(i,j) (VL + (i) + (j)*ldvl)

@@ -73,7 +73,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_mgpu(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex_ptr d_lA[], magma_int_t ldda,
     magma_int_t *info)
 {

@@ -79,8 +79,10 @@
     @ingroup magma_zposv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zpotrf(magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+magma_zpotrf(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
 #define  A(i_, j_)  (A + (j_)*lda  + (i_))
 #define dA(i_, j_) (dA + (j_)*ldda + (i_))

@@ -97,10 +97,15 @@
     @ingroup magma_dsyev_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_dlaex0(magma_int_t n, double* d, double* e, double* Q, magma_int_t ldq,
-             double* work, magma_int_t* iwork, double* dwork,
-             magma_range_t range, double vl, double vu,
-             magma_int_t il, magma_int_t iu, magma_int_t* info)
+magma_dlaex0(
+    magma_int_t n,
+    double *d, double *e,
+    double *Q, magma_int_t ldq,
+    double *work, magma_int_t *iwork,
+    magmaDouble_ptr dwork,
+    magma_range_t range, double vl, double vu,
+    magma_int_t il, magma_int_t iu,
+    magma_int_t *info)
 {
 #define Q(i_,j_) (Q + (i_) + (j_)*ldq)
 

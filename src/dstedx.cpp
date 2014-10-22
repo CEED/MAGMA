@@ -128,10 +128,14 @@
     @ingroup magma_dsyev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_dstedx(magma_range_t range, magma_int_t n, double vl, double vu,
-             magma_int_t il, magma_int_t iu, double* d, double* e, double* Z, magma_int_t ldz,
-             double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
-             double* dwork, magma_int_t* info)
+magma_dstedx(
+    magma_range_t range, magma_int_t n, double vl, double vu,
+    magma_int_t il, magma_int_t iu, double *d, double *e,
+    double *Z, magma_int_t ldz,
+    double *work, magma_int_t lwork,
+    magma_int_t *iwork, magma_int_t liwork,
+    magmaDouble_ptr dwork,
+    magma_int_t *info)
 {
 #define Z(i_,j_) (Z + (i_) + (j_)*ldz)
 

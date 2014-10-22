@@ -115,13 +115,15 @@
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zunmtr_m(magma_int_t ngpu, magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
-               magma_int_t m, magma_int_t n,
-               magmaDoubleComplex *A,    magma_int_t lda,
-               magmaDoubleComplex *tau,
-               magmaDoubleComplex *C,    magma_int_t ldc,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               magma_int_t *info)
+magma_zunmtr_m(
+    magma_int_t ngpu,
+    magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *A,    magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *C,    magma_int_t ldc,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info)
 {
     #define A(i_,j_) (A + (i_) + (j_)*lda)
     #define C(i_,j_) (C + (i_) + (j_)*ldc)

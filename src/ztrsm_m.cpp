@@ -116,7 +116,8 @@ magma_get_ztrsm_m_nb() { return 128; }
     ********************************************************************/
 extern "C" magma_int_t
 magma_ztrsm_m(
-    magma_int_t ngpu, magma_side_t side, magma_uplo_t uplo,
+    magma_int_t ngpu,
+    magma_side_t side, magma_uplo_t uplo,
     magma_trans_t transa, magma_diag_t diag,
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
     magmaDoubleComplex *A, magma_int_t lda,

@@ -28,8 +28,8 @@
             Number of GPUs to use. ngpu > 0.
 
     @param[in]
-    num_streams INTEGER
-            The number of GPU streams used for update.  10 >= num_streams > 0.
+    nqueue  INTEGER
+            The number of GPU streams used for update.  10 >= nqueue > 0.
 
     @param[in]
     uplo    magma_uplo_t
@@ -145,7 +145,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrd_mgpu(
-    magma_int_t ngpu, magma_int_t num_streams, magma_uplo_t uplo, magma_int_t n,
+    magma_int_t ngpu,
+    magma_int_t nqueue, magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     double *d, double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *work, magma_int_t lwork,
@@ -188,7 +189,7 @@ magma_zhetrd_mgpu(
         *info = -4;
     } else if (lwork < nb*n && ! lquery) {
         *info = -9;
-    } else if ( num_streams > 2 ) {
+    } else if ( nqueue > 2 ) {
         *info = 2;  // TODO fix
     }
 
@@ -238,8 +239,8 @@ magma_zhetrd_mgpu(
         magma_setdevice(did);
         // TODO fix memory leak
         if ( MAGMA_SUCCESS != magma_zmalloc(&dA[did],     ln*ldda+3*lddwork*nb) ||
-             MAGMA_SUCCESS != magma_zmalloc(&dx[did],     num_streams*n) ||
-             MAGMA_SUCCESS != magma_zmalloc(&dy[did],     num_streams*n) ||
+             MAGMA_SUCCESS != magma_zmalloc(&dx[did],     nqueue*n) ||
+             MAGMA_SUCCESS != magma_zmalloc(&dy[did],     nqueue*n) ||
              MAGMA_SUCCESS != magma_zmalloc(&dwork2[did], ldwork2 ) ) {
             for( i=0; i < did; i++ ) {
                 magma_setdevice(i);
@@ -252,12 +253,12 @@ magma_zhetrd_mgpu(
         }
         dwork[did] = dA[did] + ln*ldda;
         
-        for( kk=0; kk < num_streams; kk++ )
+        for( kk=0; kk < nqueue; kk++ )
             magma_queue_create(&stream[did][kk]);
     }
     magma_setdevice(0);
     // TODO fix memory leak dwork2
-    if ( MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, num_streams*ngpu*n ) ) {
+    if ( MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, nqueue*ngpu*n ) ) {
         for( i=0; i < ngpu; i++ ) {
             magma_setdevice(i);
             magma_free(dA[i]);
@@ -305,7 +306,7 @@ magma_zhetrd_mgpu(
             magma_zher2k_mgpu(ngpu, MagmaUpper, MagmaNoTrans, nb, i, ib,
                          c_neg_one, dwork, i+ib, 0,
                          d_one,     dA,    ldda, 0,
-                         num_streams, stream);
+                         nqueue, stream);
 
             /* get the next panel */
             if (i-nb >= nx ) {
@@ -355,7 +356,7 @@ magma_zhetrd_mgpu(
         }
     }
     else {
-        trace_init( 1, ngpu, num_streams, (CUstream_st**)stream );
+        trace_init( 1, ngpu, nqueue, (CUstream_st**)stream );
         /* Copy the matrix to the GPU */
         if (1 <= n-nx) {
             magma_zhtodhe(ngpu, uplo, n, nb, A, lda, dA, ldda, stream, &iinfo );
@@ -403,7 +404,7 @@ magma_zhetrd_mgpu(
 #endif
             magma_zher2k_mgpu(ngpu, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib,
                          c_neg_one, dwork, n-i, ib,
-                         d_one, dA, ldda, i+ib, num_streams, stream);
+                         d_one, dA, ldda, i+ib, nqueue, stream);
 #ifdef PROFILE_SY2RK
             magma_setdevice(0);
             magma_event_record(stop, 0);
@@ -457,9 +458,9 @@ magma_zhetrd_mgpu(
     trace_finalize( "zhetrd.svg", "trace.css" );
     for( did=0; did < ngpu; did++ ) {
         magma_setdevice(did);
-        for( kk=0; kk < num_streams; kk++ )
+        for( kk=0; kk < nqueue; kk++ )
             magma_queue_sync(stream[did][kk]);
-        for( kk=0; kk < num_streams; kk++ )
+        for( kk=0; kk < nqueue; kk++ )
             magma_queue_destroy(stream[did][kk]);
         magma_free(dA[did]);
         magma_free(dx[did]);
@@ -486,10 +487,12 @@ magma_zhetrd_mgpu(
 // TODO info is unused
 extern "C" magma_int_t
 magma_zhtodhe(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex     *A,   magma_int_t lda,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
-    magma_queue_t stream[][10], magma_int_t *info)
+    magma_queue_t queues[][10],
+    magma_int_t *info)
 {
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
@@ -509,7 +512,7 @@ magma_zhtodhe(
             magma_zsetmatrix_async( mj, jb,
                                      A(j,j),         lda,
                                     dA(k, j, jj*nb), ldda,
-                                    stream[k][0] );
+                                    queues[k][0] );
         }
     }
     else {
@@ -526,12 +529,12 @@ magma_zhtodhe(
             magma_zsetmatrix_async( mj, jb,
                                      A(0, j),        lda,
                                     dA(k, 0, jj*nb), ldda,
-                                    stream[k][0] );
+                                    queues[k][0] );
         }
     }
     for( k=0; k < ngpu; k++ ) {
         magma_setdevice(k);
-        magma_queue_sync(stream[k][0]);
+        magma_queue_sync( queues[k][0] );
     }
     magma_setdevice( orig_dev );
     
@@ -542,12 +545,13 @@ magma_zhtodhe(
 // ----------------------------------------------------------------------
 extern "C" void
 magma_zher2k_mgpu(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10])
+    magma_int_t nqueue, magma_queue_t queues[][10])
 {
 #define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
 #define dB1(id, i, j) (dB[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
@@ -564,9 +568,9 @@ magma_zher2k_mgpu(
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
         id = ((i+offset)/nb)%ngpu;
-        kk = (i/(nb*ngpu))%num_streams;
+        kk = (i/(nb*ngpu))%nqueue;
         magma_setdevice(id);
-        magmablasSetKernelStream(stream[id][kk]);
+        magmablasSetKernelStream( queues[id][kk] );
 
         ib = min(nb, n-i);
         ii = nb*((i+offset)/(nb*ngpu));
@@ -584,9 +588,9 @@ magma_zher2k_mgpu(
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
             id = ((i+offset)/nb)%ngpu;
-            kk = (i/(nb*ngpu))%num_streams;
+            kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
-            magmablasSetKernelStream(stream[id][kk]);
+            magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
             ii = nb*((i+offset)/(nb*ngpu));
@@ -599,9 +603,9 @@ magma_zher2k_mgpu(
     else {
         for( i=0; i < n-nb; i += nb ) {
             id = ((i+offset)/nb)%ngpu;
-            kk = (i/(nb*ngpu))%num_streams;
+            kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
-            magmablasSetKernelStream(stream[id][kk]);
+            magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
             ii = nb*((i+offset)/(nb*ngpu));
@@ -620,9 +624,9 @@ magma_zher2k_mgpu(
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
             id = ((i+offset)/nb)%ngpu;
-            kk = (i/(nb*ngpu))%num_streams;
+            kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
-            magmablasSetKernelStream(stream[id][kk]);
+            magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
             ii = nb*((i+offset)/(nb*ngpu));
@@ -634,9 +638,9 @@ magma_zher2k_mgpu(
     } else {
         for( i=0; i < n-nb; i += nb ) {
             id = ((i+offset)/nb)%ngpu;
-            kk = (i/(nb*ngpu))%num_streams;
+            kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
-            magmablasSetKernelStream(stream[id][kk]);
+            magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
             ii = nb*((i+offset)/(nb*ngpu));
@@ -654,8 +658,8 @@ magma_zher2k_mgpu(
 
     for( id=0; id < ngpu; id++ ) {
         magma_setdevice(id);
-        for( kk=0; kk < num_streams; kk++ ) {
-            magma_queue_sync(stream[id][kk]);
+        for( kk=0; kk < nqueue; kk++ ) {
+            magma_queue_sync( queues[id][kk] );
         }
     }
     magma_setdevice( orig_dev );

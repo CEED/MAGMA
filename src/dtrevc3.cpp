@@ -14,6 +14,8 @@
 
 #include "common_magma.h"
 
+#define REAL
+
 /**
     Purpose
     -------
@@ -172,6 +174,9 @@ magma_int_t magma_dtrevc3(
     double *VR, magma_int_t ldvr,
     magma_int_t mm, magma_int_t *mout,
     double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
     magma_int_t *info )
 {
 #define T(i,j)  (T  + (i) + (j)*ldt)

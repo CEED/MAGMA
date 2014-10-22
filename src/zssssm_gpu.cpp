@@ -98,7 +98,8 @@ magma_zssssm_gpu(
     magmaDoubleComplex_ptr dA2, magma_int_t ldda2,
     magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
     magmaDoubleComplex_ptr dL2, magma_int_t lddl2,
-    magma_int_t *ipiv, magma_int_t *info)
+    magma_int_t *ipiv,
+    magma_int_t *info)
 {
 #define A1T(i,j) (dA1T + (i)*ldda1 + (j))
 #define A2T(i,j) (dA2T + (i)*ldda2 + (j))

@@ -71,7 +71,7 @@ extern "C" magma_int_t
 magma_zlahru_m(
     magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
     magmaDoubleComplex *A, magma_int_t lda,
-    struct zgehrd_data* data )
+    struct zgehrd_data *data )
 {
     #define dA(  d, i, j ) (data->A [d] + (i) + (j)*ldda)
     #define dTi( d       ) (data->Ti[d])

@@ -66,11 +66,12 @@
     @ingroup magma_zgesv_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgesv(     magma_int_t n, magma_int_t nrhs,
-                 magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *ipiv,
-                 magmaDoubleComplex *B, magma_int_t ldb,
-                 magma_int_t *info)
+magma_zgesv(
+    magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *ipiv,
+    magmaDoubleComplex *B, magma_int_t ldb,
+    magma_int_t *info)
 {
     magma_int_t ngpu, ldda, lddb;
     

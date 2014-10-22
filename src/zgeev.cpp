@@ -13,6 +13,7 @@
 #include "magma_timer.h"
 
 #define PRECISION_z
+#define COMPLEX
 
 /*
  * Version1 - LAPACK              (lapack_zgehrd and lapack_zunghr)
@@ -72,8 +73,8 @@
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
-    W       COMPLEX_16 array, dimension (N)
-            W contains the computed eigenvalues.
+    w       COMPLEX_16 array, dimension (N)
+            w contains the computed eigenvalues.
 
     @param[out]
     VL      COMPLEX_16 array, dimension (LDVL,N)
@@ -124,7 +125,7 @@
       -     < 0:  if INFO = -i, the i-th argument had an illegal value.
       -     > 0:  if INFO = i, the QR algorithm failed to compute all the
                   eigenvalues, and no eigenvectors have been computed;
-                  elements and i+1:N of W contain eigenvalues which have
+                  elements and i+1:N of w contain eigenvalues which have
                   converged.
 
     @ingroup magma_zgeev_driver
@@ -133,11 +134,18 @@ extern "C" magma_int_t
 magma_zgeev(
     magma_vec_t jobvl, magma_vec_t jobvr, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *W,
+    #ifdef COMPLEX
+    magmaDoubleComplex *w,
+    #else
+    double *wr, double *wi,
+    #endif
     magmaDoubleComplex *VL, magma_int_t ldvl,
     magmaDoubleComplex *VR, magma_int_t ldvr,
     magmaDoubleComplex *work, magma_int_t lwork,
-    double *rwork, magma_int_t *info )
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
+    magma_int_t *info )
 {
     #define VL(i,j)  (VL + (i) + (j)*ldvl)
     #define VR(i,j)  (VR + (i) + (j)*ldvr)
@@ -299,7 +307,7 @@ magma_zgeev(
          *  - including N reserved for gebal/gebak, unused by zhseqr */
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, W,
+        lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, w,
                           VL, &ldvl, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
@@ -342,7 +350,7 @@ magma_zgeev(
         flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, W,
+        lapackf77_zhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, w,
                           VR, &ldvr, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
@@ -356,7 +364,7 @@ magma_zgeev(
         flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
-        lapackf77_zhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, W,
+        lapackf77_zhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, w,
                           VR, &ldvr, &work[iwrk], &liwrk, info );
         time_sum += timer_stop( time_hseqr );
         flop_sum += flops_stop( flop_hseqr );
@@ -452,12 +460,12 @@ CLEANUP:
         // converged eigenvalues, stored in WR[i+1:n] and WI[i+1:n] for i = INFO
         magma_int_t nval = n - (*info);
         magma_int_t ld   = max( nval, 1 );
-        lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, W + (*info), &ld, &ierr );
+        lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, w + (*info), &ld, &ierr );
         if (*info > 0) {
             // first ilo columns were already upper triangular,
             // so the corresponding eigenvalues are also valid.
             nval = ilo - 1;
-            lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, W, &n, &ierr );
+            lapackf77_zlascl( "G", &izero, &izero, &cscale, &anrm, &nval, &ione, w, &n, &ierr );
         }
     }
 

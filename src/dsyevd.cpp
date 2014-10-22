@@ -14,6 +14,9 @@
 #include "common_magma.h"
 #include "magma_timer.h"
 
+#define PRECISION_d
+#define REAL
+
 /**
     Purpose
     -------
@@ -123,13 +126,17 @@
     @ingroup magma_dsyev_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_dsyevd(magma_vec_t jobz, magma_uplo_t uplo,
-             magma_int_t n,
-             double *A, magma_int_t lda,
-             double *w,
-             double *work, magma_int_t lwork,
-             magma_int_t *iwork, magma_int_t liwork,
-             magma_int_t *info)
+magma_dsyevd(
+    magma_vec_t jobz, magma_uplo_t uplo,
+    magma_int_t n,
+    double *A, magma_int_t lda,
+    double *w,
+    double *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork, magma_int_t lrwork,
+    #endif
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* jobz_ = lapack_vec_const( jobz );

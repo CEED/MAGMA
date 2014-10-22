@@ -56,8 +56,10 @@
     @ingroup magma_zposv_aux
     ***************************************************************************/
 extern "C" magma_int_t
-magma_zlauum(magma_uplo_t uplo, magma_int_t n,
-         magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+magma_zlauum(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
 #define A(i, j)  (A  + (j)*lda  + (i))
 #define dA(i, j) (dA + (j)*ldda + (i))

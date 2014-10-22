@@ -78,8 +78,7 @@
             The leading dimension of the array Z. LDZ >= max(1,N).
 
     @param[out]
-    rwork   (workspace) DOUBLE PRECISION array,
-                                           dimension (LRWORK)
+    rwork   (workspace) DOUBLE PRECISION array, dimension (LRWORK)
             On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
     @param[in]
@@ -131,12 +130,14 @@
     @ingroup magma_zheev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zstedx_m(magma_int_t ngpu, magma_range_t range, magma_int_t n, double vl, double vu,
-               magma_int_t il, magma_int_t iu, double* d, double* e,
-               magmaDoubleComplex* Z, magma_int_t ldz,
-               double* rwork, magma_int_t lrwork,
-               magma_int_t* iwork, magma_int_t liwork,
-               magma_int_t* info)
+magma_zstedx_m(
+    magma_int_t ngpu,
+    magma_range_t range, magma_int_t n, double vl, double vu,
+    magma_int_t il, magma_int_t iu, double *d, double *e,
+    magmaDoubleComplex *Z, magma_int_t ldz,
+    double *rwork, magma_int_t lrwork,
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
     magma_int_t alleig, indeig, valeig, lquery;
     magma_int_t i, j, smlsiz;

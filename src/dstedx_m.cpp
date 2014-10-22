@@ -11,16 +11,6 @@
 */
 #include "common_magma.h"
 
-
-extern "C" {
-
-magma_int_t magma_dlaex0_m(magma_int_t ngpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
-                           double* work, magma_int_t* iwork,
-                           magma_range_t range, double vl, double vu,
-                           magma_int_t il, magma_int_t iu, magma_int_t* info);
-
-}  // end extern "C"
-
 /**
     Purpose
     -------
@@ -140,10 +130,14 @@ magma_int_t magma_dlaex0_m(magma_int_t ngpu, magma_int_t n, double* d, double* e
     @ingroup magma_dsyev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_dstedx_m(magma_int_t ngpu, magma_range_t range, magma_int_t n, double vl, double vu,
-               magma_int_t il, magma_int_t iu, double* d, double* e, double* Z, magma_int_t ldz,
-               double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
-               magma_int_t* info)
+magma_dstedx_m(
+    magma_int_t ngpu,
+    magma_range_t range, magma_int_t n, double vl, double vu,
+    magma_int_t il, magma_int_t iu, double *d, double *e,
+    double *Z, magma_int_t ldz,
+    double *work, magma_int_t lwork,
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
 #define Z(i_,j_) (Z + (i_) + (j_)*ldz)
 

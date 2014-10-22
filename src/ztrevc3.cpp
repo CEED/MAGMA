@@ -14,6 +14,7 @@
 
 #include "common_magma.h"
 
+#define COMPLEX
 
 /**
     Purpose
@@ -162,7 +163,10 @@ magma_int_t magma_ztrevc3(
     magmaDoubleComplex *VR, magma_int_t ldvr,
     magma_int_t mm, magma_int_t *mout,
     magmaDoubleComplex *work, magma_int_t lwork,
-    double *rwork, magma_int_t *info )
+    #ifdef COMPLEX
+    double *rwork,
+    #endif
+    magma_int_t *info )
 {
     #define  T(i,j)  ( T + (i) + (j)*ldt )
     #define VL(i,j)  (VL + (i) + (j)*ldvl)

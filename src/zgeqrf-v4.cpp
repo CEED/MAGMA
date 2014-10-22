@@ -93,10 +93,12 @@
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgeqrf4(magma_int_t ngpu, magma_int_t m, magma_int_t n,
-              magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau,
-              magmaDoubleComplex *work, magma_int_t lwork,
-              magma_int_t *info )
+magma_zgeqrf4(
+    magma_int_t ngpu,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info )
 {
     magmaDoubleComplex *da[MagmaMaxGPUs];
     magmaDoubleComplex c_one = MAGMA_Z_ONE;

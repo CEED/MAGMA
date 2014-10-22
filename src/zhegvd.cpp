@@ -16,6 +16,7 @@
 #include "magma_timer.h"
 
 #define PRECISION_z
+#define COMPLEX
 
 /**
     Purpose
@@ -180,11 +181,17 @@
     @ingroup magma_zhegv_driver
     ********************************************************************/
 extern "C" magma_int_t
-magma_zhegvd(magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
-             magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb,
-             double *w, magmaDoubleComplex *work, magma_int_t lwork,
-             double *rwork, magma_int_t lrwork,
-             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+magma_zhegvd(
+    magma_int_t itype, magma_vec_t jobz, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *B, magma_int_t ldb,
+    double *w,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    #ifdef COMPLEX
+    double *rwork, magma_int_t lrwork,
+    #endif
+    magma_int_t *iwork, magma_int_t liwork,
+    magma_int_t *info)
 {
     const char* uplo_ = lapack_uplo_const( uplo );
     const char* jobz_ = lapack_vec_const( jobz );

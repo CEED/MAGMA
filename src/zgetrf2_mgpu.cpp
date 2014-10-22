@@ -75,8 +75,8 @@
             The leading dimension of the workspace w.
 
     @param[in]
-    stream  magma_queue_t
-            stream[d] points to the streams for the d-th GPU to execute 
+    queues  magma_queue_t
+            queues[d] points to the streams for the d-th GPU to execute 
             in. Each GPU require two streams. 
 
     @param[out]
@@ -98,7 +98,8 @@ magma_zgetrf2_mgpu(
     magmaDoubleComplex_ptr d_lAT[], magma_int_t lddat, magma_int_t *ipiv,
     magmaDoubleComplex_ptr d_lAP[],
     magmaDoubleComplex *W, magma_int_t ldw,
-    magma_queue_t stream[][2], magma_int_t *info)
+    magma_queue_t queues[][2],
+    magma_int_t *info)
 {
 #define dAT(id,i,j)  (d_lAT[(id)] + ((offset)+(i)*nb)*lddat + (j)*nb)
 #define W(j) (W + ((j)%ngpu)*nb*ldw)
@@ -159,17 +160,17 @@ magma_zgetrf2_mgpu(
         /* workspaces */
         d_panel[i] = &(d_lAP[i][h*nb*maxm]);   /* temporary panel storage */
     }
-    trace_init( 1, ngpu, 2, (CUstream_st**)stream );
+    trace_init( 1, ngpu, 2, (CUstream_st**)queues );
 
     /* start sending the panel to cpu */
     nb0 = min(mindim, nb);
     magma_setdevice(0);
-    magmablasSetKernelStream(stream[0][1]);
+    magmablasSetKernelStream(queues[0][1]);
     trace_gpu_start( 0, 1, "comm", "get" );
     magmablas_ztranspose( nb0, m, dAT(0,0,0), lddat, d_lAP[0], maxm );
     magma_zgetmatrix_async( m, nb0,
                             d_lAP[0], maxm,
-                            W(0),     ldw, stream[0][1] );
+                            W(0),     ldw, queues[0][1] );
     trace_gpu_end( 0, 1 );
 
     /* ------------------------------------------------------------------------------------- */
@@ -188,7 +189,7 @@ magma_zgetrf2_mgpu(
         rows  = m - i*nb;
         
         /* synchrnoize i-th panel from id-th gpu into work */
-        magma_queue_sync( stream[id][1] );
+        magma_queue_sync( queues[id][1] );
         
         /* i-th panel factorization */
         trace_cpu_start( 0, "getrf", "getrf" );
@@ -206,7 +207,7 @@ magma_zgetrf2_mgpu(
             magma_zsetmatrix_async( rows, nb,
                                     W(i),     ldw,
                                     &d_lAP[d][(i%h)*nb*maxm], cols,
-                                    stream[d][1] );
+                                    queues[d][1] );
             trace_gpu_end( 0, 1 );
             d = (d+1)%ngpu;
         }
@@ -215,7 +216,7 @@ magma_zgetrf2_mgpu(
         d = (i+1)%ngpu;
         for( dd=0; dd < ngpu; dd++ ) {
             magma_setdevice(d);
-            magmablasSetKernelStream(stream[d][0]);
+            magmablasSetKernelStream(queues[d][0]);
             
             trace_gpu_start( d, 1, "pivot", "pivot" );
             if ( dd == 0 )
@@ -257,22 +258,22 @@ magma_zgetrf2_mgpu(
             if ( d == (i+1)%ngpu) {
                 /* owns the next column, look-ahead the column */
                 nb1 = nb0;
-                magmablasSetKernelStream(stream[d][1]);
+                magmablasSetKernelStream(queues[d][1]);
                 
                 /* make sure all the pivoting has been applied */
-                magma_queue_sync(stream[d][0]);
+                magma_queue_sync(queues[d][0]);
                 trace_gpu_start( d, 1, "gemm", "gemm" );
                 /* transpose panel on GPU */
                 magmablas_ztranspose( rows, nb, &d_lAP[d][(i%h)*nb*maxm], cols, panel_local[d], ldpan[d] );
                 /* synch for remaining update */
-                magma_queue_sync(stream[d][1]);
+                magma_queue_sync(queues[d][1]);
             } else {
                 /* update the entire trailing matrix */
                 nb1 = n_local[d] - i_local2*nb;
-                magmablasSetKernelStream(stream[d][0]);
+                magmablasSetKernelStream(queues[d][0]);
                 
                 /* synchronization to make sure panel arrived on gpu */
-                magma_queue_sync(stream[d][1]);
+                magma_queue_sync(queues[d][1]);
                 trace_gpu_start( d, 0, "gemm", "gemm" );
                 /* transpose panel on GPU */
                 magmablas_ztranspose( rows, nb, &d_lAP[d][(i%h)*nb*maxm], cols, panel_local[d], ldpan[d] );
@@ -306,7 +307,7 @@ magma_zgetrf2_mgpu(
                     /* send the panel to cpu */
                     magma_zgetmatrix_async( cols, nb0,
                                             &d_lAP[d][((i+1)%h)*nb*maxm], ldda,
-                                            W(i+1), ldw, stream[d][1] );
+                                            W(i+1), ldw, queues[d][1] );
 
                     trace_gpu_end( d, 1 );
                 }
@@ -324,7 +325,7 @@ magma_zgetrf2_mgpu(
             
             d = (i+1)%ngpu;
             magma_setdevice(d);
-            magmablasSetKernelStream(stream[d][0]);
+            magmablasSetKernelStream(queues[d][0]);
             trace_gpu_start( d, 0, "gemm", "gemm" );
 
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
@@ -356,7 +357,7 @@ magma_zgetrf2_mgpu(
         magma_setdevice(id);
         
         /* wait for the last panel on cpu */
-        magma_queue_sync( stream[id][1] );
+        magma_queue_sync( queues[id][1] );
     
         /* factor on cpu */
         lapackf77_zgetrf( &rows, &nb0, W(s), &ldw, ipiv+s*nb, &iinfo);
@@ -373,13 +374,13 @@ magma_zgetrf2_mgpu(
                 magma_zsetmatrix_async( rows, nb0,
                                         W(s),     ldw,
                                         &d_lAP[d][(s%h)*nb*maxm],
-                                        cols, stream[d][1] );
+                                        cols, queues[d][1] );
             }
         }
         
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
-            magmablasSetKernelStream(stream[d][0]);
+            magmablasSetKernelStream(queues[d][0]);
             if ( d == 0 )
                 magmablas_zpermute_long2( lddat, dAT(d,0,0), lddat, ipiv, nb0, s*nb );
             else
@@ -388,10 +389,10 @@ magma_zgetrf2_mgpu(
         
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
-            magmablasSetKernelStream(stream[d][1]);
+            magmablasSetKernelStream(queues[d][1]);
             
             /* wait for the pivoting to be done */
-            magma_queue_sync( stream[d][0] );
+            magma_queue_sync( queues[d][0] );
             
             i_local2 = i_local;
             if ( d < id ) i_local2++;
@@ -430,8 +431,8 @@ magma_zgetrf2_mgpu(
     trace_finalize( "zgetrf_mgpu.svg","trace.css" );
     for( d=0; d < ngpu; d++ ) {
         magma_setdevice(d);
-        magma_queue_sync( stream[d][0] );
-        magma_queue_sync( stream[d][1] );
+        magma_queue_sync( queues[d][0] );
+        magma_queue_sync( queues[d][1] );
     }
     magma_setdevice( orig_dev );
     magmablasSetKernelStream( orig_stream );

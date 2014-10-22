@@ -185,7 +185,8 @@ magma_int_t magma_zlatrsd(
     magma_int_t n, const magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex lambda,
     magmaDoubleComplex *x,
-    double *scale, double *cnorm, magma_int_t *info)
+    double *scale, double *cnorm,
+    magma_int_t *info)
 {
 #define A(i,j) (A + (i) + (j)*lda)
 

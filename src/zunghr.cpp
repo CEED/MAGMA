@@ -69,11 +69,12 @@
     @ingroup magma_zgeev_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
-             magmaDoubleComplex *A, magma_int_t lda,
-             magmaDoubleComplex *tau,
-             magmaDoubleComplex *dT, magma_int_t nb,
-             magma_int_t *info)
+magma_zunghr(
+    magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex_ptr dT, magma_int_t nb,
+    magma_int_t *info)
 {
     #define A(i,j) (A + (j)*lda+ (i))
 

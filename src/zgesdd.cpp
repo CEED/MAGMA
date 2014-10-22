@@ -12,6 +12,7 @@
 #include "common_magma.h"
 
 #define PRECISION_z
+#define COMPLEX
 
 // Version 1 - LAPACK
 // Version 2 - MAGMA
@@ -185,8 +186,11 @@ magma_int_t magma_zgesdd(
     magmaDoubleComplex *U, magma_int_t ldu,
     magmaDoubleComplex *VT, magma_int_t ldvt,
     magmaDoubleComplex *work, magma_int_t lwork,
+    #ifdef COMPLEX
     double *rwork,
-    magma_int_t *iwork, magma_int_t *info)
+    #endif
+    magma_int_t *iwork,
+    magma_int_t *info)
 {
     #define A(i_,j_) (A + (i_) + (j_)*lda)
     #define U(i_,j_) (U + (i_) + (j_)*ldu)

@@ -116,13 +116,15 @@
     @ingroup magma_zgeqrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t ngpu, magma_side_t side, magma_trans_t trans,
-               magma_int_t m, magma_int_t n, magma_int_t k,
-               magmaDoubleComplex *A,    magma_int_t lda,
-               magmaDoubleComplex *tau,
-               magmaDoubleComplex *C,    magma_int_t ldc,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               magma_int_t *info)
+magma_zunmqr_m(
+    magma_int_t ngpu,
+    magma_side_t side, magma_trans_t trans,
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex *A,    magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *C,    magma_int_t ldc,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info)
 {
 #define  A(i, j) (A + (j)*lda  + (i))
 #define  C(i, j) (C + (j)*ldc  + (i))
