@@ -3,4 +3,7 @@
 #
 
 CFLAGS   += -DUSE_FLOCK
-CXXFLAGS += -DUSE_FLOCK
+
+ifneq ($(CXXFLAGS),)
+    CXXFLAGS += -DUSE_FLOCK
+endif
