@@ -72,7 +72,7 @@ magmablas_zsetmatrix_transpose(
    */
 void
 magmablas_zgetmatrix_transpose_mgpu(
-    magma_int_t ngpu, magma_queue_t stream[][2],
+    magma_int_t ngpu, magma_queue_t queues[][2],
     magmaDoubleComplex_ptr  dAT[], magma_int_t ldda,
     magmaDoubleComplex     *hA,    magma_int_t lda,
     magmaDoubleComplex_ptr  dB[],  magma_int_t lddb,
@@ -80,7 +80,7 @@ magmablas_zgetmatrix_transpose_mgpu(
 
 void
 magmablas_zsetmatrix_transpose_mgpu(
-    magma_int_t ngpu, magma_queue_t stream[][2],
+    magma_int_t ngpu, magma_queue_t queues[][2],
     const magmaDoubleComplex *hA,    magma_int_t lda,
     magmaDoubleComplex_ptr    dAT[], magma_int_t ldda,
     magmaDoubleComplex_ptr    dB[],  magma_int_t lddb,
@@ -120,7 +120,8 @@ magma_zhtodhe(
     magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
     magmaDoubleComplex    *A,    magma_int_t lda,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
-    magma_queue_t stream[][10], magma_int_t *info );
+    magma_queue_t queues[][10],
+    magma_int_t *info );
 
 // in src/zpotrf3_mgpu.cpp
 magma_int_t
@@ -129,7 +130,8 @@ magma_zhtodpo(
     magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
     magmaDoubleComplex    *A,    magma_int_t lda,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
-    magma_queue_t stream[][3], magma_int_t *info );
+    magma_queue_t queues[][3],
+    magma_int_t *info );
 
 // in src/zpotrf3_mgpu.cpp
 magma_int_t
@@ -138,7 +140,8 @@ magma_zdtohpo(
     magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
     magmaDoubleComplex    *A,    magma_int_t lda,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
-    magma_queue_t stream[][3], magma_int_t *info );
+    magma_queue_t queues[][3],
+    magma_int_t *info );
 
 
   /*
@@ -156,7 +159,7 @@ magmablas_zhemm_mgpu(
     magmaDoubleComplex*    C,       magma_int_t ldc,
     magmaDoubleComplex*    work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][20], magma_int_t nbevents );
 
 void
@@ -171,7 +174,7 @@ magmablas_zhemm_mgpu_com(
     magmaDoubleComplex*    C,       magma_int_t ldc,
     magmaDoubleComplex*    work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents,
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
@@ -187,7 +190,7 @@ magmablas_zhemm_mgpu_spec(
     magmaDoubleComplex*    C,       magma_int_t ldc,
     magmaDoubleComplex*    work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents,
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
@@ -204,7 +207,7 @@ magmablas_zhemm_mgpu_spec33(
     magmaDoubleComplex *C,       magma_int_t ldc,
     magmaDoubleComplex *work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents,
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
@@ -219,7 +222,7 @@ magmablas_zhemv_mgpu(
     magmaDoubleComplex_ptr dy[], magma_int_t incy,
     magmaDoubleComplex_ptr dwork[], magma_int_t ldwork,
     magmaDoubleComplex *work, magmaDoubleComplex *W,
-    magma_queue_t stream[][10] );
+    magma_queue_t queues[][10] );
 
 magma_int_t
 magmablas_zhemv_mgpu_32_offset(
@@ -233,7 +236,7 @@ magmablas_zhemv_mgpu_32_offset(
     magma_int_t ngpu,
     magma_int_t nb,
     magma_int_t offset,
-    magma_queue_t stream[][10] );
+    magma_queue_t queues[][10] );
 
 magma_int_t
 magmablas_zhemv_mgpu_offset(
@@ -247,13 +250,13 @@ magmablas_zhemv_mgpu_offset(
     magma_int_t ngpu,
     magma_int_t nb,
     magma_int_t offset,
-    magma_queue_t stream[][10] );
+    magma_queue_t queues[][10] );
 
 magma_int_t
 magmablas_zhemv_sync(
     magma_int_t ngpu, magma_int_t k,
     magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *W,
-    magma_queue_t stream[][10] );
+    magma_queue_t queues[][10] );
 
 magma_int_t
 magmablas_zhemv2_mgpu_32_offset(
@@ -284,12 +287,13 @@ magmablas_zhemv2_mgpu_offset(
 // Ichi's version, in src/zhetrd_mgpu.cpp
 void
 magma_zher2k_mgpu(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10] );
+    magma_int_t nqueue, magma_queue_t queues[][10] );
 
 void
 magmablas_zher2k_mgpu_spec(
@@ -299,7 +303,7 @@ magmablas_zher2k_mgpu_spec(
     magmaDoubleComplex_ptr dB[], magma_int_t ldb, magma_int_t boff,
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t ldc,  magma_int_t offset,
-    magma_int_t ngpu, magma_int_t nb, magma_queue_t streams[][20], magma_int_t nstream );
+    magma_int_t ngpu, magma_int_t nb, magma_queue_t queues[][20], magma_int_t nqueue );
 
 void
 magmablas_zher2k_mgpu_spec324(
@@ -311,7 +315,7 @@ magmablas_zher2k_mgpu_spec324(
     magmaDoubleComplex_ptr dC[], magma_int_t lddc,  magma_int_t offset,
     magmaDoubleComplex_ptr dwork[], magma_int_t lndwork,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents );
 
 void
@@ -326,7 +330,7 @@ magmablas_zher2k_mgpu_spec325(
     magma_int_t ngpu, magma_int_t nb,
     magmaDoubleComplex *harray[],
     magmaDoubleComplex_ptr *darray[],
-    magma_queue_t streams[][20], magma_int_t nstream,
+    magma_queue_t queues[][20], magma_int_t nqueue,
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents );
 
 void
@@ -338,27 +342,29 @@ magmablas_zher2k_mgpu2(
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
     magma_int_t ngpu, magma_int_t nb,
-    magma_queue_t streams[][20], magma_int_t nstream );
+    magma_queue_t queues[][20], magma_int_t nqueue );
 
 // in src/zpotrf_mgpu_right.cpp
 void
 magma_zherk_mgpu(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10]);
+    magma_int_t nqueue, magma_queue_t queues[][10]);
 
 // in src/zpotrf_mgpu_right.cpp
 void
 magma_zherk_mgpu2(
-    magma_int_t ngpu, magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magma_int_t ngpu,
+    magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
     double beta,
     magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
-    magma_int_t num_streams, magma_queue_t stream[][10]);
+    magma_int_t nqueue, magma_queue_t queues[][10]);
 
 
   /*
@@ -431,13 +437,15 @@ magmablas_zlascl(
     magma_type_t type, magma_int_t kl, magma_int_t ku,
     double cfrom, double cto,
     magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *info );
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_int_t *info );
 
 void
 magmablas_zlascl2(
     magma_type_t type,
     magma_int_t m, magma_int_t n, magmaDouble_const_ptr dD,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *info );
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_int_t *info );
 
 void
 magmablas_zlaset(
