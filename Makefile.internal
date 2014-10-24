@@ -10,7 +10,20 @@ include $(MAGMA_DIR)/make.inc
 -include $(MAGMA_DIR)/make.icl
 
 #
-# If not set, use deprecated OPTS variable names
+# Check if both new CFLAGS and deprecated OPTS are set -- causes havoc.
+#
+ifdef CFLAGS
+  ifdef OPTS
+    $(error Both CFLAGS and OPTS are defined. Update your make.inc file to use standard variables: CFLAGS, CXXFLAGS, FFLAGS, F90FLAGS, NVCCFLAGS, LDFLAGS, ARCHFLAGS.)
+  endif
+else
+  ifndef OPTS
+    $(error Neither CFLAGS nor OPTS are defined. Check your make.inc file.)
+  endif
+endif
+
+#
+# If CFLAGS, etc. are not set, use deprecated OPTS variable names
 #
 CXX             ?= $(CC)
 CFLAGS          ?= $(OPTS)
