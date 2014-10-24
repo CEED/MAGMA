@@ -66,6 +66,22 @@ magmablas_zsetmatrix_transpose(
     magmaDoubleComplex_ptr    dAT,   magma_int_t ldda,
     magmaDoubleComplex_ptr    dwork, magma_int_t lddwork, magma_int_t nb );
 
+  /*
+   * RBT-related functions
+   */
+void
+magmablas_zprbt(
+    magma_int_t N, magmaDoubleComplex *d_A, magma_int_t lda, 
+    magmaDoubleComplex*d_u, magmaDoubleComplex *d_v);
+
+void
+magmablas_zprbt_mv(
+    magma_int_t N, magmaDoubleComplex *d_v, magmaDoubleComplex *d_b);
+
+void
+magmablas_zprbt_mtv(
+    magma_int_t N, magmaDoubleComplex *d_u, magmaDoubleComplex *d_b);
+
 
   /*
    * Multi-GPU copy functions
