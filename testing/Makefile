@@ -89,6 +89,7 @@ ZSRC += \
 # LU, CPU interface
 ZSRC += \
 	testing_zgesv.cpp	\
+	testing_zgesv_rbt.cpp	\
 	testing_zgetrf.cpp	\
 
 # ----------
