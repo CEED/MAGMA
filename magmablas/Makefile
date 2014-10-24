@@ -65,6 +65,7 @@ ZSRC := \
 	ztrtri_diag.cu		\
 	ztrtri_lower.cu		\
 	ztrtri_upper.cu		\
+	zgerbt.cu	\
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
