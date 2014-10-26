@@ -33,6 +33,7 @@ magma_int_t magma_get_zgeqrf_nb( magma_int_t m );
 magma_int_t magma_get_zgeqlf_nb( magma_int_t m );
 magma_int_t magma_get_zgehrd_nb( magma_int_t m );
 magma_int_t magma_get_zhetrd_nb( magma_int_t m );
+magma_int_t magma_get_zhetrf_nb( magma_int_t m );
 magma_int_t magma_get_zgelqf_nb( magma_int_t m );
 magma_int_t magma_get_zgebrd_nb( magma_int_t m );
 magma_int_t magma_get_zhegst_nb( magma_int_t m );
@@ -430,6 +431,14 @@ magma_dlaex3(
     magma_range_t range, double vl, double vu, magma_int_t il, magma_int_t iu,
     magma_int_t *info);
 #endif  // REAL
+
+magma_int_t
+magma_zlahef_gpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb,
+    magmaDoubleComplex *hA, magma_int_t lda,
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv,
+    magmaDoubleComplex *dW, magma_int_t lddw,
+    magma_queue_t stream[], magma_event_t event[], magma_int_t *info);
 
 magma_int_t
 magma_zlahr2(
