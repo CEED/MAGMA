@@ -12,29 +12,6 @@
 #include "trace.h"
 #define PRECISION_z
 
-/* ================================================================================ */
-#ifdef __cplusplus
-extern "C" {
-#endif
-magma_int_t 
-magma_get_zhetrf_nb( magma_int_t m );
-
-#define lapackf77_zhetf2   FORTRAN_NAME( zhetf2, ZHETF2 )
-void
-lapackf77_zhetf2( char*, int*, magmaDoubleComplex*, int*, int*, int* );
-#ifdef __cplusplus
-}
-#endif
-
-
-extern "C" magma_int_t
-magma_zlahef_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb,
-                 magmaDoubleComplex *hA, magma_int_t lda, 
-                 magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv,
-                 magmaDoubleComplex *dW, magma_int_t lddw, 
-                 magma_queue_t stream[], magma_event_t event[], magma_int_t *info);
-/* ================================================================================ */
-
 /**
     Purpose
     =======
