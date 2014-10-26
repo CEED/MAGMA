@@ -7,7 +7,7 @@
 
        @precisions normal z -> s d c
 
-       @author Theo Mary
+       @author Ichitaro Yamazaki
 */
 #include "common_magma.h"
 
@@ -24,12 +24,9 @@ zlascl_2x2_full(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex*
     int ind = blockIdx.x * NB + threadIdx.x;
 
     magmaDoubleComplex D21 = W( 1, 0 );
-    //magmaDoubleComplex D11 = W( 1, 1 ) / D21;
-    //magmaDoubleComplex D22 = W( 0, 0 ) / MAGMA_Z_CNJG( D21 );
     magmaDoubleComplex D11 = MAGMA_Z_DIV( W( 1, 1 ), D21 );
     magmaDoubleComplex D22 = MAGMA_Z_DIV( W( 0, 0 ), MAGMA_Z_CNJG( D21 ) );
-    double d_one = 1.0;
-    double T = d_one / ( MAGMA_Z_REAL( D11*D22 )-d_one );
+    double T = 1.0 / ( MAGMA_Z_REAL( D11*D22 ) - 1.0 );
     D21 = MAGMA_Z_DIV( MAGMA_Z_MAKE(T,0.0), D21 );
 
     if (ind < m) {
@@ -48,8 +45,7 @@ zlascl_2x2_full_trans(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleCo
     magmaDoubleComplex D21 = Wt( 1, 0 );
     magmaDoubleComplex D11 = Wt( 1, 1 ) / D21;
     magmaDoubleComplex D22 = Wt( 0, 0 ) / MAGMA_Z_CNJG( D21 );
-    double d_one = 1.0;
-    double T = d_one / ( MAGMA_Z_REAL( D11*D22 )-d_one );
+    double T = 1.0 / ( MAGMA_Z_REAL( D11*D22 ) - 1.0 );
     D21 = MAGMA_Z_MAKE(T,0.0) / D21;
 
     if (ind < m) {
