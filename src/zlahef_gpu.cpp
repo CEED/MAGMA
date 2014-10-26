@@ -3,12 +3,12 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
+       @date
 
        @precisions normal z -> s d c
 */
 
 #include "common_magma.h"
-#include "cblas.h"
 #include "trace.h"
 #define PRECISION_z
 
@@ -48,27 +48,31 @@ magmablas_zlacpy_cnjg(
     A22 (if UPLO = 'L').
 
     Arguments
-    =========
-
-    UPLO    (input) CHARACTER*1
+    ---------
+    @param[in]
+    UPLO    CHARACTER
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is stored:
-            = 'U':  Upper triangular
-            = 'L':  Lower triangular
+      -     = 'U':  Upper triangular
+      -     = 'L':  Lower triangular
 
-    N       (input) INTEGER
+    @param[in]
+    N       INTEGER
             The order of the matrix A.  N >= 0.
 
-    NB      (input) INTEGER
+    @param[in]
+    NB      INTEGER
             The maximum number of columns of the matrix A that should be
             factored.  NB should be at least 2 to allow for 2-by-2 pivot
             blocks.
 
-    KB      (output) INTEGER
+    @param[out]
+    KB      INTEGER
             The number of columns of A that were actually factored.
             KB is either NB-1 or NB, or N if N <= NB.
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)
+    @param[in,out]
+    A       COMPLEX*16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -78,14 +82,16 @@ magmablas_zlacpy_cnjg(
             triangular part of A is not referenced.
             On exit, A contains details of the partial factorization.
 
-    LDA     (input) INTEGER
+    @param[in]
+    LDA     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    ipiv    (output) INTEGER array, dimension (N)
+    @param[out]
+    ipiv    INTEGER array, dimension (N)
             Details of the interchanges and the block structure of D.
             If UPLO = 'U', only the last KB elements of ipiv are set;
             if UPLO = 'L', only the first KB elements are set.
-
+    \n
             If ipiv(k) > 0, then rows and columns k and ipiv(k) were
             interchanged and D(k,k) is a 1-by-1 diagonal block.
             If UPLO = 'U' and ipiv(k) = ipiv(k-1) < 0, then rows and
@@ -94,50 +100,57 @@ magmablas_zlacpy_cnjg(
             ipiv(k+1) < 0, then rows and columns k+1 and -ipiv(k) were
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
  
+    @param[out]
     W       (workspace) COMPLEX*16 array, dimension (LDW,NB)
  
-    LDW     (input) INTEGER
+    @param[in]
+    LDW     INTEGER
             The leading dimension of the array W.  LDW >= max(1,N).
 
-    INFO    (output) INTEGER
-            = 0: successful exit
-            > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
+    @param[out]
+    INFO    INTEGER
+      -     = 0: successful exit
+      -     > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
                  has been completed, but the block diagonal matrix D is
                  exactly singular.
   
+    @ingroup magma_zhetrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zlahef_gpu(magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb, 
-                 magmaDoubleComplex *hA, magma_int_t lda,  
-                 magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv, 
-                 magmaDoubleComplex *dW, magma_int_t lddw, 
-                 magma_queue_t stream[], magma_event_t event[],
-                 magma_int_t *info) {
-  /* .. Parameters .. */
-  double d_one   = 1.0;
-  double d_zero  = 0.0;
-  double d_eight = 8.0;
-  double d_seven = 7.0;
-  magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
-  magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
-  magma_int_t upper = (uplo == MagmaUpper);
-  magma_int_t ione = 1;
-  /* .. Local Scalars .. */
-  magma_int_t imax, jmax, kk, kp, kstep, iinfo;
-  double   abs_akk, alpha, colmax, R1, rowmax, T;
-  magmaDoubleComplex D11, D21, D22, Zimax, Z;
+magma_zlahef_gpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb, 
+    magmaDoubleComplex *hA, magma_int_t lda,  
+    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv, 
+    magmaDoubleComplex *dW, magma_int_t lddw, 
+    magma_queue_t stream[], magma_event_t event[],
+    magma_int_t *info) 
+{
+    /* .. Parameters .. */
+    double d_one   = 1.0;
+    double d_zero  = 0.0;
+    double d_eight = 8.0;
+    double d_seven = 7.0;
+    magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
+    magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
+    magma_int_t upper = (uplo == MagmaUpper);
+    magma_int_t ione = 1;
+  
+    /* .. Local Scalars .. */
+    magma_int_t imax, jmax, kk, kp, kstep, iinfo;
+    double   abs_akk, alpha, colmax, R1, rowmax, T;
+    magmaDoubleComplex D11, D21, D22, Zimax, Z;
 
-#define dA(i, j)  (dA[(j)*ldda  + (i)])
-#define dW(i, j)  (dW[(j)*lddw  + (i)])
-#define  A(i, j)  (hA[(j)*lda   + (i)])
+    #define dA(i, j)  (dA[(j)*ldda  + (i)])
+    #define dW(i, j)  (dW[(j)*lddw  + (i)])
+    #define  A(i, j)  (hA[(j)*lda   + (i)])
 
-  /* .. Executable Statements .. */
-  *info = 0;
+    /* .. Executable Statements .. */
+    *info = 0;
 
-  /* Initialize alpha for use in choosing pivot block size. */
-  alpha = ( d_one+sqrt( d_seven ) ) / d_eight;
+    /* Initialize alpha for use in choosing pivot block size. */
+    alpha = ( d_one+sqrt( d_seven ) ) / d_eight;
 
-  if( upper ) {
+    if( upper ) {
 /*
 *        Factorize the trailing columns of A using the upper triangle
 *        of A and working backwards, and compute the matrix W = U12*D
