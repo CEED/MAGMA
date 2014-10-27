@@ -78,9 +78,9 @@ magma_zbpcg(
     magma_int_t n = num_vecs;
 
     // Work space for CPU and GPU
-    magmaDoubleComplex *dwork, *hwork;
+    magmaDoubleComplex *dwork, *h_work;
 
-    magmaDoubleComplex *gramA, *gramR, *h_gram;
+    magmaDoubleComplex *gramA, *gramB, *gramR, *gramRold, *gramT, *h_gram;
 
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
@@ -89,24 +89,30 @@ magma_zbpcg(
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
-    
+    magmaDoubleComplex c_mone = MAGMA_Z_MAKE( -1.0, 0.0 );
+
     magma_int_t dofs = A.num_rows;
 
     // GPU workspace
-    magma_z_vector r, rt, p, q, h;
+    magma_z_vector r, rt, p, pnew, q, h;
     magma_z_vinit( &r, Magma_DEV, dofs*num_vecs, c_zero );
     magma_z_vinit( &rt, Magma_DEV, dofs*num_vecs, c_zero );
     magma_z_vinit( &p, Magma_DEV, dofs*num_vecs, c_zero );
+    magma_z_vinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero );
+    magma_z_vinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero );
     magma_z_vinit( &q, Magma_DEV, dofs*num_vecs, c_zero );
     magma_z_vinit( &h, Magma_DEV, dofs*num_vecs, c_zero );
     
     magma_int_t lwork = max( n*n, 2* 2*n* 2*n);
     magma_zmalloc(        &dwork     ,        m*n );
-    magma_zmalloc_pinned( &hwork   ,        lwork );
+    magma_zmalloc_pinned( &h_work   ,        lwork );
 
-    magma_zmalloc_pinned(&h_gram, 4*n*n);
-    magma_zmalloc(&gramA, 4 * n * n);
-    magma_zmalloc(&gramR, 4 * n * n);
+    magma_zmalloc_pinned(&h_gram, n*n);
+    magma_zmalloc(&gramA, n * n);
+    magma_zmalloc(&gramB, n * n);
+    magma_zmalloc(&gramR, n * n);
+    magma_zmalloc(&gramRold, n * n);
+    magma_zmalloc(&gramT, n * n);
 
     // solver variables
     magmaDoubleComplex *alpha, *beta;
@@ -131,7 +137,7 @@ magma_zbpcg(
     magma_z_applyprecond_right( A, rt, &h, precond_par );
 
     //***missing: orthogonalize h here - after the preconditioner?
-    magma_zgegqr_gpu(ikind, m, n, h.val, m, dwork, hwork, info );
+    magma_zgegqr_gpu(ikind, m, n, h.val, m, dwork, h_work, &solver_par->info );
 
     magma_zcopy( m*n, h.val, 1, p.val, 1 );                 // p = h it should be -h?
     //magma_zaxpy( dofs*num_vecs, c_mone, h.val, 1, p.val, 1 );                 // p = - h
@@ -201,7 +207,7 @@ magma_zbpcg(
         magma_z_applyprecond_right( A, rt, &h, precond_par );
 
         //***missing: orthogonalize h here - after the preconditioner?
-        magma_zgegqr_gpu(ikind, m, n, h.val, m, dwork, hwork, info ); 
+        magma_zgegqr_gpu(ikind, m, n, h.val, m, dwork, h_work, &solver_par->info ); 
 
         //*** this has to be changed - to: //GAMMANEW = R^TR
         // === Compute the GramR matrix = R^T R ===
@@ -228,7 +234,7 @@ magma_zbpcg(
             }
       */
             magma_zcopy( n*n, gramR, 1, gramT, 1 ); 
-            magma_zposv_gpu(MagmaUpper, n, n, gramRold, n, gramT, n, info);
+            magma_zposv_gpu(MagmaUpper, n, n, gramRold, n, gramT, n, &solver_par->info);
             magma_zcopy( m*n, r.val, 1, pnew.val, 1 );
             magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
             c_one, p.val, m, gramT, n, c_one, pnew.val, m);
@@ -262,12 +268,12 @@ magma_zbpcg(
     magma_zgetmatrix(1, 1, gramB, n, h_work, n);
     den[0] = MAGMA_Z_REAL(h_work[0]);
 
-        magma_zposv_gpu(MagmaUpper, n, n, gramR, n, gramB, n, info);
+        magma_zposv_gpu(MagmaUpper, n, n, gramR, n, gramB, n, &solver_par->info);
     magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
-            c_one, p.val, m, gramB, n, c_one, x.val, m);
+            c_one, p.val, m, gramB, n, c_one, x->val, m);
         magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
                     c_mone, q.val, m, gramB, n, c_one, r.val, m);
-        magmablas_swap(gramR, gramRold);
+        *gramRold = *gramR;
 
         // Get the residuals back
     magma_zgetmatrix(1, 1, gramRold, n, h_work, n);
@@ -333,6 +339,7 @@ magma_zbpcg(
     magma_z_vfree(&r);
     magma_z_vfree(&rt);
     magma_z_vfree(&p);
+    magma_z_vfree(&pnew);
     magma_z_vfree(&q);
     magma_z_vfree(&h);
 
@@ -345,6 +352,15 @@ magma_zbpcg(
     magma_free_cpu(gammanew);
     magma_free_cpu(den);
     magma_free_cpu(res);
+
+    magma_free( gramA );
+    magma_free( gramB );
+    magma_free( gramR );
+    magma_free( gramRold );
+    magma_free( gramT );
+    magma_free( dwork );
+    magma_free_pinned( h_work );
+    magma_free_pinned( h_gram );
 
     return MAGMA_SUCCESS;
 }   /* magma_zbpcg */
