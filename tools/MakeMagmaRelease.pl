@@ -64,7 +64,8 @@ my @files2delete = qw(
     sparse-iter/src/zcpbicgstab.cpp
     sparse-iter/src/zcpgmres.cpp
     sparse-iter/src/zcpir.cpp
-    sparse-iter/testing/test_matrices
+    sparse-iter/src/zbpcg_tmp.cpp
+	sparse-iter/testing/test_matrices
  
 
     src/obsolete
