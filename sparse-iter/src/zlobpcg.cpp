@@ -93,12 +93,11 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose( m, n, X, m, blockW, n );        	\
             magma_z_vector x, ax;                                       \
-            x.memory_location = Magma_DEV;  x.num_rows = m*n;  x.nnz = m*n;  x.val = blockW; \
+            x.memory_location = Magma_DEV;  x.num_rows = m*n; x.num_cols = 1; x.major = MagmaRowMajor;  x.nnz = m*n;  x.val = blockW; \
             ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax );                           \
             magmablas_ztranspose( n, m, blockW, n, X, m );            		\
 }
-
 
 
 
@@ -202,7 +201,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_zgegqr_gpu(ikind, m, n, blockX, m, dwork, hwork, info );
     //magma_zorthomgs( m, n, blockX );
     
-    magma_z_bspmv_tuned(m, n, c_one, A, blockX, c_zero, blockAX );
+    magma_z_bspmv_tuned(m, n, c_one, A, blockX, c_zero, blockAX );   
 
     // === Compute the Gram matrix = (X, AX) & its eigenstates ===
     magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m,
