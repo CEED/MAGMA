@@ -604,6 +604,7 @@ subs = {
     ('cublasIs',       'cublasId',       'cublasIs',       'cublasId'        ),
     ('cublasIs',       'cublasId',       'cublasIc',       'cublasIz'        ),
     ('cublasS',        'cublasD',        'cublasC',        'cublasZ'         ),
+    ('clAmdBlasiS',    'clAmdBlasiD',    'clAmdBlasiC',    'clAmdBlasiZ'     ),
     ('clAmdBlasS',     'clAmdBlasD',     'clAmdBlasC',     'clAmdBlasZ'      ),
     ('example_s',      'example_d',      'example_c',      'example_z'       ),
     ('ipt_s',          'ipt_d',          'ipt_c',          'ipt_z'           ),
