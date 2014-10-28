@@ -65,29 +65,6 @@ int main( int argc, char** argv)
         zopts.solver_par.ev_length = A.num_rows;
         magma_zeigensolverinfo_init( &zopts.solver_par );
 
-/*
-            magma_dmalloc_cpu( &zopts.solver_par.eigenvalues , 
-                                    3*zopts.solver_par.num_eigenvalues );
-            // setup initial guess EV using lapack
-            // then copy to GPU
-            magma_int_t ev = zopts.solver_par.num_eigenvalues * zopts.solver_par.ev_length;
-            magmaDoubleComplex *initial_guess;
-            magma_zmalloc_cpu( &initial_guess, ev );
-            magma_zmalloc( &zopts.solver_par.eigenvectors, ev );
-
-            magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
-            lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
-
-            magma_zsetmatrix( zopts.solver_par.ev_length, zopts.solver_par.num_eigenvalues, 
-                initial_guess, zopts.solver_par.ev_length, zopts.solver_par.eigenvectors, 
-                                                        zopts.solver_par.ev_length );
-            magma_free_cpu( initial_guess );
-        }else{
-            zopts.solver_par.eigenvectors = NULL;
-            zopts.solver_par.eigenvalues = NULL;
-        } 
-*/
-
         // scale matrix
         magma_zmscale( &A, zopts.scaling );
 
