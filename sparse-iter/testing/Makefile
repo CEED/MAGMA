@@ -24,6 +24,7 @@ ZSRC += \
 ZSRC += \
     testing_zdot.cpp        \
     testing_zspmv.cpp       \
+    testing_zspmm.cpp       \
     testing_zmadd.cpp     \
 
 # ----------

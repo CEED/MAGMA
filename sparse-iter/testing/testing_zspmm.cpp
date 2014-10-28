@@ -98,6 +98,7 @@ int main( int argc, char** argv)
         pntre[0] = 0;
         for (j=0; j<m; j++ ) pntre[j] = hA.row[j+1];
 
+/*
         // === Call MKL with consecutive SpMVs, using mkl_zcsrmv ===
         // warmp up
         mkl_zcsrmv( "N", &m, &hA.num_cols,
@@ -139,7 +140,7 @@ int main( int argc, char** argv)
                 (end-start)/10, FLOPS*10.*n/(end-start) );
 
         free(pntre);
-
+*/
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
         // SpMV on GPU (CSR)
@@ -183,6 +184,7 @@ int main( int argc, char** argv)
         // SpMV on GPU (CUSPARSE - CSR)
         // CUSPARSE context //
         #ifdef PRECISION_d
+        magma_device_sync(); start = magma_wtime(); 
         cusparseHandle_t cusparseHandle = 0;
         cusparseStatus_t cusparseStatus;
         cusparseStatus = cusparseCreate(&cusparseHandle);
@@ -198,38 +200,17 @@ int main( int argc, char** argv)
         // copy matrix to GPU
         magma_d_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
 
-        magma_device_sync(); start = magma_wtime(); 
-        for (j=0; j<10; j++)
-            cusparseDcsrmv(cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                        m, hA.num_cols, hA.nnz, &alpha, descr, 
-                        dA.val, dA.row, dA.col, dx.val, &beta, dy.val);
+        for (j=0; j<10; j++)                    
+        cusparseZcsrmm(cusparseHandle,
+            CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    dA.num_rows,   n, dA.num_cols, dA.nnz, 
+                    &alpha, descr, dA.val, dA.row, dA.col,
+                    dx.val, dA.num_cols, &beta, dy.val, dA.num_cols);
         magma_device_sync(); end = magma_wtime(); 
         printf( " > CUSPARSE: %.2e seconds %.2e GFLOP/s    (CSR).\n",
-                                        (end-start)/10, FLOPS*10/(end-start) );
-        cusparseMatDescr_t descrA;
-        cusparseStatus = cusparseCreateMatDescr(&descrA);
-         if(cusparseStatus != 0)    printf("error\n");
-        cusparseHybMat_t hybA;
-        cusparseStatus = cusparseCreateHybMat( &hybA );
-         if(cusparseStatus != 0)    printf("error\n");
+                                        (end-start)/10, FLOPS*10*n/(end-start) );
 
-       
-        cusparseDcsr2hyb(cusparseHandle,  m, hA.num_cols,
-                        descrA, dA.val, dA.row, dA.col,
-                        hybA, 0, CUSPARSE_HYB_PARTITION_AUTO);
-
-        magma_device_sync(); start = magma_wtime(); 
-        for (j=0; j<10; j++)
-            cusparseDhybmv( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-               &alpha, descrA, hybA,
-               dx.val, &beta, dy.val);
-        magma_device_sync(); end = magma_wtime(); 
-        printf( " > CUSPARSE: %.2e seconds %.2e GFLOP/s    (HYB).\n",
-                                        (end-start)/10, FLOPS*10/(end-start) );
-
-
-        cusparseDestroyMatDescr( descrA );
-        cusparseDestroyHybMat( hybA );
+        cusparseDestroyMatDescr( descr );
         cusparseDestroy( cusparseHandle );
 
         magma_d_mfree(&dA);

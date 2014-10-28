@@ -85,7 +85,7 @@ int main( int argc, char** argv)
         magma_z_vinit( &dx, Magma_DEV, hA.num_rows, one );
         magma_z_vinit( &dy, Magma_DEV, hA.num_rows, zero );
 
-
+/*
         // calling MKL with CSR
         pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
         pntre[0] = 0;
@@ -101,7 +101,7 @@ int main( int argc, char** argv)
         printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
         free(pntre);
-
+*/
 
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
