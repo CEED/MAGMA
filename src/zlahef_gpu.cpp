@@ -130,6 +130,7 @@ magma_zlahef_gpu(
     double d_zero  = 0.0;
     double d_eight = 8.0;
     double d_seven = 7.0;
+    float  f_zero  = 0.0;
     magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
     magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
     magma_int_t upper = (uplo == MagmaUpper);
@@ -425,10 +426,10 @@ magma_zlahef_gpu(
          magma_zcopy( n-k, &dA( k, k ), 1, &dW( k, k ), 1 );
 
          // set imaginary part of diagonal to be zero
-         #if defined(PRECISION_z)
+         #if defined(PRECISION_z) 
          magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
          #elif defined(PRECISION_c)
-         magma_ssetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
+         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, stream[0] );
          #endif
          trace_gpu_end( 0, 0 );
          /* -------------------------------------------------------------- */
@@ -441,7 +442,7 @@ magma_zlahef_gpu(
          #if defined(PRECISION_z)
          magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
          #elif defined(PRECISION_c)
-         magma_ssetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
+         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, stream[0] );
          #endif
          trace_gpu_end( 0, 0 );
 
@@ -481,7 +482,7 @@ magma_zlahef_gpu(
              #if defined(PRECISION_z)
              magma_dsetvector_async( 1, &d_zero,1, ((double*)&dA( k, k ))+1,1, stream[0] );
              #elif defined(PRECISION_c)
-             magma_ssetvector_async( 1, &d_zero,1, ((double*)&dA( k, k ))+1,1, stream[0] );
+             magma_ssetvector_async( 1, &f_zero,1, ((float*)&dA( k, k ))+1,1, stream[0] );
              #endif
          } else {
              if ( abs_akk >= alpha*colmax ) {
@@ -504,7 +505,7 @@ magma_zlahef_gpu(
                  #if defined(PRECISION_z)
                  magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
                  #elif defined(PRECISION_c)
-                 magma_ssetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, stream[0] );
                  #endif
                  trace_gpu_end( 0, 0 );
 
@@ -515,7 +516,7 @@ magma_zlahef_gpu(
                  #if defined(PRECISION_z)
                  magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
                  #elif defined(PRECISION_c)
-                 magma_ssetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, stream[0] );
                  #endif
                  trace_gpu_end( 0, 0 );
 
@@ -697,22 +698,18 @@ magma_zlahef_gpu(
          trace_gpu_start( 0, 0, "gemm", "gemm" );
          magmablasSetKernelStream( stream[0] );
          #if defined(PRECISION_z)
-         //for (int jj=0; jj<jb; jj++) magma_dsetvector_async( 1, &d_zero,1, ((double*)&dA( j+jj, j+jj ))+1,1, stream[0] );
          magmablas_dlaset(MagmaUpperLower, 1,jb, d_zero,d_zero, ((double*)&dA( j, j ))+1, 2*(1+ldda) );
          #elif defined(PRECISION_c)
-         //for (int jj=0; jj<jb; jj++) magma_ssetvector_async( 1, &d_zero,1, ((double*)&dA( j+jj, j+jj ))+1,1, stream[0] );
-         magmablas_slaset(MagmaUpperLower, 1,jb, d_zero,d_zero, ((double*)&dA( j, j ))+1, 2*(1+ldda) );
+         magmablas_slaset(MagmaUpperLower, 1,jb, f_zero,f_zero, ((float*)&dA( j, j ))+1, 2*(1+ldda) );
          #endif
          magma_zgemm( MagmaNoTrans, MagmaTrans, n-j, jb, k, 
                       c_mone, &dA( j, 0 ), ldda, 
                               &dW( j, 0 ), lddw,
                       c_one,  &dA( j, j ), ldda );
          #if defined(PRECISION_z)
-         //for (int jj=0; jj<jb; jj++) magma_dsetvector_async( 1, &d_zero,1, ((double*)&dA( j+jj, j+jj ))+1,1, stream[0] );
          magmablas_dlaset(MagmaUpperLower, 1,jb, d_zero,d_zero, ((double*)&dA( j, j ))+1, 2*(1+ldda) );
          #elif defined(PRECISION_c)
-         //for (int jj=0; jj<jb; jj++) magma_ssetvector_async( 1, &d_zero,1, ((double*)&dA( j+jj, j+jj ))+1,1, stream[0] );
-         magmablas_slaset(MagmaUpperLower, 1,jb, d_zero,d_zero, ((double*)&dA( j, j ))+1, 2*(1+ldda) );
+         magmablas_slaset(MagmaUpperLower, 1,jb, f_zero,f_zero, ((float*)&dA( j, j ))+1, 2*(1+ldda) );
          #endif
          trace_gpu_end( 0, 0 );
          #endif
