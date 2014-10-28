@@ -43,7 +43,7 @@ using namespace std;
     ---------
 
     @param
-    x           magma_z_vector
+    x           magma_z_vector*
                 vector to initialize   
 
     @param
@@ -70,7 +70,9 @@ magma_z_vinit(    magma_z_vector *x,
 
     x->memory_location = Magma_CPU;
     x->num_rows = num_rows;
-    x->nnz = num_rows;
+    x->num_cols = 1;
+    x->nnz = num_rows*1;
+    x->major = MagmaColMajor;
     if( mem_loc == Magma_CPU ){
         x->memory_location = Magma_CPU;
 

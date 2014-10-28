@@ -538,28 +538,6 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
         solver_par->timing = NULL;
     }  
 
-    if( solver_par->solver == Magma_LOBPCG ){
-        magma_dmalloc_cpu( &solver_par->eigenvalues , 
-                                3*solver_par->num_eigenvalues );
-
-        // setup initial guess EV using lapack
-        // then copy to GPU
-        magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
-        magmaDoubleComplex *initial_guess;
-        magma_zmalloc_cpu( &initial_guess, ev );
-        magma_zmalloc( &solver_par->eigenvectors, ev );
-        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
-        lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
-        magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
-            initial_guess, solver_par->ev_length, solver_par->eigenvectors, 
-                                                    solver_par->ev_length );
-
-        magma_free_cpu( initial_guess );
-    }else{
-        solver_par->eigenvectors = NULL;
-        solver_par->eigenvalues = NULL;
-    }  
-
     precond_par->d.val = NULL;
     precond_par->work1.val = NULL;
     precond_par->work2.val = NULL;
@@ -584,11 +562,57 @@ magma_zsolverinfo_init( magma_z_solver_par *solver_par,
     precond_par->LD.row = NULL;
     precond_par->LD.blockinfo = NULL;
 
-
     precond_par->UD.val = NULL;
     precond_par->UD.col = NULL;
     precond_par->UD.row = NULL;
     precond_par->UD.blockinfo = NULL;
+
+
+    return MAGMA_SUCCESS;
+}
+
+
+/**
+    Purpose
+    -------
+
+    Initializes space for eigensolvers.
+
+    Arguments
+    ---------
+
+    @param
+    solver_par  magma_z_solver_par*
+                structure containing all solver information           
+                
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+magma_int_t
+magma_zeigensolverinfo_init( magma_z_solver_par *solver_par ){
+
+    if( solver_par->solver == Magma_LOBPCG ){
+        magma_dmalloc_cpu( &solver_par->eigenvalues , 
+                                3*solver_par->num_eigenvalues );
+        // setup initial guess EV using lapack
+        // then copy to GPU
+        magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
+        magmaDoubleComplex *initial_guess;
+        magma_zmalloc_cpu( &initial_guess, ev );
+        magma_zmalloc( &solver_par->eigenvectors, ev );
+
+        magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
+        lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
+
+        magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
+            initial_guess, solver_par->ev_length, solver_par->eigenvectors, 
+                                                    solver_par->ev_length );
+        magma_free_cpu( initial_guess );
+    }else{
+        solver_par->eigenvectors = NULL;
+        solver_par->eigenvalues = NULL;
+    } 
 
 
     return MAGMA_SUCCESS;

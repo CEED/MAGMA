@@ -24,6 +24,7 @@ ZSRC := \
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
 	magma_ztranspose.cpp	\
+	magma_zvtranspose.cpp	\
     magma_zp2p.cpp   \
     magma_zcsrsplit.cpp   \
     magma_zmcsrcompressor.cpp   \

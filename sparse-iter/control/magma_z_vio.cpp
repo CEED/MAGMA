@@ -128,6 +128,8 @@ magma_z_vread(      magma_z_vector *x,
     
     x->memory_location = Magma_CPU;
     x->num_rows = length;
+    x->num_cols = 1;
+    x->major = MagmaColMajor;
     magma_zmalloc_cpu( &x->val, length );
     magma_int_t nnz=0, i=0;
     string line;
@@ -176,17 +178,20 @@ magma_z_vspread(      magma_z_vector *x,
 
     magma_z_sparse_matrix A,B;
     magma_int_t entry=0;
-
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
     magma_z_csr_mtx( &A,  filename  ); 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE );
     magma_z_vinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO );
+    x->major = MagmaRowMajor;
     for(magma_int_t i=0; i<A.num_cols; i++){
         for(magma_int_t j=0; j<A.num_rows; j++){
             x->val[i*A.num_rows+j] = B.val[ i+j*A.num_cols ];
             entry++;     
         }
     }
+    x->num_rows = A.num_rows;
+    x->num_cols = A.num_cols;
+
     magma_z_mfree( &A );
     magma_z_mfree( &B );
 

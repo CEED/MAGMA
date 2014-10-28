@@ -990,7 +990,9 @@ magma_z_vtransfer( magma_z_vector x,
         // fill in information for B
         y->memory_location = Magma_DEV;
         y->num_rows = x.num_rows;
+        y->num_cols = x.num_cols;
         y->nnz = x.nnz;
+        y->major = x.major;
         // memory allocation
         stat = magma_zmalloc( &y->val, x.num_rows );
         if( stat != 0 )
@@ -1003,7 +1005,9 @@ magma_z_vtransfer( magma_z_vector x,
         // fill in information for B
         y->memory_location = Magma_CPU;
         y->num_rows = x.num_rows;
+        y->num_cols = x.num_cols;
         y->nnz = x.nnz;
+        y->major = x.major;
         // memory allocation
         magma_zmalloc_cpu( &y->val, x.num_rows );
         // data transfer
@@ -1015,7 +1019,9 @@ magma_z_vtransfer( magma_z_vector x,
         // fill in information for B
         y->memory_location = Magma_CPU;
         y->num_rows = x.num_rows;
+        y->num_cols = x.num_cols;
         y->nnz = x.nnz;
+        y->major = x.major;
         // memory allocation
         magma_zmalloc_cpu( &y->val, x.num_rows );
         // data transfer
@@ -1026,7 +1032,9 @@ magma_z_vtransfer( magma_z_vector x,
         // fill in information for B
         y->memory_location = Magma_DEV;
         y->num_rows = x.num_rows;
+        y->num_cols = x.num_cols;
         y->nnz = x.nnz;
+        y->major = x.major;
         // memory allocation
         stat = magma_zmalloc( &y->val, x.num_rows );
         if( stat != 0 )
