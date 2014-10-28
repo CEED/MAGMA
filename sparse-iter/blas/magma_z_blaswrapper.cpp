@@ -66,7 +66,7 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 
     // DEV case
     if( A.memory_location == Magma_DEV ){
-        if( A.num_cols == x.num_rows ){
+        if( A.num_cols == x.num_rows && x.num_cols == 1 ){
              if( A.storage_type == Magma_CSR 
                             || A.storage_type == Magma_CSRL 
                             || A.storage_type == Magma_CSRU ){
@@ -164,36 +164,78 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  return MAGMA_ERR_NOT_SUPPORTED;
              }
         }
-        else if( A.num_cols < x.num_rows ){
-            magma_int_t num_vecs = x.num_rows / A.num_cols;
+        else if( A.num_cols < x.num_rows || x.num_cols > 1 ){
+            magma_int_t num_vecs = x.num_rows / A.num_cols * x.num_cols;
             if( A.storage_type == Magma_CSR ){
-                 //printf("using CSR kernel for SpMV: ");
-                 magma_zmgecsrmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    num_vecs, alpha, A.val, A.row, A.col, x.val, beta, y.val );
-                 //printf("done.\n");
-                 return MAGMA_SUCCESS;
+
+                cusparseHandle_t cusparseHandle = 0;
+                cusparseStatus_t cusparseStatus;
+                cusparseStatus = cusparseCreate(&cusparseHandle);
+                cusparseMatDescr_t descr = 0;
+                cusparseStatus = cusparseCreateMatDescr(&descr);
+
+                cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+                cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+
+                if( x.major == MagmaColMajor){
+                    cusparseZcsrmm(cusparseHandle,
+                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    A.num_rows,   num_vecs, A.num_cols, A.nnz, 
+                    &alpha, descr, A.val, A.row, A.col,
+                    x.val, A.num_cols, &beta, y.val, A.num_cols);
+                }else if( x.major == MagmaRowMajor){
+                    cusparseZcsrmm2(cusparseHandle,
+                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    A.num_rows,   num_vecs, A.num_cols, A.nnz, 
+                    &alpha, descr, A.val, A.row, A.col,
+                    x.val, A.num_cols, &beta, y.val, A.num_cols);
+                }
+
+                cusparseDestroyMatDescr( descr );
+                cusparseDestroy( cusparseHandle );
+
+                return MAGMA_SUCCESS;
              }
              else if( A.storage_type == Magma_ELLPACK ){
-                 //printf("using ELLPACK kernel for SpMV: ");
+
+                if( x.major == MagmaColMajor){
                  magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-            num_vecs, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
-                 //printf("done.\n");
+                 num_vecs, A.max_nnz_row, alpha, A.val, A.col, x.val, 
+                 beta, y.val );
+                }
+                else if( x.major == MagmaRowMajor){
+                    // transpose first to col major
+                    magma_z_vector x2;                    
+                    magma_zvtranspose( x, &x2 );
+                    magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                    num_vecs, A.max_nnz_row, alpha, A.val, A.col, x.val, 
+                    beta, y.val );
+                    magma_z_vfree(&x2);
+                }
                  return MAGMA_SUCCESS;
              }
              else if( A.storage_type == Magma_ELL ){
-                 //printf("using ELL kernel for SpMV: ");
                  magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                         num_vecs, A.max_nnz_row, alpha, A.val, 
                         A.col, x.val, beta, y.val );
-                 //printf("done.\n");
                  return MAGMA_SUCCESS;
              }else if( A.storage_type == Magma_SELLP ){
-                 //printf("using SELLP kernel for SpMV: ");
+                if( x.major == MagmaRowMajor){
                  magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.blocksize, A.numblocks, A.alignment, 
                     alpha, A.val, A.col, A.row, x.val, beta, y.val );
+                }
+                else if( x.major == MagmaColMajor){
+                    // transpose first to row major
+                    magma_z_vector x2;                    
+                    magma_zvtranspose( x, &x2 );
+                    magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                    num_vecs, A.blocksize, A.numblocks, A.alignment, 
+                    alpha, A.val, A.col, A.row, x2.val, beta, y.val );
+                    magma_z_vfree(&x2);
+                }
 
-                 //printf("done.\n");
                  return MAGMA_SUCCESS;
              }/*
              if( A.storage_type == Magma_DENSE ){
