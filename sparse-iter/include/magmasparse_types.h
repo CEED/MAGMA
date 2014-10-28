@@ -132,8 +132,10 @@ typedef struct magma_z_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
+    magma_int_t        num_cols;
     magma_int_t        nnz; 
     magmaDoubleComplex *val;
+    magma_order_t      major; 
 
 }magma_z_vector;
 
@@ -141,8 +143,10 @@ typedef struct magma_c_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
+    magma_int_t        num_cols;
     magma_int_t        nnz; 
     magmaFloatComplex  *val;
+    magma_order_t      major; 
 
 }magma_c_vector;
 
@@ -151,8 +155,10 @@ typedef struct magma_d_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
+    magma_int_t        num_cols;
     magma_int_t        nnz; 
     double             *val;
+    magma_order_t      major; 
 
 }magma_d_vector;
 
@@ -161,8 +167,10 @@ typedef struct magma_s_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
+    magma_int_t        num_cols;
     magma_int_t        nnz; 
     float              *val;
+    magma_order_t      major; 
 
 }magma_s_vector;
 

@@ -116,6 +116,10 @@ magma_z_csrtranspose(   magma_z_sparse_matrix A,
                         magma_z_sparse_matrix *B );
 
 magma_int_t 
+magma_zvtranspose(      magma_z_vector x,
+                        magma_z_vector *y );
+
+magma_int_t 
 magma_z_cucsrtranspose( magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B );
 
@@ -281,6 +285,10 @@ magma_zsolverinfo(  magma_z_solver_par *solver_par,
 magma_int_t
 magma_zsolverinfo_init( magma_z_solver_par *solver_par, 
                         magma_z_preconditioner *precond );
+
+magma_int_t
+magma_zeigensolverinfo_init( magma_z_solver_par *solver_par );
+
 
 magma_int_t
 magma_zsolverinfo_free( magma_z_solver_par *solver_par, 
