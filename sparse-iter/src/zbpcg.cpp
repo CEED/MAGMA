@@ -129,6 +129,7 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     if (den[0] <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den[0]);
         return -100;
+        solver_par->info = -100;
     }
     if ( nom[0] < r0[0] )
         return MAGMA_SUCCESS;
