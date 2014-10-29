@@ -38,6 +38,9 @@ Collection: http://www.cise.ufl.edu/research/sparse/matrices/
 A suitable test matrix is given by Trefethen_2000:
 http://www.cise.ufl.edu/research/sparse/matrices/JGD_Trefethen/Trefethen_2000.html
 
+Another option is to generate a 2D laplace problem of variable size on-the-fly:
+'LAPLACE2D 100' generates a 2D Laplacian of size 100x100.
+
 To run a solver:
 
 
