@@ -46,7 +46,7 @@ const char *usage_sparse =
 " --mscale      Possibility to scale the original matrix:\n"
 "               0   no scaling\n"
 "               1   symmetric scaling to unit diagonal\n"
-"               2   scaling tu unit row-norm\n"
+"               2   scaling to unit row-norm\n"
 " --solver      Possibility to choose a solver:\n"
 "               0   CG\n"
 "               1   merged CG\n"
@@ -119,7 +119,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
     
 
     for( int i = 1; i < argc; ++i ) {
-     if ( strcmp("--format", argv[i]) == 0 ) {
+        if ( strcmp("--format", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->output_format = Magma_CSR; break;
@@ -127,7 +127,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 2: opts->output_format = Magma_SELLP; break;
                 //case 2: opts->output_format = Magma_ELLRT; break;
             }
-        }else if ( strcmp("--mscale", argv[i]) == 0 ) {
+        }else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->scaling = Magma_NOSCALE; break;
@@ -135,7 +135,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 2: opts->scaling = Magma_UNITROW; break;
             }
 
-        }else if ( strcmp("--solver", argv[i]) == 0 ) {
+        }else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->solver_par.solver = Magma_CG; break;
@@ -151,9 +151,9 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 10: opts->solver_par.solver = Magma_JACOBI; break;
                 case 11: opts->solver_par.solver = Magma_BAITER; break;
             }
-        }else if ( strcmp("--restart", argv[i]) == 0 ) {
+        }else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
-        }else if ( strcmp("--precond", argv[i]) == 0 ) {
+        }else if ( strcmp("--precond", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->precond_par.solver = Magma_NONE; break;
@@ -165,21 +165,21 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
 
             }
-        } else if ( strcmp("--ptol", argv[i]) == 0 ) {
+        } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
-        }else if ( strcmp("--blocksize", argv[i]) == 0 ) {
+        }else if ( strcmp("--blocksize", argv[i]) == 0 && i+1 < argc ) {
             opts->blocksize = atoi( argv[++i] );
-        }else if ( strcmp("--alignment", argv[i]) == 0 ) {
+        }else if ( strcmp("--alignment", argv[i]) == 0 && i+1 < argc ) {
             opts->alignment = atoi( argv[++i] );
-        }else if ( strcmp("--verbose", argv[i]) == 0 ) {
+        }else if ( strcmp("--verbose", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.verbose = atoi( argv[++i] );
-        }  else if ( strcmp("--maxiter", argv[i]) == 0 ) {
+        }  else if ( strcmp("--maxiter", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.maxiter = atoi( argv[++i] );
-        } else if ( strcmp("--tol", argv[i]) == 0 ) {
+        } else if ( strcmp("--tol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->solver_par.epsilon );
-        } else if ( strcmp("--ev", argv[i]) == 0 ) {
+        } else if ( strcmp("--ev", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.num_eigenvalues = atoi( argv[++i] );
-        } else if ( strcmp("--version", argv[i]) == 0 ) {
+        } else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.version = atoi( argv[++i] );
         }        
         // ----- usage
