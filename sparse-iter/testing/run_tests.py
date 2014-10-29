@@ -142,7 +142,7 @@ from optparse import OptionParser
 batch = not sys.stdout.isatty()
 
 parser = OptionParser()
-parser.add_option('-p', '--precisions',  action='store',      dest='precisions', help='run given precisions ' )
+parser.add_option('-p', '--precisions',  action='store',      dest='precisions', help='run given precisions', default='sd' )
 parser.add_option(      '--start',       action='store',      dest='start',      help='start with given routine; useful to restart an interupted run')
 parser.add_option(      '--memcheck',    action='store_true', dest='memcheck',   help='run with cuda-memcheck (slow)')
 parser.add_option(      '--tol',         action='store',      dest='tol',        help='set tolerance')
@@ -153,7 +153,7 @@ parser.add_option('-l', '--large',       action='store_true', dest='large',     
 
 parser.add_option(      '--sparse-blas', action='store_true', dest='sparse_blas', help='run sparse BLAS tests')
 parser.add_option(      '--solver',      action='store_true', dest='solver',      help='run sparse solvers')
-parser.add_option(      '--control',     action='store_true', dest='io',          help='run sparse IO, copy, etc.')
+parser.add_option(      '--control',     action='store_true', dest='control',     help='run sparse IO, copy, etc.')
 
 parser.add_option(      '--csr',         action='store_true', dest='csr',         help='run CSR matrix format')
 parser.add_option(      '--ell',         action='store_true', dest='ell',         help='run ELL matrix format')
@@ -173,50 +173,50 @@ parser.add_option(      '--jacobi'           , action='store_true', dest='jacobi
 parser.add_option(      '--ba'               , action='store_true', dest='ba'             ,help='run ba-iter'       )    
 
 parser.add_option(      '--jacobi-prec'      , action='store_true', dest='jacobi_prec'    ,help='run Jacobi preconditioner'        )
-parser.add_option(      '--ilu-prec'         , action='store_true', dest='ba_prec'        ,help='run ILU preconditioner'       )    
+parser.add_option(      '--ilu-prec'         , action='store_true', dest='ilu_prec'       ,help='run ILU preconditioner'       )    
 
 (opts, args) = parser.parse_args()
 
 # default if no sizes given is all sizes
 if ( not opts.small and not opts.med and not opts.large ):
-	opts.small = True
-	opts.med   = True
-	opts.large = True
+    opts.small = True
+    opts.med   = True
+    opts.large = True
 # end
 
 # default if no groups given is all groups
 if (     not opts.sparse_blas
-	 and not opts.solver
-	 and not opts.control 
-	 and not opts.csr
-	 and not opts.ell
+     and not opts.solver
+     and not opts.control 
+     and not opts.csr
+     and not opts.ell
      and not opts.sellp ):
-	opts.sparse_blas = True
-	opts.solver      = True
-	opts.control     = True
-	opts.csr         = True
-	opts.ell         = True
+    opts.sparse_blas = True
+    opts.solver      = True
+    opts.control     = True
+    opts.csr         = True
+    opts.ell         = True
     opts.sellp       = True
 # end
 
 # default if no sizes given is all sizes
-if ( not opts.mscale and not opts.med and not opts.large ):
-	opts.small = True
-	opts.med   = True
-	opts.large = True
+if ( not opts.small and not opts.med and not opts.large ):
+    opts.small = True
+    opts.med   = True
+    opts.large = True
 # end
 
 # default if no solvers given is all solvers
 if (     not opts.cg           
-	 and not opts.cg_merge     
-	 and not opts.pcg           
-	 and not opts.bicgstab     
-	 and not opts.bicgstab_merge
+     and not opts.cg_merge     
+     and not opts.pcg           
+     and not opts.bicgstab     
+     and not opts.bicgstab_merge
      and not opts.pbicgstab    
      and not opts.gmres        
-	 and not opts.pgmres        
-	 and not opts.lobpcg       
-	 and not opts.iterref      
+     and not opts.pgmres        
+     and not opts.lobpcg       
+     and not opts.iterref      
      and not opts.jacobi       
      and not opts.ba   ):
     opts.cg             = True
@@ -235,16 +235,16 @@ if (     not opts.cg
 
 # default if no preconditioners given all
 if (     not opts.jacobi_prec
-	 and not opts.ilu_prec ):
-	opts.jacobi_prec = True
-	opts.ilu_prec    = True
+     and not opts.ilu_prec ):
+    opts.jacobi_prec = True
+    opts.ilu_prec    = True
 # end
 
 # default if no sizes given is all sizes
-if ( not opts.mscale and not opts.med and not opts.large ):
-	opts.small = True
-	opts.med   = True
-	opts.large = True
+if ( not opts.small and not opts.med and not opts.large ):
+    opts.small = True
+    opts.med   = True
+    opts.large = True
 # end
 
 print 'opts', opts
@@ -252,7 +252,7 @@ print 'args', args
 
 
 # ----------------------------------------------------------------------
-	
+    
 # looping over formats
 formats = []
 if ( opts.csr ):
@@ -321,14 +321,43 @@ if ( opts.ilu_prec ):
 # problem sizes
 # n    is squared
 # ----------
-sizes = ''
+sizes = []
 if opts.small:
-	sizes += ('LAPLACE2D 100')
+    sizes += ['LAPLACE2D 100']
 if opts.med:
-	sizes += ('LAPLACE2D 315')
+    sizes += ['LAPLACE2D 315']
 if opts.large:
-	sizes += ('LAPLACE2D 1000')
+    sizes += ['LAPLACE2D 1000']
 #end
+
+
+# ----------------------------------------------------------------------
+precisions = (
+	's', 'd', 'c', 'z'
+)
+
+subs = (
+	('',              'dlag2s',      '',              'zlag2c'    ),
+	('ssy',           'dsy',         'che',           'zhe'       ),
+	('sor',           'dor',         'cun',           'zun'       ),
+	('sy2sb',         'sy2sb',       'he2hb',         'he2hb'     ),
+	('',              'testing_ds',  '',              'testing_zc'),
+	('testing_s',     'testing_d',   'testing_c',     'testing_z' ),
+	('lansy',         'lansy',       'lanhe',         'lanhe'     ),
+	('blas_s',        'blas_d',      'blas_c',        'blas_z'    ),
+)
+
+# ----------
+# simple precision generation
+def substitute( txt, pfrom, pto ):
+	if ( pfrom != pto ):
+		ifrom = precisions.index( pfrom )
+		ito   = precisions.index( pto )
+		for sub in subs:
+			txt = re.sub( sub[ifrom], sub[ito], txt )
+	# end
+	return txt
+# end
 
 
 # ----------------------------------------------------------------------
@@ -345,20 +374,20 @@ if opts.large:
 # grep "\('#?testing_\w\w+" run_tests.py | perl -pe "s/#?\('#?//; s/',.*/.cpp \\/;" | uniq > ! b
 # diff -w a b
 
-
-precisions = (
-	's', 'd'
-)
-
+tests = []
 for solver in solvers:
     for precond in precs:
         for format in formats:
             for size in sizes:
                 for precision in opts.precisions:
                     # precision generation
-                    csolver = substitute( 'testing_zsolver ', 'z', precision )
-                    ( csolver,' ', solver,' ', precond,' ', format,' ', size ) = test
-	
+                    cmd = substitute( 'testing_zsolver', 'z', precision )
+                    tests.append( [cmd, solver + ' ' + precond + ' ' + format, size, ''] )
+
+print 'tests'
+for t in tests:
+	print t
+
 
 # ----------------------------------------------------------------------
 # runs command in a subprocess.
@@ -368,30 +397,30 @@ for solver in solvers:
 # error  is count of indications of other errors (exit, CUDA error, etc.).
 # status is exit status of the command.
 def run( cmd ):
-	words = re.split( ' +', cmd.strip() )
-	
-	# stdout & stderr are merged
-	p = subprocess.Popen( words, bufsize=1, stdout=PIPE, stderr=STDOUT )
-	
-	okay  = 0
-	fail  = 0
-	error = 0
-	# read unbuffered ("for line in p.stdout" will buffer)
-	while True:
-		line = p.stdout.readline()
-		if not line:
-			break
-		print line.rstrip()
-		if re.search( r'\bok *$', line ):
-			okay += 1
-		if re.search( 'failed', line ):
-			fail += 1
-		if re.search( 'exit|memory mapping error|CUDA runtime error|illegal value|ERROR SUMMARY: [1-9]', line ):
-			error += 1
-	# end
-	
-	status = p.wait()
-	return (okay, fail, error, status)
+    words = re.split( ' +', cmd.strip() )
+    
+    # stdout & stderr are merged
+    p = subprocess.Popen( words, bufsize=1, stdout=PIPE, stderr=STDOUT )
+    
+    okay  = 0
+    fail  = 0
+    error = 0
+    # read unbuffered ("for line in p.stdout" will buffer)
+    while True:
+        line = p.stdout.readline()
+        if not line:
+            break
+        print line.rstrip()
+        if re.search( r'\bok *$', line ):
+            okay += 1
+        if re.search( 'failed', line ):
+            fail += 1
+        if re.search( 'exit|memory mapping error|CUDA runtime error|illegal value|ERROR SUMMARY: [1-9]', line ):
+            error += 1
+    # end
+    
+    status = p.wait()
+    return (okay, fail, error, status)
 # end
 
 
@@ -404,148 +433,121 @@ failures = {}
 
 start = None
 if ( opts.start ):
-	start = re.compile( opts.start + r'\b' )
+    start = re.compile( opts.start + r'\b' )
 
 seen  = {}
 pause = 0
 
-tol = ''
-if ( opts.tol ):
-	tol = ' --tolerance ' + opts.tol + ' '
-
 last_cmd = None
 
-
-
-# ----------
-# example looping over formats
-formats = []
-formats += ['csr']
-formats += ['csc']
-
-for format in formats:
-	pass
-	
-# ----------
-
-
-
 for test in tests:
-	(cmd, options, sizes, comments) = test
-	
-	make = False
-	for precision in opts.precisions:
-		# precision generation
-		cmdp = substitute( cmd, 'z', precision )
-		
-		disabled = (cmdp[0] == '#')
-		if ( disabled ):
-			cmdp = cmdp[1:]
-		
-		# command to run
-		cmd_args = './' + cmdp +' '+ options +' '+ tol + sizes
-		cmd_args = re.sub( '  +', ' ', cmd_args )  # compress spaces
-		
-		# command to print on console, lacks sizes
-		cmd_opts = cmdp +' '+ options
-		cmd_opts = re.sub( '  +', ' ', cmd_opts )  # compress spaces
-				
-		# skip tests before start
-		if ( start and not start.search( cmdp )):
-			continue
-		start = None
-		
-		# skip tests not in args, or duplicates, or non-existing
-		#if not os.path.exists( cmdp ):
-		#	print >>sys.stderr, cmd, cmdp, "doesn't exist"
-		if (    (args and not cmdp in args)
-		     or (not os.path.exists( cmdp ))
-		     or (seen.has_key( cmd_opts )) ):
-			continue
-		# end
-		seen[ cmd_opts ] = True
-		
-		if ( opts.memcheck ):
-			cmd_args = 'cuda-memcheck ' + cmd_args
-		
-		go = True
-		while( go ):
-			if pause > 0:
-				time.sleep( pause )
-				pause = 0
-			# end
-			
-			print
-			print '*'*100
-			print cmd_args
-			print '*'*100
-			sys.stdout.flush()
-			
-			if ( batch ):
-				if ( last_cmd and cmd != last_cmd ):
-					sys.stderr.write( '\n' )
-				last_cmd = cmd
-				sys.stderr.write( '%-40s' % cmd_opts )
-				sys.stderr.flush()
-			# end
-			
-			if ( disabled ):
-				if ( comments ):
-					sys.stderr.write( '  (disabled: ' + comments + ')\n' )
-				else:
-					sys.stderr.write( '  (disabled)\n' )
-				go = False
-				continue
-			# end
-			
-			if ( make ):
-				m = 'make lib ' + cmdp
-				print m
-				run( m )
-			# end
-			
-			t = time.time()
-			(okay, fail, error, status) = run( cmd_args )
-			t = time.time() - t
-			
-			# count stats
-			ntest  += 1
-			nokay  += okay
-			nfail  += fail
-			nerror += error
-			
-			errmsg = ''
-			if ( fail > 0 ):
-				errmsg += '  ** %d tests failed' % (fail)
-			if ( error > 0 ):
-				errmsg += '  ** %d errors' % (error)
-			if ( status < 0 ):
-				errmsg += '  ** exit with signal %d' % (-status)
-				nerror += 1  # count crash as an error
-			
-			if ( errmsg != '' ):
-				if ( batch ):
-					sys.stderr.write( errmsg + '\n' )  # to console
-				sys.stdout.write( errmsg + '\n' )  # to file
-				failures[ cmd_opts ] = True
-			else:
-				sys.stderr.write( '  ok\n' )
-			# end
-			
-			if ( batch ):
-				# set to sleep a few seconds before next test,
-				# to allow processor to cool off some between tests.
-				pause = min( t, 5. )
-				go = False
-			else:
-				x = raw_input( '[enter to continue; M to make and re-run] ' )
-				if ( x in ('m','M')):
-					make = True
-				else:
-					go = False
-			# endif
-		# end
-	# end
+    (cmd, options, sizes, comments) = test
+    
+    make = False
+    disabled = (cmd[0] == '#')
+    if ( disabled ):
+        cmd = cmd[1:]
+    
+    # command to run
+    cmd_args = './' + cmd +' '+ options +' '+ sizes
+    cmd_args = re.sub( '  +', ' ', cmd_args )  # compress spaces
+    
+    # skip tests before start
+    if ( start and not start.search( cmd )):
+        continue
+    start = None
+    
+    # skip tests not in args, or duplicates, or non-existing
+    #if not os.path.exists( cmd ):
+    #    print >>sys.stderr, cmd, cmd, "doesn't exist"
+    if (    (args and not cmd in args)
+         or (not os.path.exists( cmd ))
+         or (seen.has_key( cmd_args )) ):
+        print "skipping", cmd_args
+        continue
+    # end
+    seen[ cmd_args ] = True
+    
+    if ( opts.memcheck ):
+        cmd_args = 'cuda-memcheck ' + cmd_args
+    
+    go = True
+    while( go ):
+        if pause > 0:
+            time.sleep( pause )
+            pause = 0
+        # end
+        
+        print
+        print '*'*100
+        print cmd_args
+        print '*'*100
+        sys.stdout.flush()
+        
+        if ( batch ):
+            if ( last_cmd and cmd != last_cmd ):
+                sys.stderr.write( '\n' )
+            last_cmd = cmd
+            sys.stderr.write( '%-40s' % cmd_args )
+            sys.stderr.flush()
+        # end
+        
+        if ( disabled ):
+            if ( comments ):
+                sys.stderr.write( '  (disabled: ' + comments + ')\n' )
+            else:
+                sys.stderr.write( '  (disabled)\n' )
+            go = False
+            continue
+        # end
+        
+        if ( make ):
+            m = 'make lib ' + cmd
+            print m
+            run( m )
+        # end
+        
+        t = time.time()
+        (okay, fail, error, status) = run( cmd_args )
+        t = time.time() - t
+        
+        # count stats
+        ntest  += 1
+        nokay  += okay
+        nfail  += fail
+        nerror += error
+        
+        errmsg = ''
+        if ( fail > 0 ):
+            errmsg += '  ** %d tests failed' % (fail)
+        if ( error > 0 ):
+            errmsg += '  ** %d errors' % (error)
+        if ( status < 0 ):
+            errmsg += '  ** exit with signal %d' % (-status)
+            nerror += 1  # count crash as an error
+        
+        if ( errmsg != '' ):
+            if ( batch ):
+                sys.stderr.write( errmsg + '\n' )  # to console
+            sys.stdout.write( errmsg + '\n' )  # to file
+            failures[ cmd_args ] = True
+        else:
+            sys.stderr.write( '  ok\n' )
+        # end
+        
+        if ( batch ):
+            # set to sleep a few seconds before next test,
+            # to allow processor to cool off some between tests.
+            pause = min( t, 5. )
+            go = False
+        else:
+            x = raw_input( '[enter to continue; M to make and re-run] ' )
+            if ( x in ('m','M')):
+                make = True
+            else:
+                go = False
+        # endif
+    # end
 # end
 
 
@@ -556,16 +558,16 @@ msg += 'summary' + '\n'
 msg += '*'*100   + '\n'
 
 if ( nfail == 0 and nerror == 0 ):
-	msg += 'all %d tests in %d commands passed!\n' % (nokay, ntest)
+    msg += 'all %d tests in %d commands passed!\n' % (nokay, ntest)
 else:
-	msg += '%5d tests in %d commands passed\n' % (nokay, ntest)
-	msg += '%5d tests failed accuracy test\n' % (nfail)
-	msg += '%5d errors detected (crashes, CUDA errors, etc.)\n' % (nerror)
-	f = failures.keys()
-	f.sort()
-	msg += 'routines with failures:\n    ' + '\n    '.join( f ) + '\n'
+    msg += '%5d tests in %d commands passed\n' % (nokay, ntest)
+    msg += '%5d tests failed accuracy test\n' % (nfail)
+    msg += '%5d errors detected (crashes, CUDA errors, etc.)\n' % (nerror)
+    f = failures.keys()
+    f.sort()
+    msg += 'routines with failures:\n    ' + '\n    '.join( f ) + '\n'
 # end
 
 if ( batch ):
-	sys.stderr.write( msg )  # to console
+    sys.stderr.write( msg )  # to console
 sys.stdout.write( msg )  # to file
