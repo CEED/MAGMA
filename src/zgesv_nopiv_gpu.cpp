@@ -16,7 +16,7 @@
     -------
     Solves a system of linear equations
        A * X = B
-    where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
+    where A is a general n-by-n matrix and X and B are n-by-nrhs matrices.
     The LU decomposition with no pivoting is
     used to factor A as
        A = L * U,
@@ -28,31 +28,31 @@
     ---------
     @param[in]
     n       INTEGER
-            The order of the matrix A.  N >= 0.
+            The order of the matrix A.  n >= 0.
 
     @param[in]
     nrhs    INTEGER
             The number of right hand sides, i.e., the number of columns
-            of the matrix B.  NRHS >= 0.
+            of the matrix B.  nrhs >= 0.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N).
-            On entry, the M-by-N matrix to be factored.
+    dA       COMPLEX_16 array, dimension (ldda,n).
+            On entry, the n-by-n matrix to be factored.
             On exit, the factors L and U from the factorization
             A = L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+    ldda     INTEGER
+            The leading dimension of the array A.  ldda >= max(1,n).
 
     @param[in,out]
-    B       COMPLEX_16 array, dimension (LDB,NRHS)
+    dB       COMPLEX_16 array, dimension (lddb,nrhs)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
-    ldb     INTEGER
-            The leading dimension of the array B.  LDB >= max(1,N).
+    lddb     INTEGER
+            The leading dimension of the array B.  ldb >= max(1,n).
 
     @param[out]
     info    INTEGER
@@ -67,8 +67,8 @@
 
 extern "C" magma_int_t
 magma_zgesv_nopiv_gpu( magma_int_t n, magma_int_t nrhs, 
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
+                 magmaDoubleComplex_ptr dA, magma_int_t ldda,
+                 magmaDoubleComplex_ptr dB, magma_int_t lddb, 
                  magma_int_t *info)
 {
     magma_int_t ret;
@@ -81,7 +81,7 @@ magma_zgesv_nopiv_gpu( magma_int_t n, magma_int_t nrhs,
     } else if (ldda < max(1,n)) {
         *info = -4;
     } else if (lddb < max(1,n)) {
-        *info = -7;
+        *info = -6;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );

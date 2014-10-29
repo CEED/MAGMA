@@ -71,17 +71,24 @@ magmablas_zsetmatrix_transpose(
    */
 void
 magmablas_zprbt(
-    magma_int_t N, magmaDoubleComplex *d_A, magma_int_t lda, 
-    magmaDoubleComplex*d_u, magmaDoubleComplex *d_v);
+    magma_int_t n, 
+    magmaDoubleComplex *dA, magma_int_t ldda, 
+    magmaDoubleComplex*du, magmaDoubleComplex *dv);
 
 void
 magmablas_zprbt_mv(
-    magma_int_t N, magmaDoubleComplex *d_v, magmaDoubleComplex *d_b);
+    magma_int_t n, 
+    magmaDoubleComplex *dv, magmaDoubleComplex *db);
 
 void
 magmablas_zprbt_mtv(
-    magma_int_t N, magmaDoubleComplex *d_u, magmaDoubleComplex *d_b);
+    magma_int_t n, 
+    magmaDoubleComplex *du, magmaDoubleComplex *db);
 
+void
+magmablas_zaxpycp2(
+    magma_int_t m, magmaDoubleComplex *r, magmaDoubleComplex *x,
+    const magmaDoubleComplex *b);
 
   /*
    * Multi-GPU copy functions

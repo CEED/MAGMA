@@ -84,7 +84,7 @@ magma_zgetrs_nopiv_gpu(
     } else if (ldda < max(1,n)) {
         *info = -5;
     } else if (lddb < max(1,n)) {
-        *info = -8;
+        *info = -7;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );

@@ -171,6 +171,7 @@ lapack = [
     ('sgeqrs',         'dgeqrs',         'cgeqrs',         'zgeqrs'          ),
     ('sgeqrt',         'dgeqrt',         'cgeqrt',         'zgeqrt'          ),
     ('sgerbt',         'dgerbt',         'cgerbt',         'zgerbt'          ),
+    ('sgerfs',         'dgerfs',         'cgerfs',         'zgerfs'          ),
     ('sgesdd',         'dgesdd',         'cgesdd',         'zgesdd'          ),
     ('sgessm',         'dgessm',         'cgessm',         'zgessm'          ),
     ('sgesv',          'dgesv',          'cgesv',          'zgesv'           ),  # also does zgesvd

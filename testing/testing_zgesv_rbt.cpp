@@ -76,7 +76,7 @@ int main(int argc, char **argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zgesv_rbt( N, nrhs, h_LU, lda, h_X, ldb, &info );
+            magma_zgesv_rbt(MagmaTrue, N, nrhs, h_LU, lda, h_X, ldb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)

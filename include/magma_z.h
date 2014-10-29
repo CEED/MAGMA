@@ -184,7 +184,7 @@ magma_zgesv(
 
 magma_int_t
 magma_zgesv_rbt(
-    magma_int_t n, magma_int_t nrhs,
+    magma_bool_t ref, magma_int_t n, magma_int_t nrhs,
     magmaDoubleComplex *A, magma_int_t lda, 
     magmaDoubleComplex *B, magma_int_t ldb,
     magma_int_t *info);
@@ -1065,11 +1065,12 @@ magma_zgeqrs3_gpu(
     magma_int_t *info);
 
 magma_int_t
-magma_zgerbt_gpu(char gen, magma_int_t N,
-    magma_int_t NRHS, magmaDoubleComplex *dA,
-    magma_int_t lda, magmaDoubleComplex *dB,
-    magma_int_t ldb, magmaDoubleComplex *U,
-    magmaDoubleComplex *V);
+magma_zgerbt_gpu(
+    magma_bool_t gen, magma_int_t n,magma_int_t nrhs, 
+    magmaDoubleComplex_ptr dA, magma_int_t ldda, 
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, 
+    magmaDoubleComplex *U,magmaDoubleComplex *V,
+    magma_int_t *info);
 
 magma_int_t
 magma_zgessm_gpu(
@@ -1088,10 +1089,11 @@ magma_zgesv_gpu(
     magma_int_t *info);
 
 magma_int_t
-magma_zgesv_nopiv_gpu( magma_int_t n, magma_int_t nrhs, 
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
-                 magma_int_t *info);
+magma_zgesv_nopiv_gpu( 
+    magma_int_t n, magma_int_t nrhs, 
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, 
+    magma_int_t *info);
 
 magma_int_t
 magma_zgetf2_gpu(
