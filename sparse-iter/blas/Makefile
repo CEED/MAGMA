@@ -19,11 +19,6 @@ ZSRC := \
 	magma_clag2z.cpp	\
 	magma_zlag2c.cpp	\
 	zbajac_csr.cu		\
-	zbcsrswp.cu		\
-	zbcsrtrsv.cu		\
-	zbcsrcpy.cu		\
-	zbcsrlugemm.cu		\
-	zbcsrlupivloc.cu	\
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu		\
@@ -45,6 +40,11 @@ ZSRC := \
 	zmgesellcmmv.cu		\
 	zpipelinedgmres.cu	\
 
+	#zbcsrswp.cu		\
+	#zbcsrtrsv.cu		\
+	#zbcsrcpy.cu		\
+	#zbcsrlugemm.cu		\
+	#zbcsrlupivloc.cu	\
 
 # Auxiliary routines
 ZSRC += \
