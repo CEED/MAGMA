@@ -55,7 +55,13 @@ int main( int argc, char** argv)
 
     while(  i < argc ){
 
-        magma_z_csr_mtx( &A,  argv[i]  ); 
+        if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
+            i++;
+            magma_int_t laplace_size = atoi( argv[i] );
+            magma_zm_5stencil(  laplace_size, &A );
+        } else {                        // file-matrix test
+            magma_z_csr_mtx( &A,  argv[i]  ); 
+        }
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
