@@ -25,7 +25,6 @@
 #include "magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "mkl_spblas.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////

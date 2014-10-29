@@ -19,22 +19,25 @@
 #include <cusparse_v2.h>
 #include <cuda_profiler_api.h>
 
+#ifdef MAGMA_WITH_MKL
+    #include <mkl_spblas.h>
+
+    #define PRECISION_z
+    #if defined(PRECISION_z)
+    #define MKL_ADDR(a) (MKL_Complex16*)(a)
+    #elif defined(PRECISION_c)
+    #define MKL_ADDR(a) (MKL_Complex8*)(a)
+    #else
+    #define MKL_ADDR(a) (a)
+    #endif
+#endif
+
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magmasparse.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "mkl_spblas.h"
-
-#define PRECISION_z
-#if defined(PRECISION_z)
-#define MKL_ADDR(a) (MKL_Complex16*)(a)
-#elif defined(PRECISION_c)
-#define MKL_ADDR(a) (MKL_Complex8*)(a)
-#else
-#define MKL_ADDR(a) (a)
-#endif
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -50,8 +53,8 @@ int main( int argc, char** argv)
     double start, end;
     magma_int_t *pntre;
 
-    magmaDoubleComplex one  = MAGMA_Z_MAKE(1.0, 0.0);
-    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
+    magmaDoubleComplex c_one  = MAGMA_Z_MAKE(1.0, 0.0);
+    magmaDoubleComplex c_zero = MAGMA_Z_MAKE(0.0, 0.0);
     
     int i, j;
     for( i = 1; i < argc; ++i ) {
@@ -78,37 +81,40 @@ int main( int argc, char** argv)
         magma_z_vector hx, hy, dx, dy;
 
         // init CPU vectors
-        magma_z_vinit( &hx, Magma_CPU, hA.num_rows, one );
-        magma_z_vinit( &hy, Magma_CPU, hA.num_rows, zero );
+        magma_z_vinit( &hx, Magma_CPU, hA.num_rows, c_zero );
+        magma_z_vinit( &hy, Magma_CPU, hA.num_rows, c_zero );
 
         // init DEV vectors
-        magma_z_vinit( &dx, Magma_DEV, hA.num_rows, one );
-        magma_z_vinit( &dy, Magma_DEV, hA.num_rows, zero );
+        magma_z_vinit( &dx, Magma_DEV, hA.num_rows, c_zero );
+        magma_z_vinit( &dy, Magma_DEV, hA.num_rows, c_zero );
 
-/*
-        // calling MKL with CSR
-        pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
-        pntre[0] = 0;
-        for (j=0; j<hA.num_rows; j++ ) pntre[j] = hA.row[j+1];
-
-        start = magma_wtime(); 
-        for (j=0; j<10; j++ )
-        mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, 
-                    MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre, 
-                                            MKL_ADDR(hx.val), 
-                    MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
-        end = magma_wtime();
-        printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
-                                        (end-start)/10, FLOPS*10/(end-start) );
-        free(pntre);
-*/
+        #ifdef MAGMA_WITH_MKL
+            // calling MKL with CSR
+            pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
+            pntre[0] = 0;
+            for (j=0; j<hA.num_rows; j++ ) {
+                pntre[j] = hA.row[j+1];
+            }
+    
+            start = magma_wtime();
+            for (j=0; j<10; j++ ) {
+                mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, 
+                            MKL_ADDR(&c_zero), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre, 
+                                                    MKL_ADDR(hx.val), 
+                            MKL_ADDR(&c_zero),        MKL_ADDR(hy.val) );
+            }
+            end = magma_wtime();
+            printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
+                                            (end-start)/10, FLOPS*10/(end-start) );
+            free(pntre);
+        #endif // MAGMA_WITH_MKL
 
         // copy matrix to GPU
         magma_z_mtransfer( hA, &dA, Magma_CPU, Magma_DEV);
         // SpMV on GPU (CSR)
         magma_device_sync(); start = magma_wtime(); 
         for (j=0; j<10; j++)
-            magma_z_spmv( one, dA, dx, zero, dy);
+            magma_z_spmv( c_zero, dA, dx, c_zero, dy);
         magma_device_sync(); end = magma_wtime(); 
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
@@ -121,7 +127,7 @@ int main( int argc, char** argv)
         // SpMV on GPU (ELL)
         magma_device_sync(); start = magma_wtime(); 
         for (j=0; j<10; j++)
-            magma_z_spmv( one, dA_ELL, dx, zero, dy);
+            magma_z_spmv( c_zero, dA_ELL, dx, c_zero, dy);
         magma_device_sync(); end = magma_wtime(); 
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard ELL).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
@@ -135,7 +141,7 @@ int main( int argc, char** argv)
         // SpMV on GPU (SELLP)
         magma_device_sync(); start = magma_wtime(); 
         for (j=0; j<10; j++)
-            magma_z_spmv( one, dA_SELLP, dx, zero, dy);
+            magma_z_spmv( c_zero, dA_SELLP, dx, c_zero, dy);
         magma_device_sync(); end = magma_wtime(); 
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (SELLP).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
