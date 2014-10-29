@@ -83,8 +83,8 @@ int main( int argc, char** argv)
         magma_z_spmv( one, B_d, x, zero, b );                 //  b = A x
         magma_z_vfree(&x);
         magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
-
-        magma_z_solver( B_d, b, &x, &zopts ); 
+    
+        magma_z_solver( B_d, b, &x, &zopts );         
 
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par );
 
