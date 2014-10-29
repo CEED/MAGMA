@@ -127,7 +127,7 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         r0[0] = ATOLERANCE;
     // check positive definite
     if (den[0] <= 0.0) {
-        printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
+        printf("Operator A is not postive definite. (Ar,r) = %f\n", den[0]);
         return -100;
     }
     if ( nom[0] < r0[0] )
