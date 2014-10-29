@@ -11,7 +11,7 @@ include $(MAGMA_DIR)/Makefile.internal
 -include Makefile.local
 -include Makefile.gen
 
-#LIB += -lcusparse
+LIB += -lcusparse
 
 .PHONY: all lib libmagma_sparse test clean cleanall install shared
 

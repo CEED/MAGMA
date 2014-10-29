@@ -32,10 +32,10 @@
 
 
 // --------------------
-const char *usage_sparse_short =
+static const char *usage_sparse_short =
 "Usage: %s [options] [-h|--help]  matrices\n\n";
 
-const char *usage_sparse =
+static const char *usage_sparse =
 "Options are:\n"
 " --format x     Possibility to choose a format for the sparse matrix:\n"
 "               0   CSR\n"
