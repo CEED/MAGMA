@@ -78,21 +78,15 @@ when executing "./run_xsolver -h".
 
 "--format k"
     k = 0 : CSR
-    k = 1 : ELLPACK
-    k = 2 : SELLP
+    k = 1 : ELLPACK/ELL
+    k = 2 : SELL-P
 
 "--blocksize k"
-    for Magma_ELLPACKRT: denotes the number of rows in one slice of the matrix
-                      and the number of rows assigned to one multiprocessor
-    for Magma_SELLP: k denotes the number of rows in one slice of the matrix
-                      and the number of rows assigned to one multiprocessor
-    for Magma_SELLP: k denotes the number of rows in one slice of the matrix
+    for Magma_SELL-P: k denotes the number of rows in one slice of the matrix
                       and the number of rows assigned to one multiprocessor
 
 "--alignment k"
-    for Magma_ELLPACKRT: k denotes the number of threads assigned to one row
-                      notice: blocksize * alignment needs to fit into shared mem
-    for Magma_SELLCM: k denotes the number of threads assigned to one row
+    for Magma_SELL-P: k denotes the number of threads assigned to one row
                       notice: blocksize * alignment needs to fit into shared mem
 
 "--maxiter k"
@@ -108,7 +102,6 @@ when executing "./run_xsolver -h".
 "--mscale k"
    k = 0 no scaling
    k = 1 scale symmetrically to unit diagonal
-   k = 2 scale to unit rownorm
 
 "--preconditioner k"
     k = 0 : Jacobi

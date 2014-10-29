@@ -46,7 +46,6 @@ static const char *usage_sparse =
 " --mscale      Possibility to scale the original matrix:\n"
 "               0   no scaling\n"
 "               1   symmetric scaling to unit diagonal\n"
-"               2   scaling to unit row-norm\n"
 " --solver      Possibility to choose a solver:\n"
 "               0   CG\n"
 "               1   merged CG\n"
