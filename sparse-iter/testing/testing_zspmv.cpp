@@ -95,17 +95,35 @@ int main( int argc, char** argv)
             for (j=0; j<hA.num_rows; j++ ) {
                 pntre[j] = hA.row[j+1];
             }
+             MKL_INT num_rows = hA.num_rows;
+             MKL_INT num_cols = hA.num_cols;
+             MKL_INT nnz = hA.nnz;
+
+            MKL_INT *col;
+            TESTING_MALLOC_CPU( col, MKL_INT, nnz );
+            for( magma_int_t i=0; i < hA.nnz; ++i ) {
+                col[ i ] = hA.col[ i ];
+            }
+            MKL_INT *row;
+            TESTING_MALLOC_CPU( row, MKL_INT, num_rows );
+            for( magma_int_t i=0; i < hA.num_rows; ++i ) {
+                row[ i ] = hA.col[ i ];
+            }
     
             start = magma_wtime();
             for (j=0; j<10; j++ ) {
-                mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, 
-                            MKL_ADDR(&c_zero), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre, 
+                mkl_zcsrmv( "N", &num_rows, &num_cols, 
+                            MKL_ADDR(&c_zero), "GFNC", MKL_ADDR(hA.val), 
+                            col, row, pntre, 
                                                     MKL_ADDR(hx.val), 
                             MKL_ADDR(&c_zero),        MKL_ADDR(hy.val) );
             }
             end = magma_wtime();
             printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
                                             (end-start)/10, FLOPS*10/(end-start) );
+
+            TESTING_FREE_CPU( row );
+            TESTING_FREE_CPU( col );
             free(pntre);
         #endif // MAGMA_WITH_MKL
 

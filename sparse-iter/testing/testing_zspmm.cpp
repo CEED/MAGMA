@@ -102,17 +102,33 @@ int main( int argc, char** argv)
         for (j=0; j<m; j++ ) pntre[j] = hA.row[j+1];
 
         #ifdef MAGMA_WITH_MKL
+            MKL_INT num_rows = hA.num_rows;
+            MKL_INT num_cols = hA.num_cols;
+            MKL_INT nnz = hA.nnz;
+            MKL_INT num_vecs = n;
+
+            MKL_INT *col;
+            TESTING_MALLOC_CPU( col, MKL_INT, nnz );
+            for( magma_int_t i=0; i < hA.nnz; ++i ) {
+                col[ i ] = hA.col[ i ];
+            }
+            MKL_INT *row;
+            TESTING_MALLOC_CPU( row, MKL_INT, num_rows );
+            for( magma_int_t i=0; i < hA.num_rows; ++i ) {
+                row[ i ] = hA.col[ i ];
+            }
+
             // === Call MKL with consecutive SpMVs, using mkl_zcsrmv ===
             // warmp up
-            mkl_zcsrmv( "N", &m, &hA.num_cols,
-                        MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre,
-                        MKL_ADDR(hx.val),
+            mkl_zcsrmv( "N", &num_rows, &num_cols, 
+                        MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), col, row, pntre, 
+                                                MKL_ADDR(hx.val), 
                         MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
     
             start = magma_wtime(); 
             for (j=0; j<10; j++ )
-            mkl_zcsrmv( "N", &m, &hA.num_cols, 
-                        MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre, 
+                mkl_zcsrmv( "N", &num_rows, &num_cols, 
+                        MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), col, row, pntre, 
                                                 MKL_ADDR(hx.val), 
                         MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
             end = magma_wtime();
@@ -125,23 +141,25 @@ int main( int argc, char** argv)
             char matdescra[6] = {'g', 'l', 'n', 'c', 'x', 'x'};
     
             // warm up
-            mkl_zcsrmm( &transa, &m, &n, &hA.num_cols, MKL_ADDR(&one), matdescra,
-                        MKL_ADDR(hA.val), hA.col, hA.row, pntre,
-                        MKL_ADDR(hx.val), &ldb,
-                        MKL_ADDR(&zero),
-                        MKL_ADDR(hy.val), &ldc );
+            mkl_zcsrmm( &transa, &num_rows, &num_vecs, &num_cols, MKL_ADDR(&one), matdescra, 
+                      MKL_ADDR(hA.val), col, row, pntre,
+                      MKL_ADDR(hx.val), &ldb,
+                      MKL_ADDR(&zero),        
+                      MKL_ADDR(hy.val), &ldc );
     
             start = magma_wtime();
             for (j=0; j<10; j++ )
-                mkl_zcsrmm( &transa, &m, &n, &hA.num_cols, MKL_ADDR(&one), matdescra, 
-                          MKL_ADDR(hA.val), hA.col, hA.row, pntre,
+                mkl_zcsrmm( &transa, &num_rows, &num_vecs, &num_cols, MKL_ADDR(&one), matdescra, 
+                          MKL_ADDR(hA.val), col, row, pntre,
                           MKL_ADDR(hx.val), &ldb,
                           MKL_ADDR(&zero),        
                           MKL_ADDR(hy.val), &ldc );
             end = magma_wtime();
             printf( "\n > MKL SpMM  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
                     (end-start)/10, FLOPS*10.*n/(end-start) );
-    
+
+            TESTING_FREE_CPU( row );
+            TESTING_FREE_CPU( col );
             free(pntre);
         #endif // MAGMA_WITH_MKL
 
