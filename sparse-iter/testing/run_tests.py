@@ -417,6 +417,12 @@ def run( cmd ):
             fail += 1
         if re.search( 'exit|memory mapping error|CUDA runtime error|illegal value|ERROR SUMMARY: [1-9]', line ):
             error += 1
+        m = re.search( 'solver info: (-?\d+)', line ):
+        if ( m ):
+            info = int( m.group(1) )
+            if ( info == 0 ):
+                okay += 1
+        # end
     # end
     
     status = p.wait()
