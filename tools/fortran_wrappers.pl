@@ -19,7 +19,7 @@ use Text::Wrap;
 my( $pre, $return, $func, $is_gpu, $text, $rest, $comment,
 	$funcf,
 	$wrapper, $call, $interface, $vars,
-	$args, @args, $arg, $type, $base_type, $var, $first_arg, $is_ptr );
+	$args, @args, $arg, $type, $type2, $base_type, $var, $first_arg, $is_ptr );
 
 # ignore auxiliary functions which the user doesn't need
 # ignore PLASMA functions (tstrf, incpiv)
@@ -31,22 +31,26 @@ my @ignore = qw(
 	[sdcz]potrf_msub
 	[sdcz]potrf2_msub
 	
+	[cz]lahef
+	[sd]lasyf
 	[sd]sygvr
 	[sd]sygvx
-	[sdcz]laqps
-    [sdcz]latrd
-    [sdcz]latrd2
-    [sdcz]lahr2
-    [sdcz]lahru
-    [sdcz]labrd
-    [sdcz]laex\d
-    [sdcz]lahr2_m
-    [sdcz]lahru_m
-    [sdcz]tstrf
-    [sdcz]getrf_incpiv
-    [sdcz]larfg
-    [sdcz]getrf2
-    [sdcz]geqr2
+	[sdcz]geqr2
+	[sdcz]getrf2
+	[sdcz]getrf_incpiv
+	[sdcz]labrd
+	[sdcz]laex\d
+	[sdcz]laex\d_m
+	[sdcz]lahr2
+	[sdcz]lahr2_m
+	[sdcz]lahru
+	[sdcz]lahru_m
+	[sdcz]laqps\d?
+	[sdcz]larfg
+	[sdcz]latrd
+	[sdcz]latrd2
+	[sdcz]tsqrt
+	[sdcz]tstrf
 );
 my $ignore = join( "|", @ignore );
 print STDERR "ignore: $ignore\n";
@@ -91,6 +95,7 @@ my %f90types = (
 	'magmaFloatComplex'  => 'complex         ',
 	'magmaDoubleComplex' => 'complex*16      ',
 	'magma_queue_t'      => 'integer         ',  # not sure what type to use for streams -- they are pointers, right?
+	'magma_event_t'      => 'integer         ',  # not sure what type to use for events  -- they are pointers, right?
 	
 	'magmaFloat_ptr'         => 'magma_devptr_t',
 	'magmaDouble_ptr'        => 'magma_devptr_t',
@@ -104,17 +109,24 @@ for my $type ( keys %constants ) {
 }
 
 my %devptrs = (
-	'magma_int_t'        => 'magma_idevptr',
-	'float'              => 'magma_sdevptr',
-	'double'             => 'magma_ddevptr',
-	'cuFloatComplex'     => 'magma_cdevptr',
-	'cuDoubleComplex'    => 'magma_zdevptr',
-	'magmaFloatComplex'  => 'magma_cdevptr',
-	'magmaDoubleComplex' => 'magma_zdevptr',
-	'magmaFloat_ptr'         => 'magma_cdevptr',
-	'magmaDouble_ptr'        => 'magma_zdevptr',
+	'magma_int_t'            => 'magma_idevptr',
+	'float'                  => 'magma_sdevptr',
+	'double'                 => 'magma_ddevptr',
+	
+	'cuFloatComplex'         => 'magma_cdevptr',
+	'cuDoubleComplex'        => 'magma_zdevptr',
+	'magmaFloatComplex'      => 'magma_cdevptr',
+	'magmaDoubleComplex'     => 'magma_zdevptr',
+	
+	'magmaFloat_ptr'         => 'magma_sdevptr',
+	'magmaDouble_ptr'        => 'magma_ddevptr',
 	'magmaFloatComplex_ptr'  => 'magma_cdevptr',
 	'magmaDoubleComplex_ptr' => 'magma_zdevptr',
+	
+	'magmaFloat_const_ptr'         => 'magma_sdevptr',
+	'magmaDouble_const_ptr'        => 'magma_ddevptr',
+	'magmaFloatComplex_const_ptr'  => 'magma_cdevptr',
+	'magmaDoubleComplex_const_ptr' => 'magma_zdevptr',
 );
 
 # Fortran 90 has 132 line length limit, so wrap text
@@ -125,9 +137,11 @@ $Text::Wrap::unexpand  = 0;  # no tabs
 
 # --------------------
 # parse options
+my $verbose = 0;
 my $opencl = 0;
 my( $file_wrapper, $file_interface );
 GetOptions(
+	"verbose"     => \$verbose,
 	"opencl"      => \$opencl,
 	"wrapper=s"   => \$file_wrapper,
 	"interface=s" => \$file_interface,
@@ -247,7 +261,8 @@ s/extern const .*;\n//g;
 
 
 while( $_ ) {
-	if ( m/(.*?)^(magma_err_t|magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
+	# look for function, e.g.: "magma_int_t magma_foo_gpu("
+	if ( m/(.*?)^(magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
 		# parse magma function
 		$pre    = $1;
 		$return = $2;
@@ -255,6 +270,7 @@ while( $_ ) {
 		$is_gpu = $4;
 		$text   = $5;
 		
+		# get arguments: "( ... )"
 		($args, $rest) = extract_bracketed( $text, '()' );
 		$args =~ s/\n/ /g;
 		$args =~ s/^\( *//;
@@ -272,7 +288,9 @@ while( $_ ) {
 		}
 		
 		my $match = $func =~ m/^($ignore)$/;
-		print STDERR "FUNC $func $match\n";
+		if ( $verbose ) {
+			print STDERR "FUNC $func $match\n";
+		}
 		if ( $opencl and $is_gpu ) {
 			# ignore OpenCL GPU functions, since
 			# we haven't dealt with passing cl_mem objects in Fortran yet
@@ -302,7 +320,7 @@ while( $_ ) {
 			
 			$first_arg = 1;
 			foreach $arg ( @args ) {
-				($type, $var) = $arg =~ m/^((?:const +)?\w+(?: *\*+)?) *(\w+[\[\]0-9]*)$/;
+				($type, $var, $type2) = $arg =~ m/^((?:const +)?\w+(?: *\*+)?) *(\w+)([\[0-9\]]*)$/;
 				if ( not $type ) {
 					print STDERR "\nFAILED: func $func, arg $arg\n";
 				}
@@ -313,23 +331,31 @@ while( $_ ) {
 				$base_type =~ s/ +$//;
 				#print STDERR "base_type $base_type\n";
 				
-				$is_ptr = ($type =~ m/\*/);
+				$is_ptr = ($type =~ m/\*/ or $type =~ m/_ptr$/ or $type2 ne "");
+				#print STDERR "  type $type, type2 $type2, var $var, is_ptr $is_ptr\n";
 				if ( $is_ptr ) {
 					unless( $first_arg ) {
 						$wrapper   .= ",\n    ";
 						$call      .= ",\n        ";
 						$interface .= ", ";
 					}
-					if ( ($is_gpu and $var =~ m/^d\w+/) or $var eq "dT" ) {
-						# for _gpu interfaces assume ptrs that start with "d" are device pointers
-						# Also CPU interface for geqrf, etc., passes dT as device pointer (weirdly)
+					if ( $type =~ m/_ptr$/ or ($is_gpu and $var =~ m/^d\w+/) or $var eq "dT" ) {
+						# Now, the _ptr types identify device pointers.
+						# Previously, for _gpu interfaces, assume ptrs that start with "d" are device pointers.
+						# Also CPU interface for geqrf, etc., passes dT as device pointer (weirdly).
+						if ( $type !~ m/_ptr$/ ) {
+							print STDERR "WARNING: assuming in $func$is_gpu: $var is devptr, but lacks _ptr!\n";
+						}
+						if ( not defined $devptrs{$base_type} ) {
+							print STDERR "ERROR: devptrs{$base_type} not defined\n";
+						}
 						$wrapper .= "devptr_t *$var";
 						$call    .= "$devptrs{$base_type}($var)";
 						$vars    .= "    magma_devptr_t   :: $var\n";
 					}
 					else {
-						$wrapper .= "$type$var";
-						$call .= $var;
+						$wrapper .= $arg;
+						$call    .= $var;
 						if ( $var =~ m/^(info|iter|m)$/ ) {
 							# special case for variables passed as pointers in C,
 							# but are single values, not arrays.
@@ -370,7 +396,7 @@ while( $_ ) {
 			$interface .= "${vars}end subroutine $funcf\n\n";
 		}
 		
-		if ( $pre ) {
+		if ( $pre and $verbose ) {
 			print STDERR "WARNING: ignoring unrecognized text before function: <<<\n$pre>>>\n";
 		}
 		
@@ -381,7 +407,9 @@ while( $_ ) {
 		s/^ *;//;
 	}
 	else {
-		print STDERR "WARNING: ignoring unrecognized text at end of file: <<<\n$_>>>\n";
+		if ( $verbose ) {
+			print STDERR "WARNING: ignoring unrecognized text at end of file: <<<\n$_>>>\n";
+		}
 		last;
 	}
 	s/^\n+//;
