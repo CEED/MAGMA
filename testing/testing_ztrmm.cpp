@@ -15,16 +15,11 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_CUBLAS
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#endif
-
 // includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -104,7 +99,7 @@ int main( int argc, char** argv)
             // note cublas does trmm out-of-place (i.e., adds output matrix C),
             // but allows C=B to do in-place.
             cublas_time = magma_sync_wtime( NULL );
-            cublasZtrmm( handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
+            cublasZtrmm( opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
                          cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
                          M, N, 
                          &alpha, d_A, ldda,

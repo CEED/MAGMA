@@ -58,15 +58,15 @@ int main( int argc, char** argv)
     magmaDoubleComplex_ptr d_A1, d_A2;
     
     // row-major and column-major performance
-    real_Double_t row_perf0, col_perf0;
-    real_Double_t row_perf1, col_perf1;
-    real_Double_t row_perf2, col_perf2;
-    real_Double_t row_perf3;
-    real_Double_t row_perf4;
-    real_Double_t row_perf5, col_perf5;
-    real_Double_t row_perf6, col_perf6;
-    real_Double_t row_perf7;
-    real_Double_t cpu_perf;
+    real_Double_t row_perf0 = MAGMA_D_NAN, col_perf0 = MAGMA_D_NAN;
+    real_Double_t row_perf1 = MAGMA_D_NAN, col_perf1 = MAGMA_D_NAN;
+    real_Double_t row_perf2 = MAGMA_D_NAN, col_perf2 = MAGMA_D_NAN;
+    real_Double_t row_perf3 = MAGMA_D_NAN;
+    real_Double_t row_perf4 = MAGMA_D_NAN;
+    real_Double_t row_perf5 = MAGMA_D_NAN, col_perf5 = MAGMA_D_NAN;
+    real_Double_t row_perf6 = MAGMA_D_NAN, col_perf6 = MAGMA_D_NAN;
+    real_Double_t row_perf7 = MAGMA_D_NAN;
+    real_Double_t cpu_perf  = MAGMA_D_NAN;
 
     real_Double_t time, gbytes;
 
@@ -81,7 +81,7 @@ int main( int argc, char** argv)
 
     magma_queue_t queue = 0;
     
-    printf("            cublasZswap       zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n");
+    printf("            %8s zswap    zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n", g_platform_str );
     printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  zlaswp   (GByte/s)\n");
     printf("==================================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -116,7 +116,7 @@ int main( int argc, char** argv)
             }
             
             /* =====================================================================
-             * cublasZswap, row-by-row (2 matrices)
+             * cublas / clBLAS / Xeon Phi zswap, row-by-row (2 matrices)
              */
             
             /* Row Major */
@@ -128,7 +128,11 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( queue );
             for( j=0; j < nb; j++) {
                 if ( j != (ipiv[j]-1)) {
-                    cublasZswap( N, d_A1+ldda*j, 1, d_A2+ldda*(ipiv[j]-1), 1);
+                    #ifdef HAVE_CUBLAS
+                        cublasZswap( opts.handle, N, d_A1+ldda*j, 1, d_A2+ldda*(ipiv[j]-1), 1 );
+                    #else
+                        magma_zswap( N, d_A1, ldda*j, 1, d_A2, ldda*(ipiv[j]-1), 1, opts.queue );
+                    #endif
                 }
             }
             time = magma_sync_wtime( queue ) - time;
@@ -154,7 +158,11 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( queue );
             for( j=0; j < nb; j++) {
                 if ( j != (ipiv[j]-1)) {
-                    cublasZswap( N, d_A1+j, ldda, d_A2+ipiv[j]-1, ldda);
+                    #ifdef HAVE_CUBLAS
+                        cublasZswap( opts.handle, N, d_A1+j, ldda, d_A2+ipiv[j]-1, ldda );
+                    #else
+                        magma_zswap( N, d_A1, j, ldda, d_A2, ipiv[j]-1, ldda, opts.queue );
+                    #endif
                 }
             }
             time = magma_sync_wtime( queue ) - time;
@@ -231,6 +239,7 @@ int main( int argc, char** argv)
              * zswapblk, blocked version (2 matrices)
              */
             
+            #ifdef HAVE_CUBLAS
             /* Row Major */
             init_matrix( N, N, h_A1, lda, 0 );
             init_matrix( N, N, h_A2, lda, 100 );
@@ -274,6 +283,7 @@ int main( int argc, char** argv)
             check += (diff_matrix( N, N, h_A1, lda, h_R1, lda ) ||
                       diff_matrix( N, N, h_A2, lda, h_R2, lda ))*shift;
             shift *= 2;
+            #endif
 
             /* =====================================================================
              * zpermute_long (1 matrix)
@@ -302,6 +312,7 @@ int main( int argc, char** argv)
              * LAPACK-style zlaswp (1 matrix)
              */
             
+            #ifdef HAVE_CUBLAS
             /* Row Major */
             init_matrix( N, N, h_A1, lda, 0 );
             magma_zsetmatrix( N, N, h_A1, lda, d_A1, ldda );
@@ -319,11 +330,13 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
+            #endif
 
             /* =====================================================================
              * LAPACK-style zlaswp (1 matrix) - d_ipiv on GPU
              */
             
+            #ifdef HAVE_CUBLAS
             /* Row Major */
             init_matrix( N, N, h_A1, lda, 0 );
             magma_zsetmatrix( N, N, h_A1, lda, d_A1, ldda );
@@ -342,11 +355,13 @@ int main( int argc, char** argv)
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
+            #endif
 
             /* =====================================================================
              * LAPACK-style zlaswpx (extended for row- and col-major) (1 matrix)
              */
             
+            #ifdef HAVE_CUBLAS
             /* Row Major */
             init_matrix( N, N, h_A1, lda, 0 );
             magma_zsetmatrix( N, N, h_A1, lda, d_A1, ldda );
@@ -373,14 +388,19 @@ int main( int argc, char** argv)
             magmablas_zlaswpx( N, d_A1, 1, ldda, 1, nb, ipiv, 1);
             time = magma_sync_wtime( queue ) - time;
             col_perf5 = gbytes / time;
+            #endif
             
+            /* LAPACK swap on CPU for comparison */
             time = magma_wtime();
             lapackf77_zlaswp( &N, h_A1, &lda, &ione, &nb, ipiv, &ione);
             time = magma_wtime() - time;
             cpu_perf = gbytes / time;
+            
+            #ifdef HAVE_CUBLAS
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
+            #endif
 
             /* =====================================================================
              * Copy matrix.

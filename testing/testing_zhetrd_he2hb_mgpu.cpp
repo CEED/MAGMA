@@ -43,7 +43,7 @@ extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 */
 int main( int argc, char** argv)
 {
-    TESTING_INIT_MGPU();
+    TESTING_INIT();
 
     real_Double_t gflops, gpu_time, gpu_perf;
     magmaDoubleComplex *h_A, *h_R, *h_work;
@@ -299,6 +299,6 @@ int main( int argc, char** argv)
         }
     }
 
-    TESTING_FINALIZE_MGPU();
+    TESTING_FINALIZE();
     return status;
 }

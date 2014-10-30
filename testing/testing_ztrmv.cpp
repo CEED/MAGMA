@@ -14,16 +14,11 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_CUBLAS
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#endif
-
 // includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -90,7 +85,7 @@ int main( int argc, char** argv)
             magma_zsetvector( N, h_x, 1, d_x, 1 );
             
             cublas_time = magma_sync_wtime( NULL );
-            cublasZtrmv( handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA),
+            cublasZtrmv( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA),
                          cublas_diag_const(opts.diag),
                          N, 
                          d_A, ldda,

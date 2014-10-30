@@ -7,20 +7,17 @@
 
        @precisions normal z -> c d s
 */
+// includes, system
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_CUBLAS
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#endif
-
+// includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 #define PRECISION_z
 
@@ -97,7 +94,7 @@ int main(int argc, char **argv)
             magma_zsetvector( N, Y, incy, dY, incy );
             
             cublas_time = magma_sync_wtime( 0 );
-            cublasZhemv( handle, cublas_uplo_const(opts.uplo),
+            cublasZhemv( opts.handle, cublas_uplo_const(opts.uplo),
                          N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
             cublas_time = magma_sync_wtime( 0 ) - cublas_time;
             cublas_perf = gflops / cublas_time;
@@ -107,17 +104,17 @@ int main(int argc, char **argv)
             /* =====================================================================
                Performs operation using CUBLAS - using atomics
                =================================================================== */
-            cublasSetAtomicsMode( handle, CUBLAS_ATOMICS_ALLOWED );
+            cublasSetAtomicsMode( opts.handle, CUBLAS_ATOMICS_ALLOWED );
             magma_zsetvector( N, Y, incy, dY, incy );
             
             atomics_time = magma_sync_wtime( 0 );
-            cublasZhemv( handle, cublas_uplo_const(opts.uplo),
+            cublasZhemv( opts.handle, cublas_uplo_const(opts.uplo),
                          N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
             atomics_time = magma_sync_wtime( 0 ) - atomics_time;
             atomics_perf = gflops / atomics_time;
             
             magma_zgetvector( N, dY, incy, Yatomics, incy );
-            cublasSetAtomicsMode( handle, CUBLAS_ATOMICS_NOT_ALLOWED );
+            cublasSetAtomicsMode( opts.handle, CUBLAS_ATOMICS_NOT_ALLOWED );
             
             /* =====================================================================
                Performs operation using MAGMABLAS

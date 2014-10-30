@@ -33,7 +33,7 @@
 int main( int argc, char** argv)
 {
 
-    TESTING_INIT_MGPU();
+    TESTING_INIT();
 
     real_Double_t   mgpu_time;
     magmaDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
@@ -240,6 +240,6 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_FINALIZE_MGPU();
+    TESTING_FINALIZE();
     return status;
 }

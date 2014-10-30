@@ -28,7 +28,7 @@
 int main( int argc, char** argv) 
 {
     /* Initialize */
-    TESTING_INIT_MGPU();
+    TESTING_INIT();
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double      work[1], error;
@@ -181,7 +181,7 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_FINALIZE_MGPU();
+    TESTING_FINALIZE();
 
     return 0;
 }

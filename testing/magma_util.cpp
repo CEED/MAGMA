@@ -20,6 +20,22 @@
 #include "common_magma.h"
 
 // --------------------
+// global variable
+#if   defined(HAVE_CUBLAS)
+    const char* g_platform_str = "cuBLAS";
+
+#elif defined(HAVE_clAmdBlas)
+    const char* g_platform_str = "clBLAS";
+
+#elif defined(HAVE_MIC)
+    const char* g_platform_str = "Xeon Phi";
+
+#else
+    #error "unknown platform"
+#endif
+
+
+// --------------------
 // If condition is false, print error message and exit.
 // Error message is formatted using printf, using any additional arguments.
 extern "C"
@@ -311,9 +327,13 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                           "error: --ngpu %s exceeds number of CUDA devices, %d.\n", argv[i], ndevices );
             magma_assert( opts->ngpu > 0,
                           "error: --ngpu %s is invalid; ensure ngpu > 0.\n", argv[i] );
-            #ifndef _MSC_VER  // not Windows
             // save in environment variable, so magma_num_gpus() picks it up
-            setenv( "MAGMA_NUM_GPUS", argv[i], true );
+            #if defined( _WIN32 ) || defined( _WIN64 )
+                char env_num_gpus[20] = "MAGMA_NUM_GPUS=";  // space for 4 digits & nil
+                strncat( env_num_gpus, argv[i], sizeof(env_num_gpus) - strlen(env_num_gpus) - 1 );
+                putenv( env_num_gpus );
+            #else
+                setenv( "MAGMA_NUM_GPUS", argv[i], true );
             #endif
         }
         else if ( strcmp("--nstream", argv[i]) == 0 && i+1 < argc ) {
@@ -498,8 +518,23 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->flock_fd = open_lockfile( lockfile, opts->flock_op );
     #endif
     
-    // set device
+    #ifdef HAVE_CUBLAS
+    // handle for directly calling cublas
     magma_setdevice( opts->device );
+    cublasCreate( &opts->handle );
+    #endif
+    
+    // create queues on this device
+    magma_int_t num;
+    magma_device_t devices[ MagmaMaxGPUs ];
+    magma_getdevices( devices, MagmaMaxGPUs, &num );
+    
+    // 2 queues + 1 extra NULL entry to catch errors
+    magma_queue_create( /*devices[ opts->device ],*/ &opts->queues2[ 0 ] );
+    magma_queue_create( /*devices[ opts->device ],*/ &opts->queues2[ 1 ] );
+    opts->queues2[ 2 ] = NULL;
+    
+    opts->queue = opts->queues2[ 0 ];
 }
 // end parse_opts
 

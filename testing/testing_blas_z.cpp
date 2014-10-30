@@ -18,20 +18,15 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_CUBLAS
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#endif
-
 // make sure that asserts are enabled
 #undef NDEBUG
 #include <assert.h>
 
 // includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 #define A(i,j)  &A[  (i) + (j)*ld ]
 #define dA(i,j) &dA[ (i) + (j)*ld ]
@@ -109,7 +104,7 @@ int main( int argc, char** argv )
             magma_zswap( m, dB(0,1), 1, dB(0,2), 1 );
             
             // check results, storing diff between magma and cuda calls in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dA, 1, dB, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dA, 1, dB, 1 );
             magma_zgetmatrix( m, n, dB, ld, C2, ld );
             error = lapackf77_zlange( "F", &m, &k, C2, &ld, work );
             total_error += error;
@@ -126,7 +121,7 @@ int main( int argc, char** argv )
         for( int j = 0; j < k; ++j ) {
             magma_int_t i1 = magma_izamax( m, dA(0,j), 1 );
             int i2;  // NOT magma_int_t, for cublas
-            cublasIzamax( handle, m, dA(0,j), 1, &i2 );
+            cublasIzamax( opts.handle, m, dA(0,j), 1, &i2 );
             // todo need sync here?
             assert( i1 == i2 );
             error += abs( i1 - i2 );
@@ -152,13 +147,13 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZgemv( handle, cublas_trans_const(trans[ia]),
+            cublasZgemv( opts.handle, cublas_trans_const(trans[ia]),
                          m, n, &alpha, dA, ld, dB, 1, &beta, dC2, 1 );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
             size = (trans[ia] == MagmaNoTrans ? m : n);
-            cublasZaxpy( handle, size, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, size, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetvector( size, dC2, 1, C2, 1 );
             error = lapackf77_zlange( "F", &size, &ione, C2, &ld, work );
             total_error += error;
@@ -182,12 +177,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZhemv( handle, cublas_uplo_const(uplo[iu]),
+            cublasZhemv( opts.handle, cublas_uplo_const(uplo[iu]),
                          m, &alpha, dA, ld, dB, 1, &beta, dC2, 1 );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, m, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, m, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetvector( m, dC2, 1, C2, 1 );
             error = lapackf77_zlange( "F", &m, &ione, C2, &ld, work );
             total_error += error;
@@ -223,12 +218,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZtrsv( handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
+            cublasZtrsv( opts.handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
                          cublas_diag_const(diag[id]), m, dA, ld, dC2, 1 );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, m, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, m, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetvector( m, dC2, 1, C2, 1 );
             error = lapackf77_zlange( "F", &m, &ione, C2, &ld, work );
             total_error += error;
@@ -258,12 +253,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZgemm( handle, cublas_trans_const(trans[ia]), cublas_trans_const(trans[ib]),
+            cublasZgemm( opts.handle, cublas_trans_const(trans[ia]), cublas_trans_const(trans[ib]),
                          m, n, k, &alpha, dA, ld, dB, ld, &beta, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( m, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &m, &n, C2, &ld, work );
             total_error += error;
@@ -290,12 +285,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZhemm( handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
+            cublasZhemm( opts.handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
                          m, n, &alpha, dA, ld, dB, ld, &beta, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( m, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &m, &n, C2, &ld, work );
             total_error += error;
@@ -321,12 +316,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZherk( handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
+            cublasZherk( opts.handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
                          n, k, &dalpha, dA, ld, &dbeta, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( n, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &n, &n, C2, &ld, work );
             total_error += error;
@@ -353,12 +348,12 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZher2k( handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
+            cublasZher2k( opts.handle, cublas_uplo_const(uplo[iu]), cublas_trans_const(trans[it]),
                           n, k, &alpha, dA, ld, dB, ld, &dbeta, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( n, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &n, &n, C2, &ld, work );
             total_error += error;
@@ -389,13 +384,13 @@ int main( int argc, char** argv )
             // note cublas does trmm out-of-place (i.e., adds output matrix C),
             // but allows C=B to do in-place.
             t2 = magma_sync_wtime( 0 );
-            cublasZtrmm( handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
+            cublasZtrmm( opts.handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
                          cublas_trans_const(trans[it]), cublas_diag_const(diag[id]),
                          m, n, &alpha, dA, ld, dC2, ld, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( m, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &n, &n, C2, &ld, work );
             total_error += error;
@@ -424,13 +419,13 @@ int main( int argc, char** argv )
             t1 = magma_sync_wtime( 0 ) - t1;
             
             t2 = magma_sync_wtime( 0 );
-            cublasZtrsm( handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
+            cublasZtrsm( opts.handle, cublas_side_const(side[is]), cublas_uplo_const(uplo[iu]),
                          cublas_trans_const(trans[it]), cublas_diag_const(diag[id]),
                          m, n, &alpha, dA, ld, dC2, ld );
             t2 = magma_sync_wtime( 0 ) - t2;
             
             // check results, storing diff between magma and cuda call in C2
-            cublasZaxpy( handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
+            cublasZaxpy( opts.handle, ld*n, &c_neg_one, dC1, 1, dC2, 1 );
             magma_zgetmatrix( m, n, dC2, ld, C2, ld );
             error = lapackf77_zlange( "F", &n, &n, C2, &ld, work );
             total_error += error;

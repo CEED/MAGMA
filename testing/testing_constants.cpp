@@ -9,11 +9,7 @@
 */
 #include <stdio.h>
 
-// include cublas before magma.h, to get v2
-#ifdef HAVE_CUBLAS
-#include <cublas_v2.h>
-#endif
-
+#include "testings.h"
 #include "magma.h"
 
 int gStatus;

@@ -8,20 +8,17 @@
        @precisions normal z -> c d s
 */
 
+// includes, system
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_CUBLAS
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#endif
-
+// includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 #define PRECISION_z
 
@@ -136,7 +133,7 @@ int main(int argc, char **argv)
             
             magma_setdevice(0);
             cuda_time = magma_wtime();
-            cublasZhemv( handle, cublas_uplo_const(opts.uplo), N-opts.offset,
+            cublasZhemv( opts.handle, cublas_uplo_const(opts.uplo), N-opts.offset,
                          &alpha, dA + opts.offset + opts.offset*lda, lda,
                                  dX[0] + opts.offset,    incx,
                          &beta,  dYcublas + opts.offset, incx );
@@ -165,7 +162,7 @@ int main(int argc, char **argv)
             // todo probably don't need sync here; getvector will sync
             for(d=1; d < opts.ngpu; d++) {
                 magma_setdevice(d);
-                cudaDeviceSynchronize();
+                magma_device_sync();
             }
             
             for(d=0; d < opts.ngpu; d++) {
