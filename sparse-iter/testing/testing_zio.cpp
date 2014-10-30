@@ -39,7 +39,7 @@ int main( int argc, char** argv)
 
 
     real_Double_t res;
-    magma_z_sparse_matrix A, A2;
+    magma_z_sparse_matrix A, A2, A3, A4;
 
     while(  i < argc ){
 
@@ -66,12 +66,27 @@ int main( int argc, char** argv)
         // delete temporary matrix
         unlink( filename );
 
+        // pass it to another application and back
+        magma_int_t m, n;
+        magma_index_t *row, *col;
+        magmaDoubleComplex *val;
+        magma_zcsrget( A2, &m, &n, &row, &col, &val );
+        magma_zcsrset( m, n, row, col, val, &A3 );
+
+
         magma_zmdiff( A, A2, &res);
         printf("# ||A-B||_F = %f\n", res);
         if( res < .000001 )
-            printf("# tester:  ok\n");
+            printf("# tester IO:  ok\n");
         else
-            printf("# tester:  failed\n");
+            printf("# tester IO:  failed\n");
+
+        magma_zmdiff( A, A3, &res);
+        printf("# ||A-B||_F = %f\n", res);
+        if( res < .000001 )
+            printf("# tester matrix interface:  ok\n");
+        else
+            printf("# tester matrix interface:  failed\n");
 
         magma_z_mfree(&A); 
         magma_z_mfree(&A2); 

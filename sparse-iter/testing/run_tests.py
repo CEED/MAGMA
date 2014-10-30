@@ -7,7 +7,7 @@
 # @date
 
 ## @file run_tests.py
-#  @author Mark Gates
+#  @author Mark Gates Hartwig Anzt
 #
 # Script to run testers with various matrix sizes.
 # Small sizes are chosen around block sizes (e.g., 30...34 around 32) to
@@ -404,7 +404,10 @@ def run( cmd ):
     
     okay  = 0
     fail  = 0
+    nospd = 0
     error = 0
+    nosupport = 0
+    slowconv = 0
     # read unbuffered ("for line in p.stdout" will buffer)
     while True:
         line = p.stdout.readline()
@@ -422,6 +425,14 @@ def run( cmd ):
             info = int( m.group(1) )
             if ( info == 0 ):
                 okay += 1
+            if ( info == -100 ):
+                nospd += 1
+            if ( info == -99 ):
+                nosupport += 1
+            if ( info == -1 ):
+                fail += 1
+            if ( info == -2 ):
+                slowconv += 1
         # end
     # end
     
