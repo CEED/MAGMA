@@ -209,7 +209,6 @@ if opts.small:
 	)
 if opts.med:
 	n +=  ' -N 510  -N 511  -N 512  -N 513  -N 514 --range 100:900:100'
-	n_sm = n
 if opts.large:
 	n +=  ' --range 1000:4000:1000'
 
@@ -297,8 +296,8 @@ blas = (
 	
 	# lower/upper, no-trans/conj-trans
 	('testing_zherk',   '-L             -c',  n,    'cublas only'),
-	('testing_zherk',   '-U -C          -c',  n,    'cublas only'),
-	('testing_zherk',   '-L             -c',  n,    'cublas only'),
+	('testing_zherk',   '-L -C          -c',  n,    'cublas only'),
+	('testing_zherk',   '-U             -c',  n,    'cublas only'),
 	('testing_zherk',   '-U -C          -c',  n,    'cublas only'),
 	
 	# lower/upper, no-trans/conj-trans
