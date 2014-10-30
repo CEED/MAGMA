@@ -870,15 +870,6 @@ magma_zcgmerge_spmv1(
     else if( A.storage_type == Magma_ELL )
         magma_zcgmerge_spmvellpackt_kernel<<<Gs, Bs, Ms, magma_stream >>>
         ( A.num_rows, A.max_nnz_row, A.val, A.col, d_d, d_z, d1 );
-    else if( A.storage_type == Magma_SELLC || A.storage_type == Magma_SELLP ){
-        if( A.blocksize==256){
-            magma_zcgmerge_spmvsellc_kernel<<<Gs, Bs, Ms, magma_stream >>>
-            ( A.num_rows, A.blocksize, A. val, A.col, A.row,  
-                d_d, d_z, d1 );
-        }
-        else
-            printf("error: SELLC only for blocksize 256.\n");
-    }
     else if( A.storage_type == Magma_SELLP ){
             int num_threadssellp = A.blocksize*A.alignment;
             magma_int_t arch = magma_getdevice_arch();
