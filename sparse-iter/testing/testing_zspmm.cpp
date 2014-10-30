@@ -56,7 +56,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex one  = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     
-    int i, j;
+    magma_int_t i, j;
     for( i = 1; i < argc; ++i ) {
         if ( strcmp("--blocksize", argv[i]) == 0 ) {
             hA_SELLP.blocksize = atoi( argv[++i] );
@@ -67,13 +67,19 @@ int main( int argc, char** argv)
     }
     printf( "\n#    usage: ./run_zspmv"
         " [ --blocksize %d --alignment %d (for SELLP) ]"
-        " matrices \n\n", hA_SELLP.blocksize, hA_SELLP.alignment );
+        " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
 
     while(  i < argc ){
 
-        magma_z_csr_mtx( &hA,  argv[i]  ); 
+        if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
+            i++;
+            magma_int_t laplace_size = atoi( argv[i] );
+            magma_zm_5stencil(  laplace_size, &hA );
+        } else {                        // file-matrix test
+            magma_z_csr_mtx( &hA,  argv[i]  ); 
+        }
 
-        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+        printf( "# matrix info: %d-by-%d with %d nonzeros\n",
                             (int) hA.num_rows,(int) hA.num_cols,(int) hA.nnz );
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
@@ -109,13 +115,13 @@ int main( int argc, char** argv)
 
             MKL_INT *col;
             TESTING_MALLOC_CPU( col, MKL_INT, nnz );
-            for( magma_int_t i=0; i < hA.nnz; ++i ) {
-                col[ i ] = hA.col[ i ];
+            for( magma_int_t t=0; t < hA.nnz; ++t ) {
+                col[ t ] = hA.col[ t ];
             }
             MKL_INT *row;
             TESTING_MALLOC_CPU( row, MKL_INT, num_rows );
-            for( magma_int_t i=0; i < hA.num_rows; ++i ) {
-                row[ i ] = hA.col[ i ];
+            for( magma_int_t t=0; t < hA.num_rows; ++t ) {
+                row[ t ] = hA.col[ t ];
             }
 
             // === Call MKL with consecutive SpMVs, using mkl_zcsrmv ===

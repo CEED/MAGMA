@@ -38,12 +38,27 @@ int main( int argc, char** argv)
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magmaDoubleComplex mone = MAGMA_Z_MAKE(-1.0, 0.0);
 
-    magma_z_csr_mtx( &A,  argv[1]  ); 
-    printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
-                        (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+    magma_int_t i=0;
 
-    magma_z_csr_mtx( &B,  argv[2]  ); 
-    printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+    if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
+        i++;
+        magma_int_t laplace_size = atoi( argv[i] );
+        magma_zm_5stencil(  laplace_size, &A );
+    } else {                        // file-matrix test
+        magma_z_csr_mtx( &A,  argv[i]  ); 
+    }
+    printf( "# matrix info: %d-by-%d with %d nonzeros\n",
+                        (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+    i++;
+
+    if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
+        i++;
+        magma_int_t laplace_size = atoi( argv[i] );
+        magma_zm_5stencil(  laplace_size, &B );
+    } else {                        // file-matrix test
+        magma_z_csr_mtx( &B,  argv[i]  ); 
+    }
+    printf( "# matrix info: %d-by-%d with %d nonzeros\n",
                         (int) B.num_rows,(int) B.num_cols,(int) B.nnz );
 
 
@@ -64,7 +79,11 @@ int main( int argc, char** argv)
 
     // check difference
     magma_zmdiff( B, B2, &res);
-    printf(" ||A-B||_F = %f\n", res);
+    printf("# ||A-B||_F = %f\n", res);
+    if( res < .000001 )
+        printf("# tester:  ok\n");
+    else
+        printf("# tester:  failed\n");
 
     magma_z_mfree(&A); 
     magma_z_mfree(&B); 
