@@ -22,8 +22,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <cuda_runtime_api.h>
-
 #if defined( _WIN32 ) || defined( _WIN64 )
 
     #include "magmawinthread.h"
