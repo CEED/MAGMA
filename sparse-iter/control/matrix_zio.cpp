@@ -534,7 +534,7 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
 
     z_transpose_csr( n_row, n_col, nnz, *val, *row, *col, 
         &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col);
-    printf("Writing sparse matrix to file (%s):",filename);
+    printf("#Writing sparse matrix to file (%s):",filename);
     fflush(stdout);
 
     std::ofstream file(filename);
@@ -556,7 +556,7 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
 
   }
   else{
-    printf("Writing sparse matrix to file (%s):",filename);
+    printf("#Writing sparse matrix to file (%s):",filename);
     fflush(stdout);
 
     std::ofstream file(filename);
