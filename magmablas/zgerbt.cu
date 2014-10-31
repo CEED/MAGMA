@@ -64,6 +64,7 @@ magmablas_zelementary_multiplication(
     }
 }
 
+
 __global__ void 
 magmablas_zapply_vector(
     magma_int_t n,
@@ -87,6 +88,7 @@ magmablas_zapply_vector(
         db[n/2] = a1 -a2;
     }
 }
+
 
 __global__ void 
 magmablas_zapply_transpose_vector(
@@ -113,34 +115,30 @@ magmablas_zapply_transpose_vector(
 }
 
 
-
-
 /**
-  Purpose
-  -------
-  ZPRBT_MVT compute B = UTB to randomize B
+    Purpose
+    -------
+    ZPRBT_MVT compute B = UTB to randomize B
+    
+    Arguments
+    ---------
+    @param[in]
+    n       INTEGER
+            The number of values of db.  n >= 0.
 
-  Arguments
-  ---------
-  @param[in]
-  n       INTEGER
-  The number of values of db.  n >= 0.
-  @param[in]
-  du     COMPLEX_16 array, dimension (n,2)
-  The 2*n vector representing the random butterfly matrix V
-
-  @param[in,out]
-  db     COMPLEX_16 array, dimension (n)
-  The n vector db computed by ZGESV_NOPIV_GPU
-  On exit db = du*db
-
-  @param[in]
-  queue   magma_queue_t
-  Queue to execute in.
-
- ********************************************************************/
-
-
+    @param[in]
+    du     COMPLEX_16 array, dimension (n,2)
+            The 2*n vector representing the random butterfly matrix V
+    
+    @param[in,out]
+    db     COMPLEX_16 array, dimension (n)
+            The n vector db computed by ZGESV_NOPIV_GPU
+            On exit db = du*db
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+    ********************************************************************/
 extern "C" void
 magmablas_zprbt_mtv_q(
     magma_int_t n, 
@@ -161,13 +159,10 @@ magmablas_zprbt_mtv_q(
     magmablas_zapply_transpose_vector<<< grid, threads, 0, queue >>>(n, du, db);
 }
 
+
 /**
-    
-  @see magmablas_zprbt_mtv_q
-
- ********************************************************************/
-
-
+    @see magmablas_zprbt_mtv_q
+    ********************************************************************/
 extern "C" void
 magmablas_zprbt_mtv(
     magma_int_t n, 
@@ -179,35 +174,29 @@ magmablas_zprbt_mtv(
 
 
 /**
-  Purpose
-  -------
-  ZPRBT_MV compute B = VB to obtain the non randomized solution
-
-  Arguments
-  ---------
-  @param[in]
-  n       INTEGER
-  The number of values of db.  n >= 0.
-
-  @param[in,out]
-  db     COMPLEX_16 array, dimension (n)
-  The n vector db computed by ZGESV_NOPIV_GPU
-  On exit db = dv*db
-
-  @param[in]
-  dv     COMPLEX_16 array, dimension (n,2)
-  The 2*n vector representing the random butterfly matrix V
-
-  @param[in]
-  queue   magma_queue_t
-  Queue to execute in.
-
-
- ********************************************************************/
-
-
-
-
+    Purpose
+    -------
+    ZPRBT_MV compute B = VB to obtain the non randomized solution
+    
+    Arguments
+    ---------
+    @param[in]
+    n       INTEGER
+            The number of values of db.  n >= 0.
+    
+    @param[in,out]
+    db      COMPLEX_16 array, dimension (n)
+            The n vector db computed by ZGESV_NOPIV_GPU
+            On exit db = dv*db
+    
+    @param[in]
+    dv      COMPLEX_16 array, dimension (n,2)
+            The 2*n vector representing the random butterfly matrix V
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+    ********************************************************************/
 extern "C" void
 magmablas_zprbt_mv_q(
     magma_int_t n, 
@@ -233,57 +222,50 @@ magmablas_zprbt_mv_q(
 
 
 /**
-    
-  @see magmablas_zprbt_mtv_q
-
- ********************************************************************/
-
+    @see magmablas_zprbt_mtv_q
+    ********************************************************************/
 extern "C" void
 magmablas_zprbt_mv(
     magma_int_t n, 
     magmaDoubleComplex *dv, magmaDoubleComplex *db)
 {
-
     magmablas_zprbt_mv_q(n, dv, db, magma_stream);
-   
-
 }
 
+
 /**
-  Purpose
-  -------
-  ZPRBT randomize a square general matrix using partial randomized transformation
+    Purpose
+    -------
+    ZPRBT randomize a square general matrix using partial randomized transformation
+    
+    Arguments
+    ---------
+    @param[in]
+    n       INTEGER
+            The number of columns and rows of the matrix dA.  n >= 0.
+    
+    @param[in,out]
+    dA      COMPLEX_16 array, dimension (n,ldda)
+            The n-by-n matrix dA
+            On exit dA = duT*dA*d_V
+    
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dA.  LDA >= max(1,n).
+    
+    @param[in]
+    du      COMPLEX_16 array, dimension (n,2)
+            The 2*n vector representing the random butterfly matrix U
+    
+    @param[in]
+    dv      COMPLEX_16 array, dimension (n,2)
+            The 2*n vector representing the random butterfly matrix V
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
-  Arguments
-  ---------
-  @param[in]
-  n       INTEGER
-  The number of columns and rows of the matrix dA.  n >= 0.
-
-  @param[in,out]
-  dA     COMPLEX_16 array, dimension (n,ldda)
-  The n-by-n matrix dA
-  On exit dA = duT*dA*d_V
-
-  @param[in]
-  ldda    INTEGER
-  The leading dimension of the array dA.  LDA >= max(1,n).
-
-  @param[in]
-  du     COMPLEX_16 array, dimension (n,2)
-  The 2*n vector representing the random butterfly matrix U
-
-  @param[in]
-  dv     COMPLEX_16 array, dimension (n,2)
-  The 2*n vector representing the random butterfly matrix V
-
-  @param[in]
-  queue   magma_queue_t
-  Queue to execute in.
-
-
- ********************************************************************/
-
+    ********************************************************************/
 extern "C" void 
 magmablas_zprbt_q(
     magma_int_t n, 
@@ -310,12 +292,9 @@ magmablas_zprbt_q(
 }
 
 
-
 /**
-    
-  @see magmablas_zprbt_q
-
- ********************************************************************/
+    @see magmablas_zprbt_q
+    ********************************************************************/
 extern "C" void 
 magmablas_zprbt(
     magma_int_t n, 
@@ -323,8 +302,6 @@ magmablas_zprbt(
     magmaDoubleComplex *du, magmaDoubleComplex *dv)
 {
     magmablas_zprbt_q(n, dA, ldda, du, dv, magma_stream);
-
-
 }
 
 
@@ -359,6 +336,7 @@ magmablas_zaxpycp2_q(
     zaxpycp2_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b );
 }
 
+
 extern "C" void
 magmablas_zaxpycp2(
     magma_int_t m, magmaDoubleComplex *r, magmaDoubleComplex *x,
@@ -366,8 +344,3 @@ magmablas_zaxpycp2(
 {
     magmablas_zaxpycp2_q( m, r, x, b, magma_stream );
 }
-
-
-
-
-

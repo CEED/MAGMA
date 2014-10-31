@@ -1153,4 +1153,3 @@ triple_zgemm_above64_part3_upper_kernel_batched(
     triple_zgemm_above64_part3_upper_device( n, Ain_array[batchid], lda, dinvA_array[batchid], jb, npages);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
