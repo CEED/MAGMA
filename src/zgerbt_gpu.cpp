@@ -15,12 +15,11 @@
 
 
 
-void 
+void
 init_butterfly(
-        magma_int_t n, 
+        magma_int_t n,
         magmaDoubleComplex* u, magmaDoubleComplex* v)
 {
-
     magma_int_t idx;
     double u1, v1;
     for (idx=0; idx<n; idx++){
@@ -39,7 +38,7 @@ init_butterfly(
     Solves a system of linear equations
        A * X = B
     where A is a general n-by-n matrix and X and B are n-by-nrhs matrices.
-    Random Butterfly Tranformation is applied on A and B, then 
+    Random Butterfly Tranformation is applied on A and B, then
     the LU decomposition with no pivoting is
     used to factor A as
        A = L * U,
@@ -66,53 +65,52 @@ init_butterfly(
             of the matrix B.  nrhs >= 0.
 
     @param[in,out]
-    dA       COMPLEX_16 array, dimension (LDA,n).
+    dA      COMPLEX_16 array, dimension (LDA,n).
             On entry, the M-by-n matrix to be factored.
             On exit, the factors L and U from the factorization
             A = L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
-    ldda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,n).
 
-    
     @param[in,out]
-    dB       COMPLEX_16 array, dimension (LDB,nrhs)
+    dB      COMPLEX_16 array, dimension (LDB,nrhs)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
-    lddb     INTEGER
+    lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,n).
 
     @param[in,out]
-    U        COMPLEX_16 array, dimension (2,n)
-            Random butterfly matrix, if gen = MagmaTrue U is generated and returned as output
-        else we use U given as input
-        CPU memory
+    U       COMPLEX_16 array, dimension (2,n)
+            Random butterfly matrix, if gen = MagmaTrue U is generated and returned as output;
+            else we use U given as input.
+            CPU memory
+
     @param[in,out]
-    V        COMPLEX_16 array, dimension (2,n)
-            Random butterfly matrix, if gen = MagmaTrue V is generated and returned as output
-        else we use U given as input
-        CPU memory
+    V       COMPLEX_16 array, dimension (2,n)
+            Random butterfly matrix, if gen = MagmaTrue V is generated and returned as output;
+            else we use U given as input.
+            CPU memory
+
     @param[out]
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
 
- ********************************************************************/
-
-extern "C" 
-magma_int_t 
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
+extern "C" magma_int_t
 magma_zgerbt_gpu(
-    magma_bool_t gen, magma_int_t n, magma_int_t nrhs, 
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, 
-    magmaDoubleComplex_ptr dB, magma_int_t lddb, 
+    magma_bool_t gen, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb,
     magmaDoubleComplex *U, magmaDoubleComplex *V,
     magma_int_t *info)
 {
-
     /* Function Body */
     *info = 0;
     if ( ! (gen == MagmaTrue) &&
@@ -138,14 +136,8 @@ magma_zgerbt_gpu(
     if (nrhs == 0 || n == 0)
         return *info;
 
-
-
-
-
     magma_int_t n2;
-
     n2 = n*n;
-
 
     magmaDoubleComplex *du, *dv;
 
@@ -157,7 +149,6 @@ magma_zgerbt_gpu(
     if (MAGMA_SUCCESS != magma_zmalloc( &dv, 2*n )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
-
     }
 
     /* Initialize Butterfly matrix on the CPU*/
@@ -179,7 +170,4 @@ magma_zgerbt_gpu(
     magma_free( dv );
 
     return *info;
-
 }
-
-
