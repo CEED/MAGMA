@@ -200,7 +200,6 @@ int main( int argc, char** argv)
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     double          error, error_lapack = 0.0;
     magmaDoubleComplex *h_A, *work, temp;
-    magma_uplo_t    uplo = MagmaLower;
     magma_int_t     *ipiv;
     magma_int_t     N, n2, lda, lwork, info;
     magma_int_t     status = 0;
@@ -222,18 +221,19 @@ int main( int argc, char** argv)
         }
     }
     parse_opts( argc, argv, &opts );
+    magma_uplo_t uplo = opts.uplo;
 
     if (nopiv)
-        printf( "\n No-piv version (A is SPD)\n" );
+        printf( "\n No-piv version (A is SPD)" );
     else if (cpu)
-        printf( "\n CPU-only version\n" );
+        printf( "\n CPU-only version" );
     else if (gpu)
-        printf( "\n GPU-only version\n" );
+        printf( "\n GPU-only version" );
     else if (row)
-        printf( "\n GPU-only version (row-major)\n" );
+        printf( "\n GPU-only version (row-major)" );
     else
-        printf( " hybrid CPU-GPU version\n" );
-    printf( "\n" );
+        printf( " hybrid CPU-GPU version" );
+    printf( " (%s)\n\n",(uplo == MagmaUpper ? "upper" : "lower") );
     
     magma_int_t upper = (uplo == MagmaUpper);
     double tol = opts.tolerance * lapackf77_dlamch("E");
