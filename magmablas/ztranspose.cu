@@ -138,8 +138,9 @@ ztranspose_kernel(
 extern "C" void
 magmablas_ztranspose_q(
     magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA,  magma_int_t ldda,
-    magmaDoubleComplex       *dAT, magma_int_t lddat, magma_queue_t queue )
+    magmaDoubleComplex_const_ptr dA,  magma_int_t ldda,
+    magmaDoubleComplex_ptr       dAT, magma_int_t lddat,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -174,8 +175,8 @@ magmablas_ztranspose_q(
 extern "C" void
 magmablas_ztranspose(
     magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA,  magma_int_t ldda,
-    magmaDoubleComplex       *dAT, magma_int_t lddat )
+    magmaDoubleComplex_const_ptr dA,  magma_int_t ldda,
+    magmaDoubleComplex_ptr       dAT, magma_int_t lddat )
 {
     magmablas_ztranspose_q( m, n, dA, ldda, dAT, lddat, magma_stream );
 }

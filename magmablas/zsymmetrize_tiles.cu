@@ -118,7 +118,8 @@ zsymmetrize_tiles_upper( int m, magmaDoubleComplex *dA, int ldda, int mstride, i
     ********************************************************************/
 extern "C" void
 magmablas_zsymmetrize_tiles_q(
-    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_uplo_t uplo, magma_int_t m,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride,
     magma_queue_t queue )
 {
@@ -165,7 +166,8 @@ magmablas_zsymmetrize_tiles_q(
     ********************************************************************/
 extern "C" void
 magmablas_zsymmetrize_tiles(
-    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_uplo_t uplo, magma_int_t m,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
 {
     magmablas_zsymmetrize_tiles_q( uplo, m, dA, ldda, ntile, mstride, nstride, magma_stream );

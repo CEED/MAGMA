@@ -86,8 +86,8 @@
 extern "C" void
 magmablas_ztrtri_diag_q(
     magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex *d_dinvA,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr d_dinvA,
     magma_queue_t queue)
 {
     magma_int_t info = 0;
@@ -188,8 +188,8 @@ magmablas_ztrtri_diag_q(
 extern "C" void
 magmablas_ztrtri_diag(
     magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex *d_dinvA)
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr d_dinvA)
 {
     magmablas_ztrtri_diag_q( uplo, diag, n, dA, ldda, d_dinvA, magma_stream );
 }

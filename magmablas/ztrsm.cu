@@ -128,10 +128,10 @@ void magmablas_ztrsm_outofplace(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    const magmaDoubleComplex* dA, magma_int_t ldda,
-    magmaDoubleComplex* dB, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb,
     magma_int_t flag,
-    magmaDoubleComplex* d_dinvA, magmaDoubleComplex *dX)
+    magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX)
 {
     #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
     #define dB(i_, j_) (dB + (i_) + (j_)*lddb)
@@ -348,14 +348,14 @@ void magmablas_ztrsm_work(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    const magmaDoubleComplex* dA, magma_int_t ldda,
-    magmaDoubleComplex* dB, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb,
     magma_int_t flag,
-    magmaDoubleComplex* d_dinvA, magmaDoubleComplex *dX)
+    magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX)
 {
 
     magmablas_ztrsm_outofplace( side, uplo, transA, diag, m, n, alpha,
-                              dA, ldda, dB, lddb, 1, d_dinvA, dX );
+                                dA, ldda, dB, lddb, 1, d_dinvA, dX );
     // copy X to B
     magmablas_zlacpy( MagmaFull, m, n, dX, m, dB, lddb );
 }
@@ -369,8 +369,8 @@ void magmablas_ztrsm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    const magmaDoubleComplex* dA, magma_int_t ldda,
-    magmaDoubleComplex* dB, magma_int_t lddb )
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb )
 {
     magma_int_t nrowA = (side == MagmaLeft ? m : n);
 
@@ -398,7 +398,7 @@ void magmablas_ztrsm(
         return;
     }
 
-    magmaDoubleComplex *d_dinvA, *dX;
+    magmaDoubleComplex_ptr d_dinvA, dX;
     magma_int_t size_dinvA;
     magma_int_t size_x = m*n;
     if ( side == MagmaLeft ) {

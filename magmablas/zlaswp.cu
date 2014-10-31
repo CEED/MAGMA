@@ -68,13 +68,15 @@ extern "C" void zlaswp_launch( zlaswp_params_t &params, magma_queue_t queue )
 // (In contrast, LAPACK applies laswp, then updates ipiv.)
 // It is used in zgetrf, zgetrf_gpu, zgetrf_mgpu, zgetrf_ooc.
 extern "C" void
-magmablas_zpermute_long2( magma_int_t n, magmaDoubleComplex *dAT, magma_int_t lda,
-                          magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
+magmablas_zpermute_long2(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
+    magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
     for( int k = 0; k < nb; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, nb-k );
-        // fields are:             dAT  n  lda  j0       npivots
-        zlaswp_params_t params = { dAT, n, lda, ind + k, npivots };
+        // fields are:             dAT  n  ldda  j0       npivots
+        zlaswp_params_t params = { dAT, n, ldda, ind + k, npivots };
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[ind + k + j] - k - 1;
             ipiv[ind + k + j] += ind;
@@ -90,13 +92,14 @@ magmablas_zpermute_long2( magma_int_t n, magmaDoubleComplex *dAT, magma_int_t ld
 // (In contrast, LAPACK applies laswp, then updates ipiv.)
 // It is used in zgetrf_mgpu, zgetrf_ooc.
 extern "C" void
-magmablas_zpermute_long3( magmaDoubleComplex *dAT, magma_int_t lda,
-                          const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
+magmablas_zpermute_long3(
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
+    const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
     for( int k = 0; k < nb; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, nb-k );
-        // fields are:             dAT  n    lda  j0       npivots
-        zlaswp_params_t params = { dAT, lda, lda, ind + k, npivots };
+        // fields are:             dAT  n     ldda  j0       npivots
+        zlaswp_params_t params = { dAT, ldda, ldda, ind + k, npivots };
         for( int j = 0; j < MAX_PIVOTS; ++j ) {
             params.ipiv[j] = ipiv[ind + k + j] - k - 1 - ind;
         }
@@ -121,14 +124,14 @@ magmablas_zpermute_long3( magmaDoubleComplex *dAT, magma_int_t lda,
              The number of columns of the matrix A.
     
     \param[in,out]
-    dAT      COMPLEX*16 array on GPU, stored row-wise, dimension (LDA,N)
+    dAT      COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,N)
              On entry, the matrix of column dimension N to which the row
              interchanges will be applied.
              On exit, the permuted matrix.
     
     \param[in]
-    lda      INTEGER
-             The leading dimension of the array A. lda >= n.
+    ldda     INTEGER
+             The leading dimension of the array A. ldda >= n.
     
     \param[in]
     k1       INTEGER
@@ -161,7 +164,8 @@ magmablas_zpermute_long3( magmaDoubleComplex *dAT, magma_int_t lda,
 // It is used in zgessm, zgetrf_incpiv.
 extern "C" void
 magmablas_zlaswp_q(
-    magma_int_t n, magmaDoubleComplex *dAT, magma_int_t lda,
+    magma_int_t n,
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue )
@@ -183,8 +187,8 @@ magmablas_zlaswp_q(
     
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, k2-k );
-        // fields are:             dAT        n  lda  j0 npivots
-        zlaswp_params_t params = { dAT+k*lda, n, lda, 0, npivots };
+        // fields are:             dAT         n  ldda  j0 npivots
+        zlaswp_params_t params = { dAT+k*ldda, n, ldda, 0, npivots };
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
@@ -198,11 +202,13 @@ magmablas_zlaswp_q(
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlaswp( magma_int_t n, magmaDoubleComplex *dAT, magma_int_t lda,
-                  magma_int_t k1, magma_int_t k2,
-                  const magma_int_t *ipiv, magma_int_t inci )
+magmablas_zlaswp(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
+    magma_int_t k1, magma_int_t k2,
+    const magma_int_t *ipiv, magma_int_t inci )
 {
-    magmablas_zlaswp_q( n, dAT, lda, k1, k2, ipiv, inci, magma_stream );
+    magmablas_zlaswp_q( n, dAT, ldda, k1, k2, ipiv, inci, magma_stream );
 }
 
 
@@ -283,8 +289,8 @@ extern "C" void zlaswpx( zlaswpx_params_t &params, magma_queue_t queue )
     \param[in]
     ldy      INTEGER
              Stride between elements in same row.
-             For A stored row-wise,    set ldx=lda and ldy=1.
-             For A stored column-wise, set ldx=1   and ldy=lda.
+             For A stored row-wise,    set ldx=ldda and ldy=1.
+             For A stored column-wise, set ldx=1    and ldy=ldda.
     
     \param[in]
     k1       INTEGER
@@ -316,7 +322,8 @@ extern "C" void zlaswpx( zlaswpx_params_t &params, magma_queue_t queue )
     ********************************************************************/
 extern "C" void
 magmablas_zlaswpx_q(
-    magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldx, magma_int_t ldy,
+    magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldx, magma_int_t ldy,
     magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue )
@@ -353,9 +360,11 @@ magmablas_zlaswpx_q(
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlaswpx( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldx, magma_int_t ldy,
-                   magma_int_t k1, magma_int_t k2,
-                   const magma_int_t *ipiv, magma_int_t inci )
+magmablas_zlaswpx(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldx, magma_int_t ldy,
+    magma_int_t k1, magma_int_t k2,
+    const magma_int_t *ipiv, magma_int_t inci )
 {
     return magmablas_zlaswpx_q( n, dA, ldx, ldy, k1, k2, ipiv, inci, magma_stream );
 }
@@ -412,13 +421,13 @@ __global__ void zlaswp2_kernel(
              The number of columns of the matrix A.
     
     \param[in,out]
-    dAT      COMPLEX*16 array on GPU, stored row-wise, dimension (LDA,*)
+    dAT      COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,*)
              On entry, the matrix of column dimension N to which the row
              interchanges will be applied.
              On exit, the permuted matrix.
     
     \param[in]
-    lda      INTEGER
+    ldda     INTEGER
              The leading dimension of the array A.
              (I.e., stride between elements in a column.)
     
@@ -452,7 +461,8 @@ __global__ void zlaswp2_kernel(
     ********************************************************************/
 extern "C" void
 magmablas_zlaswp2_q(
-    magma_int_t n, magmaDoubleComplex* dAT, magma_int_t lda,
+    magma_int_t n,
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
     const magma_int_t *d_ipiv, magma_int_t inci,
     magma_queue_t queue )
@@ -474,7 +484,7 @@ magmablas_zlaswp2_q(
     
     int blocks = (n + NTHREADS - 1) / NTHREADS;
     zlaswp2_kernel<<< blocks, NTHREADS, 0, queue >>>(
-        n, dAT + (k1-1)*lda, lda, k2-(k1-1), d_ipiv, inci );
+        n, dAT + (k1-1)*ldda, ldda, k2-(k1-1), d_ipiv, inci );
 }
 
 
@@ -483,9 +493,11 @@ magmablas_zlaswp2_q(
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
-magmablas_zlaswp2( magma_int_t n, magmaDoubleComplex* dAT, magma_int_t lda,
-                   magma_int_t k1, magma_int_t k2,
-                   const magma_int_t *d_ipiv, magma_int_t inci )
+magmablas_zlaswp2(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
+    magma_int_t k1, magma_int_t k2,
+    const magma_int_t *d_ipiv, magma_int_t inci )
 {
-    magmablas_zlaswp2_q( n, dAT, lda, k1, k2, d_ipiv, inci, magma_stream );
+    magmablas_zlaswp2_q( n, dAT, ldda, k1, k2, d_ipiv, inci, magma_stream );
 }

@@ -198,8 +198,8 @@ void zlat2c_upper(
 extern "C" void
 magmablas_zlat2c_q(
     magma_uplo_t uplo, magma_int_t n,
-    const magmaDoubleComplex *A, magma_int_t lda,
-    magmaFloatComplex *SA,       magma_int_t ldsa,
+    magmaDoubleComplex_const_ptr  A, magma_int_t lda,
+    magmaFloatComplex_ptr        SA, magma_int_t ldsa,
     magma_int_t *info,
     magma_queue_t queue )
 {
@@ -245,8 +245,8 @@ magmablas_zlat2c_q(
 extern "C" void
 magmablas_zlat2c(
     magma_uplo_t uplo, magma_int_t n,
-    const magmaDoubleComplex *A, magma_int_t lda,
-    magmaFloatComplex *SA,       magma_int_t ldsa,
+    magmaDoubleComplex_const_ptr  A, magma_int_t lda,
+    magmaFloatComplex_ptr        SA, magma_int_t ldsa,
     magma_int_t *info )
 {
     magmablas_zlat2c_q( uplo, n, A, lda, SA, ldsa, info, magma_stream );

@@ -104,8 +104,8 @@ extern "C" void
 magmablas_zgeadd_batched_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex              **dBarray, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
     magma_int_t batchCount,
     magma_queue_t queue )
 {
@@ -145,8 +145,8 @@ extern "C" void
 magmablas_zgeadd_batched(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex              **dBarray, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
     magma_int_t batchCount )
 {
     magmablas_zgeadd_batched_q(

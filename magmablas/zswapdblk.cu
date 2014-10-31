@@ -97,8 +97,8 @@ zswapdblk_kernel( int nb,
 extern "C" void 
 magmablas_zswapdblk_q(
     magma_int_t n, magma_int_t nb,
-    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t inca,
-    magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t incb,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t inca,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, magma_int_t incb,
     magma_queue_t queue )
 {
     magma_int_t nblocks = n / nb;
@@ -138,8 +138,8 @@ magmablas_zswapdblk_q(
 extern "C" void 
 magmablas_zswapdblk(
     magma_int_t n, magma_int_t nb,
-    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t inca,
-    magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t incb )
+    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t inca,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, magma_int_t incb )
 {
     magmablas_zswapdblk_q( n, nb, dA, ldda, inca, dB, lddb, incb, magma_stream );
 }

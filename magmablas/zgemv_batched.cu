@@ -355,9 +355,11 @@ void magmablas_zgemvc_batched(
 extern "C"
 void magmablas_zgemv_batched(
     magma_trans_t trans, magma_int_t m, magma_int_t n, 
-    magmaDoubleComplex alpha, magmaDoubleComplex **A_array, magma_int_t lda, 
-    magmaDoubleComplex **x_array,  magma_int_t incx,
-    magmaDoubleComplex beta, magmaDoubleComplex **y_array,  magma_int_t incy, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_ptr dA_array[], magma_int_t ldda, 
+    magmaDoubleComplex_ptr dx_array[], magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy_array[], magma_int_t incy, 
     magma_int_t batchCount)
 {       
     magma_int_t info = 0;
@@ -367,7 +369,7 @@ void magmablas_zgemv_batched(
         info = -2;
     else if ( n < 0 )
         info = -3;
-    else if ( lda < m )
+    else if ( ldda < m )
         info = -6;
     else if ( incx == 0 )
         info = -8;
@@ -383,17 +385,17 @@ void magmablas_zgemv_batched(
 
     if ( trans == MagmaNoTrans ) {
 
-        magmablas_zgemvn_batched(m, n, alpha, A_array, lda, x_array, incx, beta, y_array, incy, batchCount);
+        magmablas_zgemvn_batched(m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount);
             
     }
     else if ( trans == MagmaTrans ) {
-        magmablas_zgemvt_batched(m, n, alpha, A_array, lda, x_array, incx, beta, y_array, incy, batchCount);
+        magmablas_zgemvt_batched(m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount);
     }
     else if ( trans == MagmaConjTrans ) {
 #if defined(PRECISION_z) || defined (PRECISION_c)
-        magmablas_zgemvc_batched(m, n, alpha, A_array, lda, x_array, incx, beta, y_array, incy, batchCount);
+        magmablas_zgemvc_batched(m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount);
 #else
-        magmablas_zgemvt_batched(m, n, alpha, A_array, lda, x_array, incx, beta, y_array, incy, batchCount);
+        magmablas_zgemvt_batched(m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount);
 #endif
     }
     else {
@@ -402,5 +404,3 @@ void magmablas_zgemv_batched(
 }
 
 #undef zgemv_bs 
-
-

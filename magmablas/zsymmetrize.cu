@@ -94,7 +94,8 @@ zsymmetrize_upper( int m, magmaDoubleComplex *dA, int ldda )
     ********************************************************************/
 extern "C" void
 magmablas_zsymmetrize_q(
-    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda,
+    magma_uplo_t uplo, magma_int_t m,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -132,7 +133,8 @@ magmablas_zsymmetrize_q(
     ********************************************************************/
 extern "C" void
 magmablas_zsymmetrize(
-    magma_uplo_t uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda )
+    magma_uplo_t uplo, magma_int_t m,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda )
 {
     magmablas_zsymmetrize_q( uplo, m, dA, ldda, magma_stream );
 }

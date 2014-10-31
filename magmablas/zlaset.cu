@@ -188,7 +188,7 @@ extern "C"
 void magmablas_zlaset_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_queue_t queue)
 {
     magma_int_t info = 0;
@@ -230,7 +230,7 @@ extern "C"
 void magmablas_zlaset(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *dA, magma_int_t ldda )
+    magmaDoubleComplex_ptr dA, magma_int_t ldda )
 {
     magmablas_zlaset_q( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
 }
