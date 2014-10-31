@@ -15,7 +15,7 @@
 /* ================================================================================ */
 extern "C" void
 magmablas_zlascl_2x2(
-    magma_type_t type, magma_trans_t trans, magma_int_t m, 
+    magma_type_t type, magma_trans_t trans, magma_int_t m,
     magmaDoubleComplex *dW, magma_int_t lddw,
     magmaDoubleComplex *dA, magma_int_t ldda,
     magma_int_t *info );
@@ -50,29 +50,29 @@ magmablas_zlacpy_cnjg(
     Arguments
     ---------
     @param[in]
-    UPLO    CHARACTER
+    uplo    CHARACTER
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is stored:
       -     = 'U':  Upper triangular
       -     = 'L':  Lower triangular
 
     @param[in]
-    N       INTEGER
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The maximum number of columns of the matrix A that should be
             factored.  NB should be at least 2 to allow for 2-by-2 pivot
             blocks.
 
     @param[out]
-    KB      INTEGER
+    kb      INTEGER
             The number of columns of A that were actually factored.
             KB is either NB-1 or NB, or N if N <= NB.
 
     @param[in,out]
-    A       COMPLEX*16 array, dimension (LDA,N)
+    hA      COMPLEX*16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -83,7 +83,7 @@ magmablas_zlacpy_cnjg(
             On exit, A contains details of the partial factorization.
 
     @param[in]
-    LDA     INTEGER
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
@@ -101,14 +101,14 @@ magmablas_zlacpy_cnjg(
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
  
     @param[out]
-    W       (workspace) COMPLEX*16 array, dimension (LDW,NB)
+    dW      (workspace) COMPLEX*16 array, dimension (LDW,NB)
  
     @param[in]
-    LDW     INTEGER
+    lddw    INTEGER
             The leading dimension of the array W.  LDW >= max(1,N).
 
     @param[out]
-    INFO    INTEGER
+    info    INTEGER
       -     = 0: successful exit
       -     > 0: if INFO = k, D(k,k) is exactly zero.  The factorization
                  has been completed, but the block diagonal matrix D is
@@ -118,12 +118,12 @@ magmablas_zlacpy_cnjg(
     ********************************************************************/
 extern "C" magma_int_t
 magma_zlahef_gpu(
-    magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb, 
-    magmaDoubleComplex *hA, magma_int_t lda,  
-    magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv, 
-    magmaDoubleComplex *dW, magma_int_t lddw, 
-    magma_queue_t stream[], magma_event_t event[],
-    magma_int_t *info) 
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb,
+    magmaDoubleComplex    *hA, magma_int_t lda,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *ipiv,
+    magmaDoubleComplex_ptr dW, magma_int_t lddw,
+    magma_queue_t queues[], magma_event_t event[],
+    magma_int_t *info)
 {
     /* .. Parameters .. */
     double d_one   = 1.0;
@@ -151,7 +151,7 @@ magma_zlahef_gpu(
     /* Initialize alpha for use in choosing pivot block size. */
     alpha = ( d_one+sqrt( d_seven ) ) / d_eight;
 
-    if( upper ) {
+    if ( upper ) {
 /*
 *        Factorize the trailing columns of A using the upper triangle
 *        of A and working backwards, and compute the matrix W = U12*D
@@ -421,28 +421,28 @@ magma_zlahef_gpu(
          /* Copy column K of A to column K of W and update it */
 
          /* -------------------------------------------------------------- */
-         magmablasSetKernelStream( stream[0] );
+         magmablasSetKernelStream( queues[0] );
          trace_gpu_start( 0, 0, "copy", "copyAk" );
          magma_zcopy( n-k, &dA( k, k ), 1, &dW( k, k ), 1 );
 
          // set imaginary part of diagonal to be zero
-         #if defined(PRECISION_z) 
-         magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
+         #if defined(PRECISION_z)
+         magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, queues[0] );
          #elif defined(PRECISION_c)
-         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, stream[0] );
+         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, queues[0] );
          #endif
          trace_gpu_end( 0, 0 );
          /* -------------------------------------------------------------- */
 
-         magmablasSetKernelStream( stream[0] );
+         magmablasSetKernelStream( queues[0] );
          trace_gpu_start( 0, 0, "gemv", "gemv" );
-         magma_zgemv( MagmaNoTrans, n-k, k, c_mone, &dA( k, 0 ), ldda, 
+         magma_zgemv( MagmaNoTrans, n-k, k, c_mone, &dA( k, 0 ), ldda,
                       &dW( k, 0 ), lddw, c_one, &dW( k, k ), ione );
          // re-set imaginary part of diagonal to be zero
          #if defined(PRECISION_z)
-         magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, stream[0] );
+         magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( k, k ))+1,1, queues[0] );
          #elif defined(PRECISION_c)
-         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, stream[0] );
+         magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( k, k ))+1,1, queues[0] );
          #endif
          trace_gpu_end( 0, 0 );
 
@@ -451,16 +451,16 @@ magma_zlahef_gpu(
          /* Determine rows and columns to be interchanged and whether
             a 1-by-1 or 2-by-2 pivot block will be used */
 
-         magma_zgetvector_async( 1, &dW( k, k ), 1, &Z, 1, stream[0] );
-         magma_queue_sync( stream[0] );
+         magma_zgetvector_async( 1, &dW( k, k ), 1, &Z, 1, queues[0] );
+         magma_queue_sync( queues[0] );
          abs_akk = fabs( MAGMA_Z_REAL( Z ) );
 
          /* imax is the row-index of the largest off-diagonal element in
             column K, and colmax is its absolute value */
 
-         if( k < n-1 ) {
+         if ( k < n-1 ) {
              // magmablas is one-base
-             magmablasSetKernelStream( stream[0] );
+             magmablasSetKernelStream( queues[0] );
              trace_gpu_start( 0, 0, "max", "max" );
              imax = k + magma_izamax( n-k-1, &dW(k+1,k), 1 );
              trace_gpu_end( 0, 0 );
@@ -475,14 +475,14 @@ magma_zlahef_gpu(
 
              /* Column K is zero: set INFO and continue */
 
-             if( *info == 0 ) *info = k;
+             if ( *info == 0 ) *info = k;
              kp = k;
 
              // make sure the imaginary part of diagonal is zero
              #if defined(PRECISION_z)
-             magma_dsetvector_async( 1, &d_zero,1, ((double*)&dA( k, k ))+1,1, stream[0] );
+             magma_dsetvector_async( 1, &d_zero,1, ((double*)&dA( k, k ))+1,1, queues[0] );
              #elif defined(PRECISION_c)
-             magma_ssetvector_async( 1, &f_zero,1, ((float*)&dA( k, k ))+1,1, stream[0] );
+             magma_ssetvector_async( 1, &f_zero,1, ((float*)&dA( k, k ))+1,1, queues[0] );
              #endif
          } else {
              if ( abs_akk >= alpha*colmax ) {
@@ -493,48 +493,48 @@ magma_zlahef_gpu(
              } else {
                  /* Copy column imax to column K+1 of W and update it */
 
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "copy", "copy" );
                  #if defined(PRECISION_z) || defined(PRECISION_c)
                  magmablas_zlacpy_cnjg( imax-k, &dA( imax, k ), ldda, &dW( k, k+1 ), 1 );
-                 #else 
+                 #else
                  magma_zcopy( imax-k, &dA( imax, k ), ldda, &dW( k, k+1 ), 1 );
-                 #endif 
+                 #endif
 
                  magma_zcopy( n-imax, &dA( imax, imax ), 1, &dW( imax, k+1 ), 1 );
                  #if defined(PRECISION_z)
-                 magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, queues[0] );
                  #elif defined(PRECISION_c)
-                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, queues[0] );
                  #endif
                  trace_gpu_end( 0, 0 );
 
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "gemv", "gemv" );
-                 magma_zgemv( MagmaNoTrans, n-k, k, c_mone, &dA( k, 0 ), ldda, 
+                 magma_zgemv( MagmaNoTrans, n-k, k, c_mone, &dA( k, 0 ), ldda,
                               &dW( imax, 0 ), lddw, c_one, &dW( k, k+1 ), ione );
                  #if defined(PRECISION_z)
-                 magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_dsetvector_async( 1, &d_zero,1, ((double*)&dW( imax, k+1 ))+1,1, queues[0] );
                  #elif defined(PRECISION_c)
-                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, stream[0] );
+                 magma_ssetvector_async( 1, &f_zero,1, ((float*)&dW( imax, k+1 ))+1,1, queues[0] );
                  #endif
                  trace_gpu_end( 0, 0 );
 
-                 magma_zgetvector_async( 1, &dW( imax, k+1 ), 1, &Zimax, 1, stream[0] );
+                 magma_zgetvector_async( 1, &dW( imax, k+1 ), 1, &Zimax, 1, queues[0] );
 
                  /* jmax is the column-index of the largest off-diagonal
                     element in row imax, and rowmax is its absolute value */
 
                  // magmablas is one-base
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "max", "max" );
                  jmax = k-1 + magma_izamax( imax-k, &dW(k, k+1), 1 );
                  trace_gpu_end( 0, 0 );
                  magma_zgetvector( 1, &dW( jmax, k+1 ), 1, &Z, 1 );
                  rowmax = MAGMA_Z_ABS1( Z );
-                 if( imax < n-1 ) {
+                 if ( imax < n-1 ) {
                      // magmablas is one-base
-                     magmablasSetKernelStream( stream[0] );
+                     magmablasSetKernelStream( queues[0] );
                      trace_gpu_start( 0, 0, "max", "max" );
                      jmax = imax + magma_izamax( (n-1)-imax, &dW( imax+1, k+1 ), 1 );
                      trace_gpu_end( 0, 0 );
@@ -542,18 +542,18 @@ magma_zlahef_gpu(
                      rowmax = max( rowmax, MAGMA_Z_ABS1( Z ) );
                  }
 
-                 if( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
+                 if ( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
 
                      /* no interchange, use 1-by-1 pivot block */
                      kp = k;
-                 } else if( fabs( MAGMA_Z_REAL( Zimax ) ) >= alpha*rowmax ) {
+                 } else if ( fabs( MAGMA_Z_REAL( Zimax ) ) >= alpha*rowmax ) {
 
                      /* interchange rows and columns K and imax, use 1-by-1
                         pivot block */
                      kp = imax;
 
                      /* copy column K+1 of W to column K */
-                     magmablasSetKernelStream( stream[0] );
+                     magmablasSetKernelStream( queues[0] );
                      trace_gpu_start( 0, 0, "copy", "copy" );
                      magma_zcopy( n-k, &dW( k, k+1 ), 1, &dW( k, k ), 1 );
                      trace_gpu_end( 0, 0 );
@@ -571,12 +571,12 @@ magma_zlahef_gpu(
 
              /* Updated column kp is already stored in column kk of W */
 
-             if( kp != kk ) {
+             if ( kp != kk ) {
 
                  /* Copy non-updated column kk to column kp */
 
                  /* ------------------------------------------------------------------ */
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "copy", "copy" );
                  #if defined(PRECISION_z) || defined(PRECISION_c)
                  magmablas_zlacpy_cnjg( kp-kk, &dA( kk, kk ), 1, &dA( kp, kk ), ldda );
@@ -606,17 +606,17 @@ magma_zlahef_gpu(
                     where L(k) is the k-th column of L
 
                     Store L(k) in column k of A */
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "copy", "copy" );
                  magma_zcopy( n-k, &dW( k, k ), 1, &dA( k, k ), 1 );
                  trace_gpu_end( 0, 0 );
 
                  if ( k < n-1 ) {
-                     magma_zgetvector_async( 1, &dA( k, k ), 1, &Z, 1, stream[0] );
+                     magma_zgetvector_async( 1, &dA( k, k ), 1, &Z, 1, queues[0] );
                      R1 = d_one / MAGMA_Z_REAL( Z );
-                     magma_queue_sync( stream[0] );
+                     magma_queue_sync( queues[0] );
                      trace_gpu_start( 0, 0, "scal", "scal-1" );
-                     magma_zdscal((n-1)-k, R1, &dA( k+1 , k ), 1);
+                     magma_zdscal((n-1)-k, R1, &dA( k+1, k ), 1);
                      trace_gpu_end( 0, 0 );
 
                      /* Conjugate W(k) */
@@ -633,7 +633,7 @@ magma_zlahef_gpu(
                  where L(k) and L(k+1) are the k-th and (k+1)-th columns
                  of L */
 
-                 magmablasSetKernelStream( stream[0] );
+                 magmablasSetKernelStream( queues[0] );
                  trace_gpu_start( 0, 0, "scal", "scal-2" );
                  magmablas_zlascl_2x2( MagmaFull, MagmaNoTrans, n-(k+2), &dW(k,k), lddw, &dA(k+2,k), ldda, &iinfo );
 
@@ -657,7 +657,7 @@ magma_zlahef_gpu(
              ipiv[k] = -kp-1;
              ipiv[k+1] = -kp-1;
          }
-     } 
+     }
 
      /* Update the lower triangle of A22 (= A(k:n,k:n)) as
 
@@ -676,34 +676,34 @@ magma_zlahef_gpu(
              int jnb = j + jb - jj;
 
              /* -------------------------------------------------------- */
-             magma_zgemv( MagmaNoTrans, jnb, k, c_mone, &dA( jj, 0 ), ldda, 
+             magma_zgemv( MagmaNoTrans, jnb, k, c_mone, &dA( jj, 0 ), ldda,
                           &dW( jj, 0 ), lddw, c_one, &dA( jj, jj ), ione );
              /* -------------------------------------------------------- */
          }
 
          /* Update the rectangular subdiagonal block */
 
-         if( j+jb < n ) {
+         if ( j+jb < n ) {
              int nk = n - (j+jb);
 
              /* -------------------------------------------- */
-             magmablasSetKernelStream( stream[0] );
-             magma_zgemm( MagmaNoTrans, MagmaTrans, nk, jb, k, 
-                          c_mone, &dA( j+jb, 0 ), ldda, 
+             magmablasSetKernelStream( queues[0] );
+             magma_zgemm( MagmaNoTrans, MagmaTrans, nk, jb, k,
+                          c_mone, &dA( j+jb, 0 ), ldda,
                                   &dW( j, 0 ),    lddw,
                           c_one,  &dA( j+jb, j ), ldda );
              /* ------------------------------------------- */
          }
          #else
          trace_gpu_start( 0, 0, "gemm", "gemm" );
-         magmablasSetKernelStream( stream[0] );
+         magmablasSetKernelStream( queues[0] );
          #if defined(PRECISION_z)
          magmablas_dlaset(MagmaUpperLower, 1,jb, d_zero,d_zero, ((double*)&dA( j, j ))+1, 2*(1+ldda) );
          #elif defined(PRECISION_c)
          magmablas_slaset(MagmaUpperLower, 1,jb, f_zero,f_zero, ((float*)&dA( j, j ))+1, 2*(1+ldda) );
          #endif
-         magma_zgemm( MagmaNoTrans, MagmaTrans, n-j, jb, k, 
-                      c_mone, &dA( j, 0 ), ldda, 
+         magma_zgemm( MagmaNoTrans, MagmaTrans, n-j, jb, k,
+                      c_mone, &dA( j, 0 ), ldda,
                               &dW( j, 0 ), lddw,
                       c_one,  &dA( j, j ), ldda );
          #if defined(PRECISION_z)
@@ -718,27 +718,27 @@ magma_zlahef_gpu(
      /* Put L21 in standard form by partially undoing the interchanges
         in columns 1:k-1 */
 
-     for (int j = k; j > 0;) {
+     for (int j = k; j > 0; ) {
          int jj = j;
          int jp = ipiv[j-1];
-         if( jp < 0 ) {
+         if ( jp < 0 ) {
              jp = -jp;
              j--;
          }
          j--;
          if ( jp != jj && j >= 1 ) {
-             magmablasSetKernelStream( stream[0] );
+             magmablasSetKernelStream( queues[0] );
              trace_gpu_start( 0, 0, "permute", "perm" );
              magmablas_zswap( j, &dA( jp-1, 0 ), ldda, &dA( jj-1, 0 ), ldda );
              trace_gpu_end( 0, 0 );
-             magma_queue_sync( stream[0] ); 
+             magma_queue_sync( queues[0] );
          }
      }
      // copying the panel back to CPU
-     magma_event_record( event[0], stream[0] );
-     magma_queue_wait_event( stream[1], event[0] ); 
+     magma_event_record( event[0], queues[0] );
+     magma_queue_wait_event( queues[1], event[0] );
      trace_gpu_start( 0, 1, "get", "get" );
-     magma_zgetmatrix_async( n,k, &dA(0,0),ldda, &A(0,0),lda, stream[1] );
+     magma_zgetmatrix_async( n,k, &dA(0,0),ldda, &A(0,0),lda, queues[1] );
      trace_gpu_end( 0, 1 );
      /* Set KB to the number of columns factorized */
      *kb = k;
@@ -747,4 +747,3 @@ magma_zlahef_gpu(
   return *info;
   /* End of ZLAHEF */
 }
-
