@@ -131,6 +131,12 @@ ZSRC += \
 	zunmqr_m.cpp		\
 
 # ----------
+# symmetric indefinite factorization, CPU interface
+ZSRC += \
+	zhetrf.cpp		\
+	zlahef_gpu.cpp		\
+
+# ----------
 # symmetric eigenvalues, GPU interface
 ZSRC += \
 	dsyevd_gpu.cpp		\

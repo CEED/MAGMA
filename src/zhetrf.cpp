@@ -115,7 +115,7 @@
     @ingroup magma_zhetrf_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zhetrf_gpu(
+magma_zhetrf(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *ipiv, magma_int_t *info)

@@ -27,10 +27,10 @@ extern "C" magma_int_t
 magma_zhetrf_cpu(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
                  magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 extern "C" magma_int_t
-magma_zhetrf(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
+magma_zhetrf_hybrid(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
              magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 extern "C" magma_int_t
-magma_zhetrf_gpu(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
+magma_zhetrf(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
                  magma_int_t *ipiv, magma_int_t *info);
 extern "C" magma_int_t
 magma_zhetrf_gpu_row(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
@@ -289,13 +289,13 @@ int main( int argc, char** argv)
                 //magma_zhetrf_cpu( uplo, N, h_A, lda, ipiv, work, lwork, &info);
             } else if (gpu) {
                 magma_setdevice(0);
-                magma_zhetrf_gpu( uplo, N, h_A, lda, ipiv, &info);
+                magma_zhetrf( uplo, N, h_A, lda, ipiv, &info);
             } else if (row) {
                 magma_setdevice(0);
                 //magma_zhetrf_gpu_row( uplo, N, h_A, lda, ipiv, work, lwork, &info);
             } else {
                 magma_setdevice(0);
-                //magma_zhetrf( uplo, N, h_A, lda, ipiv, work, lwork, &info);
+                //magma_zhetrf_hybrid( uplo, N, h_A, lda, ipiv, work, lwork, &info);
             }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
