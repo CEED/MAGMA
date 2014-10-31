@@ -424,6 +424,11 @@ magmablas_zlacpy_batched(
     magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
     magma_int_t batchCount );
 
+void
+magmablas_zlacpy_cnjg(
+    magma_int_t n, magmaDoubleComplex *dA1, magma_int_t lda1,
+    magmaDoubleComplex *dA2, magma_int_t lda2);
+
 double
 magmablas_zlange(
     magma_norm_t norm,
@@ -463,6 +468,13 @@ magmablas_zlascl(
     double cfrom, double cto,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_int_t *info );
+
+void
+magmablas_zlascl_2x2(
+    magma_type_t type, magma_int_t m,
+    magmaDoubleComplex *dW, magma_int_t lddw,
+    magmaDoubleComplex *dA, magma_int_t ldda,
     magma_int_t *info );
 
 void

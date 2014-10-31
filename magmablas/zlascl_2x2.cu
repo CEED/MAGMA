@@ -12,6 +12,8 @@
 #include "common_magma.h"
 
 #define NB 64
+#define A(i,j) (A[(i) + (j)*lda])
+#define W(i,j) (W[(i) + (j)*ldw])
 
 
 // each thread block does one NB x n block row of A.
@@ -19,8 +21,6 @@
 __global__ void
 zlascl_2x2_full(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex* A, int lda)
 {
-    #define A(i,j) (A[(i) + (j)*lda])
-    #define W(i,j) (W[(i) + (j)*ldw])
     int ind = blockIdx.x * NB + threadIdx.x;
 
     magmaDoubleComplex D21 = W( 1, 0 );
@@ -35,42 +35,23 @@ zlascl_2x2_full(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex*
     }
 }
 
-__global__ void
-zlascl_2x2_full_trans(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex* A, int lda)
-{
-    #define At(i,j) (A[(i)*lda + (j)])
-    #define Wt(i,j) (W[(i)*ldw + (j)])
-    int ind = blockIdx.x * NB + threadIdx.x;
-
-    magmaDoubleComplex D21 = Wt( 1, 0 );
-    magmaDoubleComplex D11 = Wt( 1, 1 ) / D21;
-    magmaDoubleComplex D22 = Wt( 0, 0 ) / MAGMA_Z_CNJG( D21 );
-    double T = 1.0 / ( MAGMA_Z_REAL( D11*D22 ) - 1.0 );
-    D21 = MAGMA_Z_MAKE(T,0.0) / D21;
-
-    if (ind < m) {
-        At( ind, 0 ) = MAGMA_Z_CNJG( D21 )*( D11*Wt( 2+ind, 0 )-Wt( 2+ind, 1 ) );
-        At( ind, 1 ) = D21*( D22*Wt( 2+ind, 1 )-Wt( 2+ind, 0 ) );
-    }
-}
-
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from left edge and moving right to diagonal.
 __global__ void
 zlascl_2x2_lower(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex* A, int lda)
 {
-/*
     int ind = blockIdx.x * NB + threadIdx.x;
 
-    int break_d = (ind < n) ? ind : n-1;
+    magmaDoubleComplex D21 = W( 1, 0 );
+    magmaDoubleComplex D11 = MAGMA_Z_DIV( W( 1, 1 ), D21 );
+    magmaDoubleComplex D22 = MAGMA_Z_DIV( W( 0, 0 ), MAGMA_Z_CNJG( D21 ) );
+    double T = 1.0 / ( MAGMA_Z_REAL( D11*D22 ) - 1.0 );
+    D21 = MAGMA_Z_DIV( MAGMA_Z_MAKE(T,0.0), D21 );
 
-    double mul = D[ind];
-    A += ind;
     if (ind < m) {
-        for(int j=0; j <= break_d; j++ )
-            A[j*lda] *= mul;
+        A( ind, 0 ) = MAGMA_Z_CNJG( D21 )*( D11*W( 2+ind, 0 )-W( 2+ind, 1 ) );
+        A( ind, 1 ) = D21*( D22*W( 2+ind, 1 )-W( 2+ind, 0 ) );
     }
-*/
 }
 
 
@@ -79,16 +60,18 @@ zlascl_2x2_lower(int m, const magmaDoubleComplex* W, int ldw, magmaDoubleComplex
 __global__ void
 zlascl_2x2_upper(int m, const magmaDoubleComplex *W, int ldw, magmaDoubleComplex* A, int lda)
 {
-/*
     int ind = blockIdx.x * NB + threadIdx.x;
 
-    double mul = D[ind];
-    A += ind;
+    magmaDoubleComplex D21 = W( m, 1 );
+    magmaDoubleComplex D11 = MAGMA_Z_DIV( W( m+1, 1 ), MAGMA_Z_CNJG( D21 ) );
+    magmaDoubleComplex D22 = MAGMA_Z_DIV( W( m, 0 ), D21 );
+    double T = 1.0 / ( MAGMA_Z_REAL( D11*D22 ) - 1.0 );
+    D21 = MAGMA_Z_DIV( MAGMA_Z_MAKE(T,0.0), D21 );
+
     if (ind < m) {
-        for(int j=n-1; j >= ind; j--)
-            A[j*lda] *= mul;
+        A( ind, 0 ) = D21*( D11*W( ind, 0 )-W( ind, 1 ) );
+        A( ind, 1 ) = MAGMA_Z_CNJG( D21 )*( D22*W( ind, 1 )-W( ind, 0 ) );
     }
-*/
 }
 
 
@@ -138,7 +121,7 @@ zlascl_2x2_upper(int m, const magmaDoubleComplex *W, int ldw, magmaDoubleComplex
     ********************************************************************/
 extern "C" void
 magmablas_zlascl_2x2_q(
-    magma_type_t type, magma_trans_t trans, magma_int_t m, 
+    magma_type_t type, magma_int_t m, 
     const magmaDoubleComplex *dW, magma_int_t lddw, 
     magmaDoubleComplex *dA, magma_int_t ldda, 
     magma_int_t *info, magma_queue_t queue )
@@ -162,14 +145,8 @@ magmablas_zlascl_2x2_q(
     if (type == MagmaLower) {
         zlascl_2x2_lower <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
     }
-    else if (type == MagmaUpper) {
+    else {
         zlascl_2x2_upper <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
-    }
-    else if (type == MagmaFull) {
-        if (trans == MagmaTrans)
-        zlascl_2x2_full_trans  <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
-        else
-        zlascl_2x2_full  <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
     }
 }
 
@@ -180,10 +157,10 @@ magmablas_zlascl_2x2_q(
     ********************************************************************/
 extern "C" void
 magmablas_zlascl_2x2(
-    magma_type_t type, magma_trans_t trans, magma_int_t m, 
+    magma_type_t type, magma_int_t m, 
     magmaDoubleComplex *dW, magma_int_t lddw, 
     magmaDoubleComplex *dA, magma_int_t ldda, 
     magma_int_t *info )
 {
-    magmablas_zlascl_2x2_q( type, trans, m, dW, lddw, dA, ldda, info, magma_stream );
+    magmablas_zlascl_2x2_q( type, m, dW, lddw, dA, ldda, info, magma_stream );
 }

@@ -126,7 +126,7 @@ magma_zhetrf_gpu(
     /* .. Local Scalars .. */
     magma_int_t            upper;
     magma_int_t            nb = magma_get_zhetrf_nb(n);
-    magma_int_t            iinfo = 0, nk, kb, lwkopt;
+    magma_int_t            iinfo = 0, nk, kb;
 
     /* .. Executable Statements .. */
     /* Test the input parameters. */
@@ -147,7 +147,7 @@ magma_zhetrf_gpu(
     magma_int_t ldda = 32*((n+31)/32);
     magmaDoubleComplex *dA, *dW;
     if ((MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda  )) ||
-          (MAGMA_SUCCESS != magma_zmalloc( &dW, (1+nb)*ldda ))) {
+        (MAGMA_SUCCESS != magma_zmalloc( &dW, (1+nb)*ldda ))) {
           *info = MAGMA_ERR_DEVICE_ALLOC;
           return *info;
     }
@@ -159,8 +159,20 @@ magma_zhetrf_gpu(
     magma_event_create( &event[1] );
     trace_init( 1, 1, 2, (CUstream_st**)stream );
 
+    /* copy matrix to GPU */
     trace_gpu_start( 0, 0, "set", "setA" );
-    magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
+    //magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
+    if ( upper ) {
+         for (int k = 0; k < n; k+=nb ) {
+             kb = min(nb, n-k);
+             magma_zsetmatrix_async( k+kb, kb, A(0,k), lda, dA(0,k), ldda, stream[0] );
+         }
+    } else {
+         for (int k = 0; k < n; k+=nb ) {
+             kb = min(nb, n-k);
+             magma_zsetmatrix_async( n-k, kb, A(k,k), lda, dA(k,k), ldda, stream[0] );
+         }
+    }
     trace_gpu_end( 0, 0 );
 
     if ( upper ) {
@@ -169,42 +181,35 @@ magma_zhetrf_gpu(
 
             K is the main loop index, decreasing from N to 1 in steps of
             KB, where KB is the number of columns factorized by ZLAHEF;
-             KB is either NB or NB-1, or K for the last block */
+            KB is either NB or NB-1, or K for the last block */
 
-/*
-           K = N;
-   10    CONTINUE
-*
-*        If K < 1, exit from loop
-*
-         IF( K.LT.1 )
-     $      GO TO 40
-*
-         IF( K.GT.NB ) THEN
-*
-*           Factorize columns k-kb+1:k of A and use blocked code to
-*           update columns 1:k-kb
-*
-            CALL ZLAHEF( UPLO, K, NB, KB, A, LDA, IPIV, WORK, N, IINFO )
-         ELSE
-*
-*           Use unblocked code to factorize columns 1:k of A
-*
-            CALL ZHETF2( UPLO, K, A, LDA, IPIV, IINFO )
-            KB = K
-         END IF
-*
-*        Set INFO on the first occurrence of a zero pivot
-*
-         IF( INFO.EQ.0 .AND. IINFO.GT.0 )
-     $      INFO = IINFO
-*
-*        Decrease K and return to the start of the main loop
-*
-         K = K - KB
-         GO TO 10
-*
-*/
+         kb = min(n,nb);
+         for (int k = n-1; k >= 0; k-=kb ) {
+             nk = k+1;
+             kb = min(nb, nk);
+
+             if ( k+1 > nb ) 
+             {
+
+                 /* Factorize columns k-kb+1:k of A and use blocked code to
+                    update columns 1:k-kb */
+
+                 magma_zlahef_gpu( MagmaUpper, nk, kb, &kb, A( 0, 0 ), lda, dA( 0, 0 ), ldda, 
+                                   &ipiv[0], dW, ldda, stream, event, &iinfo );
+             } else {
+
+                 /* Use unblocked code to factorize columns 1:k of A */
+
+                 magma_queue_sync( stream[0] );
+                 magma_zgetmatrix( nk, nk, dA( 0, 0 ),ldda, A( 0, 0 ),lda );
+                 lapackf77_zhetf2( MagmaUpperStr, &nk, A( 0, 0 ), &lda, &ipiv[0], &iinfo );
+                 kb = k+1;
+             }
+
+             /* Set INFO on the first occurrence of a zero pivot */
+
+             if ( *info == 0 && iinfo > 0 ) *info = iinfo;
+         }
       } else {
 
         /* Factorize A as L*D*L' using the lower triangle of A
@@ -226,7 +231,7 @@ magma_zhetrf_gpu(
                  /* Use unblocked code to factorize columns k:n of A */
                  magma_queue_sync( stream[0] );
                  magma_zgetmatrix( nk,nk, dA(k,k),ldda, A(k,k),lda );
-                 lapackf77_zhetf2( "L", &nk, A( k, k ), &lda, &ipiv[k], &iinfo );
+                 lapackf77_zhetf2( MagmaLowerStr, &nk, A( k, k ), &lda, &ipiv[k], &iinfo );
              }
              /* Set INFO on the first occurrence of a zero pivot */
              if ( *info == 0 && iinfo > 0 ) *info = iinfo + k;
