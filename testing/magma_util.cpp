@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#include <cuda_runtime_api.h>
+
 #include "testings.h"
 #include "common_magma.h"
 
