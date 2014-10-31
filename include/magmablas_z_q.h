@@ -72,8 +72,8 @@ void
 magmablas_zgeadd_batched_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr  const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex_ptr              *dBarray, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
     magma_int_t batchCount,
     magma_queue_t queue );
 
@@ -88,8 +88,8 @@ magmablas_zlacpy_q(
 void
 magmablas_zlacpy_batched_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_const_ptr  const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex_ptr              *dBarray, magma_int_t lddb,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
     magma_int_t batchCount, 
     magma_queue_t queue );
 
@@ -120,8 +120,9 @@ magmablas_zlansy_q(
 void
 magmablas_zlarfg_q(
     magma_int_t n,
-    magmaDoubleComplex *dalpha, magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex *dtau,
+    magmaDoubleComplex_ptr dalpha,
+    magmaDoubleComplex_ptr dx, magma_int_t incx,
+    magmaDoubleComplex_ptr dtau,
     magma_queue_t queue );
 
 void
@@ -129,15 +130,18 @@ magmablas_zlascl_q(
     magma_type_t type, magma_int_t kl, magma_int_t ku,
     double cfrom, double cto,
     magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *info,
-    magma_queue_t queue );
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_queue_t queue,
+    magma_int_t *info );
 
 void
 magmablas_zlascl2_q(
     magma_type_t type,
-    magma_int_t m, magma_int_t n, const double *dD,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *info,
-    magma_queue_t queue );
+    magma_int_t m, magma_int_t n,
+    magmaDouble_const_ptr dD,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_queue_t queue,
+    magma_int_t *info );
 
 void
 magmablas_zlaset_q(
@@ -150,22 +154,22 @@ void
 magmablas_zlaset_band_q(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
-    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_queue_t queue);
 
 void
 magmablas_zlaswp_q(
     magma_int_t n,
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    magma_int_t i1,  magma_int_t i2,
+    magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue );
 
 void
 magmablas_zlaswpx_q(
     magma_int_t n,
-    magmaDoubleComplex_ptr dAT, magma_int_t ldx, magma_int_t ldy,
-    magma_int_t i1, magma_int_t i2,
+    magmaDoubleComplex_ptr dA, magma_int_t ldx, magma_int_t ldy,
+    magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue );
 
@@ -173,7 +177,7 @@ void
 magmablas_zlaswp2_q(
     magma_int_t n,
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    magma_int_t i1, magma_int_t i2,
+    magma_int_t k1, magma_int_t k2,
     const magma_int_t *d_ipiv, magma_int_t inci,
     magma_queue_t queue );
 
@@ -193,8 +197,8 @@ magmablas_zsymmetrize_tiles_q(
 void
 magmablas_ztrtri_diag_q(
     magma_uplo_t uplo, magma_diag_t diag, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex *d_invA,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr d_dinvA,
     magma_queue_t queue );
 
   /*
@@ -203,8 +207,8 @@ magmablas_ztrtri_diag_q(
 void
 magmablas_zswap_q(
     magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr dx, magma_int_t incx,
+    magmaDoubleComplex_ptr dy, magma_int_t incy,
     magma_queue_t queue );
 
 void

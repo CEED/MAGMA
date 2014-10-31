@@ -20,14 +20,17 @@ extern "C" {
   /* Mixed precision */
 void magmablas_zcaxpycp_q(
     magma_int_t m,
-    magmaFloatComplex_ptr R, magmaDoubleComplex_ptr X,
-    magmaDoubleComplex_const_ptr B, magmaDoubleComplex_ptr W,
+    magmaFloatComplex_ptr  r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b,
+    magmaDoubleComplex_ptr w,
     magma_queue_t queue );
 
 void magmablas_zaxpycp_q(
     magma_int_t m,
-    magmaDoubleComplex_ptr R, magmaDoubleComplex_ptr X,
-    magmaDoubleComplex_const_ptr B,
+    magmaDoubleComplex_ptr r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b,
     magma_queue_t queue  );
 
 void magmablas_zclaswp_q(

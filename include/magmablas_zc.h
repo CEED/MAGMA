@@ -21,17 +21,17 @@ extern "C" {
 void
 magmablas_zcaxpycp(
     magma_int_t m,
-    magmaFloatComplex_ptr R,
-    magmaDoubleComplex_ptr X,
-    magmaDoubleComplex_const_ptr B,
-    magmaDoubleComplex_ptr W );
+    magmaFloatComplex_ptr  r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b,
+    magmaDoubleComplex_ptr w );
 
 void
 magmablas_zaxpycp(
     magma_int_t m,
-    magmaDoubleComplex_ptr R,
-    magmaDoubleComplex_ptr X,
-    magmaDoubleComplex_const_ptr B );
+    magmaDoubleComplex_ptr r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b );
 
 // TODO add ldsa
 void
