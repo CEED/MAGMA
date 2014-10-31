@@ -409,7 +409,7 @@ magma_int_t magma_dtrevc3(
                     iscomplex[ iv ] = ip;
                     // back-transform and normalization is done below
                 }
-            }  // end real eigenvector 
+            }  // end real eigenvector
             else {
                 // ------------------------------------------------------------
                 // Complex right eigenvector

@@ -216,7 +216,7 @@ magma_zlaqps_gpu(
             /*blasf77_zgemv( MagmaNoTransStr, &i__1, &i__2,
                            &c_neg_one, A(rk, 0), &lda,
                                        F(k,  0), &ldf,
-                           &c_one,     A(rk, k), &ione );*/
+                           &c_one,     A(rk, k), &ione ); */
             magma_zgemv( MagmaNoTrans, i__1, i__2,
                          c_neg_one, dA(rk, 0), ldda,
                                     dF(k,  0), lddf,
@@ -334,7 +334,7 @@ magma_zlaqps_gpu(
             /*magma_zgemv( MagmaNoTrans, n, i__1,
                            c_one, F(0,0), ldf,
                                   auxv,   ione,
-                           c_one, F(0,k), ione );*/
+                           c_one, F(0,k), ione ); */
             /* I think we only need stricly lower-triangular part :) */
             magma_zgemv( MagmaNoTrans, n-k-1, i__2,
                          c_one, dF(k+1,0), lddf,
@@ -426,7 +426,7 @@ magma_zlaqps_gpu(
         /* Send F to the GPU
         magma_zsetmatrix( i__2, *kb,
                           F (*kb, 0), ldf,
-                          dF(*kb, 0), i__2 );*/
+                          dF(*kb, 0), i__2 ); */
 
         magma_zgemm( MagmaNoTrans, MagmaConjTrans, i__1, i__2, *kb,
                      c_neg_one, dA(rk+1, 0  ), ldda,
@@ -457,7 +457,7 @@ magma_zlaqps_gpu(
         // NOTE: The computation of VN1( LSTICC ) relies on the fact that
         //   SNRM2 does not fail on vectors with norm below the value of SQRT(DLAMCH('S'))
         vn2[lsticc] = vn1[lsticc];
-        lsticc = itemp;*/
+        lsticc = itemp; */
     }
     magma_free(dAks);
     magma_free(dlsticcs);

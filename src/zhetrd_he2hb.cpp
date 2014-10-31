@@ -428,7 +428,7 @@ magma_zhetrd_he2hb(
     magma_free( dA );
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
-    magmablasSetKernelStream( orig_stream );    
+    magmablasSetKernelStream( orig_stream );
     magma_set_lapack_numthreads( orig_threads );
 
     return *info;

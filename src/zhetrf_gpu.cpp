@@ -35,7 +35,7 @@
       -     = 'U':  Upper triangle of A is stored;
       -     = 'L':  Lower triangle of A is stored.
  
-    @param[in] 
+    @param[in]
     N       INTEGER
             The order of the matrix A.  N >= 0.
   
@@ -116,8 +116,8 @@
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrf_gpu(
-    magma_uplo_t uplo, magma_int_t n, 
-    magmaDoubleComplex *A, magma_int_t lda, 
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *ipiv, magma_int_t *info)
 {
     #define  A(i, j) ( A + (j)*lda  + (i))
@@ -132,14 +132,14 @@ magma_zhetrf_gpu(
     /* Test the input parameters. */
     *info = 0;
     upper = (uplo == MagmaUpper);
-    if( !upper && uplo != MagmaLower ) {
+    if ( !upper && uplo != MagmaLower ) {
          *info = -1;
     } else if ( n < 0 ) {
          *info = -2;
     } else if ( lda < max( 1, n ) ) {
          *info = -4;
     }
-    if( *info != 0 ) {
+    if ( *info != 0 ) {
          magma_xerbla( __func__, -(*info) );
          return *info;
     }
@@ -163,7 +163,7 @@ magma_zhetrf_gpu(
     magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
     trace_gpu_end( 0, 0 );
 
-    if( upper ) {
+    if ( upper ) {
 
           /* Factorize A as U*D*U' using the upper triangle of A
 
@@ -213,13 +213,13 @@ magma_zhetrf_gpu(
            KB, where KB is the number of columns factorized by ZLAHEF;
            KB is either NB or NB-1, or N-K+1 for the last block */
 
-         for (int k = 0; k < n; k+=kb ) {
+         for (int k = 0; k < n; k += kb ) {
              nk = n-k;
              kb = min(nb, n - k);
              if ( k < n-nb ) {
                  /* Factorize columns k:k+kb-1 of A and use blocked code to
                     update columns k+kb:n */
-                 magma_zlahef_gpu( MagmaLower, nk, nb, &kb, A( k, k ), lda, dA( k, k ), ldda, 
+                 magma_zlahef_gpu( MagmaLower, nk, nb, &kb, A( k, k ), lda, dA( k, k ), ldda,
                                    &ipiv[k], dW, ldda, stream, event, &iinfo );
 
              } else {
@@ -232,7 +232,7 @@ magma_zhetrf_gpu(
              if ( *info == 0 && iinfo > 0 ) *info = iinfo + k;
              /* Adjust IPIV */
              for (int j = k; j < k + kb; j ++) {
-                 if( ipiv[j] > 0 ) {
+                 if ( ipiv[j] > 0 ) {
                      ipiv[j] = ipiv[j] + k;
                  } else {
                      ipiv[j] = ipiv[j] - k;

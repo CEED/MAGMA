@@ -348,10 +348,10 @@ FALLBACK:
 
 extern "C" magma_int_t 
 magma_zgesv_rbt(
-        magma_bool_t ref ,magma_int_t n, magma_int_t nrhs, 
-        magmaDoubleComplex *A, magma_int_t lda, 
-        magmaDoubleComplex *B, magma_int_t ldb, 
-        magma_int_t *info)
+    magma_bool_t ref, magma_int_t n, magma_int_t nrhs, 
+    magmaDoubleComplex *A, magma_int_t lda, 
+    magmaDoubleComplex *B, magma_int_t ldb, 
+    magma_int_t *info)
 {
 
     /* Function Body */

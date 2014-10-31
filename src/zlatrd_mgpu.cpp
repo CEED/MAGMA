@@ -225,7 +225,7 @@ magma_zlatrd_mgpu(
 
     if (uplo == MagmaUpper) {
         /* Reduce last NB columns of upper triangle */
-        for (i = n-1; i >= n - nb ; --i) {
+        for (i = n-1; i >= n - nb; --i) {
             i_1 = i + 1;
             i_n = n - i - 1;
             iw = i - n + nb;

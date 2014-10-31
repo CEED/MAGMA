@@ -41,8 +41,8 @@
 
     @param[in,out]
     d_lA    COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
-            On entry, the M-by-N matrix A distributed over GPUs 
-            (d_lA[d] points to the local matrix on d-th GPU). 
+            On entry, the M-by-N matrix A distributed over GPUs
+            (d_lA[d] points to the local matrix on d-th GPU).
             It uses 1D block column cyclic format with the block size of nb,
             and each local matrix is stored by column.
             On exit, the factors L and U from the factorization

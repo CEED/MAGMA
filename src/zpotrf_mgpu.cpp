@@ -45,11 +45,11 @@
             (d_lA[d] points to the local matrix on the d-th GPU).
             It is distributed in 1D block column or row cyclic (with the
             block size of nb) if UPLO = MagmaUpper or MagmaLower, respectively.
-            If UPLO = MagmaUpper, the leading N-by-N upper triangular 
-            part of dA contains the upper triangular part of the matrix dA, 
-            and the strictly lower triangular part of dA is not referenced.  
-            If UPLO = MagmaLower, the leading N-by-N lower triangular part 
-            of dA contains the lower triangular part of the matrix dA, and 
+            If UPLO = MagmaUpper, the leading N-by-N upper triangular
+            part of dA contains the upper triangular part of the matrix dA,
+            and the strictly lower triangular part of dA is not referenced.
+            If UPLO = MagmaLower, the leading N-by-N lower triangular part
+            of dA contains the lower triangular part of the matrix dA, and
             the strictly upper triangular part of dA is not referenced.
     \n
             On exit, if INFO = 0, the factor U or L from the Cholesky

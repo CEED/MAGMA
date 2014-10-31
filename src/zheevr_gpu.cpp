@@ -13,7 +13,7 @@
 */
 #include "common_magma.h"
 
-/**   
+/**
     Purpose
     -------
     ZHEEVR computes selected eigenvalues and, optionally, eigenvectors

@@ -59,7 +59,7 @@ typedef struct magma_zbulge_data_s {
 } magma_zbulge_data;
 
 void magma_zbulge_data_init(
-    magma_zbulge_data *zbulge_data_S, 
+    magma_zbulge_data *zbulge_data_S,
     magma_int_t threads_num, magma_int_t n, magma_int_t nb, magma_int_t nbtiles,
     magma_int_t grsiz, magma_int_t Vblksiz, magma_int_t compT,
     magmaDoubleComplex *A, magma_int_t lda,
@@ -96,7 +96,7 @@ typedef struct magma_zbulge_id_data_s {
 
 void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id, magma_zbulge_data* data)
 {
-    id_data->id = id; 
+    id_data->id = id;
     id_data->data = data;
 }
 

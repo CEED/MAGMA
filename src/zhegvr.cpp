@@ -12,7 +12,7 @@
 */
 #include "common_magma.h"
 
-/**    
+/**
     Purpose
     -------
     ZHEGVR computes all the eigenvalues, and optionally, the eigenvectors

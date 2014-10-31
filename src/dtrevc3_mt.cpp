@@ -86,7 +86,7 @@ public:
         beta  ( in_beta   ),
         C     ( in_C      ),
         ldc   ( in_ldc    )
-    {}               
+    {}
     
     virtual void run()
     {
@@ -522,7 +522,7 @@ magma_int_t magma_dtrevc3_mt(
                     iscomplex[ iv ] = ip;
                     // back-transform and normalization is done below
                 }
-            }  // end real eigenvector 
+            }  // end real eigenvector
             else {
                 // ------------------------------------------------------------
                 // Complex right eigenvector

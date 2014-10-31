@@ -105,7 +105,7 @@ public:
         beta  ( in_beta   ),
         C     ( in_C      ),
         ldc   ( in_ldc    )
-    {}               
+    {}
     
     virtual void run()
     {

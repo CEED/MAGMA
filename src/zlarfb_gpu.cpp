@@ -113,7 +113,7 @@
                      ( v1 v2 v3 )
                      ( v1 v2 v3 )
 
-        DIRECT = MagmaBackward and        DIRECT = MagmaBackward and 
+        DIRECT = MagmaBackward and        DIRECT = MagmaBackward and
         STOREV = MagmaColumnwise:         STOREV = MagmaRowwise:
 
                  V = ( v1 v2 v3 )                 V = ( v1 v1  1  0  0 )

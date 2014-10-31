@@ -175,7 +175,7 @@ magma_zgeqp3_gpu(
         }
     }
 
-    /*  
+    /*
         // TODO:
            Factorize fixed columns
            =======================

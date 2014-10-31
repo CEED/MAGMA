@@ -45,7 +45,7 @@
     @param[in,out]
     d_lAT   COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
             On entry, the M-by-N matrix A distributed over GPUs
-            (d_lAT[d] points to the local matrix on d-th GPU). 
+            (d_lAT[d] points to the local matrix on d-th GPU).
             It uses a 1D block column cyclic format (with the block size
             nb), and each local matrix is stored by row.
             On exit, the factors L and U from the factorization
@@ -62,7 +62,7 @@
 
     @param (workspace) on device
     d_lAP   COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
-            d_lAP[d] is the workspace on d-th GPU. Each local workspace 
+            d_lAP[d] is the workspace on d-th GPU. Each local workspace
             must be of size (3+ngpu)*nb*maxm, where maxm is m rounded
             up to a multiple of 32 and nb is the block size.
 
@@ -76,8 +76,8 @@
 
     @param[in]
     queues  magma_queue_t
-            queues[d] points to the streams for the d-th GPU to execute 
-            in. Each GPU require two streams. 
+            queues[d] points to the streams for the d-th GPU to execute
+            in. Each GPU require two streams.
 
     @param[out]
     info    INTEGER

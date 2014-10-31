@@ -258,7 +258,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
     // bind threads
     CPU_ZERO(&new_set);
     CPU_SET(my_core_id, &new_set);
-    sched_setaffinity( 0, sizeof(new_set), &new_set) ;       
+    sched_setaffinity( 0, sizeof(new_set), &new_set);
 #ifdef PRINTAFFINITY
     print_set.print_affinity(my_core_id, "set affinity");
 #endif

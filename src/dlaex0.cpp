@@ -244,7 +244,7 @@ magma_dlaex0(
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
     }
     blasf77_dcopy(&n, work, &ione, d, &ione);
-    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, Q, &ldq );
+    lapackf77_dlacpy( "A", &n, &n, &work[n], &n, Q, &ldq );
 
     return *info;
 } /* magma_dlaex0 */

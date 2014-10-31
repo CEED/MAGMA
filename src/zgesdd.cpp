@@ -53,7 +53,7 @@
       -     = MagmaSomeVec: the first min(M,N) columns of U and
                             the first min(M,N) rows of V**H are
                             returned in the arrays U and VT;
-      -     = MagmaOverwriteVec: 
+      -     = MagmaOverwriteVec:
                     If M >= N, the first N columns of U are overwritten
                     on the array A and all rows of V**H are returned in
                     the array VT;
