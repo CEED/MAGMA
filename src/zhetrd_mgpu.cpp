@@ -548,13 +548,13 @@ magma_zher2k_mgpu(
     magma_int_t ngpu,
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t b_offset,
     double beta,
-    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t c_offset,
     magma_int_t nqueue, magma_queue_t queues[][10])
 {
-#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
-#define dB1(id, i, j) (dB[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
+#define dB1(id, i, j) (dB[(id)]+(j)*lddb + (i)+b_offset)+k*lddb
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     magma_int_t i, id, ib, ii, kk, n1;
@@ -567,33 +567,33 @@ magma_zher2k_mgpu(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%ngpu;
+        id = ((i+c_offset)/nb)%ngpu;
         kk = (i/(nb*ngpu))%nqueue;
         magma_setdevice(id);
         magmablasSetKernelStream( queues[id][kk] );
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*ngpu));
+        ii = nb*((i+c_offset)/(nb*ngpu));
 
         /* zher2k on diagonal block */
         trace_gpu_start( id, kk, "syr2k", "syr2k" );
         magma_zher2k(uplo, trans, ib, k,
-                     alpha, dB1(id, i,        0 ), lddb,
-                            dB(id,  i,        0 ), lddb,
-                     beta,  dC(id,  i+offset,   ii), lddc);
+                     alpha, dB1(id, i,          0 ), lddb,
+                            dB(id,  i,          0 ), lddb,
+                     beta,  dC(id,  i+c_offset, ii), lddc);
         trace_gpu_end( id, kk );
     }
 
     /* off-diagonal update */
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
+            id = ((i+c_offset)/nb)%ngpu;
             kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
             magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k,
                         alpha, dB1(id, 0, 0 ), lddb,
                                dB(id,  i, 0 ), lddb,
@@ -602,34 +602,34 @@ magma_zher2k_mgpu(
     }
     else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
+            id = ((i+c_offset)/nb)%ngpu;
             kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
             magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             n1 = n-i-ib;
             
             // zgemm on off-diagonal blocks
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k,
-                        alpha, dB1(id, i+ib,        0 ), lddb,
-                               dB(id,  i,           0 ), lddb,
-                        c_one, dC(id,  i+offset+ib, ii), lddc);
+                        alpha, dB1(id, i+ib,          0 ), lddb,
+                               dB(id,  i,             0 ), lddb,
+                        c_one, dC(id,  i+c_offset+ib, ii), lddc);
             trace_gpu_end( id, kk );
         }
     }
 
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
+            id = ((i+c_offset)/nb)%ngpu;
             kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
             magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k,
                         alpha, dB( id, 0, 0 ), lddb,
                                dB1(id, i, 0 ), lddb,
@@ -637,21 +637,21 @@ magma_zher2k_mgpu(
         }
     } else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
+            id = ((i+c_offset)/nb)%ngpu;
             kk = (i/(nb*ngpu))%nqueue;
             magma_setdevice(id);
             magmablasSetKernelStream( queues[id][kk] );
             
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             n1 = n-i-ib;
             
             /* zgemm on off-diagonal blocks */
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k,
-                        alpha, dB(id,  i+ib,        0 ), lddb,
-                               dB1(id, i,           0 ), lddb,
-                        c_one, dC(id,  i+offset+ib, ii), lddc);
+                        alpha, dB(id,  i+ib,          0 ), lddb,
+                               dB1(id, i,             0 ), lddb,
+                        c_one, dC(id,  i+c_offset+ib, ii), lddc);
             trace_gpu_end( id, kk );
         }
     }

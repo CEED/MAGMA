@@ -39,14 +39,14 @@
     @param[in,out]
     d_lA    COMPLEX_16 array of pointers on the GPU, dimension (ngpu)
             On entry, the Hermitian matrix dA distributed over GPUs
-            (dl_A[d] points to the local matrix on the d-th GPU).  
+            (dl_A[d] points to the local matrix on the d-th GPU).
             It is distributed in 1D block column or row cyclic (with the
             block size of nb) if UPLO = MagmaUpper or MagmaLower, respectively.
-            If UPLO = MagmaUpper, the leading N-by-N upper triangular 
-            part of dA contains the upper triangular part of the matrix dA, 
-            and the strictly lower triangular part of dA is not referenced.  
-            If UPLO = MagmaLower, the leading N-by-N lower triangular part 
-            of dA contains the lower triangular part of the matrix dA, and 
+            If UPLO = MagmaUpper, the leading N-by-N upper triangular
+            part of dA contains the upper triangular part of the matrix dA,
+            and the strictly lower triangular part of dA is not referenced.
+            If UPLO = MagmaLower, the leading N-by-N lower triangular part
+            of dA contains the lower triangular part of the matrix dA, and
             the strictly upper triangular part of dA is not referenced.
     \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
@@ -500,12 +500,12 @@ magma_zherk_mgpu(
     magma_int_t ngpu,
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
-    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t b_offset,
     double beta,
-    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t c_offset,
     magma_int_t nqueue, magma_queue_t queues[][10])
 {
-#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     const char* uplo_  = lapack_uplo_const( uplo  );
@@ -520,30 +520,30 @@ magma_zherk_mgpu(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%ngpu;
-        kk = STREAM_ID( i+offset );
+        id = ((i+c_offset)/nb)%ngpu;
+        kk = STREAM_ID( i+c_offset );
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*ngpu));
+        ii = nb*((i+c_offset)/(nb*ngpu));
 
         /* zher2k on diagonal block */
         magma_setdevice(id);
         magmablasSetKernelStream( queues[id][kk] );
         trace_gpu_start( id, kk, "syr2k", "syr2k" );
         magma_zherk(uplo, trans, ib, k,
-                    alpha,  dB(id, i,        0 ), lddb,
-                     beta,  dC(id, i+offset, ii), lddc);
+                    alpha,  dB(id, i,          0 ), lddb,
+                     beta,  dC(id, i+c_offset, ii), lddc);
         trace_gpu_end( id, kk );
     }
 
     /* off-diagonal update */
     if (uplo == MagmaUpper) {
         for( i=nb; i < n; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
-            kk = STREAM_ID( i+offset );
+            id = ((i+c_offset)/nb)%ngpu;
+            kk = STREAM_ID( i+c_offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
 
             magma_setdevice(id);
             magmablasSetKernelStream( queues[id][kk] );
@@ -555,11 +555,11 @@ magma_zherk_mgpu(
     }
     else {
         for( i=0; i < n-nb; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
-            kk = STREAM_ID( i+offset );
+            id = ((i+c_offset)/nb)%ngpu;
+            kk = STREAM_ID( i+c_offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             n1 = n-i-ib;
 
             /* zgemm on off-diagonal blocks */
@@ -567,9 +567,9 @@ magma_zherk_mgpu(
             magmablasSetKernelStream( queues[id][kk] );
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k,
-                        z_alpha, dB(id, i+ib,         0 ), lddb,
-                                 dB(id,  i,           0 ), lddb,
-                        z_beta,  dC(id,  i+offset+ib, ii), lddc);
+                        z_alpha, dB(id, i+ib,           0 ), lddb,
+                                 dB(id,  i,             0 ), lddb,
+                        z_beta,  dC(id,  i+c_offset+ib, ii), lddc);
             trace_gpu_end( id, kk );
         }
     }
@@ -591,12 +591,12 @@ magma_zherk_mgpu2(
     magma_int_t ngpu,
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t nb, magma_int_t n, magma_int_t k,
     double alpha,
-    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t offset_b,
+    magmaDoubleComplex_ptr dB[], magma_int_t lddb, magma_int_t b_offset,
     double beta,
-    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t offset,
+    magmaDoubleComplex_ptr dC[], magma_int_t lddc, magma_int_t c_offset,
     magma_int_t nqueue, magma_queue_t queues[][10])
 {
-#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+offset_b)
+#define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
     const char* uplo_  = lapack_uplo_const( uplo  );
@@ -611,20 +611,20 @@ magma_zherk_mgpu2(
     
     /* diagonal update */
     for( i=0; i < n; i += nb ) {
-        id = ((i+offset)/nb)%ngpu;
-        kk = STREAM_ID( i+offset );
+        id = ((i+c_offset)/nb)%ngpu;
+        kk = STREAM_ID( i+c_offset );
 
         ib = min(nb, n-i);
-        ii = nb*((i+offset)/(nb*ngpu));
+        ii = nb*((i+c_offset)/(nb*ngpu));
     }
 
     if (uplo == MagmaUpper) {
         for( i=0; i < n; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
-            kk = STREAM_ID( i+offset );
+            id = ((i+c_offset)/nb)%ngpu;
+            kk = STREAM_ID( i+c_offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             n1 = i+ib;
 
             magma_setdevice(id);
@@ -639,11 +639,11 @@ magma_zherk_mgpu2(
     }
     else {
         for( i=0; i < n; i += nb ) {
-            id = ((i+offset)/nb)%ngpu;
-            kk = STREAM_ID( i+offset );
+            id = ((i+c_offset)/nb)%ngpu;
+            kk = STREAM_ID( i+c_offset );
 
             ib = min(nb, n-i);
-            ii = nb*((i+offset)/(nb*ngpu));
+            ii = nb*((i+c_offset)/(nb*ngpu));
             n1 = n-i;
 
             magma_setdevice(id);
@@ -651,9 +651,9 @@ magma_zherk_mgpu2(
             trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
             /* zgemm on diag and off-diagonal blocks */
             magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k,
-                        z_alpha, dB(id, i,         0), lddb,
-                                 dB(id, i,         0), lddb,
-                        z_beta,  dC(id, i+offset, ii), lddc);
+                        z_alpha, dB(id, i,           0), lddb,
+                                 dB(id, i,           0), lddb,
+                        z_beta,  dC(id, i+c_offset, ii), lddc);
             trace_gpu_end( id, kk );
         }
     }
