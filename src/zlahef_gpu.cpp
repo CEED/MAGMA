@@ -302,7 +302,7 @@ magma_zlahef_gpu(
                    /* Copy non-updated column kk to column kp */
                    magmablasSetKernelStream( queues[0] );
                    #if defined(PRECISION_z) || defined(PRECISION_c)
-                   magmablas_zlacpy_cnjg( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp+1, kp ), ldda );
+                   magmablas_zlacpy_cnjg( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp, kp+1 ), ldda );
                    #else
                    magma_zcopy( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp, kp+1 ), ldda );
                    #endif
