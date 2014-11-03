@@ -143,11 +143,11 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){
-        magma_zcuilusetup( A, precond );
+        magma_zcumilusetup( A, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
-        magma_zcuiccsetup( A, precond );
+        magma_zcumiccsetup( A, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_NONE ){
@@ -273,11 +273,12 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){
-        magma_zapplycuilu_l( b, x, precond );
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
+//        magma_zapplycumilu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
-        magma_zapplycuicc_l( b, x, precond );
+        magma_zapplycumicc_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_NONE ){
@@ -333,12 +334,13 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){
-        magma_zapplycuilu_r( b, x, precond );
+        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
+//        magma_zapplycumilu_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC || 
             ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
-        magma_zapplycuicc_r( b, x, precond );
+        magma_zapplycumicc_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_NONE ){

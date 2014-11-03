@@ -514,6 +514,28 @@ magma_zapplycuicc_r( magma_z_vector b, magma_z_vector *x,
                     magma_z_preconditioner *precond );
 
 
+magma_int_t
+magma_zcumilusetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond );
+
+magma_int_t
+magma_zapplycumilu_l( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond );
+magma_int_t
+magma_zapplycumilu_r( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond );
+
+
+magma_int_t
+magma_zcumiccsetup( magma_z_sparse_matrix A, magma_z_preconditioner *precond );
+
+magma_int_t
+magma_zapplycumicc_l( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond );
+magma_int_t
+magma_zapplycumicc_r( magma_z_vector b, magma_z_vector *x, 
+                    magma_z_preconditioner *precond );
+
+
 // block-asynchronous iteration
 
 magma_int_t
