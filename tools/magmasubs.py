@@ -542,6 +542,7 @@ subs = {
     ('silu',           'dilu',           'cilu',           'zilu'            ),
     ('sailu',          'dailu',          'cailu',          'zailu'           ),
     ('scuilu',         'dcuilu',         'ccuilu',         'zcuilu'          ),
+	('scumilu',        'dcumilu',        'ccumilu',        'zcumilu'         ),
     ('sbailu',         'dbailu',         'cbailu',         'zbailu'          ),
     ('spastix',        'dpastix',        'cpastix',        'zpastix'         ),
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
