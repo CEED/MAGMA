@@ -253,7 +253,7 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
             if (*info != 0) return *info;
 
             if ( i + sb < n ) {
-                int height = n - i - sb;
+                magma_int_t height = n - i - sb;
 
                 /* Solve the lower panel ( L21*D11 )*/
                 blasf77_ztrsm(
@@ -297,7 +297,7 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
             if (*info != 0) return *info;
 
             if ( i + sb < n ) {
-                int height = n - i - sb;
+                magma_int_t height = n - i - sb;
 
                 /* Solve the lower panel ( L21*D11 )*/
                 blasf77_ztrsm(
