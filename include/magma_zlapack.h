@@ -524,8 +524,8 @@ void   lapackf77_zgetrs( const char *trans,
                          magmaDoubleComplex *B, const magma_int_t *ldb,
                          magma_int_t *info );
 
-void   lapackf77_zhetf2( char*, magma_int_t*, 
-                         magmaDoubleComplex*, int*, int*, int* );
+void   lapackf77_zhetf2( const char*, magma_int_t*, 
+                         magmaDoubleComplex*, magma_int_t*, magma_int_t*, magma_int_t* );
 
 void   lapackf77_zhetrs( const char *uplo,
                          const magma_int_t *n, const magma_int_t *nrhs,
