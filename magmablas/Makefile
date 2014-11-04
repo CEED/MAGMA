@@ -29,6 +29,7 @@ ZSRC := \
 	zgemv_conjv.cu          \
 	zhemv.cu		\
 	zlacpy.cu		\
+	zlacpy_cnjg.cu	\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
@@ -43,6 +44,8 @@ ZSRC := \
 	zlarfgx-v2.cu		\
 	zlascl.cu		\
 	zlascl2.cu		\
+	zlascl_2x2.cu		\
+	zlascl_diag.cu		\
 	zlaset.cu		\
 	zlaset_band.cu		\
 	zlaswp.cu		\
