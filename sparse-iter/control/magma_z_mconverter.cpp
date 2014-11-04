@@ -888,6 +888,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     }
                 }
             }
+            //B->nnz = A.nnz;
             return MAGMA_SUCCESS; 
         }
         // SELLC/SELLP to CSR    
@@ -944,7 +945,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
                        &B->val, &B->row, &B->col, &B->num_rows ); 
-
+            B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
             return MAGMA_SUCCESS;  
         }
