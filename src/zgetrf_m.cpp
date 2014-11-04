@@ -224,7 +224,7 @@ magma_zgetrf_m(
                 magma_setdevice(d);
                 magma_queue_sync( stream[d][0] );
                 magma_queue_sync( stream[d][1] );
-            magmablasSetKernelStream(NULL);
+                magmablasSetKernelStream(NULL);
             }
             time_set += timer_stop( time );
     
@@ -253,8 +253,7 @@ magma_zgetrf_m(
                 /* applying the pivot from the previous big-panel */
                 for( d=0; d < ngpu; d++ ) {
                     magma_setdevice(d);
-                    magmablasSetKernelStream(stream[d][1]);
-                    magmablas_zpermute_long3( dAT(d,0,0), ldn_local, ipiv, NBk, offset );
+                    magmablas_zlaswp_q( ldn_local, dAT(d,0,0), ldn_local, offset+1, offset+NBk, ipiv, 1, stream[d][1] );
                 }
                 
                 /* == going through each block-column of previous big-panels == */
@@ -306,8 +305,6 @@ magma_zgetrf_m(
     
             /* calling magma-gpu interface to panel-factorize the big panel */
             if ( M > I ) {
-                //magma_zgetrf1_mgpu(ngpu, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
-                //                   (magma_queue_t **)stream, &iinfo);
                 magma_zgetrf2_mgpu(ngpu, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                                    stream, &iinfo);
                 if ( iinfo < 0 ) {

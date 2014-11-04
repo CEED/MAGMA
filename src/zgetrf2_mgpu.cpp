@@ -110,7 +110,7 @@ magma_zgetrf2_mgpu(
     magma_int_t block_size = 32;
     magma_int_t iinfo, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
-    magma_int_t j, d, dd, rows, cols, s, ldpan[MagmaMaxGPUs];
+    magma_int_t i, j, d, dd, rows, cols, s, ldpan[MagmaMaxGPUs];
     magma_int_t id, j_local, j_local2, nb0, nb1, h = 2+ngpu;
     magmaDoubleComplex *d_panel[MagmaMaxGPUs], *panel_local[MagmaMaxGPUs];
 
@@ -216,13 +216,14 @@ magma_zgetrf2_mgpu(
         d = (j+1) % ngpu;
         for( dd=0; dd < ngpu; dd++ ) {
             magma_setdevice(d);
-            magmablasSetKernelStream(queues[d][0]);
             
             trace_gpu_start( d, 1, "pivot", "pivot" );
-            if ( dd == 0 )
-                magmablas_zpermute_long2( lddat, dAT(d,0,0), lddat, ipiv, nb, j*nb );
-            else
-                magmablas_zpermute_long3(        dAT(d,0,0), lddat, ipiv, nb, j*nb );
+            if ( dd == 0 ) {
+                for( i=j*nb; i < j*nb + nb; ++i ) {
+                    ipiv[i] += j*nb;
+                }
+            }
+            magmablas_zlaswp_q( lddat, dAT(d,0,0), lddat, j*nb + 1, j*nb + nb, ipiv, 1, queues[d][0] );
             trace_gpu_end( d, 1 );
             d = (d+1) % ngpu;
         }
@@ -380,11 +381,12 @@ magma_zgetrf2_mgpu(
         
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
-            magmablasSetKernelStream(queues[d][0]);
-            if ( d == 0 )
-                magmablas_zpermute_long2( lddat, dAT(d,0,0), lddat, ipiv, nb0, s*nb );
-            else
-                magmablas_zpermute_long3(        dAT(d,0,0), lddat, ipiv, nb0, s*nb );
+            if ( d == 0 ) {
+                for( i=s*nb; i < s*nb + nb0; ++i ) {
+                    ipiv[i] += s*nb;
+                }
+            }
+            magmablas_zlaswp_q( lddat, dAT(d,0,0), lddat, s*nb + 1, s*nb + nb0, ipiv, 1, queues[d][0] );
         }
         
         for( d=0; d < ngpu; d++ ) {
