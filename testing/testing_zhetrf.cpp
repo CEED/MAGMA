@@ -24,9 +24,6 @@
 
 /* ================================================================================================== */
 extern "C" magma_int_t
-magma_zhetrf_cpu(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
-extern "C" magma_int_t
 magma_zhetrf_hybrid(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
              magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 extern "C" magma_int_t
@@ -37,20 +34,10 @@ magma_zhetrf_gpu_row(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, ma
                      magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 extern "C" magma_int_t
 magma_zhetrf_nopiv(magma_uplo_t uplo, magma_int_t n,
-                   cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
-
-void
-zhetrf_(char*, int*, magmaDoubleComplex*, int*, int*, magmaDoubleComplex*, int*, int*);
-void 
-zhetrs_(char*, int*, int*, magmaDoubleComplex*, int*, int*, magmaDoubleComplex*, int*, int*);
-#ifdef __cplusplus
-extern "C" {
-#endif
-magma_int_t 
-magma_get_zhetrf_nb( magma_int_t m );
-#ifdef __cplusplus
-}
-#endif
+                   magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+extern "C" magma_int_t
+magma_zhetrf_nopiv_gpu(magma_uplo_t uplo, magma_int_t n,
+                       magmaDoubleComplex_ptr da, magma_int_t ldda, magma_int_t *info);
 /* ================================================================================================== */
 
 // Initialize matrix to random.
@@ -104,20 +91,28 @@ double get_residual(
     // solve Ax = b
     if (nopiv) {
         if (upper) {
-            blasf77_ztrsm( "L", "U", "C", "U", &n, &ione, &c_one,
+            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, 
+                           MagmaConjTransStr, MagmaUnitStr, 
+                           &n, &ione, &c_one,
                            A, &lda, x, &n );
             for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
-            blasf77_ztrsm( "L", "U", "N", "U", &n, &ione, &c_one,
+            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, 
+                           MagmaNoTransStr, MagmaUnitStr, 
+                           &n, &ione, &c_one,
                            A, &lda, x, &n );
         } else {
-            blasf77_ztrsm( "L", "L", "N", "U", &n, &ione, &c_one,
+            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr, 
+                           MagmaNoTransStr, MagmaUnitStr, 
+                           &n, &ione, &c_one,
                            A, &lda, x, &n );
             for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
-            blasf77_ztrsm( "L", "L", "C", "U", &n, &ione, &c_one,
+            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr, 
+                           MagmaConjTransStr, MagmaUnitStr, 
+                           &n, &ione, &c_one,
                            A, &lda, x, &n );
         }
     }else {
-        zhetrs_( (upper ? MagmaUpperStr: MagmaLowerStr), &n, &ione, A, &lda, ipiv, x, &n, &info );
+        lapackf77_zhetrs( (upper ? MagmaUpperStr: MagmaLowerStr), &n, &ione, A, &lda, ipiv, x, &n, &info );
     }
     if (info != 0)
         printf("lapackf77_zhetrs returned error %d: %s.\n",
@@ -204,52 +199,53 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
+    real_Double_t   gflops, gpu_perf, gpu_time = 0.0, cpu_perf=0, cpu_time=0;
     double          error, error_lapack = 0.0;
     magmaDoubleComplex *h_A, *work, temp;
     magma_int_t     *ipiv;
     magma_int_t     N, n2, lda, lwork, info;
     magma_int_t     status = 0;
-    magma_int_t     cpu = 0, gpu = 0, nopiv = 0, row = 0;
+    magma_int_t     cpu = 0, gpu = 0, nopiv = 0, nopiv_gpu = 0, row = 0;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     switch (opts.version) {
         case 1:
-            gpu = 1;
+            cpu = 1;
+            printf( "\n Bunch-Kauffman: CPU-Interface to GPU-only version" );
             break;
         case 2:
-            nopiv = 1;
+            gpu = 1;
+            printf( "\n Bunch-Kauffman: GPU-Interface to GPU-only version" );
+            printf( "\n not yet..\n\n" );
+            return 0;
             break;
-        //case 3:
-        //    cpu = 1;
-        //    break;
-        //case 4:
+        case 3:
+            nopiv = 1;
+            printf( "\n No-piv: CPU-Interface to Hybrid-version (A is SPD)" );
+            break;
+        case 4:
+            nopiv_gpu = 1;
+            printf( "\n No-piv: GPU-Interface to Hybrid-version (A is SPD)" );
+            break;
+            break;
+        //case 5:
         //    row = 1;
+        //    printf( "\n Bunch-Kauffman: GPU-only version (row-major)" );
         //    break;
         default:
+        //  printf( " hybrid CPU-GPU version" );
             printf( " version = %d not supported\n\n",opts.version);
             return 0;
     }
-    magma_uplo_t uplo = opts.uplo;
 
-    if (nopiv)
-        printf( "\n No-piv: Hybrid-version (A is SPD)" );
-    else if (cpu)
-        printf( "\n Bunch-Kauffman: CPU-only version" );
-    else if (gpu)
-        printf( "\n Bunch-Kauffman: GPU-only version" );
-    else if (row)
-        printf( "\n Bunch-Kauffman: GPU-only version (row-major)" );
-    else
-        printf( " hybrid CPU-GPU version" );
+    magma_uplo_t uplo = opts.uplo;
     printf( " (%s)\n",(uplo == MagmaUpper ? "upper" : "lower") );
-    printf( " (--version: 1 = Bunch-Kauffman (GPU), 2 = No-piv (hybrid))\n\n" );
+    printf( " (--version: 1 = Bunch-Kauffman (CPU), 2 = Bunch-Kauffman (GPU), 3 = No-piv (CPU), 4 = No-piv (GPU))\n\n" );
     
     magma_int_t upper = (uplo == MagmaUpper);
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 2 ) {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
@@ -269,7 +265,7 @@ int main( int argc, char** argv)
             
             lwork = -1;
             lapackf77_zhetrf((upper ? MagmaUpperStr: MagmaLowerStr), &N, h_A, &lda, ipiv, &temp, &lwork, &info);
-            lwork = max(N*(1+magma_get_zhetrf_nb(N)), (int)MAGMA_Z_REAL(temp));
+            lwork = (int)MAGMA_Z_REAL(temp);
             TESTING_MALLOC_PIN( work, magmaDoubleComplex, lwork );
 
             /* =====================================================================
@@ -290,17 +286,35 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            init_matrix( nopiv, N, N, h_A, lda );
+            init_matrix( (nopiv | nopiv_gpu), N, N, h_A, lda );
 
-            gpu_time = magma_wtime();
             if (nopiv) {
+                // CPU-interface to non-piv LDLt
                 magma_setdevice(0);
+                gpu_time = magma_wtime();
                 magma_zhetrf_nopiv( uplo, N, h_A, lda, &info);
+                gpu_time = magma_wtime() - gpu_time;
             } else if (cpu) {
-                //magma_zhetrf_cpu( uplo, N, h_A, lda, ipiv, work, lwork, &info);
-            } else if (gpu) {
+                // CPU-interface to Bunch-Kauffman LDLt
                 magma_setdevice(0);
+                gpu_time = magma_wtime();
                 magma_zhetrf( uplo, N, h_A, lda, ipiv, &info);
+                gpu_time = magma_wtime() - gpu_time;
+            } else if (nopiv_gpu) {
+                // GPU-interface to non-piv LDLt
+                magma_setdevice(0);
+                magma_int_t ldda = 32*((N+31)/32);
+                magmaDoubleComplex *d_A;
+                if (MAGMA_SUCCESS != magma_zmalloc( &d_A, N*ldda  )) {
+                    printf( " failed to allocate d_A(%dx%d)\n",N,ldda);
+                    return 0;
+                }
+                magma_zsetmatrix(N, N, h_A, lda, d_A, ldda);
+                gpu_time = magma_wtime();
+                magma_zhetrf_nopiv_gpu( uplo, N, d_A, ldda, &info);
+                gpu_time = magma_wtime() - gpu_time;
+                magma_zgetmatrix(N, N, d_A, ldda, h_A, lda);
+                magma_free( d_A );
             } else if (row) {
                 magma_setdevice(0);
                 //magma_zhetrf_gpu_row( uplo, N, h_A, lda, ipiv, work, lwork, &info);
@@ -308,7 +322,6 @@ int main( int argc, char** argv)
                 magma_setdevice(0);
                 //magma_zhetrf_hybrid( uplo, N, h_A, lda, ipiv, work, lwork, &info);
             }
-            gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zhetrf returned error %d: %s.\n",
@@ -326,7 +339,7 @@ int main( int argc, char** argv)
                        (int) N, (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check == 2 ) {
-                error = get_residual( nopiv, uplo, N, h_A, lda, ipiv );
+                error = get_residual( (nopiv | nopiv_gpu), uplo, N, h_A, lda, ipiv );
                 printf("   %8.2e   %s", error, (error < tol ? "ok" : "failed"));
                 if (opts.lapack)
                     printf(" (lapack rel.res. = %8.2e)", error_lapack);
