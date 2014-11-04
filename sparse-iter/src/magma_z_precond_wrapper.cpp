@@ -273,7 +273,7 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU || 
-            ( precond->solver == Magma_AILU && precond->maxiter == -1){
+            ( precond->solver == Magma_AILU && precond->maxiter == -1) ){
         magma_zapplycumilu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
