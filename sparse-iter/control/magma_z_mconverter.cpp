@@ -538,6 +538,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
                        &B->val, &B->row, &B->col, &B->num_rows ); 
 
+            B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }  
@@ -638,7 +639,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //The CSR compressor removes these
             magma_z_csr_compressor(&val_tmp2, &row_tmp, &col_tmp2, 
                        &B->val, &B->row, &B->col, &B->num_rows ); 
-
+            B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }  
@@ -811,6 +812,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
                    &B->val, &B->row, &B->col, &B->num_rows );  
+            B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }   
