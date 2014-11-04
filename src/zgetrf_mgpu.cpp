@@ -201,8 +201,6 @@ magma_zgetrf_mgpu(
         }
 
         /* calling multi-gpu interface with allocated workspaces and streams */
-        //magma_zgetrf1_mgpu( ngpu, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
-        //                   (magma_queue_t **)streaml, info );
         magma_zgetrf2_mgpu(ngpu, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
                            streaml, info);
 
