@@ -488,8 +488,8 @@ magmablas_zlascl2(
 void
 magmablas_zlascl_diag(
     magma_type_t type, magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex_ptr dD, magma_int_t lddd,
-          magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    const magmaDoubleComplex *dD, magma_int_t lddd,
+          magmaDoubleComplex *dA, magma_int_t ldda,
     magma_int_t *info );
 
 void
