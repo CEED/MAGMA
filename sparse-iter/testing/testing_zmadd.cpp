@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magmaDoubleComplex mone = MAGMA_Z_MAKE(-1.0, 0.0);
 
-    magma_int_t i=0;
+    magma_int_t i=1;
 
     if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
         i++;
@@ -81,9 +81,9 @@ int main( int argc, char** argv)
     magma_zmdiff( B, B2, &res);
     printf("# ||A-B||_F = %f\n", res);
     if( res < .000001 )
-        printf("# tester:  ok\n");
+        printf("# tester matrix add:  ok\n");
     else
-        printf("# tester:  failed\n");
+        printf("# tester matrix add:  failed\n");
 
     magma_z_mfree(&A); 
     magma_z_mfree(&B); 

@@ -318,16 +318,37 @@ if ( opts.ilu_prec ):
 
 
 # ----------------------------------------------------------------------
+# blocksizes
+# ----------
+blocksizes = []
+blocksizes += ['--blocksize 4']
+blocksizes += ['--blocksize 8']
+blocksizes += ['--blocksize 16']
+blocksizes += ['--blocksize 32']
+#end
+
+
+# ----------------------------------------------------------------------
+# alignments
+# ----------
+alignments = []
+alignments += ['--alignment 4']
+alignments += ['--alignment 8']
+alignments += ['--alignment 16']
+alignments += ['--alignment 32']
+
+
+# ----------------------------------------------------------------------
 # problem sizes
 # n    is squared
 # ----------
 sizes = []
 if opts.small:
-    sizes += ['LAPLACE2D 100']
+    sizes += ['LAPLACE2D 47']
 if opts.med:
-    sizes += ['LAPLACE2D 315']
+    sizes += ['LAPLACE2D 95']
 if opts.large:
-    sizes += ['LAPLACE2D 1000']
+    sizes += ['LAPLACE2D 317']
 #end
 
 
@@ -374,7 +395,36 @@ def substitute( txt, pfrom, pto ):
 # grep "\('#?testing_\w\w+" run_tests.py | perl -pe "s/#?\('#?//; s/',.*/.cpp \\/;" | uniq > ! b
 # diff -w a b
 
+# ----------------------------------------------------------------------
 tests = []
+
+if ( opts.control):
+    for size in sizes:
+        for precision in opts.precisions:
+            # precision generation
+            cmd = substitute( 'testing_zio', 'z', precision )
+            tests.append( [cmd, '', size, ''] )
+            cmd = substitute( 'testing_zmatrix', 'z', precision )
+            tests.append( [cmd, '', size, ''] )
+            cmd = substitute( 'testing_zmcompressor', 'z', precision )
+            tests.append( [cmd, '', size, ''] )
+            cmd = substitute( 'testing_zmadd', 'z', precision )
+            tests.append( [cmd, size, size, ''] )
+
+if ( opts.sparse_blas):
+    for alignment in alignments:
+        for blocksize in blocksizes:
+            for size in sizes:
+                for precision in opts.precisions:
+                    # precision generation
+                    cmd = substitute( 'testing_zspmv', 'z', precision )
+                    tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
+                    cmd = substitute( 'testing_zspmm', 'z', precision )
+                    tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
+
+
+
+# ----------------------------------------------------------------------
 for solver in solvers:
     for precond in precs:
         for format in formats:
@@ -384,10 +434,17 @@ for solver in solvers:
                     cmd = substitute( 'testing_zsolver', 'z', precision )
                     tests.append( [cmd, solver + ' ' + precond + ' ' + format, size, ''] )
 
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------
 print 'tests'
 for t in tests:
 	print t
-
 
 # ----------------------------------------------------------------------
 # runs command in a subprocess.
