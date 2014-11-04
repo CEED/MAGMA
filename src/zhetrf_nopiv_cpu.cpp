@@ -166,7 +166,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
         /* Pointer on first extra diagonal element */
         Ak1k = A + 1;
 
-        for (int k=n-1; k>0; k--) {
+        for (magma_int_t k=n-1; k>0; k--) {
             if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
@@ -194,7 +194,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
         /* Pointer on first extra diagonal element */
         Ak1k = A + lda;
 
-        for (int k=n-1; k>0; k--) {
+        for (magma_int_t k=n-1; k>0; k--) {
             if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
@@ -226,7 +226,7 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                  magmaDoubleComplex *A, magma_int_t lda,
                  magma_int_t *info)
 {
-    magma_int_t i, k, sb, ione = 1;
+    magma_int_t ione = 1;
     double alpha;
     double done = 1.0;
     magmaDoubleComplex zone  =  MAGMA_Z_ONE;
@@ -245,8 +245,8 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
     }
 
     if ( uplo == MagmaLower ) {
-        for(i = 0; i < n; i += ib) {
-            sb = min(n-i, ib);
+        for(magma_int_t i = 0; i < n; i += ib) {
+            magma_int_t sb = min(n-i, ib);
 
             /* Factorize the diagonal block */
             *info = zhetrf_diag_nopiv(uplo, sb, &A(i, i), lda);
@@ -264,10 +264,10 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                            &A(i+sb, i), &lda);
 
                 /* Scale the block to divide by D */
-                for (k=0; k<sb; k++) {
+                for (magma_int_t k=0; k<sb; k++) {
                     #define ZHERK_D_WORKSPACE
                     #ifdef ZHERK_D_WORKSPACE
-                    for (int ii=i+sb; ii<n; ii++) A(i+k, ii) = MAGMA_Z_CNJG(A(ii, i+k));
+                    for (magma_int_t ii=i+sb; ii<n; ii++) A(i+k, ii) = MAGMA_Z_CNJG(A(ii, i+k));
                     #endif
                     alpha = done / MAGMA_Z_REAL(A(i+k, i+k));
                     blasf77_zdscal(&height, &alpha, &A(i+sb, i+k), &ione);
@@ -289,8 +289,8 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
             }
         }
     } else {
-        for(i = 0; i < n; i += ib) {
-            sb = min(n-i, ib);
+        for(magma_int_t i = 0; i < n; i += ib) {
+            magma_int_t sb = min(n-i, ib);
 
             /* Factorize the diagonal block */
             *info = zhetrf_diag_nopiv(uplo, sb, &A(i, i), lda);
@@ -308,10 +308,10 @@ zhetrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                            &A(i, i+sb), &lda);
 
                 /* Scale the block to divide by D */
-                for (k=0; k<sb; k++) {
+                for (magma_int_t k=0; k<sb; k++) {
                     #define ZHERK_D_WORKSPACE
                     #ifdef ZHERK_D_WORKSPACE
-                    for (int ii=i+sb; ii<n; ii++) A(ii, i+k) = MAGMA_Z_CNJG(A(i+k, ii));
+                    for (magma_int_t ii=i+sb; ii<n; ii++) A(ii, i+k) = MAGMA_Z_CNJG(A(i+k, ii));
                     #endif
                     alpha = done / MAGMA_Z_REAL(A(i+k, i+k));
                     blasf77_zdscal(&height, &alpha, &A(i+k, i+sb), &lda);

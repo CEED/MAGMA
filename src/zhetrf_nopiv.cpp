@@ -100,7 +100,7 @@ magma_zhetrf_nopiv(magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex zone  = MAGMA_Z_ONE;
     magmaDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     int                upper = (uplo == MagmaUpper);
-    magma_int_t j, jb, ldda, nb, ib, iinfo;
+    magma_int_t j, k, jb, ldda, nb, ib, iinfo;
     magmaDoubleComplex_ptr dA;
     magmaDoubleComplex_ptr dW;
 
@@ -206,9 +206,9 @@ magma_zhetrf_nopiv(magma_uplo_t uplo, magma_int_t n,
 
                     // update the trailing submatrix with U and W
                     trace_gpu_start( 0, 0, "gemm", "gemm" );
-                    for (int k=j+jb; k<n; k+=nb)
+                    for (k=j+jb; k<n; k+=nb)
                     {
-                        int kb = min(nb,n-k);
+                        magma_int_t kb = min(nb,n-k);
                         magma_zgemm(MagmaConjTrans, MagmaNoTrans, kb, n-k, jb,
                                     mzone, dWt(0, k), nb, 
                                            dA(j, k), ldda,
@@ -277,9 +277,9 @@ magma_zhetrf_nopiv(magma_uplo_t uplo, magma_int_t n,
 
                     // update the trailing submatrix with L and W
                     trace_gpu_start( 0, 0, "gemm", "gemm" );
-                    for (int k=j+jb; k<n; k+=nb)
+                    for (k=j+jb; k<n; k+=nb)
                     {
-                        int kb = min(nb,n-k);
+                        magma_int_t kb = min(nb,n-k);
                         magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-k, kb, jb,
                                     mzone, dA(k, j), ldda, 
                                            dW(k, 0), ldda,
