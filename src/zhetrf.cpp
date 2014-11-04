@@ -124,9 +124,9 @@ magma_zhetrf(
     #define dA(i, j) (dA + (j)*ldda + (i))
 
     /* .. Local Scalars .. */
-    magma_int_t            upper;
-    magma_int_t            nb = magma_get_zhetrf_nb(n);
-    magma_int_t            iinfo = 0, nk, kb;
+    magma_int_t upper;
+    magma_int_t nb = magma_get_zhetrf_nb(n);
+    magma_int_t iinfo = 0, nk, kb;
 
     /* .. Executable Statements .. */
     /* Test the input parameters. */
