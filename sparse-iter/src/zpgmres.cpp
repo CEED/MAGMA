@@ -102,7 +102,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &z_t, Magma_DEV, dofs, c_zero );
     q_t.memory_location = Magma_DEV; 
     q_t.val = NULL; 
-    q_t.num_rows = q_t.nnz = dofs;
+    q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
 
     magmaDoubleComplex *dy, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
@@ -125,7 +125,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->init_res = nom0;
     H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 
     magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
-    if ( (r0 = nom0 * RTOLERANCE ) < ATOLERANCE ) 
+    if ( (r0 = nom0 * solver_par->epsilon ) < ATOLERANCE ) 
         r0 = solver_par->epsilon;
     if ( nom < r0 )
         return MAGMA_SUCCESS;

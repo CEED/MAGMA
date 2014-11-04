@@ -80,6 +80,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     double nom, rNorm, RNorm, nom0, betanom, r0 = 0.;
 
     // CPU workspace
+    //magma_setdevice(0);
     magmaDoubleComplex *H, *HH, *y, *h1;
     magma_zmalloc_pinned( &H, (ldh+1)*ldh );
     magma_zmalloc_pinned( &y, ldh );
@@ -92,7 +93,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &q, Magma_DEV, dofs*(ldh+1), c_zero );
     q_t.memory_location = Magma_DEV; 
     q_t.val = NULL; 
-    q_t.num_rows = q_t.nnz = dofs;
+    q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
 
     magmaDoubleComplex *dy, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
@@ -115,7 +116,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->init_res = nom0;
     H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 
     magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
-    if ( (r0 = nom0 * RTOLERANCE ) < ATOLERANCE ) 
+    if ( (r0 = nom0 * solver_par->epsilon ) < ATOLERANCE ) 
         r0 = solver_par->epsilon;
     if ( nom < r0 )
         return MAGMA_SUCCESS;
@@ -137,10 +138,11 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);    //  (to be fused)
 
             q_t.val = q(k-1);
+            magmablasSetKernelStream(stream[0]);
             magma_z_spmv( c_one, A, q_t, c_zero, r ); //  r = A q[k] 
     //            if (solver_par->ortho == Magma_MGS ) {
                 // modified Gram-Schmidt
-                //magmablasSetKernelStream(stream[0]);
+
                 for (i=1; i<=k; i++) {
                     H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            
                         //  H(i,k) = q[i] . r
@@ -302,6 +304,8 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&q);
 
     // free GPU streams and events
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_event_destroy( event[0] );
     magmablasSetKernelStream(NULL);
 
