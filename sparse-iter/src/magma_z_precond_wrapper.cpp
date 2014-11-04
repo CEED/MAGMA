@@ -272,9 +272,9 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         magma_zjacobi_diagscal( A.num_rows, precond->d, b, x );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_ILU ){
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
-//        magma_zapplycumilu_l( b, x, precond );
+    else if( precond->solver == Magma_ILU || 
+            ( precond->solver == Magma_AILU && precond->maxiter == -1){
+        magma_zapplycumilu_l( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC ){
@@ -282,7 +282,7 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_NONE ){
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );      //  x = b
         return MAGMA_SUCCESS;
     }
     else{
@@ -330,12 +330,11 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
 {
     if( precond->solver == Magma_JACOBI ){
         //magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );    // x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );    // x = b
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ILU ){
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
-//        magma_zapplycumilu_r( b, x, precond );
+        magma_zapplycumilu_r( b, x, precond );
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_ICC || 
@@ -344,7 +343,7 @@ magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b,
         return MAGMA_SUCCESS;
     }
     else if( precond->solver == Magma_NONE ){
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );      //  x = b
         return MAGMA_SUCCESS;
     }
     else{
