@@ -103,12 +103,19 @@ double get_residual(
     
     // solve Ax = b
     if (nopiv) {
-        blasf77_ztrsm( "L", "L", "N", "U", &n, &ione, &c_one,
-                       A, &lda, x, &n );
-        //for (int i=0; i<n; i++) x[i] /= A[i+i*lda];
-        for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
-        blasf77_ztrsm( "L", "L", "C", "U", &n, &ione, &c_one,
-                       A, &lda, x, &n );
+        if (upper) {
+            blasf77_ztrsm( "L", "U", "C", "U", &n, &ione, &c_one,
+                           A, &lda, x, &n );
+            for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
+            blasf77_ztrsm( "L", "U", "N", "U", &n, &ione, &c_one,
+                           A, &lda, x, &n );
+        } else {
+            blasf77_ztrsm( "L", "L", "N", "U", &n, &ione, &c_one,
+                           A, &lda, x, &n );
+            for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
+            blasf77_ztrsm( "L", "L", "C", "U", &n, &ione, &c_one,
+                           A, &lda, x, &n );
+        }
     }else {
         zhetrs_( (upper ? MagmaUpperStr: MagmaLowerStr), &n, &ione, A, &lda, ipiv, x, &n, &info );
     }
@@ -203,37 +210,41 @@ int main( int argc, char** argv)
     magma_int_t     *ipiv;
     magma_int_t     N, n2, lda, lwork, info;
     magma_int_t     status = 0;
-    magma_int_t     cpu = 0, gpu = 1, nopiv = 0, row = 0;
+    magma_int_t     cpu = 0, gpu = 0, nopiv = 0, row = 0;
     
     magma_opts opts;
-    for(int i = 1; i < argc; ++i ) {
-        if ( strcmp("--cpu", argv[i]) == 0 ) {
-            cpu = 1;
-        }
-        if ( strcmp("--gpu", argv[i]) == 0 ) {
-            gpu = 1;
-        }
-        if ( strcmp("--row", argv[i]) == 0 ) {
-            row = 1;
-        }
-        if ( strcmp("--nopiv", argv[i]) == 0 ) {
-            nopiv = 1;
-        }
-    }
     parse_opts( argc, argv, &opts );
+    switch (opts.version) {
+        case 1:
+            gpu = 1;
+            break;
+        case 2:
+            nopiv = 1;
+            break;
+        //case 3:
+        //    cpu = 1;
+        //    break;
+        //case 4:
+        //    row = 1;
+        //    break;
+        default:
+            printf( " version = %d not supported\n\n",opts.version);
+            return 0;
+    }
     magma_uplo_t uplo = opts.uplo;
 
     if (nopiv)
-        printf( "\n No-piv version (A is SPD)" );
+        printf( "\n No-piv: Hybrid-version (A is SPD)" );
     else if (cpu)
-        printf( "\n CPU-only version" );
+        printf( "\n Bunch-Kauffman: CPU-only version" );
     else if (gpu)
-        printf( "\n GPU-only version" );
+        printf( "\n Bunch-Kauffman: GPU-only version" );
     else if (row)
-        printf( "\n GPU-only version (row-major)" );
+        printf( "\n Bunch-Kauffman: GPU-only version (row-major)" );
     else
         printf( " hybrid CPU-GPU version" );
-    printf( " (%s)\n\n",(uplo == MagmaUpper ? "upper" : "lower") );
+    printf( " (%s)\n",(uplo == MagmaUpper ? "upper" : "lower") );
+    printf( " (--version: 1 = Bunch-Kauffman (GPU), 2 = No-piv (hybrid))\n\n" );
     
     magma_int_t upper = (uplo == MagmaUpper);
     double tol = opts.tolerance * lapackf77_dlamch("E");
@@ -284,7 +295,7 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime();
             if (nopiv) {
                 magma_setdevice(0);
-                //magma_zhetrf_nopiv( uplo, N, h_A, lda, &info);
+                magma_zhetrf_nopiv( uplo, N, h_A, lda, &info);
             } else if (cpu) {
                 //magma_zhetrf_cpu( uplo, N, h_A, lda, ipiv, work, lwork, &info);
             } else if (gpu) {
