@@ -16,10 +16,10 @@
 #define  D(i)    ( D[(i)*incD] )
 
 // trailing submatrix update with inner-blocking 
-int zherk_d(magma_uplo_t uplo, int m, int n,
-            magmaDoubleComplex alpha, magmaDoubleComplex *A, int lda,
-            magmaDoubleComplex beta,  magmaDoubleComplex *C, int ldc,
-            magmaDoubleComplex *D, int incD)
+int zherk_d(magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+            magmaDoubleComplex alpha, magmaDoubleComplex *A, magma_int_t lda,
+            magmaDoubleComplex beta,  magmaDoubleComplex *C, magma_int_t ldc,
+            magmaDoubleComplex *D, magma_int_t incD)
 {
     magmaDoubleComplex *Aik;
     magmaDoubleComplex *Dkk;
@@ -91,10 +91,10 @@ int zherk_d(magma_uplo_t uplo, int m, int n,
 
 // trailing submatrix update with inner-blocking, using workshpace that
 // stores D*L'
-int zherk_d_workspace(magma_uplo_t uplo, int n, int k,
-                      magmaDoubleComplex alpha, magmaDoubleComplex *A, int lda,
-                      magmaDoubleComplex beta,  magmaDoubleComplex *C, int ldc,
-                      magmaDoubleComplex *work, int ldw)
+int zherk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
+                      magmaDoubleComplex alpha, magmaDoubleComplex *A, magma_int_t lda,
+                      magmaDoubleComplex beta,  magmaDoubleComplex *C, magma_int_t ldc,
+                      magmaDoubleComplex *work, magma_int_t ldw)
 {
     magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
     magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
