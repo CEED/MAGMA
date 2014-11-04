@@ -145,7 +145,8 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 5: opts->solver_par.solver = Magma_PBICGSTAB; break;
                 case 6: opts->solver_par.solver = Magma_GMRES; break;
                 case 7: opts->solver_par.solver = Magma_PGMRES; break;
-                case 8: opts->solver_par.solver = Magma_LOBPCG; break;
+                case 8: opts->solver_par.solver = Magma_LOBPCG; 
+                            opts->solver_par.num_eigenvalues = 16;break;
                 case 9: opts->solver_par.solver = Magma_ITERREF; break;
                 case 10: opts->solver_par.solver = Magma_JACOBI; break;
                 case 11: opts->solver_par.solver = Magma_BAITER; break;
