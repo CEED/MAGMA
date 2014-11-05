@@ -203,10 +203,12 @@ magmablas_zgemm(
     else if ( transB == MagmaNoTrans )
         TransB = 0;
 
+    magma_int_t Am = ( ! TransA ? m : k);
     magma_int_t An = (!TransA ? k : m);
+    magma_int_t Bm = ( ! TransB ? k : n);
     magma_int_t Bn = (!TransB ? n : k);
-    size_t sizeA = (size_t) ldda * (An - 1) + An;
-    size_t sizeB = (size_t) lddb * (Bn - 1) + Bn;
+    size_t sizeA = (size_t) ldda * (An - 1) + Am;
+    size_t sizeB = (size_t) lddb * (Bn - 1) + Bm;
 
     size_t CUBLAS_MAX_1DBUF_SIZE = ((1 << 27) - 512);
     if ( sizeA >= CUBLAS_MAX_1DBUF_SIZE ||
