@@ -178,25 +178,25 @@ typedef struct magma_s_vector{
 
 typedef struct magma_z_solver_par{
 
-    magma_solver_type  solver;
-    magma_int_t        version;
-    double             epsilon;  
-    magma_int_t        maxiter;
-    magma_int_t        restart; 
-    magma_ortho_t      ortho;
-    magma_int_t        numiter;
-    double             init_res;
-    double             final_res;
-    double             iter_res;
-    real_Double_t      runtime;
-    real_Double_t      *res_vec;
-    real_Double_t      *timing;
-    magma_int_t        verbose;
-    magma_int_t        num_eigenvalues;
-    magma_int_t        ev_length;
-    double             *eigenvalues;
-    magmaDoubleComplex *eigenvectors;
-    magma_int_t        info;
+    magma_solver_type  solver;                  // solver type
+    magma_int_t        version;                 // sometimes there are different versions
+    double             epsilon;                 // relative residual stopping criterion
+    magma_int_t        maxiter;                 // upper iteration limit
+    magma_int_t        restart;                 // for GMRES
+    magma_ortho_t      ortho;                   // for GMRES
+    magma_int_t        numiter;                 // feedback: number of needed iterations
+    double             init_res;                // feedback: initial residual
+    double             final_res;               // feedback: final residual
+    double             iter_res;                // feedback: iteratively computed residual
+    real_Double_t      runtime;                 // feedback: runtime needed
+    real_Double_t      *res_vec;                // feedback: array containing residuals
+    real_Double_t      *timing;                 // feedback: detailed timing
+    magma_int_t        verbose;                 // print residual ever 'verbose' iterations
+    magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
+    magma_int_t        ev_length;               // needed for framework
+    double             *eigenvalues;            // feedback: array containing eigenvalues
+    magmaDoubleComplex *eigenvectors;           // feedback: array containing eigenvectors
+    magma_int_t        info;                    // feedback: did the solver converge etc.
 
 //---------------------------------
 // the input for verbose is:
