@@ -294,15 +294,21 @@ if ( opts.pgmres ):
 if ( opts.lobpcg ):
     solvers += ['--solver 8']
 # end
-if ( opts.iterref ):
+if ( opts.jacobi ):
     solvers += ['--solver 9']
 # end
-if ( opts.jacobi ):
+if ( opts.ba ):
     solvers += ['--solver 10']
 # end
-if ( opts.ba ):
-    solvers += ['--solver 11']
+
+
+# looping over solvers
+IR = []
+if ( opts.iterref ):
+    IR += ['--solver 21']
 # end
+
+
 
 # looping over preconditioners
 precs = ['--precond 0']
@@ -314,6 +320,18 @@ if ( opts.ilu_prec ):
 # end
 
 
+# looping over preconditioners
+IRprecs = []
+if ( opts.IR ):
+    IRprecs += ['--precond 1']
+    IRprecs += ['--precond 3']
+    IRprecs += ['--precond 4']
+    IRprecs += ['--precond 5']
+    IRprecs += ['--precond 6']
+    IRprecs += ['--precond 7']
+    IRprecs += ['--precond 9']
+    IRprecs += ['--precond 10']
+# end
 
 
 
@@ -411,6 +429,7 @@ if ( opts.control):
             cmd = substitute( 'testing_zmadd', 'z', precision )
             tests.append( [cmd, size, size, ''] )
 
+# ----------------------------------------------------------------------
 if ( opts.sparse_blas):
     for alignment in alignments:
         for blocksize in blocksizes:
@@ -427,6 +446,16 @@ if ( opts.sparse_blas):
 # ----------------------------------------------------------------------
 for solver in solvers:
     for precond in precs:
+        for format in formats:
+            for size in sizes:
+                for precision in opts.precisions:
+                    # precision generation
+                    cmd = substitute( 'testing_zsolver', 'z', precision )
+                    tests.append( [cmd, solver + ' ' + precond + ' ' + format, size, ''] )
+
+# ----------------------------------------------------------------------
+for solver in IR:
+    for precond in IRprecs:
         for format in formats:
             for size in sizes:
                 for precision in opts.precisions:

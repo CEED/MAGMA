@@ -56,9 +56,9 @@ static const char *usage_sparse =
 "               6   GMRES\n"
 "               7   preconditioned GMRES\n"
 "               8   LOBPCG\n"
-"               9   Iterative Refinement\n"
-"               10  Jacobi\n"
-"               11  Block-asynchronous Iteration\n"
+"               9   Jacobi\n"
+"               10  Block-asynchronous Iteration\n"
+"               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               0   no preconditioner\n"
@@ -147,9 +147,9 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 7: opts->solver_par.solver = Magma_PGMRES; break;
                 case 8: opts->solver_par.solver = Magma_LOBPCG; 
                             opts->solver_par.num_eigenvalues = 16;break;
-                case 9: opts->solver_par.solver = Magma_ITERREF; break;
-                case 10: opts->solver_par.solver = Magma_JACOBI; break;
-                case 11: opts->solver_par.solver = Magma_BAITER; break;
+                case 9: opts->solver_par.solver = Magma_JACOBI; break;
+                case 10: opts->solver_par.solver = Magma_BAITER; break;
+                case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         }else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
