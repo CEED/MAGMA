@@ -47,7 +47,7 @@ using namespace std;
                 input vector
 
     @param
-    x           magma_z_vector*
+    y           magma_z_vector*
                 output vector
 
 
@@ -61,7 +61,7 @@ magma_zvtranspose(
 {
 
     if( x.memory_location == Magma_DEV ){
-        magma_z_vinit( y, Magma_DEV, x.num_rows, MAGMA_Z_ZERO );
+        magma_z_vinit( y, Magma_DEV, x.num_rows*x.num_cols, MAGMA_Z_ZERO );
         y->num_rows = x.num_rows;
         y->num_cols = x.num_cols;
         magma_int_t    m = x.num_rows;
@@ -71,7 +71,7 @@ magma_zvtranspose(
             magmablas_ztranspose( m, n, x.val, m, y->val, n );
         }
         else{
-            y->major = MagmaRowMajor;
+            y->major = MagmaColMajor;
             magmablas_ztranspose( n, m, x.val, n, y->val, m );
         }
     }else{

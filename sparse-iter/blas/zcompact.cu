@@ -143,7 +143,6 @@ magma_zcompact(
             m, n, dA, ldda, dnorms, tol, active, active+n );
 
     magma_igetvector( 1, active+n, 1, cBlock, 1 );
-
 }
 
 

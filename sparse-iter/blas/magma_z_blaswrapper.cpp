@@ -56,6 +56,8 @@ magma_int_t
 magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                 magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y )
 {
+
+
     if( A.memory_location != x.memory_location || 
                             x.memory_location != y.memory_location ){
     printf("error: linear algebra objects are not located in same memory!\n");
@@ -67,6 +69,7 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
     // DEV case
     if( A.memory_location == Magma_DEV ){
         if( A.num_cols == x.num_rows && x.num_cols == 1 ){
+
              if( A.storage_type == Magma_CSR 
                             || A.storage_type == Magma_CSRL 
                             || A.storage_type == Magma_CSRU ){
@@ -186,7 +189,7 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                 }else if( x.major == MagmaRowMajor){
                     cusparseZcsrmm2(cusparseHandle,
                     CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                    CUSPARSE_OPERATION_TRANSPOSE, 
                     A.num_rows,   num_vecs, A.num_cols, A.nnz, 
                     &alpha, descr, A.val, A.row, A.col,
                     x.val, A.num_cols, &beta, y.val, A.num_cols);
@@ -216,9 +219,20 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  return MAGMA_SUCCESS;
              }
              else if( A.storage_type == Magma_ELL ){
+                if( x.major == MagmaColMajor){
                  magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                        num_vecs, A.max_nnz_row, alpha, A.val, 
-                        A.col, x.val, beta, y.val );
+                 num_vecs, A.max_nnz_row, alpha, A.val, A.col, x.val, 
+                 beta, y.val );
+                }
+                else if( x.major == MagmaRowMajor){
+                    // transpose first to col major
+                    magma_z_vector x2;                    
+                    magma_zvtranspose( x, &x2 );
+                    magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                    num_vecs, A.max_nnz_row, alpha, A.val, A.col, x.val, 
+                    beta, y.val );
+                    magma_z_vfree(&x2);
+                }
                  return MAGMA_SUCCESS;
              }else if( A.storage_type == Magma_SELLP ){
                 if( x.major == MagmaRowMajor){
@@ -228,7 +242,7 @@ magma_z_spmv(   magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                 }
                 else if( x.major == MagmaColMajor){
                     // transpose first to row major
-                    magma_z_vector x2;                    
+                    magma_z_vector x2; 
                     magma_zvtranspose( x, &x2 );
                     magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.blocksize, A.numblocks, A.alignment, 
