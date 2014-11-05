@@ -56,7 +56,6 @@
 extern "C" magma_int_t
 magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 
-
 #define  residualNorms(i,iter)  ( residualNorms + (i) + (iter)*n )
 #define magmablas_swap(x, y)    { pointer = x; x = y; y = pointer; }
 #define hresidualNorms(i,iter)  (hresidualNorms + (i) + (iter)*n )
@@ -65,6 +64,24 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define gramB(    m, n)   (gramB     + (m) + (n)*ldgram)
 #define gevectors(m, n)   (gevectors + (m) + (n)*ldgram) 
 #define h_gramB(  m, n)   (h_gramB   + (m) + (n)*ldgram)
+
+#define magma_z_bspmv_tuned2(m, n, alpha, A, X, beta, AX)       {        \
+    for(int k=0; k<n; k++){             \
+    magma_z_vector x, ax;                                               \
+    x.memory_location = Magma_DEV;  x.num_rows = m; x.num_cols = 1; x.major = MagmaColMajor;  x.nnz = m;  x.val = X+k*m; \
+    ax.memory_location= Magma_DEV; ax.num_rows = m; ax.nnz = m; ax.val = AX+k*m;     \
+    magma_z_spmv(alpha, A, x, beta, ax );                               \
+}                                                                       \
+}
+
+
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
+            magma_z_vector x, ax;                                       \
+            x.memory_location = Magma_DEV;  x.num_rows = m; x.num_cols = n; x.major = MagmaColMajor;  x.nnz = m*n;  x.val = X; \
+            ax.memory_location= Magma_DEV; ax.num_rows = m; ax.num_cols = n; ax.major = MagmaColMajor;  ax.nnz = m*n; ax.val = AX;     \
+            magma_z_spmv(alpha, A, x, beta, ax );                           \
+}
+
 /*
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose( m, n, X, m, blockW, n );        	\
@@ -75,15 +92,6 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magmablas_ztranspose( n, m, blockW, n, X, m );            		\
 }
 */
-#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
-            magmablas_ztranspose( m, n, X, m, blockW, n );        	\
-            magma_z_vector x, ax;                                       \
-            x.memory_location = Magma_DEV;  x.num_rows = m*n; x.num_cols = 1; x.major = MagmaRowMajor;  x.nnz = m*n;  x.val = blockW; \
-            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.num_cols = 1; ax.major = MagmaRowMajor; ax.nnz = m*n; ax.val = AX;     \
-            magma_z_spmv(alpha, A, x, beta, ax );                           \
-            magmablas_ztranspose( n, m, blockW, n, X, m );            		\
-}
-
 
 
 //**************************************************************
@@ -122,12 +130,12 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 
 //**********************************************************+
 
-    magma_int_t verbosity = 1;
     magma_int_t *iwork, liwork = 15*n+9;
 
     // === Set solver parameters ===
     double residualTolerance  = solver_par->epsilon;
     magma_int_t maxIterations = solver_par->maxiter;
+    double tmp;
 
     // === Set some constants & defaults ===
     magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
@@ -176,7 +184,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     #endif
 
     // === Set activemask to one ===
-    for(int k =0; k<n; k++)
+    for(magma_int_t k =0; k<n; k++)
         iwork[k]=1;
     magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n);
 
@@ -222,7 +230,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magmablas_zlacpy( MagmaUpperLower, m, n, blockAX, m, blockR, m);
 
 /*
-            for(int i=0; i<n; i++){
+            for(magma_int_t i=0; i<n; i++){
                magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i],0), blockX+i*m, 1, blockR+i*m, 1);
             }
   */        
@@ -240,9 +248,6 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magma_zcompact(m, n, blockR, m,
                            residualNorms(0, iterationNumber), residualTolerance, 
                            activeMask, &cBlockSize);
-            
-            if (cBlockSize == 0)
-                break;
         
             // === apply a preconditioner P to the active residulas: R_new = P R_old
             // === for now set P to be identity (no preconditioner => nothing to be done )
@@ -259,7 +264,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             // === make the active preconditioned residuals orthonormal
             magma_zgegqr_gpu(ikind, m, cBlockSize, blockR, m, dwork, hwork, info );
             //magma_zorthomgs( m, cBlockSize, blockR );
-             printf("good here\n");
+
             // === compute AR
             magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockR, c_zero, blockAR );
 
@@ -285,7 +290,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                 // === Make P orthonormal & properly change AP (without multiplication by A)
                 magma_zgegqr_gpu(ikind, m, cBlockSize, blockP, m, dwork, hwork, info );
                 //magma_zorthomgs( m, cBlockSize, blockP );
- printf("good here2\n");
+
                 //magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockP, c_zero, blockAP );
                 magma_zsetmatrix( cBlockSize, cBlockSize, hwork, cBlockSize, dwork, cBlockSize);
 
@@ -305,7 +310,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 
             iter = max(1,iterationNumber-10- (int)(log(1.*cBlockSize)));
             double condestGmean = 0.;
-            for(int i = 0; i<iterationNumber-iter+1; i++)
+            for(magma_int_t i = 0; i<iterationNumber-iter+1; i++)
                 condestGmean += condestGhistory[i];
             condestGmean = condestGmean / (iterationNumber-iter+1);
 
@@ -387,7 +392,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                 magma_zgetmatrix(gramDim, gramDim, gramA, ldgram, gevectors, ldgram);
             }
 
-            for(int k=0; k<n; k++)
+            for(magma_int_t k=0; k<n; k++)
                 *gevectors(k,k) = MAGMA_Z_MAKE(evalues[k], 0);
 
             // === the previous eigensolver destroyed what is in h_gramB => must copy it again
@@ -402,7 +407,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                              #endif
                              iwork, &liwork, info);
  
-            for(int k =0; k<n; k++)
+            for(magma_int_t k =0; k<n; k++)
                 evalues[k] = gevalues[k];
             
             // === copy back the result to gramA on the GPU and use it for the updates
@@ -453,16 +458,31 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magma_zlobpcg_maxpy( m, n, blockAP, blockAX );    
 
             condestGhistory[iterationNumber+1]=condestG;
-            if (verbosity==1) {
-                // double res;
-                // magma_zgetmatrix(1, 1, 
-                //                  (magmaDoubleComplex*)residualNorms(0, iterationNumber), 1, 
-                //                  (magmaDoubleComplex*)&res, 1);
-                // 
-                //  printf("Iteration %4d, CBS %4d, Residual: %10.7f\n",
-                //         iterationNumber, cBlockSize, res);
-                printf("%4d-%2d ", (int) iterationNumber, (int) cBlockSize); 
-                magma_dprint_gpu(1, n, residualNorms(0, iterationNumber), 1);
+
+            magma_dgetmatrix(1, 1, residualNorms(0, iterationNumber), 1,  &tmp, 1);
+            if( iterationNumber == 1 ){
+                solver_par->init_res = tmp;
+            }
+            solver_par->final_res = tmp;
+            if ( tmp < solver_par->init_res * solver_par->epsilon ){
+                break;
+            }
+            if (cBlockSize == 0){
+                break;
+            }
+
+            if ( solver_par->verbose!=0 ) {
+                if( iterationNumber%solver_par->verbose == 0 ){
+                    // double res;
+                    // magma_zgetmatrix(1, 1, 
+                    //                  (magmaDoubleComplex*)residualNorms(0, iterationNumber), 1, 
+                    //                  (magmaDoubleComplex*)&res, 1);
+                    // 
+                    //  printf("Iteration %4d, CBS %4d, Residual: %10.7f\n",
+                    //         iterationNumber, cBlockSize, res);
+                    printf("%4d-%2d ", (int) iterationNumber, (int) cBlockSize); 
+                    magma_dprint_gpu(1, n, residualNorms(0, iterationNumber), 1);
+                }
             }
 
             restart = 0;
@@ -496,7 +516,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                       #endif
                       iwork, liwork, info );
    
-    for(int k =0; k<n; k++)
+    for(magma_int_t k =0; k<n; k++)
         evalues[k] = gevalues[k];
 
     // === update X = X * evectors
@@ -511,7 +531,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 
     // === compute R = AX - evalues X
     magmablas_zlacpy( MagmaUpperLower, m, n, blockAX, m, blockR, m);
-    for(int i=0; i<n; i++)
+    for(magma_int_t i=0; i<n; i++)
         magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i], 0), blockX+i*m, 1, blockR+i*m, 1);
 
     // === residualNorms[iterationNumber] = || R ||    
@@ -522,7 +542,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
         magmablas_zlacpy( MagmaUpperLower, m, n, blockX, m, origX, m);
 
     printf("Eigenvalues:\n");
-    for(int i =0; i<n; i++)
+    for(magma_int_t i =0; i<n; i++)
         printf("%e  ", evalues[i]);
     printf("\n\n");
 
@@ -530,7 +550,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_dprint_gpu(1, n, residualNorms(0, iterationNumber), 1);
     printf("\n\n");
 
-    //=== Print residual history in a file for plotting ====
+    //=== Prmagma_int_t residual history in a file for plotting ====
     double *hresidualNorms;
     magma_dmalloc_cpu(&hresidualNorms, (iterationNumber+1) * n);
     magma_zgetmatrix(n, iterationNumber, 
@@ -542,8 +562,8 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     
     FILE *residuals_file;
     residuals_file = fopen("residualNorms", "w");
-    for(int i =1; i<iterationNumber; i++) {
-        for(int j = 0; j<n; j++)
+    for(magma_int_t i =1; i<iterationNumber; i++) {
+        for(magma_int_t j = 0; j<n; j++)
             fprintf(residuals_file, "%f ", *hresidualNorms(j,i));
         fprintf(residuals_file, "\n");
     }
