@@ -152,7 +152,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
         return -1;
 
     /**/
-    int info = 0, ione = 1;
+    magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
     magmaDoubleComplex Akk, calpha;
     double done = 1.0;
