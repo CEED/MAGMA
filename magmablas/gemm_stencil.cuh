@@ -25,8 +25,12 @@
 #undef THR_M
 #undef THR_N
 
-#undef kernel_name_
-#undef kernel_name
+#undef batched_herk_kernel_name_
+#undef batched_herk_kernel_name
+#undef batched_gemm_kernel_name_
+#undef batched_gemm_kernel_name
+#undef gemm_kernel_name_
+#undef gemm_kernel_name
 
 #undef devfunc_name_
 #undef devfunc_name
@@ -34,14 +38,17 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if   (version == trans_nn)
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_nn
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nn_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nn
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_nn
   #define BLK_M BLK_M_nn
   #define BLK_N BLK_N_nn
 
 #elif (version == trans_nt)
   #define TRANS_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_nt
+  #define batched_herk_kernel_name_(p)  magmablas_ ## p ## _herk_kernel_fermi_nt_batched
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nt_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nt
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_nt
   #define BLK_M BLK_M_nt
   #define BLK_N BLK_N_nt
@@ -49,14 +56,18 @@
 #elif (version == trans_nc)
   #define TRANS_B
   #define CONJ_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_nc
+  #define batched_herk_kernel_name_(p)  magmablas_ ## p ## _herk_kernel_fermi_nc_batched
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nc_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_nc
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_nc
   #define BLK_M BLK_M_nc
   #define BLK_N BLK_N_nc
 
 #elif (version == trans_tn)
   #define TRANS_A
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_tn
+  #define batched_herk_kernel_name_(p)  magmablas_ ## p ## _herk_kernel_fermi_tn_batched
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tn_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tn
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_tn
   #define BLK_M BLK_M_tn
   #define BLK_N BLK_N_tn
@@ -64,7 +75,8 @@
 #elif (version == trans_tt)
   #define TRANS_A
   #define TRANS_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_tt
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tt_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tt
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_tt
   #define BLK_M BLK_M_tt
   #define BLK_N BLK_N_tt
@@ -73,7 +85,8 @@
   #define TRANS_A
   #define TRANS_B
   #define CONJ_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_tc
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tc_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_tc
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_tc
   #define BLK_M BLK_M_tc
   #define BLK_N BLK_N_tc
@@ -81,7 +94,9 @@
 #elif (version == trans_cn)
   #define TRANS_A
   #define CONJ_A
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_cn
+  #define batched_herk_kernel_name_(p)  magmablas_ ## p ## _herk_kernel_fermi_cn_batched
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_cn_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_cn
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_cn
   #define BLK_M BLK_M_cn
   #define BLK_N BLK_N_cn
@@ -90,7 +105,8 @@
   #define TRANS_A
   #define CONJ_A
   #define TRANS_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_ct
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_ct_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_ct
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_ct
   #define BLK_M BLK_M_ct
   #define BLK_N BLK_N_ct
@@ -100,7 +116,8 @@
   #define CONJ_A
   #define TRANS_B
   #define CONJ_B
-  #define kernel_name_(p)  p ## gemm_kernel_fermi_cc
+  #define batched_gemm_kernel_name_(p)  p ## gemm_kernel_fermi_cc_batched
+  #define gemm_kernel_name_(p)  p ## gemm_kernel_fermi_cc
   #define devfunc_name_(p) p ## gemm_devfunc_fermi_cc
   #define BLK_M BLK_M_cc
   #define BLK_N BLK_N_cc
@@ -109,7 +126,9 @@
 
 // need a second macro in order to expand precision;
 // see http://gcc.gnu.org/onlinedocs/cpp/Argument-Prescan.html
-#define kernel_name(p) kernel_name_(p)
+#define batched_herk_kernel_name(p) batched_herk_kernel_name_(p)
+#define batched_gemm_kernel_name(p) batched_gemm_kernel_name_(p)
+#define gemm_kernel_name(p) gemm_kernel_name_(p)
 #define devfunc_name(p) devfunc_name_(p)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,17 +196,22 @@ void devfunc_name(precision) (
     #else
         #ifdef TRANS_A
             const FloatingPoint_t *offs_dA = A + blx*BLK_M*LDA + idyA*LDA + idxA;
+            size_t boundA = LDA*M - ( blx*BLK_M*LDA + idyA*LDA + idxA ) -1;
         #else
             const FloatingPoint_t *offs_dA = A + blx*BLK_M     + idyA*LDA + idxA;
+            size_t boundA = LDA*K - ( blx*BLK_M  + idyA*LDA + idxA ) -1;
         #endif
         #ifdef TRANS_B
             const FloatingPoint_t *offs_dB = B + bly*BLK_N     + idyB*LDB + idxB;
+            size_t boundB = LDB*K - ( bly*BLK_N     + idyB*LDB + idxB ) -1;
         #else
             const FloatingPoint_t *offs_dB = B + bly*BLK_N*LDB + idyB*LDB + idxB;
+            size_t boundB = LDB*N - ( bly*BLK_N*LDB + idyB*LDB + idxB ) -1;
         #endif
     #endif
 
     int m, n, k, kk;
+
 
     // Zero C
     #pragma unroll
@@ -202,13 +226,13 @@ void devfunc_name(precision) (
         for (n = 0; n < BLK_M; n += DIM_YA)
             #pragma unroll
             for (m = 0; m < BLK_K; m += DIM_XA)
-                sA[m+idxA][n+idyA] = fetch(A, m, n);
+                sA[m+idxA][n+idyA] = fetch(A, m, n, boundA);
     #else
         #pragma unroll
         for (n = 0; n < BLK_K; n += DIM_YA)
             #pragma unroll
             for (m = 0; m < BLK_M; m += DIM_XA)
-                sA[n+idyA][m+idxA] = fetch(A, m, n);
+                sA[n+idyA][m+idxA] = fetch(A, m, n, boundA);
     #endif
 
     // Load B dev->shmem
@@ -217,13 +241,13 @@ void devfunc_name(precision) (
         for (n = 0; n < BLK_K; n += DIM_YB)
             #pragma unroll
             for (m = 0; m < BLK_N; m += DIM_XB)
-                sB[m+idxB][n+idyB] = fetch(B, m, n);
+                sB[m+idxB][n+idyB] = fetch(B, m, n, boundB);
     #else
         #pragma unroll
         for (n = 0; n < BLK_N; n += DIM_YB)
             #pragma unroll
             for (m = 0; m < BLK_K; m += DIM_XB)
-                sB[n+idyB][m+idxB] = fetch(B, m, n);
+                sB[n+idyB][m+idxB] = fetch(B, m, n, boundB);
     #endif
 
     __syncthreads();
@@ -244,13 +268,17 @@ void devfunc_name(precision) (
         #else
             #ifdef TRANS_A
                 offs_dA += BLK_K;
+                boundA  -= BLK_K;
             #else
                 offs_dA += BLK_K*LDA;
+                boundA  -= BLK_K*LDA;
             #endif
             #ifdef TRANS_B
                 offs_dB += BLK_K*LDB;
+                boundB  -= BLK_K*LDB;
             #else
                 offs_dB += BLK_K;
+                boundB  -= BLK_K;
             #endif
         #endif
 
@@ -260,13 +288,13 @@ void devfunc_name(precision) (
             for (n = 0; n < BLK_M/DIM_YA; n++)
                 #pragma unroll
                 for (m = 0; m < BLK_K/DIM_XA; m++)
-                    ra[n][m] = fetch(A, m*DIM_XA, n*DIM_YA);
+                    ra[n][m] = fetch(A, m*DIM_XA, n*DIM_YA, boundA);
         #else
             #pragma unroll
             for (n = 0; n < BLK_K/DIM_YA; n++)
                 #pragma unroll
                 for (m = 0; m < BLK_M/DIM_XA; m++)
-                    ra[n][m] = fetch(A, m*DIM_XA, n*DIM_YA);
+                    ra[n][m] = fetch(A, m*DIM_XA, n*DIM_YA, boundA);
         #endif
 
         // Load B dev->regs
@@ -275,13 +303,13 @@ void devfunc_name(precision) (
             for (n = 0; n < BLK_K/DIM_YB; n++)
                 #pragma unroll
                 for (m = 0; m < BLK_N/DIM_XB; m++)
-                    rb[n][m] = fetch(B, m*DIM_XB, n*DIM_YB);
+                    rb[n][m] = fetch(B, m*DIM_XB, n*DIM_YB, boundB);
         #else
             #pragma unroll
             for (n = 0; n < BLK_N/DIM_YB; n++)
                 #pragma unroll
                 for (m = 0; m < BLK_K/DIM_XB; m++)
-                    rb[n][m] = fetch(B, m*DIM_XB, n*DIM_YB);
+                    rb[n][m] = fetch(B, m*DIM_XB, n*DIM_YB, boundB);
         #endif
 
         // Multiply
