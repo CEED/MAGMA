@@ -464,6 +464,8 @@ subs = {
     ('smove',          'dmove',          'smove',          'dmove'           ),
     ('spanel_to_q',    'dpanel_to_q',    'cpanel_to_q',    'zpanel_to_q'     ),
     ('spermute',       'dpermute',       'cpermute',       'zpermute'        ),
+    ('sprbt',          'dprbt',          'cprbt',          'zprbt'           ),
+    ('SPRBT',          'DPRBT',          'CPRBT',          'ZPRBT'           ),
     ('sprint',         'dprint',         'cprint',         'zprint'          ),
     ('SPRINT',         'DPRINT',         'CPRINT',         'ZPRINT'          ),
     ('sprint',         'dprint',         'sprint',         'dprint'          ),
