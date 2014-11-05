@@ -7,7 +7,8 @@
 # @date
 
 ## @file run_tests.py
-#  @author Mark Gates Hartwig Anzt
+#  @author Mark Gates
+#  @author Hartwig Anzt
 #
 # Script to run testers with various matrix sizes.
 # Small sizes are chosen around block sizes (e.g., 30...34 around 32) to
@@ -322,7 +323,7 @@ if ( opts.ilu_prec ):
 
 # looping over preconditioners
 IRprecs = []
-if ( opts.IR ):
+if ( opts.iterref ):
     IRprecs += ['--precond 1']
     IRprecs += ['--precond 3']
     IRprecs += ['--precond 4']
@@ -556,7 +557,7 @@ for test in tests:
     cmd_args = re.sub( '  +', ' ', cmd_args )  # compress spaces
     
     # skip tests before start
-    if ( start and not start.search( cmd )):
+    if ( start and not start.search( cmd_args )):
         continue
     start = None
     
