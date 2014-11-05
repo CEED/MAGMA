@@ -31,7 +31,7 @@ void zlaset_full(
     int ind = blockIdx.x*BLK_X + threadIdx.x;
     int iby = blockIdx.y*BLK_Y;
     /* check if full block-column && (below diag || above diag || offdiag == diag) */
-    bool full = (iby + BLK_Y <= n && (ind >= iby + BLK_Y || ind + BLK_X <= iby || offdiag == diag));
+    bool full = (iby + BLK_Y <= n && (ind >= iby + BLK_Y || ind + BLK_X <= iby || MAGMA_Z_EQUAL( offdiag, diag )));
     /* do only rows inside matrix */
     if ( ind < m ) {
         A += ind + iby*lda;
@@ -213,12 +213,15 @@ void magmablas_zlaset_q(
     dim3 threads( BLK_X, 1 );
     dim3 grid( (m-1)/BLK_X + 1, (n-1)/BLK_Y + 1 );
     
-    if (uplo == MagmaLower)
+    if (uplo == MagmaLower) {
         zlaset_lower<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
-    else if (uplo == MagmaUpper)
+    }
+    else if (uplo == MagmaUpper) {
         zlaset_upper<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
-    else
+    }
+    else {
         zlaset_full <<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
+    }
 }
 
 

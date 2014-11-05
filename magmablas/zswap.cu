@@ -67,7 +67,8 @@ magmablas_zswap_q(
     magma_queue_t queue )
 {
     dim3 blocks( (n+NB-1) / NB );
-    zswap_kernel<<< blocks, NB, 0, queue >>>( n, dx, incx, dy, incy );
+    dim3 threads( NB );
+    zswap_kernel<<< blocks, threads, 0, queue >>>( n, dx, incx, dy, incy );
 }
 
 
