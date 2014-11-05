@@ -65,14 +65,6 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define gevectors(m, n)   (gevectors + (m) + (n)*ldgram) 
 #define h_gramB(  m, n)   (h_gramB   + (m) + (n)*ldgram)
 
-#define magma_z_bspmv_tuned2(m, n, alpha, A, X, beta, AX)       {        \
-    for(int k=0; k<n; k++){             \
-    magma_z_vector x, ax;                                               \
-    x.memory_location = Magma_DEV;  x.num_rows = m; x.num_cols = 1; x.major = MagmaColMajor;  x.nnz = m;  x.val = X+k*m; \
-    ax.memory_location= Magma_DEV; ax.num_rows = m; ax.nnz = m; ax.val = AX+k*m;     \
-    magma_z_spmv(alpha, A, x, beta, ax );                               \
-}                                                                       \
-}
 
 
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
@@ -82,16 +74,6 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magma_z_spmv(alpha, A, x, beta, ax );                           \
 }
 
-/*
-#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
-            magmablas_ztranspose( m, n, X, m, blockW, n );        	\
-            magma_z_vector x, ax;                                       \
-            x.memory_location = Magma_DEV;  x.num_rows = m*n; x.num_cols = 1; x.major = MagmaRowMajor;  x.nnz = m*n;  x.val = blockW; \
-            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
-            magma_z_spmv(alpha, A, x, beta, ax );                           \
-            magmablas_ztranspose( n, m, blockW, n, X, m );            		\
-}
-*/
 
 
 //**************************************************************
@@ -590,8 +572,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_free(     blockAP    );
     magma_free(     blockR    );
     magma_free(     blockP    );
-    magma_free(     blockW    );
-    magma_free(     dwork    );   
+    magma_free(     blockW    );  
     magma_free(     eval_gpu    );    
 
     magma_free_pinned( hwork    );
