@@ -6,7 +6,7 @@
        @date
 
        @precisions normal z -> c d s
-       @author Mark Gates
+       @author Ichitaro Yamazaki
 */
 // includes, system
 #include <stdlib.h>
@@ -22,22 +22,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-/* ================================================================================================== */
-extern "C" magma_int_t
-magma_zhetrf_hybrid(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-             magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
-extern "C" magma_int_t
-magma_zhetrf(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *ipiv, magma_int_t *info);
-extern "C" magma_int_t
-magma_zhetrf_gpu_row(magma_uplo_t uplo, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda,
-                     magma_int_t *ipiv, magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
-extern "C" magma_int_t
-magma_zhetrf_nopiv(magma_uplo_t uplo, magma_int_t n,
-                   magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info);
-extern "C" magma_int_t
-magma_zhetrf_nopiv_gpu(magma_uplo_t uplo, magma_int_t n,
-                       magmaDoubleComplex_ptr da, magma_int_t ldda, magma_int_t *info);
 /* ================================================================================================== */
 
 // Initialize matrix to random.
