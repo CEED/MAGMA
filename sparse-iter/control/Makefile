@@ -23,14 +23,15 @@ ZSRC := \
 	magma_zgeneratematrix.cpp	\
 	matrix_zio.cpp		\
 	magma_zsolverinfo.cpp	\
-	magma_ztranspose.cpp	\
-	magma_zvtranspose.cpp	\
-    magma_zp2p.cpp   \
     magma_zcsrsplit.cpp   \
     magma_zmcsrpass.cpp   \
     magma_zmcsrcompressor.cpp   \
     magma_zmscale.cpp   \
     magma_zmdiff.cpp  \
+    magma_zp2p.cpp   \
+	magma_ztranspose.cpp	\
+	magma_zvtranspose.cpp	\
+    magma_zvpass.cpp   \
 
 SRC := \
 	mmio.cpp		\

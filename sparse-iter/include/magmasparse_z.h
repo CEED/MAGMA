@@ -109,6 +109,21 @@ magma_zcsrget(          magma_z_sparse_matrix A,
                         magma_index_t **col, 
                         magmaDoubleComplex **val );
 
+
+magma_int_t 
+magma_zvset( 
+                        magma_int_t m, 
+                        magma_int_t n, 
+                        magmaDoubleComplex *val,
+                        magma_z_vector *v );
+
+magma_int_t 
+magma_zvget(            magma_z_vector v,
+                        magma_int_t *m, 
+                        magma_int_t *n, 
+                        magmaDoubleComplex **val );
+
+
 magma_int_t 
 magma_z_csr_mtxsymm(    magma_z_sparse_matrix *A, 
                         const char *filename );
