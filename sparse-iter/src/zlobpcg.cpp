@@ -12,36 +12,12 @@
        @precisions normal z -> s d c
 */
 
-#include <sys/time.h>
-#include <time.h>
 
 #include "common_magma.h"
 #include "magmasparse.h"
-#include "trace.h"
 #include "magmablas.h"     
 
 #define PRECISION_z
-
-//==================================================================================
-extern "C" magma_int_t
-magma_zcompact(magma_int_t m, magma_int_t n,
-               magmaDoubleComplex *dA, magma_int_t ldda,
-               double *dnorms, double tol, 
-               magma_int_t *activeMask, magma_int_t *cBlockSize);
-
-extern "C" magma_int_t
-magma_zcompactActive(magma_int_t m, magma_int_t n,
-                     magmaDoubleComplex *dA, magma_int_t ldda, 
-                     magma_int_t *active);
-//==================================================================================
-
-
-
-
-
-
-
-
 
 
 /**
@@ -89,12 +65,21 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
 #define gramB(    m, n)   (gramB     + (m) + (n)*ldgram)
 #define gevectors(m, n)   (gevectors + (m) + (n)*ldgram) 
 #define h_gramB(  m, n)   (h_gramB   + (m) + (n)*ldgram)
-
+/*
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
             magmablas_ztranspose( m, n, X, m, blockW, n );        	\
             magma_z_vector x, ax;                                       \
             x.memory_location = Magma_DEV;  x.num_rows = m*n; x.num_cols = 1; x.major = MagmaRowMajor;  x.nnz = m*n;  x.val = blockW; \
             ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.nnz = m*n; ax.val = AX;     \
+            magma_z_spmv(alpha, A, x, beta, ax );                           \
+            magmablas_ztranspose( n, m, blockW, n, X, m );            		\
+}
+*/
+#define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX)       {        \
+            magmablas_ztranspose( m, n, X, m, blockW, n );        	\
+            magma_z_vector x, ax;                                       \
+            x.memory_location = Magma_DEV;  x.num_rows = m*n; x.num_cols = 1; x.major = MagmaRowMajor;  x.nnz = m*n;  x.val = blockW; \
+            ax.memory_location= Magma_DEV; ax.num_rows = m*n; ax.num_cols = 1; ax.major = MagmaRowMajor; ax.nnz = m*n; ax.val = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax );                           \
             magmablas_ztranspose( n, m, blockW, n, X, m );            		\
 }
@@ -274,10 +259,10 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             // === make the active preconditioned residuals orthonormal
             magma_zgegqr_gpu(ikind, m, cBlockSize, blockR, m, dwork, hwork, info );
             //magma_zorthomgs( m, cBlockSize, blockR );
-            
+             printf("good here\n");
             // === compute AR
             magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockR, c_zero, blockAR );
- 
+
             if (!restart) {
                 // === compact P & AP as well
                 magma_zcompactActive(m, n, blockP,  m, activeMask);
@@ -300,7 +285,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
                 // === Make P orthonormal & properly change AP (without multiplication by A)
                 magma_zgegqr_gpu(ikind, m, cBlockSize, blockP, m, dwork, hwork, info );
                 //magma_zorthomgs( m, cBlockSize, blockP );
-
+ printf("good here2\n");
                 //magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockP, c_zero, blockAP );
                 magma_zsetmatrix( cBlockSize, cBlockSize, hwork, cBlockSize, dwork, cBlockSize);
 

@@ -623,8 +623,17 @@ magma_int_t
 magma_z_initP2P(        magma_int_t *bandwidth_benchmark,
                         magma_int_t *num_gpus );
 
+magma_int_t
+magma_zcompact(         magma_int_t m, magma_int_t n,
+                        magmaDoubleComplex *dA, magma_int_t ldda,
+                        double *dnorms, double tol, 
+                        magma_int_t *activeMask, magma_int_t *cBlockSize);
 
-
+magma_int_t
+magma_zcompactActive(
+                        magma_int_t m, magma_int_t n,
+                        magmaDoubleComplex *dA, magma_int_t ldda, 
+                        magma_int_t *active);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE BLAS function definitions
