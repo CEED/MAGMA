@@ -20,24 +20,6 @@ extern "C" {
 #endif
 
   /*
-   * Interface to clean
-   */
-
-// see also zlaswp
-// ipiv gets updated
-void
-magmablas_zpermute_long2(
-    magma_int_t n,
-    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    magma_int_t *ipiv, magma_int_t nb, magma_int_t ind );
-
-// ipiv is not updated (unlike zpermute_long2)
-void
-magmablas_zpermute_long3(
-    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind );
-
-  /*
    * Transpose functions
    */
 void
@@ -516,7 +498,7 @@ magmablas_zlaswp2(
     magma_int_t n,
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
-    const magma_int_t *d_ipiv, magma_int_t inci );
+    magmaInt_const_ptr d_ipiv, magma_int_t inci );
 
 void
 magmablas_zlaswpx(

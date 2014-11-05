@@ -47,7 +47,7 @@ static void init_matrix( magma_int_t m, magma_int_t n, magmaDoubleComplex *A, ma
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zswap, zswapblk, zpermute, zlaswp, zlaswpx
+   -- Testing zswap, zswapblk, zlaswp, zlaswpx
 */
 int main( int argc, char** argv)
 {
@@ -61,7 +61,6 @@ int main( int argc, char** argv)
     real_Double_t row_perf0 = MAGMA_D_NAN, col_perf0 = MAGMA_D_NAN;
     real_Double_t row_perf1 = MAGMA_D_NAN, col_perf1 = MAGMA_D_NAN;
     real_Double_t row_perf2 = MAGMA_D_NAN, col_perf2 = MAGMA_D_NAN;
-    real_Double_t row_perf3 = MAGMA_D_NAN;
     real_Double_t row_perf4 = MAGMA_D_NAN;
     real_Double_t row_perf5 = MAGMA_D_NAN, col_perf5 = MAGMA_D_NAN;
     real_Double_t row_perf6 = MAGMA_D_NAN, col_perf6 = MAGMA_D_NAN;
@@ -81,9 +80,9 @@ int main( int argc, char** argv)
 
     magma_queue_t queue = 0;
     
-    printf("            %8s zswap    zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n", g_platform_str );
-    printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  zlaswp   (GByte/s)\n");
-    printf("==================================================================================================================================================\n");
+    printf("            %8s zswap    zswap             zswapblk          zlaswp   zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n", g_platform_str );
+    printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  zlaswp   (GByte/s)\n");
+    printf("=========================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             // For an N x N matrix, swap nb rows or nb columns using various methods.
@@ -98,7 +97,7 @@ int main( int argc, char** argv)
             nb     = min( N, nb );
             // each swap does 2N loads and 2N stores, for nb swaps
             gbytes = sizeof(magmaDoubleComplex) * 4.*N*nb / 1e9;
-                        
+            
             TESTING_MALLOC_PIN( h_A1, magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_A2, magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_R1, magmaDoubleComplex, lda*N );
@@ -111,8 +110,12 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( d_A1, magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( d_A2, magmaDoubleComplex, ldda*N );
             
+            // getrf always makes ipiv[j] >= j+1, where ipiv is one based and j is zero based
+            // some implementations (e.g., MacOS dlaswp) assume this
             for( j=0; j < nb; j++ ) {
-                ipiv[j] = (magma_int_t) ((rand()*1.*N) / (RAND_MAX * 1.)) + 1;
+                ipiv[j] = (rand() % (N-j)) + j + 1;
+                assert( ipiv[j] >= j+1 );
+                assert( ipiv[j] <= N   );
             }
             
             /* =====================================================================
@@ -286,29 +289,6 @@ int main( int argc, char** argv)
             #endif
 
             /* =====================================================================
-             * zpermute_long (1 matrix)
-             */
-            
-            /* Row Major */
-            memcpy( ipiv2, ipiv, nb*sizeof(magma_int_t) );  // zpermute updates ipiv2
-            init_matrix( N, N, h_A1, lda, 0 );
-            magma_zsetmatrix( N, N, h_A1, lda, d_A1, ldda );
-            
-            time = magma_sync_wtime( queue );
-            magmablas_zpermute_long2( N, d_A1, ldda, ipiv2, nb, 0 );
-            time = magma_sync_wtime( queue ) - time;
-            row_perf3 = gbytes / time;
-            
-            for( j=0; j < nb; j++) {
-                if ( j != (ipiv[j]-1)) {
-                    blasf77_zswap( &N, h_A1+lda*j, &ione, h_A1+lda*(ipiv[j]-1), &ione);
-                }
-            }
-            magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
-            check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
-            shift *= 2;
-
-            /* =====================================================================
              * LAPACK-style zlaswp (1 matrix)
              */
             
@@ -418,7 +398,7 @@ int main( int argc, char** argv)
             // copy reads 1 matrix and writes 1 matrix, so has half gbytes of swap
             row_perf6 = 0.5 * gbytes / time;
 
-            printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
+            printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
                    (int) N, (int) nb,
                    row_perf0, ((check & 0x001) != 0 ? '*' : ' '),
                    col_perf0, ((check & 0x002) != 0 ? '*' : ' '),
@@ -426,11 +406,10 @@ int main( int argc, char** argv)
                    col_perf1, ((check & 0x008) != 0 ? '*' : ' '),
                    row_perf2, ((check & 0x010) != 0 ? '*' : ' '),
                    col_perf2, ((check & 0x020) != 0 ? '*' : ' '),
-                   row_perf3, ((check & 0x040) != 0 ? '*' : ' '),
-                   row_perf4, ((check & 0x080) != 0 ? '*' : ' '),
-                   row_perf7, ((check & 0x100) != 0 ? '*' : ' '),
-                   row_perf5, ((check & 0x200) != 0 ? '*' : ' '),
-                   col_perf5, ((check & 0x400) != 0 ? '*' : ' '),
+                   row_perf4, ((check & 0x040) != 0 ? '*' : ' '),
+                   row_perf7, ((check & 0x080) != 0 ? '*' : ' '),
+                   row_perf5, ((check & 0x100) != 0 ? '*' : ' '),
+                   col_perf5, ((check & 0x200) != 0 ? '*' : ' '),
                    row_perf6,
                    col_perf6,
                    cpu_perf,

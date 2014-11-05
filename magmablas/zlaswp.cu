@@ -23,8 +23,7 @@
 #define NTHREADS   64
 
 typedef struct {
-    magmaDoubleComplex *dAT;
-    int n, lda, j0, npivots;
+    int npivots;
     int ipiv[MAX_PIVOTS];
 } zlaswp_params_t;
 
@@ -34,76 +33,22 @@ typedef struct {
 // Each GPU block processes one block-column of A.
 // Each thread goes down a column of A,
 // swapping rows according to pivots stored in params.
-__global__ void zlaswp_kernel( zlaswp_params_t params )
+__global__ void zlaswp_kernel(
+    int n, magmaDoubleComplex *dAT, int ldda, zlaswp_params_t params )
 {
-    unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
-    if( tid < params.n ) {
-        int lda = params.lda;
-        magmaDoubleComplex *dAT = params.dAT + tid + params.j0*lda;
+    int tid = threadIdx.x + blockDim.x*blockIdx.x;
+    if ( tid < n ) {
+        dAT += tid;
         magmaDoubleComplex *A1  = dAT;
         
         for( int i1 = 0; i1 < params.npivots; ++i1 ) {
             int i2 = params.ipiv[i1];
-            magmaDoubleComplex *A2 = dAT + i2*lda;
+            magmaDoubleComplex *A2 = dAT + i2*ldda;
             magmaDoubleComplex temp = *A1;
             *A1 = *A2;
             *A2 = temp;
-            A1 += lda;  // A1 = dA + i1*ldx
+            A1 += ldda;  // A1 = dA + i1*ldx
         }
-    }
-}
-
-
-// Launch zlaswp kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
-extern "C" void zlaswp_launch( zlaswp_params_t &params, magma_queue_t queue )
-{
-    int blocks = (params.n + NTHREADS - 1) / NTHREADS;
-    zlaswp_kernel<<< blocks, NTHREADS, 0, queue >>>( params );
-}
-
-
-// @deprecated
-// Swap rows of A, stored row-wise.
-// This version updates each entry of ipiv by adding ind.
-// (In contrast, LAPACK applies laswp, then updates ipiv.)
-// It is used in zgetrf, zgetrf_gpu, zgetrf_mgpu, zgetrf_ooc.
-extern "C" void
-magmablas_zpermute_long2(
-    magma_int_t n,
-    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
-{
-    for( int k = 0; k < nb; k += MAX_PIVOTS ) {
-        int npivots = min( MAX_PIVOTS, nb-k );
-        // fields are:             dAT  n  ldda  j0       npivots
-        zlaswp_params_t params = { dAT, n, ldda, ind + k, npivots };
-        for( int j = 0; j < npivots; ++j ) {
-            params.ipiv[j] = ipiv[ind + k + j] - k - 1;
-            ipiv[ind + k + j] += ind;
-        }
-        zlaswp_launch( params, magma_stream );
-    }
-}
-
-
-// @deprecated
-// Swap rows of A, stored row-wise.
-// This version assumes ind has already been added to ipiv.
-// (In contrast, LAPACK applies laswp, then updates ipiv.)
-// It is used in zgetrf_mgpu, zgetrf_ooc.
-extern "C" void
-magmablas_zpermute_long3(
-    magmaDoubleComplex_ptr dAT, magma_int_t ldda,
-    const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
-{
-    for( int k = 0; k < nb; k += MAX_PIVOTS ) {
-        int npivots = min( MAX_PIVOTS, nb-k );
-        // fields are:             dAT  n     ldda  j0       npivots
-        zlaswp_params_t params = { dAT, ldda, ldda, ind + k, npivots };
-        for( int j = 0; j < MAX_PIVOTS; ++j ) {
-            params.ipiv[j] = ipiv[ind + k + j] - k - 1 - ind;
-        }
-        zlaswp_launch( params, magma_stream );
     }
 }
 
@@ -152,8 +97,8 @@ magmablas_zpermute_long3(
     \param[in]
     inci     INTEGER
              The increment between successive values of IPIV.
-             Currently, IPIV > 0.
-             TODO: If IPIV is negative, the pivots are applied in reverse order.
+             Currently, INCI > 0.
+             TODO: If INCI is negative, the pivots are applied in reverse order.
 
     @param[in]
     queue   magma_queue_t
@@ -170,6 +115,8 @@ magmablas_zlaswp_q(
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue )
 {
+    #define dAT(i_, j_) (dAT + (i_)*ldda + (j_))
+    
     magma_int_t info = 0;
     if ( n < 0 )
         info = -1;
@@ -185,15 +132,20 @@ magmablas_zlaswp_q(
         return;  //info;
     }
     
+    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 threads( NTHREADS );
+    zlaswp_params_t params;
+    
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, k2-k );
-        // fields are:             dAT         n  ldda  j0 npivots
-        zlaswp_params_t params = { dAT+k*ldda, n, ldda, 0, npivots };
+        params.npivots = npivots;
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswp_launch( params, queue );
+        zlaswp_kernel<<< blocks, threads, 0, queue >>>( n, dAT(k,0), ldda, params );
     }
+    
+    #undef dAT
 }
 
 
@@ -220,24 +172,17 @@ magmablas_zlaswp(
 // Extended version has stride in both directions (ldx, ldy)
 // to handle both row-wise and column-wise storage.
 
-typedef struct {
-    magmaDoubleComplex *dA;
-    int n, ldx, ldy, j0, npivots;
-    int ipiv[MAX_PIVOTS];
-} zlaswpx_params_t;
-
-
 // Matrix A is stored row or column-wise in dA.
 // Divide matrix A into block-columns of NTHREADS columns each.
 // Each GPU block processes one block-column of A.
 // Each thread goes down a column of A,
 // swapping rows according to pivots stored in params.
-__global__ void zlaswpx_kernel( zlaswpx_params_t params )
+__global__ void zlaswpx_kernel(
+    int n, magmaDoubleComplex *dA, int ldx, int ldy, zlaswp_params_t params )
 {
-    unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
-    if( tid < params.n ) {
-        int ldx = params.ldx;
-        magmaDoubleComplex *dA = params.dA + tid*params.ldy + params.j0*ldx;
+    int tid = threadIdx.x + blockDim.x*blockIdx.x;
+    if ( tid < n ) {
+        dA += tid*ldy;
         magmaDoubleComplex *A1  = dA;
         
         for( int i1 = 0; i1 < params.npivots; ++i1 ) {
@@ -249,14 +194,6 @@ __global__ void zlaswpx_kernel( zlaswpx_params_t params )
             A1 += ldx;  // A1 = dA + i1*ldx
         }
     }
-}
-
-
-// Launch zlaswpx kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
-extern "C" void zlaswpx( zlaswpx_params_t &params, magma_queue_t queue )
-{
-    int blocks = (params.n + NTHREADS - 1) / NTHREADS;
-    zlaswpx_kernel<<< blocks, NTHREADS, 0, queue >>>( params );
 }
 
 
@@ -328,6 +265,8 @@ magmablas_zlaswpx_q(
     const magma_int_t *ipiv, magma_int_t inci,
     magma_queue_t queue )
 {
+    #define dA(i_, j_) (dA + (i_)*ldx + (j_)*ldy)
+    
     magma_int_t info = 0;
     if ( n < 0 )
         info = -1;
@@ -343,15 +282,20 @@ magmablas_zlaswpx_q(
         return;  //info;
     }
     
+    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 threads( NTHREADS );
+    zlaswp_params_t params;
+    
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, k2-k );
-        // fields are:              dA        n  ldx  ldy  j0 npivots
-        zlaswpx_params_t params = { dA+k*ldx, n, ldx, ldy, 0, npivots };
+        params.npivots = npivots;
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswpx( params, queue );
+        zlaswpx_kernel<<< blocks, threads, 0, queue >>>( n, dA(k,0), ldx, ldy, params );
     }
+    
+    #undef dA
 }
 
 
@@ -383,21 +327,21 @@ magmablas_zlaswpx(
 // (including copying pivots to the GPU).
 
 __global__ void zlaswp2_kernel(
-    int n, magmaDoubleComplex *dAT, int lda, int npivots,
-    const magma_int_t* d_ipiv, magma_int_t inci )
+    int n, magmaDoubleComplex *dAT, int ldda, int npivots,
+    const magma_int_t* d_ipiv, int inci )
 {
-    unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
-    if( tid < n ) {
+    int tid = threadIdx.x + blockDim.x*blockIdx.x;
+    if ( tid < n ) {
         dAT += tid;
         magmaDoubleComplex *A1  = dAT;
         
         for( int i1 = 0; i1 < npivots; ++i1 ) {
             int i2 = d_ipiv[i1*inci] - 1;  // Fortran index
-            magmaDoubleComplex *A2 = dAT + i2*lda;
+            magmaDoubleComplex *A2 = dAT + i2*ldda;
             magmaDoubleComplex temp = *A1;
             *A1 = *A2;
             *A2 = temp;
-            A1 += lda;  // A1 = dA + i1*ldx
+            A1 += ldda;  // A1 = dA + i1*ldx
         }
     }
 }
@@ -464,9 +408,11 @@ magmablas_zlaswp2_q(
     magma_int_t n,
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
-    const magma_int_t *d_ipiv, magma_int_t inci,
+    magmaInt_const_ptr d_ipiv, magma_int_t inci,
     magma_queue_t queue )
 {
+    #define dAT(i_, j_) (dAT + (i_)*ldda + (j_))
+    
     magma_int_t info = 0;
     if ( n < 0 )
         info = -1;
@@ -482,9 +428,12 @@ magmablas_zlaswp2_q(
         return;  //info;
     }
     
-    int blocks = (n + NTHREADS - 1) / NTHREADS;
-    zlaswp2_kernel<<< blocks, NTHREADS, 0, queue >>>(
-        n, dAT + (k1-1)*ldda, ldda, k2-(k1-1), d_ipiv, inci );
+    magma_int_t nb = k2-(k1-1);
+    
+    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 threads( NTHREADS );
+    zlaswp2_kernel<<< blocks, threads, 0, queue >>>
+        ( n, dAT(k1-1,0), ldda, nb, d_ipiv, inci );
 }
 
 
@@ -497,7 +446,7 @@ magmablas_zlaswp2(
     magma_int_t n,
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
-    const magma_int_t *d_ipiv, magma_int_t inci )
+    magmaInt_const_ptr d_ipiv, magma_int_t inci )
 {
     magmablas_zlaswp2_q( n, dAT, ldda, k1, k2, d_ipiv, inci, magma_stream );
 }
