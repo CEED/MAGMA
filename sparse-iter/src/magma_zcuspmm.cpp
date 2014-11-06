@@ -66,7 +66,7 @@ magma_zcuspmm( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
 
             magma_z_sparse_matrix C;
             C.num_rows = A.num_rows;
-            C.num_cols = A.num_cols;
+            C.num_cols = B.num_cols;
             C.storage_type = A.storage_type;
             C.memory_location = A.memory_location;
 
