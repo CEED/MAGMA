@@ -13,7 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" static __global__
-void kernel_name(precision)(
+void gemm_kernel_name(precision)(
     int M, int N, int K,
     const FloatingPoint_t* __restrict__ A, int LDA,
     const FloatingPoint_t* __restrict__ B, int LDB,
