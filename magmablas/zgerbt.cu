@@ -11,110 +11,14 @@
        @author Adrien REMY
 */
 #include "common_magma.h"
+#include "zgerbt.h"
 
 
 #define block_height  32
 #define block_width  4
 #define block_length 256
 #define NB 64
-
-__global__ void 
-magmablas_zelementary_multiplication(
-    magma_int_t n,
-    magmaDoubleComplex *dA, magma_int_t ldda, 
-    magmaDoubleComplex *du, 
-    magmaDoubleComplex *dv)
-{    
-    magma_int_t idx, idy;
-
-    idx = blockIdx.x * blockDim.x + threadIdx.x;
-    idy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if ((idx < n/2)&&(idy < n/2)){
-
-        dA += idx + idy * ldda;
-
-        magmaDoubleComplex a00, a10, a01, a11, b1, b2, b3, b4;
-        __shared__ magmaDoubleComplex u1[block_height], u2[block_height], v1[block_width], v2[block_width];
-
-        du += idx;
-        dv += idy;
-
-        u1[threadIdx.x]=du[0];
-        u2[threadIdx.x]=du[n/2];
-        v1[threadIdx.y]=dv[0];
-        v2[threadIdx.y]=dv[n/2];
-
-        __syncthreads();
-
-        a00 = dA[0];
-        a01 = dA[ldda*n/2];
-        a10 = dA[n/2];
-        a11 = dA[ldda*n/2+n/2];
-
-        b1 = a00 + a01;
-        b2 = a10 + a11;
-        b3 = a00 - a01;
-        b4 = a10 - a11;
-
-        dA[0] = u1[threadIdx.x] * v1[threadIdx.y] * (b1 + b2);
-        dA[ldda*n/2] = u1[threadIdx.x] * v2[threadIdx.y] * (b3 + b4);
-        dA[n/2] = u2[threadIdx.x] * v1[threadIdx.y] * (b1 - b2);
-        dA[ldda*n/2+n/2] = u2[threadIdx.x] * v2[threadIdx.y] *(b3 - b4);
-    }
-}
-
-
-__global__ void 
-magmablas_zapply_vector(
-    magma_int_t n,
-    magmaDoubleComplex *du, magmaDoubleComplex *db)
-{
-    magma_int_t idx;
-
-    idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (idx < n/2){
-
-        du += idx;
-        db += idx;
-
-        magmaDoubleComplex a1,a2;
-
-        a1 = du[0]*db[0];
-        a2 = du[n/2]*db[n/2];
-
-        db[0] = a1 + a2;
-        db[n/2] = a1 -a2;
-    }
-}
-
-
-__global__ void 
-magmablas_zapply_transpose_vector(
-    magma_int_t n,
-    magmaDoubleComplex *du,magmaDoubleComplex *db )
-{
-    magma_int_t idx;
-
-    idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (idx < n/2){
-
-        du += idx;
-        db += idx;
-
-        magmaDoubleComplex a1,a2;
-
-        a1 = db[0] + db[n/2];
-        a2 = db[0] - db[n/2];
-
-        db[0] = du[0]*a1;
-        db[n/2] = du[n/2]*a2;
-    }
-}
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
     -------
@@ -151,14 +55,13 @@ magmablas_zprbt_mtv_q(
     magma_int_t threads = block_length;
     magma_int_t grid = n/(4*block_length) + ((n%(4*block_length))!=0);
 
-    magmablas_zapply_transpose_vector<<< grid, threads, 0, queue >>>(n/2, du+n, db);
-    magmablas_zapply_transpose_vector<<< grid, threads, 0, queue >>>(n/2, du+n+n/2, db+n/2);
+    magmablas_zapply_transpose_vector_kernel<<< grid, threads, 0, queue >>>(n/2, du, n, db, 0);
+    magmablas_zapply_transpose_vector_kernel<<< grid, threads, 0, queue >>>(n/2, du, n+n/2, db, n/2);
 
     threads = block_length;
     grid = n/(2*block_length) + ((n%(2*block_length))!=0);
-    magmablas_zapply_transpose_vector<<< grid, threads, 0, queue >>>(n, du, db);
+    magmablas_zapply_transpose_vector_kernel<<< grid, threads, 0, queue >>>(n, du, 0, db, 0);
 }
-
 
 /**
     @see magmablas_zprbt_mtv_q
@@ -171,7 +74,7 @@ magmablas_zprbt_mtv(
     magmablas_zprbt_mtv_q(n, du, db, magma_stream);
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
     Purpose
@@ -207,19 +110,15 @@ magmablas_zprbt_mv_q(
     magma_int_t threads = block_length;
     magma_int_t grid = n/(2*block_length) + ((n%(2*block_length))!=0);
 
-    magmablas_zapply_vector<<< grid, threads, 0, queue >>>(n, dv, db);
+    magmablas_zapply_vector_kernel<<< grid, threads, 0, queue >>>(n, dv, 0, db, 0);
 
 
     threads = block_length;
     grid = n/(4*block_length) + ((n%(4*block_length))!=0);
 
-    magmablas_zapply_vector<<< grid, threads, 0, queue >>>(n/2, dv+n, db);
-    magmablas_zapply_vector<<< grid, threads, 0, queue >>>(n/2, dv+n+n/2, db+n/2);
-
-
+    magmablas_zapply_vector_kernel<<< grid, threads, 0, queue >>>(n/2, dv, n, db, 0);
+    magmablas_zapply_vector_kernel<<< grid, threads, 0, queue >>>(n/2, dv, n+n/2, db, n/2);
 }
-
-
 
 /**
     @see magmablas_zprbt_mtv_q
@@ -231,8 +130,7 @@ magmablas_zprbt_mv(
 {
     magmablas_zprbt_mv_q(n, dv, db, magma_stream);
 }
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
     -------
@@ -280,15 +178,15 @@ magmablas_zprbt_q(
     dim3 grid(n/(4*block_height) + ((n%(4*block_height))!=0), 
             n/(4*block_width)  + ((n%(4*block_width))!=0));
 
-    magmablas_zelementary_multiplication<<< grid, threads, 0, queue >>>(n/2, dA, ldda, du, dv);
-    magmablas_zelementary_multiplication<<< grid, threads, 0, queue >>>(n/2, dA+ldda*n/2, ldda, du, dv+n/2);
-    magmablas_zelementary_multiplication<<< grid, threads, 0, queue >>>(n/2, dA+n/2, ldda, du+n/2, dv);
-    magmablas_zelementary_multiplication<<< grid, threads, 0, queue >>>(n/2, dA+ldda*n/2+n/2, ldda, du+n/2, dv+n/2);
+    magmablas_zelementary_multiplication_kernel<<< grid, threads, 0, queue >>>(n/2, dA,            0, ldda, du,   0, dv,   0);
+    magmablas_zelementary_multiplication_kernel<<< grid, threads, 0, queue >>>(n/2, dA,     ldda*n/2, ldda, du,   0, dv, n/2);
+    magmablas_zelementary_multiplication_kernel<<< grid, threads, 0, queue >>>(n/2, dA,          n/2, ldda, du, n/2, dv,   0);
+    magmablas_zelementary_multiplication_kernel<<< grid, threads, 0, queue >>>(n/2, dA, ldda*n/2+n/2, ldda, du, n/2, dv, n/2);
 
     dim3 threads2(block_height, block_width);
     dim3 grid2(n/(2*block_height) + ((n%(2*block_height))!=0), 
             n/(2*block_width)  + ((n%(2*block_width))!=0));
-    magmablas_zelementary_multiplication<<< grid2, threads2, 0, queue >>>(n, dA, ldda, du-ldda, dv-ldda);
+    magmablas_zelementary_multiplication_kernel<<< grid2, threads2, 0, queue >>>(n, dA, 0, ldda, du, -ldda, dv, -ldda);
 }
 
 
@@ -304,7 +202,9 @@ magmablas_zprbt(
     magmablas_zprbt_q(n, dA, ldda, du, dv, magma_stream);
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // adds   x += r  --and--
 // copies r = b

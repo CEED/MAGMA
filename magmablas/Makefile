@@ -10,15 +10,24 @@ DIR = magmablas
 MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
+
 ZHDR := \
 	commonblas_z.h		\
 	ztrtri.h		\
+	zgerbt.h		\
 
 # additional dependencies
 strtri_diag.o: strtri.h
 dtrtri_diag.o: dtrtri.h
 ctrtri_diag.o: ctrtri.h
 ztrtri_diag.o: ztrtri.h
+
+# additional dependencies
+sgerbt.o: sgerbt.h
+dgerbt.o: dgerbt.h
+cgerbt.o: cgerbt.h
+zgerbt.o: zgerbt.h
+
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
@@ -68,6 +77,7 @@ ZSRC := \
 	ztrtri_diag.cu		\
 	ztrtri_lower.cu		\
 	ztrtri_upper.cu		\
+	zgerbt_kernels.cu	\
 	zgerbt.cu	\
 
 # Tesla-specific (CUDA arch 1.x) codes
