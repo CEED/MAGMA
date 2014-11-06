@@ -154,7 +154,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
     /**/
     magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
-    magmaDoubleComplex Akk, calpha;
+    magmaDoubleComplex Akk;
     double done = 1.0;
     double alpha;
 
@@ -174,8 +174,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
 
             // scale off-diagonals
             alpha = done / MAGMA_Z_REAL( Akk );
-            calpha = MAGMA_Z_MAKE( alpha, 0.0 );
-            blasf77_zscal(&k, &calpha, Ak1k, &ione);
+            blasf77_zdscal(&k, &alpha, Ak1k, &ione);
 
             // update remaining
             alpha = - MAGMA_Z_REAL( Akk );
@@ -202,13 +201,19 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
 
             // scale off-diagonals
             alpha = done / MAGMA_Z_REAL( Akk );
-            calpha = MAGMA_Z_MAKE( alpha, 0.0 );
-            blasf77_zscal(&k, &calpha, Ak1k, &lda);
+            blasf77_zdscal(&k, &alpha, Ak1k, &lda);
 
             // update remaining
             alpha = - MAGMA_Z_REAL( Akk );
+
+            #if defined(PRECISION_z) | defined(PRECISION_c)
+            lapackf77_zlacgv(&k, Ak1k, &lda);
+            #endif
             blasf77_zher(MagmaUpperStr, &k, 
                          &alpha, Ak1k, &lda, Ak1k + 1, &lda);
+            #if defined(PRECISION_z) | defined(PRECISION_c)
+            lapackf77_zlacgv(&k, Ak1k, &lda);
+            #endif
 
             /* Move to next diagonal element */
             Ak1k ++;
