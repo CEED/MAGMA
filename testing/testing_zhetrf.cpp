@@ -109,9 +109,9 @@ double get_residual(
     
     // compute residual |Ax - b| / (n*|A|*|x|)
     double norm_x, norm_A, norm_r, work[1];
-    norm_A = lapackf77_zlange( "F", &n, &n, A, &lda, work );
-    norm_r = lapackf77_zlange( "F", &n, &ione, b, &n, work );
-    norm_x = lapackf77_zlange( "F", &n, &ione, x, &n, work );
+    norm_A = lapackf77_zlange( MagmaFullStr, &n, &n, A, &lda, work );
+    norm_r = lapackf77_zlange( MagmaFullStr, &n, &ione, b, &n, work );
+    norm_x = lapackf77_zlange( MagmaFullStr, &n, &ione, x, &n, work );
     
     //printf( "r=\n" ); magma_zprint( 1, n, b, 1 );
     
@@ -128,49 +128,193 @@ double get_residual(
 // Uses init_matrix() to re-generate original A as needed.
 // Returns error in factorization, |PA - LU| / (n |A|)
 // This allocates 3 more matrices to store A, L, and U.
-double get_LU_error(magma_int_t M, magma_int_t N,
-                    magmaDoubleComplex *LU, magma_int_t lda,
-                    magma_int_t *ipiv)
+double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
+                      magmaDoubleComplex *LD, magma_int_t lda,
+                      magma_int_t *ipiv)
 {
-    magma_int_t min_mn = min(M,N);
-    magma_int_t ione   = 1;
     magma_int_t i, j;
-    magmaDoubleComplex alpha = MAGMA_Z_ONE;
-    magmaDoubleComplex beta  = MAGMA_Z_ZERO;
-    magmaDoubleComplex *A, *L, *U;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex *A, *L, *D;
     double work[1], matnorm, residual;
-    
-    TESTING_MALLOC_CPU( A, magmaDoubleComplex, lda*N    );
-    TESTING_MALLOC_CPU( L, magmaDoubleComplex, M*min_mn );
-    TESTING_MALLOC_CPU( U, magmaDoubleComplex, min_mn*N );
-    memset( L, 0, M*min_mn*sizeof(magmaDoubleComplex) );
-    memset( U, 0, min_mn*N*sizeof(magmaDoubleComplex) );
+    #define LD(i,j) (LD[(i) + (j)*lda])
+    #define  A(i,j) ( A[(i) + (j)*N])
+    #define  L(i,j) ( L[(i) + (j)*N])
+    #define  D(i,j) ( D[(i) + (j)*N])
 
-    // set to original A
-    init_matrix( 0, M, N, A, lda );
-    lapackf77_zlaswp( &N, A, &lda, &ione, &min_mn, ipiv, &ione);
-    
-    // copy LU to L and U, and set diagonal to 1
-    lapackf77_zlacpy( MagmaLowerStr, &M, &min_mn, LU, &lda, L, &M      );
-    lapackf77_zlacpy( MagmaUpperStr, &min_mn, &N, LU, &lda, U, &min_mn );
-    for(j=0; j<min_mn; j++)
-        L[j+j*M] = MAGMA_Z_MAKE( 1., 0. );
-    
-    matnorm = lapackf77_zlange("f", &M, &N, A, &lda, work);
+    TESTING_MALLOC_CPU( A, magmaDoubleComplex, N*N );
+    TESTING_MALLOC_CPU( L, magmaDoubleComplex, N*N );
+    TESTING_MALLOC_CPU( D, magmaDoubleComplex, N*N );
+    memset( L, 0, N*N*sizeof(magmaDoubleComplex) );
+    memset( D, 0, N*N*sizeof(magmaDoubleComplex) );
 
-    blasf77_zgemm("N", "N", &M, &N, &min_mn,
-                  &alpha, L, &M, U, &min_mn, &beta, LU, &lda);
+    // set to original A, and apply pivoting
+    init_matrix( nopiv, N, N, A, N );
+    if (uplo == MagmaUpper) {
+        for (j=N-1; j>=0; j--) {
+            int piv = (nopiv ? j+1 : ipiv[j]);
+            if (piv < 0) {
+                piv = -(piv+1);
+                // extract 2-by-2 pivot
+                D(j,j)     = LD(j,j);
+                D(j,j-1)   = MAGMA_Z_CNJG(LD(j-1,j));
+                D(j-1,j)   = LD(j-1,j);
+                D(j-1,j-1) = LD(j-1,j-1);
+                // exract L
+                L(j,j) = c_one;
+                for (i=0; i<j-1; i++) L(i,j) = LD(i,j);
+                j--;
+                L(j,j) = c_one;
+                for (i=0; i<j; i++) L(i,j) = LD(i,j);
+                if (piv != j) {
+                    // apply row-pivoting to previous L
+                    for (i=j+2; i<N; i++) {
+                        magmaDoubleComplex val = L(j,i);
+                        L(j,i) = L(piv,i);
+                        L(piv,i) = val;
+                    }
+                    // apply row-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(j,i);
+                        A(j,i) = A(piv,i);
+                        A(piv,i) = val;
+                    }
+                    // apply col-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(i,j);
+                        A(i,j) = A(i,piv);
+                        A(i,piv) = val;
+                    }
+                }
+            } else {
+                piv = piv-1;
+                // extract 1-by-1 pivot
+                D(j,j) = LD(j,j);
+                // exract L
+                L(j,j) = c_one;
+                for (i=0; i<j; i++) L(i,j) = LD(i,j);
+                if (piv != j) {
+                    // apply row-pivoting to previous L
+                    for (i=j+1; i<N; i++) {
+                        magmaDoubleComplex val = L(j,i);
+                        L(j,i) = L(piv,i);
+                        L(piv,i) = val;
+                    }
+                    // apply row-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(j,i);
+                        A(j,i) = A(piv,i);
+                        A(piv,i) = val;
+                    }
+                    // apply col-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(i,j);
+                        A(i,j) = A(i,piv);
+                        A(i,piv) = val;
+                    }
+                }
+            }
+        }
+        if (nopiv) {
+            // compute W = D*U
+            blasf77_zgemm(MagmaNoTransStr, MagmaNoTransStr, &N, &N, &N,
+                          &c_one, D, &N, L, &N, &c_zero, LD, &lda);
+            // compute D = U'*W
+            blasf77_zgemm(MagmaConjTransStr, MagmaNoTransStr, &N, &N, &N,
+                          &c_one, L, &N, LD, &lda, &c_zero, D, &N);
+        } else {
+            // compute W = U*D
+            blasf77_zgemm(MagmaNoTransStr, MagmaNoTransStr, &N, &N, &N,
+                          &c_one, L, &N, D, &N, &c_zero, LD, &lda);
+            // compute D = W*U'
+            blasf77_zgemm(MagmaNoTransStr, MagmaConjTransStr, &N, &N, &N,
+                          &c_one, LD, &lda, L, &N, &c_zero, D, &N);
+        }
+    } else {
+        for (j=0; j<N; j++) {
+            int piv = (nopiv ? j+1 : ipiv[j]);
+            if (piv < 0) {
+                piv = -(piv+1);
+                // extract 2-by-2 pivot
+                D(j,j)     = LD(j,j);
+                D(j,j+1)   = MAGMA_Z_CNJG(LD(j+1,j));
+                D(j+1,j)   = LD(j+1,j);
+                D(j+1,j+1) = LD(j+1,j+1);
+                // exract L
+                L(j,j) = c_one;
+                for (i=j+2; i<N; i++) L(i,j) = LD(i,j);
+                j++;
+                L(j,j) = c_one;
+                for (i=j+1; i<N; i++) L(i,j) = LD(i,j);
+                if (piv != j) {
+                    // apply row-pivoting to previous L
+                    for (i=0; i<j-1; i++) {
+                        magmaDoubleComplex val = L(j,i);
+                        L(j,i) = L(piv,i);
+                        L(piv,i) = val;
+                    }
+                    // apply row-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(j,i);
+                        A(j,i) = A(piv,i);
+                        A(piv,i) = val;
+                    }
+                    // apply col-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(i,j);
+                        A(i,j) = A(i,piv);
+                        A(i,piv) = val;
+                    }
+                }
+            } else {
+                piv = piv-1;
+                // extract 1-by-1 pivot
+                D(j,j) = LD(j,j);
+                // exract L
+                L(j,j) = c_one;
+                for (i=j+1; i<N; i++) L(i,j) = LD(i,j);
+                if (piv != j) {
+                    // apply row-pivoting to previous L
+                    for (i=0; i<j; i++) {
+                        magmaDoubleComplex val = L(j,i);
+                        L(j,i) = L(piv,i);
+                        L(piv,i) = val;
+                    }
+                    // apply row-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(j,i);
+                        A(j,i) = A(piv,i);
+                        A(piv,i) = val;
+                    }
+                    // apply col-pivoting to A
+                    for (i=0; i<N; i++) {
+                        magmaDoubleComplex val = A(i,j);
+                        A(i,j) = A(i,piv);
+                        A(i,piv) = val;
+                    }
+                }
+            }
+        }
+        // compute W = L*D
+        blasf77_zgemm(MagmaNoTransStr, MagmaNoTransStr, &N, &N, &N,
+                      &c_one, L, &N, D, &N, &c_zero, LD, &lda);
+        // compute D = W*L'
+        blasf77_zgemm(MagmaNoTransStr, MagmaConjTransStr, &N, &N, &N,
+                      &c_one, LD, &lda, L, &N, &c_zero, D, &N);
+    }
+    // compute norm of A
+    matnorm = lapackf77_zlange(MagmaFullStr, &N, &N, A, &lda, work);
 
     for( j = 0; j < N; j++ ) {
-        for( i = 0; i < M; i++ ) {
-            LU[i+j*lda] = MAGMA_Z_SUB( LU[i+j*lda], A[i+j*lda] );
+        for( i = 0; i < N; i++ ) {
+            D(i,j) = MAGMA_Z_SUB( D(i,j), A(i,j) );
         }
     }
-    residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);
+    residual = lapackf77_zlange(MagmaFullStr, &N, &N, D, &N, work);
 
     TESTING_FREE_CPU( A );
     TESTING_FREE_CPU( L );
-    TESTING_FREE_CPU( U );
+    TESTING_FREE_CPU( D );
 
     return residual / (matnorm * N);
 }
@@ -183,9 +327,9 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
+    magmaDoubleComplex *h_A, *work, temp;
     real_Double_t   gflops, gpu_perf, gpu_time = 0.0, cpu_perf=0, cpu_time=0;
     double          error, error_lapack = 0.0;
-    magmaDoubleComplex *h_A, *work, temp;
     magma_int_t     *ipiv;
     magma_int_t     N, n2, lda, lwork, info;
     magma_int_t     status = 0;
@@ -196,21 +340,21 @@ int main( int argc, char** argv)
     switch (opts.version) {
         case 1:
             cpu = 1;
-            printf( "\n Bunch-Kauffman: CPU-Interface to GPU-only version" );
+            printf( "\nCPU-Interface to Bunch-Kauffman on GPU" );
             break;
         case 2:
             gpu = 1;
-            printf( "\n Bunch-Kauffman: GPU-Interface to GPU-only version" );
+            printf( "\nGPU-Interface to Bunch-Kauffman on GPU" );
             printf( "\n not yet..\n\n" );
             return 0;
             break;
         case 3:
             nopiv = 1;
-            printf( "\n No-piv: CPU-Interface to Hybrid-version (A is SPD)" );
+            printf( "\nCPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
             break;
         case 4:
             nopiv_gpu = 1;
-            printf( "\n No-piv: GPU-Interface to Hybrid-version (A is SPD)" );
+            printf( "\nGPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
             break;
             break;
         //case 5:
@@ -234,7 +378,7 @@ int main( int argc, char** argv)
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
     else {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |PA-LU|/(N*|A|)\n");
+        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |PAP'-LDL'|/(N*|A|)\n");
     }
     printf("=========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -331,10 +475,9 @@ int main( int argc, char** argv)
                 status += ! (error < tol);
             }
             else if ( opts.check ) {
-                printf( " not yet..\n" ); exit(0);
-                //error = get_LU_error( M, N, h_A, lda, ipiv );
-                //printf("   %8.2e   %s\n", error, (error < tol ? "ok" : "failed"));
-                //status += ! (error < tol);
+                error = get_LDLt_error( (nopiv | nopiv_gpu), uplo, N, h_A, lda, ipiv );
+                printf("   %8.2e   %s\n", error, (error < tol ? "ok" : "failed"));
+                status += ! (error < tol);
             }
             else {
                 printf("     ---   \n");
