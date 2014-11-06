@@ -567,12 +567,22 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     magma_free(     gramB           );
     magma_free(  activeMask         );
 
-    magma_free(     blockAX    );
-    magma_free(     blockAR    );
-    magma_free(     blockAP    );
-    magma_free(     blockR    );
-    magma_free(     blockP    );
-    magma_free(     blockW    );  
+    if (blockX != (solver_par->eigenvectors))
+        magma_free(     blockX    );
+    if (blockAX != (solver_par->eigenvectors))
+        magma_free(     blockAX    );
+    if (blockAR != (solver_par->eigenvectors))
+        magma_free(     blockAR    );
+    if (blockAP != (solver_par->eigenvectors))
+        magma_free(     blockAP    );
+    if (blockR != (solver_par->eigenvectors))
+        magma_free(     blockR    );
+    if (blockP != (solver_par->eigenvectors))
+        magma_free(     blockP    );
+    if (blockW != (solver_par->eigenvectors))
+        magma_free(     blockW    );
+    if (dwork != (solver_par->eigenvectors))
+        magma_free(     dwork    );   
     magma_free(     eval_gpu    );    
 
     magma_free_pinned( hwork    );
