@@ -592,7 +592,7 @@ for test in tests:
             if ( last_cmd and cmd != last_cmd ):
                 sys.stderr.write( '\n' )
             last_cmd = cmd
-            sys.stderr.write( '%-40s' % cmd_args )
+            sys.stderr.write( '%-70s' % cmd_args )
             sys.stderr.flush()
         # end
         
