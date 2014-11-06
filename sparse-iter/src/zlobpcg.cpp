@@ -18,6 +18,8 @@
 #include "magmablas.h"     
 
 #define PRECISION_z
+#define RTOLERANCE     lapackf77_dlamch( "E" )
+#define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /**
@@ -118,6 +120,7 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
     double residualTolerance  = solver_par->epsilon;
     magma_int_t maxIterations = solver_par->maxiter;
     double tmp;
+    double r0;
 
     // === Set some constants & defaults ===
     magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
@@ -444,9 +447,11 @@ magma_zlobpcg( magma_z_sparse_matrix A, magma_z_solver_par *solver_par ){
             magma_dgetmatrix(1, 1, residualNorms(0, iterationNumber), 1,  &tmp, 1);
             if( iterationNumber == 1 ){
                 solver_par->init_res = tmp;
+                if ( (r0 = tmp * solver_par->epsilon) < ATOLERANCE ) 
+                    r0 = ATOLERANCE;
             }
             solver_par->final_res = tmp;
-            if ( tmp < solver_par->init_res * solver_par->epsilon ){
+            if ( tmp < r0 ){
                 break;
             }
             if (cBlockSize == 0){
