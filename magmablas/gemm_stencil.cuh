@@ -8,6 +8,7 @@
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
+       @author Azzam Haidar
 
        See [zcds]gemm_fermi.cu for description of related files.
 */
@@ -194,6 +195,8 @@ void devfunc_name(precision) (
             int coord_B = offsetB + bly*BLK_N*LDB + idyB*LDB + idxB;
         #endif
     #else
+        // bound is the correction to offs_d in order to not getting out of memory bound
+        // so bound could be negative value since offs_d could be out of bound
         #ifdef TRANS_A
             const FloatingPoint_t *offs_dA = A + blx*BLK_M*LDA + idyA*LDA + idxA;
             ssize_t boundA = (LDA*(M-1) + K) - ( blx*BLK_M*LDA + idyA*LDA + idxA ) -1;
