@@ -142,6 +142,7 @@ typedef double real_Double_t;
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
     #define MAGMA_Z_MUL(a, b)     ((a)*(b))
     #define MAGMA_Z_DIV(a, b)     ((a)/(b))
+    #define MAGMA_Z_ABS1(a)       (fabs((a).real()) + fabs((a).imag())) 
     #define MAGMA_Z_CNJG(a)       conj(a)
 
     #define MAGMA_C_MAKE(r, i)    std::complex<float> (r,i)
@@ -151,6 +152,7 @@ typedef double real_Double_t;
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
     #define MAGMA_C_MUL(a, b)     ((a)*(b))
     #define MAGMA_C_DIV(a, b)     ((a)/(b))
+    #define MAGMA_C_ABS1(a)       (fabs((a).real()) + fabs((a).imag()))
     #define MAGMA_C_CNJG(a)       conj(a)
 #else
     #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. For example, add -DHAVE_CUBLAS to CFLAGS, or #define HAVE_CUBLAS before #include <magma.h>. In MAGMA, this happens in Makefile.internal."
