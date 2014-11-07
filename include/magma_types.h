@@ -331,7 +331,8 @@ typedef enum {
     MagmaUpper         = 121,
     MagmaLower         = 122,
     MagmaUpperLower    = 123,
-    MagmaFull          = 123   /* lascl, laset */
+    MagmaFull          = 123,  /* lascl, laset */
+    MagmaHessenberg    = 124   /* lascl */
 } magma_uplo_t;
 
 typedef magma_uplo_t magma_type_t;  /* lascl */
