@@ -138,22 +138,28 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r, i)    std::complex<double>(r,i)
     #define MAGMA_Z_REAL(x)       (x).real()
     #define MAGMA_Z_IMAG(x)       (x).imag()
+    #define MAGMA_Z_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_Z_ADD(a, b)     ((a)+(b))
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
+    #define MAGMA_Z_ABS(a)        abs(a)
     #define MAGMA_Z_MUL(a, b)     ((a)*(b))
     #define MAGMA_Z_DIV(a, b)     ((a)/(b))
     #define MAGMA_Z_ABS1(a)       (fabs((a).real()) + fabs((a).imag())) 
     #define MAGMA_Z_CNJG(a)       conj(a)
+    #define MAGMA_Z_DSCALE(v,t,s) ((v) = (t)/(s))
 
     #define MAGMA_C_MAKE(r, i)    std::complex<float> (r,i)
     #define MAGMA_C_REAL(x)       (x).real()
     #define MAGMA_C_IMAG(x)       (x).imag()
+    #define MAGMA_C_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_C_ADD(a, b)     ((a)+(b))
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
+    #define MAGMA_C_ABS(a)        abs(a)
     #define MAGMA_C_MUL(a, b)     ((a)*(b))
     #define MAGMA_C_DIV(a, b)     ((a)/(b))
     #define MAGMA_C_ABS1(a)       (fabs((a).real()) + fabs((a).imag()))
     #define MAGMA_C_CNJG(a)       conj(a)
+    #define MAGMA_C_SSCALE(v,t,s) ((v) = (t)/(s))
 #else
     #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. For example, add -DHAVE_CUBLAS to CFLAGS, or #define HAVE_CUBLAS before #include <magma.h>. In MAGMA, this happens in Makefile.internal."
 #endif
@@ -167,6 +173,7 @@ typedef double real_Double_t;
 #define MAGMA_D_MAKE(r,i)         (r)
 #define MAGMA_D_REAL(x)           (x)
 #define MAGMA_D_IMAG(x)           (0.0)
+#define MAGMA_D_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_D_ADD(a, b)         ((a) + (b))
 #define MAGMA_D_SUB(a, b)         ((a) - (b))
 #define MAGMA_D_MUL(a, b)         ((a) * (b))
@@ -176,10 +183,12 @@ typedef double real_Double_t;
 #define MAGMA_D_CNJG(a)           (a)
 #define MAGMA_D_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_D_NEGATE(a)         (-a)
+#define MAGMA_D_DSCALE(v, t, s)   (v) = (t)/(s)
 
 #define MAGMA_S_MAKE(r,i)         (r)
 #define MAGMA_S_REAL(x)           (x)
 #define MAGMA_S_IMAG(x)           (0.0)
+#define MAGMA_S_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_S_ADD(a, b)         ((a) + (b))
 #define MAGMA_S_SUB(a, b)         ((a) - (b))
 #define MAGMA_S_MUL(a, b)         ((a) * (b))
@@ -189,6 +198,7 @@ typedef double real_Double_t;
 #define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_S_NEGATE(a)         (-a)
+#define MAGMA_S_SSCALE(v, t, s)   (v) = (t)/(s)
 
 #define MAGMA_Z_ZERO              MAGMA_Z_MAKE( 0.0, 0.0)
 #define MAGMA_Z_ONE               MAGMA_Z_MAKE( 1.0, 0.0)
