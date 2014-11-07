@@ -267,7 +267,7 @@ typedef double real_Double_t;
 #define MAGMA_VERSION_STAGE "svn"
 
 #define MagmaMaxGPUs 8
-
+#define MagmaMaxDevices 8
 
 // ----------------------------------------
 // Return codes
