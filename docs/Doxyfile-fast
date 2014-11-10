@@ -757,8 +757,9 @@ WARN_LOGFILE           = output_err
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = \
-	doxygen-modules.h       \
-	documentation.txt       \
+	doxygen-modules.h                 \
+	documentation.txt                 \
+	documentation-sparse.txt          \
 	../src/cblas_z.cpp                \
 	../src/dbulge_aux.cpp             \
 	../src/dgeev.cpp                  \
