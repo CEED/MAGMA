@@ -35,7 +35,7 @@ using namespace std;
     Purpose
     -------
 
-    Passes a vector to MAGMA.
+    Passes a vector to MAGMA (located on DEV).
 
     Arguments
     ---------
@@ -49,7 +49,7 @@ using namespace std;
                 number of columns
 
     @param[in]
-    val         magmaDoubleComplex*
+    val         magmaDoubleComplex_ptr 
                 array containing vector entries
 
     @param[out]
@@ -64,17 +64,17 @@ using namespace std;
 
 extern "C"
 magma_int_t
-magma_zvset(
+magma_zvset_gpu(
     magma_int_t m, magma_int_t n, 
-    magmaDoubleComplex *val,
+    magmaDoubleComplex_ptr val,
     magma_z_vector *v,
     magma_queue_t queue )
 {
     v->num_rows = m;
     v->num_cols = n;
     v->nnz = m*n;
-    v->memory_location = Magma_CPU;
-    v->val = val;
+    v->memory_location = Magma_DEV;
+    v->dval = val;
     v->major = MagmaColMajor;
 
     return MAGMA_SUCCESS;
@@ -85,7 +85,7 @@ magma_zvset(
     Purpose
     -------
 
-    Passes a MAGMA vector back.
+    Passes a MAGMA vector back (located on DEV).
 
     Arguments
     ---------
@@ -103,7 +103,7 @@ magma_zvset(
                 number of columns
 
     @param[out]
-    val         magmaDoubleComplex*
+    val         magmaDoubleComplex_ptr 
                 array containing vector entries
 
     @param[in]
@@ -115,22 +115,22 @@ magma_zvset(
 
 extern "C"
 magma_int_t
-magma_vget(
+magma_vget_gpu(
     magma_z_vector v,
     magma_int_t *m, magma_int_t *n, 
-    magmaDoubleComplex **val,
+    magmaDoubleComplex_ptr *val,
     magma_queue_t queue )
 {
-    if ( v.memory_location == Magma_CPU ) {
+    if ( v.memory_location == Magma_DEV ) {
 
         *m = v.num_rows;
         *n = v.num_cols;
-        *val = v.val;
+        *val = v.dval;
     } else {
-        magma_z_vector v_CPU;
-        magma_z_vtransfer( v, &v_CPU, v.memory_location, Magma_CPU, queue ); 
-        magma_zvget( v_CPU, m, n, val, queue );
-        magma_z_vfree( &v_CPU, queue );
+        magma_z_vector v_DEV;
+        magma_z_vtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
+        magma_zvget_gpu( v_DEV, m, n, val, queue );
+        magma_z_vfree( &v_DEV, queue );
     }
     return MAGMA_SUCCESS;
 }

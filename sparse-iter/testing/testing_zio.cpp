@@ -28,27 +28,29 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- testing any solver 
 */
-int main( int argc, char** argv)
+int main(  int argc, char** argv )
 {
     TESTING_INIT();
 
     magma_zopts zopts;
-
+    magma_queue_t queue;
+    magma_queue_create( /*devices[ opts->device ],*/ &queue );
+    
     int i=1;
-    magma_zparse_opts( argc, argv, &zopts, &i);
+    magma_zparse_opts( argc, argv, &zopts, &i, queue );
 
 
     real_Double_t res;
     magma_z_sparse_matrix A, A2, A3, A4;
 
-    while(  i < argc ){
+    while(  i < argc ) {
 
-        if( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ){   // Laplace test
+        if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
             magma_int_t laplace_size = atoi( argv[i] );
-            magma_zm_5stencil(  laplace_size, &A );
+            magma_zm_5stencil(  laplace_size, &A, queue );
         } else {                        // file-matrix test
-            magma_z_csr_mtx( &A,  argv[i]  ); 
+            magma_z_csr_mtx( &A,  argv[i], queue );
         }
 
         printf( "# matrix info: %d-by-%d with %d nonzeros\n",
@@ -58,10 +60,10 @@ int main( int argc, char** argv)
         const char *filename = "testmatrix.mtx";
 
         // write to file
-        write_z_csrtomtx( A, filename );
+        write_z_csrtomtx( A, filename, queue );
 
         // read from file
-        magma_z_csr_mtx( &A2, filename );
+        magma_z_csr_mtx( &A2, filename, queue );
 
         // delete temporary matrix
         unlink( filename );
@@ -70,30 +72,30 @@ int main( int argc, char** argv)
         magma_int_t m, n;
         magma_index_t *row, *col;
         magmaDoubleComplex *val;
-        magma_zcsrget( A2, &m, &n, &row, &col, &val );
-        magma_zcsrset( m, n, row, col, val, &A3 );
+        magma_zcsrget( A2, &m, &n, &row, &col, &val, queue );
+        magma_zcsrset( m, n, row, col, val, &A3, queue );
 
-
-        magma_zmdiff( A, A2, &res);
-        printf("# ||A-B||_F = %f\n", res);
-        if( res < .000001 )
+        magma_zmdiff( A, A2, &res, queue );
+        printf("# ||A-B||_F = %8.2e\n", res);
+        if ( res < .000001 )
             printf("# tester IO:  ok\n");
         else
             printf("# tester IO:  failed\n");
 
-        magma_zmdiff( A, A3, &res);
-        printf("# ||A-B||_F = %f\n", res);
-        if( res < .000001 )
+        magma_zmdiff( A, A3, &res, queue );
+        printf("# ||A-B||_F = %8.2e\n", res);
+        if ( res < .000001 )
             printf("# tester matrix interface:  ok\n");
         else
             printf("# tester matrix interface:  failed\n");
 
-        magma_z_mfree(&A); 
-        magma_z_mfree(&A2); 
+        magma_z_mfree(&A, queue ); 
+        magma_z_mfree(&A2, queue ); 
 
         i++;
     }
-
+    
+    magma_queue_destroy( queue );
     TESTING_FINALIZE();
     return 0;
 }

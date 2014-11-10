@@ -19,8 +19,8 @@
 
 #define PRECISION_z
 
-#define  q(i)     (q.val + (i)*dofs)
-#define  z(i)     (z.val + (i)*dofs)
+#define  q(i)     (q.dval + (i)*dofs)
+#define  z(i)     (z.dval + (i)*dofs)
 #define  H(i,j)  H[(i)   + (j)*(1+ldh)]
 #define HH(i,j) HH[(i)   + (j)*ldh]
 #define dH(i,j) dH[(i)   + (j)*(1+ldh)]
@@ -43,33 +43,42 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 descriptor for matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b vector
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
 
-    @param
+    @param[in]
     precond_par magma_z_preconditioner*
                 preconditioner
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zgesv
     ********************************************************************/
 
-magma_int_t
-magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-               magma_z_solver_par *solver_par, 
-               magma_z_preconditioner *precond_par ){
+extern "C" magma_int_t
+magma_zpgmres(
+    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_PGMRES;
@@ -95,19 +104,21 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // GPU workspace
     magma_z_vector r, q, q_t, z, z_t, t;
-    magma_z_vinit( &t, Magma_DEV, dofs, c_zero );
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
-    magma_z_vinit( &q, Magma_DEV, dofs*(ldh+1), c_zero );
-    magma_z_vinit( &z, Magma_DEV, dofs*(ldh+1), c_zero );
-    magma_z_vinit( &z_t, Magma_DEV, dofs, c_zero );
+    magma_z_vinit( &t, Magma_DEV, dofs, c_zero, queue );
+    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_z_vinit( &q, Magma_DEV, dofs*(ldh+1), c_zero, queue );
+    magma_z_vinit( &z, Magma_DEV, dofs*(ldh+1), c_zero, queue );
+    magma_z_vinit( &z_t, Magma_DEV, dofs, c_zero, queue );
     q_t.memory_location = Magma_DEV; 
-    q_t.val = NULL; 
+    q_t.dval = NULL; 
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
 
     magmaDoubleComplex *dy, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) 
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
 
     // GPU stream
@@ -119,68 +130,70 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magmablasSetKernelStream(stream[0]);
 
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
-    magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
-    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );     //  nom0= || r||
+    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );             //  r = b
+    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );     //  nom0= || r||
     nom = nom0  * nom0;
     solver_par->init_res = nom0;
     H(1,0) = MAGMA_Z_MAKE( nom0, 0. ); 
     magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
     if ( (r0 = nom0 * solver_par->epsilon ) < ATOLERANCE ) 
         r0 = solver_par->epsilon;
-    if ( nom < r0 )
+    if ( nom < r0 ) {
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_SUCCESS;
+    }
 
     //Chronometry
     real_Double_t tempo1, tempo2;
-    magma_device_sync(); tempo1=magma_wtime();
-    if( solver_par->verbose > 0 ){
+    tempo1 = magma_sync_wtime( queue );
+    if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = nom0;
         solver_par->timing[0] = 0.0;
     }
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
-                                                    solver_par->numiter++ ){
+                                                    solver_par->numiter++ ) {
 
         for(k=1; k<=restart; k++) {
 
-        magma_zcopy(dofs, r.val, 1, q(k-1), 1);       //  q[0]    = 1.0/||r||
+        magma_zcopy(dofs, r.dval, 1, q(k-1), 1);       //  q[0]    = 1.0/||r||
         magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);    //  (to be fused)
-            q_t.val = q(k-1);
+            q_t.dval = q(k-1);
             magmablasSetKernelStream(stream[0]);
             // preconditioner
             //  z[k] = M^(-1) q(k)
-            magma_z_applyprecond_left( A, q_t, &t, precond_par );      
-            magma_z_applyprecond_right( A, t, &z_t, precond_par );     
+            magma_z_applyprecond_left( A, q_t, &t, precond_par, queue );      
+            magma_z_applyprecond_right( A, t, &z_t, precond_par, queue );     
   
-            magma_zcopy(dofs, z_t.val, 1, z(k-1), 1);                  
+            magma_zcopy(dofs, z_t.dval, 1, z(k-1), 1);                  
 
             // r = A q[k] 
-            magma_z_spmv( c_one, A, z_t, c_zero, r );
+            magma_z_spmv( c_one, A, z_t, c_zero, r, queue );
 
 
     //      if (solver_par->ortho == Magma_MGS ) {
                 // modified Gram-Schmidt
                 for (i=1; i<=k; i++) {
-                    H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            
+                    H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.dval, 1);            
                         //  H(i,k) = q[i] . r
-                    magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            
+                    magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.dval, 1);            
                        //  r = r - H(i,k) q[i]
                 }
-                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); // H(k+1,k) = ||r|| 
+                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.dval, 1), 0. ); // H(k+1,k) = ||r|| 
 
 
-            /*}else if (solver_par->ortho == Magma_FUSED_CGS ) {
+            /*} else if (solver_par->ortho == Magma_FUSED_CGS ) {
                 // fusing zgemv with dznrm2 in classical Gram-Schmidt
                 magmablasSetKernelStream(stream[0]);
-                magma_zcopy(dofs, r.val, 1, q(k), 1);  
+                magma_zcopy(dofs, r.dval, 1, q(k), 1);  
                     // dH(1:k+1,k) = q[0:k] . r
                 magmablas_zgemv(MagmaTrans, dofs, k+1, c_one, q(0), 
-                                dofs, r.val, 1, c_zero, &dH(1,k), 1);
+                                dofs, r.dval, 1, c_zero, &dH(1,k), 1);
                     // r = r - q[0:k-1] dH(1:k,k)
                 magmablas_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), 
-                                dofs, &dH(1,k), 1, c_one, r.val, 1);
+                                dofs, &dH(1,k), 1, c_one, r.dval, 1);
                    // 1) dH(k+1,k) = sqrt( dH(k+1,k) - dH(1:k,k) )
-                magma_zcopyscale(  dofs, k, r.val, q(k), &dH(1,k) );  
+                magma_zcopyscale(  dofs, k, r.dval, q(k), &dH(1,k) );  
                    // 2) q[k] = q[k] / dH(k+1,k) 
 
                 magma_event_record( event[0], stream[0] );
@@ -192,7 +205,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 // > explicitly calling magmabls
                 magmablasSetKernelStream(stream[0]);                                                  
                 magmablas_zgemv(MagmaTrans, dofs, k, c_one, q(0), 
-                                dofs, r.val, 1, c_zero, &dH(1,k), 1); 
+                                dofs, r.dval, 1, c_zero, &dH(1,k), 1, queue ); 
                                 // dH(1:k,k) = q[0:k-1] . r
                 #ifndef DZNRM2SCALE 
                 // start copying dH(1:k,k) to H(1:k,k)
@@ -203,9 +216,9 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 #endif
                                   // r = r - q[0:k-1] dH(1:k,k)
                 magmablas_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), 
-                                    dofs, &dH(1,k), 1, c_one, r.val, 1);
+                                    dofs, &dH(1,k), 1, c_one, r.dval, 1);
                 #ifdef DZNRM2SCALE
-                magma_zcopy(dofs, r.val, 1, q(k), 1);                 
+                magma_zcopy(dofs, r.dval, 1, q(k), 1);                 
                     //  q[k] = r / H(k,k-1) 
                 magma_dznrm2scale(dofs, q(k), dofs, &dH(k+1,k) );     
                     //  dH(k+1,k) = sqrt(r . r) and r = r / dH(k+1,k)
@@ -216,11 +229,11 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                             // can we keep H(k+1,k) on GPU and combine?
                 magma_zgetvector_async(k+1, &dH(1,k), 1, &H(1,k), 1, stream[1]);
                 #else
-                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );   
+                H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.dval, 1), 0. );   
                             //  H(k+1,k) = sqrt(r . r) 
-                if( k<solver_par->restart ){
+                if ( k<solver_par->restart ) {
                         magmablasSetKernelStream(stream[0]);
-                        magma_zcopy(dofs, r.val, 1, q(k), 1);                  
+                        magma_zcopy(dofs, r.dval, 1, q(k), 1);                  
                             //  q[k]    = 1.0/H[k][k-1] r
                         magma_zscal(dofs, 1./H(k+1,k), q(k), 1);              
                             //  (to be fused)   
@@ -232,10 +245,10 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                 HH(k,i) = magma_cblas_zdotc( i+1, &H(1,k), 1, &H(1,i), 1 );
             }
             h1[k] = H(1,k)*H(1,0); 
-            if (k != 1){
+            if (k != 1) {
                 for (i=1; i<k; i++) {
                     HH(k,i) = HH(k,i)/HH(i,i);//
-                    for (m=i+1; m<=k; m++){
+                    for (m=i+1; m<=k; m++) {
                         HH(k,m) -= HH(k,i) * HH(m,i) * HH(i,i);
                     }
                     h1[k] -= h1[i] * HH(k,i);   
@@ -258,16 +271,16 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                                                     c_one, x->val, 1); 
 
         // compute residual
-        magma_z_spmv( c_mone, A, *x, c_zero, r );      //  r = - A * x
-        magma_zaxpy(dofs, c_one, b.val, 1, r.val, 1);  //  r = r + b
-        H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); 
+        magma_z_spmv( c_mone, A, *x, c_zero, r, queue );      //  r = - A * x
+        magma_zaxpy(dofs, c_one, b.dval, 1, r.dval, 1);  //  r = r + b
+        H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.dval, 1), 0. ); 
                                             //  RNorm = H[1][0] = || r ||
         RNorm = MAGMA_Z_REAL( H(1,0) );
         betanom = fabs(RNorm);  
 
-        if( solver_par->verbose > 0 ){
-            magma_device_sync(); tempo2=magma_wtime();
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+        if ( solver_par->verbose > 0 ) {
+            tempo2 = magma_sync_wtime( queue );
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -280,18 +293,18 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         } 
     }
 
-    magma_device_sync(); tempo2=magma_wtime();
+    tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
-    magma_zresidual( A, b, *x, &residual );
+    magma_zresidual( A, b, *x, &residual, queue );
     solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 
-    if( solver_par->numiter < solver_par->maxiter){
+    if ( solver_par->numiter < solver_par->maxiter) {
         solver_par->info = 0;
-    }else if( solver_par->init_res > solver_par->final_res ){
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    } else if ( solver_par->init_res > solver_par->final_res ) {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -300,9 +313,9 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
         solver_par->info = -2;
     }
-    else{
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    else {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -319,11 +332,11 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // free GPU memory
     magma_free(dy); 
     if (dH != NULL ) magma_free(dH); 
-    magma_z_vfree(&t);
-    magma_z_vfree(&r);
-    magma_z_vfree(&q);
-    magma_z_vfree(&z);
-    magma_z_vfree(&z_t);
+    magma_z_vfree(&t, queue );
+    magma_z_vfree(&r, queue );
+    magma_z_vfree(&q, queue );
+    magma_z_vfree(&z, queue );
+    magma_z_vfree(&z_t, queue );
 
     // free GPU streams and events
     magma_queue_destroy( stream[0] );
@@ -331,6 +344,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_event_destroy( event[0] );
     magmablasSetKernelStream(NULL);
 
+    magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zpgmres */
 

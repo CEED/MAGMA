@@ -30,30 +30,37 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zgesv
     ********************************************************************/
 
-magma_int_t
-magma_zbaiter( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_z_solver_par *solver_par )
+extern "C" magma_int_t
+magma_zbaiter(
+    magma_z_sparse_matrix A, 
+    magma_z_vector b, 
+    magma_z_vector *x,  
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue )
 {
-
     // prepare solver feedback
     solver_par->solver = Magma_BAITER;
     solver_par->info = 0;
@@ -62,51 +69,51 @@ magma_zbaiter( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     magma_z_sparse_matrix Ah, ACSR, A_d, D, R, D_d, R_d;
 
-    magma_z_mtransfer( A, &Ah, A.memory_location, Magma_CPU );
-    magma_z_mconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR );
+    magma_z_mtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
+    magma_z_mconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue );
 
-    magma_z_mtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV );
+    magma_z_mtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV, queue );
 
     // initial residual
     real_Double_t tempo1, tempo2;
     double residual;
-    magma_zresidual( A_d, b, *x, &residual );
+    magma_zresidual( A_d, b, *x, &residual, queue );
     solver_par->init_res = residual;
     solver_par->res_vec = NULL;
     solver_par->timing = NULL;
 
 
     // setup
-    magma_zcsrsplit( 256, ACSR, &D, &R );
-    magma_z_mtransfer( D, &D_d, Magma_CPU, Magma_DEV );
-    magma_z_mtransfer( R, &R_d, Magma_CPU, Magma_DEV );
+    magma_zcsrsplit( 256, ACSR, &D, &R, queue );
+    magma_z_mtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue );
+    magma_z_mtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue );
 
     magma_int_t localiter = 1;
 
-    magma_device_sync(); tempo1=magma_wtime();
+    tempo1 = magma_sync_wtime( queue );
 
     // block-asynchronous iteration iterator
     for( int iter=0; iter<solver_par->maxiter; iter++)
-        magma_zbajac_csr( localiter, D_d, R_d, b, x );
+        magma_zbajac_csr( localiter, D_d, R_d, b, x, queue );
 
-    magma_device_sync(); tempo2=magma_wtime();
+    tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
-    magma_zresidual( A_d, b, *x, &residual );
+    magma_zresidual( A_d, b, *x, &residual, queue );
     solver_par->final_res = residual;
     solver_par->numiter = solver_par->maxiter;
 
-    if( solver_par->init_res > solver_par->final_res )
+    if ( solver_par->init_res > solver_par->final_res )
         solver_par->info = 0;
     else
         solver_par->info = -1;
 
-    magma_z_mfree(&D);
-    magma_z_mfree(&R);
-    magma_z_mfree(&D_d);
-    magma_z_mfree(&R_d);
-    magma_z_mfree(&A_d);
-    magma_z_mfree(&ACSR);
-    magma_z_mfree(&Ah);
+    magma_z_mfree(&D, queue );
+    magma_z_mfree(&R, queue );
+    magma_z_mfree(&D_d, queue );
+    magma_z_mfree(&R_d, queue );
+    magma_z_mfree(&A_d, queue );
+    magma_z_mfree(&ACSR, queue );
+    magma_z_mfree(&Ah, queue );
 
     return MAGMA_SUCCESS;
 }   /* magma_zbaiter */

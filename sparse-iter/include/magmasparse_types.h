@@ -43,12 +43,27 @@ typedef struct magma_z_sparse_matrix{
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
-    magmaDoubleComplex *val;                    // array containing values
-    magmaDoubleComplex *diag;                   // opt: store the diagonal seperately
-    magma_index_t      *row;                    // row pointer
-    magma_index_t      *rowidx;                 // opt: array containing row indices
-    magma_index_t      *col;                    // array containing col indices 
-    magma_index_t      *blockinfo;              // opt: for BCSR format
+    union {
+        magmaDoubleComplex      *val;           // array containing values in CPU case
+        magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
+    };
+    union {
+        magmaDoubleComplex      *diag;          // array containing values in CPU case
+        magmaDoubleComplex_ptr  ddiag;          // array containing values in DEV case
+    };
+    union {
+        magma_index_t           *row;           // row pointer CPU case
+        magmaIndex_ptr          drow;           // row pointer DEV case
+    };
+    union {
+        magma_index_t           *rowidx;        // opt: array containing row indices CPU case
+        magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
+    };
+    union {
+        magma_index_t           *col;           // array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+    };
+    magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
@@ -66,12 +81,27 @@ typedef struct magma_c_sparse_matrix{
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
-    magmaFloatComplex  *val;                    // array containing values
-    magmaFloatComplex  *diag;                   // opt: store the diagonal seperately
-    magma_index_t      *row;                    // row pointer
-    magma_index_t      *rowidx;                 // opt: array containing row indices
-    magma_index_t      *col;                    // array containing col indices 
-    magma_index_t      *blockinfo;              // opt: for BCSR format
+    union {
+        magmaFloatComplex       *val;           // array containing values in CPU case
+        magmaFloatComplex_ptr   dval;           // array containing values in DEV case
+    };
+    union {
+        magmaFloatComplex       *diag;          // array containing values in CPU case
+        magmaFloatComplex_ptr   ddiag;          // array containing values in DEV case
+    };
+    union {
+        magma_index_t           *row;           // row pointer CPU case
+        magmaIndex_ptr          drow;           // row pointer DEV case
+    };
+    union {
+        magma_index_t           *rowidx;        // opt: array containing row indices CPU case
+        magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
+    };
+    union {
+        magma_index_t           *col;           // array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+    };
+    magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
@@ -90,12 +120,27 @@ typedef struct magma_d_sparse_matrix{
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
-    double             *val;                    // array containing values
-    double             *diag;                   // opt: store the diagonal seperately
-    magma_index_t      *row;                    // row pointer
-    magma_index_t      *rowidx;                 // opt: array containing row indices
-    magma_index_t      *col;                    // array containing col indices 
-    magma_index_t      *blockinfo;              // opt: for BCSR format
+    union {
+        double                  *val;           // array containing values in CPU case
+        magmaDouble_ptr         dval;           // array containing values in DEV case
+    };
+    union {
+        double                  *diag;          // array containing values in CPU case
+        magmaDouble_ptr         ddiag;          // array containing values in DEV case
+    };
+    union {
+        magma_index_t           *row;           // row pointer CPU case
+        magmaIndex_ptr          drow;           // row pointer DEV case
+    };
+    union {
+        magma_index_t           *rowidx;        // opt: array containing row indices CPU case
+        magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
+    };
+    union {
+        magma_index_t           *col;           // array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+    };
+    magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
@@ -114,12 +159,27 @@ typedef struct magma_s_sparse_matrix{
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
-    float              *val;                    // array containing values
-    float              *diag;                   // opt: store the diagonal seperately
-    magma_index_t      *row;                    // row pointer
-    magma_index_t      *rowidx;                 // opt: array containing row indices
-    magma_index_t      *col;                    // array containing col indices 
-    magma_index_t      *blockinfo;              // opt: for BCSR format
+    union {
+        float                   *val;           // array containing values in CPU case
+        magmaFloat_ptr          dval;           // array containing values in DEV case
+    };
+    union {
+        float                   *diag;          // array containing values in CPU case
+        magmaFloat_ptr          ddiag;          // array containing values in DEV case
+    };
+    union {
+        magma_index_t           *row;           // row pointer CPU case
+        magmaIndex_ptr          drow;           // row pointer DEV case
+    };
+    union {
+        magma_index_t           *rowidx;        // opt: array containing row indices CPU case
+        magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
+    };
+    union {
+        magma_index_t           *col;           // array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+    };
+    magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
@@ -134,7 +194,10 @@ typedef struct magma_z_vector{
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
     magma_int_t        nnz;                     // opt: number of nonzeros
-    magmaDoubleComplex *val;                    // array containing values
+    union {
+        magmaDoubleComplex      *val;           // array containing values in CPU case
+        magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
+    };
     magma_order_t      major;                   // storage type:Row/Column-Major
 
 }magma_z_vector;
@@ -145,7 +208,10 @@ typedef struct magma_c_vector{
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
     magma_int_t        nnz;                     // opt: number of nonzeros
-    magmaFloatComplex  *val;                    // array containing values
+    union {
+        magmaFloatComplex       *val;           // array containing values in CPU case
+        magmaFloatComplex_ptr   dval;           // array containing values in DEV case
+    };
     magma_order_t      major;                   // storage type:Row/Column-Major
 
 }magma_c_vector;
@@ -157,7 +223,10 @@ typedef struct magma_d_vector{
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
     magma_int_t        nnz;                     // opt: number of nonzeros
-    double             *val;                    // array containing values
+    union {
+        double                  *val;           // array containing values in CPU case
+        magmaDouble_ptr         dval;           // array containing values in DEV case
+    };
     magma_order_t      major;                   // storage type:Row/Column-Major
 
 }magma_d_vector;
@@ -169,7 +238,10 @@ typedef struct magma_s_vector{
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
     magma_int_t        nnz;                     // opt: number of nonzeros
-    float              *val;                    // array containing values
+    union {
+        float                   *val;           // array containing values in CPU case
+        magmaFloat_ptr          dval;           // array containing values in DEV case
+    };
     magma_order_t      major;                   // storage type:Row/Column-Major
 
 }magma_s_vector;
@@ -195,7 +267,7 @@ typedef struct magma_z_solver_par{
     magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
     magma_int_t        ev_length;               // needed for framework
     double             *eigenvalues;            // feedback: array containing eigenvalues
-    magmaDoubleComplex *eigenvectors;           // feedback: array containing eigenvectors
+    magmaDoubleComplex_ptr      eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
 //---------------------------------
@@ -233,7 +305,7 @@ typedef struct magma_c_solver_par{
     magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
     magma_int_t        ev_length;               // needed for framework
     float              *eigenvalues;            // feedback: array containing eigenvalues
-    magmaFloatComplex  *eigenvectors;           // feedback: array containing eigenvectors
+    magmaFloatComplex_ptr       eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
 //---------------------------------
@@ -271,7 +343,7 @@ typedef struct magma_d_solver_par{
     magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
     magma_int_t        ev_length;               // needed for framework
     double             *eigenvalues;            // feedback: array containing eigenvalues
-    double             *eigenvectors;           // feedback: array containing eigenvectors
+    magmaDouble_ptr             eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
 //---------------------------------
@@ -309,7 +381,7 @@ typedef struct magma_s_solver_par{
     magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
     magma_int_t        ev_length;               // needed for framework
     float              *eigenvalues;            // feedback: array containing eigenvalues
-    float              *eigenvectors;           // feedback: array containing eigenvectors
+    magmaFloat_ptr              eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
 //---------------------------------

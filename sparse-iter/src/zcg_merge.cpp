@@ -32,28 +32,37 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zhesv
     ********************************************************************/
 
-magma_int_t
-magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_z_solver_par *solver_par ){
+extern "C" magma_int_t
+magma_zcg_merge(
+    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_CGMERGE;
@@ -73,9 +82,9 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // GPU workspace
     magma_z_vector r, d, z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
-    magma_z_vinit( &d, Magma_DEV, dofs, c_zero );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero );
+    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_z_vinit( &d, Magma_DEV, dofs, c_zero, queue );
+    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
     
     magmaDoubleComplex *d1, *d2, *skp;
     magma_zmalloc( &d1, dofs*(1) );
@@ -90,19 +99,19 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
-    magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
-    magma_zcopy( dofs, b.val, 1, d.val, 1 );                    // d = b
-    nom0 = betanom = magma_dznrm2( dofs, r.val, 1 );               
+    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
+    magma_zcopy( dofs, b.dval, 1, d.dval, 1 );                    // d = b
+    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );               
     nom = nom0 * nom0;                                           // nom = r' * r
-    magma_z_spmv( c_one, A, d, c_zero, z );                      // z = A d
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, d.val, 1, z.val, 1) ); // den = d'* z
+    magma_z_spmv( c_one, A, d, c_zero, z, queue );                      // z = A d
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
     solver_par->init_res = nom0;
     
     // array on host for the parameters
     magma_zmalloc_cpu( &skp_h, 6 );
 
     alpha = rho = gamma = tmp1 = c_one; 
-    beta =  magma_zdotc(dofs, r.val, 1, r.val, 1);
+    beta =  magma_zdotc(dofs, r.dval, 1, r.dval, 1);
     skp_h[0]=alpha; 
     skp_h[1]=beta; 
     skp_h[2]=gamma; 
@@ -114,43 +123,46 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
-    if ( nom < r0 )
+    if ( nom < r0 ) {
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_SUCCESS;
+    }
     // check positive definite
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
+        magmablasSetKernelStream( orig_queue );
         return -100;
         solver_par->info = -100;
     }
     
     //Chronometry
     real_Double_t tempo1, tempo2;
-    magma_device_sync(); tempo1=magma_wtime();
-    if( solver_par->verbose > 0 ){
+    tempo1 = magma_sync_wtime( queue );
+    if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t) nom0;
         solver_par->timing[0] = 0.0;
     }
     
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
-                                                    solver_par->numiter++ ){
+                                                    solver_par->numiter++ ) {
 
         magmablasSetKernelStream(stream[0]);
         
         // computes SpMV and dot product
-        magma_zcgmerge_spmv1(  A, d1, d2, d.val, z.val, skp ); 
+        magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ); 
             
         // updates x, r, computes scalars and updates d
-        magma_zcgmerge_xrbeta( dofs, d1, d2, x->val, r.val, d.val, z.val, skp ); 
+        magma_zcgmerge_xrbeta( dofs, d1, d2, x->val, r.dval, d.dval, z.dval, skp, queue ); 
 
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1, 
                                                     skp_h+1, 1, stream[1] );
         betanom = sqrt(MAGMA_Z_REAL(skp_h[1]));
 
-        if( solver_par->verbose > 0 ){
-            magma_device_sync(); tempo2=magma_wtime();
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+        if ( solver_par->verbose > 0 ) {
+            tempo2 = magma_sync_wtime( queue );
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -163,18 +175,18 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
 
     } 
-    magma_device_sync(); tempo2=magma_wtime();
+    tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
-    magma_zresidual( A, b, *x, &residual );
+    magma_zresidual( A, b, *x, &residual, queue );
     solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 
-    if( solver_par->numiter < solver_par->maxiter){
+    if ( solver_par->numiter < solver_par->maxiter) {
         solver_par->info = 0;
-    }else if( solver_par->init_res > solver_par->final_res ){
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    } else if ( solver_par->init_res > solver_par->final_res ) {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -183,9 +195,9 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
         solver_par->info = -2;
     }
-    else{
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    else {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) betanom;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -194,15 +206,16 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
         solver_par->info = -1;
     }
-    magma_z_vfree(&r);
-    magma_z_vfree(&z);
-    magma_z_vfree(&d);
+    magma_z_vfree(&r, queue );
+    magma_z_vfree(&z, queue );
+    magma_z_vfree(&d, queue );
 
     magma_free( d1 );
     magma_free( d2 );
     magma_free( skp );
     magma_free_cpu( skp_h );
 
+    magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zcg_merge */
 

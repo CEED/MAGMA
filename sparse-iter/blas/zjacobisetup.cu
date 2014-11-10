@@ -55,42 +55,46 @@ zvjacobisetup_gpu(  int num_rows,
     Arguments
     ---------
 
-    @param
+    @param[in]
     num_rows    magma_int_t
                 number of rows
                 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b
 
-    @param
+    @param[in]
     d           magma_z_vector
                 vector with diagonal entries
 
-    @param
+    @param[out]
     c           magma_z_vector*
                 c = D^(-1) * b
 
-    @param
+    @param[out]
     x           magma_z_vector*
                 iteration vector
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zjacobisetup_vector_gpu(  int num_rows, 
-                                magma_z_vector b, 
-                                magma_z_vector d, 
-                                magma_z_vector c,
-                                magma_z_vector *x ){
-
-
-   dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+magma_zjacobisetup_vector_gpu(
+    int num_rows, 
+    magma_z_vector b, 
+    magma_z_vector d, 
+    magma_z_vector c,
+    magma_z_vector *x,
+    magma_queue_t queue )
+{
+    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
    int num_vecs = b.num_rows / num_rows;
 
    zvjacobisetup_gpu<<< grid, BLOCK_SIZE, 0 >>>
-                ( num_rows, num_vecs, b.val, d.val, c.val, x->val );
+                ( num_rows, num_vecs, b.dval, d.dval, c.dval, x->val );
 
    return MAGMA_SUCCESS;
 }
@@ -132,36 +136,40 @@ zjacobidiagscal_kernel(  int num_rows,
     Arguments
     ---------
 
-    @param
+    @param[in]
     num_rows    magma_int_t
                 number of rows
                 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b
 
-    @param
+    @param[in]
     d           magma_z_vector
                 vector with diagonal entries
 
-    @param
+    @param[out]
     c           magma_z_vector*
                 c = D^(-1) * b
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_z
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zjacobi_diagscal(         int num_rows, 
-                                magma_z_vector d, 
-                                magma_z_vector b, 
-                                magma_z_vector *c){
-
-
-   dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+magma_zjacobi_diagscal(
+    int num_rows, 
+    magma_z_vector d, 
+    magma_z_vector b, 
+    magma_z_vector *c,
+    magma_queue_t queue )
+{
+    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
    int num_vecs = b.num_rows/num_rows;
 
-   zjacobidiagscal_kernel<<< grid, BLOCK_SIZE, 0 >>>( num_rows, num_vecs, b.val, d.val, c->val );
+   zjacobidiagscal_kernel<<< grid, BLOCK_SIZE, 0 >>>( num_rows, num_vecs, b.dval, d.dval, c->val );
 
    return MAGMA_SUCCESS;
 }

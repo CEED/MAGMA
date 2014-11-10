@@ -77,11 +77,46 @@ static const char *usage_sparse =
 
 
 
+/**
+    Purpose
+    -------
 
+    Parses input options for a solver
+
+    Arguments
+    ---------
+
+    @param[in]
+    argc            int
+                    command line input
+                
+    @param[in]
+    argv            char**
+                    command line input
+
+    @param[in,out]
+    opts            magma_zopts *
+                    magma solver options
+
+    @param[out]
+    matrices        int
+                    counter how many linear systems to process
+
+    @param[in]
+    queue           magma_queue_t
+                    Queue to execute in.
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
 
 extern "C"
 magma_int_t
-magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
+magma_zparse_opts(
+    int argc, 
+    char** argv, 
+    magma_zopts *opts, 
+    int *matrices,
+    magma_queue_t queue )
 {
     // negative flag indicating -m, -n, -k not given
     int m = -1;
@@ -126,7 +161,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 2: opts->output_format = Magma_SELLP; break;
                 //case 2: opts->output_format = Magma_ELLRT; break;
             }
-        }else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->scaling = Magma_NOSCALE; break;
@@ -134,7 +169,7 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 2: opts->scaling = Magma_UNITROW; break;
             }
 
-        }else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->solver_par.solver = Magma_CG; break;
@@ -151,9 +186,9 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
-        }else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
-        }else if ( strcmp("--precond", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--precond", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
                 case 0: opts->precond_par.solver = Magma_NONE; break;
@@ -167,11 +202,11 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
             }
         } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
-        }else if ( strcmp("--blocksize", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--blocksize", argv[i]) == 0 && i+1 < argc ) {
             opts->blocksize = atoi( argv[++i] );
-        }else if ( strcmp("--alignment", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--alignment", argv[i]) == 0 && i+1 < argc ) {
             opts->alignment = atoi( argv[++i] );
-        }else if ( strcmp("--verbose", argv[i]) == 0 && i+1 < argc ) {
+        } else if ( strcmp("--verbose", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.verbose = atoi( argv[++i] );
         }  else if ( strcmp("--maxiter", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.maxiter = atoi( argv[++i] );
@@ -187,17 +222,16 @@ magma_zparse_opts( int argc, char** argv, magma_zopts *opts, int *matrices )
                   strcmp("--help", argv[i]) == 0 ) {
             fprintf( stderr, usage_sparse, argv[0] );
             exit(0);
-        } else{
+        } else {
             *matrices = i;
             break;
         }
     }
     // ensure to take a symmetric preconditioner for the PCG
-    if( opts->solver_par.solver == Magma_PCG 
+    if ( opts->solver_par.solver == Magma_PCG 
         && opts->precond_par.solver == Magma_ILU )
             opts->precond_par.solver = Magma_ICC;
     return MAGMA_SUCCESS;
-
 }
 
     

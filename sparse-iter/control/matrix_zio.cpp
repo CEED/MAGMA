@@ -40,45 +40,51 @@ using namespace std;
     Arguments
     ---------
     
-    @param
+    @param[out]
     n_row       magma_int_t*     
                 number of rows in matrix
                 
-    @param
+    @param[out]
     n_col       magma_int_t*     
                 number of columns in matrix
                 
-    @param
+    @param[out]
     nnz         magma_int_t*     
                 number of nonzeros in matrix
                 
-    @param
+    @param[out]
     val         magmaDoubleComplex**
                 value array of CSR output 
 
-    @param
+    @param[out]
     row         magma_index_t**
                 row pointer of CSR output
 
-    @param
+    @param[out]
     col         magma_index_t**
                 column indices of CSR output
 
-    @param
+    @param[in]
     filename    const char*
                 filname of the mtx matrix
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t read_z_csr_from_binary( magma_int_t* n_row, 
-                                    magma_int_t* n_col, 
-                                    magma_int_t* nnz, 
-                                    magmaDoubleComplex **val, 
-                                    magma_index_t **row, 
-                                    magma_index_t **col, 
-                                    const char * filename ){
+magma_int_t read_z_csr_from_binary( 
+    magma_int_t* n_row, 
+    magma_int_t* n_col, 
+    magma_int_t* nnz, 
+    magmaDoubleComplex **val, 
+    magma_index_t **row, 
+    magma_index_t **col, 
+    const char * filename,
+    magma_queue_t queue )
+{
 
 
   std::fstream binary_test(filename);
@@ -149,55 +155,61 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row,
     Arguments
     ---------
     
-    @param
+    @param[out]
     type        magma_storage_t* 
                 storage type of matrix
                 
-    @param
+    @param[out]
     location    magma_location_t*     
                 location of matrix
                 
-    @param
+    @param[out]
     n_row       magma_int_t*     
                 number of rows in matrix
                 
-    @param
+    @param[out]
     n_col       magma_int_t*     
                 number of columns in matrix
                 
-    @param
+    @param[out]
     nnz         magma_int_t*     
                 number of nonzeros in matrix
                 
-    @param
+    @param[out]
     val         magmaDoubleComplex**
                 value array of CSR output 
 
-    @param
+    @param[out]
     row         magma_index_t**
                 row pointer of CSR output
 
-    @param
+    @param[out]
     col         magma_index_t**
                 column indices of CSR output
 
-    @param
+    @param[in]
     filename    const char*
                 filname of the mtx matrix
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t read_z_csr_from_mtx(    magma_storage_t *type, 
-                                    magma_location_t *location, 
-                                    magma_int_t* n_row, 
-                                    magma_int_t* n_col, 
-                                    magma_int_t* nnz, 
-                                    magmaDoubleComplex **val, 
-                                    magma_index_t **row, 
-                                    magma_index_t **col, 
-                                    const char *filename ){
+magma_int_t read_z_csr_from_mtx(    
+    magma_storage_t *type, 
+    magma_location_t *location, 
+    magma_int_t* n_row, 
+    magma_int_t* n_col, 
+    magma_int_t* nnz, 
+    magmaDoubleComplex **val, 
+    magma_index_t **row, 
+    magma_index_t **col, 
+    const char *filename,    
+    magma_queue_t queue )
+{
   
   FILE *fid;
   MM_typecode matcode;
@@ -455,11 +467,15 @@ magma_int_t read_z_csr_from_mtx(    magma_storage_t *type,
 
 
 
-extern "C"
-magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
+extern "C" magma_int_t 
+write_z_csrtomtx( 
+    magma_z_sparse_matrix B, 
+    const char *filename,
+    magma_queue_t queue )
+{
 
     write_z_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col, 
-                     MagmaColMajor, filename );
+                     MagmaColMajor, filename, queue );
     return MAGMA_SUCCESS; 
 }
 
@@ -474,51 +490,57 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
     Arguments
     ---------
 
-    @param
+    @param[in]
     n_row       magma_int_t*     
                 number of rows in matrix
                 
-    @param
+    @param[in]
     n_col       magma_int_t*     
                 number of columns in matrix
                 
-    @param
+    @param[in]
     nnz         magma_int_t*     
                 number of nonzeros in matrix
                 
-    @param
+    @param[in]
     val         magmaDoubleComplex**
                 value array of CSR  
 
-    @param
+    @param[in]
     row         magma_index_t**
                 row pointer of CSR 
 
-    @param
+    @param[in]
     col         magma_index_t**
                 column indices of CSR 
 
-    @param
+    @param[in]
     MajorType   magma_index_t
                 Row or Column sort
                 default: 0 = RowMajor, 1 = ColMajor
 
-    @param
+    @param[in]
     filename    const char*
                 output-filname of the mtx matrix
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t write_z_csr_mtx(    magma_int_t n_row, 
-                                magma_int_t n_col, 
-                                magma_int_t nnz, 
-                                magmaDoubleComplex **val, 
-                                magma_index_t **row, 
-                                magma_index_t **col, 
-                                magma_order_t MajorType, 
-                                const char *filename ){
+magma_int_t write_z_csr_mtx(    
+    magma_int_t n_row, 
+    magma_int_t n_col, 
+    magma_int_t nnz, 
+    magmaDoubleComplex **val, 
+    magma_index_t **row, 
+    magma_index_t **col, 
+    magma_order_t MajorType, 
+    const char *filename,
+    magma_queue_t queue )
+{
 
 
 
@@ -533,7 +555,7 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     magma_int_t new_nnz;
 
     z_transpose_csr( n_row, n_col, nnz, *val, *row, *col, 
-        &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col);
+        &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
     printf("#Writing sparse matrix to file (%s):",filename);
     fflush(stdout);
 
@@ -590,46 +612,51 @@ magma_int_t write_z_csr_mtx(    magma_int_t n_row,
     Arguments
     ---------
 
-    @param
+    @param[in]
     n_row       magma_int_t*     
                 number of rows in matrix
                 
-    @param
+    @param[in]
     n_col       magma_int_t*     
                 number of columns in matrix
                 
-    @param
+    @param[in]
     nnz         magma_int_t*     
                 number of nonzeros in matrix
                 
-    @param
+    @param[in]
     val         magmaDoubleComplex**
                 value array of CSR  
 
-    @param
+    @param[in]
     row         magma_index_t**
                 row pointer of CSR 
 
-    @param
+    @param[in]
     col         magma_index_t**
                 column indices of CSR
 
-    @param
+    @param[in]
     MajorType   magma_index_t
                 Row or Column sort
                 default: 0 = RowMajor, 1 = ColMajor
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t print_z_csr_mtx(    magma_int_t n_row, 
-                                magma_int_t n_col, 
-                                magma_int_t nnz, 
-                                magmaDoubleComplex **val, 
-                                magma_index_t **row, 
-                                magma_index_t **col, 
-                                magma_order_t MajorType ){
+magma_int_t print_z_csr_mtx(    
+    magma_int_t n_row, 
+    magma_int_t n_col, 
+    magma_int_t nnz, 
+    magmaDoubleComplex **val, 
+    magma_index_t **row, 
+    magma_index_t **col, 
+    magma_order_t MajorType,
+    magma_queue_t queue ){
 
   if( MajorType == MagmaColMajor ){
     //to obtain ColMajr output we transpose the matrix 
@@ -642,7 +669,7 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
     magma_int_t new_nnz;
 
     z_transpose_csr( n_row, n_col, nnz, *val, *row, *col, 
-        &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col);
+        &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
 
     cout<< "%%MatrixMarket matrix coordinate real general ColMajor" <<std::endl;
     cout << new_n_row <<" "<< new_n_col <<" "<< new_nnz << std::endl;
@@ -688,41 +715,46 @@ magma_int_t print_z_csr_mtx(    magma_int_t n_row,
     Arguments
     ---------
     
-    @param
+    @param[in]
     n_row       magma_int_t*     
                 number of rows in matrix
                 
-    @param
+    @param[in]
     n_col       magma_int_t*     
                 number of columns in matrix
                 
-    @param
+    @param[in]
     nnz         magma_int_t*     
                 number of nonzeros in matrix
                 
-    @param
+    @param[in]
     val         magmaDoubleComplex**
                 value array of CSR  
 
-    @param
+    @param[in]
     row         magma_index_t**
                 row pointer of CSR 
 
-    @param
+    @param[in]
     col         magma_index_t**
                 column indices of CSR 
 
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t print_z_csr(    magma_int_t n_row, 
-                            magma_int_t n_col, 
-                            magma_int_t nnz, 
-                            magmaDoubleComplex **val, 
-                            magma_index_t **row, 
-                            magma_index_t **col ){
+magma_int_t print_z_csr(    
+    magma_int_t n_row, 
+    magma_int_t n_col, 
+    magma_int_t nnz, 
+    magmaDoubleComplex **val, 
+    magma_index_t **row, 
+    magma_index_t **col,
+    magma_queue_t queue ){
 
   cout << "Matrix in CSR format (row col val)" << endl;
   cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
@@ -750,48 +782,56 @@ magma_int_t print_z_csr(    magma_int_t n_row,
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix in Magma_CSR format
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
+magma_int_t
+magma_z_mvisu(
+    magma_z_sparse_matrix A,
+    magma_queue_t queue )
 {
-    if( A.memory_location == Magma_CPU ){
-        if( A.storage_type == Magma_DENSE ){
-            for( magma_index_t i=0; i<(A.num_rows); i++ ){
-              for( magma_index_t j=0; j<A.num_cols; j++ )
-                printf("%4.2f ", MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) );
+    if ( A.memory_location == Magma_CPU ) {
+        if ( A.storage_type == Magma_DENSE ) {
+            for( magma_index_t i=0; i<(A.num_rows); i++ ) {
+                for( magma_index_t j=0; j<A.num_cols; j++ ) {
+                    printf("%5.2f ", MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) );
+                }
                 //cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
-              cout << endl;
+                //cout << endl;
+                printf( "\n" );
             }
         }
-        else if( A.storage_type == Magma_CSR ){
+        else if ( A.storage_type == Magma_CSR ) {
             magma_z_sparse_matrix C;
-            magma_z_mconvert( A, &C, A.storage_type, Magma_DENSE );
-            magma_z_mvisu(  C );
-            magma_z_mfree(&C);
+            magma_z_mconvert( A, &C, A.storage_type, Magma_DENSE, queue );
+            magma_z_mvisu(  C, queue );
+            magma_z_mfree(&C, queue );
         }
-        else{
+        else {
             magma_z_sparse_matrix C, D;
-            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR );
-            magma_z_mconvert( C, &D, Magma_CSR, Magma_DENSE );
-            magma_z_mvisu(  D );
-            magma_z_mfree(&C);
-            magma_z_mfree(&D);
+            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR, queue );
+            magma_z_mconvert( C, &D, Magma_CSR, Magma_DENSE, queue );
+            magma_z_mvisu(  D, queue );
+            magma_z_mfree(&C, queue );
+            magma_z_mfree(&D, queue );
         }
     }
-    else{
+    else {
         magma_z_sparse_matrix C;
-        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU );
-        magma_z_mvisu(  C );
-        magma_z_mfree(&C);
+        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU, queue );
+        magma_z_mvisu(  C, queue );
+        magma_z_mfree(&C, queue );
     }
 
-  return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -807,21 +847,28 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
     Arguments
     ---------
 
-    @param
+    @param[out]
     A           magma_z_sparse_matrix*
                 matrix in magma sparse matrix format
 
-    @param
+    @param[in]
     filename    const char*
                 filname of the mtx matrix
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
-
-  int csr_compressor = 0;       // checks for zeros in original file
+magma_int_t
+magma_z_csr_mtx(
+    magma_z_sparse_matrix *A, 
+    const char *filename,
+    magma_queue_t queue )
+{
+    int csr_compressor = 0;       // checks for zeros in original file
 
   FILE *fid;
   MM_typecode matcode;
@@ -879,13 +926,13 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   fflush(stdout);
 
 
-  if (mm_is_real(matcode) || mm_is_integer(matcode)){
-    for(magma_int_t i = 0; i < A->nnz; ++i){
+  if (mm_is_real(matcode) || mm_is_integer(matcode)) {
+    for(magma_int_t i = 0; i < A->nnz; ++i) {
       magma_index_t ROW ,COL;
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
-      if( VAL == 0 ) 
+      if ( VAL == 0 ) 
         csr_compressor=1;
       coo_row[i] = (magma_index_t) ROW - 1; 
       coo_col[i] = (magma_index_t) COL - 1;
@@ -902,12 +949,12 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   
    A->sym = Magma_GENERAL;
 
-  if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
+  if (mm_is_symmetric(matcode)) { //duplicate off diagonal entries
     A->sym = Magma_SYMMETRIC;
   //printf("detected symmetric case\n");
     magma_index_t off_diagonals = 0;
-    for(magma_int_t i = 0; i < A->nnz; ++i){
-      if(coo_row[i] != coo_col[i])
+    for(magma_int_t i = 0; i < A->nnz; ++i) {
+      if (coo_row[i] != coo_col[i])
         ++off_diagonals;
     }
     magma_index_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
@@ -921,7 +968,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
     magma_index_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
-        if(coo_row[i] != coo_col[i]) {
+        if (coo_row[i] != coo_col[i]) {
         new_row[ptr] = coo_row[i];  
         new_col[ptr] = coo_col[i];  
         new_val[ptr] = coo_val[i];
@@ -962,7 +1009,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   // bubble sort (by cols)
   for (int i=0; i<A->nnz-1; ++i)
     for (int j=0; j<A->nnz-i-1; ++j)
-      if (coo_col[j] > coo_col[j+1] ){
+      if (coo_col[j] > coo_col[j+1] ) {
 
         ti = coo_col[j];
         coo_col[j] = coo_col[j+1];
@@ -982,7 +1029,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   // bubble sort (by rows)
   for (int i=0; i<A->nnz-1; ++i)
     for (int j=0; j<A->nnz-i-1; ++j)
-      if ( coo_row[j] > coo_row[j+1] ){
+      if ( coo_row[j] > coo_row[j+1] ) {
 
         ti = coo_col[j];
         coo_col[j] = coo_col[j+1];
@@ -1025,7 +1072,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   
   
   //cumsum the nnz per row to get Bp[]
-  for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
+  for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++) {     
     magma_index_t temp = (A->row)[i];
     (A->row)[i] = cumsum;
     cumsum += temp;
@@ -1033,7 +1080,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   (A->row)[num_rows] = A->nnz;
   
   //write Aj,Ax into Bj,Bx
-  for(magma_int_t i = 0; i < A->nnz; i++){
+  for(magma_int_t i = 0; i < A->nnz; i++) {
     magma_index_t row_  = coo_row[i];
     magma_index_t dest = (A->row)[row_];
     
@@ -1047,7 +1094,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   free (coo_col);
   free (coo_val);
   
-  for(int i = 0, last = 0; i <= num_rows; i++){
+  for(int i = 0, last = 0; i <= num_rows; i++) {
     int temp = (A->row)[i];
     (A->row)[i]  = last;
     last   = temp;
@@ -1060,7 +1107,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     for (magma_index_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
       for (magma_index_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
 
-      if ( (A->col)[j] > (A->col)[j+1] ){
+      if ( (A->col)[j] > (A->col)[j+1] ) {
 
         ti = (A->col)[j];
         (A->col)[j] = (A->col)[j+1];
@@ -1071,21 +1118,21 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
         (A->val)[j+1] = tv;
 
       }
-  if( csr_compressor > 0){ // run the CSR compressor to remove zeros
+  if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
       //printf("removing zeros: ");
       magma_z_sparse_matrix B;
-      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU ); 
+      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ); 
       magma_z_csr_compressor(&(A->val), 
                         &(A->row),
                          &(A->col), 
-                       &B.val, &B.row, &B.col, &B.num_rows ); 
+                       &B.val, &B.row, &B.col, &B.num_rows, queue ); 
       B.nnz = B.row[num_rows];
      // printf(" remaining nonzeros:%d ", B.nnz); 
       magma_free_cpu( A->val ); 
       magma_free_cpu( A->row ); 
       magma_free_cpu( A->col ); 
-      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU ); 
-      magma_z_mfree( &B ); 
+      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU, queue ); 
+      magma_z_mfree( &B, queue ); 
      // printf("done.\n");
   }
   return MAGMA_SUCCESS;
@@ -1103,22 +1150,28 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     Arguments
     ---------
 
-    @param
+    @param[out]
     A           magma_z_sparse_matrix*
                 matrix in magma sparse matrix format
 
-    @param
+    @param[in]
     filename    const char*
                 filname of the mtx matrix
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
-magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A, 
-                                 const char *filename ){
-
-  int csr_compressor = 0;       // checks for zeros in original file
+magma_int_t
+magma_z_csr_mtxsymm(
+    magma_z_sparse_matrix *A, 
+    const char *filename,
+    magma_queue_t queue )
+{
+    int csr_compressor = 0;       // checks for zeros in original file
 
   FILE *fid;
   MM_typecode matcode;
@@ -1176,13 +1229,13 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   fflush(stdout);
 
 
-  if (mm_is_real(matcode) || mm_is_integer(matcode)){
-    for(magma_int_t i = 0; i < A->nnz; ++i){
+  if (mm_is_real(matcode) || mm_is_integer(matcode)) {
+    for(magma_int_t i = 0; i < A->nnz; ++i) {
       magma_index_t ROW ,COL;
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
-      if( VAL == 0 ) 
+      if ( VAL == 0 ) 
         csr_compressor=1;
       coo_row[i] = (magma_index_t) ROW - 1; 
       coo_col[i] = (magma_index_t) COL - 1;
@@ -1199,7 +1252,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   
    A->sym = Magma_GENERAL;
 
-  if(mm_is_symmetric(matcode)) { //do not duplicate off diagonal entries!
+  if (mm_is_symmetric(matcode)) { //do not duplicate off diagonal entries!
     A->sym = Magma_SYMMETRIC;
   } //end symmetric case
   
@@ -1214,7 +1267,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   // bubble sort (by cols)
   for (int i=0; i<A->nnz-1; ++i)
     for (int j=0; j<A->nnz-i-1; ++j)
-      if (coo_col[j] > coo_col[j+1] ){
+      if (coo_col[j] > coo_col[j+1] ) {
 
         ti = coo_col[j];
         coo_col[j] = coo_col[j+1];
@@ -1234,7 +1287,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   // bubble sort (by rows)
   for (int i=0; i<A->nnz-1; ++i)
     for (int j=0; j<A->nnz-i-1; ++j)
-      if ( coo_row[j] > coo_row[j+1] ){
+      if ( coo_row[j] > coo_row[j+1] ) {
 
         ti = coo_col[j];
         coo_col[j] = coo_col[j+1];
@@ -1277,7 +1330,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   
   
   //cumsum the nnz per row to get Bp[]
-  for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++){     
+  for(magma_int_t i = 0, cumsum = 0; i < num_rows; i++) {     
     magma_index_t temp = (A->row)[i];
     (A->row)[i] = cumsum;
     cumsum += temp;
@@ -1285,7 +1338,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   (A->row)[num_rows] = A->nnz;
   
   //write Aj,Ax into Bj,Bx
-  for(magma_int_t i = 0; i < A->nnz; i++){
+  for(magma_int_t i = 0; i < A->nnz; i++) {
     magma_index_t row_  = coo_row[i];
     magma_index_t dest = (A->row)[row_];
     
@@ -1299,7 +1352,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
   free (coo_col);
   free (coo_val);
   
-  for(int i = 0, last = 0; i <= num_rows; i++){
+  for(int i = 0, last = 0; i <= num_rows; i++) {
     int temp = (A->row)[i];
     (A->row)[i]  = last;
     last   = temp;
@@ -1312,7 +1365,7 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
     for (magma_index_t i=(A->row)[k]; i<(A->row)[k+1]-1; ++i) 
       for (magma_index_t j=(A->row)[k]; j<(A->row)[k+1]-1; ++j) 
 
-      if ( (A->col)[j] > (A->col)[j+1] ){
+      if ( (A->col)[j] > (A->col)[j+1] ) {
 
         ti = (A->col)[j];
         (A->col)[j] = (A->col)[j+1];
@@ -1323,21 +1376,21 @@ magma_int_t magma_z_csr_mtxsymm( magma_z_sparse_matrix *A,
         (A->val)[j+1] = tv;
 
       }
-  if( csr_compressor > 0){ // run the CSR compressor to remove zeros
+  if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
       //printf("removing zeros: ");
       magma_z_sparse_matrix B;
-      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU ); 
+      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ); 
       magma_z_csr_compressor(&(A->val), 
                         &(A->row),
                          &(A->col), 
-                       &B.val, &B.row, &B.col, &B.num_rows ); 
+                       &B.val, &B.row, &B.col, &B.num_rows, queue ); 
       B.nnz = B.row[num_rows];
      // printf(" remaining nonzeros:%d ", B.nnz); 
       magma_free_cpu( A->val ); 
       magma_free_cpu( A->row ); 
       magma_free_cpu( A->col ); 
-      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU ); 
-      magma_z_mfree( &B ); 
+      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU, queue ); 
+      magma_z_mfree( &B, queue ); 
      // printf("done.\n");
   }
   return MAGMA_SUCCESS;

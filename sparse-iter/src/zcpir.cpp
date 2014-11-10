@@ -35,31 +35,40 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
 
     magma_precond_parameters *precond_par     parameters for inner solver
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zgesv
     ********************************************************************/
 
-magma_int_t
-magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_z_solver_par *solver_par, magma_precond_parameters *precond_par )
+extern "C" magma_int_t
+magma_zcpir(
+    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_solver_par *solver_par, magma_precond_parameters *precond_par,
+    magma_queue_t queue )
 {
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
     //Chronometry
     struct timeval inicio, fim;
     double tempo1, tempo2;
@@ -71,15 +80,15 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // workspace on GPU
     magma_z_vector r,z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero );
+    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
 
     // for mixed precision on GPU
     magma_c_vector rs, zs;
     magma_c_sparse_matrix AS;
-    magma_sparse_matrix_zlag2c( A, &AS );
-    magma_c_vinit( &rs, Magma_DEV, dofs, MAGMA_C_ZERO );
-    magma_c_vinit( &zs, Magma_DEV, dofs, MAGMA_C_ZERO );
+    magma_sparse_matrix_zlag2c( A, &AS, queue );
+    magma_c_vinit( &rs, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &zs, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
 
 
     // solver variables
@@ -91,22 +100,24 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vector c,d;
     magma_z_solver_par jacobiiter_par;
     // Jacobi setup
-    magma_zjacobisetup_matrix( A, r, &M, &d );
-    magma_z_vinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO );
+    magma_zjacobisetup_matrix( A, r, &M, &d, queue );
+    magma_z_vinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
  
 
 
     // solver setup
     magma_zscal( dofs, c_zero, x->val, 1) ;                           // x = 0
 
-    magma_z_spmv( c_mone, A, *x, c_zero, r );                       // r = - A x
-    magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
-    nom = nom0 = magma_dznrm2(dofs, r.val, 1);                            // nom0 = || r ||
+    magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                       // r = - A x
+    magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);                // r = r + b
+    nom = nom0 = magma_dznrm2(dofs, r.dval, 1);                            // nom0 = || r ||
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
-    if ( nom < r0 )
+    if ( nom < r0 ) {
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_SUCCESS;
+    }
 
     
     //Chronometry 
@@ -119,23 +130,23 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // start iteration
     for( i= 1; i<solver_par->maxiter; i++ ) {
 
-        magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.val, 1) ;  // scale it
-        magma_vector_zlag2c(r, &rs);                              // conversion to single precision
-        magma_c_precond( AS, rs, &zs, *precond_par );             // inner solver: AS * zs = rs
-        magma_vector_clag2z(zs, &z);                              // conversion to double precision
+        magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.dval, 1) ;  // scale it
+        magma_vector_zlag2c(r, &rs, queue );                              // conversion to single precision
+        magma_c_precond( AS, rs, &zs, *precond_par, queue );             // inner solver: AS * zs = rs
+        magma_vector_clag2z(zs, &z, queue );                              // conversion to double precision
         // Jacobi setup
-        magma_zjacobisetup_vector(r, d, &c );
+        magma_zjacobisetup_vector(r, d, &c, queue );
         jacobiiter_par.maxiter = 2;
         // Jacobi iterator
         //printf("Jacobi iterator: ");
-        magma_zjacobiiter( M, c, &z, &jacobiiter_par );
+        magma_zjacobiiter( M, c, &z, &jacobiiter_par, queue );
         //printf("done.\n");
 
-        magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.val, 1) ;     // scale it
-        magma_zaxpy(dofs,  c_one, z.val, 1, x->val, 1);                    // x = x + z
-        magma_z_spmv( c_mone, A, *x, c_zero, r );                       // r = - A x
-        magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
-        nom = magma_dznrm2(dofs, r.val, 1);                            // nom = || r ||
+        magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1) ;     // scale it
+        magma_zaxpy(dofs,  c_one, z.dval, 1, x->val, 1);                    // x = x + z
+        magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                       // r = - A x
+        magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);                // r = r + b
+        nom = magma_dznrm2(dofs, r.dval, 1);                            // nom = || r ||
 
         //Chronometry  
         gettimeofday(&fim, NULL);
@@ -155,24 +166,25 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf( "      Number of Iterative Refinement iterations: %d\n", i);
     
     if (solver_par->epsilon == RTOLERANCE) {
-        magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
-        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-        den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
+        magma_z_spmv( c_one, A, *x, c_zero, r, queue );                       // r = A x
+        magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);                // r = r - b
+        den = magma_dznrm2(dofs, r.dval, 1);                            // den = || r ||
         printf( "      || r_N ||   = %e\n", den);
         solver_par->residual = (double)(den);
     }
     
-    magma_z_mfree(&M);
-    magma_z_vfree(&r);
-    magma_z_vfree(&z);
-    magma_c_vfree(&rs);
-    magma_c_vfree(&zs);
-    magma_z_vfree(&c);
-    magma_z_vfree(&d);
+    magma_z_mfree(&M, queue );
+    magma_z_vfree(&r, queue );
+    magma_z_vfree(&z, queue );
+    magma_c_vfree(&rs, queue );
+    magma_c_vfree(&zs, queue );
+    magma_z_vfree(&c, queue );
+    magma_z_vfree(&d, queue );
 
-    magma_free( AS.val );
+    magma_free( AS.dval );
 
 
+    magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zcpir */
 

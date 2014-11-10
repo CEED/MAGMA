@@ -33,70 +33,77 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     n_rows      magma_int_t
                 number of rows in input matrix
 
-    @param
+    @param[in]
     n_cols      magma_int_t
                 number of columns in input matrix
 
-    @param
+    @param[in]
     nnz         magma_int_t
                 number of nonzeros in input matrix
 
-    @param
+    @param[in]
     val         magmaDoubleComplex*
                 value array of input matrix 
 
-    @param
+    @param[in]
     row         magma_index_t*
                 row pointer of input matrix
 
-    @param
+    @param[in]
     col         magma_index_t*
                 column indices of input matrix 
 
-    @param
+    @param[in]
     new_n_rows  magma_index_t*
                 number of rows in transposed matrix
 
-    @param
+    @param[in]
     new_n_cols  magma_index_t*
                 number of columns in transposed matrix
 
-    @param
+    @param[in]
     new_nnz     magma_index_t*
                 number of nonzeros in transposed matrix
 
-    @param
+    @param[in]
     new_val     magmaDoubleComplex**
                 value array of transposed matrix 
 
-    @param
+    @param[in]
     new_row     magma_index_t**
                 row pointer of transposed matrix
 
-    @param
+    @param[in]
     new_col     magma_index_t**
                 column indices of transposed matrix
 
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t z_transpose_csr(    magma_int_t n_rows, 
-                                magma_int_t n_cols, 
-                                magma_int_t nnz, 
-                                magmaDoubleComplex *val, 
-                                magma_index_t *row, 
-                                magma_index_t *col, 
-                                magma_int_t *new_n_rows, 
-                                magma_int_t *new_n_cols, 
-                                magma_int_t *new_nnz, 
-                                magmaDoubleComplex **new_val, 
-                                magma_index_t **new_row, 
-                                magma_index_t **new_col ){
+extern "C" magma_int_t 
+z_transpose_csr(    
+    magma_int_t n_rows, 
+    magma_int_t n_cols, 
+    magma_int_t nnz, 
+    magmaDoubleComplex *val, 
+    magma_index_t *row, 
+    magma_index_t *col, 
+    magma_int_t *new_n_rows, 
+    magma_int_t *new_n_cols, 
+    magma_int_t *new_nnz, 
+    magmaDoubleComplex **new_val, 
+    magma_index_t **new_row, 
+    magma_index_t **new_col,
+    magma_queue_t queue )
+{
 
 
 
@@ -171,37 +178,39 @@ magma_int_t z_transpose_csr(    magma_int_t n_rows,
     return MAGMA_SUCCESS;
 }
 
-magma_int_t 
-magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
-
-        magma_z_cucsrtranspose( A, B );
+extern "C" magma_int_t
+magma_z_mtranspose(
+    magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
+    magma_queue_t queue )
+{
+    magma_z_cucsrtranspose( A, B, queue );
 /*
-    if( A.memory_location == Magma_CPU ){
-        if( A.storage_type == Magma_CSR ){
+    if ( A.memory_location == Magma_CPU ) {
+        if ( A.storage_type == Magma_CSR ) {
             z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, 
                                 &(B->num_rows), &(B->num_cols), &(B->nnz), 
                                 &(B->val), &(B->row), &(B->col) );
             B->memory_location = Magma_CPU;
             B->storage_type = Magma_CSR;
         }
-        else{
+        else {
             magma_z_sparse_matrix C, D;
-            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR);
+            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR, queue );
             magma_z_mtranspose( C, &D );
-            magma_z_mconvert( D, B, Magma_CSR, A.storage_type );
-            magma_z_mfree(&C);
-            magma_z_mfree(&D);
+            magma_z_mconvert( D, B, Magma_CSR, A.storage_type, queue );
+            magma_z_mfree(&C, queue );
+            magma_z_mfree(&D, queue );
 
         }
         return MAGMA_SUCCESS;   
     }
-    else{
+    else {
         magma_z_sparse_matrix C, D;
-        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU);
+        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU, queue );
         magma_z_mtranspose( C, &D );
-        magma_z_mtransfer( D, B, Magma_CPU, A.memory_location );
-        magma_z_mfree(&C);
-        magma_z_mfree(&D);
+        magma_z_mtransfer( D, B, Magma_CPU, A.memory_location, queue );
+        magma_z_mfree(&C, queue );
+        magma_z_mfree(&D, queue );
         return MAGMA_SUCCESS;
     }
 
@@ -221,29 +230,34 @@ magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix (CSR)
 
-    @param
+    @param[in]
     B           magma_z_sparse_matrix*
                 output matrix (CSR)
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
-
-    if( A.storage_type != Magma_CSR ){
+extern "C" magma_int_t
+magma_z_csrtranspose(
+    magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
+    magma_queue_t queue )
+{
+    if ( A.storage_type != Magma_CSR ) {
         magma_z_sparse_matrix ACSR, BCSR;
-        magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR );
-        magma_z_cucsrtranspose( ACSR, &BCSR );
-        magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type );
+        magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
+        magma_z_cucsrtranspose( ACSR, &BCSR, queue );
+        magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type, queue );
         
         return MAGMA_SUCCESS;
     }
-    else{
+    else {
 
         magma_int_t i, j, new_nnz=0, lrow;
 
@@ -260,18 +274,18 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         magma_index_malloc_cpu( &B->row, A.num_rows+1 );
         magma_index_malloc_cpu( &B->col, A.nnz );
 
-        for( magma_int_t i=0; i<A.nnz; i++){
+        for( magma_int_t i=0; i<A.nnz; i++) {
             B->val[i] = A.val[i];
             B->col[i] = A.col[i];
         }
-        for( magma_int_t i=0; i<A.num_rows+1; i++){
+        for( magma_int_t i=0; i<A.num_rows+1; i++) {
             B->row[i] = A.row[i];
         }
-        for( lrow = 0; lrow < A.num_rows; lrow++ ){
+        for( lrow = 0; lrow < A.num_rows; lrow++ ) {
             B->row[lrow] = new_nnz;
-            for( i=0; i<A.num_rows; i++ ){
-                for( j=A.row[i]; j<A.row[i+1]; j++ ){
-                    if( A.col[j] == lrow ){
+            for( i=0; i<A.num_rows; i++ ) {
+                for( j=A.row[i]; j<A.row[i+1]; j++ ) {
+                    if ( A.col[j] == lrow ) {
                         B->val[ new_nnz ] = A.val[ j ];
                         B->col[ new_nnz ] = i;
                         new_nnz++; 
@@ -284,7 +298,7 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
         return MAGMA_SUCCESS;
 
     }
-    return MAGMA_SUCCESS; 
+    return MAGMA_SUCCESS;
 }
 
 
@@ -299,77 +313,85 @@ magma_z_csrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix (CSR)
 
-    @param
+    @param[in]
     B           magma_z_sparse_matrix*
                 output matrix (CSR)
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
-// for symmetric matrices: convert to csc using cusparse
+extern "C" magma_int_t
+magma_z_cucsrtranspose(
+    magma_z_sparse_matrix A, 
+    magma_z_sparse_matrix *B,
+    magma_queue_t queue )
+{
+    // for symmetric matrices: convert to csc using cusparse
 
 
-    if( A.storage_type != Magma_CSR && A.storage_type != Magma_CSRCOO ){
+    if ( A.storage_type != Magma_CSR && A.storage_type != Magma_CSRCOO ) {
         magma_z_sparse_matrix ACSR, BCSR;
-        magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR );
-        magma_z_cucsrtranspose( ACSR, &BCSR );
+        magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
+        magma_z_cucsrtranspose( ACSR, &BCSR, queue );
 
-        if( A.storage_type == Magma_CSRL )
+        if ( A.storage_type == Magma_CSRL )
             B->storage_type = Magma_CSRU;
-        else if( A.storage_type == Magma_CSRU )
+        else if ( A.storage_type == Magma_CSRU )
             B->storage_type = Magma_CSRL;
         else
             B->storage_type = A.storage_type;
 
-        magma_z_mconvert( BCSR, B, Magma_CSR, B->storage_type );
-        magma_z_mfree( &ACSR );
-        magma_z_mfree( &BCSR );
+        magma_z_mconvert( BCSR, B, Magma_CSR, B->storage_type, queue );
+        magma_z_mfree( &ACSR, queue );
+        magma_z_mfree( &BCSR, queue );
         return MAGMA_SUCCESS;
     }
-    else{
+    else {
 
         magma_z_sparse_matrix A_d, B_d;
 
-        magma_z_mtransfer( A, &A_d, A.memory_location, Magma_DEV );
+        magma_z_mtransfer( A, &A_d, A.memory_location, Magma_DEV, queue );
 
-        magma_z_mtransfer( A, &B_d, A.memory_location, Magma_DEV );
+        magma_z_mtransfer( A, &B_d, A.memory_location, Magma_DEV, queue );
 
 
         // CUSPARSE context //
         cusparseHandle_t handle;
         cusparseStatus_t cusparseStatus;
         cusparseStatus = cusparseCreate(&handle);
-         if(cusparseStatus != 0)    printf("error in Handle.\n");
+        cusparseSetStream( handle, queue );
+         if (cusparseStatus != 0)    printf("error in Handle.\n");
 
 
         cusparseMatDescr_t descrA;
         cusparseMatDescr_t descrB;
         cusparseStatus = cusparseCreateMatDescr(&descrA);
         cusparseStatus = cusparseCreateMatDescr(&descrB);
-         if(cusparseStatus != 0)    printf("error in MatrDescr.\n");
+         if (cusparseStatus != 0)    printf("error in MatrDescr.\n");
 
         cusparseStatus =
         cusparseSetMatType(descrA,CUSPARSE_MATRIX_TYPE_GENERAL);
         cusparseSetMatType(descrB,CUSPARSE_MATRIX_TYPE_GENERAL);
-         if(cusparseStatus != 0)    printf("error in MatrType.\n");
+         if (cusparseStatus != 0)    printf("error in MatrType.\n");
 
         cusparseStatus =
         cusparseSetMatIndexBase(descrA,CUSPARSE_INDEX_BASE_ZERO);
         cusparseSetMatIndexBase(descrB,CUSPARSE_INDEX_BASE_ZERO);
-         if(cusparseStatus != 0)    printf("error in IndexBase.\n");
+         if (cusparseStatus != 0)    printf("error in IndexBase.\n");
 
         cusparseStatus = 
         cusparseZcsr2csc( handle, A.num_rows, A.num_rows, A.nnz,
-                         A_d.val, A_d.row, A_d.col, B_d.val, B_d.col, B_d.row,
+                         A_d.dval, A_d.drow, A_d.dcol, B_d.dval, B_d.dcol, B_d.drow,
                          CUSPARSE_ACTION_NUMERIC, 
                          CUSPARSE_INDEX_BASE_ZERO);
-         if(cusparseStatus != 0)    
+         if (cusparseStatus != 0)    
                 printf("error in transpose: %d.\n", cusparseStatus);
 
         cusparseDestroyMatDescr( descrA );
@@ -378,9 +400,9 @@ magma_z_cucsrtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
 
         // end CUSPARSE context //
 
-        magma_z_mtransfer( B_d, B, Magma_DEV, A.memory_location );
-        magma_z_mfree( &A_d );
-        magma_z_mfree( &B_d );
+        magma_z_mtransfer( B_d, B, Magma_DEV, A.memory_location, queue );
+        magma_z_mfree( &A_d, queue );
+        magma_z_mfree( &B_d, queue );
 
         return MAGMA_SUCCESS;
     }

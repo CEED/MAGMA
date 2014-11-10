@@ -14,10 +14,7 @@ ZHDR  =
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
-	clag2z_sparse.cu	\
 	magma_z_blaswrapper.cpp	\
-	magma_clag2z.cpp	\
-	magma_zlag2c.cpp	\
 	zbajac_csr.cu		\
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
@@ -26,7 +23,6 @@ ZSRC := \
 	zgesellcmv.cu		\
 	zgesellcmmv.cu		\
 	zjacobisetup.cu		\
-	zlag2c_sparse.cu	\
 	zlobpcg_shift.cu	\
 	zlobpcg_residuals.cu	\
 	zlobpcg_maxpy.cu	\

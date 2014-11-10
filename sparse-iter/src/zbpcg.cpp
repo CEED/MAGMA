@@ -18,11 +18,11 @@
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
-#define  r(i)  r.val+i*dofs
-#define  b(i)  b.val+i*dofs
-#define  h(i)  h.val+i*dofs
-#define  p(i)  p.val+i*dofs
-#define  q(i)  q.val+i*dofs
+#define  r(i)  r.dval+i*dofs
+#define  b(i)  b.dval+i*dofs
+#define  h(i)  h.dval+i*dofs
+#define  p(i)  p.dval+i*dofs
+#define  q(i)  q.dval+i*dofs
 
 
 
@@ -39,33 +39,42 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 input matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b - can be a block
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
 
-    @param
+    @param[in]
     precond_par magma_z_preconditioner*
                 preconditioner
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zhesv
     ********************************************************************/
 
-magma_int_t
-magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-            magma_z_solver_par *solver_par, 
-            magma_z_preconditioner *precond_par ){
+extern "C" magma_int_t
+magma_zbpcg(
+    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
 
     magma_int_t i, num_vecs = b.num_rows/A.num_rows;
 
@@ -81,11 +90,11 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // GPU workspace
     magma_z_vector r, rt, p, q, h;
-    magma_z_vinit( &r, Magma_DEV, dofs*num_vecs, c_zero );
-    magma_z_vinit( &rt, Magma_DEV, dofs*num_vecs, c_zero );
-    magma_z_vinit( &p, Magma_DEV, dofs*num_vecs, c_zero );
-    magma_z_vinit( &q, Magma_DEV, dofs*num_vecs, c_zero );
-    magma_z_vinit( &h, Magma_DEV, dofs*num_vecs, c_zero );
+    magma_z_vinit( &r, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_z_vinit( &rt, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_z_vinit( &p, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_z_vinit( &q, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_z_vinit( &h, Magma_DEV, dofs*num_vecs, c_zero, queue );
     
     // solver variables
     magmaDoubleComplex *alpha, *beta;
@@ -103,20 +112,20 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // solver setup
     magma_zscal( dofs*num_vecs, c_zero, x->val, 1) ;                     // x = 0
-    magma_zcopy( dofs*num_vecs, b.val, 1, r.val, 1 );                    // r = b
+    magma_zcopy( dofs*num_vecs, b.dval, 1, r.dval, 1 );                    // r = b
 
     // preconditioner
-    magma_z_applyprecond_left( A, r, &rt, precond_par );
-    magma_z_applyprecond_right( A, rt, &h, precond_par );
+    magma_z_applyprecond_left( A, r, &rt, precond_par, queue );
+    magma_z_applyprecond_right( A, rt, &h, precond_par, queue );
 
-    magma_zcopy( dofs*num_vecs, h.val, 1, p.val, 1 );                 // p = h
+    magma_zcopy( dofs*num_vecs, h.dval, 1, p.dval, 1 );                 // p = h
 
-    for( i=0; i<num_vecs; i++){
+    for( i=0; i<num_vecs; i++) {
         nom[i] = MAGMA_Z_REAL( magma_zdotc(dofs, r(i), 1, h(i), 1) );     
         nom0[i] = magma_dznrm2( dofs, r(i), 1 );       
     }
                                           
-    magma_z_spmv( c_one, A, p, c_zero, q );                     // q = A p
+    magma_z_spmv( c_one, A, p, c_zero, q, queue );                     // q = A p
 
     for( i=0; i<num_vecs; i++)
         den[i] = MAGMA_Z_REAL( magma_zdotc(dofs, p(i), 1, q(i), 1) );  // den = p dot q
@@ -128,48 +137,51 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // check positive definite
     if (den[0] <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den[0]);
+        magmablasSetKernelStream( orig_queue );
         return -100;
         solver_par->info = -100;
     }
-    if ( nom[0] < r0[0] )
+    if ( nom[0] < r0[0] ) {
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_SUCCESS;
+    }
 
     //Chronometry
     real_Double_t tempo1, tempo2;
-    magma_device_sync(); tempo1=magma_wtime();
-    if( solver_par->verbose > 0 ){
+    tempo1 = magma_sync_wtime( queue );
+    if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t)nom0[0];
         solver_par->timing[0] = 0.0;
     }
     
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
-                                                    solver_par->numiter++ ){
+                                                    solver_par->numiter++ ) {
         // preconditioner
-        magma_z_applyprecond_left( A, r, &rt, precond_par );
-        magma_z_applyprecond_right( A, rt, &h, precond_par );
+        magma_z_applyprecond_left( A, r, &rt, precond_par, queue );
+        magma_z_applyprecond_right( A, rt, &h, precond_par, queue );
 
 
         for( i=0; i<num_vecs; i++)
             gammanew[i] = MAGMA_Z_REAL( magma_zdotc(dofs, r(i), 1, h(i), 1) );  // gn = < r,h>
 
 
-        if( solver_par->numiter==1 ){
-            magma_zcopy( dofs*num_vecs, h.val, 1, p.val, 1 );                    // p = h            
-        }else{
-            for( i=0; i<num_vecs; i++){
+        if ( solver_par->numiter==1 ) {
+            magma_zcopy( dofs*num_vecs, h.dval, 1, p.dval, 1 );                    // p = h            
+        } else {
+            for( i=0; i<num_vecs; i++) {
                 beta[i] = MAGMA_Z_MAKE(gammanew[i]/gammaold[i], 0.);       // beta = gn/go
                 magma_zscal(dofs, beta[i], p(i), 1);            // p = beta*p
                 magma_zaxpy(dofs, c_one, h(i), 1, p(i), 1); // p = p + h 
             }
         }
 
-        magma_z_spmv( c_one, A, p, c_zero, q );           // q = A p
+        magma_z_spmv( c_one, A, p, c_zero, q, queue );           // q = A p
 
-     //   magma_z_bspmv_tuned( dofs, num_vecs, c_one, A, p.val, c_zero, q.val );
+     //   magma_z_bspmv_tuned( dofs, num_vecs, c_one, A, p.dval, c_zero, q.dval, queue );
 
 
-        for( i=0; i<num_vecs; i++){
+        for( i=0; i<num_vecs; i++) {
             den[i] = MAGMA_Z_REAL(magma_zdotc(dofs, p(i), 1, q(i), 1));    
                 // den = p dot q 
 
@@ -181,9 +193,9 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             res[i] = magma_dznrm2( dofs, r(i), 1 );
         }
 
-        if( solver_par->verbose > 0 ){
-            magma_device_sync(); tempo2=magma_wtime();
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+        if ( solver_par->verbose > 0 ) {
+            tempo2 = magma_sync_wtime( queue );
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) res[0];
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -196,19 +208,19 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             break;
         }
     } 
-    magma_device_sync(); tempo2=magma_wtime();
+    tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double *residual;
     magma_dmalloc_cpu(&residual, num_vecs);
-    magma_zresidual( A, b, *x, residual );
+    magma_zresidual( A, b, *x, residual, queue );
     solver_par->iter_res = res[0];
     solver_par->final_res = residual[0];
 
-    if( solver_par->numiter < solver_par->maxiter){
+    if ( solver_par->numiter < solver_par->maxiter) {
         solver_par->info = 0;
-    }else if( solver_par->init_res > solver_par->final_res ){
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    } else if ( solver_par->init_res > solver_par->final_res ) {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) res[0];
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -217,9 +229,9 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
         solver_par->info = -2;
     }
-    else{
-        if( solver_par->verbose > 0 ){
-            if( (solver_par->numiter)%solver_par->verbose==0 ) {
+    else {
+        if ( solver_par->verbose > 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
                         = (real_Double_t) res[0];
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
@@ -228,20 +240,20 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         }
         solver_par->info = -1;
     }
-    for( i=0; i<num_vecs; i++){
+    for( i=0; i<num_vecs; i++) {
         printf("%.4e  ",res[i]);
     }
     printf("\n");
-    for( i=0; i<num_vecs; i++){
+    for( i=0; i<num_vecs; i++) {
         printf("%.4e  ",residual[i]);
     }
     printf("\n");
 
-    magma_z_vfree(&r);
-    magma_z_vfree(&rt);
-    magma_z_vfree(&p);
-    magma_z_vfree(&q);
-    magma_z_vfree(&h);
+    magma_z_vfree(&r, queue );
+    magma_z_vfree(&rt, queue );
+    magma_z_vfree(&p, queue );
+    magma_z_vfree(&q, queue );
+    magma_z_vfree(&h, queue );
 
     magma_free_cpu(alpha);
     magma_free_cpu(beta);
@@ -253,6 +265,7 @@ magma_zbpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_free_cpu(den);
     magma_free_cpu(res);
 
+    magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zbpcg */
 

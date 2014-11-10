@@ -40,34 +40,39 @@ using namespace std;
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix in CSR
 
-    @param
+    @param[in]
     B           magma_z_sparse_matrix
                 sparse matrix in CSR    
                 
-    @param
+    @param[out]
     res         real_Double_t* 
                 residual 
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zmdiff( magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
-                  real_Double_t *res ){
-
+extern "C" magma_int_t
+magma_zmdiff(
+    magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
+    real_Double_t *res,
+    magma_queue_t queue )
+{
     real_Double_t tmp2;
     magma_int_t i,j,k;
     *res = 0.0;
     
-    for(i=0; i<A.num_rows; i++){
-        for(j=A.row[i]; j<A.row[i+1]; j++){
+    for(i=0; i<A.num_rows; i++) {
+        for(j=A.row[i]; j<A.row[i+1]; j++) {
             magma_index_t localcol = A.col[j];
-            for( k=B.row[i]; k<B.row[i+1]; k++){
-                if(B.col[k] == localcol){
+            for( k=B.row[i]; k<B.row[i+1]; k++) {
+                if (B.col[k] == localcol) {
                     tmp2 = (real_Double_t) fabs( MAGMA_Z_REAL(A.val[j] )
                                                     - MAGMA_Z_REAL(B.val[k]) );
 
@@ -79,6 +84,6 @@ magma_zmdiff( magma_z_sparse_matrix A, magma_z_sparse_matrix B,
 
     (*res) =  sqrt((*res));
 
-    return MAGMA_SUCCESS; 
+    return MAGMA_SUCCESS;
 }
 

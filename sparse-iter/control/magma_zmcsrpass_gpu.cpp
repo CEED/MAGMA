@@ -35,7 +35,7 @@ using namespace std;
     Purpose
     -------
 
-    Passes a CSR matrix to MAGMA.
+    Passes a CSR matrix to MAGMA (located on DEV).
 
     Arguments
     ---------
@@ -49,15 +49,15 @@ using namespace std;
                 number of columns
 
     @param[in]
-    row         magma_index_t*
+    row         magmaIndex_ptr 
                 row pointer
 
     @param[in]
-    col         magma_index_t*
+    col         magmaIndex_ptr 
                 column indices
 
     @param[in]
-    val         magmaDoubleComplex*
+    val         magmaDoubleComplex_ptr 
                 array containing matrix entries
 
     @param[out]
@@ -72,12 +72,12 @@ using namespace std;
 
 extern "C"
 magma_int_t
-magma_zcsrset(
+magma_zcsrset_gpu(
     magma_int_t m, 
     magma_int_t n, 
-    magma_index_t *row, 
-    magma_index_t *col,     
-    magmaDoubleComplex *val,
+    magmaIndex_ptr row, 
+    magmaIndex_ptr col, 
+    magmaDoubleComplex_ptr val,
     magma_z_sparse_matrix *A,
     magma_queue_t queue )
 {
@@ -85,10 +85,10 @@ magma_zcsrset(
     A->num_cols = n;
     A->nnz = row[m];
     A->storage_type = Magma_CSR;
-    A->memory_location = Magma_CPU;
-    A->val = val;
-    A->col = col;
-    A->row = row;
+    A->memory_location = Magma_DEV;
+    A->dval = val;
+    A->dcol = col;
+    A->drow = row;
 
     return MAGMA_SUCCESS;
 }
@@ -98,7 +98,7 @@ magma_zcsrset(
     Purpose
     -------
 
-    Passes a MAGMA matrix to CSR structure.
+    Passes a MAGMA matrix to CSR structure (located on DEV).
 
     Arguments
     ---------
@@ -116,15 +116,15 @@ magma_zcsrset(
                 number of columns
 
     @param[out]
-    row         magma_index_t*
+    row         magmaIndex_ptr 
                 row pointer
 
     @param[out]
-    col         magma_index_t*
+    col         magmaIndex_ptr 
                 column indices
 
     @param[out]
-    val         magmaDoubleComplex*
+    val         magmaDoubleComplex_ptr 
                 array containing matrix entries
 
     @param[in]
@@ -136,29 +136,29 @@ magma_zcsrset(
 
 extern "C"
 magma_int_t
-magma_zcsrget(
+magma_zcsrget_gpu(
     magma_z_sparse_matrix A,
     magma_int_t *m, 
     magma_int_t *n, 
-    magma_index_t **row, 
-    magma_index_t **col, 
-    magmaDoubleComplex **val,
+    magmaIndex_ptr *row, 
+    magmaIndex_ptr *col, 
+    magmaDoubleComplex_ptr *val,
     magma_queue_t queue )
 {
-    if ( A.memory_location == Magma_CPU && A.storage_type == Magma_CSR ) {
+    if ( A.memory_location == Magma_DEV && A.storage_type == Magma_CSR ) {
 
         *m = A.num_rows;
         *n = A.num_cols;
-        *val = A.val;
-        *col = A.col;
-        *row = A.row;
+        *val = A.dval;
+        *col = A.dcol;
+        *row = A.drow;
     } else {
-        magma_z_sparse_matrix A_CPU, A_CSR;
-        magma_z_mtransfer( A, &A_CPU, A.memory_location, Magma_CPU, queue ); 
-        magma_z_mconvert( A_CPU, &A_CSR, A_CPU.storage_type, Magma_CSR, queue ); 
-        magma_zcsrget( A_CSR, m, n, row, col, val, queue );
+        magma_z_sparse_matrix A_DEV, A_CSR;
+        magma_z_mconvert( A, &A_CSR, A.storage_type, Magma_CSR, queue ); 
+        magma_z_mtransfer( A_CSR, &A_DEV, A.memory_location, Magma_DEV, queue ); 
+        magma_zcsrget_gpu( A_DEV, m, n, row, col, val, queue );
         magma_z_mfree( &A_CSR, queue );
-        magma_z_mfree( &A_CPU, queue );
+        magma_z_mfree( &A_DEV, queue );
     }
     return MAGMA_SUCCESS;
 }

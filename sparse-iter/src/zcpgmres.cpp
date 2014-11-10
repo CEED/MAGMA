@@ -33,35 +33,42 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 descriptor for matrix A
 
-    @param
+    @param[in]
     b           magma_z_vector
                 RHS b vector
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 solution approximation
 
-    @param
+    @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
 
     magma_precond_parameters *precond_par     preconditioner parameters
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_gesv
     ********************************************************************/
 
-magma_int_t
-magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-              magma_z_solver_par *solver_par,  magma_precond_parameters *precond_par) 
+extern "C" magma_int_t
+magma_zcpgmres(
+    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_solver_par *solver_par,  magma_precond_parameters *precond_par,
+    magma_queue_t queue )
 {
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
 
-
-#define  q(i)     (q.val + (i)*dofs)
-#define  z(i)     (z.val + (i)*dofs)
+    #define  q(i)     (q.dval + (i)*dofs)
+#define  z(i)     (z.dval + (i)*dofs)
 #define  H(i,j)  H[(i)   + (j)*ldh]
 #define HH(i,j) HH[(i)   + (j)*ldh]
 
@@ -77,25 +84,26 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     
     // GPU workspace
     magma_z_vector r, q, q_t, z, z_t;
-    magma_z_vinit( &r  , Magma_DEV, dofs,     c_zero );
-    magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero );
-    magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero );
-    magma_z_vinit( &z  , Magma_DEV, dofs*ldh, c_zero );
-    magma_z_vinit( &z_t, Magma_DEV, dofs,     c_zero );
+    magma_z_vinit( &r  , Magma_DEV, dofs,     c_zero, queue );
+    magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero, queue );
+    magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero, queue );
+    magma_z_vinit( &z  , Magma_DEV, dofs*ldh, c_zero, queue );
+    magma_z_vinit( &z_t, Magma_DEV, dofs,     c_zero, queue );
     // for mixed precision on GPU
     magma_c_vector qs_t, zs_t;
     magma_c_sparse_matrix AS;
-    magma_sparse_matrix_zlag2c( A, &AS );
-    magma_c_vinit( &zs_t, Magma_DEV, dofs, MAGMA_C_ZERO );
+    magma_sparse_matrix_zlag2c( A, &AS, queue );
+    magma_c_vinit( &zs_t, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
 
     magmaDoubleComplex *dy;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
-    magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
+    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );             //  r = b
 
-    r0 = magma_dznrm2( dofs, r.val, 1 );                 //  r0= || r||
+    r0 = magma_dznrm2( dofs, r.dval, 1 );                 //  r0= || r||
     nom0 = r0*r0;
     H(1,0) = MAGMA_Z_MAKE( r0, 0. ); 
 
@@ -108,22 +116,22 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         {
             for(k=1; k<=(solver_par->restart); k++) 
                 {
-                    magma_zcopy(dofs, r.val, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
+                    magma_zcopy(dofs, r.dval, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
                     magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
 
-                    q_t.val = q(k);
-                    magma_vector_zlag2c(q_t, &qs_t);                    // conversion to single precision            
-                    magma_c_precond( AS, qs_t, &zs_t, *precond_par );   // preconditioner AS * zs =  qs[k]
-                    magma_vector_clag2z(zs_t, &z_t);                    // conversion to double precision
-                    magma_zcopy( dofs, z_t.val, 1, z(k), 1 );             // z(k) = z_t
-                    magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A q[k] 
+                    q_t.dval = q(k);
+                    magma_vector_zlag2c(q_t, &qs_t, queue );                    // conversion to single precision            
+                    magma_c_precond( AS, qs_t, &zs_t, *precond_par, queue );   // preconditioner AS * zs =  qs[k]
+                    magma_vector_clag2z(zs_t, &z_t, queue );                    // conversion to double precision
+                    magma_zcopy( dofs, z_t.dval, 1, z(k), 1 );             // z(k) = z_t
+                    magma_z_spmv( c_one, A, z_t, c_zero, r, queue );                    //  r       = A q[k] 
                     
                     for (i=1; i<=k; i++) {
-                        H(i,k) =magma_zdotc(dofs, q(i), 1, r.val, 1);            //  H[i][k] = q[i] . r
-                        magma_zaxpy(dofs,-H(i,k), q(i), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
+                        H(i,k) =magma_zdotc(dofs, q(i), 1, r.dval, 1);            //  H[i][k] = q[i] . r
+                        magma_zaxpy(dofs,-H(i,k), q(i), 1, r.dval, 1);            //  r       = r - H[i][k] q[i]
                     }
                     
-                    H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  H[k+1][k] = sqrt(r . r) 
+                    H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.dval, 1), 0. ); //  H[k+1][k] = sqrt(r . r) 
                     
                     /*     Minimization of  || b-Ax ||  in K_k       */ 
                     for (i=1; i<=k; i++) {
@@ -159,9 +167,9 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             magma_zsetmatrix(m, 1, y+1, m, dy, m);
             magma_zgemv(MagmaNoTrans, dofs, m, c_one, z(1), dofs, dy, 1, c_one, x->val, 1); 
 
-            magma_z_spmv( c_mone, A, *x, c_zero, r );                  //  r = - A * x
-            magma_zaxpy(dofs, c_one, b.val, 1, r.val, 1);              //  r = r + b
-            H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
+            magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                  //  r = - A * x
+            magma_zaxpy(dofs, c_one, b.dval, 1, r.dval, 1);              //  r = r + b
+            H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.dval, 1), 0. ); //  RNorm = H[1][0] = || r ||
             RNorm = MAGMA_Z_REAL( H(1,0) );
             
             printf("Iteration : %4d  Norm: %f\n", iter, RNorm*RNorm);
@@ -176,9 +184,9 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf( "      Number of GMRES restarts: %d\n", iter);
     
     if (solver_par->epsilon == RTOLERANCE) {
-        magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
-        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
-        den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
+        magma_z_spmv( c_one, A, *x, c_zero, r, queue );                       // r = A x
+        magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);                // r = r - b
+        den = magma_dznrm2(dofs, r.dval, 1);                            // den = || r ||
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
     }
@@ -186,16 +194,17 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     magma_free(dy); 
 /*
-    magma_z_vfree(&r);
-    magma_z_vfree(&q);
-    magma_z_vfree(&q_t);
-    magma_z_vfree(&z);
-    magma_z_vfree(&z_t);
-    magma_c_vfree(&qs_t);
-    magma_c_vfree(&zs_t);
+    magma_z_vfree(&r, queue );
+    magma_z_vfree(&q, queue );
+    magma_z_vfree(&q_t, queue );
+    magma_z_vfree(&z, queue );
+    magma_z_vfree(&z_t, queue );
+    magma_c_vfree(&qs_t, queue );
+    magma_c_vfree(&zs_t, queue );
 
-    magma_c_mfree(&AS);
+    magma_c_mfree(&AS, queue );
 */
+    magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zcpgmres */
 

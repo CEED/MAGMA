@@ -274,23 +274,14 @@ if ( opts.cg ):
 if ( opts.cg_merge ):
     solvers += ['--solver 1']
 # end
-if ( opts.pcg ):
-    solvers += ['--solver 2']
-# end
 if ( opts.bicgstab ):
     solvers += ['--solver 3']
 # end
 if ( opts.bicgstab_merge ):
     solvers += ['--solver 4']
 # end
-if ( opts.pbicgstab ):
-    solvers += ['--solver 5']
-# end
 if ( opts.gmres ):
     solvers += ['--solver 6']
-# end
-if ( opts.pgmres ):
-    solvers += ['--solver 7']
 # end
 if ( opts.lobpcg ):
     solvers += ['--solver 8']
@@ -302,8 +293,20 @@ if ( opts.ba ):
     solvers += ['--solver 10']
 # end
 
+# looping over precsolvers
+precsolvers = []
+if ( opts.pcg ):
+    precsolvers += ['--solver 2']
+# end
+if ( opts.pbicgstab ):
+    precsolvers += ['--solver 5']
+# end
+if ( opts.pgmres ):
+    precsolvers += ['--solver 7']
+# end
 
-# looping over solvers
+
+# looping over IR
 IR = []
 if ( opts.iterref ):
     IR += ['--solver 21']
@@ -414,38 +417,87 @@ def substitute( txt, pfrom, pto ):
 # grep "\('#?testing_\w\w+" run_tests.py | perl -pe "s/#?\('#?//; s/',.*/.cpp \\/;" | uniq > ! b
 # diff -w a b
 
-# ----------------------------------------------------------------------
+
 tests = []
 
+
+# ----------------------------------------------------------------------
 if ( opts.control):
-    for size in sizes:
-        for precision in opts.precisions:
-            # precision generation
-            cmd = substitute( 'testing_zio', 'z', precision )
-            tests.append( [cmd, '', size, ''] )
-            cmd = substitute( 'testing_zmatrix', 'z', precision )
-            tests.append( [cmd, '', size, ''] )
-            cmd = substitute( 'testing_zmcompressor', 'z', precision )
-            tests.append( [cmd, '', size, ''] )
-            cmd = substitute( 'testing_zmadd', 'z', precision )
-            tests.append( [cmd, size, size, ''] )
+    for precision in opts.precisions:
+        for size in sizes:
+                # precision generation
+                cmd = substitute( 'testing_zio', 'z', precision )
+                tests.append( [cmd, '', size, ''] )
+
+# ----------------------------------------------------------------------
+if ( opts.control):
+    for precision in opts.precisions:
+        for size in sizes:
+                # precision generation
+                cmd = substitute( 'testing_zmatrix', 'z', precision )
+                tests.append( [cmd, '', size, ''] )
+
+# ----------------------------------------------------------------------
+if ( opts.control):
+    for precision in opts.precisions:
+        for size in sizes:
+                # precision generation
+                cmd = substitute( 'testing_zio', 'z', precision )
+                tests.append( [cmd, '', size, ''] )
+
+# ----------------------------------------------------------------------
+if ( opts.control):
+    for precision in opts.precisions:
+        for size in sizes:
+                # precision generation
+                cmd = substitute( 'testing_zmcompressor', 'z', precision )
+                tests.append( [cmd, '', size, ''] )
+
+# ----------------------------------------------------------------------
+if ( opts.control):
+    for precision in opts.precisions:
+        for size in sizes:
+                # precision generation
+                cmd = substitute( 'testing_zmadd', 'z', precision )
+                tests.append( [cmd, '', size + ' ' + size, ''] )
+
 
 # ----------------------------------------------------------------------
 if ( opts.sparse_blas):
-    for alignment in alignments:
-        for blocksize in blocksizes:
-            for size in sizes:
-                for precision in opts.precisions:
-                    # precision generation
-                    cmd = substitute( 'testing_zspmv', 'z', precision )
-                    tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
-                    cmd = substitute( 'testing_zspmm', 'z', precision )
-                    tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
+    for precision in opts.precisions:
+        for size in sizes:
+            for blocksize in blocksizes:
+                for alignment in alignments:
+                        # precision generation
+                        cmd = substitute( 'testing_zspmv', 'z', precision )
+                        tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
+
+
+
+# ----------------------------------------------------------------------
+if ( opts.sparse_blas):
+    for precision in opts.precisions:
+        for size in sizes:
+            for blocksize in blocksizes:
+                for alignment in alignments:
+                        # precision generation
+                        cmd = substitute( 'testing_zspmm', 'z', precision )
+                        tests.append( [cmd, alignment + ' ' + blocksize, size, ''] )
 
 
 
 # ----------------------------------------------------------------------
 for solver in solvers:
+    for format in formats:
+        for size in sizes:
+            for precision in opts.precisions:
+                # precision generation
+                cmd = substitute( 'testing_zsolver', 'z', precision )
+                tests.append( [cmd, solver + ' ' + format, size, ''] )
+
+
+# ----------------------------------------------------------------------
+for solver in precsolvers:
     for precond in precs:
         for format in formats:
             for size in sizes:
@@ -453,6 +505,7 @@ for solver in solvers:
                     # precision generation
                     cmd = substitute( 'testing_zsolver', 'z', precision )
                     tests.append( [cmd, solver + ' ' + precond + ' ' + format, size, ''] )
+
 
 # ----------------------------------------------------------------------
 for solver in IR:

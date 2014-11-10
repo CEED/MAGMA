@@ -26,79 +26,103 @@
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix A    
 
-    @param
+    @param[in]
     b           magma_z_vector
                 input vector b     
 
-    @param
+    @param[in]
     x           magma_z_vector*
                 output vector x        
 
-    @param
+    @param[in,out]
     precond     magma_z_preconditioner
                 preconditioner
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t
-magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
-                 magma_z_vector *x, magma_z_preconditioner *precond )
+extern "C" magma_int_t
+magma_z_precond(
+    magma_z_sparse_matrix A, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
 {
-// set up precond parameters as solver parameters   
+    // set up precond parameters as solver parameters   
     magma_z_solver_par psolver_par;
     psolver_par.epsilon = precond->epsilon;
     psolver_par.maxiter = precond->maxiter;
     psolver_par.restart = precond->restart;
     psolver_par.verbose = 0;
-   
-    if( precond->solver == Magma_CG ){
+
+    switch( precond->solver ) {
+        case  Magma_CG:
+                magma_zcg_res( A, b, x, &psolver_par, queue );break;
+        case  Magma_BICGSTAB:
+                magma_zbicgstab( A, b, x, &psolver_par, queue );break;
+        case  Magma_GMRES: 
+ printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: and restart:%d\n", 
+                               psolver_par.epsilon, psolver_par.maxiter, psolver_par.restart );
+                magma_zgmres( A, b, x, &psolver_par, queue );break;
+        case  Magma_JACOBI: 
+                magma_zjacobi( A, b, x, &psolver_par, queue );break;
+        case  Magma_BAITER: 
+                magma_zbaiter( A, b, x, &psolver_par, queue );break;
+    }
+/*
+   printf("here%d \n", precond->solver);
+    if ( precond->solver == Magma_CG ) {
 // printf( "start CG preconditioner with epsilon: %f and maxiter: %d: ", 
 //                            psolver_par.epsilon, psolver_par.maxiter );
-        magma_zcg( A, b, x, &psolver_par );
+        magma_zcg( A, b, x, &psolver_par, queue );
 // printf( "done.\n" );
-        return MAGMA_SUCCESS;
+        
     }
-    if( precond->solver == Magma_GMRES ){
+    if ( precond->solver == Magma_GMRES ) {printf("here\n");
 // printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: ", 
 //                               psolver_par.epsilon, psolver_par.maxiter );
-        magma_zgmres( A, b, x, &psolver_par );
+        magma_zgmres( A, b, x, &psolver_par, queue );
 // printf( "done.\n" );
-        return MAGMA_SUCCESS;
+
     }
-    if( precond->solver == Magma_BICGSTAB ){
+    if ( precond->solver == Magma_BICGSTAB ) {
 // printf( "start BICGSTAB preconditioner with epsilon: %f and maxiter: %d: ", 
 //                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zbicgstab( A, b, x, &psolver_par );
+        magma_zbicgstab( A, b, x, &psolver_par, queue );
 // printf( "done.\n");
-        return MAGMA_SUCCESS;
+
     }
-    if( precond->solver == Magma_JACOBI ){
+    if ( precond->solver == Magma_JACOBI ) {
 // printf( "start JACOBI preconditioner with epsilon: %f and maxiter: %d: ", 
 //                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zjacobi( A, b, x, &psolver_par );
+        magma_zjacobi( A, b, x, &psolver_par, queue );
 // printf( "done.\n");
-        return MAGMA_SUCCESS;
+
     }
-    if( precond->solver == Magma_BAITER ){
+    if ( precond->solver == Magma_BAITER ) {
 // printf( "start BAITER preconditioner with epsilon: %f and maxiter: %d: ", 
 //                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zbaiter( A, b, x, &psolver_par );
+        magma_zbaiter( A, b, x, &psolver_par, queue );
 // printf( "done.\n");
-        return MAGMA_SUCCESS;
+
     }
-    if( precond->solver == Magma_NONE ){
-        return MAGMA_SUCCESS;
+    if ( precond->solver == Magma_NONE ) {
+
     }
-    else{
+    else {
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
-    }
-
+    }*/
+    return MAGMA_SUCCESS;
 }
 
 
@@ -115,49 +139,53 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix A     
 
-    @param
+    @param[in]
     b           magma_z_vector
                 input vector y      
 
-    @param
+    @param[in,out]
     precond     magma_z_preconditioner
                 preconditioner
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t
-magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b, 
-                      magma_z_preconditioner *precond )
+extern "C" magma_int_t
+magma_z_precondsetup(
+    magma_z_sparse_matrix A, magma_z_vector b, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
 {
-    if( precond->solver == Magma_JACOBI ){
-        magma_zjacobisetup_diagscal( A, &(precond->d) );
+    if ( precond->solver == Magma_JACOBI ) {
+        magma_zjacobisetup_diagscal( A, &(precond->d), queue );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_PASTIX ){
-        magma_zpastixsetup( A, b, precond );
+    else if ( precond->solver == Magma_PASTIX ) {
+        magma_zpastixsetup( A, b, precond, queue );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_ILU ){
-        magma_zcumilusetup( A, precond );
+    else if ( precond->solver == Magma_ILU ) {
+        magma_zcumilusetup( A, precond, queue );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_ICC ){
-        magma_zcumiccsetup( A, precond );
+    else if ( precond->solver == Magma_ICC ) {
+        magma_zcumiccsetup( A, precond, queue );
         return MAGMA_SUCCESS;
     }
-    else if( precond->solver == Magma_NONE ){
+    else if ( precond->solver == Magma_NONE ) {
         return MAGMA_SUCCESS;
     }
-    else{
+    else {
         printf( "error: preconditioner type not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
-
 }
 
 
@@ -174,62 +202,71 @@ magma_z_precondsetup( magma_z_sparse_matrix A, magma_z_vector b,
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix A    
 
-    @param
+    @param[in]
     b           magma_z_vector
                 input vector b     
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 output vector x     
 
-    @param
+    @param[in]
     precond     magma_z_preconditioner
                 preconditioner
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t
-magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b, 
-                      magma_z_vector *x, magma_z_preconditioner *precond )
+extern "C" magma_int_t
+magma_z_applyprecond(
+    magma_z_sparse_matrix A, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
 {
-    if( precond->solver == Magma_JACOBI ){
-        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x );
-        return MAGMA_SUCCESS;
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
+    if ( precond->solver == Magma_JACOBI ) {
+        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue );
     }
-    else if( precond->solver == Magma_PASTIX ){
-        magma_zapplypastix( b, x, precond );
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_PASTIX ) {
+        magma_zapplypastix( b, x, precond, queue );
     }
-    else if( precond->solver == Magma_ILU ){
+    else if ( precond->solver == Magma_ILU ) {
         magma_z_vector tmp;
-        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
-     //   magma_zapplycuilu_l( b, &tmp, precond ); 
-     //   magma_zapplycuilu_r( tmp, x, precond );
-        magma_z_vfree( &tmp );
-        return MAGMA_SUCCESS;
+        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+     //   magma_zapplycuilu_l( b, &tmp, precond, queue ); 
+     //   magma_zapplycuilu_r( tmp, x, precond, queue );
+        magma_z_vfree( &tmp, queue );
     }
-    else if( precond->solver == Magma_ICC ){
+    else if ( precond->solver == Magma_ICC ) {
         magma_z_vector tmp;
-        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_MAKE(1.0, 0.0) );
-       // magma_ztrisv_l_nu( precond->L, b, &tmp );
-       // magma_ztrisv_r_nu( precond->L, tmp, x );
-        magma_z_vfree( &tmp );
-        return MAGMA_SUCCESS;
+        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+       // magma_ztrisv_l_nu( precond->L, b, &tmp, queue );
+       // magma_ztrisv_r_nu( precond->L, tmp, x, queue );
+        magma_z_vfree( &tmp, queue );
     }
-    else if( precond->solver == Magma_NONE ){
-        magma_zcopy( b.num_rows, b.val, 1, x->val, 1 );      //  x = b
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_NONE ) {
+        magma_zcopy( b.num_rows, b.dval, 1, x->dval, 1 );      //  x = b
     }
-    else{
+    else {
         printf( "error: preconditioner type not yet supported.\n" );
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
-
+    magmablasSetKernelStream( orig_queue );
+    return MAGMA_SUCCESS;
 }
 
 
@@ -245,51 +282,61 @@ magma_z_applyprecond( magma_z_sparse_matrix A, magma_z_vector b,
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix A    
 
-    @param
+    @param[in]
     b           magma_z_vector
                 input vector b     
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
                 output vector x     
 
-    @param
+    @param[in]
     precond     magma_z_preconditioner
                 preconditioner
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t
-magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b, 
-                      magma_z_vector *x, magma_z_preconditioner *precond )
+extern "C" magma_int_t
+magma_z_applyprecond_left(
+    magma_z_sparse_matrix A, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
 {
-    if( precond->solver == Magma_JACOBI ){
-        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x );
-        return MAGMA_SUCCESS;
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
+    if ( precond->solver == Magma_JACOBI ) {
+        magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue );
     }
-    else if( precond->solver == Magma_ILU || 
-            ( precond->solver == Magma_AILU && precond->maxiter == -1) ){
-        magma_zapplycumilu_l( b, x, precond );
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_ILU || 
+            ( precond->solver == Magma_AILU && precond->maxiter == -1) ) {
+        magma_zapplycumilu_l( b, x, precond, queue );
     }
-    else if( precond->solver == Magma_ICC ){
-        magma_zapplycumicc_l( b, x, precond );
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_ICC ) {
+        magma_zapplycumicc_l( b, x, precond, queue );
     }
-    else if( precond->solver == Magma_NONE ){
-        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );      //  x = b
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_NONE ) {
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
     }
-    else{
+    else {
         printf( "error: preconditioner type not yet supported.\n" );
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
-
+    magmablasSetKernelStream( orig_queue );
+    return MAGMA_SUCCESS;
 }
 
 
@@ -305,52 +352,61 @@ magma_z_applyprecond_left( magma_z_sparse_matrix A, magma_z_vector b,
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_sparse_matrix
                 sparse matrix A    
 
-    @param
+    @param[in]
     b           magma_z_vector
                 input vector b     
 
-    @param
+    @param[in,out]
     x           magma_z_vector*
-                output vector x  
+                output vector x     
 
-    @param
+    @param[in]
     precond     magma_z_preconditioner
                 preconditioner
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t
-magma_z_applyprecond_right( magma_z_sparse_matrix A, magma_z_vector b, 
-                      magma_z_vector *x, magma_z_preconditioner *precond )
+extern "C" magma_int_t
+magma_z_applyprecond_right(
+    magma_z_sparse_matrix A, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue )
 {
-    if( precond->solver == Magma_JACOBI ){
-        //magma_zjacobi_diagscal( A.num_rows, precond->d.val, b.val, x->val );
-        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );    // x = b
-        return MAGMA_SUCCESS;
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
+    if ( precond->solver == Magma_JACOBI ) {
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );    // x = b
     }
-    else if( precond->solver == Magma_ILU ){
-        magma_zapplycumilu_r( b, x, precond );
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_ILU ) {
+        magma_zapplycumilu_r( b, x, precond, queue );
     }
-    else if( precond->solver == Magma_ICC || 
-            ( precond->solver == Magma_AICC && precond->maxiter == -1) ){
-        magma_zapplycumicc_r( b, x, precond );
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_ICC || 
+            ( precond->solver == Magma_AICC && precond->maxiter == -1) ) {
+        magma_zapplycumicc_r( b, x, precond, queue );
     }
-    else if( precond->solver == Magma_NONE ){
-        magma_zcopy( b.num_rows*b.num_cols, b.val, 1, x->val, 1 );      //  x = b
-        return MAGMA_SUCCESS;
+    else if ( precond->solver == Magma_NONE ) {
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
     }
-    else{
+    else {
         printf( "error: preconditioner type not yet supported.\n" );
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
-
+    magmablasSetKernelStream( orig_queue );
+    return MAGMA_SUCCESS;
 }
 
 

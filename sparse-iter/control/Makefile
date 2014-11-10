@@ -25,13 +25,14 @@ ZSRC := \
 	magma_zsolverinfo.cpp	\
     magma_zcsrsplit.cpp   \
     magma_zmcsrpass.cpp   \
+    magma_zmcsrpass_gpu.cpp   \
     magma_zmcsrcompressor.cpp   \
     magma_zmscale.cpp   \
     magma_zmdiff.cpp  \
-    magma_zp2p.cpp   \
 	magma_ztranspose.cpp	\
 	magma_zvtranspose.cpp	\
     magma_zvpass.cpp   \
+    magma_zvpass_gpu.cpp   \
 
 SRC := \
 	mmio.cpp		\
