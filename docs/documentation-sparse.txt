@@ -21,64 +21,59 @@ For each of these steps, multiple options are offered by the MAGMA software
 stack.
 
 
-@subpage
-Sparse Data Structures
+Sparse Data Structures {#datastructures}
 =================================
 For a more generic programming approach, the sparse data structures
 (matrices and vectors) are stored in data structures containing all information
 necessary to access the sparse-BLAS via wrappers:
 
-struct magma_z_sparse_matrix{
-
-        magma_storage_t        storage_type;                        // matrix format - CSR, ELL, SELL-P
-        magma_location_t   memory_location;                 // CPU or DEV
-        magma_symmetry_t   sym;                                         // opt: indicate symmetry
-        magma_diagorder_t  diagorder_type;                  // opt: only needed for factorization matrices
-        magma_int_t                num_rows;                                // number of rows
-        magma_int_t                num_cols;                                // number of columns
-        magma_int_t                nnz;                                         // opt: number of nonzeros
-        magma_int_t                max_nnz_row;                         // opt: max number of nonzeros in one row
-        magma_int_t                diameter;                                // opt: max distance of entry from main diagonal
+    struct magma_z_sparse_matrix{
+        magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
+        magma_location_t   memory_location;         // CPU or DEV
+        magma_symmetry_t   sym;                     // opt: indicate symmetry
+        magma_diagorder_t  diagorder_type;          // opt: only needed for factorization matrices
+        magma_int_t        num_rows;                // number of rows
+        magma_int_t        num_cols;                // number of columns
+        magma_int_t        nnz;                     // opt: number of nonzeros
+        magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
+        magma_int_t        diameter;                // opt: max distance of entry from main diagonal
         union {
-                magmaDoubleComplex          *val;                   // array containing values in CPU case
-                magmaDoubleComplex_ptr  dval;                   // array containing values in DEV case
+            magmaDoubleComplex      *val;           // array containing values in CPU case
+            magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
         };
         union {
-                magmaDoubleComplex          *diag;                  // array containing values in CPU case
-                magmaDoubleComplex_ptr  ddiag;                  // array containing values in DEV case
+            magmaDoubleComplex      *diag;          // array containing values in CPU case
+            magmaDoubleComplex_ptr  ddiag;          // array containing values in DEV case
         };
         union {
-                magma_index_t                   *row;                   // row pointer CPU case
-                magmaIndex_ptr                  drow;                   // row pointer DEV case
+            magma_index_t           *row;           // row pointer CPU case
+            magmaIndex_ptr          drow;           // row pointer DEV case
         };
         union {
-                magma_index_t                   *rowidx;                // opt: array containing row indices CPU case
-                magmaIndex_ptr                  drowidx;                // opt: array containing row indices DEV case
+            magma_index_t           *rowidx;        // opt: array containing row indices CPU case
+            magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
         };
         union {
-                magma_index_t                   *col;                   // array containing col indices CPU case
-                magmaIndex_ptr                  dcol;                   // array containing col indices  DEV case
+            magma_index_t           *col;           // array containing col indices CPU case
+            magmaIndex_ptr          dcol;           // array containing col indices  DEV case
         };
-        magma_index_t          *blockinfo;                          // opt: for BCSR format CPU case
-        magma_int_t                blocksize;                           // opt: info for SELL-P/BCSR
-        magma_int_t                numblocks;                           // opt: info for SELL-P/BCSR
-        magma_int_t                alignment;                           // opt: info for SELL-P/BCSR
-
-}magma_z_sparse_matrix;
-
-struct magma_z_vector{
-
-        magma_location_t   memory_location;                 // CPU or DEV
-        magma_int_t                num_rows;                                // number of rows
-        magma_int_t                num_cols;                                // number of columns (in case of a block of vectors)
-        magma_int_t                nnz;                                         // opt: number of nonzeros
+        magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
+        magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
+        magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
+        magma_int_t        alignment;               // opt: info for SELL-P/BCSR
+    }magma_z_sparse_matrix;
+    
+    struct magma_z_vector{
+        magma_location_t   memory_location;         // CPU or DEV
+        magma_int_t        num_rows;                // number of rows
+        magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
+        magma_int_t        nnz;                     // opt: number of nonzeros
         union {
-                magmaDoubleComplex          *val;                   // array containing values in CPU case
-                magmaDoubleComplex_ptr  dval;                   // array containing values in DEV case
+            magmaDoubleComplex      *val;           // array containing values in CPU case
+            magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
         };
-        magma_order_t          major;                                   // storage type:Row/Column-Major
-
-}magma_z_vector;
+        magma_order_t      major;                   // storage type:Row/Column-Major
+    }magma_z_vector;
 
 The purpose of the unions (e.g. for the val array) is to support different
 hardware platforms, where the magmaXXX_ptr is adapted to the respective
@@ -90,53 +85,53 @@ Generally, the sparse-BLAS routines provide for these the best performance.
 Without specifying the storage type, the memory location or the dimension of the
 matrix, the sparse matrix vector product can then be used via the wrapper:
 
-        magma_z_spmv(
-                magmaDoubleComplex alpha,
-                magma_z_sparse_matrix A,
-                magma_z_vector x,
-                magmaDoubleComplex beta,
-                magma_z_vector y,
-                magma_queue_t queue );
+    magma_z_spmv(
+            magmaDoubleComplex alpha,
+            magma_z_sparse_matrix A,
+            magma_z_vector x,
+            magmaDoubleComplex beta,
+            magma_z_vector y,
+            magma_queue_t queue );
 
 
 
-Sparse I/O
+Sparse I/O {#io}
 =================================
 A sparse matrix stored in mtx format can be read from disk via the function:
-
-        magma_z_csr_mtx(
-                magma_z_sparse_matrix *A,
-                const char *filename,
-                magma_queue_t queue );
+    
+    magma_z_csr_mtx(
+            magma_z_sparse_matrix *A,
+            const char *filename,
+            magma_queue_t queue );
 
 A sparse linear system of dimension mxn present in main memory can be
 passed to MAGMA via the function:
 
-        magma_zcsrset(
-                magma_int_t m,
-                magma_int_t n,
-                magma_index_t *row,
-                magma_index_t *col,
-                magmaDoubleComplex *val,
-                magma_z_sparse_matrix *A,
-                magma_queue_t queue );
+    magma_zcsrset(
+            magma_int_t m,
+            magma_int_t n,
+            magma_index_t *row,
+            magma_index_t *col,
+            magmaDoubleComplex *val,
+            magma_z_sparse_matrix *A,
+            magma_queue_t queue );
 
 where row, col, val contain the matrix in CSR format.
 
 If the matrix is already present in DEV memory, the corresponding function is
 
-        magma_zcsrset_gpu(
-                magma_int_t m,
-                magma_int_t n,
-                magmaIndex_ptr row,
-                magmaIndex_ptr col,
-                magmaDoubleComplex_ptr val,
-                magma_z_sparse_matrix *A,
-                magma_queue_t queue );
-
-
+    magma_zcsrset_gpu(
+        magma_int_t m,
+        magma_int_t n,
+        magmaIndex_ptr row,
+        magmaIndex_ptr col,
+        magmaDoubleComplex_ptr val,
+        magma_z_sparse_matrix *A,
+        magma_queue_t queue );
+    
+    
 Similarly, matrices handled in MAGMA can be returned via the functions
-
+    
     magma_zcsrget(
         magma_z_sparse_matrix A,
         magma_int_t *m,
@@ -154,9 +149,9 @@ Similarly, matrices handled in MAGMA can be returned via the functions
         magmaIndex_ptr *col,
         magmaDoubleComplex_ptr *val,
         magma_queue_t queue );
-
-respectively
-
+    
+    respectively
+    
     write_z_csrtomtx(
         magma_z_sparse_matrix A,
         const char *filename,
@@ -207,7 +202,7 @@ or passed from/to main memory:
         magmaDoubleComplex **val,
         magma_queue_t queue );
 
-Matrix Formats
+Matrix Formats {#formats}
 =================================
 To convert a matrix from one into another format, the CPU-based routine
 
@@ -222,7 +217,7 @@ can be used where old_format and new_format determine the specific conversion.
 
 
 
-Memory Handling
+Memory Handling {#memorhandling}
 =================================
 All iterative solvers and eigensolvers included in the sparse-iter package
 work on the device. Hence, it is required to send the respective data structures
@@ -257,7 +252,7 @@ Linear algebra objects can be deallocated via
 
 
 
-Iterative Solvers
+Iterative Solvers {#sparsesolvers}
 =================================
 The sparse-iter package contains a variety of linear solvers, eigensolvers,
 and preconditioners. The standard procedure to call a solver is to
@@ -265,41 +260,27 @@ pass the linear algebra objects (located on the device) and a structure called
 magma_z_solver_par (respectively and magma_z_precond_par)
 controlling the iterative solver and collecting information during the execution:
 
-struct magma_z_solver_par{
-
-        magma_solver_type  solver;                                  // solver type
-        magma_int_t                version;                                 // sometimes there are different versions
-        double                         epsilon;                                 // relative residual stopping criterion
-        magma_int_t                maxiter;                                 // upper iteration limit
-        magma_int_t                restart;                                 // for GMRES
-        magma_ortho_t          ortho;                                   // for GMRES
-        magma_int_t                numiter;                                 // feedback: number of needed iterations
-        double                         init_res;                                // feedback: initial residual
-        double                         final_res;                           // feedback: final residual
-        double                         iter_res;                                // feedback: iteratively computed residual
-        real_Double_t          runtime;                                 // feedback: runtime needed
-        real_Double_t          *res_vec;                                // feedback: array containing residuals
-        real_Double_t          *timing;                                 // feedback: detailed timing
-        magma_int_t                verbose;                                 // print residual ever 'verbose' iterations
-        magma_int_t                num_eigenvalues;                 // number of EV for eigensolvers
-        magma_int_t                ev_length;                           // needed for framework
-        double                         *eigenvalues;                        // feedback: array containing eigenvalues
-        magmaDoubleComplex *eigenvectors;                   // feedback: array containing eigenvectors
-        magma_int_t                info;                                        // feedback: did the solver converge etc.
-
-//---------------------------------
-// the input for verbose is:
-// 0 = production mode
-// k>0 = convergence and timing is monitored in *res_vec and *timeing every
-// k-th iteration
-//
-// the output of info is:
-//  0 = convergence (stopping criterion met)
-// -1 = no convergence
-// -2 = convergence but stopping criterion not met within maxiter
-//--------------------------------
-
-}magma_z_solver_par;
+    struct magma_z_solver_par{
+        magma_solver_type  solver;                  // solver type
+        magma_int_t        version;                 // sometimes there are different versions
+        double             epsilon;                 // relative residual stopping criterion
+        magma_int_t        maxiter;                 // upper iteration limit
+        magma_int_t        restart;                 // for GMRES
+        magma_ortho_t      ortho;                   // for GMRES
+        magma_int_t        numiter;                 // feedback: number of needed iterations
+        double             init_res;                // feedback: initial residual
+        double             final_res;               // feedback: final residual
+        double             iter_res;                // feedback: iteratively computed residual
+        real_Double_t      runtime;                 // feedback: runtime needed
+        real_Double_t      *res_vec;                // feedback: array containing residuals
+        real_Double_t      *timing;                 // feedback: detailed timing
+        magma_int_t        verbose;                 // print residual ever 'verbose' iterations
+        magma_int_t        num_eigenvalues;         // number of EV for eigensolvers
+        magma_int_t        ev_length;               // needed for framework
+        double             *eigenvalues;            // feedback: array containing eigenvalues
+        magmaDoubleComplex *eigenvectors;           // feedback: array containing eigenvectors
+        magma_int_t        info;                    // feedback: did the solver converge etc
+    }magma_z_solver_par;
 
 These entities can either be initialized manually, or via the function
 
@@ -364,19 +345,17 @@ More conveniant is the use the wrapper
 
 where zopts is a structure containing both, the solver and the preconditioner
 information:
-struct magma_zopts{
-
-        magma_z_solver_par          solver_par;
-        magma_z_preconditioner  precond_par;
-        magma_storage_t                 input_format;
-        int                                         blocksize;
-        int                                         alignment;
-        magma_storage_t                 output_format;
-        magma_location_t                input_location;
-        magma_location_t                output_location;
-        magma_scale_t                   scaling;
-
-}magma_zopts;
+    struct magma_zopts{
+            magma_z_solver_par          solver_par;
+            magma_z_preconditioner  precond_par;
+            magma_storage_t                 input_format;
+            int     blocksize;
+            int     alignment;
+            magma_storage_t                 output_format;
+            magma_location_t                input_location;
+            magma_location_t                output_location;
+            magma_scale_t scaling;
+    }magma_zopts;
 
 All entities of this structure can be initialized from command line by calling
 
@@ -390,7 +369,7 @@ All entities of this structure can be initialized from command line by calling
 
 
 
-Example
+Example {#sparseexample}
 =================================
 Especially when using sparse-iter for the first time, the easiest way to get
 familiar with the package is to use and modify one of the predefined testers.
@@ -446,7 +425,8 @@ Finally, we clean up the used memory via
         magma_z_vfree(&b_d, queue );
 
 and
-        magma_zsolverinfo_free( &zopts.solver_par, &zopts.precond_par, queue );
+
+        magma_dsolverinfo_free( &dopts.solver_par, &dopts.precond_par, queue );
 
 The solution vector - present in main memory in the vector structure x - is
 passed back to the application via:
