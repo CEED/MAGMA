@@ -101,7 +101,7 @@ int main(  int argc, char** argv )
             pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
             pntre[0] = 0;
             for (j=0; j<hA.num_rows; j++ ) {
-                pntre[j] = hA.drow[j+1];
+                pntre[j] = hA.row[j+1];
             }
              MKL_INT num_rows = hA.num_rows;
              MKL_INT num_cols = hA.num_cols;
@@ -110,21 +110,21 @@ int main(  int argc, char** argv )
             MKL_INT *col;
             TESTING_MALLOC_CPU( col, MKL_INT, nnz );
             for( magma_int_t t=0; t < hA.nnz; ++t ) {
-                col[ t ] = hA.dcol[ t ];
+                col[ t ] = hA.col[ t ];
             }
             MKL_INT *row;
             TESTING_MALLOC_CPU( row, MKL_INT, num_rows );
             for( magma_int_t t=0; t < hA.num_rows; ++t ) {
-                row[ t ] = hA.dcol[ t ];
+                row[ t ] = hA.col[ t ];
             }
     
             start = magma_wtime();
             for (j=0; j<10; j++ ) {
                 mkl_zcsrmv( "N", &num_rows, &num_cols, 
-                            MKL_ADDR(&c_one), "GFNC", MKL_ADDR(hA.dval), 
+                            MKL_ADDR(&c_one), "GFNC", MKL_ADDR(hA.val), 
                             col, row, pntre, 
-                                                    MKL_ADDR(hx.dval), 
-                            MKL_ADDR(&c_zero),        MKL_ADDR(hy.dval) );
+                                                    MKL_ADDR(hx.val), 
+                            MKL_ADDR(&c_zero),        MKL_ADDR(hy.val) );
             }
             end = magma_wtime();
             printf( "\n > MKL  : %.2e seconds %.2e GFLOP/s    (CSR).\n",
@@ -164,7 +164,7 @@ int main(  int argc, char** argv )
         magma_z_vtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
-            res=res + MAGMA_Z_REAL(hcheck.dval[k]) - MAGMA_Z_REAL(hrefvec.dval[k]);
+            res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
         if ( res < .000001 )
             printf("# tester spmv ELL:  ok\n");
         else
@@ -188,7 +188,7 @@ int main(  int argc, char** argv )
         magma_z_vtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
-            res=res + MAGMA_Z_REAL(hcheck.dval[k]) - MAGMA_Z_REAL(hrefvec.dval[k]);
+            res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
         printf("# |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
             printf("# tester spmv SELL-P:  ok\n");
@@ -240,7 +240,7 @@ int main(  int argc, char** argv )
         magma_z_vtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
-            res=res + MAGMA_Z_REAL(hcheck.dval[k]) - MAGMA_Z_REAL(hrefvec.dval[k]);
+            res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
         printf("# |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
             printf("# tester spmv cuSPARSE CSR:  ok\n");
@@ -268,7 +268,7 @@ int main(  int argc, char** argv )
         magma_z_vtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
-            res=res + MAGMA_Z_REAL(hcheck.dval[k]) - MAGMA_Z_REAL(hrefvec.dval[k]);
+            res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
         printf("# |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
             printf("# tester spmv cuSPARSE HYB:  ok\n");

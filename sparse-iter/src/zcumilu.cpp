@@ -302,7 +302,7 @@ magma_zapplycumilu_l(
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
-    // magma_device_sync();
+
     return MAGMA_SUCCESS;
 }
 
@@ -392,7 +392,7 @@ magma_zapplycumilu_r(
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
-    // magma_device_sync();
+
     return MAGMA_SUCCESS;
 }
 
@@ -684,7 +684,7 @@ magma_zapplycumicc_l(
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
-    // magma_device_sync();
+
     return MAGMA_SUCCESS;
 }
 
@@ -779,7 +779,7 @@ magma_zapplycumicc_r(
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
-    // magma_device_sync();
+
     return MAGMA_SUCCESS;
 }
 
