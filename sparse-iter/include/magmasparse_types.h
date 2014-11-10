@@ -48,8 +48,8 @@ typedef struct magma_z_sparse_matrix{
         magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
     };
     union {
-        magmaDoubleComplex      *diag;          // array containing values in CPU case
-        magmaDoubleComplex_ptr  ddiag;          // array containing values in DEV case
+        magmaDoubleComplex      *diag;          // opt: diagonal entries in CPU case
+        magmaDoubleComplex_ptr  ddiag;          // opt: diagonal entries in DEV case
     };
     union {
         magma_index_t           *row;           // row pointer CPU case
@@ -61,7 +61,7 @@ typedef struct magma_z_sparse_matrix{
     };
     union {
         magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+        magmaIndex_ptr          dcol;           // array containing col indices DEV case
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
@@ -86,8 +86,8 @@ typedef struct magma_c_sparse_matrix{
         magmaFloatComplex_ptr   dval;           // array containing values in DEV case
     };
     union {
-        magmaFloatComplex       *diag;          // array containing values in CPU case
-        magmaFloatComplex_ptr   ddiag;          // array containing values in DEV case
+        magmaFloatComplex       *diag;          // opt: diagonal entries in CPU case
+        magmaFloatComplex_ptr   ddiag;          // opt: diagonal entries in DEV case
     };
     union {
         magma_index_t           *row;           // row pointer CPU case
@@ -99,7 +99,7 @@ typedef struct magma_c_sparse_matrix{
     };
     union {
         magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+        magmaIndex_ptr          dcol;           // array containing col indices DEV case
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
@@ -125,8 +125,8 @@ typedef struct magma_d_sparse_matrix{
         magmaDouble_ptr         dval;           // array containing values in DEV case
     };
     union {
-        double                  *diag;          // array containing values in CPU case
-        magmaDouble_ptr         ddiag;          // array containing values in DEV case
+        double                  *diag;          // opt: diagonal entries in CPU case
+        magmaDouble_ptr         ddiag;          // opt: diagonal entries in DEV case
     };
     union {
         magma_index_t           *row;           // row pointer CPU case
@@ -138,7 +138,7 @@ typedef struct magma_d_sparse_matrix{
     };
     union {
         magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+        magmaIndex_ptr          dcol;           // array containing col indices DEV case
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
@@ -164,8 +164,8 @@ typedef struct magma_s_sparse_matrix{
         magmaFloat_ptr          dval;           // array containing values in DEV case
     };
     union {
-        float                   *diag;          // array containing values in CPU case
-        magmaFloat_ptr          ddiag;          // array containing values in DEV case
+        float                   *diag;          // opt: diagonal entries in CPU case
+        magmaFloat_ptr          ddiag;          // opt: diagonal entries in DEV case
     };
     union {
         magma_index_t           *row;           // row pointer CPU case
@@ -177,7 +177,7 @@ typedef struct magma_s_sparse_matrix{
     };
     union {
         magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices  DEV case
+        magmaIndex_ptr          dcol;           // array containing col indices DEV case
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR

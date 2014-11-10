@@ -38,8 +38,8 @@ Collection: http://www.cise.ufl.edu/research/sparse/matrices/
 A suitable test matrix is given by Trefethen_2000:
 http://www.cise.ufl.edu/research/sparse/matrices/JGD_Trefethen/Trefethen_2000.html
 
-Another option is to generate a 2D laplace problem of variable size on-the-fly:
-'LAPLACE2D 100' generates a 2D Laplacian of size 100x100.
+Another option is to generate a 2D Laplace problem of variable size on-the-fly:
+'LAPLACE2D 10' generates a 2D Laplacian of size 100x100.
 
 To run a solver:
 
@@ -52,7 +52,7 @@ double-complex version ("x"=c or z, respectively).
 
 
 For different solvers there exist different options, which are printed 
-when executing "./run_xsolver -h".
+when executing "./run_xsolver —help.
 
  Some options are:
 
@@ -66,9 +66,9 @@ when executing "./run_xsolver -h".
                6   GMRES
                7   preconditioned GMRES
                8   LOBPCG
-               9   Iterative Refinement
-               10  Jacobi
-               11  Block-asynchronous Iteration
+               9   Jacobi
+               10  Block-asynchronous Iteration
+               21  Iterative Refinement
 
 "--verbose k"
     k = 0 : solver is run in production mode, no additional characteristics 
@@ -104,22 +104,22 @@ when executing "./run_xsolver -h".
    k = 1 scale symmetrically to unit diagonal
 
 "--preconditioner k"
-    k = 0 : Jacobi
-    k = 1 : ILU/IC
-    k = 2 : iterative ILU(0)/IC(0)
-    Other preconditiners are only available for the Iterative Refinement.
+    k = 0 : No
+    k = 1 : Jacobi
+    k = 2 : ILU/IC
+    Other preconditioners are only available for the Iterative Refinement.
 
 "--ev k"
-    k : number of egenvalue/eigenvectors to compute
+    k : number of eigenvalue/eigenvectors to compute
 
 
 The last argument is the traget matrices. These should be stored in MatrixMarket
 format, see http://math.nist.gov/MatrixMarket/formats.html.
 
 The solver info uses the following feedback:
-       0        Sucess.
+       0        Success.
       -1        No convergence.
       -2        No convergence within iteration limit. 
      -99        Solver not supported.
-    -100        Operator A is not postive definite
+    -100        Operator A is not positive definite
  

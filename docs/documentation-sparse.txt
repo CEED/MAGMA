@@ -42,8 +42,8 @@ necessary to access the sparse-BLAS via wrappers:
             magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
         };
         union {
-            magmaDoubleComplex      *diag;          // array containing values in CPU case
-            magmaDoubleComplex_ptr  ddiag;          // array containing values in DEV case
+            magmaDoubleComplex      *diag;          // opt: diagonal entries in CPU case
+            magmaDoubleComplex_ptr  ddiag;          // opt: diagonal entries in DEV case
         };
         union {
             magma_index_t           *row;           // row pointer CPU case
