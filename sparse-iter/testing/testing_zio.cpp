@@ -67,6 +67,9 @@ int main(  int argc, char** argv )
 
         // delete temporary matrix
         unlink( filename );
+                
+        //visualize
+        magma_z_mvisu( A2, queue );
 
         // pass it to another application and back
         magma_int_t m, n;
