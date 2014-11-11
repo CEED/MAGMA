@@ -21,7 +21,7 @@ ZSRC := \
 	magma_z_transfer.cpp	\
 	magma_z_vio.cpp		\
 	magma_zgeneratematrix.cpp	\
-	matrix_zio.cpp		\
+	magma_zmio.cpp		\
 	magma_zsolverinfo.cpp	\
     magma_zcsrsplit.cpp   \
     magma_zmcsrpass.cpp   \
