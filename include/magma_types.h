@@ -302,7 +302,10 @@ typedef double real_Double_t;
 #define MAGMA_ERR_INVALID_PTR      -115
 #define MAGMA_ERR_UNKNOWN          -116
 #define MAGMA_ERR_NOT_IMPLEMENTED  -117
-
+// some sparse-iter errors
+#define MAGMA_SLOW_CONVERGENCE     -201
+#define MAGMA_DIVERGENCE           -202
+#define MAGMA_NONSPD               -203
 
 // ----------------------------------------
 // parameter constants
