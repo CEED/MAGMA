@@ -413,9 +413,21 @@ We solve with
 
         magma_d_solver( B_d, b_d, &x_d, &zopts, queue );
 
-and return the solution vector to the CPU via
+and return the solution vector to the application via
 
-        magma_d_vtransfer( x_d, &x, Magma_DEV, Magma_CPU, queue );
+        magma_int_t m, n;
+        double * valx;
+        magma_dvget( x_d, &m, &n, &valx, queue );
+
+Finally, we clean up the used memory via
+
+        magma_z_mfree(&B_d, queue );
+        magma_z_mfree(&B, queue );
+        magma_z_vfree(&x_d, queue );
+        magma_z_vfree(&b_d, queue );
+
+and
+        magma_zsolverinfo_free( &zopts.solver_par, &zopts.precond_par, queue );
 
 Finally, we clean up the used memory via
 
@@ -427,12 +439,5 @@ Finally, we clean up the used memory via
 and
 
         magma_dsolverinfo_free( &dopts.solver_par, &dopts.precond_par, queue );
-
-The solution vector - present in main memory in the vector structure x - is
-passed back to the application via:
-
-        magma_int_t m, n;
-        double * valx;
-        magma_dvget( x, &m, &n, &valx, queue );
 
 */
