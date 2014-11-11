@@ -71,7 +71,7 @@ magma_ziterref(
     // prepare solver feedback
     solver_par->solver = Magma_ITERREF;
     solver_par->numiter = 0;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 
     double residual;
     magma_zresidual( A, b, *x, &residual, queue );
@@ -147,7 +147,7 @@ magma_ziterref(
     solver_par->iter_res = nom;
 
     if ( solver_par->numiter < solver_par->maxiter) {
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
@@ -157,7 +157,7 @@ magma_ziterref(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -2;
+        solver_par->info = MAGMA_SLOW_CONVERGENCE;
     }
     else {
         if ( solver_par->verbose > 0 ) {
@@ -168,7 +168,7 @@ magma_ziterref(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
     }   
     magma_z_vfree(&r, queue );
     magma_z_vfree(&z, queue );

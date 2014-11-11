@@ -277,7 +277,7 @@ magma_zsolverinfo(
 
     } else {
         printf("error: solver info not supported.\n");
-        solver_par->info = -99;
+        solver_par->info = MAGMA_ERR_NOT_SUPPORTED;
     }
 
     printf("#    solver info: %d\n", 
@@ -533,7 +533,7 @@ magma_zsolverinfo_init(
     solver_par->final_res = 0.;
     solver_par->runtime = 0.;
     solver_par->verbose = 0;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 */
     if ( solver_par->verbose > 0 ) {
         magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 

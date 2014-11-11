@@ -117,9 +117,9 @@ The last argument is the traget matrices. These should be stored in MatrixMarket
 format, see http://math.nist.gov/MatrixMarket/formats.html.
 
 The solver info uses the following feedback:
-       0        Success.
-      -1        No convergence.
-      -2        No convergence within iteration limit. 
-     -99        Solver not supported.
-    -100        Operator A is not positive definite
+       0          Success.
+      -117        Not supported.
+      -201        No convergence within iteration limit. 
+      -202        No convergence.
+      -203        Operator A is not positive definite.
  

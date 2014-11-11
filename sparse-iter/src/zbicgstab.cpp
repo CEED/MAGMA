@@ -66,7 +66,7 @@ magma_zbicgstab(
     // prepare solver feedback
     solver_par->solver = Magma_BICGSTAB;
     solver_par->numiter = 0;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
@@ -110,8 +110,8 @@ magma_zbicgstab(
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         magmablasSetKernelStream( orig_queue );
-        return -100;
-        solver_par->info = -100;
+        return MAGMA_NONSPD;
+        solver_par->info = MAGMA_NONSPD;;
     }
 
     //Chronometry
@@ -174,7 +174,7 @@ magma_zbicgstab(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter) {
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
@@ -184,7 +184,7 @@ magma_zbicgstab(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -2;
+        solver_par->info = MAGMA_SLOW_CONVERGENCE;
     }
     else {
         if ( solver_par->verbose > 0 ) {
@@ -195,7 +195,7 @@ magma_zbicgstab(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
     }
     magma_z_vfree(&r, queue );
     magma_z_vfree(&rr, queue );

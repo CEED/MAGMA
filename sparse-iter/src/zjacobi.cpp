@@ -68,7 +68,7 @@ magma_zjacobi(
 
     // prepare solver feedback
     solver_par->solver = Magma_JACOBI;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 
     real_Double_t tempo1, tempo2;
     double residual;
@@ -108,9 +108,9 @@ magma_zjacobi(
     solver_par->numiter = solver_par->maxiter;
 
     if ( solver_par->init_res > solver_par->final_res )
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     else
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
 
     magma_z_mfree( &M, queue );
     magma_z_vfree( &c, queue );

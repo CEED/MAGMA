@@ -117,7 +117,7 @@ magma_zcpbicgstab(
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         magmablasSetKernelStream( orig_queue );
-        return -100;
+        return MAGMA_NONSPD;
     }
 
     printf("Iteration : %4d  Norm: %f\n", 0, nom );

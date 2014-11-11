@@ -63,7 +63,7 @@ magma_zbaiter(
 {
     // prepare solver feedback
     solver_par->solver = Magma_BAITER;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 
 
 
@@ -103,9 +103,9 @@ magma_zbaiter(
     solver_par->numiter = solver_par->maxiter;
 
     if ( solver_par->init_res > solver_par->final_res )
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     else
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
 
     magma_z_mfree(&D, queue );
     magma_z_mfree(&R, queue );

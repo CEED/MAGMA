@@ -78,50 +78,6 @@ magma_z_precond(
         case  Magma_BAITER: 
                 magma_zbaiter( A, b, x, &psolver_par, queue );break;
     }
-/*
-   printf("here%d \n", precond->solver);
-    if ( precond->solver == Magma_CG ) {
-// printf( "start CG preconditioner with epsilon: %f and maxiter: %d: ", 
-//                            psolver_par.epsilon, psolver_par.maxiter );
-        magma_zcg( A, b, x, &psolver_par, queue );
-// printf( "done.\n" );
-        
-    }
-    if ( precond->solver == Magma_GMRES ) {printf("here\n");
-// printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: ", 
-//                               psolver_par.epsilon, psolver_par.maxiter );
-        magma_zgmres( A, b, x, &psolver_par, queue );
-// printf( "done.\n" );
-
-    }
-    if ( precond->solver == Magma_BICGSTAB ) {
-// printf( "start BICGSTAB preconditioner with epsilon: %f and maxiter: %d: ", 
-//                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zbicgstab( A, b, x, &psolver_par, queue );
-// printf( "done.\n");
-
-    }
-    if ( precond->solver == Magma_JACOBI ) {
-// printf( "start JACOBI preconditioner with epsilon: %f and maxiter: %d: ", 
-//                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zjacobi( A, b, x, &psolver_par, queue );
-// printf( "done.\n");
-
-    }
-    if ( precond->solver == Magma_BAITER ) {
-// printf( "start BAITER preconditioner with epsilon: %f and maxiter: %d: ", 
-//                                  psolver_par.epsilon, psolver_par.maxiter );
-        magma_zbaiter( A, b, x, &psolver_par, queue );
-// printf( "done.\n");
-
-    }
-    if ( precond->solver == Magma_NONE ) {
-
-    }
-    else {
-        printf( "error: preconditioner type not yet supported.\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
-    }*/
     return MAGMA_SUCCESS;
 }
 
@@ -246,15 +202,11 @@ magma_z_applyprecond(
     else if ( precond->solver == Magma_ILU ) {
         magma_z_vector tmp;
         magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
-     //   magma_zapplycuilu_l( b, &tmp, precond, queue ); 
-     //   magma_zapplycuilu_r( tmp, x, precond, queue );
         magma_z_vfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
         magma_z_vector tmp;
         magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
-       // magma_ztrisv_l_nu( precond->L, b, &tmp, queue );
-       // magma_ztrisv_r_nu( precond->L, tmp, x, queue );
         magma_z_vfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_NONE ) {

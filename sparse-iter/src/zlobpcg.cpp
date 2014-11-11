@@ -139,11 +139,11 @@ magma_zlobpcg(
     magma_int_t *activeMask;
 
     // === Check some parameters for possible quick exit ===
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
     if (m < 2)
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
     else if (n > m)
-        solver_par->info = -2;
+        solver_par->info = MAGMA_SLOW_CONVERGENCE;
 
     if (solver_par->info != 0) {
         magma_xerbla( __func__, -(solver_par->info) );
@@ -506,11 +506,11 @@ magma_zlobpcg(
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     solver_par->numiter = iterationNumber;
     if ( solver_par->numiter < solver_par->maxiter) {
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res )
-        solver_par->info = -2;
+        solver_par->info = MAGMA_SLOW_CONVERGENCE;
     else
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
     
     // =============================================================================
     // === postprocessing;

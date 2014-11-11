@@ -80,7 +80,7 @@ magma_zgmres(
     // prepare solver feedback
     solver_par->solver = Magma_GMRES;
     solver_par->numiter = 0;
-    solver_par->info = 0;
+    solver_par->info = MAGMA_SUCCESS;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
@@ -289,7 +289,7 @@ magma_zgmres(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter) {
-        solver_par->info = 0;
+        solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
@@ -299,7 +299,7 @@ magma_zgmres(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -2;
+        solver_par->info = MAGMA_SLOW_CONVERGENCE;
     }
     else {
         if ( solver_par->verbose > 0 ) {
@@ -310,7 +310,7 @@ magma_zgmres(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = -1;
+        solver_par->info = MAGMA_DIVERGENCE;
     }
     // free pinned memory
     magma_free_pinned( H );

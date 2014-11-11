@@ -391,9 +391,11 @@ typedef struct magma_s_solver_par{
 // k-th iteration 
 //
 // the output of info is:
-//  0 = convergence (stopping criterion met)
-// -1 = no convergence
-// -2 = convergence but stopping criterion not met within maxiter
+//       0          Success.
+//      -117        Not supported.
+//      -201        No convergence within iteration limit. 
+//      -202        No convergence.
+//      -203        Operator A is not positive definite.
 //--------------------------------
 
 }magma_s_solver_par;
