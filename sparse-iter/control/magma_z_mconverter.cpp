@@ -81,9 +81,15 @@ magma_z_csr_compressor(
     magma_int_t *n,
     magma_queue_t queue )
 {
+
     magma_int_t stat_cpu = 0, stat_dev = 0;
     magma_index_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
     stat_cpu += magma_index_malloc_cpu( &(row_nnz), (*n) );
+    if( stat_cpu != 0 ){
+        magma_free_cpu( row_nnz );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_HOST_ALLOC;
+    }
     stat_cpu += magma_index_malloc_cpu( rown, *n+1 );
     for( i=0; i<*n; i++ ) {
         (*rown)[i] = nnz_new;
@@ -113,9 +119,9 @@ magma_z_csr_compressor(
     }
 
     if ( valn == NULL || coln == NULL || rown == NULL ) {
-        magma_free( valn );
-        magma_free( coln );
-        magma_free( rown );
+        magma_free_cpu( valn );
+        magma_free_cpu( coln );
+        magma_free_cpu( rown );
         printf("error: memory allocation.\n");
         return MAGMA_ERR_HOST_ALLOC;
     }
@@ -172,6 +178,17 @@ magma_z_mconvert(
     magmablasGetKernelStream( &orig_queue );
 
     magma_int_t stat_cpu = 0, stat_dev = 0;
+    B->val = NULL;
+    B->col = NULL;
+    B->row = NULL;
+    B->rowidx = NULL;
+    B->blockinfo = NULL;
+    B->diag = NULL;
+    B->dval = NULL;
+    B->dcol = NULL;
+    B->drow = NULL;
+    B->drowidx = NULL;
+    B->ddiag = NULL;
 
     magmaDoubleComplex zero = MAGMA_Z_MAKE( 0.0, 0.0 );
 
@@ -200,8 +217,6 @@ magma_z_mconvert(
             for( magma_int_t i=0; i<A.num_rows+1; i++) {
                 B->row[i] = A.row[i];
             }
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to CSRL
         if ( old_format == Magma_CSR && new_format == Magma_CSRL ) {
@@ -246,9 +261,7 @@ magma_z_mconvert(
                     }
                 }
             }
-            B->row[B->num_rows] = numzeros;
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS;             
+            B->row[B->num_rows] = numzeros;            
         }
         // CSR to CSRU
         if ( old_format == Magma_CSR && new_format == Magma_CSRU ) {
@@ -279,8 +292,6 @@ magma_z_mconvert(
                 }
             }
             B->row[B->num_rows] = numzeros;
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSRU/CSRCSCU to CSR
         if ( ( old_format == Magma_CSRU  ) 
@@ -290,8 +301,6 @@ magma_z_mconvert(
             magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
             A.storage_type = Magma_CSRL;
 
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to CSRD (diagonal elements first)
         if ( old_format == Magma_CSR && new_format == Magma_CSRD ) {
@@ -324,8 +333,6 @@ magma_z_mconvert(
             for( magma_int_t i=0; i<A.num_rows+1; i++) {
                 B->row[i] = A.row[i];
             }
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSRD to CSR (diagonal elements first)
         if ( old_format == Magma_CSRD && new_format == Magma_CSR ) {
@@ -364,8 +371,6 @@ magma_z_mconvert(
             for( magma_int_t i=0; i<A.num_rows+1; i++) {
                 B->row[i] = A.row[i];
             }
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to COO
         if ( old_format == Magma_CSR && new_format == Magma_COO ) {
@@ -381,9 +386,7 @@ magma_z_mconvert(
                         B->row[j] = i;   
                 }
             }
-    
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
+   
         }
         // CSR to CSRCOO
         if ( old_format == Magma_CSR && new_format == Magma_CSRCOO ) {
@@ -398,23 +401,17 @@ magma_z_mconvert(
                         B->rowidx[j] = i;   
                 }
             }
-    
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
+   
         }
         // CSRCOO to CSR
         if ( old_format == Magma_CSRCOO && new_format == Magma_CSR ) {
 
             magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSRCSC to CSR
         if ( old_format == Magma_COO && new_format == Magma_CSR ) {
            // A.storage_type = Magma_CSR;
           //  magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to ELLPACK    
         if ( old_format == Magma_CSR && new_format == Magma_ELLPACK ) {
@@ -429,6 +426,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
             stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
+            if( stat_cpu != 0 ){
+                magma_free_cpu( length );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
 
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
@@ -455,8 +458,6 @@ magma_z_mconvert(
             }
             B->max_nnz_row = maxrowlength;
             //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
 
         // ELLPACK to CSR
@@ -474,6 +475,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t *row_tmp;
             stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -484,8 +491,7 @@ magma_z_mconvert(
                        &B->val, &B->row, &B->col, &B->num_rows, queue );  
             B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
+
         }        
 
         // CSR to ELL (former ELLPACKT, ELLPACK using column-major storage)
@@ -502,7 +508,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
             stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
-
+            if( stat_cpu != 0 ){
+                magma_free_cpu( length );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
                 if (length[i] > maxrowlength)
@@ -529,8 +540,6 @@ magma_z_mconvert(
             }
             B->max_nnz_row = maxrowlength;
             //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
 
         // ELL (ELLPACKT) to CSR
@@ -553,6 +562,14 @@ magma_z_mconvert(
             stat_cpu += magma_zmalloc_cpu( &val_tmp, A.num_rows*A.max_nnz_row );
             stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
             stat_cpu += magma_index_malloc_cpu( &col_tmp, A.num_rows*A.max_nnz_row );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( val_tmp );
+                magma_free_cpu( col_tmp );
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -569,9 +586,6 @@ magma_z_mconvert(
                        &B->val, &B->row, &B->col, &B->num_rows, queue ); 
 
             B->nnz = B->row[B->num_rows];
-            //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }  
 
         // CSR to ELLD (ELLPACK with diagonal element first)
@@ -588,7 +602,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
             stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
-
+            if( stat_cpu != 0 ){
+                magma_free_cpu( length );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
                 if (length[i] > maxrowlength)
@@ -619,9 +638,6 @@ magma_z_mconvert(
                 }
             }
             B->max_nnz_row = maxrowlength;
-            //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // ELLD (ELLPACK with diagonal element first) to CSR
         if ( old_format == Magma_ELLD && new_format == Magma_CSR ) {
@@ -639,6 +655,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t *row_tmp;
             stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;   
@@ -647,6 +669,14 @@ magma_z_mconvert(
             magmaDoubleComplex *val_tmp2;
             stat_cpu += magma_zmalloc_cpu( &val_tmp2, A.num_rows*A.max_nnz_row );
             stat_cpu += magma_index_malloc_cpu( &col_tmp2, A.num_rows*A.max_nnz_row );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( val_tmp2 );
+                magma_free_cpu( col_tmp2 );
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( magma_int_t j=0;j<A.num_rows;j++ ) {
                 magma_index_t diagcol = A.col[j*A.max_nnz_row];
                 magma_int_t smaller = 0;
@@ -672,9 +702,6 @@ magma_z_mconvert(
             magma_z_csr_compressor(&val_tmp2, &row_tmp, &col_tmp2, 
                        &B->val, &B->row, &B->col, &B->num_rows, queue ); 
             B->nnz = B->row[B->num_rows];
-            //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }  
         // CSR to ELLDD (2x ELLD (first row, then col major)
         if ( old_format == Magma_CSR && new_format == Magma_ELLDD ) {         
@@ -717,9 +744,6 @@ magma_z_mconvert(
             }
 
             magma_z_mfree(&A_tmp, queue );
-            //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // ELLDD to CSR
         if ( old_format == Magma_ELLDD && new_format == Magma_CSR ) {         
@@ -732,6 +756,12 @@ magma_z_mconvert(
             magma_z_sparse_matrix A_tmp;
             stat_cpu += magma_zmalloc_cpu( &A_tmp.val, off );
             stat_cpu += magma_index_malloc_cpu( &A_tmp.col, off );
+            if( stat_cpu != 0 ){
+                magma_z_mfree( &A_tmp, queue );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             A_tmp.num_rows = A.num_rows;
             A_tmp.num_cols = A.num_cols;
             A_tmp.nnz = A.nnz;
@@ -766,8 +796,6 @@ magma_z_mconvert(
 
             magma_z_mfree(&A_tmp, queue );
             //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to ELLRT (also ELLPACKRT)
         if ( old_format == Magma_CSR && new_format == Magma_ELLRT ) {
@@ -783,7 +811,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
             stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
-
+            if( stat_cpu != 0 ){
+                magma_free_cpu( length );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
                 if (length[i] > maxrowlength)
@@ -817,8 +850,6 @@ magma_z_mconvert(
             }
             B->max_nnz_row = maxrowlength;         
             //printf( "done\n" );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
 
         // ELLRT to CSR
@@ -841,6 +872,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t *row_tmp;
             stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*rowlength;
@@ -849,9 +886,7 @@ magma_z_mconvert(
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
                    &B->val, &B->row, &B->col, &B->num_rows, queue );  
             B->nnz = B->row[B->num_rows];
-            //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
+            //printf( "done\n" );       
         }   
         // CSR to SELLC / SELLP
         // SELLC is SELLP using alignment 1
@@ -879,6 +914,12 @@ magma_z_mconvert(
             // conversion
             magma_index_t i, j, k, *length, maxrowlength=0;
             stat_cpu += magma_index_malloc_cpu( &length, C);
+            if( stat_cpu != 0 ){
+                magma_free_cpu( length );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             // B-row points to the start of each slice
             stat_cpu += magma_index_malloc_cpu( &B->row, slices+1 );
 
@@ -928,8 +969,6 @@ magma_z_mconvert(
                 }
             }
             //B->nnz = A.nnz;
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // SELLC/SELLP to CSR    
         if ( (old_format == Magma_SELLC || old_format == Magma_SELLP )
@@ -954,7 +993,14 @@ magma_z_mconvert(
             stat_cpu += magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) );
             stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+C );
             stat_cpu += magma_index_malloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
-
+            if( stat_cpu != 0 ){
+                magma_free_cpu( val_tmp );
+                magma_free_cpu( col_tmp );
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                magmablasSetKernelStream( orig_queue );
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             // zero everything
             for(magma_int_t i=0; i<A.max_nnz_row*(A.num_rows+C); i++ ) {
                 val_tmp[ i ] = MAGMA_Z_MAKE(0., 0.);
@@ -987,8 +1033,6 @@ magma_z_mconvert(
                        &B->val, &B->row, &B->col, &B->num_rows, queue ); 
             B->nnz = B->row[B->num_rows];
             //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS;  
         }
         // CSR to DENSE
         if ( old_format == Magma_CSR && new_format == Magma_DENSE ) {
@@ -1015,8 +1059,6 @@ magma_z_mconvert(
             }
 
             //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // DENSE to CSR
         if ( old_format == Magma_DENSE && new_format == Magma_CSR ) {
@@ -1063,8 +1105,6 @@ magma_z_mconvert(
             (B->row)[B->num_rows]=B->nnz;
 
             //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to BCSR
         if ( old_format == Magma_CSR && new_format == Magma_BCSR ) {
@@ -1161,15 +1201,14 @@ magma_z_mconvert(
             // the values are now handled special: we want to transpose 
                                         //each block to be in MAGMA format
             magmaDoubleComplex *transpose;
-            magma_zmalloc( &transpose, size_b*size_b );
+            stat_dev += magma_zmalloc( &transpose, size_b*size_b );
+            
             for( magma_int_t i=0; i<B->numblocks; i++ ) {
                 magma_zsetvector( size_b*size_b, B->val+i*size_b*size_b, 1, transpose, 1 );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
                 magma_zgetvector( size_b*size_b, transpose, 1, B->val+i*size_b*size_b, 1 );
             }
             //printf( "done\n" );      
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
 
         }
         // BCSR to CSR
@@ -1201,6 +1240,13 @@ magma_z_mconvert(
                 // larger than the final size due to overhead blocks
             magma_index_t *col_tmp;            
             stat_cpu += magma_index_malloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( val_tmp );
+                magma_free_cpu( col_tmp );
+                magma_free_cpu( row_tmp );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             if ( col_tmp == NULL || val_tmp == NULL || row_tmp == NULL ) {
                 magma_free( B->val );
                 magma_free( B->col );
@@ -1226,8 +1272,18 @@ magma_z_mconvert(
             // the val pointer has to be handled special: we need to transpose 
                         //each block back to row-major
             magmaDoubleComplex *transpose, *val_tmp2;
-            magma_zmalloc( &transpose, size_b*size_b );
+            stat_dev +=  magma_zmalloc( &transpose, size_b*size_b );
+            if( stat_dev != 0 ){
+                magma_free( transpose );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_DEVICE_ALLOC;
+            }
             stat_cpu += magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
+            if( stat_cpu != 0 ){
+                magma_free_cpu( val_tmp2 );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( magma_int_t i=0; i<A.numblocks; i++ ) {
                 magma_zsetvector( size_b*size_b, A.val+i*size_b*size_b, 1, transpose, 1 );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );
@@ -1268,7 +1324,6 @@ magma_z_mconvert(
         
             printf( "done.\n" );      
             magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         else {
             printf("error: format not supported.\n");
@@ -1298,14 +1353,12 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_zmalloc( &B->dval, A.num_rows*A.num_cols );
+            stat_dev += magma_zmalloc( &B->dval, A.num_rows*A.num_cols );
 
             // conversion using CUSPARSE
             cusparseZcsr2dense( cusparseHandle, A.num_rows, A.num_cols,
                                 descr, A.dval, A.drow, A.dcol,
                                 B->dval, A.num_rows );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // DENSE to CSR    
         if ( old_format == Magma_DENSE && new_format == Magma_CSR ) {
@@ -1328,16 +1381,21 @@ magma_z_mconvert(
 
 
             magma_index_t *nnz_per_row, intnnz = B->nnz;
-            magma_index_malloc( &nnz_per_row, A.num_rows );
+            stat_dev +=  magma_index_malloc( &nnz_per_row, A.num_rows );
+            if( stat_dev != 0 ){
+                magma_free( nnz_per_row );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_DEVICE_ALLOC;
+            }
             //magma_zprint_gpu( A.num_rows, 1, nnz_per_row, A.num_rows )
             cusparseZnnz( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                           A.num_rows, A.num_cols, 
                           descr,
                           A.dval, A.num_rows, nnz_per_row, &intnnz );
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->num_rows+1 );
-            magma_index_malloc( &B->dcol, B->nnz );
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->num_rows+1 );
+            stat_dev += magma_index_malloc( &B->dcol, B->nnz );
 
             // conversion using CUSPARSE
             cusparseZdense2csr( cusparseHandle, A.num_rows, A.num_cols,
@@ -1346,8 +1404,6 @@ magma_z_mconvert(
                                 B->dval, B->drow, B->dcol );
 
             magma_free( nnz_per_row );
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to BCSR
         if ( old_format == Magma_CSR && new_format == Magma_BCSR ) {
@@ -1376,7 +1432,7 @@ magma_z_mconvert(
             // nnzTotalDevHostPtr points to host memory
             magma_index_t *nnzTotalDevHostPtr = &nnzb;
 
-            magma_index_malloc( &B->drow, mb+1 );
+            stat_dev += magma_index_malloc( &B->drow, mb+1 );
             cusparseXcsr2bsrNnz( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                                  A.num_rows, A.num_cols, descr,
                                  A.drow, A.dcol, size_b,
@@ -1391,8 +1447,8 @@ magma_z_mconvert(
             }
             B->numblocks = nnzb; // number of blocks
 
-            magma_zmalloc( &B->dval, nnzb*size_b*size_b );
-            magma_index_malloc( &B->dcol, nnzb );
+            stat_dev += magma_zmalloc( &B->dval, nnzb*size_b*size_b );
+            stat_dev += magma_index_malloc( &B->dcol, nnzb );
 
             // conversion using CUSPARSE
             cusparseZcsr2bsr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
@@ -1400,9 +1456,7 @@ magma_z_mconvert(
                               A.dval, A.drow, A.dcol,
                               size_b, descr,
                               B->dval, B->drow, B->dcol);
-            
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
+           
         }
         // BCSR to CSR
         if ( old_format == Magma_BCSR && new_format == Magma_CSR ) {
@@ -1430,19 +1484,15 @@ magma_z_mconvert(
             B->num_rows = mb * size_b;
             B->num_cols = nb * size_b;
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->num_rows+1 );
-            magma_index_malloc( &B->dcol, B->nnz );
-
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->num_rows+1 );
+            stat_dev += magma_index_malloc( &B->dcol, B->nnz );
+            
             // conversion using CUSPARSE
             cusparseZbsr2csr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
                               mb, nb, descr, A.dval, A.drow, A.dcol, 
                               size_b, descr,
                               B->dval, B->drow, B->dcol );
-
-
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to CSC   
         if ( old_format == Magma_CSR && new_format == Magma_CSC ) {
@@ -1464,9 +1514,9 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->nnz );
-            magma_index_malloc( &B->dcol, B->num_cols+1 );
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->nnz );
+            stat_dev += magma_index_malloc( &B->dcol, B->num_cols+1 );
 
             // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
@@ -1474,9 +1524,6 @@ magma_z_mconvert(
                              B->dval, B->drow, B->dcol, 
                              CUSPARSE_ACTION_NUMERIC, 
                              CUSPARSE_INDEX_BASE_ZERO);
-
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSC to CSR   
         if ( old_format == Magma_CSC && new_format == Magma_CSR ) {
@@ -1498,9 +1545,9 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->num_rows+1 );
-            magma_index_malloc( &B->dcol, B->nnz );
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->num_rows+1 );
+            stat_dev += magma_index_malloc( &B->dcol, B->nnz );
 
             // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
@@ -1508,9 +1555,6 @@ magma_z_mconvert(
                              B->dval, B->dcol, B->drow, 
                              CUSPARSE_ACTION_NUMERIC, 
                              CUSPARSE_INDEX_BASE_ZERO);
-
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // CSR to COO
         if ( old_format == Magma_CSR && new_format == Magma_COO ) {
@@ -1532,9 +1576,9 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->nnz );
-            magma_index_malloc( &B->dcol, B->nnz );
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->nnz );
+            stat_dev += magma_index_malloc( &B->dcol, B->nnz );
 
             magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1 );
             magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1 );
@@ -1543,9 +1587,6 @@ magma_z_mconvert(
             cusparseXcsr2coo( cusparseHandle, A.drow,
                               A.nnz, A.num_rows, B->drow, 
                               CUSPARSE_INDEX_BASE_ZERO );
-
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         // COO to CSR
         if ( old_format == Magma_COO && new_format == Magma_CSR ) {
@@ -1567,9 +1608,9 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_zmalloc( &B->dval, B->nnz );
-            magma_index_malloc( &B->drow, B->nnz );
-            magma_index_malloc( &B->dcol, B->nnz );
+            stat_dev += magma_zmalloc( &B->dval, B->nnz );
+            stat_dev += magma_index_malloc( &B->drow, B->nnz );
+            stat_dev += magma_index_malloc( &B->dcol, B->nnz );
 
             magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
             magma_index_copyvector( A.nnz, A.col, 1, B->col, 1 );
@@ -1578,9 +1619,6 @@ magma_z_mconvert(
             cusparseXcoo2csr( cusparseHandle, A.drow,
                               A.nnz, A.num_rows, B->drow, 
                               CUSPARSE_INDEX_BASE_ZERO );            
-
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_SUCCESS; 
         }
         else {
             magma_z_sparse_matrix hA, hB;
@@ -1596,6 +1634,16 @@ magma_z_mconvert(
             return MAGMA_ERR_NOT_SUPPORTED;
         }
     }
+    if( stat_cpu != 0 ){
+        magma_z_mfree( B, queue );
+        magmablasSetKernelStream( orig_queue );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    if( stat_dev != 0 ){
+        magma_z_mfree( B, queue );
+        magmablasSetKernelStream( orig_queue );
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }  
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }
@@ -1636,16 +1684,34 @@ magma_z_LUmergein(
     magma_z_sparse_matrix *B,
     magma_queue_t queue )
 {
-    if ( L.storage_type != Magma_CSRCOO ||
-        U.storage_type != Magma_CSRCOO   ) {
-        printf("error: input type not supported: %d %d.\n", 
-                                L.storage_type, U.storage_type);
-        exit(-1);
+    if( L.memory_location != Magma_CPU ||
+        U.memory_location != Magma_CPU ||
+        B->memory_location != Magma_CPU ){
+        magma_z_sparse_matrix LCPU, UCPU, *BCPU;
+        magma_z_mtransfer( L , &LCPU, L.memory_location, Magma_CPU, queue );
+        magma_z_mtransfer( U , &UCPU, U.memory_location, Magma_CPU, queue );
+        magma_z_mtransfer( *B , BCPU, B->memory_location, Magma_CPU, queue );
+        magma_z_LUmergein( LCPU, UCPU, BCPU, queue );
+        magma_z_mfree( &LCPU, queue );
+        magma_z_mfree( &UCPU, queue );
+        magma_z_mfree( BCPU, queue );
     }
-    magma_int_t i,j,k;
+    
+    if ( L.storage_type != Magma_CSRCOO ||
+        U.storage_type != Magma_CSRCOO ||
+        B->storage_type != Magma_CSRCOO ) {
+        magma_z_sparse_matrix LCSRSCOO, UCSRSCOO, *BCSRSCOO;
+        magma_z_mconvert( L , &LCSRSCOO, L.storage_type, Magma_CSRCOO, queue );
+        magma_z_mconvert( U , &UCSRSCOO, U.storage_type, Magma_CSRCOO, queue );
+        magma_z_mconvert( *B , BCSRSCOO, B->storage_type, Magma_CSRCOO, queue );
+        magma_z_LUmergein( LCSRSCOO, UCSRSCOO, BCSRSCOO, queue );
+        magma_z_mfree( &LCSRSCOO, queue );
+        magma_z_mfree( &UCSRSCOO, queue );
+        magma_z_mfree(  BCSRSCOO, queue );
+    }
+    else{
+        magma_int_t i,j,k;
 
-    if ( L.storage_type == Magma_CSRCOO )
-    {
         for(  i=0; i<L.nnz; i++) {
             magma_int_t lrow = L.rowidx[ i ]; 
             magma_int_t lcol = L.col[ i ]; 
@@ -1657,8 +1723,7 @@ magma_z_LUmergein(
                 }
             }
         }
-    }
-    if ( U.storage_type == Magma_CSRCOO ) {
+
         for(  i=0; i<U.nnz; i++) {
             magma_int_t lrow = U.col[ i ]; 
             magma_int_t lcol = U.rowidx[ i ]; 
@@ -1684,38 +1749,54 @@ magma_z_LUmerge(
     magma_z_sparse_matrix *B,
     magma_queue_t queue )
 {
-    if ( (U.storage_type != Magma_CSRCOO &&
-        U.storage_type != Magma_CSRCOO) ) {
-        printf("error: input type not supported.\n");
-        exit(-1);
+    if( L.memory_location != Magma_CPU ||
+        U.memory_location != Magma_CPU ){
+        magma_z_sparse_matrix LCPU, UCPU;
+        magma_z_mtransfer( L , &LCPU, L.memory_location, Magma_CPU, queue );
+        magma_z_mtransfer( U , &UCPU, U.memory_location, Magma_CPU, queue );
+        magma_z_LUmergein( LCPU, UCPU, B, queue );
+        magma_z_mfree( &LCPU, queue );
+        magma_z_mfree( &UCPU, queue );
     }
+    
+    if ( L.storage_type != Magma_CSRCOO ||
+              ( U.storage_type != Magma_CSRCOO &&
+                U.storage_type != Magma_CSRU ) ) {
+        magma_z_sparse_matrix LCSRSCOO, UCSRSCOO;
+        magma_z_mconvert( L , &LCSRSCOO, L.storage_type, Magma_CSRCOO, queue );
+        magma_z_mconvert( U , &UCSRSCOO, U.storage_type, Magma_CSRCOO, queue );
+        magma_z_LUmerge( LCSRSCOO, UCSRSCOO, B, queue );
+        magma_z_mfree( &LCSRSCOO, queue );
+        magma_z_mfree( &UCSRSCOO, queue );
+    }
+    else{
     magma_z_mconvert( L, B, Magma_CSRL, Magma_CSR, queue );
     magma_int_t i, j, k;
-
-    if ( U.storage_type == Magma_CSRU )
-    {
-        for(  i=0; i<U.num_rows; i++) {
-            for( j=U.row[i]; j<U.row[i+1]; j++) {
-                magma_int_t lcol = U.col[ j ]; 
-                magmaDoubleComplex lval = U.val[ j ];
-                for( k=B->row[i]; k<B->row[i+1]; k++) {
-                    if ( B->col[ k ] == lcol ) {
-                        B->val[ k ] = lval;
-                        break;
+        if ( U.storage_type == Magma_CSRU )
+        {
+            for(  i=0; i<U.num_rows; i++) {
+                for( j=U.row[i]; j<U.row[i+1]; j++) {
+                    magma_int_t lcol = U.col[ j ]; 
+                    magmaDoubleComplex lval = U.val[ j ];
+                    for( k=B->row[i]; k<B->row[i+1]; k++) {
+                        if ( B->col[ k ] == lcol ) {
+                            B->val[ k ] = lval;
+                            break;
+                        }
                     }
                 }
             }
         }
-    }
-    if ( U.storage_type == Magma_CSRCOO ) {
-        for(  i=0; i<U.nnz; i++) {
-            magma_int_t lrow = U.blockinfo[ i ]; 
-            magma_int_t lcol = U.col[ i ]; 
-            magmaDoubleComplex lval = U.val[ i ];
-            for( k=B->row[lrow]; k<B->row[lrow+1]; k++) {
-                if ( B->col[ k ] == lcol ) {
-                    B->val[ k ] = lval;
-                    break;
+        if ( U.storage_type == Magma_CSRCOO ) {
+            for(  i=0; i<U.nnz; i++) {
+                magma_int_t lrow = U.blockinfo[ i ]; 
+                magma_int_t lcol = U.col[ i ]; 
+                magmaDoubleComplex lval = U.val[ i ];
+                for( k=B->row[lrow]; k<B->row[lrow+1]; k++) {
+                    if ( B->col[ k ] == lcol ) {
+                        B->val[ k ] = lval;
+                        break;
+                    }
                 }
             }
         }
