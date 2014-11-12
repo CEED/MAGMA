@@ -82,12 +82,13 @@ magma_zilusetup(
 
     // memory allocation
     stat = magma_zmalloc( &M->val, size_b*size_b*A.numblocks );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC; }
     stat = magma_imalloc( &M->row, r_blocks + 1  );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); } 
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;} 
     stat = magma_imalloc( &M->col, A.numblocks );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
-    magma_imalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
+    stat = magma_imalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
     // data transfer
     magma_zcopyvector( size_b*size_b*A.numblocks, A.dval, 1, M->val, 1 );
     magma_icopyvector( (r_blocks+1), A.drow, 1, M->row, 1 );
@@ -98,9 +99,21 @@ magma_zilusetup(
 
 
     magma_index_t *cpu_row, *cpu_col;
-
-    magma_imalloc_cpu( &cpu_row, r_blocks+1 );
-    magma_imalloc_cpu( &cpu_col, A.numblocks );
+    cpu_row = NULL;
+    cpu_col= NULL;
+    
+    stat = magma_imalloc_cpu( &cpu_row, r_blocks+1 );
+    if ( stat != 0 ) {
+        magma_free_CPU(cpu_row);
+        magma_free_CPU(cpu_row);
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    stat = magma_imalloc_cpu( &cpu_col, A.numblocks );
+    if ( stat != 0 ) {
+        magma_free_CPU(cpu_row);
+        magma_free_CPU(cpu_row);
+        return MAGMA_ERR_HOST_ALLOC;
+    }    
     magma_igetvector( r_blocks+1, A.drow, 1, cpu_row, 1 );            
     magma_igetvector( A.numblocks, A.dcol, 1, cpu_col, 1 );
 

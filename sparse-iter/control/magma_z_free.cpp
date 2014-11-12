@@ -61,18 +61,18 @@ magma_z_vfree(
         magma_free_cpu( x->val );
         x->num_rows = 0;
         x->nnz = 0;
+        x->val = NULL;
         return MAGMA_SUCCESS;     
     }
     else if ( x->memory_location == Magma_DEV ) {
         if ( magma_free( x->dval ) != MAGMA_SUCCESS ) {
             printf("Memory Free Error.\n");  
             return MAGMA_ERR_INVALID_PTR;
-            exit(0);
         }
         
         x->num_rows = 0;
         x->nnz = 0;
-
+        x->dval = NULL;
         return MAGMA_SUCCESS;     
     }
     else {
@@ -113,24 +113,21 @@ magma_z_mfree(
             free( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                      
         } 
         if ( A->storage_type == Magma_ELL || A->storage_type == Magma_ELLD ) {
             free( A->val );
             free( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                       
         } 
         if ( A->storage_type == Magma_ELLDD ) {
             free( A->val );
             free( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                    
         } 
         if ( A->storage_type == Magma_ELLRT ) {
             free( A->val );
@@ -138,8 +135,7 @@ magma_z_mfree(
             free( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                        
         } 
         if ( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLP ) {
             free( A->val );
@@ -147,8 +143,7 @@ magma_z_mfree(
             free( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                      
         } 
         if ( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC 
                                         || A->storage_type == Magma_CSRD
@@ -159,8 +154,7 @@ magma_z_mfree(
             free( A->row );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                      
         } 
         if (  A->storage_type == Magma_CSRCOO ) {
             free( A->val );
@@ -169,8 +163,7 @@ magma_z_mfree(
             free( A->rowidx );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                     
         } 
         if ( A->storage_type == Magma_BCSR ) {
             free( A->val );
@@ -180,16 +173,26 @@ magma_z_mfree(
             A->num_rows = 0;
             A->num_cols = 0;
             A->nnz = 0; 
-            A->blockinfo = 0;        
-            return MAGMA_SUCCESS;                 
+            A->blockinfo = 0;                    
         } 
         if ( A->storage_type == Magma_DENSE ) {
             free( A->val );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                      
         } 
+        A->val = NULL;
+        A->col = NULL;
+        A->row = NULL;
+        A->rowidx = NULL;
+        A->blockinfo = NULL;
+        A->diag = NULL;
+        A->dval = NULL;
+        A->dcol = NULL;
+        A->drow = NULL;
+        A->drowidx = NULL;
+        A->ddiag = NULL;
+        return MAGMA_SUCCESS; 
     }
 
     if ( A->memory_location == Magma_DEV ) {
@@ -207,8 +210,7 @@ magma_z_mfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                    
         } 
         if ( A->storage_type == Magma_ELL || A->storage_type == Magma_ELLD ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -224,8 +226,7 @@ magma_z_mfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                   
         } 
         if ( A->storage_type == Magma_ELLDD ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -240,8 +241,7 @@ magma_z_mfree(
             }
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                    
         } 
         if ( A->storage_type == Magma_ELLRT ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -262,8 +262,7 @@ magma_z_mfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                         
         } 
         if ( A->storage_type == Magma_SELLC || A->storage_type == Magma_SELLP ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -283,8 +282,7 @@ magma_z_mfree(
             }
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                  
         } 
         if ( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC 
                                         || A->storage_type == Magma_CSRD
@@ -308,8 +306,7 @@ magma_z_mfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                    
         } 
         if (  A->storage_type == Magma_CSRCOO ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -335,8 +332,7 @@ magma_z_mfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                      
         } 
         if ( A->storage_type == Magma_BCSR ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -357,8 +353,7 @@ magma_z_mfree(
             free( A->blockinfo );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+            A->nnz = 0;                  
         } 
         if ( A->storage_type == Magma_DENSE ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -370,14 +365,25 @@ magma_z_mfree(
             A->num_rows = 0;
             A->num_cols = 0;
             A->nnz = 0;        
-            return MAGMA_SUCCESS;                 
+                
         }   
+        A->val = NULL;
+        A->col = NULL;
+        A->row = NULL;
+        A->rowidx = NULL;
+        A->blockinfo = NULL;
+        A->diag = NULL;
+        A->dval = NULL;
+        A->dcol = NULL;
+        A->drow = NULL;
+        A->drowidx = NULL;
+        A->ddiag = NULL;
+        return MAGMA_SUCCESS; 
     }
 
     else {
         printf("Memory Free Error.\n");  
         return MAGMA_ERR_INVALID_PTR;
-        exit(0);
     }
     return MAGMA_SUCCESS;
 }

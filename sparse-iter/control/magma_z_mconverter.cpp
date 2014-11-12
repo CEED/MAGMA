@@ -81,9 +81,10 @@ magma_z_csr_compressor(
     magma_int_t *n,
     magma_queue_t queue )
 {
+    magma_int_t stat_cpu = 0, stat_dev = 0;
     magma_index_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
-    magma_index_malloc_cpu( &(row_nnz), (*n) );
-    magma_index_malloc_cpu( rown, *n+1 );
+    stat_cpu += magma_index_malloc_cpu( &(row_nnz), (*n) );
+    stat_cpu += magma_index_malloc_cpu( rown, *n+1 );
     for( i=0; i<*n; i++ ) {
         (*rown)[i] = nnz_new;
         nnz_this_row = 0;
@@ -97,8 +98,8 @@ magma_z_csr_compressor(
     }
     (*rown)[*n] = nnz_new;
 
-    magma_zmalloc_cpu( valn, nnz_new );
-    magma_index_malloc_cpu( coln, nnz_new );
+    stat_cpu += magma_zmalloc_cpu( valn, nnz_new );
+    stat_cpu += magma_index_malloc_cpu( coln, nnz_new );
 
     nnz_new = 0;
     for( i=0; i<*n; i++ ) {
@@ -170,6 +171,8 @@ magma_z_mconvert(
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
 
+    magma_int_t stat_cpu = 0, stat_dev = 0;
+
     magmaDoubleComplex zero = MAGMA_Z_MAKE( 0.0, 0.0 );
 
     // check whether matrix on CPU
@@ -186,9 +189,9 @@ magma_z_mconvert(
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            magma_zmalloc_cpu( &B->val, A.nnz );
-            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
-            magma_index_malloc_cpu( &B->col, A.nnz );
+            stat_cpu += magma_zmalloc_cpu( &B->val, A.nnz );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, A.nnz );
 
             for( magma_int_t i=0; i<A.nnz; i++) {
                 B->val[i] = A.val[i];
@@ -219,9 +222,9 @@ magma_z_mconvert(
                 }
             }
             B->nnz = numzeros;
-            magma_zmalloc_cpu( &B->val, numzeros );
-            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
-            magma_index_malloc_cpu( &B->col, numzeros );
+            stat_cpu += magma_zmalloc_cpu( &B->val, numzeros );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, numzeros );
             numzeros=0;
             for( magma_int_t i=0; i<A.num_rows; i++) {
                 B->row[i]=numzeros;
@@ -261,9 +264,9 @@ magma_z_mconvert(
                 }
             }
             B->nnz = numzeros;
-            magma_zmalloc_cpu( &B->val, numzeros );
-            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
-            magma_index_malloc_cpu( &B->col, numzeros );
+            stat_cpu += magma_zmalloc_cpu( &B->val, numzeros );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, numzeros );
             numzeros=0;
             for( magma_int_t i=0; i<A.num_rows; i++) {
                 B->row[i]=numzeros;
@@ -301,9 +304,9 @@ magma_z_mconvert(
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            magma_zmalloc_cpu( &B->val, A.nnz );
-            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
-            magma_index_malloc_cpu( &B->col, A.nnz );
+            stat_cpu += magma_zmalloc_cpu( &B->val, A.nnz );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, A.nnz );
 
             for(magma_int_t i=0; i<A.num_rows; i++) {
                 magma_int_t count = 1;
@@ -335,9 +338,9 @@ magma_z_mconvert(
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
 
-            magma_zmalloc_cpu( &B->val, A.nnz );
-            magma_index_malloc_cpu( &B->row, A.num_rows+1 );
-            magma_index_malloc_cpu( &B->col, A.nnz );
+            stat_cpu += magma_zmalloc_cpu( &B->val, A.nnz );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, A.nnz );
 
             for(magma_int_t i=0; i<A.num_rows; i++) {
                 magmaDoubleComplex diagval = A.val[A.row[i]];
@@ -371,7 +374,7 @@ magma_z_mconvert(
             B->storage_type = Magma_COO;
 
             magma_free_cpu( B->row );
-            magma_index_malloc_cpu( &B->row, A.nnz );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.nnz );
 
             for(magma_int_t i=0; i<A.num_rows; i++) {
                 for(magma_int_t j=A.row[i]; j<A.row[i+1]; j++) {
@@ -388,7 +391,7 @@ magma_z_mconvert(
             magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
             B->storage_type = Magma_CSRCOO;
 
-            magma_index_malloc_cpu( &B->rowidx, A.nnz );
+            stat_cpu += magma_index_malloc_cpu( &B->rowidx, A.nnz );
 
             for(magma_int_t i=0; i<A.num_rows; i++) {
                 for(magma_int_t j=A.row[i]; j<A.row[i+1]; j++) {
@@ -425,7 +428,7 @@ magma_z_mconvert(
             B->diameter = A.diameter;
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
-            magma_index_malloc_cpu( &length, A.num_rows);
+            stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
@@ -436,8 +439,8 @@ magma_z_mconvert(
             //printf( "Conversion to ELLPACK with %d elements per row: ",
                                                             // maxrowlength );
             //fflush(stdout);
-            magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
-            magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
+            stat_cpu += magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
+            stat_cpu += magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
             for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
                 B->val[i] = MAGMA_Z_MAKE(0., 0.);
                 B->col[i] =  -1;
@@ -470,7 +473,7 @@ magma_z_mconvert(
 
             // conversion
             magma_index_t *row_tmp;
-            magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -498,7 +501,7 @@ magma_z_mconvert(
 
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
-            magma_index_malloc_cpu( &length, A.num_rows);
+            stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
@@ -509,8 +512,8 @@ magma_z_mconvert(
             //printf( "Conversion to ELL with %d elements per row: ",
                                                            // maxrowlength );
             //fflush(stdout);
-            magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
-            magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
+            stat_cpu += magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
+            stat_cpu += magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
             for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
                 B->val[i] = MAGMA_Z_MAKE(0., 0.);
                 B->col[i] =  -1;
@@ -547,9 +550,9 @@ magma_z_mconvert(
             magma_index_t *row_tmp;
             magma_index_t *col_tmp;
             magmaDoubleComplex *val_tmp;
-            magma_zmalloc_cpu( &val_tmp, A.num_rows*A.max_nnz_row );
-            magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
-            magma_index_malloc_cpu( &col_tmp, A.num_rows*A.max_nnz_row );
+            stat_cpu += magma_zmalloc_cpu( &val_tmp, A.num_rows*A.max_nnz_row );
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &col_tmp, A.num_rows*A.max_nnz_row );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
@@ -584,7 +587,7 @@ magma_z_mconvert(
 
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
-            magma_index_malloc_cpu( &length, A.num_rows);
+            stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
@@ -595,8 +598,8 @@ magma_z_mconvert(
             //printf( "Conversion to ELL with %d elements per row: ",
                                                            // maxrowlength );
             //fflush(stdout);
-            magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
-            magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
+            stat_cpu += magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
+            stat_cpu += magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows );
             for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
                 B->val[i] = MAGMA_Z_MAKE(0., 0.);
                 B->col[i] =  -1;
@@ -635,15 +638,15 @@ magma_z_mconvert(
 
             // conversion
             magma_index_t *row_tmp;
-            magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;   
             // sort the diagonal element into the right place
             magma_index_t *col_tmp2;
             magmaDoubleComplex *val_tmp2;
-            magma_zmalloc_cpu( &val_tmp2, A.num_rows*A.max_nnz_row );
-            magma_index_malloc_cpu( &col_tmp2, A.num_rows*A.max_nnz_row );
+            stat_cpu += magma_zmalloc_cpu( &val_tmp2, A.num_rows*A.max_nnz_row );
+            stat_cpu += magma_index_malloc_cpu( &col_tmp2, A.num_rows*A.max_nnz_row );
             for( magma_int_t j=0;j<A.num_rows;j++ ) {
                 magma_index_t diagcol = A.col[j*A.max_nnz_row];
                 magma_int_t smaller = 0;
@@ -698,8 +701,8 @@ magma_z_mconvert(
             B->max_nnz_row = maxrowlength;
             magma_int_t off = maxrowlength*A.num_rows;
 
-            magma_zmalloc_cpu( &B->val, 2*off );
-            magma_index_malloc_cpu( &B->col, 2*off );
+            stat_cpu += magma_zmalloc_cpu( &B->val, 2*off );
+            stat_cpu += magma_index_malloc_cpu( &B->col, 2*off );
             
             for( i=0; i<off; i++) {
                 B->val[ i ] = A_tmp.val[ i ];
@@ -727,8 +730,8 @@ magma_z_mconvert(
             // conversion
             magma_int_t i, j;
             magma_z_sparse_matrix A_tmp;
-            magma_zmalloc_cpu( &A_tmp.val, off );
-            magma_index_malloc_cpu( &A_tmp.col, off );
+            stat_cpu += magma_zmalloc_cpu( &A_tmp.val, off );
+            stat_cpu += magma_index_malloc_cpu( &A_tmp.col, off );
             A_tmp.num_rows = A.num_rows;
             A_tmp.num_cols = A.num_cols;
             A_tmp.nnz = A.nnz;
@@ -779,7 +782,7 @@ magma_z_mconvert(
 
             // conversion
             magma_index_t i, j, *length, maxrowlength=0;
-            magma_index_malloc_cpu( &length, A.num_rows);
+            stat_cpu += magma_index_malloc_cpu( &length, A.num_rows);
 
             for( i=0; i<A.num_rows; i++ ) {
                 length[i] = A.row[i+1]-A.row[i];
@@ -795,9 +798,9 @@ magma_z_mconvert(
                     ((maxrowlength+threads_per_row-1)/threads_per_row) ) 
                                                             * threads_per_row;
 
-            magma_zmalloc_cpu( &B->val, rowlength*A.num_rows );
-            magma_index_malloc_cpu( &B->col, rowlength*A.num_rows );
-            magma_index_malloc_cpu( &B->row, A.num_rows );
+            stat_cpu += magma_zmalloc_cpu( &B->val, rowlength*A.num_rows );
+            stat_cpu += magma_index_malloc_cpu( &B->col, rowlength*A.num_rows );
+            stat_cpu += magma_index_malloc_cpu( &B->row, A.num_rows );
             for( magma_int_t i=0; i<rowlength*A.num_rows; i++) {
                 B->val[i] = MAGMA_Z_MAKE(0., 0.);
                 B->col[i] =  0;
@@ -837,7 +840,7 @@ magma_z_mconvert(
                                                             * threads_per_row;
             // conversion
             magma_index_t *row_tmp;
-            magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*rowlength;
@@ -875,9 +878,9 @@ magma_z_mconvert(
             magma_int_t alignedlength, alignment = B->alignment;
             // conversion
             magma_index_t i, j, k, *length, maxrowlength=0;
-            magma_index_malloc_cpu( &length, C);
+            stat_cpu += magma_index_malloc_cpu( &length, C);
             // B-row points to the start of each slice
-            magma_index_malloc_cpu( &B->row, slices+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->row, slices+1 );
 
             B->row[0] = 0;
             for( i=0; i<slices; i++ ) {
@@ -903,8 +906,8 @@ magma_z_mconvert(
             //       " %d nonzeros.\n", slices, C, B->nnz );
 
             //fflush(stdout);
-            magma_zmalloc_cpu( &B->val, B->row[slices] );
-            magma_index_malloc_cpu( &B->col, B->row[slices] );
+            stat_cpu += magma_zmalloc_cpu( &B->val, B->row[slices] );
+            stat_cpu += magma_index_malloc_cpu( &B->col, B->row[slices] );
             // zero everything
             for( i=0; i<B->row[slices]; i++ ) {
                 B->val[ i ] = MAGMA_Z_MAKE(0., 0.);
@@ -948,9 +951,9 @@ magma_z_mconvert(
             magma_index_t *row_tmp;
             magma_index_t *col_tmp;
             magmaDoubleComplex *val_tmp;
-            magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) );
-            magma_index_malloc_cpu( &row_tmp, A.num_rows+C );
-            magma_index_malloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
+            stat_cpu += magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) );
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+C );
+            stat_cpu += magma_index_malloc_cpu( &col_tmp, A.max_nnz_row*(A.num_rows+C) );
 
             // zero everything
             for(magma_int_t i=0; i<A.max_nnz_row*(A.num_rows+C); i++ ) {
@@ -1000,7 +1003,7 @@ magma_z_mconvert(
             B->diameter = A.diameter;
 
             // conversion
-            magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols );
+            stat_cpu += magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols );
 
             for( magma_int_t i=0; i<(A.num_rows)*(A.num_cols); i++) {
                 B->val[i] = MAGMA_Z_MAKE(0., 0.);
@@ -1034,9 +1037,9 @@ magma_z_mconvert(
                 if ( MAGMA_Z_REAL(A.val[i])!=0.0 )
                     (B->nnz)++;
             }
-            magma_zmalloc_cpu( &B->val, B->nnz);
-            magma_index_malloc_cpu( &B->row, B->num_rows+1 );
-            magma_index_malloc_cpu( &B->col, B->nnz );
+            stat_cpu += magma_zmalloc_cpu( &B->val, B->nnz);
+            stat_cpu += magma_index_malloc_cpu( &B->row, B->num_rows+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->col, B->nnz );
 
             magma_int_t i = 0;
             magma_int_t j = 0;
@@ -1086,7 +1089,7 @@ magma_z_mconvert(
                             // max number of blocks per column
             //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
          
-            magma_index_malloc_cpu( &B->blockinfo, c_blocks * r_blocks );
+            stat_cpu += magma_index_malloc_cpu( &B->blockinfo, c_blocks * r_blocks );
             if ( B->blockinfo == NULL ) {
                 printf("error: memory allocation (B->blockinfo).\n");
                 magma_free( B->blockinfo );
@@ -1107,7 +1110,7 @@ magma_z_mconvert(
             } 
 
             // count blocks and fill rowpointer
-            magma_index_malloc_cpu( &B->row, r_blocks+1 );
+            stat_cpu += magma_index_malloc_cpu( &B->row, r_blocks+1 );
             numblocks = 0;
             for( i=0; i<c_blocks * r_blocks; i++ ) {
                 if ( i%c_blocks == 0)
@@ -1121,8 +1124,8 @@ magma_z_mconvert(
             //printf("number of blocks: %d  ", numblocks);
             B->numblocks = numblocks;
 
-            magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
-            magma_index_malloc_cpu( &B->col, numblocks  );
+            stat_cpu += magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
+            stat_cpu += magma_index_malloc_cpu( &B->col, numblocks  );
             if ( B->val == NULL || B->col == NULL ) {
                 printf("error: memory allocation (B->val or B->col).\n");
                 magma_free( B->blockinfo );
@@ -1192,12 +1195,12 @@ magma_z_mconvert(
             //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
             //fflush(stdout);
             magmaDoubleComplex *val_tmp;      
-            magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
+            stat_cpu += magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
             magma_index_t *row_tmp;            
-            magma_index_malloc_cpu( &row_tmp, r_blocks*size_b+1 );   
+            stat_cpu += magma_index_malloc_cpu( &row_tmp, r_blocks*size_b+1 );   
                 // larger than the final size due to overhead blocks
             magma_index_t *col_tmp;            
-            magma_index_malloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
+            stat_cpu += magma_index_malloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
             if ( col_tmp == NULL || val_tmp == NULL || row_tmp == NULL ) {
                 magma_free( B->val );
                 magma_free( B->col );
@@ -1224,7 +1227,7 @@ magma_z_mconvert(
                         //each block back to row-major
             magmaDoubleComplex *transpose, *val_tmp2;
             magma_zmalloc( &transpose, size_b*size_b );
-            magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
+            stat_cpu += magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
             for( magma_int_t i=0; i<A.numblocks; i++ ) {
                 magma_zsetvector( size_b*size_b, A.val+i*size_b*size_b, 1, transpose, 1 );
                 magmablas_ztranspose_inplace( size_b, transpose, size_b );

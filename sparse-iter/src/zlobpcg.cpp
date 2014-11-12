@@ -101,6 +101,21 @@ magma_zlobpcg(
     magmaDoubleComplex *blockP, *blockAP, *blockR, *blockAR, *blockAX, *blockW;
     magmaDoubleComplex *gramA, *gramB, *gramM;
     magmaDoubleComplex *gevectors, *h_gramB;
+    
+    magma_int_t stat = 0;
+    dwork = NULL;
+    hwork = NULL;
+    blockP = NULL;
+    blockR = NULL;
+    blockAP = NULL;
+    blockAR = NULL;
+    blockAX = NULL;
+    blockW = NULL;
+    gramA = NULL;
+    gramB = NULL;
+    gramM = NULL;
+    gevectors = NULL;
+    h_gramB = NULL;
 
     magmaDoubleComplex *pointer, *origX = blockX;
     double *eval_gpu;
@@ -108,15 +123,31 @@ magma_zlobpcg(
     magma_int_t lwork = max( 2*n+n*magma_get_dsytrd_nb(n),
                                             1 + 6*3*n + 2* 3*n* 3*n);
 
-    magma_zmalloc_pinned( &hwork   ,        lwork );
-    magma_zmalloc(        &blockAX   ,        m*n );
-    magma_zmalloc(        &blockAR   ,        m*n );
-    magma_zmalloc(        &blockAP   ,        m*n );
-    magma_zmalloc(        &blockR    ,        m*n );
-    magma_zmalloc(        &blockP    ,        m*n );
-    magma_zmalloc(        &blockW    ,        m*n );
-    magma_zmalloc(        &dwork     ,        m*n );            
-    magma_dmalloc(        &eval_gpu  ,        3*n );
+    stat += magma_zmalloc_pinned( &hwork   ,        lwork );
+        if( stat != 0){
+        magma_free_pinned( hwork );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    stat += magma_zmalloc(        &blockAX   ,        m*n );
+    stat += magma_zmalloc(        &blockAR   ,        m*n );
+    stat += magma_zmalloc(        &blockAP   ,        m*n );
+    stat += magma_zmalloc(        &blockR    ,        m*n );
+    stat += magma_zmalloc(        &blockP    ,        m*n );
+    stat += magma_zmalloc(        &blockW    ,        m*n );
+    stat += magma_zmalloc(        &dwork     ,        m*n );            
+    stat += magma_dmalloc(        &eval_gpu  ,        3*n );
+    if( stat != 0){
+        magma_free_pinned( hwork );
+        magma_free( blockAX  );
+        magma_free( blockAR  );
+        magma_free( blockAP  );
+        magma_free( blockR   );
+        magma_free( blockP   );
+        magma_free( blockW   );
+        magma_free( dwork    );
+        magma_free( eval_gpu );
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }
 
 
 

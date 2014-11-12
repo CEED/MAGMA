@@ -522,24 +522,24 @@ magma_zsolverinfo_init(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    /*
-    solver_par->solver = Magma_CG;
-    solver_par->maxiter = 1000;
-    solver_par->numiter = 0;
-    solver_par->ortho = Magma_CGS;
-    solver_par->epsilon = RTOLERANCE;
-    solver_par->restart = 30;
-    solver_par->init_res = 0.;
-    solver_par->final_res = 0.;
-    solver_par->runtime = 0.;
-    solver_par->verbose = 0;
-    solver_par->info = MAGMA_SUCCESS;
-*/
+    magma_int_t stat = 0;
+    solver_par->res_vec = NULL;
+    solver_par->timing = NULL;
+
     if ( solver_par->verbose > 0 ) {
+        stat = 
         magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
                 * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
+        if( stat != 0 ){
+            return MAGMA_ERR_HOST_ALLOC;
+        }
+        stat = 
         magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
                 *( (solver_par->maxiter)/(solver_par->verbose)+1) );
+        if( stat != 0 ){
+            magma_free_cpu( solver_par->res_vec );
+            return MAGMA_ERR_HOST_ALLOC;
+        }
     } else {
         solver_par->res_vec = NULL;
         solver_par->timing = NULL;
@@ -604,6 +604,9 @@ magma_zeigensolverinfo_init(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
+    magma_int_t stat = 0;
+    solver_par->eigenvectors = NULL;
+    solver_par->eigenvalues = NULL;
     if ( solver_par->solver == Magma_LOBPCG ) {
         magma_dmalloc_cpu( &solver_par->eigenvalues , 
                                 3*solver_par->num_eigenvalues );
@@ -611,9 +614,17 @@ magma_zeigensolverinfo_init(
         // then copy to GPU
         magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
         magmaDoubleComplex *initial_guess;
+        stat = 
         magma_zmalloc_cpu( &initial_guess, ev );
+        if( stat != 0 ){
+            return MAGMA_ERR_HOST_ALLOC;
+        }
+        stat = 
         magma_zmalloc( &solver_par->eigenvectors, ev );
-
+        if( stat != 0 ){
+            magma_free_cpu( initial_guess );
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
         magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
         lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
 

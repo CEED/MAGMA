@@ -73,6 +73,7 @@ magma_zgmres(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
+    magma_int_t stat = 0;
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
@@ -94,10 +95,47 @@ magma_zgmres(
     // CPU workspace
     //magma_setdevice(0);
     magmaDoubleComplex *H, *HH, *y, *h1;
-    magma_zmalloc_pinned( &H, (ldh+1)*ldh );
-    magma_zmalloc_pinned( &y, ldh );
-    magma_zmalloc_pinned( &HH, ldh*ldh );
-    magma_zmalloc_pinned( &h1, ldh );
+    H  = NULL;
+    HH = NULL;
+    y  = NULL;
+    h1 = NULL;
+    
+    stat =
+        magma_zmalloc_pinned( &H, (ldh+1)*ldh );
+    if( stat != 0 ){
+        magma_free_pinned( H );
+        magma_free_pinned( HH );
+        magma_free_pinned( y );
+        magma_free_pinned( h1 );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    stat = 
+        magma_zmalloc_pinned( &y, ldh );
+    if( stat != 0 ){
+        magma_free_pinned( H );
+        magma_free_pinned( HH );
+        magma_free_pinned( y );
+        magma_free_pinned( h1 );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    stat = 
+        magma_zmalloc_pinned( &HH, ldh*ldh );
+    if( stat != 0 ){
+        magma_free_pinned( H );
+        magma_free_pinned( HH );
+        magma_free_pinned( y );
+        magma_free_pinned( h1 );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    stat = 
+        magma_zmalloc_pinned( &h1, ldh );
+    if( stat != 0 ){
+        magma_free_pinned( H );
+        magma_free_pinned( HH );
+        magma_free_pinned( y );
+        magma_free_pinned( h1 );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
 
     // GPU workspace
     magma_z_vector r, q, q_t;
@@ -107,12 +145,16 @@ magma_zgmres(
     q_t.dval = NULL; 
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
 
-    magmaDoubleComplex *dy, *dH = NULL;
+    magmaDoubleComplex *dy = NULL, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )){
+        magma_free( dH );
+        magma_free( dy );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }
     if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) {
+        magma_free( dH );
+        magma_free( dy );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }
