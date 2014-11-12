@@ -1,12 +1,15 @@
 /*
-    -- MAGMA (version 1.4) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
+   -- MAGMA (version 1.5) --
+   Univ. of Tennessee, Knoxville
+   Univ. of California, Berkeley
+   Univ. of Colorado, Denver
+   @date
 
-       @precisions normal z -> s d c
-*/
+   @author Azzam Haidar
+   @author Tingxing Dong
+
+   @precisions normal z -> s d c
+ */
 #include "common_magma.h"
 
 
@@ -18,12 +21,12 @@ extern __shared__ magmaDoubleComplex shared_data[];
 __global__ void
 kernel_zgemvn_batched(
     int m, int n, magmaDoubleComplex alpha,
-    magmaDoubleComplex **A_array, int lda,
+    magmaDoubleComplex **dA_array, int lda,
     magmaDoubleComplex **x_array, int incx,
     magmaDoubleComplex beta, magmaDoubleComplex  **y_array, int incy)
 {
 
-    magmaDoubleComplex *A = A_array[blockIdx.x];
+    magmaDoubleComplex *A = dA_array[blockIdx.x];
     magmaDoubleComplex *x = x_array[blockIdx.x];
     magmaDoubleComplex *y = y_array[blockIdx.x];
 
@@ -60,7 +63,7 @@ kernel_zgemvn_batched(
 extern "C"
 void magmablas_zgemvn_batched(
     int m, int n, 
-    magmaDoubleComplex alpha, magmaDoubleComplex **A_array, int lda, 
+    magmaDoubleComplex alpha, magmaDoubleComplex **dA_array, int lda, 
     magmaDoubleComplex **x_array,  int incx,
     magmaDoubleComplex beta, magmaDoubleComplex **y_array,  int incy, 
     int batchCount)
@@ -75,7 +78,7 @@ void magmablas_zgemvn_batched(
     dim3 grid(batchCount, 1, 1);
     dim3 threads(max(m,n), 1, 1);
    
-    kernel_zgemvn_batched<<< grid, threads, n * sizeof(magmaDoubleComplex) >>>( m, n, alpha,  A_array, lda, x_array, incx,  
+    kernel_zgemvn_batched<<< grid, threads, n * sizeof(magmaDoubleComplex) >>>( m, n, alpha,  dA_array, lda, x_array, incx,  
                                                                          beta, y_array, incy);
 }
 
@@ -84,13 +87,13 @@ void magmablas_zgemvn_batched(
 __global__ void
 kernel_zgemvt_batched(
     int m, int n, int m1, magmaDoubleComplex alpha,
-    magmaDoubleComplex **A_array, int lda,
+    magmaDoubleComplex **dA_array, int lda,
     magmaDoubleComplex **x_array, int incx,
     magmaDoubleComplex beta, magmaDoubleComplex  **y_array, int incy)
 {
   
 
-    magmaDoubleComplex *A_ptr = A_array[blockIdx.x];
+    magmaDoubleComplex *A_ptr = dA_array[blockIdx.x];
     magmaDoubleComplex *x_ptr = x_array[blockIdx.x];
     magmaDoubleComplex *y_ptr = y_array[blockIdx.x];
 
@@ -163,7 +166,7 @@ kernel_zgemvt_batched(
 extern "C"
 void magmablas_zgemvt_batched(
     int m, int n, 
-    magmaDoubleComplex alpha, magmaDoubleComplex **A_array, int lda, 
+    magmaDoubleComplex alpha, magmaDoubleComplex **dA_array, int lda, 
     magmaDoubleComplex **x_array,  int incx,
     magmaDoubleComplex beta, magmaDoubleComplex **y_array,  int incy, 
     int batchCount)
@@ -174,7 +177,7 @@ void magmablas_zgemvt_batched(
 
     int m1 = (m / zgemv_bs) * zgemv_bs;
 
-    kernel_zgemvt_batched <<< grid, threads >>>(m, n, m1, alpha,  A_array, lda, x_array, incx, beta, y_array, incy);
+    kernel_zgemvt_batched <<< grid, threads >>>(m, n, m1, alpha,  dA_array, lda, x_array, incx, beta, y_array, incy);
 
 }
    
@@ -185,13 +188,13 @@ void magmablas_zgemvt_batched(
 __global__ void
 kernel_zgemvc_batched(
     int m, int n, int m1, magmaDoubleComplex alpha,
-    magmaDoubleComplex **A_array, int lda,
+    magmaDoubleComplex **dA_array, int lda,
     magmaDoubleComplex **x_array, int incx,
     magmaDoubleComplex beta, magmaDoubleComplex  **y_array, int incy)
 {
   
 
-    magmaDoubleComplex *A_ptr = A_array[blockIdx.x];
+    magmaDoubleComplex *A_ptr = dA_array[blockIdx.x];
     magmaDoubleComplex *x_ptr = x_array[blockIdx.x];
     magmaDoubleComplex *y_ptr = y_array[blockIdx.x];
 
@@ -264,7 +267,7 @@ kernel_zgemvc_batched(
 extern "C"
 void magmablas_zgemvc_batched(
     int m, int n, 
-    magmaDoubleComplex alpha, magmaDoubleComplex **A_array, int lda, 
+    magmaDoubleComplex alpha, magmaDoubleComplex **dA_array, int lda, 
     magmaDoubleComplex **x_array,  int incx,
     magmaDoubleComplex beta, magmaDoubleComplex **y_array,  int incy, 
     int batchCount)
@@ -275,19 +278,18 @@ void magmablas_zgemvc_batched(
 
     int m1 = (m / zgemv_bs) * zgemv_bs;
 
-    kernel_zgemvc_batched <<< grid, threads >>>(m, n, m1, alpha,  A_array, lda, x_array, incx, beta, y_array, incy);
+    kernel_zgemvc_batched <<< grid, threads >>>(m, n, m1, alpha,  dA_array, lda, x_array, incx, beta, y_array, incy);
 }
    
 #endif // defined(PRECISION_z) || defined (PRECISION_c)
 
 
- 
 /**
     Purpose
     -------
 
     This routine computes Y = alpha opt(A) x + beta y, on the GPU, where
-    A = A_array[i],x = x_array[i] and y = y_array[i], i=[0,batchCount-1].
+    A = dA_array[i],x = x_array[i] and y = y_array[i], i=[0,batchCount-1].
     This is a batched version.
 
     @param[in]
@@ -311,7 +313,7 @@ void magmablas_zgemvc_batched(
             On entry, ALPHA specifies the scalar alpha.
 
     @param[in]
-    A_array A = A_array[i] 
+    dA_array A = dA_array[i] 
             A: COMPLEX*16 array of dimension ( LDA, n ) on the GPU.
    
     @param[in]
@@ -347,7 +349,7 @@ void magmablas_zgemvc_batched(
     
     @param[in]
     batchCount INTEGER
-            number of pointers contained in A_array, x_array and y_array.
+            number of pointers contained in dA_array, x_array and y_array.
 
     @ingroup magma_zblas2
     *******************************************************************   */

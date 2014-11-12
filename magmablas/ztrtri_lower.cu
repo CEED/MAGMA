@@ -1103,10 +1103,10 @@ triple_zgemm_above64_part3_lower_kernel(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void
 ztrtri_diag_lower_kernel_batched(
-    magma_diag_t diag, int n, magmaDoubleComplex const * const * A_array, int lda, magmaDoubleComplex **dinvA_array)
+    magma_diag_t diag, int n, magmaDoubleComplex const * const * dA_array, int lda, magmaDoubleComplex **dinvA_array)
 {
     int batchid = blockIdx.z;
-    ztrtri_diag_lower_device(diag, n, A_array[batchid], lda, dinvA_array[batchid]);
+    ztrtri_diag_lower_device(diag, n, dA_array[batchid], lda, dinvA_array[batchid]);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void
@@ -1181,3 +1181,4 @@ triple_zgemm_above64_part3_lower_kernel_batched(
     triple_zgemm_above64_part3_lower_device( n, Ain_array[batchid], lda, dinvA_array[batchid], jb, npages);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
