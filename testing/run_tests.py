@@ -452,7 +452,7 @@ chol = (
 	
 	('testing_zpotrf_mgpu',      '-L    -c',  n,    ''),
 	('testing_zpotrf_mgpu',      '-U    -c',  n,    ''),
-	
+
 # ----------
 # Cholesky, CPU interface
 	('testing_zposv',            '-L    -c',  n,    ''),
@@ -463,6 +463,30 @@ chol = (
 	
 	('testing_zpotri',           '-L    -c',  n,    ''),
 	('testing_zpotri',           '-U    -c',  n,    ''),
+
+# ----------
+# Symmetric Indefinite, GPU interface 
+# > no-pivot LDLt
+	('testing_zhetrf',           '-L   -c  --version 4',  n,    ''),
+	('testing_zhetrf',           '-U   -c  --version 4',  n,    ''),
+
+	('testing_zhetrf',           '-L   -c2 --version 4',  n,    ''),
+	('testing_zhetrf',           '-U   -c2 --version 4',  n,    ''),
+
+# ----------
+# Symmetric Indefinite, CPU interface
+# > Bunch-Kauffman
+	('testing_zhetrf',           '-L   -c  --version 1',  n,    ''),
+	('testing_zhetrf',           '-U   -c  --version 1',  n,    ''),
+
+	('testing_zhetrf',           '-L   -c2 --version 1',  n,    ''),
+	('testing_zhetrf',           '-U   -c2 --version 1',  n,    ''),
+# > no-pivot LDLt
+	('testing_zhetrf',           '-L   -c  --version 3',  n,    ''),
+	('testing_zhetrf',           '-U   -c  --version 3',  n,    ''),
+
+	('testing_zhetrf',           '-L   -c2 --version 3',  n,    ''),
+	('testing_zhetrf',           '-U   -c2 --version 3',  n,    ''),
 )
 if ( opts.chol ):
 	tests += chol
