@@ -136,7 +136,7 @@ ZSRC += \
 	zgemm_batched.cu			\
 	zgemm_fermi_batched.cu		\
 	zgemm_fermi_batched_k32.cu	\
-	zgerbt_batched.cu			\
+	zgerbt_func_batched.cu			\
 	zgetf2_kernels.cu		\
 	zherk_batched.cu			\
 	zherk_fermi_batched.cu		\
