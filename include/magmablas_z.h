@@ -385,26 +385,11 @@ magmablas_zgeadd(
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
 
 void
-magmablas_zgeadd_batched(
-    magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
-    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
-    magma_int_t batchCount );
-
-void
 magmablas_zlacpy(
     magma_uplo_t uplo,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
-
-void
-magmablas_zlacpy_batched(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
-    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
-    magma_int_t batchCount );
 
 void
 magmablas_zlacpy_cnjg(
@@ -640,15 +625,6 @@ magmablas_zgemv(
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr       dy, magma_int_t incy );
 
-void
-magmablas_zgemv_batched(
-    magma_trans_t trans, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_ptr dA_array[], magma_int_t ldda,
-    magmaDoubleComplex_ptr dx_array[], magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr dy_array[], magma_int_t incy,
-    magma_int_t batchCount);
 
 void
 magmablas_zgemv_conjv(

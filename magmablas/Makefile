@@ -33,7 +33,6 @@ zgerbt.o: zgerbt.h
 ZSRC := \
 	zcaxpycp.cu		\
 	zgeadd.cu		\
-	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
 	zgemv_conjv.cu          \
 	zhemv.cu		\
