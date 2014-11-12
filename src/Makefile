@@ -133,6 +133,7 @@ ZSRC += \
 # ----------
 # symmetric indefinite factorization, CPU interface
 ZSRC += \
+	zhesv.cpp		 \
 	zhetrf.cpp		 \
 	zhetrf_nopiv.cpp     \
 	zhetrf_nopiv_cpu.cpp \

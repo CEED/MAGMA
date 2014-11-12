@@ -55,6 +55,10 @@ ZSRC := \
 	testing_constants.cpp	\
 	testing_operators.cpp	\
 	testing_parse_opts.cpp	\
+	\
+	testing_zhesv.cpp \
+	testing_zhetrf.cpp \
+	testing_zpotrf_right.cpp	\
 
 # ----------
 # Cholesky, GPU interface
