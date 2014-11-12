@@ -47,7 +47,7 @@
             matrix was interchanged with row IPIV(i).
 
     @param[out]
-    dwork   (workspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
+    dwork   (dworkspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
   
     @param[in]
     lwork   INTEGER
@@ -55,7 +55,7 @@
             the optimal blocksize returned by magma_get_zgetri_nb(n).
     \n
             Unlike LAPACK, this version does not currently support a
-            workspace query, because the workspace is on the GPU.
+            dworkspace query, because the dworkspace is on the GPU.
 
     @param[out]
     info    INTEGER
@@ -119,7 +119,7 @@ magma_zgetri_batched( magma_int_t n,
     magmaDoubleComplex **dW3_displ  = NULL;
     magmaDoubleComplex **dW4_displ  = NULL;
     magmaDoubleComplex **dinvdiagA_array = NULL;
-    magmaDoubleComplex **work_array = NULL;
+    magmaDoubleComplex **dwork_array = NULL;
     magmaDoubleComplex **dW_array   = NULL;
 
     magma_malloc((void**)&dA_displ,   batchCount * sizeof(*dA_displ));
@@ -129,18 +129,18 @@ magma_zgetri_batched( magma_int_t n,
     magma_malloc((void**)&dW3_displ,  batchCount * sizeof(*dW3_displ));
     magma_malloc((void**)&dW4_displ,  batchCount * sizeof(*dW4_displ));
     magma_malloc((void**)&dinvdiagA_array, batchCount * sizeof(*dinvdiagA_array));
-    magma_malloc((void**)&work_array, batchCount * sizeof(*work_array));
+    magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
     magma_malloc((void**)&dW_array,  batchCount * sizeof(*dW_array));
 
     magmaDoubleComplex* dinvdiagA;
-    magmaDoubleComplex* work;// dinvdiagA and work are workspace in ztrsm
+    magmaDoubleComplex* dwork;// dinvdiagA and dwork are dworkspace in ztrsm
 
     //magma_int_t invdiagA_msize =  BATRI_NB*((nb/BATRI_NB)+(nb % BATRI_NB != 0))* BATRI_NB ;
     magma_int_t invdiagA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
-    magma_int_t work_msize = n*nb;
+    magma_int_t dwork_msize = n*nb;
     magma_zmalloc( &dinvdiagA, invdiagA_msize * batchCount);
-    magma_zmalloc( &work, work_msize * batchCount );
-    zset_pointer(work_array, work, n, 0, 0, work_msize, batchCount);
+    magma_zmalloc( &dwork, dwork_msize * batchCount );
+    zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount);
     zset_pointer(dinvdiagA_array, dinvdiagA, ((n+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, invdiagA_msize, batchCount);
     cudaMemset( dinvdiagA, 0, batchCount * ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB * sizeof(magmaDoubleComplex) );
 
@@ -180,14 +180,14 @@ magma_zgetri_batched( magma_int_t n,
 
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1 \n",j);
-        // solve work = L^-1 * I
+        // solve dwork = L^-1 * I
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, 0, j, batchCount);
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
                 n, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
                 dW0_displ,   lddia, // dB
-                work_array,        n, // dX //output
+                dwork_array,        n, // dX //output
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
@@ -195,12 +195,12 @@ magma_zgetri_batched( magma_int_t n,
 
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 2 \n",j);
-        // solve dinvdiagA = U^-1 * work
+        // solve dinvdiagA = U^-1 * dwork
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
                 n, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
-                work_array,        n, // dB 
+                dwork_array,        n, // dB 
                 dW0_displ,   lddia, // dX //output
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
@@ -235,7 +235,7 @@ magma_zgetri_batched( magma_int_t n,
     for( j = jmax; j >= 0; j -= nb ) {
         jb = min( nb, n-j );
         
-        // copy current block column of A to work space dL
+        // copy current block column of A to dwork space dL
         // (only needs lower trapezoid, but we also copy upper triangle),
         // then zero the strictly lower trapezoid block column of A.
         magmablas_zlacpy( MagmaFull, n-j, jb,
@@ -254,7 +254,7 @@ magma_zgetri_batched( magma_int_t n,
                                     dL(j+jb,0), lddl,
                          c_one,     dA(0,j),    ldda );
         }
-        // TODO use magmablas work interface
+        // TODO use magmablas dwork interface
         magma_ztrsm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaUnit,
                      n, jb, c_one,
                      dL(j,0), lddl,
@@ -279,11 +279,11 @@ magma_zgetri_batched( magma_int_t n,
     magma_free(dW3_displ);
     magma_free(dW4_displ);
     magma_free(dinvdiagA_array);
-    magma_free(work_array);
+    magma_free(dwork_array);
     magma_free(dW_array);
 
     magma_free( dinvdiagA );
-    magma_free( work );
+    magma_free( dwork );
 
     
     return info;
