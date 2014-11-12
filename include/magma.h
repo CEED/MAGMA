@@ -13,6 +13,7 @@
  * MAGMA BLAS Functions
  * --------------------------------------------------------- */
 #include "magmablas.h"
+#include "magma_batched.h"
 
 /* ------------------------------------------------------------
  * MAGMA functions

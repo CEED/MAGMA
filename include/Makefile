@@ -21,6 +21,7 @@ ZHDR := \
 	magma_zbulge.h		\
 	magma_zbulgeinc.h	\
 	magma_zgehrd_m.h	\
+	magma_zbatched.h	\
 
 -include Makefile.local
 -include Makefile.src
