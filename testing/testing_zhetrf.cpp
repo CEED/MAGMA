@@ -321,7 +321,7 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgetrf
+   -- Testing zhetrf
 */
 int main( int argc, char** argv)
 {
@@ -386,29 +386,32 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda    = N;
             n2     = lda*N;
-            gflops = FLOPS_ZGETRF( N, N ) / 2e9;
+            gflops = FLOPS_ZPOTRF( N ) / 1e9;
             
             TESTING_MALLOC_CPU( ipiv, magma_int_t, N );
             TESTING_MALLOC_PIN( h_A,  magmaDoubleComplex, n2 );
             
-            lwork = -1;
-            lapackf77_zhetrf((upper ? MagmaUpperStr: MagmaLowerStr), &N, h_A, &lda, ipiv, &temp, &lwork, &info);
-            lwork = (int)MAGMA_Z_REAL(temp);
-            TESTING_MALLOC_PIN( work, magmaDoubleComplex, lwork );
 
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
+                lwork = -1;
+                lapackf77_zhetrf((upper ? MagmaUpperStr: MagmaLowerStr), &N, h_A, &lda, ipiv, &temp, &lwork, &info);
+                lwork = (int)MAGMA_Z_REAL(temp);
+                TESTING_MALLOC_CPU( work, magmaDoubleComplex, lwork );
+
                 init_matrix( nopiv, N, N, h_A, lda );
                 cpu_time = magma_wtime();
                 lapackf77_zhetrf((upper ? MagmaUpperStr: MagmaLowerStr), &N, h_A, &lda, ipiv, work, &lwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zgetrf returned error %d: %s.\n",
+                    printf("lapackf77_zhetrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 error_lapack = get_residual( nopiv, uplo, N, h_A, lda, ipiv );
+
+                TESTING_FREE_CPU( work );
             }
            
             /* ====================================================================
@@ -484,7 +487,6 @@ int main( int argc, char** argv)
             }
             
             TESTING_FREE_CPU( ipiv );
-            TESTING_FREE_PIN( work );
             TESTING_FREE_PIN( h_A  );
             fflush( stdout );
         }
