@@ -421,7 +421,7 @@ typedef enum {
 // sparse
 typedef enum {
     Magma_CSR          = 411,
-    Magma_ELLPACK      = 412,
+    Magma_ELLPACKT     = 412,
     Magma_ELL          = 413,
     Magma_DENSE        = 414,
     Magma_BCSR         = 415,
@@ -429,10 +429,10 @@ typedef enum {
     Magma_HYB          = 417,
     Magma_COO          = 418,
     Magma_ELLRT        = 419,
-    Magma_SELLC        = 420,
+
     Magma_SELLP        = 421,
     Magma_ELLD         = 422,
-    Magma_ELLDD        = 423,
+
     Magma_CSRD         = 424,
     Magma_CSRL         = 427,
     Magma_CSRU         = 428,
