@@ -136,10 +136,20 @@ ZSRC += \
 	zgemm_batched.cu			\
 	zgemm_fermi_batched.cu		\
 	zgemm_fermi_batched_k32.cu	\
+	zgerbt_batched.cu			\
+	zgetf2_kernels.cu		\
 	zherk_batched.cu			\
 	zherk_fermi_batched.cu		\
 	zherk_fermi_batched_k32.cu	\
+	zlaswp_batched.cu			\
+	zpotf2_kernels.cu		  \
+	zset_pointer.cu				\
+	ztrsm_batched.cu			\
+	ztrtri_diag_batched.cu		\
 
+SRC += \
+	set_pointer.cu  \
+	getrf_setup_pivinfo.cu	\
 
 
 -include Makefile.local

@@ -22,7 +22,7 @@
     Code similar to zlaset.
 */
 static __device__
-void zlacpy_device_full(
+void zlacpy_full_device(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
@@ -59,7 +59,7 @@ void zlacpy_device_full(
     Code similar to zlaset.
 */
 static __device__
-void zlacpy_device_lower(
+void zlacpy_lower_device(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
@@ -96,7 +96,7 @@ void zlacpy_device_lower(
     Code similar to zlaset.
 */
 static __device__
-void zlacpy_device_upper(
+void zlacpy_upper_device(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
@@ -131,30 +131,30 @@ void zlacpy_device_upper(
     kernel wrapper to call the device function.
 */
 __global__
-void zlacpy_kernel_full(
+void zlacpy_full_kernel(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
 {
-    zlacpy_device_full(m, n, dA, ldda, dB, lddb);
+    zlacpy_full_device(m, n, dA, ldda, dB, lddb);
 }
 
 __global__
-void zlacpy_kernel_lower(
+void zlacpy_lower_kernel(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
 {
-    zlacpy_device_lower(m, n, dA, ldda, dB, lddb);
+    zlacpy_lower_device(m, n, dA, ldda, dB, lddb);
 }
 
 __global__
-void zlacpy_kernel_upper(
+void zlacpy_upper_kernel(
     int m, int n,
     const magmaDoubleComplex *dA, int ldda,
     magmaDoubleComplex       *dB, int lddb )
 {
-    zlacpy_device_upper(m, n, dA, ldda, dB, lddb);
+    zlacpy_upper_device(m, n, dA, ldda, dB, lddb);
 }
 
 
@@ -162,33 +162,33 @@ void zlacpy_kernel_upper(
     kernel wrapper to call the device function for the batched routine.
 */
 __global__
-void zlacpy_kernel_batched_full(
+void zlacpy_full_kernel_batched(
     int m, int n,
     magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
-    zlacpy_device_full(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
+    zlacpy_full_device(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
 }
 
 __global__
-void zlacpy_kernel_batched_lower(
+void zlacpy_lower_kernel_batched(
     int m, int n,
     magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
-    zlacpy_device_lower(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
+    zlacpy_lower_device(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
 }
 
 __global__
-void zlacpy_kernel_batched_upper(
+void zlacpy_upper_kernel_batched(
     int m, int n,
     magmaDoubleComplex const * const *dAarray, int ldda,
     magmaDoubleComplex **dBarray, int lddb )
 {
     int batchid = blockIdx.z;
-    zlacpy_device_upper(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
+    zlacpy_upper_device(m, n, dAarray[batchid], ldda, dBarray[batchid], lddb);
 }
 
 
@@ -272,13 +272,13 @@ magmablas_zlacpy_q(
     dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
     
     if ( uplo == MagmaLower ) {
-        zlacpy_kernel_lower<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_lower_kernel<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
     else if ( uplo == MagmaUpper ) {
-        zlacpy_kernel_upper<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_upper_kernel<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
     else {
-        zlacpy_kernel_full <<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
+        zlacpy_full_kernel <<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
 }
 
@@ -383,13 +383,13 @@ magmablas_zlacpy_batched_q(
     dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y, batchCount );
     
     if ( uplo == MagmaLower ) {
-        zlacpy_kernel_batched_lower<<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
+        zlacpy_lower_kernel_batched<<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
     }
     else if ( uplo == MagmaUpper ) {
-        zlacpy_kernel_batched_upper<<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
+        zlacpy_upper_kernel_batched<<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
     }
     else {
-        zlacpy_kernel_batched_full <<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
+        zlacpy_full_kernel_batched <<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );
     }
 }
 

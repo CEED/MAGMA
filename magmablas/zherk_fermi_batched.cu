@@ -136,7 +136,7 @@ extern "C" void
 magmablas_zherk_batched_lg(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
     double alpha,
-    magmaDoubleComplex **dA_array, magma_int_t ldda,
+    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
     double beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount )
 {
