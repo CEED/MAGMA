@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Getopt::Std;
 
+my $version;
 my $major;
 my $minor;
 my $micro;
@@ -95,20 +96,19 @@ sub myCmd
 
 sub MakeRelease
 {
-    my $numversion = "$major.$minor.$micro";
     my $cmd;
     my $stage = "";
 
     if ( $rc > 0 ) {
-        $numversion .= "-rc$rc";
+        $version .= "-rc$rc";
         $stage = "rc$rc";
     }
     if ( $beta > 0 ) {
-        $numversion .= "-beta$beta";
+        $version .= "-beta$beta";
         $stage = "beta$beta";
     }
 
-    my $RELEASE_PATH = $ENV{PWD}."/magma-$numversion";
+    my $RELEASE_PATH = $ENV{PWD}."/magma-$version";
     if ( -e $RELEASE_PATH ) {
         die( "RELEASE_PATH $RELEASE_PATH already exists.\nPlease delete it or use different version.\n" );
     }
@@ -138,12 +138,12 @@ sub MakeRelease
     );
     $year += 1900;
     my $date = "$months[$mon] $year";
-    my $script = "s/MAGMA \\\(version [0-9.]+\\\)/MAGMA (version $numversion)/;";
+    my $script = "s/MAGMA \\\(version [0-9.]+\\\)/MAGMA (version $version)/;";
     $script .= " s/\\\@date.*/\\\@date $date/;";
     myCmd("find . -type f -exec perl -pi -e '$script' {} \\;");
     
     # Change version in pkgconfig
-    $script = "s/Version: [0-9.]+/Version: $numversion/;";
+    $script = "s/Version: [0-9.]+/Version: $version/;";
     myCmd("perl -pi -e '$script' lib/pkgconfig/magma.pc.in");
     
     # Precision Generation
@@ -198,10 +198,10 @@ sub MakeRelease
 
 #sub MakeInstallerRelease {
 #
-#    my $numversion = "$major.$minor.$micro";
+#    my $version = "$major.$minor.$micro";
 #    my $cmd;
 #
-#    $RELEASE_PATH = $ENV{ PWD}."/plasma-installer-$numversion";
+#    $RELEASE_PATH = $ENV{ PWD}."/plasma-installer-$version";
 #
 #    # Sauvegarde du rep courant
 #    my $dir = `pwd`;
@@ -224,7 +224,7 @@ sub MakeRelease
 
 sub Usage
 {
-    print "MakeRelease.pl [options] Major Minor Micro\n";
+    print "MakeRelease.pl [options] major.minor.micro\n";
     print "   -h            Print this help\n";
     print "   -b beta       Beta version\n";
     print "   -c candidate  Release candidate number\n";
@@ -255,14 +255,13 @@ if ( defined $opts{c} ) {
 if ( defined $opts{b} ) {
     $beta = $opts{b};
 }
-if ( ($#ARGV + 1) != 3 ) {
+if ( ($#ARGV + 1) != 1 ) {
     Usage();
     exit;
 }
 
-$major = $ARGV[0];
-$minor = $ARGV[1];
-$micro = $ARGV[2];
+$version = shift;
+($major, $minor, $micro) = $version =~ m/^(\d+)\.(\d+)\.(\d+)$/;
 
 MakeRelease();
 #MakeInstallerRelease();
