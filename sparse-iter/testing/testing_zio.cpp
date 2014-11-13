@@ -46,9 +46,9 @@ int main(  int argc, char** argv )
     while(  i < argc ) {
 
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
-            i++;printf("check2\n");
-            magma_int_t laplace_size = atoi( argv[i] );printf("check21\n");
-            magma_zm_5stencil(  laplace_size, &A, queue );printf("check22\n");
+            i++;
+            magma_int_t laplace_size = atoi( argv[i] );
+            magma_zm_5stencil(  laplace_size, &A, queue );
         } else {                        // file-matrix test
             magma_z_csr_mtx( &A,  argv[i], queue );
         }

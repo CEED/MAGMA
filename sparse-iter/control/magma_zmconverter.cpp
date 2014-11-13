@@ -276,7 +276,6 @@ magma_z_mconvert(
             else if (  new_format == Magma_CSRU ) {
                 // fill in information for B
                 *B = A;
-    printf("here\n");
                 magma_int_t numzeros=0;
                 for( magma_int_t i=0; i<A.num_rows; i++) {
                     for( magma_int_t j=A.row[i]; j<A.row[i+1]; j++) {
