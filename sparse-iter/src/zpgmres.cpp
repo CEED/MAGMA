@@ -136,15 +136,6 @@ magma_zpgmres(
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }
-    }
-
-    // GPU stream
-    magma_queue_t stream[2];
-    magma_event_t event[1];
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
-    magma_event_create( &event[0] );
-    //magmablasSetKernelStream(stream[0]);
 
     magma_zscal( dofs, c_zero, x->dval, 1 );              //  x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );             //  r = b
@@ -178,7 +169,6 @@ magma_zpgmres(
         magma_zcopy(dofs, r.dval, 1, q(k-1), 1);       //  q[0]    = 1.0/||r||
         magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);    //  (to be fused)
             q_t.dval = q(k-1);
-            magmablasSetKernelStream(stream[0]);
             // preconditioner
             //  z[k] = M^(-1) q(k)
             magma_z_applyprecond_left( A, q_t, &t, precond_par, queue );      
@@ -356,12 +346,6 @@ magma_zpgmres(
     magma_z_vfree(&q, queue );
     magma_z_vfree(&z, queue );
     magma_z_vfree(&z_t, queue );
-
-    // free GPU streams and events
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
-    magma_event_destroy( event[0] );
-    //magmablasSetKernelStream(NULL);
 
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
