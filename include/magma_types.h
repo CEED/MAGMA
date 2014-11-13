@@ -500,6 +500,13 @@ typedef enum {
     Magma_UNITDIAG     = 513
 } magma_scale_t;
 
+typedef enum {
+    Magma_FULL         = 521,
+    Magma_LOWER        = 522,
+    Magma_UPPER        = 523
+} magma_fillmode_t;
+
+
 
 // When adding constants, remember to do these steps as appropriate:
 // 1)  add magma_xxxx_const()  converter below and in control/constants.cpp
