@@ -270,7 +270,7 @@ __global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
     k1--;
     k2--;
-    if(k1<=0 || k2 <=0) return;
+    if( k1 < 0 || k2 < 0 ) return;
 
 
     if( tid < n) {
