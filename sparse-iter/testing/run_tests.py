@@ -441,7 +441,7 @@ if ( opts.control):
     for precision in opts.precisions:
         for size in sizes:
                 # precision generation
-                cmd = substitute( 'testing_zio', 'z', precision )
+                cmd = substitute( 'testing_zmconverter', 'z', precision )
                 tests.append( [cmd, '', size, ''] )
 
 # ----------------------------------------------------------------------

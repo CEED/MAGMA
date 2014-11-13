@@ -341,12 +341,11 @@ magma_z_cucsrtranspose(
         magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
         magma_z_cucsrtranspose( ACSR, &BCSR, queue );
 
-        if ( A.storage_type == Magma_CSRL )
-            B->storage_type = Magma_CSRU;
-        else if ( A.storage_type == Magma_CSRU )
-            B->storage_type = Magma_CSRL;
-        else
-            B->storage_type = A.storage_type;
+
+        B->storage_type = A.storage_type;
+
+        B->storage_type = A.storage_type;
+
 
         magma_z_mconvert( BCSR, B, Magma_CSR, B->storage_type, queue );
         magma_z_mfree( &ACSR, queue );

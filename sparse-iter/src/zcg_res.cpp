@@ -92,7 +92,6 @@ magma_zcg_res(
     magma_z_spmv( c_one, A, p, c_zero, q, queue );                     // q = A p
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) );// den = p dot q
     solver_par->init_res = nom0;
-    
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
     if ( nom < r0 ) {

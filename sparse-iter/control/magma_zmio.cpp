@@ -832,6 +832,10 @@ magma_z_mvisu(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     if ( A.memory_location == Magma_CPU ) {
+        
+        printf("visualizing matrix of size %d %d with %d nonzeros:\n", 
+            A.num_rows, A.num_cols, A.nnz);
+        
         if ( A.storage_type == Magma_DENSE ) {
             for( i=0; i<(A.num_rows); i++ ) {
                 for( j=0; j<A.num_cols; j++ ) {
@@ -1013,7 +1017,8 @@ magma_z_csr_mtx(
   (A->num_rows) = (magma_index_t) num_rows;
   (A->num_cols) = (magma_index_t) num_cols;
   (A->nnz)   = (magma_index_t) num_nonzeros;
-
+  (A->fill_mode) = Magma_FULL;
+  
   magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
   
@@ -1327,7 +1332,8 @@ magma_z_csr_mtxsymm(
   (A->num_rows) = (magma_index_t) num_rows;
   (A->num_cols) = (magma_index_t) num_cols;
   (A->nnz)   = (magma_index_t) num_nonzeros;
-
+  (A->fill_mode) = Magma_FULL;
+  
   magma_index_t *coo_col, *coo_row;
   magmaDoubleComplex *coo_val;
   

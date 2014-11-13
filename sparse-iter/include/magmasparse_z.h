@@ -147,7 +147,7 @@ magma_zmcsrcompressor_gpu(
     magma_queue_t queue );
 
 magma_int_t 
-magma_z_csrtranspose( 
+magma_z_mtranspose( 
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B,
     magma_queue_t queue );
@@ -828,6 +828,14 @@ magma_zcompactActive(
     magmaDoubleComplex_ptr dA, magma_int_t ldda, 
     magma_int_t *active,
     magma_queue_t queue );
+
+magma_int_t
+magma_zmlumerge(    
+    magma_z_sparse_matrix L, 
+    magma_z_sparse_matrix U,
+    magma_z_sparse_matrix *A, 
+    magma_queue_t queue );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE BLAS function definitions

@@ -73,6 +73,7 @@ magma_zcuspmm(
             C.num_cols = B.num_cols;
             C.storage_type = A.storage_type;
             C.memory_location = A.memory_location;
+            C.fill_mode = Magma_FULL;
             
             magma_int_t stat_dev = 0;
             C.val = NULL;

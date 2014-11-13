@@ -89,6 +89,7 @@ magma_zcsrset(
     A->val = val;
     A->col = col;
     A->row = row;
+    A->fill_mode = Magma_FULL;
 
     return MAGMA_SUCCESS;
 }

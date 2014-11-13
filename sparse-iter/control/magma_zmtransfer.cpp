@@ -98,6 +98,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -144,6 +145,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -166,6 +168,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -187,6 +190,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             int threads_per_row = A.alignment;
@@ -216,6 +220,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -243,6 +248,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -279,6 +285,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -304,6 +311,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -355,6 +363,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -377,6 +386,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -399,6 +409,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -431,6 +442,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -462,6 +474,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -488,6 +501,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -531,6 +545,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -551,6 +566,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -571,6 +587,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -599,6 +616,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->alignment = A.alignment;
@@ -626,6 +644,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -661,6 +680,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -685,6 +705,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -730,6 +751,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -750,6 +772,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation
@@ -771,6 +794,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -800,6 +824,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -827,6 +852,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->blocksize = A.blocksize;
@@ -863,6 +889,7 @@ magma_z_mtransfer(
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
+            B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             // memory allocation

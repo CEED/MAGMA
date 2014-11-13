@@ -189,7 +189,7 @@ magma_zmcsrcompressor_gpu(
             magma_z_mfree( &B2, queue );
             return MAGMA_ERR_HOST_ALLOC;
         }
-        magma_index_getvector( 1, A->row+(A->num_rows-1), 1, cputmp, 1 );
+        magma_index_getvector( 1, A->row+(A->num_rows), 1, cputmp, 1 );
         A->nnz = (magma_int_t) cputmp[0];
 
         // reallocate with right size

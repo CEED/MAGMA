@@ -29,8 +29,9 @@ ZSRC := \
     magma_zmcsrcompressor.cpp   \
     magma_zmscale.cpp   \
     magma_zmdiff.cpp  \
-	magma_ztranspose.cpp	\
+	magma_zmlumerge.cpp	\
 	magma_zvtranspose.cpp	\
+	magma_zmtranspose.cpp	\
 	magma_zvtransfer.cpp	\
     magma_zvpass.cpp   \
     magma_zvpass_gpu.cpp   \
