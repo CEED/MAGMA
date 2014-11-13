@@ -92,7 +92,7 @@ magma_zpcg(
     double nom, nom0, r0, gammaold, gammanew, den, res;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                     // x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
 
     // preconditioner
@@ -151,7 +151,7 @@ magma_zpcg(
                 // den = p dot q 
 
         alpha = MAGMA_Z_MAKE(gammanew/den, 0.);
-        magma_zaxpy(dofs,  alpha, p.dval, 1, x->val, 1);     // x = x + alpha p
+        magma_zaxpy(dofs,  alpha, p.dval, 1, x->dval, 1);     // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.dval, 1, r.dval, 1);      // r = r - alpha q
         gammaold = gammanew;
 

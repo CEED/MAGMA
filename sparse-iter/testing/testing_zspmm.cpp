@@ -67,7 +67,7 @@ int main(  int argc, char** argv )
         } else
             break;
     }
-    printf( "\n#    usage: ./run_zspmv"
+    printf( "\n#    usage: ./run_zspmm"
         " [ --blocksize %d --alignment %d (for SELLP) ]"
         " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
 

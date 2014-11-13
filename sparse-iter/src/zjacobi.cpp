@@ -531,7 +531,7 @@ magma_zjacobiiter(
         swap = *x;
         *x = t;
         t = swap;        
-        //magma_zcopy( dofs, t.dval, 1 , x->val, 1 );               // x = t
+        //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
     }
 
     magma_z_vfree( &t, queue );
@@ -606,7 +606,7 @@ magma_zjacobiiter_precond(
         swap = *x;
         *x = precond->work2;
         precond->work2 = swap;        
-        //magma_zcopy( dofs, t.dval, 1 , x->val, 1 );               // x = t
+        //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
     }
 
     magmablasSetKernelStream( orig_queue );

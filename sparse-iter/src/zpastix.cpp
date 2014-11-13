@@ -295,7 +295,7 @@ magma_zapplypastix(
         // fix that x is not allocated every time
         //  in case of many iterations, it might be faster to use
         // magma_zsetvector( ncol, 
-        //                                    b_h.dval, 1, x->val, 1 );
+        //                                    b_h.dval, 1, x->dval, 1 );
         magma_z_vfree( x, queue );
         magma_z_vtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
 

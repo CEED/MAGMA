@@ -19,7 +19,7 @@
 #define  blockinfo(i,j)  A.blockinfo[(i)*c_blocks   + (j)]
 #define M(i,j) M->val+((blockinfo(i,j)-1)*size_b*size_b)
 #define A(i,j) A.dval+((blockinfo(i,j)-1)*size_b*size_b)
-#define x(i) x->val+(i*size_b)
+#define x(i) x->dval+(i*size_b)
 
 /**
     Purpose
@@ -269,7 +269,7 @@ magma_zilu(
     magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
 
     // set x = b
-    magma_zcopyvector( A.num_rows, b.dval, 1, x->val, 1 );
+    magma_zcopyvector( A.num_rows, b.dval, 1, x->dval, 1 );
 
 
     // now solve

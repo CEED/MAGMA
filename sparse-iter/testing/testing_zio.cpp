@@ -41,14 +41,14 @@ int main(  int argc, char** argv )
 
 
     real_Double_t res;
-    magma_z_sparse_matrix A, A2, A3, A4;
+    magma_z_sparse_matrix A, A2, A3, A4, A5;
 
     while(  i < argc ) {
 
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
-            i++;
-            magma_int_t laplace_size = atoi( argv[i] );
-            magma_zm_5stencil(  laplace_size, &A, queue );
+            i++;printf("check2\n");
+            magma_int_t laplace_size = atoi( argv[i] );printf("check21\n");
+            magma_zm_5stencil(  laplace_size, &A, queue );printf("check22\n");
         } else {                        // file-matrix test
             magma_z_csr_mtx( &A,  argv[i], queue );
         }
@@ -69,7 +69,16 @@ int main(  int argc, char** argv )
         unlink( filename );
                 
         //visualize
+        printf("A2:\n");
         magma_z_mvisu( A2, queue );
+        
+        //visualize
+        magma_z_mconvert(A2, &A4, Magma_CSR, Magma_CSRL, queue );
+        printf("A4:\n");
+        magma_z_mvisu( A4, queue );
+        magma_z_mconvert(A4, &A5, Magma_CSR, Magma_ELL, queue );
+        printf("A5:\n");
+        magma_z_mvisu( A5, queue );
 
         // pass it to another application and back
         magma_int_t m, n;
@@ -94,6 +103,9 @@ int main(  int argc, char** argv )
 
         magma_z_mfree(&A, queue ); 
         magma_z_mfree(&A2, queue ); 
+        magma_z_mfree(&A4, queue ); 
+        magma_z_mfree(&A5, queue ); 
+
 
         i++;
     }

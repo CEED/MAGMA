@@ -92,7 +92,7 @@ magma_ziterref(
     double nom, nom0, r0;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                    // x = 0
 
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
     nom0 = magma_dznrm2(dofs, r.dval, 1);                       // nom0 = || r ||
@@ -121,7 +121,7 @@ magma_ziterref(
         magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.dval, 1) ;  // scale it
         magma_z_precond( A, r, &z, precond_par, queue );  // inner solver:  A * z = r
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1) ;  // scale it
-        magma_zaxpy(dofs,  c_one, z.dval, 1, x->val, 1);        // x = x + z
+        magma_zaxpy(dofs,  c_one, z.dval, 1, x->dval, 1);        // x = x + z
         magma_z_spmv( c_mone, A, *x, c_zero, r, queue );              // r = - A x
         magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);         // r = r + b
         nom = magma_dznrm2(dofs, r.dval, 1);                    // nom = || r || 

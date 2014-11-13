@@ -84,7 +84,7 @@ magma_zcg_res(
     double nom, nom0, r0, betanom, betanomsq, den, res;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                     // x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
     magma_zcopy( dofs, b.dval, 1, p.dval, 1 );                    // p = b
     nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );           
@@ -119,7 +119,7 @@ magma_zcg_res(
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
                                                     solver_par->numiter++ ) {
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
-        magma_zaxpy(dofs,  alpha, p.dval, 1, x->val, 1);     // x = x + alpha p
+        magma_zaxpy(dofs,  alpha, p.dval, 1, x->dval, 1);     // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.dval, 1, r.dval, 1);      // r = r - alpha q
         res = betanom = magma_dznrm2(dofs, r.dval, 1);       // betanom = || r ||
         betanomsq = betanom * betanom;                      // betanoms = r' * r

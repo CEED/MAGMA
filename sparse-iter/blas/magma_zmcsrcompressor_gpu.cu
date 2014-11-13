@@ -133,56 +133,87 @@ magma_zmcsrcompressor_gpu(
 {
     if ( A->memory_location == Magma_DEV && A->storage_type == Magma_CSR ) {
 
-        magma_int_t stat;
+        magma_int_t stat_cpu = 0, stat_dev = 0;
         magma_z_sparse_matrix B, B2;
+        
+        B.val = NULL;
+        B.col = NULL;
+        B.row = NULL;
+        B.rowidx = NULL;
+        B.blockinfo = NULL;
+        B.diag = NULL;
+        B.dval = NULL;
+        B.dcol = NULL;
+        B.drow = NULL;
+        B.drowidx = NULL;
+        B.ddiag = NULL;
+        
+        B2.val = NULL;
+        B2.col = NULL;
+        B2.row = NULL;
+        B2.rowidx = NULL;
+        B2.blockinfo = NULL;
+        B2.diag = NULL;
+        B2.dval = NULL;
+        B2.dcol = NULL;
+        B2.drow = NULL;
+        B2.drowidx = NULL;
+        B2.ddiag = NULL;
 
-        stat = magma_index_malloc( &B.drow, A->num_rows + 1 );
-        if ( stat != 0 )
-        {printf("Memory Allocation Error for B\n"); exit(0); }
-
-        stat = magma_index_malloc( &B2.drow, A->num_rows + 1 );
-        if ( stat != 0 )
-        {printf("Memory Allocation Error for B2\n"); exit(0); }
-        magma_index_copyvector( (A->num_rows+1), A->row, 1, B2.drow, 1 );
+        stat_dev += magma_index_malloc( &B.drow, A->num_rows + 1 );
+        stat_dev += magma_index_malloc( &B2.drow, A->num_rows + 1 );
+        if( stat_dev != 0 ){         
+            magma_z_mfree( &B, queue );
+            magma_z_mfree( &B2, queue ); 
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
+        
+        magma_index_copyvector( (A->num_rows+1), A->drow, 1, B2.drow, 1 );
 
         dim3 grid1( (A->num_rows+BLOCK_SIZE1-1)/BLOCK_SIZE1, 1, 1);  
 
         // copying the nonzeros into B and write in B.drow how many there are
         magma_zmcsrgpu_kernel1<<< grid1, BLOCK_SIZE1, 0, queue >>>
-                ( A->num_rows, A->val, A->row, A->col, B.dval, B.drow, B.dcol );
+                ( A->num_rows, A->dval, A->drow, A->dcol, B.dval, B.drow, B.dcol );
 
         // correct the row pointer
         dim3 grid2( 1, 1, 1);  
         magma_zmcsrgpu_kernel2<<< grid2, BLOCK_SIZE2, 0, queue >>>
-                ( A->num_rows, B.drow, A->row );
+                ( A->num_rows, B.drow, A->drow );
         // access the true number of nonzeros
         magma_index_t *cputmp;
-        magma_index_malloc_cpu( &cputmp, 1 );
+        stat_cpu += magma_index_malloc_cpu( &cputmp, 1 );
+        if( stat_cpu != 0 ){
+            magma_free_cpu( cputmp );
+            magma_z_mfree( &B, queue );
+            magma_z_mfree( &B2, queue );
+            return MAGMA_ERR_HOST_ALLOC;
+        }
         magma_index_getvector( 1, A->row+(A->num_rows-1), 1, cputmp, 1 );
         A->nnz = (magma_int_t) cputmp[0];
 
         // reallocate with right size
-        stat = magma_zmalloc( &B.dval, A->nnz );
-        if ( stat != 0 )
-            {printf("Memory Allocation Error for A\n"); exit(0); }
-        stat = magma_index_malloc( &B.dcol, A->nnz );
-        if ( stat != 0 )
-            {printf("Memory Allocation Error for A\n"); exit(0); }
-
-
+        stat_dev += magma_zmalloc( &B.dval, A->nnz );
+        stat_dev += magma_index_malloc( &B.dcol, A->nnz );
+        if( stat_dev != 0 ){         
+            magma_z_mfree( &B, queue );
+            magma_z_mfree( &B2, queue ); 
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
+        
         // copy correct values back
         magma_zmcsrgpu_kernel3<<< grid1, BLOCK_SIZE1, 0, queue >>>
-                ( A->num_rows, B.dval, B.drow, B.dcol, B2.drow, A->val, A->row, A->col );
+                ( A->num_rows, B.dval, B.drow, B.dcol, B2.drow, A->dval, A->drow, A->dcol );
 
-        magma_free( A->col );
-        magma_free( A->val );
-    A->col = B.dcol;
-    A->val = B.dval;
+        magma_free( A->dcol );
+        magma_free( A->dval );                
 
-        magma_free( B.drow );
+        A->dcol = B.dcol;
+        A->dval = B.dval;
+
         magma_free( B2.drow );
-       // magma_free( B.dcol );
-       // magma_free( B.dval );
+        magma_free( B.drow );  
+
 
         return MAGMA_SUCCESS; 
     }

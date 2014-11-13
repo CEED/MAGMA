@@ -106,7 +106,8 @@ magma_zcumilusetup(
                         precond->M.num_rows, precond->M.nnz, descrA,
                         precond->M.dval, precond->M.drow, precond->M.dcol, 
                         precond->cuinfo); 
-             if (cusparseStatus != 0)    printf("error in analysis:%d\n", cusparseStatus);
+             if (cusparseStatus != 0)    
+                 printf("error in analysis:%d\n", cusparseStatus);
 
             cusparseStatus =
             cusparseZcsrilu0( cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
@@ -115,7 +116,8 @@ magma_zcumilusetup(
                               precond->M.drow, 
                               precond->M.dcol, 
                               precond->cuinfo);
-             if (cusparseStatus != 0)    printf("error in ILU:%d\n", cusparseStatus);
+             if (cusparseStatus != 0)    
+                 printf("error in ILU:%d\n", cusparseStatus);
 
 
             cusparseStatus =
@@ -134,7 +136,6 @@ magma_zcumilusetup(
     magma_z_mconvert( hA, &hU , Magma_CSR, Magma_CSRU, queue );
     magma_z_mtransfer( hL, &(precond->L), Magma_CPU, Magma_DEV, queue );
     magma_z_mtransfer( hU, &(precond->U), Magma_CPU, Magma_DEV, queue );
-
 
     cusparseMatDescr_t descrL;
     cusparseStatus = cusparseCreateMatDescr(&descrL);
@@ -294,15 +295,18 @@ magma_zapplycumilu_l(
                                     precond->cuinfoL,
                                     b.dval,
                                     precond->L.num_rows,
-                                    x->val, 
+                                    x->dval, 
                                     precond->L.num_rows);
 
 
              if (cusparseStatus != 0)   printf("error in L triangular solve.\n");
 
+                
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
-
+    
+    magma_device_sync();
+    
     return MAGMA_SUCCESS;
 }
 
@@ -384,7 +388,7 @@ magma_zapplycumilu_r(
                                     precond->cuinfoU,
                                     b.dval,
                                     precond->U.num_rows,
-                                    x->val, 
+                                    x->dval, 
                                     precond->U.num_rows);
 
 
@@ -392,6 +396,8 @@ magma_zapplycumilu_r(
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
+    
+    magma_device_sync();
 
     return MAGMA_SUCCESS;
 }
@@ -675,15 +681,18 @@ magma_zapplycumicc_l(
                                     precond->cuinfoL,
                                     b.dval,
                                     precond->M.num_rows,
-                                    x->val, 
+                                    x->dval, 
                                     precond->M.num_rows);
 
 
-            if (cusparseStatus != 0)   printf("error in L triangular solve:%d.\n", precond->cuinfoL );
+            if (cusparseStatus != 0)   
+                printf("error in L triangular solve:%d.\n", precond->cuinfoL );
 
 
     cusparseDestroyMatDescr( descrL );
     cusparseDestroy( cusparseHandle );
+    
+    magma_device_sync();
 
     return MAGMA_SUCCESS;
 }
@@ -772,13 +781,16 @@ magma_zapplycumicc_r(
                                     precond->cuinfoU,
                                     b.dval,
                                     precond->M.num_rows,
-                                    x->val, 
+                                    x->dval, 
                                     precond->M.num_rows);
-             if (cusparseStatus != 0)   printf("error in U triangular solve:%d.\n", precond->cuinfoU );  
+             if (cusparseStatus != 0)   
+                 printf("error in U triangular solve:%d.\n", precond->cuinfoU );  
 
 
     cusparseDestroyMatDescr( descrU );
     cusparseDestroy( cusparseHandle );
+    
+    magma_device_sync();
 
     return MAGMA_SUCCESS;
 }

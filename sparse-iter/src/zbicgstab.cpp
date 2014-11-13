@@ -89,7 +89,7 @@ magma_zbicgstab(
     double nom, betanom, nom0, r0, den, res;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                    // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                    // x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                   // r = b
     magma_zcopy( dofs, b.dval, 1, rr.dval, 1 );                  // rr = b
     nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );           // nom = || r ||
@@ -142,8 +142,8 @@ magma_zbicgstab(
         omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, t.dval, 1, t.dval, 1 );
 
-        magma_zaxpy( dofs, alpha, p.dval, 1 , x->val, 1 );     // x=x+alpha*p
-        magma_zaxpy( dofs, omega, s.dval, 1 , x->val, 1 );     // x=x+omega*s
+        magma_zaxpy( dofs, alpha, p.dval, 1 , x->dval, 1 );     // x=x+alpha*p
+        magma_zaxpy( dofs, omega, s.dval, 1 , x->dval, 1 );     // x=x+omega*s
 
         magma_zcopy( dofs, s.dval, 1 , r.dval, 1 );             // r=s
         magma_zaxpy( dofs, c_mone * omega, t.dval, 1 , r.dval, 1 ); // r=r-omega*t

@@ -17,8 +17,8 @@ ZSRC := \
 	magma_z_free.cpp	\
 	magma_z_init.cpp	\
 	magma_z_matrixchar.cpp	\
-	magma_z_mconverter.cpp	\
-	magma_z_transfer.cpp	\
+	magma_zmconverter.cpp	\
+	magma_zmtransfer.cpp	\
 	magma_z_vio.cpp		\
 	magma_zgeneratematrix.cpp	\
 	magma_zmio.cpp		\
@@ -31,6 +31,7 @@ ZSRC := \
     magma_zmdiff.cpp  \
 	magma_ztranspose.cpp	\
 	magma_zvtranspose.cpp	\
+	magma_zvtransfer.cpp	\
     magma_zvpass.cpp   \
     magma_zvpass_gpu.cpp   \
 

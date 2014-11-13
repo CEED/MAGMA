@@ -221,7 +221,7 @@ magma_zparse_opts(
         else if ( strcmp("-h",     argv[i]) == 0 ||
                   strcmp("--help", argv[i]) == 0 ) {
             fprintf( stderr, usage_sparse, argv[0] );
-            exit(0);
+            return -1;
         } else {
             *matrices = i;
             break;

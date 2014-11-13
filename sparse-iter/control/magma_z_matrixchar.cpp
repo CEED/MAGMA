@@ -165,7 +165,7 @@ magma_zdiameter(
             return MAGMA_SUCCESS; 
         }
         // ELLPACK
-        else if ( A->storage_type == Magma_ELLPACK ) {
+        else if ( A->storage_type == Magma_ELL ) {
             magma_index_t i, j, tmp,  *dim, maxdim=0;
             magma_index_malloc_cpu( &dim, A->num_rows);
             for( i=0; i<A->num_rows; i++ ) {

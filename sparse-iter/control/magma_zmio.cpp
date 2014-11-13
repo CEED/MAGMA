@@ -102,7 +102,7 @@ magma_int_t read_z_csr_from_binary(
   else{
     printf("#Unable to open file %s.\n", filename);
     fflush(stdout);
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   binary_test.close();
   
@@ -223,17 +223,17 @@ magma_int_t read_z_csr_from_mtx(
   
   if (fid == NULL) {
     printf("#Unable to open file %s\n", filename);
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (mm_read_banner(fid, &matcode) != 0) {
     printf("#Could not process lMatrix Market banner.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (!mm_is_valid(matcode)) {
     printf("#Invalid lMatrix Market file.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (!((mm_is_real(matcode) || mm_is_integer(matcode) 
@@ -242,12 +242,12 @@ magma_int_t read_z_csr_from_mtx(
     printf("#Sorry, this application does not support ");
     printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
     printf("#Only real-valued or pattern coordinate matrices supported\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   
   (*type) = Magma_CSR;
   (*location) = Magma_CPU;
@@ -285,7 +285,7 @@ magma_int_t read_z_csr_from_mtx(
     }
   } else {
     printf("Unrecognized data type\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   fclose(fid);
@@ -855,8 +855,9 @@ magma_z_mvisu(
                     // upper left corner
                     for( j=0; j<4; j++ ){
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-                        magma_index_t bound = min( A.row[i]+4, A.row[i+1]);
-                        for( k=A.row[i]; k<bound; k++ ){
+                        magma_index_t rbound = min( A.row[i]+4, A.row[i+1]);
+                        magma_index_t lbound = max( A.row[i], A.row[i]);
+                        for( k=lbound; k<rbound; k++ ){
                             if( A.col[k] == j ){
                                 tmp = A.val[k];
                             }
@@ -871,7 +872,9 @@ magma_z_mvisu(
                     // upper right corner
                     for( j=A.num_rows-4; j<A.num_rows; j++ ){
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-                        for( k=A.row[i+1]-4; k<A.row[i+1]; k++ ){
+                        magma_index_t rbound = min( A.row[i+1], A.row[i+1]);
+                        magma_index_t lbound = max( A.row[i+1]-4, A.row[i]);
+                        for( k=lbound; k<rbound; k++ ){
                             if( A.col[k] == j ){
                                 tmp = A.val[k];
                                                                 
@@ -892,8 +895,9 @@ magma_z_mvisu(
                     // lower left corner
                     for( j=0; j<4; j++ ){
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-                        magma_index_t bound = min( A.row[i]+4, A.row[i+1]);
-                        for( k=A.row[i]; k<bound; k++ ){
+                        magma_index_t rbound = min( A.row[i]+4, A.row[i+1]);
+                        magma_index_t lbound = max( A.row[i], A.row[i]);
+                        for( k=lbound; k<rbound; k++ ){
                             if( A.col[k] == j ){
                                 tmp = A.val[k];
                             }
@@ -904,8 +908,9 @@ magma_z_mvisu(
                     // lower right corner
                     for( j=A.num_rows-4; j<A.num_rows; j++ ){
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-                        magma_index_t bound = min( 4, A.row[i+1]);
-                        for( k=A.row[i+1]-4; k<A.row[i+1]; k++ ){
+                        magma_index_t rbound = min( A.row[i+1], A.row[i+1]);
+                        magma_index_t lbound = max( A.row[i+1]-4, A.row[i]);
+                        for( k=lbound; k<rbound; k++ ){
                             if( A.col[k] == j ){
                                 tmp = A.val[k];
                             }
@@ -977,17 +982,17 @@ magma_z_csr_mtx(
   
   if (fid == NULL) {
     printf("#Unable to open file %s\n", filename);
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (mm_read_banner(fid, &matcode) != 0) {
     printf("#Could not process lMatrix Market banner.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (!mm_is_valid(matcode)) {
     printf("#Invalid lMatrix Market file.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (!((mm_is_real(matcode) || mm_is_integer(matcode) 
@@ -996,12 +1001,12 @@ magma_z_csr_mtx(
     printf("#Sorry, this application does not support ");
     printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
     printf("#Only real-valued or pattern coordinate matrices are supported\n");
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
-    exit(1);
+    return MAGMA_ERR_UNKNOWN;
   
   (A->storage_type) = Magma_CSR;
   (A->memory_location) = Magma_CPU;
@@ -1040,7 +1045,7 @@ magma_z_csr_mtx(
     }
   } else {
     printf("Unrecognized data type\n");
-    exit(1);
+    return MAGMA_ERR_UNKNOWN;
   }
   
   fclose(fid);
@@ -1062,9 +1067,20 @@ magma_z_csr_mtx(
     magmaDoubleComplex *new_val;
     magma_index_t* new_row;
     magma_index_t* new_col;
-    magma_zmalloc_cpu( &new_val, true_nonzeros );
-    magma_index_malloc_cpu( &new_row, true_nonzeros );
-    magma_index_malloc_cpu( &new_col, true_nonzeros );
+    new_val = NULL;
+    new_col = NULL;
+    new_row = NULL;
+    magma_int_t stat_cpu = 0;
+    stat_cpu += magma_zmalloc_cpu( &new_val, true_nonzeros );
+    stat_cpu += magma_index_malloc_cpu( &new_row, true_nonzeros );
+    stat_cpu += magma_index_malloc_cpu( &new_col, true_nonzeros );
+    if( stat_cpu != 0 ){
+        magma_free_cpu( new_val );
+        magma_free_cpu( new_col );
+        magma_free_cpu( new_row );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    
 
     magma_index_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
@@ -1280,17 +1296,17 @@ magma_z_csr_mtxsymm(
   
   if (fid == NULL) {
     printf("#Unable to open file %s\n", filename);
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   }
   
   if (mm_read_banner(fid, &matcode) != 0) {
     printf("#Could not process lMatrix Market banner.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_SUPPORTED;
   }
   
   if (!mm_is_valid(matcode)) {
     printf("#Invalid lMatrix Market file.\n");
-    exit(1);
+    return MAGMA_ERR_NOT_SUPPORTED;
   }
   
   if (!((mm_is_real(matcode) || mm_is_integer(matcode) 
@@ -1299,12 +1315,12 @@ magma_z_csr_mtxsymm(
     printf("#Sorry, this application does not support ");
     printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
     printf("#Only real-valued or pattern coordinate matrices are supported\n");
-    exit(1);
+    return MAGMA_ERR_NOT_SUPPORTED;
   }
   
   magma_index_t num_rows, num_cols, num_nonzeros;
   if (mm_read_mtx_crd_size(fid,&num_rows,&num_cols,&num_nonzeros) !=0)
-    exit(1);
+    return MAGMA_ERR_NOT_FOUND;
   
   (A->storage_type) = Magma_CSR;
   (A->memory_location) = Magma_CPU;
@@ -1343,7 +1359,7 @@ magma_z_csr_mtxsymm(
     }
   } else {
     printf("Unrecognized data type\n");
-    exit(1);
+    return MAGMA_ERR_NOT_SUPPORTED;
   }
   
   fclose(fid);

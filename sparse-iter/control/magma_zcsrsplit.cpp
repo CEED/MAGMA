@@ -68,7 +68,30 @@ magma_zcsrsplit(
                 A.storage_type == Magma_CSRCOO ) ) {
 
         magma_int_t i, k, j, nnz_diag, nnz_offd;
-
+        
+        magma_int_t stat_cpu = 0, stat_dev = 0;
+        D->val = NULL;
+        D->col = NULL;
+        D->row = NULL;
+        D->rowidx = NULL;
+        D->blockinfo = NULL;
+        D->diag = NULL;
+        D->dval = NULL;
+        D->dcol = NULL;
+        D->drow = NULL;
+        D->drowidx = NULL;
+        D->ddiag = NULL;
+        R->val = NULL;
+        R->col = NULL;
+        R->row = NULL;
+        R->rowidx = NULL;
+        R->blockinfo = NULL;
+        R->diag = NULL;
+        R->dval = NULL;
+        R->dcol = NULL;
+        R->drow = NULL;
+        R->drowidx = NULL;
+        R->ddiag = NULL;
 
         nnz_diag = nnz_offd = 0;
         // Count the new number of nonzeroes in the two matrices
@@ -95,13 +118,20 @@ magma_zcsrsplit(
         R->num_cols = A.num_cols;
         R->nnz = nnz_offd;
 
-        magma_zmalloc_cpu( &D->val, nnz_diag );
-        magma_index_malloc_cpu( &D->row, A.num_rows+1 );
-        magma_index_malloc_cpu( &D->col, nnz_diag );
+        stat_cpu += magma_zmalloc_cpu( &D->val, nnz_diag );
+        stat_cpu += magma_index_malloc_cpu( &D->row, A.num_rows+1 );
+        stat_cpu += magma_index_malloc_cpu( &D->col, nnz_diag );
 
-        magma_zmalloc_cpu( &R->val, nnz_offd );
-        magma_index_malloc_cpu( &R->row, A.num_rows+1 );
-        magma_index_malloc_cpu( &R->col, nnz_offd );
+        stat_cpu += magma_zmalloc_cpu( &R->val, nnz_offd );
+        stat_cpu += magma_index_malloc_cpu( &R->row, A.num_rows+1 );
+        stat_cpu += magma_index_malloc_cpu( &R->col, nnz_offd );
+        
+        if( stat_cpu != 0 ){
+            magma_z_mfree( D, queue );
+            magma_z_mfree( R, queue );
+            return MAGMA_ERR_HOST_ALLOC;
+        }
+        
 
         // Fill up the new sparse matrices  
         D->row[0] = 0;

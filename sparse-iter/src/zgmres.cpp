@@ -77,7 +77,8 @@ magma_zgmres(
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
-
+    
+    magma_int_t stat_cpu = 0, stat_dev = 0;
     // prepare solver feedback
     solver_par->solver = Magma_GMRES;
     solver_par->numiter = 0;
@@ -95,45 +96,16 @@ magma_zgmres(
     // CPU workspace
     //magma_setdevice(0);
     magmaDoubleComplex *H, *HH, *y, *h1;
-    H  = NULL;
-    HH = NULL;
-    y  = NULL;
-    h1 = NULL;
-    
-    stat =
-        magma_zmalloc_pinned( &H, (ldh+1)*ldh );
-    if( stat != 0 ){
+    stat_cpu += magma_zmalloc_pinned( &H, (ldh+1)*ldh );
+    stat_cpu += magma_zmalloc_pinned( &y, ldh );
+    stat_cpu += magma_zmalloc_pinned( &HH, ldh*ldh );
+    stat_cpu += magma_zmalloc_pinned( &h1, ldh );
+    if( stat_cpu != 0){
         magma_free_pinned( H );
-        magma_free_pinned( HH );
         magma_free_pinned( y );
-        magma_free_pinned( h1 );
-        return MAGMA_ERR_HOST_ALLOC;
-    }
-    stat = 
-        magma_zmalloc_pinned( &y, ldh );
-    if( stat != 0 ){
-        magma_free_pinned( H );
         magma_free_pinned( HH );
-        magma_free_pinned( y );
         magma_free_pinned( h1 );
-        return MAGMA_ERR_HOST_ALLOC;
-    }
-    stat = 
-        magma_zmalloc_pinned( &HH, ldh*ldh );
-    if( stat != 0 ){
-        magma_free_pinned( H );
-        magma_free_pinned( HH );
-        magma_free_pinned( y );
-        magma_free_pinned( h1 );
-        return MAGMA_ERR_HOST_ALLOC;
-    }
-    stat = 
-        magma_zmalloc_pinned( &h1, ldh );
-    if( stat != 0 ){
-        magma_free_pinned( H );
-        magma_free_pinned( HH );
-        magma_free_pinned( y );
-        magma_free_pinned( h1 );
+        magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_HOST_ALLOC;
     }
 
@@ -146,13 +118,15 @@ magma_zgmres(
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
 
     magmaDoubleComplex *dy = NULL, *dH = NULL;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )){
+    stat_dev += magma_zmalloc( &dy, ldh );
+    stat_dev += magma_zmalloc( &dH, (ldh+1)*ldh );
+    if( stat_dev != 0){
+        magma_free_pinned( H );
+        magma_free_pinned( y );
+        magma_free_pinned( HH );
+        magma_free_pinned( h1 );
         magma_free( dH );
         magma_free( dy );
-        magmablasSetKernelStream( orig_queue );
-        return MAGMA_ERR_DEVICE_ALLOC;
-    }
-    if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) {
         magma_free( dH );
         magma_free( dy );
         magmablasSetKernelStream( orig_queue );
@@ -167,7 +141,7 @@ magma_zgmres(
     magma_event_create( &event[0] );
     //magmablasSetKernelStream(stream[0]);
 
-    magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1 );              //  x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );             //  r = b
     nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );     //  nom0= || r||
     nom = nom0  * nom0;
@@ -298,7 +272,7 @@ magma_zgmres(
         // compute solution approximation
         magma_zsetmatrix(m, 1, y+1, m, dy, m );
         magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(0), dofs, dy, 1, 
-                                                    c_one, x->val, 1); 
+                                                    c_one, x->dval, 1); 
 
         // compute residual
         magma_z_spmv( c_mone, A, *x, c_zero, r, queue );      //  r = - A * x

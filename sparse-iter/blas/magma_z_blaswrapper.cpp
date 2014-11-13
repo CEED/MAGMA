@@ -107,16 +107,16 @@ magma_z_spmv(
                 cusparseDestroy( cusparseHandle );
 
              }
-             else if ( A.storage_type == Magma_ELLPACK ) {
-                 //printf("using ELLPACK kernel for SpMV: ");
-                 magma_zgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+             else if ( A.storage_type == Magma_ELL ) {
+                 //printf("using ELLPACKT kernel for SpMV: ");
+                 magma_zgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta, 
                     y.dval, queue );
                  //printf("done.\n");
              }
-             else if ( A.storage_type == Magma_ELL ) {
+             else if ( A.storage_type == Magma_ELLPACKT ) {
                  //printf("using ELL kernel for SpMV: ");
-                 magma_zgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                 magma_zgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta, 
                     y.dval, queue );
                  //printf("done.\n");
@@ -126,14 +126,6 @@ magma_z_spmv(
                  magma_zgeellrtmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                             A.max_nnz_row, alpha, A.dval, A.dcol, A.drow, x.dval, 
                          beta, y.dval, A.alignment, A.blocksize, queue );
-                 //printf("done.\n");
-             }
-             else if ( A.storage_type == Magma_SELLC ) {
-                 //printf("using SELLC kernel for SpMV: ");
-                 magma_zgesellcmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    A.blocksize, A.numblocks, A.alignment, 
-                    alpha, A.dval, A.dcol, A.drow, x.dval, beta, y.dval, queue );
-
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_SELLP ) {
@@ -210,10 +202,10 @@ magma_z_spmv(
                 cusparseDestroyMatDescr( descr );
                 cusparseDestroy( cusparseHandle );
              }
-             else if ( A.storage_type == Magma_ELLPACK ) {
+             else if ( A.storage_type == Magma_ELL ) {
 
                 if ( x.major == MagmaColMajor) {
-                 magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                 magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                  num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
                  beta, y.dval, queue );
                 }
@@ -227,9 +219,9 @@ magma_z_spmv(
                     magma_z_vfree(&x2, queue );
                 }
              }
-             else if ( A.storage_type == Magma_ELL ) {
+             else if ( A.storage_type == Magma_ELLPACKT ) {
                 if ( x.major == MagmaColMajor) {
-                 magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
+                 magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                  num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
                  beta, y.dval, queue );
                 }
@@ -369,8 +361,8 @@ magma_z_spmv_shift(
                 blocksize, add_rows, y.dval, queue );
              //printf("done.\n");
          }
-         else if ( A.storage_type == Magma_ELLPACK ) {
-             //printf("using ELLPACK kernel for SpMV: ");
+         else if ( A.storage_type == Magma_ELLPACKT ) {
+             //printf("using ELLPACKT kernel for SpMV: ");
              magma_zgeellmv_shift( MagmaNoTrans, A.num_rows, A.num_cols, 
                 A.max_nnz_row, alpha, lambda, A.dval, A.dcol, x.dval, beta, offset, 
                 blocksize, add_rows, y.dval, queue );

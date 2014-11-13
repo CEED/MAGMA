@@ -84,12 +84,23 @@ magma_zbicgstab_merge2(
     // workspace
     magma_z_vector q, r,rr,p,v,s,t;
     magmaDoubleComplex *d1, *d2, *skp;
-    magma_zmalloc( &d1, dofs*(2) );
-    magma_zmalloc( &d2, dofs*(2) );
+    d1 = NULL;
+    d2 = NULL;
+    skp = NULL;
+    magma_int_t stat_dev = 0, stat_cpu = 0;
+    stat_dev += magma_zmalloc( &d1, dofs*(2) );
+    stat_dev += magma_zmalloc( &d2, dofs*(2) );
 
     // array for the parameters
-    magma_zmalloc( &skp, 8 );     
+    stat_dev += magma_zmalloc( &skp, 8 );     
     // skp = [alpha|beta|omega|rho_old|rho|nom|tmp1|tmp2]  
+    if( stat_dev != 0 ){
+        magma_free( d1 );
+        magma_free( d2 );
+        magma_free( skp );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }
     magma_z_vinit( &q, Magma_DEV, dofs*6, c_zero, queue );
 
     // q = rr|r|p|v|s|t
@@ -112,7 +123,7 @@ magma_zbicgstab_merge2(
     double nom, nom0, betanom, r0, den;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                            // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                            // x = 0
     magma_zcopy( dofs, b.dval, 1, q(0), 1 );                            // rr = b
     magma_zcopy( dofs, b.dval, 1, q(1), 1 );                            // r = b
 
@@ -123,7 +134,15 @@ magma_zbicgstab_merge2(
     beta = rho_new;
     solver_par->init_res = nom0;
     // array on host for the parameters 
-    magma_zmalloc_cpu( &skp_h, 8 );
+    stat_cpu = magma_zmalloc_cpu( &skp_h, 8 );
+    if( stat_cpu != 0 ){
+        magma_free( d1 );
+        magma_free( d2 );
+        magma_free( skp );
+        magma_free_cpu( skp_h );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_HOST_ALLOC;
+    }
     skp_h[0]=alpha; 
     skp_h[1]=beta; 
     skp_h[2]=omega; 
@@ -169,7 +188,7 @@ magma_zbicgstab_merge2(
         magma_zbicgmerge2( dofs, skp, r.dval, v.dval, s.dval, queue );   // s=r-alpha*v
         magma_zbicgmerge_spmv2( A, d1, d2, q(4), q(5), skp, queue ); 
         magma_zbicgmerge_xrbeta( dofs, d1, d2, q(0), q(1), q(2), 
-                                                    q(4), q(5), x->val, skp, queue );  
+                                                    q(4), q(5), x->dval, skp, queue );  
 
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+5, 1, 

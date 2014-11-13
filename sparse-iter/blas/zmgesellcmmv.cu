@@ -1240,7 +1240,7 @@ magma_zmgesellpmv(
     magma_queue_t queue )
 {
     // using a 3D thread grid for small num_vecs, a 2D grid otherwise
-    
+
     int texture=0, kepler=0, precision=0;
 
     magma_int_t arch = magma_getdevice_arch();
@@ -1285,13 +1285,13 @@ magma_zmgesellpmv(
 
         if ( num_vecs%2 ==1 ) { // only multiple of 2 can be processed
             printf("error: number of vectors has to be multiple of 2.\n");
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
         if ( num_vecs > 8 ) // avoid running into memory problems
             alignment = 1; 
 
-        int num_threads = (num_vecs/2) * blocksize*alignment;            
-
+        int num_threads = (num_vecs/2) * blocksize*alignment;   
+        
         // every thread handles two vectors
         if (  num_threads > 1024 )
             printf("error: too many threads requested.\n");
@@ -1362,14 +1362,14 @@ magma_zmgesellpmv(
         }
         else {
             printf("error: alignment %d not supported.\n", alignment);
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
 
     } else {
 
         if ( num_vecs%2 ==1 ) { // only multiple of 2 can be processed
             printf("error: number of vectors has to be multiple of 2.\n");
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
 
         if ( num_vecs > 8 ) // avoid running into memory problems
@@ -1419,7 +1419,7 @@ magma_zmgesellpmv(
         }
         else {
             printf("error: alignment %d not supported.\n", alignment);
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
     }
 

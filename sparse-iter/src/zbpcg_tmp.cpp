@@ -75,6 +75,8 @@ magma_zbpcg(
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
+    
+    magma_int_t stat_dev = 0, stat_cpu = 0;
 
     magma_int_t i, num_vecs = b.num_rows/A.num_rows;
 
@@ -89,6 +91,16 @@ magma_zbpcg(
     magmaDoubleComplex *dwork, *h_work;
 
     magmaDoubleComplex *gramA, *gramB, *gramR, *gramRold, *gramT, *h_gram;
+    
+    dwork      = NULL;
+    hwork      = NULL;
+    gramA      = NULL;
+    gramB      = NULL;
+    gramR      = NULL;
+    gramRold   = NULL;
+    gramT      = NULL;
+    h_gram     = NULL;
+    
 
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
@@ -112,32 +124,86 @@ magma_zbpcg(
     magma_z_vinit( &h, Magma_DEV, dofs*num_vecs, c_zero, queue );
     
     magma_int_t lwork = max( n*n, 2* 2*n* 2*n);
-    magma_zmalloc(        &dwork     ,        m*n );
-    magma_zmalloc_pinned( &h_work   ,        lwork );
+    stat_dev += magma_zmalloc(        &dwork     ,        m*n );
+    stat_cpu += magma_zmalloc_pinned( &h_work   ,        lwork );
 
-    magma_zmalloc_pinned(&h_gram, n*n);
-    magma_zmalloc(&gramA, n * n);
-    magma_zmalloc(&gramB, n * n);
-    magma_zmalloc(&gramR, n * n);
-    magma_zmalloc(&gramRold, n * n);
-    magma_zmalloc(&gramT, n * n);
+    stat_cpu += magma_zmalloc_pinned(&h_gram, n*n);
+    stat_dev += magma_zmalloc(&gramA, n * n);
+    stat_dev += magma_zmalloc(&gramB, n * n);
+    stat_dev += magma_zmalloc(&gramR, n * n);
+    stat_dev += magma_zmalloc(&gramRold, n * n);
+    stat_dev += magma_zmalloc(&gramT, n * n);
 
     // solver variables
     magmaDoubleComplex *alpha, *beta;
-    magma_zmalloc_cpu(&alpha, num_vecs);
-    magma_zmalloc_cpu(&beta, num_vecs);
+    stat_cpu += magma_zmalloc_cpu(&alpha, num_vecs);
+    stat_cpu += magma_zmalloc_cpu(&beta, num_vecs);
 
-    double *nom, *nom0, *r0, *gammaold, *gammanew, *den, *res;
-    magma_dmalloc_cpu(&nom, num_vecs);
-    magma_dmalloc_cpu(&nom0, num_vecs);
-    magma_dmalloc_cpu(&r0, num_vecs);
-    magma_dmalloc_cpu(&gammaold, num_vecs);
-    magma_dmalloc_cpu(&gammanew, num_vecs);
-    magma_dmalloc_cpu(&den, num_vecs);
-    magma_dmalloc_cpu(&res, num_vecs);
-
+    double *nom, *nom0, *r0, *gammaold, *gammanew, *den, *res, residual;
+    nom        = NULL;
+    nom0       = NULL;
+    r0         = NULL;
+    gammaold   = NULL;
+    gammanew   = NULL;
+    den        = NULL;
+    res        = NULL;
+    residual   = NULL;
+    stat_cpu += magma_dmalloc_cpu(&nom, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&nom0, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&r0, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&gammaold, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&gammanew, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&den, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&res, num_vecs);
+    stat_cpu += magma_dmalloc_cpu(&residual, num_vecs);
+    if( stat_cpu != 0 ){
+        magma_free_cpu( nom      );
+        magma_free_cpu( nom0     );
+        magma_free_cpu( r0       );
+        magma_free_cpu( gammaold );
+        magma_free_cpu( gammanew );
+        magma_free_cpu( den      );
+        magma_free_cpu( res      );
+        magma_free_cpu( alpha    );
+        magma_free_cpu( beta     );
+        magma_free_cpu( residual );
+        magma_free_pinned( h_gram   );
+        magma_free_pinned( h_work   );
+        magma_free( gramA );
+        magma_free( gramB );
+        magma_free( gramR );
+        magma_free( gramRold );
+        magma_free( gramT );
+        magma_free( dwork );
+        magmablasSetKernelStream( orig_queue );
+        printf("error: host memory allocation.\n");
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+        if( stat_dev != 0 ){
+        magma_free_cpu( nom      );
+        magma_free_cpu( nom0     );
+        magma_free_cpu( r0       );
+        magma_free_cpu( gammaold );
+        magma_free_cpu( gammanew );
+        magma_free_cpu( den      );
+        magma_free_cpu( res      );
+        magma_free_cpu( alpha    );
+        magma_free_cpu( beta     );
+        magma_free_cpu( residual );
+        magma_free_pinned( h_gram   );
+        magma_free_pinned( h_work   );
+        magma_free( gramA );
+        magma_free( gramB );
+        magma_free( gramR );
+        magma_free( gramRold );
+        magma_free( gramT );
+        magma_free( dwork );
+        magmablasSetKernelStream( orig_queue );
+        printf("error: device memory allocation.\n");
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }
     // solver setup
-    magma_zscal( dofs*num_vecs, c_zero, x->val, 1) ;                     // x = 0
+    magma_zscal( dofs*num_vecs, c_zero, x->dval, 1) ;                     // x = 0
     magma_zcopy( dofs*num_vecs, b.dval, 1, r.dval, 1 );                    // r = b
 
     // preconditioner
@@ -263,7 +329,7 @@ magma_zbpcg(
             //*** this has to be changed - to: ALPHA = DEN^-1 GAMMANEW
             alpha[i] = MAGMA_Z_MAKE(gammanew[i]/den[i], 0.);
             //*** this becomes GEMMS
-            magma_zaxpy(dofs,  alpha[i], p(i), 1, x->val+dofs*i, 1); // x = x + alpha p
+            magma_zaxpy(dofs,  alpha[i], p(i), 1, x->dval+dofs*i, 1); // x = x + alpha p
             magma_zaxpy(dofs, -alpha[i], q(i), 1, r(i), 1);      // r = r - alpha q
             gammaold[i] = gammanew[i];
 
@@ -280,7 +346,7 @@ magma_zbpcg(
 
         magma_zposv_gpu(MagmaUpper, n, n, gramR, n, gramB, n, &solver_par->info);
     magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
-            c_one, p.dval, m, gramB, n, c_one, x->val, m);
+            c_one, p.dval, m, gramB, n, c_one, x->dval, m);
         magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, n, n,
                     c_mone, q.dval, m, gramB, n, c_one, r.dval, m);
         *gramRold = *gramR;
@@ -307,8 +373,6 @@ magma_zbpcg(
     } 
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
-    double *residual;
-    magma_dmalloc_cpu(&residual, num_vecs);
     magma_zresidual( A, b, *x, residual, queue );
     solver_par->iter_res = res[0];
     solver_par->final_res = residual[0];

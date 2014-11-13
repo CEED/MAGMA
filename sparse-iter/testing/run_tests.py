@@ -346,7 +346,6 @@ blocksizes = []
 blocksizes += ['--blocksize 4']
 blocksizes += ['--blocksize 8']
 blocksizes += ['--blocksize 16']
-blocksizes += ['--blocksize 32']
 #end
 
 
@@ -565,14 +564,14 @@ def run( cmd ):
             info = int( m.group(1) )
             if ( info == 0 ):
                 okay += 1
-            if ( info == -100 ):
-                nospd += 1
-            if ( info == -99 ):
+            if ( info == -103 ):
                 nosupport += 1
-            if ( info == -1 ):
-                fail += 1
-            if ( info == -2 ):
+            if ( info == -201 ):
                 slowconv += 1
+            if ( info == -202 ):
+                fail += 1
+            if ( info == -203 ):
+                fail += 1
         # end
     # end
     

@@ -295,7 +295,7 @@ magma_zapplycuilu_l(
                                         precond->L.dcol,
                                         precond->cuinfoL,
                                         b.dval+i*dofs,
-                                        x->val+i*dofs );
+                                        x->dval+i*dofs );
                  if (cusparseStatus != 0)   printf("error in L triangular solve.\n");
             }
 
@@ -383,7 +383,7 @@ magma_zapplycuilu_r(
                                         precond->U.dcol,
                                         precond->cuinfoU,
                                         b.dval+i*dofs,
-                                        x->val+i*dofs );
+                                        x->dval+i*dofs );
                  if (cusparseStatus != 0)   printf("error in L triangular solve.\n");
 
              }
@@ -673,7 +673,7 @@ magma_zapplycuicc_l(
                                         precond->M.dcol,
                                         precond->cuinfoL,
                                         b.dval+i*dofs,
-                                        x->val+i*dofs );
+                                        x->dval+i*dofs );
                  if (cusparseStatus != 0)   printf("error in L triangular solve:%p.\n", precond->cuinfoL );
             }
 
@@ -764,7 +764,7 @@ magma_zapplycuicc_r(
                                         precond->M.dcol,
                                         precond->cuinfoU,
                                         b.dval+i*dofs,
-                                        x->val+i*dofs );
+                                        x->dval+i*dofs );
                  if (cusparseStatus != 0)   printf("error in U triangular solve:%p.\n", precond->cuinfoU );
             }
 

@@ -163,7 +163,7 @@ magma_zcgmerge_spmvcsr_kernel(
 
 // computes the SpMV using ELL and the first step of the reduction
 __global__ void
-magma_zcgmerge_spmvellpackt_kernel(  
+magma_zcgmerge_spmvell_kernel(  
     int n,
     int num_cols_per_row,
     magmaDoubleComplex_ptr dval, 
@@ -881,11 +881,11 @@ magma_zcgmerge_spmv1(
     if ( A.storage_type == Magma_CSR )
         magma_zcgmerge_spmvcsr_kernel<<<Gs, Bs, Ms, queue >>>
         ( A.num_rows, A.dval, A.drow, A.dcol, dd, dz, d1 );
-    else if ( A.storage_type == Magma_ELLPACK )
+    else if ( A.storage_type == Magma_ELLPACKT )
         magma_zcgmerge_spmvellpack_kernel<<<Gs, Bs, Ms, queue >>>
         ( A.num_rows, A.max_nnz_row, A.dval, A.dcol, dd, dz, d1 );
     else if ( A.storage_type == Magma_ELL )
-        magma_zcgmerge_spmvellpackt_kernel<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvell_kernel<<<Gs, Bs, Ms, queue >>>
         ( A.num_rows, A.max_nnz_row, A.dval, A.dcol, dd, dz, d1 );
     else if ( A.storage_type == Magma_SELLP ) {
             int num_threadssellp = A.blocksize*A.alignment;
@@ -973,7 +973,7 @@ magma_zcgmerge_spmv1(
     }
     else {
         printf("error: alignment %d not supported.\n", A.alignment);
-        exit(-1);
+        return MAGMA_ERR_NOT_SUPPORTED;
     }
         // in case of using ELLRT, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel

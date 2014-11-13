@@ -70,8 +70,6 @@ magma_z_precond(
         case  Magma_BICGSTAB:
                 magma_zbicgstab( A, b, x, &psolver_par, queue );break;
         case  Magma_GMRES: 
- printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: and restart:%d\n", 
-                               psolver_par.epsilon, psolver_par.maxiter, psolver_par.restart );
                 magma_zgmres( A, b, x, &psolver_par, queue );break;
         case  Magma_JACOBI: 
                 magma_zjacobi( A, b, x, &psolver_par, queue );break;
@@ -342,7 +340,8 @@ magma_z_applyprecond_right(
     if ( precond->solver == Magma_JACOBI ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );    // x = b
     }
-    else if ( precond->solver == Magma_ILU ) {
+    else if ( precond->solver == Magma_ILU || 
+            ( precond->solver == Magma_AILU && precond->maxiter == -1)) {
         magma_zapplycumilu_r( b, x, precond, queue );
     }
     else if ( precond->solver == Magma_ICC || 

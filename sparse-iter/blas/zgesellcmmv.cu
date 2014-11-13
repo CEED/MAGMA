@@ -881,7 +881,7 @@ magma_zgesellpmv(
 
         else {
             printf("error: alignment %d not supported.\n", alignment);
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
 
         cudaDestroyTextureObject(texdx);
@@ -914,7 +914,7 @@ magma_zgesellpmv(
 
         else {
             printf("error: alignment %d not supported.\n", alignment);
-            exit(-1);
+            return MAGMA_ERR_NOT_SUPPORTED;
         }
     #endif
 

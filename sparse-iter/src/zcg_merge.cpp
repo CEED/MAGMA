@@ -87,18 +87,29 @@ magma_zcg_merge(
     magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
     
     magmaDoubleComplex *d1, *d2, *skp;
-    magma_zmalloc( &d1, dofs*(1) );
-    magma_zmalloc( &d2, dofs*(1) );
+    d1 = NULL;
+    d2 = NULL;
+    skp = NULL;
+    magma_int_t stat_dev = 0, stat_cpu = 0;
+    stat_dev += magma_zmalloc( &d1, dofs*(1) );
+    stat_dev += magma_zmalloc( &d2, dofs*(1) );
     // array for the parameters
-    magma_zmalloc( &skp, 6 );       // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
-
+    stat_dev += magma_zmalloc( &skp, 6 );       
+    // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
+    if( stat_dev != 0 ){
+        magma_free( d1 );
+        magma_free( d2 );
+        magma_free( skp );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }
 
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h;
     double nom, nom0, r0, betanom, den;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                     // x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
     magma_zcopy( dofs, b.dval, 1, d.dval, 1 );                    // d = b
     nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );               
@@ -108,8 +119,16 @@ magma_zcg_merge(
     solver_par->init_res = nom0;
     
     // array on host for the parameters
-    magma_zmalloc_cpu( &skp_h, 6 );
-
+    stat_cpu += magma_zmalloc_cpu( &skp_h, 6 );
+    if( stat_cpu != 0 ){
+        magma_free( d1 );
+        magma_free( d2 );
+        magma_free( skp );
+        magma_free_cpu( skp_h );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    
     alpha = rho = gamma = tmp1 = c_one; 
     beta =  magma_zdotc(dofs, r.dval, 1, r.dval, 1);
     skp_h[0]=alpha; 
@@ -153,7 +172,7 @@ magma_zcg_merge(
         magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ); 
             
         // updates x, r, computes scalars and updates d
-        magma_zcgmerge_xrbeta( dofs, d1, d2, x->val, r.dval, d.dval, z.dval, skp, queue ); 
+        magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, d.dval, z.dval, skp, queue ); 
 
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1, 

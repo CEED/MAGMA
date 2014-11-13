@@ -106,7 +106,7 @@ magma_zcpir(
 
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                           // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1) ;                           // x = 0
 
     magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                       // r = - A x
     magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);                // r = r + b
@@ -143,7 +143,7 @@ magma_zcpir(
         //printf("done.\n");
 
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1) ;     // scale it
-        magma_zaxpy(dofs,  c_one, z.dval, 1, x->val, 1);                    // x = x + z
+        magma_zaxpy(dofs,  c_one, z.dval, 1, x->dval, 1);                    // x = x + z
         magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                       // r = - A x
         magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);                // r = r + b
         nom = magma_dznrm2(dofs, r.dval, 1);                            // nom = || r ||

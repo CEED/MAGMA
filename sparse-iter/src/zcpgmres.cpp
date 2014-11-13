@@ -100,7 +100,7 @@ magma_zcpgmres(
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     
-    magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1 );              //  x = 0
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );             //  r = b
 
     r0 = magma_dznrm2( dofs, r.dval, 1 );                 //  r0= || r||
@@ -165,7 +165,7 @@ magma_zcpgmres(
             
             /*   Update the current approximation: x += Q y  */
             magma_zsetmatrix(m, 1, y+1, m, dy, m);
-            magma_zgemv(MagmaNoTrans, dofs, m, c_one, z(1), dofs, dy, 1, c_one, x->val, 1); 
+            magma_zgemv(MagmaNoTrans, dofs, m, c_one, z(1), dofs, dy, 1, c_one, x->dval, 1); 
 
             magma_z_spmv( c_mone, A, *x, c_zero, r, queue );                  //  r = - A * x
             magma_zaxpy(dofs, c_one, b.dval, 1, r.dval, 1);              //  r = r + b

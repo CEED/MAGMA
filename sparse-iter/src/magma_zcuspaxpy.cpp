@@ -84,7 +84,18 @@ magma_zcuspaxpy(
             C.num_cols = A.num_cols;
             C.storage_type = A.storage_type;
             C.memory_location = A.memory_location;
-
+            magma_int_t stat_dev = 0;
+            C.val = NULL;
+            C.col = NULL;
+            C.row = NULL;
+            C.rowidx = NULL;
+            C.blockinfo = NULL;
+            C.diag = NULL;
+            C.dval = NULL;
+            C.dcol = NULL;
+            C.drow = NULL;
+            C.drowidx = NULL;
+            C.ddiag = NULL;
 
             // CUSPARSE context //
             cusparseHandle_t handle;
@@ -118,7 +129,7 @@ magma_zcuspaxpy(
             // nnzTotalDevHostPtr points to host memory
             magma_index_t *nnzTotalDevHostPtr = (magma_index_t*) &C.nnz;
             cusparseSetPointerMode(handle, CUSPARSE_POINTER_MODE_HOST);
-            magma_index_malloc( &C.drow, (A.num_rows + 1) );
+            stat_dev += magma_index_malloc( &C.drow, (A.num_rows + 1) );
 
             cusparseXcsrgeamNnz(handle,A.num_rows, A.num_cols,
                         descrA, A.nnz, A.drow, A.dcol,
@@ -136,8 +147,12 @@ magma_zcuspaxpy(
                 baseC = (magma_int_t) base_t;
                 C.nnz -= baseC;
             }
-            magma_index_malloc( &C.dcol, C.nnz );
-            magma_zmalloc( &C.dval, C.nnz );
+            stat_dev += magma_index_malloc( &C.dcol, C.nnz );
+            stat_dev += magma_zmalloc( &C.dval, C.nnz );
+            if( stat_dev != 0 ){
+                magma_z_mfree( &C, queue );
+                return MAGMA_ERR_DEVICE_ALLOC;
+            }
 
             cusparseZcsrgeam(handle, A.num_rows, A.num_cols,
                     alpha,
