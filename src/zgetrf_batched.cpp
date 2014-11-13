@@ -9,7 +9,7 @@
    @author Tingxing Dong
 
    @precisions normal z -> s d c
- */
+*/
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ magma_zgetrf_batched(
 
 
     magmaDoubleComplex* dinvA;
-    magmaDoubleComplex* dwork;// dinvA and dwork are dworkspace in ztrsm
+    magmaDoubleComplex* dwork;// dinvA and dwork are workspace in ztrsm
     magma_int_t invA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
     magma_int_t dwork_msize = n*nb;
     magma_zmalloc( &dinvA, invA_msize * batchCount);

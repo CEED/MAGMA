@@ -280,20 +280,25 @@ ZSRC += \
 # Batched, GPU interface
 ZSRC += \
 	zgetf2_batched.cpp				\
-	zgetrf_panel_batched.cpp		\
-	zgetrf_batched.cpp				\
-	zgetrs_batched.cpp				\
-	zgesv_batched.cpp				\
-	zgerbt_batched.cpp          \
-	\
 	zgetf2_nopiv_batched.cpp		\
+	zgetrf_panel_batched.cpp		\
 	zgetrf_panel_nopiv_batched.cpp	\
+	zgetrf_batched.cpp				\
 	zgetrf_nopiv_batched.cpp		\
+	zgetrs_batched.cpp				\
 	zgetrs_nopiv_batched.cpp		\
+	zgesv_batched.cpp				\
 	zgesv_nopiv_batched.cpp			\
+	zgerbt_batched.cpp          	\
 	zgesv_rbt_batched.cpp			\
 	\
 	zgetri_batched.cpp				\
+	\
+	zpotf2_batched.cpp				\
+	zpotrf_batched.cpp				\
+	zpotrf_panel_batched.cpp		\
+	zpotrs_batched.cpp				\
+	zposv_batched.cpp				\
 
 # ------------------------------------------------------------
 -include Makefile.local

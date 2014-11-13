@@ -124,7 +124,7 @@ magma_zgetrs_nopiv_batched(
     magma_malloc((void**)&dW_array,  batchCount * sizeof(*dW_array));
 
     magmaDoubleComplex* dinvA;
-    magmaDoubleComplex* dwork;// dinvA and dwork are dworkspace in ztrsm
+    magmaDoubleComplex* dwork;// dinvA and dwork are workspace in ztrsm
 
     magma_int_t invA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
     magma_int_t dwork_msize = n*nrhs;

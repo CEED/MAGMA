@@ -127,7 +127,7 @@ magma_zpotrf_batched(
     magma_malloc((void**)&dx_array,    batchCount * sizeof(*dx_array));
 
     magmaDoubleComplex* dinvA;
-    magmaDoubleComplex* dx;// dinvA and x are dworkspace in ztrsm
+    magmaDoubleComplex* dx;// dinvA and x are workspace in ztrsm
     magma_int_t invA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
     magma_int_t x_msize = n*nb;
     magma_zmalloc( &dinvA, invA_msize * batchCount);

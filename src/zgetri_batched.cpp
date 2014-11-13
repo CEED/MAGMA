@@ -47,7 +47,7 @@
             matrix was interchanged with row IPIV(i).
 
     @param[out]
-    dwork   (dworkspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
+    dwork   (workspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
   
     @param[in]
     lwork   INTEGER
@@ -55,7 +55,7 @@
             the optimal blocksize returned by magma_get_zgetri_nb(n).
     \n
             Unlike LAPACK, this version does not currently support a
-            dworkspace query, because the dworkspace is on the GPU.
+            workspace query, because the workspace is on the GPU.
 
     @param[out]
     info    INTEGER
@@ -133,7 +133,7 @@ magma_zgetri_batched( magma_int_t n,
     magma_malloc((void**)&dW_array,  batchCount * sizeof(*dW_array));
 
     magmaDoubleComplex* dinvdiagA;
-    magmaDoubleComplex* dwork;// dinvdiagA and dwork are dworkspace in ztrsm
+    magmaDoubleComplex* dwork;// dinvdiagA and dwork are workspace in ztrsm
 
     //magma_int_t invdiagA_msize =  BATRI_NB*((nb/BATRI_NB)+(nb % BATRI_NB != 0))* BATRI_NB ;
     magma_int_t invdiagA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
@@ -165,18 +165,15 @@ magma_zgetri_batched( magma_int_t n,
     }
 #endif
 
+    // set dinvdiagA to identity
+    magmablas_zlaset_batched(MagmaUpperLower, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount);
+
     for(j = 0; j < n; j+=nb) {
         ib = min(nb, n-j);
         // dinvdiagA * Piv' = I * U^-1 * L^-1 = U^-1 * L^-1 * I
         // Azzam : optimization can be done:
-        //          1- swapping identity first
         //          2- compute invdiagL invdiagU only one time
 
-        //magma_queue_sync(NULL);
-        //printf(" @ step %d calling set identity \n",j);
-        // set dinvdiagA to identity at position j,j
-        magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, j, j, batchCount);
-        magmablas_zlaset_batched(MagmaUpperLower, n-j, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, lddia, batchCount);
 
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1 \n",j);
@@ -219,7 +216,7 @@ magma_zgetri_batched( magma_int_t n,
         }
     }
     */
-    magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, min(1,n-1), 1, dipiv_array, batchCount);
+    magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount);
     
     
      //TODO TODO Azzam 
