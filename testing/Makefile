@@ -32,9 +32,7 @@ ZSRC := \
 	testing_blas_z.cpp	\
 	testing_cblas_z.cpp	\
 	testing_zgeadd.cpp	\
-	testing_zgeadd_batched.cpp	\
 	testing_zlacpy.cpp	\
-	testing_zlacpy_batched.cpp	\
 	testing_zlag2c.cpp	\
 	testing_zlange.cpp	\
 	testing_zlanhe.cpp	\
@@ -173,6 +171,22 @@ ZSRC += \
 	testing_zgesvd.cpp	\
 	testing_zgebrd.cpp	\
 	testing_zunmbr.cpp	\
+
+# ----------
+# batched
+ZSRC += \
+	testing_zgeadd_batched.cpp	\
+	testing_zlacpy_batched.cpp	\
+	testing_ztrsm_batched.cpp  \
+	testing_zgemm_batched.cpp	\
+	testing_zherk_batched.cpp	\
+	testing_zgetrf_batched.cpp	\
+	testing_zgetri_batched.cpp	\
+	testing_zgesv_batched.cpp	\
+	testing_zgetrf_nopiv_batched.cpp	\
+	testing_zgesv_nopiv_batched.cpp	\
+	testing_zpotrf_batched.cpp	\
+	testing_zposv_batched.cpp	\
 
 # ----------
 # utilities

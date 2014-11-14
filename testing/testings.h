@@ -153,7 +153,7 @@ void magma_assert( bool condition, const char* msg, ... );
 
 void magma_assert_warn( bool condition, const char* msg, ... );
 
-#define MAX_NTEST 1000
+#define MAX_NTEST 1050
 
 typedef struct magma_opts
 {
@@ -165,6 +165,7 @@ typedef struct magma_opts
     magma_int_t mmax;
     magma_int_t nmax;
     magma_int_t kmax;
+    magma_int_t batchcount;
     
     // scalars
     magma_int_t device;
