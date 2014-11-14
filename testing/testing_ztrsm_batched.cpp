@@ -66,8 +66,6 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     magma_int_t batchCount = 1; 
 
-    FILE        *fp ;
-    int j,k,batchid;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -201,26 +199,7 @@ int main( int argc, char** argv)
             magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
 
 #endif 
-
-#ifdef PRINTMAT 
-                printf("Writing input matrix in mag.txt ...\n");
-                fp = fopen ("mag.txt", "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-    batchid=1;
-                for (j=0; j < N; j++) {
-                    for (k=0; k < M; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_Bmagma[k+j*lda].x, h_Bmagma[k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %25.12e\n", k+1, j+1, h_Bmagma[k+j*lda + batchid * lddb * N]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-#endif
-
-            
+       
             /* =====================================================================
                Performs operation using CUBLAS
                =================================================================== */
@@ -237,23 +216,6 @@ int main( int argc, char** argv)
             cublas_perf = gflops / cublas_time;
             
             magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bcublas, ldb );
-#ifdef PRINTMAT 
-                printf("Writing input matrix in cub.txt ...\n");
-                fp = fopen ("cub.txt", "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-                for (j=0; j < N; j++) {
-                    for (k=0; k < M; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_Bmagma[k+j*lda].x, h_Bmagma[k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %25.12e\n", k+1, j+1, h_Bcublas[k+j*lda + batchid * lddb * N]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-#endif
-
             /* =====================================================================
                Performs operation using CPU BLAS
                =================================================================== */
@@ -276,7 +238,7 @@ int main( int argc, char** argv)
                =================================================================== */
             // ||b - 1/alpha*A*x|| / (||A||*||x||)
             magmaDoubleComplex alpha2 = MAGMA_Z_DIV( c_one, alpha );
-            double normR, normX, normA;
+            double normR, normX, normA=0.;
             magma_error=0.0;
             cublas_error = 0.0;
 
@@ -299,7 +261,7 @@ int main( int argc, char** argv)
                 double magma_err = normR/(normX*normA);
 
                 if ( isnan(magma_err) || isinf(magma_err) ) {
-                    printf("error for matrix %d magma_error = %lf where normR=%lf normX=%lf and normA=%lf\n",s,magma_err,normR,normX,normA);
+                    printf("error for matrix %d magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",s,magma_err,normR,normX,normA);
                     magma_error = magma_err;
                     break;
                 }
@@ -324,7 +286,7 @@ int main( int argc, char** argv)
 
 
                 if ( isnan(cublas_err) || isinf(cublas_err) ) {
-                    printf("error for matrix %d cublas_error = %lf where normR=%lf normX=%lf and normA=%lf\n",s,cublas_err,normR,normX,normA);
+                    printf("error for matrix %d cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",s,cublas_err,normR,normX,normA);
                     cublas_error = cublas_err;
                     break;
                 }

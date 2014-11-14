@@ -220,7 +220,7 @@ int main( int argc, char** argv)
                     for(int k=0;k<min_mn; k++){
                         if(ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
                         {
-                                printf("error for matrix %d ipiv @ %d = %d\n",i,k,ipiv[i*min_mn+k]);
+                                printf("error for matrix %d ipiv @ %d = %d\n",i,k,(int)ipiv[i*min_mn+k]);
                                 stop=1;
                         }
                     }

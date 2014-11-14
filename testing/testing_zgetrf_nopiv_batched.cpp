@@ -75,17 +75,16 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
+    real_Double_t   gflops, magma_perf, magma_time, cublas_perf=0., cublas_time=0., cpu_perf=0, cpu_time=0;
     double          error; 
     magma_int_t cublas_enable = 0;
     magmaDoubleComplex *h_A, *h_R;
-    magmaDoubleComplex *dA_magma, *dA_cublas;
+    magmaDoubleComplex *dA_magma;
     magmaDoubleComplex **dA_array = NULL;
 
     magma_int_t     **dipiv_array = NULL;
     magma_int_t     *ipiv;
     magma_int_t     *dipiv_magma, *dinfo_magma;
-    magma_int_t     *dipiv_cublas, *dinfo_cublas;
     
 
     magma_int_t M, N, n2, lda, ldda, min_mn, info;
@@ -100,9 +99,6 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount ;
     magma_int_t matrixSize;  
     magma_int_t columns;
-    FILE        *fp ;
-    char fname[200];
-    int j,k,batchoffset;
     
     printf("BatchCount      M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
     printf("=========================================================================\n");
@@ -116,7 +112,6 @@ int main( int argc, char** argv)
             lda    = M;
             n2     = lda*N * batchCount;
             ldda   = ((M+31)/32)*32;
-            //ldda = M;
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
             matrixSize =  ldda * N;  
             
@@ -125,53 +120,14 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU(    h_A,  magmaDoubleComplex, n2     );
             TESTING_MALLOC_PIN( h_R,  magmaDoubleComplex, n2     );
             TESTING_MALLOC_DEV(  dA_magma,  magmaDoubleComplex, ldda*N * batchCount);
-            //TESTING_MALLOC_DEV(  dA_cublas,  magmaDoubleComplex, ldda*N * batchCount);
             TESTING_MALLOC_DEV(  dipiv_magma,  magma_int_t, min_mn * batchCount);
             TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
-            TESTING_MALLOC_DEV(  dipiv_cublas,  magma_int_t, min_mn * batchCount);
-            TESTING_MALLOC_DEV(  dinfo_cublas,  magma_int_t, batchCount);
 
             magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
             magma_malloc((void**)&dipiv_array, batchCount * sizeof(*dipiv_array));
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-#if 0
-            // introduce error in matrix "batchid" making column "col" zero.
-            magma_int_t batchid=1;
-            magma_int_t col = 35;
-            for(int i=0; i<M; i++)
-                h_A[i+col*lda + batchid*lda*N] = MAGMA_Z_ZERO;
-#endif
-
-
-
-//#define PRINTMAT
-    
-#ifdef PRINTMAT 
-            printf("Writing input matrix in orig.txt ...\n");
-            for(int i=0; i<batchCount; i++)
-            {
-                sprintf(fname,"orig_%d",i);
-                fp = fopen (fname, "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-                batchoffset = i*lda*N;
-                for (j=0; j < N; j++) {
-                    for (k=0; k < M; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_A[batchoffset+k+j*lda].x, h_A[batchoffset+k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %25.12e\n", k+1, j+1, h_A[batchoffset+k+j*lda]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-            }
-#endif  
-
-
-
             columns = N * batchCount;
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, columns, h_R, lda, dA_magma, ldda );
@@ -198,54 +154,9 @@ int main( int argc, char** argv)
             if (info != 0)
                 printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
 
-            
-#ifdef PRINTMAT 
-
-            magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_R, lda );
-            printf("Writing input matrix in mag.txt ...\n");
-            for(int i=0; i<batchCount; i++)
-            {
-                sprintf(fname,"mag_%d",i);
-                fp = fopen (fname, "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-                batchoffset = i*lda*N;
-                for (j=0; j < N; j++) {
-                    for (k=0; k < M; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_R[batchoffset+k+j*lda].x, h_R[batchoffset+k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %25.12e\n", k+1, j+1, h_R[batchoffset+k+j*lda]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-            }
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_A, &lda, h_R, &lda );
-
-#endif  
-
-
             /* ====================================================================
                Performs operation using CUBLAS
                =================================================================== */
-/*
-            magma_zsetmatrix( M, columns, h_R, lda, dA_cublas,  ldda );
-            zset_pointer(dA_array, dA_cublas, ldda, 0, 0, matrixSize, batchCount);
-
-            cublas_time = magma_sync_wtime(0);
-            if(M == N )
-            {
-                cublasZgetrfBatched( handle, N, dA_array, ldda, dipiv_cublas,  dinfo_cublas, batchCount);
-                cublas_enable = 1;
-            }
-            else
-            {
-                printf("M != N, CUBLAS required M == N ; CUBLAS is disabled\n");
-            }
-            cublas_time = magma_sync_wtime(0) - cublas_time;
-            cublas_perf = gflops / cublas_time;
-*/
 
             /* =====================================================================
                Performs operation using LAPACK
@@ -262,30 +173,6 @@ int main( int argc, char** argv)
                 if (info != 0)
                     printf("lapackf77_zgetrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
-
-#ifdef PRINTMAT 
-            printf("Writing input matrix in lpk.txt ...\n");
-            for(int i=0; i<batchCount; i++)
-            {
-                sprintf(fname,"lpk_%d",i);
-                fp = fopen (fname, "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-                batchoffset = i*lda*N;
-                for (j=0; j < N; j++) {
-                    for (k=0; k < M; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_A[batchoffset+k+j*lda].x, h_A[batchoffset+k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %25.12e\n", k+1, j+1, h_A[batchoffset+k+j*lda]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-            }
-#endif  
-
-
             }
             
 
@@ -315,26 +202,9 @@ int main( int argc, char** argv)
                     }
                 }
 
-
                 magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
-                int stop=0;
                 for(int i=0; i<batchCount; i++)
                 {
-                    /*
-                    for(int k=0;k<min_mn; k++){
-                        if(ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
-                        {
-                                printf("error for matrix %d ipiv @ %d = %d\n",i,k,ipiv[i*min_mn+k]);
-                                stop=1;
-                        }
-                    }
-                  if(stop==1){
-                      err=-1.0;
-                      break;
-                  }
-                  */
-
-
                   error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);                 
                   if ( isnan(error) || isinf(error) ) {
                       err = error;
@@ -352,11 +222,8 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
             TESTING_FREE_DEV( dA_magma );
-            TESTING_FREE_DEV( dA_cublas);
             TESTING_FREE_DEV( dinfo_magma );
             TESTING_FREE_DEV( dipiv_magma );
-            TESTING_FREE_DEV( dipiv_cublas );
-            TESTING_FREE_DEV( dinfo_cublas );
             TESTING_FREE_DEV( dipiv_array );
             TESTING_FREE_DEV( dA_array );
             free(cpu_info);

@@ -33,7 +33,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, magma_perf, magma_time, cpu_perf, cpu_time;
+    real_Double_t   gflops, magma_perf, magma_time, cpu_perf=0., cpu_time=0.;
     double          current_error, magma_error, Cnorm, work[1];
     magma_int_t N, K;
     magma_int_t Ak, An;
@@ -116,10 +116,6 @@ int main( int argc, char** argv)
             zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount);
             zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount);
 
-
-            magmaDoubleComplex cbeta  = MAGMA_Z_MAKE( beta, 0. );
-            magmaDoubleComplex calpha = MAGMA_Z_MAKE( alpha, 0. );
-
             magma_time = magma_sync_wtime( NULL );
             magmablas_zherk_batched(opts.uplo, opts.transA, N, K,
                              alpha, A_array, ldda,
@@ -169,7 +165,7 @@ int main( int argc, char** argv)
                 }
 
                 printf("%5d %5d %5d  %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
-                       batchCount, (int) N, (int) K,
+                       (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time,
                        cpu_perf,    1000.*cpu_time,
                        magma_error, (magma_error < tol ? "ok" : "failed"));
@@ -179,7 +175,7 @@ int main( int argc, char** argv)
             }
             else {
                 printf("%5d %5d %5d   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
-                       batchCount, (int) N, (int) K,
+                       (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time);
 
             }

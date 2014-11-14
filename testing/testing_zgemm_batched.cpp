@@ -96,14 +96,9 @@ int main( int argc, char** argv)
             
             NN = N * batchCount;
 
-            lda = ((lda+31)/32)*32;
-            ldb = ((ldb+31)/32)*32;
-            ldc = ((ldc+31)/32)*32;
-
-            ldda = lda;
-            lddb = ldb;
-            lddc = ldc;
-            
+            ldda = ((lda+31)/32)*32;
+            lddb = ((ldb+31)/32)*32;
+            lddc = ((ldc+31)/32)*32;
 
             sizeA = lda*An*batchCount;
             sizeB = ldb*Bn*batchCount;
@@ -139,7 +134,6 @@ int main( int argc, char** argv)
             zset_pointer(B_array, d_B, lddb, 0, 0, lddb*Bn, batchCount);
             zset_pointer(C_array, d_C, lddc, 0, 0, lddc*N,  batchCount);
 
-            sleep(1);
             magma_time = magma_sync_wtime( NULL );
             magmablas_zgemm_batched(opts.transA, opts.transB, M, N, K,
                              alpha, A_array, ldda,
@@ -222,7 +216,7 @@ int main( int argc, char** argv)
                 }
 
                     printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  \n",
-                       batchCount, (int) M, (int) N, (int) K, 
+                       (int) batchCount, (int) M, (int) N, (int) K, 
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time,
                        cpu_perf,    1000.*cpu_time,
@@ -236,7 +230,7 @@ int main( int argc, char** argv)
                     magma_error = lapackf77_zlange( "M", &M, &NN, h_Cmagma, &ldc, work ) / Cnorm;
 
                     printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   ---   (  ---  )    %8.2e     ---\n",
-                       batchCount, (int) M, (int) N, (int) K,
+                       (int) batchCount, (int) M, (int) N, (int) K,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time,
                        magma_error );
