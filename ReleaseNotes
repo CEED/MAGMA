@@ -16,6 +16,8 @@ Included are routines for the following algorithms:
     * Generalized Hermitian-definite eigenproblem solver
     * Mixed-precision iterative refinement solvers based on LU, QR, and Cholesky
     * MAGMA BLAS including gemm, gemv, symv, and trsm
+    * BATCHED MAGMA BLAS including gemm, gemv, herk, and trsm
+    * BATCHED LU, GETRI, and Cholesky factorizations
 
 Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
