@@ -265,7 +265,8 @@ magma_zgeellrtmv(
 {
     int num_blocks = ( (m+blocksize-1)/blocksize);
 
-    int threads = alignment*blocksize;
+    magma_int_t num_threads = alignment*blocksize;
+    magma_int_t threads = alignment*blocksize;
 
     int real_row_length = ((int)(nnz_per_row+alignment-1)/alignment)
                             *alignment;
