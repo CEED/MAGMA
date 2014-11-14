@@ -122,6 +122,7 @@ ZSRC += \
 	zhemm_mgpu_spec.cpp		\
 	zher2k_mgpu.cpp			\
 	zher2k_mgpu_spec.cpp		\
+	zherk_mgpu.cpp		\
 
 # panels for one-sided factorizations in CUDA
 ZSRC += \
