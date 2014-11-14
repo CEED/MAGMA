@@ -23,6 +23,19 @@ single (s), double (d), single-complex (c), double-complex (z).
 Sparse routines have recently been added as a beta release, in the sparse-iter
 directory. We would appreciate any feedback that you may have on them.
 
+
+ 1.6.0
+       - final:  Nov   16, 2014
+    * Comprehensive release of sparse routines:
+        * All sparse routines equipped with a queue.
+        * Enhanced debugging routines.
+        * Interface to cuSPARSE functions.
+        * Added interface to pass data structures located in main/device memory.
+        * Added generic interface to call any solver/eigensolver.
+        * Added testscript checking correctness of routines.
+        * Added capability to iterate in block-wise fashion.
+        * Checks for memory leaks.
+
  1.5.0
        - final:  Aug   30, 2014
        - beta 3: July  18, 2014
