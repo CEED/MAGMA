@@ -45,14 +45,6 @@ typedef size_t devptr_t;
 extern "C" {
 #endif
 
-#define magmaf_get_dlaex3_m_nb FORTRAN_NAME( magmaf_get_dlaex3_m_nb, MAGMAF_GET_DLAEX3_M_NB )
-void magmaf_get_dlaex3_m_nb(
-     )
-{
-    magma_get_dlaex3_m_nb(
-         );
-}
-
 #define magmaf_get_zpotrf_nb FORTRAN_NAME( magmaf_get_zpotrf_nb, MAGMAF_GET_ZPOTRF_NB )
 magma_int_t magmaf_get_zpotrf_nb( magma_int_t *m )
 {
@@ -107,6 +99,12 @@ magma_int_t magmaf_get_zhetrf_nb( magma_int_t *m )
     return magma_get_zhetrf_nb( *m );
 }
 
+#define magmaf_get_zhetrf_nopiv_nb FORTRAN_NAME( magmaf_get_zhetrf_nopiv_nb, MAGMAF_GET_ZHETRF_NOPIV_NB )
+magma_int_t magmaf_get_zhetrf_nopiv_nb( magma_int_t *m )
+{
+    return magma_get_zhetrf_nopiv_nb( *m );
+}
+
 #define magmaf_get_zgelqf_nb FORTRAN_NAME( magmaf_get_zgelqf_nb, MAGMAF_GET_ZGELQF_NB )
 magma_int_t magmaf_get_zgelqf_nb( magma_int_t *m )
 {
@@ -159,6 +157,28 @@ void magmaf_get_zbulge_gcperf(
 {
     magma_get_zbulge_gcperf(
          );
+}
+
+#define magmaf_zgebrd_ge2gb FORTRAN_NAME( magmaf_zgebrd_ge2gb, MAGMAF_ZGEBRD_GE2GB )
+void magmaf_zgebrd_ge2gb(
+    magma_int_t *m, magma_int_t *n, magma_int_t *nb,
+    magmaDoubleComplex *A, magma_int_t *lda,
+    magmaDoubleComplex *taup,
+    magmaDoubleComplex *tauq,
+    magmaDoubleComplex *work, magma_int_t *lwork,
+    magmaDoubleComplex *dTP,
+    magmaDoubleComplex *dTQ,
+    magma_int_t *info )
+{
+    magma_zgebrd_ge2gb(
+        *m, *n, *nb,
+        A, *lda,
+        taup,
+        tauq,
+        work, *lwork,
+        dTP,
+        dTQ,
+        info );
 }
 
 #define magmaf_zgebrd FORTRAN_NAME( magmaf_zgebrd, MAGMAF_ZGEBRD )
@@ -723,6 +743,22 @@ void magmaf_zhegvx(
         info );
 }
 
+#define magmaf_zhesv FORTRAN_NAME( magmaf_zhesv, MAGMAF_ZHESV )
+void magmaf_zhesv(
+    const char* uplo, magma_int_t *n, magma_int_t *nrhs,
+    magmaDoubleComplex *A, magma_int_t *lda,
+    magma_int_t *ipiv,
+    magmaDoubleComplex *B, magma_int_t *ldb,
+    magma_int_t *info )
+{
+    magma_zhesv(
+        magma_uplo_const(*uplo), *n, *nrhs,
+        A, *lda,
+        ipiv,
+        B, *ldb,
+        info );
+}
+
 #define magmaf_zhetrd FORTRAN_NAME( magmaf_zhetrd, MAGMAF_ZHETRD )
 void magmaf_zhetrd(
     const char* uplo, magma_int_t *n,
@@ -740,6 +776,32 @@ void magmaf_zhetrd(
         e,
         tau,
         work, *lwork,
+        info );
+}
+
+#define magmaf_zhetrf FORTRAN_NAME( magmaf_zhetrf, MAGMAF_ZHETRF )
+void magmaf_zhetrf(
+    const char* uplo, magma_int_t *n,
+    magmaDoubleComplex *A, magma_int_t *lda,
+    magma_int_t *ipiv,
+    magma_int_t *info )
+{
+    magma_zhetrf(
+        magma_uplo_const(*uplo), *n,
+        A, *lda,
+        ipiv,
+        info );
+}
+
+#define magmaf_zhetrf_nopiv FORTRAN_NAME( magmaf_zhetrf_nopiv, MAGMAF_ZHETRF_NOPIV )
+void magmaf_zhetrf_nopiv(
+    const char* uplo, magma_int_t *n,
+    magmaDoubleComplex *a, magma_int_t *lda,
+    magma_int_t *info )
+{
+    magma_zhetrf_nopiv(
+        magma_uplo_const(*uplo), *n,
+        a, *lda,
         info );
 }
 
@@ -1925,6 +1987,24 @@ void magmaf_zhetrd_gpu(
         info );
 }
 
+#define magmaf_zlarfb_gpu_gemm_new FORTRAN_NAME( magmaf_zlarfb_gpu_gemm_new, MAGMAF_ZLARFB_GPU_GEMM_NEW )
+void magmaf_zlarfb_gpu_gemm_new(
+    const char* side, const char* trans, const char* direct, const char* storev, magma_int_t *m, magma_int_t *n, magma_int_t *k,
+    const magmaDoubleComplex *dV, magma_int_t *ldv,
+    devptr_t *dT, magma_int_t *ldt,
+    magmaDoubleComplex *dC, magma_int_t *ldc,
+    magmaDoubleComplex *dwork, magma_int_t *lwork,
+    magmaDoubleComplex *dworkvt, magma_int_t *lworkvt, magma_int_t *gbm, magma_int_t *gbn, magma_int_t *oper )
+{
+    magma_zlarfb_gpu_gemm_new(
+        magma_side_const(*side), magma_trans_const(*trans), magma_direct_const(*direct), magma_storev_const(*storev), *m, *n, *k,
+        dV, *ldv,
+        magma_zdevptr(dT), *ldt,
+        dC, *ldc,
+        dwork, *lwork,
+        dworkvt, *lworkvt, *gbm, *gbn, *oper );
+}
+
 #define magmaf_zhetrd2_gpu FORTRAN_NAME( magmaf_zhetrd2_gpu, MAGMAF_ZHETRD2_GPU )
 void magmaf_zhetrd2_gpu(
     const char* uplo, magma_int_t *n,
@@ -1946,6 +2026,18 @@ void magmaf_zhetrd2_gpu(
         wA, *ldwa,
         work, *lwork,
         magma_zdevptr(dwork), *ldwork,
+        info );
+}
+
+#define magmaf_zhetrf_nopiv_gpu FORTRAN_NAME( magmaf_zhetrf_nopiv_gpu, MAGMAF_ZHETRF_NOPIV_GPU )
+void magmaf_zhetrf_nopiv_gpu(
+    const char* uplo, magma_int_t *n,
+    devptr_t *da, magma_int_t *ldda,
+    magma_int_t *info )
+{
+    magma_zhetrf_nopiv_gpu(
+        magma_uplo_const(*uplo), *n,
+        magma_zdevptr(da), *ldda,
         info );
 }
 

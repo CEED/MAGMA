@@ -23,7 +23,9 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA Auxiliary functions to get the NB used
 */
+#ifdef REAL
 magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
+#endif
 
 magma_int_t magma_get_zpotrf_nb( magma_int_t m );
 magma_int_t magma_get_zgetrf_nb( magma_int_t m );

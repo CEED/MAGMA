@@ -13,9 +13,6 @@ implicit none
 !---- Fortran interfaces to MAGMA subroutines ----
 interface
 
-subroutine magmaf_get_dlaex3_m_nb(  )
-end subroutine magmaf_get_dlaex3_m_nb
-
 integer function magmaf_get_zpotrf_nb( m )
     integer :: m
 end function magmaf_get_zpotrf_nb
@@ -52,6 +49,10 @@ integer function magmaf_get_zhetrf_nb( m )
     integer :: m
 end function magmaf_get_zhetrf_nb
 
+integer function magmaf_get_zhetrf_nopiv_nb( m )
+    integer :: m
+end function magmaf_get_zhetrf_nopiv_nb
+
 integer function magmaf_get_zgelqf_nb( m )
     integer :: m
 end function magmaf_get_zgelqf_nb
@@ -85,6 +86,22 @@ end subroutine magmaf_zbulge_get_Vblksiz
 
 subroutine magmaf_get_zbulge_gcperf(  )
 end subroutine magmaf_get_zbulge_gcperf
+
+subroutine magmaf_zgebrd_ge2gb( m, n, nb, A, lda, taup, tauq, work, lwork, dTP, dTQ, info  &
+        )
+    integer          :: m
+    integer          :: n
+    integer          :: nb
+    complex*16       :: A(*)
+    integer          :: lda
+    complex*16       :: taup(*)
+    complex*16       :: tauq(*)
+    complex*16       :: work(*)
+    integer          :: lwork
+    complex*16       :: dTP(*)
+    complex*16       :: dTQ(*)
+    integer          :: info
+end subroutine magmaf_zgebrd_ge2gb
 
 subroutine magmaf_zgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m
@@ -563,6 +580,18 @@ subroutine magmaf_zhegvx( itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu, i
     integer          :: info
 end subroutine magmaf_zhegvx
 
+subroutine magmaf_zhesv( uplo, n, nrhs, A, lda, ipiv, B, ldb, info )
+    character        :: uplo
+    integer          :: n
+    integer          :: nrhs
+    complex*16       :: A(*)
+    integer          :: lda
+    integer          :: ipiv(*)
+    complex*16       :: B(*)
+    integer          :: ldb
+    integer          :: info
+end subroutine magmaf_zhesv
+
 subroutine magmaf_zhetrd( uplo, n, A, lda, d, e, tau, work, lwork, info )
     character        :: uplo
     integer          :: n
@@ -575,6 +604,23 @@ subroutine magmaf_zhetrd( uplo, n, A, lda, d, e, tau, work, lwork, info )
     integer          :: lwork
     integer          :: info
 end subroutine magmaf_zhetrd
+
+subroutine magmaf_zhetrf( uplo, n, A, lda, ipiv, info )
+    character        :: uplo
+    integer          :: n
+    complex*16       :: A(*)
+    integer          :: lda
+    integer          :: ipiv(*)
+    integer          :: info
+end subroutine magmaf_zhetrf
+
+subroutine magmaf_zhetrf_nopiv( uplo, n, a, lda, info )
+    character        :: uplo
+    integer          :: n
+    complex*16       :: a(*)
+    integer          :: lda
+    integer          :: info
+end subroutine magmaf_zhetrf_nopiv
 
 subroutine magmaf_zhetrd_hb2st( uplo, n, nb, Vblksiz, A, lda, d, e, V, ldv, TAU, compT,  &
         T, ldt )
@@ -1556,6 +1602,30 @@ subroutine magmaf_zhetrd_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwor
     integer          :: info
 end subroutine magmaf_zhetrd_gpu
 
+subroutine magmaf_zlarfb_gpu_gemm_new( side, trans, direct, storev, m, n, k, dV, ldv, dT,  &
+        ldt, dC, ldc, dwork, lwork, dworkvt, lworkvt, gbm, gbn, oper )
+    character        :: side
+    character        :: trans
+    character        :: direct
+    character        :: storev
+    integer          :: m
+    integer          :: n
+    integer          :: k
+    complex*16       :: dV(*)
+    integer          :: ldv
+    magma_devptr_t   :: dT
+    integer          :: ldt
+    complex*16       :: dC(*)
+    integer          :: ldc
+    complex*16       :: dwork(*)
+    integer          :: lwork
+    complex*16       :: dworkvt(*)
+    integer          :: lworkvt
+    integer          :: gbm
+    integer          :: gbn
+    integer          :: oper
+end subroutine magmaf_zlarfb_gpu_gemm_new
+
 subroutine magmaf_zhetrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwork,  &
         dwork, ldwork, info )
     character        :: uplo
@@ -1573,6 +1643,14 @@ subroutine magmaf_zhetrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwo
     integer          :: ldwork
     integer          :: info
 end subroutine magmaf_zhetrd2_gpu
+
+subroutine magmaf_zhetrf_nopiv_gpu( uplo, n, da, ldda, info )
+    character        :: uplo
+    integer          :: n
+    magma_devptr_t   :: da
+    integer          :: ldda
+    integer          :: info
+end subroutine magmaf_zhetrf_nopiv_gpu
 
 subroutine magmaf_zlarf_gpu( m, n, dv, dtau, dC, lddc )
     integer          :: m

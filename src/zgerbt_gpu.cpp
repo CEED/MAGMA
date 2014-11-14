@@ -15,7 +15,7 @@
 
 
 
-void
+static void
 init_butterfly(
         magma_int_t n,
         magmaDoubleComplex* u, magmaDoubleComplex* v)
