@@ -292,7 +292,7 @@ ZSRC += \
 	zgerbt_batched.cpp          	\
 	zgesv_rbt_batched.cpp			\
 	\
-	zgetri_batched.cpp				\
+	zgetri_outofplace_batched.cpp				\
 	\
 	zpotf2_batched.cpp				\
 	zpotrf_batched.cpp				\

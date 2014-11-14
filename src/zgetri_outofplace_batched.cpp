@@ -67,7 +67,7 @@
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
-magma_zgetri_batched( magma_int_t n, 
+magma_zgetri_outofplace_batched( magma_int_t n, 
                   magmaDoubleComplex **dA_array, magma_int_t ldda,
                   magma_int_t **dipiv_array, 
                   magmaDoubleComplex **dinvA_array, magma_int_t lddia,
@@ -190,67 +190,7 @@ magma_zgetri_batched( magma_int_t n,
     }
 
     // Apply column interchanges
-    /*
-    for( j = n-2; j >= 0; --j ) {
-        jp = ipiv[j] - 1;
-        if ( jp != j ) {
-            magmablas_zswap( n, dA(0,j), 1, dA(0,jp), 1 );
-            magma_zswap(n, dA_array, lda, gbj, ipiv_array, batchCount);
-            
-        }
-    }
-    */
     magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount);
-    
-    
-     //TODO TODO Azzam 
-#if 0    
-    /* Invert the triangular factor U */
-    magmablas_ztrtri_batched( uplo, diag, m, dA_array, ldda, dinvA_array, batchCount );
-    
-    magma_ztrtri_gpu( MagmaUpper, MagmaNonUnit, n, dA, ldda, info );
-    if ( info != 0 )
-        return info;
-    
-    jmax = ((n-1) / nb)*nb;
-    for( j = jmax; j >= 0; j -= nb ) {
-        jb = min( nb, n-j );
-        
-        // copy current block column of A to dwork space dL
-        // (only needs lower trapezoid, but we also copy upper triangle),
-        // then zero the strictly lower trapezoid block column of A.
-        magmablas_zlacpy( MagmaFull, n-j, jb,
-                          dA(j,j), ldda,
-                          dL(j,0), lddl );
-        magmablas_zlaset( MagmaLower, n-j-1, jb, c_zero, c_zero, dA(j+1,j), ldda );
-        
-        // compute current block column of Ainv
-        // Ainv(:, j:j+jb-1)
-        //   = ( U(:, j:j+jb-1) - Ainv(:, j+jb:n) L(j+jb:n, j:j+jb-1) )
-        //   * L(j:j+jb-1, j:j+jb-1)^{-1}
-        // where L(:, j:j+jb-1) is stored in dL.
-        if ( j+jb < n ) {
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans, n, jb, n-j-jb,
-                         c_neg_one, dA(0,j+jb), ldda,
-                                    dL(j+jb,0), lddl,
-                         c_one,     dA(0,j),    ldda );
-        }
-        // TODO use magmablas dwork interface
-        magma_ztrsm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaUnit,
-                     n, jb, c_one,
-                     dL(j,0), lddl,
-                     dA(0,j), ldda );
-    }
-
-    // Apply column interchanges
-    for( j = n-2; j >= 0; --j ) {
-        jp = ipiv[j] - 1;
-        if ( jp != j ) {
-            magmablas_zswap( n, dA(0,j), 1, dA(0,jp), 1 );
-        }
-    }
-#endif    
-
 
     magma_queue_sync(cstream);
 
