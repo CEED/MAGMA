@@ -61,9 +61,7 @@ ZSRC += \
 
 # ILU and sparse direct
 ZSRC += \
-    zcuilu.cpp          \
     zcumilu.cpp          \
-	zpastix.cpp     	\
 
 
 
