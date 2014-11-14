@@ -113,25 +113,6 @@ int main( int argc, char** argv)
                 if (info != 0)
                     printf("lapackf77_zpotrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
-                /*
-                FILE        *fp ;
-                magma_int_t j,k;
-                printf("Writing input matrix in lpk.txt ...\n");
-                fp = fopen ("lpk.txt", "w") ;
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
-    
-                for (j=0; j < N; j++) {
-                    for (k=0; k < N; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                                h_A[k+j*lda].x, h_A[k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %11.8f\n", k+1, j+1, h_A[k+j*lda]);
-                        #endif
-                    }
-                }
-                fclose( fp ) ;
-                */
 
                 /* =====================================================================
                    Check the result compared to LAPACK
