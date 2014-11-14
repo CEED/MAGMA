@@ -31,7 +31,7 @@ extern __shared__ magmaDoubleComplex shared_data[];
 extern __shared__ double dble_shared_data[];
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-__global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int incx, int offset, int *info_array, int gbstep)
+__global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int incx, int offset, magma_int_t *info_array, int gbstep)
 {
     int tx = threadIdx.x;
 
@@ -114,7 +114,7 @@ void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-__global__ void zdscal_kernel_batched(int n, magmaDoubleComplex **x_array, int incx, int offset, int *info_array)
+__global__ void zdscal_kernel_batched(int n, magmaDoubleComplex **x_array, int incx, int offset, magma_int_t *info_array)
 {
     // checkinfo to avoid computation of the singular matrix
     if(info_array[blockIdx.z] != 0 ) return;
@@ -203,7 +203,7 @@ void magma_zlacgv_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int
 static __device__ void zpotf2_device(int m, int n, 
                               magmaDoubleComplex *A, int lda, 
                               magmaDoubleComplex alpha, 
-                              magmaDoubleComplex beta, int *info, int gbstep)
+                              magmaDoubleComplex beta, magma_int_t *info, int gbstep)
 {
 /*
     Each thread block load entire A into shared memory
@@ -317,7 +317,7 @@ __global__ void zpotf2_kernel_batched(int m, int n,
                               magmaDoubleComplex **dA_array, int lda, 
                               magmaDoubleComplex alpha, 
                               magmaDoubleComplex beta, 
-                              int *info_array, int gbstep)
+                              magma_int_t *info_array, int gbstep)
 {
 /*
     Each thread block load entire dA_array[blockIdx.z] into shared memory
@@ -332,7 +332,7 @@ __global__ void zpotf2_kernel(int m, int n,
                               magmaDoubleComplex *dA, int lda, 
                               magmaDoubleComplex alpha, 
                               magmaDoubleComplex beta,
-                              int *info)
+                              magma_int_t *info)
 {
     zpotf2_device(m, n, dA, lda, alpha, beta, info, 0);
 }

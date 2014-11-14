@@ -25,7 +25,7 @@ void zlaswp_rowparallel_devfunc(
                               int n, int width, int height,
                               magmaDoubleComplex *dA, int lda, 
                               magmaDoubleComplex *dout, int ldo,
-                              int* pivinfo)
+                              magma_int_t* pivinfo)
 {
 
     //int height = k2- k1;
@@ -72,7 +72,7 @@ void zlaswp_rowparallel_kernel(
                                 int n, int width, int height,
                                 magmaDoubleComplex *dinput, int ldi, 
                                 magmaDoubleComplex *doutput, int ldo,
-                                int*  pivinfo)
+                                magma_int_t*  pivinfo)
 {
 
     zlaswp_rowparallel_devfunc(n, width, height, dinput, ldi, doutput, ldo, pivinfo);
@@ -199,10 +199,10 @@ magma_zlaswp_rowparallel( magma_int_t n, magmaDoubleComplex* input, magma_int_t 
 //=================================================================================================
 //  serial swap that does swapping one row by one row
 //=================================================================================================
-__global__ void zlaswp_rowserial_kernel_batched( int n, magmaDoubleComplex **dA_array, int lda, int k1, int k2, int** ipiv_array )
+__global__ void zlaswp_rowserial_kernel_batched( int n, magmaDoubleComplex **dA_array, int lda, int k1, int k2, magma_int_t** ipiv_array )
 {
     magmaDoubleComplex* dA = dA_array[blockIdx.z];
-    int *d_ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *d_ipiv = ipiv_array[blockIdx.z];
     
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
     
@@ -262,10 +262,10 @@ magma_zlaswp_rowserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, mag
 //=================================================================================================
 //  serial swap that does swapping one column by one column
 //=================================================================================================
-__global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **dA_array, int lda, int k1, int k2, int** ipiv_array )
+__global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **dA_array, int lda, int k1, int k2, magma_int_t** ipiv_array )
 {
     magmaDoubleComplex* dA = dA_array[blockIdx.z];
-    int *d_ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *d_ipiv = ipiv_array[blockIdx.z];
     
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
     k1--;

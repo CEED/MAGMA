@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 extern __shared__ magmaDoubleComplex shared_data[];
 extern __shared__ double sdata[];
-extern __shared__ magma_int_t int_sdata[];
+extern __shared__ int int_sdata[];
 
 /*
   routines in this file are used by zgetf2_batched.cu
@@ -75,17 +75,17 @@ izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void 
 izamax_kernel_batched(int length, int chunk, magmaDoubleComplex **x_array, int incx, 
-                   int step, int lda, int** ipiv_array, int *info_array, int gbstep)
+                   int step, int lda, magma_int_t** ipiv_array, magma_int_t *info_array, int gbstep)
 {
 
     magmaDoubleComplex *x_start = x_array[blockIdx.z];
     const magmaDoubleComplex *x = &(x_start[step + step * lda]); 
 
-    int *ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *ipiv = ipiv_array[blockIdx.z];
     int tx = threadIdx.x;
 
     double *shared_x = sdata;     
-    magma_int_t *shared_idx = (magma_int_t*)(shared_x + zamax);
+    int *shared_idx = (int*)(shared_x + zamax);
     
     izamax_devfunc(length, x, incx, shared_x, shared_idx);
     
@@ -104,17 +104,17 @@ izamax_kernel_batched(int length, int chunk, magmaDoubleComplex **x_array, int i
 
 __global__ void
 tree_izamax_kernel_batched(int length, magmaDoubleComplex **x_array, int incx, 
-                   int step, int lda, int** ipiv_array, int *info_array, int gbstep, 
-                   double** data_pool_array, int** id_pool_array)
+                   int step, int lda, magma_int_t** ipiv_array, magma_int_t *info_array, int gbstep, 
+                   double** data_pool_array, magma_int_t** id_pool_array)
 {
 
     magmaDoubleComplex *x_start = x_array[blockIdx.z];
     const magmaDoubleComplex *x = &(x_start[step + step * lda]); 
 
     double *data_pool = data_pool_array[blockIdx.z];
-    int *id_pool = id_pool_array[blockIdx.z];
+    magma_int_t *id_pool = id_pool_array[blockIdx.z];
 
-    int *ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *ipiv = ipiv_array[blockIdx.z];
     int tx = threadIdx.x;
     int local_max_id;
 
@@ -151,15 +151,15 @@ tree_izamax_kernel_batched(int length, magmaDoubleComplex **x_array, int incx,
 
 
 __global__ void
-tree_izamax_kernel2_batched(int n, int step,  int** ipiv_array, int *info_array, int gbstep, double** data_pool_array, int** id_pool_array)
+tree_izamax_kernel2_batched(int n, int step,  magma_int_t** ipiv_array, magma_int_t *info_array, int gbstep, double** data_pool_array, magma_int_t** id_pool_array)
 {
     __shared__ double shared_x[zamax];
     __shared__ int    shared_idx[zamax];
 
-    int *ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *ipiv = ipiv_array[blockIdx.z];
 
     double *data_pool = data_pool_array[blockIdx.z];
-    int *id_pool = id_pool_array[blockIdx.z];
+    magma_int_t *id_pool = id_pool_array[blockIdx.z];
 
 
     int tx = threadIdx.x;
@@ -268,7 +268,7 @@ magma_int_t magma_izamax_batched(magma_int_t length,
 #if 1
         dim3 grid(1, 1, batchCount);
         int chunk = (length-1)/zamax + 1;
-        izamax_kernel_batched<<< grid, zamax, zamax * (sizeof(double) + sizeof(magma_int_t)), magma_stream >>>
+        izamax_kernel_batched<<< grid, zamax, zamax * (sizeof(double) + sizeof(int)), magma_stream >>>
                       (length, chunk, x_array, incx, step, lda, ipiv_array, info_array, gbstep);
 
 #else
@@ -298,7 +298,7 @@ void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int
 {
 
     magmaDoubleComplex *x = x_array[blockIdx.z];
-    int *ipiv = ipiv_array[blockIdx.z];
+    magma_int_t *ipiv = ipiv_array[blockIdx.z];
 
     __shared__ int jp;
     
@@ -340,7 +340,7 @@ magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__
-void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_array, int lda, int *info_array, int gbstep)
+void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_array, int lda, magma_int_t *info_array, int gbstep)
 {
 
     // checkinfo to avoid computation of the singular matrix
@@ -526,10 +526,10 @@ zscal5_device(int m, magmaDoubleComplex* x, magmaDoubleComplex alpha)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void 
-zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoubleComplex **dA_array, int lda, int **ipiv_array, int *info_array, int gbstep)
+zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoubleComplex **dA_array, int lda, magma_int_t **ipiv_array, magma_int_t *info_array, int gbstep)
 {
     int gboff = paneloffset+step;
-    int *ipiv                   = ipiv_array[blockIdx.z];
+    magma_int_t *ipiv                   = ipiv_array[blockIdx.z];
     magmaDoubleComplex *A_start = dA_array[blockIdx.z];
     magmaDoubleComplex *A0j     = &(A_start[paneloffset + (paneloffset+step) * lda]); 
     magmaDoubleComplex *A00     = &(A_start[paneloffset + paneloffset * lda]); 
