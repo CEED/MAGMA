@@ -146,7 +146,7 @@ magma_zgesellcmv(
     // the kernel can only handle up to 65535 slices 
    // (~2M rows for blocksize 32)
    dim3 grid( slices, 1, 1);
-   threads = blocksize;
+   magma_int_t threads = blocksize;
    zgesellcmv_kernel<<< grid, threads, 0, queue >>>
    ( m, n, blocksize, alpha,
         dval, dcolind, drowptr, dx, beta, dy );
