@@ -91,7 +91,7 @@ int main( int argc, char** argv)
             gpu_perf = gflops / gpu_time;
             magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
-            for(magma_int_t i=0; i<batchCount; i++)
+            for(int i=0; i<batchCount; i++)
             {
                 if(cpu_info[i] != 0 ){
                     printf("magma_zpotrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
