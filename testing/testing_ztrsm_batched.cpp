@@ -97,9 +97,6 @@ int main( int argc, char** argv)
             ldda = lda = ((lda+31)/32)*32;
             lddb = ldb = ((ldb+31)/32)*32;
 
-            ldda=lda;
-            lddb=ldb;
-            
             sizeA = lda*Ak*batchCount;
             sizeB = ldb*N*batchCount;
             magma_int_t NN = ldb*N;

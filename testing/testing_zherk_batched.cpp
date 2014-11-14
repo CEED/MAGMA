@@ -82,13 +82,11 @@ int main( int argc, char** argv)
 
             ldc = N;
 
-            lda = ((lda+31)/32)*32;
-            ldc = ((ldc+31)/32)*32;
+            ldda = ((lda+31)/32)*32;
+            lddc = ((ldc+31)/32)*32;
             
             NN = N * batchCount;
 
-            ldda = lda;
-            lddc = ldc;
             
             sizeA = lda*Ak*batchCount;
             sizeC = ldc*N*batchCount;

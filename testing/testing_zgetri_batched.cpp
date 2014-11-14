@@ -132,7 +132,7 @@ int main( int argc, char** argv)
                 if (info != 0)
                     printf("lapackf77_zgetri returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
-                lwork = int( MAGMA_Z_REAL( tmp ));
+                lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
                 TESTING_MALLOC_CPU( work,  magmaDoubleComplex, lwork  );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_R, &lda, h_A, &lda );
                 cpu_time = magma_wtime();
