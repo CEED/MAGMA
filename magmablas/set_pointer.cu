@@ -16,9 +16,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 static
-__global__ void stepinit_ipiv_kernel(int **ipiv_array, int pm)
+__global__ void stepinit_ipiv_kernel(magma_int_t **ipiv_array, int pm)
 {
-    int *ipiv = ipiv_array[blockIdx.x];
+    magma_int_t *ipiv = ipiv_array[blockIdx.x];
 
     int tx = threadIdx.x;  
 #if 0
@@ -53,8 +53,8 @@ void stepinit_ipiv(magma_int_t **ipiv_array,
 
 ///////////////////////////////////////////////////////////////////////////////////////
 static
-__global__ void set_ipointer_kernel(int **output_array,
-                 int *input,
+__global__ void set_ipointer_kernel(magma_int_t **output_array,
+                 magma_int_t *input,
                  int lda,
                  int row, int column, 
                  int batchSize)

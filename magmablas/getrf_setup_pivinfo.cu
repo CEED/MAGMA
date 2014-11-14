@@ -23,7 +23,7 @@
 
 
 //=================================================================================================
-static __device__ void setup_pivinfo_devfunc(int *pivinfo, int *ipiv, int m, int nb)
+static __device__ void setup_pivinfo_devfunc(magma_int_t *pivinfo, magma_int_t *ipiv, int m, int nb)
 {
    int tid = threadIdx.x;   
    int nchunk = (m-1)/MAX_NTHREADS + 1;
@@ -47,7 +47,7 @@ static __device__ void setup_pivinfo_devfunc(int *pivinfo, int *ipiv, int m, int
    }
 }
 //=================================================================================================
-__global__ void setup_pivinfo_kernel_batched(int **pivinfo_array, int **ipiv_array, int m, int nb)
+__global__ void setup_pivinfo_kernel_batched(magma_int_t **pivinfo_array, magma_int_t **ipiv_array, int m, int nb)
 {
    int batchid = blockIdx.x;
    setup_pivinfo_devfunc(pivinfo_array[batchid], ipiv_array[batchid], m, nb);
@@ -55,7 +55,7 @@ __global__ void setup_pivinfo_kernel_batched(int **pivinfo_array, int **ipiv_arr
 //=================================================================================================
 
 //=================================================================================================
-__global__ void setup_pivinfo_kernel(int *pivinfo, int *ipiv, int m, int nb)
+__global__ void setup_pivinfo_kernel(magma_int_t *pivinfo, magma_int_t *ipiv, int m, int nb)
 {
    setup_pivinfo_devfunc(pivinfo, ipiv, m, nb);
 }
@@ -124,7 +124,7 @@ setup_pivinfo( magma_int_t *pivinfo, magma_int_t *ipiv,
 
 
 //=================================================================================================
-static __device__ void adjust_ipiv_devfunc(int *ipiv, int m, int offset)
+static __device__ void adjust_ipiv_devfunc(magma_int_t *ipiv, int m, int offset)
 {
    int tid = threadIdx.x;
    if(tid < m)
@@ -133,7 +133,7 @@ static __device__ void adjust_ipiv_devfunc(int *ipiv, int m, int offset)
    }
 }
 //=================================================================================================
-__global__ void adjust_ipiv_kernel_batched(int **ipiv_array, int m, int offset)
+__global__ void adjust_ipiv_kernel_batched(magma_int_t **ipiv_array, int m, int offset)
 {
    int batchid = blockIdx.x;
    adjust_ipiv_devfunc(ipiv_array[batchid], m, offset);
@@ -141,7 +141,7 @@ __global__ void adjust_ipiv_kernel_batched(int **ipiv_array, int m, int offset)
 //=================================================================================================
 
 //=================================================================================================
-__global__ void adjust_ipiv_kernel(int *ipiv, int m, int offset)
+__global__ void adjust_ipiv_kernel(magma_int_t *ipiv, int m, int offset)
 {
    adjust_ipiv_devfunc(ipiv, m, offset);
 }
