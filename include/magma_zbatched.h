@@ -360,7 +360,7 @@ magma_zgetrf_batched(
         magma_int_t batchCount);
 
 magma_int_t 
-magma_zgetri_batched( magma_int_t n, 
+magma_zgetri_outofplace_batched( magma_int_t n, 
                   magmaDoubleComplex **dA_array, magma_int_t ldda,
                   magma_int_t **dipiv_array, 
                   magmaDoubleComplex **dinvA_array, magma_int_t lddia,

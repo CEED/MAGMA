@@ -104,7 +104,7 @@ int main( int argc, char** argv)
 
             gpu_time = magma_sync_wtime(0);
             info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount);
-            info2 = magma_zgetri_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount);
+            info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount);
             gpu_time = magma_sync_wtime(0) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
