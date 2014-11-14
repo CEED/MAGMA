@@ -53,7 +53,6 @@ int main( int argc, char** argv)
     opts.lapack |= opts.check; 
 
     magma_int_t batchCount = opts.batchcount ;
-    magma_int_t matrixSize;  
     magma_int_t columns;
     double error, rwork[1];
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -72,7 +71,6 @@ int main( int argc, char** argv)
             ldda   = ((M+31)/32)*32;
             //gflops = (FLOPS_ZGETRF( M, N ) + FLOPS_ZGETRI( min(M,N) ))/ 1e9 * batchCount; // This is the correct flops but since this getri_batched is based on 2 trsm = getrs and to know the real flops I am using the getrs one
             gflops = (FLOPS_ZGETRF( M, N ) + FLOPS_ZGETRS( min(M,N), min(M,N) ))/ 1e9 * batchCount;
-            matrixSize =  ldda * N;  
 
             TESTING_MALLOC_CPU(  ipiv, magma_int_t,     min_mn * batchCount);
             TESTING_MALLOC_CPU(  h_A,  magmaDoubleComplex, n2     );
@@ -98,8 +96,8 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, matrixSize, batchCount);
-            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, matrixSize, batchCount);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount);
+            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount);
             set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount);
 
             gpu_time = magma_sync_wtime(0);

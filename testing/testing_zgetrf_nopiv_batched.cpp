@@ -97,7 +97,6 @@ int main( int argc, char** argv)
     //opts.lapack |= opts.check; 
 
     batchCount = opts.batchcount ;
-    magma_int_t matrixSize;  
     magma_int_t columns;
     
     printf("BatchCount      M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
@@ -113,7 +112,6 @@ int main( int argc, char** argv)
             n2     = lda*N * batchCount;
             ldda   = ((M+31)/32)*32;
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
-            matrixSize =  ldda * N;  
             
 
             TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn * batchCount);

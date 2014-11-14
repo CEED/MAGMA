@@ -44,7 +44,6 @@ int main( int argc, char** argv)
     magma_int_t *dinfo_magma;
 
     magma_int_t batchCount;
-    magma_int_t matrixSize; 
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -58,13 +57,12 @@ int main( int argc, char** argv)
             N   = opts.nsize[i];
             ldda = lda = ((N+31)/32)*32;
             n2  = lda* N  * batchCount;
-            matrixSize =  ldda * N;            
 
             gflops = batchCount * FLOPS_ZPOTRF( N ) / 1e9 ;
 
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2);
             TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2);
-            TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, matrixSize * batchCount);
+            TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda * N * batchCount);
             TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
             
             magma_malloc((void**)&d_A_array, batchCount * sizeof(*d_A_array));
@@ -84,7 +82,7 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, matrixSize, batchCount);
+            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount);
             gpu_time = magma_sync_wtime(NULL);
             info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount);
             gpu_time = magma_sync_wtime(NULL) - gpu_time;
