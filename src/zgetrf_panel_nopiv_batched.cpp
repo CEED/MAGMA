@@ -29,7 +29,7 @@ magma_zgetrf_panel_nopiv_batched_q(
     //  panel factorization
     //===============================================
     if(m < nb){
-        printf("magma_zgetrf_panel_nopiv_batched_q m < nb %d < %d \n",m,nb);
+        printf("magma_zgetrf_panel_nopiv_batched_q m < nb %d < %d \n",(int) m, (int) nb);
         return -101;
     }
 

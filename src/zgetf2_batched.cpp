@@ -103,7 +103,7 @@ magma_zgetf2_batched(
 
     magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex one  = MAGMA_Z_ONE;
-    magma_int_t nb = 8;//BATF2_NB;
+    magma_int_t nb = BATF2_NB;
 
     
 

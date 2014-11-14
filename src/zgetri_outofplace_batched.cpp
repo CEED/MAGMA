@@ -155,7 +155,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1 \n",j);
         // solve dwork = L^-1 * I
-        magmablas_zlaset_batched(MagmaUpperLower, j, j, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount);
+        magmablas_zlaset_batched(MagmaUpperLower, j, ib, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount);
         magma_zdisplace_pointers(dW_array, dwork_array, n, j, 0, batchCount);
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, j, j, batchCount);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount);

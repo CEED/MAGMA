@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
+       
+       @author Azzam Haidar
+       @author Ichi Yamazaki
 
        @precisions normal z -> s d c
 
@@ -89,7 +92,7 @@ magma_zpotrf_mgpu_right(
     double             m_one = -1.0;
     const char* uplo_ = lapack_uplo_const( uplo );
 
-    magma_int_t j, nb, d, id, j_local, blkid, crosspoint, prevj, prevtrsmrows, nqueue = 5;
+    magma_int_t j, nb, d, id, j_local, blkid, crosspoint, prevj, prevtrsmrows=0, nqueue = 5;
     magmaDoubleComplex *panel, *tmppanel0, *tmppanel1, *tmppanel, *tmpprevpanel;
     magmaDoubleComplex *d_lP[MagmaMaxGPUs], *dlpanel, *dlpanels[MagmaMaxGPUs];
     magma_int_t rows, trsmrows, igpu, n_local[MagmaMaxGPUs], ldpanel;
@@ -508,7 +511,6 @@ magma_zherk_mgpu(
 #define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
-    const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);
@@ -599,7 +601,6 @@ magma_zherk_mgpu2(
 #define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
 
-    const char* uplo_  = lapack_uplo_const( uplo  );
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
     magmaDoubleComplex z_beta  = MAGMA_Z_MAKE(beta, 0.0);

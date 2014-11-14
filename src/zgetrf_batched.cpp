@@ -99,6 +99,13 @@ magma_zgetrf_batched(
     if (m == 0 || n == 0)
         if(min_mn == 0 ) return arginfo;
 
+    if( m >  2048 || n > 2048 ){
+        printf("=========================================================================================\n");
+        printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
+        printf("=========================================================================================\n");
+    }
+
+
 //#define ENABLE_TIMER3
 
 #if defined(ENABLE_TIMER3)
@@ -110,7 +117,7 @@ magma_zgetrf_batched(
     magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex one  = MAGMA_Z_ONE;
     magma_int_t ib, i, k, pm;
-    magma_int_t nb = 128;// BATRF_NB;
+    magma_int_t nb = BATRF_NB;
     magma_int_t gemm_crossover = nb > 32 ? 127 : 160;
     // magma_int_t gemm_crossover = n;// use only stream gemm
 
@@ -163,7 +170,8 @@ magma_zgetrf_batched(
     // printf(" I am in zgetrfbatched\n");
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
-    magma_int_t   streamid, nbstreams=32;
+    magma_int_t streamid;
+    const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
     for(i=0; i<nbstreams; i++){
         magma_queue_create( &stream[i] );

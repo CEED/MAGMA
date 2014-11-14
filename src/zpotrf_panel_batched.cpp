@@ -29,7 +29,7 @@ magma_zpotrf_panel_batched(
     //  panel factorization
     //===============================================
     if(n<nb){
-        printf("magma_zpotrf_panel error n < nb %d < %d \n",n,nb);
+        printf("magma_zpotrf_panel error n < nb %d < %d \n",(int) n, (int) nb);
         return -101;
     }
 
@@ -96,7 +96,7 @@ magma_zpotrf_recpanel_batched(
        return -100;
     }
     if(m<n){
-        printf("error m < n %d < %d \n",m,n);
+        printf("error m < n %d < %d \n", (int) m, (int) n);
         return -101;
     }
 
@@ -186,7 +186,7 @@ magma_zpotrf_rectile_batched(
     magma_int_t *info_array, magma_int_t gbstep,
     magma_int_t batchCount, cublasHandle_t myhandle)
 {
-    magma_int_t DEBUG=0;
+    //magma_int_t DEBUG=0;
 
     // Quick return if possible
     if (m ==0 || n == 0) {
@@ -197,7 +197,7 @@ magma_zpotrf_rectile_batched(
        return -100;
     }
     if(m<n){
-        printf("error m < n %d < %d \n",m,n);
+        printf("error m < n %d < %d \n", (int) m, (int) n);
         return -101;
     }
 
@@ -208,7 +208,7 @@ magma_zpotrf_rectile_batched(
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
     magma_int_t panel_nb = n;
     if(panel_nb <= min_recpnb){
-        if(DEBUG==1) printf("calling bottom panel recursive with n=%d\n",panel_nb);
+        // if(DEBUG==1) printf("calling bottom panel recursive with n=%d\n",(int) panel_nb);
         //  panel factorization
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount);
         magma_zpotrf_panel_batched(
@@ -233,7 +233,7 @@ magma_zpotrf_rectile_batched(
         magma_int_t p2 = n1;
 
         // panel on A11
-        if(DEBUG==1) printf("calling recursive panel on A11=A(%d,%d) with n=%d min_recpnb %d\n",p1,p1,n1,min_recpnb);
+        //if(DEBUG==1) printf("calling recursive panel on A11=A(%d,%d) with n=%d min_recpnb %d\n",(int) p1, (int) p1, (int) n1, (int) min_recpnb);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p1, p1, batchCount);        
         magma_zpotrf_rectile_batched(
                            uplo, n1, n1, min_recpnb,
@@ -246,7 +246,7 @@ magma_zpotrf_rectile_batched(
                            batchCount, myhandle);
 
         // TRSM on A21
-        if(DEBUG==1) printf("calling trsm on A21=A(%d,%d) using A11==A(%d,%d) with m=%d k=%d \n",p2,p1,p1,p1,n2,n1);
+        //if(DEBUG==1) printf("calling trsm on A21=A(%d,%d) using A11==A(%d,%d) with m=%d k=%d \n",p2,p1,p1,p1,n2,n1);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, p1, p1, batchCount);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, p2, p1, batchCount);
         magmablas_ztrsm_work_batched(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
@@ -260,7 +260,7 @@ magma_zpotrf_rectile_batched(
                               dW3_displ,   dW4_displ,
                               0, batchCount);
         // update A22
-        if(DEBUG==1) printf("calling update A22=A(%d,%d) using A21==A(%d,%d) with m=%d n=%d k=%d\n",p2,p2,p2,p1,n2,n2,n1);
+        //if(DEBUG==1) printf("calling update A22=A(%d,%d) using A21==A(%d,%d) with m=%d n=%d k=%d\n",p2,p2,p2,p1,n2,n2,n1);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, p2, p1, batchCount);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, p2, p2, batchCount);        
         magmablas_zgemm_batched(MagmaNoTrans, MagmaConjTrans, n2, n2, n1,
@@ -270,7 +270,7 @@ magma_zpotrf_rectile_batched(
                               batchCount);
 
         // panel on A22
-        if(DEBUG==1) printf("calling recursive panel on A22=A(%d,%d) with n=%d min_recpnb %d\n",p2,p2,n2,min_recpnb);
+        //if(DEBUG==1) printf("calling recursive panel on A22=A(%d,%d) with n=%d min_recpnb %d\n",p2,p2,n2,min_recpnb);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p2, p2, batchCount);        
         magma_zpotrf_rectile_batched(
                            uplo, n2, n2, min_recpnb,
@@ -285,7 +285,7 @@ magma_zpotrf_rectile_batched(
 
     if(m>n){
         // TRSM on A3:
-        if(DEBUG==1) printf("calling trsm AT THE END on A3=A(%d,%d): using A1222==A(%d,%d) with m=%d k=%d \n",n,0,0,0,m-n,n);
+        //if(DEBUG==1) printf("calling trsm AT THE END on A3=A(%d,%d): using A1222==A(%d,%d) with m=%d k=%d \n",n,0,0,0,m-n,n);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, 0, 0, batchCount);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, n, 0, batchCount);
         magmablas_ztrsm_work_batched(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,

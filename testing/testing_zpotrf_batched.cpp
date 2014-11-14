@@ -106,7 +106,6 @@ int main( int argc, char** argv)
                    Performs operation using LAPACK
                    =================================================================== */
                 cpu_time = magma_wtime();
-                #pragma unroll
                 for(int i=0; i<batchCount; i++)
                 {
                    lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + i * lda * N, &lda, &info );

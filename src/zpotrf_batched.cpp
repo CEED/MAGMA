@@ -96,8 +96,14 @@ magma_zpotrf_batched(
         return arginfo;
     }
 
+    if( n > 2048 ){
+        printf("=========================================================================================\n");
+        printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
+        printf("=========================================================================================\n");
+    }
 
-    magma_int_t j, ib;
+
+    magma_int_t j, k, ib;
     magma_int_t nb = POTRF_NB;
     magma_int_t gemm_crossover = 127;//nb > 32 ? 127 : 160;
 
@@ -146,7 +152,8 @@ magma_zpotrf_batched(
 
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
-    magma_int_t   k,streamid, nbstreams=32;
+    magma_int_t streamid;
+    const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
     for(k=0; k<nbstreams; k++){
         magma_queue_create( &stream[k] );
