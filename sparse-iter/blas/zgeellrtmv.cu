@@ -265,7 +265,7 @@ magma_zgeellrtmv(
 {
     int num_blocks = ( (m+blocksize-1)/blocksize);
 
-    int num_threads = alignment*blocksize;
+    int threads = alignment*blocksize;
 
     int real_row_length = ((int)(nnz_per_row+alignment-1)/alignment)
                             *alignment;
@@ -282,17 +282,17 @@ magma_zgeellrtmv(
     // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads , Ms);
 
     if ( alignment == 32 ) {
-        zgeellrtmv_kernel_32<<< grid, num_threads , Ms, queue >>>
+        zgeellrtmv_kernel_32<<< grid, threads , Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 16 ) {
-        zgeellrtmv_kernel_16<<< grid, num_threads , Ms, queue >>>
+        zgeellrtmv_kernel_16<<< grid, threads , Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 8 ) {
-        zgeellrtmv_kernel_8<<< grid, num_threads , Ms, queue >>>
+        zgeellrtmv_kernel_8<<< grid, threads , Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }

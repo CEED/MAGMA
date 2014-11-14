@@ -131,9 +131,10 @@ magma_zmgecsrmv(
     magma_queue_t queue )
 {
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                     * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgecsrmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>
+    zmgecsrmv_kernel<<< grid, threads, MEM_SIZE >>>
             (m, n, num_vecs, alpha, dval, drowptr, dcolind, dx, beta, dy);
 
    return MAGMA_SUCCESS;

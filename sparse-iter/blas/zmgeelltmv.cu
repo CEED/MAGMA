@@ -132,9 +132,10 @@ magma_zmgeelltmv(
     magma_queue_t queue )
 {
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                 * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgeelltmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>
+    zmgeelltmv_kernel<<< grid, threads, MEM_SIZE, queue >>>
         ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
 
 
