@@ -132,6 +132,7 @@ ZSRC += \
 
 # batched filesalphabetic order by base name (ignoring precision)
 ZSRC += \
+	zgeadd_batched.cu		\
 	zgemv_batched.cu			\
 	zgemm_batched.cu			\
 	zgemm_fermi_batched.cu		\
@@ -157,7 +158,7 @@ SRC += \
 
 ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cu=.o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
