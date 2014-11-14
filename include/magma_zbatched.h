@@ -129,21 +129,7 @@ magmablas_zherk_batched_k32(
     magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount );
 
 
-void 
-magmablas_zgeadd_batched(
-    magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr  const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex_ptr              *dBarray, magma_int_t lddb,
-    magma_int_t batchCount );
 
-
-void 
-magmablas_zlacpy_batched(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex const * const *dAarray, magma_int_t ldda,
-    magmaDoubleComplex              **dBarray, magma_int_t lddb,
-    magma_int_t batchCount );
 
 
 
@@ -561,6 +547,20 @@ setup_pivinfo( magma_int_t *pivinfo, magma_int_t *ipiv,
                     magma_int_t m, magma_int_t nb);
 
 
+void
+magmablas_zgeadd_batched_q(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
+    magma_int_t batchCount, magma_queue_t queue );
+
+void
+magmablas_zlacpy_batched_q(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr  const dAarray[], magma_int_t ldda,
+    magmaDoubleComplex_ptr              dBarray[], magma_int_t lddb,
+    magma_int_t batchCount, magma_queue_t queue );
 void
 magmablas_zgeadd_batched(
     magma_int_t m, magma_int_t n,

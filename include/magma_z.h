@@ -66,6 +66,12 @@ void
 magma_zirange(
     magma_int_t k, magma_int_t *indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu);
 #endif
+magma_int_t magma_zgebrd_ge2gb( magma_int_t m, magma_int_t n, magma_int_t nb,
+                    magmaDoubleComplex *A, magma_int_t lda,
+                    magmaDoubleComplex *taup, magmaDoubleComplex *tauq,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dTP, magmaDoubleComplex *dTQ,
+                    magma_int_t *info);
 
 magma_int_t
 magma_zgebrd(
@@ -1268,6 +1274,15 @@ magma_zhetrd_gpu(
     magmaDoubleComplex *wA,  magma_int_t ldwa,
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info);
+magma_int_t magma_zlarfb_gpu_gemm_new( magma_side_t side, magma_trans_t trans, 
+                  magma_direct_t direct, magma_storev_t storev,
+                  magma_int_t m, magma_int_t n, magma_int_t k,
+                  const magmaDoubleComplex *dV,    magma_int_t ldv,
+                  const magmaDoubleComplex *dT,    magma_int_t ldt,
+                  magmaDoubleComplex *dC,          magma_int_t ldc,
+                  magmaDoubleComplex *dwork,       magma_int_t lwork,
+                  magmaDoubleComplex *dworkvt,     magma_int_t lworkvt,
+                  magma_int_t gbm, magma_int_t gbn, magma_int_t oper);
 
 magma_int_t
 magma_zhetrd_he2hb_mgpu(
