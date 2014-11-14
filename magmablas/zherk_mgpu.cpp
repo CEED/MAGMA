@@ -35,6 +35,7 @@ magma_zherk_mgpu(
 {
 #define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
+#define STREAM_ID(i) (nqueue > 1 ? 1+((i)/nb)%(nqueue-1) : 0)
 
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
@@ -110,7 +111,9 @@ magma_zherk_mgpu(
     magma_setdevice( orig_dev );
     magmablasSetKernelStream( orig_stream );
 }
-
+#undef dB
+#undef dC
+#undef STREAM_ID
 
 // ----------------------------------------------------------------------
 extern "C" void
@@ -125,6 +128,7 @@ magma_zherk_mgpu2(
 {
 #define dB(id, i, j)  (dB[(id)]+(j)*lddb + (i)+b_offset)
 #define dC(id, i, j)  (dC[(id)]+(j)*lddc + (i))
+#define STREAM_ID(i) (nqueue > 1 ? 1+((i)/nb)%(nqueue-1) : 0)
 
     magma_int_t i, id, ib, ii, kk, n1;
     magmaDoubleComplex z_alpha = MAGMA_Z_MAKE(alpha,0.0);
@@ -193,3 +197,8 @@ magma_zherk_mgpu2(
     magma_setdevice( orig_dev );
     magmablasSetKernelStream( orig_stream );
 }
+
+#undef dB
+#undef dC
+#undef STREAM_ID
+

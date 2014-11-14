@@ -495,4 +495,10 @@ magma_zpotrf_mgpu_right(
 
     return *info;
 } /* magma_zpotrf_mgpu_right */
+#undef dlA
+#undef dlP
+#undef panel
+#undef tmppanel
+#undef tmpprevpanel
+#undef STREAM_ID
 
