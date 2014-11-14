@@ -62,7 +62,7 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
     zcumilu.cpp          \
-
+    zpastix.cpp		\
 
 
 # orthogonalization schemes
