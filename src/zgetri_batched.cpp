@@ -76,17 +76,7 @@ magma_zgetri_batched( magma_int_t n,
        
 {
     /* Local variables */
-    /*
-    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-
-
-    magmaDoubleComplex *dL = dwork;
-    magma_int_t lddl    = n;
-    magma_int_t trinb   = magma_get_zgetri_nb(n);
-    magma_int_t j, jmax, jb, jp;
-    */    
+  
     magma_int_t info = 0;
     if (n < 0)
         info = -1;
@@ -151,19 +141,6 @@ magma_zgetri_batched( magma_int_t n,
 
     //printf(" I am after malloc getri\n");
 
-#if 0
-    gbinfo = magmablas_zcheckdiag(n, n, dA_array, ldda, batchCount, info_array); 
-    if ( gbinfo != 0 ){
-        magma_int_t **cpuarray = (magma_int_t**) malloc(batchCount*sizeof(magma_int_t*));
-        magma_getvector( batchCount, sizeof(magma_int_t*), info_array, 1, cpuarray, 1);
-        for(int k=0; k<batchCount; k++)
-            if(cpu_array[k] != 0) 
-                printf("error on matrix %d info equal %d meaning U(%d,%d) is zero matrix is singular NO inverse\n",
-                        k,cpu_array[k],cpu_array[k],cpu_array[k]);
-            
-        return info;
-    }
-#endif
 
     // set dinvdiagA to identity
     magmablas_zlaset_batched(MagmaUpperLower, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount);
@@ -178,26 +155,33 @@ magma_zgetri_batched( magma_int_t n,
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1 \n",j);
         // solve dwork = L^-1 * I
-        magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, 0, j, batchCount);
+        magmablas_zlaset_batched(MagmaUpperLower, j, j, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount);
+        magma_zdisplace_pointers(dW_array, dwork_array, n, j, 0, batchCount);
+        magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, j, j, batchCount);
+        magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount);
+        
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
-                n, ib,
+                n-j, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
                 dW0_displ,   lddia, // dB
-                dwork_array,        n, // dX //output
+                dW_array,        n, // dX //output
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
                 1, batchCount);
-
+        
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 2 \n",j);
         // solve dinvdiagA = U^-1 * dwork
+        magma_zdisplace_pointers(dW_array, dwork_array, n, 0, 0, batchCount);
+        magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, 0, j, batchCount);
+        magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount);
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
                 n, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
-                dwork_array,        n, // dB 
+                dW_array,        n, // dB 
                 dW0_displ,   lddia, // dX //output
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
