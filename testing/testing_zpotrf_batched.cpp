@@ -76,7 +76,7 @@ int main( int argc, char** argv)
                magma_zmake_hpd( N, h_A + i * lda * N, lda );// need modification
             }
             
-            int columns = N * batchCount;
+            magma_int_t columns = N * batchCount;
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &(columns), h_A, &lda, h_R, &lda );
             magma_zsetmatrix( N, columns, h_A, lda, d_A, ldda );
 
@@ -91,7 +91,7 @@ int main( int argc, char** argv)
             gpu_perf = gflops / gpu_time;
             magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
-            for(int i=0; i<batchCount; i++)
+            for(magma_int_t i=0; i<batchCount; i++)
             {
                 if(cpu_info[i] != 0 ){
                     printf("magma_zpotrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
@@ -118,7 +118,7 @@ int main( int argc, char** argv)
                            (int) info, magma_strerror( info ));
                 /*
                 FILE        *fp ;
-                int j,k;
+                magma_int_t j,k;
                 printf("Writing input matrix in lpk.txt ...\n");
                 fp = fopen ("lpk.txt", "w") ;
                 if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
@@ -140,7 +140,7 @@ int main( int argc, char** argv)
                    Check the result compared to LAPACK
                    =================================================================== */
                  magma_zgetmatrix( N, columns, d_A, ldda, h_R, lda );
-                 int NN = lda*N;
+                 magma_int_t NN = lda*N;
                  char const uplo = 'l'; // lapack_uplo_const(opts.uplo)
                  double err = 0.0;
                  for(int i=0; i<batchCount; i++)

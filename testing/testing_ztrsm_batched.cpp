@@ -104,7 +104,7 @@ int main( int argc, char** argv)
             
             sizeA = lda*Ak*batchCount;
             sizeB = ldb*N*batchCount;
-            int NN = ldb*N;
+            magma_int_t NN = ldb*N;
 
             TESTING_MALLOC_CPU( h_A,       magmaDoubleComplex, sizeA  );
             TESTING_MALLOC_CPU( h_B,       magmaDoubleComplex, sizeB   );
