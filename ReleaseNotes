@@ -29,7 +29,7 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Added MAGMA Batched linear algebra routines:
         * BATCHED MAGMA BLAS including gemm, gemv, herk, and trsm
         * BATCHED LU, GETRI, and Cholesky factorizations
-    * Added Bunch-Kaufmann factorization (and solver) for symmetric 
+    * Added Bunch-Kaufman factorization (and solver) for symmetric 
       indefinite matrices
       {z|c|d|s}{he|sy}trf 
     * Added non-pivoted LDLt 
