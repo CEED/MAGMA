@@ -87,22 +87,6 @@ end subroutine magmaf_zbulge_get_Vblksiz
 subroutine magmaf_get_zbulge_gcperf(  )
 end subroutine magmaf_get_zbulge_gcperf
 
-subroutine magmaf_zgebrd_ge2gb( m, n, nb, A, lda, taup, tauq, work, lwork, dTP, dTQ, info  &
-        )
-    integer          :: m
-    integer          :: n
-    integer          :: nb
-    complex*16       :: A(*)
-    integer          :: lda
-    complex*16       :: taup(*)
-    complex*16       :: tauq(*)
-    complex*16       :: work(*)
-    integer          :: lwork
-    complex*16       :: dTP(*)
-    complex*16       :: dTQ(*)
-    integer          :: info
-end subroutine magmaf_zgebrd_ge2gb
-
 subroutine magmaf_zgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m
     integer          :: n
@@ -1601,30 +1585,6 @@ subroutine magmaf_zhetrd_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwor
     integer          :: lwork
     integer          :: info
 end subroutine magmaf_zhetrd_gpu
-
-subroutine magmaf_zlarfb_gpu_gemm_new( side, trans, direct, storev, m, n, k, dV, ldv, dT,  &
-        ldt, dC, ldc, dwork, lwork, dworkvt, lworkvt, gbm, gbn, oper )
-    character        :: side
-    character        :: trans
-    character        :: direct
-    character        :: storev
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    complex*16       :: dV(*)
-    integer          :: ldv
-    magma_devptr_t   :: dT
-    integer          :: ldt
-    complex*16       :: dC(*)
-    integer          :: ldc
-    complex*16       :: dwork(*)
-    integer          :: lwork
-    complex*16       :: dworkvt(*)
-    integer          :: lworkvt
-    integer          :: gbm
-    integer          :: gbn
-    integer          :: oper
-end subroutine magmaf_zlarfb_gpu_gemm_new
 
 subroutine magmaf_zhetrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwork,  &
         dwork, ldwork, info )

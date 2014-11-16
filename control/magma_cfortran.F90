@@ -87,22 +87,6 @@ end subroutine magmaf_cbulge_get_Vblksiz
 subroutine magmaf_get_cbulge_gcperf(  )
 end subroutine magmaf_get_cbulge_gcperf
 
-subroutine magmaf_cgebrd_ge2gb( m, n, nb, A, lda, taup, tauq, work, lwork, dTP, dTQ, info  &
-        )
-    integer          :: m
-    integer          :: n
-    integer          :: nb
-    complex          :: A(*)
-    integer          :: lda
-    complex          :: taup(*)
-    complex          :: tauq(*)
-    complex          :: work(*)
-    integer          :: lwork
-    complex          :: dTP(*)
-    complex          :: dTQ(*)
-    integer          :: info
-end subroutine magmaf_cgebrd_ge2gb
-
 subroutine magmaf_cgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m
     integer          :: n
@@ -1601,30 +1585,6 @@ subroutine magmaf_chetrd_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwor
     integer          :: lwork
     integer          :: info
 end subroutine magmaf_chetrd_gpu
-
-subroutine magmaf_clarfb_gpu_gemm_new( side, trans, direct, storev, m, n, k, dV, ldv, dT,  &
-        ldt, dC, ldc, dwork, lwork, dworkvt, lworkvt, gbm, gbn, oper )
-    character        :: side
-    character        :: trans
-    character        :: direct
-    character        :: storev
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    complex          :: dV(*)
-    integer          :: ldv
-    magma_devptr_t   :: dT
-    integer          :: ldt
-    complex          :: dC(*)
-    integer          :: ldc
-    complex          :: dwork(*)
-    integer          :: lwork
-    complex          :: dworkvt(*)
-    integer          :: lworkvt
-    integer          :: gbm
-    integer          :: gbn
-    integer          :: oper
-end subroutine magmaf_clarfb_gpu_gemm_new
 
 subroutine magmaf_chetrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwork,  &
         dwork, ldwork, info )

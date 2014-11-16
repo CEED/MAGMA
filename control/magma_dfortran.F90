@@ -119,22 +119,6 @@ subroutine magmaf_dirange( k, indxq, iil, iiu, il, iu )
     integer          :: iu
 end subroutine magmaf_dirange
 
-subroutine magmaf_dgebrd_ge2gb( m, n, nb, A, lda, taup, tauq, work, lwork, dTP, dTQ, info  &
-        )
-    integer          :: m
-    integer          :: n
-    integer          :: nb
-    double precision :: A(*)
-    integer          :: lda
-    double precision :: taup(*)
-    double precision :: tauq(*)
-    double precision :: work(*)
-    integer          :: lwork
-    double precision :: dTP(*)
-    double precision :: dTQ(*)
-    integer          :: info
-end subroutine magmaf_dgebrd_ge2gb
-
 subroutine magmaf_dgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m
     integer          :: n
@@ -1444,30 +1428,6 @@ subroutine magmaf_dsytrd_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwor
     integer          :: lwork
     integer          :: info
 end subroutine magmaf_dsytrd_gpu
-
-subroutine magmaf_dlarfb_gpu_gemm_new( side, trans, direct, storev, m, n, k, dV, ldv, dT,  &
-        ldt, dC, ldc, dwork, lwork, dworkvt, lworkvt, gbm, gbn, oper )
-    character        :: side
-    character        :: trans
-    character        :: direct
-    character        :: storev
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    double precision :: dV(*)
-    integer          :: ldv
-    magma_devptr_t   :: dT
-    integer          :: ldt
-    double precision :: dC(*)
-    integer          :: ldc
-    double precision :: dwork(*)
-    integer          :: lwork
-    double precision :: dworkvt(*)
-    integer          :: lworkvt
-    integer          :: gbm
-    integer          :: gbn
-    integer          :: oper
-end subroutine magmaf_dlarfb_gpu_gemm_new
 
 subroutine magmaf_dsytrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwork,  &
         dwork, ldwork, info )

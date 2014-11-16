@@ -119,22 +119,6 @@ subroutine magmaf_sirange( k, indxq, iil, iiu, il, iu )
     integer          :: iu
 end subroutine magmaf_sirange
 
-subroutine magmaf_sgebrd_ge2gb( m, n, nb, A, lda, taup, tauq, work, lwork, dTP, dTQ, info  &
-        )
-    integer          :: m
-    integer          :: n
-    integer          :: nb
-    real             :: A(*)
-    integer          :: lda
-    real             :: taup(*)
-    real             :: tauq(*)
-    real             :: work(*)
-    integer          :: lwork
-    real             :: dTP(*)
-    real             :: dTQ(*)
-    integer          :: info
-end subroutine magmaf_sgebrd_ge2gb
-
 subroutine magmaf_sgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m
     integer          :: n
@@ -1444,30 +1428,6 @@ subroutine magmaf_ssytrd_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwor
     integer          :: lwork
     integer          :: info
 end subroutine magmaf_ssytrd_gpu
-
-subroutine magmaf_slarfb_gpu_gemm_new( side, trans, direct, storev, m, n, k, dV, ldv, dT,  &
-        ldt, dC, ldc, dwork, lwork, dworkvt, lworkvt, gbm, gbn, oper )
-    character        :: side
-    character        :: trans
-    character        :: direct
-    character        :: storev
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    real             :: dV(*)
-    integer          :: ldv
-    magma_devptr_t   :: dT
-    integer          :: ldt
-    real             :: dC(*)
-    integer          :: ldc
-    real             :: dwork(*)
-    integer          :: lwork
-    real             :: dworkvt(*)
-    integer          :: lworkvt
-    integer          :: gbm
-    integer          :: gbn
-    integer          :: oper
-end subroutine magmaf_slarfb_gpu_gemm_new
 
 subroutine magmaf_ssytrd2_gpu( uplo, n, dA, ldda, d, e, tau, wA, ldwa, work, lwork,  &
         dwork, ldwork, info )

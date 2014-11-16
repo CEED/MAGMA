@@ -211,28 +211,6 @@ void magmaf_sirange(
         iiu, *il, *iu );
 }
 
-#define magmaf_sgebrd_ge2gb FORTRAN_NAME( magmaf_sgebrd_ge2gb, MAGMAF_SGEBRD_GE2GB )
-void magmaf_sgebrd_ge2gb(
-    magma_int_t *m, magma_int_t *n, magma_int_t *nb,
-    float *A, magma_int_t *lda,
-    float *taup,
-    float *tauq,
-    float *work, magma_int_t *lwork,
-    float *dTP,
-    float *dTQ,
-    magma_int_t *info )
-{
-    magma_sgebrd_ge2gb(
-        *m, *n, *nb,
-        A, *lda,
-        taup,
-        tauq,
-        work, *lwork,
-        dTP,
-        dTQ,
-        info );
-}
-
 #define magmaf_sgebrd FORTRAN_NAME( magmaf_sgebrd, MAGMAF_SGEBRD )
 void magmaf_sgebrd(
     magma_int_t *m, magma_int_t *n,
@@ -1847,24 +1825,6 @@ void magmaf_ssytrd_gpu(
         wA, *ldwa,
         work, *lwork,
         info );
-}
-
-#define magmaf_slarfb_gpu_gemm_new FORTRAN_NAME( magmaf_slarfb_gpu_gemm_new, MAGMAF_SLARFB_GPU_GEMM_NEW )
-void magmaf_slarfb_gpu_gemm_new(
-    const char* side, const char* trans, const char* direct, const char* storev, magma_int_t *m, magma_int_t *n, magma_int_t *k,
-    const float *dV, magma_int_t *ldv,
-    devptr_t *dT, magma_int_t *ldt,
-    float *dC, magma_int_t *ldc,
-    float *dwork, magma_int_t *lwork,
-    float *dworkvt, magma_int_t *lworkvt, magma_int_t *gbm, magma_int_t *gbn, magma_int_t *oper )
-{
-    magma_slarfb_gpu_gemm_new(
-        magma_side_const(*side), magma_trans_const(*trans), magma_direct_const(*direct), magma_storev_const(*storev), *m, *n, *k,
-        dV, *ldv,
-        magma_sdevptr(dT), *ldt,
-        dC, *ldc,
-        dwork, *lwork,
-        dworkvt, *lworkvt, *gbm, *gbn, *oper );
 }
 
 #define magmaf_ssytrd2_gpu FORTRAN_NAME( magmaf_ssytrd2_gpu, MAGMAF_SSYTRD2_GPU )
