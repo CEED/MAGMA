@@ -153,7 +153,7 @@ int main( int argc, char** argv)
 
             for( magma_int_t dev = 0; dev < opts.ngpu; ++dev ) {
                 magma_setdevice(dev);
-                cudaDeviceSynchronize();
+                magma_device_sync();
             }
             magma_setdevice(0);
             magmablasSetKernelStream( NULL );

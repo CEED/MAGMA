@@ -11,21 +11,17 @@
        @author Tingxing Dong
 */
 
-
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-#include "common_magma.h"
 
 // includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgemm_batched

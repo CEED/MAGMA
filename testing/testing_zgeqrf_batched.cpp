@@ -14,15 +14,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "common_magma.h"
 
 
 
@@ -141,9 +138,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( dnorm,  double, min_mn * batchCount );
             TESTING_MALLOC_DEV( dwork,  magmaDoubleComplex, (2 * nb * min_mn +3*nb ) * batchCount );
 
-            // todo replace with magma_zlaset
-            cudaMemset(d_R, 0, N*nb*batchCount*sizeof(magmaDoubleComplex));
-            cudaMemset(d_T, 0, nb*nb*batchCount*sizeof(magmaDoubleComplex));
+            magmablas_zlaset( MagmaFull, N,  nb*batchCount, 0, 0, d_R, nb );
+            magmablas_zlaset( MagmaFull, nb, nb*batchCount, 0, 0, d_T, nb );
         
             // to determine the size of lwork
             lwork = -1;

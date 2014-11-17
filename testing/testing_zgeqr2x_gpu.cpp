@@ -19,8 +19,8 @@
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
-#include "common_magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
@@ -32,6 +32,7 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
 
+    magmaDoubleComplex  c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_T, *h_R, *tau, *h_work, tmp[1];
     magmaDoubleComplex_ptr d_A,  d_T, ddA, dtau;
@@ -100,11 +101,10 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( dwork2, double, max(5*min_mn, (BLOCK_SIZE*2+2)*min_mn) );
             
             // todo replace with magma_zlaset
-            cudaMemset(ddA, 0, N*N*sizeof(magmaDoubleComplex));
-            cudaMemset(d_T, 0, N*N*sizeof(magmaDoubleComplex));
-        
-            cudaMemset(ddA2, 0, N*N*sizeof(magmaDoubleComplex));
-            cudaMemset(d_T2, 0, N*N*sizeof(magmaDoubleComplex));
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, ddA,  N );
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, d_T,  N );
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, ddA2, N );
+            magmablas_zlaset( MagmaFull, N, N, c_zero, c_zero, d_T2, N );
         
             lwork = -1;
             lapackf77_zgeqrf(&M, &N, NULL, &M, NULL, tmp, &lwork, &info);
@@ -191,7 +191,7 @@ int main( int argc, char** argv)
                         for(int row=0; row <= col; row++)
                             terr += (  MAGMA_Z_ABS(h_work[row + col*N] - h_T[row + col*N])*
                                        MAGMA_Z_ABS(h_work[row + col*N] - h_T[row + col*N])  );
-                    terr = magma_dsqrt(terr);
+                    terr = sqrt( terr );
     
                     printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     %8.2e     %8.2e   %s\n",
                            (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,

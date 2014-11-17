@@ -14,17 +14,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-//#include <cublas.h>
-#include <cublas_v2.h>
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-
-#include "common_magma.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -162,7 +157,7 @@ int main( int argc, char** argv)
 
             double err = 0.0;
             if ( opts.check ) {
-                cudaMemcpy(ipiv, d_ipiv, sizeof(magma_int_t) * min_mn * batchCount, cudaMemcpyDeviceToHost);
+                magma_getvector( min_mn * batchCount, sizeof(magma_int_t), d_ipiv, 1, ipiv, 1 );
                 magma_zgetmatrix( min(M,N), N*batchCount, d_invA, ldda, h_R, lda );
                 int stop=0;
                 n2     = lda*N;

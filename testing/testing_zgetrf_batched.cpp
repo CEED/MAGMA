@@ -15,16 +15,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "common_magma.h"
 
 double get_LU_error(magma_int_t M, magma_int_t N,
                     magmaDoubleComplex *A,  magma_int_t lda,
@@ -208,8 +204,7 @@ int main( int argc, char** argv)
 
             double err = 0.0;
             if ( opts.check ) {
-               
-                cudaMemcpy(ipiv, dipiv_magma, sizeof(magma_int_t) * min_mn * batchCount, cudaMemcpyDeviceToHost);
+                magma_getvector( min_mn * batchCount, sizeof(magma_int_t), dipiv_magma, 1, ipiv, 1 );
                 magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
                 int stop=0;
                 for(int i=0; i<batchCount; i++)
@@ -222,19 +217,19 @@ int main( int argc, char** argv)
                                 stop=1;
                         }
                     }
-                  if(stop==1){
-                      err=-1.0;
-                      break;
-                  }
-                  
-                  error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);                 
-                  if ( isnan(error) || isinf(error) ) {
-                      err = error;
-                      break;
-                  }
-                  err = max(fabs(error),err);
+                    if(stop==1){
+                        err=-1.0;
+                        break;
+                    }
+                    
+                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);                 
+                    if ( isnan(error) || isinf(error) ) {
+                        err = error;
+                        break;
+                    }
+                    err = max(fabs(error),err);
                 }
-                 printf("   %8.2e\n", err );
+                printf("   %8.2e\n", err );
             }
             else {
                 printf("     ---  \n");

@@ -19,7 +19,7 @@
 #include <cuda_runtime_api.h>
 
 #include "testings.h"
-#include "common_magma.h"
+#include "magma.h"
 
 // --------------------
 // global variable
@@ -125,7 +125,7 @@ const char* lockfile = "/tmp/icl-lock";
 
 // --------------------
 const char *usage_short =
-"Usage: %s [options] [-h|--help]\n\n";
+"%% Usage: %s [options] [-h|--help]\n\n";
 
 const char *usage =
 "Options are:\n"

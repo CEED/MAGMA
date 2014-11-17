@@ -15,15 +15,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
 
 // includes, project
+#include "testings.h"  // before magma.h, to include cublas_v2
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
-#include "testings.h"
-#include "common_magma.h"
 #include "batched_kernel_param.h"
 
 #define h_A(i,j, s) (h_A + (i) + (j)*lda + (s) * lda * Ak)
@@ -48,6 +45,8 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t *ipiv;
 
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    
     magmaDoubleComplex *h_A, *h_B, *h_Bcublas, *h_Bmagma, *h_Blapack, *h_X;
     magmaDoubleComplex *d_A, *d_B;
     magmaDoubleComplex **d_A_array = NULL;
@@ -134,7 +133,7 @@ int main( int argc, char** argv)
             zset_pointer(dinvA_array, dinvA, ((Ak+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, dinvA_batchSize, batchCount);
 
             memset(h_Bmagma, 0, batchCount*ldb*N*sizeof(magmaDoubleComplex));
-            cudaMemset(dwork, 0, dwork_batchSize * batchCount*sizeof(magmaDoubleComplex));
+            magmablas_zlaset( MagmaFull, lddb, N*batchCount, c_zero, c_zero, dwork, lddb );
 
 
             /* Initialize the matrices */
@@ -143,8 +142,7 @@ int main( int argc, char** argv)
              * (i.e., from U), while U fails when used with unit diagonal. */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
 
-            for(int s=0; s< batchCount; s++)
-            {    
+            for(int s=0; s < batchCount; s++) {
                 lapackf77_zgetrf( &Ak, &Ak, h_A + s * lda * Ak, &lda, ipiv, &info );
                 for( int j = 0; j < Ak; ++j ) {
                     for( int i = 0; i < j; ++i ) {
@@ -168,33 +166,29 @@ int main( int argc, char** argv)
 
             magma_time = magma_sync_wtime( NULL );
 #if 1
-            magmablas_ztrsm_outofplace_batched(opts.side, opts.uplo, opts.transA, opts.diag, 1,
-                    M, N,
-                    alpha,
-                    d_A_array,    ldda, // dA
-                    d_B_array,    lddb, // dB
-                    dwork_array,    lddb, // dX output
-                    dinvA_array,  dinvA_batchSize, 
-                    dW1_displ,   dW2_displ, 
-                    dW3_displ,   dW4_displ,
-                    1, batchCount);
+            magmablas_ztrsm_outofplace_batched(
+                opts.side, opts.uplo, opts.transA, opts.diag, 1,
+                M, N, alpha,
+                d_A_array,    ldda, // dA
+                d_B_array,    lddb, // dB
+                dwork_array,  lddb, // dX output
+                dinvA_array,  dinvA_batchSize, 
+                dW1_displ,   dW2_displ, 
+                dW3_displ,   dW4_displ,
+                1, batchCount);
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
             magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
 #else
-
-            magmablas_ztrsm_batched( opts.side, opts.uplo, opts.transA, opts.diag, 
-                             M, N,
-                             alpha, 
-                             d_A_array, ldda,
-                             d_B_array, lddb, 
-                             batchCount );
-                             
-        
+            magmablas_ztrsm_batched(
+                opts.side, opts.uplo, opts.transA, opts.diag, 
+                M, N, alpha, 
+                d_A_array, ldda,
+                d_B_array, lddb, 
+                batchCount );
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
             magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
-
 #endif 
        
             /* =====================================================================
@@ -204,11 +198,12 @@ int main( int argc, char** argv)
             zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount);
 
             cublas_time = magma_sync_wtime( NULL );
-            cublasZtrsmBatched( opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
-                         cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
-                         M, N, 
-                         &alpha, (const magmaDoubleComplex**)d_A_array, ldda,
-                                 d_B_array, lddb, batchCount);
+            cublasZtrsmBatched(
+                opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
+                cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
+                M, N, &alpha,
+                (const magmaDoubleComplex**)d_A_array, ldda,
+                d_B_array, lddb, batchCount);
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
@@ -218,13 +213,13 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for(int s=0; s< batchCount; s++)
-                {
-                    blasf77_ztrsm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
-                               &M, &N,
-                               &alpha, h_A + s * lda * Ak, &lda,
-                                       h_Blapack + s * ldb * N, &ldb );
+                for(int s=0; s < batchCount; s++) {
+                    blasf77_ztrsm(
+                        lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                        &M, &N, &alpha,
+                        h_A       + s * lda * Ak, &lda,
+                        h_Blapack + s * ldb * N,  &ldb );
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
@@ -242,14 +237,14 @@ int main( int argc, char** argv)
             memcpy( h_X, h_Bmagma, sizeB*sizeof(magmaDoubleComplex) );
 
             // check magma
-            for(int s=0; s< batchCount; s++)
-            {
+            for(int s=0; s < batchCount; s++) {
                 normA = lapackf77_zlange( "M", &Ak, &Ak, h_A + s * lda * Ak, &lda, work );
-                blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
-                        &M, &N,
-                        &alpha2, h_A + s * lda * Ak, &lda,
-                        h_X + s * ldb * N, &ldb );
+                blasf77_ztrmm(
+                    lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                    &M, &N, &alpha2,
+                    h_A + s * lda * Ak, &lda,
+                    h_X + s * ldb * N,  &ldb );
 
                 blasf77_zaxpy( &NN, &c_neg_one, h_B + s * ldb * N, &ione, h_X + s * ldb * N, &ione );
 
@@ -267,14 +262,14 @@ int main( int argc, char** argv)
 
             memcpy( h_X, h_Bcublas, sizeB*sizeof(magmaDoubleComplex) );
             // check cublas
-            for(int s=0; s< batchCount; s++)
-            {
+            for(int s=0; s < batchCount; s++) {
                 normA = lapackf77_zlange( "M", &Ak, &Ak, h_A + s * lda * Ak, &lda, work );
-                blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
-                           &M, &N,
-                           &alpha2, h_A + s * lda * Ak, &lda,
-                                    h_X + s * ldb * N, &ldb );
+                blasf77_ztrmm(
+                    lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                    &M, &N, &alpha2,
+                    h_A + s * lda * Ak, &lda,
+                    h_X + s * ldb * N, &ldb );
 
                 blasf77_zaxpy( &NN, &c_neg_one, h_B + s * ldb * N, &ione, h_X  + s * ldb * N, &ione );
                 normR = lapackf77_zlange( "M", &M, &N, h_X  + s * ldb * N,       &ldb, work );
@@ -296,20 +291,21 @@ int main( int argc, char** argv)
                 // this verifies that the matrix wasn't so bad that it couldn't be solved accurately.
                 lapack_error = 0.0;
                 memcpy( h_X, h_Blapack, sizeB*sizeof(magmaDoubleComplex) );
-                for(int s=0; s< batchCount; s++)
-                {
-                    blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
-                               &M, &N,
-                               &alpha2, h_A + s * lda * Ak, &lda,
-                                        h_X + s * ldb * N, &ldb );
+                for(int s=0; s < batchCount; s++) {
+                    blasf77_ztrmm(
+                        lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
+                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                        &M, &N, &alpha2,
+                        h_A + s * lda * Ak, &lda,
+                        h_X + s * ldb * N,  &ldb );
     
                     blasf77_zaxpy( &NN, &c_neg_one, h_B + s * ldb * N, &ione, h_X + s * ldb * N, &ione );
                     normR = lapackf77_zlange( "M", &M, &N, h_X + s * ldb * N,       &ldb, work );
                     normX = lapackf77_zlange( "M", &M, &N, h_Blapack + s * ldb * N, &ldb, work );
                     double lapack_err = normR/(normX*normA);
 
-                    if(lapack_error < lapack_err) lapack_error = lapack_err;
+                    if (lapack_error < lapack_err)
+                        lapack_error = lapack_err;
                 }
 
                 printf("%5d     %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",

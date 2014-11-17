@@ -15,16 +15,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>
-
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "common_magma.h"
 
 double get_LU_error(magma_int_t M, magma_int_t N,
                     magmaDoubleComplex *A,  magma_int_t lda,
