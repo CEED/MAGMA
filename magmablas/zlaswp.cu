@@ -132,7 +132,7 @@ magmablas_zlaswp_q(
         return;  //info;
     }
     
-    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
     
@@ -142,7 +142,7 @@ magmablas_zlaswp_q(
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswp_kernel<<< blocks, threads, 0, queue >>>( n, dAT(k,0), ldda, params );
+        zlaswp_kernel<<< grid, threads, 0, queue >>>( n, dAT(k,0), ldda, params );
     }
     
     #undef dAT
@@ -282,7 +282,7 @@ magmablas_zlaswpx_q(
         return;  //info;
     }
     
-    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
     
@@ -292,7 +292,7 @@ magmablas_zlaswpx_q(
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswpx_kernel<<< blocks, threads, 0, queue >>>( n, dA(k,0), ldx, ldy, params );
+        zlaswpx_kernel<<< grid, threads, 0, queue >>>( n, dA(k,0), ldx, ldy, params );
     }
     
     #undef dA
@@ -328,7 +328,7 @@ magmablas_zlaswpx(
 
 __global__ void zlaswp2_kernel(
     int n, magmaDoubleComplex *dAT, int ldda, int npivots,
-    const magma_int_t* d_ipiv, int inci )
+    const magma_int_t *d_ipiv, int inci )
 {
     int tid = threadIdx.x + blockDim.x*blockIdx.x;
     if ( tid < n ) {
@@ -430,9 +430,9 @@ magmablas_zlaswp2_q(
     
     magma_int_t nb = k2-(k1-1);
     
-    dim3 blocks( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
     dim3 threads( NTHREADS );
-    zlaswp2_kernel<<< blocks, threads, 0, queue >>>
+    zlaswp2_kernel<<< grid, threads, 0, queue >>>
         ( n, dAT(k1-1,0), ldda, nb, d_ipiv, inci );
 }
 
