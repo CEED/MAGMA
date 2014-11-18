@@ -236,10 +236,10 @@ magma_zunmbr(
             /* Q was determined by a call to ZGEBRD with nq >= k */
             #if VERSION == 1
             lapackf77_zunmqr( lapack_side_const(side), lapack_trans_const(trans),
-                &m, &n, &k, A, &lda, tau, C, &ldc, work, &lwork, &iinfo);
+                              &m, &n, &k, A, &lda, tau, C, &ldc, work, &lwork, &iinfo);
             #else
             magma_zunmqr( side, trans,
-                m, n, k, A, lda, tau, C, ldc, work, lwork, &iinfo);
+                          m, n, k, A, lda, tau, C, ldc, work, lwork, &iinfo);
             #endif
         }
         else if (nq > 1) {
@@ -259,10 +259,10 @@ magma_zunmbr(
             nq_1 = nq - 1;
             #if VERSION == 1
             lapackf77_zunmqr( lapack_side_const(side), lapack_trans_const(trans),
-                &mi, &ni, &nq_1, A(1,0), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
+                              &mi, &ni, &nq_1, A(1,0), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
             #else
             magma_zunmqr( side, trans,
-                mi, ni, nq-1, A(1,0), lda, tau, C(i1,i2), ldc, work, lwork, &iinfo);
+                          mi, ni, nq-1, A(1,0), lda, tau, C(i1,i2), ldc, work, lwork, &iinfo);
             #endif
         }
     }
@@ -278,10 +278,10 @@ magma_zunmbr(
             /* P was determined by a call to ZGEBRD with nq > k */
             #if VERSION == 1
             lapackf77_zunmlq( lapack_side_const(side), lapack_trans_const(transt),
-                &m, &n, &k, A, &lda, tau, C, &ldc, work, &lwork, &iinfo);
+                              &m, &n, &k, A, &lda, tau, C, &ldc, work, &lwork, &iinfo);
             #else
             magma_zunmlq( side, transt,
-                m, n, k, A, lda, tau, C, ldc, work, lwork, &iinfo);
+                          m, n, k, A, lda, tau, C, ldc, work, lwork, &iinfo);
             #endif
         }
         else if (nq > 1) {
@@ -301,10 +301,10 @@ magma_zunmbr(
             nq_1 = nq - 1;
             #if VERSION == 1
             lapackf77_zunmlq( lapack_side_const(side), lapack_trans_const(transt),
-                &mi, &ni, &nq_1, A(0,1), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
+                              &mi, &ni, &nq_1, A(0,1), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
             #else
             magma_zunmlq( side, transt,
-                mi, ni, nq-1, A(0,1), lda, tau, C(i1,i2), ldc, work, lwork, &iinfo);
+                          mi, ni, nq-1, A(0,1), lda, tau, C(i1,i2), ldc, work, lwork, &iinfo);
             #endif
         }
     }

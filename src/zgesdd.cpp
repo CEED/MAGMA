@@ -179,7 +179,8 @@
 
     @ingroup magma_zgesvd_driver
     ********************************************************************/
-magma_int_t magma_zgesdd(
+extern "C" magma_int_t
+magma_zgesdd(
     magma_vec_t jobz, magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A, magma_int_t lda,
     double *s,

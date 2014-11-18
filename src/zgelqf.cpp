@@ -94,10 +94,13 @@ magma_zgelqf(
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info)
 {
-    magmaDoubleComplex *dA, *dAT;
+    #define  dA(i_, j_)  (dA  + (i_) + (j_)*ldda)
+    #define dAT(i_, j_)  (dAT + (i_) + (j_)*ldda)
+
+    magmaDoubleComplex_ptr dA, dAT;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
-    magma_int_t iinfo, ldda;
+    magma_int_t iinfo, ldda, lddat;
     int lquery;
 
     /* Function Body */
@@ -133,40 +136,47 @@ magma_zgelqf(
     maxn = ((n + 31)/32)*32;
     maxdim = max(maxm, maxn);
 
+    // copy to GPU and transpose
     if (maxdim*maxdim < 2*maxm*maxn) {
-        ldda = maxdim;
+        // close to square, do everything in-place
+        ldda  = maxdim;
+        lddat = maxdim;
 
         if (MAGMA_SUCCESS != magma_zmalloc( &dA, maxdim*maxdim )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
 
-        magma_zsetmatrix( m, n, A, lda, dA, ldda );
+        magma_zsetmatrix( m, n, A, lda, dA(0,0), ldda );
         dAT = dA;
-        magmablas_ztranspose_inplace( ldda, dAT, ldda );
+        magmablas_ztranspose_inplace( lddat, dAT(0,0), lddat );
     }
     else {
-        ldda = maxn;
+        // rectangular, do everything out-of-place
+        ldda  = maxm;
+        lddat = maxn;
 
         if (MAGMA_SUCCESS != magma_zmalloc( &dA, 2*maxn*maxm )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
 
-        magma_zsetmatrix( m, n, A, lda, dA, maxm );
+        magma_zsetmatrix( m, n, A, lda, dA(0,0), ldda );
 
         dAT = dA + maxn * maxm;
-        magmablas_ztranspose( m, n, dA, maxm, dAT, ldda );
+        magmablas_ztranspose( m, n, dA(0,0), ldda, dAT(0,0), lddat );
     }
 
-    magma_zgeqrf2_gpu(n, m, dAT, ldda, tau, &iinfo);
+    // factor QR
+    magma_zgeqrf2_gpu(n, m, dAT(0,0), lddat, tau, &iinfo);
 
+    // undo transpose
     if (maxdim*maxdim < 2*maxm*maxn) {
-        magmablas_ztranspose_inplace( ldda, dAT, ldda );
-        magma_zgetmatrix( m, n, dA, ldda, A, lda );
+        magmablas_ztranspose_inplace( lddat, dAT(0,0), lddat );
+        magma_zgetmatrix( m, n, dA(0,0), ldda, A, lda );
     } else {
-        magmablas_ztranspose( n, m, dAT, ldda, dA, maxm );
-        magma_zgetmatrix( m, n, dA, maxm, A, lda );
+        magmablas_ztranspose( n, m, dAT(0,0), lddat, dA(0,0), ldda );
+        magma_zgetmatrix( m, n, dA(0,0), ldda, A, lda );
     }
 
     magma_free( dA );
