@@ -433,7 +433,7 @@ int main( int argc, char** argv)
                 // GPU-interface to non-piv LDLt
                 magma_setdevice(0);
                 magma_int_t ldda = 32*((N+31)/32);
-                magmaDoubleComplex *d_A;
+                magmaDoubleComplex_ptr d_A;
                 if (MAGMA_SUCCESS != magma_zmalloc( &d_A, N*ldda  )) {
                     printf( " failed to allocate d_A(%dx%d)\n",N,ldda);
                     return 0;
