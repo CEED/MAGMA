@@ -15,7 +15,7 @@
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from left edge and moving right to diagonal.
 __global__ void
-zlascl_diag_lower(int m, int n, const magmaDoubleComplex_ptr D, int ldd, 
+zlascl_diag_lower(int m, int n, magmaDoubleComplex_const_ptr D, int ldd, 
                                       magmaDoubleComplex_ptr A, int lda)
 {
     int ind = blockIdx.x * NB + threadIdx.x;
@@ -31,7 +31,7 @@ zlascl_diag_lower(int m, int n, const magmaDoubleComplex_ptr D, int ldd,
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from right edge and moving left to diagonal.
 __global__ void
-zlascl_diag_upper(int m, int n, const magmaDoubleComplex_ptr D, int ldd, 
+zlascl_diag_upper(int m, int n, magmaDoubleComplex_const_ptr D, int ldd, 
                                       magmaDoubleComplex_ptr A, int lda)
 {
     int ind = blockIdx.x * NB + threadIdx.x;
@@ -91,7 +91,7 @@ zlascl_diag_upper(int m, int n, const magmaDoubleComplex_ptr D, int ldd,
 extern "C" void
 magmablas_zlascl_diag_q(
     magma_type_t type, magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex_ptr dD, magma_int_t lddd, 
+    magmaDoubleComplex_const_ptr dD, magma_int_t lddd, 
           magmaDoubleComplex_ptr dA, magma_int_t ldda, 
     magma_int_t *info, magma_queue_t queue )
 {
@@ -129,7 +129,7 @@ magmablas_zlascl_diag_q(
 extern "C" void
 magmablas_zlascl_diag(
     magma_type_t type, magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex_ptr dD, magma_int_t lddd, 
+    magmaDoubleComplex_const_ptr dD, magma_int_t lddd, 
           magmaDoubleComplex_ptr dA, magma_int_t ldda, 
     magma_int_t *info )
 {
