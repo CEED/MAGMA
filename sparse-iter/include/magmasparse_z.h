@@ -103,7 +103,7 @@ magma_zvget(
     magma_queue_t queue );
 
 magma_int_t 
-magma_zvset_gpu( 
+magma_zvset_dev( 
     magma_int_t m, 
     magma_int_t n, 
     magmaDoubleComplex_ptr val,
@@ -111,7 +111,7 @@ magma_zvset_gpu(
     magma_queue_t queue );
 
 magma_int_t 
-magma_zvget_gpu( 
+magma_zvget_dev( 
     magma_z_vector v,
     magma_int_t *m, 
     magma_int_t *n, 

@@ -115,7 +115,7 @@ magma_zvset(
 
 extern "C"
 magma_int_t
-magma_vget(
+magma_zvget(
     magma_z_vector v,
     magma_int_t *m, magma_int_t *n, 
     magmaDoubleComplex **val,
