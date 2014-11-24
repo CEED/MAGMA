@@ -59,7 +59,7 @@ void
 magmablas_zlag2c_sparse(
     magma_int_t M, 
     magma_int_t N , 
-    const magmaDoubleComplex_ptr dA, 
+    magmaDoubleComplex_const_ptr dA, 
     magma_int_t lda, 
     magmaFloatComplex_ptr dSA, 
     magma_int_t ldsa,
@@ -70,7 +70,7 @@ void
 magmablas_clag2z_sparse(
     magma_int_t M, 
     magma_int_t N , 
-    const magmaFloatComplex_ptr dSA, 
+    magmaFloatComplex_const_ptr dSA, 
     magma_int_t ldsa, 
     magmaDoubleComplex_ptr dA, 
     magma_int_t lda,
