@@ -107,6 +107,10 @@ magma_zhetrf_nopiv_gpu(
     nb = magma_get_zhetrf_nopiv_nb(n);
     ib = min(32, nb); // inner-block for diagonal factorization
 
+    magma_queue_t orig_stream;
+    magmablasGetKernelStream( &orig_stream );
+
+
     magma_queue_t stream[2];
     magma_event_t event;
     magma_queue_create(&stream[0]);
@@ -258,6 +262,7 @@ magma_zhetrf_nopiv_gpu(
     magma_free( dW );
     magma_free_pinned( A );
     
+    magmablasSetKernelStream( orig_stream );
     return MAGMA_SUCCESS;
 } /* magma_zhetrf_nopiv */
 
