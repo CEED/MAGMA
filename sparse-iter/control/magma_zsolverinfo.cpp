@@ -525,6 +525,8 @@ magma_zsolverinfo_init(
     magma_int_t stat = 0;
     solver_par->res_vec = NULL;
     solver_par->timing = NULL;
+    solver_par->eigenvectors = NULL;
+    solver_par->eigenvalues = NULL;
 
     if ( solver_par->verbose > 0 ) {
         stat = 
