@@ -148,6 +148,8 @@ ZSRC += \
 
 # generalized symmetric eigenvalues
 ZSRC += \
+	testing_zhetrf.cpp	\
+	testing_zhesv_nopiv_gpu.cpp	\
 	testing_zhegvd.cpp	\
 	testing_zhegvd_m.cpp	\
 	testing_zhegvdx.cpp	\

@@ -470,6 +470,20 @@ zhetrf_nopiv_cpu(
     magma_int_t *info);
 
 magma_int_t
+magma_zhetrs_nopiv_gpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magma_int_t *info);
+
+magma_int_t
+magma_zhesv_nopiv_gpu(
+    magma_uplo_t uplo,  magma_int_t n, magma_int_t nrhs, 
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb, 
+    magma_int_t *info);
+
+magma_int_t
 magma_zlahr2(
     magma_int_t n, magma_int_t k, magma_int_t nb,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
