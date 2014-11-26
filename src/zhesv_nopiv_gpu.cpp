@@ -82,18 +82,17 @@ magma_zhesv_nopiv_gpu(magma_uplo_t uplo,  magma_int_t n, magma_int_t nrhs,
     magma_int_t ret;
 
     *info = 0;
-int                upper = (uplo == MagmaUpper);
-    *info = 0;
+    int   upper = (uplo == MagmaUpper);
     if (! upper && uplo != MagmaLower) {
-
-    if (n < 0) {
-        *info = -1;
-    } else if (nrhs < 0) {
+      *info = -1;
+    }else if (n < 0) {
         *info = -2;
+    } else if (nrhs < 0) {
+        *info = -3;
     } else if (ldda < max(1,n)) {
-        *info = -4;
+        *info = -5;
     } else if (lddb < max(1,n)) {
-        *info = -6;
+        *info = -7;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
