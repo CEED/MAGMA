@@ -106,9 +106,9 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( h_Cmagma,  magmaDoubleComplex, sizeC  );
             TESTING_MALLOC_CPU( h_Ccublas, magmaDoubleComplex, sizeC  );
 
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, sizeA );
-            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, sizeB );
-            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, sizeC  );
+            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*An*batchCount );
+            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*Bn*batchCount );
+            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, lddc*N*batchCount  );
 
             magma_malloc((void**)&A_array, batchCount * sizeof(*A_array));
             magma_malloc((void**)&B_array, batchCount * sizeof(*B_array));
