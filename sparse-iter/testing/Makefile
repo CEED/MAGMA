@@ -15,7 +15,8 @@ LIB += -lcusparse
 # ----------
 # utility functions
 ZSRC += \
-    testing_zmatrix.cpp     \
+	testing_zblas.cpp	\
+	testing_zmatrix.cpp     \
     testing_zio.cpp     \
     testing_zmcompressor.cpp     \
     testing_zmconverter.cpp     \
@@ -26,11 +27,12 @@ ZSRC += \
 ZSRC += \
     testing_zdot.cpp        \
     testing_zspmv.cpp       \
+    testing_zspmv_check.cpp \
     testing_zspmm.cpp       \
     testing_zmadd.cpp     \
 
 # ----------
-# low level LA operations
+# iterative solvers
 ZSRC += \
     testing_zsolver.cpp     \
 
