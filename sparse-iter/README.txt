@@ -22,7 +22,7 @@
 5) compile magma-sparse using "make -j8" (in case you want to use 8 cores...)
 
 6) If no errors show up, everything has worked out fine. 
-   In the sparse-iter/testing folder you find example runfiles - for proper
+   In the sparse-iter/testing folder you find example testers - for proper
    usage see section below.
 
 
@@ -52,7 +52,7 @@ double-complex version ("x"=c or z, respectively).
 
 
 For different solvers there exist different options, which are printed 
-when executing “./testing_xsolver —help.
+when executing "./testing_xsolver --help".
 
  Some options are:
 
@@ -113,8 +113,9 @@ when executing “./testing_xsolver —help.
     k : number of eigenvalue/eigenvectors to compute
 
 
-The last argument is the target matrices. These should be stored in MatrixMarket
-format, see http://math.nist.gov/MatrixMarket/formats.html.
+The last argument is a list of the target matrices. 
+These should be stored in MatrixMarket format, see 
+http://math.nist.gov/MatrixMarket/formats.html.
 
 The solver info uses the following feedback:
        0          Success.
