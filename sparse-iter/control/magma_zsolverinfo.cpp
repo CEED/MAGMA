@@ -528,6 +528,15 @@ magma_zsolverinfo_init(
     solver_par->eigenvectors = NULL;
     solver_par->eigenvalues = NULL;
 
+    if( solver_par->maxiter == 0 )
+        solver_par->maxiter = 1000;
+    if( solver_par->version == 0 )
+        solver_par->version = 0;
+    if( solver_par->restart == 0 )
+        solver_par->restart = 30;
+    if( solver_par->solver == 0 )
+        solver_par->solver = Magma_CG;
+
     if ( solver_par->verbose > 0 ) {
         stat = 
         magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
