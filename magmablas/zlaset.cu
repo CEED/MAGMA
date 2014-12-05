@@ -159,7 +159,7 @@ void zlaset_upper_kernel(
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex *dA, int ldda )
 {
-    zlaset_lower_device(m, n, offdiag, diag, dA, ldda);
+    zlaset_upper_device(m, n, offdiag, diag, dA, ldda);
 }
 //////////////////////////////////////////////////////////////////////////////////////
 /*
