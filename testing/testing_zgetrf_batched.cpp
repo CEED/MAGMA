@@ -74,8 +74,8 @@ int main( int argc, char** argv)
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
     double          error; 
     magma_int_t cublas_enable = 0;
-    magmaDoubleComplex *h_A, *h_R;
-    magmaDoubleComplex *dA_magma, *dA_cublas;
+    magmaDoubleComplex *h_A, *h_R, *h_Amagma;
+    magmaDoubleComplex *dA;
     magmaDoubleComplex **dA_array = NULL;
 
     magma_int_t     **dipiv_array = NULL;
@@ -113,9 +113,10 @@ int main( int argc, char** argv)
 
             TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn * batchCount);
             TESTING_MALLOC_CPU(    h_A,  magmaDoubleComplex, n2     );
-            TESTING_MALLOC_PIN( h_R,  magmaDoubleComplex, n2     );
-            TESTING_MALLOC_DEV(  dA_magma,  magmaDoubleComplex, ldda*N * batchCount);
-            TESTING_MALLOC_DEV(  dA_cublas,  magmaDoubleComplex, ldda*N * batchCount);
+            TESTING_MALLOC_CPU(    h_Amagma,  magmaDoubleComplex, n2     );
+            TESTING_MALLOC_PIN(    h_R,  magmaDoubleComplex, n2     );
+            
+            TESTING_MALLOC_DEV(  dA,  magmaDoubleComplex, ldda*N * batchCount);
             TESTING_MALLOC_DEV(  dipiv_magma,  magma_int_t, min_mn * batchCount);
             TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
             TESTING_MALLOC_DEV(  dipiv_cublas,  magma_int_t, min_mn * batchCount);
@@ -133,22 +134,28 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
 
-            magma_zsetmatrix( M, columns, h_R, lda, dA_magma, ldda );
-            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount);
+            magma_zsetmatrix( M, columns, h_R, lda, dA, ldda );
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount);
             set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount);
+            
             magma_time = magma_sync_wtime(0);
             info = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array,  dinfo_magma, batchCount);
             magma_time = magma_sync_wtime(0) - magma_time;
             magma_perf = gflops / magma_time;
+            
+            magma_zgetmatrix( M, N*batchCount, dA, ldda, h_Amagma, lda );
+            
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
+            
             for(int i=0; i<batchCount; i++)
             {
                 if(cpu_info[i] != 0 ){
                     printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
                 }
             }
+            
             if (info != 0)
                 printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
 
@@ -156,8 +163,8 @@ int main( int argc, char** argv)
                Performs operation using CUBLAS
                =================================================================== */
 
-            magma_zsetmatrix( M, columns, h_R, lda, dA_cublas,  ldda );
-            zset_pointer(dA_array, dA_cublas, ldda, 0, 0, ldda * N, batchCount);
+            magma_zsetmatrix( M, columns, h_R, lda, dA,  ldda );
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount);
 
             cublas_time = magma_sync_wtime(0);
             if(M == N )
@@ -205,7 +212,6 @@ int main( int argc, char** argv)
             double err = 0.0;
             if ( opts.check ) {
                 magma_getvector( min_mn * batchCount, sizeof(magma_int_t), dipiv_magma, 1, ipiv, 1 );
-                magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
                 int stop=0;
                 for(int i=0; i<batchCount; i++)
                 {
@@ -222,7 +228,7 @@ int main( int argc, char** argv)
                         break;
                     }
                     
-                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);                 
+                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_Amagma + i * lda*N, ipiv + i * min_mn);                 
                     if ( isnan(error) || isinf(error) ) {
                         err = error;
                         break;
@@ -237,9 +243,10 @@ int main( int argc, char** argv)
             
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_CPU( h_A );
+            TESTING_FREE_CPU( h_Amagma );
             TESTING_FREE_PIN( h_R );
-            TESTING_FREE_DEV( dA_magma );
-            TESTING_FREE_DEV( dA_cublas);
+
+            TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dinfo_magma );
             TESTING_FREE_DEV( dipiv_magma );
             TESTING_FREE_DEV( dipiv_cublas );
