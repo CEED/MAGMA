@@ -54,7 +54,7 @@ ZSRC += \
 	zcgetrs_gpu.cpp		\
 	\
 	zgesv_gpu.cpp		\
-	zgesv_nopiv_gpu.cpp     \
+	zgesv_nopiv_gpu.cpp	\
 	zgetrf_gpu.cpp		\
 	zgetrf_nopiv_gpu.cpp	\
 	zgetri_gpu.cpp		\
@@ -63,12 +63,12 @@ ZSRC += \
 	\
 	zgetrf_mgpu.cpp		\
 	zgetrf2_mgpu.cpp	\
-	zgerbt_gpu.cpp          \
+	zgerbt_gpu.cpp		\
 
 # LU, CPU interface
 ZSRC += \
 	zgesv.cpp		\
-	zgesv_rbt.cpp           \
+	zgesv_rbt.cpp		\
 	zgetrf.cpp		\
 	zgetf2_nopiv.cpp	\
 	zgetrf_nopiv.cpp	\
@@ -133,13 +133,13 @@ ZSRC += \
 # ----------
 # symmetric indefinite factorization, CPU interface
 ZSRC += \
-	zhesv.cpp		 \
-	zhetrf.cpp		 \
-	zhetrf_nopiv.cpp     \
-	zhetrf_nopiv_cpu.cpp \
-	zhetrf_nopiv_gpu.cpp \
-	zhetrs_nopiv_gpu.cpp \
-	zhesv_nopiv_gpu.cpp \
+	zhesv.cpp		\
+	zhetrf.cpp		\
+	zhetrf_nopiv.cpp	\
+	zhetrf_nopiv_cpu.cpp	\
+	zhetrf_nopiv_gpu.cpp	\
+	zhetrs_nopiv_gpu.cpp	\
+	zhesv_nopiv_gpu.cpp	\
 	zlahef_gpu.cpp		\
 
 # ----------
