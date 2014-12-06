@@ -53,9 +53,6 @@ ZSRC := \
 	testing_constants.cpp	\
 	testing_operators.cpp	\
 	testing_parse_opts.cpp	\
-	\
-	testing_zhesv.cpp \
-	testing_zhetrf.cpp \
 
 # ----------
 # Cholesky, GPU interface
@@ -75,6 +72,13 @@ ZSRC += \
 	testing_zpotrf.cpp	\
 	testing_zpotri.cpp	\
 
+# ----------
+# symmetric indefinite
+ZSRC += \
+	testing_zhesv.cpp	\
+	testing_zhesv_nopiv_gpu.cpp	\
+	testing_zhetrf.cpp	\
+	
 # ----------
 # LU, GPU interface
 ZSRC += \
@@ -148,8 +152,6 @@ ZSRC += \
 
 # generalized symmetric eigenvalues
 ZSRC += \
-	testing_zhetrf.cpp	\
-	testing_zhesv_nopiv_gpu.cpp	\
 	testing_zhegvd.cpp	\
 	testing_zhegvd_m.cpp	\
 	testing_zhegvdx.cpp	\
