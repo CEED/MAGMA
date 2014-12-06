@@ -252,7 +252,8 @@ void magma_queue_destroy_internal(
     const char* func, const char* file, int line )
 {
     if ( queue != NULL ) {
-        check_xerror( cudaStreamDestroy( queue ), func, file, line );
+        cudaError_t err = cudaStreamDestroy( queue );
+        check_xerror( err, func, file, line );
     }
 }
 
