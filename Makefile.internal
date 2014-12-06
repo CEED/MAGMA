@@ -68,7 +68,8 @@ prefix ?= /usr/local/magma
 # First, add smXX for architecture names
 #
 ifneq ($(findstring Tesla, $(GPU_TARGET)),)
-    GPU_TARGET += sm10 sm13
+    # sm10 is no longer supported by CUDA 6.x nvcc
+    GPU_TARGET += sm13
 endif
 ifneq ($(findstring Fermi, $(GPU_TARGET)),)
     GPU_TARGET += sm20
@@ -90,6 +91,7 @@ NV_SM    :=
 NV_COMP  :=
 
 ifneq ($(findstring sm10, $(GPU_TARGET)),)
+    # sm10 is no longer supported by CUDA 6.x nvcc
     MIN_ARCH ?= 100
     NV_SM    += -gencode arch=compute_10,code=sm_10
     NV_COMP  := -gencode arch=compute_10,code=compute_10
