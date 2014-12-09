@@ -81,12 +81,12 @@ __global__ void zlaswp_kernel(
     \param[in]
     k1       INTEGER
              The first element of IPIV for which a row interchange will
-             be done. (Fortran one-based index: 1 <= k1 <= n.)
+             be done. (Fortran one-based index: 1 <= k1 .)
     
     \param[in]
     k2       INTEGER
              The last element of IPIV for which a row interchange will
-             be done. (Fortran one-based index: 1 <= k2 <= n.)
+             be done. (Fortran one-based index: 1 <= k2 .)
     
     \param[in]
     ipiv     INTEGER array, on CPU, dimension (K2*abs(INCI))
@@ -120,9 +120,11 @@ magmablas_zlaswp_q(
     magma_int_t info = 0;
     if ( n < 0 )
         info = -1;
-    else if ( k1 < 1 || k1 > n )
+    else if ( n > ldda )
+        info = -3;
+    else if ( k1 < 1 )
         info = -4;
-    else if ( k2 < 1 || k2 > n )
+    else if ( k2 < 1 )
         info = -5;
     else if ( inci <= 0 )
         info = -7;
@@ -131,7 +133,7 @@ magmablas_zlaswp_q(
         magma_xerbla( __func__, -(info) );
         return;  //info;
     }
-    
+  
     dim3 grid( (n + NTHREADS - 1) / NTHREADS );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
