@@ -11,7 +11,6 @@
        @precisions normal z -> s d c
 */
 
-#include <stdio.h>
 #include "common_magma.h"
 #include "magmablas.h"
 #include "batched_kernel_param.h"
