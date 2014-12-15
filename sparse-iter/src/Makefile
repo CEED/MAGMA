@@ -35,6 +35,7 @@ ZSRC += \
 	zbpcg.cpp		\
  	zgmres.cpp	\
 	zpgmres.cpp	\
+	zfgmres.cpp \
  	zpbicgstab.cpp		\
 
 

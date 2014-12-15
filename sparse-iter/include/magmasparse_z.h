@@ -487,6 +487,13 @@ magma_zpgmres(
     magma_queue_t queue );
 
 magma_int_t
+magma_zfgmres(
+    magma_z_sparse_matrix A, magma_z_vector b, 
+    magma_z_vector *x, magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zjacobi(
     magma_z_sparse_matrix A, magma_z_vector b, 
     magma_z_vector *x, magma_z_solver_par *solver_par,

@@ -70,9 +70,9 @@ magma_z_solver(
             case  Magma_PBICGSTAB: 
                     magma_zpbicgstab( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_GMRES: 
-                    magma_zgmres( A, b, x, &zopts->solver_par, queue );break;
+                    magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_PGMRES: 
-                    magma_zpgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
+                    magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_LOBPCG: 
                     magma_zlobpcg( A, &zopts->solver_par, queue );break;
             case  Magma_ITERREF:
