@@ -128,8 +128,9 @@ void magma_print_environment()
     
     printf( "\n" );
     
-    int ndevices;
+    int ndevices = 0;
     err = cudaGetDeviceCount( &ndevices );
+printf( "ndevices %d\n", ndevices );
     check_error( err );
     for( int dev = 0; dev < ndevices; dev++ ) {
         cudaDeviceProp prop;
