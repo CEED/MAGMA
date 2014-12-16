@@ -233,9 +233,9 @@ magma_zilusetup(
 
     //free(ipiv); 
 
-    free(identity_cpu);
-    free(cpu_row);
-    free(cpu_col);
+    magma_free_CPU(identity_cpu);
+    magma_free_CPU(cpu_row);
+    magma_free_CPU(cpu_col);
 
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;

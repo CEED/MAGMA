@@ -10,8 +10,6 @@
 
        @precisions normal z -> s d c
 */
-#include <sys/time.h>
-#include <time.h>
 
 #include "common_magma.h"
 #include "magmasparse.h"

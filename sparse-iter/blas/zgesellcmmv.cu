@@ -825,7 +825,7 @@ magma_zgesellpmv(
 
     dim3 block( blocksize, alignment, 1);
 
-    int dimgrid1 = sqrt(slices);
+    int dimgrid1 = (int) sqrt( (double)slices );
     int dimgrid2 = (slices + dimgrid1 -1 ) / dimgrid1;
 
     dim3 grid( dimgrid1, dimgrid2, 1);

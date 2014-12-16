@@ -80,7 +80,7 @@ magma_z_vvisu(
         magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             printf("%5.2f\n", MAGMA_Z_REAL(y.val[i]));
-    free(y.val);
+    magma_free_cpu(y.val);
     return MAGMA_SUCCESS;
     }
     return MAGMA_SUCCESS;

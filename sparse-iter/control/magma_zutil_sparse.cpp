@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <sys/file.h>
 #include <errno.h>
 #include <sys/stat.h>
+
 // includes, project
 #include "magmasparse_z.h"
 #include "magma.h"
