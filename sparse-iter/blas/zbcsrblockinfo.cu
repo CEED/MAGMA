@@ -27,8 +27,8 @@
 __global__ void 
 zbcsrblockinfo5_kernel( 
     magma_int_t num_blocks,
-    magmaDoubleComplex_ptr address,
-    magmaDoubleComplex_ptr *AII )
+    magmaDoubleComplex * address,
+    magmaDoubleComplex **AII )
 {
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if( i < num_blocks ){

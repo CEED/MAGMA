@@ -49,8 +49,8 @@ __global__ void
 zbcsrlupivloc_kernel( 
     int size_b,
     int kblocks,   
-    magmaDouble_ptr *A,  
-    magmaInt_ptr ipiv)
+    double **A, 
+    magma_int_t *ipiv)
 {
     if( blockIdx.x < kblocks ) {
         if(threadIdx.x < size_b ){

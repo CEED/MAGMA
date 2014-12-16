@@ -25,11 +25,11 @@ zmgeellmv_kernel(
     int num_vecs,
     int num_cols_per_row,
     magmaDoubleComplex alpha, 
-    magmaDoubleComplex_ptr dval, 
-    magmaIndex_ptr dcolind,
-    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex * dval, 
+    magma_index_t * dcolind,
+    magmaDoubleComplex * dx,
     magmaDoubleComplex beta, 
-    magmaDoubleComplex_ptr dy)
+    magmaDoubleComplex * dy)
 {
 int row = blockDim.x * blockIdx.x + threadIdx.x ;
 

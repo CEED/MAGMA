@@ -45,9 +45,9 @@ zbcsr_gemm_kernel32(
     int m,
     int n,
     int kblocks,   
-    magmaDouble_ptr *Avals, 
-    magmaDouble_ptr *Bval,
-    magmaDouble_ptr *Cval)
+    mdouble **Avals, 
+    double **Bval,
+    double **Cval)
 {
 #if (__CUDA_ARCH__ >= 200)
 
@@ -182,9 +182,9 @@ zbcsr_gemm_kernel64(
     int m,
     int n,
     int kblocks,   
-    magmaDouble_ptr *Avals, 
-    magmaDouble_ptr *Bval,
-    magmaDouble_ptr *Cval)
+    double **Avals, 
+    double **Bval,
+    double **Cval)
 {
 #if (__CUDA_ARCH__ >= 200)
 

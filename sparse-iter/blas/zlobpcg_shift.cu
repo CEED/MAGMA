@@ -16,7 +16,7 @@ magma_zlobpcg_shift_kernel(
     magma_int_t num_rows, 
     magma_int_t num_vecs, 
     magma_int_t shift, 
-    magmaDoubleComplex_ptr x )
+    magmaDoubleComplex * x )
 {
 
     int idx = threadIdx.x ;     // thread in row

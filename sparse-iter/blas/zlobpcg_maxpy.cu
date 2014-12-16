@@ -20,8 +20,8 @@ __global__ void
 magma_zlobpcg_maxpy_kernel( 
     magma_int_t num_rows, 
     magma_int_t num_vecs, 
-    magmaDoubleComplex_ptr X, 
-    magmaDoubleComplex_ptr Y)
+    magmaDoubleComplex * X, 
+    magmaDoubleComplex * Y)
 {
 
     int row = blockIdx.x * blockDim.x + threadIdx.x; // global row index
