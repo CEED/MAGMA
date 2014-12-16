@@ -543,6 +543,7 @@ subs = {
     ('sbpcg',          'dbpcg',          'cbpcg',          'zbpcg',          ),
     ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab',     ),
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
+    ('sfgmres',        'dfgmres',        'cfgmres',        'zfgmres'         ),
     ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
