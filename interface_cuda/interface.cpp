@@ -20,12 +20,13 @@
 #endif
 
 #if defined(MAGMA_WITH_ACML)
-// header conflicts with magma's lapack prototypes, so declare function directly
-// #include <acml.h>
-extern "C"
-void acmlversion(int *major, int *minor, int *patch);
+#include <acml.h>
 #endif
 
+// defining MAGMA_LAPACK_H is a hack to NOT include magma_lapack.h
+// via common_magma.h here, since it conflicts with acml.h and we don't
+// need lapack here, but we want acml.h for the acmlversion() function.
+#define MAGMA_LAPACK_H
 #include "common_magma.h"
 #include "error.h"
 
@@ -121,9 +122,10 @@ void magma_print_environment()
 #endif
     
 #if defined(MAGMA_WITH_ACML)
-    int acml_major, acml_minor, acml_patch;
-    acmlversion( &acml_major, &acml_minor, &acml_patch );
-    printf( "ACML %d.%d.%d. ", acml_major, acml_minor, acml_patch );
+    // ACML 4 doesn't have acml_build parameter
+    int acml_major, acml_minor, acml_patch, acml_build;
+    acmlversion( &acml_major, &acml_minor, &acml_patch, &acml_build );
+    printf( "ACML %d.%d.%d.%d ", acml_major, acml_minor, acml_patch, acml_build );
 #endif
     
     printf( "\n" );
