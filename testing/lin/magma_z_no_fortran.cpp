@@ -16,6 +16,10 @@
 #include "magma.h"
 #include "magma_lapack.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define COMPLEX
 
 static const char* format = "Cannot check results: %s unavailable, since there was no Fortran compiler.\n";
@@ -173,3 +177,7 @@ void   lapackf77_zlatms( magma_int_t *m, magma_int_t *n,
                          magma_int_t *kl, magma_int_t *ku, const char *pack,
                          magmaDoubleComplex *a, magma_int_t *lda, magmaDoubleComplex *work, magma_int_t *info )
                          { printf( format, __func__ ); }
+
+#ifdef __cplusplus
+}
+#endif
