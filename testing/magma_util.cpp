@@ -12,9 +12,13 @@
 
 #include <string.h>
 #include <assert.h>
-#include <sys/file.h>
 #include <errno.h>
-#include <sys/stat.h>
+
+// flock exists only on Unix
+#ifdef USE_FLOCK
+#include <sys/file.h>  // flock
+#include <sys/stat.h>  // fchmod
+#endif
 
 #include <cuda_runtime_api.h>
 
@@ -391,7 +395,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                           "error: --fraction_dcpu %s is invalid; ensure fraction_dcpu in [0, 1]\n", argv[i] );
         }
         else if ( strcmp("--batch", argv[i]) == 0 && i+1 < argc ) {
-            opts->batchcount = atof( argv[++i] );
+            opts->batchcount = atoi( argv[++i] );
             magma_assert( opts->batchcount > 0,
                           "error: --batch %s is invalid; ensure batch > 0.\n", argv[i] );
         }
