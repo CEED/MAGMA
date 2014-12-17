@@ -691,36 +691,52 @@ magma_zapplycuicc_r(
 
 magma_int_t
 magma_zcumilusetup(
-    magma_z_sparse_matrix A, magma_z_preconditioner *precond,
+    magma_z_sparse_matrix A, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zcumilugeneratesolverinfo(
+    magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 magma_int_t
 magma_zapplycumilu_l(
-    magma_z_vector b, magma_z_vector *x, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 magma_int_t
 magma_zapplycumilu_r(
-    magma_z_vector b, magma_z_vector *x, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 
 magma_int_t
 magma_zcumiccsetup(
-    magma_z_sparse_matrix A, magma_z_preconditioner *precond,
+    magma_z_sparse_matrix A, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zcumicgeneratesolverinfo(
+    magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 magma_int_t
 magma_zapplycumicc_l(
-    magma_z_vector b, magma_z_vector *x, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 magma_int_t
 magma_zapplycumicc_r(
-    magma_z_vector b, magma_z_vector *x, 
+    magma_z_vector b, 
+    magma_z_vector *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
