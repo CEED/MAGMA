@@ -429,7 +429,7 @@ typedef enum {
     Magma_HYB          = 417,
     Magma_COO          = 418,
     Magma_ELLRT        = 419,
-
+    Magma_SPMVFUNCTION = 420,
     Magma_SELLP        = 421,
     Magma_ELLD         = 422,
 
@@ -461,7 +461,9 @@ typedef enum {
     Magma_AICC         = 448,
     Magma_BAITER       = 449,
     Magma_LOBPCG       = 450,
-    Magma_NONE         = 451
+    Magma_NONE         = 451,
+    Magma_FUNCTION     = 452,
+
 } magma_solver_type;
 
 typedef enum {
