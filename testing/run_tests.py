@@ -126,6 +126,8 @@
 # The --tol option sets the tolerance to verify accuracy. This is 30 by default,
 # which may be too tight for some testers. Setting it somewhat higher
 # (e.g., 50 or 100) filters out spurious accuracy failures.
+#
+# The --dev option sets which GPU device to use.
 
 import os
 import re
@@ -146,6 +148,7 @@ parser.add_option('-p', '--precisions', action='store',      dest='precisions', 
 parser.add_option(      '--start',      action='store',      dest='start',      help='start with given routine; useful to restart an interupted run')
 parser.add_option(      '--memcheck',   action='store_true', dest='memcheck',   help='run with cuda-memcheck (slow)')
 parser.add_option(      '--tol',        action='store',      dest='tol',        help='set tolerance')
+parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
@@ -805,9 +808,12 @@ if ( opts.start ):
 seen  = {}
 pause = 0
 
-tol = ''
+global_options = ''
 if ( opts.tol ):
-	tol = ' --tolerance ' + opts.tol + ' '
+	global_options += ' --tolerance ' + opts.tol + ' '
+
+if ( opts.dev != "" ):
+	global_options += ' --dev ' + opts.dev + ' '
 
 last_cmd = None
 
@@ -824,7 +830,7 @@ for test in tests:
 			cmdp = cmdp[1:]
 		
 		# command to run
-		cmd_args = './' + cmdp +' '+ options +' '+ tol + sizes
+		cmd_args = './' + cmdp +' '+ options +' '+ global_options + sizes
 		cmd_args = re.sub( '  +', ' ', cmd_args )  # compress spaces
 		
 		# command to print on console, lacks sizes
