@@ -70,8 +70,10 @@ ZSRC += \
 ZSRC += \
 #	zorthomgs.cpp   \
 
-
-
+# backward communication for SpMV and Preconditioner
+ZSRC += \
+    magma_zcustomspmv.cpp   \
+    magma_zcustomprecond.cpp   \
 
 # Wrappers, tools etc
 ZSRC += \

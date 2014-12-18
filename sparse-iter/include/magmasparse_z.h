@@ -651,6 +651,22 @@ magma_zapplypastix(
     magma_queue_t queue );
 
 
+// custom preconditioner
+magma_int_t
+magma_zapplycustomprecond_l(
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplycustomprecond_r(
+    magma_z_vector b, 
+    magma_z_vector *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+
 // CUSPARSE preconditioner
 
 magma_int_t
@@ -760,6 +776,14 @@ magma_int_t
 magma_z_spmv(
     magmaDoubleComplex alpha, 
     magma_z_sparse_matrix A, 
+    magma_z_vector x, 
+    magmaDoubleComplex beta, 
+    magma_z_vector y,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zcustomspmv(
+    magmaDoubleComplex alpha, 
     magma_z_vector x, 
     magmaDoubleComplex beta, 
     magma_z_vector y,
