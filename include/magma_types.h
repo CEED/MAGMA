@@ -528,6 +528,7 @@ typedef enum {
 #define MagmaNoTransStr       "NoTrans"
 #define MagmaTransStr         "Trans"
 #define MagmaConjTransStr     "ConjTrans"
+#define Magma_ConjTransStr    "ConjTrans"
 
 #define MagmaUpperStr         "Upper"
 #define MagmaLowerStr         "Lower"
