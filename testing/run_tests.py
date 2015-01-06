@@ -812,7 +812,7 @@ global_options = ''
 if ( opts.tol ):
 	global_options += ' --tolerance ' + opts.tol + ' '
 
-if ( opts.dev != "" ):
+if ( opts.dev is not None ):
 	global_options += ' --dev ' + opts.dev + ' '
 
 last_cmd = None
