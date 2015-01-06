@@ -10,6 +10,7 @@ DIR = interface_cuda
 MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
+# alphabetic order by base name (ignoring precision)
 ZSRC := \
 	blas_z.cpp	\
 	zset_get.cpp	\
