@@ -261,7 +261,7 @@ magmablas_zhemv_mgpu_offset(
 
 magma_int_t
 magmablas_zhemv_sync(
-    magma_int_t ngpu, magma_int_t k,
+    magma_int_t ngpu, 
     magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *W,
     magma_queue_t queues[][10] );
 
@@ -455,8 +455,8 @@ magmablas_zlascl2(
 void
 magmablas_zlascl_diag(
     magma_type_t type, magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dD, magma_int_t lddd,
-          magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dD, magma_int_t lddd,
+          magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t *info );
 
 void
