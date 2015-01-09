@@ -59,7 +59,7 @@ magmablas_zprbt_mtv_batched_q(
     magmablas_zapply_transpose_vector_kernel_batched<<< grid, threads, 0, queue >>>(n/2, du, n+n/2, db_array, n/2);
 
     threads = block_length;
-    grid = n/(2*block_length) + ((n%(2*block_length))!=0), batchCount;
+    grid = n/(2*block_length) + ((n%(2*block_length))!=0);
     magmablas_zapply_transpose_vector_kernel_batched<<< grid, threads, 0, queue >>>(n, du, 0, db_array, 0);
 }
 
@@ -114,7 +114,7 @@ magmablas_zprbt_mv_batched_q(
 
 
     threads = block_length;
-    grid = n/(4*block_length) + ((n%(4*block_length))!=0), batchCount;
+    grid = n/(4*block_length) + ((n%(4*block_length))!=0);
 
     magmablas_zapply_vector_kernel_batched<<< grid, threads, 0, queue >>>(n/2, dv, n, db_array, 0);
     magmablas_zapply_vector_kernel_batched<<< grid, threads, 0, queue >>>(n/2, dv, n+n/2, db_array, n/2);
