@@ -23,7 +23,7 @@
 #include "magma_lapack.h"
 #include "batched_kernel_param.h"
 
-#define h_A(i,j, s) (h_A + (i) + (j)*lda + (s) * lda * Ak)
+#define h_A(i,j,s) (h_A + (i) + (j)*lda + (s)*lda*Ak)
 
 
 //#define PRINTMAT
@@ -35,7 +35,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, magma_perf, magma_time=0, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
+    real_Double_t   gflops, magma_perf, magma_time=0, cublas_perf=0, cublas_time=0, cpu_perf=0, cpu_time=0;
     double          magma_error, cublas_error, lapack_error, work[1];
     magma_int_t M, N, info;
     magma_int_t Ak;
@@ -165,31 +165,31 @@ int main( int argc, char** argv)
             zset_pointer(dwork_array, dwork, lddb, 0, 0, lddb*N, batchCount);
 
             magma_time = magma_sync_wtime( NULL );
-#if 1
-            magmablas_ztrsm_outofplace_batched(
-                opts.side, opts.uplo, opts.transA, opts.diag, 1,
-                M, N, alpha,
-                d_A_array,    ldda, // dA
-                d_B_array,    lddb, // dB
-                dwork_array,  lddb, // dX output
-                dinvA_array,  dinvA_batchSize, 
-                dW1_displ,   dW2_displ, 
-                dW3_displ,   dW4_displ,
-                1, batchCount);
-            magma_time = magma_sync_wtime( NULL ) - magma_time;
-            magma_perf = gflops / magma_time;
-            magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
-#else
-            magmablas_ztrsm_batched(
-                opts.side, opts.uplo, opts.transA, opts.diag, 
-                M, N, alpha, 
-                d_A_array, ldda,
-                d_B_array, lddb, 
-                batchCount );
-            magma_time = magma_sync_wtime( NULL ) - magma_time;
-            magma_perf = gflops / magma_time;
-            magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
-#endif 
+            #if 1
+                magmablas_ztrsm_outofplace_batched(
+                    opts.side, opts.uplo, opts.transA, opts.diag, 1,
+                    M, N, alpha,
+                    d_A_array,    ldda, // dA
+                    d_B_array,    lddb, // dB
+                    dwork_array,  lddb, // dX output
+                    dinvA_array,  dinvA_batchSize, 
+                    dW1_displ,   dW2_displ, 
+                    dW3_displ,   dW4_displ,
+                    1, batchCount);
+                magma_time = magma_sync_wtime( NULL ) - magma_time;
+                magma_perf = gflops / magma_time;
+                magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
+            #else
+                magmablas_ztrsm_batched(
+                    opts.side, opts.uplo, opts.transA, opts.diag, 
+                    M, N, alpha, 
+                    d_A_array, ldda,
+                    d_B_array, lddb, 
+                    batchCount );
+                magma_time = magma_sync_wtime( NULL ) - magma_time;
+                magma_perf = gflops / magma_time;
+                magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
+            #endif 
        
             /* =====================================================================
                Performs operation using CUBLAS
@@ -197,17 +197,24 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N*batchCount, h_B, ldb, d_B, lddb );
             zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount);
 
-            cublas_time = magma_sync_wtime( NULL );
-            cublasZtrsmBatched(
-                opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
-                cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
-                M, N, &alpha,
-                (const magmaDoubleComplex**)d_A_array, ldda,
-                d_B_array, lddb, batchCount);
-            cublas_time = magma_sync_wtime( NULL ) - cublas_time;
-            cublas_perf = gflops / cublas_time;
-            
+            // CUBLAS version <= 6.0 has magmaDoubleComplex **            dA_array, no cast needed.
+            // CUBLAS version    6.5 has magmaDoubleComplex const**       dA_array, requiring cast.
+            // Correctly, it should be   magmaDoubleComplex const* const* dA_array, to avoid requiring cast.
+            //#define HAVE_CUBLAS_65
+            #ifdef HAVE_CUBLAS_65
+                cublas_time = magma_sync_wtime( NULL );
+                cublasZtrsmBatched(
+                    opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
+                    cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
+                    M, N, &alpha,
+                    (const magmaDoubleComplex**) d_A_array, ldda,
+                    d_B_array, lddb, batchCount);
+                cublas_time = magma_sync_wtime( NULL ) - cublas_time;
+                cublas_perf = gflops / cublas_time;
+            #endif
+
             magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bcublas, ldb );
+            
             /* =====================================================================
                Performs operation using CPU BLAS
                =================================================================== */
@@ -231,7 +238,7 @@ int main( int argc, char** argv)
             // ||b - 1/alpha*A*x|| / (||A||*||x||)
             magmaDoubleComplex alpha2 = MAGMA_Z_DIV( c_one, alpha );
             double normR, normX, normA=0.;
-            magma_error=0.0;
+            magma_error  = 0.0;
             cublas_error = 0.0;
 
             memcpy( h_X, h_Bmagma, sizeB*sizeof(magmaDoubleComplex) );
@@ -253,15 +260,16 @@ int main( int argc, char** argv)
                 double magma_err = normR/(normX*normA);
 
                 if ( isnan(magma_err) || isinf(magma_err) ) {
-                    printf("error for matrix %d magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",s,magma_err,normR,normX,normA);
+                    printf("error for matrix %d magma_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n", s, magma_err, normR, normX, normA);
                     magma_error = magma_err;
                     break;
                 }
-                magma_error = max(fabs(magma_err),magma_error);
+                magma_error = max(fabs(magma_err), magma_error);
             }
 
             memcpy( h_X, h_Bcublas, sizeB*sizeof(magmaDoubleComplex) );
             // check cublas
+            #ifdef HAVE_CUBLAS_65
             for(int s=0; s < batchCount; s++) {
                 normA = lapackf77_zlange( "M", &Ak, &Ak, h_A + s * lda * Ak, &lda, work );
                 blasf77_ztrmm(
@@ -276,15 +284,14 @@ int main( int argc, char** argv)
                 normX = lapackf77_zlange( "M", &M, &N, h_Bcublas  + s * ldb * N, &ldb, work );            
                 double cublas_err = normR/(normX*normA);
 
-
                 if ( isnan(cublas_err) || isinf(cublas_err) ) {
-                    printf("error for matrix %d cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n",s,cublas_err,normR,normX,normA);
+                    printf("error for matrix %d cublas_error = %7.2f where normR=%7.2f normX=%7.2f and normA=%7.2f\n", s, cublas_err, normR, normX, normA);
                     cublas_error = cublas_err;
                     break;
                 }
-                cublas_error = max(fabs(cublas_err),cublas_error);
-
+                cublas_error = max(fabs(cublas_err), cublas_error);
             }
+            #endif
 
             if ( opts.lapack ) {
                 // check lapack
