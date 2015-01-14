@@ -163,6 +163,7 @@ const char *usage =
 "  --ngpu x         Number of GPUs, default 1. Also set with $MAGMA_NUM_GPUS.\n"
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
 "  --nthread x      Number of CPU threads, default 1.\n"
+"  --offset x       Offset from beginning of matrix, default 0.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
 "  --svd_work [0123] SVD workspace size, from min (1) to optimal (3), or query (0), default 0.\n"
 "  --version x      version of routine, e.g., during development, default 1.\n"
@@ -201,6 +202,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->ngpu     = magma_num_gpus();
     opts->niter    = 1;
     opts->nthread  = 1;
+    opts->offset   = 0;
     opts->itype    = 1;
     opts->svd_work = 0;
     opts->version  = 1;
@@ -358,6 +360,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             opts->nthread = atoi( argv[++i] );
             magma_assert( opts->nthread > 0,
                           "error: --nthread %s is invalid; ensure nthread > 0.\n", argv[i] );
+        }
+        else if ( strcmp("--offset", argv[i]) == 0 && i+1 < argc ) {
+            opts->offset = atoi( argv[++i] );
+            magma_assert( opts->offset >= 0,
+                          "error: --offset %s is invalid; ensure offset >= 0.\n", argv[i] );
         }
         else if ( strcmp("--itype",   argv[i]) == 0 && i+1 < argc ) {
             opts->itype = atoi( argv[++i] );
