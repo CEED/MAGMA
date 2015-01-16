@@ -1417,18 +1417,15 @@ magma_int_t
 magma_zlatrd_mgpu(
     magma_int_t ngpu,
     magma_uplo_t uplo,
-    magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
+    magma_int_t n, magma_int_t nb, magma_int_t nb0,
     magmaDoubleComplex *A,  magma_int_t lda,
     double *e, magmaDoubleComplex *tau,
-    magmaDoubleComplex *W,   magma_int_t ldw,
+    magmaDoubleComplex    *W,       magma_int_t ldw,
     magmaDoubleComplex_ptr dA[],    magma_int_t ldda, magma_int_t offset,
     magmaDoubleComplex_ptr dW[],    magma_int_t lddw,
+    magmaDoubleComplex    *hwork,   magma_int_t lhwork,
     magmaDoubleComplex_ptr dwork[], magma_int_t ldwork,
-    magma_int_t k,
-    magmaDoubleComplex_ptr dx[], magmaDoubleComplex_ptr dy[],
-    magmaDoubleComplex *work,
-    magma_queue_t queues[][10],
-    double *times);
+    magma_queue_t queues[] );
 
 magma_int_t
 magma_zlauum_gpu(

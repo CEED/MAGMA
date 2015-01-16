@@ -46,10 +46,12 @@ ZSRC := \
 	zcaxpycp.cu		\
 	zgeadd.cu		\
 	zgemm_reduce.cu		\
-	zgemv_conjv.cu          \
+	zgemv_conjv.cu		\
+	zgerbt_kernels.cu	\
+	zgerbt.cu		\
 	zhemv.cu		\
 	zlacpy.cu		\
-	zlacpy_cnjg.cu	\
+	zlacpy_cnjg.cu		\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
@@ -88,8 +90,6 @@ ZSRC := \
 	ztrtri_diag.cu		\
 	ztrtri_lower.cu		\
 	ztrtri_upper.cu		\
-	zgerbt_kernels.cu	\
-	zgerbt.cu	\
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
@@ -116,13 +116,12 @@ ZSRC += \
 	zbcyclic.cu			\
 	zgetmatrix_transpose_mgpu.cu	\
 	zsetmatrix_transpose_mgpu.cu	\
-	zhemv_fermi_mgpu_32.cu		\
-	zhemv_fermi_mgpu.cu		\
+	zhemv_mgpu.cu			\
 	zhemm_mgpu.cpp			\
 	zhemm_mgpu_spec.cpp		\
 	zher2k_mgpu.cpp			\
 	zher2k_mgpu_spec.cpp		\
-	zherk_mgpu.cpp		\
+	zherk_mgpu.cpp			\
 
 # panels for one-sided factorizations in CUDA
 ZSRC += \
@@ -131,27 +130,27 @@ ZSRC += \
 	zgeqr2x_gpu-v4.cu	\
 	zpotf2.cu		\
 
-# batched filesalphabetic order by base name (ignoring precision)
+# batched files, alphabetic order by base name (ignoring precision)
 ZSRC += \
 	zgeadd_batched.cu		\
-	zgemv_batched.cu			\
-	zgemm_batched.cu			\
+	zgemv_batched.cu		\
+	zgemm_batched.cu		\
 	zgemm_fermi_batched.cu		\
 	zgemm_fermi_batched_k32.cu	\
-	zgerbt_func_batched.cu			\
+	zgerbt_func_batched.cu		\
 	zgetf2_kernels.cu		\
-	zherk_batched.cu			\
+	zherk_batched.cu		\
 	zherk_fermi_batched.cu		\
 	zherk_fermi_batched_k32.cu	\
-	zlaswp_batched.cu			\
-	zpotf2_kernels.cu		  \
-	zset_pointer.cu				\
-	ztrsm_batched.cu			\
+	zlaswp_batched.cu		\
+	zpotf2_kernels.cu		\
+	zset_pointer.cu			\
+	ztrsm_batched.cu		\
 	ztrtri_diag_batched.cu		\
 
 SRC += \
-	set_pointer.cu  \
-	getrf_setup_pivinfo.cu	\
+	set_pointer.cu			\
+	getrf_setup_pivinfo.cu		\
 
 
 -include Makefile.local
@@ -199,7 +198,6 @@ cgemm_fermi_batched_k32.o: cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh ge
 dgemm_fermi_batched_k32.o: dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
 sgemm_fermi_batched_k32.o: sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
 
-
 zherk_fermi_batched.o: zgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
 cherk_fermi_batched.o: cgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
 dsyrk_fermi_batched.o: dgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
@@ -209,4 +207,3 @@ zherk_fermi_batched_k32.o: zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh he
 cherk_fermi_batched_k32.o: cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
 dsyrk_fermi_batched_k32.o: dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
 ssyrk_fermi_batched_k32.o: sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-

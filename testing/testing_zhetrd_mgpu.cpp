@@ -48,7 +48,6 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     double eps = lapackf77_dlamch( "E" );
@@ -58,7 +57,7 @@ int main( int argc, char** argv)
     work  = NULL;
     rwork = NULL;
 
-    printf("uplo = %s\n", lapack_uplo_const(opts.uplo) );
+    printf("uplo = %s, ngpu %d\n", lapack_uplo_const(opts.uplo), (int) opts.ngpu );
     printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
     printf("===========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -100,7 +99,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            if( opts.ngpu == 0 ) {
+            if ( opts.ngpu == 0 ) {
                 magma_zhetrd(opts.uplo, N, h_R, lda, diag, offdiag,
                              tau, h_work, lwork, &info);
             } else {
@@ -108,8 +107,10 @@ int main( int argc, char** argv)
                                   tau, h_work, lwork, &info);
             }
             gpu_time = magma_wtime() - gpu_time;
-            if ( info != 0 )
-                printf("magma_zhetrd returned error %d\n", (int) info);
+            if ( info != 0 ) {
+                printf("magma_zhetrd_mgpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
+            }
             
             gpu_perf = gflops / gpu_time;
             
@@ -120,7 +121,7 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( lapack_uplo_const(opts.uplo), &N, &N, h_R, &lda, h_Q, &lda);
                 lapackf77_zungtr( lapack_uplo_const(opts.uplo), &N, h_Q, &lda, tau, h_work, &lwork, &info);
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
+                #if defined(PRECISION_z) || defined(PRECISION_c)
                 lapackf77_zhet21(&itwo, lapack_uplo_const(opts.uplo), &N, &ione,
                                  h_A, &lda, diag, offdiag,
                                  h_Q, &lda, h_R, &lda,
@@ -130,7 +131,7 @@ int main( int argc, char** argv)
                                  h_A, &lda, diag, offdiag,
                                  h_Q, &lda, h_R, &lda,
                                  tau, work, rwork, &result[1]);
-#else
+                #else
                 lapackf77_zhet21(&itwo, lapack_uplo_const(opts.uplo), &N, &ione,
                                  h_A, &lda, diag, offdiag,
                                  h_Q, &lda, h_R, &lda,
@@ -140,7 +141,7 @@ int main( int argc, char** argv)
                                  h_A, &lda, diag, offdiag,
                                  h_Q, &lda, h_R, &lda,
                                  tau, work, &result[1]);
-#endif
+                #endif
                 result[0] *= eps;
                 result[1] *= eps;
             }
@@ -148,25 +149,36 @@ int main( int argc, char** argv)
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            cpu_time = magma_wtime();
-            lapackf77_zhetrd(lapack_uplo_const(opts.uplo), &N, h_A, &lda, diag, offdiag, tau,
-                             h_work, &lwork, &info);
-            cpu_time = magma_wtime() - cpu_time;
-            cpu_perf = gflops / cpu_time;
-            if ( info != 0 )
-                printf("lapackf77_zhetrd returned error %d\n", (int) info);
+            if ( opts.lapack ) {
+                cpu_time = magma_wtime();
+                lapackf77_zhetrd(lapack_uplo_const(opts.uplo), &N, h_A, &lda, diag, offdiag, tau,
+                                 h_work, &lwork, &info);
+                cpu_time = magma_wtime() - cpu_time;
+                cpu_perf = gflops / cpu_time;
+                if ( info != 0 ) {
+                    printf("lapackf77_zhetrd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
+                }
+            }
             
             /* =====================================================================
                Print performance and error.
                =================================================================== */
+            if ( opts.lapack ) {
+                printf("%5d   %7.2f (%7.2f)", (int) N, cpu_perf, cpu_time );
+            }
+            else {
+                printf("%5d     ---   (  ---  )", (int) N );
+            }
+            printf("   %7.2f (%7.2f)", gpu_perf, gpu_time );
             if ( opts.check ) {
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e        %8.2e   %s\n",
-                       (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       result[0], result[1], (result[0] < tol && result[1] < tol ? "ok" : "failed") );
-                status += ! (result[0] < tol && result[1] < tol);
-            } else {
-                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)     ---  \n",
-                       (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                bool okay = (result[0] < tol && result[1] < tol);
+                status += ! okay;
+                printf("   %8.2e        %8.2e   %s\n",
+                       result[0], result[1], (okay ? "ok" : "failed") );
+            }
+            else {
+                printf("     ---  \n");
             }
 
             TESTING_FREE_PIN( h_R );
