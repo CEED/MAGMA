@@ -744,12 +744,17 @@ magmablas_zhemv_mgpu(
             zhemv_kernel_L_mgpu_sum<<< grid, threads_sum, 0, queues[dev] >>>(
                 n, alpha, ldda, dx_dev, 1, dwork_dev,
                 new_gpu_id, ngpu, block_offset );
-            
-            // copy w to CPU
-            magma_zgetvector_async( n, dx_dev + block_offset, 1, &hwork[dev*n], 1, queues[dev] );
-            
-            // see magmablas_zhemv_mgpu_sync for final row sums
         }
+        
+        // 2nd loop in case hwork is not pinned, causing this to be sync instead of async.
+        for(dev=0; dev < ngpu; dev++) {
+            // copy w to CPU
+            magma_setdevice( dev );
+            magmaDoubleComplex       *dx_dev    = dwork[dev];
+            magma_zgetvector_async( n, dx_dev + block_offset, 1, &hwork[dev*n], 1, queues[dev] );
+        }
+        
+        // see magmablas_zhemv_mgpu_sync for final row sums
     }
     
     magma_setdevice( orig_dev );
