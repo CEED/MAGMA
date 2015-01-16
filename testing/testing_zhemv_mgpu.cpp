@@ -95,13 +95,14 @@ int main(int argc, char **argv)
             ldwork = ldda*(blocks + 1);
 
             TESTING_MALLOC_CPU( A,       magmaDoubleComplex, matsize );
-            TESTING_MALLOC_CPU( X,       magmaDoubleComplex, vecsize );
             TESTING_MALLOC_CPU( Y,       magmaDoubleComplex, vecsize );
             TESTING_MALLOC_CPU( Ycublas, magmaDoubleComplex, vecsize );
             TESTING_MALLOC_CPU( Ymagma,  magmaDoubleComplex, vecsize );
             TESTING_MALLOC_CPU( Ymagma1, magmaDoubleComplex, vecsize );
             TESTING_MALLOC_CPU( Ylapack, magmaDoubleComplex, vecsize );
-            TESTING_MALLOC_CPU( hwork,   magmaDoubleComplex, lhwork  );
+
+            TESTING_MALLOC_PIN( X,       magmaDoubleComplex, vecsize );
+            TESTING_MALLOC_PIN( hwork,   magmaDoubleComplex, lhwork  );
             
             magma_setdevice( opts.device );
             TESTING_MALLOC_DEV( dA, magmaDoubleComplex, matsize );
@@ -263,13 +264,14 @@ int main(int argc, char **argv)
             
             /* Free Memory */
             TESTING_FREE_CPU( A );
-            TESTING_FREE_CPU( X );
             TESTING_FREE_CPU( Y );
             TESTING_FREE_CPU( Ycublas );
             TESTING_FREE_CPU( Ymagma  );
             TESTING_FREE_CPU( Ymagma1 );
             TESTING_FREE_CPU( Ylapack );
-            TESTING_FREE_CPU( hwork   );
+
+            TESTING_FREE_PIN( X );
+            TESTING_FREE_PIN( hwork   );
             
             magma_setdevice( opts.device );
             TESTING_FREE_DEV( dA );
