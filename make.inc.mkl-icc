@@ -25,11 +25,15 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-CFLAGS    = -O3 -DADD_ -Wall -openmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY
-FFLAGS    = -O3 -DADD_ -warn all
-F90FLAGS  = -O3 -DADD_ -warn all
-NVCCFLAGS = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
-LDFLAGS   = -openmp
+# Use -fPIC to make shared (.so) and static (.a) library;
+# can be commented out if making only static library.
+FPIC      = -fPIC
+
+CFLAGS    = -O3 $(FPIC) -DADD_ -Wall     -openmp -DMAGMA_SETAFFINITY -DMAGMA_WITH_MKL
+FFLAGS    = -O3 $(FPIC) -DADD_ -warn all
+F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all
+NVCCFLAGS = -O3         -DADD_           -Xcompiler "-fno-strict-aliasing $(FPIC)"
+LDFLAGS   =     $(FPIC)                  -openmp
 
 # old MKL
 #LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lcublas -lcudart -lstdc++ -lm
@@ -45,7 +49,8 @@ LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -l
 -include make.check-mkl
 -include make.check-cuda
 
-LIBDIR    = -L$(MKLROOT)/lib/intel64 \
-            -L$(CUDADIR)/lib64
+LIBDIR    = -L$(CUDADIR)/lib64 \
+            -L$(MKLROOT)/lib/intel64
 
-INC       = -I$(CUDADIR)/include -I$(MKLROOT)/include
+INC       = -I$(CUDADIR)/include \
+            -I$(MKLROOT)/include

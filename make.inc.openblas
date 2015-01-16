@@ -25,11 +25,15 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-CFLAGS    = -O3 -DADD_ -Wall -fno-strict-aliasing -fopenmp -DMAGMA_SETAFFINITY
-FFLAGS    = -O3 -DADD_ -Wall
-F90FLAGS  = -O3 -DADD_ -Wall -x f95-cpp-input
-NVCCFLAGS = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
-LDFLAGS   = -fopenmp
+# Use -fPIC to make shared (.so) and static (.a) library;
+# can be commented out if making only static library.
+FPIC      = -fPIC
+
+CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -fopenmp -DMAGMA_SETAFFINITY
+FFLAGS    = -O3 $(FPIC) -DADD_ -Wall
+F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
+NVCCFLAGS = -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
+LDFLAGS   =     $(FPIC)              -fopenmp
 
 # gcc with OpenBLAS (includes LAPACK)
 LIB       = -lopenblas -lcublas -lcudart
@@ -40,7 +44,7 @@ LIB       = -lopenblas -lcublas -lcudart
 -include make.check-openblas
 -include make.check-cuda
 
-LIBDIR    = -L$(OPENBLASDIR)/lib \
-            -L$(CUDADIR)/lib64
+LIBDIR    = -L$(CUDADIR)/lib64 \
+            -L$(OPENBLASDIR)/lib
 
 INC       = -I$(CUDADIR)/include

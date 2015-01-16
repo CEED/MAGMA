@@ -25,25 +25,29 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-CFLAGS    = -O3 -DADD_ -fopenmp -DMAGMA_SETAFFINITY
-FFLAGS    = -O3 -DADD_
-F90FLAGS  = -O3 -DADD_ -x f95-cpp-input
-NVCCFLAGS = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
-LDFLAGS   = -fopenmp
+# Use -fPIC to make shared (.so) and static (.a) library;
+# can be commented out if making only static library.
+FPIC      = -fPIC
+
+CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -fopenmp -DMAGMA_SETAFFINITY
+FFLAGS    = -O3 $(FPIC) -DADD_ -Wall
+F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
+NVCCFLAGS = -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
+LDFLAGS   =     $(FPIC)              -fopenmp
 
 # Depending on how ATLAS and LAPACK were compiled, you may need one or more of:
 # -lifcore -ldl -lf2c -lgfortran
 LIB       = -llapack -lf77blas -lcblas -latlas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
 
-# define library directories here or in your environment
+# define library directories preferably in your environment, or here.
 #LAPACKDIR ?= /opt/lapack
 #ATLASDIR  ?= /opt/atlas
 #CUDADIR   ?= /usr/local/cuda
 -include make.check-atlas
 -include make.check-cuda
 
-LIBDIR    = -L$(LAPACKDIR) \
+LIBDIR    = -L$(CUDADIR)/lib64 \
             -L$(ATLASDIR)/lib \
-            -L$(CUDADIR)/lib64
+            -L$(LAPACKDIR)
 
 INC       = -I$(CUDADIR)/include

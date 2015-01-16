@@ -25,17 +25,28 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
+# Use -fPIC to make shared (.so) and static (.a) library;
+# can be commented out if making only static library.
+FPIC      = -fPIC
+
+CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -fopenmp -DMAGMA_SETAFFINITY -DMAGMA_WITH_MKL
+FFLAGS    = -O3 $(FPIC) -DADD_ -Wall
+F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
+NVCCFLAGS = -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
+LDFLAGS   =     $(FPIC)              -fopenmp
+
 # Defining MAGMA_ILP64 or MKL_ILP64 changes magma_int_t to int64_t in include/magma_types.h
-# Compiling with -std=c++98 -pedantic finds non-standard things like variable length arrays
-CFLAGS    = -O3 -DADD_ -Wall -fno-strict-aliasing -fopenmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DMKL_ILP64
+CFLAGS    += -DMKL_ILP64
+FFLAGS    += -fdefault-integer-8
+F90FLAGS  += -fdefault-integer-8
+NVCCFLAGS += -DMKL_ILP64
+
+# Options to do extra checks for non-standard things like variable length arrays;
+# it is safe to disable all these
 CFLAGS   += -pedantic -Wno-long-long
 #CFLAGS   += -Werror  # uncomment to ensure all warnings are dealt with
 CXXFLAGS := $(CFLAGS) -std=c++98
 CFLAGS   += -std=c99
-FFLAGS    = -O3 -DADD_ -Wall -fdefault-integer-8
-F90FLAGS  = -O3 -DADD_ -Wall -fdefault-integer-8 -x f95-cpp-input
-NVCCFLAGS = -O3 -DADD_ -Xcompiler -fno-strict-aliasing -DMKL_ILP64
-LDFLAGS   = -fopenmp
 
 # IMPORTANT: this link line is for 64-bit int !!!!
 # For regular 64-bit builds using 64-bit pointers and 32-bit int,
@@ -52,7 +63,8 @@ LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcuda
 -include make.check-mkl
 -include make.check-cuda
 
-LIBDIR    = -L$(MKLROOT)/lib/intel64 \
-            -L$(CUDADIR)/lib64
+LIBDIR    = -L$(CUDADIR)/lib64 \
+            -L$(MKLROOT)/lib/intel64
 
-INC       = -I$(CUDADIR)/include -I$(MKLROOT)/include
+INC       = -I$(CUDADIR)/include \
+            -I$(MKLROOT)/include

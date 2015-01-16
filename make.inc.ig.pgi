@@ -37,6 +37,7 @@ LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,-
 
 CUDADIR   = /mnt/scratch/cuda-3.1
 
-LIBDIR    = -L$(MKLROOT)/lib/em64t \
-            -L$(CUDADIR)/lib64
+LIBDIR    = -L$(CUDADIR)/lib64 \
+            -L$(MKLROOT)/lib/em64t
+
 INC       = -I$(CUDADIR)/include
