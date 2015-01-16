@@ -286,13 +286,13 @@ testing_%.o : testing_%.f90
 endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
-	$(FORT) $(LDFLAGS) $< $(FOBJ) -o $@ \
+	$(FORT) $(LDFLAGS) $(RPATH) $< $(FOBJ) -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 testing_% : testing_%.o
-	$(CC) $(LDFLAGS) $(NOMAIN) $< -o $@ \
+	$(CC) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
