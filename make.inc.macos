@@ -47,6 +47,9 @@ F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
 NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
 LDFLAGS   = -m64     $(FPIC)
 
+# MacOS likes the library's path to be set
+INSTALL_NAME = -install_name @rpath/libmagma.so
+
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 
 # define library directories preferably in your environment, or here.

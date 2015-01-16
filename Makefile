@@ -158,7 +158,7 @@ shared: libmagma
 
 $(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
 	@echo ======================================== $(LIBMAGMA_SO)
-	$(CC) $(LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
+	$(CC) $(LDFLAGS) $(INSTALL_NAME) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)
 	@echo
