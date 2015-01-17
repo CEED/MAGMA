@@ -92,11 +92,7 @@ int main( int argc, char** argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &idist, ISEED, &n2, h_A );
-            //magma_zmake_hermitian( N, h_A, lda );
-            // make diagonal real -- according to docs, should NOT be necesary
-            //for( int i=0; i < N; ++i ) {
-            //    h_A[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( h_A[i + i*lda] ), 0 );
-            //}
+            
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
             
             /* ====================================================================

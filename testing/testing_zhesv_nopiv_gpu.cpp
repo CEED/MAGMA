@@ -33,10 +33,10 @@ int main(int argc, char **argv)
     double          error, Rnorm, Anorm, Xnorm, *work;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *h_A, *h_B, *h_X, temp, *cwork;
+    magmaDoubleComplex *h_A, *h_B, *h_X, temp, *hwork;
     magmaDoubleComplex_ptr d_A, d_B;
     magma_int_t *ipiv;
-    magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB;
+    magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
@@ -73,17 +73,15 @@ int main(int argc, char **argv)
             sizeB = ldb*nrhs;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-           
-            magma_int_t nopiv = 1;
-
-            for (int i=0; i<N; i++) for (int j=0; j<i; j++) h_A[i+j*lda] = MAGMA_Z_CNJG(h_A[j+i*lda]);
-            if (nopiv) for (int i=0; i<N; i++) h_A[i+i*lda] = MAGMA_Z_MAKE(MAGMA_Z_REAL(h_A[i+i*lda]) + N, 0.0);
-            else       for (int i=0; i<N; i++) h_A[i+i*lda] = MAGMA_Z_MAKE(MAGMA_Z_REAL(h_A[i+i*lda]), 0.0);
-
-            magma_uplo_t uplo = opts.uplo;
-
-            magma_int_t upper = (uplo == MagmaUpper);
-
+            
+            bool nopiv = true;
+            if ( nopiv ) {
+                magma_zmake_hpd( N, h_A, lda );  // SPD / HPD does not require pivoting
+            }
+            else {
+                magma_zmake_hermitian( N, h_A, lda );  // symmetric/Hermitian generally requires pivoting
+            }
+            
             magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, nrhs, h_B, ldb, d_B, lddb );
             
@@ -92,7 +90,7 @@ int main(int argc, char **argv)
                =================================================================== */
             gpu_time = magma_wtime();
 
-            magma_zhesv_nopiv_gpu( uplo, N, nrhs, d_A, ldda, d_B, lddb, &info );
+            magma_zhesv_nopiv_gpu( opts.uplo, N, nrhs, d_A, ldda, d_B, lddb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -120,13 +118,15 @@ int main(int argc, char **argv)
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                int lwork = -1;
-                lapackf77_zhesv((upper ? MagmaUpperStr: MagmaLowerStr), &N,&nrhs, h_A, &lda, ipiv, h_B, &ldb, &temp, &lwork, &info);
-                lwork = (int)MAGMA_Z_REAL(temp);
-                TESTING_MALLOC_PIN( cwork, magmaDoubleComplex, lwork );
+                lwork = -1;
+                lapackf77_zhesv( lapack_uplo_const(opts.uplo), &N,&nrhs,
+                                 h_A, &lda, ipiv, h_B, &ldb, &temp, &lwork, &info );
+                lwork = (magma_int_t) MAGMA_Z_REAL( temp );
+                TESTING_MALLOC_PIN( hwork, magmaDoubleComplex, lwork );
 
                 cpu_time = magma_wtime();
-                lapackf77_zhesv((upper ? MagmaUpperStr: MagmaLowerStr), &N, &nrhs, h_A, &lda, ipiv, h_B, &ldb, cwork, &lwork, &info);
+                lapackf77_zhesv( lapack_uplo_const(opts.uplo), &N, &nrhs,
+                                 h_A, &lda, ipiv, h_B, &ldb, hwork, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
                 printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
                         error, (error < tol ? "ok" : "failed"));
-                TESTING_FREE_CPU(cwork);
+                TESTING_FREE_CPU( hwork );
             }
             else {
                 printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
