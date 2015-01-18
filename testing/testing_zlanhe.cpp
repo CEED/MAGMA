@@ -19,6 +19,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#include "magma_threadsetting.h"  // to work around MKL bug
+
 #define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -70,6 +72,10 @@ int main( int argc, char** argv)
         printf( "...return values %s\n\n", (status == 0 ? "ok" : "failed") );
     }
 #endif
+
+    #ifdef MAGMA_WITH_MKL
+    printf( "\nNote: using single thread to work around MKL zlanhe bug.\n\n" );
+    #endif
     
     printf("    N   norm   uplo   CPU GByte/s (ms)    GPU GByte/s (ms)    error   \n");
     printf("=======================================================================\n");
@@ -114,6 +120,12 @@ int main( int argc, char** argv)
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
+            #ifdef MAGMA_WITH_MKL
+            // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
+            int threads = magma_get_lapack_numthreads();
+            magma_set_lapack_numthreads( 1 );
+            #endif
+            
             cpu_time = magma_wtime();
             norm_lapack = lapackf77_zlanhe(
                 lapack_norm_const( norm[inorm] ),
@@ -124,6 +136,11 @@ int main( int argc, char** argv)
             if (norm_lapack < 0)
                 printf("lapackf77_zlanhe returned error %f: %s.\n",
                        norm_lapack, magma_strerror( (int) norm_lapack ));
+            
+            #ifdef MAGMA_WITH_MKL
+            // end single thread to work around MKL bug
+            magma_set_lapack_numthreads( threads );
+            #endif
             
             /* =====================================================================
                Check the result compared to LAPACK
@@ -141,7 +158,7 @@ int main( int argc, char** argv)
                 #endif
             }
             
-            if ( error > tol2 && norm[inorm] == MagmaInfNorm && uplo[iuplo] == MagmaLower ) {
+            if ( error > tol2 ) {
                 mkl_warning = true;
             }
             
@@ -168,8 +185,8 @@ int main( int argc, char** argv)
     }
     
     if ( mkl_warning ) {
-        printf("* Some versions of MKL (e.g., 11.1.0) have a bug in zlanhe with uplo=L\n"
-               "  and multiple threads. Try again with MKL_NUM_THREADS=1.\n" );
+        printf("* MKL (e.g., 11.1.0) has a bug in zlanhe with multiple threads.\n"
+               "  Try again with MKL_NUM_THREADS=1.\n" );
     }
     
     TESTING_FINALIZE();
