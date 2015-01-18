@@ -109,17 +109,19 @@ int main( int argc, char** argv)
                Check the result compared to LAPACK
                Max norm should be identical; others should be within tolerance.
                =================================================================== */
-            bool okay;
+            error = fabs( norm_magma - norm_lapack ) / norm_lapack;
+            double tol2 = tol;
             if ( norm[inorm] == MagmaMaxNorm ) {
-                error = fabs( norm_magma - norm_lapack );
-                okay = (error == 0);
-            }
-            else {
-                error = fabs( norm_magma - norm_lapack ) / norm_lapack;
-                okay = (error < tol);
+                // max-norm depends on only one element, so for Real precisions,
+                // MAGMA and LAPACK should exactly agree (tol2 = 0),
+                // while Complex precisions incur roundoff in cuCabs.
+                #if defined(PRECISION_s) || defined(PRECISION_d)
+                tol2 = 0;
+                #endif
             }
             
-            printf("%5d %5d   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+            bool okay = (error <= tol2);
+            printf("%5d %5d   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %s\n",
                    (int) M, (int) N, lapacke_norm_const(norm[inorm]),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (okay ? "ok" : "failed") );

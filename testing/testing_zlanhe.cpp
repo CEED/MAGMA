@@ -158,17 +158,18 @@ int main( int argc, char** argv)
                 #endif
             }
             
-            if ( error > tol2 ) {
-                mkl_warning = true;
-            }
-            
+            bool okay = (error <= tol2);
             printf("%5d   %4c   %4c   %7.2f (%7.2f)   %7.2f (%7.2f)   %#9.3g   %s\n",
                    (int) N,
                    lapacke_norm_const( norm[inorm] ),
                    lapacke_uplo_const( uplo[iuplo] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
-                   error, (error <= tol2 ? "ok" : "failed") );
-            status += ! (error <= tol2);
+                   error, (okay ? "ok" : "failed") );
+            status += ! okay;
+            
+            if ( ! okay ) {
+                mkl_warning = true;
+            }
             
             TESTING_FREE_CPU( h_A    );
             TESTING_FREE_CPU( h_work );
