@@ -384,7 +384,7 @@ blas = (
 	('testing_zhemm_mgpu',          '-L -c',  n,    ''),
 	('testing_zhemm_mgpu',          '-U -c',  n,    ''),
 	('testing_zhemv_mgpu',          '-L -c',  n,    ''),
-	('testing_zhemv_mgpu',          '-U -c',  n,    ''),
+	('#testing_zhemv_mgpu',         '-U -c',  n,    'upper not implemented'),
 	('testing_zher2k_mgpu',         '-L -c',  n,    ''),
 	('testing_zher2k_mgpu',         '-U -c',  n,    ''),
 	
