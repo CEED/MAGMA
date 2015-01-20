@@ -307,6 +307,9 @@ typedef double real_Double_t;
 #define MAGMA_DIVERGENCE           -202
 #define MAGMA_NONSPD               -203
 
+// When adding error codes, please add to interface_cuda/error.cpp
+
+
 // ----------------------------------------
 // parameter constants
 // numbering is consistent with CBLAS and PLASMA; see plasma/include/plasma.h
