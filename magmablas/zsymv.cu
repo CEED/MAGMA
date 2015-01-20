@@ -271,7 +271,7 @@ zsymv_kernel_L(
     psum_t = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
-        psum_t += cuConj( sA32(ty2*4 + j, tx2) ) * sx[half_NB_X + ty2*4 + j];
+        psum_t += ( sA32(ty2*4 + j, tx2) ) * sx[half_NB_X + ty2*4 + j];
     }
     __syncthreads();
 
