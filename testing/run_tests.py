@@ -468,28 +468,18 @@ chol = (
 	('testing_zpotri',           '-U    -c',  n,    ''),
 
 # ----------
-# Symmetric Indefinite, GPU interface 
-# > no-pivot LDLt
-	('testing_zhetrf',           '-L   -c  --version 4',  n,    ''),
-	('testing_zhetrf',           '-U   -c  --version 4',  n,    ''),
-
-	('testing_zhetrf',           '-L   -c2 --version 4',  n,    ''),
-	('testing_zhetrf',           '-U   -c2 --version 4',  n,    ''),
-
-# ----------
-# Symmetric Indefinite, CPU interface
-# > Bunch-Kauffman
-	('testing_zhetrf',           '-L   -c  --version 1',  n,    ''),
-	('testing_zhetrf',           '-U   -c  --version 1',  n,    ''),
-
-	('testing_zhetrf',           '-L   -c2 --version 1',  n,    ''),
-	('testing_zhetrf',           '-U   -c2 --version 1',  n,    ''),
-# > no-pivot LDLt
-	('testing_zhetrf',           '-L   -c  --version 3',  n,    ''),
-	('testing_zhetrf',           '-U   -c  --version 3',  n,    ''),
-
-	('testing_zhetrf',           '-L   -c2 --version 3',  n,    ''),
-	('testing_zhetrf',           '-U   -c2 --version 3',  n,    ''),
+# Symmetric Indefinite
+	# Bunch-Kauffman
+	('testing_zhetrf', '-L --version 1 -c2',  n,    ''),
+	('testing_zhetrf', '-U --version 1 -c2',  n,    ''),
+	                                                
+	# no-pivot LDLt, CPU interface                  
+	('testing_zhetrf', '-L --version 3 -c2',  n,    ''),
+	('testing_zhetrf', '-U --version 3 -c2',  n,    ''),
+	                                                
+	# no-pivot LDLt, GPU interface                  
+	('testing_zhetrf', '-L --version 4 -c2',  n,    ''),
+	('testing_zhetrf', '-U --version 4 -c2',  n,    ''),
 )
 if ( opts.chol ):
 	tests += chol
