@@ -37,10 +37,10 @@ int main( int argc, char** argv)
     const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     const magma_int_t        ione      = 1;
     
-    real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           Anorm, error, error2;
+    real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
+    double           Anorm, error=0, error2=0;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
-    magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn, nb;
+    magma_int_t M, N, n2, lda, lwork, info, min_mn, nb;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
 
@@ -58,7 +58,6 @@ int main( int argc, char** argv)
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            ldda   = ((M+31)/32)*32;
             nb     = magma_get_zgeqlf_nb(M);
             gflops = FLOPS_ZGEQLF( M, N ) / 1e9;
             

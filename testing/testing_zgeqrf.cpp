@@ -34,10 +34,10 @@ int main( int argc, char** argv)
     const magma_int_t        ione      = 1;
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
-    double           Anorm, error, error2;
+    double           Anorm, error=0, error2=0;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     magma_int_t M, N, n2, lda, lwork, info, min_mn, nb;
-    magma_int_t ISEED[4] = {0,0,0,1}, ISEED2[4];
+    magma_int_t ISEED[4] = {0,0,0,1};
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -71,8 +71,6 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
             
             /* Initialize the matrix */
-            for ( int j=0; j<4; j++ )
-                ISEED2[j] = ISEED[j]; // saving seeds
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             

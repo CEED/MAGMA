@@ -341,7 +341,7 @@ int main( int argc, char** argv)
     magma_int_t     *ipiv;
     magma_int_t     N, n2, lda, lwork, info;
     magma_int_t     status = 0;
-    magma_int_t     cpu = 0, gpu = 0, nopiv = 0, nopiv_gpu = 0, row = 0;
+    magma_int_t     cpu = 0, nopiv = 0, nopiv_gpu = 0, row = 0;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -351,7 +351,7 @@ int main( int argc, char** argv)
             printf( "\nCPU-Interface to Bunch-Kauffman on GPU" );
             break;
         case 2:
-            gpu = 1;
+            //gpu = 1;
             printf( "\nGPU-Interface to Bunch-Kauffman on GPU" );
             printf( "\n not yet..\n\n" );
             return 0;
@@ -371,7 +371,7 @@ int main( int argc, char** argv)
         //    break;
         default:
         //  printf( " hybrid CPU-GPU version" );
-            printf( " version = %d not supported\n\n", opts.version);
+            printf( " version = %d not supported\n\n", (int) opts.version );
             return 0;
     }
 
@@ -443,7 +443,7 @@ int main( int argc, char** argv)
                 magma_int_t ldda = 32*((N+31)/32);
                 magmaDoubleComplex_ptr d_A;
                 if (MAGMA_SUCCESS != magma_zmalloc( &d_A, N*ldda  )) {
-                    printf( " failed to allocate d_A(%dx%d)\n", N, ldda);
+                    printf( " failed to allocate d_A(%dx%d)\n", (int) N, (int) ldda );
                     return 0;
                 }
                 magma_zsetmatrix(N, N, h_A, lda, d_A, ldda);

@@ -108,7 +108,7 @@ int main( int argc, char** argv)
             for(int i=0; i<batchCount; i++)
             {
                 if(cpu_info[i] != 0 ){
-                    printf("magma_zgetrf_batched matrix %d returned error %d\n",i, (int)cpu_info[i] );
+                    printf("magma_zgetrf_batched matrix %d returned error %d\n", i, (int)cpu_info[i] );
                 }
             }
             if (info1 != 0) printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info1, magma_strerror( info1 ));
@@ -161,12 +161,12 @@ int main( int argc, char** argv)
                 magma_zgetmatrix( min(M,N), N*batchCount, d_invA, ldda, h_R, lda );
                 int stop=0;
                 n2     = lda*N;
-                for(int i=0; i<batchCount; i++)
+                for(int i=0; i < batchCount; i++)
                 {
-                    for(int k=0;k<min_mn; k++){
+                    for(int k=0; k < min_mn; k++){
                         if(ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
                         {
-                            printf("error for matrix %d ipiv @ %d = %d\n",i,k,ipiv[i*min_mn+k]);
+                            printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*min_mn+k]);
                             stop=1;
                         }
                     }
@@ -181,7 +181,7 @@ int main( int argc, char** argv)
                         err = error;
                         break;
                     }
-                    err = max(fabs(error),err);
+                    err = max(fabs(error), err);
                 }
                 printf("   %8.2e\n", err );
             }

@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     const magma_int_t        ione      = 1;
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
-    double           Anorm, error, error2;
+    double           Anorm, error=0, error2=0;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     magmaDoubleComplex_ptr d_A, dT;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn, nb, size;
@@ -106,7 +106,7 @@ int main( int argc, char** argv)
                 }
                 #endif
                 else {
-                    printf( "Unknown version %d\n", opts.version );
+                    printf( "Unknown version %d\n", (int) opts.version );
                     exit(1);
                 }
             }
