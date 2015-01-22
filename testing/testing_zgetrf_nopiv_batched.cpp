@@ -88,6 +88,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount = 1;
 
+    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check; 
@@ -131,9 +132,9 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount);
+            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, queue);
             magma_time = magma_sync_wtime(0);
-            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount);
+            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, queue);
             magma_time = magma_sync_wtime(0) - magma_time;
             magma_perf = gflops / magma_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"

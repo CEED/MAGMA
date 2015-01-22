@@ -47,6 +47,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check; 
 
+    magma_queue_t queue = magma_stream;
     magma_int_t batchCount = opts.batchcount ;
     magma_int_t columns;
     double error, rwork[1];
@@ -91,13 +92,13 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount);
-            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount);
-            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
+            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, queue);
+            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount, queue);
 
             gpu_time = magma_sync_wtime(0);
-            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount);
-            info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount);
+            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, queue);
+            info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount, queue);
             gpu_time = magma_sync_wtime(0) - gpu_time;
             gpu_perf = gflops / gpu_time;
 

@@ -89,6 +89,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount = 1;
 
+    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check; 
@@ -135,11 +136,11 @@ int main( int argc, char** argv)
                =================================================================== */
 
             magma_zsetmatrix( M, columns, h_R, lda, dA, ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount);
-            set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount);
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount, queue);
+            set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount, queue);
             
             magma_time = magma_sync_wtime(0);
-            info = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array,  dinfo_magma, batchCount);
+            info = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array,  dinfo_magma, batchCount, queue);
             magma_time = magma_sync_wtime(0) - magma_time;
             magma_perf = gflops / magma_time;
             
@@ -164,7 +165,7 @@ int main( int argc, char** argv)
                =================================================================== */
 
             magma_zsetmatrix( M, columns, h_R, lda, dA,  ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount);
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount, queue);
 
             cublas_time = magma_sync_wtime(0);
             if(M == N )

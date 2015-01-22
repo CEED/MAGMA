@@ -43,6 +43,7 @@ int main( int argc, char** argv)
 
     magma_int_t batchCount;
 
+    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
@@ -80,9 +81,9 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount);
+            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
             gpu_time = magma_sync_wtime(NULL);
-            info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount);
+            info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount, queue);
             gpu_time = magma_sync_wtime(NULL) - gpu_time;
             gpu_perf = gflops / gpu_time;
             magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));

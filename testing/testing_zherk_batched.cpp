@@ -51,6 +51,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex **C_array = NULL;
     magma_int_t status = 0;
 
+    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
@@ -93,8 +94,8 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( h_C,  magmaDoubleComplex, sizeC );
             TESTING_MALLOC_CPU( h_Cmagma,  magmaDoubleComplex, sizeC  );
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, sizeA );
-            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, sizeC );
+            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*An*batchCount );
+            TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, lddc*N*batchCount );
 
             magma_malloc((void**)&A_array, batchCount * sizeof(*A_array));
             magma_malloc((void**)&C_array, batchCount * sizeof(*C_array));
@@ -109,13 +110,13 @@ int main( int argc, char** argv)
             magma_zsetmatrix( An, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N*batchCount, h_C, ldc, d_C, lddc );
             
-            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount);
-            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount);
+            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, queue);
+            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, queue);
 
             magma_time = magma_sync_wtime( NULL );
             magmablas_zherk_batched(opts.uplo, opts.transA, N, K,
                              alpha, A_array, ldda,
-                             beta,  C_array, lddc, batchCount);
+                             beta,  C_array, lddc, batchCount, queue);
                              
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
