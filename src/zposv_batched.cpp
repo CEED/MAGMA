@@ -79,7 +79,7 @@ magma_zposv_batched(
                   magmaDoubleComplex **dA_array, magma_int_t ldda,
                   magmaDoubleComplex **dB_array, magma_int_t lddb,
                   magma_int_t *dinfo_array,
-                  magma_int_t batchCount)
+                  magma_int_t batchCount, magma_queue_t queue)
 {
     /* Local variables */
     
@@ -105,7 +105,7 @@ magma_zposv_batched(
         return info;
     }
 
-    info = magma_zpotrf_batched( uplo, n, dA_array, ldda, dinfo_array, batchCount);
+    info = magma_zpotrf_batched( uplo, n, dA_array, ldda, dinfo_array, batchCount, queue);
     if ( (info != MAGMA_SUCCESS) ){
         return info;
     }
@@ -127,6 +127,6 @@ magma_zposv_batched(
     free (cpu_info);
 #endif
 
-    info = magma_zpotrs_batched( uplo, n, nrhs, dA_array, ldda, dB_array, lddb,  batchCount );
+    info = magma_zpotrs_batched( uplo, n, nrhs, dA_array, ldda, dB_array, lddb,  batchCount, queue );
     return info;
 }

@@ -72,7 +72,7 @@ extern "C" magma_int_t
 magma_zpotrf_batched(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex **dA_array, magma_int_t ldda,
-    magma_int_t *info_array,  magma_int_t batchCount)
+    magma_int_t *info_array,  magma_int_t batchCount, magma_queue_t queue)
 {
 #define A(i_, j_)  (A + (i_) + (j_)*ldda)   
     cudaMemset(info_array, 0, batchCount*sizeof(magma_int_t));
@@ -138,8 +138,8 @@ magma_zpotrf_batched(
     magma_int_t x_msize = n*nb;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dx,    x_msize * batchCount );
-    zset_pointer(dx_array, dx, 1, 0, 0, x_msize, batchCount);
-    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount);
+    zset_pointer(dx_array, dx, 1, 0, 0, x_msize, batchCount, queue);
+    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
     cudaMemset( dinvA, 0, batchCount * ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB * sizeof(magmaDoubleComplex) );
 
     magmaDoubleComplex **cpuAarray = NULL;
@@ -172,9 +172,9 @@ magma_zpotrf_batched(
             //===============================================
             //  panel factorization
             //===============================================
-            magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount);
-            zset_pointer(dx_array, dx, 1, 0, 0, x_msize, batchCount);
-            zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount);
+            magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount, queue);
+            zset_pointer(dx_array, dx, 1, 0, 0, x_msize, batchCount, queue);
+            zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
 
             #if 0
@@ -195,7 +195,7 @@ magma_zpotrf_batched(
                                dinvA_array, invA_msize,
                                dW0_displ, dW1_displ, dW2_displ,
                                dW3_displ, dW4_displ, 
-                               info_array, j, batchCount, myhandle);
+                               info_array, j, batchCount, myhandle, queue);
             #endif
             if(arginfo != 0 ) goto fin;
             //===============================================
@@ -240,12 +240,12 @@ magma_zpotrf_batched(
                     //-------------------------------------------
                     //          USE BATCHED GEMM(which is a HERK in fact, since it only access the lower part)
                     //-------------------------------------------
-                    magma_zdisplace_pointers(dA_displ, dA_array, ldda, j+ib, j, batchCount);
-                    magma_zdisplace_pointers(dW1_displ, dA_array, ldda, j+ib, j+ib, batchCount);
+                    magma_zdisplace_pointers(dA_displ, dA_array, ldda, j+ib, j, batchCount, queue);
+                    magma_zdisplace_pointers(dW1_displ, dA_array, ldda, j+ib, j+ib, batchCount, queue);
                     magmablas_zherk_batched(uplo, MagmaNoTrans, n-j-ib, ib,
                                           d_alpha, dA_displ, ldda, 
                                           d_beta,  dW1_displ, ldda, 
-                                          batchCount);
+                                          batchCount, queue);
                 }
             } 
             //gpu_time = magma_sync_wtime(NULL) - gpu_time;

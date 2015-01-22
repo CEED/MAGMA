@@ -64,7 +64,7 @@ magma_zpotrs_batched(
                   magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
                   magmaDoubleComplex **dA_array, magma_int_t ldda,
                   magmaDoubleComplex **dB_array, magma_int_t lddb,
-                  magma_int_t batchCount)
+                  magma_int_t batchCount, magma_queue_t queue)
 {
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t info = 0;
@@ -113,8 +113,8 @@ magma_zpotrs_batched(
     magma_int_t dwork_msize = n*nrhs;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
-    zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount);
-    zset_pointer(dinvA_array, dinvA, ((n+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, invA_msize, batchCount);
+    zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
+    zset_pointer(dinvA_array, dinvA, ((n+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
@@ -132,7 +132,7 @@ magma_zpotrs_batched(
                 dinvA_array,  invA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount);
+                1, batchCount, queue);
 
         // solve U X = dwork ==> X = U^-1 * dwork
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
@@ -144,7 +144,7 @@ magma_zpotrs_batched(
                 dinvA_array,  invA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount);
+                1, batchCount, queue);
     }
     else{
         // A = L L^T
@@ -158,7 +158,7 @@ magma_zpotrs_batched(
                 dinvA_array,  invA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount);
+                1, batchCount, queue);
 
         // solve L^{T}X= dwork ==> X = L^{-T} dwork
         magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, 1,
@@ -170,7 +170,7 @@ magma_zpotrs_batched(
                 dinvA_array,  invA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount);
+                1, batchCount, queue);
     }
 
 

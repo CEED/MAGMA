@@ -109,7 +109,7 @@ magma_zgerbt_batched(
     magmaDoubleComplex **dA_array, magma_int_t ldda,
     magmaDoubleComplex **dB_array, magma_int_t lddb,
     magmaDoubleComplex *U, magmaDoubleComplex *V,
-    magma_int_t *info, magma_int_t batchCount)
+    magma_int_t *info, magma_int_t batchCount, magma_queue_t queue)
 {
     /* Function Body */
     *info = 0;
@@ -157,13 +157,13 @@ magma_zgerbt_batched(
     magma_zsetvector( 2*n, V, 1, dv, 1);
 
     /* Perform Partial Random Butterfly Transformation on the GPU*/
-    magmablas_zprbt_batched(n, dA_array, ldda, du, dv, batchCount);
+    magmablas_zprbt_batched(n, dA_array, ldda, du, dv, batchCount, queue);
 
     /* Compute U^T.b on the GPU*/
 
     // TODO fix for multiple RHS
     for(int i= 0; i < nrhs; i++)
-        magmablas_zprbt_mtv_batched(n, du, dB_array, batchCount);
+        magmablas_zprbt_mtv_batched(n, du, dB_array, batchCount, queue);
 
     magma_free( du );
     magma_free( dv );
