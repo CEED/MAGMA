@@ -21,7 +21,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgelqf
@@ -87,7 +87,7 @@ int main( int argc, char** argv)
             if (info != 0)
                 printf("magma_zgelqf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-            
+
             /* =====================================================================
                Check the result, following zlqt01 except using the reduced Q.
                This works for any M,N (square, tall, wide).

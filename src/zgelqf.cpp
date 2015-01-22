@@ -10,6 +10,8 @@
 */
 #include "common_magma.h"
 
+#define COMPLEX
+
 /**
     Purpose
     -------
@@ -69,7 +71,7 @@
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
-                  if INFO = -10 internal GPU memory allocation failed.
+                  or another error occured, such as memory allocation failed.
 
     Further Details
     ---------------
@@ -96,16 +98,20 @@ magma_zgelqf(
 {
     #define  dA(i_, j_)  (dA  + (i_) + (j_)*ldda)
     #define dAT(i_, j_)  (dAT + (i_) + (j_)*ldda)
-
+    
+    const magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    const magma_int_t        ione  = 1;
+    MAGMA_UNUSED( ione );  // used only for complex
+    
     magmaDoubleComplex_ptr dA, dAT;
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
-    magma_int_t maxm, maxn, maxdim, nb;
+    magma_int_t min_mn, maxm, maxn, maxdim, nb;
     magma_int_t iinfo, ldda, lddat;
     int lquery;
 
     /* Function Body */
     *info = 0;
     nb = magma_get_zgelqf_nb(m);
+    min_mn = min(m,n);
 
     work[0] = MAGMA_Z_MAKE( (double)(m*nb), 0 );
     lquery = (lwork == -1);
@@ -127,7 +133,7 @@ magma_zgelqf(
     }
 
     /*  Quick return if possible */
-    if (min(m, n) == 0) {
+    if (min_mn == 0) {
         work[0] = c_one;
         return *info;
     }
@@ -168,7 +174,16 @@ magma_zgelqf(
     }
 
     // factor QR
-    magma_zgeqrf2_gpu(n, m, dAT(0,0), lddat, tau, &iinfo);
+    magma_zgeqrf2_gpu( n, m, dAT(0,0), lddat, tau, &iinfo );
+    assert( iinfo >= 0 );
+    if ( iinfo > 0 ) {
+        *info = iinfo;
+    }
+    
+    // conjugate tau
+    #ifdef COMPLEX
+    lapackf77_zlacgv( &min_mn, tau, &ione );
+    #endif
 
     // undo transpose
     if (maxdim*maxdim < 2*maxm*maxn) {

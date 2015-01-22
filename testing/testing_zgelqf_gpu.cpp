@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     double           Anorm, error=0, error2=0;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     magmaDoubleComplex_ptr d_A;
-    magma_int_t M, N, n2, lda, lwork, info, min_mn, nb;
+    magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn, nb;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
 
@@ -58,6 +58,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             min_mn = min(M, N);
             lda    = M;
+            ldda   = ((M+31)/32)*32;
             n2     = lda*N;
             nb     = magma_get_zgeqrf_nb(M);
             gflops = FLOPS_ZGELQF( M, N ) / 1e9;
@@ -74,18 +75,18 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             
-            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, lda*N  );
+            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &N, h_A, &lda, h_R, &lda );
             
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            magma_zsetmatrix( M, N, h_R, lda, d_A, lda );
+            magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             gpu_time = magma_wtime();
-            magma_zgelqf_gpu( M, N, d_A, lda, tau, h_work, lwork, &info);
+            magma_zgelqf_gpu( M, N, d_A, ldda, tau, h_work, lwork, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -93,62 +94,41 @@ int main( int argc, char** argv)
                        (int) info, magma_strerror( info ));
             
             /* =====================================================================
-               Check the result, following zqlt01 except using the reduced Q.
+               Check the result, following zlqt01 except using the reduced Q.
                This works for any M,N (square, tall, wide).
                =================================================================== */
             if ( opts.check ) {
-                magma_int_t ldq = M;
-                magma_int_t ldl = min_mn;
+                magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
+                
+                magma_int_t ldq = min_mn;
+                magma_int_t ldl = M;
                 magmaDoubleComplex *Q, *L;
                 double *work;
-                TESTING_MALLOC_CPU( Q,    magmaDoubleComplex, ldq*min_mn );  // M by K
-                TESTING_MALLOC_CPU( L,    magmaDoubleComplex, ldl*N );       // K by N
+                TESTING_MALLOC_CPU( Q,    magmaDoubleComplex, ldq*N );       // K by N
+                TESTING_MALLOC_CPU( L,    magmaDoubleComplex, ldl*min_mn );  // M by K
                 TESTING_MALLOC_CPU( work, double,             min_mn );
                 
-                // copy M by K matrix V to Q (copying diagonal, which isn't needed) and
-                // copy K by N matrix L
-                lapackf77_zlaset( "Full", &min_mn, &N, &c_zero, &c_zero, L, &ldl );
-                if ( M >= N ) {
-                    // for M=5, N=3: A = [ V V V ]  <= V full block (M-N by K)
-                    //          K=N      [ V V V ]
-                    //                   [ ----- ]
-                    //                   [ L V V ]  <= V triangle (N by K, copying diagonal too)
-                    //                   [ L L V ]  <= L triangle (K by N)
-                    //                   [ L L L ]
-                    magma_int_t M_N = M - N;
-                    lapackf77_zlacpy( "Full",  &M_N, &min_mn,  h_R,      &lda,  Q,      &ldq );
-                    lapackf77_zlacpy( "Upper", &N,   &min_mn, &h_R[M_N], &lda, &Q[M_N], &ldq );
-                    
-                    lapackf77_zlacpy( "Lower", &min_mn, &N,   &h_R[M_N], &lda,  L,      &ldl );
-                }
-                else {
-                    // for M=3, N=5: A = [ L L | L V V ] <= V triangle (K by K)
-                    //     K=M           [ L L | L L V ] <= L triangle (K by M)
-                    //                   [ L L | L L L ]
-                    //                     ^^^============= L full block (K by N-M)
-                    magma_int_t N_M = N - M;
-                    lapackf77_zlacpy( "Upper", &M, &min_mn,  &h_R[N_M*lda], &lda,  Q,          &ldq );
-                    
-                    lapackf77_zlacpy( "Full",  &min_mn, &N_M, h_R,          &lda,  L,          &ldl );
-                    lapackf77_zlacpy( "Lower", &min_mn, &M,  &h_R[N_M*lda], &lda, &L[N_M*ldl], &ldl );
-                }
-                
-                // generate M by K matrix Q, where K = min(M,N)
-                lapackf77_zungql( &M, &min_mn, &min_mn, Q, &ldq, tau, h_work, &lwork, &info );
+                // generate K by N matrix Q, where K = min(M,N)
+                lapackf77_zlacpy( "Upper", &min_mn, &N, h_R, &lda, Q, &ldq );
+                lapackf77_zunglq( &min_mn, &N, &min_mn, Q, &ldq, tau, h_work, &lwork, &info );
                 assert( info == 0 );
                 
-                // error = || L - Q^H*A || / (N * ||A||)
-                blasf77_zgemm( "Conj", "NoTrans", &min_mn, &N, &M,
-                               &c_neg_one, Q, &ldq, h_A, &lda, &c_one, L, &ldl );
-                Anorm = lapackf77_zlange( "1", &M,      &N, h_A, &lda, work );
-                error = lapackf77_zlange( "1", &min_mn, &N, L,   &ldl, work );
+                // copy N by K matrix L
+                lapackf77_zlaset( "Upper", &M, &min_mn, &c_zero, &c_zero, L, &ldl );
+                lapackf77_zlacpy( "Lower", &M, &min_mn, h_R, &lda,        L, &ldl );
+                
+                // error = || L - A*Q^H || / (N * ||A||)
+                blasf77_zgemm( "NoTrans", "Conj", &M, &min_mn, &N,
+                               &c_neg_one, h_A, &lda, Q, &ldq, &c_one, L, &ldl );
+                Anorm = lapackf77_zlange( "1", &M, &N,      h_A, &lda, work );
+                error = lapackf77_zlange( "1", &M, &min_mn, L,   &ldl, work );
                 if ( N > 0 && Anorm > 0 )
                     error /= (N*Anorm);
                 
-                // set L = I (K by K identity), then L = I - Q^H*Q
-                // error = || I - Q^H*Q || / N
+                // set L = I (K by K), then L = I - Q*Q^H
+                // error = || I - Q*Q^H || / N
                 lapackf77_zlaset( "Upper", &min_mn, &min_mn, &c_zero, &c_one, L, &ldl );
-                blasf77_zherk( "Upper", "Conj", &min_mn, &M, &d_neg_one, Q, &ldq, &d_one, L, &ldl );
+                blasf77_zherk( "Upper", "NoTrans", &min_mn, &N, &d_neg_one, Q, &ldq, &d_one, L, &ldl );
                 error2 = lapackf77_zlanhe( "1", "Upper", &min_mn, L, &ldl, work );
                 if ( N > 0 )
                     error2 /= N;
