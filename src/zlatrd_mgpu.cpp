@@ -207,7 +207,7 @@ magma_zlatrd_mgpu(
     const magma_int_t ione = 1;
 
     magmaDoubleComplex value;
-    magma_int_t dev, idw;
+    magma_int_t dev;
     magma_int_t i, i_n, i_1, iw;
     magmaDoubleComplex alpha;
     magmaDoubleComplex *f;
@@ -325,7 +325,7 @@ magma_zlatrd_mgpu(
         for (i = 0; i < nb; ++i) {
             /* Update A(i:n,i) */
             i_n = n - i;
-            idw = ((offset+i)/nb)%ngpu;
+            //idw = ((offset+i)/nb)%ngpu;
             if ( i > 0 ) {
                 trace_cpu_start( 0, "gemv", "gemv" );
                 magmaDoubleComplex wii = -conj( *W(i, i-1) );

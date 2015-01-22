@@ -44,15 +44,7 @@ void magmablas_zhemm_mgpu_spec(
     assert( nqueue >= ngpu );
     assert( nbevents >= ngpu*ngpu );
     
-    magmaDoubleComplex_ptr dwork1[MagmaMaxGPUs];
-    magmaDoubleComplex_ptr dwork2[MagmaMaxGPUs];
-
-
     magma_int_t lddwork = lddc;
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        dwork1[dev] = dwork[dev];
-        dwork2[dev] = dwork[dev]+n*lddwork;
-    }
     assert( dworksiz >= (2*n*lddwork) );
 
 

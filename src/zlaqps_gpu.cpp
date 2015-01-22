@@ -129,10 +129,9 @@ magma_zlaqps_gpu(
 
     double lsticc;
     magmaDouble_ptr dlsticcs;
-    magma_int_t lastrk;
     magma_dmalloc( &dlsticcs, 1+256*(n+255)/256 );
 
-    lastrk = min( m, n + offset );
+    //lastrk = min( m, n + offset );
     tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
     lsticc = 0;

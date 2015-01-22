@@ -185,7 +185,7 @@ magma_zheevd_gpu(
     magma_int_t lower;
     magma_int_t llrwk;
     magma_int_t wantz;
-    magma_int_t indwk2, llwrk2;
+    //magma_int_t indwk2;
     magma_int_t iscale;
     double safmin;
     double bignum;
@@ -330,9 +330,9 @@ magma_zheevd_gpu(
     // zunmtr work: tau (n) + z (n^2) + llwrk2 (n or n*nb)  ==>  2n + n^2, or n + n*nb + n^2
     indtau = 0;
     indwrk = indtau + n;
-    indwk2 = indwrk + n*n;
+    //indwk2 = indwrk + n*n;
     llwork = lwork - indwrk;
-    llwrk2 = lwork - indwk2;
+    //llwrk2 = lwork - indwk2;
 
     magma_timer_t time=0;
     timer_start( time );

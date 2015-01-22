@@ -113,6 +113,8 @@ magma_zssssm_gpu(
     magmaDoubleComplex_ptr dA1T, dA2T;
     magma_trans_t transL;
     int lddl2i, lddl2j;
+    
+    MAGMA_UNUSED( ip );  // used only if NOSWAPBLK
 
     /* Check input arguments */
     *info = 0;

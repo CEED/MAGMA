@@ -154,6 +154,8 @@ magma_zunmbr(
     magma_int_t i1, i2, nb, mi, ni, nq, nq_1, nw, iinfo, lwkopt;
     magma_int_t left, notran, applyq, lquery;
     magma_trans_t transt;
+    
+    MAGMA_UNUSED( nq_1 );  // used only in version 1
 
     *info = 0;
     applyq = (vect  == MagmaQ);
@@ -256,8 +258,8 @@ magma_zunmbr(
                 i1 = 0;
                 i2 = 1;
             }
-            nq_1 = nq - 1;
             #if VERSION == 1
+            nq_1 = nq - 1;
             lapackf77_zunmqr( lapack_side_const(side), lapack_trans_const(trans),
                               &mi, &ni, &nq_1, A(1,0), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
             #else
@@ -298,8 +300,8 @@ magma_zunmbr(
                 i1 = 0;
                 i2 = 1;
             }
-            nq_1 = nq - 1;
             #if VERSION == 1
+            nq_1 = nq - 1;
             lapackf77_zunmlq( lapack_side_const(side), lapack_trans_const(transt),
                               &mi, &ni, &nq_1, A(0,1), &lda, tau, C(i1,i2), &ldc, work, &lwork, &iinfo);
             #else
