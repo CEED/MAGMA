@@ -311,7 +311,7 @@ blas = (
 	
 	# lower/upper
 	('testing_zsymv',   '-L             -c',  n,    ''),
-	('#testing_zsymv',  '-U             -c',  n,    'upper not implemented'),
+	('testing_zsymv',   '-U             -c',  n,    ''),
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
 	('testing_ztrmm',   '-SL -L    -DN  -c',  mn,   'cublas only'),
@@ -384,7 +384,7 @@ blas = (
 	('testing_zhemm_mgpu',          '-L -c',  n,    ''),
 	('testing_zhemm_mgpu',          '-U -c',  n,    ''),
 	('testing_zhemv_mgpu',          '-L -c',  n,    ''),
-	('#testing_zhemv_mgpu',         '-U -c',  n,    'upper not implemented'),
+	('testing_zhemv_mgpu',          '-U -c',  n,    ''),
 	('testing_zher2k_mgpu',         '-L -c',  n,    ''),
 	('testing_zher2k_mgpu',         '-U -c',  n,    ''),
 	

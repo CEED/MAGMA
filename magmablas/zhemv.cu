@@ -7,11 +7,15 @@
        
        zsymv.cu is nearly identical to zhemv.cu, just change names and drop cuConj.
        
+       zhemv_kernel_U (upper) in zhemv_upper.cu is very similar to
+       zhemv_kernel_L (lower) in zhemv.cu; diff the two files to compare.
+       
        @precisions normal z -> s d c
        
        @author Mark Gates
 */
 #include "common_magma.h"
+#include "commonblas_z.h"
 
 #define PRECISION_z
 
@@ -25,9 +29,9 @@
 /*******************************************************************************
     Lower case, compute block multiply, work = A*x, for any size n:
     
-           [ A11*x1   A12*x2             A13*x3                    ]   [ A11 A12 A13 ]   [ x1 ]
-    work = [  ---    (A21*x1 + A22*x2)   A23*x3                    ] = [ A21 A22 A23 ] * [ x2 ]
-           [  ---      ---              (A31*x1 + A32*x2 + A33*x3) ]   [ A31 A32 A33 ]   [ x3 ]
+           [ (A11*x1)   (A21^H*x2)          (A31^H*x3)                 ]   [ A11  A21^H  A31^H ]   [ x1 ]
+    work = [   ---      (A21*x1 + A22*x2)   (A32^H*x3)                 ] = [ A21  A22    A32^H ] * [ x2 ]
+           [   ---        ---               (A31*x1 + A32*x2 + A33*x3) ]   [ A31  A32    A33   ]   [ x3 ]
     
     Uses a 64x4 thread block.
     For     diagonal tiles, covers a 64x64 tile using three 32x32 tiles (plus one gets transposed).
@@ -42,9 +46,9 @@
     when multiplying.
     
     Previously:
-           [ A11*x1    ---                                         ]
-    work = [ A12*x2  (A21*x1 + A22*x2)    ---                      ]
-           [ A13*x3   A23*x3            (A31*x1 + A32*x2 + A33*x3) ]
+           [ (A11*x1)       ---                                          ]
+    work = [ (A21^H*x2)   (A21*x1 + A22*x2)     ---                      ]
+           [ (A31^H*x3)   (A32^H*x3)          (A31*x1 + A32*x2 + A33*x3) ]
     which doesn't work as well because that has dimension blocks*NB by blocks,
     where blocks*NB >= n, and it can be that blocks*NB > lda, so it won't fit in
     lda*blocks space. This is why it used to need lwork = lda*(blocks + 1).
@@ -52,9 +56,9 @@
 __global__ void
 zhemv_kernel_L(
     int n,
-    const magmaDoubleComplex * __restrict__ A, int lda,
-    const magmaDoubleComplex * __restrict__ x, int incx,
-    magmaDoubleComplex * __restrict__ work)
+    magmaDoubleComplex const * __restrict__ A, int lda,
+    magmaDoubleComplex const * __restrict__ x, int incx,
+    magmaDoubleComplex       * __restrict__ work)
 {
 #if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c) || (__CUDA_ARCH__ >= 200)
 
@@ -88,28 +92,30 @@ zhemv_kernel_L(
     // sA must be at least half_NB_X*bank_shift = 32x33 = 1056;
     // quarter_NB_X*(NB_X + 2) = 16*(64 + 2) = 1056
     __shared__ magmaDoubleComplex sA [quarter_NB_X][NB_X + 3]; /* Why +3? seems it only needs +2. Does +3 reduce bank conflicts? */
-    __shared__ magmaDoubleComplex sx [NB_X];  // for x[ blk ]
-    __shared__ magmaDoubleComplex sx2[NB_X];  // for x[ jj ], which cycles over all blocks left of diag
+    __shared__ magmaDoubleComplex sx_blk[NB_X];  // for x[ blk ]
+    __shared__ magmaDoubleComplex sx_jj [NB_X];  // for x[ jj ], which cycles over all blocks left of diag
 
     magmaDoubleComplex rA[4];
     magmaDoubleComplex psums_t[4];
 
     // --------------------
-    // load 64x1 block x(blk_ind + 0:63) into sx
+    // load 64x1 block x(blk_ind + 0:63) into sx_blk
     x += (blk_ind + tx)*incx;  // x is x(blk_ind + tx)
     if ( ty == 0 ) {
-        if ( (partial && tx >= partial) ) {
-            sx[tx] = MAGMA_Z_ZERO;
+        if ( partial == 0 || tx < partial ) {
+            sx_blk[tx] = x[0];
         }
         else {
-            sx[tx] = x[0];
+            sx_blk[tx] = MAGMA_Z_ZERO;
         }
     }
 
     // --------------------
     // move to block row
+    work += blk*lda;     // work is work(0, blk)
+    
     A += blk_ind;        // A is A(blk_ind, 0)
-    A += ty2*lda + tx2;  // A is A(blk_ind + tx2,           ty2)
+    A += ty2*lda + tx2;  // A is A(blk_ind + tx2, ty2)
     
     // move to 32x32 diag block
     A += blk_ind*lda;    // A is A(blk_ind + tx2, blk_ind + ty2)
@@ -155,7 +161,7 @@ zhemv_kernel_L(
     psum = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
-        psum += sA32(tx2, ty2*4 + j) * sx[ty2*4 + j];
+        psum += sA32(tx2, ty2*4 + j) * sx_blk[ty2*4 + j];
     }
     __syncthreads();
 
@@ -212,7 +218,7 @@ zhemv_kernel_L(
     psum = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
-        psum += sA32(tx2, ty2*4 + j) * sx[half_NB_X + ty2*4 + j];
+        psum += sA32(tx2, ty2*4 + j) * sx_blk[half_NB_X + ty2*4 + j];
     }
     __syncthreads();
     
@@ -262,7 +268,7 @@ zhemv_kernel_L(
     psum = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
-        psum += sA32(tx2, ty2 + j*8) * sx[j*8 + ty2];
+        psum += sA32(tx2, ty2 + j*8) * sx_blk[j*8 + ty2];
     }
     //__syncthreads();  // no sync needed here
 
@@ -270,7 +276,7 @@ zhemv_kernel_L(
     psum_t = MAGMA_Z_ZERO;
     #pragma unroll
     for(int j=0; j < 4; j++) {
-        psum_t += cuConj( sA32(ty2*4 + j, tx2) ) * sx[half_NB_X + ty2*4 + j];
+        psum_t += cuConj( sA32(ty2*4 + j, tx2) ) * sx_blk[half_NB_X + ty2*4 + j];
     }
     __syncthreads();
 
@@ -320,14 +326,12 @@ zhemv_kernel_L(
     const int tx4 = td % quarter_NB_X;
     const int ty4 = td / quarter_NB_X;
 
-    work += tx4 + blk*lda;  // work is work(tx4, blk)
-    
     // cycle over blocks jj left of diagonal, in block row blk
     for(int jj=0; jj < blk; ++jj) {
-        // load 64x1 block x(jj_ind + 0:63) into sx2
-        // since this block is left of diagonal, x cannot be partial rows
+        // load 64x1 block x(jj_ind + 0:63) into sx_jj
+        // since this block is left of diagonal, x must have all NB rows
         if ( ty == 0 ) {
-            sx2[tx] = x[jj*NB_X*incx];
+            sx_jj[tx] = x[jj*NB_X*incx];
         }
         __syncthreads();
 
@@ -335,21 +339,21 @@ zhemv_kernel_L(
             // load 64x16 block of A into rA, 4 elements per thread,
             // as four 64x4 sections in parallel:
             // columns 0,4,8,12; then 1,5,9,13; then 2,6,10,14; then 3,7,11,15
-            // since this block is left of diagonal, it has full NB columns,
-            // and block of x must have full NB rows.
+            // since this block is left of diagonal, it has all NB columns,
+            // and block of x must have all NB rows.
             #pragma unroll
             for(int j=0; j < 4; j++) {
                 rA[j] = A[j*lda];
             }
 
-            // 1) multiply 64x16 block A_{blk,jj} * x2_jj
+            // 1) multiply 64x16 block A_{blk,jj} * x_jj
             //    each thread does partial row rA(tx + 16*k, ty*4 + 16*k : ty*4 + 3 + 16*k)
             // 2) multiply transposed 16x64 block A_{blk,jj}^H * x_blk,
             //    storing each product Aji*xi to sA(j,i)
             #pragma unroll
             for(int j=0; j < 4; j++) {
-                total += rA[j] * sx2[quarter_NB_X*k + ty*4 + j];  // y_blk = A_{blk,jj}   * x2_jj
-                sA16(ty*4 + j, tx) = cuConj( rA[j] ) * sx[tx];    // y_jj  = A_{blk,jj}^H * x_blk
+                total += rA[j] * sx_jj[quarter_NB_X*k + ty*4 + j];  // y_blk = A_{blk,jj}   * x_jj
+                sA16(ty*4 + j, tx) = cuConj( rA[j] ) * sx_blk[tx];  // y_jj  = A_{blk,jj}^H * x_blk
             }
             __syncthreads();
 
@@ -367,9 +371,11 @@ zhemv_kernel_L(
             // store partial row sums of transposed result, y_jj (locally)
             psums_t[k] = psum_t;
 
-            // move to next 64x16 block
-            A += lda * quarter_NB_X;  // A is A(blk_ind + tx#, jj*NB_x + k*NB_X/4 + 4*ty), # or partial
+            // move right to next 64x16 block
+            A += lda * quarter_NB_X;  // A is A(blk_ind + tx#, jj*NB_x + (k+1)*NB_X/4 + 4*ty), # tx or partial
         }
+        // already at next 64x64 block
+        // A is A(blk_ind + tx#, (jj+1)*NB_x + 4*ty), # tx or partial
 
         // store partial row sums of transposed result, y_jj
         #pragma unroll
@@ -380,24 +386,21 @@ zhemv_kernel_L(
         
         // sum up partial row sums of transposed result, y_jj, and store final total to workspace
         // thread (tx4,ty4) where ty4 < 4 sums row tx4 + ty4*16
-        // since this is the transposed block above the diagonal, it cannot be partial rows
+        // since this is the transposed block above the diagonal, it must have all NB rows
         if ( ty4 < 4 ) {
-            int k = ty4*quarter_NB_X;
-            psum_t = sA16(tx4,  0 + k) + sA16(tx4,  1 + k)
-                   + sA16(tx4,  2 + k) + sA16(tx4,  3 + k)
-                   + sA16(tx4,  4 + k) + sA16(tx4,  5 + k)
-                   + sA16(tx4,  6 + k) + sA16(tx4,  7 + k)
-                   + sA16(tx4,  8 + k) + sA16(tx4,  9 + k)
-                   + sA16(tx4, 10 + k) + sA16(tx4, 11 + k)
-                   + sA16(tx4, 12 + k) + sA16(tx4, 13 + k)
-                   + sA16(tx4, 14 + k) + sA16(tx4, 15 + k);
-            work[jj*NB_X + k] = psum_t;  // store at work( jj*NB_X + tx4 + ty4*16, blk )
+            int ty4_nb4 = ty4*quarter_NB_X;
+            psum_t = sA16(tx4,  0 + ty4_nb4) + sA16(tx4,  1 + ty4_nb4)
+                   + sA16(tx4,  2 + ty4_nb4) + sA16(tx4,  3 + ty4_nb4)
+                   + sA16(tx4,  4 + ty4_nb4) + sA16(tx4,  5 + ty4_nb4)
+                   + sA16(tx4,  6 + ty4_nb4) + sA16(tx4,  7 + ty4_nb4)
+                   + sA16(tx4,  8 + ty4_nb4) + sA16(tx4,  9 + ty4_nb4)
+                   + sA16(tx4, 10 + ty4_nb4) + sA16(tx4, 11 + ty4_nb4)
+                   + sA16(tx4, 12 + ty4_nb4) + sA16(tx4, 13 + ty4_nb4)
+                   + sA16(tx4, 14 + ty4_nb4) + sA16(tx4, 15 + ty4_nb4);
+            work[jj*NB_X + tx4 + ty4_nb4] = psum_t;  // store at work( jj*NB_X + tx4 + ty4*16, blk )
         }
         __syncthreads();
     }
-
-    work -= tx4;  // work is work(0,  blk)
-    work += tx;   // work is work(tx, blk)
 
     // store row sums
     sA16(ty, tx) = total;
@@ -409,16 +412,18 @@ zhemv_kernel_L(
               + sA16(1, tx)
               + sA16(2, tx)
               + sA16(3, tx);
-        work[blk*NB_X] = total;  // store at work( blk*NB_X + tx, blk )
+        work[blk*NB_X + tx] = total;  // store at work( blk*NB_X + tx, blk )
     }
 #endif  /* PRECISION_[sdc] || (__CUDA_ARCH__ >= 200) */
 }
+// end zhemv_kernel_L
 
 
 /**************************************************************
     Lower case, sum up final results
+    Each block sums one block row; each thread sums one row.
     
-    On input:
+    On input (for 3 blocks):
            [ (A11*x1)   (A21^H*x2)          (A31^H*x3)                 ]
     work = [   ---      (A21*x1 + A22*x2)   (A32^H*x3)                 ]
            [   ---        ---               (A31*x1 + A32*x2 + A33*x3) ]
@@ -453,31 +458,6 @@ zhemv_kernel_L_sum(
         }
         y[ind * incy] = beta*y[ind * incy] + alpha*Ax;
     }
-}
-
-
-/**************************************************************
- *  Lower case, launch kernels
- */
-extern "C"
-void magmablas_zhemv_L(
-    magma_int_t n, magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr dy, magma_int_t incy,
-    magmaDoubleComplex_ptr dwork)
-{
-    magma_int_t blocks = (n - 1)/NB_X + 1;
-    dim3 grid( blocks, 1, 1 );
-
-    dim3 threads( NB_X, NB_Y, 1 );
-    zhemv_kernel_L<<< grid, threads, 0, magma_stream >>>
-        (n, dA, ldda, dx, incx, dwork);
-
-    dim3 threads_sum( NB_X, 1, 1 );
-    zhemv_kernel_L_sum<<< grid, threads_sum, 0, magma_stream >>>
-        (n, alpha, ldda, beta, dy, incy, dwork);
 }
 
 
@@ -609,7 +589,7 @@ magmablas_zhemv_work(
     // [sdc] precisions, or z precision with CUDA ARCH 2.x
     int upper = (uplo == MagmaUpper);
 
-    magma_int_t blocks = (n - 1)/NB_X + 1;
+    magma_int_t blocks = ceildiv( n, NB_X );
     magma_int_t lwmin  = ldda*blocks;
 
     /*
@@ -641,15 +621,26 @@ magmablas_zhemv_work(
     if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
         return info;
 
-    /* TODO: Upper case is not implemented in MAGMA */
+    dim3 grid( blocks, 1, 1 );
+    dim3 threads( NB_X, NB_Y, 1 );
+    dim3 threads_sum( NB_X, 1, 1 );
+
     if ( upper ) {
-        magma_zhemv( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy);
+        zhemv_kernel_U<<< grid, threads, 0, magma_stream >>>
+            (n, dA, ldda, dx, incx, dwork);
+        zhemv_kernel_U_sum<<< grid, threads_sum, 0, magma_stream >>>
+            (n, alpha, ldda, beta, dy, incy, dwork);
     }
     else {
-        magmablas_zhemv_L(n, alpha, dA, ldda, dx, incx, beta, dy, incy, dwork);
+        zhemv_kernel_L<<< grid, threads, 0, magma_stream >>>
+            (n, dA, ldda, dx, incx, dwork);
+        zhemv_kernel_L_sum<<< grid, threads_sum, 0, magma_stream >>>
+            (n, alpha, ldda, beta, dy, incy, dwork);
     }
+    
     return info;
 }
+// end magmablas_zhemv_work
 
 
 /**
@@ -783,24 +774,21 @@ magmablas_zhemv(
     if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
         return info;
 
-    /* TODO: Upper case is not implemented in MAGMA */
-    if ( upper ) {
-        magma_zhemv( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy);
-    }
-    else {
-        magmaDoubleComplex_ptr dwork;
-        magma_int_t blocks = (n - 1)/NB_X + 1;
-        magma_int_t lwork  = ldda*blocks;
+    magmaDoubleComplex_ptr dwork;
+    magma_int_t blocks = ceildiv( n, NB_X );
+    magma_int_t lwork  = ldda*blocks;
 
-        magma_zmalloc( &dwork, lwork );
-        if ( dwork == NULL ) {
-            info = MAGMA_ERR_DEVICE_ALLOC;
-            magma_xerbla( __func__, -(info) );
-        }
-        else {
-            magmablas_zhemv_L(n, alpha, dA, ldda, dx, incx, beta, dy, incy, dwork);
-        }
-        magma_free( dwork );
+    magma_zmalloc( &dwork, lwork );
+    if ( dwork == NULL ) {
+        info = MAGMA_ERR_DEVICE_ALLOC;
+        magma_xerbla( __func__, -(info) );
+        return info;
     }
+    
+    magmablas_zhemv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy, dwork, lwork );
+    
+    magma_free( dwork );
+    
     return info;
 }
+// end magmablas_zhemv

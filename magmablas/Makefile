@@ -50,6 +50,7 @@ ZSRC := \
 	zgerbt_kernels.cu	\
 	zgerbt.cu		\
 	zhemv.cu		\
+	zhemv_upper.cu		\
 	zlacpy.cu		\
 	zlacpy_cnjg.cu		\
 	zlag2c.cu		\
@@ -80,6 +81,7 @@ ZSRC := \
 	zswapblk.cu		\
 	zswapdblk.cu		\
 	zsymv.cu		\
+	zsymv_upper.cu		\
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
 	ztranspose.cu		\
@@ -117,6 +119,7 @@ ZSRC += \
 	zgetmatrix_transpose_mgpu.cu	\
 	zsetmatrix_transpose_mgpu.cu	\
 	zhemv_mgpu.cu			\
+	zhemv_mgpu_upper.cu		\
 	zhemm_mgpu.cpp			\
 	zhemm_mgpu_spec.cpp		\
 	zher2k_mgpu.cpp			\

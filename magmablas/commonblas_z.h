@@ -79,6 +79,63 @@ magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt,
 __global__ void
 magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c);
 
+
+// kernels used in zhemv
+__global__ void
+zhemv_kernel_U(
+    int n,
+    magmaDoubleComplex const * __restrict__ A, int lda,
+    magmaDoubleComplex const * __restrict__ x, int incx,
+    magmaDoubleComplex       * __restrict__ work);
+
+__global__ void
+zhemv_kernel_U_sum(
+    int n,
+    magmaDoubleComplex alpha,
+    int lda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex       * __restrict__ y, int incy,
+    magmaDoubleComplex const * __restrict__ work );
+
+// kernels used in zsymv
+__global__ void
+zsymv_kernel_U(
+    int n,
+    magmaDoubleComplex const * __restrict__ A, int lda,
+    magmaDoubleComplex const * __restrict__ x, int incx,
+    magmaDoubleComplex       * __restrict__ work);
+
+__global__ void
+zsymv_kernel_U_sum(
+    int n,
+    magmaDoubleComplex alpha,
+    int lda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex       * __restrict__ y, int incy,
+    magmaDoubleComplex const * __restrict__ work );
+
+// kernels used in zhemv_mgpu
+__global__ void
+zhemv_kernel_U_mgpu(
+    int n,
+    magmaDoubleComplex const * __restrict__ A, int lda,
+    magmaDoubleComplex const * __restrict__ x, int incx,
+    magmaDoubleComplex       * __restrict__ work,
+    int my_gpu_id,
+    int ngpu,
+    int block_offset );
+
+__global__ void
+zhemv_kernel_U_mgpu_sum(
+    int n,
+    magmaDoubleComplex alpha,
+    int lda,
+    magmaDoubleComplex       * __restrict__ y, int incy,
+    magmaDoubleComplex const * __restrict__ work,
+    int my_gpu_id,
+    int ngpu,
+    int block_offset);
+
 #ifdef __cplusplus
 }
 #endif
