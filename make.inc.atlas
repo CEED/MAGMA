@@ -30,8 +30,8 @@ RANLIB    = ranlib
 FPIC      = -fPIC
 
 CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -fopenmp -DMAGMA_SETAFFINITY
-FFLAGS    = -O3 $(FPIC) -DADD_ -Wall
-F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
+FFLAGS    = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
+F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
 LDFLAGS   =     $(FPIC)              -fopenmp
 

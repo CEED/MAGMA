@@ -42,8 +42,8 @@ RANLIB    = ranlib
 FPIC      = -fPIC
 
 CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall
-FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall
-F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -x f95-cpp-input
+FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
+F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
 LDFLAGS   = -m64     $(FPIC)
 
