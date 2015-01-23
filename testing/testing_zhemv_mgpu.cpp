@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 {
     TESTING_INIT();
 
-    real_Double_t gflops, cpu_time, cpu_perf, gpu_time, gpu_perf, mgpu_time, mgpu_perf, cuda_time, cuda_perf;
+    real_Double_t gflops, cpu_time=0, cpu_perf=0, gpu_time, gpu_perf, mgpu_time, mgpu_perf, cuda_time, cuda_perf;
     double      error=0, error2=0, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};

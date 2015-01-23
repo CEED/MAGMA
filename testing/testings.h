@@ -60,6 +60,9 @@ void flops_init();
 #define ceildiv(a, b) ((a - 1)/b + 1)
 #endif
 
+// suppress "warning: unused variable" in a portable fashion
+#define MAGMA_UNUSED(var)  ((void)var)
+
 
 /***************************************************************************//**
  * Macros to handle error checking.

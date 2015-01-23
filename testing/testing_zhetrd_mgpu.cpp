@@ -36,7 +36,10 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
     magmaDoubleComplex *tau;
-    double *diag, *offdiag, *rwork;
+    double *diag, *offdiag;
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork = NULL;
+    #endif
     double result[2] = {0., 0.};
     magma_int_t N, n2, lda, lwork, info, nb;
     magma_int_t ione     = 1;
@@ -55,7 +58,6 @@ int main( int argc, char** argv)
     /* To avoid uninitialized variable warning */
     h_Q   = NULL;
     work  = NULL;
-    rwork = NULL;
 
     printf("uplo = %s, ngpu %d\n", lapack_uplo_const(opts.uplo), (int) opts.ngpu );
     printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");

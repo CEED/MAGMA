@@ -46,6 +46,8 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_vec_t jobz;
     magma_int_t status = 0;
+
+    MAGMA_UNUSED( max_mn );  // used only in complex
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );

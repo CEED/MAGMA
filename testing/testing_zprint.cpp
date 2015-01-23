@@ -30,7 +30,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex *hA, *dA;
     //magma_int_t ione     = 1;
     //magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t M, N, lda, ldda, size;
+    magma_int_t M, N, lda, ldda;  //size
     magma_int_t status = 0;
     
     magma_opts opts;
@@ -42,7 +42,7 @@ int main( int argc, char** argv)
             N     = opts.nsize[itest];
             lda   = M;
             ldda  = ((M + 31)/32)*32;
-            size  = lda*N;
+            //size  = lda*N;
 
             /* Allocate host memory for the matrix */
             TESTING_MALLOC_CPU( hA, magmaDoubleComplex, lda *N );
