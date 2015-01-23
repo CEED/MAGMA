@@ -52,9 +52,9 @@ CFLAGS   += -std=c99
 # For regular 64-bit builds using 64-bit pointers and 32-bit int,
 # use the lp64 library, not the ilp64 library. See make.inc.mkl-gcc or make.inc.mkl-icc.
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
-# gcc with MKL 10.3, GNU threads, 64-bit int
+# gcc with MKL 10.3, Intel threads, 64-bit int
 # note -DMAGMA_ILP64 or -DMKL_ILP64, and -fdefault-integer-8 in FFLAGS above
-LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -lgfortran
+LIB       = -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -liomp5 -lgfortran
 
 # define library directories preferably in your environment, or here.
 # for MKL run, e.g.: source /opt/intel/composerxe/mkl/bin/mklvars.sh intel64
