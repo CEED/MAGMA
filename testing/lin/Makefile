@@ -325,7 +325,7 @@ FRC:
 	@FRC=$(FRC)
  
 clean:
-	rm -f *.o liblapacktest.a *~
+	rm -f *.o *.mod liblapacktest.a *~
 
 cleanall: clean
 	rm -f liblapacktest.a xlintsts xlintstd xlintstc xlintstz testing_results.txt
