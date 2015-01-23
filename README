@@ -50,6 +50,9 @@ MAGMA README FILE
       make test
   will create a shared library lib/libmagma.so, static library lib/libmagma.a,
   and testing drivers in 'testing'.
+
+  (The current exception is for ATLAS, in make.inc.atlas, which in our
+   install is a static library, thus requiring MAGMA to be a static library.)
   
 * Building a Static Library
 

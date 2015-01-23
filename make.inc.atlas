@@ -27,7 +27,10 @@ RANLIB    = ranlib
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
-FPIC      = -fPIC
+##
+## Our ATLAS installation has only static libraries, and one can't
+## build a shared library against a static library, so disable FPIC.
+##FPIC      = -fPIC
 
 CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -fopenmp -DMAGMA_SETAFFINITY
 FFLAGS    = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
