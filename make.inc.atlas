@@ -47,7 +47,7 @@ LIB       = -llapack -lf77blas -lcblas -latlas -lcublas -lcudart -lstdc++ -lm -l
 -include make.check-cuda
 
 LIBDIR    = -L$(CUDADIR)/lib64 \
-            -L$(ATLASDIR)/lib \
-            -L$(LAPACKDIR)
+            -L$(LAPACKDIR) \
+            -L$(ATLASDIR)/lib
 
 INC       = -I$(CUDADIR)/include
