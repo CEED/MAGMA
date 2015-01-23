@@ -30,8 +30,8 @@ RANLIB    = ranlib
 FPIC      = -fPIC
 
 CFLAGS    = -O3 $(FPIC) -DADD_ -Wall     -openmp -DMAGMA_SETAFFINITY -DMAGMA_WITH_MKL
-FFLAGS    = -O3 $(FPIC) -DADD_ -warn all
-F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all
+FFLAGS    = -O3 $(FPIC) -DADD_ -warn all -warn nounused
+F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all -warn nounused
 NVCCFLAGS = -O3         -DADD_           -Xcompiler "-fno-strict-aliasing $(FPIC)"
 LDFLAGS   =     $(FPIC)                  -openmp
 
@@ -39,7 +39,7 @@ LDFLAGS   =     $(FPIC)                  -openmp
 #LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lcublas -lcudart -lstdc++ -lm
 
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
-# icc with MKL 10.3
+# icc with MKL 10.3, Intel threads
 LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm
 
 # define library directories preferably in your environment, or here.
