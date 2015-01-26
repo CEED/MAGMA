@@ -159,7 +159,7 @@ magma_zhetrd_mgpu(
     const char* uplo_ = lapack_uplo_const( uplo );
     
     magma_int_t nlocal, ldda;
-    magma_int_t nb = magma_get_zhetrd_nb(n), ib;
+    magma_int_t nb = magma_get_zhetrd_nb(n), ib, ib2;
 
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -305,13 +305,13 @@ magma_zhetrd_mgpu(
 
             /* get the next panel */
             if (i-nb >= nx ) {
-                ib = min(nb, n-(i-nb));
+                ib2 = min(nb, n-(i-nb));
                 
                 ii  = nb*((i-nb)/(nb*ngpu));
                 dev = ((i-nb)/nb)%ngpu;
                 magma_setdevice( dev );
                 
-                magma_zgetmatrix_async( (i-nb)+ib, ib,
+                magma_zgetmatrix_async( (i-nb)+ib2, ib2,
                                         dA(dev, 0, ii), ldda,
                                         A(0, i-nb),     lda,
                                         queues[dev][0] );
