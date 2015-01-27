@@ -17,9 +17,9 @@
 # e.g., nearly square, 2:1, 10:1, 1:2, 1:10.
 # The -h or --help option provides a summary of the options.
 #
-# Batch vs. interactive mode
+# Non-interactive vs. interactive mode
 # --------------------------
-# When output is redirected to a file, it runs in batch mode, printing a
+# When output is redirected to a file, it runs in non-interactive mode, printing a
 # short summary to stderr on the console and all other output to the file.
 # For example:
 #
@@ -94,9 +94,10 @@
 # particular sets of tests. By default, all tests are run.
 #
 # The --start option skips all testers before the given one, then continues
-# with testers from there. This is helpful to restart a batch. For example:
+# with testers from there. This is helpful to restart a non-interactive set
+# of tests. For example:
 #
-#       ./run_tests.py --start testing_spotrf
+#       ./run_tests.py --start testing_spotrf > output.log
 #
 # If specific testers are named on the command line, only those are run.
 # For example:
@@ -140,8 +141,8 @@ from subprocess import PIPE, STDOUT
 from optparse import OptionParser
 
 # on a TTY screen, stop after each test for user input
-# when redirected to file ("batch mode"), don't stop
-batch = not sys.stdout.isatty()
+# when redirected to file ("non-interactive mode"), don't stop
+non_interactive = not sys.stdout.isatty()
 
 parser = OptionParser()
 parser.add_option('-p', '--precisions', action='store',      dest='precisions', help='run given precisions (initials, e.g., "sd" for single and double)', default='sdcz')
@@ -149,6 +150,7 @@ parser.add_option(      '--start',      action='store',      dest='start',      
 parser.add_option(      '--memcheck',   action='store_true', dest='memcheck',   help='run with cuda-memcheck (slow)')
 parser.add_option(      '--tol',        action='store',      dest='tol',        help='set tolerance')
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
+parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
 
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
@@ -163,6 +165,7 @@ parser.add_option(      '--syev',       action='store_true', dest='syev',       
 parser.add_option(      '--sygv',       action='store_true', dest='sygv',       help='run generalized symmetric eigenvalue tests')
 parser.add_option(      '--geev',       action='store_true', dest='geev',       help='run non-symmetric eigenvalue tests')
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
+parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
 
 (opts, args) = parser.parse_args()
 
@@ -176,7 +179,8 @@ if ( not opts.small and not opts.med and not opts.large ):
 # default if no groups given is all groups
 if ( not opts.blas and not opts.aux  and
 	 not opts.chol and not opts.lu   and not opts.qr   and
-	 not opts.syev and not opts.sygv and not opts.geev and not opts.svd ):
+	 not opts.syev and not opts.sygv and not opts.geev and
+	 not opts.svd  and not opts.batched ):
 	opts.blas = True
 	opts.aux  = True
 	opts.chol = True
@@ -186,6 +190,7 @@ if ( not opts.blas and not opts.aux  and
 	opts.sygv = True
 	opts.geev = True
 	opts.svd  = True
+	opts.batched = True
 # end
 
 print 'opts', opts
@@ -719,6 +724,14 @@ svd = (
 if ( opts.svd ):
 	tests += svd
 
+# ----------
+# batched (BLAS, LU, etc.)
+batched = (
+	('testing_placeholder',  '--batch ' + opts.batch + ' -c',  mn,   ''),
+)
+if ( opts.batched ):
+	tests += batched
+
 
 # ----------------------------------------------------------------------
 precisions = (
@@ -813,7 +826,10 @@ for test in tests:
 	make = False
 	for precision in opts.precisions:
 		# precision generation
+		# in a few cases this doesn't produce a valid tester name (e.g., testing_zcposv_gpu -> posv_gpu)
 		cmdp = substitute( cmd, 'z', precision )
+		if ( not re.match( 'testing_', cmdp )):
+			continue
 		
 		disabled = (cmdp[0] == '#')
 		if ( disabled ):
@@ -832,12 +848,14 @@ for test in tests:
 			continue
 		start = None
 		
-		# skip tests not in args, or duplicates, or non-existing
-		#if not os.path.exists( cmdp ):
-		#	print >>sys.stderr, cmd, cmdp, "doesn't exist"
+		# skip tests not in args, or duplicates
+		# skip and warn about non-existing
 		if (    (args and not cmdp in args)
-		     or (not os.path.exists( cmdp ))
 		     or (seen.has_key( cmd_opts )) ):
+			continue
+		# end
+		if ( not os.path.exists( cmdp )):
+			print >>sys.stderr, cmdp, "doesn't exist"
 			continue
 		# end
 		seen[ cmd_opts ] = True
@@ -858,7 +876,7 @@ for test in tests:
 			print '*'*100
 			sys.stdout.flush()
 			
-			if ( batch ):
+			if ( non_interactive ):
 				if ( last_cmd and cmd != last_cmd ):
 					sys.stderr.write( '\n' )
 				last_cmd = cmd
@@ -901,7 +919,7 @@ for test in tests:
 				nerror += 1  # count crash as an error
 			
 			if ( errmsg != '' ):
-				if ( batch ):
+				if ( non_interactive ):
 					sys.stderr.write( errmsg + '\n' )  # to console
 				sys.stdout.write( errmsg + '\n' )  # to file
 				failures[ cmd_opts ] = True
@@ -909,7 +927,7 @@ for test in tests:
 				sys.stderr.write( '  ok\n' )
 			# end
 			
-			if ( batch ):
+			if ( non_interactive ):
 				# set to sleep a few seconds before next test,
 				# to allow processor to cool off some between tests.
 				pause = min( t, 5. )
@@ -943,6 +961,6 @@ else:
 	msg += 'routines with failures:\n    ' + '\n    '.join( f ) + '\n'
 # end
 
-if ( batch ):
+if ( non_interactive ):
 	sys.stderr.write( msg )  # to console
 sys.stdout.write( msg )  # to file
