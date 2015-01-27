@@ -92,7 +92,7 @@ shared: libmagma_sparse
 
 # MacOS likes the library's path to be set; see make.inc.macos
 ifneq ($(INSTALL_NAME),)
-    LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SO))
+    LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SPARSE_SO))
 endif
 
 $(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.o

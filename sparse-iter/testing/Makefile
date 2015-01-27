@@ -53,8 +53,8 @@ ZSRC += \
 #	testing_z_mpk_5.cpp	\
 
 # debugging
-ZSRC += \
-	testing_zsolver_debug.cpp	\
+#ZSRC += \
+#	testing_zsolver_debug.cpp	\
 #   testing_spmvELLRT.cpp \
 #	testing_zcdebug.cpp	\
 
@@ -92,8 +92,10 @@ $(ALLOBJ): $(MAGMA_DIR)/testing/testings.h
 
 $(EXE): $(LIBMAGMA_SPARSE) $(LIBTEST)
 
-clean:
-	rm -f *.o *~ 
+clean: cleanobj cleanexe
+
+cleanobj:
+	rm -f *.o *~
 
 cleanexe:
 	rm -f $(EXE)
@@ -102,13 +104,13 @@ cleanall: clean cleanexe
 
 testing_% : testing_%.o
 	echo $(LIB)
-	$(CXX) $(LDFLAGS) $(NOMAIN) $< -o $@ \
+	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
 run_% : run_%.o
-	$(CXX) $(LDFLAGS) $(NOMAIN) $< -o $@ \
+	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
