@@ -92,6 +92,7 @@ ZSRC := \
 	ztrtri_diag.cu		\
 	ztrtri_lower.cu		\
 	ztrtri_upper.cu		\
+	zlarft_kernels.cu		\
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
@@ -150,6 +151,8 @@ ZSRC += \
 	zset_pointer.cu			\
 	ztrsm_batched.cu		\
 	ztrtri_diag_batched.cu		\
+	zgeqr2_kernels.cu		\
+	zgeqr2_batched.cu		\
 
 SRC += \
 	set_pointer.cu			\
