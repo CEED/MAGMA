@@ -20,7 +20,7 @@ ZSRC := \
 	magma_zmconverter.cpp	\
 	magma_zmtransfer.cpp	\
 	magma_z_vio.cpp		\
-	magma_zgeneratematrix.cpp	\
+	magma_zmgenerator.cpp	\
 	magma_zmio.cpp		\
 	magma_zsolverinfo.cpp	\
     magma_zcsrsplit.cpp   \
