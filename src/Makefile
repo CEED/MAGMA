@@ -301,7 +301,12 @@ ZSRC += \
 	zpotrf_panel_batched.cpp		\
 	zpotrs_batched.cpp				\
 	zposv_batched.cpp				\
-
+    \
+	zlarft_batched.cpp				\
+	zlarfb_gemm_batched.cpp         \
+	zgeqrf_panel_batched.cpp		\
+	zgeqrf_batched.cpp				\
+	
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
