@@ -48,7 +48,7 @@ NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPI
 LDFLAGS   = -m64     $(FPIC)
 
 # MacOS likes the library's path to be set
-INSTALL_NAME = -install_name @rpath/libmagma.so
+INSTALL_NAME = -install_name @rpath/
 
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 

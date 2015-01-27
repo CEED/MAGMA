@@ -142,6 +142,13 @@ endif
 # CPPFLAGS adds internal MAGMA directories needed to compile MAGMA itself.
 CPPFLAGS = $(INC) -I$(MAGMA_DIR)/include -I$(MAGMA_DIR)/control -I$(MAGMA_DIR)/sparse-iter/include
 
+# check whether all FLAGS have -fPIC
+have_fpic = $(and $(findstring -fPIC, $(CFLAGS)),   \
+                  $(findstring -fPIC, $(CXXFLAGS)), \
+                  $(findstring -fPIC, $(FFLAGS)),   \
+                  $(findstring -fPIC, $(F90FLAGS)), \
+                  $(findstring -fPIC, $(NVCCFLAGS)))
+
 # Define the pointer size for fortran compilation
 PTRFILE = $(MAGMA_DIR)/control/sizeptr.c
 PTROBJ  = $(MAGMA_DIR)/control/sizeptr.o

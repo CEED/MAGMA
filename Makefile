@@ -141,24 +141,25 @@ install: lib install_dirs
 # 'make lib' should do the right thing:
 # shared if it detects -fPIC in all the variables, otherwise static.
 
-fpic = $(and $(findstring -fPIC, $(CFLAGS)),   \
-             $(findstring -fPIC, $(CXXFLAGS)), \
-             $(findstring -fPIC, $(FFLAGS)),   \
-             $(findstring -fPIC, $(F90FLAGS)), \
-             $(findstring -fPIC, $(NVCCFLAGS)))
-
 LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
 
-ifneq ($(fpic),)
-    # ---------- has -fPIC: compile shared & static
+# see Makefile.internal for $(have_fpic) -- boolean for whether all FLAGS have -fPIC
+
+ifneq ($(have_fpic),)
+    # ---------- all flags have -fPIC: compile shared & static
 lib: static shared
 
 shared: libmagma
 	$(MAKE) $(LIBMAGMA_SO)
 
+# MacOS likes the library's path to be set; see make.inc.macos
+ifneq ($(INSTALL_NAME),)
+    LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SO))
+endif
+
 $(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
 	@echo ======================================== $(LIBMAGMA_SO)
-	$(CC) $(LDFLAGS) $(INSTALL_NAME) -shared -o $(LIBMAGMA_SO) $^ \
+	$(CC) $(LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)
 	@echo
@@ -168,7 +169,8 @@ lib: static
 
 shared:
 	@echo "Error: 'make shared' requires CFLAGS, CXXFLAGS, FFLAGS, F90FLAGS, and NVCCFLAGS to have -fPIC."
+	@echo "This is now the default in most example make.inc.* files, except atlas."
+	@echo "Please edit your make.inc file and uncomment FPIC."
+	@echo "After updating make.inc, please 'make clean && make shared && make testing'."
 	@echo "To compile only a static library, use 'make static'."
-	@echo "Please edit your make.inc file. See make.inc.mkl-shared for an example."
-	@echo "After updating make.inc, please 'make clean', then 'make shared', then 'make testing'."
 endif
