@@ -1,3 +1,4 @@
+
 #//////////////////////////////////////////////////////////////////////////////
 #   -- MAGMA (version 1.1) --
 #      Univ. of Tennessee, Knoxville
@@ -180,7 +181,9 @@ ZSRC += \
 # batched
 ZSRC += \
 	testing_zgeadd_batched.cpp	\
+	testing_zgemv_batched.cpp	\
 	testing_zgemm_batched.cpp	\
+	testing_ztrsm_batched.cpp	\
 	testing_zgesv_batched.cpp	\
 	testing_zgesv_nopiv_batched.cpp	\
 	testing_zgetrf_batched.cpp	\
@@ -190,7 +193,7 @@ ZSRC += \
 	testing_zlacpy_batched.cpp	\
 	testing_zposv_batched.cpp	\
 	testing_zpotrf_batched.cpp	\
-	testing_ztrsm_batched.cpp	\
+	testing_zgeqrf_batched.cpp	\
 
 # ----------
 # utilities
