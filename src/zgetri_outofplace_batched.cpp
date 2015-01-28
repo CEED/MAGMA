@@ -131,17 +131,18 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_zmalloc( &dinvdiagA, invdiagA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
-    zset_pointer(dinvdiagA_array, dinvdiagA, ((n+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, invdiagA_msize, batchCount, queue);
-    cudaMemset( dinvdiagA, 0, batchCount * ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB * sizeof(magmaDoubleComplex) );
-
-    magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
-
+    zset_pointer(dinvdiagA_array, dinvdiagA, TRI_NB, 0, 0, invdiagA_msize, batchCount, queue);
+    cudaMemset( dinvdiagA, 0, batchCount * invdiagA_msize * sizeof(magmaDoubleComplex) );
+    cudaMemset( dwork, 0, batchCount * dwork_msize * sizeof(magmaDoubleComplex) );
+    
+    
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
     //printf(" I am after malloc getri\n");
 
 
+    magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
     // set dinvdiagA to identity
     magmablas_zlaset_batched(MagmaUpperLower, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount, queue);
 

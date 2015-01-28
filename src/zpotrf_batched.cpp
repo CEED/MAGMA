@@ -140,7 +140,8 @@ magma_zpotrf_batched(
     magma_zmalloc( &dx,    x_msize * batchCount );
     zset_pointer(dx_array, dx, 1, 0, 0, x_msize, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
-    cudaMemset( dinvA, 0, batchCount * ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB * sizeof(magmaDoubleComplex) );
+    cudaMemset( dinvA, 0, batchCount * invA_msize * sizeof(magmaDoubleComplex) );
+    cudaMemset( dx, 0, batchCount * x_msize * sizeof(magmaDoubleComplex) );
 
     magmaDoubleComplex **cpuAarray = NULL;
     magma_malloc_cpu((void**) &cpuAarray, batchCount*sizeof(magmaDoubleComplex*));
