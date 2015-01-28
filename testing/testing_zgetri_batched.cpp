@@ -50,11 +50,16 @@ int main( int argc, char** argv)
     magma_queue_t queue = magma_stream;
     magma_int_t batchCount = opts.batchcount ;
     magma_int_t columns;
-    double error, rwork[1];
+    double error=0.0, rwork[1];
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magma_int_t     status = 0;
+    // need looser bound (3000*eps instead of 30*eps) for tests
+    // TODO: should compute ||I - A*A^{-1}|| / (n*||A||*||A^{-1}||)
+    opts.tolerance = max( 3000., opts.tolerance );
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("batchCount      M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N)\n");
-    printf("=========================================================================\n");
+    printf("batchCount      M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
+    printf("====================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
     
       for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -148,11 +153,11 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%10d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                printf("%10d %6d %6d   %7.2f (%7.2f)   %7.2f (%7.2f)",
                        (int) batchCount, (int) M, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
             }
             else {
-                printf("%10d %5d %5d     ---   (  ---  )   %7.2f (%7.2f)",
+                printf("%10d %6d %6d     ---   (  ---  )   %7.2f (%7.2f)",
                        (int) batchCount, (int) M, (int) N, gpu_perf, gpu_time*1000. );
             }
 
@@ -184,7 +189,8 @@ int main( int argc, char** argv)
                     }
                     err = max(fabs(error), err);
                 }
-                printf("   %8.2e\n", err );
+                printf("   %18.2e   %10.2e   %s\n", err, tol, (err < tol ? "ok" : "failed") );
+                status += ! (error < tol);
             }
             else {
                 printf("     ---  \n");
@@ -208,5 +214,5 @@ int main( int argc, char** argv)
         }
     }
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

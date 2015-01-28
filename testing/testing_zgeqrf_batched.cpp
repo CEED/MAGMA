@@ -90,7 +90,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double           magma_error=0.0, cublas_error=0.0, error, error2;
+    double           magma_error=0.0, cublas_error=0.0, magma_error2=0.0, cublas_error2=0.0, error, error2;
 
     magmaDoubleComplex *h_A, *h_R, *h_Amagma, *tau, *h_work, tmp[1];
     magmaDoubleComplex *d_A, *dtau_magma, *dtau_cublas;
@@ -118,9 +118,9 @@ int main( int argc, char** argv)
     magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
-
-    printf("BatchCount     M    N     MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   CPU GFlop/s (ms)   ||R||_F/||A||_F: MAGMA error CUBLA error\n");
-    printf("=============================================================================\n");
+    printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
+    printf("BatchCount     M    N     MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub \n");
+    printf("============================================================================================================================================================= \n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M     = opts.msize[itest];
@@ -256,6 +256,7 @@ int main( int argc, char** argv)
                          break;
                     }
                     magma_error = max(fabs(error),magma_error);
+                    magma_error2 = max(fabs(error2),magma_error2);
                  }
 
                 /* check cublas result */  
@@ -273,16 +274,20 @@ int main( int argc, char** argv)
                          break;
                     }
                     cublas_error = max(fabs(error),cublas_error);
-
+                    cublas_error2 = max(fabs(error2),cublas_error2);
                 }
 
                 TESTING_FREE_CPU( Q    );  Q    = NULL;
                 TESTING_FREE_CPU( R    );  R    = NULL;
                 TESTING_FREE_CPU( work );  work = NULL;
 
-                printf("%5d       %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)                       %8.2e     %8.2e \n",
-                       (int)batchCount, (int) M, (int) N, magma_perf, 1000.*magma_time, cublas_perf, 1000.*cublas_time,cpu_perf, 1000.*cpu_time, 
-                       magma_error, cublas_error );
+                bool okay_mag = (magma_error < tol && magma_error2 < tol);
+                bool okay_cub = (cublas_error < tol && cublas_error2 < tol);
+                status += ! okay_mag;
+
+                printf("%5d       %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %15.2e   %15.2e   %15.2e   %15.2e   %s   %s \n",
+                       (int)batchCount, (int) M, (int) N, magma_perf, 1000.*magma_time, cublas_perf, 1000.*cublas_time, cpu_perf, 1000.*cpu_time, 
+                       magma_error, magma_error2, cublas_error, cublas_error2, (okay_mag ? "ok" : "failed"), " " );
                 status += ! (magma_error < tol);
 
 

@@ -72,7 +72,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
-    double          error; 
+    double          error=0.0; 
     magma_int_t cublas_enable = 0;
     magmaDoubleComplex *h_A, *h_R, *h_Amagma;
     magmaDoubleComplex *dA;
@@ -93,6 +93,8 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check; 
+    magma_int_t     status = 0;
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     batchCount = opts.batchcount ;
     magma_int_t columns;
@@ -236,7 +238,8 @@ int main( int argc, char** argv)
                     }
                     err = max(fabs(error),err);
                 }
-                printf("   %8.2e\n", err );
+                printf("   %8.2e   %s\n", err, (err < tol ? "ok" : "failed") );
+                status += ! (error < tol);
             }
             else {
                 printf("     ---  \n");
@@ -261,5 +264,5 @@ int main( int argc, char** argv)
         }
     }
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

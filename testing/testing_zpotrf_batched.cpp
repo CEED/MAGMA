@@ -38,6 +38,7 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double      work[1], error;
+    magma_int_t status = 0;
     magmaDoubleComplex **d_A_array = NULL;
     magma_int_t *dinfo_magma;
 
@@ -48,6 +49,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     batchCount = opts.batchcount;
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     printf("BatchCount    N      CPU GFlop/s (ms)      GPU GFlop/s (ms)    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
@@ -133,8 +135,10 @@ int main( int argc, char** argv)
                  }
               
 
-                printf("%5d      %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e\n",
-                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., err);
+                printf("%5d      %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e   %s\n",
+                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., err,  (error < tol ? "ok" : "failed"));
+                status += ! (err < tol);
+                
             }
             else {
                 printf("%5d      %5d    ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
@@ -153,7 +157,7 @@ int main( int argc, char** argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 
 }
 
