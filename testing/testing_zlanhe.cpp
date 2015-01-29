@@ -86,7 +86,7 @@ int main( int argc, char** argv)
             N   = opts.nsize[itest];
             lda = N;
             n2  = lda*N;
-            ldda = roundup( N, opts.pad );
+            ldda = roundup( N, opts.roundup );
             // read upper or lower triangle
             gbytes = 0.5*(N+1)*N*sizeof(magmaDoubleComplex) / 1e9;
             

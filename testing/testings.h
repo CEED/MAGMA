@@ -178,7 +178,7 @@ typedef struct magma_opts
     
     // scalars
     magma_int_t device;
-    magma_int_t pad;
+    magma_int_t roundup;
     magma_int_t nb;
     magma_int_t nrhs;
     magma_int_t nstream;
