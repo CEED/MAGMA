@@ -280,7 +280,17 @@ void magmablas_zlaset_q(
         zlaset_upper_kernel<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
     }
     else {
-        zlaset_full_kernel<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
+        // if continuous in memory & set to zero, cudaMemset is faster.
+        if ( m == ldda &&
+             MAGMA_Z_EQUAL( offdiag, MAGMA_Z_ZERO ) &&
+             MAGMA_Z_EQUAL( diag,    MAGMA_Z_ZERO ) )
+        {
+            magma_int_t size = m*n;
+            cudaMemsetAsync( dA, 0, size*sizeof(magmaDoubleComplex), queue );
+        }
+        else {
+            zlaset_full_kernel<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
+        }
     }
 }
 /**
