@@ -477,12 +477,12 @@ chol = (
 	# Bunch-Kauffman
 	('testing_zhetrf', '-L --version 1 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 1 -c2',  n,    ''),
-	                                                
-	# no-pivot LDLt, CPU interface                  
+	
+	# no-pivot LDLt, CPU interface
 	('testing_zhetrf', '-L --version 3 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 3 -c2',  n,    ''),
-	                                                
-	# no-pivot LDLt, GPU interface                  
+	
+	# no-pivot LDLt, GPU interface
 	('testing_zhetrf', '-L --version 4 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 4 -c2',  n,    ''),
 )
@@ -557,26 +557,30 @@ if ( opts.qr ):
 # symmetric eigenvalues, GPU interface
 syev = (
 	# no-vectors/vectors, lower/upper
-	#('testing_dsyevd_gpu',              '',  n,    ''),  # covered by zheevd_gpu
-	#('testing_zheevd_gpu',     '-L -JN -c',  n,    '-c implies -JV'),
-	#('testing_zheevd_gpu',     '-U -JN -c',  n,    '-c implies -JV'),
+	('testing_zheevd_gpu',      '-L -JN -c',  n,    ''),
+	('testing_zheevd_gpu',      '-U -JN -c',  n,    ''),
 	('testing_zheevd_gpu',      '-L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',      '-U -JV -c',  n,    ''),
 	
-	('testing_zhetrd_gpu',      '-L     -c',  n,    ''),
-	('testing_zhetrd_gpu',      '-U     -c',  n,    ''),
+	# lower/upper, version 1 (cublas_hemv)/2 (fast_hemv)
+	('testing_zhetrd_gpu',  '--version 1 -L -c',  n,    ''),
+	('testing_zhetrd_gpu',  '--version 1 -U -c',  n,    ''),
+	('testing_zhetrd_gpu',  '--version 2 -L -c',  n,    ''),
+	('testing_zhetrd_gpu',  '--version 2 -U -c',  n,    ''),
 	
+	# multi-gpu
 	('testing_zhetrd_mgpu',     '-L     -c',  n,    ''),
 	('testing_zhetrd_mgpu',     '-U     -c',  n,    ''),
 	
 # ----------
 # symmetric eigenvalues, CPU interface
-	#('testing_dsyevd',                  '',  n,    ''),  # covered by zheevd
-	#('testing_zheevd',         '-L -JN -c',  n,    '-c implies -JV'),
-	#('testing_zheevd',         '-U -JN -c',  n,    '-c implies -JV'),
+	# no vectors/vectors, lower/upper
+	('testing_zheevd',          '-L -JN -c',  n,    ''),
+	('testing_zheevd',          '-U -JN -c',  n,    ''),
 	('testing_zheevd',          '-L -JV -c',  n,    ''),
 	('testing_zheevd',          '-U -JV -c',  n,    ''),
 	
+	# lower/upper
 	('testing_zhetrd',          '-L     -c',  n,    ''),
 	('testing_zhetrd',          '-U     -c',  n,    ''),
 	
@@ -597,13 +601,13 @@ if ( opts.syev ):
 # generalized symmetric eigenvalues
 sygv = (
 	# no-vector/vector, lower/upper, itypes
-	#('testing_zhegvd',          '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd',          '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd',          '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	
-	#('testing_zhegvd',          '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd',          '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd',          '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
+	('testing_zhegvd',           '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd',           '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd',           '-L -JN --itype 3 -c',  n,  ''),
+	                                                          
+	('testing_zhegvd',           '-U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd',           '-U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd',           '-U -JN --itype 3 -c',  n,  ''),
 	
 	('testing_zhegvd',           '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JV --itype 2 -c',  n,  ''),
@@ -614,30 +618,30 @@ sygv = (
 	('testing_zhegvd',           '-U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes
-	#('testing_zhegvd_m',        '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd_m',        '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd_m',        '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	
-	#('testing_zhegvd_m',        '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd_m',        '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvd_m',        '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
+	('testing_zhegvd_m',         '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd_m',         '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd_m',         '-L -JN --itype 3 -c',  n,  ''),
+	                                                          
+	('testing_zhegvd_m',         '-U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd_m',         '-U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd_m',         '-U -JN --itype 3 -c',  n,  ''),
 	
 	('testing_zhegvd_m',         '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvd_m',         '-L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvd_m',         '-L -JV --itype 3 -c',  n,  ''),
 	
-	('#testing_zhegvd_m',        '-U -JV --itype 1 -c',  n,  'upper not implemented'),
-	('#testing_zhegvd_m',        '-U -JV --itype 2 -c',  n,  'upper not implemented'),
-	('#testing_zhegvd_m',        '-U -JV --itype 3 -c',  n,  'upper not implemented'),
+	('testing_zhegvd_m',         '-U -JV --itype 1 -c',  n,  'upper not implemented ??'),
+	('testing_zhegvd_m',         '-U -JV --itype 2 -c',  n,  'upper not implemented ??'),
+	('testing_zhegvd_m',         '-U -JV --itype 3 -c',  n,  'upper not implemented ??'),
 	
 	# lower/upper, no-vector/vector, itypes
-	#('testing_zhegvdx',         '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx',         '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx',         '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	
-	#('testing_zhegvdx',         '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx',         '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx',         '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
+	('testing_zhegvdx',          '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',          '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',          '-L -JN --itype 3 -c',  n,  ''),
+	                                                          
+	('testing_zhegvdx',          '-U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',          '-U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',          '-U -JN --itype 3 -c',  n,  ''),
 	
 	('testing_zhegvdx',          '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JV --itype 2 -c',  n,  ''),
@@ -822,7 +826,7 @@ pause = 0
 
 global_options = ''
 if ( opts.tol ):
-	global_options += ' --tolerance ' + opts.tol + ' '
+	global_options += ' --tol ' + opts.tol + ' '
 
 if ( opts.dev is not None ):
 	global_options += ' --dev ' + opts.dev + ' '

@@ -547,6 +547,10 @@ zhemv_kernel_L_sum(
     lwork   INTEGER.
             The dimension of the array DWORK. LWORK >= LDDA * ceil( N / NB_X ),
             where NB_X = 64.
+    
+    @param[in]
+    queue   magma_queue_t.
+            Queue to execute in.
 
     MAGMA implements zhemv through two steps:
     1)  perform the multiplication in each thread block and put the
@@ -574,7 +578,8 @@ magmablas_zhemv_work(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr dy, magma_int_t incy,
-    magmaDoubleComplex_ptr dwork, magma_int_t lwork)
+    magmaDoubleComplex_ptr dwork, magma_int_t lwork,
+    magma_queue_t queue )
 {
 #if defined(PRECISION_z)
     // z precision requires CUDA ARCH 2.x; call CUBLAS version instead.
@@ -626,15 +631,15 @@ magmablas_zhemv_work(
     dim3 threads_sum( NB_X, 1, 1 );
 
     if ( upper ) {
-        zhemv_kernel_U<<< grid, threads, 0, magma_stream >>>
+        zhemv_kernel_U<<< grid, threads, 0, queue >>>
             (n, dA, ldda, dx, incx, dwork);
-        zhemv_kernel_U_sum<<< grid, threads_sum, 0, magma_stream >>>
+        zhemv_kernel_U_sum<<< grid, threads_sum, 0, queue >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     else {
-        zhemv_kernel_L<<< grid, threads, 0, magma_stream >>>
+        zhemv_kernel_L<<< grid, threads, 0, queue >>>
             (n, dA, ldda, dx, incx, dwork);
-        zhemv_kernel_L_sum<<< grid, threads_sum, 0, magma_stream >>>
+        zhemv_kernel_L_sum<<< grid, threads_sum, 0, queue >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     
@@ -785,7 +790,8 @@ magmablas_zhemv(
         return info;
     }
     
-    magmablas_zhemv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy, dwork, lwork );
+    magmablas_zhemv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy,
+                          dwork, lwork, magma_stream );
     
     magma_free( dwork );
     

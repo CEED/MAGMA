@@ -5,8 +5,9 @@
        Univ. of Colorado, Denver
        @date
 
-       @author Stan Tomov
        @author Raffaele Solca
+       @author Stan Tomov
+       @author Mark Gates
 
        @precisions normal z -> s d c
 
@@ -85,9 +86,8 @@
 
     @param[in]
     lwork   INTEGER
-            The dimension of the array WORK.  LWORK >= 1.
-            For optimum performance LWORK >= N*NB, where NB is the
-            optimal blocksize.
+            The dimension of the array WORK.  LWORK >= N*NB, where NB is the
+            optimal blocksize given by magma_get_zhetrd_nb().
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -235,7 +235,7 @@ magma_zhetrd_mgpu(
     magma_event_create( &stop  );
     #endif
 
-    ldda = ((lda+31)/32)*32;
+    ldda = roundup( lda, 32 );
     lddw = ldda;
     nlocal = nb*(1 + n/(nb*ngpu));
     ldwork2 = ldda*( ((n - 1)/nb + 1) + 1);  // i.e., ldda*(blocks + 1)
@@ -262,12 +262,11 @@ magma_zhetrd_mgpu(
     }
 
     // crossover point: use CPU code for last nx columns
-    if (n < 2048)
-        nx = n;
-    else
-        nx = 512;
-    //nx = 128;
-    //printf( "n %4d, nx %3d. ", n, nx );
+    //if (n < 2048)
+    //    nx = n;
+    //else
+    //    nx = 512;
+    nx = min( 128, n );  // nx <= n is required
 
     if (upper) {
         /* Copy the matrix to the GPU */
@@ -346,8 +345,9 @@ magma_zhetrd_mgpu(
                 magma_setdevice( dev );
                 magma_queue_sync( queues[dev][0] );
             }
-            /*  Use unblocked code to reduce the last or only block */
-            lapackf77_zhetd2( uplo_, &nx, A(0, 0), &lda, d, e, tau, &iinfo );
+            /* Use CPU code to reduce the last or only block */
+            lapackf77_zhetrd( uplo_, &nx, A(0, 0), &lda, d, e, tau,
+                              work, &lwork, &iinfo );
         }
     }
     else {
@@ -417,7 +417,7 @@ magma_zhetrd_mgpu(
             }
         } /* for i=... */
 
-        /* Use unblocked code to reduce the last or only block */
+        /* Use CPU code to reduce the last or only block */
         if ( i < n ) {
             iii = i;
             i_n = n-i;

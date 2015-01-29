@@ -5,10 +5,11 @@
        Univ. of Colorado, Denver
        @date
 
-    @author Raffaele Solca
-    @author Azzam Haidar
+       @author Raffaele Solca
+       @author Azzam Haidar
+       @author Mark Gates
 
-    @precisions normal z -> c d s
+       @precisions normal z -> c d s
 
 */
 
@@ -184,7 +185,7 @@ int main( int argc, char** argv)
             printf("%5d %5d  %7.2f      ",
                    (int) N, (int) m1, gpu_time );
 
-            if ( opts.check ) {
+            if ( opts.check && opts.jobz != MagmaNoVec ) {
                 double eps   = lapackf77_dlamch("E");
                 //printf("\n");
                 //printf("------ TESTS FOR MAGMA ZHEEVD ROUTINE -------  \n");

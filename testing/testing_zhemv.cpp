@@ -133,7 +133,7 @@ int main(int argc, char **argv)
             
             magma_time = magma_sync_wtime( 0 );
             if ( opts.version == 1 ) {
-                magmablas_zhemv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork );
+                magmablas_zhemv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
             }
             else {
                 // non-work interface (has added overhead)
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
         if ( opts.niter > 1 ) {
             printf( "\n" );
         }
-    }
+      }
 
     TESTING_FINALIZE();
     return status;

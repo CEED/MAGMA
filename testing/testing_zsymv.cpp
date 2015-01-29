@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        @date
 
+       @author Mark Gates
+       
        Note: [ds] precisions generated from testing_zhemv.cu
        
        @precisions normal z -> c
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
             
             magma_time = magma_sync_wtime( 0 );
             if ( opts.version == 1 ) {
-                magmablas_zsymv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork );
+                magmablas_zsymv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
             }
             else {
                 // non-work interface (has added overhead)

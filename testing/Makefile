@@ -133,7 +133,6 @@ ZSRC += \
 # ----------
 # symmetric eigenvalues, GPU interface
 ZSRC += \
-	testing_dsyevd_gpu.cpp	\
 	testing_zheevd_gpu.cpp	\
 	testing_zhetrd_gpu.cpp	\
 	\
@@ -141,7 +140,6 @@ ZSRC += \
 
 # symmetric eigenvalues, CPU interface
 ZSRC += \
-	testing_dsyevd.cpp	\
 	testing_zheevd.cpp	\
 	testing_zhetrd.cpp	\
 

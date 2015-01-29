@@ -13,6 +13,8 @@
  */
 #include "common_magma.h"
 
+//#define FAST_HEMV
+
 /**
     Purpose
     -------

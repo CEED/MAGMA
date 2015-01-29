@@ -6,6 +6,7 @@
        @date
 
        @author Stan Tomov
+       @author Mark Gates
 
        @precisions normal z -> s d c
 
@@ -23,7 +24,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd
@@ -37,7 +38,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
     magmaDoubleComplex *tau;
     double *diag, *offdiag;
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
     double *rwork = NULL;
     #endif
     double result[2] = {0., 0.};
@@ -81,14 +82,6 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( diag,    double, N   );
             TESTING_MALLOC_CPU( offdiag, double, N-1 );
             
-            if ( opts.check ) {
-                TESTING_MALLOC_CPU( h_Q,  magmaDoubleComplex, lda*N );
-                TESTING_MALLOC_CPU( work, magmaDoubleComplex, 2*N*N );
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                TESTING_MALLOC_CPU( rwork, double, N );
-                #endif
-            }
-        
             /* ====================================================================
                Initialize the matrix
                =================================================================== */
@@ -120,32 +113,40 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.check ) {
+                TESTING_MALLOC_CPU( h_Q,  magmaDoubleComplex, lda*N );
+                TESTING_MALLOC_CPU( work, magmaDoubleComplex, 2*N*N );
+                #ifdef COMPLEX
+                TESTING_MALLOC_CPU( rwork, double, N );
+                #endif
+                
                 lapackf77_zlacpy( lapack_uplo_const(opts.uplo), &N, &N, h_R, &lda, h_Q, &lda);
                 lapackf77_zungtr( lapack_uplo_const(opts.uplo), &N, h_Q, &lda, tau, h_work, &lwork, &info);
 
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zhet21(&itwo, lapack_uplo_const(opts.uplo), &N, &ione,
-                                 h_A, &lda, diag, offdiag,
-                                 h_Q, &lda, h_R, &lda,
-                                 tau, work, rwork, &result[0]);
+                lapackf77_zhet21( &itwo, lapack_uplo_const(opts.uplo), &N, &ione,
+                                  h_A, &lda, diag, offdiag,
+                                  h_Q, &lda, h_R, &lda,
+                                  tau, work,
+                                  #ifdef COMPLEX
+                                  rwork,
+                                  #endif
+                                  &result[0] );
                 
-                lapackf77_zhet21(&ithree, lapack_uplo_const(opts.uplo), &N, &ione,
-                                 h_A, &lda, diag, offdiag,
-                                 h_Q, &lda, h_R, &lda,
-                                 tau, work, rwork, &result[1]);
-                #else
-                lapackf77_zhet21(&itwo, lapack_uplo_const(opts.uplo), &N, &ione,
-                                 h_A, &lda, diag, offdiag,
-                                 h_Q, &lda, h_R, &lda,
-                                 tau, work, &result[0]);
-                
-                lapackf77_zhet21(&ithree, lapack_uplo_const(opts.uplo), &N, &ione,
-                                 h_A, &lda, diag, offdiag,
-                                 h_Q, &lda, h_R, &lda,
-                                 tau, work, &result[1]);
-                #endif
+                lapackf77_zhet21( &ithree, lapack_uplo_const(opts.uplo), &N, &ione,
+                                  h_A, &lda, diag, offdiag,
+                                  h_Q, &lda, h_R, &lda,
+                                  tau, work,
+                                  #ifdef COMPLEX
+                                  rwork,
+                                  #endif
+                                  &result[1] );
                 result[0] *= eps;
                 result[1] *= eps;
+
+                TESTING_FREE_CPU( h_Q );
+                TESTING_FREE_CPU( work );
+                #ifdef COMPLEX
+                TESTING_FREE_CPU( rwork );
+                #endif
             }
             
             /* =====================================================================
@@ -174,10 +175,9 @@ int main( int argc, char** argv)
             }
             printf("   %7.2f (%7.2f)", gpu_perf, gpu_time );
             if ( opts.check ) {
-                bool okay = (result[0] < tol && result[1] < tol);
-                status += ! okay;
                 printf("   %8.2e        %8.2e   %s\n",
-                       result[0], result[1], (okay ? "ok" : "failed") );
+                       result[0], result[1], (result[0] < tol && result[1] < tol ? "ok" : "failed") );
+                status += ! (result[0] < tol && result[1] < tol);
             }
             else {
                 printf("     ---  \n");
@@ -191,13 +191,6 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( diag );
             TESTING_FREE_CPU( offdiag );
             
-            if ( opts.check ) {
-                TESTING_FREE_CPU( h_Q );
-                TESTING_FREE_CPU( work );
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                TESTING_FREE_CPU( rwork );
-                #endif
-            }
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

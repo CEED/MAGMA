@@ -617,7 +617,8 @@ magmablas_zhemv_work(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr       dy, magma_int_t incy,
-    magmaDoubleComplex_ptr       dwork, magma_int_t lwork );
+    magmaDoubleComplex_ptr       dwork, magma_int_t lwork,
+    magma_queue_t queue );
 
 magma_int_t
 magmablas_zsymv_work(
@@ -627,7 +628,8 @@ magmablas_zsymv_work(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr       dy, magma_int_t incy,
-    magmaDoubleComplex_ptr       dwork, magma_int_t lwork );
+    magmaDoubleComplex_ptr       dwork, magma_int_t lwork,
+    magma_queue_t queue );
 
   /*
    * Level 3 BLAS (alphabetical order)

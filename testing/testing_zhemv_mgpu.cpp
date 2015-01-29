@@ -155,14 +155,15 @@ int main(int argc, char **argv)
             magma_setdevice( opts.device );
             magma_zsetvector( Noffset, Y, incx, dY, incx );
             
-            gpu_time = magma_sync_wtime(0);
+            gpu_time = magma_sync_wtime( opts.queue );
             
             magmablas_zhemv_work( opts.uplo, N,
                                   alpha, dA + offset + offset*ldda, ldda,
                                          dX + offset, incx,
-                                  beta,  dY + offset, incx, dwork[ opts.device ], ldwork );
+                                  beta,  dY + offset, incx, dwork[ opts.device ], ldwork,
+                                  opts.queue );
             
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             magma_zgetvector( Noffset, dY, incx, Ymagma1, incx );
             

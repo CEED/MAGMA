@@ -575,7 +575,8 @@ magmablas_zsymv_work(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr dy, magma_int_t incy,
-    magmaDoubleComplex_ptr dwork, magma_int_t lwork)
+    magmaDoubleComplex_ptr dwork, magma_int_t lwork,
+    magma_queue_t queue )
 {
 #if defined(PRECISION_z)
     // z precision requires CUDA ARCH 2.x; call CUBLAS version instead.
@@ -629,17 +630,17 @@ magmablas_zsymv_work(
     dim3 threads_sum( NB_X, 1, 1 );
 
     if ( upper ) {
-        zsymv_kernel_U<<< grid, threads, 0, magma_stream >>>
+        zsymv_kernel_U<<< grid, threads, 0, queue >>>
             (n, dA, ldda, dx, incx, dwork);
         
-        zsymv_kernel_U_sum<<< grid, threads_sum, 0, magma_stream >>>
+        zsymv_kernel_U_sum<<< grid, threads_sum, 0, queue >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     else {
-        zsymv_kernel_L<<< grid, threads, 0, magma_stream >>>
+        zsymv_kernel_L<<< grid, threads, 0, queue >>>
             (n, dA, ldda, dx, incx, dwork);
         
-        zsymv_kernel_L_sum<<< grid, threads_sum, 0, magma_stream >>>
+        zsymv_kernel_L_sum<<< grid, threads_sum, 0, queue >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     return info;
@@ -791,7 +792,8 @@ magmablas_zsymv(
         return info;
     }
     
-    magmablas_zsymv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy, dwork, lwork );
+    magmablas_zsymv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy,
+                          dwork, lwork, magma_stream );
     
     magma_free( dwork );
     
