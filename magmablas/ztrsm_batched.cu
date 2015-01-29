@@ -96,11 +96,10 @@
             When side = MagmaLeft,  ldda >= max( 1, m ),
             when side = MagmaRight, ldda >= max( 1, n ).
 
-    @param[in,out]
+    @param[in]
     dB      COMPLEX_16 array of dimension ( lddb, n ).
             Before entry, the leading m by n part of the array B must
-            contain the right-hand side matrix B, and on exit is
-            overwritten by the solution matrix X.
+            contain the right-hand side matrix B.
 
     @param[in]
     lddb    INTEGER.
@@ -118,8 +117,9 @@
             If side == MagmaRight, d_dinvA must be of size >= ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB,
             where TRI_NB = 128.
 
-    @param
-    dX      (workspace) size m*n, on device.
+    @param[out]
+    dX      COMPLEX_16 array of dimension ( lddx, n ).
+            On exit it contain the solution matrix X.
 
     @ingroup magma_zblas3
     ********************************************************************/
@@ -576,7 +576,8 @@ void magmablas_ztrsm_batched(
         magma_xerbla( __func__, -(info) );
         return;
     }
-    cudaMemset(dinvA, 0, size_dinvA*batchCount*sizeof(magmaDoubleComplex));
+    magmablas_zlaset_q(MagmaFull, size_dinvA, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, size_dinvA, queue);
+    magmablas_zlaset_q(MagmaFull, lddx, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dX, lddx, queue);
 
     zset_pointer(dX_array, dX, lddx, 0, 0, size_x, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, size_dinvA, batchCount, queue);

@@ -110,7 +110,7 @@ magmablas_ztrtri_diag_batched(
 
     if(resetozero)
     { 
-        magmablas_zlaset_batched(MagmaUpperLower, ((n+NB-1)/NB)*NB, NB, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA_array, ((n+NB-1)/NB)*NB, batchCount, queue);
+        magmablas_zlaset_batched(MagmaFull, ((n+NB-1)/NB)*NB, NB, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA_array, ((n+NB-1)/NB)*NB, batchCount, queue);
        //magmablas_zmemset_batched( dinvA_array, ((n+NB-1)/NB)*NB*NB, batchCount, queue);
     }
     // if someone want to use cudamemset he need to set the whole vectors 
