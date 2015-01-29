@@ -129,7 +129,7 @@ const char* lockfile = "/tmp/icl-lock";
 
 // --------------------
 const char *usage_short =
-"%% Usage: %s [options] [-h|--help]\n\n";
+"Usage: %s [options] [-h|--help]\n\n";
 
 const char *usage =
 "Options are:\n"
@@ -169,6 +169,7 @@ const char *usage =
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
+"  --tol x          same.\n"
 "  --panel_nthread x Number of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
 "  --fraction_dcpu x Percentage of the workload to schedule on the cpu. Used in magma_amc algorithms only, default 0.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
@@ -386,7 +387,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             magma_assert( opts->fraction >= 0 && opts->fraction <= 1,
                           "error: --fraction %s is invalid; ensure fraction in [0,1].\n", argv[i] );
         }
-        else if ( strcmp("--tolerance", argv[i]) == 0 && i+1 < argc ) {
+        else if ( (strcmp("--tol",       argv[i]) == 0 ||
+                   strcmp("--tolerance", argv[i]) == 0) && i+1 < argc ) {
             opts->tolerance = atof( argv[++i] );
             magma_assert( opts->tolerance >= 0 && opts->tolerance <= 1000,
                           "error: --tolerance %s is invalid; ensure tolerance in [0,1000].\n", argv[i] );
