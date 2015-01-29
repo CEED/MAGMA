@@ -128,7 +128,6 @@ magma_zgetrf_nopiv_batched(
     magmaDoubleComplex **dW4_displ  = NULL;
     magmaDoubleComplex **dinvA_array = NULL;
     magmaDoubleComplex **dwork_array = NULL;
-    magmaDoubleComplex **dW_array   = NULL;
 
     magma_malloc((void**)&dA_displ,   batchCount * sizeof(*dA_displ));
     magma_malloc((void**)&dW0_displ,  batchCount * sizeof(*dW0_displ));
@@ -138,20 +137,39 @@ magma_zgetrf_nopiv_batched(
     magma_malloc((void**)&dW4_displ,  batchCount * sizeof(*dW4_displ));
     magma_malloc((void**)&dinvA_array, batchCount * sizeof(*dinvA_array));
     magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
-    magma_malloc((void**)&dW_array,  batchCount * sizeof(*dW_array));
-
-    magmaDoubleComplex* dinvA;
-    magmaDoubleComplex* dwork;// dinvA and dwork are workspace in ztrsm
 
     magma_int_t invA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
     magma_int_t dwork_msize = max(m,n)*nb;
+    magmaDoubleComplex* dinvA      = NULL;
+    magmaDoubleComplex* dwork      = NULL;// dinvA and dwork are workspace in ztrsm
+    magmaDoubleComplex **cpuAarray = NULL;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
+    magma_malloc_cpu((void**) &cpuAarray, batchCount*sizeof(magmaDoubleComplex*));
+   /* check allocation */
+    if ( dA_displ  == NULL || dW0_displ == NULL || dW1_displ   == NULL || dW2_displ   == NULL || 
+         dW3_displ == NULL || dW4_displ == NULL || dinvA_array == NULL || dwork_array == NULL || 
+         dinvA     == NULL || dwork     == NULL || cpuAarray   == NULL ) {
+        magma_free(dA_displ);
+        magma_free(dW0_displ);
+        magma_free(dW1_displ);
+        magma_free(dW2_displ);
+        magma_free(dW3_displ);
+        magma_free(dW4_displ);
+        magma_free(dinvA_array);
+        magma_free(dwork_array);
+        magma_free( dinvA );
+        magma_free( dwork );
+        free(cpuAarray);
+        magma_int_t info = MAGMA_ERR_DEVICE_ALLOC;
+        magma_xerbla( __func__, -(info) );
+        return info;
+    }
+
+    magmablas_zlaset_q(MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue);
+    magmablas_zlaset_q(MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue);
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
-    cudaMemset( dinvA, 0, batchCount * invA_msize * sizeof(magmaDoubleComplex) );
-    cudaMemset( dwork, 0, batchCount * dwork_msize * sizeof(magmaDoubleComplex) );
-
 
     // printf(" I am in zgetrfbatched\n");
     magma_queue_t cstream;
@@ -162,9 +180,6 @@ magma_zgetrf_nopiv_batched(
     for(i=0; i<nbstreams; i++){
         magma_queue_create( &stream[i] );
     }
-
-    magmaDoubleComplex **cpuAarray = NULL;
-    magma_malloc_cpu((void**) &cpuAarray, batchCount*sizeof(magmaDoubleComplex*));
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
 
 
@@ -294,6 +309,7 @@ fin:
     cublasDestroy_v2(myhandle);
 #endif
 
+
     magma_free(dA_displ);
     magma_free(dW0_displ);
     magma_free(dW1_displ);
@@ -302,11 +318,9 @@ fin:
     magma_free(dW4_displ);
     magma_free(dinvA_array);
     magma_free(dwork_array);
-    magma_free(dW_array);
-
     magma_free( dinvA );
     magma_free( dwork );
-    magma_free_cpu(cpuAarray);
+    free(cpuAarray);
 
     return arginfo;
 

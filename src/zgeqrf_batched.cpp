@@ -140,47 +140,63 @@ magma_zgeqrf_batched(
     magmaDoubleComplex **dW1_displ = NULL;
     magmaDoubleComplex **dW2_displ = NULL;
     magmaDoubleComplex **dW3_displ = NULL;
+    magmaDoubleComplex **dW4_displ = NULL;
+    magmaDoubleComplex **dW5_displ = NULL;
 
-    magmaDoubleComplex **W_array = NULL;
-    magmaDoubleComplex **W2_array = NULL;
-
-    magmaDoubleComplex *dwork;
-
-    magmaDoubleComplex *d_T, *d_R;
+    magmaDoubleComplex *dwork = NULL;
+    magmaDoubleComplex *dT   = NULL;
+    magmaDoubleComplex *dR   = NULL;
     magmaDoubleComplex **dR_array = NULL;
     magmaDoubleComplex **dT_array = NULL; 
+    magmaDoubleComplex **cpuAarray = NULL;
+    magmaDoubleComplex **cpuTarray = NULL;
 
     magma_malloc((void**)&dW0_displ, batchCount * sizeof(*dW0_displ));
     magma_malloc((void**)&dW1_displ, batchCount * sizeof(*dW1_displ));
     magma_malloc((void**)&dW2_displ, batchCount * sizeof(*dW2_displ));
     magma_malloc((void**)&dW3_displ, batchCount * sizeof(*dW3_displ));
-
-    magma_malloc((void**)&W_array, batchCount * sizeof(*W_array));  // used in zlarfb
-    magma_malloc((void**)&W2_array, batchCount * sizeof(*W2_array));
-
-    magma_zmalloc(&dwork,  (2 * nb * n) * batchCount);
-
-    magma_malloc((void**)&d_T, sizeof(magmaDoubleComplex) * min(nb, min_mn) * min(nb, min_mn)*batchCount);
-    magma_malloc((void**)&d_R, sizeof(magmaDoubleComplex) * min(nb, min_mn) * n * batchCount);
-
+    magma_malloc((void**)&dW4_displ, batchCount * sizeof(*dW4_displ));  // used in zlarfb
+    magma_malloc((void**)&dW5_displ, batchCount * sizeof(*dW5_displ));
     magma_malloc((void**)&dR_array, batchCount * sizeof(*dR_array));
     magma_malloc((void**)&dT_array, batchCount * sizeof(*dT_array));
 
     ldt = ldr = min(nb, min_mn);
-
-    cudaMemset(d_R, 0, ldr * min(nb, min_mn) * batchCount*sizeof(magmaDoubleComplex));
-    cudaMemset(d_T, 0, ldt * min(nb, min_mn) * batchCount*sizeof(magmaDoubleComplex));
-
-    zset_pointer(dR_array, d_R, 1, 0, 0, ldr*min(nb, min_mn), batchCount, queue);
-    zset_pointer(dT_array, d_T, 1, 0, 0, ldt*min(nb, min_mn), batchCount, queue);
-
-    magmaDoubleComplex **cpuAarray = NULL;
+    magma_zmalloc(&dwork,  (2 * nb * n) * batchCount);
+    magma_zmalloc(&dR,  ldr * n   * batchCount);
+    magma_zmalloc(&dT,  ldt * ldt * batchCount);
     magma_malloc_cpu((void**) &cpuAarray, batchCount*sizeof(magmaDoubleComplex*));
-    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
-
-    magmaDoubleComplex **cpuTarray = NULL;
     magma_malloc_cpu((void**) &cpuTarray, batchCount*sizeof(magmaDoubleComplex*));
+
+    /* check allocation */
+    if ( dW0_displ == NULL || dW1_displ == NULL || dW2_displ == NULL || dW3_displ == NULL || 
+         dW4_displ == NULL || dW5_displ == NULL || dR_array  == NULL || dT_array  == NULL || 
+         dR == NULL || dT == NULL || dwork == NULL || cpuAarray == NULL || cpuTarray == NULL ) {
+        magma_free(dW0_displ);
+        magma_free(dW1_displ);
+        magma_free(dW2_displ);
+        magma_free(dW3_displ);
+        magma_free(dW4_displ);
+        magma_free(dW5_displ);
+        magma_free(dR_array);
+        magma_free(dT_array);
+        magma_free(dR);
+        magma_free(dT);
+        magma_free(dwork);
+        free(cpuAarray);
+        free(cpuTarray);
+        magma_int_t info = MAGMA_ERR_DEVICE_ALLOC;
+        magma_xerbla( __func__, -(info) );
+        return info;
+    }
+
+
+    magmablas_zlaset_q(MagmaFull, ldr, n*batchCount  , MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, ldr, queue);
+    magmablas_zlaset_q(MagmaFull, ldt, ldt*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, ldt, queue);
+    zset_pointer(dR_array, dR, 1, 0, 0, ldr*min(nb, min_mn), batchCount, queue);
+    zset_pointer(dT_array, dT, 1, 0, 0, ldt*min(nb, min_mn), batchCount, queue);
+    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1);
+
 
     magmablasSetKernelStream(NULL);
 
@@ -197,7 +213,7 @@ magma_zgeqrf_batched(
 
 
             //dwork is used in panel factorization and trailing matrix update
-            //W_array, W2_array are used as workspace and configured inside
+            //dW4_displ, dW5_displ are used as workspace and configured inside
             magma_zgeqrf_panel_batched(m-i, ib, jb, 
                                        dW0_displ, ldda, 
                                        dW2_displ, 
@@ -206,7 +222,7 @@ magma_zgeqrf_batched(
                                        dW1_displ,
                                        dW3_displ,
                                        dwork, 
-                                       W_array, W2_array,
+                                       dW4_displ, dW5_displ,
                                        info_array,
                                        batchCount, myhandle, queue);
                
@@ -224,11 +240,11 @@ magma_zgeqrf_batched(
             //===============================================
 
             //dwork is used in panel factorization and trailing matrix update
-            //reset W_array
+            //reset dW4_displ
             ldw = nb;
-            zset_pointer(W_array, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
+            zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
             offset = ldw*n*batchCount;
-            zset_pointer(W2_array, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
+            zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
 
             if( (n-ib-i) > 0)
             {
@@ -242,7 +258,7 @@ magma_zgeqrf_batched(
                                  dW0_displ, ldda,
                                  dW2_displ,
                                  dT_array, ldt, 
-                                 W_array, nb*ldt,
+                                 dW4_displ, nb*ldt,
                                  batchCount, myhandle, queue);
 
                 
@@ -292,8 +308,8 @@ magma_zgeqrf_batched(
                                 (const magmaDoubleComplex**)dW0_displ, ldda,
                                 (const magmaDoubleComplex**)dT_array, ldt,
                                 dW1_displ,  ldda,
-                                W_array,  ldw,
-                                W2_array, ldw,
+                                dW4_displ,  ldw,
+                                dW5_displ, ldw,
                                 batchCount, myhandle, queue);
                
                 }
@@ -310,26 +326,21 @@ magma_zgeqrf_batched(
         magma_queue_destroy( stream[k] );
     }
     magmablasSetKernelStream(cstream);
-
     cublasDestroy_v2(myhandle);
 
     magma_free(dW0_displ);
     magma_free(dW1_displ);
     magma_free(dW2_displ);
     magma_free(dW3_displ);
-    magma_free(W_array);
-    magma_free(W2_array);
-
-
-    magma_free(dwork);
-    magma_free(d_T);
-    magma_free(d_R);
-    magma_free(dT_array);
+    magma_free(dW4_displ);
+    magma_free(dW5_displ);
     magma_free(dR_array);
-
+    magma_free(dT_array);
+    magma_free(dR);
+    magma_free(dT);
+    magma_free(dwork);
     free(cpuAarray);
     free(cpuTarray);
-
 
     return arginfo;
            

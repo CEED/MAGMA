@@ -106,17 +106,32 @@ magma_zpotrs_batched(
     magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
 
 
-    magmaDoubleComplex* dinvA;
-    magmaDoubleComplex* dwork;// dinvA and dwork are workspace in ztrsm
-
     magma_int_t invA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
     magma_int_t dwork_msize = n*nrhs;
+    magmaDoubleComplex* dinvA      = NULL;
+    magmaDoubleComplex* dwork      = NULL;// dinvA and dwork are workspace in ztrsm
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
+   /* check allocation */
+    if ( dW1_displ == NULL || dW2_displ == NULL || dW3_displ   == NULL || dW4_displ   == NULL || 
+         dinvA_array == NULL || dwork_array == NULL || dinvA     == NULL || dwork     == NULL ) {
+        magma_free(dW1_displ);
+        magma_free(dW2_displ);
+        magma_free(dW3_displ);
+        magma_free(dW4_displ);
+        magma_free(dinvA_array);
+        magma_free(dwork_array);
+        magma_free( dinvA );
+        magma_free( dwork );
+        info = MAGMA_ERR_DEVICE_ALLOC;
+        magma_xerbla( __func__, -(info) );
+        return info;
+    }
+
+    magmablas_zlaset_q(MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue);
+    magmablas_zlaset_q(MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue);
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
-    cudaMemset( dinvA, 0, batchCount * invA_msize * sizeof(magmaDoubleComplex) );
-    cudaMemset( dwork, 0, batchCount * dwork_msize * sizeof(magmaDoubleComplex) );
 
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
@@ -186,11 +201,8 @@ magma_zpotrs_batched(
     magma_free(dW4_displ);
     magma_free(dinvA_array);
     magma_free(dwork_array);
-
-
     magma_free( dinvA );
     magma_free( dwork );
 
-    
     return info;
 }
