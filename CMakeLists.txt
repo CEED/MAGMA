@@ -42,7 +42,7 @@ endif()
 
 # ----------------------------------------
 # locate CUDA libraries
-set( GPU_TARGET "Tesla Fermi Kepler" CACHE STRING "CUDA architectures to compile for; one or more of Tesla, Fermi, Kepler" )
+set( GPU_TARGET "Fermi Kepler" CACHE STRING "CUDA architectures to compile for; one or more of Tesla, Fermi, Kepler" )
 find_package( CUDA )
 if ( CUDA_FOUND )
 	message( "-- Found CUDA ${CUDA_VERSION}" )
