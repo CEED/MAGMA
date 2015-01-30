@@ -323,7 +323,7 @@ static magma_int_t check_reduction(magma_uplo_t uplo, magma_int_t N, magma_int_t
         blasf77_zdscal(&N, &D[i], &(TEMP[i*N]), &ione);
     }
     /* Compute Residual = A - Q * LAMBDA * Q^H */
-    /* A is Hermetian but both upper and lower 
+    /* A is Hermitian but both upper and lower 
      * are assumed valable here for checking 
      * otherwise it need to be symetrized before 
      * checking.
