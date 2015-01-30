@@ -732,10 +732,10 @@ batched = (
     # ----------
     # Cholesky,
 	('testing_zpotrf_batched',  '--batch ' + opts.batch + ' -L   -c',  n,   ''),
-	('testing_zposv_batched ',  '--batch ' + opts.batch + ' -L   -c',  n,   ''),
+	('testing_zposv_batched',   '--batch ' + opts.batch + ' -L   -c',  n,   ''),
     # LU,
 	('testing_zgetrf_batched',  '--batch ' + opts.batch + '   -c',  n,   ''),
-	('testing_zgesv_batched ',  '--batch ' + opts.batch + '   -c',  n,   ''),
+	('testing_zgesv_batched',   '--batch ' + opts.batch + '   -c',  n,   ''),
 	('testing_zgetri_batched',  '--batch ' + opts.batch + '   -c',  n,   ''),
     # QR,
 	('testing_zgeqrf_batched',  '--batch ' + opts.batch + '   -c',  mn,   ''),
