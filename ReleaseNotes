@@ -25,7 +25,7 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
- 1.6.1
+ 1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.
       Comment out FPIC in make.inc to build only static library.
     * Added max norm and one norm to [zcsd]lange.
@@ -44,7 +44,6 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Adding the batched QR routine.
     * Performance improvments of all batched routines.
     * Fixing "nan" output for batched factorizations.
-
 
  1.6.0 - November 16, 2014
     * Added MAGMA Batched linear algebra routines:
