@@ -30,7 +30,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           error, error2, work[1];
+    double           error, error2;
 
     magmaDoubleComplex  c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
