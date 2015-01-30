@@ -196,14 +196,15 @@ int main( int argc, char** argv)
 
             cublas_time = magma_sync_wtime(0);
     
-            cublasZgeqrfBatched(opts.handle, M, N, dA_array, ldda, dtau_array, &info, batchCount);
+            int cublas_info;  // int, not magma_int_t
+            cublasZgeqrfBatched(opts.handle, M, N, dA_array, ldda, dtau_array, &cublas_info, batchCount);
 
             cublas_time = magma_sync_wtime(0) - cublas_time;
             cublas_perf = gflops / cublas_time;
 
-            if (info != 0)
+            if (cublas_info != 0)
                 printf("cublasZgeqrfBatched returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
+                       (int) cublas_info, magma_strerror( cublas_info ));
 
             /* =====================================================================
                    Performs operation using LAPACK
