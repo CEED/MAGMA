@@ -72,6 +72,7 @@ clean:
 	( cd interface_cuda && $(MAKE) clean )
 	( cd testing        && $(MAKE) clean )
 	( cd testing/lin    && $(MAKE) clean )
+	( cd sparse-iter    && $(MAKE) clean )
 	#(cd quark          && $(MAKE) clean )
 	-rm -f $(LIBMAGMA) $(LIBMAGMA_SO)
 	@echo
@@ -84,6 +85,7 @@ cleanall:
 	( cd interface_cuda && $(MAKE) cleanall )
 	( cd testing        && $(MAKE) cleanall )
 	( cd testing/lin    && $(MAKE) cleanall )
+	( cd sparse-iter    && $(MAKE) cleanall )
 	( cd lib            && rm -f *.a *.so )
 	#(cd quark          && $(MAKE) cleanall )
 	$(MAKE) cleanall2
