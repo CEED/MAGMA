@@ -36,6 +36,11 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Fixed workspace size in symmetric/Hermitian eigenvalue solvers.
     * Made fast magmablas_zhemv default in symmetric/Hermitian eigenvalue solvers
       (previously needed to define -DFAST_HEMV option).
+    * Added FGMRES for non-constant preconditioner operator.
+    * Added backward communication interfaces for SpMV and 
+      preconditioner passing the vectors on the GPU.
+    * Added function to generate cuSPARSE ILU level-scheduling information
+      for a given matrix.
 
  1.6.0 - November 16, 2014
     * Added MAGMA Batched linear algebra routines:
