@@ -285,8 +285,6 @@ tests = []
 # ----------
 # BLAS
 blas = (
-	('testing_z_cublas_v2',            '-c',  n,    'cublas only'),
-	
 	# no-trans/conj-trans; there are other combinations with trans
 	('testing_zgemm',   '-l -NN         -c',  mnk,  ''),
 	('testing_zgemm',   '-l -NC         -c',  mnk,  ''),
