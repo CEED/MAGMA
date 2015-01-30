@@ -16,7 +16,7 @@ Included are routines for the following algorithms:
     * Mixed-precision iterative refinement solvers based on LU, QR, and Cholesky
     * MAGMA BLAS including gemm, gemv, symv, and trsm
     * Batched MAGMA BLAS including gemm, gemv, herk, and trsm
-    * Batched LU, getri, and Cholesky factorizations
+    * Batched MAGMA LAPACK including LU, inverse(getri), QR, and Cholesky factorizations
     * MAGMA Sparse including CG, GMRES, BiCGSTAB, LOBPCG, iterative refinement,
       preconditioners, sparse kernels (SpMV, SpMM), and support for CSR, ELL, and
       SELL-P data formats
@@ -41,6 +41,10 @@ single (s), double (d), single-complex (c), double-complex (z).
       preconditioner passing the vectors on the GPU.
     * Added function to generate cuSPARSE ILU level-scheduling information
       for a given matrix.
+    * Adding the batched QR routine.
+    * Performance improvments of all batched routines.
+    * Fixing "nan" output for batched factorizations.
+
 
  1.6.0 - November 16, 2014
     * Added MAGMA Batched linear algebra routines:
