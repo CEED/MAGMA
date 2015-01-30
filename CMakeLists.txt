@@ -9,6 +9,13 @@ project( MAGMA C CXX Fortran )
 
 
 # ----------------------------------------
+# don't regenerate files during make.
+# (I think this means you have to manually re-run CMake if CMakeLists changes.
+#  Hopefully it fixes the huge problems with CMake interrupting Visual Studio.)
+set(CMAKE_SUPPRESS_REGENERATION on)
+
+
+# ----------------------------------------
 # force an out-of-source build, to not overwrite the existing Makefiles
 # (out-of-source is cleaner, too)
 string( COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MAGMA_COMPILE_INPLACE )
