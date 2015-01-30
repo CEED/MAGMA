@@ -152,6 +152,7 @@ parser.add_option(      '--tol',        action='store',      dest='tol',        
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
 
+parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     help='run very few, extra small tests, N=25:100:25, 32:128:32')
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
 parser.add_option('-l', '--large',      action='store_true', dest='large',      help='run large  tests, N > 1000')
@@ -169,8 +170,8 @@ parser.add_option(      '--batched',    action='store_true', dest='batched',    
 
 (opts, args) = parser.parse_args()
 
-# default if no sizes given is all sizes
-if ( not opts.small and not opts.med and not opts.large ):
+# default if no sizes given is all sizes (small, medium, large)
+if ( not opts.xsmall and not opts.small and not opts.med and not opts.large ):
 	opts.small = True
 	opts.med   = True
 	opts.large = True
@@ -207,6 +208,8 @@ print 'args', args
 
 # ----------
 n = ''
+if opts.xsmall:
+	n +=  ' --range 32:128:32 --range 25:100:25'
 if opts.small:
 	n += (' --range 1:20:1'
 	  +   ' -N  30  -N  31  -N  32  -N  33  -N  34'
@@ -750,14 +753,15 @@ precisions = (
 )
 
 subs = (
-	('',              'dlag2s',      '',              'zlag2c'    ),
-	('ssy',           'dsy',         'che',           'zhe'       ),
-	('sor',           'dor',         'cun',           'zun'       ),
-	('sy2sb',         'sy2sb',       'he2hb',         'he2hb'     ),
-	('',              'testing_ds',  '',              'testing_zc'),
-	('testing_s',     'testing_d',   'testing_c',     'testing_z' ),
-	('lansy',         'lansy',       'lanhe',         'lanhe'     ),
-	('blas_s',        'blas_d',      'blas_c',        'blas_z'    ),
+	('',              'testing_dlag2s', '',              'testing_zlag2c'),
+	('',              'testing_dlat2s', '',              'testing_zlat2c'),
+	('ssy',           'dsy',            'che',           'zhe'           ),
+	('sor',           'dor',            'cun',           'zun'           ),
+	('sy2sb',         'sy2sb',          'he2hb',         'he2hb'         ),
+	('',              'testing_ds',     '',              'testing_zc'    ),
+	('testing_s',     'testing_d',      'testing_c',     'testing_z'     ),
+	('lansy',         'lansy',          'lanhe',         'lanhe'         ),
+	('blas_s',        'blas_d',         'blas_c',        'blas_z'        ),
 )
 
 # ----------
@@ -866,7 +870,7 @@ for test in tests:
 			continue
 		# end
 		if ( not os.path.exists( cmdp )):
-			print >>sys.stderr, cmdp, "doesn't exist"
+			print >>sys.stderr, cmdp, "doesn't exist (original name: " + cmd + ", precision: " + precision + ")"
 			continue
 		# end
 		seen[ cmd_opts ] = True
