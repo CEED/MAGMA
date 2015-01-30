@@ -116,26 +116,15 @@ magma_zgeqrf_batched(
     }
 
 
-
-    cublasHandle_t myhandle;
-
-    cublasCreate_v2(&myhandle);
-
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
-    magma_int_t   k, streamid, nbstreams=32;
-    magma_queue_t stream[nbstreams];
-    for(k=0; k<nbstreams; k++){
-        magma_queue_create( &stream[k] );
-    }
-
-
     magma_int_t nb = 32;
-
     magma_int_t nnb = 8;
     magma_int_t i, ib=nb, jb=nnb;
     magma_int_t ldw, ldt, ldr, offset; 
-       
+
+    cublasHandle_t myhandle;
+    cublasCreate_v2(&myhandle);
+
+
     magmaDoubleComplex **dW0_displ = NULL;
     magmaDoubleComplex **dW1_displ = NULL;
     magmaDoubleComplex **dW2_displ = NULL;
@@ -194,6 +183,16 @@ magma_zgeqrf_batched(
     magmablas_zlaset_q(MagmaFull, ldt, ldt*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, ldt, queue);
     zset_pointer(dR_array, dR, 1, 0, 0, ldr*min(nb, min_mn), batchCount, queue);
     zset_pointer(dT_array, dT, 1, 0, 0, ldt*min(nb, min_mn), batchCount, queue);
+
+
+    magma_queue_t cstream;
+    magmablasGetKernelStream(&cstream);
+    magma_int_t streamid;
+    const magma_int_t nbstreams=32;
+    magma_queue_t stream[nbstreams];
+    for(i=0; i<nbstreams; i++){
+        magma_queue_create( &stream[i] );
+    }
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1);
 
