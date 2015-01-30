@@ -33,6 +33,9 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Fixed memory access bug in {sy|he}mv_mgpu, used in {sy|he}trd_mgpu.
     * Fixed errant argument check in laswp, affecting getrf_mgpu.
     * Fixed tau in [cz]gelqf, which needed to be conjugated.
+    * Fixed workspace size in symmetric/Hermitian eigenvalue solvers.
+    * Made fast magmablas_zhemv default in symmetric/Hermitian eigenvalue solvers
+      (previously needed to define -DFAST_HEMV option).
 
  1.6.0 - November 16, 2014
     * Added MAGMA Batched linear algebra routines:
