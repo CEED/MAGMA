@@ -118,7 +118,7 @@ magma_zgeqrf_batched(
 
     magma_int_t nb = 32;
     magma_int_t nnb = 8;
-    magma_int_t i, ib=nb, jb=nnb;
+    magma_int_t i, k, ib=nb, jb=nnb;
     magma_int_t ldw, ldt, ldr, offset; 
 
     cublasHandle_t myhandle;
