@@ -240,12 +240,8 @@ magma_zlarfb_gemm_batched_magem(
     else
         transt = MagmaNoTrans;
     
-    // whether T is upper or lower triangular
-    magma_uplo_t uplo;
-    if (direct == MagmaForward)
-        uplo = MagmaUpper;
-    else
-        uplo = MagmaLower;
+    MAGMA_UNUSED( transt );  // TODO: is this a bug that it isn't used?
+    
     
     // whether V is stored transposed or not
     magma_trans_t notransV, transV;
@@ -380,13 +376,8 @@ magma_zlarfb_gemm_batched_cugem(
         transt = Magma_ConjTrans;
     else
         transt = MagmaNoTrans;
+    MAGMA_UNUSED( transt );  // TODO: is this a bug that it isn't used?
     
-    // whether T is upper or lower triangular
-    magma_uplo_t uplo;
-    if (direct == MagmaForward)
-        uplo = MagmaUpper;
-    else
-        uplo = MagmaLower;
     
     // whether V is stored transposed or not
     magma_trans_t notransV, transV;
