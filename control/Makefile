@@ -59,6 +59,8 @@ SRC += \
 	magma_cfortran.F90	\
 	magma_zfortran.F90	\
 
+
+# ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
 
@@ -91,7 +93,7 @@ stamp: $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr stamp
+	rm -f *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)

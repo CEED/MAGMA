@@ -15,48 +15,48 @@ LIB += -lcusparse
 # ----------
 # utility functions
 ZSRC += \
-	testing_zblas.cpp	\
-	testing_zmatrix.cpp     \
-    testing_zio.cpp     \
-    testing_zmcompressor.cpp     \
-    testing_zmconverter.cpp     \
+	testing_zblas.cpp			\
+	testing_zmatrix.cpp			\
+	testing_zio.cpp				\
+	testing_zmcompressor.cpp	\
+	testing_zmconverter.cpp		\
 
 
 # ----------
 # low level LA operations
 ZSRC += \
-    testing_zdot.cpp        \
-    testing_zspmv.cpp       \
-    testing_zspmv_check.cpp \
-    testing_zspmm.cpp       \
-    testing_zmadd.cpp     \
+	testing_zdot.cpp			\
+	testing_zspmv.cpp			\
+	testing_zspmv_check.cpp		\
+	testing_zspmm.cpp			\
+	testing_zmadd.cpp			\
 
 # ----------
 # iterative solvers
 ZSRC += \
-    testing_zsolver.cpp     \
+	testing_zsolver.cpp			\
 
 
 # ----------
 # Mixed-precision solvers
-ZSRC += \
-#	testing_zpcg.cpp	\
-#	testing_zpbicgstab.cpp	\
-#	testing_zcpbicgstab.cpp	\
-#	testing_zpgmres.cpp	\
-#	testing_zgmres_pipe.cpp	\
-#	testing_zcpgmres.cpp	\
-#	testing_zdot.cpp	\
-#	testing_zkernel.cpp	\
-#	testing_z_csrmv.cpp	\
-#	testing_z_mpk_4.cpp	\
-#	testing_z_mpk_5.cpp	\
+#ZSRC += \
+#	testing_zpcg.cpp			\
+#	testing_zpbicgstab.cpp		\
+#	testing_zcpbicgstab.cpp		\
+#	testing_zpgmres.cpp			\
+#	testing_zgmres_pipe.cpp		\
+#	testing_zcpgmres.cpp		\
+#	testing_zdot.cpp			\
+#	testing_zkernel.cpp			\
+#	testing_z_csrmv.cpp			\
+#	testing_z_mpk_4.cpp			\
+#	testing_z_mpk_5.cpp			\
 
 # debugging
 #ZSRC += \
 #	testing_zsolver_debug.cpp	\
-#   testing_spmvELLRT.cpp \
-#	testing_zcdebug.cpp	\
+#	testing_spmvELLRT.cpp 		\
+#	testing_zcdebug.cpp			\
 
 
 # ------------------------------------------------------------
@@ -83,14 +83,31 @@ echo:
 	@echo ALLSRC $(ALLSRC)
 	@echo ZSRC $(ZSRC)
 
+
+# build libraries if they have not yet been built
+$(LIBTEST):
+	@echo ======================================== libtest.a
+	cd ../../testing && $(MAKE) libtest.a
+
+$(LIBMAGMA):
+	@echo ======================================== libmagma.a
+	cd ../.. && $(MAKE) lib
+
+$(LIBMAGMA_SPARSE):
+	@echo ======================================== libmagma_sparse.a
+	cd ..    && $(MAKE) lib
+
 lib:
-	cd .. && $(MAKE) lib
+	@echo ======================================== lib
+	cd ../.. && $(MAKE) lib
+	cd ..    && $(MAKE) lib
+
 
 # depend on header, in case struct magma_opts changes
 $(ALLOBJ): $(MAGMA_DIR)/testing/testings.h
 
 
-$(EXE): $(LIBMAGMA_SPARSE) $(LIBTEST)
+$(EXE): $(LIBMAGMA) $(LIBMAGMA_SPARSE) $(LIBTEST)
 
 clean: cleanobj cleanexe
 
@@ -103,7 +120,6 @@ cleanexe:
 cleanall: clean cleanexe
 
 testing_% : testing_%.o
-	echo $(LIB)
 	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \

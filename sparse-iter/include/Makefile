@@ -10,11 +10,13 @@ DIR = sparse-iter/include
 MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 
-ZHDR = \
+ZHDR := \
 	magmasparse_z.h		\
 	magmasparse_zc.h	\
 	magmasparse_types.h	\
 
+
+# ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
 

@@ -159,6 +159,7 @@ SRC += \
 	getrf_setup_pivinfo.cu		\
 
 
+# ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
 
@@ -183,7 +184,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo stamp
+	rm -f *.o *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)

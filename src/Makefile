@@ -291,22 +291,23 @@ ZSRC += \
 	zgetrs_nopiv_batched.cpp		\
 	zgesv_batched.cpp				\
 	zgesv_nopiv_batched.cpp			\
-	zgerbt_batched.cpp          	\
+	zgerbt_batched.cpp				\
 	zgesv_rbt_batched.cpp			\
 	\
-	zgetri_outofplace_batched.cpp				\
+	zgetri_outofplace_batched.cpp	\
 	\
 	zpotf2_batched.cpp				\
 	zpotrf_batched.cpp				\
 	zpotrf_panel_batched.cpp		\
 	zpotrs_batched.cpp				\
 	zposv_batched.cpp				\
-    \
+	\
 	zlarft_batched.cpp				\
-	zlarfb_gemm_batched.cpp         \
+	zlarfb_gemm_batched.cpp			\
 	zgeqrf_panel_batched.cpp		\
 	zgeqrf_batched.cpp				\
-	
+
+
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src

@@ -21,6 +21,8 @@ SRC := \
 	interface.cpp	\
 	set_get.cpp	\
 
+
+# ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
 

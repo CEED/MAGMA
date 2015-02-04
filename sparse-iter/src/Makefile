@@ -22,66 +22,66 @@ INC += -g3
 
 # Krylov space linear solvers
 ZSRC += \
-	zcg.cpp			\
-	zcg_res.cpp		\
+	zcg.cpp				\
+	zcg_res.cpp			\
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
-	zbicgstab_merge2.cpp	\
+	zbicgstab_merge2.cpp\
 	ziterref.cpp		\
-	zjacobi.cpp		\
-	zbaiter.cpp 	        \
-	zpcg.cpp		\
-	zbpcg.cpp		\
- 	zgmres.cpp	\
-	zpgmres.cpp	\
-	zfgmres.cpp \
- 	zpbicgstab.cpp		\
+	zjacobi.cpp			\
+	zbaiter.cpp			\
+	zpcg.cpp			\
+	zbpcg.cpp			\
+	zgmres.cpp			\
+	zpgmres.cpp			\
+	zfgmres.cpp 		\
+	zpbicgstab.cpp		\
 
 
 # Krylov space eigen-solvers
 ZSRC += \
-	zlobpcg.cpp		\
-	#zcgeig.cpp		\
-	#zlancsoz.cpp		\
+	zlobpcg.cpp			\
+#	zcgeig.cpp			\
+#	zlancsoz.cpp		\
 
 # Mixed-precision solvers
-ZSRC += \
+#ZSRC += \
 #	zcpbicgstab.cpp		\
 #	zcpgmres.cpp		\
 #	zciterref.cpp		\
-#	zcpir.cpp		\
+#	zcpir.cpp			\
 
 # QR and least squares, GPU interface
-ZSRC += \
-	#zungqr_lapack.cpp	\
-	#zungqr_cgs.cpp		\
-	#zungqr_mgs.cpp		\
-	#zungqr_chol.cpp	\
-	#zungqr_iter.cpp	\
+#ZSRC += \
+#	zungqr_lapack.cpp	\
+#	zungqr_cgs.cpp		\
+#	zungqr_mgs.cpp		\
+#	zungqr_chol.cpp		\
+#	zungqr_iter.cpp		\
 
 # ILU and sparse direct
 ZSRC += \
-    zcumilu.cpp          \
-    zpastix.cpp		\
+	zcumilu.cpp			\
+	zpastix.cpp			\
 
 
 # orthogonalization schemes
 ZSRC += \
-#	zorthomgs.cpp   \
+#	zorthomgs.cpp		\
 
 # backward communication for SpMV and Preconditioner
 ZSRC += \
-    magma_zcustomspmv.cpp   \
-    magma_zcustomprecond.cpp   \
+	magma_zcustomspmv.cpp		\
+	magma_zcustomprecond.cpp	\
 
 # Wrappers, tools etc
 ZSRC += \
-	magma_z_precond_wrapper.cpp \
-	magma_z_solver_wrapper.cpp \
-    magma_zcuspmm.cpp   \
-    magma_zcuspaxpy.cpp   \
-	zresidual.cpp		\
+	magma_z_precond_wrapper.cpp		\
+	magma_z_solver_wrapper.cpp		\
+	magma_zcuspmm.cpp				\
+	magma_zcuspaxpy.cpp				\
+	zresidual.cpp					\
 
 
 # ------------------------------------------------------------
