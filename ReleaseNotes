@@ -41,9 +41,9 @@ single (s), double (d), single-complex (c), double-complex (z).
       preconditioner passing the vectors on the GPU.
     * Added function to generate cuSPARSE ILU level-scheduling information
       for a given matrix.
-    * Adding the batched QR routine.
+    * Added the batched QR routine.
     * Performance improvments of all batched routines.
-    * Fixing "nan" output for batched factorizations.
+    * Fixed "nan" output for batched factorizations.
 
  1.6.0 - November 16, 2014
     * Added MAGMA Batched linear algebra routines:
