@@ -248,8 +248,23 @@ magma_z_cucsrtranspose(
 
     if( A.storage_type == Magma_CSR && A.memory_location == Magma_DEV ) {
                   
-         magma_z_sparse_matrix C;
-         magma_z_mtransfer( A, &C, Magma_DEV, Magma_DEV, queue );
+        // fill in information for B
+        B->storage_type = A.storage_type;
+        B->diagorder_type = A.diagorder_type;
+        B->memory_location = Magma_DEV;
+        B->num_rows = A.num_cols;
+        B->num_cols = A.num_rows;
+        B->nnz = A.nnz;
+        B->fill_mode = A.fill_mode;
+        // memory allocation
+        stat_dev += magma_zmalloc( &B->dval, A.nnz ); 
+        if( stat_dev != 0 ){ goto CLEANUP; }
+        stat_dev += magma_index_malloc( &B->drow, A.num_cols + 1 ); 
+        if( stat_dev != 0 ){ goto CLEANUP; }
+        stat_dev += magma_index_malloc( &B->dcol, A.nnz ); 
+        if( stat_dev != 0 ){ goto CLEANUP; }
+         
+
         // CUSPARSE context //
         cusparseHandle_t handle;
         cusparseStatus_t cusparseStatus;
@@ -276,7 +291,7 @@ magma_z_cucsrtranspose(
 
         cusparseStatus = 
         cusparseZcsr2csc( handle, A.num_rows, A.num_rows, A.nnz,
-                         A.dval, A.drow, A.dcol, C.dval, C.dcol, C.drow,
+                         A.dval, A.drow, A.dcol, B->dval, B->dcol, B->drow,
                          CUSPARSE_ACTION_NUMERIC, 
                          CUSPARSE_INDEX_BASE_ZERO);
          if (cusparseStatus != 0)    
@@ -286,7 +301,6 @@ magma_z_cucsrtranspose(
         cusparseDestroyMatDescr( descrB );
         cusparseDestroy( handle );
         
-        magma_z_mtransfer( C, B, Magma_DEV, Magma_DEV, queue );   
         
         if( A.fill_mode == Magma_FULL ){
              B->fill_mode = Magma_FULL;
