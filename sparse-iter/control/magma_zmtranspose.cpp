@@ -245,6 +245,8 @@ magma_z_cucsrtranspose(
     magma_queue_t queue )
 {
     // for symmetric matrices: convert to csc using cusparse
+    
+    magma_int_t stat_cpu = 0, stat_dev = 0;
 
     if( A.storage_type == Magma_CSR && A.memory_location == Magma_DEV ) {
                   
@@ -342,6 +344,16 @@ magma_z_cucsrtranspose(
 
         return MAGMA_SUCCESS;
     }
+CLEANUP:
+    if( stat_cpu != 0 ){
+        magma_z_mfree( B, queue );
+        return MAGMA_ERR_HOST_ALLOC;
+    }
+    if( stat_dev != 0 ){
+        magma_z_mfree( B, queue );
+        return MAGMA_ERR_DEVICE_ALLOC;
+    }  
+    return MAGMA_SUCCESS;
 }
 
 
