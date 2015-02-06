@@ -11,11 +11,9 @@
        @precisions normal z -> s d c
 */
 
+#include <cublas_v2.h>
 
-#include "../testing/testings.h"  // muse bed included in order to use cublas_trans_const
 #include "common_magma.h"
-
-//#define USE_CUBLAS
 
 /**
     Purpose
