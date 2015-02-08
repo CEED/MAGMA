@@ -561,12 +561,12 @@ magma_int_t write_z_csr_mtx(
 
     z_transpose_csr( n_row, n_col, nnz, *val, *row, *col, 
         &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
-    printf("#Writing sparse matrix to file (%s):",filename);
+    printf("# Writing sparse matrix to file (%s):",filename);
     fflush(stdout);
 
     std::ofstream file(filename);
     file<< "%%MatrixMarket matrix coordinate real general ColMajor" <<std::endl;
-    file << new_n_row <<" "<< new_n_col <<" "<< new_nnz << std::endl;
+    file << new_n_col <<" "<< new_n_row <<" "<< new_nnz << std::endl;
    
     magma_index_t i=0, j=0, rowindex=1;
 
@@ -583,7 +583,7 @@ magma_int_t write_z_csr_mtx(
 
   }
   else{
-    printf("#Writing sparse matrix to file (%s):",filename);
+    printf("# Writing sparse matrix to file (%s):",filename);
     fflush(stdout);
 
     std::ofstream file(filename);
@@ -828,7 +828,7 @@ magma_z_mvisu(
 #endif
 //**************************************************************
 
-    magma_index_t i, j, k, l;
+    magma_index_t i, j, k;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     if ( A.memory_location == Magma_CPU ) {
@@ -927,7 +927,7 @@ magma_z_mvisu(
             }
         }
         else {
-            magma_z_sparse_matrix C, D;
+            magma_z_sparse_matrix C;
             magma_z_mconvert( A, &C, A.storage_type, Magma_CSR, queue );
             magma_z_mvisu(  C, queue );
             magma_z_mfree(&C, queue );
