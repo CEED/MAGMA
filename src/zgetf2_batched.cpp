@@ -173,7 +173,7 @@ magma_zgetf2_batched(
         }
     }
 
-    //free(cpuAarray);
+    //magma_free_cpu(cpuAarray);
 
     return 0;
 

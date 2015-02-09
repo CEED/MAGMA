@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     magma_int_t  **dipiv_array = NULL;
     magma_int_t *dinfo_array = NULL;
 
-    magma_int_t     *ipiv;
+    magma_int_t     *ipiv, *cpu_info ;
     magma_int_t     *d_ipiv, *d_info;
     magma_int_t M, N, n2, lda, ldda, min_mn, info, info1, info2;
     magma_int_t ione     = 1;
@@ -73,6 +73,7 @@ int main( int argc, char** argv)
             //gflops = (FLOPS_ZGETRF( M, N ) + FLOPS_ZGETRI( min(M,N) ))/ 1e9 * batchCount; // This is the correct flops but since this getri_batched is based on 2 trsm = getrs and to know the real flops I am using the getrs one
             gflops = (FLOPS_ZGETRF( M, N ) + FLOPS_ZGETRS( min(M,N), min(M,N) ))/ 1e9 * batchCount;
 
+            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             TESTING_MALLOC_CPU(  ipiv, magma_int_t,     min_mn * batchCount);
             TESTING_MALLOC_CPU(  h_A,  magmaDoubleComplex, n2     );
             TESTING_MALLOC_PIN(  h_R,  magmaDoubleComplex, n2     );
@@ -109,7 +110,6 @@ int main( int argc, char** argv)
 
 
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
-            magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
             for(int i=0; i<batchCount; i++)
             {
@@ -196,6 +196,7 @@ int main( int argc, char** argv)
                 printf("     ---  \n");
             }
 
+            TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
@@ -207,7 +208,6 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( dA_array );
             TESTING_FREE_DEV( dinfo_array );
             TESTING_FREE_DEV( C_array );
-            free(cpu_info);
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

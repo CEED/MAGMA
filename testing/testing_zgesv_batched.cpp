@@ -36,7 +36,8 @@ int main(int argc, char **argv)
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
     magmaDoubleComplex_ptr d_A, d_B;
-    magma_int_t *ipiv, *dipiv, *dinfo_array;
+    magma_int_t *dipiv, *dinfo_array;
+    magma_int_t *ipiv, *cpu_info ;
     magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
             TESTING_MALLOC_CPU( h_X, magmaDoubleComplex, sizeB );
             TESTING_MALLOC_CPU( work, double,      N);
             TESTING_MALLOC_CPU( ipiv, magma_int_t, N);
+            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N*batchCount    );
             TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*nrhs*batchCount );
@@ -106,7 +108,6 @@ int main(int argc, char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
-            magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
             for(int i=0; i<batchCount; i++)
             {
@@ -173,6 +174,7 @@ int main(int argc, char **argv)
             TESTING_FREE_CPU( h_X );
             TESTING_FREE_CPU( work );
             TESTING_FREE_CPU( ipiv );
+            TESTING_FREE_CPU( cpu_info );
             
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_B );
@@ -183,7 +185,6 @@ int main(int argc, char **argv)
             magma_free(dA_array);
             magma_free(dB_array);
             magma_free(dipiv_array);
-            free(cpu_info);
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

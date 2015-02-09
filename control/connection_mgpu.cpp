@@ -15,7 +15,8 @@
 extern "C"
 magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu)
 {
-    magma_int_t *deviceid = (magma_int_t *) malloc(ngpu*sizeof(magma_int_t));
+    magma_int_t *deviceid = NULL;
+    magma_imalloc_cpu( &deviceid, ngpu );
     memset(deviceid, 0, ngpu*sizeof(magma_int_t));
 
     nbcmplx[0] =0;
@@ -40,7 +41,7 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
         cudaGetDeviceProperties( &prop, d );
         if ( ! prop.unifiedAddressing ) {
             printf( "device %d doesn't support unified addressing\n", (int) d );
-            free(deviceid);
+            magma_free_cpu(deviceid);
             return -1;
         }
         // add this device to the list if not added yet.
@@ -61,7 +62,7 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
             cudaGetDeviceProperties( &prop, d2 );
             if ( ! prop.unifiedAddressing ) {
                 printf( "device %d doesn't support unified addressing\n", (int) d2 );
-                free(deviceid);
+                magma_free_cpu(deviceid);
                 return -1;
             }
 
@@ -77,7 +78,7 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
                 //printf("enabling devide %d ==> %d  error %d\n", d, d2, err);
                 if ( err != cudaSuccess && err != cudaErrorPeerAccessAlreadyEnabled ) {
                     printf( "device %d cudaDeviceEnablePeerAccess error %d\n", (int) d2, (int) err );
-                    free(deviceid);
+                    magma_free_cpu(deviceid);
                     return -2;
                 }
 
@@ -95,7 +96,7 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
                     }
                 }else{
                     printf( "device %d cudaDeviceEnablePeerAccess error %d\n", (int) d, (int) err );
-                    free(deviceid);
+                    magma_free_cpu(deviceid);
                     return -2;
                 }
             }
@@ -103,6 +104,6 @@ magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][Magma
     }
 
     nbcmplx[0] = cmplxnb;
-    free(deviceid); 
+    magma_free_cpu(deviceid); 
     return cmplxnb;
 }

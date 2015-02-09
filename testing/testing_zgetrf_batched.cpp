@@ -79,7 +79,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex **dA_array = NULL;
 
     magma_int_t     **dipiv_array = NULL;
-    magma_int_t     *ipiv;
+    magma_int_t     *ipiv, *cpu_info ;
     magma_int_t     *dipiv_magma, *dinfo_magma;
     int             *dipiv_cublas, *dinfo_cublas;
     
@@ -114,6 +114,7 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
             
 
+            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn * batchCount);
             TESTING_MALLOC_CPU(    h_A,  magmaDoubleComplex, n2     );
             TESTING_MALLOC_CPU(    h_Amagma,  magmaDoubleComplex, n2     );
@@ -149,7 +150,6 @@ int main( int argc, char** argv)
             magma_zgetmatrix( M, N*batchCount, dA, ldda, h_Amagma, lda );
             
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
-            magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
             
             for(int i=0; i<batchCount; i++)
@@ -245,6 +245,7 @@ int main( int argc, char** argv)
                 printf("     ---  \n");
             }
             
+            TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_CPU( h_Amagma );
@@ -257,7 +258,6 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( dinfo_cublas );
             TESTING_FREE_DEV( dipiv_array );
             TESTING_FREE_DEV( dA_array );
-            free(cpu_info);
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

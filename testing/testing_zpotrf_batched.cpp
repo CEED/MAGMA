@@ -41,6 +41,7 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     magmaDoubleComplex **d_A_array = NULL;
     magma_int_t *dinfo_magma;
+    magma_int_t *cpu_info ;
 
     magma_int_t batchCount;
 
@@ -61,6 +62,7 @@ int main( int argc, char** argv)
 
             gflops = batchCount * FLOPS_ZPOTRF( N ) / 1e9 ;
 
+            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2);
             TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2);
             TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda * N * batchCount);
@@ -88,7 +90,6 @@ int main( int argc, char** argv)
             info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount, queue);
             gpu_time = magma_sync_wtime(NULL) - gpu_time;
             gpu_perf = gflops / gpu_time;
-            magma_int_t *cpu_info = (magma_int_t*) malloc(batchCount*sizeof(magma_int_t));
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
             for(int i=0; i<batchCount; i++)
             {
@@ -144,12 +145,12 @@ int main( int argc, char** argv)
                 printf("%5d      %5d    ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
                        (int)batchCount, (int) N, gpu_perf, gpu_time*1000. );
             }
+            TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_A_array );
             TESTING_FREE_DEV( dinfo_magma );
-            free(cpu_info);
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

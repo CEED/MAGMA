@@ -160,7 +160,7 @@ magma_zgetrf_nopiv_batched(
         magma_free(dwork_array);
         magma_free( dinvA );
         magma_free( dwork );
-        free(cpuAarray);
+        magma_free_cpu(cpuAarray);
         magma_int_t info = MAGMA_ERR_DEVICE_ALLOC;
         magma_xerbla( __func__, -(info) );
         return info;
@@ -320,7 +320,7 @@ fin:
     magma_free(dwork_array);
     magma_free( dinvA );
     magma_free( dwork );
-    free(cpuAarray);
+    magma_free_cpu(cpuAarray);
 
     return arginfo;
 
