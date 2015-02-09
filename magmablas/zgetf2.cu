@@ -51,14 +51,14 @@ void magma_zscal_zgeru(
             On CUDA architecture 1.x cards, N <= 512.
 
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             On entry, the m by n matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A.  LDA >= max(1,M).
+    ldda    INTEGER
+            The leading dimension of the array A.  LDDA >= max(1,M).
 
     @param[out]
     ipiv    INTEGER array, dimension (min(M,N))

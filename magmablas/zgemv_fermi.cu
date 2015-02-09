@@ -231,11 +231,11 @@ zgemvc_kernel_fermi(
             On entry, ALPHA specifies the scalar alpha.
 
     @param[in]
-    dA      COMPLEX_16 array of dimension ( LDA, n ) on the GPU.
+    dA      COMPLEX_16 array of dimension ( LDDA, n ) on the GPU.
    
     @param[in]
-    lda     INTEGER
-            LDA specifies the leading dimension of A.
+    ldda    INTEGER
+            LDDA specifies the leading dimension of A.
 
     @param[in]
     dx      COMPLEX_16 array of dimension

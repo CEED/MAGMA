@@ -72,7 +72,7 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
 
     Arguments
     ---------
-    \param[in]
+    @param[in]
     type    magma_type_t
             TYPE indices the storage type of the input matrix A.
             = MagmaFull:   full matrix.
@@ -80,28 +80,28 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
             = MagmaUpper:  upper triangular matrix.
             Other formats that LAPACK supports, MAGMA does not currently support.
 
-    \param[in]
+    @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
-    \param[in]
+    @param[in]
     n       INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    \param[in]
+    @param[in]
     dD      DOUBLE PRECISION vector, dimension (M)
             The diagonal matrix containing the scalar factors. Stored as a vector.
 
-    \param[in,out]
+    @param[in,out]
     dA      COMPLEX*16 array, dimension (LDDA,N)
             The matrix to be scaled by dD.  See TYPE for the
             storage type.
 
-    \param[in]
+    @param[in]
     ldda    INTEGER
             The leading dimension of the array A.  LDDA >= max(1,M).
 
-    \param[out]
+    @param[out]
     info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value.

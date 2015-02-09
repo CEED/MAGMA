@@ -548,6 +548,10 @@ zsymv_kernel_L_sum(
     lwork   INTEGER.
             The dimension of the array DWORK. LWORK >= LDDA * ceil( N / NB_X ),
             where NB_X = 64.
+    
+    @param[in]
+    queue   magma_queue_t.
+            Queue to execute in.
 
     MAGMA implements zsymv through two steps:
     1)  perform the multiplication in each thread block and put the

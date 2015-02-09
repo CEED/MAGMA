@@ -567,12 +567,19 @@ zhemv_kernel_L_mgpu_sum(
             upper triangular part of A is not referenced.
             Note that the imaginary parts of the diagonal elements need
             not be set and are assumed to be zero.
-
+            
+    @param[in]
+    offset  INTEGER.
+            Row & column offset to start of matrix A within the distributed d_lA
+            structure. Note that N is the size of this multiply, excluding the
+            offset, so the size of the original parent matrix is N+offset.
+            Also, x and y do not have an offset.
+    
     @param[in]
     ldda    INTEGER.
             On entry, LDDA specifies the first dimension of A as declared
             in the calling (sub) program. LDDA must be at least
-            max( 1, n ).
+            max( 1, n + offset ).
             It is recommended that ldda is multiple of 16. Otherwise
             performance would be deteriorated as the memory accesses
             would not be fully coalescent.

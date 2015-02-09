@@ -57,6 +57,10 @@ __global__ void zswap_kernel(
     @param[in]
     incy    Stride between consecutive elements of dy. incy != 0.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zblas1
     ********************************************************************/
 extern "C" void 

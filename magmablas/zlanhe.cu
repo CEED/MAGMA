@@ -578,7 +578,7 @@ zlanhe_max(
             set to zero.
     
     @param[in]
-    A       COMPLEX*16 array on the GPU, dimension (LDA,N)
+    dA      COMPLEX*16 array on the GPU, dimension (LDDA,N)
             The Hermitian matrix A. If UPLO = MagmaUpper, the leading n by n
             upper triangular part of A contains the upper triangular part
             of the matrix A, and the strictly lower triangular part of A
@@ -589,8 +589,8 @@ zlanhe_max(
             elements need not be set and are assumed to be zero.
     
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A. LDA >= max(N,1).
+    ldda    INTEGER
+            The leading dimension of the array A. LDDA >= max(N,1).
     
     @param
     dwork   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),

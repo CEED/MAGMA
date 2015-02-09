@@ -227,16 +227,18 @@ zlange_one_kernel(
             ZLANGE is set to zero.
     
     @param[in]
-    A       DOUBLE PRECISION array on the GPU, dimension (LDA,N)
+    dA      DOUBLE PRECISION array on the GPU, dimension (LDDA,N)
             The m by n matrix A.
     
     @param[in]
-    lda     INTEGER
-            The leading dimension of the array A.  LDA >= max(M,1).
+    ldda    INTEGER
+            The leading dimension of the array A.  LDDA >= max(M,1).
     
     @param
     dwork   (workspace) DOUBLE PRECISION array on the GPU, dimension (LWORK).
     
+@cond
+TODO add lwork parameter
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.
@@ -244,6 +246,7 @@ zlange_one_kernel(
             If NORM = '1',        LWORK >= max( 1, N ).
             Note this is different than LAPACK, which requires WORK only for
             NORM = 'I', and does not pass LWORK.
+@endcond
 
     @ingroup magma_zaux2
     ********************************************************************/
