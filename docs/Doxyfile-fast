@@ -744,7 +744,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           = output_err
+WARN_LOGFILE           = output_err_fast
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -829,9 +829,11 @@ INPUT                  = \
 	../src/zgeqrf2_gpu.cpp            \
 	../src/zgeqrf3_gpu.cpp            \
 	../src/zgeqrf4_gpu.cpp            \
+	../src/zgeqrf_batched.cpp             \
 	../src/zgeqrf_gpu.cpp             \
 	../src/zgeqrf_mgpu.cpp            \
 	../src/zgeqrf_ooc.cpp             \
+	../src/zgeqrf_panel_batched.cpp       \
 	../src/zgeqrs3_gpu.cpp            \
 	../src/zgeqrs_gpu.cpp             \
 	../src/zgerbt_batched.cpp             \
@@ -913,8 +915,10 @@ INPUT                  = \
 	../src/zlahru_m.cpp               \
 	../src/zlaqps.cpp                 \
 	../src/zlaqps_gpu.cpp             \
+	../src/zlarfb_gemm_batched.cpp        \
 	../src/zlarfb_gpu.cpp             \
 	../src/zlarfb_gpu_gemm.cpp        \
+	../src/zlarft_batched.cpp             \
 	../src/zlatrd.cpp                 \
 	../src/zlatrd2.cpp                \
 	../src/zlatrd_mgpu.cpp            \
@@ -1066,6 +1070,8 @@ INPUT                  = \
 	../magmablas/zgemv_conjv.cu                 \
 	../magmablas/zgemv_fermi.cu                 \
 	../magmablas/zgeqr2.cu                      \
+	../magmablas/zgeqr2_batched.cu              \
+	../magmablas/zgeqr2_kernels.cu              \
 	../magmablas/zgeqr2x_gpu-v4.cu              \
 	../magmablas/zgerbt.cu                      \
 	../magmablas/zgerbt.h                       \
@@ -1078,8 +1084,9 @@ INPUT                  = \
 	../magmablas/zhemm_mgpu.cpp                 \
 	../magmablas/zhemm_mgpu_spec.cpp            \
 	../magmablas/zhemv.cu                       \
-	../magmablas/zhemv_fermi_mgpu.cu            \
-	../magmablas/zhemv_fermi_mgpu_32.cu         \
+	../magmablas/zhemv_mgpu.cu                  \
+	../magmablas/zhemv_mgpu_upper.cu            \
+	../magmablas/zhemv_upper.cu                 \
 	../magmablas/zher2k_mgpu.cpp                \
 	../magmablas/zher2k_mgpu_spec.cpp           \
 	../magmablas/zherk_batched.cu               \
@@ -1099,6 +1106,7 @@ INPUT                  = \
 	../magmablas/zlarfg-v2.cu                   \
 	../magmablas/zlarfg.cu                      \
 	../magmablas/zlarfgx-v2.cu                  \
+	../magmablas/zlarft_kernels.cu              \
 	../magmablas/zlarfx.cu                      \
 	../magmablas/zlascl.cu                      \
 	../magmablas/zlascl2.cu                     \
@@ -1120,6 +1128,7 @@ INPUT                  = \
 	../magmablas/zsymmetrize.cu                 \
 	../magmablas/zsymmetrize_tiles.cu           \
 	../magmablas/zsymv.cu                       \
+	../magmablas/zsymv_upper.cu                 \
 	../magmablas/ztranspose.cu                  \
 	../magmablas/ztranspose_inplace.cu          \
 	../magmablas/ztrsm.cu                       \
@@ -1166,12 +1175,12 @@ INPUT                  = \
 	../sparse-iter/control/magma_z_matrixchar.cpp     \
 	../sparse-iter/control/magma_z_vio.cpp            \
 	../sparse-iter/control/magma_zcsrsplit.cpp        \
-	../sparse-iter/control/magma_zgeneratematrix.cpp  \
 	../sparse-iter/control/magma_zmconverter.cpp          \
 	../sparse-iter/control/magma_zmcsrcompressor.cpp      \
 	../sparse-iter/control/magma_zmcsrpass.cpp            \
 	../sparse-iter/control/magma_zmcsrpass_gpu.cpp        \
 	../sparse-iter/control/magma_zmdiff.cpp               \
+	../sparse-iter/control/magma_zmgenerator.cpp          \
 	../sparse-iter/control/magma_zmio.cpp                 \
 	../sparse-iter/control/magma_zmlumerge.cpp            \
 	../sparse-iter/control/magma_zmscale.cpp          \
@@ -1504,7 +1513,7 @@ GENERATE_HTML          = YES
 # The default directory is: html.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_OUTPUT            = html
+HTML_OUTPUT            = html-fast
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for each
 # generated HTML page (for example: .htm, .php, .asp).
