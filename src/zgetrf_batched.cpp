@@ -178,7 +178,7 @@ magma_zgetrf_batched(
         magma_free(dwork_array);
         magma_free( dinvA );
         magma_free( dwork );
-        free(cpuAarray);
+        magma_free_cpu(cpuAarray);
         magma_free(dipiv_displ);
         magma_free(pivinfo_array);
         magma_free(pivinfo);
@@ -209,7 +209,7 @@ magma_zgetrf_batched(
 
 
 #if defined(ENABLE_TIMER3)
-    printf(" I am after malloc\n");
+    printf(" I am after magma_malloc_cpu\n");
     talloc = magma_sync_wtime(0) - talloc;
     tloop  = magma_sync_wtime(0);
 #endif
@@ -379,7 +379,7 @@ fin:
     magma_free(dwork_array);
     magma_free( dinvA );
     magma_free( dwork );
-    free(cpuAarray);
+    magma_free_cpu(cpuAarray);
     magma_free(dipiv_displ);
     magma_free(pivinfo_array);
     magma_free(pivinfo);

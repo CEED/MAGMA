@@ -160,7 +160,7 @@ magma_zgetrs_nopiv_batched(
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
-    //printf(" I am after malloc getri\n");
+    //printf(" I am after magma_malloc_cpu getri\n");
 
     if (notran) {
         // solve dwork = L^-1 * NRHS

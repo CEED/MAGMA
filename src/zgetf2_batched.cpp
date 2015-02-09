@@ -107,7 +107,7 @@ magma_zgetf2_batched(
 
     
 
-    //magmaDoubleComplex **cpuAarray = (magmaDoubleComplex**) malloc(batchCount*sizeof(magmaDoubleComplex*));
+    //magmaDoubleComplex **cpuAarray = (magmaDoubleComplex**) magma_malloc_cpu(batchCount*sizeof(magmaDoubleComplex*));
     //magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
 
 
@@ -173,7 +173,7 @@ magma_zgetf2_batched(
         }
     }
 
-    //free(cpuAarray);
+    //magma_free_cpu(cpuAarray);
 
     return 0;
 
