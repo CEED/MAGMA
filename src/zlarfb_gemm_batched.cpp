@@ -15,6 +15,31 @@
 
 #include "common_magma.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+extern "C" magma_int_t
+magma_zlarfb_gemm_batched_magem(
+    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex_const_ptr dV_array[],    magma_int_t lddv,
+    magmaDoubleComplex_const_ptr dT_array[],    magma_int_t lddt,
+    magmaDoubleComplex_ptr dC_array[],          magma_int_t lddc,
+    magmaDoubleComplex_ptr dwork_array[],       magma_int_t ldwork,
+    magmaDoubleComplex_ptr dworkvt_array[],     magma_int_t ldworkvt,
+    magma_int_t batchCount, magma_queue_t queue);
+
+extern "C" magma_int_t
+magma_zlarfb_gemm_batched_cugem(
+    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex_const_ptr dV_array[],    magma_int_t lddv,
+    magmaDoubleComplex_const_ptr dT_array[],    magma_int_t lddt,
+    magmaDoubleComplex_ptr dC_array[],          magma_int_t lddc,
+    magmaDoubleComplex_ptr dwork_array[],       magma_int_t ldwork,
+    magmaDoubleComplex_ptr dworkvt_array[],     magma_int_t ldworkvt,
+    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue);
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 /**
     Purpose
     -------
@@ -139,30 +164,6 @@
 
     @ingroup magma_zaux3
     ********************************************************************/
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" magma_int_t
-magma_zlarfb_gemm_batched_magem(
-    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_const_ptr dV_array[],    magma_int_t lddv,
-    magmaDoubleComplex_const_ptr dT_array[],    magma_int_t lddt,
-    magmaDoubleComplex_ptr dC_array[],          magma_int_t lddc,
-    magmaDoubleComplex_ptr dwork_array[],       magma_int_t ldwork,
-    magmaDoubleComplex_ptr dworkvt_array[],     magma_int_t ldworkvt,
-    magma_int_t batchCount, magma_queue_t queue);
-extern "C" magma_int_t
-magma_zlarfb_gemm_batched_cugem(
-    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_const_ptr dV_array[],    magma_int_t lddv,
-    magmaDoubleComplex_const_ptr dT_array[],    magma_int_t lddt,
-    magmaDoubleComplex_ptr dC_array[],          magma_int_t lddc,
-    magmaDoubleComplex_ptr dwork_array[],       magma_int_t ldwork,
-    magmaDoubleComplex_ptr dworkvt_array[],     magma_int_t ldworkvt,
-    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue);
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" magma_int_t
 magma_zlarfb_gemm_batched(
     magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
@@ -198,9 +199,11 @@ magma_zlarfb_gemm_batched(
             dwork_array, ldwork,
             dworkvt_array, ldworkvt,
             batchCount, myhandle, queue);
-   }
+    }
     return MAGMA_SUCCESS;
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" magma_int_t
@@ -338,6 +341,8 @@ magma_zlarfb_gemm_batched_magem(
     }
     return MAGMA_SUCCESS;
 } /* magma_zlarfb */
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" magma_int_t
@@ -459,7 +464,7 @@ magma_zlarfb_gemm_batched_cugem(
                                   (const magmaDoubleComplex**)dV_array, lddv,
                          &c_zero, dworkvt_array, ldwvt, batchCount);
             // C = C - W W2 = C - C V T V' = C (I - V T V') = C H
-           cublasZgemmBatched(myhandle, cublas_trans_const(MagmaNoTrans), cublas_trans_const(MagmaNoTrans),
+            cublasZgemmBatched(myhandle, cublas_trans_const(MagmaNoTrans), cublas_trans_const(MagmaNoTrans),
                          m, n, k,
                          &c_neg_one, (const magmaDoubleComplex**)dwork_array,   ldw,
                                      (const magmaDoubleComplex**)dworkvt_array, ldwvt,
@@ -468,4 +473,3 @@ magma_zlarfb_gemm_batched_cugem(
     }
     return MAGMA_SUCCESS;
 } /* magma_zlarfb */
-
