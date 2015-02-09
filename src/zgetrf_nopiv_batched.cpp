@@ -160,7 +160,7 @@ magma_zgetrf_nopiv_batched(
         magma_free(dwork_array);
         magma_free( dinvA );
         magma_free( dwork );
-        magma_free_cpu(cpuAarray);
+        free(cpuAarray);
         magma_int_t info = MAGMA_ERR_DEVICE_ALLOC;
         magma_xerbla( __func__, -(info) );
         return info;
@@ -183,7 +183,7 @@ magma_zgetrf_nopiv_batched(
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
 
 
-    //printf(" I am after magma_malloc_cpu\n");
+    //printf(" I am after malloc\n");
 
 
 
@@ -320,7 +320,7 @@ fin:
     magma_free(dwork_array);
     magma_free( dinvA );
     magma_free( dwork );
-    magma_free_cpu(cpuAarray);
+    free(cpuAarray);
 
     return arginfo;
 

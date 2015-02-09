@@ -171,8 +171,8 @@ magma_zgeqrf_batched(
         magma_free(dR);
         magma_free(dT);
         magma_free(dwork);
-        magma_free_cpu(cpuAarray);
-        magma_free_cpu(cpuTarray);
+        free(cpuAarray);
+        free(cpuTarray);
         magma_int_t info = MAGMA_ERR_DEVICE_ALLOC;
         magma_xerbla( __func__, -(info) );
         return info;
@@ -338,8 +338,8 @@ magma_zgeqrf_batched(
     magma_free(dR);
     magma_free(dT);
     magma_free(dwork);
-    magma_free_cpu(cpuAarray);
-    magma_free_cpu(cpuTarray);
+    free(cpuAarray);
+    free(cpuTarray);
 
     return arginfo;
            

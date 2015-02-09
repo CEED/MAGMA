@@ -155,7 +155,7 @@ magma_zgetf2_nopiv_batched(
         }
     }
 
-    //magma_free_cpu(cpuAarray);
+    //free(cpuAarray);
 
     return 0;
 

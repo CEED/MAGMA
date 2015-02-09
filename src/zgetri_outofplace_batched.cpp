@@ -155,7 +155,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
-    //printf(" I am after magma_malloc_cpu getri\n");
+    //printf(" I am after malloc getri\n");
 
 
     magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
