@@ -136,8 +136,8 @@ magma_zgeqrf_batched(
         return info;
     }
 
-    zset_pointer(dR_array, dR, 1, 0, 0, lddr*min(nb, min_mn), batchCount, queue);
-    zset_pointer(dT_array, dT, 1, 0, 0, lddt*min(nb, min_mn), batchCount, queue);
+    zset_pointer(dR_array, dR, lddr, 0, 0, lddr*min(nb, min_mn), batchCount, queue);
+    zset_pointer(dT_array, dT, lddt, 0, 0, lddt*min(nb, min_mn), batchCount, queue);
 
     arginfo = magma_zgeqrf_expert_batched(m, n, 
                                           dA_array, ldda, 
