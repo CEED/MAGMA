@@ -47,7 +47,7 @@ zlascl_diag_upper(int m, int n, magmaDoubleComplex const* D, int ldd,
 /**
     Purpose
     -------
-    ZLASCL2 scales the M by N complex matrix A by the real diagonal matrix dD.
+    ZLASCL_DIAG scales the M by N complex matrix A by the real diagonal matrix dD.
     TYPE specifies that A may be full, upper triangular, lower triangular.
 
     Arguments
@@ -69,8 +69,12 @@ zlascl_diag_upper(int m, int n, magmaDoubleComplex const* D, int ldd,
             The number of columns of the matrix A.  N >= 0.
 
     @param[in]
-    dD      DOUBLE PRECISION vector, dimension (M)
-            The diagonal matrix containing the scalar factors. Stored as a vector.
+    dD      DOUBLE PRECISION vector, dimension (LDDD,M)
+            The matrix storing the scaling factor on its diagonal. 
+
+    @param[in]
+    lddd    INTEGER
+            The leading dimension of the array D.  
 
     @param[in,out]
     dA      COMPLEX*16 array, dimension (LDDA,N)
