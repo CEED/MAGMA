@@ -228,29 +228,23 @@ magma_zgeqrf_batched(
             //===============================================
             // end of panel
             //===============================================
-
-           //direct panel matrix V in dW0_displ, 
-           magma_zdisplace_pointers(dW0_displ, dA_array, ldda, i, i, batchCount, queue); 
-           // copy the upper part of V into dR 
-           zgeqrf_copy_upper_batched(ib, jb, dW0_displ, ldda, dR_array, ldr, batchCount, queue);
        
             //===============================================
             // update trailing matrix
             //===============================================
-
-            //dwork is used in panel factorization and trailing matrix update
-            //reset dW4_displ
-            ldw = nb;
-            zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
-            offset = ldw*n*batchCount;
-            zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
-
             if( (n-ib-i) > 0)
             {
     
-                // set the diagonal of v as one and the upper triangular part as zero
-                magmablas_zlaset_batched(MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
-                magma_zdisplace_pointers(dW2_displ, tau_array, 1, i, 0, batchCount, queue); 
+                //dwork is used in panel factorization and trailing matrix update
+                //reset dW4_displ
+                ldw = nb;
+                zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
+                offset = ldw*n*batchCount;
+                zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
+
+                // set the diagonal of v as one and the upper triangular part as zero already set inside geqrf_panel
+                //magmablas_zlaset_batched(MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
+                //magma_zdisplace_pointers(dW2_displ, tau_array, 1, i, 0, batchCount, queue); 
 
                 // it is faster since it is using BLAS-3 GEMM routines, different from lapack implementation 
                 magma_zlarft_batched(m-i, ib, 0,
