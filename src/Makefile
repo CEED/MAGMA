@@ -306,6 +306,7 @@ ZSRC += \
 	zlarfb_gemm_batched.cpp			\
 	zgeqrf_panel_batched.cpp		\
 	zgeqrf_batched.cpp				\
+	zgeqrf_expert_batched.cpp		\
 
 
 # ------------------------------------------------------------

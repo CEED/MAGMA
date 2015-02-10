@@ -563,7 +563,16 @@ magma_zgeqrf_batched(
     magma_int_t m, magma_int_t n, 
     magmaDoubleComplex **dA_array,
     magma_int_t lda, 
-    magmaDoubleComplex **tau_array,
+    magmaDoubleComplex **dtau_array,
+    magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue);
+
+magma_int_t
+magma_zgeqrf_expert_batched(
+    magma_int_t m, magma_int_t n, 
+    magmaDoubleComplex **dA_array, magma_int_t ldda, 
+    magmaDoubleComplex **dR_array, magma_int_t lddr,
+    magmaDoubleComplex **dT_array, magma_int_t lddt,
+    magmaDoubleComplex **dtau_array, magma_int_t provide_RT,
     magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue);
 
 magma_int_t 
