@@ -223,7 +223,7 @@ magma_zsymbilu(
 
 
 magma_int_t 
-write_z_csr_mtx( 
+magma_zwrite_csr_mtx( 
     magma_int_t n_row, 
     magma_int_t n_col, 
     magma_int_t nnz, 
@@ -235,13 +235,13 @@ write_z_csr_mtx(
     magma_queue_t queue );
 
 magma_int_t 
-write_z_csrtomtx( 
+magma_zwrite_csrtomtx( 
     magma_z_sparse_matrix A,
- const char *filename,
+    const char *filename,
     magma_queue_t queue );
 
 magma_int_t 
-print_z_csr( 
+magma_zprint_csr( 
     magma_int_t n_row, 
     magma_int_t n_col, 
     magma_int_t nnz, 
@@ -251,7 +251,7 @@ print_z_csr(
     magma_queue_t queue );
 
 magma_int_t 
-print_z_csr_mtx( 
+magma_zprint_csr_mtx( 
     magma_int_t n_row, 
     magma_int_t n_col, 
     magma_int_t nnz, 

@@ -60,7 +60,7 @@ int main(  int argc, char** argv )
         const char *filename = "testmatrix.mtx";
 
         // write to file
-        write_z_csrtomtx( A, filename, queue );
+        magma_zwrite_csrtomtx( A, filename, queue );
 
         // read from file
         magma_z_csr_mtx( &A2, filename, queue );

@@ -436,13 +436,13 @@ magma_int_t read_z_csr_from_mtx(
 
 
 extern "C" magma_int_t
-write_z_csrtomtx(
+magma_zwrite_csrtomtx( 
     magma_z_sparse_matrix B,
     const char *filename,
     magma_queue_t queue )
 {
     // TODO: why does this hard code MagmaColMajor?
-    write_z_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col,
+    magma_zwrite_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col,
                      MagmaColMajor, filename, queue );
     return MAGMA_SUCCESS;
 }
@@ -499,7 +499,8 @@ write_z_csrtomtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t write_z_csr_mtx(
+magma_int_t 
+magma_zwrite_csr_mtx(
     magma_int_t n_row,
     magma_int_t n_col,
     magma_int_t nnz,
@@ -618,7 +619,8 @@ magma_int_t write_z_csr_mtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t print_z_csr_mtx(
+magma_int_t 
+magma_zprint_csr_mtx(
     magma_int_t n_row,
     magma_int_t n_col,
     magma_int_t nnz,
@@ -717,7 +719,8 @@ magma_int_t print_z_csr_mtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t print_z_csr(
+magma_int_t 
+magma_zprint_csr(
     magma_int_t n_row,
     magma_int_t n_col,
     magma_int_t nnz,
