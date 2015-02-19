@@ -58,7 +58,7 @@ magma_zmlumerge(    magma_z_sparse_matrix L,
 
     if( L.memory_location == Magma_CPU && U.memory_location == Magma_CPU ){
         
-        magma_z_mtransfer( L, A, Magma_CPU, Magma_CPU );
+        magma_zmtransfer( L, A, Magma_CPU, Magma_CPU );
         magma_free_cpu( A->col );
         magma_free_cpu( A->val );
         // make sure it is strictly lower triangular

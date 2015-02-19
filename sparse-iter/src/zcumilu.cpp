@@ -58,12 +58,12 @@ magma_zcumilusetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-    //magma_z_mvisu(A, queue );
+    //magma_zprint_matrix(A, queue );
         // copy matrix into preconditioner parameter
         magma_z_sparse_matrix hA, hACSR;    
-        magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
         magma_z_mconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
-        magma_z_mtransfer(hACSR, &(precond->M), Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer(hACSR, &(precond->M), Magma_CPU, Magma_DEV, queue );
 
         magma_z_mfree( &hA, queue );
         magma_z_mfree( &hACSR, queue );
@@ -129,14 +129,14 @@ magma_zcumilusetup(
 
     magma_z_sparse_matrix hL, hU;
 
-    magma_z_mtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
+    magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
 
     hL.diagorder_type = Magma_UNITY;
     magma_z_mconvert( hA, &hL , Magma_CSR, Magma_CSRL, queue );
     hU.diagorder_type = Magma_VALUE;
     magma_z_mconvert( hA, &hU , Magma_CSR, Magma_CSRU, queue );
-    magma_z_mtransfer( hL, &(precond->L), Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( hU, &(precond->U), Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hL, &(precond->L), Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hU, &(precond->U), Magma_CPU, Magma_DEV, queue );
 
     cusparseMatDescr_t descrL;
     cusparseStatus = cusparseCreateMatDescr(&descrL);
@@ -245,15 +245,15 @@ magma_zcumilugeneratesolverinfo(
         
         magma_z_sparse_matrix hA, hL, hU;
         
-        magma_z_mtransfer( precond->M, &hA, 
+        magma_zmtransfer( precond->M, &hA, 
             precond->M.memory_location, Magma_CPU, queue );
 
         hL.diagorder_type = Magma_UNITY;
         magma_z_mconvert( hA, &hL , Magma_CSR, Magma_CSRL, queue );
         hU.diagorder_type = Magma_VALUE;
         magma_z_mconvert( hA, &hU , Magma_CSR, Magma_CSRU, queue );
-        magma_z_mtransfer( hL, &(precond->L), Magma_CPU, Magma_DEV, queue );
-        magma_z_mtransfer( hU, &(precond->U), Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( hL, &(precond->L), Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( hU, &(precond->U), Magma_CPU, Magma_DEV, queue );
         
         magma_z_mfree(&hA, queue );
         magma_z_mfree(&hL, queue );
@@ -564,12 +564,12 @@ magma_zcumiccsetup(
     magma_queue_t queue )
 {
     magma_z_sparse_matrix hA, hACSR, U, hD, hR, hAt;
-    magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
+    magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
     U.diagorder_type = Magma_VALUE;
     magma_z_mconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
     magma_z_mconvert( hACSR, &U, Magma_CSR, Magma_CSRL, queue );
     magma_z_mfree( &hACSR, queue );
-    magma_z_mtransfer(U, &(precond->M), Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer(U, &(precond->M), Magma_CPU, Magma_DEV, queue );
 
     // CUSPARSE context //
     cusparseHandle_t cusparseHandle;
@@ -700,13 +700,13 @@ magma_zcumiccsetup(
 
 /*
     // to enable also the block-asynchronous iteration for the triangular solves
-    magma_z_mtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
+    magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
     hA.storage_type = Magma_CSR;
 
     magma_zcsrsplit( 256, hA, &hD, &hR, queue );
 
-    magma_z_mtransfer( hD, &precond->LD, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( hR, &precond->L, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hD, &precond->LD, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hR, &precond->L, Magma_CPU, Magma_DEV, queue );
 
     magma_z_mfree(&hD, queue );
     magma_z_mfree(&hR, queue );
@@ -715,8 +715,8 @@ magma_zcumiccsetup(
 
     magma_zcsrsplit( 256, hAt, &hD, &hR, queue );
 
-    magma_z_mtransfer( hD, &precond->UD, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( hR, &precond->U, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hD, &precond->UD, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hR, &precond->U, Magma_CPU, Magma_DEV, queue );
     
     magma_z_mfree(&hD, queue );
     magma_z_mfree(&hR, queue );
@@ -830,13 +830,13 @@ magma_zcumicgeneratesolverinfo(
 
 /*
     // to enable also the block-asynchronous iteration for the triangular solves
-    magma_z_mtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
+    magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
     hA.storage_type = Magma_CSR;
 
     magma_zcsrsplit( 256, hA, &hD, &hR, queue );
 
-    magma_z_mtransfer( hD, &precond->LD, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( hR, &precond->L, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hD, &precond->LD, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hR, &precond->L, Magma_CPU, Magma_DEV, queue );
 
     magma_z_mfree(&hD, queue );
     magma_z_mfree(&hR, queue );
@@ -845,8 +845,8 @@ magma_zcumicgeneratesolverinfo(
 
     magma_zcsrsplit( 256, hAt, &hD, &hR, queue );
 
-    magma_z_mtransfer( hD, &precond->UD, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( hR, &precond->U, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hD, &precond->UD, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( hR, &precond->U, Magma_CPU, Magma_DEV, queue );
     
     magma_z_mfree(&hD, queue );
     magma_z_mfree(&hR, queue );

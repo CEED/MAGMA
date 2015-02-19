@@ -199,12 +199,12 @@ magma_z_applyprecond(
     }
     else if ( precond->solver == Magma_ILU ) {
         magma_z_vector tmp;
-        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_z_vfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
         magma_z_vector tmp;
-        magma_z_vinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_z_vfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_NONE ) {

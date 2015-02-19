@@ -77,14 +77,14 @@ int main(  int argc, char** argv )
         magma_zmscale( &A, zopts.scaling, queue );
 
         magma_z_mconvert( A, &B, Magma_CSR, zopts.output_format, queue );
-        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
 
         // vectors and initial guess
-        magma_z_vinit( &b, Magma_DEV, A.num_cols, one, queue );
-        magma_z_vinit( &x, Magma_DEV, A.num_cols, one, queue );
+        magma_zvinit( &b, Magma_DEV, A.num_cols, one, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, one, queue );
         magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
         magma_z_vfree(&x, queue );
-        magma_z_vinit( &x, Magma_DEV, A.num_cols, zero, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, zero, queue );
 
         magma_z_solver( B_d, b, &x, &zopts, queue );         
 

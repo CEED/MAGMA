@@ -82,16 +82,16 @@ magma_zpbicgstab(
 
     // workspace
     magma_z_vector r,rr,p,v,s,t,ms,mt,y,z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &rr, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &p, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &v, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &s, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &t, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &ms, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &mt, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &y, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &rr, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &v, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &s, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &ms, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &mt, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &y, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
     
     // solver variables

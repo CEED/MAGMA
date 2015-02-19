@@ -87,16 +87,16 @@ magma_zpastixsetup(
 
         magma_z_sparse_matrix A_h1, B;
         magma_z_vector diag, c_t, b_h;
-        magma_z_vinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
-        magma_z_vinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
-        magma_z_vtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
+        magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
 
         if ( A.storage_type != Magma_CSR ) {
-            magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
+            magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
             magma_z_mconvert( A_h1, &B, A_h1.storage_type, Magma_CSR, queue );
         }
         else {
-            magma_z_mtransfer( A, &B, A.memory_location, Magma_CPU, queue );
+            magma_zmtransfer( A, &B, A.memory_location, Magma_CPU, queue );
         }
 
 
@@ -264,7 +264,7 @@ magma_zapplypastix(
 
         magma_z_vector b_h;
 
-        magma_z_vtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
+        magma_zvtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
 
         rhs = (pastix_float_t*) b_h.dval;
         ncol = precond->M.num_rows;
@@ -297,7 +297,7 @@ magma_zapplypastix(
         // magma_zsetvector( ncol, 
         //                                    b_h.dval, 1, x->dval, 1 );
         magma_z_vfree( x, queue );
-        magma_z_vtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
+        magma_zvtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
 
         magma_z_vfree( &b_h, queue );
 

@@ -40,11 +40,11 @@ int main(  int argc, char** argv )
     magmaDoubleComplex two = MAGMA_Z_MAKE( 2.0, 0.0 );
 
     magma_z_vector a, ad, bd, cd;
-    magma_z_vinit( &a, Magma_CPU, n, one, queue );
-    magma_z_vinit( &bd, Magma_DEV, n, two, queue );
-    magma_z_vinit( &cd, Magma_DEV, n, one, queue );
+    magma_zvinit( &a, Magma_CPU, n, one, queue );
+    magma_zvinit( &bd, Magma_DEV, n, two, queue );
+    magma_zvinit( &cd, Magma_DEV, n, one, queue );
     
-    magma_z_vtransfer( a, &ad, Magma_CPU, Magma_DEV, queue ); 
+    magma_zvtransfer( a, &ad, Magma_CPU, Magma_DEV, queue ); 
 
     double res;
     res = magma_dznrm2(n, ad.dval, 1); 

@@ -74,10 +74,10 @@ int main(  int argc, char** argv )
 
         magma_z_mconvert( AT, &B, Magma_CSR, zopts.output_format, queue );
         magma_z_mfree(&AT, queue );
-        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
         magma_z_mfree(&B, queue );
         magma_zmcsrcompressor_gpu( &B_d, queue );
-        magma_z_mtransfer( B_d, &B, Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( B_d, &B, Magma_DEV, Magma_CPU, queue );
         magma_z_mfree(&B_d, queue );
         magma_z_mconvert( B, &AT, zopts.output_format,Magma_CSR, queue );      
         magma_z_mfree(&B, queue );

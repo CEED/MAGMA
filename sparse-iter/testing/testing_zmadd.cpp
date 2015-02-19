@@ -65,8 +65,8 @@ int main(  int argc, char** argv )
                         (int) B.num_rows,(int) B.num_cols,(int) B.nnz );
 
 
-    magma_z_mtransfer( A, &A_d, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( A, &A_d, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
 
     magma_zcuspaxpy( &one, A_d, &one, B_d, &C_d, queue );
 
@@ -74,7 +74,7 @@ int main(  int argc, char** argv )
 
     magma_zcuspaxpy( &mone, A_d, &one, C_d, &B_d, queue );
     
-    magma_z_mtransfer( B_d, &B2, Magma_DEV, Magma_CPU, queue );
+    magma_zmtransfer( B_d, &B2, Magma_DEV, Magma_CPU, queue );
 
     magma_z_mfree(&A_d, queue );
     magma_z_mfree(&B_d, queue );

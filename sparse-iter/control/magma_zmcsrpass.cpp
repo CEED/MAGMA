@@ -155,7 +155,7 @@ magma_zcsrget(
         *row = A.row;
     } else {
         magma_z_sparse_matrix A_CPU, A_CSR;
-        magma_z_mtransfer( A, &A_CPU, A.memory_location, Magma_CPU, queue ); 
+        magma_zmtransfer( A, &A_CPU, A.memory_location, Magma_CPU, queue ); 
         magma_z_mconvert( A_CPU, &A_CSR, A_CPU.storage_type, Magma_CSR, queue ); 
         magma_zcsrget( A_CSR, m, n, row, col, val, queue );
         magma_z_mfree( &A_CSR, queue );

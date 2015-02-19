@@ -54,17 +54,17 @@ int main(  int argc, char** argv )
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
         magma_int_t n = A.num_rows;
-        magma_z_mtransfer( A, &B_d, Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( A, &B_d, Magma_CPU, Magma_DEV, queue );
 
         // vectors and initial guess
-        magma_z_vinit( &b, Magma_DEV, A.num_cols, zero, queue );
-        magma_z_vinit( &x, Magma_DEV, A.num_cols, one, queue );
+        magma_zvinit( &b, Magma_DEV, A.num_cols, zero, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, one, queue );
         
-        magma_z_vvisu( b, 90, 10, queue );
+        magma_zprint_vector( b, 90, 10, queue );
         
-            magma_z_mvisu( A, queue );
+            magma_zprint_matrix( A, queue );
             printf("\n\n\n");
-            magma_z_mvisu( B_d, queue );
+            magma_zprint_matrix( B_d, queue );
         
         double res;
         res = magma_dznrm2(n, b.dval, 1 );
@@ -72,8 +72,8 @@ int main(  int argc, char** argv )
         
         magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
 
-        magma_z_vvisu( b, 0, 100, queue );
-        magma_z_vvisu( b, b.num_rows-10, 10, queue );
+        magma_zprint_vector( b, 0, 100, queue );
+        magma_zprint_vector( b, b.num_rows-10, 10, queue );
 
         res = magma_dznrm2(n, b.dval, 1 );
         printf("norm: %f\n", res);

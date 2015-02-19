@@ -114,11 +114,11 @@ magma_zpgmres(
 
     // GPU workspace
     magma_z_vector r, q, q_t, z, z_t, t;
-    magma_z_vinit( &t, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &q, Magma_DEV, dofs*(ldh+1), c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs*(ldh+1), c_zero, queue );
-    magma_z_vinit( &z_t, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*(ldh+1), c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs*(ldh+1), c_zero, queue );
+    magma_zvinit( &z_t, Magma_DEV, dofs, c_zero, queue );
     q_t.memory_location = Magma_DEV; 
     q_t.dval = NULL; 
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;

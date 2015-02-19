@@ -85,8 +85,8 @@ magma_ziterref(
 
     // workspace
     magma_z_vector r,z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
     // solver variables
     double nom, nom0, r0;

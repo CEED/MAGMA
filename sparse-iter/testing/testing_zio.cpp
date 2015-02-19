@@ -70,15 +70,15 @@ int main(  int argc, char** argv )
                 
         //visualize
         printf("A2:\n");
-        magma_z_mvisu( A2, queue );
+        magma_zprint_matrix( A2, queue );
         
         //visualize
         magma_z_mconvert(A2, &A4, Magma_CSR, Magma_CSRL, queue );
         printf("A4:\n");
-        magma_z_mvisu( A4, queue );
+        magma_zprint_matrix( A4, queue );
         magma_z_mconvert(A4, &A5, Magma_CSR, Magma_ELL, queue );
         printf("A5:\n");
-        magma_z_mvisu( A5, queue );
+        magma_zprint_matrix( A5, queue );
 
         // pass it to another application and back
         magma_int_t m, n;

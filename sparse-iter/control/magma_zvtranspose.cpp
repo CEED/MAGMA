@@ -68,7 +68,7 @@ magma_zvtranspose(
     magmablasGetKernelStream( &orig_queue );
 
     if ( x.memory_location == Magma_DEV ) {
-        magma_z_vinit( y, Magma_DEV, x.num_rows*x.num_cols, MAGMA_Z_ZERO, queue );
+        magma_zvinit( y, Magma_DEV, x.num_rows*x.num_cols, MAGMA_Z_ZERO, queue );
         y->num_rows = x.num_rows;
         y->num_cols = x.num_cols;
         magma_int_t    m = x.num_rows;
@@ -83,9 +83,9 @@ magma_zvtranspose(
         }
     } else {
         magma_z_vector x_d, y_d;
-        magma_z_vtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue );
+        magma_zvtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue );
         magma_zvtranspose( x_d, &y_d, queue );  
-        magma_z_vtransfer( y_d, y, Magma_DEV, Magma_CPU, queue );
+        magma_zvtransfer( y_d, y, Magma_DEV, Magma_CPU, queue );
         magma_z_vfree( &x_d, queue );
         magma_z_vfree( &y_d, queue );
 

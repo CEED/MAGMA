@@ -321,9 +321,9 @@ magma_z_cucsrtranspose(
                
         magma_z_sparse_matrix A_d, B_d;
 
-        magma_z_mtransfer( A, &A_d, A.memory_location, Magma_DEV, queue );
+        magma_zmtransfer( A, &A_d, A.memory_location, Magma_DEV, queue );
         magma_z_cucsrtranspose( A_d, &B_d, queue );
-        magma_z_mtransfer( B_d, B, Magma_DEV, A.memory_location, queue );
+        magma_zmtransfer( B_d, B, Magma_DEV, A.memory_location, queue );
         
         magma_z_mfree( &A_d, queue );
         magma_z_mfree( &B_d, queue );

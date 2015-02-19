@@ -223,13 +223,13 @@ magma_zmcsrcompressor_gpu(
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_z_mconvert( *A, &CSRA, A->storage_type, Magma_CSR, queue );
-        magma_z_mtransfer( *A, &dA, A->memory_location, Magma_DEV, queue );
+        magma_zmtransfer( *A, &dA, A->memory_location, Magma_DEV, queue );
 
         magma_zmcsrcompressor_gpu( &dA, queue );
 
         magma_z_mfree( &dA, queue );
         magma_z_mfree( A, queue );
-        magma_z_mtransfer( dA, &CSRA, Magma_DEV, A_location, queue );
+        magma_zmtransfer( dA, &CSRA, Magma_DEV, A_location, queue );
         magma_z_mconvert( CSRA, A, Magma_CSR, A_storage, queue );
         magma_z_mfree( &dA, queue );
         magma_z_mfree( &CSRA, queue );    

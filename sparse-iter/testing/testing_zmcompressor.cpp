@@ -74,7 +74,7 @@ int main(  int argc, char** argv )
         // convert, copy back and forth to check everything works
         magma_z_mconvert( AT, &B, Magma_CSR, Magma_CSR, queue );
         magma_z_mfree(&AT, queue ); 
-        magma_z_mtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
+        magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
         magma_z_mfree(&B, queue );
 
         start = magma_sync_wtime( queue ); 
@@ -84,7 +84,7 @@ int main(  int argc, char** argv )
         printf( " > MAGMA GPU: %.2e seconds.\n", (end-start)/10 );
 
 
-        magma_z_mtransfer( B_d, &B, Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( B_d, &B, Magma_DEV, Magma_CPU, queue );
         magma_z_mfree(&B_d, queue );
         magma_z_mconvert( B, &AT, Magma_CSR, Magma_CSR, queue );      
         magma_z_mfree(&B, queue );

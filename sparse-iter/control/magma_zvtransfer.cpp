@@ -61,7 +61,7 @@ using namespace std;
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_z_vtransfer(
+magma_zvtransfer(
     magma_z_vector x,
     magma_z_vector *y,
     magma_location_t src,

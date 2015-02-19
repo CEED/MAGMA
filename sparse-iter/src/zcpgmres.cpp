@@ -84,11 +84,11 @@ magma_zcpgmres(
     
     // GPU workspace
     magma_z_vector r, q, q_t, z, z_t;
-    magma_z_vinit( &r  , Magma_DEV, dofs,     c_zero, queue );
-    magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero, queue );
-    magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero, queue );
-    magma_z_vinit( &z  , Magma_DEV, dofs*ldh, c_zero, queue );
-    magma_z_vinit( &z_t, Magma_DEV, dofs,     c_zero, queue );
+    magma_zvinit( &r  , Magma_DEV, dofs,     c_zero, queue );
+    magma_zvinit( &q  , Magma_DEV, dofs*ldh, c_zero, queue );
+    magma_zvinit( &q_t, Magma_DEV, dofs,     c_zero, queue );
+    magma_zvinit( &z  , Magma_DEV, dofs*ldh, c_zero, queue );
+    magma_zvinit( &z_t, Magma_DEV, dofs,     c_zero, queue );
     // for mixed precision on GPU
     magma_c_vector qs_t, zs_t;
     magma_c_sparse_matrix AS;

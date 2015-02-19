@@ -60,7 +60,7 @@ using namespace std;
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_z_mtransfer(
+magma_zmtransfer(
     magma_z_sparse_matrix A,
     magma_z_sparse_matrix *B,
     magma_location_t src,

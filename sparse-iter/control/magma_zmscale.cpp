@@ -107,7 +107,7 @@ magma_zmscale(
         magma_z_sparse_matrix hA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
-        magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
+        magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
         magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO, queue );
 
         magma_zmscale( &CSRA, scaling, queue );
@@ -115,7 +115,7 @@ magma_zmscale(
         magma_z_mfree( &hA, queue );
         magma_z_mfree( A, queue );
         magma_z_mconvert( CSRA, &hA, Magma_CSRCOO, A_storage, queue );
-        magma_z_mtransfer( hA, A, Magma_CPU, A_location, queue );
+        magma_zmtransfer( hA, A, Magma_CPU, A_location, queue );
         magma_z_mfree( &hA, queue );
         magma_z_mfree( &CSRA, queue );    
 
@@ -167,7 +167,7 @@ magma_zmdiagadd(
         magma_z_sparse_matrix hA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
-        magma_z_mtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
+        magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
         magma_z_mconvert( hA, &CSRA, hA.storage_type, Magma_CSRCOO, queue );
 
         magma_zmdiagadd( &CSRA, add, queue );
@@ -175,7 +175,7 @@ magma_zmdiagadd(
         magma_z_mfree( &hA, queue );
         magma_z_mfree( A, queue );
         magma_z_mconvert( CSRA, &hA, Magma_CSRCOO, A_storage, queue );
-        magma_z_mtransfer( hA, A, Magma_CPU, A_location, queue );
+        magma_zmtransfer( hA, A, Magma_CPU, A_location, queue );
         magma_z_mfree( &hA, queue );
         magma_z_mfree( &CSRA, queue );    
 

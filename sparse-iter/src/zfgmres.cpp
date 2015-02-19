@@ -136,8 +136,8 @@ magma_zfgmres(
     w_t.num_cols = 1;   
     w_t.dval = NULL; 
     
-    magma_z_vinit( &t, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
-    magma_z_vinit( &t2, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &t, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &t2, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
 
 
     magma_int_t inc = 1;  // vector stride is always 1
@@ -158,8 +158,8 @@ magma_zfgmres(
         return MAGMA_ERR_HOST_ALLOC;
     }
     
-    magma_z_vinit( &V, Magma_DEV, dofs*(dim+1), MAGMA_Z_ZERO, queue );
-    magma_z_vinit( &W, Magma_DEV, dofs*dim, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &V, Magma_DEV, dofs*(dim+1), MAGMA_Z_ZERO, queue );
+    magma_zvinit( &W, Magma_DEV, dofs*dim, MAGMA_Z_ZERO, queue );
     
     magma_zscal( dofs, MAGMA_Z_ZERO, x->dval, 1 );              //  x = 0
     double rel_resid, resid0, r0, betanom = 0.0;

@@ -66,7 +66,7 @@ magma_zresidual(
     
     if ( A.num_rows == b.num_rows ) {
         magma_z_vector r;
-        magma_z_vinit( &r, Magma_DEV, A.num_rows, zero, queue );
+        magma_zvinit( &r, Magma_DEV, A.num_rows, zero, queue );
 
         magma_z_spmv( one, A, x, zero, r, queue );                   // r = A x
         magma_zaxpy(dofs, mone, b.dval, 1, r.dval, 1);          // r = r - b
@@ -79,7 +79,7 @@ magma_zresidual(
         magma_int_t num_vecs = b.num_rows/A.num_rows;
 
         magma_z_vector r;
-        magma_z_vinit( &r, Magma_DEV, b.num_rows, zero, queue );
+        magma_zvinit( &r, Magma_DEV, b.num_rows, zero, queue );
 
         magma_z_spmv( one, A, x, zero, r, queue );                   // r = A x
 

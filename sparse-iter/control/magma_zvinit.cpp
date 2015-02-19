@@ -36,7 +36,8 @@ using namespace std;
     Purpose
     -------
 
-    Initialize a magma_z_vector.
+    Allocates memory for magma_z_vector and initializes it 
+    with the passed value.
 
 
     Arguments
@@ -66,7 +67,7 @@ using namespace std;
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_z_vinit(
+magma_zvinit(
     magma_z_vector *x, 
     magma_location_t mem_loc,
     magma_int_t num_rows, 

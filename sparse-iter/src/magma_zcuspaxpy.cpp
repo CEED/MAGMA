@@ -171,7 +171,7 @@ magma_zcuspaxpy(
             cusparseDestroy( handle );
             // end CUSPARSE context //
 
-            magma_z_mtransfer( C, AB, Magma_DEV, Magma_DEV, queue );
+            magma_zmtransfer( C, AB, Magma_DEV, Magma_DEV, queue );
             magma_z_mfree( &C, queue );
 
         return MAGMA_SUCCESS; 

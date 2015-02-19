@@ -263,14 +263,14 @@ print_z_csr_mtx(
 
 
 magma_int_t 
-magma_z_mtranspose(
+magma_zmtranspose(
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B,
     magma_queue_t queue );
 
 
 magma_int_t 
-magma_z_mtransfer(
+magma_zmtransfer(
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B, 
     magma_location_t src, 
@@ -278,7 +278,7 @@ magma_z_mtransfer(
     magma_queue_t queue );
 
 magma_int_t 
-magma_z_vtransfer(
+magma_zvtransfer(
     magma_z_vector x, 
     magma_z_vector *y, 
     magma_location_t src, 
@@ -295,7 +295,7 @@ magma_z_mconvert(
 
 
 magma_int_t
-magma_z_vinit(
+magma_zvinit(
     magma_z_vector *x, 
     magma_location_t memory_location,
     magma_int_t num_rows, 
@@ -303,27 +303,27 @@ magma_z_vinit(
     magma_queue_t queue );
 
 magma_int_t
-magma_z_vvisu(
+magma_zprint_vector(
     magma_z_vector x, 
     magma_int_t offset, 
     magma_int_t displaylength,
     magma_queue_t queue );
 
 magma_int_t
-magma_z_vread(
+magma_zvread(
     magma_z_vector *x, 
     magma_int_t length,
     char * filename,
     magma_queue_t queue );
 
 magma_int_t
-magma_z_vspread(
+magma_zvspread(
     magma_z_vector *x, 
     const char * filename,
     magma_queue_t queue );
 
 magma_int_t
-magma_z_mvisu(
+magma_zprint_matrix(
     magma_z_sparse_matrix A,
     magma_queue_t queue );
 

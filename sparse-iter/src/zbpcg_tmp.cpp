@@ -115,13 +115,13 @@ magma_zbpcg(
 
     // GPU workspace
     magma_z_vector r, rt, p, pnew, q, h;
-    magma_z_vinit( &r, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &rt, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &p, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &q, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_z_vinit( &h, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &rt, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &pnew, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &h, Magma_DEV, dofs*num_vecs, c_zero, queue );
     
     magma_int_t lwork = max( n*n, 2* 2*n* 2*n);
     stat_dev += magma_zmalloc(        &dwork     ,        m*n );

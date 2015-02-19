@@ -83,8 +83,8 @@ magma_zcir(
 
     // workspace on GPU
     magma_z_vector r,z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
     // for mixed precision on GPU
     magma_c_vector rs, zs;

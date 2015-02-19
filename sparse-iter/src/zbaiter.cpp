@@ -69,10 +69,10 @@ magma_zbaiter(
 
     magma_z_sparse_matrix Ah, ACSR, A_d, D, R, D_d, R_d;
 
-    magma_z_mtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
+    magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
     magma_z_mconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue );
 
-    magma_z_mtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV, queue );
 
     // initial residual
     real_Double_t tempo1, tempo2;
@@ -85,8 +85,8 @@ magma_zbaiter(
 
     // setup
     magma_zcsrsplit( 256, ACSR, &D, &R, queue );
-    magma_z_mtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue );
-    magma_z_mtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue );
+    magma_zmtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue );
 
     magma_int_t localiter = 1;
 

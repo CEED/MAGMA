@@ -764,7 +764,7 @@ magma_int_t print_z_csr(
 
 extern "C"
 magma_int_t
-magma_z_mvisu(
+magma_zprint_matrix(
     magma_z_sparse_matrix A,
     magma_queue_t queue )
 {
@@ -814,7 +814,7 @@ magma_z_mvisu(
             if ( A.num_rows < 11 && A.num_cols < 11 ) {
                 magma_z_sparse_matrix C;
                 magma_z_mconvert( A, &C, A.storage_type, Magma_DENSE, queue );
-                magma_z_mvisu(  C, queue );
+                magma_zprint_matrix(  C, queue );
                 magma_z_mfree( &C, queue );
             }
             // otherwise visualize only coners
@@ -890,14 +890,14 @@ magma_z_mvisu(
         else {
             magma_z_sparse_matrix C;
             magma_z_mconvert( A, &C, A.storage_type, Magma_CSR, queue );
-            magma_z_mvisu(  C, queue );
+            magma_zprint_matrix(  C, queue );
             magma_z_mfree( &C, queue );
         }
     }
     else {
         magma_z_sparse_matrix C;
-        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU, queue );
-        magma_z_mvisu(  C, queue );
+        magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue );
+        magma_zprint_matrix(  C, queue );
         magma_z_mfree( &C, queue );
     }
 
@@ -1190,7 +1190,7 @@ magma_z_csr_mtx(
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
         magma_z_sparse_matrix B;
-        magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
+        magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
         magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),
             &B.val, &B.row, &B.col, &B.num_rows, queue );
@@ -1199,7 +1199,7 @@ magma_z_csr_mtx(
         magma_free_cpu( A->val );
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
-        magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU, queue );
+        magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
         magma_z_mfree( &B, queue );
         //printf("done.\n");
     }
@@ -1439,7 +1439,7 @@ magma_z_csr_mtxsymm(
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
         magma_z_sparse_matrix B;
-        magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
+        magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
         magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),
             &B.val, &B.row, &B.col, &B.num_rows, queue );
@@ -1448,7 +1448,7 @@ magma_z_csr_mtxsymm(
         magma_free_cpu( A->val );
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
-        magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU, queue );
+        magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
         magma_z_mfree( &B, queue );
         //printf("done.\n");
     }

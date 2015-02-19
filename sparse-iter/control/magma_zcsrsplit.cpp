@@ -185,7 +185,7 @@ magma_zcsrsplit(
     }
     else {
         magma_z_sparse_matrix Ah, ACSR, DCSR, RCSR, Dh, Rh;
-        magma_z_mtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
         magma_z_mconvert( Ah, &ACSR, A.storage_type, Magma_CSR, queue );
 
         magma_zcsrsplit( bsize, ACSR, &DCSR, &RCSR, queue );
@@ -193,8 +193,8 @@ magma_zcsrsplit(
         magma_z_mconvert( DCSR, &Dh, Magma_CSR, A.storage_type, queue );
         magma_z_mconvert( RCSR, &Rh, Magma_CSR, A.storage_type, queue );
 
-        magma_z_mtransfer( Dh, D, Magma_CPU, A.memory_location, queue );
-        magma_z_mtransfer( Rh, R, Magma_CPU, A.memory_location, queue );
+        magma_zmtransfer( Dh, D, Magma_CPU, A.memory_location, queue );
+        magma_zmtransfer( Rh, R, Magma_CPU, A.memory_location, queue );
 
         magma_z_mfree( &Ah, queue );
         magma_z_mfree( &ACSR, queue );

@@ -1319,7 +1319,7 @@ magma_z_mconvert(
 
         // CSR to CSR
         if ( old_format == Magma_CSR && new_format == Magma_CSR ) {
-            magma_z_mtransfer( A, B, Magma_DEV, Magma_DEV, queue );
+            magma_zmtransfer( A, B, Magma_DEV, Magma_DEV, queue );
         }
         // CSR to DENSE
         if ( old_format == Magma_CSR && new_format == Magma_DENSE ) {
@@ -1621,9 +1621,9 @@ magma_z_mconvert(
             printf("warning: format not supported on GPU. "
             "Conversion handled by CPU.\n");
             magma_z_sparse_matrix hA, hB;
-            magma_z_mtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
+            magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
             magma_z_mconvert( hA, &hB, old_format, new_format, queue );
-            magma_z_mtransfer( hB, B, Magma_CPU, A.memory_location, queue );
+            magma_zmtransfer( hB, B, Magma_CPU, A.memory_location, queue );
             magma_z_mfree( &hA, queue );
             magma_z_mfree( &hB, queue );   
         }

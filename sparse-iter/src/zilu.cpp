@@ -223,7 +223,7 @@ magma_zilusetup(
         }
     }
     
-    //magma_z_mvisu( *M, queue );
+    //magma_zprint_matrix( *M, queue );
 
 
     magma_free(inverse);

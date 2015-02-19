@@ -82,9 +82,9 @@ magma_zcg_merge(
 
     // GPU workspace
     magma_z_vector r, d, z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &d, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &d, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
     
     magmaDoubleComplex *d1, *d2, *skp;
     d1 = NULL;

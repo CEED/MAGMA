@@ -64,7 +64,7 @@ magma_zmlumerge(
     if( L.storage_type == Magma_CSR && U.storage_type == Magma_CSR ){
         if( L.memory_location == Magma_CPU && U.memory_location == Magma_CPU ){
             
-            magma_z_mtransfer( L, A, Magma_CPU, Magma_CPU, queue );
+            magma_zmtransfer( L, A, Magma_CPU, Magma_CPU, queue );
             magma_free_cpu( A->col );
             magma_free_cpu( A->val );
             // make sure it is strictly lower triangular

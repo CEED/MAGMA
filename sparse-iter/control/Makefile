@@ -14,12 +14,9 @@ INC += -I../include
 
 ZSRC := \
 	magma_zutil_sparse.cpp	\
-	magma_z_free.cpp		\
-	magma_z_init.cpp		\
-	magma_z_matrixchar.cpp	\
+	magma_zfree.cpp		    \
+	magma_zmatrixchar.cpp	\
 	magma_zmconverter.cpp	\
-	magma_zmtransfer.cpp	\
-	magma_z_vio.cpp			\
 	magma_zmgenerator.cpp	\
 	magma_zmio.cpp			\
 	magma_zsolverinfo.cpp	\
@@ -30,9 +27,12 @@ ZSRC := \
 	magma_zmscale.cpp		\
 	magma_zmdiff.cpp		\
 	magma_zmlumerge.cpp		\
-	magma_zvtranspose.cpp	\
 	magma_zmtranspose.cpp	\
+	magma_zmtransfer.cpp	\
+	magma_zvinit.cpp		\
+	magma_zvio.cpp			\
 	magma_zvtransfer.cpp	\
+	magma_zvtranspose.cpp	\
 	magma_zvpass.cpp		\
 	magma_zvpass_gpu.cpp	\
 

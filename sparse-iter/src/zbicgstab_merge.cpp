@@ -100,7 +100,7 @@ magma_zbicgstab_merge(
         return MAGMA_ERR_DEVICE_ALLOC;
     }
     // skp = [alpha|beta|omega|rho_old|rho|nom|tmp1|tmp2]
-    magma_z_vinit( &q, Magma_DEV, dofs*6, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*6, c_zero, queue );
 
     // q = rr|r|p|v|s|t
     rr.memory_location = Magma_DEV; rr.dval = NULL; rr.num_rows = rr.nnz = dofs; rr.num_cols = 1;

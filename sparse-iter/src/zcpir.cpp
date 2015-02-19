@@ -80,8 +80,8 @@ magma_zcpir(
 
     // workspace on GPU
     magma_z_vector r,z;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
     // for mixed precision on GPU
     magma_c_vector rs, zs;
@@ -101,7 +101,7 @@ magma_zcpir(
     magma_z_solver_par jacobiiter_par;
     // Jacobi setup
     magma_zjacobisetup_matrix( A, r, &M, &d, queue );
-    magma_z_vinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
  
 
 

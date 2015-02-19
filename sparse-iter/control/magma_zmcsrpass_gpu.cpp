@@ -157,7 +157,7 @@ magma_zcsrget_gpu(
     } else {
         magma_z_sparse_matrix A_DEV, A_CSR;
         magma_z_mconvert( A, &A_CSR, A.storage_type, Magma_CSR, queue ); 
-        magma_z_mtransfer( A_CSR, &A_DEV, A.memory_location, Magma_DEV, queue ); 
+        magma_zmtransfer( A_CSR, &A_DEV, A.memory_location, Magma_DEV, queue ); 
         magma_zcsrget_gpu( A_DEV, m, n, row, col, val, queue );
         magma_z_mfree( &A_CSR, queue );
         magma_z_mfree( &A_DEV, queue );

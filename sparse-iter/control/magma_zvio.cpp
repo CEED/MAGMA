@@ -59,7 +59,7 @@ using namespace std;
 
 extern "C"
 magma_int_t
-magma_z_vvisu(
+magma_zprint_vector(
     magma_z_vector x, 
     magma_int_t offset, 
     magma_int_t  visulen,
@@ -77,7 +77,7 @@ magma_z_vvisu(
     else if ( x.memory_location == Magma_DEV ) {
         printf("located on DEV:\n");
         magma_z_vector y;
-        magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
+        magma_zvtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             printf("%5.2f\n", MAGMA_Z_REAL(y.val[i]));
     magma_free_cpu(y.val);
@@ -130,7 +130,7 @@ double magma_zstring_to_double( const std::string& s )
 
 extern "C"
 magma_int_t
-magma_z_vread(
+magma_zvread(
     magma_z_vector *x, 
     magma_int_t length,
     char * filename,
@@ -186,7 +186,7 @@ magma_z_vread(
 
 extern "C"
 magma_int_t
-magma_z_vspread(
+magma_zvspread(
     magma_z_vector *x, 
     const char * filename,
     magma_queue_t queue )
@@ -196,7 +196,7 @@ magma_z_vspread(
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
     magma_z_csr_mtx( &A,  filename, queue  ); 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE, queue );
-    magma_z_vinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO, queue );
     x->major = MagmaRowMajor;
     for(magma_int_t i=0; i<A.num_cols; i++) {
         for(magma_int_t j=0; j<A.num_rows; j++) {

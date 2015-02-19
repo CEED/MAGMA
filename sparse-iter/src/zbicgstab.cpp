@@ -76,12 +76,12 @@ magma_zbicgstab(
 
     // workspace
     magma_z_vector r,rr,p,v,s,t;
-    magma_z_vinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &rr, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &p, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &v, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &s, Magma_DEV, dofs, c_zero, queue );
-    magma_z_vinit( &t, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &rr, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &v, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &s, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
 
     
     // solver variables
