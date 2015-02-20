@@ -48,9 +48,10 @@
     solver_par  magma_z_solver_par*
                 solver parameters
 
-                                            make sure to fill:
-                                            num_eigenvalues
-                                            length_ev
+    @param[in,out]
+    precond_par magma_z_precond_par*
+                preconditioner parameters
+                
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -60,7 +61,9 @@
 
 extern "C" magma_int_t
 magma_zlobpcg(
-    magma_z_sparse_matrix A, magma_z_solver_par *solver_par,
+    magma_z_sparse_matrix A, 
+    magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par, 
     magma_queue_t queue )
 {
     // set queue for old dense routines
@@ -164,7 +167,8 @@ magma_zlobpcg(
 
     // === Set some constants & defaults ===
     magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
-
+    magmaDoubleComplex c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
+    
     double *residualNorms, *condestGhistory, condestG;
     double *gevalues;
     magma_int_t *activeMask;
@@ -215,7 +219,7 @@ magma_zlobpcg(
     }
     magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n);
 
-    magma_int_t gramDim, ldgram  = 3*n, ikind = 4;
+    magma_int_t gramDim, ldgram  = 3*n, ikind = 3;
 #if defined(PRECISION_s)
     ikind = 3;
 #endif  
@@ -279,19 +283,31 @@ magma_zlobpcg(
                            residualNorms(0, iterationNumber), residualTolerance, 
                            activeMask, &cBlockSize, queue );
         
+            if (cBlockSize == 0)
+               break;
+
             // === apply a preconditioner P to the active residulas: R_new = P R_old
             // === for now set P to be identity (no preconditioner => nothing to be done )
-            // magmablas_zlacpy( MagmaUpperLower, m, cBlockSize, blockR, m, blockW, m);
-
-            /*
+            //magmablas_zlacpy( MagmaUpperLower, m, cBlockSize, blockR, m, blockW, m);
+            //SWAP(blockW, blockR);
+            
+                // preconditioner
+            magma_z_vector bWv, bRv;
+            bWv.memory_location = Magma_DEV;  bWv.num_rows = m; bWv.num_cols = cBlockSize; bWv.major = MagmaColMajor;  bWv.nnz = m*cBlockSize;  bWv.dval = blockW;
+            bRv.memory_location = Magma_DEV;  bRv.num_rows = m; bRv.num_cols = cBlockSize; bRv.major = MagmaColMajor;  bRv.nnz = m*cBlockSize;  bRv.dval = blockR;
+            magma_z_applyprecond_left( A, bRv, &bWv, precond_par, queue );
+            magma_z_applyprecond_right( A, bWv, &bRv, precond_par, queue );
+            
             // === make the preconditioned residuals orthogonal to X
-            magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, cBlockSize, m,
-                        c_one, blockX, m, blockR, m, c_zero, gramB(0,0), ldgram);
-            magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, cBlockSize, n,
-                        c_mone, blockX, m, gramB(0,0), ldgram, c_one, blockR, m);
-            */
+            if( precond_par->solver != Magma_NONE){
+                magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, cBlockSize, m,
+                            c_one, blockX, m, blockR, m, c_zero, gramB(0,0), ldgram);
+                magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, cBlockSize, n,
+                            c_mone, blockX, m, gramB(0,0), ldgram, c_one, blockR, m);
+            }
 
             // === make the active preconditioned residuals orthonormal
+
             magma_zgegqr_gpu(ikind, m, cBlockSize, blockR, m, dwork, hwork, info );
 #if defined(PRECISION_s)
 // re-orthogonalization

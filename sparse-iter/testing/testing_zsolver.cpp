@@ -50,7 +50,8 @@ int main(  int argc, char** argv )
     if ( zopts.solver_par.solver != Magma_PCG &&
          zopts.solver_par.solver != Magma_PGMRES &&
          zopts.solver_par.solver != Magma_PBICGSTAB &&
-         zopts.solver_par.solver != Magma_ITERREF )
+         zopts.solver_par.solver != Magma_ITERREF  &&
+         zopts.solver_par.solver != Magma_LOBPCG )
     zopts.precond_par.solver = Magma_NONE;
 
     magma_zsolverinfo_init( &zopts.solver_par, &zopts.precond_par, queue );

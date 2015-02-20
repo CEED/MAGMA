@@ -74,7 +74,7 @@ magma_z_solver(
             case  Magma_PGMRES: 
                     magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_LOBPCG: 
-                    magma_zlobpcg( A, &zopts->solver_par, queue );break;
+                    magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_ITERREF:
                     magma_ziterref( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_JACOBI: 
