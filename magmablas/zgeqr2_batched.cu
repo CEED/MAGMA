@@ -229,9 +229,6 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
     for(int s=0; s<min(m,n); s++)
     {
 
-       //lapack zlarfg, compute the norm, scale and generate the householder vector   
-
-
        zgeqr2_device(m-s, n-(s+1),
                                &(sdata[s+(s+1)*m]), m,
                                dtau+s, 
