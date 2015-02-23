@@ -165,6 +165,32 @@ void zlarfx_device( int m, int n,  magmaDoubleComplex *v, magmaDoubleComplex *ta
     } 
 }
 
+
+//==============================================================================
+
+static __device__
+void zgeqr2_device( magma_int_t m, magma_int_t n, 
+                               magmaDoubleComplex* dA, magma_int_t lda,
+                               magmaDoubleComplex *dtau, 
+                               magmaDoubleComplex *dv,
+                               magmaDoubleComplex *sum,
+                               double *swork,
+                               magmaDoubleComplex *scale,
+                               double *sscale)
+{
+
+
+       //lapack zlarfg, compute the norm, scale and generate the householder vector   
+       zlarfg_device(m, dv, &(dv[1]), 1, dtau, swork, sscale, scale); 
+
+       __syncthreads();
+
+       //update the trailing matix with the householder
+       zlarfx_device(m, n, dv, dtau, dA, lda, sum);
+
+       __syncthreads();
+}
+
 //==============================================================================
 
 extern __shared__ magmaDoubleComplex shared_data[];
@@ -205,12 +231,16 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
 
        //lapack zlarfg, compute the norm, scale and generate the householder vector   
 
-       zlarfg_device(m-s, &(sdata[s+s*m]), &(sdata[s+1+s*m]), 1, dtau+s, swork, &sscale, &scale); 
-       __syncthreads();
 
-       
-       //update the trailing matix with the householder
-       zlarfx_device(m-s, n-(s+1), &(sdata[s+s*m]), dtau+s,&(sdata[s+(s+1)*m]), m, sum);
+       zgeqr2_device(m-s, n-(s+1),
+                               &(sdata[s+(s+1)*m]), m,
+                               dtau+s, 
+                               &(sdata[s+s*m]),
+                               sum,
+                               swork,
+                               &scale,
+                               &sscale);
+
 
     }// end of s
 
@@ -227,31 +257,6 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
 
 
 
-
-//==============================================================================
-
-static __device__
-void zgeqr2_device( magma_int_t m, magma_int_t n, 
-                               magmaDoubleComplex* dA, magma_int_t lda,
-                               magmaDoubleComplex *dtau, 
-                               magmaDoubleComplex *dv,
-                               magmaDoubleComplex *sum,
-                               double *swork,
-                               magmaDoubleComplex *scale,
-                               double *sscale)
-{
-
-
-       //lapack zlarfg, compute the norm, scale and generate the householder vector   
-       zlarfg_device(m, dv, &(dv[1]), 1, dtau, swork, sscale, scale); 
-
-       __syncthreads();
-
-       //update the trailing matix with the householder
-       zlarfx_device(m, n, dv, dtau, dA, lda, sum);
-
-       __syncthreads();
-}
 
 
 
@@ -452,7 +457,7 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
     dim3 blocks(1, 1, batchCount);
     dim3 threads(BLOCK_SIZE);
 
-    if(sizeof(magmaDoubleComplex)*(m*k) <= 128 /*sizeof(magmaDoubleComplex) * 128 * k*/) // there are some static shared memory besides of dynamic ones 
+    if(sizeof(magmaDoubleComplex)*(m*k) <= 42000 /*sizeof(magmaDoubleComplex) * 128 * k*/) // there are some static shared memory besides of dynamic ones 
     {   
         //load panel in shared memory and factorize it and copy back to gloabl memory
         //intend for small panel to avoid overfill of shared memory.
