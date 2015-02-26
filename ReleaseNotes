@@ -25,6 +25,13 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
+
+ 1.6.2 - ???
+    * LOBPCG sparse eigensolver enabled for preconditioning using Jacobi and 
+	  incomplete LU factorizations.
+	* Some name changes in MAGMA sparse for consistency with dense MAGMA.
+
+
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.
       Comment out FPIC in make.inc to build only static library.
