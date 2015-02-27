@@ -204,7 +204,7 @@ magma_zpotrf_batched(
                                dinvA_array, invA_msize,
                                dW0_displ, dW1_displ, dW2_displ,
                                dW3_displ, dW4_displ,
-                               info_array, j, batchCount, myhandle);
+                               info_array, j, batchCount, myhandle, queue);
             #else
             //arginfo = magma_zpotrf_rectile_batched(
             arginfo = magma_zpotrf_recpanel_batched(
