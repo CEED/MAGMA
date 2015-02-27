@@ -50,7 +50,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda    = M;
             ldb    = lda;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             lddb   = ldda;
             size   = lda*N;
             if ( uplo[iuplo] == MagmaLower || uplo[iuplo] == MagmaUpper ) {

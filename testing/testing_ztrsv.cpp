@@ -57,7 +57,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             gflops = FLOPS_ZTRSM(opts.side, N, 1) / 1e9;
             lda    = N;
-            ldda   = ((lda+31)/32)*32;
+            ldda   = magma_roundup( lda, opts.align );  // multiple of 32 by default
             sizeA  = lda*N;
             
             TESTING_MALLOC_CPU( ipiv,      magma_int_t,        N     );

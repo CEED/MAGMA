@@ -268,72 +268,72 @@ magmablas_zgemm_batched_lg(
     offsetB = offsetB/sizeof(magmaDoubleComplex);
 
     if ( TransA == 0 && TransB == 0 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_nn + 1,
-                      (n - 1)/BLK_N_nn + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_nn ),
+                      magma_ceildiv( n, BLK_N_nn ),
                       batchCount );
         zgemm_kernel_fermi_nn_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 0 && TransB == 1 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_nt + 1,
-                      (n - 1)/BLK_N_nt + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_nt ),
+                      magma_ceildiv( n, BLK_N_nt ),
                       batchCount );
         zgemm_kernel_fermi_nt_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 0 && TransB == 2 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_nc + 1,
-                      (n - 1)/BLK_N_nc + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_nc ),
+                      magma_ceildiv( n, BLK_N_nc ),
                       batchCount );
         zgemm_kernel_fermi_nc_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 1 && TransB == 0 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_tn + 1,
-                      (n - 1)/BLK_N_tn + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_tn ),
+                      magma_ceildiv( n, BLK_N_tn ),
                       batchCount );
         zgemm_kernel_fermi_tn_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 1 && TransB == 1 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_tt + 1,
-                      (n - 1)/BLK_N_tt + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_tt ),
+                      magma_ceildiv( n, BLK_N_tt ),
                       batchCount );
         zgemm_kernel_fermi_tt_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 1 && TransB == 2 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_tc + 1,
-                      (n - 1)/BLK_N_tc + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_tc ),
+                      magma_ceildiv( n, BLK_N_tc ),
                       batchCount );
         zgemm_kernel_fermi_tc_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 2 && TransB == 0 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_cn + 1,
-                      (n - 1)/BLK_N_cn + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_cn ),
+                      magma_ceildiv( n, BLK_N_cn ),
                       batchCount );
         zgemm_kernel_fermi_cn_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 2 && TransB == 1 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_ct + 1,
-                      (n - 1)/BLK_N_ct + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_ct ),
+                      magma_ceildiv( n, BLK_N_ct ),
                       batchCount );
         zgemm_kernel_fermi_ct_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,
             (int)offsetA, (int)offsetB );
     }
     else if ( TransA == 2 && TransB == 2 ) {
-        dim3 dimGrid( (m - 1)/BLK_M_cc + 1,
-                      (n - 1)/BLK_N_cc + 1 ,
+        dim3 dimGrid( magma_ceildiv( m, BLK_M_cc ),
+                      magma_ceildiv( n, BLK_N_cc ),
                       batchCount );
         zgemm_kernel_fermi_cc_batched<<< dimGrid, dimBlock, 0, queue >>>(
             m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta,

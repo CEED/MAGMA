@@ -74,8 +74,8 @@ int main( int argc, char** argv)
             
             ldc = N;
             
-            ldda = ((lda+31)/32)*32;
-            lddc = ((ldc+31)/32)*32;
+            ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
+            lddc = magma_roundup( ldc, opts.align );  // multiple of 32 by default
             
             sizeA = lda*Ak;
             sizeC = ldc*N;

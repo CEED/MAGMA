@@ -90,13 +90,13 @@ magma_zjacobisetup_vector_gpu(
     magma_z_vector *x,
     magma_queue_t queue )
 {
-    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
-   int num_vecs = b.num_rows / num_rows;
+    dim3 grid( magma_ceildiv( num_rows, BLOCK_SIZE ) );
+    int num_vecs = b.num_rows / num_rows;
     magma_int_t threads = BLOCK_SIZE;
-   zvjacobisetup_gpu<<< grid, threads, 0 >>>
+    zvjacobisetup_gpu<<< grid, threads, 0 >>>
                 ( num_rows, num_vecs, b.dval, d.dval, c.dval, x->val );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 
@@ -166,12 +166,12 @@ magma_zjacobi_diagscal(
     magma_z_vector *c,
     magma_queue_t queue )
 {
-    dim3 grid( (num_rows+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
-   int num_vecs = b.num_rows*b.num_cols/num_rows;
+    dim3 grid( magma_ceildiv( num_rows, BLOCK_SIZE ));
+    int num_vecs = b.num_rows*b.num_cols/num_rows;
     magma_int_t threads = BLOCK_SIZE;
-   zjacobidiagscal_kernel<<< grid, threads, 0 >>>( num_rows, num_vecs, b.dval, d.dval, c->val );
+    zjacobidiagscal_kernel<<< grid, threads, 0 >>>( num_rows, num_vecs, b.dval, d.dval, c->val );
 
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 

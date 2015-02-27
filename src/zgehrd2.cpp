@@ -131,7 +131,7 @@ magma_zgehrd2(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     magma_int_t nb = magma_get_zgehrd_nb(n);
-    magma_int_t ldda = ((n+31)/32)*32;
+    magma_int_t ldda = magma_roundup( n, 32 );
 
     magma_int_t i, nh, iws;
     magma_int_t iinfo;

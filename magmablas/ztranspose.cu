@@ -185,7 +185,7 @@ magmablas_ztranspose_q(
         return;
 
     dim3 threads( NX, NY );
-    dim3 grid( (m+NB-1)/NB, (n+NB-1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ), magma_ceildiv( n, NB ) );
     ztranspose_kernel<<< grid, threads, 0, queue >>>
         ( m, n, dA, ldda, dAT, lddat );
 }
@@ -279,7 +279,7 @@ magmablas_ztranspose_batched_q(
         return;
 
     dim3 threads( NX, NY );
-    dim3 grid( (m+NB-1)/NB, (n+NB-1)/NB, batchCount );
+    dim3 grid( magma_ceildiv( m, NB ), magma_ceildiv( n, NB ), batchCount );
     ztranspose_kernel_batched<<< grid, threads, 0, queue >>>
         ( m, n, dA_array, ldda, dAT_array, lddat );
 }

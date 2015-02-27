@@ -215,7 +215,7 @@ magma_zgehrd_m(
     else {
         // Use blocked code
         // allocate memory on GPUs for A and workspaces
-        ldda = ((n+31)/32)*32;
+        ldda = magma_roundup( n, 32 );
         min_lblocks = (n     / nb) / ngpu;
         max_lblocks = ((n-1) / nb) / ngpu + 1;
         last_dev    = (n     / nb) % ngpu;

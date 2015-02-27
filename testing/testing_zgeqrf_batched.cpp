@@ -129,7 +129,7 @@ int main( int argc, char** argv)
             lda    = M;
             n2     = lda*N * batchCount;
             ldda = M;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
 
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRT( M, N )) / 1e9 * batchCount;
 

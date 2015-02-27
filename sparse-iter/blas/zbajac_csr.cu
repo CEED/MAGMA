@@ -187,7 +187,7 @@ magma_zbajac_csr(
     int blocksize1 = BLOCKSIZE;
     int blocksize2 = 1;
 
-    int dimgrid1 = ( D.num_rows + blocksize1 -1 ) / blocksize1;
+    int dimgrid1 = magma_ceildiv(  D.num_rows, blocksize1 );
     int dimgrid2 = 1;
     int dimgrid3 = 1;
 

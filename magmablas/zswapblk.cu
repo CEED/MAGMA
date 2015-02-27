@@ -82,7 +82,7 @@ magmablas_zswapblk_q(
     magma_queue_t queue )
 {
     magma_int_t  blocksize = 64;
-    dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
+    dim3 blocks( magma_ceildiv( n, blocksize ) );
     magma_int_t  k, im;
     
     /* Quick return */

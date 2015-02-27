@@ -226,7 +226,7 @@ magmablas_zlat2c_q(
     double rmax = (double)lapackf77_slamch("O");
 
     dim3 threads( BLK_X, 1 );
-    dim3    grid( (n+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
+    dim3    grid( magma_ceildiv( n, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
     if (uplo == MagmaLower) {

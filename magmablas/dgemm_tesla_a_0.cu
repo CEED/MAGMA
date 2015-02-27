@@ -229,7 +229,7 @@ magmablas_dgemm_a_0(
     double alpha, double beta )
 {
     dim3 threads( 16, 4 );
-    dim3 grid( (m - 1)/64 + 1, (n - 1)/16 + 1 );
+    dim3 grid( magma_ceildiv( m, 64 ), magma_ceildiv( n, 16 ) );
     dgemm_kernel_a_0<<< grid, threads, 0, magma_stream >>>
         ( C, A, B, m, n, k, lda, ldb, ldc, alpha, beta );
 }

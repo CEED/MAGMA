@@ -55,7 +55,7 @@ int main( int argc, char** argv )
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
             
             // ngpu must be at least the number of blocks
-            ngpu = min( opts.ngpu, int((N+nb-1)/nb) );
+            ngpu = min( opts.ngpu, magma_ceildiv(N,nb) );
             if ( ngpu < opts.ngpu ) {
                 printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) ngpu );
             }
@@ -68,7 +68,7 @@ int main( int argc, char** argv )
             // matrix is distributed by block-rows or block-columns
             // this is maximum size that any GPU stores;
             // size is rounded up to full blocks in both rows and columns
-            max_size = nb*(1+N/(nb*ngpu)) * nb*((N+nb-1)/nb);
+            max_size = (1+N/(nb*ngpu))*nb * magma_roundup( N, nb );
             for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_MALLOC_DEV( d_lA[dev], magmaDoubleComplex, max_size );
@@ -96,7 +96,7 @@ int main( int argc, char** argv )
                Performs operation using MAGMA
                =================================================================== */
             if ( opts.uplo == MagmaUpper ) {
-                ldda = ((N+nb-1)/nb)*nb;
+                ldda = magma_roundup( N, nb );
                 magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
             } else {
                 ldda = (1+N/(nb*ngpu))*nb;

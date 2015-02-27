@@ -53,7 +53,7 @@ int main( int argc, char** argv)
             N   = opts.nsize[itest];
             lda = N;
             n2  = lda*N;
-            ldda = ((N+31)/32)*32;
+            ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
 
             magma_setdevice(0);
@@ -77,7 +77,7 @@ int main( int argc, char** argv)
                 else if (j == (N / nb) % ngpu)
                     n_local += N % nb;
 
-                ldn_local = ((n_local + 31) / 32) * 32;
+                ldn_local = magma_roundup( n_local, opts.align );  // multiple of 32 by default
                 ldn_local = (ldn_local % 256 == 0) ? ldn_local + 32 : ldn_local;
 
                 magma_setdevice(j);

@@ -109,9 +109,9 @@ magmablas_zclaswp_q(
     const magma_int_t *ipiv, magma_int_t incx,
     magma_queue_t queue )
 {
-    int blocks = (m - 1)/NB + 1;
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(NB, 1, 1);
+    int blocks = magma_ceildiv( m, NB );
+    dim3 grid( blocks );
+    dim3 threads( NB );
 
     if (incx >= 0)
         zclaswp_kernel<<< grid, threads, 0, queue >>>(n, A, lda, SA, m, ipiv);

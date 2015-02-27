@@ -230,7 +230,7 @@ magma_zhegvdx(
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     magmaDoubleComplex *dA=NULL, *dB=NULL;
-    magma_int_t ldda = roundup( n, 32 );
+    magma_int_t ldda = magma_roundup( n, 32 );
     magma_int_t lddb = ldda;
 
     magma_int_t lower;

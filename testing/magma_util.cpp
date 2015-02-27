@@ -151,7 +151,7 @@ const char *usage =
 "                   Also set with $MAGMA_WARMUP.\n"
 "      --[not]all   Whether to test all combinations of flags, e.g., jobu.\n"
 "  --dev x          GPU device to use, default 0.\n"
-"  --roundup n      Round up LDDA on GPU to multiple of roundup, default 32.\n"
+"  --align n        Round up LDDA on GPU to multiple of align, default 32.\n"
 "  --verbose        Verbose output.\n"
 "  -x  --exclusive  Lock file for exclusive use (internal ICL functionality).\n"
 "\n"
@@ -196,7 +196,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     // fill in default values
     opts->batchcount = 1;
     opts->device   = 0;
-    opts->roundup  = 32;
+    opts->align    = 32;
     opts->nb       = 0;  // auto
     opts->nrhs     = 1;
     opts->nstream  = 1;
@@ -315,10 +315,10 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             magma_assert( opts->device >= 0 && opts->device < ndevices,
                           "error: --dev %s is invalid; ensure dev in [0,%d].\n", argv[i], ndevices-1 );
         }
-        else if ( strcmp("--roundup", argv[i]) == 0 && i+1 < argc ) {
-            opts->roundup = atoi( argv[++i] );
-            magma_assert( opts->roundup >= 1 && opts->roundup <= 4096,
-                          "error: --roundup %s is invalid; ensure roundup in [1,4096].\n", argv[i] );
+        else if ( strcmp("--align", argv[i]) == 0 && i+1 < argc ) {
+            opts->align = atoi( argv[++i] );
+            magma_assert( opts->align >= 1 && opts->align <= 4096,
+                          "error: --align %s is invalid; ensure align in [1,4096].\n", argv[i] );
         }
         else if ( strcmp("--nrhs",    argv[i]) == 0 && i+1 < argc ) {
             opts->nrhs = atoi( argv[++i] );

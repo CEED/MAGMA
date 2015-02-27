@@ -132,8 +132,8 @@ magma_zgelqf_gpu(
         return *info;
     }
 
-    maxm = ((m + 31)/32)*32;
-    maxn = ((n + 31)/32)*32;
+    maxm = magma_roundup( m, 32 );
+    maxn = magma_roundup( n, 32 );
 
     magma_int_t lddat = maxn;
 

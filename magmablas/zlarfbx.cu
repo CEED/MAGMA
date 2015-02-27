@@ -127,7 +127,7 @@ magma_zlarfbx_gpu(
     magma_ztrmv_tkernel<<< k, k, 0, magma_stream >>>( dT, ldt, dwork, dwork+k);
  
     /* c = c - V dwork    */
-    dim3  blocks3( (m + BLOCK_SIZE-1) / BLOCK_SIZE );
+    dim3  blocks3( magma_ceildiv( m, BLOCK_SIZE ) );
     dim3 threads3( BLOCK_SIZE );     
     magma_zgemv_kernel2<<< blocks3, threads3, 0, magma_stream >>>( m, k, V, ldv, dwork+k, c);
 }

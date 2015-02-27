@@ -94,8 +94,8 @@ int main( int argc, char** argv)
             
             ldb = M;
             
-            ldda = lda = ((lda+31)/32)*32;
-            lddb = ldb = ((ldb+31)/32)*32;
+            ldda = lda = magma_roundup( lda, opts.align );  // multiple of 32 by default
+            lddb = ldb = magma_roundup( ldb, opts.align );  // multiple of 32 by default
 
             sizeA = lda*Ak*batchCount;
             sizeB = ldb*N*batchCount;
@@ -125,13 +125,13 @@ int main( int argc, char** argv)
             magmaDoubleComplex* dinvA=NULL;
             magmaDoubleComplex* dwork=NULL;// invA and work are workspace in ztrsm
  
-            magma_int_t dinvA_batchSize = ((Ak+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+            magma_int_t dinvA_batchSize = magma_roundup( Ak, TRI_NB )*TRI_NB;
             magma_int_t dwork_batchSize = lddb*N;
             magma_zmalloc( &dinvA, dinvA_batchSize * batchCount);
             magma_zmalloc( &dwork, dwork_batchSize * batchCount );
     
             zset_pointer(dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, queue);
-            zset_pointer(dinvA_array, dinvA, ((Ak+TRI_NB-1)/TRI_NB)*TRI_NB, 0, 0, dinvA_batchSize, batchCount, queue);
+            zset_pointer(dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, queue);
 
             memset(h_Bmagma, 0, batchCount*ldb*N*sizeof(magmaDoubleComplex));
             magmablas_zlaset( MagmaFull, lddb, N*batchCount, c_zero, c_zero, dwork, lddb);

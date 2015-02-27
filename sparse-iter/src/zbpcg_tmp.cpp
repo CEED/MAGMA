@@ -210,7 +210,7 @@ magma_zbpcg(
     magma_z_applyprecond_left( A, r, &rt, precond_par, queue );
     magma_z_applyprecond_right( A, rt, &h, precond_par, queue );
 
-    //***missing: orthogonalize h here - after the preconditioner?
+    // ***missing: orthogonalize h here - after the preconditioner?
     magma_zgegqr_gpu(ikind, m, n, h.dval, m, dwork, h_work, &solver_par->info );
 
     magma_zcopy( m*n, h.dval, 1, p.dval, 1 );                 // p = h it should be -h?
@@ -218,7 +218,7 @@ magma_zbpcg(
 
     /*
     for( i=0; i<num_vecs; i++) {
-        //*** this should become GEMMS
+        // *** this should become GEMMS
         nom[i] = (MAGMA_Z_REAL( magma_zdotc(dofs, r(i), 1, h(i), 1) ));     
         nom0[i] = magma_dznrm2( dofs, r(i), 1 );       
     }
@@ -282,10 +282,10 @@ magma_zbpcg(
         magma_z_applyprecond_left( A, r, &rt, precond_par, queue );
         magma_z_applyprecond_right( A, rt, &h, precond_par, queue );
 
-        //***missing: orthogonalize h here - after the preconditioner?
+        // ***missing: orthogonalize h here - after the preconditioner?
         magma_zgegqr_gpu(ikind, m, n, h.dval, m, dwork, h_work, &solver_par->info ); 
 
-        //*** this has to be changed - to: //GAMMANEW = R^TR
+        // *** this has to be changed - to: //GAMMANEW = R^TR
         // === Compute the GramR matrix = R^T R ===
         magma_zcopy( n*n, gramR, 1, gramRold, 1 );
         magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m,
@@ -300,10 +300,10 @@ magma_zbpcg(
             //magma_zaxpy( dofs*num_vecs, c_mone, h.dval, 1, p.dval, 1 );                 // p = - h
          
         } else {
-            //*** this llop should go away
+            // *** this llop should go away
       /*
             for( i=0; i<num_vecs; i++) {
-                //*** this has to be changed - to: BETA = GAMMAOLD^-1 * GAMMANEW
+                // *** this has to be changed - to: BETA = GAMMAOLD^-1 * GAMMANEW
                 beta[i] = MAGMA_Z_MAKE(gammanew[i]/gammaold[i], 0.);       // beta = gn/go
                 magma_zscal(dofs, beta[i], p(i), 1);            // p = beta*p
                 magma_zaxpy(dofs, c_one, h(i), 1, p(i), 1); // p = p + h 
@@ -319,16 +319,16 @@ magma_zbpcg(
 
         magma_z_spmv( c_one, A, p, c_zero, q, queue );           // q = A p
 
-            //*** this llop should go away
+            // *** this llop should go away
     /*
         for( i=0; i<num_vecs; i++) {
             // den = p dot q 
-            //*** this has to be changed - to: DEN = GEMM(P,Q)
+            // *** this has to be changed - to: DEN = GEMM(P,Q)
             den[i] = MAGMA_Z_REAL(magma_zdotc(dofs, p(i), 1, q(i), 1));    
 
-            //*** this has to be changed - to: ALPHA = DEN^-1 GAMMANEW
+            // *** this has to be changed - to: ALPHA = DEN^-1 GAMMANEW
             alpha[i] = MAGMA_Z_MAKE(gammanew[i]/den[i], 0.);
-            //*** this becomes GEMMS
+            // *** this becomes GEMMS
             magma_zaxpy(dofs,  alpha[i], p(i), 1, x->dval+dofs*i, 1); // x = x + alpha p
             magma_zaxpy(dofs, -alpha[i], q(i), 1, r(i), 1);      // r = r - alpha q
             gammaold[i] = gammanew[i];

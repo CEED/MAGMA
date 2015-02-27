@@ -70,7 +70,7 @@ magmablas_zswap_q(
     magmaDoubleComplex_ptr dy, magma_int_t incy,
     magma_queue_t queue )
 {
-    dim3 grid( (n+NB-1) / NB );
+    dim3 grid( magma_ceildiv( n, NB ) );
     dim3 threads( NB );
     zswap_kernel<<< grid, threads, 0, queue >>>( n, dx, incx, dy, incy );
 }

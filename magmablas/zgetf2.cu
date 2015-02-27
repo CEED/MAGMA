@@ -155,7 +155,7 @@ void magma_zgetf2_swap(magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magm
     zswap two row vectors: ith and jth
 */
     dim3 threads(zswap_bs, 1, 1);
-    int num_blocks = (n - 1)/zswap_bs + 1;
+    int num_blocks = magma_ceildiv( n, zswap_bs );
     dim3 grid(num_blocks,1);
     kernel_zswap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, incx);
 }
@@ -206,7 +206,7 @@ void magma_zscal_zgeru(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magm
 
 */
     dim3 threads(zgeru_bs, 1, 1);
-    int num_blocks = (m - 1)/zgeru_bs + 1;
+    int num_blocks = magma_ceildiv( m, zgeru_bs );
     dim3 grid(num_blocks,1);
     size_t shared_size = sizeof(magmaDoubleComplex)*(n);
     kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);

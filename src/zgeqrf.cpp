@@ -139,8 +139,8 @@ magma_zgeqrf(
     }
 
     // largest N for larfb is n-nb (trailing matrix lacks 1st panel)
-    lddwork = ((n+31)/32)*32 - nb;
-    ldda    = ((m+31)/32)*32;
+    lddwork = magma_roundup( n, 32 ) - nb;
+    ldda    = magma_roundup( m, 32 );
 
     magma_int_t ngpu = magma_num_gpus();
     if ( ngpu > 1 ) {

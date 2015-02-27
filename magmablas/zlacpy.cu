@@ -269,7 +269,7 @@ magmablas_zlacpy_q(
         return;
     
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
     if ( uplo == MagmaLower ) {
         zlacpy_lower_kernel<<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
@@ -380,7 +380,7 @@ magmablas_zlacpy_batched(
         return;
     
     dim3 threads( BLK_X, 1, 1 );
-    dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y, batchCount );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ), batchCount );
     
     if ( uplo == MagmaLower ) {
         zlacpy_lower_kernel_batched<<< grid, threads, 0, queue >>> ( m, n, dAarray, ldda, dBarray, lddb );

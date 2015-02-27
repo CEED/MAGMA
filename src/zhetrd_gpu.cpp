@@ -187,7 +187,7 @@ magma_zhetrd_gpu(
 
     /* Determine the block size. */
     ldw = n;
-    lddw = roundup( n, 32 );
+    lddw = magma_roundup( n, 32 );
     lwkopt = n * nb;
     if (*info == 0) {
         work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
@@ -225,7 +225,7 @@ magma_zhetrd_gpu(
     if (upper) {
         /* Reduce the upper triangle of A.
            Columns 1:kk are handled by the unblocked method. */
-        kk = n - (n - nx + nb - 1) / nb * nb;
+        kk = n - magma_roundup( n - nx, nb );
         
         for (i = n - nb; i >= kk; i -= nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the

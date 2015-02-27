@@ -112,7 +112,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
 
     }
 
-    int blocks =  (n-1)/ SWP_WIDTH + 1;
+    int blocks = magma_ceildiv( n, SWP_WIDTH );
     dim3  grid(blocks, 1, batchCount);
 
     if( n < SWP_WIDTH)
@@ -150,7 +150,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
 
     }
 
-    int blocks =  (n-1)/ SWP_WIDTH + 1;
+    int blocks = magma_ceildiv( n, SWP_WIDTH );
     dim3  grid(blocks, 1, 1);
 
     if( n < SWP_WIDTH)
@@ -226,7 +226,7 @@ magma_zlaswp_rowserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, mag
 
     if(n == 0 ) return ;
 
-    int blocks =  (n-1)/ BLK_SIZE + 1;
+    int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);
 
     zlaswp_rowserial_kernel_batched<<< grid, max(BLK_SIZE, n), 0, queue >>>(
@@ -293,7 +293,7 @@ magma_zlaswp_columnserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, 
 
     if(n == 0 ) return ;
 
-    int blocks =  (n-1)/ BLK_SIZE + 1;
+    int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);
 
     zlaswp_columnserial_kernel_batched<<< grid, min(BLK_SIZE, n), 0, queue >>>(

@@ -120,7 +120,7 @@ magmablas_zgemv_conjv(
         return;  //info;
     }
     
-    magma_int_t blocks = (m - 1)/num_threads + 1;
+    magma_int_t blocks = magma_ceildiv( m, num_threads );
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
 

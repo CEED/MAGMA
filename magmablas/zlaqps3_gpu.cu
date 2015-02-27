@@ -403,7 +403,7 @@ magma_zlaqps3_gpu(
 
         /* Apply previous Householder reflectors to column K:
            A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'  */
-        magma_zswap_gemv_kernel<<< (m + BLOCK_SIZE1-1) / BLOCK_SIZE1, BLOCK_SIZE1, 0, magma_stream >>> 
+        magma_zswap_gemv_kernel<<< magma_ceildiv( m, BLOCK_SIZE1 ), BLOCK_SIZE1, 0, magma_stream >>> 
                               ( m, rk, k, dA(0, 0), ldda, dF(k,  0), lddf, dA(0, k), dA(0,pvt));
                                  
         /*  Generate elementary reflector H(k). */
@@ -430,7 +430,7 @@ magma_zlaqps3_gpu(
            so, F is (updated A)*V */
         if (k > 0) {
             /* I think we only need stricly lower-triangular part */
-            magma_zgemv_kernel<<< (n-k-1 + BLOCK_SIZE1 -1)/BLOCK_SIZE1, BLOCK_SIZE1, 0, magma_stream >>>
+            magma_zgemv_kernel<<< magma_ceildiv( n-k-1, BLOCK_SIZE1 ), BLOCK_SIZE1, 0, magma_stream >>>
                        (n-k-1, k, dF(k+1,0), lddf, dauxv, dauxv+k+1, dF(k+1,k));
         }
         
@@ -441,7 +441,7 @@ magma_zlaqps3_gpu(
             i__2 = k + 1;
             /* left-looking update of rows,                     *
              * since F=A**H v with original A, so no right-looking */
-            magma_zgemv_kernel_adjust<<<(n-k-1 + BLOCK_SIZE2-1)/BLOCK_SIZE2, BLOCK_SIZE2, 0, magma_stream>>>
+            magma_zgemv_kernel_adjust<<< magma_ceildiv( n-k-1, BLOCK_SIZE2 ), BLOCK_SIZE2, 0, magma_stream >>>
                            (n-k-1, k+1, dA(rk, 0  ), ldda, dF(k+1,0  ), lddf, dA(rk, k+1),
                            &dvn1[k+1], &dvn2[k+1], dAkk, dlsticc, dlsticcs);
             magma_getmatrix(1,1, sizeof(int), dlsticc, 1, &lsticc, 1); 

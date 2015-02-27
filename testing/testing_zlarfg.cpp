@@ -51,7 +51,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             lda  = N;
-            ldda = ((N+31)/32)*32;
+            ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZLARFG( N ) / 1e9 * nb;
     
             TESTING_MALLOC_CPU( h_x,    magmaDoubleComplex, N*nb );

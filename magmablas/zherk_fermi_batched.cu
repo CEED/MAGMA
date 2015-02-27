@@ -224,32 +224,32 @@ magmablas_zherk_batched_lg(
     offsetA = offsetA/sizeof(magmaDoubleComplex);
  
     if ( TransA == 0 && TransB == 1 ) {
-        dim3 dimGrid( (n - 1)/BLK_M_nt + 1,
-                      (n - 1)/BLK_N_nt + 1 ,
+        dim3 dimGrid( magma_ceildiv( n, BLK_M_nt ),
+                      magma_ceildiv( n, BLK_N_nt ),
                       batchCount );
         magmablas_z_herk_kernel_fermi_nt_batched<<< dimGrid, dimBlock, 0, queue >>>(
             uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 0 && TransB == 2 ) {
-        dim3 dimGrid( (n - 1)/BLK_M_nc + 1,
-                      (n - 1)/BLK_N_nc + 1 ,
+        dim3 dimGrid( magma_ceildiv( n, BLK_M_nc ),
+                      magma_ceildiv( n, BLK_N_nc ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_nc_batched<<< dimGrid, dimBlock, 0, queue >>>(
             uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 1 && TransB == 0 ) {
-        dim3 dimGrid( (n - 1)/BLK_M_tn + 1,
-                      (n - 1)/BLK_N_tn + 1 ,
+        dim3 dimGrid( magma_ceildiv( n, BLK_M_tn ),
+                      magma_ceildiv( n, BLK_N_tn ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_tn_batched<<< dimGrid, dimBlock, 0, queue >>>(
             uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 2 && TransB == 0 ) {
-        dim3 dimGrid( (n - 1)/BLK_M_cn + 1,
-                      (n - 1)/BLK_N_cn + 1 ,
+        dim3 dimGrid( magma_ceildiv( n, BLK_M_cn ),
+                      magma_ceildiv( n, BLK_N_cn ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_cn_batched<<< dimGrid, dimBlock, 0, queue >>>(
             uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,

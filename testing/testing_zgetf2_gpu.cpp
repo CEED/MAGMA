@@ -93,7 +93,7 @@ int main( int argc, char** argv)
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGETRF( M, N ) / 1e9;
             
             if ( N > 512 ) {

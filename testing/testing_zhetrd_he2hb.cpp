@@ -106,7 +106,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( D, double, N );
             TESTING_MALLOC_PIN( E, double, N );
             
-            //TESTING_MALLOC_DEV( dT1, magmaDoubleComplex, (2*min(N,N)+(N+31)/32*32)*NB );
+            //TESTING_MALLOC_DEV( dT1, magmaDoubleComplex, (2*min(N,N) + roundup( N, 32 ))*NB );
             TESTING_MALLOC_DEV( dT1, magmaDoubleComplex, (N*NB) );
         
             // if (WANTZ) gflops = 2.0*gflops;

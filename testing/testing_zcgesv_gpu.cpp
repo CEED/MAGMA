@@ -59,7 +59,7 @@ int main(int argc, char **argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             ldb  = ldx = lda = N;
-            ldda = ((N+31)/32)*32;
+            ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             lddb = lddx = ldda;
             
             gflopsF = FLOPS_ZGETRF( N, N ) / 1e9;

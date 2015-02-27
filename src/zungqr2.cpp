@@ -122,8 +122,8 @@ magma_zungqr2(
     // ldda*n     for matrix dA
     // ldda*nb    for dV
     // lddwork*nb for dW larfb workspace
-    ldda    = ((m + 31) / 32) * 32;
-    lddwork = ((n + 31) / 32) * 32;
+    ldda    = magma_roundup( m, 32 );
+    lddwork = magma_roundup( n, 32 );
     if (MAGMA_SUCCESS != magma_zmalloc( &dA, ldda*n + ldda*nb + lddwork*nb + nb*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;

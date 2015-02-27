@@ -101,7 +101,7 @@ magma_zgesv(
     if ( ngpu > 1 ) {
         goto CPU_INTERFACE;
     }
-    ldda = ((n+31)/32)*32;
+    ldda = magma_roundup( n, 32 );
     lddb = ldda;
     if ( MAGMA_SUCCESS != magma_zmalloc( &dA, ldda*n )) {
         goto CPU_INTERFACE;

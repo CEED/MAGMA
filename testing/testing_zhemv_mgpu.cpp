@@ -85,12 +85,12 @@ int main(int argc, char **argv)
             N       = opts.nsize[itest];
             Noffset = N + offset;
             lda     = Noffset;
-            ldda    = ((Noffset+31)/32)*32;
+            ldda    = magma_roundup( Noffset, opts.align );  // multiple of 32 by default
             matsize = Noffset*ldda;
             vecsize = (Noffset-1)*incx + 1;
             gflops  = FLOPS_ZHEMV( N ) / 1e9;
             
-            blocks = (N + (offset % nb) - 1)/nb + 1;
+            blocks = magma_ceildiv( N + (offset % nb), nb );
             lhwork = N*opts.ngpu;
             ldwork = ldda*(blocks + 1);
 

@@ -62,7 +62,7 @@ int main( int argc, char** argv)
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
             // query for workspace size
@@ -93,7 +93,7 @@ int main( int argc, char** argv)
             }
             else {
                 nb = magma_get_zgeqrf_nb( M );
-                size = (2*min(M, N) + (N+31)/32*32 )*nb;
+                size = (2*min(M, N) + magma_roundup( N, 32 ) )*nb;
                 TESTING_MALLOC_DEV( dT, magmaDoubleComplex, size );
                 if ( opts.version == 1 ) {
                     // stores dT, V blocks have zeros, R blocks inverted & stored in dT

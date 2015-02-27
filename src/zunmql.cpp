@@ -198,7 +198,7 @@ magma_zunmql(
          * nb*nb  for dT
          * lddc*n for dC.
          */
-        magma_int_t lddc = ((m+31)/32)*32;
+        magma_int_t lddc = magma_roundup( m, 32 );
         magmaDoubleComplex *dwork, *dV, *dT, *dC;
         magma_zmalloc( &dwork, (nw + nq + nb)*nb + lddc*n );
         if ( dwork == NULL ) {

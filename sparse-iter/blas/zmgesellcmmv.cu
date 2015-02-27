@@ -1299,7 +1299,7 @@ magma_zmgesellpmv(
         dim3 block( blocksize, alignment, num_vecs/2 );
 
         int dimgrid1 = sqrt(slices);
-        int dimgrid2 = (slices + dimgrid1 -1 ) / dimgrid1;
+        int dimgrid2 = magma_ceildiv( slices, dimgrid1 );
 
         dim3 grid( dimgrid1, dimgrid2, 1);
         int Ms = num_vecs * blocksize*alignment * sizeof( magmaDoubleComplex );
@@ -1382,7 +1382,7 @@ magma_zmgesellpmv(
             printf("error: too many threads requested.\n");
 
         int dimgrid1 = sqrt(slices);
-        int dimgrid2 = (slices + dimgrid1 -1 ) / dimgrid1;
+        int dimgrid2 = magma_ceildiv( slices, dimgrid1 );
 
         dim3 grid( dimgrid1, dimgrid2, 1);
         int Ms =  num_threads * sizeof( magmaDoubleComplex );

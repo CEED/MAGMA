@@ -182,7 +182,7 @@ magmablas_ztranspose_inplace_q(
     }
     
     dim3 threads( NB, NB );
-    int nblock = (n + NB - 1)/NB;
+    int nblock = magma_ceildiv( n, NB );
     
     // need 1/2 * (nblock+1) * nblock to cover lower triangle and diagonal of matrix.
     // block assignment differs depending on whether nblock is odd or even.

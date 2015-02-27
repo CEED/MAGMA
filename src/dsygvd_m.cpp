@@ -314,7 +314,7 @@ magma_dsygvd_m(
 
             printf("--- the multi GPU version is falling back to 1 GPU to perform the last TRMM since there is no TRMM_mgpu --- \n");
             double *dA=NULL, *dB=NULL;
-            magma_int_t ldda = roundup( n, 32 );
+            magma_int_t ldda = magma_roundup( n, 32 );
             magma_int_t lddb = ldda;
             
             if (MAGMA_SUCCESS != magma_dmalloc( &dA, n*ldda ) ||

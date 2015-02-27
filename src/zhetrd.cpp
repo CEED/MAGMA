@@ -149,7 +149,7 @@ magma_zhetrd(
 
     const char* uplo_ = lapack_uplo_const( uplo );
 
-    magma_int_t ldda = roundup( n, 32 );
+    magma_int_t ldda = magma_roundup( n, 32 );
     magma_int_t nb = magma_get_zhetrd_nb( n );
 
     const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -199,7 +199,7 @@ magma_zhetrd(
 
     magmaDoubleComplex *dA;
     #ifdef FAST_HEMV
-    magma_int_t ldwork2 = ldda*ceildiv(n,64);
+    magma_int_t ldwork2 = ldda*magma_ceildiv(n,64);
     #else
     magma_int_t ldwork2 = 0;
     #endif
@@ -229,7 +229,7 @@ magma_zhetrd(
 
         /* Reduce the upper triangle of A.
            Columns 1:kk are handled by the unblocked method. */
-        kk = n - (n - nx + nb - 1) / nb * nb;
+        kk = n - magma_roundup( n - nx, nb );
 
         for (i = n - nb; i >= kk; i -= nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the

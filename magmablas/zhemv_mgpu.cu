@@ -675,7 +675,7 @@ magmablas_zhemv_mgpu(
     magma_int_t offset_gpu_id   = offset_block_id % ngpu;
     magma_int_t block_offset    = offset % NB_X;
     
-    magma_int_t blocks = ceildiv( n + block_offset, NB_X );
+    magma_int_t blocks = magma_ceildiv( n + block_offset, NB_X );
     magma_int_t ldwmin = ldda*(blocks + 1);
     magma_int_t lhwmin = n*ngpu;
     

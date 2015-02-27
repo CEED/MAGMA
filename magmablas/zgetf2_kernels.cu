@@ -39,7 +39,7 @@ izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared
     int tx = threadIdx.x;
     magmaDoubleComplex res;
     double  res1;
-    int nchunk = (length-1)/zamax + 1;
+    int nchunk = magma_ceildiv( length, zamax );
 
     if( tx < zamax ){
         shared_x[tx]   = 0.0;
@@ -266,7 +266,7 @@ magma_int_t magma_izamax_batched(magma_int_t length,
 
 #if 1
         dim3 grid(1, 1, batchCount);
-        int chunk = (length-1)/zamax + 1;
+        int chunk = magma_ceildiv( length, zamax );
         izamax_kernel_batched<<< grid, zamax, zamax * (sizeof(double) + sizeof(int)), queue >>>
                       (length, chunk, x_array, incx, step, lda, ipiv_array, info_array, gbstep);
 
@@ -275,7 +275,7 @@ magma_int_t magma_izamax_batched(magma_int_t length,
     if( length <= 10 * zamax )
     {  
         dim3 grid(1, 1, batchCount);
-        int chunk = (length-1)/zamax + 1;
+        int chunk = magma_ceildiv( length, zamax );
         izamax_kernel_batched<<< grid, zamax, zamax * (sizeof(double) + sizeof(magma_int_t)), queue >>>
                       (length, chunk, x_array, incx, step, lda, ipiv_array, info_array, gbstep);
 
@@ -397,7 +397,7 @@ magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t 
        return -15;
     }
 
-    int nchunk = (m-1)/MAX_NTHREADS + 1;
+    int nchunk = magma_ceildiv( m, MAX_NTHREADS );
     size_t shared_size = sizeof(magmaDoubleComplex)*(n);
     dim3 grid(nchunk, 1, batchCount);
 
@@ -482,7 +482,7 @@ zupdate_device(int m, int step, magmaDoubleComplex* x, int ldx,  magmaDoubleComp
 {
 
     int tid = threadIdx.x;
-    int nchunk = (m-1)/MAX_NTHREADS + 1;    
+    int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
     int indx;
     //magmaDoubleComplex reg = MAGMA_Z_ZERO;
 
@@ -509,7 +509,7 @@ static __device__ void
 zscal5_device(int m, magmaDoubleComplex* x, magmaDoubleComplex alpha)
 {
     int tid = threadIdx.x;
-    int nchunk = (m-1)/MAX_NTHREADS + 1;    
+    int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
 
     for(int s=0 ; s < nchunk; s++)
     {
@@ -543,7 +543,7 @@ zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoub
     if(info_array[blockIdx.z] != 0 ) return;
 
 
-    int nchunk = (m-1)/MAX_NTHREADS + 1;    
+    int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
     // read the current column from dev to shared memory
     for(int s=0 ; s < nchunk; s++)
     {

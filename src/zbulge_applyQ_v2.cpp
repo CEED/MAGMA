@@ -112,7 +112,7 @@ magma_zbulge_applyQ_v2(
     magma_int_t lddv = ldv;
     magma_int_t lddt = ldt;
     magma_int_t lddw = 0;
-    magma_int_t lddwork  = ((NE+31)/32)*32;
+    magma_int_t lddwork  = magma_roundup( NE, 32 );
     magma_int_t dwVTsiz  = lddv*Vblksiz; // lddv*lddv + lddv*lddwork; (v2) // lddv*Vblksiz; (v1,v3)
     magma_int_t dworksiz = lddwork*Vblksiz;  // lddv*Vblksiz; (v2)   // NE*Vblksiz=lddwork*Vblksiz; (v1,v3)
 

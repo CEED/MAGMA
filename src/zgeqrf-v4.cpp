@@ -138,7 +138,7 @@ magma_zgeqrf4(
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
     
-    ldda    = ((m+31)/32)*32;
+    ldda = magma_roundup( m, 32 );
 
     magma_int_t  n_local[MagmaMaxGPUs];
     for (i=0; i < ngpu; i++) {

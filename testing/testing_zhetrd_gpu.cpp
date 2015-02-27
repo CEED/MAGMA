@@ -72,12 +72,12 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             lda    = N;
-            ldda   = roundup( N, opts.roundup );  // by default, round to multiple of 32
+            ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             n2     = N*lda;
             nb     = magma_get_zhetrd_nb(N);
             lwork  = N*nb;  /* We suppose the magma nb is bigger than lapack nb */
             gflops = FLOPS_ZHETRD( N ) / 1e9;
-            ldwork = ldda*ceildiv(N,64) + 2*ldda*nb;
+            ldwork = ldda*magma_ceildiv(N,64) + 2*ldda*nb;
             
             TESTING_MALLOC_CPU( h_A,     magmaDoubleComplex, lda*N );
             TESTING_MALLOC_CPU( tau,     magmaDoubleComplex, N     );

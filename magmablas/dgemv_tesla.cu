@@ -156,7 +156,7 @@ magmablas_dgemv_tesla(
     if ( incx == 1 && incy == 1 && beta == 0 ) {
         if ( trans == MagmaNoTrans ) {
             if ( alpha == 1. ) {
-                magma_int_t blocks = (m - 1)/num_threads + 1;
+                magma_int_t blocks = magma_ceildiv( m, num_threads );
                 dim3 grid( blocks, 1, 1 );
                 dim3 threads( num_threads, 1, 1 );
                 dgemv_kernel_tesla<<< grid, threads, 0, magma_stream >>>
@@ -425,7 +425,7 @@ magmablas_dgemvt1_tesla(
     const double *x,
     double       *y )
 {
-    magma_int_t blocks = (n - 1)/32 + 1;
+    magma_int_t blocks = magma_ceildiv( n, 32 );
     dim3 grid( blocks, 1, 1 );
     dim3 threads( 32, 2, 1 );
     dgemvt_kernel1_tesla<<< grid, threads, 0, magma_stream >>>
@@ -474,7 +474,7 @@ magmablas_dgemvt2_tesla(
     const double *x,
     double       *y )
 {
-    magma_int_t blocks = (n - 1)/16 + 1;
+    magma_int_t blocks = magma_ceildiv( n, 16 );
     dim3 grid( blocks, 1, 1 );
     dim3 threads( 16, 4, 1 );
     dgemvt_kernel2_tesla<<< grid, threads, 0, magma_stream >>>

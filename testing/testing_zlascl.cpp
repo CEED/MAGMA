@@ -57,7 +57,7 @@ int main( int argc, char** argv)
             //M += 2;  // space for insets
             //N += 2;
             lda    = M;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             size   = lda*N;
             if ( uplo[iuplo] == MagmaLower || uplo[iuplo] == MagmaUpper ) {
                 // read & write triangle (with diagonal)

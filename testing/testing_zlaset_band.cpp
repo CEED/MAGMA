@@ -59,7 +59,7 @@ int main( int argc, char** argv)
             M = opts.msize[itest] + 2*inset;
             N = opts.nsize[itest] + 2*inset;
             lda    = M;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             size   = lda*N;
             
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, size   );

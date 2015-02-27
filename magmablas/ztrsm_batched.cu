@@ -113,8 +113,8 @@
 
     @param
     d_dinvA (workspace) on device.
-            If side == MagmaLeft,  d_dinvA must be of size >= ((m+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB,
-            If side == MagmaRight, d_dinvA must be of size >= ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB,
+            If side == MagmaLeft,  d_dinvA must be of size >= ceil(m/TRI_NB)*TRI_NB*TRI_NB,
+            If side == MagmaRight, d_dinvA must be of size >= ceil(n/TRI_NB)*TRI_NB*TRI_NB,
             where TRI_NB = 128.
 
     @param[out]
@@ -170,10 +170,10 @@ void magmablas_ztrsm_outofplace_batched(
     }
     magma_int_t size_dinvA;
     if ( side == MagmaLeft ) {
-        size_dinvA = ((m+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+        size_dinvA = magma_roundup( m, TRI_NB )*TRI_NB;
     }
     else {
-        size_dinvA = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+        size_dinvA = magma_roundup( n, TRI_NB )*TRI_NB;
     }
     if(dinvA_length < size_dinvA) info = -19;
 
@@ -562,10 +562,10 @@ void magmablas_ztrsm_batched(
     magma_int_t size_x = lddx*n;
 
     if ( side == MagmaLeft ) {
-        size_dinvA = ((m+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+        size_dinvA = magma_roundup( m, TRI_NB )*TRI_NB;
     }
     else {
-        size_dinvA = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+        size_dinvA = magma_roundup( n, TRI_NB )*TRI_NB;
     }
     magmaDoubleComplex *dinvA=NULL, *dX=NULL;
     magma_int_t resetozero = 0;

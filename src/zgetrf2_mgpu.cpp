@@ -145,7 +145,7 @@ magma_zgetrf2_mgpu(
     magmablasGetKernelStream( &orig_stream );
     
     /* Use hybrid blocked code. */
-    maxm  = ((m + block_size-1)/block_size)*block_size;
+    maxm  = magma_roundup( m, block_size );
 
     /* some initializations */
     for (d=0; d < ngpu; d++) {

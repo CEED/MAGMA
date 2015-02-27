@@ -132,7 +132,7 @@ magma_zmgeellmv(
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue )
 {
-    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                             * sizeof( magmaDoubleComplex ); // num_vecs vectors 

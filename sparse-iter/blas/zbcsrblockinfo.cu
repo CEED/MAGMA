@@ -100,7 +100,7 @@ magma_zbcsrblockinfo5(
 {
     dim3 dimBlock( BLOCK_SIZE, 1, 1 );
 
-        int dimgrid = (num_blocks+BLOCK_SIZE-1)/BLOCK_SIZE;
+        int dimgrid = magma_ceildiv( num_blocks, BLOCK_SIZE );
         dim3 dimGrid( dimgrid, 1, 1 );
 
 

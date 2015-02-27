@@ -205,7 +205,7 @@ magma_zlatrd2(
         info = -11;
     } else if ( lddw < max(1,n) ) {
         info = -13;
-    } else if ( ldwork < ldda*ceildiv(n,64) ) {
+    } else if ( ldwork < ldda*magma_ceildiv(n,64) ) {
         info = -15;
     }
     

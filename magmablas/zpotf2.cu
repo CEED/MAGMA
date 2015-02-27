@@ -258,7 +258,7 @@ void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 
 */
     dim3 threads(zdscal_bs, 1, 1);
-    int num_blocks = (n - 1)/zdscal_bs + 1;
+    int num_blocks = magma_ceildiv( n, zdscal_bs );
     dim3 grid(num_blocks,1);
     kernel_zdscal<<< grid, threads, 0, magma_stream >>> (n, x, incx);
 }
@@ -304,7 +304,7 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
 void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 {
     dim3 threads(zlacgv_bs, 1, 1);
-    int num_blocks = (n - 1)/zlacgv_bs + 1;
+    int num_blocks = magma_ceildiv( n, zlacgv_bs );
     dim3 grid(num_blocks,1);
     kernel_zlacgv<<< grid, threads, 0, magma_stream >>> (n, x, incx);
 }

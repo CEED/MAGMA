@@ -129,9 +129,9 @@ magma_zgels3_gpu(
     /*
      * Allocate temporary buffers
      */
-    int ldtwork = ( 2*k + ((n+31)/32)*32 )*nb;
+    int ldtwork = ( 2*k + magma_roundup( n, 32 ) )*nb;
     if (nb < nrhs)
-        ldtwork = ( 2*k + ((n+31)/32)*32 )*nrhs;
+        ldtwork = ( 2*k + magma_roundup( n, 32 ) )*nrhs;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, ldtwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;

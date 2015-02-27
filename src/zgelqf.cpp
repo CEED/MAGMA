@@ -138,8 +138,8 @@ magma_zgelqf(
         return *info;
     }
 
-    maxm = ((m + 31)/32)*32;
-    maxn = ((n + 31)/32)*32;
+    maxm = magma_roundup( m, 32 );
+    maxn = magma_roundup( n, 32 );
     maxdim = max(maxm, maxn);
 
     // copy to GPU and transpose

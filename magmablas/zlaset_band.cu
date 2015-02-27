@@ -201,12 +201,12 @@ magmablas_zlaset_band_q(
     
     if (uplo == MagmaUpper) {
         dim3 threads( min(k,n) );
-        dim3 grid( (min(m+k-1,n) - 1)/NB + 1 );
+        dim3 grid( magma_ceildiv( min(m+k-1,n), NB ) );
         zlaset_band_upper<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
 }
     else if (uplo == MagmaLower) {
         dim3 threads( min(k,m) );
-        dim3 grid( (min(m,n) - 1)/NB + 1 );
+        dim3 grid( magma_ceildiv( min(m,n), NB ) );
         zlaset_band_lower<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
     }
 }

@@ -26,7 +26,7 @@
 static __device__ void setup_pivinfo_devfunc(magma_int_t *pivinfo, magma_int_t *ipiv, int m, int nb)
 {
    int tid = threadIdx.x;   
-   int nchunk = (m-1)/MAX_NTHREADS + 1;
+   int nchunk = magma_ceildiv( m, MAX_NTHREADS );
 
     // initialize pivinfo (could be done in a separate kernel using multiple thread block
     for(int s =0 ; s < nchunk; s++)

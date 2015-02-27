@@ -170,7 +170,7 @@ magma_zmcsrcompressor_gpu(
         
         magma_index_copyvector( (A->num_rows+1), A->drow, 1, B2.drow, 1 );
 
-        dim3 grid1( (A->num_rows+BLOCK_SIZE1-1)/BLOCK_SIZE1, 1, 1);  
+        dim3 grid1( magma_ceildiv( A->num_rows, BLOCK_SIZE1 ) );  
 
         // copying the nonzeros into B and write in B.drow how many there are
         magma_zmcsrgpu_kernel1<<< grid1, BLOCK_SIZE1, 0, queue >>>

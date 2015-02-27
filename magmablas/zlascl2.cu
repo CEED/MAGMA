@@ -135,7 +135,7 @@ magmablas_zlascl2_q(
         return;  //info;
     }
     
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     dim3 threads( NB );
     
     if (type == MagmaLower) {

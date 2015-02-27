@@ -451,7 +451,7 @@ zlanhe_inf(
     magmaDoubleComplex_const_ptr A, int lda,
     magmaDouble_ptr dwork )
 {
-    int blocks = (n - 1)/inf_bs + 1;
+    int blocks = magma_ceildiv( n, inf_bs );
     dim3 grid(blocks, 1, 1);
     dim3 threads(inf_bs, 4, 1);
 
@@ -521,7 +521,7 @@ zlanhe_max(
     magmaDoubleComplex_const_ptr A, int lda,
     magmaDouble_ptr dwork )
 {
-    int blocks = (n - 1)/max_bs + 1;
+    int blocks = magma_ceildiv( n, max_bs );
     dim3 grid(blocks, 1, 1);
     dim3 threads(max_bs, 1, 1);
 

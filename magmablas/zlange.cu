@@ -282,13 +282,13 @@ magmablas_zlange(
     dim3 threads( 64 );
     double result = -1;
     if ( norm == MagmaInfNorm ) {
-        dim3 grid( (m-1)/64 + 1 );
+        dim3 grid( magma_ceildiv( m, 64 ) );
         zlange_inf_kernel<<< grid, threads, 0, magma_stream >>>( m, n, dA, ldda, dwork );
         max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
         cudaMemcpy( &result, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
     }
     else if ( norm == MagmaMaxNorm ) {
-        dim3 grid( (m-1)/64 + 1 );
+        dim3 grid( magma_ceildiv( m, 64 ) );
         zlange_max_kernel<<< grid, threads, 0, magma_stream >>>( m, n, dA, ldda, dwork );
         max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
         cudaMemcpy( &result, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );

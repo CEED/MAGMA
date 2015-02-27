@@ -62,7 +62,7 @@ int main( int argc, char** argv )
             }
             
             lda  = m;
-            ldda = ((m + 31)/32)*32;
+            ldda = magma_roundup( m, opts.align );  // multiple of 32 by default
             n2 = lda*n;
             min_mn = min(m, n);
             nb = magma_get_zgeqrf_nb( m );
@@ -77,7 +77,7 @@ int main( int argc, char** argv )
             TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn    );
                                         
             TESTING_MALLOC_DEV( dA,     magmaDoubleComplex, ldda*n    );
-            TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, ( 2*min_mn + ((n + 31)/32)*32 )*nb );
+            TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, ( 2*min_mn + magma_roundup( n, 32 ) )*nb );
             
             lapackf77_zlarnv( &ione, ISEED, &n2, hA );
             lapackf77_zlacpy( MagmaUpperLowerStr, &m, &n, hA, &lda, hR, &lda );

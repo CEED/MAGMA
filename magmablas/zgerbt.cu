@@ -232,7 +232,7 @@ magmablas_zaxpycp2_q(
     magma_queue_t queue )
 {
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     zaxpycp2_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b );
 }
 

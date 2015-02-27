@@ -119,8 +119,8 @@ magma_zbcsrvalcpy(
         // the grids are adapted to the number of nonzero/zero blocks 
         // the upper block-number the kernels can handle is 65535*65535
         int dimgrid1 = 65535;
-        int dimgrid2 = (num_blocks+65535-1)/65535;
-        int dimgrid3 = (num_zblocks+65535-1)/65535;
+        int dimgrid2 = magma_ceildiv( num_blocks, 65535 );
+        int dimgrid3 = magma_ceildiv( num_zblocks, 65535 );
         dim3 dimGrid( dimgrid2, dimgrid1, 1 );
 
         zbcsrvalcpy_kernel<<<dimGrid,dimBlock, 0, queue >>>

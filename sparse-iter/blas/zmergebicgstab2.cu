@@ -237,7 +237,7 @@ magma_zbicgmerge_spmv1(
     int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (n+local_block_size-1)/local_block_size );
+    dim3 Gs( magma_ceildiv( n, local_block_size ) );
     dim3 Gs_next;
     int Ms =  local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
@@ -535,7 +535,7 @@ magma_zbicgmerge_spmv2(
     int n = A.num_rows;
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (n+local_block_size-1)/local_block_size );
+    dim3 Gs( magma_ceildiv( n, local_block_size ) );
     dim3 Gs_next;
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
@@ -769,7 +769,7 @@ magma_zbicgmerge_xrbeta(
 
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (n+local_block_size-1)/local_block_size );
+    dim3 Gs( magma_ceildiv( n, local_block_size ) );
     dim3 Gs_next;
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;

@@ -144,7 +144,7 @@ magma_zhetrf(
         return *info;
     }
 
-    magma_int_t ldda = 32*((n+31)/32);
+    magma_int_t ldda = magma_roundup( n, 32 );
     magmaDoubleComplex *dA, *dW;
     if ((MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda  )) ||
         (MAGMA_SUCCESS != magma_zmalloc( &dW, (1+nb)*ldda ))) {

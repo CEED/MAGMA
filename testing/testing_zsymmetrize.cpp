@@ -48,7 +48,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             lda    = N;
-            ldda   = ((N+31)/32)*32;
+            ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             size   = lda*N;
             // load strictly lower triangle, save strictly upper triangle
             gbytes = sizeof(magmaDoubleComplex) * 1.*N*(N-1) / 1e9;

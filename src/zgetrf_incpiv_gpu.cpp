@@ -186,7 +186,7 @@ magma_zgetrf_incpiv_gpu(
     }
     else {
         /* Use hybrid blocked code. */
-        maxm = ((m + 31)/32)*32;
+        maxm = magma_roundup( m, 32 );
 
         if ( order == MagmaColMajor ) {
             magmablas_zgetmo_in( dA, dAT, ldda, m, n );

@@ -57,7 +57,7 @@ magmablas_zcaxpycp_q(
     magma_queue_t queue )
 {
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     zcaxpycp_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b, w );
 }
 
@@ -86,7 +86,7 @@ magmablas_zaxpycp_q(
     magma_queue_t queue )
 {
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     zaxpycp_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b );
 }
 

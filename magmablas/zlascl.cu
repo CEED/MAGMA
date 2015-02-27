@@ -155,7 +155,7 @@ magmablas_zlascl_q(
         return;  //info;
     }
     
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     dim3 threads( NB );
     
     double smlnum, bignum, cfromc, ctoc, cto1, cfrom1, mul;

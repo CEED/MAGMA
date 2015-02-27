@@ -58,8 +58,8 @@ int main( int argc, char** argv )
             n = opts.nsize[itest];
             k = opts.ksize[itest];
             nb  = magma_get_zgeqrf_nb( m );
-            ldc = ((m + 31)/32)*32;
-            lda = ((max(m,n) + 31)/32)*32;
+            ldc = magma_roundup( m, opts.align );  // multiple of 32 by default
+            lda = magma_roundup( max(m,n), opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
@@ -80,12 +80,12 @@ int main( int argc, char** argv )
             if ( side[iside] == MagmaLeft ) {
                 // side = left
                 lwork_max = (m - k + nb)*(n + nb) + n*nb;
-                dt_size = ( 2*min(m,k) + ((max(m,n) + 31)/32)*32 )*nb;
+                dt_size = ( 2*min(m,k) + magma_roundup( max(m,n), 32) )*nb;
             }
             else {
                 // side = right
                 lwork_max = (n - k + nb)*(m + nb) + m*nb;
-                dt_size = ( 2*min(n,k) + ((max(m,n) + 31)/32)*32 )*nb;
+                dt_size = ( 2*min(n,k) + magma_roundup( max(m,n), 32 ) )*nb;
             }
             
             TESTING_MALLOC_CPU( C,   magmaDoubleComplex, ldc*n );

@@ -116,7 +116,7 @@ magma_zlarfgx_gpu(
     magmaDouble_ptr        dxnorm,
     magmaDoubleComplex_ptr dA, magma_int_t iter)
 {
-    dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
+    dim3 blocks( magma_ceildiv( n, BLOCK_SIZE ) );
     dim3 threads( BLOCK_SIZE );
  
     magma_zlarfgx_gpu_kernel<<< blocks, threads, 0, magma_stream >>>( n, dx0, dx, dtau, dxnorm, dA, iter);

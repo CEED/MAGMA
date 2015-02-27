@@ -361,7 +361,7 @@ magma_dsyevdx_2stage_m(
     magma_int_t nstream = max(3,ngpu+2);
     magma_queue_t streams[MagmaMaxGPUs][20];
     double *dA[MagmaMaxGPUs], *dT1[MagmaMaxGPUs];
-    magma_int_t ldda = ((n+31)/32)*32;
+    magma_int_t ldda = magma_roundup( n, 32 );
 
     magma_int_t ver = 0;
     magma_int_t distblk = max(256, 4*nb);

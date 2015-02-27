@@ -67,7 +67,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
             N = opts.nsize[itest];
-            lda    = ((M+31)/32)*32;
+            lda    = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGEMV( M, N ) / 1e9 * batchCount;
 
             if ( opts.transA == MagmaNoTrans ) {
@@ -82,7 +82,7 @@ int main( int argc, char** argv)
             sizeX = incx*Xm*batchCount;
             sizeY = incy*Ym*batchCount;
 
-            ldda = ((lda+31)/32)*32;
+            ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
 
             TESTING_MALLOC_CPU( h_A,  magmaDoubleComplex, sizeA );
             TESTING_MALLOC_CPU( h_X,  magmaDoubleComplex, sizeX );

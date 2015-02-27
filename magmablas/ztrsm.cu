@@ -113,8 +113,8 @@
 
     @param
     d_dinvA (workspace) on device.
-            If side == MagmaLeft,  d_dinvA must be of size >= ((m+NB-1)/NB)*NB*NB,
-            If side == MagmaRight, d_dinvA must be of size >= ((n+NB-1)/NB)*NB*NB,
+            If side == MagmaLeft,  d_dinvA must be of size >= ceil(m/NB)*NB*NB,
+            If side == MagmaRight, d_dinvA must be of size >= ceil(n/NB)*NB*NB,
             where NB = 128.
 
     @param[out]
@@ -402,10 +402,10 @@ void magmablas_ztrsm(
     magma_int_t size_dinvA;
     magma_int_t size_x = m*n;
     if ( side == MagmaLeft ) {
-        size_dinvA = ((m+NB-1)/NB)*NB*NB;
+        size_dinvA = magma_roundup( m, NB )*NB;
     }
     else {
-        size_dinvA = ((n+NB-1)/NB)*NB*NB;
+        size_dinvA = magma_roundup( n, NB )*NB;
     }
 
     magma_zmalloc( &d_dinvA, size_dinvA );

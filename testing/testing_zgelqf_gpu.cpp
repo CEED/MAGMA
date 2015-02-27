@@ -58,7 +58,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             min_mn = min(M, N);
             lda    = M;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             n2     = lda*N;
             nb     = magma_get_zgeqrf_nb(M);
             gflops = FLOPS_ZGELQF( M, N ) / 1e9;

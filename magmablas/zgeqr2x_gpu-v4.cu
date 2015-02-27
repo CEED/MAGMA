@@ -161,7 +161,7 @@ magma_zgeqr2x4_gpu(
 
                 /* c = c - V work */
                 if ( m-b > 0 ) {
-                    dim3  blocks3( (m-b + BLOCK_SIZE-1) / BLOCK_SIZE );
+                    dim3  blocks3( magma_ceildiv( m-b, BLOCK_SIZE ) );
                     dim3 threads3( BLOCK_SIZE );
                     magma_zgemv_kernel2<<< blocks3, threads3, 0, magma_stream >>>
                         (m-b, i-b, dA(b,b), ldda,  work+i-b, dA(b, i));

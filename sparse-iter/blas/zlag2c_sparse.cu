@@ -132,7 +132,7 @@ magmablas_zlag2c_sparse(
     }
 
 
-    dim3 grid( (M+BLOCKSIZE-1)/BLOCKSIZE, 1, 1);
+    dim3 grid( magma_ceildiv( M, BLOCKSIZE ) );
 
 
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
@@ -224,7 +224,7 @@ magma_zlag2c_CSR_DENSE(
         {printf("Memory Allocation Error converting matrix\n"); exit(0); }
         
         dim3 Bs( BLOCKSIZE );
-        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+        dim3 Gs( magma_ceildiv( A.num_rows, BLOCKSIZE ) );
 
         magma_zlag2c_CSR_DENSE_kernel<<< Bs, Gs, 0, queue >>>
         ( A.num_rows, A.num_cols, A.dval, A.drow, A.dcol, B->val );
@@ -252,7 +252,7 @@ magma_zlag2c_CSR_DENSE_alloc(
         {printf("Memory Allocation Error converting matrix\n"); exit(0); }
         
         dim3 Bs( BLOCKSIZE );
-        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+        dim3 Gs( magma_ceildiv( A.num_rows, BLOCKSIZE ) );
 
         magma_zlag2c_CSR_DENSE_kernel_1<<< Bs, Gs, 0, queue >>>
         ( A.num_rows, A.num_cols, B->val );
@@ -268,7 +268,7 @@ magma_zlag2c_CSR_DENSE_convert(
 {
     if ( B->memory_location == Magma_DEV && B->storage_type == Magma_DENSE) {
         dim3 Bs( BLOCKSIZE );
-        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+        dim3 Gs( magma_ceildiv( A.num_rows, BLOCKSIZE ) );
 
         magma_zlag2c_CSR_DENSE_kernel_2<<< Bs, Gs, 0, queue >>>
         ( A.num_rows, A.num_cols, A.dval, A.drow, A.dcol, B->val );

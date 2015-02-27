@@ -153,7 +153,7 @@ magma_zgeellmv(
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue )
 {
-    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
    zgeellmv_kernel<<< grid, threads, 0, queue >>>
                   ( m, n, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
@@ -254,7 +254,7 @@ magma_zgeellmv_shift(
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue )
 {
-    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
    zgeellmv_kernel_shift<<< grid, threads, 0, queue >>>
                   ( m, n, nnz_per_row, alpha, lambda, dval, dcolind, dx, 

@@ -130,7 +130,7 @@ magmablas_zgeadd_batched_q(
         return;
     
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB, batchCount );
+    dim3 grid( magma_ceildiv( m, NB ), batchCount );
         
     zgeadd_batched_kernel<<< grid, threads, 0, queue >>>(
         m, n, alpha, dAarray, ldda, dBarray, lddb );

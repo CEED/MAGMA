@@ -64,8 +64,8 @@ int main( int argc, char** argv )
             max_mn = max(M, N);
             lda    = M;
             ldb    = max_mn;
-            ldda   = ((M+31)/32)*32;
-            lddb   = ((max_mn+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
+            lddb   = magma_roundup( max_mn, opts.align );  // multiple of 32 by default
             nb     = magma_get_zgeqrf_nb(M);
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRS( M, N, nrhs )) / 1e9;
             

@@ -106,7 +106,7 @@ magma_zhetrf_nopiv(
     if ( n == 0 )
       return MAGMA_SUCCESS;
 
-    ldda = ((n+31)/32)*32;
+    ldda = magma_roundup( n, 32 );
     nb = magma_get_zhetrf_nopiv_nb(n);
     ib = min(32, nb); // inner-block for diagonal factorization
 

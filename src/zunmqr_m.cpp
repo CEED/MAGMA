@@ -220,7 +220,7 @@ magma_zunmqr_m(
         return *info;
     }
 
-    magma_int_t lddc = (m+63)/64*64;
+    magma_int_t lddc = magma_roundup( m, 64 );  // TODO why 64 instead of 32 ?
     magma_int_t lddac = nq;
     magma_int_t lddar = nb;
     magma_int_t lddwork = nw;
@@ -228,10 +228,10 @@ magma_zunmqr_m(
     magma_int_t nlocal[ MagmaMaxGPUs ] = { 0 };
 
     magma_int_t nb_l=256;
-    magma_int_t nbl = (n-1)/nb_l+1; // number of blocks
-    magma_int_t maxnlocal = (nbl+ngpu-1)/ngpu*nb_l;
+    magma_int_t nbl = magma_ceildiv( n, nb_l ); // number of blocks
+    magma_int_t maxnlocal = magma_ceildiv( nbl, ngpu )*nb_l;
 
-    ngpu = min(ngpu, (n+nb_l-1)/nb_l); // Don't use GPU that will not have data.
+    ngpu = min(ngpu, magma_ceildiv( n, nb_l )); // Don't use GPU that will not have data.
 
     magma_int_t ldw = maxnlocal*lddc // dC
                     + 2*lddac*lddar // 2*dA

@@ -134,7 +134,7 @@ magmablas_zlaswp_q(
         return;  //info;
     }
   
-    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
     
@@ -284,7 +284,7 @@ magmablas_zlaswpx_q(
         return;  //info;
     }
     
-    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
     
@@ -432,7 +432,7 @@ magmablas_zlaswp2_q(
     
     magma_int_t nb = k2-(k1-1);
     
-    dim3 grid( (n + NTHREADS - 1) / NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
     zlaswp2_kernel<<< grid, threads, 0, queue >>>
         ( n, dAT(k1-1,0), ldda, nb, d_ipiv, inci );

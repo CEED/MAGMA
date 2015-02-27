@@ -73,7 +73,7 @@
             The leading dimension of the array A.  LDDA >= max(1,N).
 
     @param[out]
-    d_dinvA COMPLEX_16 array of dimension (NB, ((n+NB-1)/NB)*NB),
+    d_dinvA COMPLEX_16 array of dimension (NB, ceil(n/NB)*NB),
             where NB = 128.
             On exit, contains inverses of the NB-by-NB diagonal blocks of A.
 
@@ -105,9 +105,9 @@ magmablas_ztrtri_diag_q(
         return;  //info
     }
     
-    int nblocks = (n + IB - 1)/IB;
+    int nblocks = magma_ceildiv( n, IB );
 
-    cudaMemset( d_dinvA, 0, ((n+NB-1)/NB)*NB*NB * sizeof(magmaDoubleComplex) );
+    cudaMemset( d_dinvA, 0, magma_roundup( n, NB )*NB * sizeof(magmaDoubleComplex) );
     
     if ( uplo == MagmaLower ) {
         // invert diagonal IB x IB inner blocks
@@ -120,7 +120,7 @@ magmablas_ztrtri_diag_q(
         // then 128 x 128 blocks to build 256 x 256 blocks,  2 x (8 x npages) grid, 16 x 4 threads.
         for( int jb=IB; jb < NB; jb *= 2 ) {
             int kb = jb*2;
-            int npages = (n + kb - 1)/kb;
+            int npages = magma_ceildiv( n, kb );
             dim3 threads( (jb <= 32 ? jb/4 : 16), 4 );
             dim3 grid( jb/(threads.x*threads.y), npages*(jb/16) );  // emulate 3D grid: NX * (NY*npages), for CUDA ARCH 1.x
             
@@ -153,7 +153,7 @@ magmablas_ztrtri_diag_q(
         // update the inverse up to the size of IB
         for( int jb=IB; jb < NB; jb*=2 ) {
             int kb = jb*2;
-            int npages = (n + kb - 1)/kb;
+            int npages = magma_ceildiv( n, kb );
             dim3 threads( (jb <= 32 ? jb/4 : 16), 4 );
             dim3 grid( jb/(threads.x*threads.y), npages*(jb/16) );  // emulate 3D grid: NX * (NY*npages), for CUDA ARCH 1.x
             

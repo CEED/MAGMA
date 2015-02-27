@@ -92,7 +92,7 @@ int main( int argc, char** argv)
             int check = 0;
             N = opts.nsize[itest];
             lda    = N;
-            ldda   = ((N+31)/32)*32;
+            ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             nb     = (opts.nb > 0 ? opts.nb : magma_get_zgetrf_nb( N ));
             nb     = min( N, nb );
             // each swap does 2N loads and 2N stores, for nb swaps

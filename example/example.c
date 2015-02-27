@@ -56,7 +56,7 @@ void gpu_interface( magma_int_t n, magma_int_t nrhs )
 {
     magmaDoubleComplex *dA=NULL, *dX=NULL;
     magma_int_t *ipiv=NULL;
-    magma_int_t ldda = ((n+31)/32)*32;  // round up to multiple of 32 for best GPU performance
+    magma_int_t ldda = magma_roundup( n, 32 );  // round up to multiple of 32 for best GPU performance
     magma_int_t lddx = ldda;
     magma_int_t info = 0;
     

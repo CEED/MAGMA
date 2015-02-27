@@ -55,7 +55,7 @@ int main( int argc, char** argv)
             N   = opts.nsize[itest];
             lda = M;
             n2  = lda*N;
-            ldda = roundup( M, opts.roundup );
+            ldda = magma_roundup( M, opts.align );
             if ( norm[inorm] == MagmaOneNorm )
                 lwork = N;
             else

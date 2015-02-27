@@ -127,7 +127,7 @@ magma_zpotrf3_mgpu(
     /* used by ztrsm_work */
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     int trsm_nb = 128;
-    int trsm_n = trsm_nb*((nb+trsm_nb-1)/trsm_nb);
+    int trsm_n = magma_roundup( nb, trsm_nb );
     magmaDoubleComplex *d_dinvA[MagmaMaxGPUs];
     magmaDoubleComplex *d_x[MagmaMaxGPUs];
     #define dinvA(d,j) &(d_dinvA[(d)][(j)*trsm_nb*trsm_n])

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
             N = opts.nsize[itest];
-            lda    = ((M+31)/32)*32;
+            lda    = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGEMV( M, N ) / 1e9;
 
             if ( opts.transA == MagmaNoTrans ) {

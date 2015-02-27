@@ -68,7 +68,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             n2   = N*N;
             lda  = N;
-            ldda = roundup( N, opts.roundup );  // by default, round to multiple of 32
+            ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             
             // query for workspace sizes
             magma_zheevd_gpu( opts.jobz, opts.uplo,

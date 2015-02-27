@@ -116,7 +116,7 @@ magmablas_zsymmetrize_q(
     
     
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     
     if ( uplo == MagmaUpper ) {
         zsymmetrize_upper<<< grid, threads, 0, queue >>>( m, dA, ldda );

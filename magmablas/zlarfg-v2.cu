@@ -105,7 +105,7 @@ magma_zlarfg_gpu(
     magmaDouble_ptr        dxnorm,
     magmaDoubleComplex_ptr dAkk)
 {
-    dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
+    dim3 blocks( magma_ceildiv( n, BLOCK_SIZE ) );
     dim3 threads( BLOCK_SIZE );
 
     /* recomputing the norm */

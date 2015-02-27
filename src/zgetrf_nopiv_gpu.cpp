@@ -109,7 +109,7 @@ magma_zgetrf_nopiv_gpu(
     }
     else {
         /* Use hybrid blocked code. */
-        maxm = ((m + 31)/32)*32;
+        maxm = magma_roundup( m, 32 );
 
         lddwork = maxm;
 

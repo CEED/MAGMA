@@ -75,7 +75,7 @@ int main( int argc, char** argv)
         for( int offset = 0; offset < n; offset += min(k,nb) ) {
             for( int iter = 0; iter < opts.niter; ++iter ) {
                 lda    = n;
-                ldda   = ((n + 31)/32)*32;
+                ldda   = magma_roundup( n, opts.align );  // multiple of 32 by default
                 gflops = FLOPS_ZHER2K( k, n-offset ) / 1e9;
                 
                 TESTING_MALLOC_CPU( hA,  magmaDoubleComplex, lda*n   );

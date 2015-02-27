@@ -64,7 +64,7 @@ int main( int argc, char** argv)
             //M += 2;  // space for insets
             //N += 2;
             lda    = M;
-            ldda   = roundup( M, opts.roundup );
+            ldda   = magma_roundup( M, opts.align );
             size   = lda*N;
             if ( uplo[iuplo] == MagmaLower || uplo[iuplo] == MagmaUpper ) {
                 // save triangle (with diagonal)

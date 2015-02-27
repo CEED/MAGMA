@@ -150,7 +150,7 @@ magma_zcompact(
         return;
     
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     
     zcompact_kernel<<< grid, threads, 0, queue >>>(
             m, n, dA, ldda, dnorms, tol, active, active+n );
@@ -221,7 +221,7 @@ magma_zcompactActive(
         return;
 
     dim3 threads( NB );
-    dim3 grid( (m + NB - 1)/NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
 
     zcompactactive_kernel<<< grid, threads, 0, queue >>>(
             m, n, dA, ldda, active);

@@ -278,7 +278,7 @@ magma_zheevd_gpu(
     // zhetrd2_gpu requires ldda*ceildiv(n,64) + 2*ldda*nb, in double-complex.
     // zunmtr_gpu  requires lddc*n,                         in double-complex.
     // zlanhe      requires n, in double.
-    magma_int_t ldwork = max( ldda*ceildiv(n,64) + 2*ldda*nb, lddc*n );
+    magma_int_t ldwork = max( ldda*magma_ceildiv(n,64) + 2*ldda*nb, lddc*n );
     magma_int_t ldwork_real = max( ldwork*2, n );
     if ( wantz ) {
         // zstedx requrise 3n^2/2, in double

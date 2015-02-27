@@ -271,7 +271,7 @@ void magmablas_zlaset_q(
     }
     
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m-1)/BLK_X + 1, (n-1)/BLK_Y + 1 );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
     if (uplo == MagmaLower) {
         zlaset_lower_kernel<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
@@ -334,7 +334,7 @@ void magmablas_zlaset_batched(
     }
     
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m-1)/BLK_X + 1, (n-1)/BLK_Y + 1, batchCount );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ), batchCount );
     
     if (uplo == MagmaLower) {
         zlaset_lower_kernel_batched<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dAarray, ldda);
@@ -370,7 +370,7 @@ void magmablas_zmemset_batched(magma_int_t length,
 {
 
     magma_int_t size_per_block = TH_NCHUNK * MAX_NTHREADS;
-    magma_int_t nblock = (length-1)/size_per_block + 1;
+    magma_int_t nblock = magma_ceildiv( length, size_per_block );
     dim3 grid(nblock, 1, batchCount );  // emulate 3D grid: NX * (NY*npages), for CUDA ARCH 1.x
 
     zmemset_kernel_batched<<< grid, MAX_NTHREADS, 0, queue >>>(length, dAarray, val); 

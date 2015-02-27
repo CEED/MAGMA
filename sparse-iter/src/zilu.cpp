@@ -122,9 +122,9 @@ magma_zilusetup(
     magmaDoubleComplex tmp;
     // magma_imalloc_cpu( &ipiv, size_b*(r_blocks+1) );
 
-    ldda = size_b;//((size_b+31)/32)*32;
-    lddb = size_b;//((size_b+31)/32)*32;
-    lddc = size_b;//((size_b+31)/32)*32;
+    ldda = size_b; //magma_roundup( size_b, 32 );
+    lddb = size_b; //magma_roundup( size_b, 32 );
+    lddc = size_b; //magma_roundup( size_b, 32 );
 
 
 

@@ -62,12 +62,12 @@ int main( int argc, char** argv )
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             nb     = magma_get_zgeqrf_nb( M );
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
             // ngpu must be at least the number of blocks
-            ngpu = min( opts.ngpu, int((N+nb-1)/nb) );
+            ngpu = min( opts.ngpu, magma_ceildiv(N,nb) );
             if ( ngpu < opts.ngpu ) {
                 printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) ngpu );
             }

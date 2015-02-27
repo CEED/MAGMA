@@ -148,7 +148,7 @@ magmablas_zsymmetrize_tiles_q(
         return;
     
     dim3 threads( NB );
-    dim3 grid( ntile, (m + NB - 1)/NB );
+    dim3 grid( ntile, magma_ceildiv( m, NB ) );
     
     //printf( "m %d, grid %d x %d, threads %d\n", m, grid.x, grid.y, threads.x );
     if ( uplo == MagmaUpper ) {

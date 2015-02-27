@@ -130,9 +130,9 @@ magma_zpotrf_m(
     } else {
         ngpu = ngpu0;
     }
-    //ldda  = ((n+31)/32)*32;
-    ldda  = ((n+nb-1)/nb)*nb;
-    lddla = ((nb*((n+nb*ngpu-1)/(nb*ngpu))+31)/32)*32;
+    //ldda  = magma_roundup( n, 32 );
+    ldda  = magma_roundup( n, nb );
+    lddla = magma_roundup( nb*((n+nb*ngpu-1)/(nb*ngpu)), 32 );
 
     /* figure out NB */
     size_t freeMem, totalMem;
@@ -293,7 +293,7 @@ magma_zpotrf_m(
             } /* end of updates with previous rows */
             
             /* factor the big panel */
-            h  = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
+            h  = magma_ceildiv( JB, nb ); // big diagonal of big panel will be on CPU
             // using three streams
             magma_zpotrf3_mgpu(ngpu, uplo, JB, n-J, J, J, nb,
                                dwork, NB, dt, ldda, A, lda, h, stream, event, &iinfo);
@@ -414,7 +414,7 @@ magma_zpotrf_m(
             }
             
             /* factor the big panel */
-            h = (JB+nb-1)/nb; // big diagonal of big panel will be on CPU
+            h = magma_ceildiv( JB, nb ); // big diagonal of big panel will be on CPU
             // using three streams
             magma_zpotrf3_mgpu(ngpu, uplo, n-J, JB, J, J, nb,
                                dwork, lddla, dt, ldda, A, lda, h, stream, event, &iinfo);

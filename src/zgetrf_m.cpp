@@ -125,7 +125,7 @@ magma_zgetrf_m(
     
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
-    maxm = ((m  + 31)/32)*32;
+    maxm = magma_roundup( m, 32 );
 
     /* figure out NB */
     size_t freeMem, totalMem;
@@ -177,7 +177,7 @@ magma_zgetrf_m(
         if ( NB%(nb*ngpu) != 0 )
             n_local[0]++;
         n_local[0] *= nb;
-        ldn_local = ((n_local[0]+31)/32)*32;
+        ldn_local = magma_roundup( n_local[0], 32 );
     
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
@@ -200,7 +200,7 @@ magma_zgetrf_m(
             N = min( NB, n-I );       /* number of columns in this big panel             */
             //s = min( max(m-I,0), N )/nb; /* number of small block-columns in this big panel */
     
-            maxm = ((M + 31)/32)*32;
+            maxm = magma_roundup( M, 32 );
             if ( ngpu0 > ceil((double)N/nb) ) {
                 ngpu = (int)ceil((double)N/nb);
             } else {
@@ -214,7 +214,7 @@ magma_zgetrf_m(
                 else if (d == (N/nb)%ngpu)
                     n_local[d] += N%nb;
             }
-            ldn_local = ((n_local[0]+31)/32)*32;
+            ldn_local = magma_roundup( n_local[0], 32 );
             
             /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
             timer_start( time );

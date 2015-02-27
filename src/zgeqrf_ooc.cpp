@@ -149,8 +149,8 @@ magma_zgeqrf_ooc(
         return *info;
     }
 
-    lddwork = ((NB+31)/32)*32+nb;
-    ldda    = ((m+31)/32)*32;
+    lddwork = magma_roundup( NB, 32 ) + nb;
+    ldda    = magma_roundup( m, 32 );
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dA, (NB + nb)*ldda + nb*lddwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;

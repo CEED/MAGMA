@@ -565,9 +565,7 @@ magma_z_mconvert(
                 //                                                   maxrowlength );
     
                 magma_int_t threads_per_row = B->alignment; 
-                magma_int_t rowlength = ( (int)
-                        ((maxrowlength+threads_per_row-1)/threads_per_row) ) 
-                                                                * threads_per_row;
+                magma_int_t rowlength = magma_roundup( maxrowlength, threads_per_row );
     
                 stat_cpu += magma_zmalloc_cpu( &B->val, rowlength*A.num_rows );
                 stat_cpu += magma_index_malloc_cpu( &B->col, rowlength*A.num_rows );
@@ -641,8 +639,7 @@ magma_z_mconvert(
                             maxrowlength = length[j];
                         }
                     }
-                    alignedlength = ((maxrowlength+alignment-1)/alignment) 
-                                                                    * alignment;
+                    alignedlength = magma_roundup( maxrowlength, alignment );
                     B->row[i+1] = B->row[i] + alignedlength * C;
                     if ( alignedlength > B->max_nnz_row )
                         B->max_nnz_row = alignedlength;
@@ -1049,9 +1046,7 @@ magma_z_mconvert(
                 B->diameter = A.diameter;
     
                 magma_int_t threads_per_row = A.alignment; 
-                magma_int_t rowlength = ( (int)
-                        ((A.max_nnz_row+threads_per_row-1)/threads_per_row) ) 
-                                                                * threads_per_row;
+                magma_int_t rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
                 // conversion
                 magma_index_t *row_tmp;
                 stat_cpu += magma_index_malloc_cpu( &row_tmp, A.num_rows+1 );
@@ -1418,7 +1413,7 @@ magma_z_mconvert(
             // end CUSPARSE context //
 
             magma_index_t base, nnzb;
-            magma_int_t mb = (A.num_rows + size_b-1)/size_b;
+            magma_int_t mb = magma_ceildiv( A.num_rows, size_b );
             // nnzTotalDevHostPtr points to host memory
             magma_index_t *nnzTotalDevHostPtr = &nnzb;
 
@@ -1469,8 +1464,8 @@ magma_z_mconvert(
             cusparseStatus = cusparseCreateMatDescr(&descr);
             // end CUSPARSE context //
 
-            magma_int_t mb = (A.num_rows + size_b-1)/size_b;
-            magma_int_t nb = (A.num_cols + size_b-1)/size_b;
+            magma_int_t mb = magma_ceildiv( A.num_rows, size_b );
+            magma_int_t nb = magma_ceildiv( A.num_cols, size_b );
             magma_int_t nnzb = A.numblocks; // number of blocks
             B->nnz  = nnzb * size_b * size_b; // number of elements
             B->num_rows = mb * size_b;

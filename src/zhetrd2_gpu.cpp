@@ -195,7 +195,7 @@ magma_zhetrd2_gpu(
         *info = -9;
     } else if (lwork < nb*n && ! lquery) {
         *info = -11;
-    } else if (ldwork < ldda*ceildiv(n,64) + 2*ldda*nb) {
+    } else if (ldwork < ldda*magma_ceildiv(n,64) + 2*ldda*nb) {
         *info = -13;
     }
 
@@ -233,7 +233,7 @@ magma_zhetrd2_gpu(
     if (upper) {
         /* Reduce the upper triangle of A.
            Columns 1:kk are handled by the unblocked method. */
-        kk = n - (n - nx + nb - 1) / nb * nb;
+        kk = n - magma_roundup( n - nx, nb );
         
         for (i = n - nb; i >= kk; i -= nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the

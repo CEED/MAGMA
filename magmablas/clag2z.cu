@@ -130,7 +130,7 @@ magmablas_clag2z_q(
     }
 
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     clag2z_kernel<<< grid, threads, 0, queue >>> ( m, n, SA, ldsa, A, lda );
 }
 

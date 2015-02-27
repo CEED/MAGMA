@@ -137,8 +137,8 @@ magmablas_clag2z_sparse(
     dim3 dimGrid(block);// Number of Blocks
    
 
-    dim3 threads( blksize, 1, 1 );
-    dim3 grid( (M+blksize-1)/blksize, 1, 1);
+    dim3 threads( blksize );
+    dim3 grid( magma_ceildiv( M, blksize ) );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     magmaint_clag2z_sparse<<< dimGrid , dimBlock, 0, queue >>>
                                         ( M, N, SA, lda, A, ldsa, RMAX ) ; 

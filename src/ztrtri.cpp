@@ -115,7 +115,7 @@ magma_ztrtri(
     /* Determine the block size for this environment */
     nb = magma_get_zpotrf_nb(n);
 
-    ldda = ((n+31)/32)*32;
+    ldda = magma_roundup( n, 32 );
     if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;

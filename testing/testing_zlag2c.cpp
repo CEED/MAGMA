@@ -51,7 +51,7 @@ int main( int argc, char** argv )
             m = opts.msize[itest];
             n = opts.nsize[itest];
             lda  = m;
-            ldda = ((m+31)/32)*32;
+            ldda = magma_roundup( m, opts.align );  // multiple of 32 by default
             // m*n double-complex loads and m*n single-complex stores (and vice-versa for clag2z)
             gbytes = (real_Double_t) m*n * (sizeof(magmaDoubleComplex) + sizeof(magmaFloatComplex)) / 1e9;
             size = ldda*n;  // ldda >= lda

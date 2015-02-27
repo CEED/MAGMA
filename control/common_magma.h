@@ -82,20 +82,6 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-// for integers a >  0, b > 0, returns ceil( a/b ).
-// for integers a == 0, b > 0, returns 1.
-#ifndef ceildiv
-#define ceildiv(a, b) ((a - 1)/b + 1)
-#endif
-
-// for integers a >  0, b > 0, returns a rounded up to multiple of b.
-// for integers a == 0, b > 0, returns b.
-// old implementation assumes b is power of 2:
-// (b <= 0) ? (a) : (((a) + (b)-1) & ~((b)-1))
-#ifndef roundup
-#define roundup(a, b) (ceildiv((a), (b)) * (b))
-#endif
-
 // suppress "warning: unused variable" in a portable fashion
 #define MAGMA_UNUSED(var)  ((void)var)
 

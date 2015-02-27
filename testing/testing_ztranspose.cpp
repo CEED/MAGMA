@@ -49,9 +49,9 @@ int main( int argc, char** argv)
             M = opts.msize[itest];
             N = opts.nsize[itest];
             lda    = M;
-            ldda   = ((M+31)/32)*32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             ldb    = N;
-            lddb   = ((N+31)/32)*32;
+            lddb   = magma_roundup( N, opts.align );  // multiple of 32 by default
             // load entire matrix, save entire matrix
             gbytes = sizeof(magmaDoubleComplex) * 2.*M*N / 1e9;
             

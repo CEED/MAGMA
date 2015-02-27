@@ -339,7 +339,7 @@ extern __shared__ magmaDoubleComplex shared[];
 
     if(i < n ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int max_ = (drowlength[i]+T-1)/T;  
+        int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
@@ -391,7 +391,7 @@ extern __shared__ magmaDoubleComplex shared[];
 
     if(i < n ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int max_ = (drowlength[i]+T-1)/T;  
+        int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
@@ -444,7 +444,7 @@ extern __shared__ magmaDoubleComplex shared[];
 
     if(i < n ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
-        int max_ = (drowlength[i]+T-1)/T;  
+        int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
         for ( int k = 0; k < max_ ; k++ ){
@@ -872,7 +872,7 @@ magma_zcgmerge_spmv1(
 
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (A.num_rows+local_block_size-1)/local_block_size );
+    dim3 Gs( magma_ceildiv( A.num_rows, local_block_size ) );
     dim3 Gs_next;
     int Ms =  local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
@@ -895,7 +895,7 @@ magma_zcgmerge_spmv1(
 
             dim3 block( A.blocksize, A.alignment, 1);
             int dimgrid1 = sqrt(A.numblocks);
-            int dimgrid2 = (A.numblocks + dimgrid1 -1 ) / dimgrid1;
+            int dimgrid2 = magma_ceildiv( A.numblocks, dimgrid1 );
 
             dim3 gridsellp( dimgrid1, dimgrid2, 1);
             int Mssellp = num_threadssellp * sizeof( magmaDoubleComplex );
@@ -947,7 +947,7 @@ magma_zcgmerge_spmv1(
         printf("error: too much shared memory requested.\n");
 
     int dimgrid1 = sqrt(num_blocks);
-    int dimgrid2 = (num_blocks + dimgrid1 -1 ) / dimgrid1;
+    int dimgrid2 = magma_ceildiv( num_blocks, dimgrid1 );
     dim3 gridellrt( dimgrid1, dimgrid2, 1);
 
     int Mellrt = A.alignment * A.blocksize * sizeof( magmaDoubleComplex );
@@ -1183,7 +1183,7 @@ magma_zcgmerge_xrbeta(
 
     int local_block_size=256;
     dim3 Bs( local_block_size );
-    dim3 Gs( (n+local_block_size-1)/local_block_size );
+    dim3 Gs( magma_ceildiv( n, local_block_size ) );
     dim3 Gs_next;
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
@@ -1212,7 +1212,7 @@ magma_zcgmerge_xrbeta(
     magma_zcg_alphabetakernel<<<Gs2, Bs2, 0>>>( skp );
 
     dim3 Bs3( local_block_size );
-    dim3 Gs3( (n+local_block_size-1)/local_block_size );
+    dim3 Gs3( magma_ceildiv( n, local_block_size ) );
     magma_zcg_d_kernel<<<Gs3, Bs3, 0>>>( n, skp, dr, dd );  
 
    magmablasSetKernelStream( orig_queue );

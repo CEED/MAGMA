@@ -235,10 +235,10 @@ magma_zhetrd_mgpu(
     magma_event_create( &stop  );
     #endif
 
-    ldda = roundup( lda, 32 );
+    ldda = magma_roundup( lda, 32 );
     lddw = ldda;
     nlocal = nb*(1 + n/(nb*ngpu));
-    ldwork2 = ldda*( ((n - 1)/nb + 1) + 1);  // i.e., ldda*(blocks + 1)
+    ldwork2 = ldda*( magma_ceildiv( n, nb ) + 1);  // i.e., ldda*(blocks + 1)
     for( dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         // TODO fix memory leak

@@ -50,7 +50,7 @@ int main( int argc, char** argv)
             M     = opts.msize[itest];
             N     = opts.nsize[itest];
             lda   = M;
-            ldda  = ((M + 31)/32)*32;
+            ldda  = magma_roundup( M, opts.align );  // multiple of 32 by default
             size  = lda*N;
 
             /* Allocate memory for the matrix */

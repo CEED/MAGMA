@@ -124,7 +124,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magmaDoubleComplex* dinvdiagA;
     magmaDoubleComplex* dwork;// dinvdiagA and dwork are workspace in ztrsm
     //magma_int_t invdiagA_msize =  BATRI_NB*((nb/BATRI_NB)+(nb % BATRI_NB != 0))* BATRI_NB ;
-    magma_int_t invdiagA_msize = ((n+TRI_NB-1)/TRI_NB)*TRI_NB*TRI_NB;
+    magma_int_t invdiagA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = n*nb;
     magma_zmalloc( &dinvdiagA, invdiagA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );

@@ -163,7 +163,7 @@ magmablas_zlag2c_q(
     double rmax = (double)lapackf77_slamch("O");
 
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
+    dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
     zlag2c_kernel<<< grid, threads, 0, queue >>>( m, n, A, lda, SA, ldsa, rmax );

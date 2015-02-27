@@ -80,7 +80,7 @@ void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleCompl
 
     @param[out]
     dT      (workspace) COMPLEX_16 array on the GPU,
-            dimension (2*MIN(M, N) + (N+31)/32*32 )*NB,
+            dimension (2*MIN(M, N) + ceil(N/32)*32 )*NB,
             where NB can be obtained through magma_get_zgeqrf_nb(M).
             It starts with MIN(M,N)*NB block that store the triangular T
             matrices, followed by the MIN(M,N)*NB block of the diagonal

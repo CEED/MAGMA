@@ -225,7 +225,7 @@ magmablas_dznrm2_row_check_adjust(
     magmaDoubleComplex_ptr dC, magma_int_t lddc,
     magmaDouble_ptr dlsticc)
 {
-    int nblocks = (k+BS-1)/BS;
+    int nblocks = magma_ceildiv( k, BS );
     magma_dznrm2_row_check_adjust_kernel<<< nblocks, BS >>> (k, tol, dxnorm, dxnorm2, dC, lddc, dlsticc);
 }
 

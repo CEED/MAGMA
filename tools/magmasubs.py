@@ -385,6 +385,9 @@ subs = {
     ('magma_get_d',               'magma_get_z'             ),
     ('magma_get_s',               'magma_get_c'             ),
     ('magmasparse_ds',            'magmasparse_zc'          ),
+    
+    # magma_ceildiv -> magma_seildiv, so revert
+    ('magma_ceildiv',             'magma_seildiv'           ),
   ],
   
   # ------------------------------------------------------------

@@ -63,7 +63,7 @@ int main( int argc, char** argv)
             lda = N;
             Ak = N;
             
-            ldda = ((lda+31)/32)*32;
+            ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
             
             sizeA = lda*Ak;
             

@@ -94,7 +94,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             msize = M - offset;
             lda   = M;
-            ldda  = ((M + 31)/32)*32;
+            ldda  = magma_roundup( M, opts.align );  // multiple of 32 by default
             size  = lda*M;
             gflops = FLOPS_ZHEMM( MagmaLeft, (double)msize, (double)N ) / 1e9;
             

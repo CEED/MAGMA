@@ -150,7 +150,7 @@ magma_zhetrd_he2hb(
     #define tau_ref(a_1) (tau + (a_1)-1)
     #define dT(a_1)      (dT + ((a_1)-1)*(lddt))
 
-    int ldda = ((n+31)/32)*32;
+    int ldda = magma_roundup( n, 32 );
     int lddt = nb;
    
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;

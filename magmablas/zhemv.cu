@@ -594,7 +594,7 @@ magmablas_zhemv_work(
     // [sdc] precisions, or z precision with CUDA ARCH 2.x
     int upper = (uplo == MagmaUpper);
 
-    magma_int_t blocks = ceildiv( n, NB_X );
+    magma_int_t blocks = magma_ceildiv( n, NB_X );
     magma_int_t lwmin  = ldda*blocks;
 
     /*
@@ -780,7 +780,7 @@ magmablas_zhemv(
         return info;
 
     magmaDoubleComplex_ptr dwork;
-    magma_int_t blocks = ceildiv( n, NB_X );
+    magma_int_t blocks = magma_ceildiv( n, NB_X );
     magma_int_t lwork  = ldda*blocks;
 
     magma_zmalloc( &dwork, lwork );

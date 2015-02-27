@@ -47,7 +47,7 @@ magmablas_zlacpy_cnjg_q(
     magma_queue_t queue )
 {
     int blocksize = 64;
-    dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
+    dim3 blocks( magma_ceildiv( n, blocksize ) );
     magmagpu_zlacpy_cnjg_params_t params = { dA1, dA2, n, lda1, lda2 };
     magmagpu_zlacpy_cnjg<<< blocks, blocksize, 0, queue >>>( params );
 }

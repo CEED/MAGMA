@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             lda    = N;
-            ldda   = ((N + 31)/32)*32;
+            ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             sizeA  = N*lda;
             sizeX  = N*incx;
             sizeY  = N*incy;
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
             TESTING_MALLOC_DEV( dX, magmaDoubleComplex, sizeX );
             TESTING_MALLOC_DEV( dY, magmaDoubleComplex, sizeY );
             
-            blocks = (N + nb - 1) / nb;
+            blocks = magma_ceildiv( N, nb );
             ldwork = ldda*blocks;
             TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
             

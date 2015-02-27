@@ -72,9 +72,9 @@ int main( int argc, char** argv)
             max_mn = max(M, N);
             lda    = M;
             ldb    = max_mn;
-            ldda   = ((M+31)/32) * 32;
-            lddb   = ((max_mn+31)/32)*32;
-            lddx   = ((N+31)/32) * 32;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
+            lddb   = magma_roundup( max_mn, opts.align );  // multiple of 32 by default
+            lddx   = magma_roundup( N, opts.align );  // multiple of 32 by default
             nb     = max( magma_get_zgeqrf_nb( M ), magma_get_cgeqrf_nb( M ) );
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRS( M, N, nrhs )) / 1e9;
             
@@ -99,7 +99,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N      );
             TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*nrhs   );
             TESTING_MALLOC_DEV( d_X, magmaDoubleComplex, lddx*nrhs   );
-            TESTING_MALLOC_DEV( d_T, magmaDoubleComplex, ( 2*min_mn + (N+31)/32*32 )*nb );
+            TESTING_MALLOC_DEV( d_T, magmaDoubleComplex, ( 2*min_mn + magma_roundup( N, 32 ) )*nb );
             
             /* Initialize the matrices */
             size = lda*N;

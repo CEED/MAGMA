@@ -199,10 +199,10 @@ magma_zcopyscale(
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
-    dim3 Gs( (k+BLOCK_SIZE-1)/BLOCK_SIZE );
+    dim3 Gs( magma_ceildiv( k, BLOCK_SIZE ) );
     unsigned int Ms =   Bs.x * sizeof( magmaDoubleComplex ); 
 
-    dim3 Gs2( (n+BLOCK_SIZE-1)/BLOCK_SIZE );
+    dim3 Gs2( magma_ceildiv( n, BLOCK_SIZE ) );
 
 
     magma_zpipelined_correction<<<Gs, Bs, Ms, queue >>>
@@ -228,7 +228,7 @@ magma_dznrm2scale(
                                 ( m, r, lddr, drnorm );
 
     dim3 Bs( BLOCK_SIZE );
-    dim3 Gs2( (m+BLOCK_SIZE-1)/BLOCK_SIZE );
+    dim3 Gs2( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_zpipelinedscale<<<Gs2, Bs, 0, queue >>>( m, r, drnorm );
 
     return MAGMA_SUCCESS;

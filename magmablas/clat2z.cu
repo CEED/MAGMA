@@ -174,7 +174,7 @@ magmablas_clat2z_q(
     }
     
     dim3 threads( BLK_X );
-    dim3 grid( (n+BLK_X-1)/BLK_X, (n+BLK_Y-1)/BLK_Y );
+    dim3 grid( magma_ceildiv( n, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
     if (uplo == MagmaLower)
         clat2z_lower<<< grid, threads, 0, queue >>> (n, SA, ldsa, A, lda);
