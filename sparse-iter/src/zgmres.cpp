@@ -71,7 +71,6 @@ magma_zgmres(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t stat = 0;
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );

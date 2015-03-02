@@ -118,10 +118,7 @@ magma_zparse_opts(
     int *matrices,
     magma_queue_t queue )
 {
-    // negative flag indicating -m, -n, -k not given
-    int m = -1;
-    int n = -1;
-    int k = -1;
+
     
     // fill in default values
     opts->input_format = Magma_CSR;
@@ -149,7 +146,6 @@ magma_zparse_opts(
     cudaGetDeviceCount( &ndevices );
     
     int info;
-    int ntest = 0;
     
 
     for( int i = 1; i < argc; ++i ) {

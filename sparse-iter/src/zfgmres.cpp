@@ -112,10 +112,9 @@ magma_zfgmres(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue ){
     
-    magma_int_t N = A.num_rows;
     magma_int_t dofs = A.num_rows;
 
-    magma_int_t stat_cpu = 0, stat_dev = 0;
+    magma_int_t stat_cpu = 0;
     // prepare solver feedback
     solver_par->solver = Magma_PGMRES;
     solver_par->numiter = 0;
@@ -139,8 +138,6 @@ magma_zfgmres(
     magma_zvinit( &t, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
     magma_zvinit( &t2, Magma_DEV, dofs, MAGMA_Z_ZERO, queue );
 
-
-    magma_int_t inc = 1;  // vector stride is always 1
     magmaDoubleComplex temp;
     
     magmaDoubleComplex *H, *s, *cs, *sn;

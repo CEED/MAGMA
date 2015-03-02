@@ -37,7 +37,7 @@ int main(  int argc, char** argv )
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-    magma_z_sparse_matrix A, B, B_d;
+    magma_z_sparse_matrix A, B_d;
     magma_z_vector x, b;
 
     while(  i < argc ) {

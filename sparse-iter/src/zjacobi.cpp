@@ -81,7 +81,7 @@ magma_zjacobi(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                                 c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
-    double nom0;
+    double nom0 = 0.0;
 
 
     magma_z_sparse_matrix M;

@@ -75,7 +75,7 @@ magma_zmgenerator(
     
     magma_z_sparse_matrix B;
     
-    magma_int_t stat_cpu = 0, stat_dev = 0;
+    magma_int_t stat_cpu = 0;
     B.val = NULL;
     B.col = NULL;
     B.row = NULL;
@@ -231,8 +231,6 @@ magma_zm_27stencil(
     for( i=0; i<n*n; i++ ) {
     for( j=0; j<n; j++ ) {
         magma_index_t row = i*n+j;
-        magma_index_t l_bound = i*n;
-        magma_index_t u_bound = (i+1)*n;
         for( k=hA.row[row]; k<hA.row[row+1]; k++) {
 
             if ((hA.col[k] == row-1 ||
@@ -329,8 +327,6 @@ magma_zm_5stencil(
     for( i=0; i<n; i++ ) {
     for( j=0; j<n; j++ ) {
         magma_index_t row = i*n+j;
-        magma_index_t l_bound = i*n;
-        magma_index_t u_bound = (i+1)*n;
         for( k=hA.row[row]; k<hA.row[row+1]; k++) {
 
             if ((hA.col[k] == row-1 ) && (row+1)%n == 1 )

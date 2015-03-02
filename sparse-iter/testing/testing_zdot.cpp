@@ -56,8 +56,7 @@ int main(  int argc, char** argv )
 
     for( magma_int_t n=10000; n<100000001; n=n+10000 ) {
            
-            magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
-            magma_z_vector a,b,c,x, y, z, skp;
+            magma_z_vector a,b,x,y,skp;
             int iters = 10;
             double computations = (2.* n * iters * num_vecs); 
 

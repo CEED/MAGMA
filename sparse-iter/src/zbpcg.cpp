@@ -75,7 +75,7 @@ magma_zbpcg(
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
-    magma_int_t stat_dev = 0, stat_cpu = 0;
+    magma_int_t stat_cpu = 0;
     
     magma_int_t i, num_vecs = b.num_rows/A.num_rows;
 

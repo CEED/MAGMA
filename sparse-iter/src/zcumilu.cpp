@@ -563,7 +563,7 @@ magma_zcumiccsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-    magma_z_sparse_matrix hA, hACSR, U, hD, hR, hAt;
+    magma_z_sparse_matrix hA, hACSR, U;
     magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
     U.diagorder_type = Magma_VALUE;
     magma_z_mconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
@@ -702,6 +702,8 @@ magma_zcumiccsetup(
     // to enable also the block-asynchronous iteration for the triangular solves
     magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
     hA.storage_type = Magma_CSR;
+
+    magma_z_sparse_matrix hD, hR, hAt
 
     magma_zcsrsplit( 256, hA, &hD, &hR, queue );
 
@@ -1022,9 +1024,6 @@ magma_zapplycumicc_r(
             cusparseStatus =
             cusparseSetMatFillMode(descrU,CUSPARSE_FILL_MODE_LOWER);
              if (cusparseStatus != 0)    printf("error in fillmode.\n");
-
-            // end CUSPARSE context //
-            magma_int_t dofs = precond->M.num_rows;
 
 
             cusparseStatus =

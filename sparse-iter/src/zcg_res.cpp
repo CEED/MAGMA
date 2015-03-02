@@ -147,7 +147,7 @@ magma_zcg_res(
     } 
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
-    double residual;
+    double residual=0.0;
     magma_zresidual( A, b, *x, &residual, queue );
     solver_par->iter_res = res;
     solver_par->final_res = residual;

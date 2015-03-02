@@ -82,7 +82,7 @@ magma_z_csr_compressor(
     magma_queue_t queue )
 {
 
-    magma_int_t stat_cpu = 0, stat_dev = 0;
+    magma_int_t stat_cpu = 0;
     magma_index_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
     stat_cpu += magma_index_malloc_cpu( &(row_nnz), (*n) );
     if( stat_cpu != 0 ){

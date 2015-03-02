@@ -53,7 +53,6 @@ int main(  int argc, char** argv )
     hA_SELLP.blocksize = 8;
     hA_SELLP.alignment = 8;
     real_Double_t start, end, res;
-    magma_int_t *pntre;
 
     magmaDoubleComplex c_one  = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex c_zero = MAGMA_Z_MAKE(0.0, 0.0);

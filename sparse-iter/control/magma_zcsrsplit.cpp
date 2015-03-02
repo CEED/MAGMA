@@ -69,7 +69,7 @@ magma_zcsrsplit(
 
         magma_int_t i, k, j, nnz_diag, nnz_offd;
         
-        magma_int_t stat_cpu = 0, stat_dev = 0;
+        magma_int_t stat_cpu = 0;
         D->val = NULL;
         D->col = NULL;
         D->row = NULL;
