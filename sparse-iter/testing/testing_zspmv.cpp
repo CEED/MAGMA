@@ -94,6 +94,8 @@ int main(  int argc, char** argv )
         // init DEV vectors
         magma_zvinit( &dx, Magma_DEV, hA.num_rows, c_one, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
+        
+        magma_int_t *pntre;
 
         #ifdef MAGMA_WITH_MKL
             // calling MKL with CSR
