@@ -34,7 +34,7 @@ int main(  int argc, char** argv )
         magma_queue_t queue;
             magma_queue_create( /*devices[ opts->device ],*/ &queue );
 
-    magma_int_t j, n=10000, FLOPS;
+    magma_int_t j, n=1000000, FLOPS;
     
     magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
     magmaDoubleComplex two = MAGMA_Z_MAKE( 2.0, 0.0 );
@@ -53,8 +53,8 @@ int main(  int argc, char** argv )
     for (j=0; j<100; j++)
         res = magma_dznrm2(n, ad.dval, 1); 
     end = magma_sync_wtime( queue );
-    printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
-                                    (end-start)/100, FLOPS*100/(end-start) );   
+    printf( " > MAGMA nrm2: %.2e seconds %.2e GFLOP/s\n",
+                                    (end-start)/100, FLOPS*100/1e9/(end-start) );   
     printf("res: %f\n", res);
 
     FLOPS = n;
@@ -62,29 +62,29 @@ int main(  int argc, char** argv )
     for (j=0; j<100; j++)
         magma_zscal( n, two, ad.dval, 1 );   
     end = magma_sync_wtime( queue );
-    printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
-                                    (end-start)/100, FLOPS*100/(end-start) );   
+    printf( " > MAGMA scal: %.2e seconds %.2e GFLOP/s\n",
+                                    (end-start)/100, FLOPS*100/1e9/(end-start) );   
     FLOPS = 2*n;
     start = magma_sync_wtime( queue );
     for (j=0; j<100; j++)
         magma_zaxpy( n, one, ad.dval, 1, bd.dval, 1 );
     end = magma_sync_wtime( queue );
-    printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
-                                    (end-start)/100, FLOPS*100/(end-start) );   
+    printf( " > MAGMA axpy: %.2e seconds %.2e GFLOP/s\n",
+                                    (end-start)/100, FLOPS*100/1e9/(end-start) );   
     FLOPS = n;
     start = magma_sync_wtime( queue );
     for (j=0; j<100; j++)
         magma_zcopy( n, bd.dval, 1, ad.dval, 1 );
     end = magma_sync_wtime( queue );
     printf( " > MAGMA copy: %.2e seconds %.2e GFLOP/s\n",
-                                    (end-start)/100, FLOPS*100/(end-start) );
+                                    (end-start)/100, FLOPS*100/1e9/(end-start) );
     FLOPS = 2*n;
     start = magma_sync_wtime( queue );
     for (j=0; j<100; j++) 
         res = MAGMA_Z_REAL( magma_zdotc(n, ad.dval, 1, bd.dval, 1) );
     end = magma_sync_wtime( queue );
     printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
-                                    (end-start)/100, FLOPS*100/(end-start) );   
+                                    (end-start)/100, FLOPS*100/1e9/(end-start) );   
 
     printf("res: %f\n", res);
 
