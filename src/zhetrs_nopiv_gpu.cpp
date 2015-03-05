@@ -92,28 +92,30 @@ magma_zhetrs_nopiv_gpu(
         return *info;
     }
 
-    if (upper) {
-        magmablas_ztrsm( MagmaLeft, MagmaUpper,
-                         MagmaConjTrans, MagmaUnit,
-                         n, nrhs, c_one,
-                         dA, ldda, dB, lddb );
-        magmablas_zlascl_diag( MagmaUpper, 1, n, dA, ldda, dB, 1, info );
-        magmablas_ztrsm( MagmaLeft, MagmaUpper,
-                         MagmaNoTrans, MagmaUnit,
-                         n, nrhs, c_one,
-                         dA, ldda, dB, lddb );
-    }
-    else {
-        magmablas_ztrsm( MagmaLeft, MagmaLower,
-                         MagmaNoTrans, MagmaUnit,
-                         n, nrhs, c_one,
-                         dA, ldda, dB, lddb );
-        magmablas_zlascl_diag( MagmaLower, 1, n, dA, ldda, dB, 1, info );
-        magmablas_ztrsm( MagmaLeft, MagmaLower,
-                         MagmaConjTrans, MagmaUnit,
-                         n, nrhs, c_one,
-                         dA, ldda, dB, lddb );
-    }
 
+    if (upper) {
+        magmablas_ztrsm( MagmaLeft, MagmaUpper, 
+                         MagmaConjTrans, MagmaUnit, 
+                         n, nrhs, c_one,
+                         dA, ldda, dB, lddb );
+        for(int i = 0; i<nrhs; i++)
+            magmablas_zlascl_diag(MagmaUpper, 1, n, dA, ldda, dB+(lddb*i),1, info);
+        magmablas_ztrsm( MagmaLeft, MagmaUpper, 
+                         MagmaNoTrans, MagmaUnit, 
+                         n, nrhs, c_one,
+                         dA, ldda, dB, lddb );
+    } else {
+        magma_ztrsm( MagmaLeft, MagmaLower, 
+                     MagmaNoTrans, MagmaUnit, 
+                     n, nrhs, c_one,
+                     dA, ldda, dB, lddb );
+        for(int i = 0; i<nrhs; i++)
+            magmablas_zlascl_diag(MagmaLower, 1, n, dA, ldda, dB+(lddb*i),1, info);
+        magmablas_ztrsm( MagmaLeft, MagmaLower, 
+                         MagmaConjTrans, MagmaUnit, 
+                         n, nrhs, c_one,
+                         dA, ldda, dB, lddb );
+    }
+    
     return *info;
 }

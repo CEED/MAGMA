@@ -57,7 +57,7 @@ int main(int argc, char **argv)
             ldb    = lda;
             ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             lddb   = ldda;
-            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) / 1e9;
+            gflops = ( FLOPS_ZPOTRF( N ) + FLOPS_ZPOTRS( N, nrhs ) ) / 1e9;
             
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, lda*N    );
             TESTING_MALLOC_CPU( h_B, magmaDoubleComplex, ldb*nrhs );
