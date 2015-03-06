@@ -1,4 +1,4 @@
-/*
+    /*
     -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -45,17 +45,17 @@ magmablas_zgetmatrix_transpose_mgpu(
     }
     
     /* Move data from GPU to CPU using two buffers; first transpose the data on the GPU */
-    for(j=0; j<n; j+=nb){
-       d       = (j/nb)%ngpu;
-       j_local = (j/nb)/ngpu;
-       id      = j_local%nstreams;
-       magma_setdevice(d);
-
-       ib = min(n-j, nb);
-       magmablas_ztranspose_q( ib, m, dAT(d,j_local), ldda, dwork(d,id), lddw, queues[d][id] );
-       magma_zgetmatrix_async( m, ib,
-                               dwork(d, id), lddw,
-                               hA(j),        lda, 
-                               queues[d][id] );
+    for(j=0; j < n; j += nb){
+        d       = (j/nb)%ngpu;
+        j_local = (j/nb)/ngpu;
+        id      = j_local%nstreams;
+        magma_setdevice(d);
+        
+        ib = min(n-j, nb);
+        magmablas_ztranspose_q( ib, m, dAT(d,j_local), ldda, dwork(d,id), lddw, queues[d][id] );
+        magma_zgetmatrix_async( m, ib,
+                                dwork(d, id), lddw,
+                                hA(j),        lda, 
+                                queues[d][id] );
     }
 }

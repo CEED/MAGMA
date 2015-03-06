@@ -33,11 +33,11 @@ magmablas_zsetmatrix_transpose_mgpu(
 #define dAT(d, j)   (dAT[(d)]   + (j)*nb)
 
     magma_int_t nqueues = 2, d, j, j_local, id, ib;
-
+    
     /* Quick return */
     if ( (m == 0) || (n == 0) )
         return;
-
+    
     if (lda < m || ngpu*ldda < n || lddw < m){
         printf( "Wrong arguments in magmablas_zsetmatrix_transpose_mgpu (%d<%d), (%d*%d<%d), or (%d<%d).\n",
                 (int) lda, (int) m, (int) ngpu, (int) ldda, (int) n, (int) lddw, (int) m );
@@ -45,18 +45,18 @@ magmablas_zsetmatrix_transpose_mgpu(
     }
     
     /* Move data from CPU to GPU by block columns and transpose it */
-    for(j=0; j<n; j+=nb){
-       d       = (j/nb)%ngpu;
-       j_local = (j/nb)/ngpu;
-       id      = j_local%nqueues;
-       magma_setdevice(d);
-
-       ib = min(n-j, nb);
-       magma_zsetmatrix_async( m, ib,
-                               hA(j),        lda,
-                               dwork(d, id), lddw, 
-                               queues[d][id] );
-
-       magmablas_ztranspose_q( m, ib, dwork(d,id), lddw, dAT(d,j_local), ldda, queues[d][id] );
+    for(j=0; j < n; j += nb){
+        d       = (j/nb)%ngpu;
+        j_local = (j/nb)/ngpu;
+        id      = j_local%nqueues;
+        magma_setdevice(d);
+        
+        ib = min(n-j, nb);
+        magma_zsetmatrix_async( m, ib,
+                                hA(j),        lda,
+                                dwork(d, id), lddw, 
+                                queues[d][id] );
+        
+        magmablas_ztranspose_q( m, ib, dwork(d,id), lddw, dAT(d,j_local), ldda, queues[d][id] );
     }
 }
