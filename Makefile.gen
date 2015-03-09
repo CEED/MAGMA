@@ -93,6 +93,19 @@ CMakes:
 	( cd $(MAGMA_DIR)/testing        && $(MAKE) CMake )
 	@echo ======================================== testing/lin
 	( cd $(MAGMA_DIR)/testing/lin    && $(MAKE) CMake )
+	@echo ======================================== sparse blas
+	( cd $(MAGMA_DIR)/sparse_iter/blas      && $(MAKE) CMake )
+	@echo ======================================== sparse src
+	( cd $(MAGMA_DIR)/sparse_iter/src            && $(MAKE) CMake )
+	@echo ======================================== sparse control
+	( cd $(MAGMA_DIR)/sparse_iter/control        && $(MAKE) CMake )
+	@echo ======================================== sparse testing
+	( cd $(MAGMA_DIR)/sparse_iter/testing        && $(MAKE) CMake )
+
+
+
+
+
 
 ZSRC_ = $(addprefix $(DIR)/, $(filter-out %.f90, $(filter-out %.F90, $(ZSRC))))
 CSRC_ = $(addprefix $(DIR)/, $(filter-out %.f90, $(filter-out %.F90, $(CSRC))))
