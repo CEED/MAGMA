@@ -133,9 +133,11 @@ void zlaset_upper_device(
         }
     }
 }
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 /*
-    kernel wrapper to call the device function.
+    kernel wrappers to call the device functions.
 */
 __global__
 void zlaset_full_kernel(
@@ -145,6 +147,7 @@ void zlaset_full_kernel(
 {
     zlaset_full_device(m, n, offdiag, diag, dA, ldda);
 }
+
 __global__
 void zlaset_lower_kernel(
     int m, int n,
@@ -153,6 +156,7 @@ void zlaset_lower_kernel(
 {
     zlaset_lower_device(m, n, offdiag, diag, dA, ldda);
 }
+
 __global__
 void zlaset_upper_kernel(
     int m, int n,
@@ -161,9 +165,11 @@ void zlaset_upper_kernel(
 {
     zlaset_upper_device(m, n, offdiag, diag, dA, ldda);
 }
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 /*
-    kernel wrapper to call the device function for the batched routine.
+    kernel wrappers to call the device functions for the batched routine.
 */
 __global__
 void zlaset_full_kernel_batched(
@@ -174,6 +180,7 @@ void zlaset_full_kernel_batched(
     int batchid = blockIdx.z;
     zlaset_full_device(m, n, offdiag, diag, dAarray[batchid], ldda);
 }
+
 __global__
 void zlaset_lower_kernel_batched(
     int m, int n,
@@ -183,6 +190,7 @@ void zlaset_lower_kernel_batched(
     int batchid = blockIdx.z;
     zlaset_lower_device(m, n, offdiag, diag, dAarray[batchid], ldda);
 }
+
 __global__
 void zlaset_upper_kernel_batched(
     int m, int n,
@@ -192,6 +200,8 @@ void zlaset_upper_kernel_batched(
     int batchid = blockIdx.z;
     zlaset_upper_device(m, n, offdiag, diag, dAarray[batchid], ldda);
 }
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
@@ -293,6 +303,7 @@ void magmablas_zlaset_q(
         }
     }
 }
+
 /**
     @see magmablas_zlaset_q
     @ingroup magma_zaux2
@@ -305,8 +316,9 @@ void magmablas_zlaset(
 {
     magmablas_zlaset_q( uplo, m, n, offdiag, diag, dA, ldda, magma_stream );
 }
-////////////////////////////////////////////////////////////////////////////////////////
 
+
+////////////////////////////////////////////////////////////////////////////////////////
 extern "C"
 void magmablas_zlaset_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
@@ -346,34 +358,3 @@ void magmablas_zlaset_batched(
         zlaset_full_kernel_batched<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dAarray, ldda);
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#define A(n, bound) d##A[min(n, bound)]
-#define TH_NCHUNK   8
-static
-__global__ void
-zmemset_kernel_batched(int length, magmaDoubleComplex **dAarray, magmaDoubleComplex val)
-{
-    int tid = threadIdx.x;
-    magmaDoubleComplex *dA = dAarray[blockIdx.z];
-
-    #pragma unroll
-    for (int l = 0; l < TH_NCHUNK; l++)
-        A(l*MAX_NTHREADS+tid, length) = val;
-}
-#undef A
-
-extern "C"
-void magmablas_zmemset_batched(magma_int_t length, 
-        magmaDoubleComplex_ptr dAarray[], magmaDoubleComplex val, 
-        magma_int_t batchCount, magma_queue_t queue)
-{
-
-    magma_int_t size_per_block = TH_NCHUNK * MAX_NTHREADS;
-    magma_int_t nblock = magma_ceildiv( length, size_per_block );
-    dim3 grid(nblock, 1, batchCount );  // emulate 3D grid: NX * (NY*npages), for CUDA ARCH 1.x
-
-    zmemset_kernel_batched<<< grid, MAX_NTHREADS, 0, queue >>>(length, dAarray, val); 
-}
-
-

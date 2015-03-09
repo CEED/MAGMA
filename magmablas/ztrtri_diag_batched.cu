@@ -107,11 +107,8 @@ magmablas_ztrtri_diag_batched(
     
     int nblocks = magma_ceildiv( n, IB );
 
-
-    if(resetozero)
-    { 
+    if ( resetozero ) {
         magmablas_zlaset_batched(MagmaFull, magma_roundup( n, NB ), NB, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA_array, magma_roundup( n, NB ), batchCount, queue);
-       //magmablas_zmemset_batched( dinvA_array, magma_roundup( n, NB )*NB, batchCount, queue);
     }
     // if someone want to use cudamemset he need to set the whole vectors 
     // of initial size otherwise it is a bug and thus need to have dinvA_length 

@@ -299,11 +299,6 @@ magmablas_zlaset_batched(
     magmaDoubleComplex_ptr dAarray[], magma_int_t ldda,
     magma_int_t batchCount, magma_queue_t queue);
 
-void 
-magmablas_zmemset_batched(magma_int_t length, 
-        magmaDoubleComplex_ptr dAarray[], magmaDoubleComplex val, 
-        magma_int_t batchCount, magma_queue_t queue);
-
 magma_int_t 
 magma_zgetf2_batched(
     magma_int_t m, magma_int_t n,
