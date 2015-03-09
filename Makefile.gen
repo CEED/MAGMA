@@ -94,13 +94,13 @@ CMakes:
 	@echo ======================================== testing/lin
 	( cd $(MAGMA_DIR)/testing/lin    && $(MAKE) CMake )
 	@echo ======================================== sparse blas
-	( cd $(MAGMA_DIR)/sparse_iter/blas      && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/sparse-iter/blas      && $(MAKE) CMake )
 	@echo ======================================== sparse src
-	( cd $(MAGMA_DIR)/sparse_iter/src            && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/sparse-iter/src            && $(MAKE) CMake )
 	@echo ======================================== sparse control
-	( cd $(MAGMA_DIR)/sparse_iter/control        && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/sparse-iter/control        && $(MAKE) CMake )
 	@echo ======================================== sparse testing
-	( cd $(MAGMA_DIR)/sparse_iter/testing        && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/sparse-iter/testing        && $(MAKE) CMake )
 
 
 
