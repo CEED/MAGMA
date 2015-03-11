@@ -608,7 +608,7 @@ magmablas_zlanhe(
     magmaDouble_ptr dwork )
 {
     magma_int_t info = 0;
-    magma_int_t arch = magma_getdevice_arch();
+
     // 1-norm == inf-norm since A is Hermitian
     bool inf_norm = (norm == MagmaInfNorm || norm == MagmaOneNorm);
     bool max_norm = (norm == MagmaMaxNorm);
