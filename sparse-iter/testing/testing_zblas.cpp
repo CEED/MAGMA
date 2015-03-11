@@ -55,8 +55,6 @@ int main(  int argc, char** argv )
     end = magma_sync_wtime( queue );
     printf( " > MAGMA nrm2: %.2e seconds %.2e GFLOP/s\n",
                                     (end-start)/100, FLOPS*100/1e9/(end-start) );   
-    printf("res: %f\n", res);
-
     FLOPS = n;
     start = magma_sync_wtime( queue );
     for (j=0; j<100; j++)
@@ -86,7 +84,7 @@ int main(  int argc, char** argv )
     printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
                                     (end-start)/100, FLOPS*100/1e9/(end-start) );   
 
-    printf("res: %f\n", res);
+    printf("# tester spmv SELL-P:  ok\n");
 
 
     magma_z_vfree( &a, queue);
