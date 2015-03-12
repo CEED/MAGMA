@@ -98,8 +98,9 @@ magma_zhetrs_nopiv_gpu(
                          MagmaConjTrans, MagmaUnit, 
                          n, nrhs, c_one,
                          dA, ldda, dB, lddb );
-        for(int i = 0; i<nrhs; i++)
-            magmablas_zlascl_diag(MagmaUpper, 1, n, dA, ldda, dB+(lddb*i),1, info);
+        magmablas_zlascl_diag(MagmaUpper, n, nrhs, dA, ldda, dB,lddb, info);
+        //for(int i = 0; i<nrhs; i++)
+        //    magmablas_zlascl_diag(MagmaUpper, 1, n, dA, ldda, dB+(lddb*i),1, info);
         magmablas_ztrsm( MagmaLeft, MagmaUpper, 
                          MagmaNoTrans, MagmaUnit, 
                          n, nrhs, c_one,
@@ -109,8 +110,9 @@ magma_zhetrs_nopiv_gpu(
                      MagmaNoTrans, MagmaUnit, 
                      n, nrhs, c_one,
                      dA, ldda, dB, lddb );
-        for(int i = 0; i<nrhs; i++)
-            magmablas_zlascl_diag(MagmaLower, 1, n, dA, ldda, dB+(lddb*i),1, info);
+        magmablas_zlascl_diag(MagmaUpper, n, nrhs, dA, ldda, dB,lddb, info);
+        //for(int i = 0; i<nrhs; i++)
+        //    magmablas_zlascl_diag(MagmaLower, 1, n, dA, ldda, dB+(lddb*i),1, info);
         magmablas_ztrsm( MagmaLeft, MagmaLower, 
                          MagmaConjTrans, MagmaUnit, 
                          n, nrhs, c_one,
