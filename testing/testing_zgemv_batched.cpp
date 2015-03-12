@@ -52,6 +52,7 @@ int main( int argc, char** argv)
 
 
     magma_opts opts;
+    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
     batchCount = opts.batchcount;
     opts.lapack |= opts.check; 
@@ -110,15 +111,15 @@ int main( int argc, char** argv)
             magma_zsetvector( Xm*batchCount, h_X, incx, d_X, incx );
             magma_zsetvector( Ym*batchCount, h_Y, incy, d_Y, incy );
             
-            zset_pointer(A_array, d_A, ldda, 0, 0, ldda*N, batchCount, magma_stream);
-            zset_pointer(X_array, d_X, 1, 0, 0, incx*Xm, batchCount, magma_stream);
-            zset_pointer(Y_array, d_Y, 1, 0, 0, incy*Ym, batchCount, magma_stream);
+            zset_pointer(A_array, d_A, ldda, 0, 0, ldda*N, batchCount, queue);
+            zset_pointer(X_array, d_X, 1, 0, 0, incx*Xm, batchCount, queue);
+            zset_pointer(Y_array, d_Y, 1, 0, 0, incy*Ym, batchCount, queue);
 
             magma_time = magma_sync_wtime( NULL );
             magmablas_zgemv_batched(opts.transA, M, N,
                              alpha, A_array, ldda,
                                     X_array, incx,
-                             beta,  Y_array, incy, batchCount, magma_stream);
+                             beta,  Y_array, incy, batchCount, queue);
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;            
             magma_zgetvector( Ym*batchCount, d_Y, incy, h_Ymagma, incy );
