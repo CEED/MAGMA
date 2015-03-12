@@ -88,8 +88,8 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount = 1;
 
-    magma_queue_t queue = magma_stream;
     magma_opts opts;
+    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check; 
 

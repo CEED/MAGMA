@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t queue = magma_stream;
+    magma_queue_t queue = opts.queue;
     batchCount = opts.batchcount ;
     magma_int_t columns;
     nrhs = opts.nrhs;

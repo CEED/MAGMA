@@ -48,8 +48,8 @@ int main(int argc, char **argv)
     magmaDoubleComplex **dB_array = NULL;
     magma_int_t     **dipiv_array = NULL;
 
-    magma_queue_t queue = magma_stream;
     magma_opts opts;
+    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");

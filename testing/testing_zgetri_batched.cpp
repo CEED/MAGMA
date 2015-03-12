@@ -47,7 +47,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check; 
 
-    magma_queue_t queue = magma_stream;
+    magma_queue_t queue = opts.queue;
     magma_int_t batchCount = opts.batchcount ;
     magma_int_t columns;
     double error=0.0, rwork[1];

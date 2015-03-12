@@ -45,8 +45,8 @@ int main( int argc, char** argv)
 
     magma_int_t batchCount;
 
-    magma_queue_t queue = magma_stream;
     magma_opts opts;
+    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     batchCount = opts.batchcount;
