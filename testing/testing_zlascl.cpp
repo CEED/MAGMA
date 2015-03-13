@@ -59,14 +59,25 @@ int main( int argc, char** argv)
             lda    = M;
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             size   = lda*N;
-            if ( uplo[iuplo] == MagmaLower || uplo[iuplo] == MagmaUpper ) {
-                // read & write triangle (with diagonal)
-                // TODO wrong for trapezoid
-                gbytes = sizeof(magmaDoubleComplex) * 0.5*2.*N*(N+1) / 1e9;
+            if ( uplo[iuplo] == MagmaLower ) {
+                // load & save lower trapezoid (with diagonal)
+                if ( M > N ) {
+                    gbytes = 2. * sizeof(magmaDoubleComplex) * (1.*M*N - 0.5*N*(N-1)) / 1e9;
+                } else {
+                    gbytes = 2. * sizeof(magmaDoubleComplex) * 0.5*M*(M+1) / 1e9;
+                }
+            }
+            else if ( uplo[iuplo] == MagmaUpper ) {
+                // load & save upper trapezoid (with diagonal)
+                if ( N > M ) {
+                    gbytes = 2. * sizeof(magmaDoubleComplex) * (1.*M*N - 0.5*M*(M-1)) / 1e9;
+                } else {
+                    gbytes = 2. * sizeof(magmaDoubleComplex) * 0.5*N*(N+1) / 1e9;
+                }
             }
             else {
-                // read & write entire matrix
-                gbytes = sizeof(magmaDoubleComplex) * 2.*M*N / 1e9;
+                // load & save entire matrix
+                gbytes = 2. * sizeof(magmaDoubleComplex) * 1.*M*N / 1e9;
             }
     
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, size   );

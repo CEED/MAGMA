@@ -44,8 +44,8 @@ int main( int argc, char** argv)
 
     magma_uplo_t uplo[] = { MagmaLower, MagmaUpper, MagmaFull };
 
-    printf("uplo      M     N  offdiag  diag    CPU GByte/s (ms)    GPU GByte/s (ms)   check\n");
-    printf("================================================================================\n");
+    printf("uplo      M     N    offdiag    diag    CPU GByte/s (ms)    GPU GByte/s (ms)   check\n");
+    printf("====================================================================================\n");
     for( int iuplo = 0; iuplo < 3; ++iuplo ) {
       for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -66,15 +66,27 @@ int main( int argc, char** argv)
             lda    = M;
             ldda   = magma_roundup( M, opts.align );
             size   = lda*N;
-            if ( uplo[iuplo] == MagmaLower || uplo[iuplo] == MagmaUpper ) {
-                // save triangle (with diagonal)
-                // TODO wrong for trapezoid
-                gbytes = sizeof(magmaDoubleComplex) * 0.5*N*(N+1) / 1e9;
+            if ( uplo[iuplo] == MagmaLower ) {
+                // save lower trapezoid (with diagonal)
+                if ( M > N ) {
+                    gbytes = sizeof(magmaDoubleComplex) * (1.*M*N - 0.5*N*(N-1)) / 1e9;
+                } else {
+                    gbytes = sizeof(magmaDoubleComplex) * 0.5*M*(M+1) / 1e9;
+                }
+            }
+            else if ( uplo[iuplo] == MagmaUpper ) {
+                // save upper trapezoid (with diagonal)
+                if ( N > M ) {
+                    gbytes = sizeof(magmaDoubleComplex) * (1.*M*N - 0.5*M*(M-1)) / 1e9;
+                } else {
+                    gbytes = sizeof(magmaDoubleComplex) * 0.5*N*(N+1) / 1e9;
+                }
             }
             else {
                 // save entire matrix
                 gbytes = sizeof(magmaDoubleComplex) * 1.*M*N / 1e9;
             }
+            printf( "bytes %.2f  ", gbytes*1e9 );
     
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, size   );
             TESTING_MALLOC_CPU( h_R, magmaDoubleComplex, size   );
@@ -125,7 +137,7 @@ int main( int argc, char** argv)
 
             bool okay = (error == 0);
             status += ! okay;
-            printf("%5s %5d %5d  %7.2f  %4.2f   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+            printf("%5s %5d %5d  %9.4f  %6.4f   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
                    lapack_uplo_const( uplo[iuplo] ), (int) M, (int) N,
                    real(offdiag), real(diag),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
