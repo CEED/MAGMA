@@ -86,7 +86,6 @@ int main( int argc, char** argv)
                 // save entire matrix
                 gbytes = sizeof(magmaDoubleComplex) * 1.*M*N / 1e9;
             }
-            printf( "bytes %.2f  ", gbytes*1e9 );
     
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, size   );
             TESTING_MALLOC_CPU( h_R, magmaDoubleComplex, size   );

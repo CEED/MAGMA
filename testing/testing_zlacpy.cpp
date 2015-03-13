@@ -79,7 +79,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( h_R, magmaDoubleComplex, size   );
             
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N );
-            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, ldda*N );
+            TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*N );
             
             /* Initialize the matrix */
             for( int j = 0; j < N; ++j ) {
@@ -114,15 +114,15 @@ int main( int argc, char** argv)
             
             if ( opts.verbose ) {
                 printf( "A= " );  magma_zprint(     M, N, h_A, lda );
-                printf( "B= " );  magma_zprint(     M, N, h_B, lda );
+                printf( "B= " );  magma_zprint(     M, N, h_B, ldb );
                 printf( "dA=" );  magma_zprint_gpu( M, N, d_A, ldda );
-                printf( "dB=" );  magma_zprint_gpu( M, N, d_B, ldda );
+                printf( "dB=" );  magma_zprint_gpu( M, N, d_B, lddb );
             }
             
             /* =====================================================================
                Check the result
                =================================================================== */
-            magma_zgetmatrix( M, N, d_B, ldda, h_R, lda );
+            magma_zgetmatrix( M, N, d_B, lddb, h_R, lda );
             
             blasf77_zaxpy(&size, &c_neg_one, h_B, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &M, &N, h_R, &lda, work);
