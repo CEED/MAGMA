@@ -31,7 +31,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cpu_perf, cpu_time;
-    double          magma_error, magma_err, Ynorm, work[1];
+    double          magma_error, magma_err,  work[1];
     magma_int_t M, N, Xm, Ym, lda, ldda;
     magma_int_t sizeA, sizeX, sizeY;
     magma_int_t incx = 1;
@@ -153,10 +153,12 @@ int main( int argc, char** argv)
                 for(int s=0; s<batchCount; s++)
                 {
 
-                    Ynorm = lapackf77_zlange( "M", &M, &ione, h_Y + s*Ym, &incy, work );
+                    double Anorm = lapackf77_zlange( "F", &M, &N, h_A + s * lda * N, &lda, work );
+                    double Xnorm = lapackf77_zlange( "F", &Xm, &ione, h_X + s * Xm , &Xm, work );
+                                                    
+                    blasf77_zaxpy( &Ym, &c_neg_one, h_Y + s * Ym, &incy, h_Ymagma + s * Ym, &incy );
+                    magma_err = lapackf77_zlange( "F", &Ym, &ione, h_Ymagma + s * Ym, &Ym, work ) / (Anorm * Xnorm);
 
-                    blasf77_zaxpy( &Ym, &c_neg_one, h_Y + s*Ym, &ione, h_Ymagma + s*Ym, &ione );
-                    magma_err = lapackf77_zlange( "M", &M, &ione, h_Ymagma + s*Ym, &incy, work ) / Ynorm; 
 
                     if ( isnan(magma_err) || isinf(magma_err) ) {
                       magma_error = magma_err;
