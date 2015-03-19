@@ -137,9 +137,13 @@ ZSRC += \
 	zhetrf.cpp		\
 	zhetrf_nopiv.cpp	\
 	zhetrf_nopiv_cpu.cpp	\
+	zsytrf_nopiv_cpu.cpp	\
 	zhetrf_nopiv_gpu.cpp	\
+	zsytrf_nopiv_gpu.cpp	\
 	zhetrs_nopiv_gpu.cpp	\
+	zsytrs_nopiv_gpu.cpp	\
 	zhesv_nopiv_gpu.cpp	\
+	zsysv_nopiv_gpu.cpp	\
 	zlahef_gpu.cpp		\
 
 # ----------

@@ -171,6 +171,7 @@ lapack = [
     ('sgeqrs',         'dgeqrs',         'cgeqrs',         'zgeqrs'          ),
     ('sgeqrt',         'dgeqrt',         'cgeqrt',         'zgeqrt'          ),
     ('sgerbt',         'dgerbt',         'cgerbt',         'zgerbt'          ),
+    ('ssyrbt',         'dsyrbt',         'cherbt',         'zherbt'          ),
     ('sgerfs',         'dgerfs',         'cgerfs',         'zgerfs'          ),
     ('sgesdd',         'dgesdd',         'cgesdd',         'zgesdd'          ),
     ('sgessm',         'dgessm',         'cgessm',         'zgessm'          ),
@@ -279,6 +280,11 @@ lapack = [
     ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
     ('ssytf2',         'dsytf2',         'chetf2',         'zhetf2'          ),
     ('ssytrs',         'dsytrs',         'chetrs',         'zhetrs'          ),
+    ('ssysv',          'dsysv',          'chesv',          'zhesv'           ),
+    ('ssytrf',         'dsytrf',         'csytrf',         'zsytrf'          ),
+    ('ssytf2',         'dsytf2',         'csytf2',         'zsytf2'          ),
+    ('ssytrs',         'dsytrs',         'csytrs',         'zsytrs'          ),
+    ('ssysv',          'dsysv',          'csysv',          'zsysv'           ),
     ('strevc',         'dtrevc',         'ctrevc',         'ztrevc'          ),
     ('strsmpl',        'dtrsmpl',        'ctrsmpl',        'ztrsmpl'         ),
     ('strtri',         'dtrtri',         'ctrtri',         'ztrtri'          ),
@@ -295,21 +301,21 @@ subs = {
   'mixed' : [
     # ----- Special line indicating column types
     ['ds',                        'zc'                      ],
-    
+
     # ----- special cases
     ('dcopy',                     'zcopy'                   ),  # before zc
-    
+
     # ----- Mixed precision prefix
     # TODO drop these two -- they are way too general
     ('DS',                        'ZC'                      ),
     ('ds',                        'zc'                      ),
-    
+
     # ----- Preprocessor
     ('#define PRECISION_d',       '#define PRECISION_z'     ),
     ('#define PRECISION_s',       '#define PRECISION_c'     ),
     ('#undef PRECISION_d',        '#undef PRECISION_z'      ),
     ('#undef PRECISION_s',        '#undef PRECISION_c'      ),
-    
+
     # ----- Data types
     ('double',                    'double2'                 ),
     ('float',                     'float2'                  ),
@@ -326,14 +332,14 @@ subs = {
     ('DOUBLE PRECISION',          'COMPLEX_16'              ),
     ('SINGLE PRECISION',          'COMPLEX'                 ),
     ('real',                      'complex'                 ),
-    
+
     # ----- Text
     ('symmetric',                 'hermitian',              ),
     ('symmetric',                 'Hermitian',              ),
-    
+
     # ----- CBLAS
     ('',                          'CBLAS_SADDR'             ),
-    
+
     # ----- Complex numbers
     ('(double)',                  'cuComplexFloatToDouble'  ),
     ('(float)',                   'cuComplexDoubleToFloat'  ),
@@ -344,28 +350,28 @@ subs = {
     ('',                          'cuConj'                  ),
     ('abs',                       'cuCabs'                  ),
     ('absf',                      'cuCabsf'                 ),
-    
+
     # ----- PLASMA / MAGMA
     ('magma_sdgetrs',             'magma_czgetrs'           ),
-    
+
     # ----- Constants
     # see note in "normal" section about ConjTrans
     #('CblasTrans',                'CblasConjTrans'          ),
     #('MagmaTrans',                'MagmaConjTrans'          ),
     ('MagmaTrans',                 'Magma_ConjTrans'         ),
-    
+
     ]
     + blas_mixed             # lowercase
     + upper( blas_mixed )    # uppercase
     + title( blas_mixed )    # Titlecase, for cublas
     + [
-    
+
     # ----- Sparse Stuff
     ('dspgmres',                  'zcpgmres'                ),
     ('dspbicgstab',               'zcpbicgstab'             ),
     ('dsir',                      'zcir'                    ),
     ('dspir',                     'zcpir'                   ),
-    
+
     # ----- Prefixes
     ('blasf77_d',                 'blasf77_z'               ),
     ('blasf77_s',                 'blasf77_c'               ),
@@ -385,18 +391,18 @@ subs = {
     ('magma_get_d',               'magma_get_z'             ),
     ('magma_get_s',               'magma_get_c'             ),
     ('magmasparse_ds',            'magmasparse_zc'          ),
-    
+
     # magma_ceildiv -> magma_seildiv, so revert
     ('magma_ceildiv',             'magma_seildiv'           ),
   ],
-  
+
   # ------------------------------------------------------------
   # replacements applied to most files.
   'normal' : [
     # ----- Special line indicating column types
     # old python (2.4) requires this line to be list [] rather than tuple () to use index() function.
     ['s',              'd',              'c',              'z'               ],
-    
+
     # ----- Preprocessor
     ('#define PRECISION_s', '#define PRECISION_d', '#define PRECISION_c', '#define PRECISION_z' ),
     ('#undef PRECISION_s',  '#undef PRECISION_d',  '#undef PRECISION_c',  '#undef PRECISION_z'  ),
@@ -404,7 +410,7 @@ subs = {
     ('#undef REAL',         '#undef REAL',         '#undef COMPLEX',      '#undef COMPLEX'      ),
     ('#define SINGLE',      '#define DOUBLE',      '#define SINGLE',      '#define DOUBLE'      ),
     ('#undef SINGLE',       '#undef DOUBLE',       '#undef SINGLE',       '#undef DOUBLE'       ),
-    
+
     # ----- Data types
     ('REAL',                'DOUBLE PRECISION',    'REAL',                'DOUBLE PRECISION'    ),
     ('real',                'double precision',    'real',                'double precision'    ),  # before double
@@ -425,15 +431,15 @@ subs = {
     ('real',                'real',                'complex',             'complex'             ),
     ('float',               'double',              'float2',              'double2'             ),
     ('float',               'double',              'float',               'double'              ),
-    
+
     # ----- Text
     ('symmetric',      'symmetric',      'hermitian',      'hermitian'       ),
     ('symmetric',      'symmetric',      'Hermitian',      'Hermitian'       ),
     ('%f',             '%lf',            '%f',             '%lf'             ),  # for scanf
-    
+
     # ----- CBLAS
     ('',               '',               'CBLAS_SADDR',    'CBLAS_SADDR'     ),
-    
+
     # ----- Complex numbers
     # \b regexp here avoids conjugate -> conjfugate, and fabs -> fabsf -> fabsff.
     # The \b is deleted from replacement strings.
@@ -444,7 +450,7 @@ subs = {
     ('',               '',               'cuCimagf',       'cuCimag'         ),
     ('',               '',               'cuConjf',        'cuConj'          ),
     ('fabsf',         r'\bfabs\b',       'cuCabsf',        'cuCabs'          ),
-    
+
     # ----- PLASMA / MAGMA, alphabetic order
     ('bsy2trc',        'bsy2trc',        'bhe2trc',        'bhe2trc'         ),
     ('magma_ssqrt',    'magma_dsqrt',    'magma_ssqrt',    'magma_dsqrt'     ),
@@ -484,17 +490,17 @@ subs = {
     ('STRANSPOSE',     'DTRANSPOSE',     'CTRANSPOSE',     'ZTRANSPOSE'      ),
     ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
     ('szero',          'dzero',          'czero',          'zzero'           ),
-    
+
     # ----- Constants
     # Do not convert ConjTrans to Trans, since in most cases ConjTrans
     # must be a valid option to real-precision function.
     # E.g., dgemm( ConjTrans, ConjTrans, ... ) is valid.
-    # Only for zlarfb, zun*, zher*k, convert it using special Magma_ConjTrans alias    
+    # Only for zlarfb, zun*, zher*k, convert it using special Magma_ConjTrans alias
     #('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
     #('MagmaTrans',     'MagmaTrans',     'MagmaConjTrans', 'MagmaConjTrans'  ),
     #('PlasmaTrans',    'PlasmaTrans',    'PlasmaConjTrans','PlasmaConjTrans' ),
     ('MagmaTrans',     'MagmaTrans',     'Magma_ConjTrans', 'Magma_ConjTrans'  ),
-    
+
     # ----- special cases for d -> s that need complex (e.g., testing_dgeev)
     # c/z precisions are effectively disabled for these rules
     ('caxpy',             'zaxpy',              'cccccccc', 'zzzzzzzz' ),
@@ -503,7 +509,7 @@ subs = {
     ('magmaFloatComplex', 'magmaDoubleComplex', 'cccccccc', 'zzzzzzzz' ),
     ('MAGMA_C',           'MAGMA_Z',            'cccccccc', 'zzzzzzzz' ),
     ('scnrm2',            'dznrm2',             'cccccccc', 'zzzzzzzz' ),
-    
+
     ]
     + title( blas )    # Titlecase, for cublas, before lowercase (e.g., for Zdrot)
     + blas             # lowercase
@@ -511,7 +517,7 @@ subs = {
     + lapack           # lowercase
     + upper( lapack )  # uppercase
     + [
-    
+
     # ----- SPARSE BLAS
     ('cusparseS',      'cusparseD',      'cusparseC',      'cusparseZ'       ),
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
@@ -580,7 +586,7 @@ subs = {
 
     # ----- SPARSE runfiles
     ('run_s',          'run_d',          'run_c',          'run_z'           ),
- 
+
 
     # ----- Xeon Phi (MIC) specific, alphabetic order unless otherwise required
     ('SREG_WIDTH',                  'DREG_WIDTH',                  'CREG_WIDTH',                  'ZREG_WIDTH' ),
@@ -655,7 +661,7 @@ subs = {
     ('Workspace_s',    'Workspace_d',    'Workspace_c',    'Workspace_z'     ),
     ('workspace_s',    'workspace_d',    'workspace_c',    'workspace_z'     ),
     ('QUARK_Insert_Task_s', 'QUARK_Insert_Task_d', 'QUARK_Insert_Task_c', 'QUARK_Insert_Task_z' ),
-    
+
     # magma_[get_]d -> magma_[get_]s, so revert _sevice to _device
     ('_device',        '_sevice',        '_device',        '_sevice'         ),
     ('magma_diag',     'magma_siag',     'magma_diag',     'magma_siag'      ),
@@ -663,13 +669,13 @@ subs = {
     ('lapack_diag',    'lapack_siag',    'lapack_diag',    'lapack_siag'     ),
     ('lapack_direct',  'lapack_sirect',  'lapack_direct',  'lapack_sirect'   ),
   ],
-  
+
   # ------------------------------------------------------------
   # replacements applied for profiling with tau
   'tracing' :[
     # ----- Special line indicating column types
     ['plain', 'tau'],
-    
+
     # ----- Replacements
     ('(\w+\*?)\s+(\w+)\s*\(([a-z* ,A-Z_0-9]*)\)\s*{\s+(.*)\s*#pragma tracing_start\s+(.*)\s+#pragma tracing_end\s+(.*)\s+}',
       r'\1 \2(\3){\n\4tau("\2");\5tau();\6}'),

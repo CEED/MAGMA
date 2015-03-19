@@ -48,3 +48,38 @@ void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
         }
     }
 }
+
+#define COMPLEX 
+#ifdef COMPLEX
+// --------------------
+// Make a matrix symmetric
+// Makes diagonal real.
+// Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
+extern "C"
+void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
+{
+    magma_int_t i, j;
+    for( i=0; i<N; ++i ) {
+        for( j=0; j<i; ++j ) {
+            A(j,i) =  A(i,j) ;
+        }
+    }
+}
+
+
+// --------------------
+// Make a matrix symmetric positive definite.
+// Increases diagonal by N, and makes it real.
+// Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
+extern "C"
+void magma_zmake_hpd_sym( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
+{
+    magma_int_t i, j;
+    for( i=0; i<N; ++i ) {
+        A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ) + N, MAGMA_Z_IMAG( A(i,i) ) );
+        for( j=0; j<i; ++j ) {
+            A(j,i) = A(i,j) ;
+        }
+    }
+}
+#endif

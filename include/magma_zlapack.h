@@ -89,10 +89,10 @@ extern "C" {
 #define lapackf77_zhegs2   FORTRAN_NAME( zhegs2, ZHEGS2 )
 #define lapackf77_zhegst   FORTRAN_NAME( zhegst, ZHEGST )
 #define lapackf77_zhegvd   FORTRAN_NAME( zhegvd, ZHEGVD )
-#define lapackf77_zhesv    FORTRAN_NAME( zhesv,  ZHESV  )
 #define lapackf77_zhetd2   FORTRAN_NAME( zhetd2, ZHETD2 )
 #define lapackf77_zhetrd   FORTRAN_NAME( zhetrd, ZHETRD )
 #define lapackf77_zhetrf   FORTRAN_NAME( zhetrf, ZHETRF )
+#define lapackf77_zhesv    FORTRAN_NAME( zhesv,  ZHESV )
 #define lapackf77_zhseqr   FORTRAN_NAME( zhseqr, ZHSEQR )
 #define lapackf77_zlabrd   FORTRAN_NAME( zlabrd, ZLABRD )
 #define lapackf77_zlacgv   FORTRAN_NAME( zlacgv, ZLACGV )
@@ -131,6 +131,8 @@ extern "C" {
 #define lapackf77_zstemr   FORTRAN_NAME( zstemr, ZSTEMR )
 #define lapackf77_zsteqr   FORTRAN_NAME( zsteqr, ZSTEQR )
 #define lapackf77_zsymv    FORTRAN_NAME( zsymv,  ZSYMV  )
+#define lapackf77_zsyr     FORTRAN_NAME( zsyr,   ZSYR   )
+#define lapackf77_zsysv    FORTRAN_NAME( zsysv,  ZSYSV  )
 #define lapackf77_ztrevc   FORTRAN_NAME( ztrevc, ZTREVC )
 #define lapackf77_ztrevc3  FORTRAN_NAME( ztrevc3, ZTREVC3 )
 #define lapackf77_ztrtri   FORTRAN_NAME( ztrtri, ZTRTRI )
@@ -888,6 +890,20 @@ void   lapackf77_zsymv(  const char *uplo,
                          const magmaDoubleComplex *x, const magma_int_t *incx,
                          const magmaDoubleComplex *beta,
                                magmaDoubleComplex *y, const magma_int_t *incy );
+
+void lapackf77_zsyr(     const char *uplo,
+                         const magma_int_t *n,
+                         const magmaDoubleComplex *alpha,
+                         const magmaDoubleComplex *x, const magma_int_t *incx,
+                               magmaDoubleComplex *A, const magma_int_t *lda );
+
+void   lapackf77_zsysv(  const char *uplo, 
+                         const magma_int_t *n, const magma_int_t *nrhs,
+                         magmaDoubleComplex *A, const magma_int_t *lda, magma_int_t *ipiv,
+                         magmaDoubleComplex *B, const magma_int_t *ldb,
+                         magmaDoubleComplex *work, const magma_int_t *lwork,
+                         magma_int_t *info );
+
 #endif
 
 void   lapackf77_ztrevc( const char *side, const char *howmny,
