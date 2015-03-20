@@ -25,7 +25,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a regular matrix A.
     This is a GPU implementation of the Biconjugate Gradient Stabelized method.
 
     Arguments
@@ -105,13 +105,6 @@ magma_zbicgstab(
     if ( nom < r0 ) {
         magmablasSetKernelStream( orig_queue );
         return MAGMA_SUCCESS;
-    }
-    // check positive definite  
-    if (den <= 0.0) {
-        printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
-        magmablasSetKernelStream( orig_queue );
-        return MAGMA_NONSPD;
-        solver_par->info = MAGMA_NONSPD;;
     }
 
     //Chronometry
