@@ -145,13 +145,13 @@ int main(  int argc, char** argv )
         end = magma_sync_wtime( queue );
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
-        magma_z_mfree(&dA, queue );
+        magma_zmfree(&dA, queue );
         magma_zvtransfer( dy, &hrefvec , Magma_DEV, Magma_CPU, queue );
 
         // convert to ELL and copy to GPU
-        magma_z_mconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
+        magma_zmconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
         magma_zmtransfer( hA_ELL, &dA_ELL, Magma_CPU, Magma_DEV, queue );
-        magma_z_mfree(&hA_ELL, queue );
+        magma_zmfree(&hA_ELL, queue );
         magma_z_vfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
         // SpMV on GPU (ELL)
@@ -161,7 +161,7 @@ int main(  int argc, char** argv )
         end = magma_sync_wtime( queue );
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard ELL).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
-        magma_z_mfree(&dA_ELL, queue );
+        magma_zmfree(&dA_ELL, queue );
         magma_zvtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
@@ -173,9 +173,9 @@ int main(  int argc, char** argv )
         magma_z_vfree( &hcheck, queue );
 
         // convert to SELLP and copy to GPU
-        magma_z_mconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
+        magma_zmconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
         magma_zmtransfer( hA_SELLP, &dA_SELLP, Magma_CPU, Magma_DEV, queue );
-        magma_z_mfree(&hA_SELLP, queue );
+        magma_zmfree(&hA_SELLP, queue );
         magma_z_vfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
         // SpMV on GPU (SELLP)
@@ -197,7 +197,7 @@ int main(  int argc, char** argv )
             printf("# tester spmv SELL-P:  failed\n");
         magma_z_vfree( &hcheck, queue );
 
-        magma_z_mfree(&dA_SELLP, queue );
+        magma_zmfree(&dA_SELLP, queue );
 
 
         // SpMV on GPU (CUSPARSE - CSR)
@@ -281,7 +281,7 @@ int main(  int argc, char** argv )
         cusparseDestroyHybMat( hybA );
         cusparseDestroy( cusparseHandle );
 
-        magma_z_mfree(&dA, queue );
+        magma_zmfree(&dA, queue );
 
 
 
@@ -289,7 +289,7 @@ int main(  int argc, char** argv )
 
 
         // free CPU memory
-        magma_z_mfree(&hA, queue );
+        magma_zmfree(&hA, queue );
         magma_z_vfree(&hx, queue );
         magma_z_vfree(&hy, queue );
         magma_z_vfree(&hrefvec, queue );

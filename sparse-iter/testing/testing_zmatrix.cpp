@@ -65,26 +65,26 @@ int main(  int argc, char** argv )
         magma_zmcsrcompressor( &Z, queue );
         
         // convert to be non-symmetric
-        magma_z_mconvert( Z, &A, Magma_CSR, Magma_CSRL, queue );
+        magma_zmconvert( Z, &A, Magma_CSR, Magma_CSRL, queue );
         
         // transpose
-        magma_z_mtranspose( A, &AT, queue );
+        magma_zmtranspose( A, &AT, queue );
 
         // convert, copy back and forth to check everything works
 
-        magma_z_mconvert( AT, &B, Magma_CSR, zopts.output_format, queue );
-        magma_z_mfree(&AT, queue );
+        magma_zmconvert( AT, &B, Magma_CSR, zopts.output_format, queue );
+        magma_zmfree(&AT, queue );
         magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
-        magma_z_mfree(&B, queue );
+        magma_zmfree(&B, queue );
         magma_zmcsrcompressor_gpu( &B_d, queue );
         magma_zmtransfer( B_d, &B, Magma_DEV, Magma_CPU, queue );
-        magma_z_mfree(&B_d, queue );
-        magma_z_mconvert( B, &AT, zopts.output_format,Magma_CSR, queue );      
-        magma_z_mfree(&B, queue );
+        magma_zmfree(&B_d, queue );
+        magma_zmconvert( B, &AT, zopts.output_format,Magma_CSR, queue );      
+        magma_zmfree(&B, queue );
 
         // transpose back
-        magma_z_mtranspose( AT, &A2, queue );
-        magma_z_mfree(&AT, queue );
+        magma_zmtranspose( AT, &A2, queue );
+        magma_zmfree(&AT, queue );
         magma_zmdiff( A, A2, &res, queue);
         printf("# ||A-B||_F = %8.2e\n", res);
         if ( res < .000001 )
@@ -92,9 +92,9 @@ int main(  int argc, char** argv )
         else
             printf("# tester:  failed\n");
 
-        magma_z_mfree(&A, queue ); 
-        magma_z_mfree(&A2, queue );
-        magma_z_mfree(&Z, queue ); 
+        magma_zmfree(&A, queue ); 
+        magma_zmfree(&A2, queue );
+        magma_zmfree(&Z, queue ); 
 
         i++;
     }

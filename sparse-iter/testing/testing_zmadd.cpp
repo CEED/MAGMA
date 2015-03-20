@@ -69,15 +69,15 @@ int main(  int argc, char** argv )
 
     magma_zcuspaxpy( &one, A_d, &one, B_d, &C_d, queue );
 
-    magma_z_mfree(&B_d, queue );
+    magma_zmfree(&B_d, queue );
 
     magma_zcuspaxpy( &mone, A_d, &one, C_d, &B_d, queue );
     
     magma_zmtransfer( B_d, &B2, Magma_DEV, Magma_CPU, queue );
 
-    magma_z_mfree(&A_d, queue );
-    magma_z_mfree(&B_d, queue );
-    magma_z_mfree(&C_d, queue );
+    magma_zmfree(&A_d, queue );
+    magma_zmfree(&B_d, queue );
+    magma_zmfree(&C_d, queue );
 
     // check difference
     magma_zmdiff( B, B2, &res, queue );
@@ -87,9 +87,9 @@ int main(  int argc, char** argv )
     else
         printf("# tester matrix add:  failed\n");
 
-    magma_z_mfree(&A, queue ); 
-    magma_z_mfree(&B, queue ); 
-    magma_z_mfree(&B2, queue ); 
+    magma_zmfree(&A, queue ); 
+    magma_zmfree(&B, queue ); 
+    magma_zmfree(&B2, queue ); 
 
     magma_queue_destroy( queue );
     TESTING_FINALIZE();

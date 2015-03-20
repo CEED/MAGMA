@@ -83,9 +83,9 @@ int main(  int argc, char** argv )
         printf("res: %f\n", res);
 
 
-        magma_z_mfree(&B_d, queue );
+        magma_zmfree(&B_d, queue );
 
-        magma_z_mfree(&A, queue ); 
+        magma_zmfree(&A, queue ); 
         
         magma_z_vfree(&x, queue );
         magma_z_vfree(&b, queue );

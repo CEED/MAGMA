@@ -73,10 +73,10 @@ int main(  int argc, char** argv )
         magma_zprint_matrix( A2, queue );
         
         //visualize
-        magma_z_mconvert(A2, &A4, Magma_CSR, Magma_CSRL, queue );
+        magma_zmconvert(A2, &A4, Magma_CSR, Magma_CSRL, queue );
         printf("A4:\n");
         magma_zprint_matrix( A4, queue );
-        magma_z_mconvert(A4, &A5, Magma_CSR, Magma_ELL, queue );
+        magma_zmconvert(A4, &A5, Magma_CSR, Magma_ELL, queue );
         printf("A5:\n");
         magma_zprint_matrix( A5, queue );
 
@@ -101,10 +101,10 @@ int main(  int argc, char** argv )
         else
             printf("# tester matrix interface:  failed\n");
 
-        magma_z_mfree(&A, queue ); 
-        magma_z_mfree(&A2, queue ); 
-        magma_z_mfree(&A4, queue ); 
-        magma_z_mfree(&A5, queue ); 
+        magma_zmfree(&A, queue ); 
+        magma_zmfree(&A2, queue ); 
+        magma_zmfree(&A4, queue ); 
+        magma_zmfree(&A5, queue ); 
 
 
         i++;

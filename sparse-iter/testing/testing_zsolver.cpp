@@ -77,7 +77,7 @@ int main(  int argc, char** argv )
         // scale matrix
         magma_zmscale( &A, zopts.scaling, queue );
 
-        magma_z_mconvert( A, &B, Magma_CSR, zopts.output_format, queue );
+        magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue );
         magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
 
         // vectors and initial guess
@@ -91,9 +91,9 @@ int main(  int argc, char** argv )
 
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
 
-        magma_z_mfree(&B_d, queue );
-        magma_z_mfree(&B, queue );
-        magma_z_mfree(&A, queue ); 
+        magma_zmfree(&B_d, queue );
+        magma_zmfree(&B, queue );
+        magma_zmfree(&A, queue ); 
         magma_z_vfree(&x, queue );
         magma_z_vfree(&b, queue );
 

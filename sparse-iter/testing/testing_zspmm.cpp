@@ -182,12 +182,12 @@ int main(  int argc, char** argv )
                                         (end-start)/10, FLOPS*10.*n/(end-start) );
 
         magma_zvtransfer( dy, &hrefvec , Magma_DEV, Magma_CPU, queue );
-        magma_z_mfree(&dA, queue );
+        magma_zmfree(&dA, queue );
 
         // convert to ELL and copy to GPU
-        magma_z_mconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
+        magma_zmconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
         magma_zmtransfer( hA_ELL, &dA_ELL, Magma_CPU, Magma_DEV, queue );
-        magma_z_mfree(&hA_ELL, queue );
+        magma_zmfree(&hA_ELL, queue );
         magma_z_vfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
         // SpMV on GPU (ELL)
@@ -209,13 +209,13 @@ int main(  int argc, char** argv )
             printf("# tester spmm ELL:  failed\n");
         magma_z_vfree( &hcheck, queue );
 
-        magma_z_mfree(&dA_ELL, queue );
+        magma_zmfree(&dA_ELL, queue );
 
 
         // convert to SELLP and copy to GPU
-        magma_z_mconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
+        magma_zmconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
         magma_zmtransfer( hA_SELLP, &dA_SELLP, Magma_CPU, Magma_DEV, queue );
-        magma_z_mfree(&hA_SELLP, queue );
+        magma_zmfree(&hA_SELLP, queue );
         magma_z_vfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
         // SpMV on GPU (SELLP)
@@ -236,7 +236,7 @@ int main(  int argc, char** argv )
         else
             printf("# tester spmm SELL-P:  failed\n");
         magma_z_vfree( &hcheck, queue );
-        magma_z_mfree(&dA_SELLP, queue );
+        magma_zmfree(&dA_SELLP, queue );
 
 
 
@@ -294,7 +294,7 @@ int main(  int argc, char** argv )
 
 
         // free CPU memory
-        magma_z_mfree(&hA, queue );
+        magma_zmfree(&hA, queue );
         magma_z_vfree(&hx, queue );
         magma_z_vfree(&hy, queue );
         magma_z_vfree(&hrefvec, queue );
