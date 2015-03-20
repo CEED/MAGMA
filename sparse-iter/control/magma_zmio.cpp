@@ -816,9 +816,9 @@ magma_zprint_matrix(
             // visualize only small matrices like dense
             if ( A.num_rows < 11 && A.num_cols < 11 ) {
                 magma_z_sparse_matrix C;
-                magma_z_mconvert( A, &C, A.storage_type, Magma_DENSE, queue );
+                magma_zmconvert( A, &C, A.storage_type, Magma_DENSE, queue );
                 magma_zprint_matrix(  C, queue );
-                magma_z_mfree( &C, queue );
+                magma_zmfree( &C, queue );
             }
             // otherwise visualize only coners
             else {
@@ -892,16 +892,16 @@ magma_zprint_matrix(
         }
         else {
             magma_z_sparse_matrix C;
-            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR, queue );
+            magma_zmconvert( A, &C, A.storage_type, Magma_CSR, queue );
             magma_zprint_matrix(  C, queue );
-            magma_z_mfree( &C, queue );
+            magma_zmfree( &C, queue );
         }
     }
     else {
         magma_z_sparse_matrix C;
         magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue );
         magma_zprint_matrix(  C, queue );
-        magma_z_mfree( &C, queue );
+        magma_zmfree( &C, queue );
     }
 
     return MAGMA_SUCCESS;
@@ -1203,7 +1203,7 @@ magma_z_csr_mtx(
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
         magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
-        magma_z_mfree( &B, queue );
+        magma_zmfree( &B, queue );
         //printf("done.\n");
     }
     return MAGMA_SUCCESS;
@@ -1452,7 +1452,7 @@ magma_z_csr_mtxsymm(
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
         magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
-        magma_z_mfree( &B, queue );
+        magma_zmfree( &B, queue );
         //printf("done.\n");
     }
     return MAGMA_SUCCESS;

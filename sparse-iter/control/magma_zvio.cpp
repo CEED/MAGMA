@@ -195,7 +195,7 @@ magma_zvspread(
     magma_int_t entry=0;
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
     magma_z_csr_mtx( &A,  filename, queue  ); 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE, queue );
+    magma_zmconvert( A, &B, Magma_CSR, Magma_DENSE, queue );
     magma_zvinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO, queue );
     x->major = MagmaRowMajor;
     for(magma_int_t i=0; i<A.num_cols; i++) {
@@ -207,8 +207,8 @@ magma_zvspread(
     x->num_rows = A.num_rows;
     x->num_cols = A.num_cols;
 
-    magma_z_mfree( &A, queue );
-    magma_z_mfree( &B, queue );
+    magma_zmfree( &A, queue );
+    magma_zmfree( &B, queue );
 
     return MAGMA_SUCCESS;
 }   

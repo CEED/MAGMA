@@ -85,7 +85,7 @@ magma_zmlumerge(
             stat_cpu += magma_index_malloc_cpu( &A->col, A->nnz );
             stat_cpu += magma_zmalloc_cpu( &A->val, A->nnz );
             if( stat_cpu != 0 ){
-                magma_z_mfree( A, queue );
+                magma_zmfree( A, queue );
                 printf("error: memory allocation.\n");
                 return MAGMA_ERR_HOST_ALLOC;
             }

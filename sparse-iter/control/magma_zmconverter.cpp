@@ -166,7 +166,7 @@ magma_z_csr_compressor(
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_z_mconvert(
+magma_zmconvert(
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B, 
     magma_storage_t old_format, 
@@ -348,7 +348,7 @@ magma_z_mconvert(
             // CSR to COO
             else if ( new_format == Magma_COO ) {
         
-                magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
+                magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
                 B->storage_type = Magma_COO;
         
                 magma_free_cpu( B->row );
@@ -366,7 +366,7 @@ magma_z_mconvert(
             // CSR to CSRCOO
             else if ( new_format == Magma_CSRCOO ) {
     
-                magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
+                magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
                 B->storage_type = Magma_CSRCOO;
     
                 stat_cpu += magma_index_malloc_cpu( &B->rowidx, A.nnz );
@@ -828,7 +828,7 @@ magma_z_mconvert(
             // CSRU/CSRCSCU to CSR
             if ( old_format == Magma_CSRU ) {
     
-                magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
+                magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
     
             }
                     
@@ -877,13 +877,13 @@ magma_z_mconvert(
             // CSRCOO to CSR
             else if ( old_format == Magma_CSRCOO ) {
     
-                magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
+                magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
             }
             
             // CSRCSC to CSR
             else if ( old_format == Magma_COO ) {
                // A.storage_type = Magma_CSR;
-              //  magma_z_mconvert( A, B, Magma_CSR, Magma_CSR, queue );
+              //  magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
             }
                 
             // ELL/ELLPACK to CSR
@@ -1617,21 +1617,21 @@ magma_z_mconvert(
             "Conversion handled by CPU.\n");
             magma_z_sparse_matrix hA, hB;
             magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
-            magma_z_mconvert( hA, &hB, old_format, new_format, queue );
+            magma_zmconvert( hA, &hB, old_format, new_format, queue );
             magma_zmtransfer( hB, B, Magma_CPU, A.memory_location, queue );
-            magma_z_mfree( &hA, queue );
-            magma_z_mfree( &hB, queue );   
+            magma_zmfree( &hA, queue );
+            magma_zmfree( &hB, queue );   
         }
     }
     
 CLEANUP:
     if( stat_cpu != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_HOST_ALLOC;
     }
     if( stat_dev != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }  

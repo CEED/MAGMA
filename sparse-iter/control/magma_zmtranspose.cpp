@@ -196,7 +196,7 @@ z_transpose_csr(
     
     
 extern "C" magma_int_t
-magma_z_mtranspose(
+magma_zmtranspose(
     magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
     magma_queue_t queue )
 {
@@ -325,8 +325,8 @@ magma_z_cucsrtranspose(
         magma_z_cucsrtranspose( A_d, &B_d, queue );
         magma_zmtransfer( B_d, B, Magma_DEV, A.memory_location, queue );
         
-        magma_z_mfree( &A_d, queue );
-        magma_z_mfree( &B_d, queue );
+        magma_zmfree( &A_d, queue );
+        magma_zmfree( &B_d, queue );
         
         return MAGMA_SUCCESS;
                 
@@ -334,22 +334,22 @@ magma_z_cucsrtranspose(
 
         magma_z_sparse_matrix ACSR, BCSR;
         
-        magma_z_mconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
+        magma_zmconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
         magma_z_cucsrtranspose( ACSR, &BCSR, queue );
-        magma_z_mconvert( BCSR, B, Magma_CSR, A.storage_type, queue );
+        magma_zmconvert( BCSR, B, Magma_CSR, A.storage_type, queue );
        
-        magma_z_mfree( &ACSR, queue );
-        magma_z_mfree( &BCSR, queue );
+        magma_zmfree( &ACSR, queue );
+        magma_zmfree( &BCSR, queue );
 
         return MAGMA_SUCCESS;
     }
 CLEANUP:
     if( stat_cpu != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         return MAGMA_ERR_HOST_ALLOC;
     }
     if( stat_dev != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }
     return MAGMA_SUCCESS;

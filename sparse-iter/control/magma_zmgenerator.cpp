@@ -98,7 +98,7 @@ magma_zmgenerator(
     stat_cpu += magma_zmalloc_cpu( &B.val, B.max_nnz_row*n );
     stat_cpu += magma_index_malloc_cpu( &B.col, B.max_nnz_row*n );
     if( stat_cpu != 0 ){
-        magma_z_mfree( &B, queue );
+        magma_zmfree( &B, queue );
         return MAGMA_ERR_HOST_ALLOC;
     }
     
@@ -141,7 +141,7 @@ magma_zmgenerator(
     }  
 
     // converting it to CSR will remove the invalit entries completely
-    magma_z_mconvert( B, A, Magma_ELLPACKT, Magma_CSR, queue );
+    magma_zmconvert( B, A, Magma_ELLPACKT, Magma_CSR, queue );
 
     return MAGMA_SUCCESS;
 }   
@@ -260,8 +260,8 @@ magma_zm_27stencil(
         
     }
     }
-    magma_z_mconvert( hA, A, Magma_CSR, Magma_CSR, queue );
-    magma_z_mfree( &hA, queue );
+    magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue );
+    magma_zmfree( &hA, queue );
 
     return MAGMA_SUCCESS;
 }   
@@ -341,8 +341,8 @@ magma_zm_5stencil(
     }
     }
 
-    magma_z_mconvert( hA, A, Magma_CSR, Magma_CSR, queue );
-    magma_z_mfree( &hA, queue );
+    magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue );
+    magma_zmfree( &hA, queue );
 
     return MAGMA_SUCCESS;
 }   

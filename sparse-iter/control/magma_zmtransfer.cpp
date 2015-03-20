@@ -902,12 +902,12 @@ magma_zmtransfer(
     }
 CLEANUP:
     if( stat_cpu != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_HOST_ALLOC;
     }
     if( stat_dev != 0 ){
-        magma_z_mfree( B, queue );
+        magma_zmfree( B, queue );
         magmablasSetKernelStream( orig_queue );
         return MAGMA_ERR_DEVICE_ALLOC;
     }  

@@ -127,8 +127,8 @@ magma_zcsrsplit(
         stat_cpu += magma_index_malloc_cpu( &R->col, nnz_offd );
         
         if( stat_cpu != 0 ){
-            magma_z_mfree( D, queue );
-            magma_z_mfree( R, queue );
+            magma_zmfree( D, queue );
+            magma_zmfree( R, queue );
             return MAGMA_ERR_HOST_ALLOC;
         }
         
@@ -186,22 +186,22 @@ magma_zcsrsplit(
     else {
         magma_z_sparse_matrix Ah, ACSR, DCSR, RCSR, Dh, Rh;
         magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
-        magma_z_mconvert( Ah, &ACSR, A.storage_type, Magma_CSR, queue );
+        magma_zmconvert( Ah, &ACSR, A.storage_type, Magma_CSR, queue );
 
         magma_zcsrsplit( bsize, ACSR, &DCSR, &RCSR, queue );
 
-        magma_z_mconvert( DCSR, &Dh, Magma_CSR, A.storage_type, queue );
-        magma_z_mconvert( RCSR, &Rh, Magma_CSR, A.storage_type, queue );
+        magma_zmconvert( DCSR, &Dh, Magma_CSR, A.storage_type, queue );
+        magma_zmconvert( RCSR, &Rh, Magma_CSR, A.storage_type, queue );
 
         magma_zmtransfer( Dh, D, Magma_CPU, A.memory_location, queue );
         magma_zmtransfer( Rh, R, Magma_CPU, A.memory_location, queue );
 
-        magma_z_mfree( &Ah, queue );
-        magma_z_mfree( &ACSR, queue );
-        magma_z_mfree( &Dh, queue );
-        magma_z_mfree( &DCSR, queue );
-        magma_z_mfree( &Rh, queue );
-        magma_z_mfree( &RCSR, queue );
+        magma_zmfree( &Ah, queue );
+        magma_zmfree( &ACSR, queue );
+        magma_zmfree( &Dh, queue );
+        magma_zmfree( &DCSR, queue );
+        magma_zmfree( &Rh, queue );
+        magma_zmfree( &RCSR, queue );
 
         return MAGMA_SUCCESS; 
     }

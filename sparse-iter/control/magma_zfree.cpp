@@ -103,7 +103,7 @@ magma_z_vfree(
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_z_mfree(
+magma_zmfree(
     magma_z_sparse_matrix *A,
     magma_queue_t queue )
 {
