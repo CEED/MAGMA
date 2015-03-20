@@ -95,15 +95,28 @@ magma_zcsrsplit(
 
         nnz_diag = nnz_offd = 0;
         // Count the new number of nonzeroes in the two matrices
-        for( i=0; i<A.num_rows; i+=bsize )
-            for( k=i; k<min(A.num_rows,i+bsize); k++ )
-                for( j=A.row[k]; j<A.row[k+1]; j++ )
-                if ( A.col[j] < i )
-                    nnz_offd++;
-                else if ( A.col[j] < i+bsize )
-                    nnz_diag++;
-                else
-                    nnz_offd++;
+        for( i=0; i<A.num_rows; i+=bsize ){
+            for( k=i; k<min(A.num_rows,i+bsize); k++ ){
+                int check = 0;
+                for( j=A.row[k]; j<A.row[k+1]; j++ ){
+                    if ( A.col[j] < i )
+                        nnz_offd++;
+                    else if ( A.col[j] < i+bsize ){
+                        if( A.col[j] == k ){
+                            check = 1;
+                        }
+                        nnz_diag++;
+                    }
+                    else
+                        nnz_offd++;
+                }
+                if( check == 0 ){
+                    printf("error: matrix contains zero on diagonal at (%d,%d).\n", i, i);
+                    magma_zmfree( &A, queue );
+                    exit(-1);
+                }
+            }
+        }
 
         // Allocate memory for the new matrices
         D->storage_type = Magma_CSRD;
