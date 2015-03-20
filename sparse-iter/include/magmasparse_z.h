@@ -147,7 +147,7 @@ magma_zmcsrcompressor_gpu(
     magma_queue_t queue );
 
 magma_int_t 
-magma_z_mtranspose( 
+magma_zmtranspose( 
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B,
     magma_queue_t queue );
@@ -286,7 +286,7 @@ magma_zvtransfer(
     magma_queue_t queue );
 
 magma_int_t 
-magma_z_mconvert(
+magma_zmconvert(
     magma_z_sparse_matrix A, 
     magma_z_sparse_matrix *B, 
     magma_storage_t old_format, 
@@ -338,7 +338,7 @@ magma_zrowentries(
     magma_queue_t queue );
 
 magma_int_t
-magma_z_mfree(
+magma_zmfree(
     magma_z_sparse_matrix *A,
     magma_queue_t queue );
 
