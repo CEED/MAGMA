@@ -163,8 +163,8 @@ magma_zmcsrcompressor_gpu(
         stat_dev += magma_index_malloc( &B.drow, A->num_rows + 1 );
         stat_dev += magma_index_malloc( &B2.drow, A->num_rows + 1 );
         if( stat_dev != 0 ){         
-            magma_z_mfree( &B, queue );
-            magma_z_mfree( &B2, queue ); 
+            magma_zmfree( &B, queue );
+            magma_zmfree( &B2, queue ); 
             return MAGMA_ERR_DEVICE_ALLOC;
         }
         
@@ -185,8 +185,8 @@ magma_zmcsrcompressor_gpu(
         stat_cpu += magma_index_malloc_cpu( &cputmp, 1 );
         if( stat_cpu != 0 ){
             magma_free_cpu( cputmp );
-            magma_z_mfree( &B, queue );
-            magma_z_mfree( &B2, queue );
+            magma_zmfree( &B, queue );
+            magma_zmfree( &B2, queue );
             return MAGMA_ERR_HOST_ALLOC;
         }
         magma_index_getvector( 1, A->row+(A->num_rows), 1, cputmp, 1 );
@@ -196,8 +196,8 @@ magma_zmcsrcompressor_gpu(
         stat_dev += magma_zmalloc( &B.dval, A->nnz );
         stat_dev += magma_index_malloc( &B.dcol, A->nnz );
         if( stat_dev != 0 ){         
-            magma_z_mfree( &B, queue );
-            magma_z_mfree( &B2, queue ); 
+            magma_zmfree( &B, queue );
+            magma_zmfree( &B2, queue ); 
             return MAGMA_ERR_DEVICE_ALLOC;
         }
         
@@ -222,17 +222,17 @@ magma_zmcsrcompressor_gpu(
         magma_z_sparse_matrix dA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
-        magma_z_mconvert( *A, &CSRA, A->storage_type, Magma_CSR, queue );
+        magma_zmconvert( *A, &CSRA, A->storage_type, Magma_CSR, queue );
         magma_zmtransfer( *A, &dA, A->memory_location, Magma_DEV, queue );
 
         magma_zmcsrcompressor_gpu( &dA, queue );
 
-        magma_z_mfree( &dA, queue );
-        magma_z_mfree( A, queue );
+        magma_zmfree( &dA, queue );
+        magma_zmfree( A, queue );
         magma_zmtransfer( dA, &CSRA, Magma_DEV, A_location, queue );
-        magma_z_mconvert( CSRA, A, Magma_CSR, A_storage, queue );
-        magma_z_mfree( &dA, queue );
-        magma_z_mfree( &CSRA, queue );    
+        magma_zmconvert( CSRA, A, Magma_CSR, A_storage, queue );
+        magma_zmfree( &dA, queue );
+        magma_zmfree( &CSRA, queue );    
 
         return MAGMA_SUCCESS; 
     }
