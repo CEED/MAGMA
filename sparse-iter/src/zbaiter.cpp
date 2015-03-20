@@ -70,7 +70,7 @@ magma_zbaiter(
     magma_z_sparse_matrix Ah, ACSR, A_d, D, R, D_d, R_d;
 
     magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
-    magma_z_mconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue );
+    magma_zmconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue );
 
     magma_zmtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV, queue );
 
@@ -107,13 +107,13 @@ magma_zbaiter(
     else
         solver_par->info = MAGMA_DIVERGENCE;
 
-    magma_z_mfree(&D, queue );
-    magma_z_mfree(&R, queue );
-    magma_z_mfree(&D_d, queue );
-    magma_z_mfree(&R_d, queue );
-    magma_z_mfree(&A_d, queue );
-    magma_z_mfree(&ACSR, queue );
-    magma_z_mfree(&Ah, queue );
+    magma_zmfree(&D, queue );
+    magma_zmfree(&R, queue );
+    magma_zmfree(&D_d, queue );
+    magma_zmfree(&R_d, queue );
+    magma_zmfree(&A_d, queue );
+    magma_zmfree(&ACSR, queue );
+    magma_zmfree(&Ah, queue );
 
     return MAGMA_SUCCESS;
 }   /* magma_zbaiter */

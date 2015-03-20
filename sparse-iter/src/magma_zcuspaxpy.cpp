@@ -150,7 +150,7 @@ magma_zcuspaxpy(
             stat_dev += magma_index_malloc( &C.dcol, C.nnz );
             stat_dev += magma_zmalloc( &C.dval, C.nnz );
             if( stat_dev != 0 ){
-                magma_z_mfree( &C, queue );
+                magma_zmfree( &C, queue );
                 return MAGMA_ERR_DEVICE_ALLOC;
             }
 
@@ -172,7 +172,7 @@ magma_zcuspaxpy(
             // end CUSPARSE context //
 
             magma_zmtransfer( C, AB, Magma_DEV, Magma_DEV, queue );
-            magma_z_mfree( &C, queue );
+            magma_zmfree( &C, queue );
 
         return MAGMA_SUCCESS; 
     }

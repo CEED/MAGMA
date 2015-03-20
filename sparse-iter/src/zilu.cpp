@@ -82,13 +82,13 @@ magma_zilusetup(
 
     // memory allocation
     stat = magma_zmalloc( &M->val, size_b*size_b*A.numblocks );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC; }
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_zmfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC; }
     stat = magma_imalloc( &M->row, r_blocks + 1  );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;} 
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_zmfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;} 
     stat = magma_imalloc( &M->col, A.numblocks );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_zmfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
     stat = magma_imalloc_cpu( &M->blockinfo, r_blocks * c_blocks );
-    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_z_mfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
+    if ( stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); magma_zmfree(M, queue); return MAGMA_ERR_DEVICE_ALLOC;}
     // data transfer
     magma_zcopyvector( size_b*size_b*A.numblocks, A.dval, 1, M->val, 1 );
     magma_icopyvector( (r_blocks+1), A.drow, 1, M->row, 1 );

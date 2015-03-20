@@ -93,7 +93,7 @@ magma_zpastixsetup(
 
         if ( A.storage_type != Magma_CSR ) {
             magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
-            magma_z_mconvert( A_h1, &B, A_h1.storage_type, Magma_CSR, queue );
+            magma_zmconvert( A_h1, &B, A_h1.storage_type, Magma_CSR, queue );
         }
         else {
             magma_zmtransfer( A, &B, A.memory_location, Magma_CPU, queue );
@@ -192,10 +192,10 @@ magma_zpastixsetup(
         precond->dparm = dparm;
 
         if ( A.storage_type != Magma_CSR) {
-            magma_z_mfree( &A_h1, queue );
+            magma_zmfree( &A_h1, queue );
         }   
         magma_z_vfree( &b_h, queue );
-        magma_z_mfree( &B, queue );
+        magma_zmfree( &B, queue );
 
     #else
         printf( "error: only double precision supported yet.\n");

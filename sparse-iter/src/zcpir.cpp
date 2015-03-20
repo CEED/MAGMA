@@ -173,7 +173,7 @@ magma_zcpir(
         solver_par->residual = (double)(den);
     }
     
-    magma_z_mfree(&M, queue );
+    magma_zmfree(&M, queue );
     magma_z_vfree(&r, queue );
     magma_z_vfree(&z, queue );
     magma_c_vfree(&rs, queue );
