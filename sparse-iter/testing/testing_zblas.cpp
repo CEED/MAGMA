@@ -31,8 +31,9 @@ int main(  int argc, char** argv )
 {
     /* Initialize */
     TESTING_INIT();
-        magma_queue_t queue;
-            magma_queue_create( /*devices[ opts->device ],*/ &queue );
+    magma_queue_t queue;
+    magma_queue_create( &queue );
+    magmablasSetKernelStream( queue );
 
     magma_int_t j, n=1000000, FLOPS;
     
@@ -93,6 +94,7 @@ int main(  int argc, char** argv )
     magma_z_vfree(&cd, queue);
 
     /* Shutdown */
+    magmablasSetKernelStream( NULL );
     magma_queue_destroy( queue );
     magma_finalize();
     
