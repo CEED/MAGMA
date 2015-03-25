@@ -161,7 +161,7 @@ int main( int argc, char** argv)
            
             gpu_time = magma_sync_wtime(0) - gpu_time;
             gpu_perf = gflops / gpu_time;
-                
+            
             #ifdef TRACING
             char buf[80];
             snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-stream%d-ngpu%d-run%d.svg",

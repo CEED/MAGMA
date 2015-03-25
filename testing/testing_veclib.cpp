@@ -157,7 +157,7 @@ float test( magma_int_t m, magma_int_t n )
         snorm_inf = lapackf77_slange( "inf", &m, &n, sA, &lda, swork );
         snorm_max = lapackf77_slange( "max", &m, &n, sA, &lda, swork );
         snorm_fro = lapackf77_slange( "fro", &m, &n, sA, &lda, swork );
-                                                      
+        
         dnorm_one = lapackf77_dlange( "one", &m, &n, dA, &lda, dwork );
         dnorm_inf = lapackf77_dlange( "inf", &m, &n, dA, &lda, dwork );
         dnorm_max = lapackf77_dlange( "max", &m, &n, dA, &lda, dwork );
@@ -185,7 +185,7 @@ float test( magma_int_t m, magma_int_t n )
         snorm_inf = lapackf77_slansy( "inf", "up", &n, sA, &lda, swork );
         snorm_max = lapackf77_slansy( "max", "up", &n, sA, &lda, swork );
         snorm_fro = lapackf77_slansy( "fro", "up", &n, sA, &lda, swork );
-                                                  
+        
         dnorm_one = lapackf77_dlansy( "one", "up", &n, dA, &lda, dwork );
         dnorm_inf = lapackf77_dlansy( "inf", "up", &n, dA, &lda, dwork );
         dnorm_max = lapackf77_dlansy( "max", "up", &n, dA, &lda, dwork );

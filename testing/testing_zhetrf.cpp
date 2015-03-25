@@ -369,13 +369,11 @@ int main( int argc, char** argv)
             nopiv_gpu = 1;
             printf( "\nGPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
             break;
-            break;
         //case 5:
         //    row = 1;
         //    printf( "\n Bunch-Kauffman: GPU-only version (row-major)" );
         //    break;
         default:
-        //  printf( " hybrid CPU-GPU version" );
             printf( " version = %d not supported\n\n", (int) opts.version );
             return 0;
     }

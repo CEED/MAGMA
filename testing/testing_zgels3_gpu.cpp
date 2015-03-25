@@ -168,7 +168,7 @@ int main( int argc, char** argv)
             printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e",
                    (int) M, (int) N, (int) nrhs,
                    cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error, error );
-                        
+            
             if ( M == N ) {
                 printf( "   %s\n", (gpu_error < tol && error < tol ? "ok" : "failed"));
                 status += ! (gpu_error < tol && error < tol);

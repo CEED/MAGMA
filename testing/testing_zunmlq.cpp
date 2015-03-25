@@ -142,7 +142,7 @@ int main( int argc, char** argv )
             if (info != 0)
                 printf("magma_zunmlq returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-                        
+            
             /* =====================================================================
                compute relative error |QC_magma - QC_lapack| / |QC_lapack|
                =================================================================== */

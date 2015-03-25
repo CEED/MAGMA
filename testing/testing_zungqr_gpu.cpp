@@ -82,7 +82,7 @@ int main( int argc, char** argv)
             lapackf77_zlacpy( MagmaFullStr, &m, &n, hA, &lda, hR, &lda );
             
             Anorm = lapackf77_zlange("f", &m, &n, hA, &lda, work );
-                
+            
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */

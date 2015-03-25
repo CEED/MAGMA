@@ -206,7 +206,7 @@ int main( int argc, char** argv)
                     lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                                       &M, &N, h_A, &lda, tau, h_work, &N);
                     //magma_zgeqr2(&M, &N, h_A, &lda, tau, h_work, &info);
-                                              
+                    
                     cpu_time = magma_wtime() - cpu_time;
                     cpu_perf = gflops / cpu_time;
                     if (info != 0)

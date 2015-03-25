@@ -194,7 +194,7 @@ int main( int argc, char** argv )
             TESTING_FREE_CPU(   A );
             TESTING_FREE_CPU(  SR );
             TESTING_FREE_CPU(   R );
-                                 
+            
             TESTING_FREE_DEV( dSA );
             TESTING_FREE_DEV(  dA );
             printf( "\n" );

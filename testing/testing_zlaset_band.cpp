@@ -120,7 +120,7 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
-                        
+            
             //printf( "h_R=" );  magma_zprint( M, N, h_R, lda );
             //printf( "h_A=" );  magma_zprint( M, N, h_A, lda );
 

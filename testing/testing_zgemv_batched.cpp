@@ -120,7 +120,7 @@ int main( int argc, char** argv)
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
             magma_zgetvector( Ym*batchCount, d_Y, incy, h_Ymagma, incy );
-                      
+            
             /* =====================================================================
                Performs operation using CPU BLAS
                =================================================================== */
@@ -152,7 +152,7 @@ int main( int argc, char** argv)
 
                     double Anorm = lapackf77_zlange( "F", &M, &N, h_A + s * lda * N, &lda, work );
                     double Xnorm = lapackf77_zlange( "F", &Xm, &ione, h_X + s * Xm, &Xm, work );
-                                                    
+                    
                     blasf77_zaxpy( &Ym, &c_neg_one, h_Y + s * Ym, &incy, h_Ymagma + s * Ym, &incy );
                     magma_err = lapackf77_zlange( "F", &Ym, &ione, h_Ymagma + s * Ym, &Ym, work ) / (Anorm * Xnorm);
 

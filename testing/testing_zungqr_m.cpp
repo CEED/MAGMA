@@ -75,7 +75,7 @@ int main( int argc, char** argv )
             TESTING_MALLOC_CPU( hR,     magmaDoubleComplex, lda*n     );
             TESTING_MALLOC_CPU( hT,     magmaDoubleComplex, min_mn*nb );
             TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn    );
-                                        
+            
             TESTING_MALLOC_DEV( dA,     magmaDoubleComplex, ldda*n    );
             TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, ( 2*min_mn + magma_roundup( n, 32 ) )*nb );
             
@@ -83,7 +83,7 @@ int main( int argc, char** argv )
             lapackf77_zlacpy( MagmaUpperLowerStr, &m, &n, hA, &lda, hR, &lda );
             
             Anorm = lapackf77_zlange("f", &m, &n, hA, &lda, work );
-                
+            
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */

@@ -111,7 +111,7 @@ int main( int argc, char** argv)
             //magma_zprint( M, N, hA, lda );
             
             magma_zsetmatrix( M, N, hA, lda, dA, ldda );
-                        
+            
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */

@@ -54,11 +54,11 @@ void get_QR_error(magma_int_t M, magma_int_t N, magma_int_t min_mn,
     lapackf77_zlacpy( "Lower", &M, &min_mn, h_R, &lda, Q, &ldq );
     lapackf77_zungqr( &M, &min_mn, &min_mn, Q, &ldq, tau, h_work, &lwork, &info );
     assert( info == 0 );
-             
+    
     // copy K by N matrix R
     lapackf77_zlaset( "Lower", &min_mn, &N, &c_zero, &c_zero, R, &ldr );
     lapackf77_zlacpy( "Upper", &min_mn, &N, h_R, &lda,        R, &ldr );
-             
+    
     // error = || R - Q^H*A || / (N * ||A||)
     blasf77_zgemm( "Conj", "NoTrans", &min_mn, &N, &M,
     &c_neg_one, Q, &ldq, h_A, &lda, &c_one, R, &ldr );
@@ -68,7 +68,7 @@ void get_QR_error(magma_int_t M, magma_int_t N, magma_int_t min_mn,
     
     if ( N > 0 && Anorm > 0 )
         *error /= (N*Anorm);
-             
+    
     // set R = I (K by K identity), then R = I - Q^H*Q
     // error = || I - Q^H*Q || / N
     lapackf77_zlaset( "Upper", &min_mn, &min_mn, &c_zero, &c_one, R, &ldr );
