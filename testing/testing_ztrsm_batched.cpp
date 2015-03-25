@@ -65,7 +65,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
     magma_int_t status = 0;
-    magma_int_t batchCount = 1; 
+    magma_int_t batchCount = 1;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -123,7 +123,7 @@ int main( int argc, char** argv)
             magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
 
             magmaDoubleComplex* dinvA=NULL;
-            magmaDoubleComplex* dwork=NULL;// invA and work are workspace in ztrsm
+            magmaDoubleComplex* dwork=NULL; // invA and work are workspace in ztrsm
  
             magma_int_t dinvA_batchSize = magma_roundup( Ak, TRI_NB )*TRI_NB;
             magma_int_t dwork_batchSize = lddb*N;
@@ -136,14 +136,13 @@ int main( int argc, char** argv)
             memset(h_Bmagma, 0, batchCount*ldb*N*sizeof(magmaDoubleComplex));
             magmablas_zlaset( MagmaFull, lddb, N*batchCount, c_zero, c_zero, dwork, lddb);
 
-
             /* Initialize the matrices */
             /* Factor A into LU to get well-conditioned triangular matrix.
              * Copy L to U, since L seems okay when used with non-unit diagonal
              * (i.e., from U), while U fails when used with unit diagonal. */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
 
-            for(int s=0; s < batchCount; s++) {
+            for (int s=0; s < batchCount; s++) {
                 lapackf77_zgetrf( &Ak, &Ak, h_A + s * lda * Ak, &lda, ipiv, &info );
                 for( int j = 0; j < Ak; ++j ) {
                     for( int i = 0; i < j; ++i ) {
@@ -173,8 +172,8 @@ int main( int argc, char** argv)
                     d_A_array,    ldda, // dA
                     d_B_array,    lddb, // dB
                     dwork_array,  lddb, // dX output
-                    dinvA_array,  dinvA_batchSize, 
-                    dW1_displ,   dW2_displ, 
+                    dinvA_array,  dinvA_batchSize,
+                    dW1_displ,   dW2_displ,
                     dW3_displ,   dW4_displ,
                     1, batchCount, opts.queue);
                 magma_time = magma_sync_wtime( NULL ) - magma_time;
@@ -182,15 +181,15 @@ int main( int argc, char** argv)
                 magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
             #else
                 magmablas_ztrsm_batched(
-                    opts.side, opts.uplo, opts.transA, opts.diag, 
-                    M, N, alpha, 
+                    opts.side, opts.uplo, opts.transA, opts.diag,
+                    M, N, alpha,
                     d_A_array, ldda,
-                    d_B_array, lddb, 
+                    d_B_array, lddb,
                     batchCount, opts.queue );
                 magma_time = magma_sync_wtime( NULL ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
-            #endif 
+            #endif
        
             /* =====================================================================
                Performs operation using CUBLAS
@@ -220,10 +219,10 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for(int s=0; s < batchCount; s++) {
+                for (int s=0; s < batchCount; s++) {
                     blasf77_ztrsm(
                         lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                         &M, &N, &alpha,
                         h_A       + s * lda * Ak, &lda,
                         h_Blapack + s * ldb * N,  &ldb );
@@ -244,11 +243,11 @@ int main( int argc, char** argv)
             memcpy( h_X, h_Bmagma, sizeB*sizeof(magmaDoubleComplex) );
 
             // check magma
-            for(int s=0; s < batchCount; s++) {
+            for (int s=0; s < batchCount; s++) {
                 normA = lapackf77_zlange( "M", &Ak, &Ak, h_A + s * lda * Ak, &lda, work );
                 blasf77_ztrmm(
                     lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                     &M, &N, &alpha2,
                     h_A + s * lda * Ak, &lda,
                     h_X + s * ldb * N,  &ldb );
@@ -270,18 +269,18 @@ int main( int argc, char** argv)
             memcpy( h_X, h_Bcublas, sizeB*sizeof(magmaDoubleComplex) );
             // check cublas
             #if CUDA_VERSION >= 6050
-            for(int s=0; s < batchCount; s++) {
+            for (int s=0; s < batchCount; s++) {
                 normA = lapackf77_zlange( "M", &Ak, &Ak, h_A + s * lda * Ak, &lda, work );
                 blasf77_ztrmm(
                     lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                    lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                     &M, &N, &alpha2,
                     h_A + s * lda * Ak, &lda,
                     h_X + s * ldb * N, &ldb );
 
                 blasf77_zaxpy( &NN, &c_neg_one, h_B + s * ldb * N, &ione, h_X  + s * ldb * N, &ione );
                 normR = lapackf77_zlange( "M", &M, &N, h_X  + s * ldb * N,       &ldb, work );
-                normX = lapackf77_zlange( "M", &M, &N, h_Bcublas  + s * ldb * N, &ldb, work );            
+                normX = lapackf77_zlange( "M", &M, &N, h_Bcublas  + s * ldb * N, &ldb, work );
                 double cublas_err = normR/(normX*normA);
 
                 if ( isnan(cublas_err) || isinf(cublas_err) ) {
@@ -298,10 +297,10 @@ int main( int argc, char** argv)
                 // this verifies that the matrix wasn't so bad that it couldn't be solved accurately.
                 lapack_error = 0.0;
                 memcpy( h_X, h_Blapack, sizeB*sizeof(magmaDoubleComplex) );
-                for(int s=0; s < batchCount; s++) {
+                for (int s=0; s < batchCount; s++) {
                     blasf77_ztrmm(
                         lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                        lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                         &M, &N, &alpha2,
                         h_A + s * lda * Ak, &lda,
                         h_X + s * ldb * N,  &ldb );

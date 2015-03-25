@@ -43,7 +43,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     lapackf77_zlacpy( MagmaLowerStr, &M, &min_mn, LU, &lda, L, &M      );
     lapackf77_zlacpy( MagmaUpperStr, &min_mn, &N, LU, &lda, U, &min_mn );
 
-    for(j=0; j<min_mn; j++)
+    for (j=0; j < min_mn; j++)
         L[j+j*M] = MAGMA_Z_MAKE( 1., 0. );
     
     matnorm = lapackf77_zlange("f", &M, &N, A, &lda, work);
@@ -72,28 +72,26 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf=0., cublas_time=0., cpu_perf=0, cpu_time=0;
-    double          error; 
+    double          error;
     magma_int_t cublas_enable = 0;
     magmaDoubleComplex *h_A, *h_R;
     magmaDoubleComplex *dA_magma;
     magmaDoubleComplex **dA_array = NULL;
 
     magma_int_t     **dipiv_array = NULL;
-    magma_int_t     *ipiv, *cpu_info ;
+    magma_int_t     *ipiv, *cpu_info;
     magma_int_t     *dipiv_magma, *dinfo_magma;
     
-
     magma_int_t M, N, n2, lda, ldda, min_mn, info;
-    magma_int_t ione     = 1; 
+    magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount = 1;
 
     magma_opts opts;
-    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
-    //opts.lapack |= opts.check; 
+    //opts.lapack |= opts.check;
 
-    batchCount = opts.batchcount ;
+    batchCount = opts.batchcount;
     magma_int_t columns;
     
     printf("BatchCount      M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
@@ -110,7 +108,6 @@ int main( int argc, char** argv)
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
             
-
             TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn * batchCount);
             TESTING_MALLOC_CPU(    h_A,  magmaDoubleComplex, n2     );
@@ -128,21 +125,19 @@ int main( int argc, char** argv)
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, columns, h_R, lda, dA_magma, ldda );
             
-
-
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, queue);
+            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, opts.queue);
             magma_time = magma_sync_wtime(0);
-            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, queue);
+            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, opts.queue);
             magma_time = magma_sync_wtime(0) - magma_time;
             magma_perf = gflops / magma_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
-            for(int i=0; i<batchCount; i++)
+            for (int i=0; i < batchCount; i++)
             {
-                if(cpu_info[i] != 0 ){
+                if (cpu_info[i] != 0 ) {
                     printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
                 }
             }
@@ -159,7 +154,7 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 //#pragma unroll
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
                   lapackf77_zgetrf(&M, &N, h_A + i*lda*N, &lda, ipiv + i * min_mn, &info);
                 }
@@ -170,10 +165,6 @@ int main( int argc, char** argv)
                            (int) info, magma_strerror( info ));
             }
             
-
-
-
-
             /* =====================================================================
                Check the factorization
                =================================================================== */
@@ -190,17 +181,17 @@ int main( int argc, char** argv)
             if ( opts.check ) {
                
                 // initialize ipiv to 1,2,3,4,5,6
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
-                    for(int k=0;k<min_mn; k++){
+                    for (int k=0; k < min_mn; k++) {
                         ipiv[i*min_mn+k] = k+1;
                     }
                 }
 
                 magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
-                  error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);                 
+                  error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);
                   if ( isnan(error) || isinf(error) ) {
                       err = error;
                       break;

@@ -51,7 +51,6 @@ int main( int argc, char** argv)
     magmaDoubleComplex **C_array = NULL;
     magma_int_t status = 0;
 
-    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
@@ -86,7 +85,6 @@ int main( int argc, char** argv)
             
             NN = N * batchCount;
 
-            
             sizeA = lda*Ak*batchCount;
             sizeC = ldc*N*batchCount;
             
@@ -110,26 +108,25 @@ int main( int argc, char** argv)
             magma_zsetmatrix( An, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N*batchCount, h_C, ldc, d_C, lddc );
             
-            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, queue);
-            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, queue);
+            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, opts.queue);
+            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, opts.queue);
 
             magma_time = magma_sync_wtime( NULL );
             magmablas_zherk_batched(opts.uplo, opts.transA, N, K,
                              alpha, A_array, ldda,
-                             beta,  C_array, lddc, batchCount, queue);
+                             beta,  C_array, lddc, batchCount, opts.queue);
                              
             magma_time = magma_sync_wtime( NULL ) - magma_time;
             magma_perf = gflops / magma_time;
             
             magma_zgetmatrix( N, NN, d_C, lddc, h_Cmagma, ldc );
             
-            
             /* =====================================================================
                Performs operation using CPU BLAS
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
                    blasf77_zherk(
                                lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA),
@@ -149,7 +146,7 @@ int main( int argc, char** argv)
                 // |C_magma - C_lapack| / |C_lapack|
                 sizeC = ldc*N;
                 magma_error = MAGMA_D_ZERO;
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
                     Cnorm = lapackf77_zlanhe("fro", lapack_uplo_const(opts.uplo), &N, h_C+i*ldc*N, &ldc, work);
                     blasf77_zaxpy( &sizeC, &c_neg_one, h_C+i*ldc*N, &ione, h_Cmagma+i*ldc*N, &ione );
@@ -168,26 +165,22 @@ int main( int argc, char** argv)
                        magma_error, (magma_error < tol ? "ok" : "failed"));
 
                 status += ! (magma_error < tol);
-
             }
             else {
                 printf("%5d %5d %5d   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
                        (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time);
-
             }
             
             TESTING_FREE_CPU( h_A  );
             TESTING_FREE_CPU( h_C  );
             TESTING_FREE_CPU( h_Cmagma  );
 
-            
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_C );
             TESTING_FREE_DEV( A_array );
             TESTING_FREE_DEV( C_array );
             fflush( stdout);
-
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

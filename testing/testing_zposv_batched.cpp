@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
     magmaDoubleComplex_ptr d_A, d_B;
-    magma_int_t *cpu_info ;
+    magma_int_t *cpu_info;
     magma_int_t *dinfo_array;
     magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
@@ -47,15 +47,13 @@ int main(int argc, char **argv)
     magmaDoubleComplex **dA_array = NULL;
     magmaDoubleComplex **dB_array = NULL;
 
-
     magma_opts opts;
-    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
     nrhs = opts.nrhs;
-    batchCount = opts.batchcount ;
+    batchCount = opts.batchcount;
 
     printf("uplo = %s\n", lapack_uplo_const(opts.uplo) );
     printf("BatchCount    N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
@@ -85,14 +83,13 @@ int main(int argc, char **argv)
             magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
             magma_malloc((void**)&dB_array, batchCount * sizeof(*dB_array));
 
-
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
 
-            for(int i=0; i<batchCount; i++)
+            for (int i=0; i < batchCount; i++)
             {
-               magma_zmake_hpd( N, h_A + i * lda * N, lda );// need modification
+               magma_zmake_hpd( N, h_A + i * lda * N, lda ); // need modification
             }
 
             magma_zsetmatrix( N, N*batchCount,    h_A, lda, d_A, ldda );
@@ -101,19 +98,19 @@ int main(int argc, char **argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda*N, batchCount, queue);
-            zset_pointer(dB_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, queue);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda*N, batchCount, opts.queue);
+            zset_pointer(dB_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue);
 
             gpu_time = magma_wtime();
-            info = magma_zposv_batched(opts.uplo, N, nrhs, dA_array, ldda, dB_array, lddb, dinfo_array, batchCount, queue); 
+            info = magma_zposv_batched(opts.uplo, N, nrhs, dA_array, ldda, dB_array, lddb, dinfo_array, batchCount, opts.queue);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
-            for(int i=0; i<batchCount; i++)
+            for (int i=0; i < batchCount; i++)
             {
-                if(cpu_info[i] != 0 ){
-                    printf("magma_zposv_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
+                if (cpu_info[i] != 0 ) {
+                    printf("magma_zposv_batched matrix %d returned internal error %d\n", i, (int)cpu_info[i] );
                 }
             }
             if (info != 0)
@@ -124,7 +121,7 @@ int main(int argc, char **argv)
             //=====================================================================
             magma_zgetmatrix( N, nrhs*batchCount, d_B, lddb, h_X, ldb );
 
-            for(magma_int_t s=0; s<batchCount; s++)
+            for (magma_int_t s=0; s < batchCount; s++)
             {
                 Anorm = lapackf77_zlange("I", &N, &N,    h_A + s * lda * N, &lda, work);
                 Xnorm = lapackf77_zlange("I", &N, &nrhs, h_X + s * ldb * nrhs, &ldb, work);
@@ -141,7 +138,7 @@ int main(int argc, char **argv)
                     err = error;
                     break;
                 }
-                err = max(err, error);            
+                err = max(err, error);
             }
             status += ! (err < tol);
 
@@ -150,7 +147,7 @@ int main(int argc, char **argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for(magma_int_t s=0; s<batchCount; s++)
+                for (magma_int_t s=0; s < batchCount; s++)
                 {
                     lapackf77_zposv( lapack_uplo_const(opts.uplo), &N, &nrhs, h_A + s * lda * N, &lda, h_B + s * ldb * nrhs, &ldb, &info );
                 }

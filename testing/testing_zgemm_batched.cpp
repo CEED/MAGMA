@@ -51,7 +51,6 @@ int main( int argc, char** argv)
     magmaDoubleComplex **B_array = NULL;
     magmaDoubleComplex **C_array = NULL;
 
-    magma_queue_t queue = magma_stream;
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     batchCount = opts.batchcount;
@@ -61,7 +60,7 @@ int main( int argc, char** argv)
     
     printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "transA = %s, transB = %s\n", 
+           "transA = %s, transB = %s\n",
            lapack_trans_const(opts.transA),
            lapack_trans_const(opts.transB));
     printf("BatchCount    M     N     K   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
@@ -126,17 +125,17 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Bm, Bn*batchCount, h_B, ldb, d_B, lddb );
             magma_zsetmatrix( M, N*batchCount, h_C, ldc, d_C, lddc );
             
-            zset_pointer(A_array, d_A, ldda, 0, 0, ldda*An, batchCount, queue);
-            zset_pointer(B_array, d_B, lddb, 0, 0, lddb*Bn, batchCount, queue);
-            zset_pointer(C_array, d_C, lddc, 0, 0, lddc*N,  batchCount, queue);
+            zset_pointer(A_array, d_A, ldda, 0, 0, ldda*An, batchCount, opts.queue);
+            zset_pointer(B_array, d_B, lddb, 0, 0, lddb*Bn, batchCount, opts.queue);
+            zset_pointer(C_array, d_C, lddc, 0, 0, lddc*N,  batchCount, opts.queue);
 
             magma_time = magma_sync_wtime( NULL );
             magmablas_zgemm_batched(opts.transA, opts.transB, M, N, K,
                              alpha, A_array, ldda,
                                     B_array, lddb,
-                             beta,  C_array, lddc, batchCount, queue);
+                             beta,  C_array, lddc, batchCount, opts.queue);
             magma_time = magma_sync_wtime( NULL ) - magma_time;
-            magma_perf = gflops / magma_time;            
+            magma_perf = gflops / magma_time;
             magma_zgetmatrix( M, N*batchCount, d_C, lddc, h_Cmagma, ldc );
             
             /* =====================================================================
@@ -157,13 +156,12 @@ int main( int argc, char** argv)
             
             magma_zgetmatrix( M, N*batchCount, d_C, lddc, h_Ccublas, ldc );
           
-            
             /* =====================================================================
                Performs operation using CPU BLAS
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
                    blasf77_zgemm(
                                lapack_trans_const(opts.transA), lapack_trans_const(opts.transB),
@@ -185,34 +183,33 @@ int main( int argc, char** argv)
                 magma_error = 0.0;
                 cublas_error = 0.0;
 
-                for(int s=0; s<batchCount; s++)
+                for (int s=0; s < batchCount; s++)
                 {
                     magma_int_t C_batchSize = ldc * N;
  
                     Cnorm = lapackf77_zlange( "M", &M, &N, h_C + s*C_batchSize, &ldc, work );
 
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C + s*C_batchSize, &ione, h_Cmagma + s*C_batchSize, &ione );
-                    magma_err = lapackf77_zlange( "M", &M, &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm; 
+                    magma_err = lapackf77_zlange( "M", &M, &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm;
 
                     if ( isnan(magma_err) || isinf(magma_err) ) {
                       magma_error = magma_err;
                       break;
                     }
-                    magma_error = max(fabs(magma_err), magma_error); 
+                    magma_error = max(fabs(magma_err), magma_error);
 
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C + s*C_batchSize, &ione, h_Ccublas + s*C_batchSize, &ione );
-                    cublas_err = lapackf77_zlange( "M", &M, &N, h_Ccublas + s*C_batchSize, &ldc, work ) / Cnorm; 
+                    cublas_err = lapackf77_zlange( "M", &M, &N, h_Ccublas + s*C_batchSize, &ldc, work ) / Cnorm;
                     
                    if ( isnan(cublas_err) || isinf(cublas_err) ) {
                       cublas_error = cublas_err;
                       break;
                     }
-                    cublas_error = max(fabs(cublas_err), cublas_error); 
-
+                    cublas_error = max(fabs(cublas_err), cublas_error);
                 }
 
                     printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  \n",
-                       (int) batchCount, (int) M, (int) N, (int) K, 
+                       (int) batchCount, (int) M, (int) N, (int) K,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time,
                        cpu_perf,    1000.*cpu_time,
@@ -245,9 +242,7 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( B_array );
             TESTING_FREE_DEV( C_array );
 
-            
             fflush( stdout);
-
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

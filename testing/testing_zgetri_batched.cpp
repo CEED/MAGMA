@@ -38,17 +38,16 @@ int main( int argc, char** argv)
     magma_int_t  **dipiv_array = NULL;
     magma_int_t *dinfo_array = NULL;
 
-    magma_int_t     *ipiv, *cpu_info ;
+    magma_int_t     *ipiv, *cpu_info;
     magma_int_t     *d_ipiv, *d_info;
     magma_int_t M, N, n2, lda, ldda, min_mn, info, info1, info2;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    opts.lapack |= opts.check; 
+    opts.lapack |= opts.check;
 
-    magma_queue_t queue = opts.queue;
-    magma_int_t batchCount = opts.batchcount ;
+    magma_int_t batchCount = opts.batchcount;
     magma_int_t columns;
     double error=0.0, rwork[1];
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -82,7 +81,6 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV(  d_ipiv,  magma_int_t, min_mn * batchCount);
             TESTING_MALLOC_DEV(  d_info,  magma_int_t, batchCount);
 
-
             magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
             magma_malloc((void**)&dinvA_array, batchCount * sizeof(*dinvA_array));
             magma_malloc((void**)&dinfo_array, batchCount * sizeof(magma_int_t));
@@ -98,22 +96,21 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
-            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, queue);
-            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount, queue);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount, opts.queue);
 
             gpu_time = magma_sync_wtime(0);
-            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, queue);
-            info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount, queue);
+            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, opts.queue);
+            info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount, opts.queue);
             gpu_time = magma_sync_wtime(0) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
-
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
-            for(int i=0; i<batchCount; i++)
+            for (int i=0; i < batchCount; i++)
             {
-                if(cpu_info[i] != 0 ){
+                if (cpu_info[i] != 0 ) {
                     printf("magma_zgetrf_batched matrix %d returned error %d\n", i, (int)cpu_info[i] );
                 }
             }
@@ -135,7 +132,7 @@ int main( int argc, char** argv)
                 TESTING_MALLOC_CPU( work,  magmaDoubleComplex, lwork  );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_R, &lda, h_A, &lda );
                 cpu_time = magma_wtime();
-                for(int i=0; i<batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
                     lapackf77_zgetrf(&M, &N, h_A + i * lda*N, &lda, ipiv + i * min_mn, &info);
                     if (info != 0)
@@ -167,16 +164,16 @@ int main( int argc, char** argv)
                 magma_zgetmatrix( min(M,N), N*batchCount, d_invA, ldda, h_R, lda );
                 int stop=0;
                 n2     = lda*N;
-                for(int i=0; i < batchCount; i++)
+                for (int i=0; i < batchCount; i++)
                 {
-                    for(int k=0; k < min_mn; k++){
-                        if(ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
+                    for (int k=0; k < min_mn; k++) {
+                        if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
                         {
                             printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*min_mn+k]);
                             stop=1;
                         }
                     }
-                    if(stop==1){
+                    if (stop == 1) {
                         err=-1.0;
                         break;
                     }

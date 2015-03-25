@@ -47,8 +47,7 @@ int main(int argc, char **argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t queue = opts.queue;
-    batchCount = opts.batchcount ;
+    batchCount = opts.batchcount;
     magma_int_t columns;
     nrhs = opts.nrhs;
     
@@ -76,7 +75,6 @@ int main(int argc, char **argv)
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N*batchCount    );
             TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*nrhs*batchCount );
             
-
             magma_malloc((void**)&d_A_array, batchCount * sizeof(*d_A_array));
             magma_malloc((void**)&d_B_array, batchCount * sizeof(*d_B_array));
 
@@ -93,23 +91,18 @@ int main(int argc, char **argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            
-            
-            
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*N, batchCount, queue);
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, queue);
-            
-            
+            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*N, batchCount, opts.queue);
+            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue);
             
             gpu_time = magma_wtime();
-            magma_zgesv_nopiv_batched( N, nrhs, d_A_array, ldda, d_B_array, lddb, dinfo_magma, batchCount, queue );
+            magma_zgesv_nopiv_batched( N, nrhs, d_A_array, ldda, d_B_array, lddb, dinfo_magma, batchCount, opts.queue );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
-            for(int i=0; i<batchCount; i++)
+            for (int i=0; i < batchCount; i++)
             {
-                if(cpu_info[i] != 0 ){
+                if (cpu_info[i] != 0 ) {
                     printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
                 }
             }
@@ -122,7 +115,7 @@ int main(int argc, char **argv)
             double err = 0;
             error = 0;
             magma_zgetmatrix( N, nrhs*batchCount, d_B, lddb, h_X, ldb );
-            for(magma_int_t s = 0; s < batchCount; s++)
+            for (magma_int_t s = 0; s < batchCount; s++)
             {
                 Anorm = lapackf77_zlange("I", &N, &N,    h_A+s*lda*N, &lda, work);
                 Xnorm = lapackf77_zlange("I", &N, &nrhs, h_X+s*ldb*nrhs, &ldb, work);

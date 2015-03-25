@@ -41,7 +41,6 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     
     magma_opts opts;
-    magma_queue_t queue = opts.queue;
     parse_opts( argc, argv, &opts );
 
     mb = (opts.nb == 0 ? 32 : opts.nb);
@@ -97,7 +96,7 @@ int main( int argc, char** argv)
             magma_setvector( ntile, sizeof(magmaDoubleComplex*), hBarray, 1, dBarray, 1 );
             
             gpu_time = magma_sync_wtime( 0 );
-            magmablas_zlacpy_batched( MagmaUpperLower, mb, nb, dAarray, ldda, dBarray, ldda, ntile, queue );
+            magmablas_zlacpy_batched( MagmaUpperLower, mb, nb, dAarray, ldda, dBarray, ldda, ntile, opts.queue );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             
