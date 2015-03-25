@@ -19,6 +19,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define COMPLEX
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zlange
 */
@@ -115,7 +117,7 @@ int main( int argc, char** argv)
                 // max-norm depends on only one element, so for Real precisions,
                 // MAGMA and LAPACK should exactly agree (tol2 = 0),
                 // while Complex precisions incur roundoff in cuCabs.
-                #if defined(PRECISION_s) || defined(PRECISION_d)
+                #ifdef REAL
                 tol2 = 0;
                 #endif
             }
