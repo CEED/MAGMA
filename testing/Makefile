@@ -77,7 +77,6 @@ ZSRC += \
 # symmetric indefinite
 ZSRC += \
 	testing_zhesv.cpp	\
-	testing_zhesv.cpp	\
 	testing_zsysv_nopiv_gpu.cpp	\
 	testing_zhetrf.cpp	\
 	
