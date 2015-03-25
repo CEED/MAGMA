@@ -186,7 +186,7 @@ typedef struct magma_opts
     double      fraction;  // hegvdx
     double      tolerance;
     magma_int_t panel_nthread; //in magma_amc: first dimension for a 2D big panel
-    double fraction_dcpu; //in magma_amc: fraction of the work for the cpu 
+    double fraction_dcpu; //in magma_amc: fraction of the work for the cpu
     // boolean arguments
     int check;
     int lapack;

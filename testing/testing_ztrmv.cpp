@@ -87,7 +87,7 @@ int main( int argc, char** argv)
             cublas_time = magma_sync_wtime( NULL );
             cublasZtrmv( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA),
                          cublas_diag_const(opts.diag),
-                         N, 
+                         N,
                          d_A, ldda,
                          d_x, 1 );
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
@@ -100,7 +100,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_ztrmv( lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                blasf77_ztrmv( lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                                &N,
                                h_A, &lda,
                                h_x, &ione );

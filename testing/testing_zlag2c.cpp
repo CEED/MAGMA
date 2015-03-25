@@ -83,7 +83,7 @@ int main( int argc, char** argv )
             
             /* ====================================================================
                Performs operation using MAGMA zlag2c
-               =================================================================== */            
+               =================================================================== */
             gpu_time = magma_sync_wtime(0);
             magmablas_zlag2c( m, n, dA, ldda, dSA, ldda, &info );
             gpu_time = magma_sync_wtime(0) - gpu_time;
@@ -106,7 +106,6 @@ int main( int argc, char** argv )
                     cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                     serror, (serror == 0 ? "ok" : "failed") );
             status += ! (serror == 0);
-            
             
             /* =====================================================================
                Reset matrices

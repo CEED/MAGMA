@@ -60,7 +60,7 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("Running version %d; available are (specified through --version num):\n", 
+    printf("Running version %d; available are (specified through --version num):\n",
            (int) opts.version);
     printf("1 - uses ZHEMV from CUBLAS (default)\n");
     printf("2 - uses ZHEMV from MAGMA BLAS that requires extra space\n\n");

@@ -18,7 +18,7 @@
       double precision zlange, dlamch
       integer cublas_alloc
 
-      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm, Xnorm 
+      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm, Xnorm
       double precision, allocatable :: work(:)
       complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
       magma_devptr_t                :: devptrA, devptrB
@@ -120,7 +120,7 @@
       if ( Rnorm > 60. ) then
          write(*,105) '  Solution is suspicious, ', Rnorm
       else
-         write(*,105) '  Solution is CORRECT' 
+         write(*,105) '  Solution is CORRECT'
       end if
 
 !---- Free CPU memory

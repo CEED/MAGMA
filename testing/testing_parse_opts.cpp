@@ -17,7 +17,7 @@ int main( int argc, char** argv )
     printf( "kmax     %d\n", (int) opts.kmax  );
     printf( "\n" );
     
-    printf( "nb       %d\n", (int) opts.nb       ); 
+    printf( "nb       %d\n", (int) opts.nb       );
     printf( "nrhs     %d\n", (int) opts.nrhs     );
     printf( "nstream  %d\n", (int) opts.nstream  );
     printf( "ngpu     %d\n", (int) opts.ngpu     );

@@ -155,15 +155,14 @@ int main( int argc, char** argv)
                                  &info);
             gpu_time = magma_wtime() - gpu_time;
 
-
             if ( opts.check && opts.jobz != MagmaNoVec ) {
                 /* =====================================================================
                    Check the results following the LAPACK's [zc]hegvdx routine.
                    A x = lambda B x is solved
                    and the following 3 tests computed:
-                   (1)    | A Z - B Z D | / ( |A||Z| N )  (itype = 1)
-                          | A B Z - Z D | / ( |A||Z| N )  (itype = 2)
-                          | B A Z - Z D | / ( |A||Z| N )  (itype = 3)
+                   (1)    | A Z - B Z D | / ( |A| |Z| N )  (itype = 1)
+                          | A B Z - Z D | / ( |A| |Z| N )  (itype = 2)
+                          | B A Z - Z D | / ( |A| |Z| N )  (itype = 3)
                    (2)    | S(with V) - S(w/o V) | / | S |
                    =================================================================== */
                 #if defined(PRECISION_d) || defined(PRECISION_s)
@@ -176,21 +175,21 @@ int main( int argc, char** argv)
 
                 if (opts.itype == 1) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_work, &N, rwork)/N;
                 }
                 else if (opts.itype == 2) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
                 else if (opts.itype == 3) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
@@ -210,14 +209,13 @@ int main( int argc, char** argv)
                               &info);
 
                 double maxw=0, diff=0;
-                for(int j=0; j<m2; j++) {
+                for (int j=0; j < m2; j++) {
                     maxw = max(maxw, fabs(w1[j]));
                     maxw = max(maxw, fabs(w2[j]));
                     diff = max(diff, fabs(w1[j] - w2[j]));
                 }
                 result[1] = diff / (m2*maxw);
             }
-
 
             /* =====================================================================
                Print execution time
@@ -226,13 +224,13 @@ int main( int argc, char** argv)
                    (int) N, (int) m1, gpu_time);
             if ( opts.check && opts.jobz != MagmaNoVec ) {
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
-                if (opts.itype==1) {
+                if (opts.itype == 1) {
                     printf("    | A Z - B Z D | / (|A| |Z| N) = %8.2e   %s\n",   result[0], (result[0] < tol    ? "ok" : "failed"));
                 }
-                else if (opts.itype==2) {
+                else if (opts.itype == 2) {
                     printf("    | A B Z - Z D | / (|A| |Z| N) = %8.2e   %s\n",   result[0], (result[0] < tol    ? "ok" : "failed"));
                 }
-                else if (opts.itype==3) {
+                else if (opts.itype == 3) {
                     printf("    | B A Z - Z D | / (|A| |Z| N) = %8.2e   %s\n",   result[0], (result[0] < tol    ? "ok" : "failed"));
                 }
                 printf(    "    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e   %s\n\n", result[1], (result[1] < tolulp ? "ok" : "failed"));

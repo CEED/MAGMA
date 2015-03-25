@@ -111,7 +111,7 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_B, ldb, d_B, lddb );
             
             magma_time = magma_sync_wtime( NULL );
-            magmablas_ztrsm( opts.side, opts.uplo, opts.transA, opts.diag, 
+            magmablas_ztrsm( opts.side, opts.uplo, opts.transA, opts.diag,
                              M, N,
                              alpha, d_A, ldda,
                                     d_B, lddb );
@@ -128,7 +128,7 @@ int main( int argc, char** argv)
             cublas_time = magma_sync_wtime( NULL );
             cublasZtrsm( opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
                          cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
-                         M, N, 
+                         M, N,
                          &alpha, d_A, ldda,
                                  d_B, lddb );
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
@@ -142,7 +142,7 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 blasf77_ztrsm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                                &M, &N,
                                &alpha, h_A, &lda,
                                        h_Blapack, &ldb );
@@ -161,7 +161,7 @@ int main( int argc, char** argv)
             // check magma
             memcpy( h_X, h_Bmagma, sizeB*sizeof(magmaDoubleComplex) );
             blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                            &M, &N,
                            &alpha2, h_A, &lda,
                                     h_X, &ldb );
@@ -174,14 +174,14 @@ int main( int argc, char** argv)
             // check cublas
             memcpy( h_X, h_Bcublas, sizeB*sizeof(magmaDoubleComplex) );
             blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                           lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                            &M, &N,
                            &alpha2, h_A, &lda,
                                     h_X, &ldb );
 
             blasf77_zaxpy( &sizeB, &c_neg_one, h_B, &ione, h_X, &ione );
             normR = lapackf77_zlange( "M", &M, &N, h_X,       &ldb, work );
-            normX = lapackf77_zlange( "M", &M, &N, h_Bcublas, &ldb, work );            
+            normX = lapackf77_zlange( "M", &M, &N, h_Bcublas, &ldb, work );
             cublas_error = normR/(normX*normA);
 
             if ( opts.lapack ) {
@@ -189,7 +189,7 @@ int main( int argc, char** argv)
                 // this verifies that the matrix wasn't so bad that it couldn't be solved accurately.
                 memcpy( h_X, h_Blapack, sizeB*sizeof(magmaDoubleComplex) );
                 blasf77_ztrmm( lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
-                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag), 
+                               lapack_trans_const(opts.transA), lapack_diag_const(opts.diag),
                                &M, &N,
                                &alpha2, h_A, &lda,
                                         h_X, &ldb );

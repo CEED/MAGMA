@@ -71,27 +71,32 @@ double get_residual(
     // solve Ax = b
     if (nopiv) {
         if (upper) {
-            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, 
-                           MagmaConjTransStr, MagmaUnitStr, 
+            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr,
+                           MagmaConjTransStr, MagmaUnitStr,
                            &n, &ione, &c_one,
                            A, &lda, x, &n );
-            for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
-            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, 
-                           MagmaNoTransStr, MagmaUnitStr, 
+            for (int i=0; i < n; i++) {
+                x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
+            }
+            blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr,
+                           MagmaNoTransStr, MagmaUnitStr,
                            &n, &ione, &c_one,
                            A, &lda, x, &n );
         } else {
-            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr, 
-                           MagmaNoTransStr, MagmaUnitStr, 
+            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr,
+                           MagmaNoTransStr, MagmaUnitStr,
                            &n, &ione, &c_one,
                            A, &lda, x, &n );
-            for (int i=0; i<n; i++) x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
-            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr, 
-                           MagmaConjTransStr, MagmaUnitStr, 
+            for (int i=0; i < n; i++) {
+                x[i] = MAGMA_Z_DIV( x[i], A[i+i*lda] );
+            }
+            blasf77_ztrsm( MagmaLeftStr, MagmaLowerStr,
+                           MagmaConjTransStr, MagmaUnitStr,
                            &n, &ione, &c_one,
                            A, &lda, x, &n );
         }
-    }else {
+    }
+    else {
         lapackf77_zhetrs( lapack_uplo_const(uplo), &n, &ione, A, &lda, ipiv, x, &n, &info );
     }
     if (info != 0)
@@ -147,7 +152,7 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
     // set to original A, and apply pivoting
     init_matrix( nopiv, N, N, A, N );
     if (uplo == MagmaUpper) {
-        for (j=N-1; j>=0; j--) {
+        for (j=N-1; j >= 0; j--) {
             int piv = (nopiv ? j+1 : ipiv[j]);
             if (piv < 0) {
                 piv = -(piv+1);
@@ -158,29 +163,29 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
                 D(j-1,j-1) = LD(j-1,j-1);
                 // exract L
                 L(j,j) = c_one;
-                for (i=0; i<j-1; i++) {
+                for (i=0; i < j-1; i++) {
                     L(i,j) = LD(i,j);
                 }
                 j--;
                 L(j,j) = c_one;
-                for (i=0; i<j; i++) {
+                for (i=0; i < j; i++) {
                     L(i,j) = LD(i,j);
                 }
                 if (piv != j) {
                     // apply row-pivoting to previous L
-                    for (i=j+2; i<N; i++) {
+                    for (i=j+2; i < N; i++) {
                         magmaDoubleComplex val = L(j,i);
                         L(j,i) = L(piv,i);
                         L(piv,i) = val;
                     }
                     // apply row-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(j,i);
                         A(j,i) = A(piv,i);
                         A(piv,i) = val;
                     }
                     // apply col-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(i,j);
                         A(i,j) = A(i,piv);
                         A(i,piv) = val;
@@ -192,24 +197,24 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
                 D(j,j) = LD(j,j);
                 // exract L
                 L(j,j) = c_one;
-                for (i=0; i<j; i++) {
+                for (i=0; i < j; i++) {
                     L(i,j) = LD(i,j);
                 }
                 if (piv != j) {
                     // apply row-pivoting to previous L
-                    for (i=j+1; i<N; i++) {
+                    for (i=j+1; i < N; i++) {
                         magmaDoubleComplex val = L(j,i);
                         L(j,i) = L(piv,i);
                         L(piv,i) = val;
                     }
                     // apply row-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(j,i);
                         A(j,i) = A(piv,i);
                         A(piv,i) = val;
                     }
                     // apply col-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(i,j);
                         A(i,j) = A(i,piv);
                         A(i,piv) = val;
@@ -233,7 +238,7 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
                           &c_one, LD, &lda, L, &N, &c_zero, D, &N);
         }
     } else {
-        for (j=0; j<N; j++) {
+        for (j=0; j < N; j++) {
             int piv = (nopiv ? j+1 : ipiv[j]);
             if (piv < 0) {
                 piv = -(piv+1);
@@ -244,29 +249,29 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
                 D(j+1,j+1) = LD(j+1,j+1);
                 // exract L
                 L(j,j) = c_one;
-                for (i=j+2; i<N; i++) {
+                for (i=j+2; i < N; i++) {
                     L(i,j) = LD(i,j);
                 }
                 j++;
                 L(j,j) = c_one;
-                for (i=j+1; i<N; i++) {
+                for (i=j+1; i < N; i++) {
                     L(i,j) = LD(i,j);
                 }
                 if (piv != j) {
                     // apply row-pivoting to previous L
-                    for (i=0; i<j-1; i++) {
+                    for (i=0; i < j-1; i++) {
                         magmaDoubleComplex val = L(j,i);
                         L(j,i) = L(piv,i);
                         L(piv,i) = val;
                     }
                     // apply row-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(j,i);
                         A(j,i) = A(piv,i);
                         A(piv,i) = val;
                     }
                     // apply col-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(i,j);
                         A(i,j) = A(i,piv);
                         A(i,piv) = val;
@@ -278,24 +283,24 @@ double get_LDLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
                 D(j,j) = LD(j,j);
                 // exract L
                 L(j,j) = c_one;
-                for (i=j+1; i<N; i++) {
+                for (i=j+1; i < N; i++) {
                     L(i,j) = LD(i,j);
                 }
                 if (piv != j) {
                     // apply row-pivoting to previous L
-                    for (i=0; i<j; i++) {
+                    for (i=0; i < j; i++) {
                         magmaDoubleComplex val = L(j,i);
                         L(j,i) = L(piv,i);
                         L(piv,i) = val;
                     }
                     // apply row-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(j,i);
                         A(j,i) = A(piv,i);
                         A(piv,i) = val;
                     }
                     // apply col-pivoting to A
-                    for (i=0; i<N; i++) {
+                    for (i=0; i < N; i++) {
                         magmaDoubleComplex val = A(i,j);
                         A(i,j) = A(i,piv);
                         A(i,piv) = val;
@@ -397,7 +402,6 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( ipiv, magma_int_t, N );
             TESTING_MALLOC_PIN( h_A,  magmaDoubleComplex, n2 );
             
-
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */

@@ -64,7 +64,7 @@ int main( int argc, char** argv )
       for( int iside = 0; iside < 2; ++iside ) {
       for( int idir  = 0; idir  < 2; ++idir  ) {
       for( int itran = 0; itran < 2; ++itran ) {
-        for( int iter = 0; iter < opts.niter; ++iter ) {            
+        for( int iter = 0; iter < opts.niter; ++iter ) {
             ldc = magma_roundup( M, opts.align );  // multiple of 32 by default
             ldt = magma_roundup( K, opts.align );  // multiple of 32 by default
             ldw = (side[iside] == MagmaLeft ? N : M);

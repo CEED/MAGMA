@@ -22,7 +22,7 @@
 
 #define PRECISION_z
 
-// if ( A==B ) return 0, else return 1
+// if ( A == B ) return 0, else return 1
 static int diff_matrix( magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb )
 {
     for( magma_int_t j = 0; j < n; j++ ) {

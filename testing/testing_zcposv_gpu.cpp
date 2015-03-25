@@ -74,11 +74,11 @@ int main(int argc, char **argv)
             TESTING_MALLOC_DEV( d_workd, magmaDoubleComplex, N*nrhs       );
             
             /* Initialize the matrix */
-            size = lda * N ;
+            size = lda * N;
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             magma_zmake_hpd( N, h_A, lda );
             
-            size = ldb * nrhs ;
+            size = ldb * nrhs;
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );
             
             magma_zsetmatrix( N, N,    h_A, lda, d_A, lda );
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
             //=====================================================================
             //                 Error Computation
             //=====================================================================
-            magma_zgetmatrix( N, nrhs, d_X, ldx, h_X, ldx ) ;
+            magma_zgetmatrix( N, nrhs, d_X, ldx, h_X, ldx );
             
             Anorm = lapackf77_zlanhe( "I", lapack_uplo_const(opts.uplo), &N, h_A, &N, h_workd);
             blasf77_zhemm( "L", lapack_uplo_const(opts.uplo), &N, &nrhs,

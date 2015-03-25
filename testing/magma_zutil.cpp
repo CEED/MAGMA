@@ -24,9 +24,9 @@ extern "C"
 void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
-    for( i=0; i<N; ++i ) {
+    for( i=0; i < N; ++i ) {
         A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ), 0. );
-        for( j=0; j<i; ++j ) {
+        for( j=0; j < i; ++j ) {
             A(j,i) = MAGMA_Z_CNJG( A(i,j) );
         }
     }
@@ -41,15 +41,15 @@ extern "C"
 void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
-    for( i=0; i<N; ++i ) {
+    for( i=0; i < N; ++i ) {
         A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ) + N, 0. );
-        for( j=0; j<i; ++j ) {
+        for( j=0; j < i; ++j ) {
             A(j,i) = MAGMA_Z_CNJG( A(i,j) );
         }
     }
 }
 
-#define COMPLEX 
+#define COMPLEX
 #ifdef COMPLEX
 // --------------------
 // Make a matrix symmetric
@@ -59,9 +59,9 @@ extern "C"
 void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
-    for( i=0; i<N; ++i ) {
-        for( j=0; j<i; ++j ) {
-            A(j,i) =  A(i,j) ;
+    for( i=0; i < N; ++i ) {
+        for( j=0; j < i; ++j ) {
+            A(j,i) =  A(i,j);
         }
     }
 }
@@ -75,10 +75,10 @@ extern "C"
 void magma_zmake_hpd_sym( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
-    for( i=0; i<N; ++i ) {
+    for( i=0; i < N; ++i ) {
         A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ) + N, MAGMA_Z_IMAG( A(i,i) ) );
-        for( j=0; j<i; ++j ) {
-            A(j,i) = A(i,j) ;
+        for( j=0; j < i; ++j ) {
+            A(j,i) = A(i,j);
         }
     }
 }

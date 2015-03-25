@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
 
-    printf("Inplace transpose requires M==N.\n");
+    printf("Inplace transpose requires M == N.\n");
     printf("    M     N   CPU GByte/s (ms)    GPU GByte/s (ms)  check   Inplace GB/s (ms)  check\n");
     printf("====================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {

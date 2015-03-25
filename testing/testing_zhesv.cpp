@@ -110,7 +110,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 lwork = -1;
-                lapackf77_zhesv(lapack_uplo_const(opts.uplo), &N, &opts.nrhs, 
+                lapackf77_zhesv(lapack_uplo_const(opts.uplo), &N, &opts.nrhs,
                                 h_A, &lda, ipiv, h_X, &ldb, &temp, &lwork, &info);
                 lwork = (int)MAGMA_Z_REAL(temp);
                 TESTING_MALLOC_CPU( work, magmaDoubleComplex, lwork );

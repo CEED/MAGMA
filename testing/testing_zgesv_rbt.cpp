@@ -82,7 +82,7 @@ int main(int argc, char **argv)
             if (info != 0)
                 printf("magma_zgesv_rbt returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-            for(int i = 0; i < N; i++)
+            for (int i = 0; i < N; i++)
                 ipiv[i] = i+1;
 
             //=====================================================================

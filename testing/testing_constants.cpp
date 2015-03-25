@@ -101,7 +101,6 @@ int main( int argc, char** argv )
     check( lapack_storev_const( MagmaRowwise       )[0] == 'R' );
     printf( "MAGMA  -> lapack_xxxxx_const    %s\n", (s == gStatus ? "ok" : "failed"));
 
-
     // ------------------------------------------------------------
     s = gStatus;
     check( lapacke_bool_const(   MagmaFalse         ) == 'N' );
@@ -169,7 +168,6 @@ int main( int argc, char** argv )
     check( lapacke_storev_const( MagmaColumnwise    ) == 'C' );
     check( lapacke_storev_const( MagmaRowwise       ) == 'R' );
     printf( "MAGMA  -> lapacke_xxxxx_const   %s\n", (s == gStatus ? "ok" : "failed"));
-
 
     // ------------------------------------------------------------
     s = gStatus;
@@ -239,7 +237,6 @@ int main( int argc, char** argv )
     check( lapack_const( MagmaRowwise       )[0] == 'R' );
     printf( "MAGMA  -> lapack_const          %s\n", (s == gStatus ? "ok" : "failed"));
 
-
     // ------------------------------------------------------------
     s = gStatus;
     check( lapacke_const( MagmaFalse         ) == 'N' );
@@ -307,7 +304,6 @@ int main( int argc, char** argv )
     check( lapacke_const( MagmaColumnwise    ) == 'C' );
     check( lapacke_const( MagmaRowwise       ) == 'R' );
     printf( "MAGMA  -> lapacke_const         %s\n", (s == gStatus ? "ok" : "failed"));
-
 
     // ------------------------------------------------------------
     s = gStatus;
@@ -426,7 +422,6 @@ int main( int argc, char** argv )
     check( magma_storev_const( 'R' ) == MagmaRowwise     );
     check( magma_storev_const( 'r' ) == MagmaRowwise     );
     printf( "LAPACK -> magma_xxxxx_const     %s\n", (s == gStatus ? "ok" : "failed"));
-
 
     // ------------------------------------------------------------
     #ifdef HAVE_clAmdBlas

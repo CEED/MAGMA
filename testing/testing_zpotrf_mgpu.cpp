@@ -120,7 +120,7 @@ int main( int argc, char** argv )
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
-            for( int dev=0; dev < ngpu; dev++ ){
+            for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 magma_device_sync();
             }
@@ -141,7 +141,7 @@ int main( int argc, char** argv )
             
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
-            for( int dev=0; dev < ngpu; dev++ ){
+            for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
             }

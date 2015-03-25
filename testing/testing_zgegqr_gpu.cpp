@@ -158,14 +158,14 @@ int main( int argc, char** argv)
                    Check the result compared to LAPACK
                    =================================================================== */
                 blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_R, &M, h_R, &M, &c_zero, h_work, &N);
-                for(int ii = 0; ii < N*N; ii += N+1 ) {
+                for (int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }
                 e1 = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
                 e3 = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
                 blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
-                for(int ii = 0; ii < N*N; ii += N+1 ) {
+                for (int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }
                 e2 = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
@@ -173,14 +173,14 @@ int main( int argc, char** argv)
 
                 if (opts.version != 4)
                     e = e1;
-                else 
+                else
                     e = e1 / (10.*max(M,N));
 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e / %8.2e   %8.2e / %8.2e   %8.2e  %s\n",
                        (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                        e1, e2, e3, e4, e5,
                        (e < tol ? "ok" : "failed"));
-                status += ! (e < tol); 
+                status += ! (e < tol);
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",

@@ -151,7 +151,7 @@ int main( int argc, char** argv)
             if (info != 0) {
                 printf("magma_zgeqr2x_gpu version %d returned error %d: %s.\n",
                        (int) opts.version, (int) info, magma_strerror( info ));
-            } 
+            }
             else {
                 if ( opts.check ) {
                     /* =====================================================================
@@ -163,8 +163,8 @@ int main( int argc, char** argv)
                     magma_zgetmatrix( min_mn, 1, dtau, min_mn,   tau, min_mn );
 
                     // Restore the upper triangular part of A before the check
-                    for(int col=0; col < N; col++){
-                        for(int row=0; row <= col; row++)
+                    for (int col=0; col < N; col++) {
+                        for (int row=0; row <= col; row++)
                             h_R[row + col*M] = h_T[row + col*N];
                     }
 
@@ -213,14 +213,13 @@ int main( int argc, char** argv)
                         printf("lapackf77_zgeqrf returned error %d: %s.\n",
                                (int) info, magma_strerror( info ));
 
-
                     /* =====================================================================
                        Check the result compared to LAPACK
                        =================================================================== */
 
                     // Restore the upper triangular part of A before the check
-                    for(int col=0; col < N; col++){
-                        for(int row=0; row <= col; row++)
+                    for (int col=0; col < N; col++) {
+                        for (int row=0; row <= col; row++)
                             h_R[row + col*M] = h_T[row + col*N];
                     }
                 
@@ -232,17 +231,17 @@ int main( int argc, char** argv)
                     magma_zgetmatrix( N, N, d_T, N, h_T, N );
     
                     double terr = 0.;
-                    for(int col=0; col < N; col++)
-                        for(int row=0; row <= col; row++)
+                    for (int col=0; col < N; col++)
+                        for (int row=0; row <= col; row++)
                             terr += (  MAGMA_Z_ABS(h_work[row + col*N] - h_T[row + col*N])*
                                        MAGMA_Z_ABS(h_work[row + col*N] - h_T[row + col*N])  );
                     terr = sqrt( terr );
     
                     // If comparison to LAPACK fail, check || R - Q^H*A || / (N * ||A||)
-                    // and print fail if both fails, otherwise print ok (*) 
+                    // and print fail if both fails, otherwise print ok (*)
                     printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     %8.2e     %8.2e   %s\n",
                            (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
-                           error2, terr, (error2 < tol ? "ok" : "failed" )); 
+                           error2, terr, (error2 < tol ? "ok" : "failed" ));
 
                     status += ! (error2 < tol);
                 }

@@ -426,7 +426,7 @@ void cublasalloc_f_ ( const int *n, const int *elem_size, void *A, uint64_t *off
   retVal = (int)cublasAlloc((*n), (*elem_size), &tPtr);
   *off = ((uintptr_t)tPtr-(uintptr_t)A)/(*elem_size);
   printf("off = %d\n", *off);
-  return ;
+  return;
 }
 
 extern "C"
@@ -436,7 +436,7 @@ void cublasmallochost_f_ (void *A, const int *n, uint64_t *off)
   int retVal;
   retVal = (int)cudaMallocHost(&tPtr, (*n));
   *off = ((uintptr_t)tPtr-(uintptr_t)A);
-  return ;
+  return;
 }
 
 int CUBLAS_FREE (const devptr_t *devicePtr)
@@ -1479,7 +1479,7 @@ int CUBLAS_IDAMAX (const int *n, const double *x, const int *incx)
     int retVal = 0;
     cublasStatus stat;
 
-    if (*n == 0) return retVal;;
+    if (*n == 0) return retVal;
     stat = cublasAlloc (1+(*n-1)*abs(*incx),sizeof(x[0]),(void**)&devPtrx);
     if (stat != CUBLAS_STATUS_SUCCESS) {
         wrapperError ("Idamax", CUBLAS_WRAPPER_ERROR_ALLOC);
@@ -5211,4 +5211,3 @@ void CUBLAS_ZGEMM (const char *transa, const char *transb, const int *m,
 }
 
 #endif  /* defined(CUBLAS_USE_THUNKING) */
-

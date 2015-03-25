@@ -307,7 +307,7 @@ int main( int argc, char** argv)
                 }
                 
                 result[3] = 0.;
-                for(int j=0; j < min_mn-1; j++){
+                for (int j=0; j < min_mn-1; j++) {
                     if ( S1[j] < S1[j+1] )
                         result[3] = 1.;
                     if ( S1[j] < 0. )

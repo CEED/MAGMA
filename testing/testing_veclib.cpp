@@ -58,7 +58,7 @@ blasf77_sdot(   const magma_int_t *n,
                 const float *x, const magma_int_t *incx,
                 const float *y, const magma_int_t *incy );
                 
-RETURN_FLOAT    
+RETURN_FLOAT
 blasf77_snrm2(  const magma_int_t *n,
                 const float *x, const magma_int_t *incx );
 

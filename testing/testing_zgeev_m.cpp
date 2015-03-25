@@ -191,12 +191,12 @@ int main( int argc, char** argv)
                     result[2] = max( result[2], min( ulpinv, fabs(tnrm-1.)/ulp ));
                     
                     vmx  = vrmx = 0.;
-                    for( int jj = 0; jj <N; ++jj ) {
+                    for( int jj = 0; jj < N; ++jj ) {
                         vtst = MAGMA_Z_ABS(VR[jj + j*lda]);
                         if (vtst > vmx)
                             vmx = vtst;
                         
-                        if (MAGMA_Z_IMAG(VR[jj + j*lda])==0. &&
+                        if (MAGMA_Z_IMAG(VR[jj + j*lda]) == 0. &&
                             fabs( MAGMA_Z_REAL(VR[jj+j*lda]) ) > vrmx)
                         {
                             vrmx = fabs( MAGMA_Z_REAL( VR[jj+j*lda] ) );
@@ -219,7 +219,7 @@ int main( int argc, char** argv)
                         if (vtst > vmx)
                             vmx = vtst;
                         
-                        if (MAGMA_Z_IMAG(VL[jj + j*lda])==0. &&
+                        if (MAGMA_Z_IMAG(VL[jj + j*lda]) == 0. &&
                             fabs( MAGMA_Z_REAL( VL[jj + j*lda] ) ) > vrmx)
                         {
                             vrmx = fabs( MAGMA_Z_REAL( VL[jj+j*lda]) );

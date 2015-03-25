@@ -97,7 +97,7 @@ int main( int argc, char** argv )
             /* Factor A into LU to get well-conditioned triangular matrix.
              * Copy L to U, since L seems okay when used with non-unit diagonal
              * (i.e., from U), while U fails when used with unit diagonal. */
-            sizeA = lda*N;            
+            sizeA = lda*N;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zgetrf( &N, &N, h_A, &lda, ipiv, &info );
             for( int j = 0; j < N; ++j ) {

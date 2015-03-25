@@ -58,10 +58,10 @@ int main( int argc, char** argv)
     nb      = (opts.nb      > 0 ? opts.nb      : 64);
     nstream = (opts.nstream > 0 ? opts.nstream :  2);
     
-    printf( "version 1: magmablas_zher2k_mgpu2     %s\n", (opts.version==1 ? "(enabled)" : ""));
-    printf( "version 2: magmablas_zher2k_mgpu_spec %s\n", (opts.version==2 ? "(enabled)" : ""));
+    printf( "version 1: magmablas_zher2k_mgpu2     %s\n", (opts.version == 1 ? "(enabled)" : ""));
+    printf( "version 2: magmablas_zher2k_mgpu_spec %s\n", (opts.version == 2 ? "(enabled)" : ""));
 #ifdef ICHI
-    printf( "version 3: magma_zher2k_mgpu (Ichi)   %s\n", (opts.version==3 ? "(enabled)" : ""));
+    printf( "version 3: magma_zher2k_mgpu (Ichi)   %s\n", (opts.version == 3 ? "(enabled)" : ""));
 #endif
     printf( "\n" );
     

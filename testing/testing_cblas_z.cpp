@@ -88,7 +88,6 @@ void output( const char* routine, double diff, double error )
 }
 
 
-
 // ----------------------------------------
 int main( int argc, char** argv )
 {
@@ -155,7 +154,6 @@ int main( int argc, char** argv )
         lapackf77_zlarnv( &ione, ISEED, &size, B );
         
         printf( "Level 1 BLAS ----------------------------------------------------------\n" );
-        
         
         // ----- test DZASUM
         // get one-norm of column j of A

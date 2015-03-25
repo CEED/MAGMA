@@ -89,7 +89,7 @@ int main( int argc, char** argv)
             n2 = lda*N;
             nb = magma_get_zgesvd_nb(N);
             
-            // query or use formula for workspace size 
+            // query or use formula for workspace size
             switch( opts.svd_work ) {
                 case 0: {  // query for workspace size
                     lwork = -1;
@@ -201,7 +201,7 @@ int main( int argc, char** argv)
                 
                 // zbdt01 and zunt01 need max(M,N), depending
                 double *rwork_err;
-                TESTING_MALLOC_CPU( rwork_err, double, max(M,N) );                
+                TESTING_MALLOC_CPU( rwork_err, double, max(M,N) );
                 
                 if ( U2 != NULL && VT2 != NULL ) {
                     // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
@@ -229,7 +229,7 @@ int main( int argc, char** argv)
                 }
                 
                 result[3] = 0.;
-                for(int j=0; j < min_mn-1; j++){
+                for (int j=0; j < min_mn-1; j++) {
                     if ( S1[j] < S1[j+1] )
                         result[3] = 1.;
                     if ( S1[j] < 0. )

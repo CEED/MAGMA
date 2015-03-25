@@ -53,7 +53,7 @@ int main( int argc, char** argv )
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int iside = 0; iside < 2; ++iside ) {
       for( int itran = 0; itran < 2; ++itran ) {
-        for( int iter = 0; iter < opts.niter; ++iter ) {        
+        for( int iter = 0; iter < opts.niter; ++iter ) {
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];

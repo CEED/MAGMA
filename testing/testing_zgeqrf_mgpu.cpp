@@ -50,8 +50,8 @@ int main( int argc, char** argv )
     if ( opts.check == 1 ) {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
         printf("================================================================================================\n");
-
-    } else {
+    }
+    else {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
         printf("==========================================================================\n");
     }
@@ -96,7 +96,7 @@ int main( int argc, char** argv )
             }
             
             /* Initialize the matrix */
-            for ( int j=0; j<4; j++ )
+            for( int j=0; j < 4; j++ )
                 ISEED2[j] = ISEED[j]; // save seeds
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
@@ -197,7 +197,7 @@ int main( int argc, char** argv )
             
             TESTING_FREE_PIN( h_R    );
             
-            for( int dev=0; dev < ngpu; dev++ ){
+            for( int dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
                 TESTING_FREE_DEV( d_lA[dev] );
             }

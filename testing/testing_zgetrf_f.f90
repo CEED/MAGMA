@@ -15,7 +15,7 @@
 
       double precision zlange, dlamch
 
-      double precision              :: rnumber(2), Anorm, Bnorm, Xnorm, Rnorm 
+      double precision              :: rnumber(2), Anorm, Bnorm, Xnorm, Rnorm
       double precision, allocatable :: work(:)
       complex*16, allocatable       :: A(:), B(:), X(:)
       complex*16, allocatable       :: A2(:)
@@ -96,7 +96,7 @@
       if ( Rnorm > 60. ) then
          write(*,105) '  Solution is suspicious, ', Rnorm
       else
-         write(*,105) '  Solution is CORRECT' 
+         write(*,105) '  Solution is CORRECT'
       end if
 
 !---- Free CPU memory

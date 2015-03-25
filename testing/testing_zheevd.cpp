@@ -140,7 +140,7 @@ int main( int argc, char** argv)
                    (1)    | A - U S U' | / ( |A| N )
                    (2)    | I - U'U | / ( N )
                    (3)    | S(with U) - S(w/o U) | / | S |    // currently disabled, but compares to LAPACK
-                   =================================================================== */                
+                   =================================================================== */
                 magmaDoubleComplex *work;
                 TESTING_MALLOC_CPU( work, magmaDoubleComplex, 2*N*N );
                 

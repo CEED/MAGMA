@@ -88,10 +88,9 @@ int main( int argc, char** argv)
             #endif
             liwork = 3 + 5*N;
 
-
-            //magma_int_t NB = 96;//magma_bulge_get_nb(N);
-            //magma_int_t sizvblg = magma_zbulge_get_lq2(N, threads);        
-            //magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N; 
+            //magma_int_t NB = 96; //magma_bulge_get_nb(N);
+            //magma_int_t sizvblg = magma_zbulge_get_lq2(N, threads);
+            //magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N;
             /* Allocate host memory for the matrix */
             TESTING_MALLOC_PIN( h_A,    magmaDoubleComplex, n2 );
             TESTING_MALLOC_PIN( h_B,    magmaDoubleComplex, n2 );
@@ -115,8 +114,6 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_Ainit, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_Binit, &N );
             }
-
-
 
             magma_int_t m1 = 0;
             double vl = 0;
@@ -175,25 +172,25 @@ int main( int argc, char** argv)
                 #endif
                 result = 1.;
                 result /= lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_Ainit, &N, rwork);
-                result /= lapackf77_zlange("1", &N , &m1, h_A, &N, rwork);
+                result /= lapackf77_zlange("1", &N, &m1, h_A, &N, rwork);
 
                 if (opts.itype == 1) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_Ainit, &N, h_A, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_neg_one, h_Binit, &N, h_A, &N, &c_one, h_work, &N);
                     result *= lapackf77_zlange("1", &N, &m1, h_work, &N, rwork)/N;
                 }
                 else if (opts.itype == 2) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_Binit, &N, h_A, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_Ainit, &N, h_work, &N, &c_neg_one, h_A, &N);
                     result *= lapackf77_zlange("1", &N, &m1, h_A, &N, rwork)/N;
                 }
                 else if (opts.itype == 3) {
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_Ainit, &N, h_A, &N, &c_zero, h_work, &N);
-                    for(int i=0; i<m1; ++i)
+                    for (int i=0; i < m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
                     blasf77_zhemm("L", lapack_uplo_const(opts.uplo), &N, &m1, &c_one, h_Binit, &N, h_work, &N, &c_neg_one, h_A, &N);
                     result *= lapackf77_zlange("1", &N, &m1, h_A, &N, rwork)/N;
@@ -207,13 +204,13 @@ int main( int argc, char** argv)
                    (int) N, (int) m1, (int) opts.ngpu, mgpu_time);
             if ( opts.check && opts.jobz != MagmaNoVec ) {
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
-                if (opts.itype==1) {
+                if (opts.itype == 1) {
                     printf("    | A Z - B Z D | / (|A| |Z| N) = %8.2e   %s\n", result, (result < tol ? "ok" : "failed") );
                 }
-                else if (opts.itype==2) {
+                else if (opts.itype == 2) {
                     printf("    | A B Z - Z D | / (|A| |Z| N) = %8.2e   %s\n", result, (result < tol ? "ok" : "failed") );
                 }
-                else if (opts.itype==3) {
+                else if (opts.itype == 3) {
                     printf("    | B A Z - Z D | / (|A| |Z| N) = %8.2e   %s\n", result, (result < tol ? "ok" : "failed") );
                 }
                 printf("\n");

@@ -25,7 +25,7 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf_mgpu
 */
-int main( int argc, char** argv) 
+int main( int argc, char** argv)
 {
     /* Initialize */
     TESTING_INIT();
@@ -62,15 +62,15 @@ int main( int argc, char** argv)
 
             //TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda*N );
             nb = magma_get_zpotrf_nb(N);
-            if( ngpu0 > N / nb ) {
+            if ( ngpu0 > N / nb ) {
                 ngpu = N / nb;
-                if( N % nb != 0 ) ngpu++;
+                if ( N % nb != 0 ) ngpu++;
                 printf( " * too many gpus for the matrix size, using %d gpus\n", (int) ngpu );
             } else {
                 ngpu = ngpu0;
             }
 
-            for(j = 0; j < ngpu; j++){
+            for (j = 0; j < ngpu; j++) {
                 n_local = nb*(N /(nb * ngpu));
                 if (j < (N / nb) % ngpu)
                     n_local += nb;
@@ -85,7 +85,7 @@ int main( int argc, char** argv)
             }
 
             /* Initialize the matrix */
-            if(opts.check) {
+            if (opts.check) {
                 lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
                 magma_zmake_hpd( N, h_A, lda );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
@@ -95,12 +95,12 @@ int main( int argc, char** argv)
             }
 
             /* ====================================================================
-               Performs operation using MAGMA 
+               Performs operation using MAGMA
                =================================================================== */
             /* distribute matrix to gpus */
-            //magma_zprint( N,N, h_A, lda );
-            //if( opts.uplo == MagmaUpper) {
-                for(j = 0; j < N; j += nb){
+            //magma_zprint( N, N, h_A, lda );
+            //if ( opts.uplo == MagmaUpper) {
+                for (j = 0; j < N; j += nb) {
                     k = (j / nb) % ngpu;
                     magma_setdevice(k);
                     nk = min(nb, N - j);
@@ -126,7 +126,7 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime();
                 lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 //printf( " ==== LAPACK ====\n" );
-                //magma_zprint( N,N, h_A, lda );
+                //magma_zprint( N, N, h_A, lda );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -136,8 +136,8 @@ int main( int argc, char** argv)
                    Check the result compared to LAPACK
                    =================================================================== */
                 /* gather matrix from gpus */
-                //if( opts.uplo == MagmaUpper ) {
-                    for(j = 0; j < N; j += nb){
+                //if ( opts.uplo == MagmaUpper ) {
+                    for (j = 0; j < N; j += nb) {
                         k = (j / nb) % ngpu;
                         magma_setdevice(k);
                         nk = min(nb, N - j);
@@ -149,8 +149,7 @@ int main( int argc, char** argv)
                 }*/
                 magma_setdevice(0);
                 //printf( " ==== MAGMA ====\n" );
-                //magma_zprint( N,N, h_R, lda );
-
+                //magma_zprint( N, N, h_R, lda );
 
                 //error = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
                 error = lapackf77_zlanhe("f", "L", &N, h_A, &lda, work);
@@ -166,7 +165,7 @@ int main( int argc, char** argv)
                         (int) N, gpu_perf, gpu_time );
             }
 
-            for(j = 0; j < ngpu; j++) {
+            for (j = 0; j < ngpu; j++) {
                 magma_setdevice(j);
                 TESTING_DEVFREE( d_lA[j] );
             }
@@ -185,4 +184,3 @@ int main( int argc, char** argv)
 
     return 0;
 }
-

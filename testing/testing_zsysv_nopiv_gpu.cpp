@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> c 
+       @precisions normal z -> c
        
        @author Mark Gates
        @author Adrien Remy
@@ -21,7 +21,6 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -121,7 +120,7 @@ int main(int argc, char **argv)
                =================================================================== */
             if ( opts.lapack ) {
                 lwork = -1;
-                lapackf77_zsysv( lapack_uplo_const(opts.uplo), &N,&nrhs,
+                lapackf77_zsysv( lapack_uplo_const(opts.uplo), &N, &nrhs,
                                  h_A, &lda, ipiv, h_B, &ldb, &temp, &lwork, &info );
                 lwork = (magma_int_t) MAGMA_Z_REAL( temp );
                 TESTING_MALLOC_PIN( hwork, magmaDoubleComplex, lwork );

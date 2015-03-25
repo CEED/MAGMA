@@ -238,7 +238,7 @@ int main(int argc, char **argv)
             
             /* =====================================================================
                Compute the Difference Cublas vs. Magma
-               =================================================================== */            
+               =================================================================== */
             error = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work );
             blasf77_zaxpy( &Noffset, &c_neg_one, Ymagma, &incx, Ycublas, &incx );
             error = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work ) / error;
@@ -293,7 +293,6 @@ int main(int argc, char **argv)
       // comment out these two lines line & top of loop test a specific offset
       }  // end for ioffset
       printf( "\n" );
-      
     }
     
     for( dev=0; dev < opts.ngpu; ++dev ) {

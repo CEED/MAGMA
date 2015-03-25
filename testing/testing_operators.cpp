@@ -61,7 +61,6 @@ int main( int argc, char** argv)
     double dtol = opts.tolerance * lapackf77_dlamch("E");
     double stol = opts.tolerance * lapackf77_slamch("E");
 
-
     // --------------------
     // MAGMA operator                 std::complex operator                      verify
     s = gStatus;
@@ -83,7 +82,6 @@ int main( int argc, char** argv)
     eq = (za == zb);                  eq3 = (za3 == zb3);                        check( eq == eq3 );
     eq = (za == zc);                  eq3 = (za3 == zc3);                        check( eq == eq3 );
     printf( "std::complex<double> operators  %s\n", (s == gStatus ? "ok" : "failed"));
-
 
     // --------------------
     // MAGMA operator                 std::complex operator                      verify
@@ -129,7 +127,6 @@ int main( int argc, char** argv)
     eq = (za == zc);                  eq2 = MAGMA_Z_EQUAL( za2, zc2 );   check( eq == eq2 );
     printf( "magmaDoubleComplex operators    %s\n", (s == gStatus ? "ok" : "failed"));
 
-
     // --------------------
     // MAGMA operator                 MAGMA MACRO                        verify
     s = gStatus;
@@ -152,7 +149,6 @@ int main( int argc, char** argv)
     eq = (ca == cc);                  eq2 = MAGMA_C_EQUAL( ca2, cc2 );   check( eq == eq2 );
     printf( "magmaFloatComplex  operators    %s\n", (s == gStatus ? "ok" : "failed"));
 
-
     // --------------------
     // MAGMA operator                 MAGMA MACRO                        verify
     s = gStatus;
@@ -174,7 +170,6 @@ int main( int argc, char** argv)
     eq = (da == db);                  eq2 = MAGMA_D_EQUAL( da2, db2 );   check( eq == eq2 );
     eq = (da == dc);                  eq2 = MAGMA_D_EQUAL( da2, dc2 );   check( eq == eq2 );
     printf( "double operators                %s\n", (s == gStatus ? "ok" : "failed"));
-
 
     // --------------------
     // MAGMA operator                 MAGMA MACRO                        verify

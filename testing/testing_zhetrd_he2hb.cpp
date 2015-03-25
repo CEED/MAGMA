@@ -119,7 +119,6 @@ int main( int argc, char** argv)
             
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
     
-    
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
@@ -185,7 +184,6 @@ int main( int argc, char** argv)
                                 #endif
                                 iwork, liwork,
                                 &info);
-    
             } else {
                 printf("calling zheevdx_2stage_m %d GPU\n", (int) ngpu);
                 magma_zheevdx_2stage_m(ngpu, opts.jobz, range, opts.uplo, N,
@@ -200,7 +198,6 @@ int main( int argc, char** argv)
                                 &info);
             }
     
-    
             magma_setdevice( cdev );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
@@ -210,10 +207,10 @@ int main( int argc, char** argv)
                =================================================================== */
             /*
             if ( opts.check ) {
-                FILE        *fp ;
+                FILE        *fp;
     
                 printf("Writing input matrix in matlab_i_mat.txt ...\n");
-                fp = fopen ("matlab_i_mat.txt", "w") ;
+                fp = fopen ("matlab_i_mat.txt", "w");
                 if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
     
                 for (j=0; j < N; j++) {
@@ -226,10 +223,10 @@ int main( int argc, char** argv)
                         #endif
                     }
                 }
-                fclose( fp ) ;
+                fclose( fp );
     
                 printf("Writing output matrix in matlab_o_mat.txt ...\n");
-                fp = fopen ("matlab_o_mat.txt", "w") ;
+                fp = fopen ("matlab_o_mat.txt", "w");
                 if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
     
                 for (j=0; j < N; j++) {
@@ -242,11 +239,9 @@ int main( int argc, char** argv)
                         #endif
                     }
                 }
-                fclose( fp ) ;
+                fclose( fp );
             }
             */
-    
-    
     
             /* =====================================================================
                Print performance and error.
@@ -304,10 +299,8 @@ int main( int argc, char** argv)
                 // magma_zmalloc_cpu( &Z, N*lda );
                 // dgemm_("N", "N", &N, &N, &N, &mydo, h_R, &lda, h_A, &lda, &mydz, Z, &lda);
     
-    
                 /* compare result */
                 cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
-    
     
                 magmaDoubleComplex *WORKAJETER;
                 double *RWORKAJETER, *RESU;
@@ -318,7 +311,6 @@ int main( int argc, char** argv)
                 int MATYPE;
                 memset(RESU, 0, 10*sizeof(double));
     
-     
                 MATYPE=3;
                 double NOTHING=0.0;
                 cpu_time = magma_wtime();

@@ -122,7 +122,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     // copy LU to L and U, and set diagonal to 1
     lapackf77_zlacpy( MagmaLowerStr, &M, &min_mn, LU, &lda, L, &M      );
     lapackf77_zlacpy( MagmaUpperStr, &min_mn, &N, LU, &lda, U, &min_mn );
-    for(j=0; j<min_mn; j++)
+    for (j=0; j < min_mn; j++)
         L[j+j*M] = MAGMA_Z_MAKE( 1., 0. );
     
     matnorm = lapackf77_zlange("f", &M, &N, A, &lda, work);

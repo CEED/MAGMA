@@ -211,12 +211,12 @@ int main( int argc, char** argv)
                         result[1] = max( result[1], min( ulpinv, fabs(tnrm-1.)/ulp ));
                         
                         vmx = vrmx = 0.;
-                        for( int jj = 0; jj <N; ++jj ) {
+                        for( int jj = 0; jj < N; ++jj ) {
                             vtst = magma_dzlapy2(VR[jj + j*lda]);
                             if (vtst > vmx)
                                 vmx = vtst;
                             
-                            if (MAGMA_Z_IMAG(VR[jj + j*lda])==0. &&
+                            if (MAGMA_Z_IMAG(VR[jj + j*lda]) == 0. &&
                                 fabs( MAGMA_Z_REAL(VR[jj+j*lda]) ) > vrmx)
                             {
                                 vrmx = fabs( MAGMA_Z_REAL( VR[jj+j*lda] ) );
@@ -248,7 +248,7 @@ int main( int argc, char** argv)
                             if (vtst > vmx)
                                 vmx = vtst;
                             
-                            if (MAGMA_Z_IMAG(VL[jj + j*lda])==0. &&
+                            if (MAGMA_Z_IMAG(VL[jj + j*lda]) == 0. &&
                                 fabs( MAGMA_Z_REAL( VL[jj + j*lda] ) ) > vrmx)
                             {
                                 vrmx = fabs( MAGMA_Z_REAL( VL[jj+j*lda]) );
@@ -290,7 +290,7 @@ int main( int argc, char** argv)
                 // if (info != 0)
                 //     printf("magma_zgeev (case N, N) returned error %d: %s.\n",
                 //            (int) info, magma_strerror( info ));
-                // 
+                //
                 // // Do test 5: W(full) = W(partial, W only)
                 // result[4] = 1;
                 // for( int j = 0; j < N; ++j )

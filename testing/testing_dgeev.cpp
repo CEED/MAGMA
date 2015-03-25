@@ -224,7 +224,7 @@ int main( int argc, char** argv)
                                 if (vtst > vmx)
                                     vmx = vtst;
                                 
-                                if ( (VR[jj + (j+1)*lda])==0. &&
+                                if ( (VR[jj + (j+1)*lda]) == 0. &&
                                      MAGMA_D_ABS( VR[jj+j*lda] ) > vrmx)
                                 {
                                     vrmx = MAGMA_D_ABS( VR[jj+j*lda] );
@@ -264,7 +264,7 @@ int main( int argc, char** argv)
                                 if (vtst > vmx)
                                     vmx = vtst;
                                 
-                                if ( (VL[jj + (j+1)*lda])==0. &&
+                                if ( (VL[jj + (j+1)*lda]) == 0. &&
                                      MAGMA_D_ABS( VL[jj+j*lda]) > vrmx)
                                 {
                                     vrmx = MAGMA_D_ABS( VL[jj+j*lda] );
