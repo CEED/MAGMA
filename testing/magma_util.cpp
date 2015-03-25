@@ -156,7 +156,7 @@ const char *usage =
 "  -x  --exclusive  Lock file for exclusive use (internal ICL functionality).\n"
 "\n"
 "The following options apply to only some routines.\n"
-"  --batch x        number of matrices for the batched routines, default is 1.\n"
+"  --batch x        number of matrices for the batched routines, default 1000.\n"
 "  --nb x           Block size, default set automatically.\n"
 "  --nrhs x         Number of right hand sides, default 1.\n"
 "  --nstream x      Number of CUDA streams, default 1.\n"
@@ -194,7 +194,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     int k = -1;
     
     // fill in default values
-    opts->batchcount = 1;
+    opts->batchcount = 1000;
     opts->device   = 0;
     opts->align    = 32;
     opts->nb       = 0;  // auto
@@ -400,7 +400,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         }
         else if ( strcmp("--fraction_dcpu", argv[i]) == 0 && i+1 < argc ) {
             opts->fraction_dcpu = atof( argv[++i] );
-            magma_assert( opts->fraction_dcpu > 0 && opts->fraction_dcpu<=1,
+            magma_assert( opts->fraction_dcpu > 0 && opts->fraction_dcpu <= 1,
                           "error: --fraction_dcpu %s is invalid; ensure fraction_dcpu in [0, 1]\n", argv[i] );
         }
         else if ( strcmp("--batch", argv[i]) == 0 && i+1 < argc ) {
