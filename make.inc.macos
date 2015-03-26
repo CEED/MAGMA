@@ -77,3 +77,6 @@ blas_fix:
 	@echo
 
 lib: blas_fix
+
+# reset default goal
+.DEFAULT_GOAL :=
