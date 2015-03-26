@@ -34,8 +34,8 @@ static void magma_ztile_bulge_applyQ(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class magma_zapplyQ_m_data {
-
+class magma_zapplyQ_m_data
+{
 public:
 
     magma_zapplyQ_m_data(magma_int_t ngpu_, magma_int_t threads_num_, magma_int_t n_, magma_int_t ne_, magma_int_t n_gpu_,
@@ -91,8 +91,8 @@ private:
     magma_zapplyQ_m_data(magma_zapplyQ_m_data& data); // disable copy
 };
 
-class magma_zapplyQ_m_id_data {
-
+class magma_zapplyQ_m_id_data
+{
 public:
 
     magma_zapplyQ_m_id_data()

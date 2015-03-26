@@ -180,7 +180,7 @@ magma_zunmql2_gpu(
     }
 
     ldwork = nw;
-        
+    
     /* Use hybrid CPU-GPU code */
     if ((left && notran) || (! left && ! notran)) {
         i1 = 1;

@@ -339,7 +339,7 @@ magma_dlaex3_m(
     magma_timer_t time=0;
     timer_start( time );
 
-#pragma omp parallel private(i, j, tmp, temp)
+    #pragma omp parallel private(i, j, tmp, temp)
     {
         magma_int_t id = omp_get_thread_num();
         magma_int_t tot = omp_get_num_threads();
@@ -357,16 +357,16 @@ magma_dlaex3_m(
             lapackf77_dlaed4(&k, &tmpp, dlamda, w, Q(0,j), &rho, &d[j], &iinfo);
             // If the zero finder fails, the computation is terminated.
             if (iinfo != 0) {
-#pragma omp critical (info)
+                #pragma omp critical (info)
                 *info = iinfo;
                 break;
             }
         }
 
-#pragma omp barrier
+        #pragma omp barrier
 
         if (*info == 0) {
-#pragma omp single
+            #pragma omp single
             {
                 //Prepare the INDXQ sorting permutation.
                 magma_int_t nk = n - k;
@@ -385,7 +385,7 @@ magma_dlaex3_m(
             }
 
             if (k == 2) {
-#pragma omp single
+                #pragma omp single
                 {
                     for (j = 0; j < k; ++j) {
                         w[0] = *Q(0,j);
@@ -418,7 +418,7 @@ magma_dlaex3_m(
                 for (i = ib; i < ie; ++i)
                     w[i] = copysign( sqrt( -w[i] ), s[i]);
 
-#pragma omp barrier
+                #pragma omp barrier
 
                 //reduce the number of used threads to have enough S workspace
                 tot = min(n1, omp_get_num_threads());
@@ -446,7 +446,7 @@ magma_dlaex3_m(
                 }
             }
         }
-    }
+    }  // end omp parallel
     if (*info != 0)
         return *info;
 

@@ -237,7 +237,6 @@ magma_ztstrf_gpu(
             magma_zsetmatrix( m, n, hA, ldha, dA, ldda );
         }
         magma_zsetmatrix( p*ib, n, hL, ldhl, dL, lddl );
-            
     }
     else {
         /* Use hybrid blocked code. */

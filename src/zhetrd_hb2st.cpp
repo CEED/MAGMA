@@ -527,9 +527,9 @@ static void magma_ztile_bulge_parallel(
     #ifdef ENABLE_DEBUG
     if (my_core_id == 0) {
         if (cores_num > maxrequiredcores)    {
-           printf("==================================================================================\n");
-           printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n", maxrequiredcores);
-           printf("==================================================================================\n");
+            printf("==================================================================================\n");
+            printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n", maxrequiredcores);
+            printf("==================================================================================\n");
         }
         printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d \n", cores_num, n, nb, grsiz, thgrsiz);
     }

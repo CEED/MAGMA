@@ -117,8 +117,8 @@ magma_zbulge_applyQ_v2(
     magma_int_t dworksiz = lddwork*Vblksiz;  // lddv*Vblksiz; (v2)   // NE*Vblksiz=lddwork*Vblksiz; (v1,v3)
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*dworksiz + 2*dwVTsiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
-       printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
-       exit(-1);
+        printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
+        exit(-1);
     }
     dwork0 = dwork;               // size = dworksiz;
     dwork1 = dwork0 + dworksiz;   // size = dworksiz;
@@ -299,9 +299,9 @@ magma_zbulge_applyQ_v2(
                     }
 
                     if ((Vm > 0) && (Vn > 0)) {
-                    /*calculate the pointer to the Vs and the Ts.
-                     * Note that Vs and Ts have special storage done
-                     * by the bulgechasing function*/
+                        /* calculate the pointer to the Vs and the Ts.
+                         * Note that Vs and Ts have special storage done
+                         * by the bulgechasing function*/
                         magma_bulge_findVTpos(N, NB, Vblksiz, mycol, myrow, ldv, ldt, &vpos, &tpos);
                         magma_zsetmatrix_async(Vm, Vn, V(vpos), ldv, dV0, lddv, NULL);
                         magma_zsetmatrix_async(Vn,  Vn, T(tpos), ldt, dT0, lddt, NULL);

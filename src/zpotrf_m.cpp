@@ -452,7 +452,7 @@ magma_zpotrf_m(
     }
     magma_setdevice( orig_dev );
     magmablasSetKernelStream( orig_stream );
-                 
+    
     timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
     timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
                   FLOPS_ZPOTRF(n) / 1e9,  time_total,

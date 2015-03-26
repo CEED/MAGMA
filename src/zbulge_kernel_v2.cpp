@@ -31,9 +31,9 @@ magma_zlarfxsym_v2(
     magmaDoubleComplex *V, magmaDoubleComplex *TAU,
     magmaDoubleComplex *work)
 {
-/*
-    WORK (workspace) double complex array, dimension N
-*/
+    /*
+        WORK (workspace) double complex array, dimension N
+    */
 
     magma_int_t ione = 1;
     magmaDoubleComplex dtmp;
@@ -74,9 +74,9 @@ magma_ztrdtype1cbHLsym_withQ_v2(
     magma_int_t sweep, magma_int_t Vblksiz,
     magmaDoubleComplex *work)
 {
-/*
-    WORK (workspace) double complex array, dimension N
-*/
+    /*
+        WORK (workspace) double complex array, dimension N
+    */
 
     magma_int_t ione = 1;
     magma_int_t vpos, taupos, len, len2;

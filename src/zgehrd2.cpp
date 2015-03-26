@@ -197,7 +197,7 @@ magma_zgehrd2(
         magmaDoubleComplex *dA = dwork + nb*ldda*2;
         magmaDoubleComplex *dT = dwork + nb*ldda*2 + n*ldda;
         ldwork = ldda;
-            
+        
         magmaDoubleComplex *T;
         magma_zmalloc_cpu( &T, nb*nb );
         if ( T == NULL ) {

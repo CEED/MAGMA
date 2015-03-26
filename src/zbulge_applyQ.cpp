@@ -260,7 +260,7 @@ extern "C" void magma_zbulge_applyQ(
             }
         }
     } else {
-            printf("ERROR SIDE %d\n", SIDE);
+        printf("ERROR SIDE %d\n", SIDE);
     }
 
 #if defined(USESTREAM)

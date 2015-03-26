@@ -1002,7 +1002,7 @@ magma_dgesvd(
                         lwork2 = lwork - iwork + 1;
                         lapackf77_dgeqrf(&m, &n, A, &lda, &work[itau],
                                          &work[iwork], &lwork2, &ierr);
-                                                
+                        
                         // Copy R to WORK(IU), zeroing out below it
                         lapackf77_dlacpy("U", &n, &n,
                                          A, &lda,

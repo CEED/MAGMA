@@ -22,7 +22,7 @@ init_butterfly(
 {
     magma_int_t idx;
     double u1, v1;
-    for (idx=0; idx<n; idx++){
+    for (idx=0; idx < n; idx++) {
         u1 = exp((((rand() * 1.0)/RAND_MAX)-0.5)/10);
         v1 = exp((((rand() * 1.0)/RAND_MAX)-0.5)/10);
         u[idx] = MAGMA_Z_MAKE(u1,u1);
@@ -149,7 +149,7 @@ magma_zgerbt_gpu(
     }
 
     /* Initialize Butterfly matrix on the CPU*/
-    if(gen == MagmaTrue)
+    if (gen == MagmaTrue)
         init_butterfly(2*n, U, V);
 
     /* Copy the butterfly to the GPU */
@@ -160,7 +160,7 @@ magma_zgerbt_gpu(
     magmablas_zprbt(n, dA, ldda, du, dv);
 
     /* Compute U^T.b on the GPU*/
-    for(int i= 0; i < nrhs; i++)
+    for (int i= 0; i < nrhs; i++)
         magmablas_zprbt_mtv(n, du, dB+(i*lddb));
 
     magma_free( du );

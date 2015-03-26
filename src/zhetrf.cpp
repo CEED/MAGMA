@@ -163,15 +163,15 @@ magma_zhetrf(
     trace_gpu_start( 0, 0, "set", "setA" );
     //magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
     if ( upper ) {
-       for (int k = 0; k < n; k+=nb ) {
-           kb = min(nb, n-k);
-           magma_zsetmatrix_async( k+kb, kb, A(0,k), lda, dA(0,k), ldda, stream[0] );
-       }
+        for (int k = 0; k < n; k += nb ) {
+            kb = min(nb, n-k);
+            magma_zsetmatrix_async( k+kb, kb, A(0,k), lda, dA(0,k), ldda, stream[0] );
+        }
     } else {
-       for (int k = 0; k < n; k+=nb ) {
-           kb = min(nb, n-k);
-           magma_zsetmatrix_async( n-k, kb, A(k,k), lda, dA(k,k), ldda, stream[0] );
-       }
+        for (int k = 0; k < n; k += nb ) {
+            kb = min(nb, n-k);
+            magma_zsetmatrix_async( n-k, kb, A(k,k), lda, dA(k,k), ldda, stream[0] );
+        }
     }
     trace_gpu_end( 0, 0 );
 
@@ -184,7 +184,7 @@ magma_zhetrf(
            KB is either NB or NB-1, or K for the last block */
 
         kb = min(n,nb);
-        for (int k = n-1; k >= 0; k-=kb ) {
+        for (int k = n-1; k >= 0; k -= kb ) {
             nk = k+1;
             kb = min(nb, nk);
 
@@ -193,7 +193,7 @@ magma_zhetrf(
                 /* Factorize columns k-kb+1:k of A and use blocked code to
                    update columns 1:k-kb */
 
-                magma_zlahef_gpu( MagmaUpper, nk, kb, &kb, A( 0, 0 ), lda, dA( 0, 0 ), ldda, 
+                magma_zlahef_gpu( MagmaUpper, nk, kb, &kb, A( 0, 0 ), lda, dA( 0, 0 ), ldda,
                                   &ipiv[0], dW, ldda, stream, event, &iinfo );
             } else {
 

@@ -206,7 +206,7 @@ magma_zunmtr_m(
         //magma_zunmql_m(ngpu, side, trans, mi, ni, i__2, A(0,1), lda, tau,
         //               C, ldc, work, lwork, &iinfo);
         magma_zunmql(side, trans, mi, ni, i__2, A(0,1), lda, tau,
-                       C, ldc, work, lwork, &iinfo); 
+                       C, ldc, work, lwork, &iinfo);
     }
     else {
         /* Q was determined by a call to SSYTRD with UPLO = 'L' */

@@ -411,7 +411,6 @@ magma_zlabrd_gpu(
     else {
         /* Reduce to lower bidiagonal form */
         for (i = 1; i <= nb; ++i) {
-        
             /* Update A(i,i:n) */
             i__2 = n - i + 1;
             i__3 = i - 1;

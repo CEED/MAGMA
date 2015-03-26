@@ -51,7 +51,6 @@ void magma_zapplyQ_data_init(
     magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
     magmaDoubleComplex *T, magma_int_t ldt, magmaDoubleComplex *dE, magma_int_t ldde)
 {
-
     zapplyQ_data->threads_num = threads_num;
     zapplyQ_data->n = n;
     zapplyQ_data->ne = ne;

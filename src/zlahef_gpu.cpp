@@ -161,7 +161,7 @@ magma_zlahef_gpu(
             magmablasSetKernelStream( queues[0] );
             magma_zcopy( k+1, &dA( 0, k ), 1, &dW( 0, kw ), 1 );
             // set imaginary part of diagonal to be zero
-            #if defined(PRECISION_z) 
+            #if defined(PRECISION_z)
             magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, kw ))+1,1, queues[0] );
             #elif defined(PRECISION_c)
             magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dW( k, kw ))+1,1, queues[0] );
@@ -172,7 +172,7 @@ magma_zlahef_gpu(
                              &dW( k, kw+1 ), lddw, c_one, &dW( 0, kw ), ione );
 
                 // set imaginary part of diagonal to be zero
-                #if defined(PRECISION_z) 
+                #if defined(PRECISION_z)
                 magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, kw ))+1,1, queues[0] );
                 #elif defined(PRECISION_c)
                 magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dW( k, kw ))+1,1, queues[0] );
@@ -191,7 +191,7 @@ magma_zlahef_gpu(
             /* imax is the row-index of the largest off-diagonal element in
                column K, and colmax is its absolute value */
 
-            if( k > 0 ) {
+            if ( k > 0 ) {
                 magmablasSetKernelStream( queues[0] );
                 // magma is one-base
                 imax = magma_izamax( k, &dW( 0, kw ), 1 ) - 1;
@@ -201,7 +201,7 @@ magma_zlahef_gpu(
                 colmax = d_zero;
             }
 
-            if( max( abs_akk, colmax ) == 0.0 ) {
+            if ( max( abs_akk, colmax ) == 0.0 ) {
 
                 /* Column K is zero: set INFO and continue */
 
@@ -209,13 +209,13 @@ magma_zlahef_gpu(
 
                 kp = k;
 
-                #if defined(PRECISION_z) 
+                #if defined(PRECISION_z)
                 magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( k, k ))+1,1, queues[0] );
                 #elif defined(PRECISION_c)
                 magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dA( k, k ))+1,1, queues[0] );
                 #endif
             } else {
-                if( abs_akk >= alpha*colmax ) {
+                if ( abs_akk >= alpha*colmax ) {
 
                     /* no interchange, use 1-by-1 pivot block */
 
@@ -225,7 +225,7 @@ magma_zlahef_gpu(
                     /* Copy column imax to column KW-1 of W and update it */
                     magmablasSetKernelStream( queues[0] );
                     magma_zcopy( imax+1, &dA( 0, imax ), 1, &dW( 0, kw-1 ), 1 );
-                    #if defined(PRECISION_z) 
+                    #if defined(PRECISION_z)
                     magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
                     #elif defined(PRECISION_c)
                     magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
@@ -236,13 +236,13 @@ magma_zlahef_gpu(
                     #else
                     magma_zcopy( k-imax, &dA( imax, imax+1 ), ldda, &dW( imax+1, kw-1 ), 1 );
                     #endif
-                    if( k+1 < n ) {
+                    if ( k+1 < n ) {
                         magmablasSetKernelStream( queues[0] );
                         magma_zgemv( MagmaNoTrans, k+1, n-(k+1), c_mone,
                                      &dA( 0, k+1 ), ldda, &dW( imax, kw+1 ), lddw,
                                      c_one, &dW( 0, kw-1 ), ione );
 
-                        #if defined(PRECISION_z) 
+                        #if defined(PRECISION_z)
                         magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
                         #elif defined(PRECISION_c)
                         magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
@@ -263,7 +263,7 @@ magma_zlahef_gpu(
                         rowmax = max( rowmax, MAGMA_Z_ABS1( Z  ) );
                     }
 
-                    if( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
+                    if ( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
 
                         /* no interchange, use 1-by-1 pivot block */
 
@@ -292,7 +292,7 @@ magma_zlahef_gpu(
 
                 /* Updated column kp is already stored in column kkW of W */
 
-                if( kp != kk ) {
+                if ( kp != kk ) {
 
                     /* Interchange rows kk and kp in last kk columns of A and W */
                     // note: row-swap A(:,kk)
@@ -309,14 +309,14 @@ magma_zlahef_gpu(
 
                     // now A(kp,kk) should be A(kk,kk), and copy to A(kp,kp)
                     magma_zcopy( kp+1, &dA( 0, kk ), 1, &dA( 0, kp ), 1 );
-                    #if defined(PRECISION_z) 
+                    #if defined(PRECISION_z)
                     magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( kp, kp ))+1,1, queues[0] );
                     #elif defined(PRECISION_c)
                     magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dA( kp, kp ))+1,1, queues[0] );
                     #endif
                 }
 
-                if( kstep == 1 ) {
+                if ( kstep == 1 ) {
 
                     /* 1-by-1 pivot block D(k): column KW of W now holds
 
@@ -351,7 +351,7 @@ magma_zlahef_gpu(
                        of U */
 
                     magmablasSetKernelStream( queues[0] );
-                    if( k > 1 ) {
+                    if ( k > 1 ) {
 
                         /* Store U(k) and U(k-1) in columns k and k-1 of A */
 
@@ -369,12 +369,12 @@ magma_zlahef_gpu(
                     magmablas_zlacpy_cnjg( k,   &dW( 0, kw ),1, &dW( 0, kw ),1 );
                     magmablas_zlacpy_cnjg( k-1, &dW( 0, kw-1 ), 1, &dW( 0, kw-1 ), 1 );
                     #endif
-                } 
+                }
             }
 
             /* Store details of the interchanges in ipiv */
 
-            if( kstep == 1 ) {
+            if ( kstep == 1 ) {
                 ipiv[ k ] = 1+kp;
             } else {
                 ipiv[ k ] = -(1+kp);
@@ -396,7 +396,7 @@ magma_zlahef_gpu(
             #ifdef SYMMETRIC_UPDATE
             /* Update the upper triangle of the diagonal block */
             for (int jj = j; jj < j + jb; jj++) {
-                #if defined(PRECISION_z) 
+                #if defined(PRECISION_z)
                 magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( jj, jj ))+1,1, queues[0] );
                 #elif defined(PRECISION_c)
                 magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dA( jj, jj ))+1,1, queues[0] );
@@ -404,7 +404,7 @@ magma_zlahef_gpu(
                 magma_zgemv( MagmaNoTrans, jj-j+1, n-(k+1), c_mone,
                              &dA( j, k+1 ), ldda, &dW( jj, kw+1 ), lddw, c_one,
                              &dA( j, jj ), 1 );
-                #if defined(PRECISION_z) 
+                #if defined(PRECISION_z)
                 magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( jj, jj ))+1,1, queues[0] );
                 #elif defined(PRECISION_c)
                 magma_ssetvector_async( 1, &f_zero,1, ((magmaFloat_ptr)&dA( jj, jj ))+1,1, queues[0] );
@@ -436,22 +436,22 @@ magma_zlahef_gpu(
         /* Put U12 in standard form by partially undoing the interchanges
            in columns k+1:n */
 
-        for (int j = k+1; j < n;) {
+        for (int j = k+1; j < n; ) {
             int jj = j;
             int jp = ipiv[ j ];
-            if( jp < 0 ) {
+            if ( jp < 0 ) {
                 jp = -jp;
                 j = j + 1;
             }
             j = j + 1;
             jp = jp - 1;
-            if( jp != jj && j < n )
+            if ( jp != jj && j < n )
                 magmablas_zswap( n-j, &dA( jp, j ), ldda, &dA( jj, j ), ldda );
         }
 
         // copying the panel back to CPU
         magma_event_record( event[0], queues[0] );
-        magma_queue_wait_event( queues[1], event[0] ); 
+        magma_queue_wait_event( queues[1], event[0] );
         trace_gpu_start( 0, 1, "get", "get" );
         magma_zgetmatrix_async( n,n-(k+1), &dA(0,k+1),ldda, &A(0,k+1),lda, queues[1] );
 

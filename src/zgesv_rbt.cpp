@@ -205,7 +205,7 @@ magma_zgerfs_nopiv_gpu(
 REFINEMENT:
     for( iiter=1; iiter < ITERMAX; ) {
         *info = 0;
-        // solve dAF*dX = dR 
+        // solve dAF*dX = dR
         // it's okay that dR is used for both dB input and dX output.
         magma_zgetrs_nopiv_gpu( trans, n, nrhs, dAF, lddsa, dR, lddr, info );
         if (*info != 0) {
@@ -290,7 +290,7 @@ FALLBACK:
     Solves a system of linear equations
        A * X = B
     where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
-    Random Butterfly Tranformation is applied on A and B, then 
+    Random Butterfly Tranformation is applied on A and B, then
     the LU decomposition with no pivoting is
     used to factor A as
        A = L * U,
@@ -346,14 +346,13 @@ FALLBACK:
  ********************************************************************/
 
 
-extern "C" magma_int_t 
+extern "C" magma_int_t
 magma_zgesv_rbt(
-    magma_bool_t ref, magma_int_t n, magma_int_t nrhs, 
-    magmaDoubleComplex *A, magma_int_t lda, 
-    magmaDoubleComplex *B, magma_int_t ldb, 
+    magma_bool_t ref, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *B, magma_int_t ldb,
     magma_int_t *info)
 {
-
     /* Function Body */
     *info = 0;
     if ( ! (ref == MagmaTrue) &&
@@ -421,10 +420,10 @@ magma_zgesv_rbt(
 
     magmablas_zlaset(MagmaFull, nn, nn, MAGMA_Z_ZERO, MAGMA_Z_ONE, dA, nn);
 
-    /* Send matrix on the GPU*/
+    /* Send matrix to the GPU */
     magma_zsetmatrix(n, n, A, lda, dA, nn);
 
-    /* Send b on the GPU*/
+    /* Send b to the GPU */
     magma_zsetmatrix(n, nrhs, B, ldb, db, nn);
 
     *info = magma_zgerbt_gpu(MagmaTrue, nn, nrhs, dA, nn, db, nn, hu, hv, info);
@@ -436,7 +435,7 @@ magma_zgesv_rbt(
         magma_zcopymatrix(nn, nn, dA, nn, dAo, nn);
         magma_zcopymatrix(nn, nrhs, db, nn, dBo, nn);
     }
-    /* Solve the system U^TAV.y = U^T.b on the GPU*/ 
+    /* Solve the system U^TAV.y = U^T.b on the GPU */
     magma_zgesv_nopiv_gpu( nn, nrhs, dA, nn, db, nn, info);
 
 
@@ -456,7 +455,7 @@ magma_zgesv_rbt(
 
     magma_zsetvector(2*nn, hv, 1, dv, 1);
     
-    for(int i = 0; i < nrhs; i++) {
+    for (int i = 0; i < nrhs; i++) {
         magmablas_zprbt_mv(nn, dv, db+(i*nn));
     }
 
@@ -469,7 +468,7 @@ magma_zgesv_rbt(
     magma_free( dv );
     magma_free( db );
     
-    if (ref == MagmaTrue) {    
+    if (ref == MagmaTrue) {
         magma_free( dAo );
         magma_free( dBo );
         magma_free( dwork );

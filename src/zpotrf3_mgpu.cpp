@@ -433,7 +433,6 @@ magma_zpotrf3_mgpu(
         /* > Compute the Cholesky factorization A = L*L'. */
         /* ---------------------------------------------- */
         for (j=0; j < n; j += nb) {
-        
             /* Set the GPU number that holds the current panel */
             id  = (j/nb)%ngpu;
             buf = (j/nb)%ngpu;
