@@ -25,8 +25,8 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a regular matrix A.
-    This is a GPU implementation of the Biconjugate Gradient Stabelized method.
+    where A is a general matrix.
+    This is a GPU implementation of the Biconjugate Gradient Stabilized method.
 
     Arguments
     ---------

@@ -24,8 +24,8 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a regular matrix A.
-    This is a GPU implementation of the Biconjugate Gradient Stabelized method.
+    where A is a general matrix.
+    This is a GPU implementation of the Biconjugate Gradient Stabilized method.
     The difference to magma_zbicgstab is that we use specifically designed 
     kernels merging multiple operations into one kernel.
 
