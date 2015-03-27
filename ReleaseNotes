@@ -29,8 +29,11 @@ single (s), double (d), single-complex (c), double-complex (z).
  1.6.2 - ???
     * LOBPCG sparse eigensolver enabled for preconditioning using Jacobi and 
 	  incomplete LU factorizations.
-	* Some name changes in MAGMA sparse for consistency with dense MAGMA.
-
+    * Some name changes in MAGMA sparse for consistency with dense MAGMA.
+      All functions working on matrices now start with the prefix magma_zm***
+      instead some of them starting with magma_z_m***.
+    * Added a tester for the level 1BLAS.
+        
 
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.

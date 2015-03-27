@@ -22,6 +22,7 @@ ZSRC += \
 	testing_zmconverter.cpp		\
 
 
+
 # ----------
 # low level LA operations
 ZSRC += \
@@ -53,7 +54,8 @@ ZSRC += \
 #	testing_z_mpk_5.cpp			\
 
 # debugging
-#ZSRC += \
+ZSRC += \
+	testing_zbug.cpp	\
 #	testing_zsolver_debug.cpp	\
 #	testing_spmvELLRT.cpp 		\
 #	testing_zcdebug.cpp			\
