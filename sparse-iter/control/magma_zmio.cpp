@@ -283,8 +283,7 @@ magma_int_t read_z_csr_from_mtx(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
         } 
-        printf("Successfully read complex matrix.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
         return MAGMA_ERR_NOT_FOUND;
@@ -1056,8 +1055,7 @@ magma_z_csr_mtx(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
         } 
-        printf("Successfully read complex matrix.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
         return MAGMA_ERR_NOT_FOUND;
@@ -1383,8 +1381,7 @@ magma_z_csr_mtxsymm(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
         } 
-        printf("Successfully read complex matrix.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
         return MAGMA_ERR_NOT_FOUND;
