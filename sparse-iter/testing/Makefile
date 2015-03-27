@@ -55,7 +55,7 @@ ZSRC += \
 
 # debugging
 ZSRC += \
-	testing_zbug.cpp	\
+#	testing_zbug.cpp	\
 #	testing_zsolver_debug.cpp	\
 #	testing_spmvELLRT.cpp 		\
 #	testing_zcdebug.cpp			\
