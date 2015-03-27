@@ -65,13 +65,40 @@ magma_zprint_vector(
     magma_int_t  visulen,
     magma_queue_t queue )
 {
+
+    //**************************************************************
+    #define COMPLEX
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    
+    #ifdef COMPLEX
+    #define magma_zprintval( tmp )       {                                  \
+        if ( MAGMA_Z_EQUAL( tmp, c_zero )) {                                \
+            printf( "   0.              \n" );                                \
+        }                                                                   \
+        else {                                                              \
+            printf( " %8.4f+%8.4fi\n",                                        \
+                    MAGMA_Z_REAL( tmp ), MAGMA_Z_IMAG( tmp ));              \
+        }                                                                   \
+    }
+    #else
+    #define magma_zprintval( tmp )       {                                  \
+        if ( MAGMA_Z_EQUAL( tmp, c_zero )) {                                \
+            printf( "   0.    \n" );                                          \
+        }                                                                   \
+        else {                                                              \
+            printf( " %8.4f\n", MAGMA_Z_REAL( tmp ));                         \
+        }                                                                   \
+    }
+    #endif
+    //**************************************************************
+    
     printf("visualize entries %d - %d of vector ", 
                     (int) offset, (int) (offset + visulen) );
     fflush(stdout);  
     if ( x.memory_location == Magma_CPU ) {
         printf("located on CPU:\n");
         for( magma_int_t i=offset; i<offset + visulen; i++ )
-            printf("%5.2f\n", MAGMA_Z_REAL(x.val[i]));
+            magma_zprintval(x.val[i]);
     return MAGMA_SUCCESS;
     }
     else if ( x.memory_location == Magma_DEV ) {
@@ -79,7 +106,7 @@ magma_zprint_vector(
         magma_z_vector y;
         magma_zvtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
-            printf("%5.2f\n", MAGMA_Z_REAL(y.val[i]));
+            magma_zprintval(y.val[i]);
     magma_free_cpu(y.val);
     return MAGMA_SUCCESS;
     }
