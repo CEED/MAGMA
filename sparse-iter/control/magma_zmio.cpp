@@ -265,9 +265,8 @@ magma_int_t read_z_csr_from_mtx(
     } else if (mm_is_pattern(matcode) ) {
         for(magma_int_t i = 0; i < *nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            fscanf(fid, " %d %d \n", &ROW, &COL );
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
@@ -276,9 +275,9 @@ magma_int_t read_z_csr_from_mtx(
     } else if (mm_is_complex(matcode) ){
        for(magma_int_t i = 0; i < *nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
+            double VAL, VALC;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL, &VALC);
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
@@ -1037,22 +1036,21 @@ magma_z_csr_mtx(
             coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
         }
     } else if (mm_is_pattern(matcode) ) {
-        for(magma_int_t i = 0; i < *nnz; ++i) {
+        for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            fscanf(fid, " %d %d \n", &ROW, &COL );
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( 1.0, 0.);
         }
     } else if (mm_is_complex(matcode) ){
-       for(magma_int_t i = 0; i < *nnz; ++i) {
+       for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
+            double VAL, VALC;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL, &VALC);
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
@@ -1365,22 +1363,21 @@ magma_z_csr_mtxsymm(
             coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
         }
     } else if (mm_is_pattern(matcode) ) {
-        for(magma_int_t i = 0; i < *nnz; ++i) {
+        for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            fscanf(fid, " %d %d \n", &ROW, &COL);
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( 1.0, 0.);
         }
     } else if (mm_is_complex(matcode) ){
-       for(magma_int_t i = 0; i < *nnz; ++i) {
+       for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
-            double VAL;  // always read in a double and convert later if necessary
+            double VAL, VALC;  // always read in a double and convert later if necessary
             
-            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL, &VALC);
             
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
