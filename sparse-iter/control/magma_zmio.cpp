@@ -215,7 +215,8 @@ magma_int_t read_z_csr_from_mtx(
         return MAGMA_ERR_NOT_FOUND;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) || mm_is_pattern(matcode))
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
@@ -261,6 +262,30 @@ magma_int_t read_z_csr_from_mtx(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
         }
+    } else if (mm_is_pattern(matcode) ) {
+        for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( 1.0, 0.);
+        }
+    } else if (mm_is_complex(matcode) ){
+       for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
+        } 
+        printf("Successfully read complex matrix.\n");
+        return MAGMA_ERR_NOT_FOUND;
     } else {
         printf("Unrecognized data type\n");
         return MAGMA_ERR_NOT_FOUND;
@@ -962,7 +987,8 @@ magma_z_csr_mtx(
         return MAGMA_ERR_NOT_FOUND;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) || mm_is_pattern(matcode))
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
@@ -1010,9 +1036,33 @@ magma_z_csr_mtx(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
         }
+    } else if (mm_is_pattern(matcode) ) {
+        for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( 1.0, 0.);
+        }
+    } else if (mm_is_complex(matcode) ){
+       for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
+        } 
+        printf("Successfully read complex matrix.\n");
+        return MAGMA_ERR_NOT_FOUND;
     } else {
         printf("Unrecognized data type\n");
-        return MAGMA_ERR_UNKNOWN;
+        return MAGMA_ERR_NOT_FOUND;
     }
     
     fclose(fid);
@@ -1264,7 +1314,8 @@ magma_z_csr_mtxsymm(
         return MAGMA_ERR_NOT_SUPPORTED;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) || mm_is_pattern(matcode))
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+           || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
@@ -1313,9 +1364,33 @@ magma_z_csr_mtxsymm(
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
         }
+    } else if (mm_is_pattern(matcode) ) {
+        for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d \n", &ROW, &COL, &VAL);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( 1.0, 0.);
+        }
+    } else if (mm_is_complex(matcode) ){
+       for(magma_int_t i = 0; i < *nnz; ++i) {
+            magma_index_t ROW, COL;
+            double VAL;  // always read in a double and convert later if necessary
+            
+            fscanf(fid, " %d %d %lf %lf\n", &ROW, &COL, &VAL &VALC);
+            
+            coo_row[i] = ROW - 1;
+            coo_col[i] = COL - 1;
+            coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
+        } 
+        printf("Successfully read complex matrix.\n");
+        return MAGMA_ERR_NOT_FOUND;
     } else {
         printf("Unrecognized data type\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        return MAGMA_ERR_NOT_FOUND;
     }
     
     fclose(fid);
