@@ -86,13 +86,13 @@ magma_vector_zlag2c(
     Purpose
     -------
 
-    convertes magma_z_sparse_matrix from Z to C
+    convertes magma_z_matrix from Z to C
 
     Arguments
     ---------
 
     @param
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix descriptor
 
     @param
@@ -107,7 +107,7 @@ magma_vector_zlag2c(
 
 extern "C" magma_int_t
 magma_sparse_matrix_zlag2c(
-    magma_z_sparse_matrix A, magma_c_sparse_matrix *B,
+    magma_z_matrix A, magma_c_sparse_matrix *B,
     magma_queue_t queue )
 {
     magma_int_t info;

@@ -152,11 +152,11 @@ magma_zbajac_csr_kernel(
                 number of local Jacobi-like updates
 
     @param[in]
-    D           magma_z_sparse_matrix
+    D           magma_z_matrix
                 input matrix with diagonal blocks
 
     @param[in]
-    R           magma_z_sparse_matrix
+    R           magma_z_matrix
                 input matrix with non-diagonal parts
 
     @param[in]
@@ -178,8 +178,8 @@ magma_zbajac_csr_kernel(
 extern "C" magma_int_t
 magma_zbajac_csr(
     magma_int_t localiters,
-    magma_z_sparse_matrix D,
-    magma_z_sparse_matrix R,
+    magma_z_matrix D,
+    magma_z_matrix R,
     magma_z_vector b,
     magma_z_vector *x,
     magma_queue_t queue )

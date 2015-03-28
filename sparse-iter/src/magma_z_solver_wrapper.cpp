@@ -25,7 +25,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -48,7 +48,7 @@
 
 extern "C" magma_int_t
 magma_z_solver(
-    magma_z_sparse_matrix A, magma_z_vector b, 
+    magma_z_matrix A, magma_z_vector b, 
     magma_z_vector *x, magma_zopts *zopts,
     magma_queue_t queue )
 {

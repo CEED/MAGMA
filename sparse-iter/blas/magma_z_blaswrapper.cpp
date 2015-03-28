@@ -35,7 +35,7 @@
                 scalar alpha
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -58,7 +58,7 @@
 extern "C" magma_int_t
 magma_z_spmv(
     magmaDoubleComplex alpha, 
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector x, 
     magmaDoubleComplex beta, 
     magma_z_vector y,
@@ -300,7 +300,7 @@ magma_z_spmv(
                 scalar alpha
 
     @param
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A   
 
     @param
@@ -340,7 +340,7 @@ magma_z_spmv(
 extern "C" magma_int_t
 magma_z_spmv_shift(
     magmaDoubleComplex alpha, 
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magmaDoubleComplex lambda,
     magma_z_vector x, 
     magmaDoubleComplex beta, 

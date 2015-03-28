@@ -37,24 +37,24 @@
     ---------
 
     @param
-    L           magma_z_sparse_matrix
+    L           magma_z_matrix
                 input strictly lower triangular matrix L
 
     @param
-    U           magma_z_sparse_matrix
+    U           magma_z_matrix
                 input upper triangular matrix U
     
     @param
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 output matrix 
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmlumerge(    magma_z_sparse_matrix L, 
-                    magma_z_sparse_matrix U,
-                    magma_z_sparse_matrix *A){
+magma_zmlumerge(    magma_z_matrix L, 
+                    magma_z_matrix U,
+                    magma_z_matrix *A){
 
     if( L.memory_location == Magma_CPU && U.memory_location == Magma_CPU ){
         

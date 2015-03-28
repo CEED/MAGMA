@@ -32,7 +32,7 @@ extern "C" {
 
 
 
-typedef struct magma_z_sparse_matrix{
+typedef struct magma_z_matrix{
 
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
@@ -69,9 +69,9 @@ typedef struct magma_z_sparse_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
 
-}magma_z_sparse_matrix;
+}magma_z_matrix;
 
-typedef struct magma_c_sparse_matrix{
+typedef struct magma_c_matrix{
 
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
@@ -108,10 +108,10 @@ typedef struct magma_c_sparse_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
 
-}magma_c_sparse_matrix;
+}magma_c_matrix;
 
 
-typedef struct magma_d_sparse_matrix{
+typedef struct magma_d_matrix{
 
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
@@ -148,10 +148,10 @@ typedef struct magma_d_sparse_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
 
-}magma_d_sparse_matrix;
+}magma_d_matrix;
 
 
-typedef struct magma_s_sparse_matrix{
+typedef struct magma_s_matrix{
 
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
@@ -188,7 +188,7 @@ typedef struct magma_s_sparse_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
 
-}magma_s_sparse_matrix;
+}magma_s_matrix;
 
 
 
@@ -420,11 +420,11 @@ typedef struct magma_z_preconditioner{
     magma_int_t             numiter;
     double                  init_res;
     double                  final_res;
-    magma_z_sparse_matrix   M;
-    magma_z_sparse_matrix   L;
-    magma_z_sparse_matrix   U;
-    magma_z_sparse_matrix   LD;
-    magma_z_sparse_matrix   UD;
+    magma_z_matrix   M;
+    magma_z_matrix   L;
+    magma_z_matrix   U;
+    magma_z_matrix   LD;
+    magma_z_matrix   UD;
     magma_z_vector          d;
     magma_z_vector          work1;
     magma_z_vector          work2;
@@ -453,11 +453,11 @@ typedef struct magma_c_preconditioner{
     magma_int_t             numiter;
     float                   init_res;
     float                   final_res;
-    magma_c_sparse_matrix   M;
-    magma_c_sparse_matrix   L;
-    magma_c_sparse_matrix   U;
-    magma_c_sparse_matrix   LD;
-    magma_c_sparse_matrix   UD;
+    magma_c_matrix   M;
+    magma_c_matrix   L;
+    magma_c_matrix   U;
+    magma_c_matrix   LD;
+    magma_c_matrix   UD;
     magma_c_vector          d;
     magma_c_vector          work1;
     magma_c_vector          work2;
@@ -487,11 +487,11 @@ typedef struct magma_d_preconditioner{
     magma_int_t             numiter;
     double                  init_res;
     double                  final_res;
-    magma_d_sparse_matrix   M;
-    magma_d_sparse_matrix   L;
-    magma_d_sparse_matrix   U;
-    magma_d_sparse_matrix   LD;
-    magma_d_sparse_matrix   UD;
+    magma_d_matrix   M;
+    magma_d_matrix   L;
+    magma_d_matrix   U;
+    magma_d_matrix   LD;
+    magma_d_matrix   UD;
     magma_d_vector          d;
     magma_d_vector          work1;
     magma_d_vector          work2;
@@ -521,11 +521,11 @@ typedef struct magma_s_preconditioner{
     magma_int_t             numiter;
     float                   init_res;
     float                   final_res;
-    magma_s_sparse_matrix   M;
-    magma_s_sparse_matrix   L;
-    magma_s_sparse_matrix   U;
-    magma_s_sparse_matrix   LD;
-    magma_s_sparse_matrix   UD;
+    magma_s_matrix   M;
+    magma_s_matrix   L;
+    magma_s_matrix   U;
+    magma_s_matrix   LD;
+    magma_s_matrix   UD;
     magma_s_vector          d;
     magma_s_vector          work1;
     magma_s_vector          work2;

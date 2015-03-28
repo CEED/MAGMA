@@ -31,7 +31,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
@@ -55,7 +55,7 @@
 
 extern "C" magma_int_t
 magma_zbaiter(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,  
     magma_z_solver_par *solver_par,
@@ -67,7 +67,7 @@ magma_zbaiter(
 
 
 
-    magma_z_sparse_matrix Ah, ACSR, A_d, D, R, D_d, R_d;
+    magma_z_matrix Ah, ACSR, A_d, D, R, D_d, R_d;
 
     magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
     magma_zmconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue );

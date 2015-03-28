@@ -46,7 +46,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
@@ -65,7 +65,7 @@
 
 extern "C" magma_int_t
 magma_zpastixsetup(
-    magma_z_sparse_matrix A, magma_z_vector b,
+    magma_z_matrix A, magma_z_vector b,
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -85,7 +85,7 @@ magma_zpastixsetup(
         pastix_int_t     *invp        = NULL; /* Reverse permutation tabular                               */
         pastix_int_t      mat_type;
 
-        magma_z_sparse_matrix A_h1, B;
+        magma_z_matrix A_h1, B;
         magma_z_vector diag, c_t, b_h;
         magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
@@ -225,7 +225,7 @@ magma_zpastixsetup(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]

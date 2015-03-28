@@ -207,7 +207,7 @@ magma_zlag2c_CSR_DENSE_kernel_2(
 
 extern "C" void
 magma_zlag2c_CSR_DENSE(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_c_sparse_matrix *B,
     magma_queue_t queue )
 {
@@ -235,7 +235,7 @@ magma_zlag2c_CSR_DENSE(
 
 extern "C" void
 magma_zlag2c_CSR_DENSE_alloc(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_c_sparse_matrix *B,
     magma_queue_t queue )
 {
@@ -262,7 +262,7 @@ magma_zlag2c_CSR_DENSE_alloc(
 
 extern "C" void
 magma_zlag2c_CSR_DENSE_convert(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_c_sparse_matrix *B,
     magma_queue_t queue )
 {

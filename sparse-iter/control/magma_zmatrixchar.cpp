@@ -39,7 +39,7 @@ using namespace std;
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 sparse matrix     
     @param[in]
     queue       magma_queue_t
@@ -50,7 +50,7 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zrowentries(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     // check whether matrix on CPU
@@ -109,7 +109,7 @@ magma_zrowentries(
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 sparse matrix     
     @param[in]
     queue       magma_queue_t
@@ -119,7 +119,7 @@ magma_zrowentries(
     ********************************************************************/
 extern "C" magma_int_t
 magma_zdiameter(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     // check whether matrix on CPU

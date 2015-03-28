@@ -86,14 +86,14 @@ magma_z_vfree(
     Purpose
     -------
 
-    Free the memory of a magma_z_sparse_matrix.
+    Free the memory of a magma_z_matrix.
 
 
     Arguments
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix to free    
     @param[in]
     queue       magma_queue_t
@@ -104,7 +104,7 @@ magma_z_vfree(
 
 extern "C" magma_int_t
 magma_zmfree(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     if ( A->memory_location == Magma_CPU ) {

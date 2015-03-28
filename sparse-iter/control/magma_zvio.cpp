@@ -218,7 +218,7 @@ magma_zvspread(
     const char * filename,
     magma_queue_t queue )
 {
-    magma_z_sparse_matrix A,B;
+    magma_z_matrix A,B;
     magma_int_t entry=0;
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
     magma_z_csr_mtx( &A,  filename, queue  ); 

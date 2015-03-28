@@ -27,7 +27,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -51,7 +51,7 @@
 
 extern "C" magma_int_t
 magma_z_precond(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x, 
     magma_z_preconditioner *precond,
@@ -94,7 +94,7 @@ magma_z_precond(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A     
 
     @param[in]
@@ -113,7 +113,7 @@ magma_z_precond(
 
 extern "C" magma_int_t
 magma_z_precondsetup(
-    magma_z_sparse_matrix A, magma_z_vector b, 
+    magma_z_matrix A, magma_z_vector b, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -157,7 +157,7 @@ magma_z_precondsetup(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -181,7 +181,7 @@ magma_z_precondsetup(
 
 extern "C" magma_int_t
 magma_z_applyprecond(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x, 
     magma_z_preconditioner *precond,
@@ -233,7 +233,7 @@ magma_z_applyprecond(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -257,7 +257,7 @@ magma_z_applyprecond(
 
 extern "C" magma_int_t
 magma_z_applyprecond_left(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x, 
     magma_z_preconditioner *precond,
@@ -306,7 +306,7 @@ magma_z_applyprecond_left(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[in]
@@ -330,7 +330,7 @@ magma_z_applyprecond_left(
 
 extern "C" magma_int_t
 magma_z_applyprecond_right(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x, 
     magma_z_preconditioner *precond,

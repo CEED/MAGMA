@@ -41,7 +41,7 @@
     Arguments
     ---------
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in,out]
@@ -61,7 +61,7 @@
 
 extern "C" magma_int_t
 magma_zlobpcg(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par, 
     magma_queue_t queue )

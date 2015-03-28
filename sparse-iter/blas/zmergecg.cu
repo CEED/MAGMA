@@ -826,7 +826,7 @@ magma_zcg_rhokernel(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix 
 
     @param[in]
@@ -858,7 +858,7 @@ magma_zcg_rhokernel(
 
 extern "C" magma_int_t
 magma_zcgmerge_spmv1(
-    magma_z_sparse_matrix A,
+    magma_z_matrix A,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dd,

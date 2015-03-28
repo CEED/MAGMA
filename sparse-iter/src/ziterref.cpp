@@ -33,7 +33,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
@@ -60,7 +60,7 @@
 
 extern "C" magma_int_t
 magma_ziterref(
-    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
     magma_z_solver_par *solver_par, magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {

@@ -39,7 +39,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in,out]
@@ -54,13 +54,13 @@
 
 extern "C" magma_int_t
 magma_zcumilusetup(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
     //magma_zprint_matrix(A, queue );
         // copy matrix into preconditioner parameter
-        magma_z_sparse_matrix hA, hACSR;    
+        magma_z_matrix hA, hACSR;    
         magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
         magma_zmconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
         magma_zmtransfer(hACSR, &(precond->M), Magma_CPU, Magma_DEV, queue );
@@ -127,7 +127,7 @@ magma_zcumilusetup(
 
     cusparseDestroyMatDescr( descrA );
 
-    magma_z_sparse_matrix hL, hU;
+    magma_z_matrix hL, hU;
 
     magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
 
@@ -243,7 +243,7 @@ magma_zcumilugeneratesolverinfo(
     
     if (precond->L.memory_location != Magma_DEV ){
         
-        magma_z_sparse_matrix hA, hL, hU;
+        magma_z_matrix hA, hL, hU;
         
         magma_zmtransfer( precond->M, &hA, 
             precond->M.memory_location, Magma_CPU, queue );
@@ -544,7 +544,7 @@ magma_zapplycumilu_r(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in,out]
@@ -559,11 +559,11 @@ magma_zapplycumilu_r(
 
 extern "C" magma_int_t
 magma_zcumiccsetup(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-    magma_z_sparse_matrix hA, hACSR, U;
+    magma_z_matrix hA, hACSR, U;
     magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
     U.diagorder_type = Magma_VALUE;
     magma_zmconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
@@ -703,7 +703,7 @@ magma_zcumiccsetup(
     magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue );
     hA.storage_type = Magma_CSR;
 
-    magma_z_sparse_matrix hD, hR, hAt
+    magma_z_matrix hD, hR, hAt
 
     magma_zcsrsplit( 256, hA, &hD, &hR, queue );
 

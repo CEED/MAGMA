@@ -100,7 +100,7 @@ magma_vector_clag2z(
                 input matrix descriptor
 
     @param
-    B           magma_z_sparse_matrix*
+    B           magma_z_matrix*
                 output matrix descriptor
     @param[in]
     queue       magma_queue_t
@@ -111,7 +111,7 @@ magma_vector_clag2z(
 
 extern "C" magma_int_t
 magma_sparse_matrix_clag2z(
-    magma_c_sparse_matrix A, magma_z_sparse_matrix *B,
+    magma_c_sparse_matrix A, magma_z_matrix *B,
     magma_queue_t queue )
 {
     magma_int_t info;

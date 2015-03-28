@@ -52,7 +52,7 @@ using namespace std;
 
                                                 (length offsets+1)
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix to generate   
     @param[in]
     queue       magma_queue_t
@@ -68,12 +68,12 @@ magma_zmgenerator(
     magma_int_t offdiags,
     magma_index_t *diag_offset,
     magmaDoubleComplex *diag_vals,
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     
     
-    magma_z_sparse_matrix B;
+    magma_z_matrix B;
     
     magma_int_t stat_cpu = 0;
     B.val = NULL;
@@ -163,7 +163,7 @@ magma_zmgenerator(
                 number of rows
 
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix to generate   
     @param[in]
     queue       magma_queue_t
@@ -176,11 +176,11 @@ extern "C"
 magma_int_t
 magma_zm_27stencil(
     magma_int_t n,
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     magma_int_t i,j,k;
-    magma_z_sparse_matrix hA;
+    magma_z_matrix hA;
     magma_int_t stat_cpu = 0;
     
     // generate matrix of desired structure and size (3d 27-point stencil)
@@ -282,7 +282,7 @@ magma_zm_27stencil(
                 number of rows
 
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix to generate   
     @param[in]
     queue       magma_queue_t
@@ -295,11 +295,11 @@ extern "C"
 magma_int_t
 magma_zm_5stencil(
     magma_int_t n,
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     magma_int_t i,j,k;
-    magma_z_sparse_matrix hA;
+    magma_z_matrix hA;
     magma_int_t stat_cpu = 0; 
     
     // generate matrix of desired structure and size (2d 5-point stencil)

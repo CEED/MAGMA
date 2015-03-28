@@ -26,7 +26,7 @@
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 input/output matrix 
     @param[in]
     queue       magma_queue_t
@@ -37,12 +37,12 @@
 
 extern "C" magma_int_t
 magma_zmcsrcompressor(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     if ( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ) {
 
-        magma_z_sparse_matrix B;
+        magma_z_matrix B;
 
         magma_zmconvert( *A, &B, Magma_CSR, Magma_CSR, queue );
 
@@ -59,7 +59,7 @@ magma_zmcsrcompressor(
     }
     else {
 
-        magma_z_sparse_matrix hA, CSRA;
+        magma_z_matrix hA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );

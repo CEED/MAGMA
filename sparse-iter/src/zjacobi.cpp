@@ -32,7 +32,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
@@ -56,7 +56,7 @@
 
 extern "C" magma_int_t
 magma_zjacobi(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,  
     magma_z_solver_par *solver_par,
@@ -84,7 +84,7 @@ magma_zjacobi(
     double nom0 = 0.0;
 
 
-    magma_z_sparse_matrix M;
+    magma_z_matrix M;
     magma_z_vector c, r;
     magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
     magma_z_spmv( c_one, A, *x, c_zero, r, queue );                  // r = A x
@@ -140,11 +140,11 @@ magma_zjacobi(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
-    M           magma_z_sparse_matrix*
+    M           magma_z_matrix*
                 M = D^(-1) * (L+U)
 
     @param[in,out]
@@ -159,13 +159,13 @@ magma_zjacobi(
 
 extern "C" magma_int_t
 magma_zjacobisetup_matrix(
-    magma_z_sparse_matrix A, 
-    magma_z_sparse_matrix *M, magma_z_vector *d,
+    magma_z_matrix A, 
+    magma_z_matrix *M, magma_z_vector *d,
     magma_queue_t queue )
 {
     magma_int_t i;
 
-    magma_z_sparse_matrix A_h1, A_h2, B, C;
+    magma_z_matrix A_h1, A_h2, B, C;
     magma_z_vector diag;
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
 
@@ -236,7 +236,7 @@ magma_zjacobisetup_matrix(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in,out]
@@ -251,12 +251,12 @@ magma_zjacobisetup_matrix(
 
 extern "C" magma_int_t
 magma_zjacobisetup_diagscal(
-    magma_z_sparse_matrix A, magma_z_vector *d,
+    magma_z_matrix A, magma_z_vector *d,
     magma_queue_t queue )
 {
     magma_int_t i;
 
-    magma_z_sparse_matrix A_h1, B;
+    magma_z_matrix A_h1, B;
     magma_z_vector diag;
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
 
@@ -374,7 +374,7 @@ magma_zjacobisetup_vector(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A
 
     @param[in]
@@ -382,7 +382,7 @@ magma_zjacobisetup_vector(
                 RHS b
 
     @param[in]
-    M           magma_z_sparse_matrix*
+    M           magma_z_matrix*
                 M = D^(-1) * (L+U)
 
     @param[in]
@@ -397,13 +397,13 @@ magma_zjacobisetup_vector(
 
 extern "C" magma_int_t
 magma_zjacobisetup(
-    magma_z_sparse_matrix A, magma_z_vector b, 
-    magma_z_sparse_matrix *M, magma_z_vector *c,
+    magma_z_matrix A, magma_z_vector b, 
+    magma_z_matrix *M, magma_z_vector *c,
     magma_queue_t queue )
 {
     magma_int_t i;
 
-    magma_z_sparse_matrix A_h1, A_h2, B, C;
+    magma_z_matrix A_h1, A_h2, B, C;
     magma_z_vector diag, c_t, b_h;
     magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
@@ -484,7 +484,7 @@ magma_zjacobisetup(
     ---------
 
     @param[in]
-    M           magma_z_sparse_matrix
+    M           magma_z_matrix
                 input matrix M = D^(-1) * (L+U)
 
     @param[in]
@@ -507,7 +507,7 @@ magma_zjacobisetup(
 
 extern "C" magma_int_t
 magma_zjacobiiter(
-    magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,  
+    magma_z_matrix M, magma_z_vector c, magma_z_vector *x,  
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
@@ -554,7 +554,7 @@ magma_zjacobiiter(
     ---------
 
     @param[in]
-    M           magma_z_sparse_matrix
+    M           magma_z_matrix
                 input matrix M = D^(-1) * (L+U)
 
     @param[in]
@@ -581,7 +581,7 @@ magma_zjacobiiter(
 
 extern "C" magma_int_t
 magma_zjacobiiter_precond(
-    magma_z_sparse_matrix M, magma_z_vector *x, 
+    magma_z_matrix M, magma_z_vector *x, 
     magma_z_solver_par *solver_par, magma_z_preconditioner *precond,
     magma_queue_t queue )
 {

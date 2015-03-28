@@ -185,7 +185,7 @@ magma_zbicgstab_alphakernel(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 system matrix
 
     @param[in]
@@ -221,7 +221,7 @@ magma_zbicgstab_alphakernel(
 
 extern "C" magma_int_t
 magma_zbicgmerge_spmv1(
-    magma_z_sparse_matrix A,
+    magma_z_matrix A,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dp,
@@ -488,7 +488,7 @@ magma_zbicgstab_omegakernel(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix 
 
     @param[in]
@@ -520,7 +520,7 @@ magma_zbicgstab_omegakernel(
 
 extern "C" magma_int_t
 magma_zbicgmerge_spmv2(
-    magma_z_sparse_matrix A,
+    magma_z_matrix A,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr ds,

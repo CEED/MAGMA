@@ -32,11 +32,11 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix A (on DEV)
 
     @param[in]
-    M           magma_z_sparse_matrix*
+    M           magma_z_matrix*
                 output matrix M approx. (LU)^{-1} (on DEV)
 
     @param[out]
@@ -51,7 +51,7 @@
 
 extern "C" magma_int_t
 magma_zilusetup(
-    magma_z_sparse_matrix A, magma_z_sparse_matrix *M, magma_int_t *ipiv,
+    magma_z_matrix A, magma_z_matrix *M, magma_int_t *ipiv,
     magma_queue_t queue )
 {
     // set queue for old dense routines
@@ -248,7 +248,7 @@ magma_zilusetup(
 
 extern "C" magma_int_t
 magma_zilu(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,  
     magma_z_solver_par *solver_par, 

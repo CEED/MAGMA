@@ -38,8 +38,8 @@ magma_vector_zlag2c(
 
 magma_int_t
 magma_sparse_matrix_zlag2c(
-    magma_z_sparse_matrix A,
-    magma_c_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_c_matrix *B,
     magma_queue_t queue );
 
 
@@ -51,8 +51,8 @@ magma_vector_clag2z(
 
 magma_int_t
 magma_sparse_matrix_clag2z(
-    magma_c_sparse_matrix A,
-    magma_z_sparse_matrix *B,
+    magma_c_matrix A,
+    magma_z_matrix *B,
     magma_queue_t queue );
 
 void
@@ -79,20 +79,20 @@ magmablas_clag2z_sparse(
 
 void 
 magma_zlag2c_CSR_DENSE(
-    magma_z_sparse_matrix A,
-    magma_c_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_c_matrix *B,
     magma_queue_t queue );
 
 void 
 magma_zlag2c_CSR_DENSE_alloc(
-    magma_z_sparse_matrix A,
-    magma_c_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_c_matrix *B,
     magma_queue_t queue );
 
 void 
 magma_zlag2c_CSR_DENSE_convert(
-    magma_z_sparse_matrix A,
-    magma_c_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_c_matrix *B,
     magma_queue_t queue );
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ magma_zlag2c_CSR_DENSE_convert(
 */
 magma_int_t
 magma_zcpgmres(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,
     magma_z_solver_par *solver_par,
@@ -118,7 +118,7 @@ magma_zcpgmres(
 
 magma_int_t
 magma_zcpbicgstab(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,
     magma_z_solver_par *solver_par,
@@ -127,7 +127,7 @@ magma_zcpbicgstab(
 
 magma_int_t
 magma_zcir(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,
     magma_z_solver_par *solver_par, 
@@ -136,7 +136,7 @@ magma_zcir(
 
 magma_int_t
 magma_zcpir(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,
     magma_z_solver_par *solver_par, 

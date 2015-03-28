@@ -35,7 +35,7 @@
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 input/output matrix 
 
     @param[in]
@@ -51,7 +51,7 @@
 
 extern "C" magma_int_t
 magma_zmscale(
-    magma_z_sparse_matrix *A, 
+    magma_z_matrix *A, 
     magma_scale_t scaling,
     magma_queue_t queue )
 {
@@ -104,7 +104,7 @@ magma_zmscale(
     }
     else {
 
-        magma_z_sparse_matrix hA, CSRA;
+        magma_z_matrix hA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
@@ -134,7 +134,7 @@ magma_zmscale(
     ---------
 
     @param[in,out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 input/output matrix 
 
     @param[in]
@@ -149,7 +149,7 @@ magma_zmscale(
 
 extern "C" magma_int_t
 magma_zmdiagadd(
-    magma_z_sparse_matrix *A, 
+    magma_z_matrix *A, 
     magmaDoubleComplex add,
     magma_queue_t queue )
 {
@@ -164,7 +164,7 @@ magma_zmdiagadd(
     }
     else {
 
-        magma_z_sparse_matrix hA, CSRA;
+        magma_z_matrix hA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );

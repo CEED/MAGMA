@@ -41,7 +41,7 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 descriptor for matrix A
 
     @param[in]
@@ -65,7 +65,7 @@
 
 extern "C" magma_int_t
 magma_zgmres(
-    magma_z_sparse_matrix A, 
+    magma_z_matrix A, 
     magma_z_vector b, 
     magma_z_vector *x,  
     magma_z_solver_par *solver_par,

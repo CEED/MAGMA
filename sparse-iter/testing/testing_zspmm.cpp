@@ -49,7 +49,7 @@ int main(  int argc, char** argv )
     magma_queue_t queue;
     magma_queue_create( /*devices[ opts->device ],*/ &queue );
     
-    magma_z_sparse_matrix hA, hA_SELLP, hA_ELL, dA, dA_SELLP, dA_ELL;
+    magma_z_matrix hA, hA_SELLP, hA_ELL, dA, dA_SELLP, dA_ELL;
     hA_SELLP.blocksize = 8;
     hA_SELLP.alignment = 8;
     real_Double_t start, end, res;

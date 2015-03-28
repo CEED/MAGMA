@@ -41,11 +41,11 @@ using namespace std;
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix in CSR
 
     @param[in]
-    B           magma_z_sparse_matrix
+    B           magma_z_matrix
                 sparse matrix in CSR    
                 
     @param[out]
@@ -60,7 +60,7 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zmdiff(
-    magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
+    magma_z_matrix A, magma_z_matrix B, 
     real_Double_t *res,
     magma_queue_t queue )
 {

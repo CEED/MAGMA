@@ -36,11 +36,11 @@ using namespace std;
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A
 
     @param[out]
-    B           magma_z_sparse_matrix*
+    B           magma_z_matrix*
                 copy of A
 
     @param[in]
@@ -61,8 +61,8 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zmtransfer(
-    magma_z_sparse_matrix A,
-    magma_z_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_z_matrix *B,
     magma_location_t src,
     magma_location_t dst,
     magma_queue_t queue )

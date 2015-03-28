@@ -40,7 +40,7 @@ int main(  int argc, char** argv )
 
 
     real_Double_t res;
-    magma_z_sparse_matrix Z, A, AT, A2, B, B_d;
+    magma_z_matrix Z, A, AT, A2, B, B_d;
 
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;

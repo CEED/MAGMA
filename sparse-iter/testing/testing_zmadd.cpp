@@ -35,7 +35,7 @@ int main(  int argc, char** argv )
     magma_queue_create( /*devices[ opts->device ],*/ &queue );
 
     real_Double_t res;
-    magma_z_sparse_matrix A, B, B2, A_d, B_d, C_d;
+    magma_z_matrix A, B, B2, A_d, B_d, C_d;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex mone = MAGMA_Z_MAKE(-1.0, 0.0);

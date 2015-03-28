@@ -61,7 +61,7 @@ using namespace std;
                 array containing matrix entries
 
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix in magma sparse matrix format
     @param[in]
     queue       magma_queue_t
@@ -78,7 +78,7 @@ magma_zcsrset_gpu(
     magmaIndex_ptr row, 
     magmaIndex_ptr col, 
     magmaDoubleComplex_ptr val,
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     A->num_rows = m;
@@ -106,7 +106,7 @@ magma_zcsrset_gpu(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 magma sparse matrix in CSR format
 
     @param[out]
@@ -139,7 +139,7 @@ magma_zcsrset_gpu(
 extern "C"
 magma_int_t
 magma_zcsrget_gpu(
-    magma_z_sparse_matrix A,
+    magma_z_matrix A,
     magma_int_t *m, 
     magma_int_t *n, 
     magmaIndex_ptr *row, 
@@ -155,7 +155,7 @@ magma_zcsrget_gpu(
         *col = A.dcol;
         *row = A.drow;
     } else {
-        magma_z_sparse_matrix A_DEV, A_CSR;
+        magma_z_matrix A_DEV, A_CSR;
         magma_zmconvert( A, &A_CSR, A.storage_type, Magma_CSR, queue ); 
         magma_zmtransfer( A_CSR, &A_DEV, A.memory_location, Magma_DEV, queue ); 
         magma_zcsrget_gpu( A_DEV, m, n, row, col, val, queue );

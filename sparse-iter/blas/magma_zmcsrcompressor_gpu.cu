@@ -117,7 +117,7 @@ magma_zmcsrgpu_kernel3( int num_rows,
     ---------
 
     @param
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 input/output matrix 
     @param[in]
     queue       magma_queue_t
@@ -128,13 +128,13 @@ magma_zmcsrgpu_kernel3( int num_rows,
 
 extern "C" magma_int_t
 magma_zmcsrcompressor_gpu(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     magma_queue_t queue )
 {
     if ( A->memory_location == Magma_DEV && A->storage_type == Magma_CSR ) {
 
         magma_int_t stat_cpu = 0, stat_dev = 0;
-        magma_z_sparse_matrix B, B2;
+        magma_z_matrix B, B2;
         
         B.val = NULL;
         B.col = NULL;
@@ -219,7 +219,7 @@ magma_zmcsrcompressor_gpu(
     }
     else {
 
-        magma_z_sparse_matrix dA, CSRA;
+        magma_z_matrix dA, CSRA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         magma_zmconvert( *A, &CSRA, A->storage_type, Magma_CSR, queue );

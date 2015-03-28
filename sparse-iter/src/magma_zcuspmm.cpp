@@ -37,15 +37,15 @@
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix 
 
     @param[in]
-    B           magma_z_sparse_matrix
+    B           magma_z_matrix
                 input matrix 
 
     @param[out]
-    AB          magma_z_sparse_matrix*
+    AB          magma_z_matrix*
                 output matrix AB = A * B
 
     @param[in]
@@ -57,8 +57,8 @@
 
 extern "C" magma_int_t
 magma_zcuspmm(
-    magma_z_sparse_matrix A, magma_z_sparse_matrix B, 
-    magma_z_sparse_matrix *AB,
+    magma_z_matrix A, magma_z_matrix B, 
+    magma_z_matrix *AB,
     magma_queue_t queue )
 {
     if (    A.memory_location == Magma_DEV 
@@ -68,7 +68,7 @@ magma_zcuspmm(
         && ( B.storage_type == Magma_CSR ||
              B.storage_type == Magma_CSRCOO ) ) {
             
-            magma_z_sparse_matrix C;
+            magma_z_matrix C;
             C.num_rows = A.num_rows;
             C.num_cols = B.num_cols;
             C.storage_type = A.storage_type;

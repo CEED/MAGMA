@@ -181,11 +181,11 @@ z_transpose_csr(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix (CSR)
 
     @param[out]
-    B           magma_z_sparse_matrix*
+    B           magma_z_matrix*
                 output matrix (CSR)
     @param[in]
     queue       magma_queue_t
@@ -197,7 +197,7 @@ z_transpose_csr(
     
 extern "C" magma_int_t
 magma_zmtranspose(
-    magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
+    magma_z_matrix A, magma_z_matrix *B,
     magma_queue_t queue )
 {
     
@@ -219,11 +219,11 @@ magma_zmtranspose(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 input matrix (CSR)
 
     @param[out]
-    B           magma_z_sparse_matrix*
+    B           magma_z_matrix*
                 output matrix (CSR)
     @param[in]
     queue       magma_queue_t
@@ -234,8 +234,8 @@ magma_zmtranspose(
 
 extern "C" magma_int_t
 magma_z_cucsrtranspose(
-    magma_z_sparse_matrix A,
-    magma_z_sparse_matrix *B,
+    magma_z_matrix A,
+    magma_z_matrix *B,
     magma_queue_t queue )
 {
     // for symmetric matrices: convert to csc using cusparse
@@ -319,7 +319,7 @@ magma_z_cucsrtranspose(
         
     }else if( A.storage_type == Magma_CSR && A.memory_location == Magma_CPU ){
                
-        magma_z_sparse_matrix A_d, B_d;
+        magma_z_matrix A_d, B_d;
 
         magma_zmtransfer( A, &A_d, A.memory_location, Magma_DEV, queue );
         magma_z_cucsrtranspose( A_d, &B_d, queue );
@@ -332,7 +332,7 @@ magma_z_cucsrtranspose(
                 
     }else {
 
-        magma_z_sparse_matrix ACSR, BCSR;
+        magma_z_matrix ACSR, BCSR;
         
         magma_zmconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
         magma_z_cucsrtranspose( ACSR, &BCSR, queue );

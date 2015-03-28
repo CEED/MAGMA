@@ -41,7 +41,7 @@ int main(  int argc, char** argv )
 
 
     real_Double_t res;
-    magma_z_sparse_matrix A, A2, A3, A4, A5;
+    magma_z_matrix A, A2, A3, A4, A5;
 
     while(  i < argc ) {
 

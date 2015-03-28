@@ -460,7 +460,7 @@ magma_int_t read_z_csr_from_mtx(
 
 extern "C" magma_int_t
 magma_zwrite_csrtomtx( 
-    magma_z_sparse_matrix B,
+    magma_z_matrix B,
     const char *filename,
     magma_queue_t queue )
 {
@@ -779,7 +779,7 @@ magma_zprint_csr(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix in Magma_CSR format
     @param[in]
     queue       magma_queue_t
@@ -791,7 +791,7 @@ magma_zprint_csr(
 extern "C"
 magma_int_t
 magma_zprint_matrix(
-    magma_z_sparse_matrix A,
+    magma_z_matrix A,
     magma_queue_t queue )
 {
     
@@ -838,7 +838,7 @@ magma_zprint_matrix(
         else if ( A.storage_type == Magma_CSR ) {
             // visualize only small matrices like dense
             if ( A.num_rows < 11 && A.num_cols < 11 ) {
-                magma_z_sparse_matrix C;
+                magma_z_matrix C;
                 magma_zmconvert( A, &C, A.storage_type, Magma_DENSE, queue );
                 magma_zprint_matrix(  C, queue );
                 magma_zmfree( &C, queue );
@@ -914,14 +914,14 @@ magma_zprint_matrix(
             }
         }
         else {
-            magma_z_sparse_matrix C;
+            magma_z_matrix C;
             magma_zmconvert( A, &C, A.storage_type, Magma_CSR, queue );
             magma_zprint_matrix(  C, queue );
             magma_zmfree( &C, queue );
         }
     }
     else {
-        magma_z_sparse_matrix C;
+        magma_z_matrix C;
         magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue );
         magma_zprint_matrix(  C, queue );
         magma_zmfree( &C, queue );
@@ -943,7 +943,7 @@ magma_zprint_matrix(
     ---------
 
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix in magma sparse matrix format
 
     @param[in]
@@ -959,7 +959,7 @@ magma_zprint_matrix(
 extern "C"
 magma_int_t
 magma_z_csr_mtx(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     const char *filename,
     magma_queue_t queue )
 {
@@ -1238,7 +1238,7 @@ magma_z_csr_mtx(
     }
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
-        magma_z_sparse_matrix B;
+        magma_z_matrix B;
         magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
         magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),
@@ -1268,7 +1268,7 @@ magma_z_csr_mtx(
     ---------
 
     @param[out]
-    A           magma_z_sparse_matrix*
+    A           magma_z_matrix*
                 matrix in magma sparse matrix format
 
     @param[in]
@@ -1284,7 +1284,7 @@ magma_z_csr_mtx(
 extern "C"
 magma_int_t
 magma_z_csr_mtxsymm(
-    magma_z_sparse_matrix *A,
+    magma_z_matrix *A,
     const char *filename,
     magma_queue_t queue )
 {
@@ -1510,7 +1510,7 @@ magma_z_csr_mtxsymm(
     }
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
-        magma_z_sparse_matrix B;
+        magma_z_matrix B;
         magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
         magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),

@@ -143,11 +143,11 @@ magma_z_csr_compressor(
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 sparse matrix A    
 
     @param[out]
-    B           magma_z_sparse_matrix*
+    B           magma_z_matrix*
                 copy of A in new format      
 
     @param[in]
@@ -167,8 +167,8 @@ magma_z_csr_compressor(
 
 extern "C" magma_int_t
 magma_zmconvert(
-    magma_z_sparse_matrix A, 
-    magma_z_sparse_matrix *B, 
+    magma_z_matrix A, 
+    magma_z_matrix *B, 
     magma_storage_t old_format, 
     magma_storage_t new_format,
     magma_queue_t queue )
@@ -1615,7 +1615,7 @@ magma_zmconvert(
         else {
             printf("warning: format not supported on GPU. "
             "Conversion handled by CPU.\n");
-            magma_z_sparse_matrix hA, hB;
+            magma_z_matrix hA, hB;
             magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
             magma_zmconvert( hA, &hB, old_format, new_format, queue );
             magma_zmtransfer( hB, B, Magma_CPU, A.memory_location, queue );

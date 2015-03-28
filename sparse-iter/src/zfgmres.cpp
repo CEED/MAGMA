@@ -80,7 +80,7 @@ static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, m
     ---------
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 descriptor for matrix A
 
     @param[in]
@@ -107,7 +107,7 @@ static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, m
 
 extern "C" magma_int_t
 magma_zfgmres(
-    magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
     magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
     magma_queue_t queue ){

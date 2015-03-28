@@ -38,15 +38,15 @@
                 size of the diagonal blocks
 
     @param[in]
-    A           magma_z_sparse_matrix
+    A           magma_z_matrix
                 CSR input matrix
 
     @param[out]
-    D           magma_z_sparse_matrix*
+    D           magma_z_matrix*
                 CSR matrix containing diagonal blocks
 
     @param[out]
-    R           magma_z_sparse_matrix*
+    R           magma_z_matrix*
                 CSR matrix containing rest
     @param[in]
     queue       magma_queue_t
@@ -58,9 +58,9 @@
 extern "C" magma_int_t
 magma_zcsrsplit(
     magma_int_t bsize,
-    magma_z_sparse_matrix A,
-    magma_z_sparse_matrix *D,
-    magma_z_sparse_matrix *R,
+    magma_z_matrix A,
+    magma_z_matrix *D,
+    magma_z_matrix *R,
     magma_queue_t queue )
 {
     if (  A.memory_location == Magma_CPU &&
@@ -197,7 +197,7 @@ magma_zcsrsplit(
         return MAGMA_SUCCESS; 
     }
     else {
-        magma_z_sparse_matrix Ah, ACSR, DCSR, RCSR, Dh, Rh;
+        magma_z_matrix Ah, ACSR, DCSR, RCSR, Dh, Rh;
         magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue );
         magma_zmconvert( Ah, &ACSR, A.storage_type, Magma_CSR, queue );
 

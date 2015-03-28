@@ -32,8 +32,9 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Some name changes in MAGMA sparse for consistency with dense MAGMA.
       All functions working on matrices now start with the prefix magma_zm***
       instead some of them starting with magma_z_m***.
+    * magma_zmvisu( );  for printing a matrix is now called magma_zprint_matrix( );  
     * Added a tester for the level 1BLAS.
-        
+    * Rename magma_z_sparse_matrix into magma_z_matrix      
 
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.
