@@ -278,14 +278,6 @@ magma_zmtransfer(
     magma_queue_t queue );
 
 magma_int_t 
-magma_zvtransfer(
-    magma_z_matrix x, 
-    magma_z_matrix *y, 
-    magma_location_t src, 
-    magma_location_t dst,
-    magma_queue_t queue );
-
-magma_int_t 
 magma_zmconvert(
     magma_z_matrix A, 
     magma_z_matrix *B, 
@@ -340,11 +332,6 @@ magma_zrowentries(
 magma_int_t
 magma_zmfree(
     magma_z_matrix *A,
-    magma_queue_t queue );
-
-magma_int_t
-magma_z_vfree(
-    magma_z_matrix *x,
     magma_queue_t queue );
 
 magma_int_t

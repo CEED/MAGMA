@@ -209,7 +209,7 @@ magma_zjacobisetup_matrix(
     else {
         magma_zmtransfer( C, M, Magma_CPU, A.memory_location, queue );
     }    
-    magma_zvtransfer( diag, d, Magma_CPU, A.memory_location, queue );
+    magma_zmtransfer( diag, d, Magma_CPU, A.memory_location, queue );
 
     if ( A.storage_type != Magma_CSR) {
         magma_zmfree( &A_h1, queue );
@@ -279,7 +279,7 @@ magma_zjacobisetup_diagscal(
             }
         }
     }
-    magma_zvtransfer( diag, d, Magma_CPU, A.memory_location, queue );
+    magma_zmtransfer( diag, d, Magma_CPU, A.memory_location, queue );
 
     if ( A.storage_type != Magma_CSR) {
         magma_zmfree( &A_h1, queue );
@@ -333,14 +333,14 @@ magma_zjacobisetup_vector(
         magma_z_matrix diag, c_t, b_h;
         magma_zvinit( &c_t, Magma_CPU, b.num_rows, MAGMA_Z_ZERO, queue );
 
-        magma_zvtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
-        magma_zvtransfer( d, &diag, b.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( d, &diag, b.memory_location, Magma_CPU, queue );
 
         for( magma_int_t rowindex=0; rowindex<b.num_rows; rowindex++ ) {   
             c_t.val[rowindex] = b_h.val[rowindex] / diag.val[rowindex];
 
         }  
-        magma_zvtransfer( c_t, c, Magma_CPU, b.memory_location, queue ); 
+        magma_zmtransfer( c_t, c, Magma_CPU, b.memory_location, queue ); 
 
         magma_zmfree( &diag, queue );
         magma_zmfree( &c_t, queue );
@@ -407,7 +407,7 @@ magma_zjacobisetup(
     magma_z_matrix diag, c_t, b_h;
     magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
-    magma_zvtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
+    magma_zmtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
 
     if ( A.storage_type != Magma_CSR ) {
         magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
@@ -455,7 +455,7 @@ magma_zjacobisetup(
     else {
         magma_zmtransfer( C, M, Magma_CPU, A.memory_location, queue );
     }     
-    magma_zvtransfer( c_t, c, Magma_CPU, A.memory_location, queue );
+    magma_zmtransfer( c_t, c, Magma_CPU, A.memory_location, queue );
 
     if ( A.storage_type != Magma_CSR) {
         magma_zmfree( &A_h1, queue );

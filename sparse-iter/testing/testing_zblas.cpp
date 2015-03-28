@@ -45,7 +45,7 @@ int main(  int argc, char** argv )
     magma_zvinit( &bd, Magma_DEV, n, two, queue );
     magma_zvinit( &cd, Magma_DEV, n, one, queue );
     
-    magma_zvtransfer( a, &ad, Magma_CPU, Magma_DEV, queue ); 
+    magma_zmtransfer( a, &ad, Magma_CPU, Magma_DEV, queue ); 
 
     real_Double_t start, end, res;
     

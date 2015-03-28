@@ -129,9 +129,9 @@ magma_zvget_dev(
         *val = v.dval;
     } else {
         magma_z_matrix v_DEV;
-        magma_zvtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
+        magma_zmtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
         magma_zvget_dev( v_DEV, m, n, val, queue );
-        magma_z_vfree( &v_DEV, queue );
+        magma_zmfree( &v_DEV, queue );
     }
     return MAGMA_SUCCESS;
 }

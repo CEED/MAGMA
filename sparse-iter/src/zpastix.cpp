@@ -89,7 +89,7 @@ magma_zpastixsetup(
         magma_z_matrix diag, c_t, b_h;
         magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
-        magma_zvtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
 
         if ( A.storage_type != Magma_CSR ) {
             magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
@@ -264,7 +264,7 @@ magma_zapplypastix(
 
         magma_z_matrix b_h;
 
-        magma_zvtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
+        magma_zmtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
 
         rhs = (pastix_float_t*) b_h.dval;
         ncol = precond->M.num_rows;
@@ -297,7 +297,7 @@ magma_zapplypastix(
         // magma_zsetvector( ncol, 
         //                                    b_h.dval, 1, x->dval, 1 );
         magma_zmfree( x, queue );
-        magma_zvtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
+        magma_zmtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
 
         magma_zmfree( &b_h, queue );
 

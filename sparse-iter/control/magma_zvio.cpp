@@ -104,7 +104,7 @@ magma_zprint_vector(
     else if ( x.memory_location == Magma_DEV ) {
         printf("located on DEV:\n");
         magma_z_matrix y;
-        magma_zvtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             magma_zprintval(y.val[i]);
     magma_free_cpu(y.val);

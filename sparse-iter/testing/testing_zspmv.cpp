@@ -146,7 +146,7 @@ int main(  int argc, char** argv )
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
         magma_zmfree(&dA, queue );
-        magma_zvtransfer( dy, &hrefvec , Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( dy, &hrefvec , Magma_DEV, Magma_CPU, queue );
 
         // convert to ELL and copy to GPU
         magma_zmconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
@@ -162,7 +162,7 @@ int main(  int argc, char** argv )
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard ELL).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
         magma_zmfree(&dA_ELL, queue );
-        magma_zvtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
@@ -186,7 +186,7 @@ int main(  int argc, char** argv )
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (SELLP).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
 
-        magma_zvtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
@@ -238,7 +238,7 @@ int main(  int argc, char** argv )
         cusparseStatus = cusparseCreateHybMat( &hybA );
          if (cusparseStatus != 0)    printf("error\n");
 
-        magma_zvtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
@@ -266,7 +266,7 @@ int main(  int argc, char** argv )
         printf( " > CUSPARSE: %.2e seconds %.2e GFLOP/s    (HYB).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
 
-        magma_zvtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
+        magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue );
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);

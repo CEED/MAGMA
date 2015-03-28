@@ -42,56 +42,6 @@ using namespace std;
     Arguments
     ---------
 
-    @param[i,out]
-    x           magma_z_matrix*
-                vector to free    
-    @param[in]
-    queue       magma_queue_t
-                Queue to execute in.
-
-    @ingroup magmasparse_zaux
-    ********************************************************************/
-
-extern "C" magma_int_t
-magma_z_vfree(
-    magma_z_matrix *x,
-    magma_queue_t queue )
-{
-    if ( x->memory_location == Magma_CPU ) {
-        magma_free_cpu( x->val );
-        x->num_rows = 0;
-        x->nnz = 0;
-        x->val = NULL;
-        return MAGMA_SUCCESS;     
-    }
-    else if ( x->memory_location == Magma_DEV ) {
-        if ( magma_free( x->dval ) != MAGMA_SUCCESS ) {
-            printf("Memory Free Error.\n");  
-            return MAGMA_ERR_INVALID_PTR;
-        }
-        
-        x->num_rows = 0;
-        x->nnz = 0;
-        x->dval = NULL;
-        return MAGMA_SUCCESS;     
-    }
-    else {
-        printf("Memory Free Error.\n");  
-        return MAGMA_ERR_INVALID_PTR;
-    }
-}
-
-
-/**
-    Purpose
-    -------
-
-    Free the memory of a magma_z_matrix.
-
-
-    Arguments
-    ---------
-
     @param[in,out]
     A           magma_z_matrix*
                 matrix to free    
