@@ -37,11 +37,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -56,8 +56,8 @@
 
 extern "C" magma_int_t
 magma_zbicgstab_merge(
-    magma_z_matrix A, magma_z_vector b, 
-    magma_z_vector *x, magma_z_solver_par *solver_par,
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
     // set queue for old dense routines
@@ -82,7 +82,7 @@ magma_zbicgstab_merge(
     magma_event_create( &event[0] );
 
     // workspace
-    magma_z_vector q, r,rr,p,v,s,t;
+    magma_z_matrix q, r,rr,p,v,s,t;
     magmaDoubleComplex *d1, *d2, *skp;
     d1 = NULL;
     d2 = NULL;
@@ -239,7 +239,7 @@ magma_zbicgstab_merge(
         }
         solver_par->info = MAGMA_DIVERGENCE;
     }
-    magma_z_vfree(&q, queue );  // frees all vectors
+    magma_zmfree(&q, queue );  // frees all vectors
 
     magma_free(d1);
     magma_free(d2);

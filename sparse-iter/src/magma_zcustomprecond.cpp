@@ -55,11 +55,11 @@
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -74,8 +74,8 @@
 
 extern "C" magma_int_t
 magma_zapplycustomprecond_l(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -97,11 +97,11 @@ magma_zapplycustomprecond_l(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -116,8 +116,8 @@ magma_zapplycustomprecond_l(
 
 extern "C" magma_int_t
 magma_zapplycustomprecond_r(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {

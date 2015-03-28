@@ -42,7 +42,7 @@ int main(  int argc, char** argv )
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magma_z_matrix A, B, B_d;
-    magma_z_vector x, b;
+    magma_z_matrix x, b;
 
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
@@ -84,7 +84,7 @@ int main(  int argc, char** argv )
         magma_zvinit( &b, Magma_DEV, A.num_cols, one, queue );
         magma_zvinit( &x, Magma_DEV, A.num_cols, one, queue );
         magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
-        magma_z_vfree(&x, queue );
+        magma_zmfree(&x, queue );
         magma_zvinit( &x, Magma_DEV, A.num_cols, zero, queue );
 
         magma_z_solver( B_d, b, &x, &zopts, queue );         
@@ -94,8 +94,8 @@ int main(  int argc, char** argv )
         magma_zmfree(&B_d, queue );
         magma_zmfree(&B, queue );
         magma_zmfree(&A, queue ); 
-        magma_z_vfree(&x, queue );
-        magma_z_vfree(&b, queue );
+        magma_zmfree(&x, queue );
+        magma_zmfree(&b, queue );
 
         i++;
     }

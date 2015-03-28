@@ -29,11 +29,11 @@
                 sparse matrix A    
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector b     
 
     @param[in]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 output vector x        
 
     @param[in]
@@ -48,8 +48,8 @@
 
 extern "C" magma_int_t
 magma_z_solver(
-    magma_z_matrix A, magma_z_vector b, 
-    magma_z_vector *x, magma_zopts *zopts,
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_zopts *zopts,
     magma_queue_t queue )
 {
     // preconditioner

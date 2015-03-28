@@ -42,7 +42,7 @@ using namespace std;
                 input vector descriptor
 
     @param[out]
-    y           magma_z_vector*
+    y           magma_z_matrix*
                 output vector descriptor
     @param[in]
     queue       magma_queue_t
@@ -53,7 +53,7 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_vector_clag2z(
-    magma_c_vector x, magma_z_vector *y,
+    magma_c_vector x, magma_z_matrix *y,
     magma_queue_t queue )
 {
     magma_int_t info;

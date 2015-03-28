@@ -43,11 +43,11 @@ using namespace std;
     ---------
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 input vector
 
     @param[out]
-    y           magma_z_vector*
+    y           magma_z_matrix*
                 output vector
 
     @param[in]
@@ -59,8 +59,8 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zvtranspose(
-    magma_z_vector x,
-    magma_z_vector *y,
+    magma_z_matrix x,
+    magma_z_matrix *y,
     magma_queue_t queue )
 {
     // set queue for old dense routines
@@ -82,7 +82,7 @@ magma_zvtranspose(
             magmablas_ztranspose( n, m, x.val, n, y->val, m );
         }
     } else {
-        magma_z_vector x_d, y_d;
+        magma_z_matrix x_d, y_d;
         magma_zvtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue );
         magma_zvtranspose( x_d, &y_d, queue );  
         magma_zvtransfer( y_d, y, Magma_DEV, Magma_CPU, queue );

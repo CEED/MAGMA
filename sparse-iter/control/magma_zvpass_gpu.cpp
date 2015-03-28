@@ -53,7 +53,7 @@ using namespace std;
                 array containing vector entries
 
     @param[out]
-    v           magma_z_vector*
+    v           magma_z_matrix*
                 magma vector
     @param[in]
     queue       magma_queue_t
@@ -67,13 +67,14 @@ magma_int_t
 magma_zvset_dev(
     magma_int_t m, magma_int_t n, 
     magmaDoubleComplex_ptr val,
-    magma_z_vector *v,
+    magma_z_matrix *v,
     magma_queue_t queue )
 {
     v->num_rows = m;
     v->num_cols = n;
     v->nnz = m*n;
     v->memory_location = Magma_DEV;
+    v->storage_type = Magma_DENSE;
     v->dval = val;
     v->major = MagmaColMajor;
 
@@ -91,7 +92,7 @@ magma_zvset_dev(
     ---------
 
     @param[in]
-    v           magma_z_vector
+    v           magma_z_matrix
                 magma vector
 
     @param[out]
@@ -116,7 +117,7 @@ magma_zvset_dev(
 extern "C"
 magma_int_t
 magma_zvget_dev(
-    magma_z_vector v,
+    magma_z_matrix v,
     magma_int_t *m, magma_int_t *n, 
     magmaDoubleComplex_ptr *val,
     magma_queue_t queue )
@@ -127,7 +128,7 @@ magma_zvget_dev(
         *n = v.num_cols;
         *val = v.dval;
     } else {
-        magma_z_vector v_DEV;
+        magma_z_matrix v_DEV;
         magma_zvtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
         magma_zvget_dev( v_DEV, m, n, val, queue );
         magma_z_vfree( &v_DEV, queue );

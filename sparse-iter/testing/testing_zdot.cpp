@@ -56,7 +56,7 @@ int main(  int argc, char** argv )
 
     for( magma_int_t n=10000; n<100000001; n=n+10000 ) {
            
-            magma_z_vector a,b,x,y,skp;
+            magma_z_matrix a,b,x,y,skp;
             int iters = 10;
             double computations = (2.* n * iters * num_vecs); 
 
@@ -164,11 +164,11 @@ int main(  int argc, char** argv )
                     (double)(computations)/(mdgm_time*(1.e+09)) );
             #endif
 
-            magma_z_vfree(&a, queue );
-            magma_z_vfree(&b, queue );
-            magma_z_vfree(&x, queue );
-            magma_z_vfree(&y, queue );
-            magma_z_vfree(&skp, queue );
+            magma_zmfree(&a, queue );
+            magma_zmfree(&b, queue );
+            magma_zmfree(&x, queue );
+            magma_zmfree(&y, queue );
+            magma_zmfree(&skp, queue );
 
 
 

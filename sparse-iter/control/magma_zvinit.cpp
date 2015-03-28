@@ -36,7 +36,7 @@ using namespace std;
     Purpose
     -------
 
-    Allocates memory for magma_z_vector and initializes it 
+    Allocates memory for magma_z_matrix and initializes it 
     with the passed value.
 
 
@@ -44,7 +44,7 @@ using namespace std;
     ---------
 
     @param[out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to initialize   
 
     @param[in]
@@ -68,7 +68,7 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zvinit(
-    magma_z_vector *x, 
+    magma_z_matrix *x, 
     magma_location_t mem_loc,
     magma_int_t num_rows, 
     magmaDoubleComplex values,
@@ -80,6 +80,7 @@ magma_zvinit(
 
     x->memory_location = Magma_CPU;
     x->num_rows = num_rows;
+    x->storage_type = Magma_DENSE;
     x->num_cols = 1;
     x->nnz = num_rows*1;
     x->major = MagmaColMajor;

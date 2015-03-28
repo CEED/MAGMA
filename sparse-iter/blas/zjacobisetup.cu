@@ -60,19 +60,19 @@ zvjacobisetup_gpu(  int num_rows,
                 number of rows
                 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
-    d           magma_z_vector
+    d           magma_z_matrix
                 vector with diagonal entries
 
     @param[out]
-    c           magma_z_vector*
+    c           magma_z_matrix*
                 c = D^(-1) * b
 
     @param[out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 iteration vector
     @param[in]
     queue       magma_queue_t
@@ -84,10 +84,10 @@ zvjacobisetup_gpu(  int num_rows,
 extern "C" magma_int_t
 magma_zjacobisetup_vector_gpu(
     int num_rows, 
-    magma_z_vector b, 
-    magma_z_vector d, 
-    magma_z_vector c,
-    magma_z_vector *x,
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix c,
+    magma_z_matrix *x,
     magma_queue_t queue )
 {
     dim3 grid( magma_ceildiv( num_rows, BLOCK_SIZE ) );
@@ -141,15 +141,15 @@ zjacobidiagscal_kernel(  int num_rows,
                 number of rows
                 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
-    d           magma_z_vector
+    d           magma_z_matrix
                 vector with diagonal entries
 
     @param[out]
-    c           magma_z_vector*
+    c           magma_z_matrix*
                 c = D^(-1) * b
     @param[in]
     queue       magma_queue_t
@@ -161,9 +161,9 @@ zjacobidiagscal_kernel(  int num_rows,
 extern "C" magma_int_t
 magma_zjacobi_diagscal(
     int num_rows, 
-    magma_z_vector d, 
-    magma_z_vector b, 
-    magma_z_vector *c,
+    magma_z_matrix d, 
+    magma_z_matrix b, 
+    magma_z_matrix *c,
     magma_queue_t queue )
 {
     dim3 grid( magma_ceildiv( num_rows, BLOCK_SIZE ));

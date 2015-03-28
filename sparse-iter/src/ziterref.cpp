@@ -37,11 +37,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -60,7 +60,7 @@
 
 extern "C" magma_int_t
 magma_ziterref(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
     magma_z_solver_par *solver_par, magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
@@ -84,7 +84,7 @@ magma_ziterref(
     magma_int_t dofs = A.num_rows;
 
     // workspace
-    magma_z_vector r,z;
+    magma_z_matrix r,z;
     magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
     magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
@@ -170,8 +170,8 @@ magma_ziterref(
         }
         solver_par->info = MAGMA_DIVERGENCE;
     }   
-    magma_z_vfree(&r, queue );
-    magma_z_vfree(&z, queue );
+    magma_zmfree(&r, queue );
+    magma_zmfree(&z, queue );
 
 
     magmablasSetKernelStream( orig_queue );

@@ -28,13 +28,13 @@
     Purpose
     -------
 
-    convertes magma_z_vector from Z to C
+    convertes magma_z_matrix from Z to C
 
     Arguments
     ---------
 
     @param
-    x           magma_z_vector
+    x           magma_z_matrix
                 input vector descriptor
 
     @param
@@ -49,7 +49,7 @@
 
 extern "C" magma_int_t
 magma_vector_zlag2c(
-    magma_z_vector x, magma_c_vector *y,
+    magma_z_matrix x, magma_c_vector *y,
     magma_queue_t queue )
 {
     magma_int_t info;

@@ -40,7 +40,7 @@ int main(  int argc, char** argv )
     magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
     magmaDoubleComplex two = MAGMA_Z_MAKE( 2.0, 0.0 );
 
-    magma_z_vector a, ad, bd, cd;
+    magma_z_matrix a, ad, bd, cd;
     magma_zvinit( &a, Magma_CPU, n, one, queue );
     magma_zvinit( &bd, Magma_DEV, n, two, queue );
     magma_zvinit( &cd, Magma_DEV, n, one, queue );
@@ -88,10 +88,10 @@ int main(  int argc, char** argv )
     printf("# tester BLAS:  ok\n");
 
 
-    magma_z_vfree( &a, queue);
-    magma_z_vfree(&ad, queue);
-    magma_z_vfree(&bd, queue);
-    magma_z_vfree(&cd, queue);
+    magma_zmfree( &a, queue);
+    magma_zmfree(&ad, queue);
+    magma_zmfree(&bd, queue);
+    magma_zmfree(&cd, queue);
 
     /* Shutdown */
     magmablasSetKernelStream( NULL );

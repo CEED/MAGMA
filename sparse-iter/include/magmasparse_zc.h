@@ -32,8 +32,8 @@ extern "C" {
 */
 magma_int_t
 magma_vector_zlag2c(
-    magma_z_vector x,
-    magma_c_vector *y,
+    magma_z_matrix x,
+    magma_c_matrix *y,
     magma_queue_t queue );
 
 magma_int_t
@@ -45,8 +45,8 @@ magma_sparse_matrix_zlag2c(
 
 magma_int_t
 magma_vector_clag2z(
-    magma_c_vector x,
-    magma_z_vector *y,
+    magma_c_matrix x,
+    magma_z_matrix *y,
     magma_queue_t queue );
 
 magma_int_t
@@ -110,8 +110,8 @@ magma_zlag2c_CSR_DENSE_convert(
 magma_int_t
 magma_zcpgmres(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,
+    magma_z_matrix b, 
+    magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
     magma_queue_t queue );
@@ -119,8 +119,8 @@ magma_zcpgmres(
 magma_int_t
 magma_zcpbicgstab(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,
+    magma_z_matrix b, 
+    magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
     magma_queue_t queue );
@@ -128,8 +128,8 @@ magma_zcpbicgstab(
 magma_int_t
 magma_zcir(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,
+    magma_z_matrix b, 
+    magma_z_matrix *x,
     magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
     magma_queue_t queue );
@@ -137,8 +137,8 @@ magma_zcir(
 magma_int_t
 magma_zcpir(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,
+    magma_z_matrix b, 
+    magma_z_matrix *x,
     magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
     magma_queue_t queue );

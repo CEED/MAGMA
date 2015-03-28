@@ -31,7 +31,7 @@ using namespace std;
     Purpose
     -------
 
-    Visualizes part of a vector of type magma_z_vector.
+    Visualizes part of a vector of type magma_z_matrix.
     With input vector x , offset, visulen, the entries 
     offset - (offset +  visulen) of x are visualized.
 
@@ -39,7 +39,7 @@ using namespace std;
     ---------
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 vector to visualize
 
     @param[in]
@@ -60,7 +60,7 @@ using namespace std;
 extern "C"
 magma_int_t
 magma_zprint_vector(
-    magma_z_vector x, 
+    magma_z_matrix x, 
     magma_int_t offset, 
     magma_int_t  visulen,
     magma_queue_t queue )
@@ -103,7 +103,7 @@ magma_zprint_vector(
     }
     else if ( x.memory_location == Magma_DEV ) {
         printf("located on DEV:\n");
-        magma_z_vector y;
+        magma_z_matrix y;
         magma_zvtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             magma_zprintval(y.val[i]);
@@ -139,7 +139,7 @@ double magma_zstring_to_double( const std::string& s )
     ---------
 
     @param[out]
-    x           magma_z_vector *
+    x           magma_z_matrix *
                 vector to read in
 
     @param[in]
@@ -158,12 +158,13 @@ double magma_zstring_to_double( const std::string& s )
 extern "C"
 magma_int_t
 magma_zvread(
-    magma_z_vector *x, 
+    magma_z_matrix *x, 
     magma_int_t length,
     char * filename,
     magma_queue_t queue )
 {
     x->memory_location = Magma_CPU;
+    x->storage_type = Magma_DENSE;
     x->num_rows = length;
     x->num_cols = 1;
     x->major = MagmaColMajor;
@@ -198,7 +199,7 @@ magma_zvread(
     ---------
 
     @param[out]
-    x           magma_z_vector *
+    x           magma_z_matrix *
                 vector to read in
 
     @param[in]
@@ -214,7 +215,7 @@ magma_zvread(
 extern "C"
 magma_int_t
 magma_zvspread(
-    magma_z_vector *x, 
+    magma_z_matrix *x, 
     const char * filename,
     magma_queue_t queue )
 {

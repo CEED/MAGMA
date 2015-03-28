@@ -36,11 +36,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -57,8 +57,8 @@
 extern "C" magma_int_t
 magma_zjacobi(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,  
+    magma_z_matrix b, 
+    magma_z_matrix *x,  
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
@@ -85,7 +85,7 @@ magma_zjacobi(
 
 
     magma_z_matrix M;
-    magma_z_vector c, r;
+    magma_z_matrix c, r;
     magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
     magma_z_spmv( c_one, A, *x, c_zero, r, queue );                  // r = A x
     magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);           // r = r - b
@@ -113,8 +113,8 @@ magma_zjacobi(
         solver_par->info = MAGMA_DIVERGENCE;
 
     magma_zmfree( &M, queue );
-    magma_z_vfree( &c, queue );
-    magma_z_vfree( &r, queue );
+    magma_zmfree( &c, queue );
+    magma_zmfree( &r, queue );
 
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
@@ -148,7 +148,7 @@ magma_zjacobi(
                 M = D^(-1) * (L+U)
 
     @param[in,out]
-    d           magma_z_vector*
+    d           magma_z_matrix*
                 vector with diagonal elements of A
     @param[in]
     queue       magma_queue_t
@@ -160,13 +160,13 @@ magma_zjacobi(
 extern "C" magma_int_t
 magma_zjacobisetup_matrix(
     magma_z_matrix A, 
-    magma_z_matrix *M, magma_z_vector *d,
+    magma_z_matrix *M, magma_z_matrix *d,
     magma_queue_t queue )
 {
     magma_int_t i;
 
     magma_z_matrix A_h1, A_h2, B, C;
-    magma_z_vector diag;
+    magma_z_matrix diag;
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
 
     if ( A.storage_type != Magma_CSR) {
@@ -218,7 +218,7 @@ magma_zjacobisetup_matrix(
     magma_zmfree( &B, queue );
     magma_zmfree( &C, queue ); 
 
-    magma_z_vfree( &diag, queue );
+    magma_zmfree( &diag, queue );
  
     return MAGMA_SUCCESS;
 }
@@ -240,7 +240,7 @@ magma_zjacobisetup_matrix(
                 input matrix A
 
     @param[in,out]
-    d           magma_z_vector*
+    d           magma_z_matrix*
                 vector with diagonal elements
     @param[in]
     queue       magma_queue_t
@@ -251,13 +251,13 @@ magma_zjacobisetup_matrix(
 
 extern "C" magma_int_t
 magma_zjacobisetup_diagscal(
-    magma_z_matrix A, magma_z_vector *d,
+    magma_z_matrix A, magma_z_matrix *d,
     magma_queue_t queue )
 {
     magma_int_t i;
 
     magma_z_matrix A_h1, B;
-    magma_z_vector diag;
+    magma_z_matrix diag;
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
 
     if ( A.storage_type != Magma_CSR) {
@@ -285,7 +285,7 @@ magma_zjacobisetup_diagscal(
         magma_zmfree( &A_h1, queue );
     }
     magma_zmfree( &B, queue );
-    magma_z_vfree( &diag, queue );
+    magma_zmfree( &diag, queue );
  
     return MAGMA_SUCCESS;
 }
@@ -306,15 +306,15 @@ magma_zjacobisetup_diagscal(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
-    d           magma_z_vector
+    d           magma_z_matrix
                 vector with diagonal entries
 
     @param[in]
-    c           magma_z_vector*
+    c           magma_z_matrix*
                 c = D^(-1) * b
     @param[in]
     queue       magma_queue_t
@@ -325,12 +325,12 @@ magma_zjacobisetup_diagscal(
 
 extern "C" magma_int_t
 magma_zjacobisetup_vector(
-    magma_z_vector b, magma_z_vector d, 
-    magma_z_vector *c,
+    magma_z_matrix b, magma_z_matrix d, 
+    magma_z_matrix *c,
     magma_queue_t queue )
 {
     if ( b.memory_location == Magma_CPU ) {
-        magma_z_vector diag, c_t, b_h;
+        magma_z_matrix diag, c_t, b_h;
         magma_zvinit( &c_t, Magma_CPU, b.num_rows, MAGMA_Z_ZERO, queue );
 
         magma_zvtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
@@ -342,19 +342,19 @@ magma_zjacobisetup_vector(
         }  
         magma_zvtransfer( c_t, c, Magma_CPU, b.memory_location, queue ); 
 
-        magma_z_vfree( &diag, queue );
-        magma_z_vfree( &c_t, queue );
-        magma_z_vfree( &b_h, queue );
+        magma_zmfree( &diag, queue );
+        magma_zmfree( &c_t, queue );
+        magma_zmfree( &b_h, queue );
 
         return MAGMA_SUCCESS;
     }
     else if ( b.memory_location == Magma_DEV ) {
         // fill vector
-        magma_z_vector tmp;
+        magma_z_matrix tmp;
         magma_zvinit( &tmp, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
         magma_zjacobisetup_vector_gpu( 
                     b.num_rows, b, d, *c, &tmp, queue );
-        magma_z_vfree( &tmp, queue );
+        magma_zmfree( &tmp, queue );
         return MAGMA_SUCCESS;
     }
 
@@ -378,7 +378,7 @@ magma_zjacobisetup_vector(
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
@@ -386,7 +386,7 @@ magma_zjacobisetup_vector(
                 M = D^(-1) * (L+U)
 
     @param[in]
-    c           magma_z_vector*
+    c           magma_z_matrix*
                 c = D^(-1) * b
     @param[in]
     queue       magma_queue_t
@@ -397,14 +397,14 @@ magma_zjacobisetup_vector(
 
 extern "C" magma_int_t
 magma_zjacobisetup(
-    magma_z_matrix A, magma_z_vector b, 
-    magma_z_matrix *M, magma_z_vector *c,
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *M, magma_z_matrix *c,
     magma_queue_t queue )
 {
     magma_int_t i;
 
     magma_z_matrix A_h1, A_h2, B, C;
-    magma_z_vector diag, c_t, b_h;
+    magma_z_matrix diag, c_t, b_h;
     magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
     magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
     magma_zvtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
@@ -463,9 +463,9 @@ magma_zjacobisetup(
     }   
     magma_zmfree( &B, queue );
     magma_zmfree( &C, queue );  
-    magma_z_vfree( &diag, queue );
-    magma_z_vfree( &c_t, queue );
-    magma_z_vfree( &b_h, queue );
+    magma_zmfree( &diag, queue );
+    magma_zmfree( &c_t, queue );
+    magma_zmfree( &b_h, queue );
 
     return MAGMA_SUCCESS;
 }
@@ -488,11 +488,11 @@ magma_zjacobisetup(
                 input matrix M = D^(-1) * (L+U)
 
     @param[in]
-    c           magma_z_vector
+    c           magma_z_matrix
                 c = D^(-1) * b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 iteration vector x
 
     @param[in,out]
@@ -507,7 +507,7 @@ magma_zjacobisetup(
 
 extern "C" magma_int_t
 magma_zjacobiiter(
-    magma_z_matrix M, magma_z_vector c, magma_z_vector *x,  
+    magma_z_matrix M, magma_z_matrix c, magma_z_matrix *x,  
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
@@ -519,7 +519,7 @@ magma_zjacobiiter(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                             c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = M.num_rows;
-    magma_z_vector t, swap;
+    magma_z_matrix t, swap;
     magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
 
 
@@ -534,7 +534,7 @@ magma_zjacobiiter(
         //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
     }
 
-    magma_z_vfree( &t, queue );
+    magma_zmfree( &t, queue );
 
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
@@ -558,11 +558,11 @@ magma_zjacobiiter(
                 input matrix M = D^(-1) * (L+U)
 
     @param[in]
-    c           magma_z_vector
+    c           magma_z_matrix
                 c = D^(-1) * b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 iteration vector x
 
     @param[in,out]
@@ -581,7 +581,7 @@ magma_zjacobiiter(
 
 extern "C" magma_int_t
 magma_zjacobiiter_precond(
-    magma_z_matrix M, magma_z_vector *x, 
+    magma_z_matrix M, magma_z_matrix *x, 
     magma_z_solver_par *solver_par, magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -594,7 +594,7 @@ magma_zjacobiiter_precond(
                                             c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = M.num_rows;
     magma_int_t num_vecs = x->num_rows / dofs;
-    magma_z_vector swap;
+    magma_z_matrix swap;
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {
         magma_z_spmv( c_mone, M, *x, c_zero, precond->work2, queue );   // t = - M * x

@@ -86,7 +86,7 @@ int main(  int argc, char** argv )
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
-        magma_z_vector hx, hy, dx, dy, hrefvec, hcheck;
+        magma_z_matrix hx, hy, dx, dy, hrefvec, hcheck;
 
         // m - number of rows for the sparse matrix
         // n - number of vectors to be multiplied in the SpMM product
@@ -188,7 +188,7 @@ int main(  int argc, char** argv )
         magma_zmconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
         magma_zmtransfer( hA_ELL, &dA_ELL, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_ELL, queue );
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
         // SpMV on GPU (ELL)
         start = magma_sync_wtime( queue ); 
@@ -207,7 +207,7 @@ int main(  int argc, char** argv )
             printf("# tester spmm ELL:  ok\n");
         else
             printf("# tester spmm ELL:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         magma_zmfree(&dA_ELL, queue );
 
@@ -216,7 +216,7 @@ int main(  int argc, char** argv )
         magma_zmconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
         magma_zmtransfer( hA_SELLP, &dA_SELLP, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_SELLP, queue );
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
         // SpMV on GPU (SELLP)
         start = magma_sync_wtime( queue ); 
@@ -235,14 +235,14 @@ int main(  int argc, char** argv )
             printf("# tester spmm SELL-P:  ok\n");
         else
             printf("# tester spmm SELL-P:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
         magma_zmfree(&dA_SELLP, queue );
 
 
 
         // SpMV on GPU (CUSPARSE - CSR)
         // CUSPARSE context //
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
         #ifdef PRECISION_d
         start = magma_sync_wtime( queue ); 
@@ -281,7 +281,7 @@ int main(  int argc, char** argv )
             printf("# tester spmm cuSPARSE:  ok\n");
         else
             printf("# tester spmm cuSPARSE:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         cusparseDestroyMatDescr( descr );
         cusparseDestroy( cusparseHandle );
@@ -295,12 +295,12 @@ int main(  int argc, char** argv )
 
         // free CPU memory
         magma_zmfree(&hA, queue );
-        magma_z_vfree(&hx, queue );
-        magma_z_vfree(&hy, queue );
-        magma_z_vfree(&hrefvec, queue );
+        magma_zmfree(&hx, queue );
+        magma_zmfree(&hy, queue );
+        magma_zmfree(&hrefvec, queue );
         // free GPU memory
-        magma_z_vfree(&dx, queue );
-        magma_z_vfree(&dy, queue );
+        magma_zmfree(&dx, queue );
+        magma_zmfree(&dy, queue );
 
         i++;
 

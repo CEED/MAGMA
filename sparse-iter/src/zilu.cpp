@@ -249,8 +249,8 @@ magma_zilusetup(
 extern "C" magma_int_t
 magma_zilu(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x,  
+    magma_z_matrix b, 
+    magma_z_matrix *x,  
     magma_z_solver_par *solver_par, 
     magmaInt_ptr ipiv,
     magma_queue_t queue )

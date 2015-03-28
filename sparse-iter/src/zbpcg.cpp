@@ -44,11 +44,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b - can be a block
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -67,7 +67,7 @@
 
 extern "C" magma_int_t
 magma_zbpcg(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
     magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
@@ -90,7 +90,7 @@ magma_zbpcg(
     magma_int_t dofs = A.num_rows;
 
     // GPU workspace
-    magma_z_vector r, rt, p, q, h;
+    magma_z_matrix r, rt, p, q, h;
     magma_zvinit( &r, Magma_DEV, dofs*num_vecs, c_zero, queue );
     magma_zvinit( &rt, Magma_DEV, dofs*num_vecs, c_zero, queue );
     magma_zvinit( &p, Magma_DEV, dofs*num_vecs, c_zero, queue );
@@ -274,11 +274,11 @@ magma_zbpcg(
     }
     printf("\n");
 
-    magma_z_vfree(&r, queue );
-    magma_z_vfree(&rt, queue );
-    magma_z_vfree(&p, queue );
-    magma_z_vfree(&q, queue );
-    magma_z_vfree(&h, queue );
+    magma_zmfree(&r, queue );
+    magma_zmfree(&rt, queue );
+    magma_zmfree(&p, queue );
+    magma_zmfree(&q, queue );
+    magma_zmfree(&h, queue );
 
     magma_free_cpu(alpha);
     magma_free_cpu(beta);

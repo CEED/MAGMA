@@ -31,11 +31,11 @@
                 sparse matrix A    
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector b     
 
     @param[in]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 output vector x        
 
     @param[in,out]
@@ -52,8 +52,8 @@
 extern "C" magma_int_t
 magma_z_precond(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -98,7 +98,7 @@ magma_z_precond(
                 sparse matrix A     
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector y      
 
     @param[in,out]
@@ -113,7 +113,7 @@ magma_z_precond(
 
 extern "C" magma_int_t
 magma_z_precondsetup(
-    magma_z_matrix A, magma_z_vector b, 
+    magma_z_matrix A, magma_z_matrix b, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -161,11 +161,11 @@ magma_z_precondsetup(
                 sparse matrix A    
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector b     
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 output vector x     
 
     @param[in]
@@ -182,8 +182,8 @@ magma_z_precondsetup(
 extern "C" magma_int_t
 magma_z_applyprecond(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -198,14 +198,14 @@ magma_z_applyprecond(
         magma_zapplypastix( b, x, precond, queue );
     }
     else if ( precond->solver == Magma_ILU ) {
-        magma_z_vector tmp;
+        magma_z_matrix tmp;
         magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
-        magma_z_vfree( &tmp, queue );
+        magma_zmfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
-        magma_z_vector tmp;
+        magma_z_matrix tmp;
         magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
-        magma_z_vfree( &tmp, queue );
+        magma_zmfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
         magma_zcopy( b.num_rows, b.dval, 1, x->dval, 1 );      //  x = b
@@ -237,11 +237,11 @@ magma_z_applyprecond(
                 sparse matrix A    
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector b     
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 output vector x     
 
     @param[in]
@@ -258,8 +258,8 @@ magma_z_applyprecond(
 extern "C" magma_int_t
 magma_z_applyprecond_left(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -310,11 +310,11 @@ magma_z_applyprecond_left(
                 sparse matrix A    
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 input vector b     
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 output vector x     
 
     @param[in]
@@ -331,8 +331,8 @@ magma_z_applyprecond_left(
 extern "C" magma_int_t
 magma_z_applyprecond_right(
     magma_z_matrix A, 
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {

@@ -39,14 +39,14 @@
                 sparse matrix A    
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 input vector x  
                 
     @param[in]
     beta        magmaDoubleComplex
                 scalar beta
     @param[out]
-    y           magma_z_vector
+    y           magma_z_matrix
                 output vector y      
     @param[in]
     queue       magma_queue_t
@@ -59,9 +59,9 @@ extern "C" magma_int_t
 magma_z_spmv(
     magmaDoubleComplex alpha, 
     magma_z_matrix A, 
-    magma_z_vector x, 
+    magma_z_matrix x, 
     magmaDoubleComplex beta, 
-    magma_z_vector y,
+    magma_z_matrix y,
     magma_queue_t queue )
 {
     // set queue for old dense routines
@@ -216,12 +216,12 @@ magma_z_spmv(
                 }
                 else if ( x.major == MagmaRowMajor) {
                     // transpose first to col major
-                    magma_z_vector x2;                    
+                    magma_z_matrix x2;                    
                     magma_zvtranspose( x, &x2, queue );
                     magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
                     beta, y.dval, queue );
-                    magma_z_vfree(&x2, queue );
+                    magma_zmfree(&x2, queue );
                 }
              }
              else if ( A.storage_type == Magma_ELLPACKT ) {
@@ -232,12 +232,12 @@ magma_z_spmv(
                 }
                 else if ( x.major == MagmaRowMajor) {
                     // transpose first to col major
-                    magma_z_vector x2;                    
+                    magma_z_matrix x2;                    
                     magma_zvtranspose( x, &x2, queue );
                     magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
                     beta, y.dval, queue );
-                    magma_z_vfree(&x2, queue );
+                    magma_zmfree(&x2, queue );
                 }
              } else if ( A.storage_type == Magma_SELLP ) {
                 if ( x.major == MagmaRowMajor) {
@@ -247,12 +247,12 @@ magma_z_spmv(
                 }
                 else if ( x.major == MagmaColMajor) {
                     // transpose first to row major
-                    magma_z_vector x2; 
+                    magma_z_matrix x2; 
                     magma_zvtranspose( x, &x2, queue );
                     magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
                     num_vecs, A.blocksize, A.numblocks, A.alignment, 
                     alpha, A.dval, A.dcol, A.drow, x2.dval, beta, y.dval, queue );
-                    magma_z_vfree(&x2, queue );
+                    magma_zmfree(&x2, queue );
                 }
              }/*
              if ( A.storage_type == Magma_DENSE ) {
@@ -308,7 +308,7 @@ magma_z_spmv(
                 scalar lambda 
 
     @param
-    x           magma_z_vector
+    x           magma_z_matrix
                 input vector x  
 
     @param
@@ -328,7 +328,7 @@ magma_z_spmv(
                 in case the matrixpowerskernel is used
                 
     @param
-    y           magma_z_vector
+    y           magma_z_matrix
                 output vector y    
     @param[in]
     queue       magma_queue_t
@@ -342,12 +342,12 @@ magma_z_spmv_shift(
     magmaDoubleComplex alpha, 
     magma_z_matrix A, 
     magmaDoubleComplex lambda,
-    magma_z_vector x, 
+    magma_z_matrix x, 
     magmaDoubleComplex beta, 
     magma_int_t offset, 
     magma_int_t blocksize, 
     magma_index_t *add_rows, 
-    magma_z_vector y,
+    magma_z_matrix y,
     magma_queue_t queue )
 {
     if ( A.memory_location != x.memory_location 

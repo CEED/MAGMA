@@ -37,11 +37,11 @@ using namespace std;
     ---------
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 vector x
 
     @param[out]
-    y           magma_z_vector*
+    y           magma_z_matrix*
                 copy of x
 
     @param[in]
@@ -62,8 +62,8 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_zvtransfer(
-    magma_z_vector x,
-    magma_z_vector *y,
+    magma_z_matrix x,
+    magma_z_matrix *y,
     magma_location_t src,
     magma_location_t dst,
     magma_queue_t queue )

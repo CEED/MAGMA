@@ -84,11 +84,11 @@ static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, m
                 descriptor for matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b vector
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -107,7 +107,7 @@ static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, m
 
 extern "C" magma_int_t
 magma_zfgmres(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
     magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
     magma_queue_t queue ){
@@ -125,7 +125,7 @@ magma_zfgmres(
     magma_int_t i, j, k;
     magmaDoubleComplex beta;
     
-    magma_z_vector v_t, w_t, t, t2, V, W;
+    magma_z_matrix v_t, w_t, t, t2, V, W;
     v_t.memory_location = Magma_DEV;
     v_t.num_rows = dofs;
     v_t.num_cols = 1;
@@ -312,10 +312,10 @@ magma_zfgmres(
     magma_free_pinned(H);
 
     //free DEV memory
-    magma_z_vfree( &V, queue);
-    magma_z_vfree( &W, queue);
-    magma_z_vfree( &t, queue);
-    magma_z_vfree( &t2, queue);
+    magma_zmfree( &V, queue);
+    magma_zmfree( &W, queue);
+    magma_zmfree( &t, queue);
+    magma_zmfree( &t2, queue);
 
     return MAGMA_SUCCESS;
 

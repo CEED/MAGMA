@@ -38,11 +38,11 @@
                 descriptor for matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b vector
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -59,7 +59,7 @@
 
 extern "C" magma_int_t
 magma_zcpgmres(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
     magma_z_solver_par *solver_par,  magma_precond_parameters *precond_par,
     magma_queue_t queue )
 {
@@ -83,7 +83,7 @@ magma_zcpgmres(
     magmaDoubleComplex  y[ldh], h1[ldh];
     
     // GPU workspace
-    magma_z_vector r, q, q_t, z, z_t;
+    magma_z_matrix r, q, q_t, z, z_t;
     magma_zvinit( &r  , Magma_DEV, dofs,     c_zero, queue );
     magma_zvinit( &q  , Magma_DEV, dofs*ldh, c_zero, queue );
     magma_zvinit( &q_t, Magma_DEV, dofs,     c_zero, queue );
@@ -194,11 +194,11 @@ magma_zcpgmres(
 
     magma_free(dy); 
 /*
-    magma_z_vfree(&r, queue );
-    magma_z_vfree(&q, queue );
-    magma_z_vfree(&q_t, queue );
-    magma_z_vfree(&z, queue );
-    magma_z_vfree(&z_t, queue );
+    magma_zmfree(&r, queue );
+    magma_zmfree(&q, queue );
+    magma_zmfree(&q_t, queue );
+    magma_zmfree(&z, queue );
+    magma_zmfree(&z_t, queue );
     magma_c_vfree(&qs_t, queue );
     magma_c_vfree(&zs_t, queue );
 

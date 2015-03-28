@@ -31,11 +31,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 solution approximation
 
     @param[out]
@@ -51,7 +51,7 @@
 
 extern "C" magma_int_t
 magma_zresidual(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector x, 
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix x, 
     double *res,
     magma_queue_t queue )
 {
@@ -65,7 +65,7 @@ magma_zresidual(
     magma_int_t dofs = A.num_rows;
     
     if ( A.num_rows == b.num_rows ) {
-        magma_z_vector r;
+        magma_z_matrix r;
         magma_zvinit( &r, Magma_DEV, A.num_rows, zero, queue );
 
         magma_z_spmv( one, A, x, zero, r, queue );                   // r = A x
@@ -74,11 +74,11 @@ magma_zresidual(
         //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
         //printf( "relative residual: %e\n", *res );
 
-        magma_z_vfree(&r, queue );
+        magma_zmfree(&r, queue );
     } else if (b.num_rows%A.num_rows== 0 ) {
         magma_int_t num_vecs = b.num_rows/A.num_rows;
 
-        magma_z_vector r;
+        magma_z_matrix r;
         magma_zvinit( &r, Magma_DEV, b.num_rows, zero, queue );
 
         magma_z_spmv( one, A, x, zero, r, queue );                   // r = A x
@@ -90,7 +90,7 @@ magma_zresidual(
         //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
         //printf( "relative residual: %e\n", *res );
 
-        magma_z_vfree(&r, queue );
+        magma_zmfree(&r, queue );
     } else {
         printf("error: dimensions do not match.\n");
     }

@@ -33,14 +33,14 @@
                 scalar alpha
 
     @param[in]
-    x           magma_z_vector
+    x           magma_z_matrix
                 input vector x  
                 
     @param[in]
     beta        magmaDoubleComplex
                 scalar beta
     @param[out]
-    y           magma_z_vector
+    y           magma_z_matrix
                 output vector y      
     @param[in]
     queue       magma_queue_t
@@ -52,9 +52,9 @@
 extern "C" magma_int_t
 magma_zcustomspmv(
     magmaDoubleComplex alpha, 
-    magma_z_vector x, 
+    magma_z_matrix x, 
     magmaDoubleComplex beta, 
-    magma_z_vector y,
+    magma_z_matrix y,
     magma_queue_t queue )
 {
     // vector access via x.dval, y.dval

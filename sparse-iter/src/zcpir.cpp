@@ -40,11 +40,11 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 solution approximation
 
     @param[in,out]
@@ -61,7 +61,7 @@
 
 extern "C" magma_int_t
 magma_zcpir(
-    magma_z_matrix A, magma_z_vector b, magma_z_vector *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
     magma_z_solver_par *solver_par, magma_precond_parameters *precond_par,
     magma_queue_t queue )
 {
@@ -79,7 +79,7 @@ magma_zcpir(
     magma_int_t dofs = A.num_rows;
 
     // workspace on GPU
-    magma_z_vector r,z;
+    magma_z_matrix r,z;
     magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
     magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
 
@@ -97,7 +97,7 @@ magma_zcpir(
 
     // Jacobi setup
     magma_z_matrix M;
-    magma_z_vector c,d;
+    magma_z_matrix c,d;
     magma_z_solver_par jacobiiter_par;
     // Jacobi setup
     magma_zjacobisetup_matrix( A, r, &M, &d, queue );
@@ -174,12 +174,12 @@ magma_zcpir(
     }
     
     magma_zmfree(&M, queue );
-    magma_z_vfree(&r, queue );
-    magma_z_vfree(&z, queue );
+    magma_zmfree(&r, queue );
+    magma_zmfree(&z, queue );
     magma_c_vfree(&rs, queue );
     magma_c_vfree(&zs, queue );
-    magma_z_vfree(&c, queue );
-    magma_z_vfree(&d, queue );
+    magma_zmfree(&c, queue );
+    magma_zmfree(&d, queue );
 
     magma_free( AS.dval );
 

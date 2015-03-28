@@ -85,7 +85,7 @@ int main(  int argc, char** argv )
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 
-        magma_z_vector hx, hy, dx, dy, hrefvec, hcheck;
+        magma_z_matrix hx, hy, dx, dy, hrefvec, hcheck;
 
         // init CPU vectors
         magma_zvinit( &hx, Magma_CPU, hA.num_rows, c_zero, queue );
@@ -152,7 +152,7 @@ int main(  int argc, char** argv )
         magma_zmconvert(  hA, &hA_ELL, Magma_CSR, Magma_ELL, queue );
         magma_zmtransfer( hA_ELL, &dA_ELL, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_ELL, queue );
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
         // SpMV on GPU (ELL)
         start = magma_sync_wtime( queue );
@@ -170,13 +170,13 @@ int main(  int argc, char** argv )
             printf("# tester spmv ELL:  ok\n");
         else
             printf("# tester spmv ELL:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         // convert to SELLP and copy to GPU
         magma_zmconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue );
         magma_zmtransfer( hA_SELLP, &dA_SELLP, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_SELLP, queue );
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
         // SpMV on GPU (SELLP)
         start = magma_sync_wtime( queue );
@@ -195,7 +195,7 @@ int main(  int argc, char** argv )
             printf("# tester spmv SELL-P:  ok\n");
         else
             printf("# tester spmv SELL-P:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         magma_zmfree(&dA_SELLP, queue );
 
@@ -215,7 +215,7 @@ int main(  int argc, char** argv )
         cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
         magmaDoubleComplex alpha = c_one;
         magmaDoubleComplex beta = c_zero;
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
 
         // copy matrix to GPU
@@ -247,8 +247,8 @@ int main(  int argc, char** argv )
             printf("# tester spmv cuSPARSE CSR:  ok\n");
         else
             printf("# tester spmv cuSPARSE CSR:  failed\n");
-        magma_z_vfree( &hcheck, queue );
-        magma_z_vfree( &dy, queue );
+        magma_zmfree( &hcheck, queue );
+        magma_zmfree( &dy, queue );
         magma_zvinit( &dy, Magma_DEV, hA.num_rows, c_zero, queue );
        
         cusparseZcsr2hyb(cusparseHandle,  hA.num_rows, hA.num_cols,
@@ -275,7 +275,7 @@ int main(  int argc, char** argv )
             printf("# tester spmv cuSPARSE HYB:  ok\n");
         else
             printf("# tester spmv cuSPARSE HYB:  failed\n");
-        magma_z_vfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         cusparseDestroyMatDescr( descrA );
         cusparseDestroyHybMat( hybA );
@@ -290,12 +290,12 @@ int main(  int argc, char** argv )
 
         // free CPU memory
         magma_zmfree(&hA, queue );
-        magma_z_vfree(&hx, queue );
-        magma_z_vfree(&hy, queue );
-        magma_z_vfree(&hrefvec, queue );
+        magma_zmfree(&hx, queue );
+        magma_zmfree(&hy, queue );
+        magma_zmfree(&hrefvec, queue );
         // free GPU memory
-        magma_z_vfree(&dx, queue );
-        magma_z_vfree(&dy, queue );
+        magma_zmfree(&dx, queue );
+        magma_zmfree(&dy, queue );
 
         i++;
 

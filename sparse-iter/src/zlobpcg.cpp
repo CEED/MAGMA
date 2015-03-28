@@ -82,7 +82,7 @@ magma_zlobpcg(
 
 
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX, queue)       {        \
-            magma_z_vector x, ax;                                       \
+            magma_z_matrix x, ax;                                       \
             x.memory_location = Magma_DEV;  x.num_rows = m; x.num_cols = n; x.major = MagmaColMajor;  x.nnz = m*n;  x.dval = X; \
             ax.memory_location= Magma_DEV; ax.num_rows = m; ax.num_cols = n; ax.major = MagmaColMajor;  ax.nnz = m*n; ax.dval = AX;     \
             magma_z_spmv(alpha, A, x, beta, ax, queue );                           \
@@ -292,7 +292,7 @@ magma_zlobpcg(
             //SWAP(blockW, blockR);
             
                 // preconditioner
-            magma_z_vector bWv, bRv;
+            magma_z_matrix bWv, bRv;
             bWv.memory_location = Magma_DEV;  bWv.num_rows = m; bWv.num_cols = cBlockSize; bWv.major = MagmaColMajor;  bWv.nnz = m*cBlockSize;  bWv.dval = blockW;
             bRv.memory_location = Magma_DEV;  bRv.num_rows = m; bRv.num_cols = cBlockSize; bRv.major = MagmaColMajor;  bRv.nnz = m*cBlockSize;  bRv.dval = blockR;
             magma_z_applyprecond_left( A, bRv, &bWv, precond_par, queue );

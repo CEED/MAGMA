@@ -355,11 +355,11 @@ magma_zcumilugeneratesolverinfo(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -374,8 +374,8 @@ magma_zcumilugeneratesolverinfo(
 
 extern "C" magma_int_t
 magma_zapplycumilu_l(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -449,11 +449,11 @@ magma_zapplycumilu_l(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -468,8 +468,8 @@ magma_zapplycumilu_l(
 
 extern "C" magma_int_t
 magma_zapplycumilu_r(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -871,11 +871,11 @@ magma_zcumicgeneratesolverinfo(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -890,8 +890,8 @@ magma_zcumicgeneratesolverinfo(
 
 extern "C" magma_int_t
 magma_zapplycumicc_l(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -970,11 +970,11 @@ magma_zapplycumicc_l(
     ---------
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to precondition
 
     @param[in,out]
@@ -989,8 +989,8 @@ magma_zapplycumicc_l(
 
 extern "C" magma_int_t
 magma_zapplycumicc_r(
-    magma_z_vector b, 
-    magma_z_vector *x, 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {

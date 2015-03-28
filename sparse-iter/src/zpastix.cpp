@@ -50,7 +50,7 @@
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
@@ -65,7 +65,7 @@
 
 extern "C" magma_int_t
 magma_zpastixsetup(
-    magma_z_matrix A, magma_z_vector b,
+    magma_z_matrix A, magma_z_matrix b,
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -86,7 +86,7 @@ magma_zpastixsetup(
         pastix_int_t      mat_type;
 
         magma_z_matrix A_h1, B;
-        magma_z_vector diag, c_t, b_h;
+        magma_z_matrix diag, c_t, b_h;
         magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
         magma_zvtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
@@ -194,7 +194,7 @@ magma_zpastixsetup(
         if ( A.storage_type != Magma_CSR) {
             magma_zmfree( &A_h1, queue );
         }   
-        magma_z_vfree( &b_h, queue );
+        magma_zmfree( &b_h, queue );
         magma_zmfree( &B, queue );
 
     #else
@@ -229,7 +229,7 @@ magma_zpastixsetup(
                 input matrix A
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS b
 
     @param[in]
@@ -244,7 +244,7 @@ magma_zpastixsetup(
 
 extern "C" magma_int_t
 magma_zapplypastix(
-    magma_z_vector b, magma_z_vector *x, 
+    magma_z_matrix b, magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -262,7 +262,7 @@ magma_zapplypastix(
         pastix_int_t     *perm        = NULL; /* Permutation tabular                                       */
         pastix_int_t     *invp        = NULL; /* Reverse permutation tabular                               */
 
-        magma_z_vector b_h;
+        magma_z_matrix b_h;
 
         magma_zvtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
 
@@ -296,10 +296,10 @@ magma_zapplypastix(
         //  in case of many iterations, it might be faster to use
         // magma_zsetvector( ncol, 
         //                                    b_h.dval, 1, x->dval, 1 );
-        magma_z_vfree( x, queue );
+        magma_zmfree( x, queue );
         magma_zvtransfer( b_h, x, Magma_CPU, b.memory_location, queue );
 
-        magma_z_vfree( &b_h, queue );
+        magma_zmfree( &b_h, queue );
 
     #else
         printf( "error: only double precision supported yet.\n");

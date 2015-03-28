@@ -35,6 +35,8 @@ single (s), double (d), single-complex (c), double-complex (z).
     * magma_zmvisu( );  for printing a matrix is now called magma_zprint_matrix( );  
     * Added a tester for the level 1BLAS.
     * Rename magma_z_sparse_matrix into magma_z_matrix      
+    * Redefine all vectors as dense matrices
+
 
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.

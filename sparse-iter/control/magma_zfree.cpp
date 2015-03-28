@@ -36,14 +36,14 @@ using namespace std;
     Purpose
     -------
 
-    Free the memory of a magma_z_vector.
+    Free the memory of a magma_z_matrix.
 
 
     Arguments
     ---------
 
     @param[i,out]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 vector to free    
     @param[in]
     queue       magma_queue_t
@@ -54,7 +54,7 @@ using namespace std;
 
 extern "C" magma_int_t
 magma_z_vfree(
-    magma_z_vector *x,
+    magma_z_matrix *x,
     magma_queue_t queue )
 {
     if ( x->memory_location == Magma_CPU ) {

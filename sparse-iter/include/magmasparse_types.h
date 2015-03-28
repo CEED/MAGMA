@@ -68,6 +68,7 @@ typedef struct magma_z_matrix{
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
+    magma_order_t      major;                   // opt: row/col major for dense matrices
 
 }magma_z_matrix;
 
@@ -107,6 +108,7 @@ typedef struct magma_c_matrix{
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
+    magma_order_t      major;                   // opt: row/col major for dense matrices
 
 }magma_c_matrix;
 
@@ -147,6 +149,7 @@ typedef struct magma_d_matrix{
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
+    magma_order_t      major;                   // opt: row/col major for dense matrices
 
 }magma_d_matrix;
 
@@ -187,6 +190,7 @@ typedef struct magma_s_matrix{
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
+    magma_order_t      major;                   // opt: row/col major for dense matrices
 
 }magma_s_matrix;
 
@@ -425,9 +429,9 @@ typedef struct magma_z_preconditioner{
     magma_z_matrix   U;
     magma_z_matrix   LD;
     magma_z_matrix   UD;
-    magma_z_vector          d;
-    magma_z_vector          work1;
-    magma_z_vector          work2;
+    magma_z_matrix          d;
+    magma_z_matrix          work1;
+    magma_z_matrix          work2;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
@@ -458,9 +462,9 @@ typedef struct magma_c_preconditioner{
     magma_c_matrix   U;
     magma_c_matrix   LD;
     magma_c_matrix   UD;
-    magma_c_vector          d;
-    magma_c_vector          work1;
-    magma_c_vector          work2;
+    magma_c_matrix          d;
+    magma_c_matrix          work1;
+    magma_c_matrix          work2;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
@@ -492,9 +496,9 @@ typedef struct magma_d_preconditioner{
     magma_d_matrix   U;
     magma_d_matrix   LD;
     magma_d_matrix   UD;
-    magma_d_vector          d;
-    magma_d_vector          work1;
-    magma_d_vector          work2;
+    magma_d_matrix          d;
+    magma_d_matrix          work1;
+    magma_d_matrix          work2;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
@@ -526,9 +530,9 @@ typedef struct magma_s_preconditioner{
     magma_s_matrix   U;
     magma_s_matrix   LD;
     magma_s_matrix   UD;
-    magma_s_vector          d;
-    magma_s_vector          work1;
-    magma_s_vector          work2;
+    magma_s_matrix          d;
+    magma_s_matrix          work1;
+    magma_s_matrix          work2;
     magma_int_t*            int_array_1;
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;

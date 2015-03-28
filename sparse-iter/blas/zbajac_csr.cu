@@ -160,11 +160,11 @@ magma_zbajac_csr_kernel(
                 input matrix with non-diagonal parts
 
     @param[in]
-    b           magma_z_vector
+    b           magma_z_matrix
                 RHS
 
     @param[in]
-    x           magma_z_vector*
+    x           magma_z_matrix*
                 iterate/solution
 
     
@@ -180,8 +180,8 @@ magma_zbajac_csr(
     magma_int_t localiters,
     magma_z_matrix D,
     magma_z_matrix R,
-    magma_z_vector b,
-    magma_z_vector *x,
+    magma_z_matrix b,
+    magma_z_matrix *x,
     magma_queue_t queue )
 {
     int blocksize1 = BLOCKSIZE;
