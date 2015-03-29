@@ -317,10 +317,21 @@ magma_zm_5stencil(
     diag_offset[0] = 0;
     diag_offset[1] = 1;
     diag_offset[2] = n;
-
-    diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
-    diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
-    diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
+    
+    #define COMPLEX
+    
+    #ifdef COMPLEX
+        // complex case
+        diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
+        diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
+        diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
+        
+    #else
+        // real case
+        diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
+        diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
+        diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
+    #endif
     magma_zmgenerator( nn, offdiags, diag_offset, diag_vals, &hA, queue );
 
     // now set some entries to zero (boundary...)
@@ -340,10 +351,11 @@ magma_zm_5stencil(
         
     }
     }
+   
 
     magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue );
     magma_zmfree( &hA, queue );
-
+    
     return MAGMA_SUCCESS;
 }   
 

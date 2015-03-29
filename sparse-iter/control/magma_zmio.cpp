@@ -552,6 +552,31 @@ magma_zwrite_csr_mtx(
         fflush(stdout);
         
         std::ofstream file(filename);
+        
+            
+        #define COMPLEX
+        
+        #ifdef COMPLEX
+        // complex case
+        file << "%%MatrixMarket matrix coordinate complex general ColMajor" << std::endl;
+        file << new_n_col << " " << new_n_row << " " << new_nnz << std::endl;
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
+        magma_index_t i=0, j=0, rowindex=1;
+        
+        for(i=0; i < n_col; i++) {
+            magma_index_t rowtemp1 = (new_row)[i];
+            magma_index_t rowtemp2 = (new_row)[i+1];
+            for(j=0; j < rowtemp2 - rowtemp1; j++) {
+                file << ((new_col)[rowtemp1+j]+1) << " " << rowindex << " "
+                     << MAGMA_Z_REAL((new_val)[rowtemp1+j]) << " "
+                     << MAGMA_Z_IMAG((new_val)[rowtemp1+j]) << std::endl;
+            }
+            rowindex++;
+        }
+        
+        #else
+        // real case
         file << "%%MatrixMarket matrix coordinate real general ColMajor" << std::endl;
         file << new_n_col << " " << new_n_row << " " << new_nnz << std::endl;
         
@@ -567,6 +592,7 @@ magma_zwrite_csr_mtx(
             }
             rowindex++;
         }
+        #endif
         
         // TODO leaks memory from z_transpose_csr?
         
