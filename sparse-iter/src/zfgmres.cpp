@@ -47,11 +47,11 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
         *cs = MAGMA_Z_ONE;
         *sn = MAGMA_Z_ZERO;
     } else if (abs(MAGMA_Z_REAL(dy)) > abs(MAGMA_Z_REAL(dx))) {
-        magmaDoubleComplex temp = -dx / dy;
+        magmaDoubleComplex temp = dx / dy;
         *sn = MAGMA_Z_ONE / MAGMA_Z_MAKE(sqrt( MAGMA_Z_REAL( MAGMA_Z_ONE + temp*temp)), 0.0 ) ;
         *cs = temp * *sn;
     } else {
-        magmaDoubleComplex temp = -dy / dx;
+        magmaDoubleComplex temp = dy / dx;
         *cs = MAGMA_Z_ONE /MAGMA_Z_MAKE(sqrt( MAGMA_Z_REAL( MAGMA_Z_ONE + temp*temp )), 0.0 );
         *sn = temp * *cs;
     }
@@ -60,7 +60,7 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
 static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, magmaDoubleComplex cs, magmaDoubleComplex sn)
 {
     magmaDoubleComplex temp  =  cs * *dx +  - sn * *dy;
-    *dy = MAGMA_Z_CNJG(sn) * *dx + cs * *dy;
+    *dy = -(sn) * *dx + cs * *dy;
     *dx = temp;
 }
 
