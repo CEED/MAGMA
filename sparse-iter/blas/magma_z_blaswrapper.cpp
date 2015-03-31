@@ -68,6 +68,15 @@ magma_z_spmv(
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
 
+    // make sure RHS is a dense matrix
+    if ( x.storage_type != Magma_DENSE ) {
+        magma_z_matrix bdense;
+        magma_zmconvert( x, &bdense, x.storage_type, Magma_DENSE, queue );
+        magma_zmfree(&x, queue);
+        magma_zmtranspose(bdense, &x, queue );
+        magma_zmfree(&bdense, queue);    
+    }
+
     if ( A.memory_location != x.memory_location || 
                             x.memory_location != y.memory_location ) {
         printf("error: linear algebra objects are not located in same memory!\n");
@@ -350,6 +359,17 @@ magma_z_spmv_shift(
     magma_z_matrix y,
     magma_queue_t queue )
 {
+
+    // make sure RHS is a dense matrix
+    if ( x.storage_type != Magma_DENSE ) {
+        magma_z_matrix bdense;
+        magma_zmconvert( x, &bdense, x.storage_type, Magma_DENSE, queue );
+        magma_zmfree(&x, queue);
+        magma_zmtranspose(bdense, &x, queue );
+        magma_zmfree(&bdense, queue);    
+    }
+
+
     if ( A.memory_location != x.memory_location 
                 || x.memory_location != y.memory_location ) {
     printf("error: linear algebra objects are not located in same memory!\n");
@@ -357,6 +377,7 @@ magma_z_spmv_shift(
                     A.memory_location, x.memory_location, y.memory_location );
     return MAGMA_ERR_INVALID_PTR;
     }
+
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
          if ( A.storage_type == Magma_CSR ) {

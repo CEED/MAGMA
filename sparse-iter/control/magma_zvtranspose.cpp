@@ -68,7 +68,7 @@ magma_zvtranspose(
     magmablasGetKernelStream( &orig_queue );
 
     if ( x.memory_location == Magma_DEV ) {
-        magma_zvinit( y, Magma_DEV, x.num_rows*x.num_cols, MAGMA_Z_ZERO, queue );
+        magma_zvinit( y, Magma_DEV, x.num_rows,x.num_cols, MAGMA_Z_ZERO, queue );
         y->num_rows = x.num_rows;
         y->num_cols = x.num_cols;
         y->storage_type = x.storage_type;

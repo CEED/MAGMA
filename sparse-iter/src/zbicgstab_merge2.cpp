@@ -101,7 +101,7 @@ magma_zbicgstab_merge2(
         printf("error: memory allocation.\n");
         return MAGMA_ERR_DEVICE_ALLOC;
     }
-    magma_zvinit( &q, Magma_DEV, dofs*6, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*6, 1, c_zero, queue );
 
     // q = rr|r|p|v|s|t
     rr.memory_location = Magma_DEV; rr.dval = NULL; rr.num_rows = rr.nnz = dofs;

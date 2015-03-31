@@ -76,19 +76,19 @@ magma_zcpir(
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
     
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows*b.num_cols;
 
     // workspace on GPU
     magma_z_matrix r,z;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, 1, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, 1, c_zero, queue );
 
     // for mixed precision on GPU
     magma_c_vector rs, zs;
     magma_c_sparse_matrix AS;
     magma_sparse_matrix_zlag2c( A, &AS, queue );
-    magma_c_vinit( &rs, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
-    magma_c_vinit( &zs, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &rs, Magma_DEV, A.num_rows, b.num_cols, 1, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &zs, Magma_DEV, A.num_rows, b.num_cols, 1, MAGMA_C_ZERO, queue );
 
 
     // solver variables
@@ -101,7 +101,7 @@ magma_zcpir(
     magma_z_solver_par jacobiiter_par;
     // Jacobi setup
     magma_zjacobisetup_matrix( A, r, &M, &d, queue );
-    magma_zvinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &c, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
  
 
 

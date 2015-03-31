@@ -68,26 +68,26 @@ magma_zcpbicgstab(
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
     
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows * b.num_cols;
 
     // workspace on GPU
     magma_z_matrix r,rr,p,v,s,t,y,z;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &rr, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &p, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &v, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &s, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &y, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &rr,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &s, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
 
     // for mixed precision on GPU
     magma_c_vector ps, ys, ss, zs;
     magma_c_sparse_matrix AS;
     magma_sparse_matrix_zlag2c( A, &AS, queue );
 
-    magma_c_vinit( &ys, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
-    magma_c_vinit( &zs, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &ys, Magma_DEV, A.num_rows, b.num_cols, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &zs, Magma_DEV, A.num_rows, b.num_cols, MAGMA_C_ZERO, queue );
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;

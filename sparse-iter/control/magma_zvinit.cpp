@@ -71,6 +71,7 @@ magma_zvinit(
     magma_z_matrix *x, 
     magma_location_t mem_loc,
     magma_int_t num_rows, 
+    magma_int_t num_cols,   
     magmaDoubleComplex values,
     magma_queue_t queue )
 {
@@ -81,29 +82,30 @@ magma_zvinit(
     x->memory_location = Magma_CPU;
     x->num_rows = num_rows;
     x->storage_type = Magma_DENSE;
-    x->num_cols = 1;
-    x->nnz = num_rows*1;
+    x->ld = num_rows;
+    x->num_cols = num_cols;
+    x->nnz = num_rows*num_cols;
     x->major = MagmaColMajor;
     if ( mem_loc == Magma_CPU ) {
         x->memory_location = Magma_CPU;
 
-        magma_zmalloc_cpu( &x->val, num_rows );
+        magma_zmalloc_cpu( &x->val, x->nnz );
         if ( x->val == NULL ) {
             magmablasSetKernelStream( orig_queue );
             return MAGMA_ERR_HOST_ALLOC;
     }
-        for( magma_int_t i=0; i<num_rows; i++)
+        for( magma_int_t i=0; i<x->nnz; i++)
              x->val[i] = values; 
     }
     else if ( mem_loc == Magma_DEV ) {
         x->memory_location = Magma_DEV;
 
-        if (MAGMA_SUCCESS != magma_zmalloc( &x->dval, x->num_rows)){ 
+        if (MAGMA_SUCCESS != magma_zmalloc( &x->dval, x->nnz)){ 
             magmablasSetKernelStream( orig_queue );
             return MAGMA_ERR_DEVICE_ALLOC;
         }
 
-        magmablas_zlaset(MagmaFull, num_rows, 1, values, values, x->val, num_rows);
+        magmablas_zlaset(MagmaFull, x->num_rows, x->num_cols, values, values, x->val, x->num_rows);
 
     }
     magmablasSetKernelStream( orig_queue );

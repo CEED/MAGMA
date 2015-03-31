@@ -81,11 +81,11 @@ int main(  int argc, char** argv )
         magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue );
 
         // vectors and initial guess
-        magma_zvinit( &b, Magma_DEV, A.num_cols, one, queue );
-        magma_zvinit( &x, Magma_DEV, A.num_cols, one, queue );
+        magma_zvinit( &b, Magma_DEV, A.num_cols, 1, one, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, 1, one, queue );
         magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
         magma_zmfree(&x, queue );
-        magma_zvinit( &x, Magma_DEV, A.num_cols, zero, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, 1, zero, queue );
 
         magma_z_solver( B_d, b, &x, &zopts, queue );         
 

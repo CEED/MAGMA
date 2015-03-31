@@ -291,6 +291,7 @@ magma_zvinit(
     magma_z_matrix *x, 
     magma_location_t memory_location,
     magma_int_t num_rows, 
+    magma_int_t num_cols,
     magmaDoubleComplex values,
     magma_queue_t queue );
 

@@ -71,13 +71,13 @@ magma_zcg(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows * b.num_cols;
 
     // GPU workspace
     magma_z_matrix r, p, q;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &p, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &q, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
     
     // solver variables
     magmaDoubleComplex alpha, beta;

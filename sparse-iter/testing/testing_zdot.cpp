@@ -72,12 +72,12 @@ int main(  int argc, char** argv )
             #endif
 
 
-            magma_zvinit( &a, Magma_DEV, n*num_vecs, one, queue );
-            magma_zvinit( &b, Magma_DEV, num_vecs, one, queue );
+            magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue );
+            magma_zvinit( &b, Magma_DEV, num_vecs, 1, one, queue );
             int min_ten = min(num_vecs, 15);
-            magma_zvinit( &x, Magma_DEV, min_ten*n, one, queue );
-            magma_zvinit( &y, Magma_DEV, min_ten*n, one, queue );
-            magma_zvinit( &skp, Magma_DEV, num_vecs, zero, queue );
+            magma_zvinit( &x, Magma_DEV, min_ten, n, one, queue );
+            magma_zvinit( &y, Magma_DEV, min_ten, n, one, queue );
+            magma_zvinit( &skp, Magma_DEV, num_vecs, 1, zero, queue );
 
             // warm up
             magma_zgemvmdot( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );

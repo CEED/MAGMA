@@ -224,7 +224,7 @@ magma_zvspread(
      //   char *vfilename[] = {"/mnt/sparse_matrices/mtx/rail_79841_B.mtx"};
     magma_z_csr_mtx( &A,  filename, queue  ); 
     magma_zmconvert( A, &B, Magma_CSR, Magma_DENSE, queue );
-    magma_zvinit( x, Magma_CPU, A.num_cols*A.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( x, Magma_CPU, A.num_cols, A.num_rows, MAGMA_Z_ZERO, queue );
     x->major = MagmaRowMajor;
     for(magma_int_t i=0; i<A.num_cols; i++) {
         for(magma_int_t j=0; j<A.num_rows; j++) {

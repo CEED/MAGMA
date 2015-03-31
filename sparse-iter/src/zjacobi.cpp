@@ -80,13 +80,13 @@ magma_zjacobi(
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                                 c_mone = MAGMA_Z_NEG_ONE;
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows*b.num_cols;
     double nom0 = 0.0;
 
 
     magma_z_matrix M;
     magma_z_matrix c, r;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
     magma_z_spmv( c_one, A, *x, c_zero, r, queue );                  // r = A x
     magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);           // r = r - b
     nom0 = magma_dznrm2(dofs, r.dval, 1);                      // den = || r ||
@@ -167,7 +167,7 @@ magma_zjacobisetup_matrix(
 
     magma_z_matrix A_h1, A_h2, B, C;
     magma_z_matrix diag;
-    magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &diag, Magma_CPU, A.num_rows, 1, MAGMA_Z_ZERO, queue );
 
     if ( A.storage_type != Magma_CSR) {
         magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
@@ -258,7 +258,7 @@ magma_zjacobisetup_diagscal(
 
     magma_z_matrix A_h1, B;
     magma_z_matrix diag;
-    magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &diag, Magma_CPU, A.num_rows, 1, MAGMA_Z_ZERO, queue );
 
     if ( A.storage_type != Magma_CSR) {
         magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue );
@@ -331,7 +331,7 @@ magma_zjacobisetup_vector(
 {
     if ( b.memory_location == Magma_CPU ) {
         magma_z_matrix diag, c_t, b_h;
-        magma_zvinit( &c_t, Magma_CPU, b.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &c_t, Magma_CPU, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
 
         magma_zmtransfer( b, &b_h, b.memory_location, Magma_CPU, queue );
         magma_zmtransfer( d, &diag, b.memory_location, Magma_CPU, queue );
@@ -351,7 +351,7 @@ magma_zjacobisetup_vector(
     else if ( b.memory_location == Magma_DEV ) {
         // fill vector
         magma_z_matrix tmp;
-        magma_zvinit( &tmp, Magma_DEV, b.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &tmp, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
         magma_zjacobisetup_vector_gpu( 
                     b.num_rows, b, d, *c, &tmp, queue );
         magma_zmfree( &tmp, queue );
@@ -405,8 +405,8 @@ magma_zjacobisetup(
 
     magma_z_matrix A_h1, A_h2, B, C;
     magma_z_matrix diag, c_t, b_h;
-    magma_zvinit( &c_t, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
-    magma_zvinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &c_t, Magma_CPU, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
+    magma_zvinit( &diag, Magma_CPU, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
     magma_zmtransfer( b, &b_h, A.memory_location, Magma_CPU, queue );
 
     if ( A.storage_type != Magma_CSR ) {
@@ -518,9 +518,9 @@ magma_zjacobiiter(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                             c_mone = MAGMA_Z_NEG_ONE;
-    magma_int_t dofs = M.num_rows;
+    magma_int_t dofs = M.num_rows*x->num_cols;
     magma_z_matrix t, swap;
-    magma_zvinit( &t, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &t, Magma_DEV, M.num_rows, x->num_cols, c_zero, queue );
 
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {

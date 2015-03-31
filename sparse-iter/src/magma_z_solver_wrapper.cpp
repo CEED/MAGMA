@@ -52,6 +52,15 @@ magma_z_solver(
     magma_z_matrix *x, magma_zopts *zopts,
     magma_queue_t queue )
 {
+    // make sure RHS is a dense matrix
+    if ( b.storage_type != Magma_DENSE ) {
+        magma_z_matrix bdense;
+        magma_zmconvert( b, &bdense, b.storage_type, Magma_DENSE, queue );
+        magma_zmfree(&b, queue);
+        magma_zmtranspose(bdense, &b, queue );
+        magma_zmfree(&bdense, queue);    
+    }
+    if( b.num_cols == 1 ){
     // preconditioner
         if ( zopts->solver_par.solver != Magma_ITERREF ) {
             magma_z_precondsetup( A, b, &zopts->precond_par, queue );
@@ -81,8 +90,26 @@ magma_z_solver(
                     magma_zjacobi( A, b, x, &zopts->solver_par, queue );break;
             case  Magma_BAITER: 
                     magma_zbaiter( A, b, x, &zopts->solver_par, queue );break;
-            
+            default:  
+                    printf("error: solver class not supported.\n");break;
         }
+    }
+    else{
+  // preconditioner
+        if ( zopts->solver_par.solver != Magma_ITERREF ) {
+            magma_z_precondsetup( A, b, &zopts->precond_par, queue );
+        }
+        switch( zopts->solver_par.solver ) {
+            case  Magma_CG:
+                    magma_zbpcg( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
+            case  Magma_PCG:
+                    magma_zbpcg( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
+            case  Magma_LOBPCG: 
+                    magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue );break;
+            default:  
+                    printf("error: only 1 RHS supported for this solver class.\n");break;
+        }   
+    }
     return MAGMA_SUCCESS;
 }
 

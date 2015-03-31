@@ -84,7 +84,7 @@ magma_zgmres(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
                                                 c_mone = MAGMA_Z_NEG_ONE;
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows*b.num_cols;
     magma_int_t i, j, k, m = 0;
     magma_int_t restart = min( dofs-1, solver_par->restart );
     magma_int_t ldh = restart+1;
@@ -108,8 +108,8 @@ magma_zgmres(
 
     // GPU workspace
     magma_z_matrix r, q, q_t;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &q, Magma_DEV, dofs*(ldh+1), c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs, 1, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*(ldh+1), 1, c_zero, queue );
     q_t.memory_location = Magma_DEV; 
     q_t.dval = NULL; 
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;

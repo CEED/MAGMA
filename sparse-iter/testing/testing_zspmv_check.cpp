@@ -57,8 +57,8 @@ int main(  int argc, char** argv )
         magma_zmtransfer( A, &B_d, Magma_CPU, Magma_DEV, queue );
 
         // vectors and initial guess
-        magma_zvinit( &b, Magma_DEV, A.num_cols, zero, queue );
-        magma_zvinit( &x, Magma_DEV, A.num_cols, one, queue );
+        magma_zvinit( &b, Magma_DEV, A.num_cols, 1, zero, queue );
+        magma_zvinit( &x, Magma_DEV, A.num_cols, 1, one, queue );
         
         magma_zprint_vector( b, 90, 10, queue );
         

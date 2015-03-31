@@ -41,9 +41,9 @@ int main(  int argc, char** argv )
     magmaDoubleComplex two = MAGMA_Z_MAKE( 2.0, 0.0 );
 
     magma_z_matrix a, ad, bd, cd;
-    magma_zvinit( &a, Magma_CPU, n, one, queue );
-    magma_zvinit( &bd, Magma_DEV, n, two, queue );
-    magma_zvinit( &cd, Magma_DEV, n, one, queue );
+    magma_zvinit( &a, Magma_CPU, n, 1, one, queue );
+    magma_zvinit( &bd, Magma_DEV, n, 1, two, queue );
+    magma_zvinit( &cd, Magma_DEV, n, 1, one, queue );
     
     magma_zmtransfer( a, &ad, Magma_CPU, Magma_DEV, queue ); 
 

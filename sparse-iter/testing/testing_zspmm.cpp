@@ -96,12 +96,12 @@ int main(  int argc, char** argv )
         n = 48;
 
         // init CPU vectors
-        magma_zvinit( &hx, Magma_CPU, m*n, c_one, queue );
-        magma_zvinit( &hy, Magma_CPU, m*n, c_zero, queue );
+        magma_zvinit( &hx, Magma_CPU, m, n, c_one, queue );
+        magma_zvinit( &hy, Magma_CPU, m, n, c_zero, queue );
 
         // init DEV vectors
-        magma_zvinit( &dx, Magma_DEV, m*n, c_one, queue );
-        magma_zvinit( &dy, Magma_DEV, m*n, c_zero, queue );
+        magma_zvinit( &dx, Magma_DEV, m, n, c_one, queue );
+        magma_zvinit( &dy, Magma_DEV, m, n, c_zero, queue );
 
 
         // calling MKL with CSR
@@ -189,7 +189,7 @@ int main(  int argc, char** argv )
         magma_zmtransfer( hA_ELL, &dA_ELL, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_ELL, queue );
         magma_zmfree( &dy, queue );
-        magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
+        magma_zvinit( &dy, Magma_DEV, dx.num_rows, dx.num_cols, c_zero, queue );
         // SpMV on GPU (ELL)
         start = magma_sync_wtime( queue ); 
         for (j=0; j<10; j++)
@@ -217,7 +217,7 @@ int main(  int argc, char** argv )
         magma_zmtransfer( hA_SELLP, &dA_SELLP, Magma_CPU, Magma_DEV, queue );
         magma_zmfree(&hA_SELLP, queue );
         magma_zmfree( &dy, queue );
-        magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
+        magma_zvinit( &dy, Magma_DEV, dx.num_rows, dx.num_cols, c_zero, queue );
         // SpMV on GPU (SELLP)
         start = magma_sync_wtime( queue ); 
         for (j=0; j<10; j++)
@@ -243,7 +243,7 @@ int main(  int argc, char** argv )
         // SpMV on GPU (CUSPARSE - CSR)
         // CUSPARSE context //
         magma_zmfree( &dy, queue );
-        magma_zvinit( &dy, Magma_DEV, dx.num_rows, c_zero, queue );
+        magma_zvinit( &dy, Magma_DEV, dx.num_rows, dx.num_cols, c_zero, queue );
         #ifdef PRECISION_d
         start = magma_sync_wtime( queue ); 
         cusparseHandle_t cusparseHandle = 0;

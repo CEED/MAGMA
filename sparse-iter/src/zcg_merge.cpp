@@ -71,7 +71,7 @@ magma_zcg_merge(
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows*b.num_cols;
 
     // GPU stream
     magma_queue_t stream[2];
@@ -82,9 +82,9 @@ magma_zcg_merge(
 
     // GPU workspace
     magma_z_matrix r, d, z;
-    magma_zvinit( &r, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &d, Magma_DEV, dofs, c_zero, queue );
-    magma_zvinit( &z, Magma_DEV, dofs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
     
     magmaDoubleComplex *d1, *d2, *skp;
     d1 = NULL;

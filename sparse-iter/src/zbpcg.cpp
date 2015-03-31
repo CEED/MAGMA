@@ -91,11 +91,11 @@ magma_zbpcg(
 
     // GPU workspace
     magma_z_matrix r, rt, p, q, h;
-    magma_zvinit( &r, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_zvinit( &rt, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_zvinit( &p, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_zvinit( &q, Magma_DEV, dofs*num_vecs, c_zero, queue );
-    magma_zvinit( &h, Magma_DEV, dofs*num_vecs, c_zero, queue );
+    magma_zvinit( &r, Magma_DEV, dofs*num_vecs, 1, c_zero, queue );
+    magma_zvinit( &rt, Magma_DEV, dofs*num_vecs, 1, c_zero, queue );
+    magma_zvinit( &p, Magma_DEV, dofs*num_vecs, 1, c_zero, queue );
+    magma_zvinit( &q, Magma_DEV, dofs*num_vecs, 1, c_zero, queue );
+    magma_zvinit( &h, Magma_DEV, dofs*num_vecs, 1, c_zero, queue );
     
     // solver variables
     magmaDoubleComplex *alpha, *beta;

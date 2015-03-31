@@ -74,7 +74,7 @@ magma_zcpgmres(
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
-    magma_int_t dofs = A.num_rows;
+    magma_int_t dofs = A.num_rows *b.num_cols;
     magma_int_t i, j, k, m, iter, ldh = solver_par->restart+1;
     double rNorm, RNorm, den, nom0, r0 = 0.;
 
@@ -84,16 +84,16 @@ magma_zcpgmres(
     
     // GPU workspace
     magma_z_matrix r, q, q_t, z, z_t;
-    magma_zvinit( &r  , Magma_DEV, dofs,     c_zero, queue );
-    magma_zvinit( &q  , Magma_DEV, dofs*ldh, c_zero, queue );
-    magma_zvinit( &q_t, Magma_DEV, dofs,     c_zero, queue );
-    magma_zvinit( &z  , Magma_DEV, dofs*ldh, c_zero, queue );
-    magma_zvinit( &z_t, Magma_DEV, dofs,     c_zero, queue );
+    magma_zvinit( &r  , Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_zvinit( &q  , Magma_DEV, dofs*ldh, 1, c_zero, queue );
+    magma_zvinit( &q_t, Magma_DEV, dofs, 1,    c_zero, queue );
+    magma_zvinit( &z  , Magma_DEV, dofs*ldh, 1, c_zero, queue );
+    magma_zvinit( &z_t, Magma_DEV, dofs, 1,    c_zero, queue );
     // for mixed precision on GPU
     magma_c_vector qs_t, zs_t;
     magma_c_sparse_matrix AS;
     magma_sparse_matrix_zlag2c( A, &AS, queue );
-    magma_c_vinit( &zs_t, Magma_DEV, dofs, MAGMA_C_ZERO, queue );
+    magma_c_vinit( &zs_t, Magma_DEV, dofs, 1,  MAGMA_C_ZERO, queue );
 
     magmaDoubleComplex *dy;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 

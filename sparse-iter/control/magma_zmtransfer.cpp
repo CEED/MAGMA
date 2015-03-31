@@ -288,6 +288,7 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->ld = A.ld;
             // memory allocation
             stat_dev += magma_zmalloc( &B->dval, A.num_rows*A.num_cols ); 
             if( stat_dev != 0 ){ goto CLEANUP; }
@@ -477,6 +478,7 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->ld = A.ld;
             // memory allocation
             stat_cpu += magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols ); 
             if( stat_cpu != 0 ){ goto CLEANUP; }
@@ -683,6 +685,7 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->ld = A.ld;
             // memory allocation
             stat_cpu += magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols ); 
             if( stat_cpu != 0 ){ goto CLEANUP; }
@@ -892,6 +895,7 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->ld = A.ld;
             // memory allocation
             stat_dev += magma_zmalloc( &B->dval, A.num_rows*A.num_cols ); 
             if( stat_dev != 0 ){ goto CLEANUP; }

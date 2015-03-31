@@ -117,6 +117,16 @@ magma_z_precondsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
+
+    // make sure RHS is a dense matrix
+    if ( b.storage_type != Magma_DENSE ) {
+        magma_z_matrix bdense;
+        magma_zmconvert( b, &bdense, b.storage_type, Magma_DENSE, queue );
+        magma_zmfree(&b, queue);
+        magma_zmtranspose(bdense, &b, queue );
+        magma_zmfree(&bdense, queue);    
+    }
+
     if ( precond->solver == Magma_JACOBI ) {
         magma_zjacobisetup_diagscal( A, &(precond->d), queue );
         return MAGMA_SUCCESS;
@@ -199,16 +209,16 @@ magma_z_applyprecond(
     }
     else if ( precond->solver == Magma_ILU ) {
         magma_z_matrix tmp;
-        magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
         magma_zmfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
         magma_z_matrix tmp;
-        magma_zvinit( &tmp, Magma_DEV, A.num_rows, MAGMA_Z_ZERO, queue );
+        magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue );
         magma_zmfree( &tmp, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows, b.dval, 1, x->dval, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );

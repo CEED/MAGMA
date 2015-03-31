@@ -69,6 +69,7 @@ typedef struct magma_z_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
+    magma_int_t        ld;                      // opt: leading dimension for dense
 
 }magma_z_matrix;
 
@@ -109,6 +110,7 @@ typedef struct magma_c_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
+    magma_int_t        ld;                      // opt: leading dimension for dense
 
 }magma_c_matrix;
 
@@ -150,6 +152,7 @@ typedef struct magma_d_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
+    magma_int_t        ld;                      // opt: leading dimension for dense
 
 }magma_d_matrix;
 
@@ -191,7 +194,8 @@ typedef struct magma_s_matrix{
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
-
+    magma_int_t        ld;                      // opt: leading dimension for dense
+    
 }magma_s_matrix;
 
 
