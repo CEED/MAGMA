@@ -193,6 +193,15 @@ static inline magma_int_t magma_roundup( magma_int_t x, magma_int_t y )
 }
 
 
+// ========================================
+// real and complex square root
+// sqrt alone cannot be caught by the generation script because of tsqrt
+static inline float  magma_ssqrt( float  x ) { return sqrtf( x ); }
+static inline double magma_dsqrt( double x ) { return sqrt( x ); }
+magmaFloatComplex    magma_csqrt( magmaFloatComplex  x );
+magmaDoubleComplex   magma_zsqrt( magmaDoubleComplex x );
+
+
 #ifdef __cplusplus
 }
 #endif

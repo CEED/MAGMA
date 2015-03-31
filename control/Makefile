@@ -38,6 +38,7 @@ SRC := \
 	magmawinthread.cpp	\
 	pthread_barrier.cpp	\
 	strlcpy.cpp		\
+	sqrt.cpp		\
 	thread_queue.cpp	\
 	trace.cpp		\
 	xerbla.cpp		\

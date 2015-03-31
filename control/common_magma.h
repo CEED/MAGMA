@@ -91,13 +91,4 @@
  */
 extern magma_queue_t magma_stream;
 
-
-/** ****************************************************************************
- *  Define magma_[sd]sqrt functions
- *    - sqrt alone cannot be caught by the generation script because of tsqrt
- */
-
-#define magma_dsqrt sqrt
-#define magma_ssqrt sqrtf
-
 #endif /* MAGMA_COMMON_H */
