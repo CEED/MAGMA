@@ -13,6 +13,7 @@
 #include <time.h>
 
 #include "common_magma.h"
+#include "magma_operators.h"    
 #include "magmasparse.h"
 
 
@@ -46,20 +47,20 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
     if (dy == MAGMA_Z_ZERO) {
         *cs = MAGMA_Z_ONE;
         *sn = MAGMA_Z_ZERO;
-    } else if (abs(MAGMA_Z_REAL(dy)) > abs(MAGMA_Z_REAL(dx))) {
+    } else if (fabs((dy)) > fabs((dx))) {
         magmaDoubleComplex temp = dx / dy;
-        *sn = MAGMA_Z_ONE / MAGMA_Z_MAKE(sqrt( MAGMA_Z_REAL( MAGMA_Z_ONE + temp*temp)), 0.0 ) ;
+        *sn = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp)) ;
         *cs = temp * *sn;
     } else {
         magmaDoubleComplex temp = dy / dx;
-        *cs = MAGMA_Z_ONE /MAGMA_Z_MAKE(sqrt( MAGMA_Z_REAL( MAGMA_Z_ONE + temp*temp )), 0.0 );
+        *cs = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp )) ;
         *sn = temp * *cs;
     }
 }
 
 static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, magmaDoubleComplex cs, magmaDoubleComplex sn)
 {
-    magmaDoubleComplex temp  =  cs * *dx +  - sn * *dy;
+    magmaDoubleComplex temp  =  cs * *dx +  sn * *dy;
     *dy = -(sn) * *dx + cs * *dy;
     *dx = temp;
 }
