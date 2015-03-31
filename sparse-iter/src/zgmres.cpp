@@ -113,6 +113,7 @@ magma_zgmres(
     q_t.memory_location = Magma_DEV; 
     q_t.dval = NULL; 
     q_t.num_rows = q_t.nnz = dofs; q_t.num_cols = 1;
+    q_t.storage_type = Magma_DENSE;
 
     magmaDoubleComplex *dy = NULL, *dH = NULL;
     stat_dev += magma_zmalloc( &dy, ldh );

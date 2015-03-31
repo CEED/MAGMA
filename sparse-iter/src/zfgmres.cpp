@@ -130,11 +130,14 @@ magma_zfgmres(
     v_t.num_rows = dofs;
     v_t.num_cols = 1;
     v_t.dval = NULL; 
+    v_t.storage_type = Magma_DENSE;
+
     w_t.memory_location = Magma_DEV;
     w_t.num_rows = dofs;
     w_t.num_cols = 1;   
     w_t.dval = NULL; 
-    
+    w_t.storage_type = Magma_DENSE;
+
     magma_zvinit( &t, Magma_DEV, dofs, 1, MAGMA_Z_ZERO, queue );
     magma_zvinit( &t2, Magma_DEV, dofs, 1, MAGMA_Z_ZERO, queue );
 
