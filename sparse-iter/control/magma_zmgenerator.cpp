@@ -322,9 +322,9 @@ magma_zm_5stencil(
     
     #ifdef COMPLEX
         // complex case
-        diag_vals[0] = MAGMA_Z_MAKE( 4.0, 0.0 );
-        diag_vals[1] = MAGMA_Z_MAKE( -1.0, 0.0 );
-        diag_vals[2] = MAGMA_Z_MAKE( -1.0, 0.0 );
+        diag_vals[0] = MAGMA_Z_MAKE( 4.0, 4.0 );
+        diag_vals[1] = MAGMA_Z_MAKE( -1.0, -1.0 );
+        diag_vals[2] = MAGMA_Z_MAKE( -1.0, -1.0 );
         
     #else
         // real case

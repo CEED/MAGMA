@@ -44,10 +44,11 @@
 static void 
 GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleComplex *cs, magmaDoubleComplex *sn)
 {
+    
     if (dy == MAGMA_Z_ZERO) {
         *cs = MAGMA_Z_ONE;
         *sn = MAGMA_Z_ZERO;
-    } else if (fabs((dy)) > fabs((dx))) {
+    } else if (MAGMA_Z_ABS((dy)) > MAGMA_Z_ABS((dx))) {
         magmaDoubleComplex temp = dx / dy;
         *sn = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp)) ;
         *cs = temp * *sn;
@@ -56,13 +57,22 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
         *cs = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp )) ;
         *sn = temp * *cs;
     }
+
+  //  real_Double_t rho = sqrt(MAGMA_Z_REAL(MAGMA_Z_CNJG(dx)*dx + MAGMA_Z_CNJG(dy)*dy));
+  //  *cs = dx / rho;
+  //  *sn = dy / rho;
 }
 
 static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, magmaDoubleComplex cs, magmaDoubleComplex sn)
 {
-    magmaDoubleComplex temp  =  cs * *dx +  sn * *dy;
-    *dy = -(sn) * *dx + cs * *dy;
-    *dx = temp;
+
+    magmaDoubleComplex temp = *dx;
+    *dx =  cs * *dx + sn * *dy;
+    *dy = -sn * temp + cs * *dy;
+
+ //   magmaDoubleComplex temp  =  MAGMA_Z_CNJG(cs) * *dx +  MAGMA_Z_CNJG(sn) * *dy;
+ //   *dy = -(sn) * *dx + cs * *dy;
+ //   *dx = temp;
 }
 
 
@@ -218,13 +228,13 @@ magma_zfgmres(
             magma_zcopy( dofs, t2.dval, 1, W(i), 1 );  
 
             // A.mult(n, 1, W(i), n, V(i+1), n);
-            w_t.val = W(i);
+            w_t.dval = W(i);
             magma_z_spmv( MAGMA_Z_ONE, A, w_t, MAGMA_Z_ZERO, t, queue );
             magma_zcopy( dofs, t.dval, 1, V(i+1), 1 );  
             
             for (k = 0; k <= i; k++)
-            {
-                H(k, i) = magma_zdotc(dofs, V(i+1), 1, V(k), 1);            
+            {      
+                H(k, i) = magma_zdotc(dofs, V(k), 1, V(i+1), 1);    
                 temp = -H(k,i);
                 // V(i+1) -= H(k, i) * V(k);
                 magma_zaxpy(dofs,-H(k,i), V(k), 1, V(i+1), 1);            
@@ -242,7 +252,7 @@ magma_zfgmres(
             ApplyPlaneRotation(&H(i,i), &H(i+1,i), cs[i], sn[i]);
             ApplyPlaneRotation(&s[i], &s[i+1], cs[i], sn[i]);
             
-            betanom = ABS(MAGMA_Z_REAL( s[i+1] ) );
+            betanom = MAGMA_Z_ABS( s[i+1] );
             rel_resid = betanom / resid0;
             if ( solver_par->verbose > 0 ) {
                 tempo2 = magma_sync_wtime( queue );
