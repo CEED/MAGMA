@@ -40,6 +40,9 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Bugfix in Complex FGMRES
     * Wrapper for complex squareroots
     * Added iterative incomplete factorization routines (iterative ILU/iterative IC)
+    * Enhance the ILU/IC with fill-in (level-ILU) 
+
+
 
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.
