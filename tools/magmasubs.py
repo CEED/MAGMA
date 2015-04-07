@@ -540,8 +540,8 @@ subs = {
     ('mic_sbsrmv',     'mic_dbsrmv',     'mic_cbsrmv',     'mic_zbsrmv'      ),
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
-    ('ialu',           'dailu',          'cailu',          'zailu'           ),
-    ('saic',           'daic',           'caic',           'zaic'            ),
+    ('siterilu',       'diterilu',       'citerilu',       'ziterilu'        ),
+    ('siteric',        'diteric',        'citeric',        'ziteric'         ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
