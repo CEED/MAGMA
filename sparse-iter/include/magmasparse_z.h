@@ -146,6 +146,7 @@ magma_zmcsrcompressor_gpu(
     magma_z_matrix *A,
     magma_queue_t queue );
 
+magma_int_t
 magma_zvtranspose( 
     magma_z_matrix x,
     magma_z_matrix *y,
