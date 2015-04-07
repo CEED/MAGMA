@@ -36,11 +36,12 @@ ZSRC := \
 	zmgesellcmmv.cu			\
 	zpipelinedgmres.cu		\
 
-	#zbcsrswp.cu			\
-	#zbcsrtrsv.cu			\
-	#zbcsrcpy.cu			\
-	#zbcsrlugemm.cu			\
-	#zbcsrlupivloc.cu		\
+
+# Iterative factorizations
+ZSRC += \
+	ziterilu.cu	\
+	ziteric.cu	\
+
 
 # Auxiliary routines
 ZSRC += \

@@ -21,6 +21,7 @@ ZSRC := \
 	magma_zmio.cpp			\
 	magma_zsolverinfo.cpp	\
 	magma_zcsrsplit.cpp		\
+	magma_ziteriluutils.cpp	\
 	magma_zmcsrpass.cpp		\
 	magma_zmcsrpass_gpu.cpp	\
 	magma_zmcsrcompressor.cpp	\
@@ -29,6 +30,7 @@ ZSRC := \
 	magma_zmlumerge.cpp		\
 	magma_zmtranspose.cpp	\
 	magma_zmtransfer.cpp	\
+	magma_zmilustruct.cpp	\
 	magma_zvinit.cpp		\
 	magma_zvio.cpp			\
 	magma_zmtransfer.cpp	\

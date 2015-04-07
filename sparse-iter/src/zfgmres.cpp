@@ -294,7 +294,7 @@ magma_zfgmres(
     solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 
-        if ( solver_par->numiter < solver_par->maxiter) {
+    if ( solver_par->numiter < solver_par->maxiter) {
         solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {

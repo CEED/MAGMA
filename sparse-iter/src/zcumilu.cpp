@@ -63,10 +63,21 @@ magma_zcumilusetup(
         magma_z_matrix hA, hACSR;    
         magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
         magma_zmconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
+
+            // in case using fill-in
+        if( precond->levels > 0 ){
+            magma_z_matrix hAL, hAUt;
+            magma_zsymbilu( &hACSR, precond->levels, &hAL, &hAUt,  queue ); 
+            magma_zmfree(&hAL, queue);
+            magma_zmfree(&hAUt, queue);
+        }
+
         magma_zmtransfer(hACSR, &(precond->M), Magma_CPU, Magma_DEV, queue );
 
         magma_zmfree( &hA, queue );
         magma_zmfree( &hACSR, queue );
+
+
 
 
             // CUSPARSE context //
@@ -567,6 +578,15 @@ magma_zcumiccsetup(
     magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue );
     U.diagorder_type = Magma_VALUE;
     magma_zmconvert( hA, &hACSR, hA.storage_type, Magma_CSR, queue );
+
+    // in case using fill-in
+    if( precond->levels > 0 ){
+            magma_z_matrix hAL, hAUt;
+            magma_zsymbilu( &hACSR, precond->levels, &hAL, &hAUt,  queue ); 
+            magma_zmfree(&hAL, queue);
+            magma_zmfree(&hAUt, queue);
+    }
+
     magma_zmconvert( hACSR, &U, Magma_CSR, Magma_CSRL, queue );
     magma_zmfree( &hACSR, queue );
     magma_zmtransfer(U, &(precond->M), Magma_CPU, Magma_DEV, queue );
@@ -946,7 +966,7 @@ magma_zapplycumicc_l(
 
 
             if (cusparseStatus != 0)   
-                printf("error in L triangular solve:%d.\n", precond->cuinfoL );
+                printf("error in L triangular solve.\n" );
 
 
     cusparseDestroyMatDescr( descrL );
@@ -1042,7 +1062,7 @@ magma_zapplycumicc_r(
                                     x->dval, 
                                     precond->M.num_rows);
              if (cusparseStatus != 0)   
-                 printf("error in U triangular solve:%d.\n", precond->cuinfoU );  
+                 printf("error in U triangular solve.\n" );  
 
 
     cusparseDestroyMatDescr( descrU );

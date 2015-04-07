@@ -413,3 +413,93 @@ magma_z_spmv_shift(
         return MAGMA_ERR_NOT_SUPPORTED;
     }
 }
+
+
+
+/**
+    Purpose
+    -------
+
+    For a given input matrix A and B and scalar alpha,
+    the wrapper determines the suitable SpMV computing
+              C = alpha * A * B.  
+    Arguments
+    ---------
+
+    @param[in]
+    alpha       magmaDoubleComplex
+                scalar alpha
+
+    @param[in]
+    A           magma_z_matrix
+                sparse matrix A    
+                
+    @param[in]
+    B           magma_z_matrix
+                sparse matrix C    
+                
+    @param[out]
+    C           magma_z_matrix *
+                outpur sparse matrix C    
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_z_spmm(
+    magmaDoubleComplex alpha, 
+    magma_z_matrix A,
+    magma_z_matrix B,
+    magma_z_matrix *C,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    //magma_queue_t orig_queue;
+    //magmablasGetKernelStream( &orig_queue );
+
+    if ( A.memory_location != B.memory_location ) {
+        printf("error: linear algebra objects are not located in same memory!\n");
+        printf("memory locations are: %d   %d\n", 
+                        A.memory_location, B.memory_location );
+        //magmablasSetKernelStream( orig_queue );
+        return MAGMA_ERR_INVALID_PTR;
+    }
+
+    // DEV case
+    if ( A.memory_location == Magma_DEV ) {
+        if ( A.num_cols == B.num_rows ) {
+
+             if ( A.storage_type == Magma_CSR 
+                            || A.storage_type == Magma_CSRL 
+                            || A.storage_type == Magma_CSRU
+                            || A.storage_type == Magma_CSRCOO ) {
+                    
+                magma_zcuspmm( A, B, C, queue );
+                
+             }
+             else {
+                 printf("error: format not supported.\n");
+                 // magmablasSetKernelStream( orig_queue );
+                 return MAGMA_ERR_NOT_SUPPORTED;
+             }
+        }
+         
+    }
+    // CPU case missing!     
+    else {
+        printf("error: CPU not yet supported.\n");
+        // magmablasSetKernelStream( orig_queue );
+        return MAGMA_ERR_NOT_SUPPORTED;
+    }
+    // magmablasSetKernelStream( orig_queue );
+    return MAGMA_SUCCESS;
+}
+
+
+
+
+

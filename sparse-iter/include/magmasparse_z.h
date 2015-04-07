@@ -383,6 +383,118 @@ magma_zsolverinfo_free(
     magma_queue_t queue );
 
 
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- MAGMA_SPARSE iterative incomplete factorizations
+*/
+
+
+magma_int_t
+magma_ziterilusetup( 
+    magma_z_matrix A, 
+    magma_z_matrix b,                                 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zitericsetup( 
+    magma_z_matrix A, 
+    magma_z_matrix b, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zitericupdate( 
+    magma_z_matrix A, 
+    magma_z_preconditioner *precond, 
+    magma_int_t updates,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplyiteric_l( 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplyiteric_r( 
+    magma_z_matrix b, 
+    magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+
+magma_int_t
+magma_ziterilu_csr( 
+    magma_z_matrix A,
+    magma_z_matrix L,
+    magma_z_matrix U,
+    magma_queue_t queue );
+
+magma_int_t
+magma_ziteric_csr( 
+    magma_z_matrix A,
+    magma_z_matrix A_CSR,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zfrobenius( 
+    magma_z_matrix A, 
+    magma_z_matrix B, 
+    real_Double_t *res,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_znonlinres(   
+    magma_z_matrix A, 
+    magma_z_matrix L,
+    magma_z_matrix U, 
+    magma_z_matrix *LU, 
+    real_Double_t *res,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zilures(   
+    magma_z_matrix A, 
+    magma_z_matrix L,
+    magma_z_matrix U, 
+    magma_z_matrix *LU, 
+    real_Double_t *res,
+    real_Double_t *nonlinres,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zicres(       
+    magma_z_matrix A, 
+    magma_z_matrix C,
+    magma_z_matrix CT, 
+    magma_z_matrix *LU, 
+    real_Double_t *res,
+    real_Double_t *nonlinres,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zinitguess( 
+    magma_z_matrix A, 
+    magma_z_matrix *L, 
+    magma_z_matrix *U,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zinitrecursiveLU( 
+    magma_z_matrix A, 
+    magma_z_matrix *B,
+    magma_queue_t queue );
+
+magma_int_t 
+magma_zmLdiagadd( 
+    magma_z_matrix *L,
+    magma_queue_t queue );
+
+
+
+
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -790,6 +902,22 @@ magma_zcuspmm(
     magma_z_matrix A, 
     magma_z_matrix B, 
     magma_z_matrix *AB,
+    magma_queue_t queue );
+
+magma_int_t
+magma_z_spmm(
+    magmaDoubleComplex alpha, 
+    magma_z_matrix A,
+    magma_z_matrix B,
+    magma_z_matrix *C,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zsymbilu( 
+    magma_z_matrix *A, 
+    magma_int_t levels, 
+    magma_z_matrix *L, 
+    magma_z_matrix *U,
     magma_queue_t queue );
 
 magma_int_t

@@ -75,6 +75,9 @@ magma_z_precond(
                 magma_zjacobi( A, b, x, &psolver_par, queue );break;
         case  Magma_BAITER: 
                 magma_zbaiter( A, b, x, &psolver_par, queue );break;
+        default:
+                magma_zcg_res( A, b, x, &psolver_par, queue );break;
+
     }
     return MAGMA_SUCCESS;
 }
@@ -141,6 +144,14 @@ magma_z_precondsetup(
     }
     else if ( precond->solver == Magma_ICC ) {
         magma_zcumiccsetup( A, precond, queue );
+        return MAGMA_SUCCESS;
+    }
+    else if ( precond->solver == Magma_AICC ) {
+        magma_zitericsetup( A, b, precond, queue );
+        return MAGMA_SUCCESS;
+    }
+    else if ( precond->solver == Magma_AILU ) {
+        magma_ziterilusetup( A, b, precond, queue );
         return MAGMA_SUCCESS;
     }
     else if ( precond->solver == Magma_NONE ) {
@@ -281,10 +292,11 @@ magma_z_applyprecond_left(
         magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue );
     }
     else if ( precond->solver == Magma_ILU || 
-            ( precond->solver == Magma_AILU && precond->maxiter == -1) ) {
+              precond->solver == Magma_AILU ) {
         magma_zapplycumilu_l( b, x, precond, queue );
     }
-    else if ( precond->solver == Magma_ICC ) {
+    else if ( precond->solver == Magma_ICC ||
+              precond->solver == Magma_AICC ) {
         magma_zapplycumicc_l( b, x, precond, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
@@ -354,11 +366,11 @@ magma_z_applyprecond_right(
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );    // x = b
     }
     else if ( precond->solver == Magma_ILU || 
-            ( precond->solver == Magma_AILU && precond->maxiter == -1)) {
+              precond->solver == Magma_AILU ) {
         magma_zapplycumilu_r( b, x, precond, queue );
     }
     else if ( precond->solver == Magma_ICC || 
-            ( precond->solver == Magma_AICC && precond->maxiter == -1) ) {
+              precond->solver == Magma_AICC ) {
         magma_zapplycumicc_r( b, x, precond, queue );
     }
     else if ( precond->solver == Magma_NONE ) {

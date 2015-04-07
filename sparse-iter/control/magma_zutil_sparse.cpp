@@ -64,12 +64,16 @@ static const char *usage_sparse =
 "               0   no preconditioner\n"
 "               1   Jacobi\n"
 "               2   ILU(0) / IC(0)\n"
+"               -2   iterative ILU(0) / IC(0)\n"
 "                   For Iterative Refinement also possible: \n"
 "                   3   CG\n"
 "                   4   BiCGSTAB\n"
 "                   5   GMRES\n"
 "                   6   Block-asynchronous Iteration\n"
-"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"               
+"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"       
+"                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"   
+"                   --piter k     Iteration count for iterative preconditioner.\n"   
+"                   --plevels k   Number of ILU levels.\n"               
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
@@ -190,6 +194,7 @@ magma_zparse_opts(
                 case 0: opts->precond_par.solver = Magma_NONE; break;
                 case 1: opts->precond_par.solver = Magma_JACOBI; break;
                 case 2: opts->precond_par.solver = Magma_ILU; break;
+                case -2: opts->precond_par.solver = Magma_AILU; break;
                 case 3: opts->precond_par.solver = Magma_CG; break;
                 case 4: opts->precond_par.solver = Magma_BICGSTAB; break;
                 case 5: opts->precond_par.solver = Magma_GMRES; break;
@@ -198,6 +203,12 @@ magma_zparse_opts(
             }
         } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
+        } else if ( strcmp("--piter", argv[i]) == 0 && i+1 < argc ) {
+            opts->precond_par.maxiter = atoi( argv[++i] );
+        } else if ( strcmp("--psweeps", argv[i]) == 0 && i+1 < argc ) {
+            opts->precond_par.sweeps = atoi( argv[++i] );
+        } else if ( strcmp("--plevels", argv[i]) == 0 && i+1 < argc ) {
+            opts->precond_par.levels = atoi( argv[++i] );
         } else if ( strcmp("--blocksize", argv[i]) == 0 && i+1 < argc ) {
             opts->blocksize = atoi( argv[++i] );
         } else if ( strcmp("--alignment", argv[i]) == 0 && i+1 < argc ) {
@@ -227,6 +238,9 @@ magma_zparse_opts(
     if ( opts->solver_par.solver == Magma_PCG 
         && opts->precond_par.solver == Magma_ILU )
             opts->precond_par.solver = Magma_ICC;
+    if ( opts->solver_par.solver == Magma_PCG 
+        && opts->precond_par.solver == Magma_AILU )
+            opts->precond_par.solver = Magma_AICC;
     return MAGMA_SUCCESS;
 }
 
