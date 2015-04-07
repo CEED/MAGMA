@@ -39,7 +39,7 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Replace the vector functions with matrix functions
     * Bugfix in Complex FGMRES
     * Wrapper for complex squareroots
-
+    * Added iterative incomplete factorization routines (iterative ILU/iterative IC)
 
  1.6.1 - January 30, 2014
     * Building as both shared and static library is default now.
