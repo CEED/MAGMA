@@ -445,6 +445,27 @@ magma_int_t magma_get_ssytrf_nb( magma_int_t m )
 }
 
 /* //////////////////////////////////////////////////////////////////////// */
+magma_int_t magma_get_zhetrf_aasen_nb( magma_int_t m ) 
+{
+    return 256;
+}
+
+magma_int_t magma_get_chetrf_aasen_nb( magma_int_t m ) 
+{
+    return 256;
+}
+
+magma_int_t magma_get_dsytrf_aasen_nb( magma_int_t m ) 
+{
+    return 256; 
+}
+
+magma_int_t magma_get_ssytrf_aasen_nb( magma_int_t m ) 
+{
+    return 256;
+}
+
+/* //////////////////////////////////////////////////////////////////////// */
 magma_int_t magma_get_zhetrf_nopiv_nb( magma_int_t m ) 
 {
     return 320; 
@@ -462,7 +483,7 @@ magma_int_t magma_get_dsytrf_nopiv_nb( magma_int_t m )
 
 magma_int_t magma_get_ssytrf_nopiv_nb( magma_int_t m ) 
 {
-    return 96;  
+    return 320;  
 }
 
 /* ////////////////////////////////////////////////////////////////////////////

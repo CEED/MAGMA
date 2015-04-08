@@ -37,6 +37,7 @@ magma_int_t magma_get_zgehrd_nb( magma_int_t m );
 magma_int_t magma_get_zhetrd_nb( magma_int_t m );
 magma_int_t magma_get_zhetrf_nb( magma_int_t m );
 magma_int_t magma_get_zhetrf_nopiv_nb( magma_int_t m );
+magma_int_t magma_get_zhetrf_aasen_nb( magma_int_t m );
 magma_int_t magma_get_zgelqf_nb( magma_int_t m );
 magma_int_t magma_get_zgebrd_nb( magma_int_t m );
 magma_int_t magma_get_zhegst_nb( magma_int_t m );
