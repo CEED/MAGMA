@@ -78,7 +78,7 @@ void zlacpy_sym_out_lower_device(
             for( int jj=0; jj < BLK_Y; ++jj ) {
                 int j = rows[2*(iby+jj)+1];
                 if (ind <= j)
-                    dB[j + ind*ldda] = dA[ind + (iby+jj)*lddb];
+                    dB[j + ind*ldda] = MAGMA_Z_CNJG( dA[ind + (iby+jj)*lddb] );
                 else
                     dB[ind + j*ldda] = dA[ind + (iby+jj)*lddb];
             }
@@ -88,7 +88,7 @@ void zlacpy_sym_out_lower_device(
             for( int jj=0; jj < BLK_Y && iby+jj < n; ++jj ) {
                 int j = rows[2*(iby+jj)+1];
                 if (ind <= j)
-                    dB[j + ind*ldda] = dA[ind + (iby+jj)*lddb];
+                    dB[j + ind*ldda] = MAGMA_Z_CNJG( dA[ind + (iby+jj)*lddb] );
                 else
                     dB[ind + j*ldda] = dA[ind + (iby+jj)*lddb];
             }

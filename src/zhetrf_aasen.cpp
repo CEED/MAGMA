@@ -217,7 +217,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         }
         else {
             //=========================================================
-            // Compute the Cholesky factorization A = L*L'.
+            // Compute the Aasen's factorization P*A*P' = L*T*L'.
             for (int j=0; j < (n+nb-1)/nb; j ++) {
                 int jb = min(nb, (n-j*nb));
 
@@ -280,7 +280,11 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                     -c_half, dX(i), nb,
                                              dY(i), nb);
                     // transpose W for calling zher2k
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    magmablas_ztranspose_conj( nb,jb, dY(i), nb, dW(i), lddw );
+                    #else
                     magmablas_ztranspose( nb,jb, dY(i), nb, dW(i), lddw );
+                    #endif
 
                     // > H(i,j) += T(i,i-1) * L(j,i-1)', X
                     if (i > 1) // if i==1, then L(j,i-1) = 0
