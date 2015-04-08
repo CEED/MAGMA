@@ -454,6 +454,7 @@ subs = {
     # ----- PLASMA / MAGMA, alphabetic order
     ('bsy2trc',        'bsy2trc',        'bhe2trc',        'bhe2trc'         ),
     ('magma_ssqrt',    'magma_dsqrt',    'magma_ssqrt',    'magma_dsqrt'     ),
+    ('magma_ssqrt',    'magma_dsqrt',    'magma_csqrt',    'magma_zsqrt'     ),
     ('SAUXILIARY',     'DAUXILIARY',     'CAUXILIARY',     'ZAUXILIARY'      ),
     ('sauxiliary',     'dauxiliary',     'cauxiliary',     'zauxiliary'      ),
     ('sb2st',          'sb2st',          'hb2st',          'hb2st'           ),
@@ -486,6 +487,7 @@ subs = {
     ('SSIZE',          'DSIZE',          'CSIZE',          'ZSIZE'           ),
     ('ssplit',         'dsplit',         'csplit',         'zsplit'          ),
     ('stile',          'dtile',          'ctile',          'ztile'           ),
+    ('stranspose',     'dtranspose',     'ctranspose_conj','ztranspose_conj' ),
     ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
     ('STRANSPOSE',     'DTRANSPOSE',     'CTRANSPOSE',     'ZTRANSPOSE'      ),
     ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
