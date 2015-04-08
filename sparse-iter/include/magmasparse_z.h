@@ -733,6 +733,16 @@ magma_zjacobiiter_precond(
     magma_queue_t queue );
 
 magma_int_t
+magma_zjacobiiter_sys(
+    magma_z_matrix A, 
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix t, 
+    magma_z_matrix *x,  
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zpastixsetup(
     magma_z_matrix A, magma_z_matrix b,
     magma_z_preconditioner *precond,
@@ -1260,6 +1270,14 @@ magma_zjacobi_diagscal(
     magma_z_matrix d, 
     magma_z_matrix b, 
     magma_z_matrix *c,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zjacobiupdate(
+    magma_z_matrix t, 
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix *x,
     magma_queue_t queue );
 
 magma_int_t

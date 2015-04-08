@@ -214,11 +214,22 @@ magma_zcumilusetup(
 
     cusparseDestroyMatDescr( descrU );
 
+
+    // extract the diagonal of L into precond->d 
+    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+    magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+    
+    // extract the diagonal of U into precond->d2  
+    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+    magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+
     magma_zmfree(&hA, queue );
     magma_zmfree(&hL, queue );
     magma_zmfree(&hU, queue );
 
     cusparseDestroy( cusparseHandle );
+
+
 
     return MAGMA_SUCCESS;
 }
@@ -714,6 +725,20 @@ magma_zcumiccsetup(
     cusparseDestroyMatDescr( descrU );
     cusparseDestroyMatDescr( descrA );
     cusparseDestroy( cusparseHandle );
+
+
+
+    // copy the matrix to precond->L and (transposed) to precond->U
+    magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue );
+    magma_zmtranspose( precond->L, &(precond->U), queue );
+
+    // extract the diagonal of L into precond->d 
+    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+    magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+
+    // extract the diagonal of U into precond->d2
+    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+    magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
 
     magma_zmfree(&U, queue );
     magma_zmfree(&hA, queue );

@@ -148,6 +148,15 @@ magma_ziterilusetup(
 
     //-- for ba-solve uncomment this
 */
+
+        // extract the diagonal of L into precond->d 
+    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+    magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+    
+    // extract the diagonal of U into precond->d2  
+    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+    magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+
     magma_zmfree(&hAL, queue );
     magma_zmfree(&hAU, queue );
     magma_zmfree(&DL, queue );
@@ -321,9 +330,19 @@ magma_zitericsetup(
 
     magma_zmfree(&d_h, queue );
 
-    // and the workspace for the preconditioner
-    magma_zvinit( &precond->work1, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO , queue );
-    magma_zvinit( &precond->work2, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO , queue );
+
+        // copy the matrix to precond->L and (transposed) to precond->U
+    magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue );
+    magma_zmtranspose( precond->L, &(precond->U), queue );
+
+    // extract the diagonal of L into precond->d 
+    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+    magma_zvinit( &precond->work1, Magma_DEV, hAL.num_rows, 1, MAGMA_Z_ZERO, queue );
+
+    // extract the diagonal of U into precond->d2
+    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+    magma_zvinit( &precond->work2, Magma_DEV, hAL.num_rows, 1, MAGMA_Z_ZERO, queue );
+
 
     magma_zmfree(&hAL, queue );
     magma_zmfree(&hALt, queue );

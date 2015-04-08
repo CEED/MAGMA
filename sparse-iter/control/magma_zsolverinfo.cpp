@@ -342,6 +342,10 @@ magma_zsolverinfo_free(
         magma_free( precond_par->d.val );
         precond_par->d.val = NULL;
     }
+    if ( precond_par->d2.val != NULL ) {
+        magma_free( precond_par->d2.val );
+        precond_par->d2.val = NULL;
+    }
     if ( precond_par->work1.val != NULL ) {
         magma_free( precond_par->work1.val );
         precond_par->work1.val = NULL;
@@ -557,6 +561,7 @@ magma_zsolverinfo_init(
     }  
 
     precond_par->d.val = NULL;
+    precond_par->d2.val = NULL;
     precond_par->work1.val = NULL;
     precond_par->work2.val = NULL;
 

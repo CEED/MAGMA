@@ -176,3 +176,90 @@ magma_zjacobi_diagscal(
 
 
 
+
+
+
+
+
+
+
+
+
+
+__global__ void 
+zjacobiupdate_kernel(  int num_rows,
+                       int num_cols, 
+                    magmaDoubleComplex *t, 
+                    magmaDoubleComplex *b, 
+                    magmaDoubleComplex *d, 
+                    magmaDoubleComplex *x){
+
+    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+
+    if(row < num_rows ){
+        for( int i=0; i<num_cols; i++)
+            x[row+i*num_rows] += (b[row+i*num_rows]-t[row+i*num_rows]) * d[row];
+    }
+}
+
+
+/**
+    Purpose
+    -------
+
+    Updates the iteration vector x for the Jacobi iteration
+    according to
+        x=x+d.*(b-t)
+    where d is the diagonal of the system matrix A and t=Ax.
+
+    Arguments
+    ---------
+
+    @param[in]
+    num_rows    magma_int_t
+                number of rows
+                
+    @param[in]
+    num_cols    magma_int_t
+                number of cols
+                
+    @param[in]
+    t           magma_z_matrix
+                t = A*x
+                
+    @param[in]
+    b           magma_z_matrix
+                RHS b
+                
+    @param[in]
+    d           magma_z_matrix
+                vector with diagonal entries
+
+    @param[out]
+    x           magma_z_matrix*
+                iteration vector
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zjacobiupdate(
+    magma_z_matrix t, 
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix *x,
+    magma_queue_t queue )
+{
+
+    dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
+    magma_int_t threads = BLOCK_SIZE;
+    zjacobiupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, t.dval, b.dval, d.dval, x->dval );
+
+    return MAGMA_SUCCESS;
+}
+
+
+

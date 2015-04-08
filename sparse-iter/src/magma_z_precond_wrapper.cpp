@@ -291,13 +291,27 @@ magma_z_applyprecond_left(
     if ( precond->solver == Magma_JACOBI ) {
         magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue );
     }
-    else if ( precond->solver == Magma_ILU || 
-              precond->solver == Magma_AILU ) {
+    else if ( ( precond->solver == Magma_ILU || 
+                precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
         magma_zapplycumilu_l( b, x, precond, queue );
     }
-    else if ( precond->solver == Magma_ICC ||
-              precond->solver == Magma_AICC ) {
+    else if ( ( precond->solver == Magma_ILU || 
+                precond->solver == Magma_AILU ) && precond->maxiter < 50 ) { 
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_z_solver_par solver_par;
+        solver_par.maxiter = precond->maxiter;
+        magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
+    }
+    else if ( ( precond->solver == Magma_ICC ||
+                precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
         magma_zapplycumicc_l( b, x, precond, queue );
+    }
+    else if ( ( precond->solver == Magma_ICC ||
+                precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_z_solver_par solver_par;
+        solver_par.maxiter = precond->maxiter;
+        magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
@@ -365,13 +379,28 @@ magma_z_applyprecond_right(
     if ( precond->solver == Magma_JACOBI ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );    // x = b
     }
-    else if ( precond->solver == Magma_ILU || 
-              precond->solver == Magma_AILU ) {
+    else if ( ( precond->solver == Magma_ILU || 
+                precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
         magma_zapplycumilu_r( b, x, precond, queue );
     }
-    else if ( precond->solver == Magma_ICC || 
-              precond->solver == Magma_AICC ) {
+    else if ( ( precond->solver == Magma_ILU || 
+                precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+        //magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_z_solver_par solver_par;
+        solver_par.maxiter = precond->maxiter;
+        magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
+    }
+
+    else if ( ( precond->solver == Magma_ICC || 
+                precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
         magma_zapplycumicc_r( b, x, precond, queue );
+    }
+    else if ( ( precond->solver == Magma_ICC || 
+               precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
+        //magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_z_solver_par solver_par;
+        solver_par.maxiter = precond->maxiter;
+        magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b

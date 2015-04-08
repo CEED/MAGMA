@@ -480,6 +480,8 @@ magma_zjacobisetup(
        x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
        x^(k+1) =      c     -       M        * x^k.
 
+    This routine takes the iteration matrix M as input.
+
     Arguments
     ---------
 
@@ -612,3 +614,71 @@ magma_zjacobiiter_precond(
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }   /* magma_zjacobiiter */
+
+
+
+    /**
+    Purpose
+    -------
+
+    Iterates the solution approximation according to
+       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
+       x^(k+1) =      c     -       M        * x^k.
+
+    This routine takes the system matrix A and the RHS b as input.
+
+    Arguments
+    ---------
+
+    @param[in]
+    M           magma_z_matrix
+                input matrix M = D^(-1) * (L+U)
+
+    @param[in]
+    c           magma_z_matrix
+                c = D^(-1) * b
+
+    @param[in,out]
+    x           magma_z_matrix*
+                iteration vector x
+
+    @param[in,out]
+    solver_par  magma_z_solver_par*
+                solver parameters
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zjacobiiter_sys(
+    magma_z_matrix A, 
+    magma_z_matrix b, 
+    magma_z_matrix d,
+    magma_z_matrix t, 
+    magma_z_matrix *x,  
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
+    // local variables
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+
+    for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {
+        magma_z_spmv( c_one, A, *x, c_zero, t, queue );                // t =  A * x
+        magma_zjacobiupdate( t, b, d, x, queue );
+        // swap so that x again contains solution, and y is ready to be used
+        //swap = *x;
+        //*x = t;
+        //t = swap;        
+        //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
+    }
+
+    magmablasSetKernelStream( orig_queue );
+    return MAGMA_SUCCESS;
+}   /* magma_zjacobiiter_sys */
