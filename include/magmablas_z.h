@@ -28,7 +28,18 @@ magmablas_ztranspose_inplace(
     magmaDoubleComplex_ptr dA, magma_int_t ldda );
 
 void
+magmablas_ztranspose_conj_inplace(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda );
+
+void
 magmablas_ztranspose(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr dA,  magma_int_t ldda,
+    magmaDoubleComplex_ptr       dAT, magma_int_t lddat );
+
+void
+magmablas_ztranspose_conj(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dA,  magma_int_t ldda,
     magmaDoubleComplex_ptr       dAT, magma_int_t lddat );
