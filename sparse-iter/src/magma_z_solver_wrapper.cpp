@@ -87,7 +87,7 @@ magma_z_solver(
             case  Magma_ITERREF:
                     magma_ziterref( A, b, x, &zopts->solver_par, &zopts->precond_par, queue );break;
             case  Magma_JACOBI: 
-                    magma_zjacobi( A, b, x, &zopts->solver_par, queue );break;
+                    magma_zjacobidomainoverlap( A, b, x, &zopts->solver_par, queue );break;
             case  Magma_BAITER: 
                     magma_zbaiter( A, b, x, &zopts->solver_par, queue );break;
             default:  

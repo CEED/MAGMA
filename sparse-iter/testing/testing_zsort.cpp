@@ -41,7 +41,10 @@ int main(  int argc, char** argv )
     magma_index_t *x;
 
     stat_cpu += magma_index_malloc_cpu( &x, n );
-
+    if( stat_cpu != 0 ){
+        magma_free_cpu( x );
+        return MAGMA_ERR_HOST_ALLOC;
+    } 
     printf("unsorted:\n");
     srand(time(NULL));  
     for(magma_int_t i = 0; i<n; i++ ){
@@ -78,7 +81,10 @@ int main(  int argc, char** argv )
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
     
         stat_cpu += magma_index_malloc_cpu( &x, A.num_rows*10 );
-        
+        if( stat_cpu != 0 ){
+            magma_free_cpu( x );
+            return MAGMA_ERR_HOST_ALLOC;
+        } 
         magma_int_t num_ind = 0;
 
         magma_zdomainoverlap( A.num_rows, &num_ind, A.row, A.col, x, queue );

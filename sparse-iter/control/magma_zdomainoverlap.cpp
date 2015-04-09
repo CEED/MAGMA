@@ -102,7 +102,7 @@ magma_zdomainoverlap(
     magma_queue_t queue )
 {
     
-    magma_int_t blocksize=8;
+    magma_int_t blocksize=128;
 
     magma_int_t stat_cpu=0, row=0, col=0, num_ind=0, offset=0;
 

@@ -401,8 +401,8 @@ zjacobispmvupdateselect_kernel(
     int j;
 
     if(idx<num_updates){
-        int row = indices[ idx ];
-        
+        int row = idx;//indices[ idx ];
+        if( row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_ZERO;
         int start = drowptr[ row ];
         int end = drowptr[ row+1 ];
@@ -411,6 +411,7 @@ zjacobispmvupdateselect_kernel(
                 dot += dval[ j ] * x[ dcolind[j]+i*num_rows ];
             }
             x[row+i*num_rows] += (b[row+i*num_rows]-dot) * d[row];
+        }
         }
     }
 }
@@ -485,8 +486,10 @@ magma_zjacobispmvupdateselect(
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+
     dim3 grid( magma_ceildiv( num_updates, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
+        printf("num updates:%d %d %d \n", num_updates, threads, grid.x);
 
     for( magma_int_t i=0; i<maxiter; i++ ) {
         zjacobispmvupdateselect_kernel<<< grid, threads, 0 >>>

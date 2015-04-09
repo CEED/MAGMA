@@ -84,6 +84,9 @@ ZSRC += \
 	magma_zcuspaxpy.cpp				\
 	zresidual.cpp					\
 
+# research functions
+ZSRC += \
+	zjacobidomainoverlap.cpp			\
 
 # ------------------------------------------------------------
 -include Makefile.local
