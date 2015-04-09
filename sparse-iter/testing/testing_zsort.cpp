@@ -37,7 +37,7 @@ int main(  int argc, char** argv )
     magma_queue_create( &queue );
     magmablasSetKernelStream( queue );
 
-    magma_int_t n=100, stat_cpu = 0;
+    magma_int_t i=1, n=100, stat_cpu = 0;
     magma_index_t *x;
 
     stat_cpu += magma_index_malloc_cpu( &x, n );
@@ -62,6 +62,38 @@ int main(  int argc, char** argv )
     printf("\n\n"); 
 
     magma_free_cpu( x );
+    
+    while(  i < argc ) {
+        magma_z_matrix A;
+
+        if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
+            i++;
+            magma_int_t laplace_size = atoi( argv[i] );
+            magma_zm_5stencil(  laplace_size, &A, queue );
+        } else {                        // file-matrix test
+            magma_z_csr_mtx( &A,  argv[i], queue );
+        }
+
+        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+    
+        stat_cpu += magma_index_malloc_cpu( &x, A.num_rows*10 );
+        
+        magma_int_t num_ind = 0;
+
+        magma_zdomainoverlap( A.num_rows, &num_ind, A.row, A.col, x, queue );
+                printf("domain overlap indices:\n");
+        for(magma_int_t j = 0; j<num_ind; j++ ){
+            printf("%d  ", x[j]);
+        }
+        printf("\n\n"); 
+        magma_free_cpu( x );
+        magma_zmfree(&A, queue);
+        
+        i++;
+        
+    }
+    
 
     /* Shutdown */
     magmablasSetKernelStream( NULL );

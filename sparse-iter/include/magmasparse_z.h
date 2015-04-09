@@ -213,6 +213,14 @@ magma_zindexsort(
     magma_int_t last,
     magma_queue_t queue );
 
+magma_int_t
+magma_zdomainoverlap(
+    magma_index_t num_rows,
+    magma_index_t *num_indices,
+    magma_index_t *rowptr,
+    magma_index_t *colidx,
+    magma_index_t *x,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zsymbilu( 
