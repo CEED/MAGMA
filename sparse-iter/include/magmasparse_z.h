@@ -1281,6 +1281,16 @@ magma_zjacobiupdate(
     magma_queue_t queue );
 
 magma_int_t
+magma_zjacobispmvupdate(
+    magma_int_t maxiter,
+    magma_z_matrix A, 
+    magma_z_matrix t, 
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix *x,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zjacobisetup_diagscal(
     magma_z_matrix A, magma_z_matrix *d,
     magma_queue_t queue );
