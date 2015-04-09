@@ -99,7 +99,7 @@ magma_zmscale(
             magma_free_cpu( tmp );
         }
         else
-            printf( "error: scaling not supported\n" );
+            printf( "error: scaling %d not supported.\n", scaling );
         return MAGMA_SUCCESS; 
     }
     else {

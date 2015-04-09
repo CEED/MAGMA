@@ -142,6 +142,7 @@ magma_zparse_opts(
     opts->precond_par.epsilon = 0.01;
     opts->precond_par.maxiter = 100;
     opts->precond_par.restart = 10;
+    opts->precond_par.levels = 0;
     opts->solver_par.solver = Magma_CG;
     
     printf( usage_sparse_short, argv[0] );
@@ -241,6 +242,7 @@ magma_zparse_opts(
     if ( opts->solver_par.solver == Magma_PCG 
         && opts->precond_par.solver == Magma_AILU )
             opts->precond_par.solver = Magma_AICC;
+            
     return MAGMA_SUCCESS;
 }
 
