@@ -83,23 +83,21 @@ magma_zjacobi(
     magma_int_t dofs = A.num_rows*b.num_cols;
     double nom0 = 0.0;
 
-
-    magma_z_matrix M;
-    magma_z_matrix c, r;
+    magma_z_matrix r, d;
     magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
     magma_z_spmv( c_one, A, *x, c_zero, r, queue );                  // r = A x
     magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);           // r = r - b
     nom0 = magma_dznrm2(dofs, r.dval, 1);                      // den = || r ||
 
     // Jacobi setup
-    magma_zjacobisetup( A, b, &M, &c, queue );
+    magma_zjacobisetup_diagscal( A, &d, queue );
     magma_z_solver_par jacobiiter_par;
     jacobiiter_par.maxiter = solver_par->maxiter;
 
     tempo1 = magma_sync_wtime( queue );
 
-    // Jacobi iterator
-    magma_zjacobiiter( M, c, x, &jacobiiter_par, queue ); 
+    // Jacobi iterator    
+    magma_zjacobispmvupdate(jacobiiter_par.maxiter, A, r, b, d, x, queue );
 
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
@@ -111,10 +109,9 @@ magma_zjacobi(
         solver_par->info = MAGMA_SUCCESS;
     else
         solver_par->info = MAGMA_DIVERGENCE;
-
-    magma_zmfree( &M, queue );
-    magma_zmfree( &c, queue );
+    
     magma_zmfree( &r, queue );
+    magma_zmfree( &d, queue );
 
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
