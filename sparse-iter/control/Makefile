@@ -31,6 +31,7 @@ ZSRC := \
 	magma_zmtranspose.cpp	\
 	magma_zmtransfer.cpp	\
 	magma_zmilustruct.cpp	\
+	magma_zsort.cpp		\
 	magma_zvinit.cpp		\
 	magma_zvio.cpp			\
 	magma_zmtransfer.cpp	\

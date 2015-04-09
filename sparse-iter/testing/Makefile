@@ -20,6 +20,7 @@ ZSRC += \
 	testing_zio.cpp				\
 	testing_zmcompressor.cpp	\
 	testing_zmconverter.cpp		\
+	testing_zsort.cpp	\
 
 
 

@@ -206,6 +206,14 @@ magma_zmsort(
     magma_z_matrix *A,
     magma_queue_t queue );
 
+magma_int_t
+magma_zsort(
+    magma_index_t x, 
+    magma_int_t size,
+    magma_int_t first,
+    magma_int_t last,
+    magma_queue_t queue );
+
 
 magma_int_t
 magma_zsymbilu( 
