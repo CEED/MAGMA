@@ -53,6 +53,8 @@ ZSRC := \
 	zhemv_upper.cu		\
 	zlacpy.cu		\
 	zlacpy_cnjg.cu		\
+	zlacpy_sym_in.cu	\
+	zlacpy_sym_out.cu	\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
@@ -72,6 +74,7 @@ ZSRC := \
 	zlaset.cu		\
 	zlaset_band.cu		\
 	zlaswp.cu		\
+	zlaswp_sym.cu		\
 	zclaswp.cu		\
 	zlat2c.cu		\
 	clat2z.cu		\
