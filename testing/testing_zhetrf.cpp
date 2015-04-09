@@ -134,8 +134,8 @@ double get_residual_aasen(
     magma_int_t *ipiv )
 {
     magma_int_t ione = 1;
-    magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
-    magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_mone = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *L, *T;
     #define  A(i,j) ( A[(i) + (j)*lda])
     #define  L(i,j) ( L[(i) + (j)*n])
@@ -184,7 +184,11 @@ double get_residual_aasen(
     // forward solve
     blasf77_ztrsv( MagmaLowerStr, MagmaNoTransStr, MagmaUnitStr, &n, &L(0,0),&n, x,&ione);
     // banded solver
-    magma_int_t nrhs = 1, *p = (int*)malloc(n*sizeof(magma_int_t));
+    magma_int_t nrhs = 1, *p = NULL;
+    if (MAGMA_SUCCESS != magma_imalloc_cpu(&p, n)) {
+        printf( " failed to allocate perm\n" );
+        return 0;
+    }
     lapackf77_zgesv(&n,&nrhs, &T(0,0),&n, p,x,&n, &info);
     free(p);
     // backward solve
