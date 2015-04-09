@@ -271,18 +271,32 @@ magma_zjacobiupdate(
 
 
 __global__ void 
-zjacobispmvupdate_kernel(  int num_rows,
-                       int num_cols, 
-                    magmaDoubleComplex *t, 
-                    magmaDoubleComplex *b, 
-                    magmaDoubleComplex *d, 
-                    magmaDoubleComplex *x){
+zjacobispmvupdate_kernel(  
+    int num_rows,
+    int num_cols, 
+    magmaDoubleComplex * dval, 
+    magma_index_t * drowptr, 
+    magma_index_t * dcolind,
+    magmaDoubleComplex *t, 
+    magmaDoubleComplex *b, 
+    magmaDoubleComplex *d, 
+    magmaDoubleComplex *x ){
+
+
 
     int row = blockDim.x * blockIdx.x + threadIdx.x ;
+    int j;
 
-    if(row < num_rows ){
-        for( int i=0; i<num_cols; i++)
-            x[row+i*num_rows] += (b[row+i*num_rows]-t[row+i*num_rows]) * d[row];
+    if(row<num_rows){
+        magmaDoubleComplex dot = MAGMA_Z_ZERO;
+        int start = drowptr[ row ];
+        int end = drowptr[ row+1 ];
+        for( int i=0; i<num_cols; i++){
+            for( j=start; j<end; j++){
+                dot += dval[ j ] * x[ dcolind[j]+i*num_rows ];
+            }
+            x[row+i*num_rows] += (b[row+i*num_rows]-dot) * d[row];
+        }
     }
 }
 
@@ -346,8 +360,11 @@ magma_zjacobispmvupdate(
     magma_int_t threads = BLOCK_SIZE;
 
     for( magma_int_t i=0; i<maxiter; i++ ) {
-        magma_z_spmv( c_one, A, *x, c_zero, t, queue );                // t =  A * x
-        zjacobiupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, t.dval, b.dval, d.dval, x->dval );
+        // distinct routines imply synchronization
+        // magma_z_spmv( c_one, A, *x, c_zero, t, queue );                // t =  A * x
+        // zjacobiupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, t.dval, b.dval, d.dval, x->dval );
+        // merged in one implies asynchronous update
+        zjacobispmvupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval );
 
     }
 
