@@ -46,10 +46,6 @@ using namespace std;
                 array to sort
 
     @param[in]
-    size        magma_int_t 
-                size of the array to sort
-
-    @param[in]
     first       magma_int_t 
                 pointer to first element
 
@@ -66,19 +62,13 @@ using namespace std;
 
 extern "C"
 magma_int_t
-magma_zsort(
-    magma_index_t x, 
-    magma_int_t size,
+magma_zindexsort(
+    magma_index_t *x,
     magma_int_t first,
     magma_int_t last,
     magma_queue_t queue )
 {
-    magma_int_t pivot,j,temp,i;
-
-    if ( size != last-first-1 ){
-
-        printf('warning: the size of the array to sort is not consistent to first and last element.\n');
-    }
+    magma_index_t pivot,j,temp,i;
 
     if(first<last){
          pivot=first;
@@ -86,22 +76,22 @@ magma_zsort(
          j=last;
 
         while(i<j){
-            while(x[i]<=x[pivot]&&i<last)
+            while( x[i]<=x[pivot] && i<last )
                 i++;
-            while(x[j]>x[pivot])
+            while( x[j]>x[pivot] )
                 j--;
-            if(i<j){
-                temp=x[i];
-                x[i]=x[j];
-                x[j]=temp;
+            if( i<j ){
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
             }
         }
 
         temp=x[pivot];
         x[pivot]=x[j];
         x[j]=temp;
-        magma_zsort( x, (j-1)-first-1, first, j-1);
-        magma_zsort( x, last-(j+1)-1j+1, last);
+        magma_zindexsort( x, first, j-1, queue );
+        magma_zindexsort( x, j+1, last, queue );
 
     }
 

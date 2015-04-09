@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 
 // includes, project
@@ -37,21 +38,28 @@ int main(  int argc, char** argv )
     magmablasSetKernelStream( queue );
 
     magma_int_t n=100, stat_cpu = 0;
+    magma_index_t *x;
 
     stat_cpu += magma_index_malloc_cpu( &x, n );
 
+    printf("unsorted:\n");
     srand(time(NULL));  
     for(magma_int_t i = 0; i<n; i++ ){
-        int r = rand();
+        int r = rand()%100;
         x[i] = r;
         printf("%d  ", x[i]);
     }
-
-    magma_zsort(x, n, 0, n );
-
+    printf("\n\n"); 
+    
+    printf("sorting...");
+    magma_zindexsort(x, 0, n-1, queue );
+    printf("done.\n\n");
+    
+    printf("sorted:\n");
     for(magma_int_t i = 0; i<n; i++ ){
         printf("%d  ", x[i]);
     }
+    printf("\n\n"); 
 
     magma_free_cpu( x );
 
