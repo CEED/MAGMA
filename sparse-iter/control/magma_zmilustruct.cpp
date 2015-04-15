@@ -131,11 +131,20 @@ void magma_zsymbolic_ilu(
     magma_index_t *curlev;
     magma_index_t *levels;
     magma_index_t *iwork;
+    magma_int_t stat_cpu = 0;
 
-    magma_index_malloc_cpu( &lnklst, n );
-    magma_index_malloc_cpu( &curlev, n );
-    magma_index_malloc_cpu( &levels, *nzu );
-    magma_index_malloc_cpu( &iwork, n );
+    stat_cpu += magma_index_malloc_cpu( &lnklst, n );
+    stat_cpu += magma_index_malloc_cpu( &curlev, n );
+    stat_cpu += magma_index_malloc_cpu( &levels, *nzu );
+    stat_cpu += magma_index_malloc_cpu( &iwork, n );
+    
+    if( stat_cpu != 0 ){
+        magma_free_cpu(lnklst);
+        magma_free_cpu(curlev);
+        magma_free_cpu(levels);
+        magma_free_cpu(iwork);
+        printf("error: memory allocation.\n");
+    }
 
     for(magma_int_t t=0; t<n; t++){
         lnklst[t] = 0;
@@ -334,6 +343,7 @@ magma_zsymbilu(
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
         magma_z_matrix A_copy, B;
+        magma_int_t stat_cpu = 0;
 
         magma_zmtransfer( *A, &A_copy, Magma_CPU, Magma_CPU, queue );
         magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
@@ -349,17 +359,21 @@ magma_zsymbilu(
 
         magma_free_cpu( L->col );
         magma_free_cpu( U->col );
-        magma_index_malloc_cpu( &L->col, num_lnnz );
-        magma_index_malloc_cpu( &U->col, num_unnz );
-
+        stat_cpu += magma_index_malloc_cpu( &L->col, num_lnnz );
+        stat_cpu += magma_index_malloc_cpu( &U->col, num_unnz );
+        if( stat_cpu != 0 ){
+            magma_zmfree( L, queue );
+            printf("error: memory allocation.\n");
+            return MAGMA_ERR_HOST_ALLOC;
+        }
         magma_zsymbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
                                             L->row, L->col, U->row, U->col ); 
         L->nnz = num_lnnz;
         U->nnz = num_unnz;
         magma_free_cpu( L->val );
         magma_free_cpu( U->val );
-        magma_zmalloc_cpu( &L->val, L->nnz );
-        magma_zmalloc_cpu( &U->val, U->nnz );
+        stat_cpu += magma_zmalloc_cpu( &L->val, L->nnz );
+        stat_cpu += magma_zmalloc_cpu( &U->val, U->nnz );
         for( magma_int_t i=0; i<L->nnz; i++ )
             L->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
@@ -392,8 +406,13 @@ magma_zsymbilu(
         // fill A with the new structure;
         magma_free_cpu( A->col );
         magma_free_cpu( A->val );
-        magma_index_malloc_cpu( &A->col, L->nnz+U->nnz );
-        magma_zmalloc_cpu( &A->val, L->nnz+U->nnz );
+        stat_cpu += magma_index_malloc_cpu( &A->col, L->nnz+U->nnz );
+        stat_cpu += magma_zmalloc_cpu( &A->val, L->nnz+U->nnz );
+        if( stat_cpu != 0 ){
+            magma_zmfree( L, queue );
+            printf("error: memory allocation.\n");
+            return MAGMA_ERR_HOST_ALLOC;
+        }
         A->nnz = L->nnz+U->nnz ;
     
         magma_int_t z = 0;
