@@ -450,7 +450,7 @@ magma_zwrite_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        fprintf( fp, "%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general ColMajor\n" );
         fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -471,7 +471,7 @@ magma_zwrite_csr_mtx(
         
         #else
         // real case
-        fprintf( fp, "%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general ColMajor\n" );
         fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -503,7 +503,7 @@ magma_zwrite_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        fprintf( fp, "%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general RowMajor\n" );
         fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -524,7 +524,7 @@ magma_zwrite_csr_mtx(
         
         #else
         // real case
-        fprintf( fp, "%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general RowMajor\n" );
         fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -623,7 +623,7 @@ magma_zprint_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        printf( "%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate complex general ColMajor\n" );
         printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -644,7 +644,7 @@ magma_zprint_csr_mtx(
         
         #else
         // real case
-        printf( "%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate real general ColMajor\n" );
         printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -671,7 +671,7 @@ magma_zprint_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        printf( "%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate complex general RowMajor\n" );
         printf( "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -692,7 +692,7 @@ magma_zprint_csr_mtx(
         
         #else
         // real case
-        printf( "%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate real general RowMajor\n" );
         printf( "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?

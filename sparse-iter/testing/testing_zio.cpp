@@ -61,7 +61,6 @@ int main(  int argc, char** argv )
 
         // write to file
         magma_zwrite_csrtomtx( A, filename, queue );
-
         // read from file
         magma_z_csr_mtx( &A2, filename, queue );
 

@@ -106,18 +106,6 @@ magma_zprint_vector(
 
 
 
-// small helper function
-extern "C"
-double magma_zstring_to_double( const std::string& s )
-{
-    std::istringstream i(s);
-    double x;
-    if (!(i >> x))
-        return 0;
-    return x;
-} 
-
-
 
 /**
     Purpose
@@ -160,18 +148,33 @@ magma_zvread(
     x->major = MagmaColMajor;
     magma_zmalloc_cpu( &x->val, length );
     magma_int_t nnz=0, i=0;
-    string line;
-    ifstream fin(filename);  
-    getline(fin, line, '\n');  
+    FILE *fid;
+    
+    fid = fopen(filename, "r");
+    
     while( i<length )  // eof() is 'true' at the end of data
     {
-        getline(fin, line, '\n');
-        if ( magma_zstring_to_double(line) != 0 )
+        double VAL1;
+
+        magmaDoubleComplex VAL;
+        #define COMPLEX
+        
+        #ifdef COMPLEX
+            double VAL2;
+            fscanf(fid, " %lf %lf \n", &VAL1, &VAL2);
+            VAL = MAGMA_Z_MAKE(VAL1, VAL2);
+        #else
+            fscanf(fid, " %lf \n", &VAL1);
+            VAL = MAGMA_Z_MAKE(VAL1, 0.0);
+        #endif
+        
+        if ( VAL != MAGMA_Z_ZERO )
             nnz++;
-        x->val[i] = MAGMA_Z_MAKE(magma_zstring_to_double(line), 0.0);
+        x->val[i] = VAL;
         i++;
     }
-    fin.close();
+    fclose(fid);
+    
     x->nnz = nnz;
     return MAGMA_SUCCESS;
 }   
