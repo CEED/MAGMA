@@ -9,22 +9,13 @@
        @author Hartwig Anzt
 */
 
-#include <fstream>
-#include <stdlib.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <ostream>
-#include <assert.h>
-#include <stdio.h>
+// includes, project
+#include "common_magma.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
 
-
 #define THRESHOLD 10e-99
-
-using namespace std;
 
 
 /**

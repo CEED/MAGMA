@@ -13,7 +13,7 @@ include $(MAGMA_DIR)/Makefile.internal
 INC += -I../include
 
 ZSRC := \
-    magma_zdomainoverlap.cpp    \
+	magma_zdomainoverlap.cpp    \
 	magma_zutil_sparse.cpp	\
 	magma_zfree.cpp		    \
 	magma_zmatrixchar.cpp	\
@@ -35,7 +35,6 @@ ZSRC := \
 	magma_zsort.cpp		\
 	magma_zvinit.cpp		\
 	magma_zvio.cpp			\
-	magma_zmtransfer.cpp	\
 	magma_zvtranspose.cpp	\
 	magma_zvpass.cpp		\
 	magma_zvpass_gpu.cpp	\

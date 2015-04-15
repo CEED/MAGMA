@@ -9,20 +9,12 @@
        @author Hartwig Anzt
 */
 
-#include <fstream>
-#include <stdlib.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <ostream>
-#include <assert.h>
-#include <stdio.h>
-#include <math.h>       /* fabs */
+// includes, project
+#include "common_magma.h"
 #include "magmasparse_z.h"
 #include "magma.h"
-#include "../include/mmio.h"
+#include "mmio.h"
 
-using namespace std;
 
 #define PRECISION_z
 

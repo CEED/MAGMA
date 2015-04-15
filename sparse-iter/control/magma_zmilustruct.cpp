@@ -12,15 +12,8 @@
 //  in this file, many routines are taken from 
 //  the IO functions provided by MatrixMarket
 
-#include <fstream>
-#include <stdlib.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <ostream>
-#include <assert.h>
-#include <stdio.h>
-
+// includes, project
+#include "common_magma.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -31,12 +24,6 @@
 #include <cusparse_v2.h>
 #include <cuda_profiler_api.h>
 
-
-using namespace std;
-
-
-#include <stdlib.h>
-//#include "mex.h"
 
 /******************************************************************************
  * ILU mex function from MATLAB:

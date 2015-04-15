@@ -12,121 +12,13 @@
 //  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
-#include <fstream>
-#include <iostream>
+//#include <fstream>
+//#include <iostream>
 
 #include "common_magma.h"
 #include "magmasparse.h"
 #include "mmio.h"
 
-
-using namespace std;
-
-
-/**
-    Purpose
-    -------
-    Reads in a matrix stored in coo format from a binary and converts it
-    into CSR format. It duplicates the off-diagonal entries in the
-    symmetric case.
-
-    Arguments
-    ---------    
-    @param[out]
-    n_row       magma_int_t*
-                number of rows in matrix
-                
-    @param[out]
-    n_col       magma_int_t*
-                number of columns in matrix
-                
-    @param[out]
-    nnz         magma_int_t*
-                number of nonzeros in matrix
-                
-    @param[out]
-    val         magmaDoubleComplex**
-                value array of CSR output
-
-    @param[out]
-    row         magma_index_t**
-                row pointer of CSR output
-
-    @param[out]
-    col         magma_index_t**
-                column indices of CSR output
-
-    @param[in]
-    filename    const char*
-                filname of the mtx matrix
-    @param[in]
-    queue       magma_queue_t
-                Queue to execute in.
-
-    @ingroup magmasparse_zaux
-    ********************************************************************/
-
-extern "C"
-magma_int_t read_z_csr_from_binary(
-    magma_int_t* n_row,
-    magma_int_t* n_col,
-    magma_int_t* nnz,
-    magmaDoubleComplex **val,
-    magma_index_t **row,
-    magma_index_t **col,
-    const char * filename,
-    magma_queue_t queue )
-{
-    std::fstream binary_test(filename);
-
-    if (binary_test) {
-        printf("# Start reading...");
-        fflush(stdout);
-    }
-    else {
-        printf("# Unable to open file %s.\n", filename);
-        fflush(stdout);
-        return MAGMA_ERR_NOT_FOUND;
-    }
-    binary_test.close();
-    
-    std::fstream binary_rfile(filename, std::ios::binary|std::ios::in);
-    
-    // read number of rows
-    binary_rfile.read(reinterpret_cast<char *>(n_row), sizeof(int));
-    
-    // read number of columns
-    binary_rfile.read(reinterpret_cast<char *>(n_col), sizeof(int));
-    
-    // read number of nonzeros
-    binary_rfile.read(reinterpret_cast<char *>(nnz), sizeof(int));
-    
-    *val = new magmaDoubleComplex[*nnz];
-    *col = new magma_index_t[*nnz];
-    *row = new magma_index_t[*n_row+1];
-    
-    // read row pointer
-    for(magma_int_t i=0; i <= *n_row; i++) {
-        binary_rfile.read(reinterpret_cast<char *>(&(*row)[i]), sizeof(int));
-    }
-    
-    // read col
-    for(magma_int_t i=0; i < *nnz; i++) {
-        binary_rfile.read(reinterpret_cast<char *>(&(*col)[i]), sizeof(int));
-    }
-    
-    // read val
-    for(magma_int_t i=0; i < *nnz; i++) {
-        binary_rfile.read(reinterpret_cast<char *>(&(*val)[i]), sizeof(double));
-    }
-
-    binary_rfile.close();
-    
-    printf("# Finished reading.");
-    fflush(stdout);
-
-    return MAGMA_SUCCESS;
-}
 
 
 /**
@@ -349,7 +241,7 @@ magma_int_t read_z_csr_from_mtx(
     // If matrix is not in standard format, sorting is necessary
     /*
     
-    std::cout << "Sorting the cols...." << std::endl;
+    cout << "Sorting the cols...." << endl;
     // bubble sort (by cols)
     for (int i=0; i < *nnz-1; ++i) {
         for (int j=0; j < *nnz-i-1; ++j) {
@@ -369,7 +261,7 @@ magma_int_t read_z_csr_from_mtx(
         }
     }
 
-    std::cout << "Sorting the rows...." << std::endl;
+    cout << "Sorting the rows...." << endl;
     // bubble sort (by rows)
     for (int i=0; i < *nnz-1; ++i) {
         for (int j=0; j < *nnz-i-1; ++j) {
@@ -388,7 +280,7 @@ magma_int_t read_z_csr_from_mtx(
             }
         }
     }
-    std::cout << "Sorting: done" << std::endl;
+    cout << "Sorting: done" << endl;
     
     */
     
@@ -551,15 +443,15 @@ magma_zwrite_csr_mtx(
         printf("# Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
-        std::ofstream file(filename);
-        
+        FILE *fp;
+        fp = fopen (filename, "w+");   
             
         #define COMPLEX
         
         #ifdef COMPLEX
         // complex case
-        file << "%%MatrixMarket matrix coordinate complex general ColMajor" << std::endl;
-        file << new_n_col << " " << new_n_row << " " << new_nnz << std::endl;
+        fprintf( fp, "%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
@@ -568,17 +460,19 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                file << ((new_col)[rowtemp1+j]+1) << " " << rowindex << " "
-                     << MAGMA_Z_REAL((new_val)[rowtemp1+j]) << " "
-                     << MAGMA_Z_IMAG((new_val)[rowtemp1+j]) << std::endl;
+                fprintf( fp, "%d %d %.6e %.6e\n", 
+                    ((new_col)[rowtemp1+j]+1), rowindex, 
+                    MAGMA_Z_REAL((new_val)[rowtemp1+j]), 
+                    MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
+
             }
             rowindex++;
         }
         
         #else
         // real case
-        file << "%%MatrixMarket matrix coordinate real general ColMajor" << std::endl;
-        file << new_n_col << " " << new_n_row << " " << new_nnz << std::endl;
+        fprintf( fp, "%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
@@ -587,14 +481,14 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                file << ((new_col)[rowtemp1+j]+1) << " " << rowindex << " "
-                     << MAGMA_Z_REAL((new_val)[rowtemp1+j]) << std::endl;
+                fprintf( fp, "%d %d %.6e\n", 
+                    ((new_col)[rowtemp1+j]+1), rowindex, 
+                    MAGMA_Z_REAL((new_val)[rowtemp1+j]) );
             }
             rowindex++;
         }
         #endif
-        
-        // TODO leaks memory from z_transpose_csr?
+       
         
         printf(" done\n");
     }
@@ -602,21 +496,52 @@ magma_zwrite_csr_mtx(
         printf("# Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
-        std::ofstream file(filename);
-        file << "%%MatrixMarket matrix coordinate real general RowMajor" << std::endl;
-        file << n_row << " " << n_col << " " << nnz << std::endl;
+        FILE *fp;
+        fp = fopen (filename, "w+");   
+            
+        #define COMPLEX
         
+        #ifdef COMPLEX
+        // complex case
+        fprintf( fp, "%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
         
         for(i=0; i < n_col; i++) {
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                file << rowindex << " " << ((*col)[rowtemp1+j]+1) << " "
-                     << MAGMA_Z_REAL((*val)[rowtemp1+j]) << std::endl;
+                fprintf( fp, "%d %d %.6e %.6e\n", 
+                    rowindex, ((*col)[rowtemp1+j]+1),  
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]), 
+                    MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
+
             }
             rowindex++;
         }
+        
+        #else
+        // real case
+        fprintf( fp, "%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
+        magma_index_t i=0, j=0, rowindex=1;
+        
+        for(i=0; i < n_col; i++) {
+            magma_index_t rowtemp1 = (*row)[i];
+            magma_index_t rowtemp2 = (*row)[i+1];
+            for(j=0; j < rowtemp2 - rowtemp1; j++) {
+                fprintf( fp, "%d %d %.6e\n", 
+                    rowindex, ((*col)[rowtemp1+j]+1), 
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]) );
+            }
+            rowindex++;
+        }
+        #endif
+        
         printf(" done\n");
     }
     return MAGMA_SUCCESS;
@@ -680,48 +605,111 @@ magma_zprint_csr_mtx(
     magma_queue_t queue )
 {
     if ( MajorType == MagmaColMajor ) {
-        // to obtain ColMajr output we transpose the matrix
-        // and flip in the output the row and col pointer
+        // to obtain ColMajor output we transpose the matrix
+        // and flip the row and col pointer in the output
         magmaDoubleComplex *new_val;
         magma_index_t *new_row;
         magma_index_t *new_col;
         magma_int_t new_n_row;
         magma_int_t new_n_col;
         magma_int_t new_nnz;
-
+        
         z_transpose_csr( n_row, n_col, nnz, *val, *row, *col,
             &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
-
-        cout << "%%MatrixMarket matrix coordinate real general ColMajor" << std::endl;
-        cout << new_n_row << " " << new_n_col << " " << new_nnz << std::endl;
-     
+       
+ 
+            
+        #define COMPLEX
+        
+        #ifdef COMPLEX
+        // complex case
+        printf( "%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
-
+        
         for(i=0; i < n_col; i++) {
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                cout << ((new_col)[rowtemp1+j]+1) << " " << rowindex << " "
-                     << MAGMA_Z_REAL((new_val)[rowtemp1+j]) << std::endl;
+                printf( "%d %d %.6e %.6e\n", 
+                    ((new_col)[rowtemp1+j]+1), rowindex, 
+                    MAGMA_Z_REAL((new_val)[rowtemp1+j]), 
+                    MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
+
             }
             rowindex++;
         }
+        
+        #else
+        // real case
+        printf( "%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
+        magma_index_t i=0, j=0, rowindex=1;
+        
+        for(i=0; i < n_col; i++) {
+            magma_index_t rowtemp1 = (new_row)[i];
+            magma_index_t rowtemp2 = (new_row)[i+1];
+            for(j=0; j < rowtemp2 - rowtemp1; j++) {
+                printf( "%d %d %.6e\n", 
+                    ((new_col)[rowtemp1+j]+1), rowindex, 
+                    MAGMA_Z_REAL((new_val)[rowtemp1+j]) );
+            }
+            rowindex++;
+        }
+        #endif
+       
+        
     }
     else {
-        cout << "%%MatrixMarket matrix coordinate real general RowMajor" << std::endl;
-        cout << n_row << " " << n_col << " " << nnz << std::endl;
-     
-        magma_index_t i=0, j=0, rowindex=1;
 
+            
+        #define COMPLEX
+        
+        #ifdef COMPLEX
+        // complex case
+        printf( "%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        printf( "%d %d %d\n",n_col, n_row, nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
+        magma_index_t i=0, j=0, rowindex=1;
+        
         for(i=0; i < n_col; i++) {
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                cout << rowindex << " " << (*col)[rowtemp1+j]+1 << " "
-                     << MAGMA_Z_REAL((*val)[rowtemp1+j]) << endl;
+                printf( "%d %d %.6e %.6e\n", 
+                    rowindex, ((*col)[rowtemp1+j]+1),  
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]), 
+                    MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
+
             }
             rowindex++;
         }
+        
+        #else
+        // real case
+        printf( "%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        printf( "%d %d %d\n",n_col, n_row, nnz);
+        
+        // TODO what's the difference between i (or i+1) and rowindex?
+        magma_index_t i=0, j=0, rowindex=1;
+        
+        for(i=0; i < n_col; i++) {
+            magma_index_t rowtemp1 = (*row)[i];
+            magma_index_t rowtemp2 = (*row)[i+1];
+            for(j=0; j < rowtemp2 - rowtemp1; j++) {
+                printf( "%d %d %.6e\n", 
+                    rowindex, ((*col)[rowtemp1+j]+1), 
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]) );
+            }
+            rowindex++;
+        }
+        #endif
+        
     }
     return MAGMA_SUCCESS;
 }
@@ -778,8 +766,8 @@ magma_zprint_csr(
     magma_index_t **col,
     magma_queue_t queue )
 {
-    cout << "Matrix in CSR format (row col val)" << endl;
-    cout << n_row << " " << n_col << " " << nnz << endl;
+    printf( "Matrix in CSR format (row col val)\n" );
+    printf( " %d %d %d\n", n_row, n_col, nnz );
      
     magma_index_t i=0, j=0;
 
@@ -787,8 +775,8 @@ magma_zprint_csr(
         magma_index_t rowtemp1 = (*row)[i];
         magma_index_t rowtemp2 = (*row)[i+1];
         for(j=0; j < rowtemp2 - rowtemp1; j++) {
-            cout << (rowtemp1+1) << " " << (*col)[rowtemp1+j]+1 << " "
-                 << MAGMA_Z_REAL((*val)[rowtemp1+j]) << endl;
+                printf(" %d %d %.2f\n", (rowtemp1+1), (*col)[rowtemp1+j]+1, 
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]) );
         }
     }
     return MAGMA_SUCCESS;
@@ -1155,7 +1143,7 @@ magma_z_csr_mtx(
     // If matrix is not in standard format, sorting is necessary
     /*
     
-        std::cout << "Sorting the cols...." << std::endl;
+        cout << "Sorting the cols...." << endl;
     // bubble sort (by cols)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1175,7 +1163,7 @@ magma_z_csr_mtx(
         }
     }
 
-    std::cout << "Sorting the rows...." << std::endl;
+    cout << "Sorting the rows...." << endl;
     // bubble sort (by rows)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1194,7 +1182,7 @@ magma_z_csr_mtx(
             }
         }
     }
-    std::cout << "Sorting: done" << std::endl;
+    cout << "Sorting: done" << endl;
     
     */
     
@@ -1427,7 +1415,7 @@ magma_z_csr_mtxsymm(
     
     // If matrix is not in standard format, sorting is necessary
     /*
-    std::cout << "Sorting the cols...." << std::endl;
+    cout << "Sorting the cols...." << endl;
     // bubble sort (by cols)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1447,7 +1435,7 @@ magma_z_csr_mtxsymm(
         }
     }
 
-    std::cout << "Sorting the rows...." << std::endl;
+    cout << "Sorting the rows...." << endl;
     // bubble sort (by rows)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1466,7 +1454,7 @@ magma_z_csr_mtxsymm(
             }
         }
     }
-    std::cout << "Sorting: done" << std::endl;
+    cout << "Sorting: done" << endl;
     
     */
     

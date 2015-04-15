@@ -9,11 +9,12 @@
        @author Hartwig Anzt
 
 */
-#include "magma_lapack.h"
-#include "common_magma.h"
-#include "../include/magmasparse.h"
 
-#include <assert.h>
+// includes, project
+#include "common_magma.h"
+#include "magmasparse_z.h"
+#include "magma.h"
+#include "mmio.h"
 
 // includes CUDA
 #include <cuda_runtime_api.h>
