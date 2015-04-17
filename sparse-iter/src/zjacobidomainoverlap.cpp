@@ -111,6 +111,12 @@ magma_zjacobidomainoverlap(
     magma_z_matrix hA;
     magma_zmtransfer( A, &hA, Magma_DEV, Magma_CPU, queue );
     magma_zdomainoverlap( hA.num_rows, &num_ind, hA.row, hA.col, hindices, queue );
+    /*num_ind = A.num_rows*5;
+    for(magma_int_t i=0; i<num_ind; i++){
+        hindices[i] = i%A.num_rows;
+    }
+*/
+    
     magma_zmfree(&hA, queue );
     stat_dev += magma_index_malloc( &indices, num_ind );
         if( stat_dev != 0 ){
@@ -126,7 +132,7 @@ magma_zjacobidomainoverlap(
 
     // Jacobi iterator    
     magma_zjacobispmvupdateselect(jacobiiter_par.maxiter, num_ind, indices, 
-                                                        A, r, b, d, x, queue );
+                                                        A, r, b, d, r, x, queue );
     
     //magma_zjacobispmvupdate(jacobiiter_par.maxiter, A, r, b, d, x, queue );
 

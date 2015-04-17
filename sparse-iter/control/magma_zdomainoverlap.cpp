@@ -99,6 +99,10 @@ magma_zdomainoverlap(
         magma_free_cpu( tmp_x );
         return MAGMA_ERR_HOST_ALLOC;
     } 
+    for(magma_int_t i=0; i<blocksize; i++ ){
+        tmp_x[i] = -1;
+    }
+    
     for(magma_int_t i=0; i<num_rows; i++){
         row = i;
         for(magma_int_t j=rowptr[row]; j<rowptr[row+1]; j++){

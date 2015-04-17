@@ -1322,6 +1322,7 @@ magma_zjacobispmvupdateselect(
     magma_z_matrix t, 
     magma_z_matrix b, 
     magma_z_matrix d, 
+    magma_z_matrix tmp, 
     magma_z_matrix *x,
     magma_queue_t queue );
 

@@ -12,13 +12,11 @@
 #include "common_magma.h"
 #include "magmasparse.h"
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 128
-#else
-   #define BLOCK_SIZE 512
-#endif
+
+#define BLOCK_SIZE 128
 
 
+#define PRECISION_z
 
 __global__ void 
 zvjacobisetup_gpu(  int num_rows, 
@@ -393,16 +391,18 @@ zjacobispmvupdateselect_kernel(
     magmaDoubleComplex *t, 
     magmaDoubleComplex *b, 
     magmaDoubleComplex *d, 
-    magmaDoubleComplex *x ){
+    magmaDoubleComplex *x,
+    magmaDoubleComplex *y ){
 
 
 
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
 
-    if(idx<num_updates){
-        int row = idx;//indices[ idx ];
-        if( row < num_rows ){
+    if(  idx<num_updates){
+        int row = indices[ idx ];
+        printf(" ");    
+        //if( row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_ZERO;
         int start = drowptr[ row ];
         int end = drowptr[ row+1 ];
@@ -410,8 +410,14 @@ zjacobispmvupdateselect_kernel(
             for( j=start; j<end; j++){
                 dot += dval[ j ] * x[ dcolind[j]+i*num_rows ];
             }
-            x[row+i*num_rows] += (b[row+i*num_rows]-dot) * d[row];
-        }
+            x[row+i*num_rows] = x[row+i*num_rows] + (b[row+i*num_rows]-dot) * d[row];
+            
+            //magmaDoubleComplex add = (b[row+i*num_rows]-dot) * d[row];
+            //#if defined(PRECISION_s) //|| defined(PRECISION_d)
+            //    atomicAdd( x + row + i*num_rows, add );  
+            //#endif
+            // ( unsigned int* address, unsigned int val);
+        //}
         }
     }
 }
@@ -460,6 +466,10 @@ zjacobispmvupdateselect_kernel(
     @param[in]
     d           magma_z_matrix
                 vector with diagonal entries
+   
+    @param[in]
+    tmp         magma_z_matrix
+                workspace
 
     @param[out]
     x           magma_z_matrix*
@@ -480,12 +490,15 @@ magma_zjacobispmvupdateselect(
     magma_z_matrix t, 
     magma_z_matrix b, 
     magma_z_matrix d, 
+    magma_z_matrix tmp, 
     magma_z_matrix *x,
     magma_queue_t queue )
 {
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    
+    magma_z_matrix swp;
 
     dim3 grid( magma_ceildiv( num_updates, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
@@ -493,10 +506,14 @@ magma_zjacobispmvupdateselect(
 
     for( magma_int_t i=0; i<maxiter; i++ ) {
         zjacobispmvupdateselect_kernel<<< grid, threads, 0 >>>
-            ( t.num_rows, t.num_cols, num_updates, indices, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval );
-
+            ( t.num_rows, t.num_cols, num_updates, indices, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval, tmp.dval );
+        cudaDeviceSynchronize();
+        //swp.dval = x->dval;
+        //x->dval = tmp.dval;
+        //tmp.dval = swp.dval;
+        
     }
-
+    
     return MAGMA_SUCCESS;
 }
 
