@@ -42,7 +42,7 @@ magma_zindexcopy(
     Purpose
     -------
 
-    Sorts an array of integers.
+    Generates the update list.
 
     Arguments
     ---------
