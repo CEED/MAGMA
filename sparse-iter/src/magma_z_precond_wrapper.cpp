@@ -120,7 +120,7 @@ magma_z_precondsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-
+    
     // make sure RHS is a dense matrix
     if ( b.storage_type != Magma_DENSE ) {
         magma_z_matrix bdense;
@@ -131,28 +131,22 @@ magma_z_precondsetup(
     }
 
     if ( precond->solver == Magma_JACOBI ) {
-        magma_zjacobisetup_diagscal( A, &(precond->d), queue );
-        return MAGMA_SUCCESS;
+        return magma_zjacobisetup_diagscal( A, &(precond->d), queue );
     }
     else if ( precond->solver == Magma_PASTIX ) {
-        magma_zpastixsetup( A, b, precond, queue );
-        return MAGMA_SUCCESS;
+        return magma_zpastixsetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_ILU ) {
-        magma_zcumilusetup( A, precond, queue );
-        return MAGMA_SUCCESS;
+        return magma_zcumilusetup( A, precond, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
-        magma_zcumiccsetup( A, precond, queue );
-        return MAGMA_SUCCESS;
+        return magma_zcumiccsetup( A, precond, queue );
     }
     else if ( precond->solver == Magma_AICC ) {
-        magma_zitericsetup( A, b, precond, queue );
-        return MAGMA_SUCCESS;
+        return magma_zitericsetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_AILU ) {
-        magma_ziterilusetup( A, b, precond, queue );
-        return MAGMA_SUCCESS;
+        return magma_ziterilusetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
         return MAGMA_SUCCESS;

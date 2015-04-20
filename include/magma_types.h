@@ -306,6 +306,7 @@ typedef double real_Double_t;
 #define MAGMA_SLOW_CONVERGENCE     -201
 #define MAGMA_DIVERGENCE           -202
 #define MAGMA_NONSPD               -203
+#define MAGMA_ERR_BADPRECOND       -204
 
 // When adding error codes, please add to interface_cuda/error.cpp
 

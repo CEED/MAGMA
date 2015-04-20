@@ -215,13 +215,22 @@ magma_zcumilusetup(
     cusparseDestroyMatDescr( descrU );
 
 
-    // extract the diagonal of L into precond->d 
-    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
-    magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
-    
-    // extract the diagonal of U into precond->d2  
-    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
-    magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+    if( precond->maxiter < 50 ){
+        //prepare for iterative solves
+        
+        magma_int_t stat=0;
+        // extract the diagonal of L into precond->d 
+        stat+=magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+        magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+        
+        // extract the diagonal of U into precond->d2  
+        stat+=magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+        magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+        if( stat!=0 ){
+            printf("error: bad preconditioner.\n");
+            return MAGMA_ERR_BADPRECOND;
+        }
+    }
 
     magma_zmfree(&hA, queue );
     magma_zmfree(&hL, queue );
@@ -229,9 +238,10 @@ magma_zcumilusetup(
 
     cusparseDestroy( cusparseHandle );
 
-
-
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -356,8 +366,28 @@ magma_zcumilugeneratesolverinfo(
     cusparseDestroyMatDescr( descrU );
 
     cusparseDestroy( cusparseHandle );
+    
+    if( precond->maxiter < 50 ){
+        //prepare for iterative solves
+        
+        magma_int_t stat=0;
+        // extract the diagonal of L into precond->d 
+        stat+=magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+        magma_zvinit( &precond->work1, Magma_DEV, precond->U.num_rows, 1, MAGMA_Z_ZERO, queue );
+        
+        // extract the diagonal of U into precond->d2  
+        stat+=magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+        magma_zvinit( &precond->work2, Magma_DEV, precond->U.num_rows, 1, MAGMA_Z_ZERO, queue );
+        if( stat!=0 ){
+            printf("error: bad preconditioner.\n");
+            return MAGMA_ERR_BADPRECOND;
+        }
+    }
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -457,7 +487,10 @@ magma_zapplycumilu_l(
     
     magma_device_sync();
     
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -550,7 +583,10 @@ magma_zapplycumilu_r(
     
     magma_device_sync();
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -727,18 +763,27 @@ magma_zcumiccsetup(
     cusparseDestroy( cusparseHandle );
 
 
-
-    // copy the matrix to precond->L and (transposed) to precond->U
-    magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue );
-    magma_zmtranspose( precond->L, &(precond->U), queue );
-
-    // extract the diagonal of L into precond->d 
-    magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
-    magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
-
-    // extract the diagonal of U into precond->d2
-    magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
-    magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+    
+    if( precond->maxiter < 50 ){
+        //prepare for iterative solves
+        
+        // copy the matrix to precond->L and (transposed) to precond->U
+        magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue );
+        magma_zmtranspose( precond->L, &(precond->U), queue );
+        
+        magma_int_t stat=0;
+        // extract the diagonal of L into precond->d 
+        stat+=magma_zjacobisetup_diagscal( precond->L, &precond->d, queue );
+        magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+        
+        // extract the diagonal of U into precond->d2  
+        stat+=magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue );
+        magma_zvinit( &precond->work2, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue );
+        if( stat!=0 ){
+            printf("error: bad preconditioner.\n");
+            return MAGMA_ERR_BADPRECOND;
+        }
+    }
 
     magma_zmfree(&U, queue );
     magma_zmfree(&hA, queue );
@@ -771,7 +816,10 @@ magma_zcumiccsetup(
     magma_zmfree(&hAt, queue );
 */
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -901,7 +949,10 @@ magma_zcumicgeneratesolverinfo(
     magma_zmfree(&hAt, queue );
 */
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -999,7 +1050,10 @@ magma_zapplycumicc_l(
     
     magma_device_sync();
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 
@@ -1095,7 +1149,10 @@ magma_zapplycumicc_r(
     
     magma_device_sync();
 
-    return MAGMA_SUCCESS;
+    if (cusparseStatus != 0)
+        return MAGMA_ERR_BADPRECOND;
+    else
+        return MAGMA_SUCCESS;
 }
 
 

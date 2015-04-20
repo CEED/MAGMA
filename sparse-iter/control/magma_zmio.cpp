@@ -988,7 +988,6 @@ magma_z_csr_mtx(
 
     FILE *fid;
     MM_typecode matcode;
-    printf("reading here %s\n", filename);
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
@@ -997,10 +996,9 @@ magma_z_csr_mtx(
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
-        printf("#Could not process lMatrix Market banner here %s.\n", matcode);
+        printf("#Could not process lMatrix Market banner: %s.\n", matcode);
         return MAGMA_ERR_NOT_FOUND;
     }
-            printf("Matrix Market banner is %s.\n", matcode);
     
     if (!mm_is_valid(matcode)) {
         printf("#Invalid lMatrix Market file.\n");

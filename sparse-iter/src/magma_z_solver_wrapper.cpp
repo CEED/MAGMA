@@ -63,7 +63,11 @@ magma_z_solver(
     if( b.num_cols == 1 ){
     // preconditioner
         if ( zopts->solver_par.solver != Magma_ITERREF ) {
-            magma_z_precondsetup( A, b, &zopts->precond_par, queue );
+            int stat = magma_z_precondsetup( A, b, &zopts->precond_par, queue );
+            if (  stat != MAGMA_SUCCESS ){ 
+                printf("error: bad preconditioner.\n");
+                return MAGMA_ERR_BADPRECOND;
+            }
         }
         switch( zopts->solver_par.solver ) {
             case  Magma_CG:
@@ -98,7 +102,11 @@ magma_z_solver(
     else{
   // preconditioner
         if ( zopts->solver_par.solver != Magma_ITERREF ) {
-            magma_z_precondsetup( A, b, &zopts->precond_par, queue );
+            int stat = magma_z_precondsetup( A, b, &zopts->precond_par, queue );
+            if (  stat != MAGMA_SUCCESS ){ 
+                printf("error: bad preconditioner.\n");
+                return MAGMA_ERR_BADPRECOND;
+            }
         }
         switch( zopts->solver_par.solver ) {
             case  Magma_CG:
