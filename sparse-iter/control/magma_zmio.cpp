@@ -444,13 +444,14 @@ magma_zwrite_csr_mtx(
         fflush(stdout);
         
         FILE *fp;
-        fp = fopen (filename, "w+");   
+        if ( (fp = fopen (filename, "w+")) != 0 )
+            printf("error writing matrix: file exists or missing write permit\n");   
             
         #define COMPLEX
         
         #ifdef COMPLEX
         // complex case
-        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
         fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -460,7 +461,7 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.6e %.6e\n", 
+                fprintf( fp, "%d %d %.16g %.16g\n", 
                     ((new_col)[rowtemp1+j]+1), rowindex, 
                     MAGMA_Z_REAL((new_val)[rowtemp1+j]), 
                     MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
@@ -471,7 +472,7 @@ magma_zwrite_csr_mtx(
         
         #else
         // real case
-        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general\n" );
         fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -481,7 +482,7 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.6e\n", 
+                fprintf( fp, "%d %d %.16g\n", 
                     ((new_col)[rowtemp1+j]+1), rowindex, 
                     MAGMA_Z_REAL((new_val)[rowtemp1+j]) );
             }
@@ -489,21 +490,25 @@ magma_zwrite_csr_mtx(
         }
         #endif
        
-        
-        printf(" done\n");
+        if(fclose (fp)!=0)
+            printf("error: writing matrix failed\n");  
+        else
+            printf(" done\n");
     }
     else {
         printf("# Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
         FILE *fp;
-        fp = fopen (filename, "w+");   
+        if ( (fp = fopen (filename, "w+")) != 0 )
+            printf("error writing matrix: file exists or missing write permit\n");    
+             
             
         #define COMPLEX
         
         #ifdef COMPLEX
         // complex case
-        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
         fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -513,7 +518,7 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.6e %.6e\n", 
+                fprintf( fp, "%d %d %.16g %.16g\n", 
                     rowindex, ((*col)[rowtemp1+j]+1),  
                     MAGMA_Z_REAL((*val)[rowtemp1+j]), 
                     MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
@@ -524,7 +529,7 @@ magma_zwrite_csr_mtx(
         
         #else
         // real case
-        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        fprintf( fp, "%%%%MatrixMarket matrix coordinate real general\n" );
         fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -534,15 +539,17 @@ magma_zwrite_csr_mtx(
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.6e\n", 
+                fprintf( fp, "%d %d %.16g\n", 
                     rowindex, ((*col)[rowtemp1+j]+1), 
                     MAGMA_Z_REAL((*val)[rowtemp1+j]) );
             }
             rowindex++;
         }
         #endif
-        
-        printf(" done\n");
+        if(fclose (fp)!=0)
+            printf("error: writing matrix failed\n");  
+        else
+            printf(" done\n");
     }
     return MAGMA_SUCCESS;
 }
@@ -623,7 +630,7 @@ magma_zprint_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        printf( "%%%%MatrixMarket matrix coordinate complex general ColMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate complex general\n" );
         printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -644,7 +651,7 @@ magma_zprint_csr_mtx(
         
         #else
         // real case
-        printf( "%%%%MatrixMarket matrix coordinate real general ColMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate real general\n" );
         printf( "%d %d %d\n",new_n_col, new_n_row, new_nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -671,7 +678,7 @@ magma_zprint_csr_mtx(
         
         #ifdef COMPLEX
         // complex case
-        printf( "%%%%MatrixMarket matrix coordinate complex general RowMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate complex general\n" );
         printf( "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -692,7 +699,7 @@ magma_zprint_csr_mtx(
         
         #else
         // real case
-        printf( "%%%%MatrixMarket matrix coordinate real general RowMajor\n" );
+        printf( "%%%%MatrixMarket matrix coordinate real general\n" );
         printf( "%d %d %d\n",n_col, n_row, nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
@@ -981,7 +988,7 @@ magma_z_csr_mtx(
 
     FILE *fid;
     MM_typecode matcode;
-    
+    printf("reading here %s\n", filename);
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
@@ -990,9 +997,10 @@ magma_z_csr_mtx(
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
-        printf("#Could not process lMatrix Market banner.\n");
+        printf("#Could not process lMatrix Market banner here %s.\n", matcode);
         return MAGMA_ERR_NOT_FOUND;
     }
+            printf("Matrix Market banner is %s.\n", matcode);
     
     if (!mm_is_valid(matcode)) {
         printf("#Invalid lMatrix Market file.\n");
