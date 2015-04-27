@@ -190,7 +190,7 @@ double get_residual_aasen(
         return 0;
     }
     lapackf77_zgesv(&n,&nrhs, &T(0,0),&n, p,x,&n, &info);
-    free(p);
+    magma_free(p);
     // backward solve
     blasf77_ztrsv( MagmaLowerStr, MagmaConjTransStr, MagmaUnitStr, &n, &L(0,0),&n, x,&ione);
     // pivot..
@@ -453,25 +453,33 @@ double get_LTLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
 
     int nb = magma_get_zhetrf_aasen_nb(N);
     // for debuging
-    /*int *p = (int*)malloc(N * sizeof(int));
-    for (int i=0; i<N; i++) p[i] = i;
-    for (int i=0; i<N; i++)
-    {
+    /*
+    magma_int_t *p;
+    magma_imalloc_cpu(&p, N);
+    for (int i=0; i<N; i++) {
+        p[i] = i;
+    }
+    for (int i=0; i<N; i++) {
         int piv = ipiv[i]-1;
         int i2 = p[piv];
         p[piv] = p[i];
         p[i] = i2;
     }
     printf( " p=[" );
-    for (int i=0; i<N; i++) printf("%d ",p[i] );
+    for (int i=0; i<N; i++) {
+        printf("%d ", p[i] );
+    }
     printf( "];\n" );
-    free(p);*/
+    magma_free(p);*/
     // extract T
-    for (int i=0; i<N; i++)
-    {
+    for (int i=0; i < N; i++) {
         int istart = max(0, i-nb);
-        for (int j=istart; j<=i; j++) T(i,j) = LT(i,j);
-        for (int j=istart; j<i;  j++) T(j,i) = MAGMA_Z_CNJG(LT(i,j));
+        for (int j=istart; j <= i; j++) {
+            T(i,j) = LT(i,j);
+        }
+        for (int j=istart; j < i;  j++) {
+            T(j,i) = MAGMA_Z_CNJG( LT(i,j) );
+        }
     }
     //printf( "T=" );
     //magma_zprint(N,N, &T(0,0),N);
