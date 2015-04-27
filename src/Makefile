@@ -340,5 +340,4 @@ clean:
 	rm -f *.o *~ *.linkinfo stamp
 
 cleanall: clean
-	
 	rm -f $(LIBMAGMA)
