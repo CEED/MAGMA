@@ -239,7 +239,7 @@ magma_zpastixsetup(
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 extern "C" magma_int_t
