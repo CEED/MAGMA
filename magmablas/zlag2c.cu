@@ -82,8 +82,8 @@ void zlag2c_kernel(
 /**
     Purpose
     -------
-    ZLAG2C_STREAM converts a double-complex matrix, A,
-                        to a single-complex matrix, SA.
+    ZLAG2C_Q converts a double-complex matrix, A,
+                   to a single-complex matrix, SA.
     
     RMAX is the overflow for the single-complex arithmetic.
     ZLAG2C checks that all the entries of A are between -RMAX and
