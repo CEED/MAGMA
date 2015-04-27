@@ -12,17 +12,31 @@
 
 #include "magma_operators.h"
 
-// ----------------------------------------
-magmaDoubleComplex magma_zsqrt( magmaDoubleComplex a )
+/**
+    @return Complex square root of x.
+    
+    @param[in]
+    x       COMPLEX_16
+    
+    @ingroup magma_zaux0
+    ********************************************************************/
+magmaDoubleComplex magma_zsqrt( magmaDoubleComplex x )
 {
-    std::complex<double> b = std::sqrt( std::complex<double>( real(a), imag(a) ));
-    return MAGMA_Z_MAKE( real(b), imag(b) );
+    std::complex<double> y = std::sqrt( std::complex<double>( real(x), imag(x) ));
+    return MAGMA_Z_MAKE( real(y), imag(y) );
 }
 
 
-// ----------------------------------------
-magmaFloatComplex magma_csqrt( magmaFloatComplex a )
+/**
+    @return Complex square root of x.
+    
+    @param[in]
+    x       COMPLEX
+    
+    @ingroup magma_caux0
+    ********************************************************************/
+magmaFloatComplex magma_csqrt( magmaFloatComplex x )
 {
-    std::complex<float> b = std::sqrt( std::complex<float>( real(a), imag(a) ));
-    return MAGMA_C_MAKE( real(b), imag(b) );
+    std::complex<float> y = std::sqrt( std::complex<float>( real(x), imag(x) ));
+    return MAGMA_C_MAKE( real(y), imag(y) );
 }

@@ -47,12 +47,18 @@ struct magma_device* g_magma_devices = NULL;
 // ========================================
 // initialization
 // --------------------
-// Caches information about available CUDA devices.
-// When renumbering devices after calling magma_init,
-// call magma_finalize, then cudaSetValidDevices, then magma_init again.
-// Ideally magma_init is paired with magma_finalize, but this implementation
-// ensures there isn't a memory leak if magma_init is called multiple times
-// without calling magma_finalize.
+/**
+    Caches information about available CUDA devices.
+    When renumbering devices after calling magma_init,
+    call magma_finalize, then cudaSetValidDevices, then magma_init again.
+    Ideally magma_init is paired with magma_finalize, but this implementation
+    ensures there isn't a memory leak if magma_init is called multiple times
+    without calling magma_finalize.
+    
+    @see magma_finalize
+    
+    @ingroup magma_init
+*/
 extern "C"
 magma_int_t magma_init()
 {
@@ -73,7 +79,10 @@ magma_int_t magma_init()
 }
 
 // --------------------
-// Frees information about CUDA devices.
+/**
+    Frees information about CUDA devices.
+    @ingroup magma_init
+*/
 extern "C"
 magma_int_t magma_finalize()
 {
@@ -83,7 +92,10 @@ magma_int_t magma_finalize()
 }
 
 // --------------------
-// Print the available GPU devices. Used in testing.
+/**
+    Print the available GPU devices. Used in testing.
+    @ingroup magma_init
+*/
 extern "C"
 void magma_print_environment()
 {
