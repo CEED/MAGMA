@@ -112,6 +112,8 @@ magma_zvget_dev(
     magmaDoubleComplex_ptr *val,
     magma_queue_t queue )
 {
+    magma_int_t stat_dev =0;
+    
     if ( v.memory_location == Magma_DEV ) {
 
         *m = v.num_rows;
@@ -119,9 +121,12 @@ magma_zvget_dev(
         *val = v.dval;
     } else {
         magma_z_matrix v_DEV;
-        magma_zmtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
+        stat_dev += magma_zmtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
         magma_zvget_dev( v_DEV, m, n, val, queue );
         magma_zmfree( &v_DEV, queue );
+        if( stat_dev != 0 ){
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
     }
     return MAGMA_SUCCESS;
 }

@@ -53,12 +53,19 @@ magma_zvtranspose(
     magma_z_matrix *y,
     magma_queue_t queue )
 {
+    magma_int_t stat_dev = 0;
+    
     // set queue for old dense routines
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
 
     if ( x.memory_location == Magma_DEV ) {
-        magma_zvinit( y, Magma_DEV, x.num_rows,x.num_cols, MAGMA_Z_ZERO, queue );
+        stat_dev += magma_zvinit( y, Magma_DEV, x.num_rows,x.num_cols, MAGMA_Z_ZERO, queue );
+        if( stat_dev !=0 ){
+            magma_zmfree( &y, queue );  
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
+            
         y->num_rows = x.num_rows;
         y->num_cols = x.num_cols;
         y->storage_type = x.storage_type;
@@ -74,12 +81,14 @@ magma_zvtranspose(
         }
     } else {
         magma_z_matrix x_d, y_d;
-        magma_zmtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue );
-        magma_zvtranspose( x_d, &y_d, queue );  
-        magma_zmtransfer( y_d, y, Magma_DEV, Magma_CPU, queue );
+        stat_dev += magma_zmtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue );
+        stat_dev += magma_zvtranspose( x_d, &y_d, queue );  
+        stat_dev += magma_zmtransfer( y_d, y, Magma_DEV, Magma_CPU, queue );
         magma_zmfree( &x_d, queue );
         magma_zmfree( &y_d, queue );
-
+        if( stat_dev !=0 ){
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
     }
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;

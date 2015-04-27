@@ -112,6 +112,8 @@ magma_zvget(
     magmaDoubleComplex **val,
     magma_queue_t queue )
 {
+    magma_int_t stat_dev =0;
+    
     if ( v.memory_location == Magma_CPU ) {
 
         *m = v.num_rows;
@@ -122,6 +124,9 @@ magma_zvget(
         magma_zmtransfer( v, &v_CPU, v.memory_location, Magma_CPU, queue ); 
         magma_zvget( v_CPU, m, n, val, queue );
         magma_zmfree( &v_CPU, queue );
+        if( stat_dev != 0 ){
+            return MAGMA_ERR_DEVICE_ALLOC;
+        }
     }
     return MAGMA_SUCCESS;
 }

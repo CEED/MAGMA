@@ -545,13 +545,13 @@ magma_zsolverinfo_init(
         solver_par->solver = Magma_CG;
 
     if ( solver_par->verbose > 0 ) {
-        stat = 
+        stat += 
         magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
                 * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
         if( stat != 0 ){
             return MAGMA_ERR_HOST_ALLOC;
         }
-        stat = 
+        stat += 
         magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
                 *( (solver_par->maxiter)/(solver_par->verbose)+1) );
         if( stat != 0 ){
@@ -627,13 +627,14 @@ magma_zeigensolverinfo_init(
     solver_par->eigenvectors = NULL;
     solver_par->eigenvalues = NULL;
     if ( solver_par->solver == Magma_LOBPCG ) {
+        stat += 
         magma_dmalloc_cpu( &solver_par->eigenvalues , 
                                 3*solver_par->num_eigenvalues );
         // setup initial guess EV using lapack
         // then copy to GPU
         magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
         magmaDoubleComplex *initial_guess;
-        stat = 
+        stat += 
         magma_zmalloc_cpu( &initial_guess, ev );
         if( stat != 0 ){
             return MAGMA_ERR_HOST_ALLOC;

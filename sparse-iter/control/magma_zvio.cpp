@@ -55,6 +55,7 @@ magma_zprint_vector(
     magma_int_t  visulen,
     magma_queue_t queue )
 {
+    magma_int_t stat_dev=0;
 
     //**************************************************************
     #define COMPLEX
@@ -94,11 +95,14 @@ magma_zprint_vector(
     else if ( x.memory_location == Magma_DEV ) {
         printf("located on DEV:\n");
         magma_z_matrix y;
-        magma_zmtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
+        stat_dev += magma_zmtransfer( x, &y, Magma_DEV, Magma_CPU, queue );
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             magma_zprintval(y.val[i]);
-    magma_free_cpu(y.val);
-    return MAGMA_SUCCESS;
+        magma_free_cpu(y.val);
+        if( stat_dev !=0 ){
+            return stat_dev;
+        }
+        return MAGMA_SUCCESS;
     }
     return MAGMA_SUCCESS;
 }   
@@ -141,12 +145,18 @@ magma_zvread(
     char * filename,
     magma_queue_t queue )
 {
+    magma_int_t stat = 0;
+    
     x->memory_location = Magma_CPU;
     x->storage_type = Magma_DENSE;
     x->num_rows = length;
     x->num_cols = 1;
     x->major = MagmaColMajor;
-    magma_zmalloc_cpu( &x->val, length );
+    stat += magma_zmalloc_cpu( &x->val, length );
+    if( stat !=0 ){
+        magma_free_cpu( x->val ) ;
+        return stat;
+    }
     magma_int_t nnz=0, i=0;
     FILE *fid;
     
