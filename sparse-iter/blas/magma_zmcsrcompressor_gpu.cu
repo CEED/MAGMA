@@ -13,13 +13,8 @@
 #include "common_magma.h"
 #include "magmasparse.h"
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE1 256
-   #define BLOCK_SIZE2 1
-#else
-   #define BLOCK_SIZE1 256
-   #define BLOCK_SIZE2 1
-#endif
+#define BLOCK_SIZE1 256
+#define BLOCK_SIZE2 1
 
 
 // copy nonzeros into new structure

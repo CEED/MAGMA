@@ -11,12 +11,8 @@
 */
 #include "common_magma.h"
 
+#define BLOCK_SIZE 512
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 128
-#else
-   #define BLOCK_SIZE 512
-#endif
 
 template< int n >
 __device__ void sum_reduce( /*int n,*/ int i, double* x )

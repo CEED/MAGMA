@@ -15,11 +15,7 @@
 #include "magma.h"
 
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 128
-#else
-   #define BLOCK_SIZE 512
-#endif
+#define BLOCK_SIZE 512
 
 #define PRECISION_z
 

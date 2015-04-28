@@ -10,11 +10,7 @@
 */
 #include "common_magma.h"
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 256
-#else
-   #define BLOCK_SIZE 256
-#endif
+#define BLOCK_SIZE 256
 
 
 // CSR-SpMV kernel

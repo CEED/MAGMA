@@ -11,12 +11,7 @@
 
 #include "common_magma.h"
 
-#if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 128
-#else
-   #define BLOCK_SIZE 512
-#endif
-
+#define BLOCK_SIZE 512
 
 #define  blockinfo(i,j)  blockinfo[(i)*c_blocks   + (j)]
 #define  val(i,j) val+((blockinfo(i,j)-1)*size_b*size_b)
