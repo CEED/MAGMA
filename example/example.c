@@ -22,7 +22,7 @@ void cpu_interface( magma_int_t n, magma_int_t nrhs )
     magma_int_t ldx  = lda;
     magma_int_t info = 0;
     
-    // magma malloc_cpu routines are type-safe and align to memory boundaries,
+    // magma_*malloc_cpu routines for CPU memory are type-safe and align to memory boundaries,
     // but you can use malloc or new if you prefer.
     magma_zmalloc_cpu( &A, lda*n );
     magma_zmalloc_cpu( &X, ldx*nrhs );
@@ -60,7 +60,7 @@ void gpu_interface( magma_int_t n, magma_int_t nrhs )
     magma_int_t lddx = ldda;
     magma_int_t info = 0;
     
-    // magma malloc (GPU) routines are type-safe,
+    // magma_*malloc routines for GPU memory are type-safe,
     // but you can use cudaMalloc if you prefer.
     magma_zmalloc( &dA, ldda*n );
     magma_zmalloc( &dX, lddx*nrhs );
