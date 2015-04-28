@@ -66,7 +66,10 @@ magma_int_t magma_init()
         cudaError_t err;
         err = cudaGetDeviceCount( &g_magma_devices_cnt );
         check_error( err );
-        g_magma_devices = (struct magma_device*) malloc( g_magma_devices_cnt * sizeof(struct magma_device) );
+        magma_malloc_cpu( (void**) &g_magma_devices, g_magma_devices_cnt * sizeof(struct magma_device) );
+        if ( g_magma_devices == NULL ) {
+            return MAGMA_ERR_HOST_ALLOC;
+        }
         for( int i = 0; i < g_magma_devices_cnt; ++i ) {
             cudaDeviceProp prop;
             err = cudaGetDeviceProperties( &prop, i );
@@ -86,7 +89,7 @@ magma_int_t magma_init()
 extern "C"
 magma_int_t magma_finalize()
 {
-    free( g_magma_devices );
+    magma_free_cpu( g_magma_devices );
     g_magma_devices = NULL;
     return MAGMA_SUCCESS;
 }
