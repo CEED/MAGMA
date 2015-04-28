@@ -111,7 +111,7 @@ struct qm_trace {
 };
 
 #define TRACEBUF        struct qm_trace trace;
-#define TRASHIT(x)      do {(x) = (void *)-1;} while (0)
+#define TRASHIT(x)      do { (x) = (void *)-1; } while (0)
 
 #define QMD_TRACE_HEAD(head) do {                                       \
         (head)->trace.prevline = (head)->trace.lastline;                \
@@ -215,8 +215,8 @@ struct {                                                                \
  */
 #define STAILQ_HEAD(name, type)                                         \
 struct name {                                                           \
-        struct type *stqh_first;/* first element */                     \
-        struct type **stqh_last;/* addr of last next element */         \
+        struct type *stqh_first; /* first element */                    \
+        struct type **stqh_last; /* addr of last next element */        \
 }
 
 #define STAILQ_HEAD_INITIALIZER(head)                                   \

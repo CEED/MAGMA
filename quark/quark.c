@@ -1118,7 +1118,7 @@ void QUARK_Task_Pack_Arg( Quark *quark, Task *task, int arg_size, void *arg_ptr,
             }
         } else if ( (arg_flags & TASK_LABEL) != 0 ) {
             if ( quark->dot_dag_enable ) {
-                task->task_label = arg_dup(arg_ptr, arg_size) ;
+                task->task_label = arg_dup(arg_ptr, arg_size);
             }
         }
         break;
@@ -1233,7 +1233,7 @@ unsigned long long QUARK_Insert_Task_Packed(Quark * quark, Task *task )
         num_tasks = quark_work_main_loop(quark->worker[0]);
         quark_process_completed_tasks(quark);
     }
-    return taskid ;
+    return taskid;
 }
 
 /* **************************************************************************** */
@@ -1947,7 +1947,7 @@ static void quark_work_set_affinity_and_call_main_loop(Worker *worker)
 {
     Quark *quark = worker->quark_ptr;
     int thread_rank = QUARK_Thread_Rank(quark);
-    quark_setaffinity( quark->coresbind[thread_rank] ) ;
+    quark_setaffinity( quark->coresbind[thread_rank] );
     quark_work_main_loop( quark->worker[thread_rank] );
     return;
 }

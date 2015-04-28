@@ -85,7 +85,7 @@ icl_hash_create( int nbuckets, unsigned int (*hash_function)(void*), int (*hash_
     if(!ht->buckets) return NULL;
 
     ht->nbuckets = nbuckets;
-    for(i=0;i<ht->nbuckets;i++)
+    for(i=0; i < ht->nbuckets; i++)
         ht->buckets[i] = NULL;
 
     ht->hash_function = hash_function ? hash_function : hash_pjw;

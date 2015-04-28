@@ -47,7 +47,7 @@ int icl_hash_delete( icl_hash_t *ht, void* key, void (*free_key)(void*), void (*
 
 
 #define icl_hash_foreach(ht, tmpint, tmpent, kp, dp)    \
-    for (tmpint=0;tmpint<ht->nbuckets; tmpint++)        \
+    for (tmpint=0; tmpint < ht->nbuckets; tmpint++)     \
         for (tmpent=ht->buckets[tmpint];                                \
              tmpent!=NULL&&((kp=tmpent->key)!=NULL)&&((dp=tmpent->data)!=NULL); \
              tmpent=tmpent->next)
