@@ -107,7 +107,9 @@ int main(  int argc, char** argv )
         // calling MKL with CSR
         pntre = (magma_int_t*)malloc( (m+1)*sizeof(magma_int_t) );
         pntre[0] = 0;
-        for (j=0; j<m; j++ ) pntre[j] = hA.row[j+1];
+        for (j=0; j < m; j++ ) {
+            pntre[j] = hA.row[j+1];
+        }
 
         #ifdef MAGMA_WITH_MKL
             MKL_INT num_rows = hA.num_rows;
