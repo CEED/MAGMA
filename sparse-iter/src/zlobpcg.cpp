@@ -127,7 +127,7 @@ magma_zlobpcg(
                                             1 + 6*3*n + 2* 3*n* 3*n);
 
     stat += magma_zmalloc_pinned( &hwork   ,        lwork );
-        if( stat != 0){
+    if ( stat != 0 ) {
         magma_free_pinned( hwork );
         return MAGMA_ERR_HOST_ALLOC;
     }
@@ -139,7 +139,7 @@ magma_zlobpcg(
     stat += magma_zmalloc(        &blockW    ,        m*n );
     stat += magma_zmalloc(        &dwork     ,        m*n );            
     stat += magma_dmalloc(        &eval_gpu  ,        3*n );
-    if( stat != 0){
+    if ( stat != 0 ) {
         magma_free_pinned( hwork );
         magma_free( blockAX  );
         magma_free( blockAR  );
