@@ -142,7 +142,6 @@ ZSRC += \
 # batched files, alphabetic order by base name (ignoring precision)
 ZSRC += \
 	zgeadd_batched.cu		\
-	zgemv_batched.cu		\
 	zgemm_batched.cu		\
 	zgemm_fermi_batched.cu		\
 	zgemm_fermi_batched_k32.cu	\
