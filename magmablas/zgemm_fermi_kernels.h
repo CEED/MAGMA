@@ -185,3 +185,6 @@
 #define version trans_cn
 #include "gemm_stencil.cuh"
 #include "gemm_kernel.cuh"
+
+#undef COMPLEX
+#undef DOUBLE

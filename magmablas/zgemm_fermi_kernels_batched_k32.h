@@ -190,9 +190,5 @@
 #include "gemm_kernel_batched.cuh"
 #include "herk_kernel_batched.cuh"
 
-
-
-
-
-
-
+#undef COMPLEX
+#undef DOUBLE
