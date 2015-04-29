@@ -77,7 +77,7 @@ __global__ void zlaswp_sym_kernel( zlaswp_sym_params_t params )
 // Launch zlaswpx kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
 extern "C" void zlaswp_sym( zlaswp_sym_params_t &params, magma_queue_t queue )
 {
-    int blocks = (params.n + NTHREADS - 1) / NTHREADS;
+    int blocks = magma_ceildiv(params.n,  NTHREADS);
     zlaswp_sym_kernel<<< blocks, NTHREADS, 0, queue >>>( params );
 }
 

@@ -326,7 +326,7 @@ magmablas_zgemv(
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
     if ( trans == MagmaNoTrans ) {
-        dim3 grid( (m - 1)/BLK_X + 1 );
+        dim3 grid( magma_ceildiv(m, BLK_X) );
         dim3 threads( BLK_X, 1, 1 );
         zgemvn_kernel_fermi<<< grid, threads, 0, magma_stream >>>
             ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
@@ -379,7 +379,7 @@ magmablas_zgemv_batched(
 
     // --------------------
     if ( trans == MagmaNoTrans ) {
-        dim3 grid( (m - 1)/BLK_X + 1, 1, batchCount );
+        dim3 grid( magma_ceildiv(m, BLK_X), 1, batchCount );
         dim3 threads( BLK_X, 1, 1 );
         zgemvn_kernel_batched<<< grid, threads, 0, queue >>>
             ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );

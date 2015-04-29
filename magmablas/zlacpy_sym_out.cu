@@ -246,7 +246,7 @@ magmablas_zlacpy_sym_out_q(
         return;
     
     dim3 threads( BLK_X, 1 );
-    dim3 grid( (m + BLK_X - 1)/BLK_X, (n + BLK_Y - 1)/BLK_Y );
+    dim3 grid( magma_ceildiv(m, BLK_X), magma_ceildiv(n, BLK_Y) );
     
     if ( uplo == MagmaLower ) {
         zlacpy_sym_out_lower_kernel<<< grid, threads, 0, queue >>> ( m, n, rows, perm, dA, ldda, dB, lddb );
