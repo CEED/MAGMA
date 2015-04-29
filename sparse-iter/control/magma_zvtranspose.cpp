@@ -62,7 +62,7 @@ magma_zvtranspose(
     if ( x.memory_location == Magma_DEV ) {
         stat_dev += magma_zvinit( y, Magma_DEV, x.num_rows,x.num_cols, MAGMA_Z_ZERO, queue );
         if( stat_dev !=0 ){
-            magma_zmfree( &y, queue );  
+            magma_zmfree( y, queue );  
             return MAGMA_ERR_DEVICE_ALLOC;
         }
             
