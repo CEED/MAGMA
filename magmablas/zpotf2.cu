@@ -11,11 +11,7 @@
 
 #define PRECISION_z
 
-//#if (GPUSHMEM < 200)
 #define zdotc_max_bs 512  // 512 is max threads for 1.x cards
-//#else
-//#define zdotc_max_bs 1024
-//#endif
 
 void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
