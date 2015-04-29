@@ -12,27 +12,6 @@
 #include "magma_templates.h"
 
 
-// ----------------------------------------
-// max reduction, for arbitrary size vector. Leaves max(x) in x[0].
-// Uses only one thread block of 512 threads, so is not efficient for really large vectors.
-template< typename T >
-__global__ void
-max_nan_kernel( int n, T* x )
-{
-    __shared__ T smax[ 512 ];
-    int tx = threadIdx.x;
-    
-    smax[tx] = 0;
-    for( int i=tx; i < n; i += 512 ) {
-        smax[tx] = max_nan( smax[tx], x[i] );
-    }
-    magma_max_nan_reduce< 512 >( tx, smax );
-    if ( tx == 0 ) {
-        x[0] = smax[0];
-    }
-}
-
-
 /* Computes row sums dwork[i] = sum( abs( A(i,:) )), i=0:m-1, for || A ||_inf,
  * where m and n are any size.
  * Has ceil( m/64 ) blocks of 64 threads. Each thread does one row.
@@ -284,19 +263,19 @@ magmablas_zlange(
     if ( norm == MagmaInfNorm ) {
         dim3 grid( magma_ceildiv( m, 64 ) );
         zlange_inf_kernel<<< grid, threads, 0, magma_stream >>>( m, n, dA, ldda, dwork );
-        max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
         cudaMemcpy( &result, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
     }
     else if ( norm == MagmaMaxNorm ) {
         dim3 grid( magma_ceildiv( m, 64 ) );
         zlange_max_kernel<<< grid, threads, 0, magma_stream >>>( m, n, dA, ldda, dwork );
-        max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, magma_stream >>>( m, dwork );
         cudaMemcpy( &result, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
     }
     else if ( norm == MagmaOneNorm ) {
         dim3 grid( n );
         zlange_one_kernel<<< grid, threads, 0, magma_stream >>>( m, n, dA, ldda, dwork );
-        max_nan_kernel<<< 1, 512, 0, magma_stream >>>( n, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, magma_stream >>>( n, dwork );
         cudaMemcpy( &result, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
     }
     

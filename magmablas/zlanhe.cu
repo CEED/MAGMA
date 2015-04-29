@@ -10,6 +10,7 @@
 
 */
 #include "common_magma.h"
+#include "magma_templates.h"
 
 #define inf_bs 32
 #define max_bs 64
@@ -25,7 +26,7 @@
  * Has ceil( n / inf_bs ) blocks of (inf_bs x 4) threads each (inf_bs=32).
  * z precision uses > 16 KB shared memory, so requires Fermi (arch >= 200). */
 __global__ void
-zlanhe_inf_kernel_generic_lower(
+zlanhe_inf_kernel_lower(
     int n, const magmaDoubleComplex* A, int lda, double *dwork,
     int n_full_block, int n_mod_bs )
 {
@@ -239,7 +240,7 @@ zlanhe_inf_kernel_generic_lower(
  * upper goes from top  down to diagonal, then over to right.
  * Differences are noted with # in comments. */
 __global__ void
-zlanhe_inf_kernel_generic_upper(
+zlanhe_inf_kernel_upper(
     int n, const magmaDoubleComplex* A, int lda, double *dwork,
     int n_full_block, int n_mod_bs )
 {
@@ -458,11 +459,11 @@ zlanhe_inf(
     int n_full_block = (n - n % inf_bs) /inf_bs;
     int n_mod_bs = n % inf_bs;
     if ( uplo == MagmaLower) {
-        zlanhe_inf_kernel_generic_lower<<< grid, threads, 0, magma_stream >>>
+        zlanhe_inf_kernel_lower<<< grid, threads, 0, magma_stream >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
     else {
-        zlanhe_inf_kernel_generic_upper<<< grid, threads, 0, magma_stream >>>
+        zlanhe_inf_kernel_upper<<< grid, threads, 0, magma_stream >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
 }
@@ -482,11 +483,11 @@ zlanhe_max_kernel_lower(
     if (ind < n) {
         A += ind;
         for(int j=0; j < ind; ++j) {
-            res = fmax( res, cuCabs( *A ));
+            res = max_nan( res, cuCabs( *A ));
             A += lda;
         }
         // diagonal element (ignoring imaginary part)
-        res = fmax( res, MAGMA_D_ABS( MAGMA_Z_REAL( *A )));
+        res = max_nan( res, MAGMA_D_ABS( MAGMA_Z_REAL( *A )));
         dwork[ind] = res;
     }
 }
@@ -504,11 +505,11 @@ zlanhe_max_kernel_upper(
         A += ind;
         A += (n-1)*lda;
         for(int j=n-1; j > ind; j--) {
-            res = fmax( res, cuCabs( *A ));
+            res = max_nan( res, cuCabs( *A ));
             A -= lda;
         }
         // diagonal element (ignoring imaginary part)
-        res = fmax( res, MAGMA_D_ABS( MAGMA_Z_REAL( *A )));
+        res = max_nan( res, MAGMA_D_ABS( MAGMA_Z_REAL( *A )));
         dwork[ind] = res;
     }
 }
@@ -557,7 +558,7 @@ zlanhe_max(
     normF denotes the Frobenius norm of a matrix (square root of sum of squares).
     Note that max(abs(A(i,j))) is not a consistent matrix norm.
     
-    Returns ZLANHE < 0: if ZLANHE = -i, the i-th argument had an illegal value.
+    On error, returns ZLANHE < 0: if ZLANHE = -i, the i-th argument had an illegal value.
     
     Arguments:
     ----------
@@ -645,8 +646,8 @@ magmablas_zlanhe(
     else {
         zlanhe_max( uplo, n, dA, ldda, dwork );
     }
-    int i = magma_idamax( n, dwork, 1 ) - 1;
-    cudaMemcpy( &res, &dwork[i], sizeof(double), cudaMemcpyDeviceToHost );
+    magma_max_nan_kernel<<< 1, 512, 0, magma_stream >>>( n, dwork );
+    cudaMemcpy( &res, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
     
     return res;
 }
