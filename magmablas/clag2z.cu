@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
 #define BLK_X 64
 #define BLK_Y 32
 
@@ -83,7 +81,7 @@ void clag2z_kernel(
             The leading dimension of the array SA.  LDSA >= max(1,M).
 
     @param[out]
-    A       DOUBLE PRECISION array, dimension (LDA,N)
+    A       COMPLEX_16 array, dimension (LDA,N)
             On exit, the M-by-N coefficient matrix A.
 
     @param[in]

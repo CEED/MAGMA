@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
 #define BLK_X 64
 #define BLK_Y 32
 
