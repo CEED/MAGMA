@@ -28,29 +28,29 @@ EZT_DIR ?= /usr
 CFLAGS += -DTRACE_QUARK -I${EZT_DIR}/include
 # LDFLAGS += -L${EZT_DIR}/lib -leztrace -lfxt
 QUARK_TRACE_SO_LIB=$(TRACE_SHARED_LIB_DESTINATION_DIRECTORY)/libeztrace-convert-quark.so
-QUARK_TRACE_OBJS=eztrace_convert_quark.o 
-$(QUARK_TRACE_SO_LIB): eztrace_convert_quark.o
+QUARK_TRACE_OBJS=eztrace_convert_quark.$(o_ext) 
+$(QUARK_TRACE_SO_LIB): eztrace_convert_quark.$(o_ext)
 	$(CC) -shared $(CFLAGS) $(INC) $^ -o $@
-eztrace_convert_quark.o: eztrace_convert_quark.c quark_trace.h
+eztrace_convert_quark.$(o_ext): eztrace_convert_quark.c quark_trace.h
 	$(CC) -fPIC $(CFLAGS) $(INC) -c $< -o $@
 endif
 
 trace_shared_libs: $(QUARK_TRACE_SO_LIB)
 
-icl_hash.o: icl_hash.c icl_hash.h
-icl_list.o: icl_list.c icl_list.h
-quark.o: quark.c quark.h bsd_queue.h bsd_tree.h quark_trace.h
-quarkos.o: quarkos.c quarkos-hwloc.c
+icl_hash.$(o_ext): icl_hash.c icl_hash.h
+icl_list.$(o_ext): icl_list.c icl_list.h
+quark.$(o_ext): quark.c quark.h bsd_queue.h bsd_tree.h quark_trace.h
+quarkos.$(o_ext): quarkos.c quarkos-hwloc.c
 
-libquark.a: icl_hash.o icl_list.o quarkos.o quark.o $(QUARK_TRACE_OBJS)
+libquark.a: icl_hash.$(o_ext) icl_list.$(o_ext) quarkos.$(o_ext) quark.$(o_ext) $(QUARK_TRACE_OBJS)
 	$(ARCH) $(ARCHFLAGS) $@ $^
 	$(RANLIB) $@
 
-.c.o:
+.c.$(o_ext):
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 clean:
-	rm -f *.o *~
+	rm -f *.$(o_ext) *~
 
 cleanall: clean
 	rm -f *.a

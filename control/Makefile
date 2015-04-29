@@ -67,13 +67,13 @@ SRC += \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
-ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(filter %.o, $(ALLOBJ))
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
+ALLOBJ := $(filter %.$(o_ext), $(ALLOBJ))
 
-FOBJ   := $(ALLSRC:.f90=.o)
-FOBJ   := $(FOBJ:.F90=.o)
-FOBJ   := $(FOBJ:.f=.o)
-FOBJ   := $(filter %.o, $(FOBJ))
+FOBJ   := $(ALLSRC:.f90=.$(o_ext))
+FOBJ   := $(FOBJ:.F90=.$(o_ext))
+FOBJ   := $(FOBJ:.f=.$(o_ext))
+FOBJ   := $(filter %.$(o_ext), $(FOBJ))
 
 ifneq ($(FORT),no_fortran)
     ALLOBJ += $(FOBJ)
@@ -94,7 +94,7 @@ stamp: $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr stamp
+	rm -f *.$(o_ext) *~ *.linkinfo *.mod ../include/*.mod sizeptr stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
@@ -107,8 +107,8 @@ wrappers: ../include/magma_s.i ../include/magma_d.i ../include/magma_c.i ../incl
 	rm $^
 
 # Extra dependencies for .mod files
-magma.o: magma_zfortran.o magma_cfortran.o magma_dfortran.o magma_sfortran.o 
-magma_zfortran.o: magma_param.o
-magma_cfortran.o: magma_param.o
-magma_dfortran.o: magma_param.o
-magma_sfortran.o: magma_param.o
+magma.$(o_ext): magma_zfortran.$(o_ext) magma_cfortran.$(o_ext) magma_dfortran.$(o_ext) magma_sfortran.$(o_ext) 
+magma_zfortran.$(o_ext): magma_param.$(o_ext)
+magma_cfortran.$(o_ext): magma_param.$(o_ext)
+magma_dfortran.$(o_ext): magma_param.$(o_ext)
+magma_sfortran.$(o_ext): magma_param.$(o_ext)

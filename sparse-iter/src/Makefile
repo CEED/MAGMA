@@ -95,7 +95,7 @@ ZSRC += \
 ALLSRC_F = \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext)) $(ALLSRC_F:.f=.$(o_ext))
 
 all: $(LIBMAGMA_SPARSE)
 
@@ -108,7 +108,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo
+	rm -f *.$(o_ext) *~ *.linkinfo
 
 cleanall: clean
 	rm -f *.a

@@ -320,8 +320,8 @@ ZSRC += \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f=.o)
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
+ALLOBJ := $(ALLOBJ:.f=.$(o_ext))
 
 .PHONY: all clean cleanall
 
@@ -337,7 +337,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo stamp
+	rm -f *.$(o_ext) *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)

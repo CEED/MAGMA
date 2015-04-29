@@ -17,28 +17,28 @@ ZHDR := \
 	zgerbt.h		\
 
 # additional dependencies
-strtri_diag.o: strtri.h
-dtrtri_diag.o: dtrtri.h
-ctrtri_diag.o: ctrtri.h
-ztrtri_diag.o: ztrtri.h
+strtri_diag.$(o_ext): strtri.h
+dtrtri_diag.$(o_ext): dtrtri.h
+ctrtri_diag.$(o_ext): ctrtri.h
+ztrtri_diag.$(o_ext): ztrtri.h
 
 # additional dependencies
-sgerbt.o: sgerbt.h
-dgerbt.o: dgerbt.h
-cgerbt.o: cgerbt.h
-zgerbt.o: zgerbt.h
+sgerbt.$(o_ext): sgerbt.h
+dgerbt.$(o_ext): dgerbt.h
+cgerbt.$(o_ext): cgerbt.h
+zgerbt.$(o_ext): zgerbt.h
 
 # additional batched dependencies
-strtri_diag_batched.o: strtri.h
-dtrtri_diag_batched.o: dtrtri.h
-ctrtri_diag_batched.o: ctrtri.h
-ztrtri_diag_batched.o: ztrtri.h
+strtri_diag_batched.$(o_ext): strtri.h
+dtrtri_diag_batched.$(o_ext): dtrtri.h
+ctrtri_diag_batched.$(o_ext): ctrtri.h
+ztrtri_diag_batched.$(o_ext): ztrtri.h
 
 # additional batched dependencies
-sgerbt_batched.o: sgerbt.h
-dgerbt_batched.o: dgerbt.h
-cgerbt_batched.o: cgerbt.h
-zgerbt_batched.o: zgerbt.h
+sgerbt_batched.$(o_ext): sgerbt.h
+dgerbt_batched.$(o_ext): dgerbt.h
+cgerbt_batched.$(o_ext): cgerbt.h
+zgerbt_batched.$(o_ext): zgerbt.h
 
 
 # alphabetic order by base name (ignoring precision)
@@ -171,8 +171,8 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
-ALLOBJ := $(ALLSRC:.cu=.o) 
-ALLOBJ := $(ALLOBJ:.cpp=.o)
+ALLOBJ := $(ALLSRC:.cu=.$(o_ext)) 
+ALLOBJ := $(ALLOBJ:.cpp=.$(o_ext))
 
 .PHONY: all clean cleanall
 
@@ -188,33 +188,33 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo stamp
+	rm -f *.$(o_ext) *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
 
 # extra include dependencies
-zgemm_fermi.o: zgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
-cgemm_fermi.o: cgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
-dgemm_fermi.o: dgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
-sgemm_fermi.o: sgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+zgemm_fermi.$(o_ext): zgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+cgemm_fermi.$(o_ext): cgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+dgemm_fermi.$(o_ext): dgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
+sgemm_fermi.$(o_ext): sgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
 
-zgemm_fermi_batched.o: zgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-cgemm_fermi_batched.o: cgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-dgemm_fermi_batched.o: dgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-sgemm_fermi_batched.o: sgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+zgemm_fermi_batched.$(o_ext): zgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+cgemm_fermi_batched.$(o_ext): cgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+dgemm_fermi_batched.$(o_ext): dgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+sgemm_fermi_batched.$(o_ext): sgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
 
-zgemm_fermi_batched_k32.o: zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-cgemm_fermi_batched_k32.o: cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-dgemm_fermi_batched_k32.o: dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-sgemm_fermi_batched_k32.o: sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+zgemm_fermi_batched_k32.$(o_ext): zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+cgemm_fermi_batched_k32.$(o_ext): cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+dgemm_fermi_batched_k32.$(o_ext): dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
+sgemm_fermi_batched_k32.$(o_ext): sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
 
-zherk_fermi_batched.o: zgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-cherk_fermi_batched.o: cgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-dsyrk_fermi_batched.o: dgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-ssyrk_fermi_batched.o: sgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+zherk_fermi_batched.$(o_ext): zgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+cherk_fermi_batched.$(o_ext): cgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+dsyrk_fermi_batched.$(o_ext): dgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+ssyrk_fermi_batched.$(o_ext): sgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
 
-zherk_fermi_batched_k32.o: zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-cherk_fermi_batched_k32.o: cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-dsyrk_fermi_batched_k32.o: dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-ssyrk_fermi_batched_k32.o: sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+zherk_fermi_batched_k32.$(o_ext): zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+cherk_fermi_batched_k32.$(o_ext): cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+dsyrk_fermi_batched_k32.$(o_ext): dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
+ssyrk_fermi_batched_k32.$(o_ext): sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h

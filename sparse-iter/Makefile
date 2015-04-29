@@ -95,7 +95,7 @@ ifneq ($(INSTALL_NAME),)
     LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SPARSE_SO))
 endif
 
-$(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.o
+$(LIBMAGMA_SPARSE_SO): src/*.$(o_ext) control/*.$(o_ext) blas/*.$(o_ext)
 	@echo ======================================== libmagma_sparse.so
 	$(CC) $(LDFLAGS) -shared -o $(LIBMAGMA_SPARSE_SO) $^ \
 	-L$(MAGMA_DIR)/lib -lmagma \

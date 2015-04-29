@@ -159,9 +159,9 @@ ifneq ($(INSTALL_NAME),)
     LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SO))
 endif
 
-$(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.o
+$(LIBMAGMA_SO): src/*.$(o_ext) control/*.$(o_ext) interface_cuda/*.$(o_ext) magmablas/*.$(o_ext)
 	@echo ======================================== $(LIBMAGMA_SO)
-	$(CC) $(LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
+	$(CXX) $(LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)
 	@echo

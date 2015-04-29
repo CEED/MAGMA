@@ -58,7 +58,7 @@ SRC += \
 	slapy3.f	\
 	slamch.f	\
 
-OBJ := $(addsuffix .o, $(basename $(SRC)))
+OBJ := $(addsuffix .$(o_ext), $(basename $(SRC)))
 
 .PHONY: all clean cleanall
 
@@ -71,6 +71,6 @@ $(BLAS_FIX): $(OBJ)
 	$(RANLIB) $@
 
 clean:
-	-rm -f *.o *.a *~ *.linkinfo stamp
+	-rm -f *.$(o_ext) *.a *~ *.linkinfo stamp
 
 cleanall: clean

@@ -49,9 +49,9 @@ SRC := \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
-ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f90=.o)
-ALLOBJ := $(ALLOBJ:.F90=.o)
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
+ALLOBJ := $(ALLOBJ:.f90=.$(o_ext))
+ALLOBJ := $(ALLOBJ:.F90=.$(o_ext))
 
 .PHONY: all clean cleanall
 
@@ -66,7 +66,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr
+	rm -f *.$(o_ext) *~ *.linkinfo *.mod ../include/*.mod sizeptr
 
 cleanall: clean
 	rm -f $(LIBMAGMA_SPARSE)

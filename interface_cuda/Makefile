@@ -28,7 +28,7 @@ SRC := \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
-ALLOBJ := $(ALLSRC:.cpp=.o)
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
 
 .PHONY: all clean cleanall
 
@@ -44,7 +44,7 @@ stamp: $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo stamp
+	rm -f *.$(o_ext) *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)

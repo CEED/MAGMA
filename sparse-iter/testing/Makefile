@@ -70,8 +70,8 @@ ZSRC += \
 INC += -I$(MAGMA_DIR)/testing
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJ := $(ALLSRC:.cpp=.o)
-EXE    := $(ALLOBJ:.o=)
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
+EXE    := $(ALLOBJ:.$(o_ext)=)
 
 LIBTEST := $(MAGMA_DIR)/testing/libtest.a
 
@@ -115,20 +115,20 @@ $(EXE): $(LIBMAGMA) $(LIBMAGMA_SPARSE) $(LIBTEST)
 clean: cleanobj cleanexe
 
 cleanobj:
-	rm -f *.o *~
+	rm -f *.$(o_ext) *~
 
 cleanexe:
 	rm -f $(EXE)
 
 cleanall: clean cleanexe
 
-testing_% : testing_%.o
+testing_% : testing_%.$(o_ext)
 	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
-run_% : run_%.o
+run_% : run_%.$(o_ext)
 	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \

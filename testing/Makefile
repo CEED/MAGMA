@@ -201,10 +201,10 @@ ZSRC += \
 
 # ----------
 ifeq ($(FORT), pgfortran)
-	FOBJ  = fortran_thunking.o
+	FOBJ  = fortran_thunking.$(o_ext)
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
-	FOBJ  = fortran.o
+	FOBJ  = fortran.$(o_ext)
 	ZSRCF = testing_zgetrf_gpu_f.F90	\
 		testing_zgetrf_f.f90
 endif
@@ -218,26 +218,26 @@ ZSRC += $(ZSRCF)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(filter %.o, $(ALLOBJ))
+ALLOBJ := $(ALLSRC:.cpp=.$(o_ext))
+ALLOBJ := $(filter %.$(o_ext), $(ALLOBJ))
 
-FOBJS  := $(ALLSRC:.f90=.o)
-FOBJS  := $(FOBJS:.F90=.o)
-FOBJS  := $(FOBJS:.cuf=.o)
-FOBJS  := $(filter %.o, $(FOBJS))
+FOBJS  := $(ALLSRC:.f90=.$(o_ext))
+FOBJS  := $(FOBJS:.F90=.$(o_ext))
+FOBJS  := $(FOBJS:.cuf=.$(o_ext))
+FOBJS  := $(filter %.$(o_ext), $(FOBJS))
 
 ifneq ($(FORT),no_fortran)
     ALLOBJ += $(FOBJS)
 endif
 
 TESTS  := $(filter testing_%,$(ALLOBJ))
-EXE    := $(TESTS:.o=)
+EXE    := $(TESTS:.$(o_ext)=)
 
 # --------------------
 LIBTEST := libtest.a
-LIBSRC  := magma_zutil.o magma_cutil.o magma_dutil.o magma_sutil.o magma_util.o
-LIBOBJ  := $(LIBSRC:.cpp=.o)
-LIBEXE  := $(LIBOBJ:.o=)
+LIBSRC  := magma_zutil.$(o_ext) magma_cutil.$(o_ext) magma_dutil.$(o_ext) magma_sutil.$(o_ext) magma_util.$(o_ext)
+LIBOBJ  := $(LIBSRC:.cpp=.$(o_ext))
+LIBEXE  := $(LIBOBJ:.$(o_ext)=)
 
 
 # --------------------
@@ -271,7 +271,7 @@ clean: cleanobj cleanexe
 cleanobj:
 	cd lin    && $(MAKE) clean
 	cd matgen && $(MAKE) clean
-	rm -f *.o *~ $(LIBTEST)
+	rm -f *.$(o_ext) *~ $(LIBTEST)
 
 cleanexe:
 	rm -f $(EXE)
@@ -279,21 +279,21 @@ cleanexe:
 cleanall: clean cleanexe
 
 ifeq ($(FORT), pgfortran)
-testing_%.o : testing_%.cuf
+testing_%.$(o_ext) : testing_%.cuf
 	$(FORT) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 else
-testing_%.o : testing_%.f90
+testing_%.$(o_ext) : testing_%.f90
 	$(FORT) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 endif
 
-testing_%_f : testing_%_f.o $(FOBJ)
+testing_%_f : testing_%_f.$(o_ext) $(FOBJ)
 	$(FORT) $(LDFLAGS) $(RPATH) $< $(FOBJ) -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
 
-testing_% : testing_%.o
-	$(CC) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
+testing_% : testing_%.$(o_ext)
+	$(CXX) $(LDFLAGS) $(RPATH) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB)
@@ -302,11 +302,11 @@ testing_% : testing_%.o
 # These two files are provided by cuda
 # CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
 #
-fortran.o : CFLAGS += -DCUBLAS_GFORTRAN
-fortran.o : $(CUDADIR)/src/fortran.c
+fortran.$(o_ext) : CFLAGS += -DCUBLAS_GFORTRAN
+fortran.$(o_ext) : $(CUDADIR)/src/fortran.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
+fortran_thunking.$(o_ext) : $(CUDADIR)/src/fortran_thunking.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # keep intermediate object files, to speed up re-compiling when library changes

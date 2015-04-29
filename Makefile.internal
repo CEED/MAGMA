@@ -33,6 +33,11 @@ NVCCFLAGS       ?= $(NVOPTS)
 LDFLAGS         ?= $(LDOPTS)
 
 #
+# Extension for object files; o for unix, obj for Windows?
+#
+o_ext           ?= o
+
+#
 # If not set, make CXXFLAGS same as CFLAGS
 #
 CXXFLAGS        ?= $(CFLAGS)
@@ -151,7 +156,7 @@ have_fpic = $(and $(findstring -fPIC, $(CFLAGS)),   \
 
 # Define the pointer size for fortran compilation
 PTRFILE = $(MAGMA_DIR)/control/sizeptr.c
-PTROBJ  = $(MAGMA_DIR)/control/sizeptr.o
+PTROBJ  = $(MAGMA_DIR)/control/sizeptr.$(o_ext)
 PTREXEC = $(MAGMA_DIR)/control/sizeptr
 PTRSIZE = $(shell $(PTREXEC))
 PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
@@ -179,22 +184,22 @@ F90FLAGS += $(PTROPT)
 %.i: %.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -E $< -o $@
 
-%.o: %.cpp
+%.$(o_ext): %.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
-%.o: %.c
+%.$(o_ext): %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-%.o: %.cu
+%.$(o_ext): %.cu
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -c $< -o $@
 
-%.o: %.f90  $(PTREXEC)
+%.$(o_ext): %.f90  $(PTREXEC)
 	$(FORT) $(F90FLAGS) $(CPPFLAGS) -c $< -o $@
 
-%.o: %.F90  $(PTREXEC)
+%.$(o_ext): %.F90  $(PTREXEC)
 	$(FORT) $(F90FLAGS) $(CPPFLAGS) -c $< -o $@
 
-%.o: %.f
+%.$(o_ext): %.f
 	$(FORT) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 
 -include $(MAGMA_DIR)/Makefile.gen

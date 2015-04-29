@@ -57,8 +57,8 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.cu=.o) 
-ALLOBJ := $(ALLOBJ:.cpp=.o)
+ALLOBJ := $(ALLSRC:.cu=.$(o_ext)) 
+ALLOBJ := $(ALLOBJ:.cpp=.$(o_ext))
 
 .PHONY: all clean cleanall
 
@@ -73,7 +73,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.o *~ *.linkinfo
+	rm -f *.$(o_ext) *~ *.linkinfo
 
 cleanall: clean
 	rm -f $(LIBMAGMA_SPARSE)
