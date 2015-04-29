@@ -127,7 +127,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
         *p = tolower(*p);
     }
     for (p=crd; *p != '\0'; p++) {
-        *p = tolower(*p)
+        *p = tolower(*p);
     }
     for (p=data_type; *p != '\0'; p++) {
         *p = tolower(*p);
