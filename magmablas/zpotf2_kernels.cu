@@ -245,7 +245,7 @@ static __device__ void zpotf2_device(int m, int n,
             sum[tx] = 0.0;
         }
         __syncthreads();
-        magma_sum_reduce<POTF2_TILE_SIZE>(tx, sum);//tried on K40: if m=32 n=32 the overall zpotf2_device routine time is 60ms n=16 time=25 n=8 time=20ms 
+        magma_sum_reduce<POTF2_TILE_SIZE>(tx, sum); //tried on K40: if m=32 n=32 the overall zpotf2_device routine time is 60ms n=16 time=25 n=8 time=20ms 
         //magma_sum_reduce_n(iter, tx, sum); //tried on K40: if m=32 n=32 the time went from 61ms to 70ms when switching to reduce_n. n=16 time=28.
         //magma_sum_reduce_inlined(iter, tx, sum); //tried on K40: similar to magma_sum_reduce<POTF2_TILE_SIZE>(tx, sum);
         

@@ -195,7 +195,7 @@ magma_zlaqps2_gpu(
             magma_zgemv( MagmaConjTrans, m-rk, k,
                          z__1,   dA(rk, 0), ldda,
                                  dA(rk, k), ione,
-                         c_zero, dauxv, ione );*/
+                         c_zero, dauxv, ione ); */
 
             magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, dA(rk, 0), ldda,
                                                                       dA(rk, k), dauxv, dtau+k);

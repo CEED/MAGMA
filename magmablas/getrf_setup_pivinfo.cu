@@ -29,7 +29,7 @@ static __device__ void setup_pivinfo_devfunc(magma_int_t *pivinfo, magma_int_t *
    int nchunk = magma_ceildiv( m, MAX_NTHREADS );
 
     // initialize pivinfo (could be done in a separate kernel using multiple thread block
-    for(int s =0 ; s < nchunk; s++)
+    for(int s =0; s < nchunk; s++)
     {
        if( (tid + s * MAX_NTHREADS < m) && (tid < MAX_NTHREADS) )   pivinfo[tid + s * MAX_NTHREADS] = tid + s * MAX_NTHREADS + 1;
     }
@@ -73,7 +73,7 @@ setup_pivinfo_batched( magma_int_t **pivinfo_array, magma_int_t **ipiv_array,
                          magma_int_t batchCount,
                          magma_queue_t queue)
 {
-    if(nb == 0 ) return ;
+    if(nb == 0 ) return;
     setup_pivinfo_kernel_batched<<<batchCount, min(m, MAX_NTHREADS), 0, queue>>>(pivinfo_array, ipiv_array, m, nb);
 }
 
@@ -89,7 +89,7 @@ setup_pivinfo( magma_int_t *pivinfo, magma_int_t *ipiv,
                  magma_int_t m, magma_int_t nb, 
                  magma_queue_t queue)
 {
-    if(nb == 0 ) return ;
+    if(nb == 0 ) return;
     setup_pivinfo_kernel<<<1, min(m, MAX_NTHREADS), 0, queue>>>(pivinfo, ipiv, m, nb);
 }
 //=================================================================================================
@@ -137,7 +137,7 @@ adjust_ipiv_batched( magma_int_t **ipiv_array,
                          magma_int_t m, magma_int_t offset, 
                          magma_int_t batchCount, magma_queue_t queue)
 {
-    if(offset == 0 ) return ;
+    if(offset == 0 ) return;
     if( m  > MAX_NTHREADS) 
     {
        printf(" adjust_ipiv_batched_q m=%d > %d, not supported \n", m, MAX_NTHREADS);
@@ -161,7 +161,7 @@ adjust_ipiv( magma_int_t *ipiv,
                  magma_int_t m, magma_int_t offset, 
                  magma_queue_t queue)
 {
-    if(offset == 0 ) return ;
+    if(offset == 0 ) return;
     if( m  > 1024) 
     {
        printf(" adjust_ipiv_q m=%d > %d, not supported \n", m, MAX_NTHREADS);

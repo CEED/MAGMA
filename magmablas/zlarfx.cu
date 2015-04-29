@@ -53,7 +53,7 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
         __syncthreads();
         magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
         if (blockIdx.x>it){
-           for( int j = m-tx-1; j>=0 ; j -= BLOCK_SIZE )
+           for( int j = m-tx-1; j >= 0; j -= BLOCK_SIZE )
                  dc[j] += z__1 * v[j];
            __syncthreads();
 

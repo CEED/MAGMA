@@ -69,7 +69,9 @@ void zlacpy_sym_out_lower_device(
 
     /* check if full block-column && (below diag) */
     bool full = (iby + BLK_Y <= n);
-    for (int jj=0; jj<n; jj++) perm[rows[2*jj+1]] = rows[2*jj+1];
+    for (int jj=0; jj < n; jj++) {
+        perm[rows[2*jj+1]] = rows[2*jj+1];
+    }
     /* do only rows inside matrix, and blocks not above diag */
     if ( ind < m ) {
         if ( full ) {

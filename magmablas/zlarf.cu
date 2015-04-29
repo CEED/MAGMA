@@ -47,7 +47,7 @@ void magma_zlarf_kernel( int m, const magmaDoubleComplex *dv, const magmaDoubleC
         /*  C := C - v * w  */
         __syncthreads();
         tmp = - MAGMA_Z_CNJG(*dtau) * sum[0];
-        for( int j = m-tx-1; j>0 ; j -= BLOCK_SIZE )
+        for( int j = m-tx-1; j > 0; j -= BLOCK_SIZE )
              dc[j] += tmp * dv[j];
 
         if(tx==0) dc[0] += tmp;
@@ -84,7 +84,7 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComp
             /*  C := C - v * w  */
             __syncthreads();
             magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*dtau) * sum[0][col];
-            for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZEx ) {
+            for( int j = m-i-1; j >= 0; j -= BLOCK_SIZEx ) {
                  if (j==0)
                     dc[j] += z__1;
                  else

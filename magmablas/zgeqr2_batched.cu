@@ -124,14 +124,14 @@ void zlarfx_device( int m, int n,  magmaDoubleComplex *v, magmaDoubleComplex *ta
 {
 
 
-    if(n <=0) return ;
+    if(n <=0) return;
     if (MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) )  return; // check singularity
 
     const int tx = threadIdx.x;
 
     magmaDoubleComplex lsum;
        
-    for(int k=0;k<n;k++)
+    for(int k=0; k < n; k++)
     {
         /* perform  w := v' * C  */
         if(tx<BLOCK_SIZE)
@@ -154,7 +154,7 @@ void zlarfx_device( int m, int n,  magmaDoubleComplex *v, magmaDoubleComplex *ta
         /*  C := C - v * w  */
         if(tx<BLOCK_SIZE)
         {    
-           for( int j = tx+1; j<m ; j += BLOCK_SIZE )
+           for( int j = tx+1; j<m; j += BLOCK_SIZE )
                  dc[j+ldc*k] += z__1 * v[j];
         }
         if(tx==0) dc[0+ldc*k] += z__1;
@@ -215,11 +215,11 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
     __shared__ double sscale;
     
     //load data from global to shared memory
-    for(int s=0;s<n;s++)
+    for(int s=0; s < n; s++)
     {
         for( int j = tx; j < m; j += BLOCK_SIZE )
         {
-            sdata[j + s * m] = dA[j + s * lda] ;
+            sdata[j + s * m] = dA[j + s * lda];
         }
     }
 
@@ -242,7 +242,7 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
     }// end of s
 
     //copy back to global memory
-    for(int s=0;s<n;s++)
+    for(int s=0; s < n; s++)
     {
         for( int j = tx; j < m; j += BLOCK_SIZE )
         {
@@ -283,7 +283,7 @@ void zgeqr2_column_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_arra
        //load one vector in shared memory: sdata
        for( int j = tx; j < m-s; j += BLOCK_SIZE )
        {
-           sdata[j] = dA[s + j + s * lda] ;
+           sdata[j] = dA[s + j + s * lda];
        }
 
        __syncthreads();

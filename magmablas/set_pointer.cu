@@ -36,7 +36,7 @@ __global__ void stepinit_ipiv_kernel(magma_int_t **ipiv_array, int pm)
         i = pm/32;
         i = i==1 ? 0 : i;
         s = tx%i;
-        ipiv[tx] =  ( (pm - (s*32) ) - tx/i)  ;
+        ipiv[tx] =  ( (pm - (s*32) ) - tx/i);
         //printf("voici s %d pm %d me %d  ipiv %d \n",s, pm, tx, ipiv[tx]);
     }
 #endif

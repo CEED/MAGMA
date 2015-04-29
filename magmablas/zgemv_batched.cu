@@ -45,7 +45,7 @@ kernel_zgemvn_batched(
     
     if(tx < m )
     {
-        for(int j=0; j < n ; j++)
+        for(int j=0; j < n; j++)
         {
             res += A[tx]*buff[j];
             A += lda;
@@ -72,7 +72,7 @@ void magmablas_zgemvn_batched(
     if( m > 512 || n > 512)
     {
         fprintf( stderr, "m=%d, n=%d, zgemv_batched nontranspose assume row && column lower than %d. Plz call magmablas_zgemv instead", m, n, 512);
-        return ;
+        return;
     }
 
     dim3 grid(batchCount, 1, 1);
@@ -129,7 +129,7 @@ kernel_zgemvt_batched(
     sdata[tx] = res;
     __syncthreads();
 
-    for(int s=blockDim.x/2; s>32;s>>=1)
+    for(int s=blockDim.x/2; s>32; s>>=1)
     {
         if(tx<s)
         {
@@ -148,7 +148,7 @@ kernel_zgemvt_batched(
 
     if(tx == 0)
     {
-        for(int i=1;i<32;i++)
+        for(int i=1; i<32; i++)
         {
             sdata[tx] += sdata[tx + i];
         }
@@ -230,7 +230,7 @@ kernel_zgemvc_batched(
     sdata[tx] = res;
     __syncthreads();
 
-    for(int s=blockDim.x/2; s>32;s>>=1)
+    for(int s=blockDim.x/2; s>32; s>>=1)
     {
         if(tx<s)
         {
@@ -249,7 +249,7 @@ kernel_zgemvc_batched(
 
     if(tx == 0)
     {
-        for(int i=1;i<32;i++)
+        for(int i=1; i<32; i++)
         {
             sdata[tx] += sdata[tx + i];
         }

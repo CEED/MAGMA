@@ -43,11 +43,11 @@ izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared
 
     if( tx < zamax ){
         shared_x[tx]   = 0.0;
-        shared_idx[tx] = tx;//-1;// -1 will crash the code in case matrix is singular, better is to put =tx and make check info at output
+        shared_idx[tx] = tx; //-1; // -1 will crash the code in case matrix is singular, better is to put =tx and make check info at output
     }
     __syncthreads();
 
-    for(int s =0 ; s < nchunk; s++)
+    for(int s =0; s < nchunk; s++)
     {
         if( (tx + s * zamax < length) && (tx < zamax) )
         {
@@ -368,7 +368,7 @@ void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_
         A[gbidx] = reg;
         #pragma unroll
         for(int i=1; i < n; i++) {
-            //A[gbidx + i*lda] = A[gbidx + i*lda] - shared_y[i] * reg;//cuda give wrong results with this one
+            //A[gbidx + i*lda] = A[gbidx + i*lda] - shared_y[i] * reg; //cuda give wrong results with this one
             //A[gbidx + i*lda] -= shared_y[i] * reg; //cuda give wrong results with this one
             A[gbidx + i*lda] += (MAGMA_Z_NEG_ONE) * shared_y[i] * reg;
         }
@@ -489,7 +489,7 @@ zupdate_device(int m, int step, magmaDoubleComplex* x, int ldx,  magmaDoubleComp
     // update the current column by all the previous one
     #pragma unroll
     for(int i=0; i < step; i++) {
-        for(int s=0 ; s < nchunk; s++)
+        for(int s=0; s < nchunk; s++)
         {
             indx = tid + s * MAX_NTHREADS;
             if ( indx > i  && indx < m ) {
@@ -511,7 +511,7 @@ zscal5_device(int m, magmaDoubleComplex* x, magmaDoubleComplex alpha)
     int tid = threadIdx.x;
     int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
 
-    for(int s=0 ; s < nchunk; s++)
+    for(int s=0; s < nchunk; s++)
     {
         if( (tid + s * MAX_NTHREADS) < m ) {
             #if 0
@@ -545,7 +545,7 @@ zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoub
 
     int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
     // read the current column from dev to shared memory
-    for(int s=0 ; s < nchunk; s++)
+    for(int s=0; s < nchunk; s++)
     {
         if( (tid + s * MAX_NTHREADS) < m ) shared_A[tid + s * MAX_NTHREADS] = A0j[tid + s * MAX_NTHREADS];
     }
@@ -581,7 +581,7 @@ zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoub
     __syncthreads();
 
     // write back from shared to dev memory
-    for(int s=0 ; s < nchunk; s++)
+    for(int s=0; s < nchunk; s++)
     {
         if( (tid + s * MAX_NTHREADS) < m )
         {

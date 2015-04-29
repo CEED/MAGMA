@@ -159,8 +159,8 @@ void magmablas_zhemm_mgpu_com(
     //magma_zgetmatrix( siz, siz, dA[0], ldda, R, siz );
     FILE *trace_file;
     trace_file = fopen("AJETE/Aafter", "w");
-    for (int j = 0; j < siz ; j++) 
-          for (int i = 0; i < siz ; i++) 
+    for (int j = 0; j < siz; j++) 
+          for (int i = 0; i < siz; i++) 
                          fprintf(trace_file, "%10d%10d%40.30e\n", i+1, j+1, R[j*siz+i]);
     fclose(trace_file);
 return;
@@ -287,7 +287,7 @@ return;
                 for( magma_int_t blki = 0; blki < myblk; ++blki){
                     magma_int_t gbblki = (blki*ngpu + devperm)*nb - blockoffset;
                     magma_int_t lcblki = blki*nb;
-                    magma_int_t ib     = nb;// min(nb, m-gbblki);
+                    magma_int_t ib     = nb; // min(nb, m-gbblki);
                     if(dev==stdev){
                         lcblki = blki*nb-blockoffset;
                         if(blki==0){

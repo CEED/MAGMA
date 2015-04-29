@@ -35,15 +35,15 @@ void zlaswp_rowparallel_devfunc(
     dout += SWP_WIDTH * blockIdx.x * ldo;
     magmaDoubleComplex *sdata = shared_data;
 
-    if(blockIdx.x == gridDim.x -1)
+    if (blockIdx.x == gridDim.x -1)
     {
        width = n - blockIdx.x * SWP_WIDTH;
     }
 
-    if(tid < height)
+    if (tid < height)
     {
         int mynewroworig = pivinfo[tid]-1; //-1 to get the index in C
-        int itsreplacement = pivinfo[mynewroworig] -1 ; //-1 to get the index in C
+        int itsreplacement = pivinfo[mynewroworig] -1; //-1 to get the index in C
         #pragma unroll
         for(int i=0; i<width; i++)
         {
@@ -53,7 +53,7 @@ void zlaswp_rowparallel_devfunc(
     }
     __syncthreads();
 
-    if(tid < height)
+    if (tid < height)
     {
         // copy back the upper swapped portion of A to dout 
         #pragma unroll
@@ -104,18 +104,17 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
                        magma_int_t batchCount, magma_queue_t queue)
 {
 
-    if(n == 0 ) return ;
+    if (n == 0 ) return;
     int height = k2-k1;
-    if( height  > 1024) 
+    if ( height  > 1024) 
     {
        printf(" n=%d > 1024, not supported \n", n);
-
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
     dim3  grid(blocks, 1, batchCount);
 
-    if( n < SWP_WIDTH)
+    if ( n < SWP_WIDTH)
     {
         zlaswp_rowparallel_kernel_batched<<<grid, height, sizeof(magmaDoubleComplex) * height * n, queue >>>
                                            ( n, n, height, input_array, ldi, output_array, ldo, pivinfo_array ); 
@@ -142,9 +141,9 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
                        magma_int_t *pivinfo, 
                        magma_queue_t queue)
 {
-    if(n == 0 ) return ;
+    if (n == 0 ) return;
     int height = k2-k1;
-    if( height  > MAX_NTHREADS) 
+    if ( height  > MAX_NTHREADS) 
     {
        printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n,MAX_NTHREADS);
 
@@ -153,7 +152,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
     int blocks = magma_ceildiv( n, SWP_WIDTH );
     dim3  grid(blocks, 1, 1);
 
-    if( n < SWP_WIDTH)
+    if ( n < SWP_WIDTH)
     {
         zlaswp_rowparallel_kernel<<<grid, height, sizeof(magmaDoubleComplex) * height * n, queue >>>
                                    ( n, n, height, input, ldi, output, ldo, pivinfo ); 
@@ -196,14 +195,14 @@ __global__ void zlaswp_rowserial_kernel_batched( int n, magmaDoubleComplex **dA_
     k1--;
     k2--;
 
-    if( tid < n) {
+    if ( tid < n) {
 
         magmaDoubleComplex A1;
 
         for( int i1 = k1; i1 < k2; i1++ ) 
         {
             int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
-            if( i2 != i1)
+            if ( i2 != i1)
             {
                 A1 = dA[i1 + tid * lda];
                 dA[i1 + tid * lda] = dA[i2 + tid * lda];
@@ -224,7 +223,7 @@ magma_zlaswp_rowserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, mag
                    magma_int_t batchCount, magma_queue_t queue)
 {
 
-    if(n == 0 ) return ;
+    if (n == 0 ) return;
 
     int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);
@@ -247,17 +246,17 @@ __global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
     k1--;
     k2--;
-    if( k1 < 0 || k2 < 0 ) return;
+    if ( k1 < 0 || k2 < 0 ) return;
 
 
-    if( tid < n) {
+    if ( tid < n) {
         magmaDoubleComplex A1;
-        if(k1 <= k2)
+        if (k1 <= k2)
         {
             for( int i1 = k1; i1 <= k2; i1++ ) 
             {
                 int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
-                if( i2 != i1)
+                if ( i2 != i1)
                 {
                     A1 = dA[i1 * lda + tid];
                     dA[i1 * lda + tid] = dA[i2 * lda + tid];
@@ -269,7 +268,7 @@ __global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **
             for( int i1 = k1; i1 >= k2; i1-- ) 
             {
                 int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
-                if( i2 != i1)
+                if ( i2 != i1)
                 {
                     A1 = dA[i1 * lda + tid];
                     dA[i1 * lda + tid] = dA[i2 * lda + tid];
@@ -291,7 +290,7 @@ magma_zlaswp_columnserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, 
                    magma_int_t batchCount, magma_queue_t queue)
 {
 
-    if(n == 0 ) return ;
+    if (n == 0 ) return;
 
     int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);

@@ -164,7 +164,7 @@ zlarft_gemvrowwise_device(
     #else
     if(tx == 0)
     {
-            W[ty] = -sdata[ty * zgemv_bs + 0] * (*tau) ;
+            W[ty] = -sdata[ty * zgemv_bs + 0] * (*tau);
     }
     #endif 
 }
@@ -274,7 +274,7 @@ zlarft_gemv_loop_inside_device(
         T[0] = tau[0];
     } 
  
-    for(int i=1; i<k;i++)
+    for(int i=1; i < k; i++)
     {
 
         int m = n-i; 
@@ -319,7 +319,7 @@ zlarft_gemv_loop_inside_device(
        #else
        if(tx < i && ty == 0)
        {
-           T[i* ldt + tx] = -sdata[tx * zgemv_bs + 0] * (tau[i]) ;  
+           T[i* ldt + tx] = -sdata[tx * zgemv_bs + 0] * (tau[i]);  
        } 
       
        if(tx == i && ty == 0)
@@ -428,7 +428,7 @@ zlarft_ztrmv_sm32x32_device(
 #endif
 
     // perform trmv
-    for(int i=n-k; i<n;i++)
+    for(int i=n-k; i < n; i++)
     {
        __syncthreads();  
        res = MAGMA_Z_ZERO;
@@ -527,7 +527,7 @@ zlarft_recztrmv_sm32x32_device(
     __syncthreads();  
     
     // perform sequence of n-1 gemv
-    for(int i=0; i<n;i++)
+    for(int i=0; i < n; i++)
     {
        res = MAGMA_Z_ZERO;
        for(int j=0; j<i; j++)

@@ -55,7 +55,7 @@ void zgeqrf_copy_upper_batched(
         copy some data in dV to dR
    */
 
-      if( nb >= n) return ;
+      if( nb >= n) return;
 
       zgeqrf_copy_upper_kernel_batched<<<batchCount, n, 0, queue>>>(n, nb, dV_array, ldv, dR_array, ldr);
 

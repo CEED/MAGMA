@@ -322,7 +322,7 @@ void magmablas_zhemm_mgpu_spec(
                     for( magma_int_t blki = 0; blki < gblk; ++blki){
                         gbblki = (blki*ngpu + devperm)*nb - blockoffset;
                         lcblki = blki*nb;
-                        ib     = nb;//min(nb, m-gbblki);
+                        ib     = nb; //min(nb, m-gbblki);
                         if(gdev==stdev){
                             lcblki = blki*nb-blockoffset;
                             if(blki==0){
@@ -370,7 +370,7 @@ void magmablas_zhemm_mgpu_spec(
                                 for( magma_int_t blki = 0; blki < gblk; ++blki){
                                     gbblki = (blki*ngpu + devperm)*nb - blockoffset;
                                     lcblki = blki*nb;
-                                    ib     = nb;//min(nb, m-gbblki);
+                                    ib     = nb; //min(nb, m-gbblki);
                                     if(gdev==stdev){
                                         lcblki = blki*nb-blockoffset;
                                         if(blki==0){
