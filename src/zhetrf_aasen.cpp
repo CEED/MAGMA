@@ -10,6 +10,7 @@
 */
 #include "common_magma.h"
 #include "trace.h"
+
 extern "C" void
 magmablas_zlaswp_sym( magma_int_t n, magmaDoubleComplex *dA, magma_int_t lda,
                       magma_int_t k1, magma_int_t k2,
@@ -26,22 +27,9 @@ magmablas_zlacpy_sym_out(
     magma_int_t *rows, magma_int_t *perm,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
+
 #define PRECISION_z
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
-#endif
-
-#if (GPUSHMEM >= 200)
-#if (defined(PRECISION_s))
-     #undef  cublasSgemm
-     #define cublasSgemm magmablas_sgemm_fermi80
-  #endif
-#endif
-// === End defining what BLAS to use ======================================
 
 /**
     Purpose
@@ -200,12 +188,16 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         return *info;
     }
 
-    for (int ii=0; ii<n; ii++) perm[ii] = ii;
+    for (int ii=0; ii < n; ii++) {
+        perm[ii] = ii;
+    }
     magma_isetvector_async(n, perm, 1, dperm, 1, stream[0]);
 
     /* copy A to GPU */
     magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
-    for (int j=0; j<min(n,nb); j++) ipiv[j] = j+1;
+    for (int j=0; j < min(n,nb); j++) {
+        ipiv[j] = j+1;
+    }
 
     trace_init( 1, 1, num_streams, (CUstream_st**)stream );
     //if (nb <= 1 || nb >= n) {
@@ -430,12 +422,18 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         magmablas_zlacpy_sym_out(MagmaLower, n-(j+1)*nb, count, drows, dperm, dH(0,0),ldda, dA(j+1,j+1),ldda);
 
                         // reset perm
-                        for (int ii=0; ii<count; ii++) perm[rows[2*ii+1]] = rows[2*ii+1];
-                        //for (int k=0; k<n; k++) printf( "%d ",perm[k] );
+                        for (int ii=0; ii < count; ii++) {
+                            perm[rows[2*ii+1]] = rows[2*ii+1];
+                        }
+                        //for (int k=0; k < n; k++) {
+                        //    printf( "%d ",perm[k] );
+                        //}
                         //printf( "\n" );
 
                     }
-                    for (int k=(1+j)*nb; k<(1+j)*nb+min(jb,ib); k++) ipiv[k] += (j+1)*nb;
+                    for (int k=(1+j)*nb; k < (1+j)*nb+min(jb,ib); k++) {
+                        ipiv[k] += (j+1)*nb;
+                    }
                     trace_gpu_end( 0,0 );
                 }
             }

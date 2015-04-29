@@ -277,7 +277,9 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                 for (magma_int_t k=0; k<sb; k++) {
                     #define ZSYRK_D_WORKSPACE
                     #ifdef ZSYRK_D_WORKSPACE
-                    for (magma_int_t ii=i+sb; ii<n; ii++) A(i+k, ii) = A(ii, i+k);
+                    for (magma_int_t ii=i+sb; ii < n; ii++) {
+                        A(i+k, ii) = A(ii, i+k);
+                    }
                     #endif
                     alpha = MAGMA_Z_DIV( zone,A(i+k, i+k));
                     blasf77_zscal(&height, &alpha, &A(i+sb, i+k), &ione);
@@ -320,7 +322,9 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                 for (magma_int_t k=0; k<sb; k++) {
                     #define ZSYRK_D_WORKSPACE
                     #ifdef ZSYRK_D_WORKSPACE
-                    for (magma_int_t ii=i+sb; ii<n; ii++) A(ii, i+k) = A(i+k, ii);
+                    for (magma_int_t ii=i+sb; ii < n; ii++) {
+                        A(ii, i+k) = A(i+k, ii);
+                    }
                     #endif
                     alpha = MAGMA_Z_DIV(zone , A(i+k, i+k));
                     blasf77_zscal(&height, &alpha, &A(i+k, i+sb), &lda);
