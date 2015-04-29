@@ -44,7 +44,7 @@ FPIC      = -fPIC
 CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall
 FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
-NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
+NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   = -m64     $(FPIC)
 
 # MacOS likes the library's path to be set

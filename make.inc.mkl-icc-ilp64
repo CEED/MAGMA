@@ -32,7 +32,7 @@ FPIC      = -fPIC
 CFLAGS    = -O3 $(FPIC) -DADD_ -Wall -openmp -DMAGMA_SETAFFINITY -DMAGMA_WITH_MKL
 FFLAGS    = -O3 $(FPIC) -DADD_ -warn all -warn nounused
 F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all -warn nounused
-NVCCFLAGS = -O3         -DADD_       -Xcompiler "-fno-strict-aliasing $(FPIC)"
+NVCCFLAGS = -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)              -openmp
 
 # Defining MAGMA_ILP64 or MKL_ILP64 changes magma_int_t to int64_t in include/magma_types.h
