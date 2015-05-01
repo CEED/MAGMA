@@ -10,7 +10,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -22,24 +22,24 @@
     Purpose
     -------
 
-    Computes the Frobenius norm of the difference between the CSR matrices A 
+    Computes the Frobenius norm of the difference between the CSR matrices A
     and B. They need to share the same sparsity pattern!
 
 
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix
                 sparse matrix in CSR
 
-    @param
+    @param[in]
     B           magma_z_matrix
-                sparse matrix in CSR    
+                sparse matrix in CSR
                 
-    @param
-    res         real_Double_t* 
-                residual 
+    @param[out]
+    res         real_Double_t*
+                Frobenius norm of difference
                 
     @param[in]
     queue       magma_queue_t
@@ -48,10 +48,10 @@
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zfrobenius( 
-    magma_z_matrix A, 
-    magma_z_matrix B, 
+magma_int_t
+magma_zfrobenius(
+    magma_z_matrix A,
+    magma_z_matrix B,
     real_Double_t *res,
     magma_queue_t queue ){
 
@@ -70,12 +70,12 @@ magma_zfrobenius(
                     (*res) = (*res) + tmp2* tmp2;
                 }
             }
-        }      
+        }
     }
 
     (*res) =  sqrt((*res));
 
-    return MAGMA_SUCCESS; 
+    return MAGMA_SUCCESS;
 }
 
 
@@ -91,25 +91,25 @@ magma_zfrobenius(
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix
                 input sparse matrix in CSR
 
-    @param
+    @param[in]
     L           magma_z_matrix
-                input sparse matrix in CSR    
+                input sparse matrix in CSR
 
-    @param
+    @param[in]
     U           magma_z_matrix
-                input sparse matrix in CSR    
+                input sparse matrix in CSR
 
-    @param
+    @param[out]
     LU          magma_z_matrix*
-                output sparse matrix in A-LU in CSR    
+                output sparse matrix in A-LU in CSR
 
-    @param
-    res         real_Double_t* 
-                residual 
+    @param[out]
+    res         real_Double_t*
+                Frobenius norm of difference
                 
     @param[in]
     queue       magma_queue_t
@@ -118,30 +118,30 @@ magma_zfrobenius(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_znonlinres(   
-    magma_z_matrix A, 
+magma_int_t
+magma_znonlinres(
+    magma_z_matrix A,
     magma_z_matrix L,
-    magma_z_matrix U, 
-    magma_z_matrix *LU, 
+    magma_z_matrix U,
+    magma_z_matrix *LU,
     real_Double_t *res,
-    magma_queue_t queue ){
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
 
-    // TODO what is m suppose to be?
     real_Double_t tmp2;
     magma_int_t i,j,k;
-
-    magma_z_matrix L_d, U_d, LU_d, A_t;
-
-    magma_zmtransfer( L, &L_d, Magma_CPU, Magma_DEV, queue  ); 
-    magma_zmtransfer( U, &U_d, Magma_CPU, Magma_DEV, queue  ); 
-
-    magma_zmtransfer( A, &A_t, Magma_CPU, Magma_CPU, queue  ); 
-    
+        
     magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
-    magma_z_spmm( one, L_d, U_d, &LU_d, queue );
 
-    magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue );
+    magma_z_matrix L_d={Magma_CSR}, U_d={Magma_CSR}, LU_d={Magma_CSR}, A_t={Magma_CSR};
+
+    CHECK( magma_zmtransfer( L, &L_d, Magma_CPU, Magma_DEV, queue  ));
+    CHECK( magma_zmtransfer( U, &U_d, Magma_CPU, Magma_DEV, queue  ));
+    CHECK( magma_zmtransfer( A, &A_t, Magma_CPU, Magma_CPU, queue  ));
+    CHECK( magma_z_spmm( one, L_d, U_d, &LU_d, queue ));
+
+    CHECK( magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue ));
     magma_zmfree( &L_d, queue  );
     magma_zmfree( &U_d, queue  );
     magma_zmfree( &LU_d, queue  );
@@ -173,8 +173,16 @@ magma_znonlinres(
     magma_zmfree( &A_t, queue  );
 
     (*res) =  sqrt((*res));
-
-    return MAGMA_SUCCESS; 
+    
+cleanup:
+    if( info !=0 ){
+        magma_zmfree( LU, queue  );
+    }
+    magma_zmfree( &A_t, queue  );
+    magma_zmfree( &L_d, queue  );
+    magma_zmfree( &U_d, queue  );
+    magma_zmfree( &LU_d, queue  );
+    return info;
 }
 
 /**
@@ -188,25 +196,29 @@ magma_znonlinres(
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix
                 input sparse matrix in CSR
 
-    @param
+    @param[in]
     L           magma_z_matrix
-                input sparse matrix in CSR    
+                input sparse matrix in CSR
 
-    @param
+    @param[in]
     U           magma_z_matrix
-                input sparse matrix in CSR    
+                input sparse matrix in CSR
 
-    @param
+    @param[out]
     LU          magma_z_matrix*
-                output sparse matrix in A-LU in CSR    
-
-    @param
-    res         real_Double_t* 
-                residual 
+                output sparse matrix in A-LU in CSR
+                
+    @param[out]
+    res         real_Double_t*
+                Frobenius norm of difference
+                
+    @param[out]
+    nonlinres   real_Double_t*
+                Frobenius norm of difference
                 
     @param[in]
     queue       magma_queue_t
@@ -215,36 +227,39 @@ magma_znonlinres(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zilures(   
-    magma_z_matrix A, 
+magma_int_t
+magma_zilures(
+    magma_z_matrix A,
     magma_z_matrix L,
-    magma_z_matrix U, 
-    magma_z_matrix *LU, 
+    magma_z_matrix U,
+    magma_z_matrix *LU,
     real_Double_t *res,
     real_Double_t *nonlinres,
-    magma_queue_t queue ){
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
 
-    // TODO what is m suppose to be?
     magmaDoubleComplex tmp;
     real_Double_t tmp2;
     magma_int_t i,j,k;
+    
+    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
 
-    magma_z_matrix LL, L_d, U_d, LU_d;
+    magma_z_matrix LL={Magma_CSR}, L_d={Magma_CSR}, U_d={Magma_CSR}, LU_d={Magma_CSR};
 
     if( L.row[1]==1 ){        // lower triangular with unit diagonal
         //printf("L lower triangular.\n");
         LL.diagorder_type = Magma_UNITY;
-        magma_zmconvert( L, &LL, Magma_CSR, Magma_CSRL, queue );
+        CHECK( magma_zmconvert( L, &LL, Magma_CSR, Magma_CSRL, queue ));
     }
     else if( L.row[1]==0 ){ // strictly lower triangular
         //printf("L strictly lower triangular.\n");
-        magma_zmtransfer( L, &LL, Magma_CPU, Magma_CPU, queue );
+        CHECK( magma_zmtransfer( L, &LL, Magma_CPU, Magma_CPU, queue ));
         magma_free_cpu( LL.col );
         magma_free_cpu( LL.val );
         LL.nnz = L.nnz+L.num_rows;
-        magma_zmalloc_cpu( &LL.val, LL.nnz );
-        magma_index_malloc_cpu( &LL.col, LL.nnz );
+        CHECK( magma_zmalloc_cpu( &LL.val, LL.nnz ));
+        CHECK( magma_index_malloc_cpu( &LL.col, LL.nnz ));
         magma_int_t z=0;
         for( magma_int_t i=0; i<L.num_rows; i++){
             LL.row[i] = z;
@@ -264,16 +279,14 @@ magma_zilures(
         printf("error: L neither lower nor strictly lower triangular!\n");
     }
 
-    magma_zmtransfer( LL, &L_d, Magma_CPU, Magma_DEV, queue  ); 
-    magma_zmtransfer( U, &U_d, Magma_CPU, Magma_DEV, queue  ); 
+    CHECK( magma_zmtransfer( LL, &L_d, Magma_CPU, Magma_DEV, queue  ));
+    CHECK( magma_zmtransfer( U, &U_d, Magma_CPU, Magma_DEV, queue  ));
     magma_zmfree( &LL, queue );
-
-    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
-    magma_z_spmm( one, L_d, U_d, &LU_d, queue );
+    CHECK( magma_z_spmm( one, L_d, U_d, &LU_d, queue ));
 
 
 
-    magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue );
+    CHECK( magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue ));
     magma_zmfree( &L_d, queue );
     magma_zmfree( &U_d, queue );
     magma_zmfree( &LU_d, queue );
@@ -305,12 +318,18 @@ magma_zilures(
         }
     }
 
-    magma_zmfree( LU, queue );
-
     (*res) =  sqrt((*res));
     (*nonlinres) =  sqrt((*nonlinres));
 
-    return MAGMA_SUCCESS; 
+cleanup:
+    if( info !=0 ){
+        magma_zmfree( LU, queue  );
+    }
+    magma_zmfree( &LL, queue );
+    magma_zmfree( &L_d, queue  );
+    magma_zmfree( &U_d, queue  );
+    magma_zmfree( &LU_d, queue  );
+    return info;
 }
 
 
@@ -326,25 +345,25 @@ magma_zilures(
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix
                 input sparse matrix in CSR
 
-    @param
+    @param[in]
     C           magma_z_matrix
-                input sparse matrix in CSR    
+                input sparse matrix in CSR
 
-    @param
-    CT         magma_z_matrix
-                input sparse matrix in CSR    
+    @param[in]
+    CT          magma_z_matrix
+                input sparse matrix in CSR
 
-    @param
+    @param[in]
     LU          magma_z_matrix*
-                output sparse matrix in A-LU in CSR    
+                output sparse matrix in A-LU in CSR
 
-    @param
-    res         real_Double_t* 
-                residual 
+    @param[out]
+    res         real_Double_t*
+                IC residual
                 
     @param[in]
     queue       magma_queue_t
@@ -353,33 +372,33 @@ magma_zilures(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zicres(       
-    magma_z_matrix A, 
+magma_int_t
+magma_zicres(
+    magma_z_matrix A,
     magma_z_matrix C,
-    magma_z_matrix CT, 
-    magma_z_matrix *LU, 
+    magma_z_matrix CT,
+    magma_z_matrix *LU,
     real_Double_t *res,
     real_Double_t *nonlinres,
-    magma_queue_t queue ){
-
-    // TODO what is m suppose to be?
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+    
     magmaDoubleComplex tmp;
     real_Double_t tmp2;
     magma_int_t i,j,k;
 
-    magma_z_matrix L_d, U_d, LU_d;
+    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
+    
+    magma_z_matrix L_d={Magma_CSR}, U_d={Magma_CSR}, LU_d={Magma_CSR};
     
     *res = 0.0;
     *nonlinres = 0.0;
 
-    magma_zmtransfer( C, &L_d, Magma_CPU, Magma_DEV, queue ); 
-    magma_zmtransfer( CT, &U_d, Magma_CPU, Magma_DEV, queue ); 
-
-    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
-    magma_z_spmm( one, L_d, U_d, &LU_d, queue );
-
-    magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue );
+    CHECK( magma_zmtransfer( C, &L_d, Magma_CPU, Magma_DEV, queue ));
+    CHECK( magma_zmtransfer( CT, &U_d, Magma_CPU, Magma_DEV, queue ));
+    CHECK( magma_z_spmm( one, L_d, U_d, &LU_d, queue ));
+    CHECK( magma_zmtransfer(LU_d, LU, Magma_DEV, Magma_CPU, queue ));
 
     magma_zmfree( &LU_d, queue );
 
@@ -409,12 +428,18 @@ magma_zicres(
         }
     }
 
-    magma_zmfree( LU, queue );
 
     (*res) =  sqrt((*res));
     (*nonlinres) =  sqrt((*nonlinres));
 
-    return MAGMA_SUCCESS; 
+cleanup:
+    if( info !=0 ){
+        magma_zmfree( LU, queue  );
+    }
+    magma_zmfree( &L_d, queue  );
+    magma_zmfree( &U_d, queue  );
+    magma_zmfree( &LU_d, queue  );
+    return info;
 }
 
 
@@ -429,17 +454,17 @@ magma_zicres(
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix
                 sparse matrix in CSR
 
-    @param
+    @param[out]
     L           magma_z_matrix*
-                sparse matrix in CSR 
+                sparse matrix in CSR
 
-    @param
+    @param[out]
     U           magma_z_matrix*
-                sparse matrix in CSR    
+                sparse matrix in CSR
                 
     @param[in]
     queue       magma_queue_t
@@ -449,47 +474,48 @@ magma_zicres(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zinitguess( 
-    magma_z_matrix A, 
-    magma_z_matrix *L, 
+magma_int_t
+magma_zinitguess(
+    magma_z_matrix A,
+    magma_z_matrix *L,
     magma_z_matrix *U,
-    magma_queue_t queue ){
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
 
-    magma_z_matrix hAL, hAU, dAL, dAU, dALU, hALU, hD, dD, dL, hL;
+    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
+    
+    magma_z_matrix hAL={Magma_CSR}, hAU={Magma_CSR}, dAL={Magma_CSR}, 
+    dAU={Magma_CSR}, dALU={Magma_CSR}, hALU={Magma_CSR}, hD={Magma_CSR}, 
+    dD={Magma_CSR}, dL={Magma_CSR}, hL={Magma_CSR};
     magma_int_t i,j;
+    
+    magma_int_t offdiags = 0;
+    magma_index_t *diag_offset;
+    magmaDoubleComplex *diag_vals=NULL;
 
     // need only lower triangular
     hAL.diagorder_type = Magma_VALUE;
-    magma_zmconvert( A, &hAL, Magma_CSR, Magma_CSRL, queue );
+    CHECK( magma_zmconvert( A, &hAL, Magma_CSR, Magma_CSRL, queue ));
     //magma_zmconvert( hAL, &hALCOO, Magma_CSR, Magma_CSRCOO );
 
     // need only upper triangular
     //magma_zmconvert( A, &hAU, Magma_CSR, Magma_CSRU );
-    magma_z_cucsrtranspose(  hAL, &hAU, queue );
+    CHECK( magma_z_cucsrtranspose(  hAL, &hAU, queue ));
     //magma_zmconvert( hAU, &hAUCOO, Magma_CSR, Magma_CSRCOO );
-
-    magma_zmtransfer( hAL, &dAL, Magma_CPU, Magma_DEV, queue );
-
-    magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
-    magma_z_spmm( one, dAL, dAU, &dALU, queue );
-
-    magma_zmtransfer( dALU, &hALU, Magma_DEV, Magma_CPU, queue );
-
+    CHECK( magma_zmtransfer( hAL, &dAL, Magma_CPU, Magma_DEV, queue ));
+    CHECK( magma_z_spmm( one, dAL, dAU, &dALU, queue ));
+    CHECK( magma_zmtransfer( dALU, &hALU, Magma_DEV, Magma_CPU, queue ));
 
     magma_zmfree( &dAU, queue);
     magma_zmfree( &dALU, queue);
 
 
-    // generate diagonal matrix 
-    magma_int_t offdiags = 0;
-    magma_index_t *diag_offset;
-    magmaDoubleComplex *diag_vals;
-    magma_zmalloc_cpu( &diag_vals, offdiags+1 );
-    magma_index_malloc_cpu( &diag_offset, offdiags+1 );
+    CHECK( magma_zmalloc_cpu( &diag_vals, offdiags+1 ));
+    CHECK( magma_index_malloc_cpu( &diag_offset, offdiags+1 ));
     diag_offset[0] = 0;
     diag_vals[0] = MAGMA_Z_MAKE( 1.0, 0.0 );
-    magma_zmgenerator( hALU.num_rows, offdiags, diag_offset, diag_vals, &hD, queue );
+    CHECK( magma_zmgenerator( hALU.num_rows, offdiags, diag_offset, diag_vals, &hD, queue ));
     magma_zmfree( &hALU, queue );
 
     
@@ -501,14 +527,14 @@ magma_zinitguess(
                         1.0 / sqrt(fabs(MAGMA_Z_REAL(hALU.val[j])))  , 0.0 );
                 //printf("insert %f at %d\n", hD.val[i], i);
             }
-        }      
+        }
     }
 
 
-    magma_zmtransfer( hD, &dD, Magma_CPU, Magma_DEV, queue );
+    CHECK( magma_zmtransfer( hD, &dD, Magma_CPU, Magma_DEV, queue ));
     magma_zmfree( &hD, queue);
 
-    magma_z_spmm( one, dD, dAL, &dL, queue );
+    CHECK( magma_z_spmm( one, dD, dAL, &dL, queue ));
     magma_zmfree( &dAL, queue );
     magma_zmfree( &dD, queue );
 
@@ -516,27 +542,37 @@ magma_zinitguess(
 
 /*
     // check for diagonal = 1
-    magma_z_matrix dLt, dLL, LL;
-    magma_z_cucsrtranspose(  dL, &dLt );
-    magma_zcuspmm( dL, dLt, &dLL );
-    magma_zmtransfer( dLL, &LL, Magma_DEV, Magma_CPU );
+    magma_z_matrix dLt={Magma_CSR}, dLL={Magma_CSR}, LL={Magma_CSR};
+    CHECK( magma_z_cucsrtranspose(  dL, &dLt ));
+    CHECK( magma_zcuspmm( dL, dLt, &dLL ));
+    CHECK( magma_zmtransfer( dLL, &LL, Magma_DEV, Magma_CPU ));
     for(i=0; i<100; i++){//hALU.num_rows; i++){
         for(j=hALU.row[i]; j<hALU.row[i+1]; j++){
             if( hALU.col[j] == i ){
                 printf("%d %d -> %f   -->", i, i, LL.val[j]);
             }
-        }      
+        }
     }
 */
-    magma_zmtransfer( dL, &hL, Magma_DEV, Magma_CPU, queue );
+    CHECK( magma_zmtransfer( dL, &hL, Magma_DEV, Magma_CPU, queue ));
+    CHECK( magma_zmconvert( hL, L, Magma_CSR, Magma_CSRCOO, queue ));
 
 
-    magma_zmconvert( hL, L, Magma_CSR, Magma_CSRCOO, queue );
 
+cleanup:
+    if( info !=0 ){
+        magma_zmfree( L, queue  );
+        magma_zmfree( U, queue  );
+    }
+    magma_zmfree( &dAU, queue);
+    magma_zmfree( &dALU, queue);
     magma_zmfree( &dL, queue );
     magma_zmfree( &hL, queue );
-
-    return MAGMA_SUCCESS; 
+    magma_zmfree( &dAL, queue );
+    magma_zmfree( &dD, queue );
+    magma_zmfree( &hD, queue);
+    magma_zmfree( &hALU, queue );
+    return info;
 }
 
 
@@ -556,17 +592,17 @@ magma_zinitguess(
     Arguments
     ---------
 
-    @param
+    @param[in]
     A           magma_z_matrix*
                 sparse matrix in CSR
 
-    @param
+    @param[out]
     L           magma_z_matrix*
-                sparse matrix in CSR 
+                sparse matrix in CSR
 
-    @param
+    @param[out]
     U           magma_z_matrix*
-                sparse matrix in CSR   
+                sparse matrix in CSR
                 
     @param[in]
     queue       magma_queue_t
@@ -576,9 +612,9 @@ magma_zinitguess(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zinitrecursiveLU( 
-    magma_z_matrix A, 
+magma_int_t
+magma_zinitrecursiveLU(
+    magma_z_matrix A,
     magma_z_matrix *B,
     magma_queue_t queue ){
 
@@ -593,7 +629,7 @@ magma_zinitrecursiveLU(
                     B->val[j] = A.val[k];
                 }
             }
-        }      
+        }
     }
 
     return MAGMA_SUCCESS; 
@@ -606,13 +642,13 @@ magma_zinitrecursiveLU(
     -------
 
     Checks for a lower triangular matrix whether it is strictly lower triangular
-    and in the negative case adds a unit diagonal.
+    and in the negative case adds a unit diagonal. It does this in-place.
 
 
     Arguments
     ---------
 
-    @param
+    @param[in,out]
     L           magma_z_matrix*
                 sparse matrix in CSR
                 
@@ -623,26 +659,28 @@ magma_zinitrecursiveLU(
     @ingroup magmasparse_zaux
     ********************************************************************/
 
-magma_int_t 
-magma_zmLdiagadd( 
+magma_int_t
+magma_zmLdiagadd(
     magma_z_matrix *L,
-    magma_queue_t queue ){
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
 
-    magma_z_matrix LL;
+    magma_z_matrix LL={Magma_CSR};
 
     if( L->row[1]==1 ){        // lower triangular with unit diagonal
         //printf("L lower triangular.\n");
         LL.diagorder_type = Magma_UNITY;
-        magma_zmconvert( *L, &LL, Magma_CSR, Magma_CSRL, queue );
+        CHECK( magma_zmconvert( *L, &LL, Magma_CSR, Magma_CSRL, queue ));
     }
     else if( L->row[1]==0 ){ // strictly lower triangular
         //printf("L strictly lower triangular.\n");
-        magma_zmtransfer( *L, &LL, Magma_CPU, Magma_CPU, queue );
+        CHECK( magma_zmtransfer( *L, &LL, Magma_CPU, Magma_CPU, queue ));
         magma_free_cpu( LL.col );
         magma_free_cpu( LL.val );
         LL.nnz = L->nnz+L->num_rows;
-        magma_zmalloc_cpu( &LL.val, LL.nnz );
-        magma_index_malloc_cpu( &LL.col, LL.nnz );
+        CHECK( magma_zmalloc_cpu( &LL.val, LL.nnz ));
+        CHECK( magma_index_malloc_cpu( &LL.col, LL.nnz ));
         magma_int_t z=0;
         for( magma_int_t i=0; i<L->num_rows; i++){
             LL.row[i] = z;
@@ -663,10 +701,14 @@ magma_zmLdiagadd(
         printf("error: L neither lower nor strictly lower triangular!\n");
     }
     magma_zmfree( L, queue );
-    magma_zmtransfer(LL, L, Magma_CPU, Magma_CPU, queue );
-    magma_zmfree( &LL, queue );
+    CHECK( magma_zmtransfer(LL, L, Magma_CPU, Magma_CPU, queue ));
 
-    return MAGMA_SUCCESS; 
+cleanup:
+    if( info != 0 ){
+        magma_zmfree( L, queue );
+    }
+    magma_zmfree( &LL, queue );
+    return info;
 }
 
 

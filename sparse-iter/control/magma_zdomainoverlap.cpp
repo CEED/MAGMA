@@ -10,7 +10,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -28,13 +28,16 @@ magma_zindexcopy(
     magma_index_t *x,
     magma_queue_t queue )
 {
-        magma_zindexsort( tmp_x, 0, num_copy-1, queue );
-        for( magma_int_t j=0; j<num_copy; j++ ){
-            x[ j+offset ] = tmp_x[ j ];
-            tmp_x[ j ] = -1;
-        }
+    magma_int_t info = 0;
     
-    return MAGMA_SUCCESS;
+    CHECK( magma_zindexsort( tmp_x, 0, num_copy-1, queue ));
+    for( magma_int_t j=0; j<num_copy; j++ ){
+        x[ j+offset ] = tmp_x[ j ];
+        tmp_x[ j ] = -1;
+    }
+        
+cleanup:    
+    return info;
 }
 
 
@@ -52,7 +55,7 @@ magma_zindexcopy(
                 array to sort
 
     @param[in]
-    num_rows    magma_int_t 
+    num_rows    magma_int_t
                 number of rows in matrix
                 
     @param[out]
@@ -88,17 +91,15 @@ magma_zdomainoverlap(
     magma_index_t *x,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     
     magma_int_t blocksize=128;
 
-    magma_int_t stat_cpu=0, row=0, col=0, num_ind=0, offset=0;
+    magma_int_t row=0, col=0, num_ind=0, offset=0;
 
     magma_index_t *tmp_x;
-    stat_cpu += magma_index_malloc_cpu( &tmp_x, blocksize );
-    if( stat_cpu != 0 ){
-        magma_free_cpu( tmp_x );
-        return MAGMA_ERR_HOST_ALLOC;
-    } 
+    CHECK( magma_index_malloc_cpu( &tmp_x, blocksize ));
+
     for(magma_int_t i=0; i<blocksize; i++ ){
         tmp_x[i] = -1;
     }
@@ -125,10 +126,10 @@ magma_zdomainoverlap(
             }
         }
     }
-    
+
+cleanup:
     magma_free_cpu( tmp_x );
-    
-    return MAGMA_SUCCESS;
+    return info;
 
 }
 

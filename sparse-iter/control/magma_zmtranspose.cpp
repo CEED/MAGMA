@@ -10,8 +10,7 @@
        @author Mark Gates
 
 */
-#include "common_magma.h"
-#include "magmasparse.h"
+#include "common_magmasparse.h"
 
 /**
     Purpose
@@ -92,6 +91,8 @@ z_transpose_csr(
     magma_index_t **new_colind,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
     // easier to keep names straight if we convert CSR to CSC,
     // which is the same as tranposing CSR.
     magmaDoubleComplex *csc_values=NULL;
@@ -101,15 +102,9 @@ z_transpose_csr(
     // k is index into col and values (0 <= k < nnz).
     magma_int_t i, j, k, total, tmp;
     
-    if ( MAGMA_SUCCESS != magma_zmalloc_cpu( &csc_values, nnz )             ||
-         MAGMA_SUCCESS != magma_index_malloc_cpu( &csc_colptr, n_cols + 1 ) ||
-         MAGMA_SUCCESS != magma_index_malloc_cpu( &csc_rowind, nnz ))
-    {
-        magma_free_cpu( csc_values );
-        magma_free_cpu( csc_colptr );
-        magma_free_cpu( csc_rowind );
-        return MAGMA_ERR_HOST_ALLOC;
-    }
+    CHECK( magma_zmalloc_cpu( &csc_values, nnz ) );
+    CHECK( magma_index_malloc_cpu( &csc_colptr, n_cols + 1 ) );
+    CHECK( magma_index_malloc_cpu( &csc_rowind, nnz ) );
     
     // example matrix
     // [ x x 0 x ]
@@ -167,7 +162,11 @@ z_transpose_csr(
     *new_rowptr = csc_colptr;
     *new_colind = csc_rowind;
     
-    return MAGMA_SUCCESS;
+cleanup:
+    magma_free_cpu( csc_values );
+    magma_free_cpu( csc_colptr );
+    magma_free_cpu( csc_rowind );
+    return info;
 }
 
 
@@ -200,10 +199,12 @@ magma_zmtranspose(
     magma_z_matrix A, magma_z_matrix *B,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     
-    magma_z_cucsrtranspose( A, B, queue );
-    return MAGMA_SUCCESS;
-
+    CHECK( magma_z_cucsrtranspose( A, B, queue ));
+    
+cleanup:
+    return info;
 }
 
 
@@ -240,7 +241,14 @@ magma_z_cucsrtranspose(
 {
     // for symmetric matrices: convert to csc using cusparse
     
-    magma_int_t stat_cpu = 0, stat_dev = 0;
+    magma_int_t info = 0;
+    cusparseHandle_t handle=NULL;
+    cusparseMatDescr_t descrA=NULL;
+    cusparseMatDescr_t descrB=NULL;
+    
+    
+    magma_z_matrix ACSR={Magma_CSR}, BCSR={Magma_CSR};
+    magma_z_matrix A_d={Magma_CSR}, B_d={Magma_CSR};
 
     if( A.storage_type == Magma_CSR && A.memory_location == Magma_DEV ) {
                   
@@ -267,92 +275,47 @@ magma_z_cucsrtranspose(
         B->dcol = NULL;
         
         // memory allocation
-        stat_dev += magma_zmalloc( &B->dval, B->nnz );
-        if( stat_dev != 0 ){ goto CLEANUP; }
-        stat_dev += magma_index_malloc( &B->drow, B->num_rows + 1 );
-        if( stat_dev != 0 ){ goto CLEANUP; }
-        stat_dev += magma_index_malloc( &B->dcol, B->nnz );
-        if( stat_dev != 0 ){ goto CLEANUP; }
+        CHECK( magma_zmalloc( &B->dval, B->nnz ));
+        CHECK( magma_index_malloc( &B->drow, B->num_rows + 1 ));
+        CHECK( magma_index_malloc( &B->dcol, B->nnz ));
         
         // CUSPARSE context //
-        cusparseHandle_t handle;
-        cusparseStatus_t cusparseStatus;
-        cusparseStatus = cusparseCreate(&handle);
-        cusparseSetStream( handle, queue );
-        if (cusparseStatus != 0)
-            printf("error in Handle.\n");
-
-
-        cusparseMatDescr_t descrA;
-        cusparseMatDescr_t descrB;
-        cusparseStatus = cusparseCreateMatDescr(&descrA);
-        cusparseStatus = cusparseCreateMatDescr(&descrB);
-        if (cusparseStatus != 0)
-            printf("error in MatrDescr.\n");
-
-        cusparseStatus =
-        cusparseSetMatType(descrA,CUSPARSE_MATRIX_TYPE_GENERAL);
-        cusparseSetMatType(descrB,CUSPARSE_MATRIX_TYPE_GENERAL);
-        if (cusparseStatus != 0)
-            printf("error in MatrType.\n");
-
-        cusparseStatus =
-        cusparseSetMatIndexBase(descrA,CUSPARSE_INDEX_BASE_ZERO);
-        cusparseSetMatIndexBase(descrB,CUSPARSE_INDEX_BASE_ZERO);
-        if (cusparseStatus != 0)
-            printf("error in IndexBase.\n");
-
-        cusparseStatus =
+        CHECK_CUSPARSE( cusparseCreate( &handle ));
+        CHECK_CUSPARSE( cusparseSetStream( handle, queue ));
+        CHECK_CUSPARSE( cusparseCreateMatDescr( &descrA ));
+        CHECK_CUSPARSE( cusparseCreateMatDescr( &descrB ));
+        CHECK_CUSPARSE( cusparseSetMatType( descrA, CUSPARSE_MATRIX_TYPE_GENERAL ));
+        CHECK_CUSPARSE( cusparseSetMatType( descrB, CUSPARSE_MATRIX_TYPE_GENERAL ));
+        CHECK_CUSPARSE( cusparseSetMatIndexBase( descrA, CUSPARSE_INDEX_BASE_ZERO ));
+        CHECK_CUSPARSE( cusparseSetMatIndexBase( descrB, CUSPARSE_INDEX_BASE_ZERO ));
+        CHECK_CUSPARSE(
         cusparseZcsr2csc( handle, A.num_rows, A.num_cols, A.nnz,
                           A.dval, A.drow, A.dcol, B->dval, B->dcol, B->drow,
                           CUSPARSE_ACTION_NUMERIC,
-                          CUSPARSE_INDEX_BASE_ZERO);
-        if (cusparseStatus != 0)
-            printf("error in transpose: %d.\n", cusparseStatus);
-
-        cusparseDestroyMatDescr( descrA );
-        cusparseDestroyMatDescr( descrB );
-        cusparseDestroy( handle );
-        // end CUSPARSE context //
-        
-        return MAGMA_SUCCESS;
+                          CUSPARSE_INDEX_BASE_ZERO) );
         
     }else if( A.storage_type == Magma_CSR && A.memory_location == Magma_CPU ){
-               
-        magma_z_matrix A_d, B_d;
-
-        magma_zmtransfer( A, &A_d, A.memory_location, Magma_DEV, queue );
-        magma_z_cucsrtranspose( A_d, &B_d, queue );
-        magma_zmtransfer( B_d, B, Magma_DEV, A.memory_location, queue );
-        
-        magma_zmfree( &A_d, queue );
-        magma_zmfree( &B_d, queue );
-        
-        return MAGMA_SUCCESS;
+        CHECK( magma_zmtransfer( A, &A_d, A.memory_location, Magma_DEV, queue ));
+        CHECK( magma_z_cucsrtranspose( A_d, &B_d, queue ));
+        CHECK( magma_zmtransfer( B_d, B, Magma_DEV, A.memory_location, queue ));
                 
     }else {
-
-        magma_z_matrix ACSR, BCSR;
-        
-        magma_zmconvert( A, &ACSR, A.storage_type, Magma_CSR, queue );
-        magma_z_cucsrtranspose( ACSR, &BCSR, queue );
-        magma_zmconvert( BCSR, B, Magma_CSR, A.storage_type, queue );
-       
-        magma_zmfree( &ACSR, queue );
-        magma_zmfree( &BCSR, queue );
-
-        return MAGMA_SUCCESS;
+        CHECK( magma_zmconvert( A, &ACSR, A.storage_type, Magma_CSR, queue ));
+        CHECK( magma_z_cucsrtranspose( ACSR, &BCSR, queue ));
+        CHECK( magma_zmconvert( BCSR, B, Magma_CSR, A.storage_type, queue ));
     }
-CLEANUP:
-    if( stat_cpu != 0 ){
+cleanup:
+    cusparseDestroyMatDescr( descrA );
+    cusparseDestroyMatDescr( descrB );
+    cusparseDestroy( handle );
+    magma_zmfree( &A_d, queue );
+    magma_zmfree( &B_d, queue );
+    magma_zmfree( &ACSR, queue );
+    magma_zmfree( &BCSR, queue );
+    if( info != 0 ){
         magma_zmfree( B, queue );
-        return MAGMA_ERR_HOST_ALLOC;
     }
-    if( stat_dev != 0 ){
-        magma_zmfree( B, queue );
-        return MAGMA_ERR_DEVICE_ALLOC;
-    }
-    return MAGMA_SUCCESS;
+    return info;
 }
 
 

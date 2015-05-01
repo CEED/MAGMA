@@ -11,7 +11,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -51,7 +51,7 @@
 
 extern "C" magma_int_t
 magma_zsolverinfo(
-    magma_z_solver_par *solver_par, 
+    magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
@@ -61,7 +61,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             if ( solver_par->solver == Magma_CG )
-                printf("#   CG performance analysis every %d iteration\n", 
+                printf("#   CG performance analysis every %d iteration\n",
                                                                     (int) k);
             else if ( solver_par->solver == Magma_PCG ) {
                 if ( precond_par->solver == Magma_JACOBI )
@@ -76,7 +76,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                    (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -86,7 +86,7 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                      solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_CGMERGE ) {
         if ( solver_par->verbose > 0 ) {
@@ -99,7 +99,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                    (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -109,16 +109,16 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int)(solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
-    } else if ( solver_par->solver == Magma_BICGSTAB || 
+    } else if ( solver_par->solver == Magma_BICGSTAB ||
                         solver_par->solver == Magma_PBICGSTAB ) {
         if ( solver_par->verbose > 0 ) {
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
                     "======#\n");
             if ( solver_par->solver == Magma_BICGSTAB )
-                printf("#   BiCGStab performance analysis every %d iteration\n", 
+                printf("#   BiCGStab performance analysis every %d iteration\n",
                                                              (int) k);
             else if ( solver_par->solver == Magma_PBICGSTAB ) {
                 if ( precond_par->solver == Magma_JACOBI )
@@ -132,7 +132,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -142,7 +142,7 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_BICGSTABMERGE ) {
         if ( solver_par->verbose > 0 ) {
@@ -153,7 +153,7 @@ magma_zsolverinfo(
                    " every %d iteration\n", (int) k);
             printf("#   iter   ||   residual-nrm2    ||   runtime \n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -163,7 +163,7 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_BICGSTABMERGE2 ) {
         if ( solver_par->verbose > 0 ) {
@@ -176,7 +176,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                   (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -186,16 +186,16 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
-    } else if ( solver_par->solver == Magma_GMRES || 
+    } else if ( solver_par->solver == Magma_GMRES ||
                         solver_par->solver == Magma_PGMRES ) {
         if ( solver_par->verbose > 0 ) {
             magma_int_t k = solver_par->verbose;
             printf("#======================================================="
                     "======#\n");
             if ( solver_par->solver == Magma_GMRES )
-                printf("#   GMRES-(%d) performance analysis\n", 
+                printf("#   GMRES-(%d) performance analysis\n",
                                                  (int) solver_par->restart);
             else if ( solver_par->solver == Magma_PGMRES ) {
                 if ( precond_par->solver == Magma_JACOBI )
@@ -209,7 +209,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                  (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -219,7 +219,7 @@ magma_zsolverinfo(
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
         printf("#    iterative residual: %e\n", solver_par->iter_res );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_ITERREF ) {
         if ( solver_par->verbose > 0 ) {
@@ -232,7 +232,7 @@ magma_zsolverinfo(
             printf("#======================================================="
                     "======#\n");
             for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                printf("   %4d    ||    %e    ||    %f\n", 
+                printf("   %4d    ||    %e    ||    %f\n",
                    (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
             }
         }
@@ -241,7 +241,7 @@ magma_zsolverinfo(
         printf("# Iterative Refinement solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_JACOBI ) {
         printf("#======================================================="
@@ -249,7 +249,7 @@ magma_zsolverinfo(
         printf("# Jacobi solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_BAITER ) {
         printf("#======================================================="
@@ -257,7 +257,7 @@ magma_zsolverinfo(
         printf("# Block-asynchronous iteration solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_LOBPCG ) {
         printf("#======================================================="
@@ -265,7 +265,7 @@ magma_zsolverinfo(
         printf("# LOBPCG eigensolver solver summary:\n");
         printf("#    initial residual: %e\n", solver_par->init_res );
         printf("#    iterations: %4d\n", (int) (solver_par->numiter) );
-        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n", 
+        printf("#    exact final residual: %e\n#    runtime: %.4f sec\n",
                     solver_par->final_res, solver_par->runtime);
     } else if ( solver_par->solver == Magma_BCSRLU ) {
         printf("#======================================================="
@@ -275,7 +275,7 @@ magma_zsolverinfo(
         printf("#    exact final residual: %e\n", solver_par->final_res );
         printf("#    runtime factorization: %4f sec\n",
                     solver_par->timing[0] );
-        printf("#    runtime triangular solve: %.4f sec\n", 
+        printf("#    runtime triangular solve: %.4f sec\n",
                     solver_par->timing[1] );
 
     } else {
@@ -283,7 +283,8 @@ magma_zsolverinfo(
         solver_par->info = MAGMA_ERR_NOT_SUPPORTED;
     }
 
-    printf("#    solver info: %d\n", 
+    printf("#    solver info: %s (%d)\n",
+                magma_strerror( solver_par->info ),
                 solver_par->info );
     printf("#======================================================="
             "======#\n");
@@ -306,7 +307,7 @@ magma_zsolverinfo(
                 structure containing all solver information
     @param[in,out]
     precond_par magma_z_preconditioner*
-                structure containing all preconditioner information                
+                structure containing all preconditioner information
                 
     @param[in]
     queue       magma_queue_t
@@ -317,7 +318,7 @@ magma_zsolverinfo(
 
 extern "C" magma_int_t
 magma_zsolverinfo_free(
-    magma_z_solver_par *solver_par, 
+    magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
@@ -436,13 +437,8 @@ magma_zsolverinfo_free(
         precond_par->solver == Magma_AILU ||
         precond_par->solver == Magma_ICC||
         precond_par->solver == Magma_AICC ) {
-        cusparseStatus_t cusparseStatus;
-        cusparseStatus =
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoL );
-         if (cusparseStatus != 0)    printf("error in info-free.\n");
-        cusparseStatus =
-        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU );
-         if (cusparseStatus != 0)    printf("error in info-free.\n");
+        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoL ); 
+        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
 
     }
     if ( precond_par->LD.val != NULL ) {
@@ -514,7 +510,7 @@ magma_zsolverinfo_free(
                 structure containing all solver information
     @param[in,out]
     precond_par magma_z_preconditioner*
-                structure containing all preconditioner information                
+                structure containing all preconditioner information
                 
     @param[in]
     queue       magma_queue_t
@@ -525,11 +521,11 @@ magma_zsolverinfo_free(
 
 extern "C" magma_int_t
 magma_zsolverinfo_init(
-    magma_z_solver_par *solver_par, 
+    magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t stat = 0;
+    magma_int_t info = 0;
     solver_par->res_vec = NULL;
     solver_par->timing = NULL;
     solver_par->eigenvectors = NULL;
@@ -545,23 +541,14 @@ magma_zsolverinfo_init(
         solver_par->solver = Magma_CG;
 
     if ( solver_par->verbose > 0 ) {
-        stat += 
-        magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t) 
-                * ( (solver_par->maxiter)/(solver_par->verbose)+1) );
-        if( stat != 0 ){
-            return MAGMA_ERR_HOST_ALLOC;
-        }
-        stat += 
-        magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t) 
-                *( (solver_par->maxiter)/(solver_par->verbose)+1) );
-        if( stat != 0 ){
-            magma_free_cpu( solver_par->res_vec );
-            return MAGMA_ERR_HOST_ALLOC;
-        }
+        CHECK( magma_malloc_cpu( (void **)&solver_par->res_vec, sizeof(real_Double_t)
+                * ( (solver_par->maxiter)/(solver_par->verbose)+1) ));
+        CHECK( magma_malloc_cpu( (void **)&solver_par->timing, sizeof(real_Double_t)
+                *( (solver_par->maxiter)/(solver_par->verbose)+1) ));
     } else {
         solver_par->res_vec = NULL;
         solver_par->timing = NULL;
-    }  
+    }
 
     precond_par->d.val = NULL;
     precond_par->d2.val = NULL;
@@ -593,8 +580,12 @@ magma_zsolverinfo_init(
     precond_par->UD.row = NULL;
     precond_par->UD.blockinfo = NULL;
 
-
-    return MAGMA_SUCCESS;
+cleanup:
+    if( info != 0 ){
+        magma_free( solver_par->timing );
+        magma_free( solver_par->res_vec );
+    }
+    return info;
 }
 
 
@@ -609,7 +600,7 @@ magma_zsolverinfo_init(
 
     @param[in,out]
     solver_par  magma_z_solver_par*
-                structure containing all solver information           
+                structure containing all solver information
                 
     @param[in]
     queue       magma_queue_t
@@ -623,42 +614,37 @@ magma_zeigensolverinfo_init(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t stat = 0;
+    magma_int_t info = 0;
+    magmaDoubleComplex *initial_guess=NULL;
     solver_par->eigenvectors = NULL;
     solver_par->eigenvalues = NULL;
     if ( solver_par->solver == Magma_LOBPCG ) {
-        stat += 
-        magma_dmalloc_cpu( &solver_par->eigenvalues , 
-                                3*solver_par->num_eigenvalues );
+        CHECK( magma_dmalloc_cpu( &solver_par->eigenvalues ,
+                                3*solver_par->num_eigenvalues ));
         // setup initial guess EV using lapack
         // then copy to GPU
         magma_int_t ev = solver_par->num_eigenvalues * solver_par->ev_length;
-        magmaDoubleComplex *initial_guess;
-        stat += 
-        magma_zmalloc_cpu( &initial_guess, ev );
-        if( stat != 0 ){
-            return MAGMA_ERR_HOST_ALLOC;
-        }
-        stat = 
-        magma_zmalloc( &solver_par->eigenvectors, ev );
-        if( stat != 0 ){
-            magma_free_cpu( initial_guess );
-            return MAGMA_ERR_DEVICE_ALLOC;
-        }
+
+        CHECK( magma_zmalloc_cpu( &initial_guess, ev ));
+        CHECK( magma_zmalloc( &solver_par->eigenvectors, ev ));
         magma_int_t ISEED[4] = {0,0,0,1}, ione = 1;
         lapackf77_zlarnv( &ione, ISEED, &ev, initial_guess );
 
-        magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues, 
-            initial_guess, solver_par->ev_length, solver_par->eigenvectors, 
+        magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues,
+            initial_guess, solver_par->ev_length, solver_par->eigenvectors,
                                                     solver_par->ev_length );
-        magma_free_cpu( initial_guess );
     } else {
         solver_par->eigenvectors = NULL;
         solver_par->eigenvalues = NULL;
-    } 
+    }
 
-
-    return MAGMA_SUCCESS;
+cleanup:
+    if( info != 0 ){
+        magma_free( solver_par->eigenvectors );
+        magma_free( solver_par->eigenvalues );
+    }
+    magma_free_cpu( initial_guess );
+    return info;
 }
 
 

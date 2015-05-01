@@ -10,7 +10,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -26,7 +26,7 @@
     Purpose
     -------
 
-    Allocates memory for magma_z_matrix and initializes it 
+    Allocates memory for magma_z_matrix and initializes it
     with the passed value.
 
 
@@ -35,15 +35,15 @@
 
     @param[out]
     x           magma_z_matrix*
-                vector to initialize   
+                vector to initialize
 
     @param[in]
     mem_loc     magma_location_t
-                memory for vector 
+                memory for vector
 
     @param[in]
     num_rows    magma_int_t
-                desired length of vector      
+                desired length of vector
 
     @param[in]
     values      magmaDoubleComplex
@@ -58,15 +58,17 @@
 
 extern "C" magma_int_t
 magma_zvinit(
-    magma_z_matrix *x, 
+    magma_z_matrix *x,
     magma_location_t mem_loc,
-    magma_int_t num_rows, 
-    magma_int_t num_cols,   
+    magma_int_t num_rows,
+    magma_int_t num_cols,
     magmaDoubleComplex values,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
     // set queue for old dense routines
-    magma_queue_t orig_queue;
+    magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
 
     x->memory_location = Magma_CPU;
@@ -78,26 +80,17 @@ magma_zvinit(
     x->major = MagmaColMajor;
     if ( mem_loc == Magma_CPU ) {
         x->memory_location = Magma_CPU;
-
-        magma_zmalloc_cpu( &x->val, x->nnz );
-        if ( x->val == NULL ) {
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_ERR_HOST_ALLOC;
-    }
+        CHECK( magma_zmalloc_cpu( &x->val, x->nnz ));
         for( magma_int_t i=0; i<x->nnz; i++)
-             x->val[i] = values; 
+             x->val[i] = values;
     }
     else if ( mem_loc == Magma_DEV ) {
         x->memory_location = Magma_DEV;
-
-        if (MAGMA_SUCCESS != magma_zmalloc( &x->dval, x->nnz)){ 
-            magmablasSetKernelStream( orig_queue );
-            return MAGMA_ERR_DEVICE_ALLOC;
-        }
-
+        CHECK( magma_zmalloc( &x->val, x->nnz ));
         magmablas_zlaset(MagmaFull, x->num_rows, x->num_cols, values, values, x->val, x->num_rows);
-
     }
+    
+cleanup:
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }

@@ -9,11 +9,11 @@
        @author Hartwig Anzt
 */
 
-//  in this file, many routines are taken from 
+//  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -31,15 +31,15 @@
     ---------
 
     @param[in]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[in]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[in]
-    val         magmaDoubleComplex_ptr 
+    val         magmaDoubleComplex_ptr
                 array containing vector entries
 
     @param[out]
@@ -55,7 +55,7 @@
 extern "C"
 magma_int_t
 magma_zvset_dev(
-    magma_int_t m, magma_int_t n, 
+    magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr val,
     magma_z_matrix *v,
     magma_queue_t queue )
@@ -86,15 +86,15 @@ magma_zvset_dev(
                 magma vector
 
     @param[out]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[out]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[out]
-    val         magmaDoubleComplex_ptr 
+    val         magmaDoubleComplex_ptr
                 array containing vector entries
 
     @param[in]
@@ -108,11 +108,13 @@ extern "C"
 magma_int_t
 magma_zvget_dev(
     magma_z_matrix v,
-    magma_int_t *m, magma_int_t *n, 
+    magma_int_t *m, magma_int_t *n,
     magmaDoubleComplex_ptr *val,
     magma_queue_t queue )
 {
-    magma_int_t stat_dev =0;
+    magma_int_t info =0;
+    
+    magma_z_matrix v_DEV={Magma_CSR};
     
     if ( v.memory_location == Magma_DEV ) {
 
@@ -120,15 +122,13 @@ magma_zvget_dev(
         *n = v.num_cols;
         *val = v.dval;
     } else {
-        magma_z_matrix v_DEV;
-        stat_dev += magma_zmtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ); 
-        magma_zvget_dev( v_DEV, m, n, val, queue );
-        magma_zmfree( &v_DEV, queue );
-        if( stat_dev != 0 ){
-            return MAGMA_ERR_DEVICE_ALLOC;
-        }
+        CHECK( magma_zmtransfer( v, &v_DEV, v.memory_location, Magma_DEV, queue ));
+        CHECK( magma_zvget_dev( v_DEV, m, n, val, queue ));
     }
-    return MAGMA_SUCCESS;
+    
+cleanup:
+    magma_zmfree( &v_DEV, queue );
+    return info;
 }
 
 

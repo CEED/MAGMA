@@ -9,11 +9,11 @@
        @author Hartwig Anzt
 */
 
-//  in this file, many routines are taken from 
+//  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -43,11 +43,11 @@ void magma_zsymbolic_ilu(
   const magma_int_t n,
   magma_int_t *nzl,
   magma_int_t *nzu,
-  const mwIndex *ia, 
+  const mwIndex *ia,
   const mwIndex *ja,
-  mwIndex *ial, 
+  mwIndex *ial,
   mwIndex *jal,
-  mwIndex *iau, 
+  mwIndex *iau,
   mwIndex *jau);
 
 
@@ -102,7 +102,7 @@ void magma_zshell_sort(
                 x[k+m] = x[k];
                 x[k] = itemp;
             }
-        }  
+        }
         m = m/2;
     }
 }
@@ -119,33 +119,29 @@ void magma_zsymbolic_ilu(
   const magma_int_t n,                       /* order of matrix */
   magma_int_t *nzl,                          /* input-output */
   magma_int_t *nzu,                          /* input-output */
-  const mwIndex *ia, 
+  const mwIndex *ia,
   const mwIndex *ja,    /* input */
-  mwIndex *ial, 
+  mwIndex *ial,
   mwIndex *jal,              /* output lower factor structure */
-  mwIndex *iau, 
+  mwIndex *iau,
   mwIndex *jau)              /* output upper factor structure */
 {
-    magma_int_t i;
-    magma_index_t *lnklst; 
-    magma_index_t *curlev;
-    magma_index_t *levels;
-    magma_index_t *iwork;
-    magma_int_t stat_cpu = 0;
-
-    stat_cpu += magma_index_malloc_cpu( &lnklst, n );
-    stat_cpu += magma_index_malloc_cpu( &curlev, n );
-    stat_cpu += magma_index_malloc_cpu( &levels, *nzu );
-    stat_cpu += magma_index_malloc_cpu( &iwork, n );
+    magma_int_t info = 0;
     
-    if( stat_cpu != 0 ){
-        magma_free_cpu(lnklst);
-        magma_free_cpu(curlev);
-        magma_free_cpu(levels);
-        magma_free_cpu(iwork);
-        printf("error: memory allocation.\n");
-    }
+    magma_int_t i;
+    magma_index_t *lnklst=NULL;
+    magma_index_t *curlev=NULL;
+    magma_index_t *levels=NULL;
+    magma_index_t *iwork=NULL;
+    
+    magma_int_t knzl = 0;
+    magma_int_t knzu = 0;
 
+    CHECK( magma_index_malloc_cpu( &lnklst, n ));
+    CHECK( magma_index_malloc_cpu( &curlev, n ));
+    CHECK( magma_index_malloc_cpu( &levels, *nzu ));
+    CHECK( magma_index_malloc_cpu( &iwork, n ));
+    
     for(magma_int_t t=0; t<n; t++){
         lnklst[t] = 0;
         curlev[t] = 0;
@@ -155,9 +151,6 @@ void magma_zsymbolic_ilu(
     for(magma_int_t t=0; t<*nzu; t++){
         levels[t] = 0;
     }
-
-    magma_int_t knzl = 0;
-    magma_int_t knzu = 0;
 
     ial[0] = 0;
     iau[0] = 0;
@@ -283,10 +276,7 @@ void magma_zsymbolic_ilu(
         iau[i+1] = knzu;
     }
 
-    magma_free_cpu(lnklst);
-    magma_free_cpu(curlev);
-    magma_free_cpu(levels);
-    magma_free_cpu(iwork);
+
 
     *nzl = knzl;
     *nzu = knzu;
@@ -296,6 +286,17 @@ void magma_zsymbolic_ilu(
 #if 0
     cout << "Actual nnz for ILU: " << *nzl + *nzu << endl;
 #endif
+
+cleanup:
+    magma_free_cpu(lnklst);
+    magma_free_cpu(curlev);
+    magma_free_cpu(levels);
+    magma_free_cpu(iwork);
+    magma_free_cpu(lnklst);
+    magma_free_cpu(curlev);
+    magma_free_cpu(levels);
+    magma_free_cpu(iwork);
+
 }
 
 
@@ -309,71 +310,73 @@ void magma_zsymbolic_ilu(
 
     Arguments
     ---------
-    @param
+    @param[in,out]
     A           magma_z_matrix*
-                matrix in magma sparse matrix format containing the original 
+                matrix in magma sparse matrix format containing the original
                 matrix on input, and L,U on output
 
-    @param
+    @param[in]
     levels      magma_magma_int_t_t
                 fill in level
 
-    @param
+    @param[out]
     L           magma_z_matrix*
                 output lower triangular matrix in magma sparse matrix format
+                empty on function call
 
-    @param
+    @param[out]
     U           magma_z_matrix*
                 output upper triangular matrix in magma sparse matrix format
-
+                empty on function call
+                
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C"
 magma_int_t
-magma_zsymbilu( 
-    magma_z_matrix *A, 
-    magma_int_t levels, 
-    magma_z_matrix *L, 
+magma_zsymbilu(
+    magma_z_matrix *A,
+    magma_int_t levels,
+    magma_z_matrix *L,
     magma_z_matrix *U,
-    magma_queue_t queue ){
-
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+    
+    magma_z_matrix A_copy={Magma_CSR}, B={Magma_CSR};
+    magma_z_matrix hA={Magma_CSR}, CSRCOOA={Magma_CSR};
     
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
 
-        magma_z_matrix A_copy, B;
-        magma_int_t stat_cpu = 0;
-
-        magma_zmtransfer( *A, &A_copy, Magma_CPU, Magma_CPU, queue );
-        magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
+        CHECK( magma_zmtransfer( *A, &A_copy, Magma_CPU, Magma_CPU, queue ));
+        CHECK( magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ));
 
         // possibility to scale to unit diagonal
         //magma_zmscale( &B, Magma_UNITDIAG );
 
-        magma_zmconvert( B, L, Magma_CSR, Magma_CSR , queue);
-        magma_zmconvert( B, U, Magma_CSR, Magma_CSR, queue );
+        CHECK( magma_zmconvert( B, L, Magma_CSR, Magma_CSR , queue));
+        CHECK( magma_zmconvert( B, U, Magma_CSR, Magma_CSR, queue ));
 
         magma_int_t num_lnnz = (levels > 0 ) ? B.nnz/2*(2*levels+50) : B.nnz;
         magma_int_t num_unnz = (levels > 0 ) ? B.nnz/2*(2*levels+50) : B.nnz;
 
         magma_free_cpu( L->col );
         magma_free_cpu( U->col );
-        stat_cpu += magma_index_malloc_cpu( &L->col, num_lnnz );
-        stat_cpu += magma_index_malloc_cpu( &U->col, num_unnz );
-        if( stat_cpu != 0 ){
-            magma_zmfree( L, queue );
-            printf("error: memory allocation.\n");
-            return MAGMA_ERR_HOST_ALLOC;
-        }
-        magma_zsymbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col, 
-                                            L->row, L->col, U->row, U->col ); 
+        CHECK( magma_index_malloc_cpu( &L->col, num_lnnz ));
+        CHECK( magma_index_malloc_cpu( &U->col, num_unnz ));
+
+        magma_zsymbolic_ilu( levels, A->num_rows, &num_lnnz, &num_unnz, B.row, B.col,
+                                            L->row, L->col, U->row, U->col );
         L->nnz = num_lnnz;
         U->nnz = num_unnz;
         magma_free_cpu( L->val );
         magma_free_cpu( U->val );
-        stat_cpu += magma_zmalloc_cpu( &L->val, L->nnz );
-        stat_cpu += magma_zmalloc_cpu( &U->val, U->nnz );
+        CHECK( magma_zmalloc_cpu( &L->val, L->nnz ));
+        CHECK( magma_zmalloc_cpu( &U->val, U->nnz ));
         for( magma_int_t i=0; i<L->nnz; i++ )
             L->val[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
 
@@ -406,15 +409,10 @@ magma_zsymbilu(
         // fill A with the new structure;
         magma_free_cpu( A->col );
         magma_free_cpu( A->val );
-        stat_cpu += magma_index_malloc_cpu( &A->col, L->nnz+U->nnz );
-        stat_cpu += magma_zmalloc_cpu( &A->val, L->nnz+U->nnz );
-        if( stat_cpu != 0 ){
-            magma_zmfree( L, queue );
-            printf("error: memory allocation.\n");
-            return MAGMA_ERR_HOST_ALLOC;
-        }
+        CHECK( magma_index_malloc_cpu( &A->col, L->nnz+U->nnz ));
+        CHECK( magma_zmalloc_cpu( &A->val, L->nnz+U->nnz ));
         A->nnz = L->nnz+U->nnz ;
-    
+        
         magma_int_t z = 0;
         for(magma_int_t i=0; i<A->num_rows; i++){
             A->row[i] = z;
@@ -441,28 +439,30 @@ magma_zsymbilu(
                 }
             }
         }
-        magma_zmfree( &A_copy, queue );
-
-        return MAGMA_SUCCESS;
     }
     else{
-
-        magma_z_matrix hA, CSRCOOA;
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
-        magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue );
-        magma_zmconvert( hA, &CSRCOOA, hA.storage_type, Magma_CSR, queue );
+        CHECK( magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue ));
+        CHECK( magma_zmconvert( hA, &CSRCOOA, hA.storage_type, Magma_CSR, queue ));
 
-        magma_zsymbilu( &CSRCOOA, levels, L, U, queue );
+        CHECK( magma_zsymbilu( &CSRCOOA, levels, L, U, queue ));
 
         magma_zmfree( &hA, queue );
         magma_zmfree( A, queue );
-        magma_zmconvert( CSRCOOA, &hA, Magma_CSR, A_storage, queue );
-        magma_zmtransfer( hA, A, Magma_CPU, A_location, queue );
-        magma_zmfree( &hA, queue );
-        magma_zmfree( &CSRCOOA, queue );    
-
-        return MAGMA_SUCCESS; 
+        CHECK( magma_zmconvert( CSRCOOA, &hA, Magma_CSR, A_storage, queue ));
+        CHECK( magma_zmtransfer( hA, A, Magma_CPU, A_location, queue ));
     }
+    
+cleanup:
+    if( info != 0 ){
+        magma_zmfree( L, queue );
+        magma_zmfree( U, queue );
+    }
+    magma_zmfree( &A_copy, queue );
+    magma_zmfree( &B, queue );
+    magma_zmfree( &hA, queue );
+    magma_zmfree( &CSRCOOA, queue );
+    return info;
 }
 

@@ -233,12 +233,7 @@ magma_zsymbilu(
 
 magma_int_t 
 magma_zwrite_csr_mtx( 
-    magma_int_t n_row, 
-    magma_int_t n_col, 
-    magma_int_t nnz, 
-    magmaDoubleComplex **val, 
-    magma_index_t **row, 
-    magma_index_t **col, 
+    magma_z_matrix A,
     magma_order_t MajorType,
  const char *filename,
     magma_queue_t queue );
@@ -349,6 +344,15 @@ magma_zresidual(
     magma_z_matrix A, 
     magma_z_matrix b, 
     magma_z_matrix x, 
+    double *res,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zresidualvec(
+    magma_z_matrix A,
+    magma_z_matrix b,
+    magma_z_matrix x,
+    magma_z_matrix *r,
     double *res,
     magma_queue_t queue );
 

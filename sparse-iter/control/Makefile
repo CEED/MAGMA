@@ -13,6 +13,7 @@ include $(MAGMA_DIR)/Makefile.internal
 INC += -I../include
 
 ZSRC := \
+	error.cpp				\
 	magma_zdomainoverlap.cpp    \
 	magma_zutil_sparse.cpp	\
 	magma_zfree.cpp		    \

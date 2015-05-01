@@ -19,21 +19,20 @@
 #include <cuda_profiler_api.h>
 
 
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
 #include <iostream>
 
 /////////////////////////////////////
-// CUDA imports 
+// CUDA imports
 /////////////////////////////////////
 #include <cuda_runtime.h>
 #include <cublas.h>
 
 #include "magma_lapack.h"
-#include "common_magma.h"
-#include "magmasparse.h"
+#include "common_magmasparse.h"
 
 // includes, project
 #include "magma.h"
@@ -43,7 +42,7 @@
 #define STREAM_COUNT 4
 
 /////////////////////////////////////
-// error checking 
+// error checking
 /////////////////////////////////////
 extern "C" magma_int_t
 magma_zcheckerr(
@@ -57,7 +56,7 @@ magma_zcheckerr(
         const char *e = cudaGetErrorString(err);
         fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
     }
-    return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS; // TODO change to goto cleanup?
 }
 
 
@@ -124,18 +123,18 @@ magma_z_initP2P(
     printf("\nChecking GPU(s) for support of peer to peer memory access...\n");
     int can_access_peer_0_1, can_access_peer_1_0;
     // In this case we just pick the first two that we can support
-     (cudaDeviceCanAccessPeer(&can_access_peer_0_1, gpuid_tesla[i], 
+     (cudaDeviceCanAccessPeer(&can_access_peer_0_1, gpuid_tesla[i],
                                                         gpuid_tesla[j]));
-     (cudaDeviceCanAccessPeer(&can_access_peer_1_0, gpuid_tesla[j], 
+     (cudaDeviceCanAccessPeer(&can_access_peer_1_0, gpuid_tesla[j],
                                                         gpuid_tesla[i]));
 
 
     // Output results from P2P capabilities
-    printf("> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n", 
-                        prop[gpuid_tesla[i]].name, gpuid_tesla[i],                                                                  
+    printf("> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n",
+                        prop[gpuid_tesla[i]].name, gpuid_tesla[i],
                         prop[gpuid_tesla[j]].name, gpuid_tesla[j] ,
                              can_access_peer_0_1 ? "Yes" : "No");
-    printf("> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n", 
+    printf("> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n",
                         prop[gpuid_tesla[j]].name, gpuid_tesla[j],
                         prop[gpuid_tesla[i]].name, gpuid_tesla[i],
                             can_access_peer_1_0 ? "Yes" : "No");
@@ -150,7 +149,7 @@ magma_z_initP2P(
         printf("PASSED\n");
         //exit(EXIT_SUCCESS);
     }
-     }    
+     }
     }
 
   // Enable peer access
@@ -177,14 +176,14 @@ magma_z_initP2P(
         for(int j=i+1; j<gpu_n; j++)
         {
     // Check that we got UVA on both devices
-    printf("Checking GPU%d and GPU%d for UVA capabilities...\n", 
+    printf("Checking GPU%d and GPU%d for UVA capabilities...\n",
     gpuid_tesla[i], gpuid_tesla[j]);
-    //const bool has_uva = (prop[gpuid_tesla[i]].unifiedAddressing && 
+    //const bool has_uva = (prop[gpuid_tesla[i]].unifiedAddressing &&
     //                            prop[gpuid_tesla[j]].unifiedAddressing);
 
-    printf("> %s (GPU%d) supports UVA: %s\n", prop[gpuid_tesla[i]].name, 
+    printf("> %s (GPU%d) supports UVA: %s\n", prop[gpuid_tesla[i]].name,
     gpuid_tesla[i], (prop[gpuid_tesla[i]].unifiedAddressing ? "Yes" : "No") );
-    printf("> %s (GPU%d) supports UVA: %s\n", prop[gpuid_tesla[j]].name, 
+    printf("> %s (GPU%d) supports UVA: %s\n", prop[gpuid_tesla[j]].name,
     gpuid_tesla[j], (prop[gpuid_tesla[j]].unifiedAddressing ? "Yes" : "No") );
 
         }
@@ -202,7 +201,7 @@ magma_z_initP2P(
         {
     // Allocate buffers
     const size_t buf_size = 1024 * 1024 * 16 * sizeof(float);
-    printf("Allocating buffers (%iMB on GPU%d, GPU%d and CPU Host)...\n", 
+    printf("Allocating buffers (%iMB on GPU%d, GPU%d and CPU Host)...\n",
                 int(buf_size / 1024 / 1024), gpuid_tesla[i], gpuid_tesla[j]);
     (cudaSetDevice(gpuid_tesla[i]));
     float* g0;
@@ -239,7 +238,7 @@ magma_z_initP2P(
     (cudaEventElapsedTime(&time_memcpy, start_event, stop_event));
     printf("cudaMemcpyPeer / cudaMemcpy between"
             "GPU%d and GPU%d: %.2fGB/s\n", gpuid_tesla[i], gpuid_tesla[j],
-        (1.0f / (time_memcpy / 1000.0f)) 
+        (1.0f / (time_memcpy / 1000.0f))
             * ((100.0f * buf_size)) / 1024.0f / 1024.0f / 1024.0f);
 
 
@@ -282,21 +281,21 @@ magma_z_initP2P(
     memsize = 1000000 * sizeof(int);
 
     h_data_source = (int*) malloc(memsize);
-    h_data_sink = (int*) malloc(memsize);    
+    h_data_sink = (int*) malloc(memsize);
 
     for( int i =0; i<STREAM_COUNT; ++i ) {
         
-        ( cudaHostAlloc(&h_data_in[i], memsize, 
+        ( cudaHostAlloc(&h_data_in[i], memsize,
             cudaHostAllocDefault) );
         ( cudaMalloc(&d_data_in[i], memsize) );
         
-        ( cudaHostAlloc(&h_data_out[i], memsize, 
+        ( cudaHostAlloc(&h_data_out[i], memsize,
             cudaHostAllocDefault) );
         ( cudaMalloc(&d_data_out[i], memsize) );
 
         
         ( cudaStreamCreate(&stream[i]) );
-        ( cudaEventCreate(&cycleDone[i]) ); 
+        ( cudaEventCreate(&cycleDone[i]) );
         
         cudaEventRecord(cycleDone[i], stream[i]);
     }
@@ -307,22 +306,22 @@ magma_z_initP2P(
 
     // Time host-device copies
     cudaEventRecord(start,0);
-    ( cudaMemcpyAsync(d_data_in[0], h_data_in[0], memsize, 
+    ( cudaMemcpyAsync(d_data_in[0], h_data_in[0], memsize,
         cudaMemcpyHostToDevice,0) );
     cudaEventRecord(stop,0);
     cudaEventSynchronize(stop);
     
-    float memcpy_h2d_time;    
+    float memcpy_h2d_time;
     cudaEventElapsedTime(&memcpy_h2d_time, start, stop);
 
     
     cudaEventRecord(start,0);
-    ( cudaMemcpyAsync(h_data_out[0], d_data_out[0], memsize, 
-        cudaMemcpyDeviceToHost, 0) );        
+    ( cudaMemcpyAsync(h_data_out[0], d_data_out[0], memsize,
+        cudaMemcpyDeviceToHost, 0) );
     cudaEventRecord(stop,0);
     cudaEventSynchronize(stop);
     
-    float memcpy_d2h_time;    
+    float memcpy_d2h_time;
     cudaEventElapsedTime(&memcpy_d2h_time, start, stop);
     
     cudaEventSynchronize(stop);
@@ -346,7 +345,7 @@ magma_z_initP2P(
         magma_free( d_data_out[i] );
         
         cudaStreamDestroy(stream[i]);
-        cudaEventDestroy(cycleDone[i]);        
+        cudaEventDestroy(cycleDone[i]);
     }
     
     cudaEventDestroy(start);
@@ -359,6 +358,6 @@ magma_z_initP2P(
 
     magma_zcheckerr("P2P established");
 
-    return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS; // TODO change to goto cleanup?
 }
 

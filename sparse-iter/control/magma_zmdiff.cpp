@@ -10,7 +10,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -22,7 +22,7 @@
     Purpose
     -------
 
-    Computes the Frobenius norm of the difference between the CSR matrices A 
+    Computes the Frobenius norm of the difference between the CSR matrices A
     and B. They do not need to share the same sparsity pattern!
         
             res = ||A-B||_F = sqrt( sum_ij (A_ij-B_ij)^2 )
@@ -37,11 +37,11 @@
 
     @param[in]
     B           magma_z_matrix
-                sparse matrix in CSR    
+                sparse matrix in CSR
                 
     @param[out]
-    res         real_Double_t* 
-                residual 
+    res         real_Double_t*
+                residual
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -51,10 +51,11 @@
 
 extern "C" magma_int_t
 magma_zmdiff(
-    magma_z_matrix A, magma_z_matrix B, 
+    magma_z_matrix A, magma_z_matrix B,
     real_Double_t *res,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     
     if( A.memory_location == Magma_CPU && B.memory_location == Magma_CPU
             && A.storage_type == Magma_CSR && B.storage_type == Magma_CSR ){
@@ -73,16 +74,15 @@ magma_zmdiff(
                         (*res) = (*res) + tmp2* tmp2;
                     }
                 }
-            }      
+            }
         }
 
         (*res) =  sqrt((*res));
-
-        return MAGMA_SUCCESS;
     }
     else{
         printf("error: mdiff only supported for CSR matrices on the CPU.\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
+    return info;
 }
 

@@ -5,13 +5,12 @@
        Univ. of Colorado, Denver
        @date
 
-       @author Hartwig Anzt 
+       @author Hartwig Anzt
 
        @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
-#include "magmasparse.h"
+#include "common_magmasparse.h"
 
 #include <assert.h>
 
@@ -55,18 +54,20 @@
 
 extern "C" magma_int_t
 magma_zcg(
-    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,  
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
     // set queue for old dense routines
-    magma_queue_t orig_queue;
+    magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_CG;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS; 
+    solver_par->info = MAGMA_SUCCESS;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -74,37 +75,37 @@ magma_zcg(
     magma_int_t dofs = A.num_rows * b.num_cols;
 
     // GPU workspace
-    magma_z_matrix r, p, q;
-    magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
-    magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
-    magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue );
+    magma_z_matrix r={Magma_CSR}, p={Magma_CSR}, q={Magma_CSR};
+    CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     
     // solver variables
     magmaDoubleComplex alpha, beta;
     double nom, nom0, r0, betanom, betanomsq, den;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1) ;                     // x = 0
-    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
-    magma_zcopy( dofs, b.dval, 1, p.dval, 1 );                    // p = b
-    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );           
+    CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
+    magma_zcopy( dofs, r.dval, 1, p.dval, 1 );                    // p = r
+    betanom = nom0;
     nom  = nom0 * nom0;                                // nom = r' * r
-    magma_z_spmv( c_one, A, p, c_zero, q, queue );                     // q = A p
+    CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) );// den = p dot q
     solver_par->init_res = nom0;
     
-    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
+    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
         r0 = ATOLERANCE;
     if ( nom < r0 ) {
-        magmablasSetKernelStream( orig_queue );
-        return MAGMA_SUCCESS;
+        solver_par->final_res = solver_par->init_res;
+        solver_par->iter_res = solver_par->init_res;
+        goto cleanup;
     }
     // check positive definite
     if (den <= 0.0) {
         printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         magmablasSetKernelStream( orig_queue );
-        return MAGMA_NONSPD;
-        solver_par->info = MAGMA_NONSPD;
+        info = MAGMA_NONSPD; 
+        goto cleanup;
     }
 
     //Chronometry
@@ -116,7 +117,7 @@ magma_zcg(
     }
     
     // start iteration
-    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter; 
+    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter;
                                                     solver_par->numiter++ ) {
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
         magma_zaxpy(dofs,  alpha, p.dval, 1, x->dval, 1);     // x = x + alpha p
@@ -127,9 +128,9 @@ magma_zcg(
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
-                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) betanom;
-                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
         }
@@ -140,48 +141,54 @@ magma_zcg(
 
         beta = MAGMA_Z_MAKE(betanomsq/nom, 0.);           // beta = betanoms/nom
         magma_zscal(dofs, beta, p.dval, 1);                // p = beta*p
-        magma_zaxpy(dofs, c_one, r.dval, 1, p.dval, 1);     // p = p + r 
-        magma_z_spmv( c_one, A, p, c_zero, q, queue );           // q = A p
-        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.dval, 1, q.dval, 1));    
+        magma_zaxpy(dofs, c_one, r.dval, 1, p.dval, 1);     // p = p + r
+        CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));   // q = A p
+        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.dval, 1, q.dval, 1));
                 // den = p dot q
         nom = betanomsq;
-    } 
+    }
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
-    magma_zresidual( A, b, *x, &residual, queue );
+    CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter) {
+    if ( solver_par->numiter < solver_par->maxiter ) {
         solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
-                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) betanom;
-                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = MAGMA_SLOW_CONVERGENCE;
+        info = MAGMA_SLOW_CONVERGENCE;
+        if( solver_par->iter_res < solver_par->epsilon*solver_par->init_res ){
+            info = MAGMA_SUCCESS;
+        }
     }
     else {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
-                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) betanom;
-                solver_par->timing[(solver_par->numiter)/solver_par->verbose] 
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-        solver_par->info = MAGMA_DIVERGENCE;
+        info = MAGMA_DIVERGENCE;
     }
+    
+cleanup:
     magma_zmfree(&r, queue );
     magma_zmfree(&p, queue );
     magma_zmfree(&q, queue );
 
     magmablasSetKernelStream( orig_queue );
-    return MAGMA_SUCCESS;
+    solver_par->info = info;
+    return info;
 }   /* magma_zcg */
 
 

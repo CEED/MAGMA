@@ -10,8 +10,7 @@
 
 */
 #include "magma_lapack.h"
-#include "common_magma.h"
-#include "../include/magmasparse.h"
+#include "common_magmasparse.h"
 
 #include <assert.h>
 
@@ -30,7 +29,7 @@
     -------
 
     Takes an strictly lower triangular matrix L and an upper triangular matrix U
-    and merges them into a matrix A containing the upper and lower triangular 
+    and merges them into a matrix A containing the upper and lower triangular
     parts.
 
     Arguments
@@ -46,19 +45,19 @@
     
     @param
     A           magma_z_matrix*
-                output matrix 
+                output matrix
 
     @ingroup magmasparse_zaux
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmlumerge(    magma_z_matrix L, 
+magma_zmlumerge(    magma_z_matrix L,
                     magma_z_matrix U,
                     magma_z_matrix *A){
 
     if( L.memory_location == Magma_CPU && U.memory_location == Magma_CPU ){
         
-        magma_zmtransfer( L, A, Magma_CPU, Magma_CPU );
+        CHECK( magma_zmtransfer( L, A, Magma_CPU, Magma_CPU ));
         magma_free_cpu( A->col );
         magma_free_cpu( A->val );
         // make sure it is strictly lower triangular
@@ -75,8 +74,8 @@ magma_zmlumerge(    magma_z_matrix L,
         }
         A->nnz = z;
         // fill A with the new structure;
-        magma_index_malloc_cpu( &A->col, A->nnz );
-        magma_zmalloc_cpu( &A->val, A->nnz );
+        CHECK( magma_index_malloc_cpu( &A->col, A->nnz ));
+        CHECK( magma_zmalloc_cpu( &A->val, A->nnz ));
         z = 0;
         for(magma_int_t i=0; i<A->num_rows; i++){
             A->row[i] = z;
@@ -95,14 +94,17 @@ magma_zmlumerge(    magma_z_matrix L,
         }
         A->row[A->num_rows] = z;
         A->nnz = z;
-        return MAGMA_SUCCESS; 
+
     }
     else{
 
-        printf("error: matrix not on CPU.\n"); 
-
-        return MAGMA_SUCCESS; 
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
+    
+cleanup:
+        magma_free_cpu( A->col );
+    magma_free_cpu( A->val );
+    return info;
 }
 
 

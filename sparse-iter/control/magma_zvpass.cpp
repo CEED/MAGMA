@@ -9,11 +9,11 @@
        @author Hartwig Anzt
 */
 
-//  in this file, many routines are taken from 
+//  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -31,11 +31,11 @@
     ---------
 
     @param[in]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[in]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[in]
@@ -55,7 +55,7 @@
 extern "C"
 magma_int_t
 magma_zvset(
-    magma_int_t m, magma_int_t n, 
+    magma_int_t m, magma_int_t n,
     magmaDoubleComplex *val,
     magma_z_matrix *v,
     magma_queue_t queue )
@@ -86,11 +86,11 @@ magma_zvset(
                 magma vector
 
     @param[out]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[out]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[out]
@@ -108,11 +108,12 @@ extern "C"
 magma_int_t
 magma_zvget(
     magma_z_matrix v,
-    magma_int_t *m, magma_int_t *n, 
+    magma_int_t *m, magma_int_t *n,
     magmaDoubleComplex **val,
     magma_queue_t queue )
 {
-    magma_int_t stat_dev =0;
+    magma_z_matrix v_CPU={Magma_CSR};
+    magma_int_t info =0;
     
     if ( v.memory_location == Magma_CPU ) {
 
@@ -120,15 +121,13 @@ magma_zvget(
         *n = v.num_cols;
         *val = v.val;
     } else {
-        magma_z_matrix v_CPU;
-        magma_zmtransfer( v, &v_CPU, v.memory_location, Magma_CPU, queue ); 
-        magma_zvget( v_CPU, m, n, val, queue );
-        magma_zmfree( &v_CPU, queue );
-        if( stat_dev != 0 ){
-            return MAGMA_ERR_DEVICE_ALLOC;
-        }
+        CHECK( magma_zmtransfer( v, &v_CPU, v.memory_location, Magma_CPU, queue ));
+        CHECK( magma_zvget( v_CPU, m, n, val, queue ));
     }
-    return MAGMA_SUCCESS;
+    
+cleanup:
+    magma_zmfree( &v_CPU, queue );
+    return info;
 }
 
 

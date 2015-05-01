@@ -9,11 +9,11 @@
        @author Hartwig Anzt
 */
 
-//  in this file, many routines are taken from 
+//  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -31,11 +31,11 @@
     ---------
 
     @param[in]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[in]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[in]
@@ -63,10 +63,10 @@
 extern "C"
 magma_int_t
 magma_zcsrset(
-    magma_int_t m, 
-    magma_int_t n, 
-    magma_index_t *row, 
-    magma_index_t *col,     
+    magma_int_t m,
+    magma_int_t n,
+    magma_index_t *row,
+    magma_index_t *col,
     magmaDoubleComplex *val,
     magma_z_matrix *A,
     magma_queue_t queue )
@@ -99,11 +99,11 @@ magma_zcsrset(
                 magma sparse matrix in CSR format
 
     @param[out]
-    m           magma_int_t 
+    m           magma_int_t
                 number of rows
 
     @param[out]
-    n           magma_int_t 
+    n           magma_int_t
                 number of columns
 
     @param[out]
@@ -129,29 +129,33 @@ extern "C"
 magma_int_t
 magma_zcsrget(
     magma_z_matrix A,
-    magma_int_t *m, 
-    magma_int_t *n, 
-    magma_index_t **row, 
-    magma_index_t **col, 
+    magma_int_t *m,
+    magma_int_t *n,
+    magma_index_t **row,
+    magma_index_t **col,
     magmaDoubleComplex **val,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
+    magma_z_matrix A_CPU={Magma_CSR}, A_CSR={Magma_CSR};
+        
     if ( A.memory_location == Magma_CPU && A.storage_type == Magma_CSR ) {
-
         *m = A.num_rows;
         *n = A.num_cols;
         *val = A.val;
         *col = A.col;
         *row = A.row;
     } else {
-        magma_z_matrix A_CPU, A_CSR;
-        magma_zmtransfer( A, &A_CPU, A.memory_location, Magma_CPU, queue ); 
-        magma_zmconvert( A_CPU, &A_CSR, A_CPU.storage_type, Magma_CSR, queue ); 
-        magma_zcsrget( A_CSR, m, n, row, col, val, queue );
-        magma_zmfree( &A_CSR, queue );
-        magma_zmfree( &A_CPU, queue );
+        CHECK( magma_zmtransfer( A, &A_CPU, A.memory_location, Magma_CPU, queue ));
+        CHECK( magma_zmconvert( A_CPU, &A_CSR, A_CPU.storage_type, Magma_CSR, queue ));
+        CHECK( magma_zcsrget( A_CSR, m, n, row, col, val, queue ));
     }
-    return MAGMA_SUCCESS;
+
+cleanup:
+    magma_zmfree( &A_CSR, queue );
+    magma_zmfree( &A_CPU, queue );
+    return info;
 }
 
 

@@ -33,8 +33,6 @@ ZSRC += \
 	zbaiter.cpp			\
 	zpcg.cpp			\
 	zbpcg.cpp			\
-	zgmres.cpp			\
-	zpgmres.cpp			\
 	zfgmres.cpp 		\
 	zpbicgstab.cpp		\
 
@@ -60,14 +58,12 @@ ZSRC += \
 #	zungqr_chol.cpp		\
 #	zungqr_iter.cpp		\
 
-# ILU and sparse direct
+# iterative ILU
 ZSRC += \
-        zcumilu.cpp			\
-        zpastix.cpp			\
-        ziterilu.cpp			\
+	ziterilu.cpp			\
 
 
-# orthogonalization schemes
+# orthogonalization schemes    
 ZSRC += \
 #	zorthomgs.cpp		\
 
@@ -76,13 +72,18 @@ ZSRC += \
 	magma_zcustomspmv.cpp		\
 	magma_zcustomprecond.cpp	\
 
+# Wrappers to cusparse functions
+ZSRC += \
+	zcumilu.cpp			\
+	magma_zcuspmm.cpp				\
+	magma_zcuspaxpy.cpp				\
+
 # Wrappers, tools etc
 ZSRC += \
 	magma_z_precond_wrapper.cpp		\
 	magma_z_solver_wrapper.cpp		\
-	magma_zcuspmm.cpp				\
-	magma_zcuspaxpy.cpp				\
 	zresidual.cpp					\
+	zresidualvec.cpp			\
 
 # research functions
 ZSRC += \
@@ -91,6 +92,7 @@ ZSRC += \
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
+#include "magmasparse_common.h"
 
 ALLSRC_F = \
 

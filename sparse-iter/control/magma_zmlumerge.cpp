@@ -11,7 +11,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -31,7 +31,7 @@
     -------
 
     Takes an strictly lower triangular matrix L and an upper triangular matrix U
-    and merges them into a matrix A containing the upper and lower triangular 
+    and merges them into a matrix A containing the upper and lower triangular
     parts.
 
     Arguments
@@ -47,7 +47,7 @@
     
     @param[out]
     A           magma_z_matrix*
-                output matrix 
+                output matrix
                 
     @param[in]
     queue       magma_queue_t
@@ -57,15 +57,18 @@
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmlumerge(    
-    magma_z_matrix L, 
+magma_zmlumerge(
+    magma_z_matrix L,
     magma_z_matrix U,
     magma_z_matrix *A,
-    magma_queue_t queue ){
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;    
+
     if( L.storage_type == Magma_CSR && U.storage_type == Magma_CSR ){
         if( L.memory_location == Magma_CPU && U.memory_location == Magma_CPU ){
             
-            magma_zmtransfer( L, A, Magma_CPU, Magma_CPU, queue );
+            CHECK( magma_zmtransfer( L, A, Magma_CPU, Magma_CPU, queue ));
             magma_free_cpu( A->col );
             magma_free_cpu( A->val );
             // make sure it is strictly lower triangular
@@ -82,14 +85,8 @@ magma_zmlumerge(
             }
             A->nnz = z;
             // fill A with the new structure;
-            magma_int_t stat_cpu = 0;
-            stat_cpu += magma_index_malloc_cpu( &A->col, A->nnz );
-            stat_cpu += magma_zmalloc_cpu( &A->val, A->nnz );
-            if( stat_cpu != 0 ){
-                magma_zmfree( A, queue );
-                printf("error: memory allocation.\n");
-                return MAGMA_ERR_HOST_ALLOC;
-            }
+            CHECK( magma_index_malloc_cpu( &A->col, A->nnz ));
+            CHECK( magma_zmalloc_cpu( &A->val, A->nnz ));
             z = 0;
             for(magma_int_t i=0; i<A->num_rows; i++){
                 A->row[i] = z;
@@ -108,21 +105,21 @@ magma_zmlumerge(
             }
             A->row[A->num_rows] = z;
             A->nnz = z;
-            return MAGMA_SUCCESS; 
         }
         else{
-    
             printf("error: matrix not on CPU.\n"); 
-    
-            return MAGMA_SUCCESS; 
+            info = MAGMA_ERR_NOT_SUPPORTED;
         }
     }
     else{
-        
-        printf("error: matrix not on CPU.\n"); 
-    
-        return MAGMA_SUCCESS; 
+            printf("error: matrix in wrong format.\n"); 
+            info = MAGMA_ERR_NOT_SUPPORTED;
     }
+cleanup:
+    if( info != 0 ){
+        magma_zmfree( A, queue );
+    }
+    return info;
 }
 
 

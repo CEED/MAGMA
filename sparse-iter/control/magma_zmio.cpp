@@ -15,8 +15,7 @@
 //#include <fstream>
 //#include <iostream>
 
-#include "common_magma.h"
-#include "magmasparse.h"
+#include "common_magmasparse.h"
 #include "mmio.h"
 
 
@@ -87,27 +86,35 @@ magma_int_t read_z_csr_from_mtx(
     const char *filename,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
     FILE *fid;
     MM_typecode matcode;
+    
+    magma_index_t *coo_col=NULL, *coo_row=NULL;
+    magmaDoubleComplex *coo_val=NULL;
     
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
         printf("# Unable to open file %s\n", filename);
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
         printf("#Could not process lMatrix Market banner.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
         printf("#Invalid lMatrix Market file.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
            || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
@@ -115,12 +122,15 @@ magma_int_t read_z_csr_from_mtx(
         printf("#Sorry, this application does not support ");
         printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         printf("#Only real-valued or pattern coordinate matrices are supported\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
     magma_index_t num_rows, num_cols, num_nonzeros;
-    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0)
-        return MAGMA_ERR_NOT_FOUND;
+    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0){
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
+    }
     
     *type     = Magma_CSR;
     *location = Magma_CPU;
@@ -128,20 +138,10 @@ magma_int_t read_z_csr_from_mtx(
     *n_col    = num_cols;
     *nnz      = num_nonzeros;
 
-    magma_index_t *coo_col, *coo_row;
-    magmaDoubleComplex *coo_val;
-    
-    coo_col = (magma_index_t *) malloc( *nnz*sizeof(magma_index_t) );
-    assert(coo_col != NULL);
 
-    coo_row = (magma_index_t *) malloc( *nnz*sizeof(magma_index_t) );
-    assert( coo_row != NULL);
-
-    coo_val = (magmaDoubleComplex *) malloc( *nnz*sizeof(magmaDoubleComplex) );
-    assert( coo_val != NULL);
-
-    printf("# Reading sparse matrix from file (%s):", filename);
-    fflush(stdout);
+    CHECK( magma_index_malloc_cpu( &coo_col, *nnz ) );
+    CHECK( magma_index_malloc_cpu( &coo_row, *nnz ) );
+    CHECK( magma_zmalloc_cpu( &coo_val, *nnz ) );
 
     if (mm_is_real(matcode) || mm_is_integer(matcode)) {
         for(magma_int_t i = 0; i < *nnz; ++i) {
@@ -174,11 +174,11 @@ magma_int_t read_z_csr_from_mtx(
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
-        } 
+        }
         // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
     }
     
     fclose(fid);
@@ -198,12 +198,12 @@ magma_int_t read_z_csr_from_mtx(
 
         
     
-    magma_index_t* new_row = 
-        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
-    magma_index_t* new_col = 
-        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ; 
-    magmaDoubleComplex* new_val = 
-      (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ; 
+    magma_index_t* new_row =
+        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ;
+    magma_index_t* new_col =
+        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ;
+    magmaDoubleComplex* new_val =
+      (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ;
     
         magma_index_t ptr = 0;
         for(magma_int_t i = 0; i < *nnz; ++i) {
@@ -224,9 +224,9 @@ magma_int_t read_z_csr_from_mtx(
             }
         }
         
-        free (coo_row);
-        free (coo_col);
-        free (coo_val);
+        magma_free_cpu(coo_row); 
+        magma_free_cpu(coo_col); 
+        magma_free_cpu(coo_val);
 
         coo_row = new_row;
         coo_col = new_col;
@@ -283,15 +283,11 @@ magma_int_t read_z_csr_from_mtx(
     cout << "Sorting: done" << endl;
     
     */
+    CHECK( magma_zmalloc_cpu( val, *nnz ) );
     
-    *val = (magmaDoubleComplex *) malloc(*nnz*sizeof(magmaDoubleComplex));
-    assert((*val) != NULL);
-    
-    *col = (magma_index_t *) malloc(*nnz*sizeof(magma_index_t));
-    assert((*col) != NULL);
-    
-    *row = (magma_index_t *) malloc((*n_row+1)*sizeof(magma_index_t));
-    assert((*row) != NULL);
+    CHECK( magma_index_malloc_cpu( col, *nnz ) );
+    CHECK( magma_index_malloc_cpu( row, (*n_row+1) ) );
+    CHECK( magma_zmalloc_cpu( val, *nnz ) );
 
     // original code from  Nathan Bell and Michael Garland
     // the output CSR structure is NOT sorted!
@@ -346,20 +342,25 @@ magma_int_t read_z_csr_from_mtx(
         }
     }
 
-    return MAGMA_SUCCESS;
+cleanup:
+    magma_free_cpu(coo_row);
+    magma_free_cpu(coo_col);
+    magma_free_cpu(coo_val);
+    return info;
 }
 
 
 extern "C" magma_int_t
-magma_zwrite_csrtomtx( 
+magma_zwrite_csrtomtx(
     magma_z_matrix B,
     const char *filename,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     // TODO: why does this hard code MagmaColMajor?
-    magma_zwrite_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col,
-                     MagmaColMajor, filename, queue );
-    return MAGMA_SUCCESS;
+    CHECK( magma_zwrite_csr_mtx( B, MagmaColMajor, filename, queue ));
+cleanup:
+    return info;
 }
 
 
@@ -414,84 +415,84 @@ magma_zwrite_csrtomtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t 
+magma_int_t
 magma_zwrite_csr_mtx(
-    magma_int_t n_row,
-    magma_int_t n_col,
-    magma_int_t nnz,
-    magmaDoubleComplex **val,
-    magma_index_t **row,
-    magma_index_t **col,
+    magma_z_matrix A,
     magma_order_t MajorType,
     const char *filename,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
+    FILE *fp;
+    magma_z_matrix B = {Magma_CSR};
+    
     if ( MajorType == MagmaColMajor ) {
         // to obtain ColMajor output we transpose the matrix
         // and flip the row and col pointer in the output
-        magmaDoubleComplex *new_val;
-        magma_index_t *new_row;
-        magma_index_t *new_col;
-        magma_int_t new_n_row;
-        magma_int_t new_n_col;
-        magma_int_t new_nnz;
         
-        z_transpose_csr( n_row, n_col, nnz, *val, *row, *col,
-            &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
+        CHECK( magma_z_cucsrtranspose( A, &B, queue ));
+        magma_zprint_matrix( A, queue );
+        
+        
+        magma_zprint_matrix( B, queue );
         
         // TODO avoid duplicating this code below.
         printf("# Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
-        FILE *fp;
-        if ( (fp = fopen (filename, "w+")) != 0 )
-            printf("error writing matrix: file exists or missing write permit\n");   
+        fp = fopen (filename, "w");
+        if (  fp == NULL ){
+            printf("error writing matrix: file exists or missing write permission\n");
+            info = -1;
+            goto cleanup;
+        }
             
         #define COMPLEX
-        
+        printf("check1\n");
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
-        fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
+        fprintf( fp, "%d %d %d\n",B.num_cols, B.num_rows, B.nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
         
-        for(i=0; i < n_col; i++) {
-            magma_index_t rowtemp1 = (new_row)[i];
-            magma_index_t rowtemp2 = (new_row)[i+1];
+        for(i=0; i < B.num_cols; i++) {
+            magma_index_t rowtemp1 = B.row[i];
+            magma_index_t rowtemp2 = B.row[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.16g %.16g\n", 
-                    ((new_col)[rowtemp1+j]+1), rowindex, 
-                    MAGMA_Z_REAL((new_val)[rowtemp1+j]), 
-                    MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
+                fprintf( fp, "%d %d %.16g %.16g\n",
+                    ((B.col)[rowtemp1+j]+1), rowindex,
+                    MAGMA_Z_REAL((B.val)[rowtemp1+j]),
+                    MAGMA_Z_IMAG((B.val)[rowtemp1+j]) );
 
             }
             rowindex++;
         }
-        
         #else
         // real case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate real general\n" );
-        fprintf( fp, "%d %d %d\n",new_n_col, new_n_row, new_nnz);
+        fprintf( fp, "%d %d %d\n",B.num_cols, B.num_rows, B.nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
-        
-        for(i=0; i < n_col; i++) {
-            magma_index_t rowtemp1 = (new_row)[i];
-            magma_index_t rowtemp2 = (new_row)[i+1];
+                
+        for(i=0; i < B.num_cols; i++) {
+            magma_index_t rowtemp1 = B.row[i];
+            magma_index_t rowtemp2 = B.row[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.16g\n", 
-                    ((new_col)[rowtemp1+j]+1), rowindex, 
-                    MAGMA_Z_REAL((new_val)[rowtemp1+j]) );
+                fprintf( fp, "%d %d %.16g\n",
+                    ((B.col)[rowtemp1+j]+1), rowindex,
+                    MAGMA_Z_REAL((B.val)[rowtemp1+j]) );
+
             }
             rowindex++;
         }
         #endif
        
         if(fclose (fp)!=0)
-            printf("error: writing matrix failed\n");  
+            printf("error: writing matrix failed\n");
         else
             printf(" done\n");
     }
@@ -499,59 +500,64 @@ magma_zwrite_csr_mtx(
         printf("# Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
-        FILE *fp;
-        if ( (fp = fopen (filename, "w+")) != 0 )
-            printf("error writing matrix: file exists or missing write permit\n");    
+        fp = fopen (filename, "w");
+        if (  fp == NULL ){
+            printf("error writing matrix: file exists or missing write permission\n");
+            info = -1;
+            goto cleanup;
+        }
              
             
         #define COMPLEX
-        
+        printf("check1\n");
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
-        fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
+        fprintf( fp, "%d %d %d\n",A.num_cols, A.num_rows, A.nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
         
-        for(i=0; i < n_col; i++) {
-            magma_index_t rowtemp1 = (*row)[i];
-            magma_index_t rowtemp2 = (*row)[i+1];
+        for(i=0; i < A.num_cols; i++) {
+            magma_index_t rowtemp1 = A.row[i];
+            magma_index_t rowtemp2 = A.row[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.16g %.16g\n", 
-                    rowindex, ((*col)[rowtemp1+j]+1),  
-                    MAGMA_Z_REAL((*val)[rowtemp1+j]), 
-                    MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
+                fprintf( fp, "%d %d %.16g %.16g\n",
+                    ((A.col)[rowtemp1+j]+1), rowindex,
+                    MAGMA_Z_REAL((A.val)[rowtemp1+j]),
+                    MAGMA_Z_IMAG((A.val)[rowtemp1+j]) );
 
             }
             rowindex++;
         }
-        
         #else
         // real case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate real general\n" );
-        fprintf( fp, "%d %d %d\n",n_col, n_row, nnz);
+        fprintf( fp, "%d %d %d\n",A.num_cols, A.num_rows, A.nnz);
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
-        
-        for(i=0; i < n_col; i++) {
-            magma_index_t rowtemp1 = (*row)[i];
-            magma_index_t rowtemp2 = (*row)[i+1];
+                
+        for(i=0; i < B.num_cols; i++) {
+            magma_index_t rowtemp1 = A.row[i];
+            magma_index_t rowtemp2 = A.row[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                fprintf( fp, "%d %d %.16g\n", 
-                    rowindex, ((*col)[rowtemp1+j]+1), 
-                    MAGMA_Z_REAL((*val)[rowtemp1+j]) );
+                fprintf( fp, "%d %d %.16g\n",
+                    ((A.col)[rowtemp1+j]+1), rowindex,
+                    MAGMA_Z_REAL((A.val)[rowtemp1+j]));
+
             }
             rowindex++;
         }
         #endif
+
         if(fclose (fp)!=0)
-            printf("error: writing matrix failed\n");  
+            printf("error: writing matrix failed\n");
         else
             printf(" done\n");
     }
-    return MAGMA_SUCCESS;
+cleanup:
+    return info;
 }
 
 
@@ -600,7 +606,7 @@ magma_zwrite_csr_mtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t 
+magma_int_t
 magma_zprint_csr_mtx(
     magma_int_t n_row,
     magma_int_t n_col,
@@ -611,18 +617,20 @@ magma_zprint_csr_mtx(
     magma_order_t MajorType,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+        
     if ( MajorType == MagmaColMajor ) {
         // to obtain ColMajor output we transpose the matrix
         // and flip the row and col pointer in the output
-        magmaDoubleComplex *new_val;
+        magmaDoubleComplex *new_val=NULL;
         magma_index_t *new_row;
         magma_index_t *new_col;
         magma_int_t new_n_row;
         magma_int_t new_n_col;
         magma_int_t new_nnz;
         
-        z_transpose_csr( n_row, n_col, nnz, *val, *row, *col,
-            &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue);
+        CHECK( z_transpose_csr( n_row, n_col, nnz, *val, *row, *col,
+            &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col, queue) );
        
  
             
@@ -640,9 +648,9 @@ magma_zprint_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                printf( "%d %d %.6e %.6e\n", 
-                    ((new_col)[rowtemp1+j]+1), rowindex, 
-                    MAGMA_Z_REAL((new_val)[rowtemp1+j]), 
+                printf( "%d %d %.6e %.6e\n",
+                    ((new_col)[rowtemp1+j]+1), rowindex,
+                    MAGMA_Z_REAL((new_val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
 
             }
@@ -661,8 +669,8 @@ magma_zprint_csr_mtx(
             magma_index_t rowtemp1 = (new_row)[i];
             magma_index_t rowtemp2 = (new_row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                printf( "%d %d %.6e\n", 
-                    ((new_col)[rowtemp1+j]+1), rowindex, 
+                printf( "%d %d %.6e\n",
+                    ((new_col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((new_val)[rowtemp1+j]) );
             }
             rowindex++;
@@ -688,9 +696,9 @@ magma_zprint_csr_mtx(
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                printf( "%d %d %.6e %.6e\n", 
-                    rowindex, ((*col)[rowtemp1+j]+1),  
-                    MAGMA_Z_REAL((*val)[rowtemp1+j]), 
+                printf( "%d %d %.6e %.6e\n",
+                    rowindex, ((*col)[rowtemp1+j]+1),
+                    MAGMA_Z_REAL((*val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
 
             }
@@ -709,8 +717,8 @@ magma_zprint_csr_mtx(
             magma_index_t rowtemp1 = (*row)[i];
             magma_index_t rowtemp2 = (*row)[i+1];
             for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                printf( "%d %d %.6e\n", 
-                    rowindex, ((*col)[rowtemp1+j]+1), 
+                printf( "%d %d %.6e\n",
+                    rowindex, ((*col)[rowtemp1+j]+1),
                     MAGMA_Z_REAL((*val)[rowtemp1+j]) );
             }
             rowindex++;
@@ -718,7 +726,9 @@ magma_zprint_csr_mtx(
         #endif
         
     }
-    return MAGMA_SUCCESS;
+
+cleanup:
+    return info;
 }
 
 
@@ -763,7 +773,7 @@ magma_zprint_csr_mtx(
     ********************************************************************/
 
 extern "C"
-magma_int_t 
+magma_int_t
 magma_zprint_csr(
     magma_int_t n_row,
     magma_int_t n_col,
@@ -776,17 +786,18 @@ magma_zprint_csr(
     printf( "Matrix in CSR format (row col val)\n" );
     printf( " %d %d %d\n", n_row, n_col, nnz );
      
-    magma_index_t i=0, j=0;
+    magma_index_t info = 0, i=0, j=0;
 
     for(i=0; i < n_col; i++) {
         magma_index_t rowtemp1 = (*row)[i];
         magma_index_t rowtemp2 = (*row)[i+1];
         for(j=0; j < rowtemp2 - rowtemp1; j++) {
-                printf(" %d %d %.2f\n", (rowtemp1+1), (*col)[rowtemp1+j]+1, 
+                printf(" %d %d %.2f\n", (rowtemp1+1), (*col)[rowtemp1+j]+1,
                     MAGMA_Z_REAL((*val)[rowtemp1+j]) );
         }
     }
-    return MAGMA_SUCCESS;
+    
+    return info;
 }
 
 
@@ -815,6 +826,7 @@ magma_zprint_matrix(
     magma_z_matrix A,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     
     //**************************************************************
     #define COMPLEX
@@ -843,6 +855,7 @@ magma_zprint_matrix(
     
     magma_index_t i, j, k;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magma_z_matrix C={Magma_CSR};
 
     if ( A.memory_location == Magma_CPU ) {
         printf("visualizing matrix of size %d %d with %d nonzeros:\n",
@@ -859,9 +872,8 @@ magma_zprint_matrix(
         else if ( A.storage_type == Magma_CSR ) {
             // visualize only small matrices like dense
             if ( A.num_rows < 11 && A.num_cols < 11 ) {
-                magma_z_matrix C;
-                magma_zmconvert( A, &C, A.storage_type, Magma_DENSE, queue );
-                magma_zprint_matrix(  C, queue );
+                CHECK( magma_zmconvert( A, &C, A.storage_type, Magma_DENSE, queue ));
+                CHECK( magma_zprint_matrix(  C, queue ));
                 magma_zmfree( &C, queue );
             }
             // otherwise visualize only coners
@@ -935,20 +947,19 @@ magma_zprint_matrix(
             }
         }
         else {
-            magma_z_matrix C;
-            magma_zmconvert( A, &C, A.storage_type, Magma_CSR, queue );
-            magma_zprint_matrix(  C, queue );
-            magma_zmfree( &C, queue );
+            CHECK( magma_zmconvert( A, &C, A.storage_type, Magma_CSR, queue ));
+            CHECK( magma_zprint_matrix(  C, queue ));
         }
     }
     else {
-        magma_z_matrix C;
-        magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue );
-        magma_zprint_matrix(  C, queue );
-        magma_zmfree( &C, queue );
+        magma_z_matrix C={Magma_CSR};
+        CHECK( magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue ));
+        CHECK( magma_zprint_matrix(  C, queue ));
     }
 
-    return MAGMA_SUCCESS;
+cleanup:
+    magma_zmfree( &C, queue );
+    return info;
 }
 
 
@@ -984,7 +995,18 @@ magma_z_csr_mtx(
     const char *filename,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+
     int csr_compressor = 0;       // checks for zeros in original file
+    
+    magma_z_matrix B={Magma_CSR};
+    
+    magma_index_t *coo_col = NULL;
+    magma_index_t *coo_row = NULL;
+    magmaDoubleComplex *coo_val = NULL;
+    magmaDoubleComplex *new_val = NULL;
+    magma_index_t* new_row = NULL;
+    magma_index_t* new_col = NULL;
 
     FILE *fid;
     MM_typecode matcode;
@@ -992,20 +1014,23 @@ magma_z_csr_mtx(
     
     if (fid == NULL) {
         printf("#Unable to open file %s\n", filename);
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
         printf("#Could not process lMatrix Market banner: %s.\n", matcode);
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
         printf("#Invalid lMatrix Market file.\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
            || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
@@ -1013,12 +1038,13 @@ magma_z_csr_mtx(
         printf("#Sorry, this application does not support ");
         printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         printf("#Only real-valued or pattern coordinate matrices are supported\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
-    
+
     magma_index_t num_rows, num_cols, num_nonzeros;
     if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0)
-        return MAGMA_ERR_UNKNOWN;
+        info = MAGMA_ERR_UNKNOWN;
     
     A->storage_type    = Magma_CSR;
     A->memory_location = Magma_CPU;
@@ -1027,21 +1053,14 @@ magma_z_csr_mtx(
     A->nnz             = num_nonzeros;
     A->fill_mode       = Magma_FULL;
     
-    magma_index_t *coo_col, *coo_row;
-    magmaDoubleComplex *coo_val;
-    
-    coo_col = (magma_index_t *) malloc( A->nnz*sizeof(magma_index_t) );
-    assert( coo_col != NULL );
 
-    coo_row = (magma_index_t *) malloc( A->nnz*sizeof(magma_index_t) );
-    assert( coo_row != NULL );
 
-    coo_val = (magmaDoubleComplex *) malloc( A->nnz*sizeof(magmaDoubleComplex) );
-    assert( coo_val != NULL );
+    CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
+    CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
+    CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
 
     printf("# Reading sparse matrix from file (%s):", filename);
     fflush(stdout);
-
     if (mm_is_real(matcode) || mm_is_integer(matcode)) {
         for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
@@ -1074,15 +1093,14 @@ magma_z_csr_mtx(
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
-        } 
+        }
         // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
     }
-    
     fclose(fid);
-    printf(" done\n");
+    printf(" done.\n");
         
     A->sym = Magma_GENERAL;
 
@@ -1095,23 +1113,12 @@ magma_z_csr_mtx(
                 ++off_diagonals;
         }
         magma_index_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
-        
-        magmaDoubleComplex *new_val;
-        magma_index_t* new_row;
-        magma_index_t* new_col;
-        new_val = NULL;
-        new_col = NULL;
-        new_row = NULL;
-        magma_int_t stat_cpu = 0;
-        stat_cpu += magma_zmalloc_cpu( &new_val, true_nonzeros );
-        stat_cpu += magma_index_malloc_cpu( &new_row, true_nonzeros );
-        stat_cpu += magma_index_malloc_cpu( &new_col, true_nonzeros );
-        if ( stat_cpu != 0 ) {
-            magma_free_cpu( new_val );
-            magma_free_cpu( new_col );
-            magma_free_cpu( new_row );
-            return MAGMA_ERR_HOST_ALLOC;
-        }
+         
+
+
+        CHECK( magma_zmalloc_cpu( &new_val, true_nonzeros ));
+        CHECK( magma_index_malloc_cpu( &new_row, true_nonzeros ));
+        CHECK( magma_index_malloc_cpu( &new_col, true_nonzeros ));
         
         magma_index_t ptr = 0;
         for(magma_int_t i = 0; i < A->nnz; ++i) {
@@ -1132,9 +1139,9 @@ magma_z_csr_mtx(
             }
         }
         
-        free (coo_row);
-        free (coo_col);
-        free (coo_val);
+        magma_free_cpu(coo_row);
+        magma_free_cpu(coo_col);
+        magma_free_cpu(coo_val);
 
         coo_row = new_row;
         coo_col = new_col;
@@ -1191,15 +1198,10 @@ magma_z_csr_mtx(
     cout << "Sorting: done" << endl;
     
     */
-    
-    magma_zmalloc_cpu( &A->val, A->nnz );
-    assert((A->val) != NULL);
-    
-    magma_index_malloc_cpu( &A->col, A->nnz );
-    assert((A->col) != NULL);
-    
-    magma_index_malloc_cpu( &A->row, A->num_rows+1 );
-    assert((A->row) != NULL);
+
+    CHECK( magma_zmalloc_cpu( &A->val, A->nnz ));
+    CHECK( magma_index_malloc_cpu( &A->col, A->nnz ));
+    CHECK( magma_index_malloc_cpu( &A->row, A->num_rows+1 ));
     
     // original code from  Nathan Bell and Michael Garland
     // the output CSR structure is NOT sorted!
@@ -1228,11 +1230,14 @@ magma_z_csr_mtx(
         (A->val)[dest] = coo_val[i];
         
         (A->row)[row_]++;
-    }
-    free (coo_row);
-    free (coo_col);
-    free (coo_val);
-    
+    }    
+    magma_free_cpu(coo_row);
+    magma_free_cpu(coo_col);
+    magma_free_cpu(coo_val);
+    coo_row = NULL;
+    coo_col = NULL;
+    coo_val = NULL;
+
     for(int i = 0, last = 0; i <= num_rows; i++) {
         int temp    = (A->row)[i];
         (A->row)[i] = last;
@@ -1258,21 +1263,28 @@ magma_z_csr_mtx(
     }
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
-        magma_z_matrix B;
-        magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
-        magma_z_csr_compressor(
+        CHECK( magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ));
+        CHECK( magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),
-            &B.val, &B.row, &B.col, &B.num_rows, queue );
+            &B.val, &B.row, &B.col, &B.num_rows, queue ));
         B.nnz = B.row[num_rows];
         //printf(" remaining nonzeros:%d ", B.nnz);
         magma_free_cpu( A->val );
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
-        magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
-        magma_zmfree( &B, queue );
+        CHECK( magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue ));
         //printf("done.\n");
+
     }
-    return MAGMA_SUCCESS;
+cleanup:
+    magma_zmfree( &B, queue );
+    magma_free_cpu(coo_row);
+    magma_free_cpu(coo_col);
+    magma_free_cpu(coo_val);
+    magma_free_cpu( new_val );
+    magma_free_cpu( new_col );
+    magma_free_cpu( new_row );
+    return info;
 }
 
 
@@ -1308,7 +1320,14 @@ magma_z_csr_mtxsymm(
     const char *filename,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
+    magma_z_matrix B={Magma_CSR};
+        
     int csr_compressor = 0;       // checks for zeros in original file
+    
+    magma_index_t *coo_col=NULL, *coo_row=NULL;
+    magmaDoubleComplex *coo_val=NULL;
 
     FILE *fid;
     MM_typecode matcode;
@@ -1317,20 +1336,23 @@ magma_z_csr_mtxsymm(
     
     if (fid == NULL) {
         printf("#Unable to open file %s\n", filename);
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
+        goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
         printf("#Could not process lMatrix Market banner.\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
         printf("#Invalid lMatrix Market file.\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
-    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode) 
+    if ( ! ( (mm_is_real(matcode) || mm_is_integer(matcode)
            || mm_is_pattern(matcode) || mm_is_complex(matcode) )
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
@@ -1338,12 +1360,13 @@ magma_z_csr_mtxsymm(
         printf("#Sorry, this application does not support ");
         printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         printf("#Only real-valued or pattern coordinate matrices are supported\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
     }
     
     magma_index_t num_rows, num_cols, num_nonzeros;
     if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0)
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
     
     A->storage_type    = Magma_CSR;
     A->memory_location = Magma_CPU;
@@ -1351,20 +1374,13 @@ magma_z_csr_mtxsymm(
     A->num_cols        = num_cols;
     A->nnz             = num_nonzeros;
     A->fill_mode       = Magma_FULL;
+  
     
-    magma_index_t *coo_col, *coo_row;
-    magmaDoubleComplex *coo_val;
     
-    // TODO use magma_index_malloc, magma_zmalloc (everywhere in this file)
-    coo_col = (magma_index_t *) malloc( A->nnz*sizeof(magma_index_t) );
-    assert(coo_col != NULL);
-
-    coo_row = (magma_index_t *) malloc( A->nnz*sizeof(magma_index_t) );
-    assert(coo_row != NULL);
-
-    coo_val = (magmaDoubleComplex *) malloc( A->nnz*sizeof(magmaDoubleComplex) );
-    assert(coo_val != NULL);
-
+    CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
+    CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
+    CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
+    
     printf("# Reading sparse matrix from file (%s):", filename);
     fflush(stdout);
 
@@ -1400,11 +1416,11 @@ magma_z_csr_mtxsymm(
             coo_row[i] = ROW - 1;
             coo_col[i] = COL - 1;
             coo_val[i] = MAGMA_Z_MAKE( VAL, VALC);
-        } 
+        }
         // printf(" ...successfully read complex matrix... ");
     } else {
         printf("Unrecognized data type\n");
-        return MAGMA_ERR_NOT_FOUND;
+        info = MAGMA_ERR_NOT_FOUND;
     }
     
     fclose(fid);
@@ -1463,16 +1479,11 @@ magma_z_csr_mtxsymm(
     cout << "Sorting: done" << endl;
     
     */
-    
-    magma_zmalloc_cpu( &A->val, A->nnz );
-    assert((A->val) != NULL);
-    
-    magma_index_malloc_cpu( &A->col, A->nnz );
-    assert((A->col) != NULL);
-    
-    magma_index_malloc_cpu( &A->row, A->num_rows+1 );
-    assert((A->row) != NULL);
-    
+
+    CHECK( magma_index_malloc_cpu( &A->col, A->nnz ) );
+    CHECK( magma_index_malloc_cpu( &A->row, A->num_rows+1 ) );
+    CHECK( magma_zmalloc_cpu( &A->val, A->nnz ) );
+
     // original code from  Nathan Bell and Michael Garland
     // the output CSR structure is NOT sorted!
 
@@ -1501,10 +1512,13 @@ magma_z_csr_mtxsymm(
         
         (A->row)[row_]++;
     }
-    free (coo_row);
-    free (coo_col);
-    free (coo_val);
-    
+    magma_free_cpu(coo_row);
+    magma_free_cpu(coo_col);
+    magma_free_cpu(coo_val);
+    coo_row = NULL;
+    coo_col = NULL;
+    coo_val = NULL;
+        
     for(int i = 0, last = 0; i <= num_rows; i++) {
         int temp    = (A->row)[i];
         (A->row)[i] = last;
@@ -1530,19 +1544,23 @@ magma_z_csr_mtxsymm(
     }
     if ( csr_compressor > 0) { // run the CSR compressor to remove zeros
         //printf("removing zeros: ");
-        magma_z_matrix B;
-        magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue );
-        magma_z_csr_compressor(
+        CHECK( magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ));
+        CHECK( magma_z_csr_compressor(
             &(A->val), &(A->row), &(A->col),
-            &B.val, &B.row, &B.col, &B.num_rows, queue );
+            &B.val, &B.row, &B.col, &B.num_rows, queue ));
         B.nnz = B.row[num_rows];
         //printf(" remaining nonzeros:%d ", B.nnz);
         magma_free_cpu( A->val );
         magma_free_cpu( A->row );
         magma_free_cpu( A->col );
-        magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue );
-        magma_zmfree( &B, queue );
+        CHECK( magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue ));
+
         //printf("done.\n");
     }
-    return MAGMA_SUCCESS;
+cleanup:
+    magma_zmfree( &B, queue );
+    magma_free_cpu(coo_row);
+    magma_free_cpu(coo_col);
+    magma_free_cpu(coo_val);
+    return info;
 }

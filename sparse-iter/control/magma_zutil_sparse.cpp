@@ -13,7 +13,7 @@
 */
 
 // includes, project
-#include "common_magma.h"
+#include "common_magmasparse.h"
 #include "magmasparse_z.h"
 #include "magma.h"
 #include "mmio.h"
@@ -29,8 +29,8 @@ static const char *usage_sparse =
 "               0   CSR\n"
 "               1   ELL\n"
 "               2   SELL-P\n"
-" --blocksize x Set a specific blocksize for SELL-P format.\n"   
-" --alignment x Set a specific alignment for SELL-P format.\n"   
+" --blocksize x Set a specific blocksize for SELL-P format.\n"
+" --alignment x Set a specific alignment for SELL-P format.\n"
 " --mscale      Possibility to scale the original matrix:\n"
 "               0   no scaling\n"
 "               1   symmetric scaling to unit diagonal\n"
@@ -58,10 +58,10 @@ static const char *usage_sparse =
 "                   4   BiCGSTAB\n"
 "                   5   GMRES\n"
 "                   6   Block-asynchronous Iteration\n"
-"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"       
-"                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"   
-"                   --piter k     Iteration count for iterative preconditioner.\n"   
-"                   --plevels k   Number of ILU levels.\n"               
+"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"
+"                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
+"                   --piter k     Iteration count for iterative preconditioner.\n"
+"                   --plevels k   Number of ILU levels.\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
@@ -104,9 +104,9 @@ static const char *usage_sparse =
 extern "C"
 magma_int_t
 magma_zparse_opts(
-    int argc, 
-    char** argv, 
-    magma_zopts *opts, 
+    int argc,
+    char** argv,
+    magma_zopts *opts,
     int *matrices,
     magma_queue_t queue )
 {
@@ -131,6 +131,7 @@ magma_zparse_opts(
     opts->precond_par.maxiter = 100;
     opts->precond_par.restart = 10;
     opts->precond_par.levels = 0;
+    opts->precond_par.sweeps = 5;
     opts->solver_par.solver = Magma_CG;
     
     printf( usage_sparse_short, argv[0] );
@@ -169,7 +170,7 @@ magma_zparse_opts(
                 case 5: opts->solver_par.solver = Magma_PBICGSTAB; break;
                 case 6: opts->solver_par.solver = Magma_GMRES; break;
                 case 7: opts->solver_par.solver = Magma_PGMRES; break;
-                case 8: opts->solver_par.solver = Magma_LOBPCG; 
+                case 8: opts->solver_par.solver = Magma_LOBPCG;
                             opts->solver_par.num_eigenvalues = 16;break;
                 case 9: opts->solver_par.solver = Magma_JACOBI; break;
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
@@ -212,22 +213,21 @@ magma_zparse_opts(
             opts->solver_par.num_eigenvalues = atoi( argv[++i] );
         } else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.version = atoi( argv[++i] );
-        }        
+        }
         // ----- usage
         else if ( strcmp("-h",     argv[i]) == 0 ||
                   strcmp("--help", argv[i]) == 0 ) {
             fprintf( stderr, usage_sparse, argv[0] );
-            return -1;
         } else {
             *matrices = i;
             break;
         }
     }
     // ensure to take a symmetric preconditioner for the PCG
-    if ( opts->solver_par.solver == Magma_PCG 
+    if ( opts->solver_par.solver == Magma_PCG
         && opts->precond_par.solver == Magma_ILU )
             opts->precond_par.solver = Magma_ICC;
-    if ( opts->solver_par.solver == Magma_PCG 
+    if ( opts->solver_par.solver == Magma_PCG
         && opts->precond_par.solver == Magma_AILU )
             opts->precond_par.solver = Magma_AICC;
             
