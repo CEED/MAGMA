@@ -15,7 +15,6 @@
 # See http://developer.nvidia.com/cuda-gpus
 #
 #GPU_TARGET ?= Fermi Kepler
-GPU_TARGET = sm30
 
 CC        = gcc
 CXX       = g++
