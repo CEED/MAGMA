@@ -174,12 +174,7 @@ magmablas_zherk_batched_k32(
         return;
     
     size_t offsetA = 0;
-    int TransA = 0, TransB = 0, uploA = 0;
-
-    if      ( uplo == MagmaLower )
-        uploA = 1;
-    else if ( uplo == MagmaUpper )
-        uploA = 2;
+    int TransA = 0, TransB = 0;
 
     if      ( trans == MagmaNoTrans )
         #if defined(PRECISION_z) || defined(PRECISION_c)     
@@ -228,7 +223,7 @@ magmablas_zherk_batched_k32(
                       magma_ceildiv( n, BLK_N_nt ),
                       batchCount );
         magmablas_z_herk_kernel_fermi_nt_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
+            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 0 && TransB == 2 ) {
@@ -236,7 +231,7 @@ magmablas_zherk_batched_k32(
                       magma_ceildiv( n, BLK_N_nc ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_nc_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
+            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 1 && TransB == 0 ) {
@@ -244,7 +239,7 @@ magmablas_zherk_batched_k32(
                       magma_ceildiv( n, BLK_N_tn ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_tn_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
+            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
     else if ( TransA == 2 && TransB == 0 ) {
@@ -252,7 +247,7 @@ magmablas_zherk_batched_k32(
                       magma_ceildiv( n, BLK_N_cn ),
                       batchCount );
          magmablas_z_herk_kernel_fermi_cn_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uploA, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
+            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
             (int)offsetA, (int)offsetA );
     }
 
