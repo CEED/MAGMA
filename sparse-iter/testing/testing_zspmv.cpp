@@ -145,7 +145,10 @@ int main(  int argc, char** argv )
 
             TESTING_FREE_CPU( row );
             TESTING_FREE_CPU( col );
+            row = NULL;
+            col = NULL;
             free(pntre);
+            pntre = NULL;
         #endif // MAGMA_WITH_MKL
 
         // copy matrix to GPU
