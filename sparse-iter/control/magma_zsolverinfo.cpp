@@ -439,7 +439,7 @@ magma_zsolverinfo_free(
         precond_par->solver == Magma_AICC ) {
         cusparseDestroySolveAnalysisInfo( precond_par->cuinfoL ); 
         cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
-        precond_par->cuinfoL = NULL:
+        precond_par->cuinfoL = NULL;
         precond_par->cuinfoU = NULL;
 
     }
@@ -582,7 +582,7 @@ magma_zsolverinfo_init(
     precond_par->UD.row = NULL;
     precond_par->UD.blockinfo = NULL;
     
-    precond_par->cuinfoL = NULL:
+    precond_par->cuinfoL = NULL;
     precond_par->cuinfoU = NULL;
 
 cleanup:
