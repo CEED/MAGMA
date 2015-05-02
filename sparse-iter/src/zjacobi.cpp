@@ -61,6 +61,8 @@ magma_zjacobi(
 {
     magma_int_t info = 0;
     
+
+    
     // set queue for old dense routines
     magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
@@ -71,6 +73,11 @@ magma_zjacobi(
     double nom0 = 0.0;
 
     magma_z_matrix r={Magma_CSR}, d={Magma_CSR};
+    
+    if( A.storage_type != Magma_CSR ){
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
+    }
 
     // prepare solver feedback
     solver_par->solver = Magma_JACOBI;
