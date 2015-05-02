@@ -12,11 +12,7 @@
 //  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
 
 
 /**

@@ -9,15 +9,7 @@
        @author Hartwig Anzt
 
 */
-
-//#include <cusparse_v2.h>
-
-#include "common_magma.h"
-#include "magmablas.h"
-#include "magmasparse_types.h"
-#include "magmasparse.h"
-
-
+#include "common_magmasparse.h"
 
 
 /**

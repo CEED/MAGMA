@@ -8,24 +8,7 @@
        @precisions mixed zc -> ds
        @author Hartwig Anzt
 */
-
-#include <fstream>
-#include <stdlib.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <ostream>
-#include <assert.h>
-#include <stdio.h>
-#include "magmasparse_z.h"
-#include "magmasparse_zc.h"
-#include "magma.h"
-#include "mmio.h"
-#include "common_magma.h"
-
-
-
-using namespace std;
+#include "common_magmasparse.h"
 
 
 /**

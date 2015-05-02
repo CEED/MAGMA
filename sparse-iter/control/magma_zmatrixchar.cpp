@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
-
 
 #define THRESHOLD 10e-99
 

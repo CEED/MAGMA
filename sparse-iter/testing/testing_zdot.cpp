@@ -14,10 +14,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
 
 // includes, project
 #include "flops.h"
@@ -50,18 +46,11 @@ int main(  int argc, char** argv )
         printf("#------------------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("\n");
 
-
-
-
     for( magma_int_t num_vecs=5; num_vecs<6; num_vecs+=1 ) {
-
-    for( magma_int_t n=10000; n<100000001; n=n+10000 ) {
-           
-
+        for( magma_int_t n=10000; n<100000001; n=n+10000 ) {
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
 
-            
             magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
             magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
             magmaDoubleComplex alpha;
@@ -71,7 +60,6 @@ int main(  int argc, char** argv )
             real_Double_t mdot1, mdot2, mdgm1, mdgm2, magmagemv1, magmagemv2, cugemv1, cugemv2, cudot1, cudot2;
             real_Double_t mdot_time, mdgm_time, magmagemv_time, cugemv_time, cudot_time;
             #endif
-
 
             CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
             CHECK( magma_zvinit( &b, Magma_DEV, num_vecs, 1, one, queue ));
@@ -170,17 +158,12 @@ int main(  int argc, char** argv )
             magma_zmfree(&x, queue );
             magma_zmfree(&y, queue );
             magma_zmfree(&skp, queue );
-
-
-
         }
 
-
-  //  }
         printf("#================================================================================================================================================\n");
         printf("\n");
         printf("\n");
-}
+    }
 
 cleanup:
     magma_zmfree(&a, queue );

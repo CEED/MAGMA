@@ -8,11 +8,7 @@
        @precisions normal z -> c d s
 
 */
-#include "cuda_runtime.h"
-#include <stdio.h>
-#include "common_magma.h"
-#include <cublas_v2.h>
-
+#include "common_magmasparse.h"
 
 #define PRECISION_z
 

@@ -9,10 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "magma_lapack.h"
 #include "common_magmasparse.h"
-
-#include <assert.h>
 
 
 /**

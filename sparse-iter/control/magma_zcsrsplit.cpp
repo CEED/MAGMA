@@ -9,16 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "magma_lapack.h"
 #include "common_magmasparse.h"
-
-#include <assert.h>
-
-// includes CUDA
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
 
 
 /**

@@ -9,33 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "magma_lapack.h"
 #include "common_magmasparse.h"
-
-#include <assert.h>
-
-/*
-    -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       @date
-
-       @author Hartwig Anzt
-
-       @precisions normal z -> s d c
-*/
-// includes CUDA
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
-
-// project includes
-#include "common_magma.h"
-
-#include <assert.h>
-
 
 #define PRECISION_z
 

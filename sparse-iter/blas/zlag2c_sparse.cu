@@ -8,12 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-#include "common_magma.h"
-#include "magmasparse_z.h"
-#include "magmasparse_zc.h"
-#include "magma.h"
-#include "mmio.h"
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 #define PRECISION_z
 #define BLOCKSIZE 512

@@ -11,12 +11,7 @@
 
        Utilities for testing MAGMA-sparse.
 */
-
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
 
 
 // --------------------

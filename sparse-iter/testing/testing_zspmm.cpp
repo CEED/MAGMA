@@ -14,13 +14,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
 
 #ifdef MAGMA_WITH_MKL
-    #include "mkl_spblas.h"
+    #include <mkl_spblas.h>
     
     #define PRECISION_z
     #if defined(PRECISION_z)

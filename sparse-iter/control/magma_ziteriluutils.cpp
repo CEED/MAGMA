@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
-
 
 #define PRECISION_z
 
@@ -546,8 +540,9 @@ magma_zinitguess(
     CHECK( magma_z_cucsrtranspose(  dL, &dLt ));
     CHECK( magma_zcuspmm( dL, dLt, &dLL ));
     CHECK( magma_zmtransfer( dLL, &LL, Magma_DEV, Magma_CPU ));
-    for(i=0; i<100; i++){//hALU.num_rows; i++){
-        for(j=hALU.row[i]; j<hALU.row[i+1]; j++){
+    //for(i=0; i < hALU.num_rows; i++) {
+    for(i=0; i < 100; i++) {
+        for(j=hALU.row[i]; j < hALU.row[i+1]; j++) {
             if( hALU.col[j] == i ){
                 printf("%d %d -> %f   -->", i, i, LL.val[j]);
             }

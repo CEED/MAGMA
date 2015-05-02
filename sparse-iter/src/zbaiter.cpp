@@ -12,8 +12,6 @@
 
 #include "common_magmasparse.h"
 
-#include <assert.h>
-
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 

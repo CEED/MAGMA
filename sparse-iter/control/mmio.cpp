@@ -5,18 +5,8 @@
 *
 *
 */
-
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "mmio.h"
-
-#include "magma.h"
-#include "magmasparse.h"
 #include "common_magmasparse.h"
+#include "mmio.h"
 
 int mm_read_unsymmetric_sparse(
     const char *fname, 

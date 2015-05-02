@@ -8,12 +8,7 @@
        @precisions normal z -> c d s
 
 */
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas_v2.h>  // include before magma.h
-
-#include "magma.h"
-
+#include "common_magmasparse.h"
 
 #define BLOCK_SIZE 512
 

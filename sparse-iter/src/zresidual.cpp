@@ -11,8 +11,6 @@
 */
 #include "common_magmasparse.h"
 
-#include <assert.h>
-
 #define  r(i)  r.dval+i*dofs
 #define  b(i)  b.dval+i*dofs
 

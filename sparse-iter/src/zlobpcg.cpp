@@ -11,10 +11,7 @@
 
        @precisions normal z -> s d c
 */
-
-
 #include "common_magmasparse.h"
-#include "magmablas.h"
 
 #define PRECISION_z
 #define RTOLERANCE     lapackf77_dlamch( "E" )

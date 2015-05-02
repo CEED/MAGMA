@@ -9,14 +9,10 @@
 
        @precisions normal z -> s d c
 */
-#include <sys/time.h>
-#include <time.h>
-
 #include "common_magmasparse.h"
-#include "magma_operators.h"
-
 
 #define PRECISION_z
+
 /*
 #define  q(i)     (q.dval + (i)*dofs)
 #define  z(i)     (z.dval + (i)*dofs)

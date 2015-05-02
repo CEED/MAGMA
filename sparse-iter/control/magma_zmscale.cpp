@@ -9,18 +9,7 @@
        @author Hartwig Anzt
 
 */
-
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
-
-// includes CUDA
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
