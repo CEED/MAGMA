@@ -112,6 +112,7 @@ cleanup:
         magma_free_cpu( rown );
     }
     magma_free_cpu( row_nnz );
+    row_nnz = NULL;
     return info;
 }
 
@@ -1291,6 +1292,8 @@ magma_zmconvert(
 cleanup:    
     cusparseDestroyMatDescr(descr); 
     cusparseDestroy(cusparseHandle);
+    descr = NULL;
+    cusparseHandle = NULL;
     magma_free( nnz_per_row );
     magma_free_cpu( row_tmp );
     magma_free_cpu( col_tmp );
@@ -1298,8 +1301,15 @@ cleanup:
     magma_free_cpu( row_tmp2 );
     magma_free_cpu( col_tmp2 );
     magma_free_cpu( val_tmp2 );
+    row_tmp = NULL;
+    col_tmp = NULL;
+    val_tmp = NULL;
+    row_tmp2 = NULL;
+    col_tmp2 = NULL;
+    val_tmp2 = NULL;   
     magma_free( transpose );
     magma_free_cpu( length );
+    length = NULL;
     magma_zmfree( &hA, queue );
     magma_zmfree( &hB, queue );
     magma_zmfree( &A_d, queue );
