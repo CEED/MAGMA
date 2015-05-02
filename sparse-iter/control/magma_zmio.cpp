@@ -12,9 +12,6 @@
 //  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
-//#include <fstream>
-//#include <iostream>
-
 #include "common_magmasparse.h"
 #include "mmio.h"
 
@@ -240,8 +237,7 @@ magma_int_t read_z_csr_from_mtx(
     
     // If matrix is not in standard format, sorting is necessary
     /*
-    
-    cout << "Sorting the cols...." << endl;
+    printf( "Sorting the cols....\n" );
     // bubble sort (by cols)
     for (int i=0; i < *nnz-1; ++i) {
         for (int j=0; j < *nnz-i-1; ++j) {
@@ -261,7 +257,7 @@ magma_int_t read_z_csr_from_mtx(
         }
     }
 
-    cout << "Sorting the rows...." << endl;
+    printf( "Sorting the rows....\n" );
     // bubble sort (by rows)
     for (int i=0; i < *nnz-1; ++i) {
         for (int j=0; j < *nnz-i-1; ++j) {
@@ -280,7 +276,7 @@ magma_int_t read_z_csr_from_mtx(
             }
         }
     }
-    cout << "Sorting: done" << endl;
+    printf( "Sorting: done\n" );
     
     */
     CHECK( magma_zmalloc_cpu( val, *nnz ) );
@@ -1155,8 +1151,7 @@ magma_z_csr_mtx(
     
     // If matrix is not in standard format, sorting is necessary
     /*
-    
-        cout << "Sorting the cols...." << endl;
+    printf( "Sorting the cols....\n" );
     // bubble sort (by cols)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1176,7 +1171,7 @@ magma_z_csr_mtx(
         }
     }
 
-    cout << "Sorting the rows...." << endl;
+    printf( "Sorting the rows....\n" );
     // bubble sort (by rows)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1195,7 +1190,7 @@ magma_z_csr_mtx(
             }
         }
     }
-    cout << "Sorting: done" << endl;
+    printf( "Sorting: done\n" );
     
     */
 
@@ -1437,7 +1432,7 @@ magma_z_csr_mtxsymm(
     
     // If matrix is not in standard format, sorting is necessary
     /*
-    cout << "Sorting the cols...." << endl;
+    printf( "Sorting the cols....\n" );
     // bubble sort (by cols)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1457,7 +1452,7 @@ magma_z_csr_mtxsymm(
         }
     }
 
-    cout << "Sorting the rows...." << endl;
+    printf( "Sorting the rows....\n" );
     // bubble sort (by rows)
     for (int i=0; i < A->nnz-1; ++i) {
         for (int j=0; j < A->nnz-i-1; ++j) {
@@ -1476,7 +1471,7 @@ magma_z_csr_mtxsymm(
             }
         }
     }
-    cout << "Sorting: done" << endl;
+    printf( "Sorting: done\n" );
     
     */
 

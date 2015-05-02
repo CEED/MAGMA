@@ -12,17 +12,7 @@
 //  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
-// includes, project
 #include "common_magmasparse.h"
-#include "magmasparse_z.h"
-#include "magma.h"
-#include "mmio.h"
-
-// includes CUDA
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cusparse_v2.h>
-#include <cuda_profiler_api.h>
 
 
 /******************************************************************************
@@ -284,7 +274,7 @@ void magma_zsymbolic_ilu(
    // printf("ende\n");
 
 #if 0
-    cout << "Actual nnz for ILU: " << *nzl + *nzu << endl;
+    printf( "Actual nnz for ILU: %d\n", *nzl + *nzu );
 #endif
 
 cleanup:
