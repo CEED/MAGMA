@@ -11,6 +11,8 @@
 */
 #include "common_magma.h"
 
+#define COMPLEX
+
 #define BLOCK_SIZE 512
 
 
@@ -112,16 +114,14 @@ magma_zpipelineddznrm2_kernel(
     // get norm of dx
     lsum = 0;
     for( int j = i; j < m; j += 512 ) {
-
-    #if (defined(PRECISION_s) || defined(PRECISION_d))
-        re = dx[j];
-        lsum += re*re;
-    #else
-        re = MAGMA_Z_REAL( dx[j] );
-        double im = MAGMA_Z_IMAG( dx[j] );
-        lsum += re*re + im*im;
-    #endif
-
+        #ifdef REAL
+            re = dx[j];
+            lsum += re*re;
+        #else
+            re = MAGMA_Z_REAL( dx[j] );
+            double im = MAGMA_Z_IMAG( dx[j] );
+            lsum += re*re + im*im;
+        #endif
     }
     sum[i] = lsum;
     sum_reduce< 512 >( i, sum );
