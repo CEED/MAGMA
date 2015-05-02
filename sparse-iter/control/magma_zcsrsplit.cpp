@@ -105,8 +105,8 @@ magma_zcsrsplit(
                 }
                 if( check == 0 ){
                     printf("error: matrix contains zero on diagonal at (%d,%d).\n", i, i);
-                    magma_zmfree( &A, queue );
-                    exit(-1);
+                    info = -1;
+                    goto cleanup;
                 }
             }
         }

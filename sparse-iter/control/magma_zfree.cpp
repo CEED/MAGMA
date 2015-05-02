@@ -256,7 +256,8 @@ magma_zmfree(
                 return MAGMA_ERR_INVALID_PTR; 
                 
             }
-            free( A->blockinfo );
+            magma_free_cpu( A->blockinfo );
+            A->blockinfo = NULL;
             A->num_rows = 0;
             A->num_cols = 0;
             A->nnz = 0;

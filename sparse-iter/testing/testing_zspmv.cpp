@@ -60,9 +60,9 @@ int main(  int argc, char** argv )
     magmaDoubleComplex c_zero = MAGMA_Z_MAKE(0.0, 0.0);
     
     cusparseMatDescr_t descrA=NULL;
-    cusparseHandle_t cusparseHandle = 0;
+    cusparseHandle_t cusparseHandle = NULL;
     cusparseHybMat_t hybA=NULL;
-    cusparseMatDescr_t descr = 0;
+    cusparseMatDescr_t descr = NULL;
     
     #ifdef MAGMA_WITH_MKL
         magma_int_t *pntre=NULL;
@@ -107,7 +107,7 @@ int main(  int argc, char** argv )
 
         #ifdef MAGMA_WITH_MKL
             // calling MKL with CSR
-            pntre = (magma_int_t*)malloc( (hA.num_rows+1)*sizeof(magma_int_t) );
+            CHECK( magma_index_malloc_cpu( &pntre, m + 1 ) );
             pntre[0] = 0;
             for (j=0; j<hA.num_rows; j++ ) {
                 pntre[j] = hA.row[j+1];
@@ -143,8 +143,6 @@ int main(  int argc, char** argv )
             TESTING_FREE_CPU( col );
             row = NULL;
             col = NULL;
-            free(pntre);
-            pntre = NULL;
         #endif // MAGMA_WITH_MKL
 
         // copy matrix to GPU
@@ -280,13 +278,10 @@ int main(  int argc, char** argv )
         cusparseDestroyMatDescr( descrA );
         cusparseDestroyHybMat( hybA );
         cusparseDestroy( cusparseHandle ); 
-
-        magma_zmfree(&dA, queue );
-
-
-
-        printf("\n\n");
-
+        descrA=NULL;
+        cusparseHandle = NULL;
+        hybA=NULL;
+        descr = NULL;
 
         // free CPU memory
         magma_zmfree(&hA, queue );
@@ -294,8 +289,11 @@ int main(  int argc, char** argv )
         magma_zmfree(&hy, queue );
         magma_zmfree(&hrefvec, queue );
         // free GPU memory
+        magma_zmfree(&dA, queue );
         magma_zmfree(&dx, queue );
         magma_zmfree(&dy, queue );
+        
+        printf("\n\n");
 
         i++;
 
@@ -303,8 +301,8 @@ int main(  int argc, char** argv )
     
 cleanup:
     #ifdef MAGMA_WITH_MKL
-        free(pntre);
-    #endif
+        magma_free_cpu(pntre);
+    #endif    
     cusparseDestroyMatDescr( descrA );
     cusparseDestroyHybMat( hybA );
     cusparseDestroy( cusparseHandle ); 

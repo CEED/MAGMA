@@ -229,7 +229,8 @@ void magma_zsymbolic_ilu(
         {
             printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
                 printf("Increase STORAGE parameter.");
-                    exit(-1);
+                    info = -1;
+                    goto cleanup;
         }
             jal[knzl++] = next;
             next = lnklst[next];
@@ -253,7 +254,8 @@ void magma_zsymbolic_ilu(
         {
             printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
                 printf("Increase STORAGE parameter.");
-                    exit(-1);
+                info = -1;
+                goto cleanup;
         }
                    // printf("1 knzu:%d  next:%d \n", knzu, next );
             levels[knzu] = curlev[next];

@@ -90,6 +90,8 @@ magma_int_t read_z_csr_from_mtx(
     
     magma_index_t *coo_col=NULL, *coo_row=NULL;
     magmaDoubleComplex *coo_val=NULL;
+    magma_index_t *new_col=NULL, *new_row=NULL;
+    magmaDoubleComplex *new_val=NULL;
     
     fid = fopen(filename, "r");
     
@@ -194,13 +196,9 @@ magma_int_t read_z_csr_from_mtx(
         printf("total number of nonzeros: %d\n", (int) *nnz);
 
         
-    
-    magma_index_t* new_row =
-        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ;
-    magma_index_t* new_col =
-        (magma_index_t *) malloc(true_nonzeros*sizeof(magma_index_t)) ;
-    magmaDoubleComplex* new_val =
-      (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ;
+        CHECK( magma_index_malloc_cpu( &new_col, true_nonzeros ) );
+        CHECK( magma_index_malloc_cpu( &new_row, true_nonzeros ) );
+        CHECK( magma_zmalloc_cpu( &new_val, true_nonzeros ) );
     
         magma_index_t ptr = 0;
         for(magma_int_t i = 0; i < *nnz; ++i) {

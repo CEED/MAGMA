@@ -12,13 +12,20 @@
 #include "common_magmasparse.h"
 
 
+#include "common_magmasparse.h"
+#include "magmablas.h"
+#include "magmasparse_types.h"
+
+
+
+
 /**
     Purpose
     -------
 
     For a given input matrix A and vectors x, y and scalars alpha, beta
     the wrapper determines the suitable SpMV computing
-              y = alpha * A * x + beta * y.  
+              y = alpha * A * x + beta * y.
     Arguments
     ---------
 
@@ -28,18 +35,18 @@
 
     @param[in]
     A           magma_z_matrix
-                sparse matrix A    
+                sparse matrix A
 
     @param[in]
     x           magma_z_matrix
-                input vector x  
+                input vector x
                 
     @param[in]
     beta        magmaDoubleComplex
                 scalar beta
     @param[out]
     y           magma_z_matrix
-                output vector y      
+                output vector y
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -49,240 +56,195 @@
 
 extern "C" magma_int_t
 magma_z_spmv(
-    magmaDoubleComplex alpha, 
-    magma_z_matrix A, 
-    magma_z_matrix x, 
-    magmaDoubleComplex beta, 
+    magmaDoubleComplex alpha,
+    magma_z_matrix A,
+    magma_z_matrix x,
+    magmaDoubleComplex beta,
     magma_z_matrix y,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
     // set queue for old dense routines
-    magma_queue_t orig_queue;
+    magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
 
+    magma_z_matrix x2={Magma_CSR};
+
+    cusparseHandle_t cusparseHandle = 0;
+    cusparseMatDescr_t descr = 0;
     // make sure RHS is a dense matrix
     if ( x.storage_type != Magma_DENSE ) {
-        magma_z_matrix bdense;
-        magma_zmconvert( x, &bdense, x.storage_type, Magma_DENSE, queue );
-        magma_zmfree(&x, queue);
-        magma_zmtranspose(bdense, &x, queue );
-        magma_zmfree(&bdense, queue);    
+         printf("error: only dense vectors are supported.\n");
+         info = MAGMA_ERR_NOT_SUPPORTED;
+         goto cleanup;
     }
 
-    if ( A.memory_location != x.memory_location || 
+    if ( A.memory_location != x.memory_location ||
                             x.memory_location != y.memory_location ) {
         printf("error: linear algebra objects are not located in same memory!\n");
-        printf("memory locations are: %d   %d   %d\n", 
+        printf("memory locations are: %d   %d   %d\n",
                         A.memory_location, x.memory_location, y.memory_location );
-        magmablasSetKernelStream( orig_queue );
-        return MAGMA_ERR_INVALID_PTR;
+        info = MAGMA_ERR_INVALID_PTR;
+        goto cleanup;
     }
 
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
         if ( A.num_cols == x.num_rows && x.num_cols == 1 ) {
 
-             if ( A.storage_type == Magma_CSR 
-                            || A.storage_type == Magma_CSRL 
+             if ( A.storage_type == Magma_CSR
+                            || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
                  //printf("using CSR kernel for SpMV: ");
-                 //magma_zgecsrmv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
+                 //magma_zgecsrmv( MagmaNoTrans, A.num_rows, A.num_cols, alpha,
                  //                A.dval, A.drow, A.dcol, x.dval, beta, y.dval );
                  //printf("done.\n");
+                CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
+                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+                CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
 
-                cusparseHandle_t cusparseHandle = 0;
-                cusparseStatus_t cusparseStatus;
-                cusparseStatus = cusparseCreate(&cusparseHandle);
-                cusparseSetStream( cusparseHandle, queue );
-                cusparseMatDescr_t descr = 0;
-                cusparseStatus = cusparseCreateMatDescr(&descr);
+                CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
+                CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));
 
-                cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-                cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-
-                cusparseZcsrmv( cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                            A.num_rows, A.num_cols, A.nnz, &alpha, descr, 
+                cusparseZcsrmv( cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+                            A.num_rows, A.num_cols, A.nnz, &alpha, descr,
                             A.dval, A.drow, A.dcol, x.dval, &beta, y.dval );
-
-                cusparseDestroyMatDescr( descr );
-                cusparseDestroy( cusparseHandle );
-
              }
              else if ( A.storage_type == Magma_ELL ) {
                  //printf("using ELLPACKT kernel for SpMV: ");
-                 magma_zgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta, 
-                    y.dval, queue );
+                 CHECK( magma_zgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                    A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta,
+                    y.dval, queue ));
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_ELLPACKT ) {
                  //printf("using ELL kernel for SpMV: ");
-                 magma_zgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta, 
-                    y.dval, queue );
+                 CHECK( magma_zgeellmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                    A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, beta,
+                    y.dval, queue ));
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_ELLRT ) {
                  //printf("using ELLRT kernel for SpMV: ");
-                 magma_zgeellrtmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                            A.max_nnz_row, alpha, A.dval, A.dcol, A.drow, x.dval, 
-                         beta, y.dval, A.alignment, A.blocksize, queue );
+                 CHECK( magma_zgeellrtmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                            A.max_nnz_row, alpha, A.dval, A.dcol, A.drow, x.dval,
+                         beta, y.dval, A.alignment, A.blocksize, queue ));
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_SELLP ) {
                  //printf("using SELLP kernel for SpMV: ");
-                 magma_zgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    A.blocksize, A.numblocks, A.alignment, 
-                    alpha, A.dval, A.dcol, A.drow, x.dval, beta, y.dval, queue );
+                 CHECK( magma_zgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                    A.blocksize, A.numblocks, A.alignment,
+                    alpha, A.dval, A.dcol, A.drow, x.dval, beta, y.dval, queue ));
 
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_DENSE ) {
                  //printf("using DENSE kernel for SpMV: ");
-                 magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
-                                A.dval, A.num_rows, x.dval, 1, beta,  y.dval, 
+                 magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha,
+                                A.dval, A.num_rows, x.dval, 1, beta,  y.dval,
                                 1 );
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_SPMVFUNCTION ) {
                  //printf("using DENSE kernel for SpMV: ");
-                 magma_zcustomspmv( alpha, x, beta, y, queue );
+                 CHECK( magma_zcustomspmv( alpha, x, beta, y, queue ));
                  //printf("done.\n");
              }
-/*             else if ( A.storage_type == Magma_BCSR ) {
+             else if ( A.storage_type == Magma_BCSR ) {
                  //printf("using CUSPARSE BCSR kernel for SpMV: ");
                 // CUSPARSE context //
-                cusparseHandle_t cusparseHandle = 0;
-                cusparseStatus_t cusparseStatus;
-                cusparseStatus = cusparseCreate(&cusparseHandle);
-                cusparseSetStream( cusparseHandle, queue );
-                cusparseMatDescr_t descr = 0;
-                cusparseStatus = cusparseCreateMatDescr(&descr);
-                // end CUSPARSE context //
                 cusparseDirection_t dirA = CUSPARSE_DIRECTION_ROW;
                 int mb = (A.num_rows + A.blocksize-1)/A.blocksize;
                 int nb = (A.num_cols + A.blocksize-1)/A.blocksize;
-                cusparseZbsrmv( cusparseHandle, dirA, 
-                    CUSPARSE_OPERATION_NON_TRANSPOSE, mb, nb, A.numblocks, 
-                    &alpha, descr, A.dval, A.drow, A.dcol, A.blocksize, x.dval, 
+                CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
+                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+                CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
+                cusparseZbsrmv( cusparseHandle, dirA,
+                    CUSPARSE_OPERATION_NON_TRANSPOSE, mb, nb, A.numblocks,
+                    &alpha, descr, A.dval, A.drow, A.dcol, A.blocksize, x.dval,
                     &beta, y.dval );
-                 //printf("done.\n");
-                 magmablasSetKernelStream( orig_queue );
-                 return MAGMA_SUCCESS;
-             }*/
+
+             }
              else {
                  printf("error: format not supported.\n");
-                 magmablasSetKernelStream( orig_queue );
-                 return MAGMA_ERR_NOT_SUPPORTED;
+                 info = MAGMA_ERR_NOT_SUPPORTED; 
              }
         }
         else if ( A.num_cols < x.num_rows || x.num_cols > 1 ) {
             magma_int_t num_vecs = x.num_rows / A.num_cols * x.num_cols;
             if ( A.storage_type == Magma_CSR ) {
 
-                cusparseHandle_t cusparseHandle = 0;
-                cusparseStatus_t cusparseStatus;
-                cusparseStatus = cusparseCreate(&cusparseHandle);
-                cusparseSetStream( cusparseHandle, queue );
-                cusparseMatDescr_t descr = 0;
-                cusparseStatus = cusparseCreateMatDescr(&descr);
-
-                cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-                cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+                CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
+                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+                CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
+                CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
+                CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));
 
                 if ( x.major == MagmaColMajor) {
                     cusparseZcsrmm(cusparseHandle,
-                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                    A.num_rows,   num_vecs, A.num_cols, A.nnz, 
+                    CUSPARSE_OPERATION_NON_TRANSPOSE,
+                    A.num_rows,   num_vecs, A.num_cols, A.nnz,
                     &alpha, descr, A.dval, A.drow, A.dcol,
                     x.dval, A.num_cols, &beta, y.dval, A.num_cols);
                 } else if ( x.major == MagmaRowMajor) {
                     cusparseZcsrmm2(cusparseHandle,
-                    CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                    CUSPARSE_OPERATION_TRANSPOSE, 
-                    A.num_rows,   num_vecs, A.num_cols, A.nnz, 
+                    CUSPARSE_OPERATION_NON_TRANSPOSE,
+                    CUSPARSE_OPERATION_TRANSPOSE,
+                    A.num_rows,   num_vecs, A.num_cols, A.nnz,
                     &alpha, descr, A.dval, A.drow, A.dcol,
                     x.dval, A.num_cols, &beta, y.dval, A.num_cols);
                 }
 
-                cusparseDestroyMatDescr( descr );
-                cusparseDestroy( cusparseHandle );
-             }
-             else if ( A.storage_type == Magma_ELL ) {
-
-                if ( x.major == MagmaColMajor) {
-                 magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                 num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
-                 beta, y.dval, queue );
-                }
-                else if ( x.major == MagmaRowMajor) {
-                    // transpose first to col major
-                    magma_z_matrix x2;                    
-                    magma_zvtranspose( x, &x2, queue );
-                    magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
-                    beta, y.dval, queue );
-                    magma_zmfree(&x2, queue );
-                }
-             }
-             else if ( A.storage_type == Magma_ELLPACKT ) {
-                if ( x.major == MagmaColMajor) {
-                 magma_zmgeellmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                 num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
-                 beta, y.dval, queue );
-                }
-                else if ( x.major == MagmaRowMajor) {
-                    // transpose first to col major
-                    magma_z_matrix x2;                    
-                    magma_zvtranspose( x, &x2, queue );
-                    magma_zmgeelltmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    num_vecs, A.max_nnz_row, alpha, A.dval, A.dcol, x.dval, 
-                    beta, y.dval, queue );
-                    magma_zmfree(&x2, queue );
-                }
              } else if ( A.storage_type == Magma_SELLP ) {
                 if ( x.major == MagmaRowMajor) {
-                 magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    num_vecs, A.blocksize, A.numblocks, A.alignment, 
-                    alpha, A.dval, A.dcol, A.drow, x.dval, beta, y.dval, queue );
+                 CHECK( magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                    num_vecs, A.blocksize, A.numblocks, A.alignment,
+                    alpha, A.dval, A.dcol, A.drow, x.dval, beta, y.dval, queue ));
                 }
                 else if ( x.major == MagmaColMajor) {
                     // transpose first to row major
-                    magma_z_matrix x2; 
-                    magma_zvtranspose( x, &x2, queue );
-                    magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                    num_vecs, A.blocksize, A.numblocks, A.alignment, 
-                    alpha, A.dval, A.dcol, A.drow, x2.dval, beta, y.dval, queue );
-                    magma_zmfree(&x2, queue );
+                    CHECK( magma_zvtranspose( x, &x2, queue ));
+                    CHECK( magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols,
+                    num_vecs, A.blocksize, A.numblocks, A.alignment,
+                    alpha, A.dval, A.dcol, A.drow, x2.dval, beta, y.dval, queue ));
                 }
-             }/*
-             if ( A.storage_type == Magma_DENSE ) {
+             }
+             /*if ( A.storage_type == Magma_DENSE ) {
                  //printf("using DENSE kernel for SpMV: ");
-                 magmablas_zmgemv( MagmaNoTrans, A.num_rows, A.num_cols, 
-                            num_vecs, alpha, A.dval, A.num_rows, x.dval, 1, 
+                 magmablas_zmgemv( MagmaNoTrans, A.num_rows, A.num_cols,
+                            num_vecs, alpha, A.dval, A.num_rows, x.dval, 1,
                             beta,  y.dval, 1 );
                  //printf("done.\n");
-                 magmablasSetKernelStream( orig_queue );
-                 return MAGMA_SUCCESS;
              }*/
              else {
                  printf("error: format not supported.\n");
-                 magmablasSetKernelStream( orig_queue );
-                 return MAGMA_ERR_NOT_SUPPORTED;
+                 info = MAGMA_ERR_NOT_SUPPORTED;
              }
         }
          
          
     }
-    // CPU case missing!     
+    // CPU case missing!
     else {
         printf("error: CPU not yet supported.\n");
-        magmablasSetKernelStream( orig_queue );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
+
+cleanup:
+    cusparseDestroyMatDescr( descr );
+    cusparseDestroy( cusparseHandle );
+    cusparseHandle = 0;
+    descr = 0;
+    magma_zmfree(&x2, queue );
+    
     magmablasSetKernelStream( orig_queue );
-    return MAGMA_SUCCESS;
+    return info;
+
+
 }
+
+
 
 
 
@@ -292,7 +254,7 @@ magma_z_spmv(
 
     For a given input matrix A and vectors x, y and scalars alpha, beta
     the wrapper determines the suitable SpMV computing
-              y = alpha * ( A - lambda I ) * x + beta * y.  
+              y = alpha * ( A - lambda I ) * x + beta * y.
     Arguments
     ---------
 
@@ -302,27 +264,27 @@ magma_z_spmv(
 
     @param
     A           magma_z_matrix
-                sparse matrix A   
+                sparse matrix A
 
     @param
     lambda      magmaDoubleComplex
-                scalar lambda 
+                scalar lambda
 
     @param
     x           magma_z_matrix
-                input vector x  
+                input vector x
 
     @param
     beta        magmaDoubleComplex
-                scalar beta   
+                scalar beta
                 
     @param
-    offset      magma_int_t 
+    offset      magma_int_t
                 in case not the main diagonal is scaled
                 
     @param
-    blocksize   magma_int_t 
-                in case of processing multiple vectors  
+    blocksize   magma_int_t
+                in case of processing multiple vectors
                 
     @param
     add_rows    magma_int_t*
@@ -330,7 +292,7 @@ magma_z_spmv(
                 
     @param
     y           magma_z_matrix
-                output vector y    
+                output vector y
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -340,70 +302,71 @@ magma_z_spmv(
 
 extern "C" magma_int_t
 magma_z_spmv_shift(
-    magmaDoubleComplex alpha, 
-    magma_z_matrix A, 
+    magmaDoubleComplex alpha,
+    magma_z_matrix A,
     magmaDoubleComplex lambda,
-    magma_z_matrix x, 
-    magmaDoubleComplex beta, 
-    magma_int_t offset, 
-    magma_int_t blocksize, 
-    magma_index_t *add_rows, 
+    magma_z_matrix x,
+    magmaDoubleComplex beta,
+    magma_int_t offset,
+    magma_int_t blocksize,
+    magma_index_t *add_rows,
     magma_z_matrix y,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
 
     // make sure RHS is a dense matrix
     if ( x.storage_type != Magma_DENSE ) {
-        magma_z_matrix bdense;
-        magma_zmconvert( x, &bdense, x.storage_type, Magma_DENSE, queue );
-        magma_zmfree(&x, queue);
-        magma_zmtranspose(bdense, &x, queue );
-        magma_zmfree(&bdense, queue);    
+         printf("error: only dense vectors are supported.\n");
+         info = MAGMA_ERR_NOT_SUPPORTED;
+         goto cleanup;
     }
 
 
-    if ( A.memory_location != x.memory_location 
+    if ( A.memory_location != x.memory_location
                 || x.memory_location != y.memory_location ) {
-    printf("error: linear algebra objects are not located in same memory!\n");
-    printf("memory locations are: %d   %d   %d\n", 
+        printf("error: linear algebra objects are not located in same memory!\n");
+        printf("memory locations are: %d   %d   %d\n",
                     A.memory_location, x.memory_location, y.memory_location );
-    return MAGMA_ERR_INVALID_PTR;
+        info = MAGMA_ERR_INVALID_PTR;
+        goto cleanup;
     }
 
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
          if ( A.storage_type == Magma_CSR ) {
              //printf("using CSR kernel for SpMV: ");
-             magma_zgecsrmv_shift( MagmaNoTrans, A.num_rows, A.num_cols, 
-                alpha, lambda, A.dval, A.drow, A.dcol, x.dval, beta, offset, 
-                blocksize, add_rows, y.dval, queue );
+             CHECK( magma_zgecsrmv_shift( MagmaNoTrans, A.num_rows, A.num_cols,
+                alpha, lambda, A.dval, A.drow, A.dcol, x.dval, beta, offset,
+                blocksize, add_rows, y.dval, queue ));
              //printf("done.\n");
          }
          else if ( A.storage_type == Magma_ELLPACKT ) {
              //printf("using ELLPACKT kernel for SpMV: ");
-             magma_zgeellmv_shift( MagmaNoTrans, A.num_rows, A.num_cols, 
-                A.max_nnz_row, alpha, lambda, A.dval, A.dcol, x.dval, beta, offset, 
-                blocksize, add_rows, y.dval, queue );
+             CHECK( magma_zgeellmv_shift( MagmaNoTrans, A.num_rows, A.num_cols,
+                A.max_nnz_row, alpha, lambda, A.dval, A.dcol, x.dval, beta, offset,
+                blocksize, add_rows, y.dval, queue ));
              //printf("done.\n");
          }
          else if ( A.storage_type == Magma_ELL ) {
              //printf("using ELL kernel for SpMV: ");
-             magma_zgeelltmv_shift( MagmaNoTrans, A.num_rows, A.num_cols, 
-                A.max_nnz_row, alpha, lambda, A.dval, A.dcol, x.dval, beta, offset, 
-                blocksize, add_rows, y.dval, queue );
+             CHECK( magma_zgeelltmv_shift( MagmaNoTrans, A.num_rows, A.num_cols,
+                A.max_nnz_row, alpha, lambda, A.dval, A.dcol, x.dval, beta, offset,
+                blocksize, add_rows, y.dval, queue ));
              //printf("done.\n");
          }
          else {
              printf("error: format not supported.\n");
-             return MAGMA_ERR_NOT_SUPPORTED;
+             info = MAGMA_ERR_NOT_SUPPORTED;
          }
-         return MAGMA_SUCCESS;
     }
-    // CPU case missing!     
+    // CPU case missing!
     else {
         printf("error: CPU not yet supported.\n");
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
+cleanup:
+    return info;
 }
 
 
@@ -414,7 +377,7 @@ magma_z_spmv_shift(
 
     For a given input matrix A and B and scalar alpha,
     the wrapper determines the suitable SpMV computing
-              C = alpha * A * B.  
+              C = alpha * A * B.
     Arguments
     ---------
 
@@ -424,15 +387,15 @@ magma_z_spmv_shift(
 
     @param[in]
     A           magma_z_matrix
-                sparse matrix A    
+                sparse matrix A
                 
     @param[in]
     B           magma_z_matrix
-                sparse matrix C    
+                sparse matrix C
                 
     @param[out]
     C           magma_z_matrix *
-                outpur sparse matrix C    
+                outpur sparse matrix C
 
     @param[in]
     queue       magma_queue_t
@@ -443,52 +406,56 @@ magma_z_spmv_shift(
 
 extern "C" magma_int_t
 magma_z_spmm(
-    magmaDoubleComplex alpha, 
+    magmaDoubleComplex alpha,
     magma_z_matrix A,
     magma_z_matrix B,
     magma_z_matrix *C,
     magma_queue_t queue )
 {
+    magma_int_t info = 0;
+    
     // set queue for old dense routines
-    //magma_queue_t orig_queue;
+    //magma_queue_t orig_queue=NULL;
     //magmablasGetKernelStream( &orig_queue );
 
     if ( A.memory_location != B.memory_location ) {
         printf("error: linear algebra objects are not located in same memory!\n");
-        printf("memory locations are: %d   %d\n", 
+        printf("memory locations are: %d   %d\n",
                         A.memory_location, B.memory_location );
-        //magmablasSetKernelStream( orig_queue );
-        return MAGMA_ERR_INVALID_PTR;
+        info = MAGMA_ERR_INVALID_PTR;
+        goto cleanup;
     }
 
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
         if ( A.num_cols == B.num_rows ) {
 
-             if ( A.storage_type == Magma_CSR 
-                            || A.storage_type == Magma_CSRL 
+             if ( A.storage_type == Magma_CSR
+                            || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU
                             || A.storage_type == Magma_CSRCOO ) {
                     
-                magma_zcuspmm( A, B, C, queue );
+                CHECK( magma_zcuspmm( A, B, C, queue ));
                 
              }
              else {
                  printf("error: format not supported.\n");
                  // magmablasSetKernelStream( orig_queue );
-                 return MAGMA_ERR_NOT_SUPPORTED;
+                 info = MAGMA_ERR_NOT_SUPPORTED;
              }
         }
          
     }
-    // CPU case missing!     
+    // CPU case missing!
     else {
         printf("error: CPU not yet supported.\n");
         // magmablasSetKernelStream( orig_queue );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED; // TODO change to goto cleanup?
     }
+    
+cleanup:
     // magmablasSetKernelStream( orig_queue );
-    return MAGMA_SUCCESS;
+    return info;
 }
 
 
