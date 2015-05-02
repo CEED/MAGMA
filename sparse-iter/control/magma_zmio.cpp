@@ -994,7 +994,7 @@ magma_z_csr_mtx(
     int csr_compressor = 0;       // checks for zeros in original file
     
     magma_z_matrix B={Magma_CSR};
-    
+
     magma_index_t *coo_col = NULL;
     magma_index_t *coo_row = NULL;
     magmaDoubleComplex *coo_val = NULL;
@@ -1191,7 +1191,6 @@ magma_z_csr_mtx(
     printf( "Sorting: done\n" );
     
     */
-
     CHECK( magma_zmalloc_cpu( &A->val, A->nnz ));
     CHECK( magma_index_malloc_cpu( &A->col, A->nnz ));
     CHECK( magma_index_malloc_cpu( &A->row, A->num_rows+1 ));
@@ -1274,9 +1273,6 @@ cleanup:
     magma_free_cpu(coo_row);
     magma_free_cpu(coo_col);
     magma_free_cpu(coo_val);
-    magma_free_cpu( new_val );
-    magma_free_cpu( new_col );
-    magma_free_cpu( new_row );
     return info;
 }
 
