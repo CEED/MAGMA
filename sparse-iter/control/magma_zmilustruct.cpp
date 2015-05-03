@@ -284,10 +284,6 @@ cleanup:
     magma_free_cpu(curlev);
     magma_free_cpu(levels);
     magma_free_cpu(iwork);
-    magma_free_cpu(lnklst);
-    magma_free_cpu(curlev);
-    magma_free_cpu(levels);
-    magma_free_cpu(iwork);
 
 }
 

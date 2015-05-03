@@ -46,7 +46,7 @@ magma_ziterilusetup(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    
+
     cusparseHandle_t cusparseHandle=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
@@ -173,7 +173,6 @@ magma_ziterilusetup(
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->L.num_rows,
         precond->L.nnz, descrL,
         precond->L.val, precond->L.row, precond->L.col, precond->cuinfoL ));
-    CHECK_CUSPARSE( cusparseDestroyMatDescr( descrL ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrU ));
     CHECK_CUSPARSE( cusparseSetMatType( descrU, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrU, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -190,6 +189,9 @@ cleanup:
     cusparseDestroy( cusparseHandle );
     cusparseDestroyMatDescr( descrL );
     cusparseDestroyMatDescr( descrU );
+    cusparseHandle=NULL;
+    descrL=NULL;
+    descrU=NULL;
     magma_zmfree( &hAh, queue );
     magma_zmfree( &hA, queue );
     magma_zmfree( &hL, queue );
@@ -208,7 +210,7 @@ cleanup:
     magma_zmfree( &DU, queue );
     magma_zmfree( &RL, queue );
     magma_zmfree( &RU, queue );
-    
+
     return info;
 
 }
@@ -353,7 +355,10 @@ magma_zitericsetup(
     cleanup:
     cusparseDestroy( cusparseHandle );
     cusparseDestroyMatDescr( descrL );
-    cusparseDestroyMatDescr( descrU );    
+    cusparseDestroyMatDescr( descrU );
+    cusparseHandle=NULL;
+    descrL=NULL;
+    descrU=NULL;    
     magma_zmfree( &hAh, queue );
     magma_zmfree( &hA, queue );
     magma_zmfree( &hAtmp, queue );

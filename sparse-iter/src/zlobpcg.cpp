@@ -601,9 +601,9 @@ magma_zlobpcg(
 
     //=== Prmagma_int_t residual history in a file for plotting ====
     CHECK( magma_dmalloc_cpu(&hresidualNorms, (iterationNumber+1) * n));
-    magma_zgetmatrix(n, iterationNumber,
-                     (magmaDoubleComplex*)residualNorms, n,
-                     (magmaDoubleComplex*)hresidualNorms, n);
+    magma_dgetmatrix(n, iterationNumber,
+                                        residualNorms, n,
+                                        hresidualNorms, n);
 
     printf("Residuals are stored in file residualNorms\n");
     printf("Plot the residuals using: myplot \n");
@@ -658,6 +658,7 @@ cleanup:
 
     #if defined(PRECISION_z) || defined(PRECISION_c)
     magma_free_cpu( rwork           );
+    rwork = NULL;
     #endif
 
     magmablasSetKernelStream( orig_queue );
