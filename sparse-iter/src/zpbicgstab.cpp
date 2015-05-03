@@ -124,9 +124,11 @@ magma_zpbicgstab(
         solver_par->timing[0] = 0.0;
     }
 
+    solver_par->numiter = 0;
     // start iteration
-    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter;
-                                                    solver_par->numiter++ ) {
+    do
+    {
+        solver_par->numiter++;
         rho_old = rho_new;                                   // rho_old=rho
         rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1 );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
@@ -183,6 +185,8 @@ magma_zpbicgstab(
             break;
         }
     }
+    while ( solver_par->numiter+1 <= solver_par->maxiter );
+    
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;

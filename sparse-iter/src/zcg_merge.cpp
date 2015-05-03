@@ -144,9 +144,11 @@ magma_zcg_merge(
         solver_par->timing[0] = 0.0;
     }
     
+    solver_par->numiter = 0;
     // start iteration
-    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter;
-                                                    solver_par->numiter++ ) {
+    do
+    {
+        solver_par->numiter++;
 
         magmablasSetKernelStream(stream[0]);
         
@@ -174,8 +176,9 @@ magma_zcg_merge(
         if (  betanom  < r0 ) {
             break;
         }
-
     }
+    while ( solver_par->numiter+1 <= solver_par->maxiter );
+    
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;

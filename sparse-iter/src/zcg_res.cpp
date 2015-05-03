@@ -111,9 +111,11 @@ magma_zcg_res(
         solver_par->timing[0] = 0.0;
     }
     
+    solver_par->numiter = 0;
     // start iteration
-    for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter;
-                                                    solver_par->numiter++ ) {
+    do
+    {
+        solver_par->numiter++;
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
         magma_zaxpy(dofs,  alpha, p.dval, 1, x->dval, 1);     // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.dval, 1, r.dval, 1);      // r = r - alpha q
@@ -140,6 +142,8 @@ magma_zcg_res(
         den = MAGMA_Z_REAL(magma_zdotc(dofs, p.dval, 1, q.dval, 1));  // den = p dot q
         nom = betanomsq;
     }
+    while ( solver_par->numiter+1 <= solver_par->maxiter );
+    
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = tempo2-tempo1;
     residual=0.0;
