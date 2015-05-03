@@ -98,7 +98,7 @@ magma_zjacobi(
     tempo1 = magma_sync_wtime( queue );
 
     // Jacobi iterator
-    CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
+    CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));
 
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
