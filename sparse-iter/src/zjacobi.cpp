@@ -72,8 +72,9 @@ magma_zjacobi(
     
     double nom0 = 0.0;
 
-    magma_z_matrix r={Magma_CSR}, d={Magma_CSR};
+    magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, ACSR={Magma_CSR} ;
     
+    CHECK( magma_zmconvert(A, &ACSR, A.storage_type, Magma_CSR, queue ) );
     if( A.storage_type != Magma_CSR ){
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
@@ -87,14 +88,14 @@ magma_zjacobi(
     double residual;
     // solver setup
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
+    CHECK(  magma_zresidualvec( ACSR, b, *x, &r, &residual, queue));
     solver_par->init_res = residual;
     solver_par->res_vec = NULL;
     solver_par->timing = NULL;
     nom0 = residual;
 
     // Jacobi setup
-    CHECK( magma_zjacobisetup_diagscal( A, &d, queue ));
+    CHECK( magma_zjacobisetup_diagscal( ACSR, &d, queue ));
     magma_z_solver_par jacobiiter_par;
     jacobiiter_par.maxiter = solver_par->maxiter;
 
@@ -117,6 +118,7 @@ magma_zjacobi(
 cleanup:
     magma_zmfree( &r, queue );
     magma_zmfree( &d, queue );
+    magma_zmfree( &ACSR, queue );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
