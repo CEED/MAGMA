@@ -75,10 +75,6 @@ magma_zjacobi(
     magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, ACSR={Magma_CSR} ;
     
     CHECK( magma_zmconvert(A, &ACSR, A.storage_type, Magma_CSR, queue ) );
-    if( A.storage_type != Magma_CSR ){
-        info = MAGMA_ERR_NOT_SUPPORTED;
-        goto cleanup;
-    }
 
     // prepare solver feedback
     solver_par->solver = Magma_JACOBI;
