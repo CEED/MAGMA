@@ -363,6 +363,18 @@ void
 magmablas_zlacpy_cnjg(
     magma_int_t n, magmaDoubleComplex *dA1, magma_int_t lda1,
     magmaDoubleComplex *dA2, magma_int_t lda2);
+void
+magmablas_zlacpy_sym_in(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t *rows, magma_int_t *perm,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
+void
+magmablas_zlacpy_sym_out(
+    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t *rows, magma_int_t *perm,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
 
 double
 magmablas_zlange(
@@ -452,7 +464,10 @@ magmablas_zlaswp2(
     magmaDoubleComplex_ptr dAT, magma_int_t ldda,
     magma_int_t k1, magma_int_t k2,
     magmaInt_const_ptr d_ipiv, magma_int_t inci );
-
+void
+magmablas_zlaswp_sym( magma_int_t n, magmaDoubleComplex *dA, magma_int_t lda,
+                      magma_int_t k1, magma_int_t k2,
+                        const magma_int_t *ipiv, magma_int_t inci );
 void
 magmablas_zlaswpx(
     magma_int_t n,

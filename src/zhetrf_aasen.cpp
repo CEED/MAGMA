@@ -150,9 +150,9 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     }
     magmablasSetKernelStream(stream[0]);
 
-    int lddw = nb*(1+(n+nb-1)/nb);
-    ldda = ((n+31)/32)*32;
-    if (MAGMA_SUCCESS != magma_zmalloc( &work, (nb*((n+nb-1)/nb)) *ldda ) ||
+    int lddw = nb*(1+magma_ceildiv(n, nb));
+    ldda = magma_roundup(n, 32);
+    if (MAGMA_SUCCESS != magma_zmalloc( &work, magma_roundup(n, nb) *ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &dH,   (2*nb)*ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &dL,   nb*ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &dX,   nb*lddw ) ||
@@ -210,7 +210,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         else {
             //=========================================================
             // Compute the Aasen's factorization P*A*P' = L*T*L'.
-            for (int j=0; j < (n+nb-1)/nb; j ++) {
+            for (int j=0; j < magma_ceildiv(n, nb); j ++) {
                 int jb = min(nb, (n-j*nb));
 
                 // Compute off-diagonal blocks of H(:,j), 
@@ -322,7 +322,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                         dT(j,j), ldda);
                 }
                 trace_gpu_end( 0,0 );
-                if (j < (n+nb-1)/nb-1)
+                if (j < magma_ceildiv(n, nb)-1)
                 {
                     // ** Panel + Update **
                     int ib = n-(j+1)*nb;
@@ -438,7 +438,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 }
             }
             // copy back to CPU
-            for (int j=0; j<(n+nb-1)/nb; j++)
+            for (int j=0; j<magma_ceildiv(n, nb); j++)
             {
                 int jb = min(nb, n-j*nb);
                 //#define COPY_BACK_BY_BLOCK_COL
@@ -447,7 +447,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 #else
                 // copy T
                 magma_zgetmatrix_async( jb, jb, dT(j,j), ldda, A(j,j), lda, stream[0] );
-                if (j < (n+nb-1)/nb-1)
+                if (j < magma_ceildiv(n, nb)-1)
                 {
                     // copy L
                     int jb2 = min(nb, n-(j+1)*nb);
