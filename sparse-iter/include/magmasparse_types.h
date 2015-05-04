@@ -199,7 +199,18 @@ typedef struct magma_s_matrix{
 }magma_s_matrix;
 
 
+// for backwards compatability, make these aliases.
+typedef magma_s_matrix magma_s_sparse_matrix;
+typedef magma_d_matrix magma_d_sparse_matrix;
+typedef magma_c_matrix magma_c_sparse_matrix;
+typedef magma_z_matrix magma_z_sparse_matrix;
 
+typedef magma_s_matrix magma_s_vector;
+typedef magma_d_matrix magma_d_vector;
+typedef magma_c_matrix magma_c_vector;
+typedef magma_z_matrix magma_z_vector;
+
+/*
 typedef struct magma_z_vector{
 
     magma_location_t   memory_location;         // CPU or DEV
@@ -257,6 +268,8 @@ typedef struct magma_s_vector{
     magma_order_t      major;                   // storage type:Row/Column-Major
 
 }magma_s_vector;
+*/
+
 
 //*****************     solver parameters     ********************************//
 

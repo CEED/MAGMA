@@ -22,6 +22,27 @@
 extern "C" {
 #endif
 
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- For backwards compatability, map old (1.6.1) to new (1.6.2) function names
+*/
+
+#define magma_z_mtranspose  magma_zmtranspose
+#define magma_z_mtransfer   magma_zmtransfer
+#define magma_z_vtransfer   magma_zmtransfer
+#define magma_z_mconvert    magma_zmconvert
+#define magma_z_vinit       magma_zvinit
+#define magma_z_vvisu       magma_zprint_vector
+#define magma_z_vread       magma_zvread
+#define magma_z_vspread     magma_zvspread
+#define magma_z_mvisu       magma_zprint_matrix
+#define magma_z_mfree       magma_zmfree
+#define magma_z_vfree       magma_zmfree
+#define write_z_csr_mtx     magma_zwrite_csr_mtx
+#define write_z_csrtomtx    magma_zwrite_csrtomtx
+#define print_z_csr         magma_zprint_csr_mtx
+
+
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE Auxiliary functions
 */
