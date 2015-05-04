@@ -486,6 +486,9 @@ chol = (
 	# no-pivot LDLt, GPU interface
 	('testing_zhetrf', '-L --version 4 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 4 -c2',  n,    ''),
+
+	# Aasen's
+	('testing_zhetrf', '-L --version 6 -c2',  n,    ''),
 )
 if ( opts.chol ):
 	tests += chol
