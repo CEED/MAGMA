@@ -408,7 +408,7 @@ magma_z_applyprecond_right(
         magma_z_solver_par solver_par;
         solver_par.maxiter = precond->maxiter;
         //magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
-        CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
+        CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
     }
     else if ( precond->solver == Magma_NONE ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b

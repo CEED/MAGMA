@@ -374,6 +374,113 @@ magma_zjacobispmvupdate(
 
 
 
+__global__ void 
+zjacobispmvupdate_bw_kernel(  
+    int num_rows,
+    int num_cols, 
+    magmaDoubleComplex * dval, 
+    magma_index_t * drowptr, 
+    magma_index_t * dcolind,
+    magmaDoubleComplex *t, 
+    magmaDoubleComplex *b, 
+    magmaDoubleComplex *d, 
+    magmaDoubleComplex *x ){
+
+
+
+    int row_tmp = blockDim.x * blockIdx.x + threadIdx.x ;
+    int row = num_rows-1 - row_tmp;
+    int j;
+
+    if( row>0 ){
+        magmaDoubleComplex dot = MAGMA_Z_ZERO;
+        int start = drowptr[ row ];
+        int end = drowptr[ row+1 ];
+        for( int i=0; i<num_cols; i++){
+            for( j=start; j<end; j++){
+                dot += dval[ j ] * x[ dcolind[j]+i*num_rows ];
+            }
+            x[row+i*num_rows] += (b[row+i*num_rows]-dot) * d[row];
+        }
+    }
+}
+
+
+
+
+
+/**
+    Purpose
+    -------
+
+    Updates the iteration vector x for the Jacobi iteration
+    according to
+        x=x+d.*(b-Ax)
+    This kernel processes the thread blocks in reversed order.
+
+    Arguments
+    ---------
+
+    @param[in]
+    maxiter     magma_int_t
+                number of Jacobi iterations   
+                
+    @param[in]
+    A           magma_z_matrix
+                system matrix
+                
+    @param[in]
+    t           magma_z_matrix
+                workspace
+                
+    @param[in]
+    b           magma_z_matrix
+                RHS b
+                
+    @param[in]
+    d           magma_z_matrix
+                vector with diagonal entries
+
+    @param[out]
+    x           magma_z_matrix*
+                iteration vector
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_z
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zjacobispmvupdate_bw(
+    magma_int_t maxiter,
+    magma_z_matrix A,
+    magma_z_matrix t, 
+    magma_z_matrix b, 
+    magma_z_matrix d, 
+    magma_z_matrix *x,
+    magma_queue_t queue )
+{
+
+    // local variables
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
+    magma_int_t threads = BLOCK_SIZE;
+
+    for( magma_int_t i=0; i<maxiter; i++ ) {
+        // distinct routines imply synchronization
+        // magma_z_spmv( c_one, A, *x, c_zero, t, queue );                // t =  A * x
+        // zjacobiupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, t.dval, b.dval, d.dval, x->dval );
+        // merged in one implies asynchronous update
+        zjacobispmvupdate_bw_kernel<<< grid, threads, 0 >>>
+            ( t.num_rows, t.num_cols, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval );
+
+    }
+
+    return MAGMA_SUCCESS;
+}
+
+
 
 
 
