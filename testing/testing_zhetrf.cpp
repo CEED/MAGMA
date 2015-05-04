@@ -190,7 +190,7 @@ double get_residual_aasen(
         return 0;
     }
     lapackf77_zgesv(&n,&nrhs, &T(0,0),&n, p,x,&n, &info);
-    magma_free(p);
+    magma_free_cpu(p);
     // backward solve
     blasf77_ztrsv( MagmaLowerStr, MagmaConjTransStr, MagmaUnitStr, &n, &L(0,0),&n, x,&ione);
     // pivot..
@@ -470,7 +470,7 @@ double get_LTLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
         printf("%d ", p[i] );
     }
     printf( "];\n" );
-    magma_free(p);*/
+    magma_free_cpu(p);*/
     // extract T
     for (int i=0; i < N; i++) {
         int istart = max(0, i-nb);
@@ -690,7 +690,6 @@ int main( int argc, char** argv)
             if (info != 0)
                 printf("magma_zhetrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-            //magma_zprint(N,N, h_A,lda);
 
             /* =====================================================================
                Check the factorization
