@@ -237,7 +237,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                     // W(i) = L(j,i+1)'
                     magmablasSetKernelStream(stream[1]);
                     magma_zgemm(MagmaConjTrans, MagmaConjTrans,
-                                nb, jb, nb,
+                                nb, jb, (i < j-1 ? nb : jb),
                                 c_one,  dT(i+1,i), ldda,
                                         dL(j,i+1), ldda,
                                 c_zero, dH(i,j),   ldda);
@@ -325,6 +325,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 if (j < (n+nb-1)/nb-1)
                 {
                     // ** Panel + Update **
+                    int ib = n-(j+1)*nb;
                     // compute H(j,j)
                     // > H(j,j) = T(j,j)*L(j,j)'
                     //   H(0,0) is not needed since it is multiplied with L(j+1:n,0)
@@ -350,14 +351,13 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                     // extract L(:, j+1)
                     trace_gpu_start( 0, 0, "gemm", "compLj" );
                     magma_zgemm(MagmaNoTrans, MagmaNoTrans,
-                                n-(j+1)*nb, jb, (j-1)*nb+jb,
+                                ib, jb, j*nb,
                                 c_mone, dL(j+1,1), ldda,
                                         dH(  1,j), ldda,
                                 c_one,  dA(j+1,j), ldda);
                     trace_gpu_end( 0,0 );
 
                     // panel factorization
-                    int ib = n-(j+1)*nb;
                     if (cpu_panel || j < 2) {
                         // copy panel to CPU
                         magma_zgetmatrix_async( ib, jb,
