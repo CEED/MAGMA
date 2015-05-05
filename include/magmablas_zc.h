@@ -26,13 +26,6 @@ magmablas_zcaxpycp(
     magmaDoubleComplex_const_ptr b,
     magmaDoubleComplex_ptr w );
 
-void
-magmablas_zaxpycp(
-    magma_int_t m,
-    magmaDoubleComplex_ptr r,
-    magmaDoubleComplex_ptr x,
-    magmaDoubleComplex_const_ptr b );
-
 // TODO add ldsa
 void
 magmablas_zclaswp(

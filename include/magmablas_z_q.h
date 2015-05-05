@@ -188,6 +188,14 @@ magmablas_ztrtri_diag_q(
    * Level 1 BLAS
    */
 void
+magmablas_zaxpycp_q(
+    magma_int_t m,
+    magmaDoubleComplex_ptr r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b,
+    magma_queue_t queue );
+
+void
 magmablas_zswap_q(
     magma_int_t n,
     magmaDoubleComplex_ptr dx, magma_int_t incx,

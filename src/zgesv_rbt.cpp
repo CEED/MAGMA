@@ -219,7 +219,7 @@ REFINEMENT:
         // This saves going through dR a second time (if done with one more kernel).
         // -- not really: first time is read, second time is write.
         for( j=0; j < nrhs; j++ ) {
-            magmablas_zaxpycp2( n, dR(0,j), dX(0,j), dB(0,j) );
+            magmablas_zaxpycp( n, dR(0,j), dX(0,j), dB(0,j) );
         }
         
         // residual dR = dB - dA*dX in double precision

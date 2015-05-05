@@ -77,11 +77,6 @@ magmablas_zprbt_mtv(
     magma_int_t n, 
     magmaDoubleComplex *du, magmaDoubleComplex *db);
 
-void
-magmablas_zaxpycp2(
-    magma_int_t m, magmaDoubleComplex *r, magmaDoubleComplex *x,
-    const magmaDoubleComplex *b);
-
   /*
    * Multi-GPU copy functions
    */
@@ -574,6 +569,13 @@ magma_zlarfx_gpu(
   /*
    * Level 1 BLAS (alphabetical order)
    */
+void
+magmablas_zaxpycp(
+    magma_int_t m,
+    magmaDoubleComplex_ptr r,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_const_ptr b );
+
 void
 magmablas_zswap(
     magma_int_t n,

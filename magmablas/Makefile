@@ -43,6 +43,7 @@ zgerbt_batched.$(o_ext): zgerbt.h
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
+	zaxpycp.cu		\
 	zcaxpycp.cu		\
 	zgeadd.cu		\
 	zgemm_reduce.cu		\
