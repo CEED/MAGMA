@@ -71,6 +71,6 @@ $(BLAS_FIX): $(OBJ)
 	$(RANLIB) $@
 
 clean:
-	-rm -f *.$(o_ext) *.a *~ *.linkinfo stamp
+	-rm -f *.$(o_ext) *.a *~ *.linkinfo stamp $(BLAS_FIX)
 
 cleanall: clean
