@@ -20,11 +20,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-extern "C" magma_int_t
-magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
-                   magmaDoubleComplex *A, magma_int_t lda,
-                   magma_int_t *ipiv, magma_int_t *info);
-
 /* ================================================================================================== */
 
 // Initialize matrix to random & symmetrize. If nopiv, make positive definite.
