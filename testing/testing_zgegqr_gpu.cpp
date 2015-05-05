@@ -30,7 +30,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           e, e1, e2, e3, e4, e5, *work;
+    double           error, e1, e2, e3, e4, e5, *work;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -172,15 +172,15 @@ int main( int argc, char** argv)
                 e4 = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
                 if (opts.version != 4)
-                    e = e1;
+                    error = e1;
                 else
-                    e = e1 / (10.*max(M,N));
+                    error = e1 / (10.*max(M,N));
 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e / %8.2e   %8.2e / %8.2e   %8.2e  %s\n",
                        (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                        e1, e2, e3, e4, e5,
-                       (e < tol ? "ok" : "failed"));
-                status += ! (e < tol);
+                       (error < tol ? "ok" : "failed"));
+                status += ! (error < tol);
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",

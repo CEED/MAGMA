@@ -164,8 +164,8 @@ int main(int argc, char **argv)
             blasf77_zaxpy( &N, &c_neg_one, Y, &incy, Yatomics, &incy );
             atomics_error = lapackf77_zlange( "M", &N, &ione, Yatomics, &N, work ) / N;
             
-            bool ok = (magma_error < tol && cublas_error < tol && atomics_error < tol);
-            status += ! ok;
+            bool okay = (magma_error < tol && cublas_error < tol && atomics_error < tol);
+            status += ! okay;
             printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %8.2e   %s\n",
                    (int) N,
                    magma_perf,   1000.*magma_time,
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
                    cublas_perf,  1000.*cublas_time,
                    cpu_perf,     1000.*cpu_time,
                    magma_error, cublas_error, atomics_error,
-                   (ok ? "ok" : "failed"));
+                   (okay ? "ok" : "failed"));
             
             TESTING_FREE_CPU( A );
             TESTING_FREE_CPU( X );
