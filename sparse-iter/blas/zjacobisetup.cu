@@ -595,7 +595,7 @@ magma_zjacobispmvupdateselect(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     
-    magma_z_matrix swp;
+    //magma_z_matrix swp;
 
     dim3 grid( magma_ceildiv( num_updates, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
