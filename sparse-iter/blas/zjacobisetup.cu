@@ -350,7 +350,9 @@ magma_zjacobispmvupdate(
     magma_queue_t queue )
 {
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    //magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    //magmaDoubleComplex c_one = MAGMA_Z_ONE;
+
     dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
 
@@ -458,7 +460,9 @@ magma_zjacobispmvupdate_bw(
 {
 
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    //magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    //magmaDoubleComplex c_one = MAGMA_Z_ONE;
+
     dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
 
@@ -593,7 +597,8 @@ magma_zjacobispmvupdateselect(
     magma_queue_t queue )
 {
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    //magmaDoubleComplex c_zero = MAGMA_Z_ZERO
+    //magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
     //magma_z_matrix swp;
 
