@@ -25,8 +25,7 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
-
- 1.6.2 - ???
+ 1.6.2 - May 4, 2015
     * Added magma_{s,d,c,z}sqrt for real and complex scalar square root.
     * Added magma_ceildiv and magma_roundup.
     * Fixed magmablas_zlaset and magmablas_zlacpy for large M or N > 4M.

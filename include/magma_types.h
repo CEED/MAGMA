@@ -271,7 +271,7 @@ typedef double real_Double_t;
 // ----------------------------------------
 #define MAGMA_VERSION_MAJOR 1
 #define MAGMA_VERSION_MINOR 6
-#define MAGMA_VERSION_MICRO 1
+#define MAGMA_VERSION_MICRO 2
 
 // stage is "svn", "beta#", "rc#" (release candidate), or blank ("") for final release
 #define MAGMA_VERSION_STAGE "svn"
