@@ -22,9 +22,9 @@ zvjacobisetup_gpu(  int num_rows,
                     magmaDoubleComplex *b, 
                     magmaDoubleComplex *d, 
                     magmaDoubleComplex *c,
-                    magmaDoubleComplex *x){
-
-    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+                    magmaDoubleComplex *x)
+{
+    int row = blockDim.x * blockIdx.x + threadIdx.x;
 
     if(row < num_rows ){
         for( int i=0; i<num_vecs; i++ ){
@@ -105,9 +105,9 @@ zjacobidiagscal_kernel(  int num_rows,
                          int num_vecs, 
                     magmaDoubleComplex *b, 
                     magmaDoubleComplex *d, 
-                    magmaDoubleComplex *c){
-
-    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+                    magmaDoubleComplex *c)
+{
+    int row = blockDim.x * blockIdx.x + threadIdx.x;
 
     if(row < num_rows ){
         for( int i=0; i<num_vecs; i++)
@@ -188,9 +188,9 @@ zjacobiupdate_kernel(  int num_rows,
                     magmaDoubleComplex *t, 
                     magmaDoubleComplex *b, 
                     magmaDoubleComplex *d, 
-                    magmaDoubleComplex *x){
-
-    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+                    magmaDoubleComplex *x)
+{
+    int row = blockDim.x * blockIdx.x + threadIdx.x;
 
     if(row < num_rows ){
         for( int i=0; i<num_cols; i++)
@@ -249,7 +249,6 @@ magma_zjacobiupdate(
     magma_z_matrix *x,
     magma_queue_t queue )
 {
-
     dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
     zjacobiupdate_kernel<<< grid, threads, 0 >>>( t.num_rows, t.num_cols, t.dval, b.dval, d.dval, x->dval );
@@ -276,11 +275,9 @@ zjacobispmvupdate_kernel(
     magmaDoubleComplex *t, 
     magmaDoubleComplex *b, 
     magmaDoubleComplex *d, 
-    magmaDoubleComplex *x ){
-
-
-
-    int row = blockDim.x * blockIdx.x + threadIdx.x ;
+    magmaDoubleComplex *x )
+{
+    int row = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
 
     if(row<num_rows){
@@ -352,7 +349,6 @@ magma_zjacobispmvupdate(
     magma_z_matrix *x,
     magma_queue_t queue )
 {
-
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     dim3 grid( magma_ceildiv( t.num_rows, BLOCK_SIZE ));
@@ -365,7 +361,6 @@ magma_zjacobispmvupdate(
         // merged in one implies asynchronous update
         zjacobispmvupdate_kernel<<< grid, threads, 0 >>>
             ( t.num_rows, t.num_cols, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval );
-
     }
 
     return MAGMA_SUCCESS;
@@ -497,10 +492,8 @@ zjacobispmvupdateselect_kernel(
     magmaDoubleComplex *b, 
     magmaDoubleComplex *d, 
     magmaDoubleComplex *x,
-    magmaDoubleComplex *y ){
-
-
-
+    magmaDoubleComplex *y )
+{
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
 
@@ -599,7 +592,6 @@ magma_zjacobispmvupdateselect(
     magma_z_matrix *x,
     magma_queue_t queue )
 {
-
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     
@@ -612,15 +604,11 @@ magma_zjacobispmvupdateselect(
     for( magma_int_t i=0; i<maxiter; i++ ) {
         zjacobispmvupdateselect_kernel<<< grid, threads, 0 >>>
             ( t.num_rows, t.num_cols, num_updates, indices, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval, tmp.dval );
-        cudaDeviceSynchronize();
+        magma_device_sync();
         //swp.dval = x->dval;
         //x->dval = tmp.dval;
         //tmp.dval = swp.dval;
-        
     }
     
     return MAGMA_SUCCESS;
 }
-
-
-
