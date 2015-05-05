@@ -81,8 +81,7 @@ int main(  int argc, char** argv )
         " [ --blocksize %d --alignment %d (for SELLP) ]"
         " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
 
-    while(  i < argc ) {
-
+    while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
             magma_int_t laplace_size = atoi( argv[i] );
@@ -296,7 +295,6 @@ int main(  int argc, char** argv )
         printf("\n\n");
 
         i++;
-
     }
     
 cleanup:

@@ -81,8 +81,7 @@ int main(  int argc, char** argv )
         " [ --blocksize %d --alignment %d (for SELLP) ]"
         " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
 
-    while(  i < argc ) {
-
+    while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
             magma_int_t laplace_size = atoi( argv[i] );
@@ -119,8 +118,9 @@ int main(  int argc, char** argv )
             magma_int_t *pntre=NULL;
             CHECK( magma_index_malloc_cpu( &pntre, m + 1 ) );
             pntre[0] = 0;
-            for (j=0; j<m; j++ ) pntre[j] = hA.row[j+1];
-
+            for (j=0; j < m; j++ ) {
+                pntre[j] = hA.row[j+1];
+            }
 
             MKL_INT num_rows = hA.num_rows;
             MKL_INT num_cols = hA.num_cols;
@@ -285,7 +285,6 @@ int main(  int argc, char** argv )
         magma_zmfree(&dA, queue);
 
         i++;
-
     }
 
 cleanup:

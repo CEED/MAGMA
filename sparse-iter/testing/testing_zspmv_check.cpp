@@ -41,8 +41,7 @@ int main(  int argc, char** argv )
     magma_z_matrix A={Magma_CSR}, B_d={Magma_CSR};
     magma_z_matrix x={Magma_CSR}, b={Magma_CSR};
 
-    while(  i < argc ) {
-
+    while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
             magma_int_t laplace_size = atoi( argv[i] );
