@@ -37,4 +37,3 @@ void dcheck_eig(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 #endif
 
 #endif /* CHECKDIAG_H */
-
