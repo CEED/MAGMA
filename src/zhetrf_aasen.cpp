@@ -11,23 +11,6 @@
 #include "common_magma.h"
 #include "trace.h"
 
-extern "C" void
-magmablas_zlaswp_sym( magma_int_t n, magmaDoubleComplex *dA, magma_int_t lda,
-                      magma_int_t k1, magma_int_t k2,
-                      const magma_int_t *ipiv, magma_int_t inci );
-extern "C" void
-magmablas_zlacpy_sym_in(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magma_int_t *rows, magma_int_t *perm,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
-extern "C" void
-magmablas_zlacpy_sym_out(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magma_int_t *rows, magma_int_t *perm,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
-
 #define PRECISION_z
 
 
@@ -150,7 +133,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     }
     magmablasSetKernelStream(stream[0]);
 
-    int lddw = nb*(1+magma_ceildiv(n, nb));
+    magma_int_t lddw = nb*(1+magma_ceildiv(n, nb));
     ldda = magma_roundup(n, 32);
     if (MAGMA_SUCCESS != magma_zmalloc( &work, magma_roundup(n, nb) *ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &dH,   (2*nb)*ldda ) ||
@@ -165,8 +148,8 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     lddw = nb;
 
     /* permutation info */
-    int *perm, *rows;
-    int *drows, *dperm;
+    magma_int_t *perm, *rows;
+    magma_int_t *drows, *dperm;
     if (MAGMA_SUCCESS != magma_imalloc_cpu(&perm, n) ||
         MAGMA_SUCCESS != magma_imalloc_pinned(&rows, 2*(2*nb)) ||
         MAGMA_SUCCESS != magma_imalloc( &drows, 2*(2*nb) ) ||
@@ -188,14 +171,14 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         return *info;
     }
 
-    for (int ii=0; ii < n; ii++) {
+    for (magma_int_t ii=0; ii < n; ii++) {
         perm[ii] = ii;
     }
     magma_isetvector_async(n, perm, 1, dperm, 1, stream[0]);
 
     /* copy A to GPU */
     magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
-    for (int j=0; j < min(n,nb); j++) {
+    for (magma_int_t j=0; j < min(n,nb); j++) {
         ipiv[j] = j+1;
     }
 
@@ -210,8 +193,8 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         else {
             //=========================================================
             // Compute the Aasen's factorization P*A*P' = L*T*L'.
-            for (int j=0; j < magma_ceildiv(n, nb); j ++) {
-                int jb = min(nb, (n-j*nb));
+            for (magma_int_t j=0; j < magma_ceildiv(n, nb); j ++) {
+                magma_int_t jb = min(nb, (n-j*nb));
 
                 // Compute off-diagonal blocks of H(:,j), 
                 // i.e., H(i,j) = T(i,i-1)*L(j,i-1)' + T(i,i)*L(j,i)' + T(i,i+1)*L(j,i+1)'
@@ -222,7 +205,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 //
                 trace_gpu_start( 0, 0, "gemm", "compH" );
                 trace_gpu_start( 0, 1, "gemm", "compH" );
-                for (int i=1; i<j; i++)
+                for (magma_int_t i=1; i<j; i++)
                 {
                     //printf( " > compute H(%d,%d)\n",i,j);
                     // > H(i,j) = T(i,i) * L(j,i)', Y
@@ -248,7 +231,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 // * make sure they are done
                 magma_queue_wait_event( stream[0], event[1] );
                 magma_queue_wait_event( stream[1], event[0] );
-                for (int i=1; i<j; i++)
+                for (magma_int_t i=1; i<j; i++)
                 {
                     // H(i,j) = W(i)+.5*H(i,j)
                     magmablasSetKernelStream(stream[(i-1)%2]);
@@ -264,7 +247,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 // * make sure they are done
                 magma_queue_wait_event( stream[0], event[1] );
                 magma_queue_wait_event( stream[1], event[0] );
-                for (int i=1; i<j; i++)
+                for (magma_int_t i=1; i<j; i++)
                 {
                     // W(i) += .5*H(i,j)
                     magmablasSetKernelStream(stream[(i-1)%2]);
@@ -325,7 +308,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 if (j < magma_ceildiv(n, nb)-1)
                 {
                     // ** Panel + Update **
-                    int ib = n-(j+1)*nb;
+                    magma_int_t ib = n-(j+1)*nb;
                     // compute H(j,j)
                     // > H(j,j) = T(j,j)*L(j,j)'
                     //   H(0,0) is not needed since it is multiplied with L(j+1:n,0)
@@ -404,13 +387,13 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                        1, min(jb,ib), &ipiv[(j+1)*nb], 1 );
                     // symmetric pivot
                     {
-                        for (int ii=0; ii<min(jb,ib); ii++) {
-                            int piv = perm[ipiv[(j+1)*nb+ii]-1];
+                        for (magma_int_t ii=0; ii<min(jb,ib); ii++) {
+                            magma_int_t piv = perm[ipiv[(j+1)*nb+ii]-1];
                             perm[ipiv[(j+1)*nb+ii]-1] = perm[ii];
                             perm[ii] = piv;
                         }
-                        int count = 0;
-                        for (int ii=0; ii<n; ii++) {
+                        magma_int_t count = 0;
+                        for (magma_int_t ii=0; ii<n; ii++) {
                             if (perm[ii] != ii) {
                                 rows[2*count] = perm[ii];
                                 rows[2*count+1] = ii;
@@ -422,25 +405,25 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         magmablas_zlacpy_sym_out(MagmaLower, n-(j+1)*nb, count, drows, dperm, dH(0,0),ldda, dA(j+1,j+1),ldda);
 
                         // reset perm
-                        for (int ii=0; ii < count; ii++) {
+                        for (magma_int_t ii=0; ii < count; ii++) {
                             perm[rows[2*ii+1]] = rows[2*ii+1];
                         }
-                        //for (int k=0; k < n; k++) {
+                        //for (magma_int_t k=0; k < n; k++) {
                         //    printf( "%d ",perm[k] );
                         //}
                         //printf( "\n" );
 
                     }
-                    for (int k=(1+j)*nb; k < (1+j)*nb+min(jb,ib); k++) {
+                    for (magma_int_t k=(1+j)*nb; k < (1+j)*nb+min(jb,ib); k++) {
                         ipiv[k] += (j+1)*nb;
                     }
                     trace_gpu_end( 0,0 );
                 }
             }
             // copy back to CPU
-            for (int j=0; j<magma_ceildiv(n, nb); j++)
+            for (magma_int_t j=0; j<magma_ceildiv(n, nb); j++)
             {
-                int jb = min(nb, n-j*nb);
+                magma_int_t jb = min(nb, n-j*nb);
                 //#define COPY_BACK_BY_BLOCK_COL
                 #if defined(COPY_BACK_BY_BLOCK_COL)
                 magma_zgetmatrix_async( n-j*nb, jb, dA(j,j), ldda, A(j,j), lda, stream[0] );
@@ -450,7 +433,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 if (j < magma_ceildiv(n, nb)-1)
                 {
                     // copy L
-                    int jb2 = min(nb, n-(j+1)*nb);
+                    magma_int_t jb2 = min(nb, n-(j+1)*nb);
                     magmablas_zlacpy( MagmaLower, jb2-1,jb2-1, dL(j+1,j+1)+1, ldda, dA(j+1,j)+1, ldda );
                     magma_zgetmatrix_async( n-j*nb-jb, jb, dA(j+1,j), ldda, A(j+1,j), lda, stream[0] );
                 }
