@@ -42,8 +42,6 @@ magma_zmcsrcompressor(
     magma_z_matrix hA={Magma_CSR}, CSRA={Magma_CSR};
         
     if ( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ) {
-
-
         CHECK( magma_zmconvert( *A, &B, Magma_CSR, Magma_CSR, queue ));
 
         magma_free_cpu( A->row );
@@ -54,7 +52,6 @@ magma_zmcsrcompressor(
         A->nnz = A->row[A->num_rows];
     }
     else {
-
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         CHECK( magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue ));
@@ -76,5 +73,3 @@ cleanup:
     magma_zmfree( &B, queue );
     return info;
 }
-
-

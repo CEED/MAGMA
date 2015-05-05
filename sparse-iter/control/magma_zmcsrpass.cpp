@@ -151,5 +151,3 @@ cleanup:
     magma_zmfree( &A_CPU, queue );
     return info;
 }
-
-

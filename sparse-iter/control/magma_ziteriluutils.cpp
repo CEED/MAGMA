@@ -47,8 +47,8 @@ magma_zfrobenius(
     magma_z_matrix A,
     magma_z_matrix B,
     real_Double_t *res,
-    magma_queue_t queue ){
-
+    magma_queue_t queue )
+{
     real_Double_t tmp2;
     magma_int_t i,j,k;
     *res = 0.0;
@@ -291,7 +291,6 @@ magma_zilures(
             magma_index_t lcol = A.col[j];
             for(k=LU->row[i]; k<LU->row[i+1]; k++){
                 if( LU->col[k] == lcol ){
-
                     tmp = MAGMA_Z_MAKE(
                         MAGMA_Z_REAL( LU->val[k] )- MAGMA_Z_REAL( A.val[j] )
                                                 , 0.0 );
@@ -300,7 +299,6 @@ magma_zilures(
                     tmp2 = (real_Double_t) fabs( MAGMA_Z_REAL(tmp) );
                     (*nonlinres) = (*nonlinres) + tmp2*tmp2;
                 }
-
             }
         }
     }
@@ -402,7 +400,6 @@ magma_zicres(
             magma_index_t lcol = A.col[j];
             for(k=LU->row[i]; k<LU->row[i+1]; k++){
                 if( LU->col[k] == lcol ){
-
                     tmp = MAGMA_Z_MAKE(
                         MAGMA_Z_REAL( LU->val[k] )- MAGMA_Z_REAL( A.val[j] )
                                                 , 0.0 );
@@ -611,8 +608,8 @@ magma_int_t
 magma_zinitrecursiveLU(
     magma_z_matrix A,
     magma_z_matrix *B,
-    magma_queue_t queue ){
-
+    magma_queue_t queue )
+{
     magma_int_t i,j,k;
 
     for(i=0; i<A.num_rows; i++){
@@ -705,5 +702,3 @@ cleanup:
     magma_zmfree( &LL, queue );
     return info;
 }
-
-

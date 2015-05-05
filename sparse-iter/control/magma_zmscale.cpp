@@ -86,7 +86,6 @@ magma_zmscale(
                     info = MAGMA_ERR;
                 }
                 tmp[z] = MAGMA_Z_MAKE( 1.0/sqrt(  MAGMA_Z_REAL( s )  ), 0.0 );
-                   
             }
             for( magma_int_t z=0; z<A->nnz; z++ ) {
                 A->val[z] = A->val[z] * tmp[A->col[z]] * tmp[A->rowidx[z]];
@@ -179,6 +178,3 @@ cleanup:
     magma_zmfree( &CSRA, queue );
     return info;
 }
-
-
-

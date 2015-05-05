@@ -312,7 +312,6 @@ int mm_read_mtx_crd_data(FILE *f, magma_index_t M, magma_index_t N, magma_index_
         {
             if (fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i])
                 != 3) info = MM_PREMATURE_EOF;
-
         }
     }
 
@@ -326,7 +325,6 @@ int mm_read_mtx_crd_data(FILE *f, magma_index_t M, magma_index_t N, magma_index_
         info = MM_UNSUPPORTED_TYPE;
 
     return info;
-        
 }
 
 int mm_read_mtx_crd_entry(FILE *f, magma_index_t *I, magma_index_t *J,
@@ -343,7 +341,6 @@ int mm_read_mtx_crd_entry(FILE *f, magma_index_t *I, magma_index_t *J,
     {
             if (fscanf(f, "%d %d %lg\n", I, J, real)
                 != 3) info = MM_PREMATURE_EOF;
-
     }
 
     else if (mm_is_pattern(matcode))
@@ -354,7 +351,6 @@ int mm_read_mtx_crd_entry(FILE *f, magma_index_t *I, magma_index_t *J,
         info = MM_UNSUPPORTED_TYPE;
 
     return info;
-        
 }
 
 
@@ -497,7 +493,6 @@ int mm_write_mtx_crd(char fname[], magma_index_t M, magma_index_t N, magma_index
 */
 char *mm_strdup(const char *s)
 {
-    
     int len = strlen(s);
     char *s2 = (char *) malloc((len+1)*sizeof(char));
     return strcpy(s2, s);
@@ -505,7 +500,6 @@ char *mm_strdup(const char *s)
 
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
- 
     char buffer[MM_MAX_LINE_LENGTH];
     const char *types[4];
     char *mm_strdup(const char *);
@@ -559,5 +553,4 @@ char  *mm_typecode_to_str(MM_typecode matcode)
 
     sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
     return mm_strdup(buffer);
-
 }

@@ -52,8 +52,8 @@ void magma_zmexFunction(magma_int_t nlhs, magma_int_t n, magmaDoubleComplex omeg
                 magma_index_t * ial, magma_index_t *jal, magmaDoubleComplex *al,
                 magma_index_t * iau, magma_index_t *jau, magmaDoubleComplex *au,
                 magma_int_t nrhs,
-                magma_index_t * ia, magma_index_t *ja, magmaDoubleComplex *a ){
-
+                magma_index_t * ia, magma_index_t *ja, magmaDoubleComplex *a )
+{
     /* matrix is stored in CSC format, 0-based */
 
     magma_int_t nzl, nzu;
@@ -65,7 +65,6 @@ void magma_zmexFunction(magma_int_t nlhs, magma_int_t n, magmaDoubleComplex omeg
 
     /* the following will fail and return to matlab if insufficient storage */
     magma_zsymbolic_ilu(levfill, n, &nzl, &nzu, ia, ja, ial, jal, iau, jau);
-
 }
 
 /* shell sort
@@ -145,10 +144,8 @@ void magma_zsymbolic_ilu(
     ial[0] = 0;
     iau[0] = 0;
 
-    for (i=0; i<n; i++)
-    {
-
-     //   printf("check line %d\n", i);
+    for (i=0; i<n; i++) {
+        //printf("check line %d\n", i);
         magma_int_t first, next, j;
 
         /* copy column indices of row into workspace and sort them */
@@ -158,7 +155,7 @@ void magma_zsymbolic_ilu(
         for (j=ia[i]; j<ia[i+1]; j++)
             iwork[next++] = ja[j];
         magma_zshell_sort(len, iwork);
-     //   printf("check2 line %d\n", i);
+        //printf("check2 line %d\n", i);
         /* construct implied linked list for row */
 
         first = iwork[0];
@@ -169,14 +166,14 @@ void magma_zsymbolic_ilu(
             lnklst[iwork[j]] = iwork[j+1];
             curlev[iwork[j]] = 0;
         }
-       // printf("check3 line %d iwork[len-1]:%d\n", i, iwork[len-1]);
+        // printf("check3 line %d iwork[len-1]:%d\n", i, iwork[len-1]);
         lnklst[iwork[len-1]] = n;
         curlev[iwork[len-1]] = 0;
 
         /* merge with rows in U */
-       // printf("check4 line %d lnklst[iwork[len-1]]:%d\n", i, lnklst[iwork[len-1]]);
+        // printf("check4 line %d lnklst[iwork[len-1]]:%d\n", i, lnklst[iwork[len-1]]);
         next = first;
-       // printf("next:%d (!<) first:%d\n", next, i);
+        // printf("next:%d (!<) first:%d\n", next, i);
         while (next < i)
         {
           //  printf("check line %d while %d\n", i, next);
@@ -204,7 +201,7 @@ void magma_zsymbolic_ilu(
                 }
                 else if (jau[ii] == nxtlst)
                 {
-            magma_int_t newlev;
+                    magma_int_t newlev;
                     oldlst = nxtlst;
                     nxtlst = lnklst[oldlst];
                     newlev = curlev[row] + levels[ii] + 1;
@@ -225,50 +222,46 @@ void magma_zsymbolic_ilu(
         next = first;
         while (next < i)
         {
-            if (knzl >= *nzl)
-        {
-            printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
+            if (knzl >= *nzl) {
+                printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
                 printf("Increase STORAGE parameter.");
-                    info = -1;
-                    goto cleanup;
-        }
+                info = -1;
+                goto cleanup;
+            }
             jal[knzl++] = next;
             next = lnklst[next];
         }
         ial[i+1] = knzl;
-      //  printf("check line6 %d\n", i);
+        //  printf("check line6 %d\n", i);
         if (next != i)
         {
-        printf("ILU structurally singular.\n");
-        /*
-            assert(knzu < *nzu);
-            levels[knzu] = 2*n;
-            jau[knzu++] = i;
-        */
+            printf("ILU structurally singular.\n");
+            /*
+                assert(knzu < *nzu);
+                levels[knzu] = 2*n;
+                jau[knzu++] = i;
+            */
         }
-      //  printf("check line7 %d\n", i);
-           //                 printf("next:%d  n:%d \n", next, n);
+        //  printf("check line7 %d\n", i);
+        //                 printf("next:%d  n:%d \n", next, n);
         while (next < n)
         {
-            if (knzu >= *nzu)
-        {
-            printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
+            if (knzu >= *nzu) {
+                printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
                 printf("Increase STORAGE parameter.");
                 info = -1;
                 goto cleanup;
-        }
-                   // printf("1 knzu:%d  next:%d \n", knzu, next );
+            }
+            // printf("1 knzu:%d  next:%d \n", knzu, next );
             levels[knzu] = curlev[next];
-                  //  printf("2 knzu:%d  next:%d \n", knzu, next );
+            //  printf("2 knzu:%d  next:%d \n", knzu, next );
             jau[knzu++] = next;
-                  //  printf("3 knzu:%d  next:%d \n", knzu, next );
+            //  printf("3 knzu:%d  next:%d \n", knzu, next );
             next = lnklst[next];
-                  //  printf("4 next:%d  n:%d \n", next, n);
+            //  printf("4 next:%d  n:%d \n", next, n);
         }
         iau[i+1] = knzu;
     }
-
-
 
     *nzl = knzl;
     *nzu = knzu;
@@ -284,7 +277,6 @@ cleanup:
     magma_free_cpu(curlev);
     magma_free_cpu(levels);
     magma_free_cpu(iwork);
-
 }
 
 
@@ -339,7 +331,6 @@ magma_zsymbilu(
     magma_z_matrix hA={Magma_CSR}, CSRCOOA={Magma_CSR};
     
     if( A->memory_location == Magma_CPU && A->storage_type == Magma_CSR ){
-
         CHECK( magma_zmtransfer( *A, &A_copy, Magma_CPU, Magma_CPU, queue ));
         CHECK( magma_zmtransfer( *A, &B, Magma_CPU, Magma_CPU, queue ));
 
@@ -399,7 +390,7 @@ magma_zsymbilu(
         magma_free_cpu( A->val );
         CHECK( magma_index_malloc_cpu( &A->col, L->nnz+U->nnz ));
         CHECK( magma_zmalloc_cpu( &A->val, L->nnz+U->nnz ));
-        A->nnz = L->nnz+U->nnz ;
+        A->nnz = L->nnz+U->nnz;
         
         magma_int_t z = 0;
         for(magma_int_t i=0; i<A->num_rows; i++){
@@ -453,4 +444,3 @@ cleanup:
     magma_zmfree( &CSRCOOA, queue );
     return info;
 }
-

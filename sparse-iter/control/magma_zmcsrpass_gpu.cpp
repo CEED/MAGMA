@@ -152,5 +152,3 @@ cleanup:
     magma_zmfree( &A_DEV, queue );
     return info;
 }
-
-

@@ -110,7 +110,6 @@ magma_zvget(
     magma_int_t info =0;
     
     if ( v.memory_location == Magma_CPU ) {
-
         *m = v.num_rows;
         *n = v.num_cols;
         *val = v.val;
@@ -123,5 +122,3 @@ cleanup:
     magma_zmfree( &v_CPU, queue );
     return info;
 }
-
-

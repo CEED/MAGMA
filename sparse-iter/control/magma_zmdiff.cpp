@@ -52,7 +52,7 @@ magma_zmdiff(
 {
     magma_int_t info = 0;
     
-    if( A.memory_location == Magma_CPU && B.memory_location == Magma_CPU
+    if ( A.memory_location == Magma_CPU && B.memory_location == Magma_CPU
             && A.storage_type == Magma_CSR && B.storage_type == Magma_CSR ){
         real_Double_t tmp2;
         magma_int_t i,j,k;
@@ -80,4 +80,3 @@ magma_zmdiff(
     }
     return info;
 }
-

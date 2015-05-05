@@ -460,7 +460,6 @@ magma_zwrite_csr_mtx(
                     ((B.col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((B.val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((B.val)[rowtemp1+j]) );
-
             }
             rowindex++;
         }
@@ -479,7 +478,6 @@ magma_zwrite_csr_mtx(
                 fprintf( fp, "%d %d %.16g\n",
                     ((B.col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((B.val)[rowtemp1+j]) );
-
             }
             rowindex++;
         }
@@ -520,7 +518,6 @@ magma_zwrite_csr_mtx(
                     ((A.col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((A.val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((A.val)[rowtemp1+j]) );
-
             }
             rowindex++;
         }
@@ -539,7 +536,6 @@ magma_zwrite_csr_mtx(
                 fprintf( fp, "%d %d %.16g\n",
                     ((A.col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((A.val)[rowtemp1+j]));
-
             }
             rowindex++;
         }
@@ -646,7 +642,6 @@ magma_zprint_csr_mtx(
                     ((new_col)[rowtemp1+j]+1), rowindex,
                     MAGMA_Z_REAL((new_val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((new_val)[rowtemp1+j]) );
-
             }
             rowindex++;
         }
@@ -670,12 +665,8 @@ magma_zprint_csr_mtx(
             rowindex++;
         }
         #endif
-       
-        
     }
     else {
-
-            
         #define COMPLEX
         
         #ifdef COMPLEX
@@ -694,7 +685,6 @@ magma_zprint_csr_mtx(
                     rowindex, ((*col)[rowtemp1+j]+1),
                     MAGMA_Z_REAL((*val)[rowtemp1+j]),
                     MAGMA_Z_IMAG((*val)[rowtemp1+j]) );
-
             }
             rowindex++;
         }
@@ -718,7 +708,6 @@ magma_zprint_csr_mtx(
             rowindex++;
         }
         #endif
-        
     }
 
 cleanup:
@@ -899,7 +888,6 @@ magma_zprint_matrix(
                         for( k=lbound; k < rbound; k++ ) {
                             if ( A.col[k] == j ) {
                                 tmp = A.val[k];
-                                                                
                             }
                         }
                         magma_zprintval( tmp );
@@ -1266,7 +1254,6 @@ magma_z_csr_mtx(
         magma_free_cpu( A->col );
         CHECK( magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue ));
         //printf("done.\n");
-
     }
 cleanup:
     magma_zmfree( &B, queue );

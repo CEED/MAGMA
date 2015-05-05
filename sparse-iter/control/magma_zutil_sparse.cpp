@@ -105,8 +105,6 @@ magma_zparse_opts(
     int *matrices,
     magma_queue_t queue )
 {
-
-    
     // fill in default values
     opts->input_format = Magma_CSR;
     opts->blocksize = 8;
@@ -153,7 +151,6 @@ magma_zparse_opts(
                 case 1: opts->scaling = Magma_UNITDIAG; break;
                 case 2: opts->scaling = Magma_UNITROW; break;
             }
-
         } else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
             switch( info ) {
@@ -166,7 +163,7 @@ magma_zparse_opts(
                 case 6: opts->solver_par.solver = Magma_GMRES; break;
                 case 7: opts->solver_par.solver = Magma_PGMRES; break;
                 case 8: opts->solver_par.solver = Magma_LOBPCG;
-                            opts->solver_par.num_eigenvalues = 16;break;
+                        opts->solver_par.num_eigenvalues = 16; break;
                 case 9: opts->solver_par.solver = Magma_JACOBI; break;
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
@@ -184,7 +181,6 @@ magma_zparse_opts(
                 case 4: opts->precond_par.solver = Magma_BICGSTAB; break;
                 case 5: opts->precond_par.solver = Magma_GMRES; break;
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
-
             }
         } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
@@ -228,6 +224,3 @@ magma_zparse_opts(
             
     return MAGMA_SUCCESS;
 }
-
-    
-

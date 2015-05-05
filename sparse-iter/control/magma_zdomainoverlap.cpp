@@ -122,6 +122,4 @@ magma_zdomainoverlap(
 cleanup:
     magma_free_cpu( tmp_x );
     return info;
-
 }
-

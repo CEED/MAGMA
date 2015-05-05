@@ -83,9 +83,3 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }
-
-
-
-   
-
-

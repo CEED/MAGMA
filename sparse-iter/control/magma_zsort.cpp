@@ -77,10 +77,7 @@ magma_zindexsort(
         x[j]=temp;
         CHECK( magma_zindexsort( x, first, j-1, queue ));
         CHECK( magma_zindexsort( x, j+1, last, queue ));
-
     }
 cleanup:
     return info;
-
 }
-

@@ -92,8 +92,6 @@ magma_zprint_vector(
         CHECK( magma_zmtransfer( x, &y, Magma_DEV, Magma_CPU, queue ));
         for( magma_int_t i=offset; i<offset +  visulen; i++ )
             magma_zprintval(y.val[i]);
-
-
     }
 
 cleanup:
@@ -238,5 +236,3 @@ cleanup:
     magma_zmfree( &B, queue );
     return info;
 }
-
-
