@@ -21,12 +21,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "magma_types.h"
+// hack to NOT include magma_lapack.h, by pre-defining MAGMA_LAPACK_H.
+// we re-define the lapack prototypes below, so can't include that header.
+#define MAGMA_LAPACK_H
+#include "testings.h"
 #include "magma_mangling.h"
-
-// ------------------------------------------------------------
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // ------------------------------------------------------------
 //#define LAPACK_RETURN_DOUBLE
@@ -114,19 +113,20 @@ float test( magma_int_t m, magma_int_t n )
     double dnorm_one, dnorm_inf, dnorm_fro, dnorm_max;
     
     const magma_int_t ione = 1;
-    magma_int_t lda = MAX(m,n);
+    magma_int_t lda = max(m,n);
     
-    sA    = (float*)  malloc( lda*n * sizeof(float)  );
-    dA    = (double*) malloc( lda*n * sizeof(double) );
-    swork = (float*)  malloc( m     * sizeof(float)  );
-    dwork = (double*) malloc( m     * sizeof(double) );
+    magma_smalloc_cpu( &sA,    lda*n );
+    magma_dmalloc_cpu( &dA,    lda*n );
+    magma_smalloc_cpu( &swork, m     );
+    magma_dmalloc_cpu( &dwork, m     );
     
     for( magma_int_t j = 0; j < n; ++j ) {
-    for( magma_int_t i = 0; i < lda; ++i ) {
-        double tmp = rand() / (double)(RAND_MAX);
-        *sA(i,j) = tmp;
-        *dA(i,j) = tmp;
-    }}
+        for( magma_int_t i = 0; i < lda; ++i ) {
+            double tmp = rand() / (double)(RAND_MAX);
+            *sA(i,j) = tmp;
+            *dA(i,j) = tmp;
+        }
+    }
     
     double error;
     magma_int_t status;
