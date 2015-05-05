@@ -98,7 +98,7 @@ zhemv_kernel_U(
     // load 64x1 block x(blk_ind + 0:63) into sx_blk
     x += (blk_ind + tx)*incx;  // x is x(blk_ind + tx)
     if ( ty == 0 ) {
-        if ( (partial == 0 || tx < partial) ) {
+        if ( partial == 0 || tx < partial ) {
             sx_blk[tx] = x[0];
         }
         else {
