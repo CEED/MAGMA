@@ -4,9 +4,10 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
- 
+
        @author Mathieu Faverge
- 
+       @author Mark Gates
+
        Based on PLASMA common.h
 */
 
@@ -33,7 +34,7 @@
     // (only with Microsoft, not with nvcc on Windows)
     // in both common_magma.h and testings.h
     #ifndef __NVCC__
-    
+
         #include <float.h>
         #define copysign(x,y) _copysign(x,y)
         #define isnan(x)      _isnan(x)
@@ -41,7 +42,7 @@
         #define isfinite(x)   _finite(x)
         // note _snprintf has slightly different semantics than snprintf
         #define snprintf _snprintf
-    
+
     #endif
 
 #else

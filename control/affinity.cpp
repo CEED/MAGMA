@@ -46,7 +46,6 @@ void affinity_set::print_affinity(int id, const char* s)
         print_set(id, s);
     else
         printf("Error in sched_getaffinity\n");
-
 }
 
 void affinity_set::print_set(int id, const char* s)

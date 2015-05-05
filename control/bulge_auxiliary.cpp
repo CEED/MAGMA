@@ -66,7 +66,6 @@ extern "C" {
         maxv = 0.0;
         sumv = 0.0;
         for (i = 0; i < n; ++i) {
-
             curv = fabs( wr1[i] - wr2[i]);
             sumv += curv;
             if (maxv < curv) maxv = curv;
@@ -276,9 +275,4 @@ extern "C" {
         }
         *LDV= NB+Vblksiz;
     }
-
-
 }
-
-
-

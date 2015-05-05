@@ -202,4 +202,3 @@ void magma_set_lapack_numthreads(magma_int_t threads)
     #endif
 
 */
-
