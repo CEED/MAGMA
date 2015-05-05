@@ -91,7 +91,6 @@ magma_z_spmv(
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
         if ( A.num_cols == x.num_rows && x.num_cols == 1 ) {
-
              if ( A.storage_type == Magma_CSR
                             || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
@@ -164,7 +163,6 @@ magma_z_spmv(
                     CUSPARSE_OPERATION_NON_TRANSPOSE, mb, nb, A.numblocks,
                     &alpha, descr, A.dval, A.drow, A.dcol, A.blocksize, x.dval,
                     &beta, y.dval );
-
              }
              else {
                  printf("error: format not supported.\n");
@@ -174,7 +172,6 @@ magma_z_spmv(
         else if ( A.num_cols < x.num_rows || x.num_cols > 1 ) {
             magma_int_t num_vecs = x.num_rows / A.num_cols * x.num_cols;
             if ( A.storage_type == Magma_CSR ) {
-
                 CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
                 CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
                 CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
@@ -195,7 +192,6 @@ magma_z_spmv(
                     &alpha, descr, A.dval, A.drow, A.dcol,
                     x.dval, A.num_cols, &beta, y.dval, A.num_cols);
                 }
-
              } else if ( A.storage_type == Magma_SELLP ) {
                 if ( x.major == MagmaRowMajor) {
                  CHECK( magma_zmgesellpmv( MagmaNoTrans, A.num_rows, A.num_cols,
@@ -222,8 +218,6 @@ magma_z_spmv(
                  info = MAGMA_ERR_NOT_SUPPORTED;
              }
         }
-         
-         
     }
     // CPU case missing!
     else {
@@ -240,8 +234,6 @@ cleanup:
     
     magmablasSetKernelStream( orig_queue );
     return info;
-
-
 }
 
 
@@ -429,22 +421,18 @@ magma_z_spmm(
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
         if ( A.num_cols == B.num_rows ) {
-
-             if ( A.storage_type == Magma_CSR
-                            || A.storage_type == Magma_CSRL
-                            || A.storage_type == Magma_CSRU
-                            || A.storage_type == Magma_CSRCOO ) {
-                    
-                CHECK( magma_zcuspmm( A, B, C, queue ));
-                
-             }
-             else {
-                 printf("error: format not supported.\n");
-                 // magmablasSetKernelStream( orig_queue );
-                 info = MAGMA_ERR_NOT_SUPPORTED;
-             }
+            if ( A.storage_type == Magma_CSR
+                           || A.storage_type == Magma_CSRL
+                           || A.storage_type == Magma_CSRU
+                           || A.storage_type == Magma_CSRCOO ) {
+               CHECK( magma_zcuspmm( A, B, C, queue ));
+            }
+            else {
+                printf("error: format not supported.\n");
+                // magmablasSetKernelStream( orig_queue );
+                info = MAGMA_ERR_NOT_SUPPORTED;
+            }
         }
-         
     }
     // CPU case missing!
     else {
@@ -457,8 +445,3 @@ cleanup:
     // magmablasSetKernelStream( orig_queue );
     return info;
 }
-
-
-
-
-

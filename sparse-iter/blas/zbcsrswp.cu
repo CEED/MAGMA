@@ -57,7 +57,7 @@ magma_zbcsrswp(
 {
     const magma_int_t nrhs = 1, n = r_blocks*size_b, ione = 1, inc = 1;
 
-   magmaDoubleComplex_ptr work; 
+    magmaDoubleComplex_ptr work; 
     magma_zmalloc_cpu( &work, r_blocks*size_b );
 
     // first shift the pivot elements
@@ -75,6 +75,3 @@ magma_zbcsrswp(
 
     return MAGMA_SUCCESS;
 }
-
-
-

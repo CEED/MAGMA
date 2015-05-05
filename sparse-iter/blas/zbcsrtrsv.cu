@@ -96,7 +96,6 @@ magma_zbcsrtrsv(
                     magmablas_zgemv( MagmaNoTrans, size_b, size_b, 
                                      mone, A(j,k), size_b,
                                      x(k), 1, one,  x(j), 1 );
-
                 }
             }
         }
@@ -115,7 +114,6 @@ magma_zbcsrtrsv(
                     magmablas_zgemv( MagmaNoTrans, size_b, size_b, 
                                      mone, A(j,k), size_b,
                                      x(k), 1, one,  x(j), 1 );
-
                 }
             }
         }
@@ -124,6 +122,3 @@ magma_zbcsrtrsv(
     magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 }
-
-
-

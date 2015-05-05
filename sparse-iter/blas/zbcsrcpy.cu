@@ -51,7 +51,6 @@ zbcsrvalzro_kernel(
                 i+=BLOCK_SIZE;
         }
     }
-
 }
 
 
@@ -128,6 +127,3 @@ magma_zbcsrvalcpy(
 
         return MAGMA_SUCCESS;
 }
-
-
-

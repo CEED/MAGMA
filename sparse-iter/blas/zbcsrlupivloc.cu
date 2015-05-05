@@ -46,10 +46,8 @@ zbcsrlupivloc_kernel(
                     *A1 = tmp;
                 }               
             }
-            
         }
     }
-
 }
 
 
@@ -102,12 +100,7 @@ magma_zbcsrlupivloc(
     dim3 grid(kblocks, 1, 1);
     zbcsrlupivloc_kernel<<< grid, threads, 0, queue >>>( 
                   size_b, kblocks, dA, ipiv );
-
-#endif
-
+    #endif
 
     return MAGMA_SUCCESS;
 }
-
-
-

@@ -23,15 +23,13 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
                             magma_index_t * rowR,
                             magma_index_t * colR, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x ){
-
+                            magmaDoubleComplex * x )
+{
     int inddiag =  blockIdx.x*blockDim.x;
     int index = blockIdx.x*blockDim.x+threadIdx.x;
-    int i, j, start, end;   
+    int i, j, start, end;
 
-
-    if(index<n){
-    
+    if (index < n) {
         start=rowR[index];
         end  =rowR[index+1];
 
@@ -88,13 +86,12 @@ magma_zbajac_csr_kernel(
     magma_index_t * rowR,
     magma_index_t * colR, 
     magmaDoubleComplex * b,                                
-    magmaDoubleComplex * x ){
-
+    magmaDoubleComplex * x )
+{
     int index = blockIdx.x*blockDim.x+threadIdx.x;
     int i, start, end;   
 
-    if(index<n){
-        
+    if (index < n) {
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
         magmaDoubleComplex bl, tmp = zero, v = zero; 
 
@@ -123,13 +120,6 @@ magma_zbajac_csr_kernel(
         x[index] = x[index] + ( v - tmp ) / (valD[start]); 
     }
 }
-
-
-
-
-
-
-
 
 
 /**
@@ -205,6 +195,3 @@ magma_zbajac_csr(
 
     return MAGMA_SUCCESS;
 }
-
-
-

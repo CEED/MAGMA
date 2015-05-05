@@ -23,12 +23,10 @@ magma_zlobpcg_maxpy_kernel(
     magmaDoubleComplex * X, 
     magmaDoubleComplex * Y)
 {
-
     int row = blockIdx.x * blockDim.x + threadIdx.x; // global row index
 
-    if( row<num_rows ){
-        for( int i=0; i<num_vecs; i++ ){ 
-
+    if ( row < num_rows ) {
+        for( int i=0; i < num_vecs; i++ ) {
             Y[ row + i*num_rows ] += X[ row + i*num_rows ];
         }
     }
@@ -102,6 +100,3 @@ magma_zlobpcg_maxpy(
 
     return MAGMA_SUCCESS;
 }
-
-
-

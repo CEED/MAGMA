@@ -23,7 +23,6 @@ magma_zgpumemzero(
     int n, 
     int k )
 {
-
    int i = blockIdx.x * blockDim.x + threadIdx.x;
 
    if( i < n ){
@@ -41,7 +40,6 @@ magma_zdot_kernel(
     magmaDoubleComplex * r,
     magmaDoubleComplex * vtmp)
 {
-
     extern __shared__ magmaDoubleComplex temp[]; 
     int Idx = threadIdx.x;   
     int i   = blockIdx.x * blockDim.x + Idx;
@@ -58,12 +56,12 @@ magma_zdot_kernel(
     __syncthreads();
     #if defined(PRECISION_z) || defined(PRECISION_c)
         if( Idx < 32 ){
-            temp[ Idx ] += temp[ Idx + 32 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 16 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 8 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 4 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 2 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 1 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 32 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 16 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 8  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 4  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 2  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 1  ]; __syncthreads();
         }
     #endif
     #if defined(PRECISION_d)
@@ -103,7 +101,6 @@ magma_zblockdot_kernel(
     magmaDoubleComplex * r,
     magmaDoubleComplex * vtmp)
 {
-
     extern __shared__ magmaDoubleComplex temp[]; 
     int Idx = threadIdx.x;   
     int i   = blockIdx.x * blockDim.x + Idx;
@@ -195,7 +192,6 @@ magma_zblockreduce_kernel(
     magmaDoubleComplex * vtmp,
     magmaDoubleComplex * vtmp2 )
 {
-
     extern __shared__ magmaDoubleComplex temp[];    
     int Idx = threadIdx.x;
     int i = blockIdx.x * blockDim.x + Idx;  
@@ -277,8 +273,8 @@ __global__ void
 magma_zreduce_kernel_fast( int Gs,
                            int n, 
                            magmaDoubleComplex * vtmp,
-                           magmaDoubleComplex * vtmp2 ){
-
+                           magmaDoubleComplex * vtmp2 )
+{
     extern __shared__ magmaDoubleComplex temp[];    
     int Idx = threadIdx.x;
     int blockSize = 128;
@@ -298,12 +294,12 @@ magma_zreduce_kernel_fast( int Gs,
     __syncthreads();
     #if defined(PRECISION_z) || defined(PRECISION_c)
         if( Idx < 32 ){
-            temp[ Idx ] += temp[ Idx + 32 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 16 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 8 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 4 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 2 ];__syncthreads();
-            temp[ Idx ] += temp[ Idx + 1 ];__syncthreads();
+            temp[ Idx ] += temp[ Idx + 32 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 16 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 8  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 4  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 2  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 1  ]; __syncthreads();
         }
     #endif
     #if defined(PRECISION_d)
@@ -342,7 +338,6 @@ magma_zblockreduce_kernel_fast(
     magmaDoubleComplex * vtmp,
     magmaDoubleComplex * vtmp2 )
 {
-
     extern __shared__ magmaDoubleComplex temp[];    
     int Idx = threadIdx.x;
     int blockSize = 128;
@@ -506,7 +501,7 @@ magma_zmdotc(
     //magmablas_zlaset( MagmaUpperLower, n, k, d1, n );
     //magmablas_zlaset( MagmaUpperLower, n, k, d2, n );
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
+        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
         magma_zblockreduce_kernel<<< Gs_next.x, Bs.x, Ms >>> 
                                         ( Gs.x, n, k, aux1, aux2 );
         Gs.x = Gs_next.x;
@@ -521,7 +516,7 @@ magma_zmdotc(
    
     if ( k>1) {
         while( Gs.x > 1 ) {
-            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
+            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
             magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                         ( Gs.x, n, k, aux1, aux2 );
@@ -534,7 +529,7 @@ magma_zmdotc(
     }
     else {
         while( Gs.x > 1 ) {
-            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
+            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
             magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                         ( Gs.x, n, aux1, aux2 );
@@ -625,7 +620,6 @@ magma_zgemvmdot(
         magma_zmdotc( n, chunk_size, v+offset*n, r, d1, d2, skp+offset, queue );
         offset = offset + chunk_size;
         rows_left = rows_left-chunk_size;
-
     }
     // process rest
     magma_zmdotc( n, rows_left, v+offset*n, r, d1, d2, skp+offset, queue ); 
@@ -633,6 +627,3 @@ magma_zgemvmdot(
 
    return MAGMA_SUCCESS;
 }
-
-
-

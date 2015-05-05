@@ -22,10 +22,10 @@ magma_ziteric_csr_kernel(
     const magmaDoubleComplex * __restrict__  A_val,
     magma_index_t *rowptr, 
     magma_index_t *colidx, 
-    magmaDoubleComplex *val ){
-
+    magmaDoubleComplex *val )
+{
     int i, j;
-    int k = (blockDim.x * blockIdx.x + threadIdx.x);// % nnz;
+    int k = (blockDim.x * blockIdx.x + threadIdx.x); // % nnz;
 
 
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
@@ -64,7 +64,6 @@ magma_ziteric_csr_kernel(
                 il++;
                 iu++;
             }
-
         }
         // undo the last operation (it must be the last)
         s += sp;
@@ -75,9 +74,7 @@ magma_ziteric_csr_kernel(
             val[il-1] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);
         else
             val[il-1] =  s / val[iu-1];
-
     }
-
 }// kernel 
 
 
@@ -124,11 +121,8 @@ extern "C" magma_int_t
 magma_ziteric_csr( 
     magma_z_matrix A,
     magma_z_matrix A_CSR,
-    magma_queue_t queue ){
-
-
-
-    
+    magma_queue_t queue )
+{
     int blocksize1 = 128;
     int blocksize2 = 1;
 
@@ -154,6 +148,3 @@ magma_ziteric_csr(
 
     return MAGMA_SUCCESS;
 }
-
-
-

@@ -25,8 +25,8 @@ magma_ziterilu_csr_kernel(
     magmaDoubleComplex *valL, 
     magma_index_t *rowptrU, 
     magma_index_t *rowidxU, 
-    magmaDoubleComplex *valU ){
-
+    magmaDoubleComplex *valU )
+{
     int i, j;
     int k = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -37,9 +37,7 @@ magma_ziterilu_csr_kernel(
     
 
     if (k < nnz)
-    {     
-
-         
+    {
         i = rowidxA[k];
         j = colidxA[k];
 
@@ -63,7 +61,6 @@ magma_ziterilu_csr_kernel(
             s = ( jl == ju ) ? s-sp : s;
             il = ( jl <= ju ) ? il+1 : il;
             iu = ( jl >= ju ) ? iu+1 : iu;
-
         }
         // undo the last operation (it must be the last)
         s += sp;
@@ -75,7 +72,6 @@ magma_ziterilu_csr_kernel(
             valU[iu-1] = s;
         }
     }
-
 }// kernel 
 
 
@@ -124,8 +120,8 @@ magma_ziterilu_csr(
     magma_z_matrix A,
     magma_z_matrix L,
     magma_z_matrix U,
-    magma_queue_t queue ){
-    
+    magma_queue_t queue )
+{
     int blocksize1 = 128;
     int blocksize2 = 1;
 

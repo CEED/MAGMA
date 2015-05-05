@@ -18,20 +18,18 @@ magma_zlobpcg_shift_kernel(
     magma_int_t shift, 
     magmaDoubleComplex * x )
 {
-
-    int idx = threadIdx.x ;     // thread in row
+    int idx = threadIdx.x;      // thread in row
     int row = blockIdx.y * gridDim.x + blockIdx.x; // global block index
 
-    if( row<num_rows){
+    if ( row<num_rows) {
         magmaDoubleComplex tmp = x[idx];
         __syncthreads();
 
-        if( idx > shift-1 ){
+        if ( idx > shift-1 ) {
             idx-=shift;
             x[idx] = tmp;
             __syncthreads();
         }
-
     }
 }
 
@@ -108,6 +106,3 @@ magma_zlobpcg_shift(
 
     return MAGMA_SUCCESS;
 }
-
-
-

@@ -33,11 +33,9 @@ magma_zbicgmerge1_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     magmaDoubleComplex beta=skp[1];
     magmaDoubleComplex omega=skp[2];
-    if( i<n ){
+    if ( i<n ) {
         p[i] =  r[i] + beta * ( p[i] - omega * v[i] );
-
     }
-
 }
 
 /**
@@ -88,9 +86,8 @@ magma_zbicgmerge1(
     magmaDoubleComplex_ptr skp,
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r, 
-    magmaDoubleComplex_ptr p ){
-
-    
+    magmaDoubleComplex_ptr p )
+{
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
     magma_zbicgmerge1_kernel<<<Gs, Bs, 0>>>( n, skp, v, r, p );
@@ -110,10 +107,9 @@ magma_zbicgmerge2_kernel(
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     magmaDoubleComplex alpha=skp[0];
-    if( i<n ){
-        s[i] =  r[i] - alpha * v[i] ;
+    if ( i < n ) {
+        s[i] =  r[i] - alpha * v[i];
     }
-
 }
 
 /**
@@ -165,8 +161,6 @@ magma_zbicgmerge2(
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr s )
 {
-
-    
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
 
@@ -190,13 +184,12 @@ magma_zbicgmerge3_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     magmaDoubleComplex alpha=skp[0];
     magmaDoubleComplex omega=skp[2];
-    if( i<n ){
+    if ( i<n ) {
         magmaDoubleComplex s;
         s = se[i];
         x[i] = x[i] + alpha * p[i] + omega * s;
         r[i] = s - omega * t[i];
     }
-
 }
 
 /**
@@ -261,8 +254,6 @@ magma_zbicgmerge3(
     magmaDoubleComplex_ptr x, 
     magmaDoubleComplex_ptr r )
 {
-
-    
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
     magma_zbicgmerge3_kernel<<<Gs, Bs, 0>>>( n, skp, p, s, t, x, r );
@@ -278,7 +269,7 @@ magma_zbicgmerge4_kernel_1(
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if( i==0 ){
+    if ( i==0 ) {
         magmaDoubleComplex tmp = skp[0];
         skp[0] = skp[4]/tmp;
     }
@@ -290,7 +281,7 @@ magma_zbicgmerge4_kernel_2(
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if( i==0 ){
+    if ( i==0 ) {
         skp[2] = skp[6]/skp[7];
         skp[3] = skp[4];
     }
@@ -302,12 +293,11 @@ magma_zbicgmerge4_kernel_3(
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if( i==0 ){
+    if ( i==0 ) {
         magmaDoubleComplex tmp1 = skp[4]/skp[3];
         magmaDoubleComplex tmp2 = skp[0] / skp[2];
         skp[1] =  tmp1*tmp2;
         //skp[1] =  skp[4]/skp[3] * skp[0] / skp[2];
-
     }
 }
 
@@ -340,18 +330,16 @@ magma_zbicgmerge4(
     int type, 
     magmaDoubleComplex_ptr skp )
 {
-
     dim3 Bs( 1 );
     dim3 Gs( 1 );
-    if( type == 1 )
+    if ( type == 1 )
         magma_zbicgmerge4_kernel_1<<<Gs, Bs, 0>>>( skp );
-    else if( type == 2 )
+    else if ( type == 2 )
         magma_zbicgmerge4_kernel_2<<<Gs, Bs, 0>>>( skp );
-    else if( type == 3 )
+    else if ( type == 3 )
         magma_zbicgmerge4_kernel_3<<<Gs, Bs, 0>>>( skp );
     else
         printf("error: no kernel called\n");
 
    return MAGMA_SUCCESS;
 }
-

@@ -26,21 +26,20 @@ zgeellrtmv_kernel_32(
     int T,
     int alignment )
 {
-int idx = blockIdx.y * gridDim.x * blockDim.x + 
-          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
-int idb = threadIdx.x ;  // local thread index
-int idp = idb%T;  // number of threads assigned to one row
-int i = idx/T;  // row index
+    int idx = blockIdx.y * gridDim.x * blockDim.x + 
+              blockDim.x * blockIdx.x + threadIdx.x;  // global thread index
+    int idb = threadIdx.x;   // local thread index
+    int idp = idb%T;  // number of threads assigned to one row
+    int i = idx/T;  // row index
+    
+    extern __shared__ magmaDoubleComplex shared[];
 
-extern __shared__ magmaDoubleComplex shared[];
-
-    if(i < num_rows ){
+    if (i < num_rows ) {
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
-        for ( int k = 0; k < max_ ; k++ ){
-
+        for ( int k = 0; k < max_; k++ ) {
             // original code in paper (not working for me)
             //magmaDoubleComplex val = dval[ k*(T*alignment)+(i*T)+idp ];  
             //int col = dcolind [ k*(T*alignment)+(i*T)+idp ];    
@@ -52,18 +51,16 @@ extern __shared__ magmaDoubleComplex shared[];
             dot += val * dx[ col ];
         }
         shared[idb]  = dot;
-        if( idp < 16 ){
-            shared[idb]+=shared[idb+16];
-            if( idp < 8 ) shared[idb]+=shared[idb+8];
-            if( idp < 4 ) shared[idb]+=shared[idb+4];
-            if( idp < 2 ) shared[idb]+=shared[idb+2];
-            if( idp == 0 ) {
+        if ( idp < 16 ) {
+            shared[idb] += shared[idb+16];
+            if ( idp < 8 ) shared[idb] += shared[idb+8];
+            if ( idp < 4 ) shared[idb] += shared[idb+4];
+            if ( idp < 2 ) shared[idb] += shared[idb+2];
+            if ( idp == 0 ) {
                 dy[i] = (shared[idb]+shared[idb+1])*alpha + beta*dy [i];
             }
-
         }
     }
-
 }
 
 //F. Vázquez, G. Ortega, J.J. Fernández, E.M. Garzón, Almeria University
@@ -81,21 +78,20 @@ zgeellrtmv_kernel_16(
     int T,
     int alignment )
 {
-int idx = blockIdx.y * gridDim.x * blockDim.x + 
-          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
-int idb = threadIdx.x ;  // local thread index
-int idp = idb%T;  // number of threads assigned to one row
-int i = idx/T;  // row index
+    int idx = blockIdx.y * gridDim.x * blockDim.x + 
+              blockDim.x * blockIdx.x + threadIdx.x;  // global thread index
+    int idb = threadIdx.x;   // local thread index
+    int idp = idb%T;  // number of threads assigned to one row
+    int i = idx/T;  // row index
+    
+    extern __shared__ magmaDoubleComplex shared[];
 
-extern __shared__ magmaDoubleComplex shared[];
-
-    if(i < num_rows ){
+    if (i < num_rows ) {
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
-        for ( int k = 0; k < max_ ; k++ ){
-
+        for ( int k = 0; k < max_; k++ ) {
             // original code in paper (not working for me)
             //magmaDoubleComplex val = dval[ k*(T*alignment)+(i*T)+idp ];  
             //int col = dcolind [ k*(T*alignment)+(i*T)+idp ];    
@@ -107,17 +103,15 @@ extern __shared__ magmaDoubleComplex shared[];
             dot += val * dx[ col ];
         }
         shared[idb]  = dot;
-        if( idp < 8 ){
-            shared[idb]+=shared[idb+8];
-            if( idp < 4 ) shared[idb]+=shared[idb+4];
-            if( idp < 2 ) shared[idb]+=shared[idb+2];
-            if( idp == 0 ) {
+        if ( idp < 8 ) {
+            shared[idb] += shared[idb+8];
+            if ( idp < 4 ) shared[idb] += shared[idb+4];
+            if ( idp < 2 ) shared[idb] += shared[idb+2];
+            if ( idp == 0 ) {
                 dy[i] = (shared[idb]+shared[idb+1])*alpha + beta*dy [i];
             }
-
         }
     }
-
 }
 
 //F. Vázquez, G. Ortega, J.J. Fernández, E.M. Garzón, Almeria University
@@ -135,21 +129,20 @@ zgeellrtmv_kernel_8(
     int T,
     int alignment )
 {
-int idx = blockIdx.y * gridDim.x * blockDim.x + 
-          blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
-int idb = threadIdx.x ;  // local thread index
-int idp = idb%T;  // number of threads assigned to one row
-int i = idx/T;  // row index
+    int idx = blockIdx.y * gridDim.x * blockDim.x + 
+              blockDim.x * blockIdx.x + threadIdx.x;  // global thread index
+    int idb = threadIdx.x;   // local thread index
+    int idp = idb%T;  // number of threads assigned to one row
+    int i = idx/T;  // row index
+    
+    extern __shared__ magmaDoubleComplex shared[];
 
-extern __shared__ magmaDoubleComplex shared[];
-
-    if(i < num_rows ){
+    if (i < num_rows ) {
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         int max_ = magma_ceildiv( drowlength[i], T );  
             // number of elements each thread handles
 
-        for ( int k = 0; k < max_ ; k++ ){
-
+        for ( int k = 0; k < max_; k++ ) {
             // original code in paper (not working for me)
             //magmaDoubleComplex val = dval[ k*(T*alignment)+(i*T)+idp ];  
             //int col = dcolind [ k*(T*alignment)+(i*T)+idp ];    
@@ -161,16 +154,14 @@ extern __shared__ magmaDoubleComplex shared[];
             dot += val * dx[ col ];
         }
         shared[idb]  = dot;
-        if( idp < 4 ){
-            shared[idb]+=shared[idb+4];
-            if( idp < 2 ) shared[idb]+=shared[idb+2];
-            if( idp == 0 ) {
+        if ( idp < 4 ) {
+            shared[idb] += shared[idb+4];
+            if ( idp < 2 ) shared[idb] += shared[idb+2];
+            if ( idp == 0 ) {
                 dy[i] = (shared[idb]+shared[idb+1])*alpha + beta*dy [i];
             }
-
         }
     }
-
 }
 
 
@@ -279,20 +270,20 @@ magma_zgeellrtmv(
     dim3 grid( dimgrid1, dimgrid2, 1);
 
     int Ms = alignment * blocksize * sizeof( magmaDoubleComplex );
-    // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads , Ms);
+    // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads, Ms);
 
     if ( alignment == 32 ) {
-        zgeellrtmv_kernel_32<<< grid, threads , Ms, queue >>>
+        zgeellrtmv_kernel_32<<< grid, threads, Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 16 ) {
-        zgeellrtmv_kernel_16<<< grid, threads , Ms, queue >>>
+        zgeellrtmv_kernel_16<<< grid, threads, Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 8 ) {
-        zgeellrtmv_kernel_8<<< grid, threads , Ms, queue >>>
+        zgeellrtmv_kernel_8<<< grid, threads, Ms, queue >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
@@ -301,9 +292,5 @@ magma_zgeellrtmv(
         return MAGMA_ERR_NOT_SUPPORTED;
     }
 
-
-
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
-
-

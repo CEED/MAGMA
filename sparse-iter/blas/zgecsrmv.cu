@@ -26,7 +26,6 @@ zgecsrmv_kernel(
     magmaDoubleComplex beta, 
     magmaDoubleComplex * dy)
 {
-
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
 
@@ -57,7 +56,6 @@ zgecsrmv_kernel_shift(
     magma_index_t * addrows,
     magmaDoubleComplex * dy)
 {
-
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
 
@@ -254,6 +252,3 @@ magma_zgecsrmv_shift(
 
     return MAGMA_SUCCESS;
 }
-
-
-
