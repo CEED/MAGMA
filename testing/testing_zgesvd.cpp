@@ -118,7 +118,7 @@ int main( int argc, char** argv)
                 
                 default: {
                     fprintf( stderr, "Error: unknown option svd_work %d\n", (int) opts.svd_work );
-                    exit(1);
+                    return -1;
                     break;
                 }
             }
@@ -285,9 +285,9 @@ int main( int argc, char** argv)
                 if ( result[0] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[0]); }
                 if ( result[1] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[1]); }
                 if ( result[2] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[2]); }
-                int success = (result[0] < tol) && (result[1] < tol) && (result[2] < tol) && (result[3] == 0.) && (result[4] < tol);
-                printf("   %3s   %s\n", (result[3] == 0. ? "yes" : "no"), (success ? "ok" : "failed"));
-                status += ! success;
+                bool okay = (result[0] < tol) && (result[1] < tol) && (result[2] < tol) && (result[3] == 0.) && (result[4] < tol);
+                printf("   %3s   %s\n", (result[3] == 0. ? "yes" : "no"), (okay ? "ok" : "failed"));
+                status += ! okay;
             }
             else {
                 printf("\n");

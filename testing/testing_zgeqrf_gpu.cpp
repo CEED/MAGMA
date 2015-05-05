@@ -107,7 +107,7 @@ int main( int argc, char** argv)
                 #endif
                 else {
                     printf( "Unknown version %d\n", (int) opts.version );
-                    exit(1);
+                    return -1;
                 }
             }
             gpu_time = magma_wtime() - gpu_time;
@@ -221,7 +221,7 @@ int main( int argc, char** argv)
                 #endif
                 else {
                     printf( "Unknown version %d\n", (int) opts.version );
-                    exit(1);
+                    return -1;
                 }
                 magma_zgetvector( N, d_B, 1, x, 1 );
 

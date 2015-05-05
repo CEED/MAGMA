@@ -107,7 +107,7 @@ int main( int argc, char** argv)
                 if ( info != 0 ) {
                     printf("magma_zunghr returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
-                    exit(1);
+                    return -1;
                 }
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 lapackf77_zhst01(&N, &ione, &N,
