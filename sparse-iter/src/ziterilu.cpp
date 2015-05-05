@@ -37,7 +37,7 @@
 
     @ingroup magmasparse_zgepr
     ********************************************************************/
-
+extern "C"
 magma_int_t
 magma_ziterilusetup(
     magma_z_matrix A,
@@ -242,7 +242,7 @@ cleanup:
 
     @ingroup magmasparse_zhepr
     ********************************************************************/
-
+extern "C"
 magma_int_t
 magma_zitericsetup(
     magma_z_matrix A,
@@ -398,7 +398,7 @@ magma_zitericsetup(
                 
     @ingroup magmasparse_zhepr
     ********************************************************************/
-
+extern "C"
 magma_int_t
 magma_zitericupdate(
     magma_z_matrix A,
@@ -466,7 +466,7 @@ cleanup:
 
     @ingroup magmasparse_zgepr
     ********************************************************************/
-
+extern "C"
 magma_int_t
 magma_zapplyiteric_l(
     magma_z_matrix b,
@@ -518,7 +518,7 @@ cleanup:
 
     @ingroup magmasparse_zgepr
     ********************************************************************/
-
+extern "C"
 magma_int_t
 magma_zapplyiteric_r(
     magma_z_matrix b,
