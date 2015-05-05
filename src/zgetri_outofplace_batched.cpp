@@ -73,7 +73,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                   magmaDoubleComplex **dinvA_array, magma_int_t lddia,
                   magma_int_t *info_array,
                   magma_int_t batchCount, magma_queue_t queue)
-       
 {
     /* Local variables */
   
@@ -94,13 +93,8 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     if ( n == 0 )
         return info;
 
-
-
-
     magma_int_t ib, j;
-    magma_int_t nb = 256;//256;// BATRF_NB;
-
-
+    magma_int_t nb = 256; //256; // BATRF_NB;
 
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
@@ -122,8 +116,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_malloc((void**)&dW5_displ,  batchCount * sizeof(*dW5_displ));
 
     magmaDoubleComplex* dinvdiagA;
-    magmaDoubleComplex* dwork;// dinvdiagA and dwork are workspace in ztrsm
-    //magma_int_t invdiagA_msize =  BATRI_NB*((nb/BATRI_NB)+(nb % BATRI_NB != 0))* BATRI_NB ;
+    magmaDoubleComplex* dwork; // dinvdiagA and dwork are workspace in ztrsm
     magma_int_t invdiagA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = n*nb;
     magma_zmalloc( &dinvdiagA, invdiagA_msize * batchCount);
@@ -143,7 +136,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         magma_free(dinvdiagA);
         magma_free( dwork );
         info = MAGMA_ERR_DEVICE_ALLOC;
-        magma_xerbla( __func__, -(info) );
         return info;
     }
 
@@ -221,7 +213,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_free(dwork_array);
     magma_free(dinvdiagA);
     magma_free( dwork );
-
     
     return info;
 }
