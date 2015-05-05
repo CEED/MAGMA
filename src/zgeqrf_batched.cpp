@@ -80,9 +80,9 @@
 
 extern "C" magma_int_t
 magma_zgeqrf_batched(
-    magma_int_t m, magma_int_t n, 
+    magma_int_t m, magma_int_t n,
     magmaDoubleComplex **dA_array,
-    magma_int_t ldda, 
+    magma_int_t ldda,
     magmaDoubleComplex **dtau_array,
     magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue)
 {
@@ -110,13 +110,12 @@ magma_zgeqrf_batched(
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        if(min_mn == 0 ) return arginfo;
-
+        return arginfo;
 
     magmaDoubleComplex *dT        = NULL;
     magmaDoubleComplex *dR        = NULL;
     magmaDoubleComplex **dR_array = NULL;
-    magmaDoubleComplex **dT_array = NULL; 
+    magmaDoubleComplex **dT_array = NULL;
     magma_malloc((void**)&dR_array, batchCount * sizeof(*dR_array));
     magma_malloc((void**)&dT_array, batchCount * sizeof(*dT_array));
 
@@ -139,13 +138,12 @@ magma_zgeqrf_batched(
     zset_pointer(dR_array, dR, lddr, 0, 0, lddr*min(nb, min_mn), batchCount, queue);
     zset_pointer(dT_array, dT, lddt, 0, 0, lddt*min(nb, min_mn), batchCount, queue);
 
-    arginfo = magma_zgeqrf_expert_batched(m, n, 
-                                          dA_array, ldda, 
+    arginfo = magma_zgeqrf_expert_batched(m, n,
+                                          dA_array, ldda,
                                           dR_array, lddr,
                                           dT_array, lddt,
                                           dtau_array, 0,
                                           info_array, batchCount, queue);
-
 
     magma_free(dR_array);
     magma_free(dT_array);
@@ -153,10 +151,4 @@ magma_zgeqrf_batched(
     magma_free(dT);
 
     return arginfo;
-           
 }
-
-
-
-
-
