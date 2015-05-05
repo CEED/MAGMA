@@ -14,8 +14,8 @@
  **/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef _UNPACK_ARGS_
-#define _UNPACK_ARGS_
+#ifndef _UNPACK_ARGS_H
+#define _UNPACK_ARGS_H
 
 #include "quark.h"
 
@@ -787,4 +787,4 @@
   memcpy(&arg24, arg, sizeof(arg24)); \
 }
 
-#endif
+#endif  // _UNPACK_ARGS_H
