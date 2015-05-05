@@ -25,14 +25,12 @@ magma_zpotf2_ztrsm_batched(
     magma_int_t *info_array, magma_int_t gbstep,  
     magma_int_t batchCount, magma_queue_t queue)
 {
-
-
     magma_int_t j;
     magma_int_t arginfo = 0;
     if( m > MAX_NTHREADS )
     {
-        printf("magma_zpotf2_ztrsm_batched m=%d > %d not supported today \n", (int) m, (int) MAX_NTHREADS);
-        arginfo =-13;
+        printf("magma_zpotf2_ztrsm_batched m=%d > %d not supported today\n", (int) m, (int) MAX_NTHREADS);
+        arginfo = -13;
         return arginfo;
     }
 
@@ -40,7 +38,6 @@ magma_zpotf2_ztrsm_batched(
     if (n == 0) {
         return arginfo;
     }
-
 
     magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
@@ -65,8 +62,7 @@ magma_zpotf2_ztrsm_batched(
                                  alpha, dA_displ, lda,
                                         dB_displ,    lda,
                                  beta,  dC_displ, 1,
-                                 batchCount, queue);// 
-
+                                 batchCount, queue);
 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 magma_zlacgv_batched(j, dA_array, lda, j, batchCount, queue);

@@ -100,7 +100,7 @@ magma_zgetf2_nopiv_batched(
 
     magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex one  = MAGMA_Z_ONE;
-    magma_int_t nb = 32;//BATF2_NB;
+    magma_int_t nb = 32; //BATF2_NB;
 
     
     magma_int_t min_mn = min(m, n);

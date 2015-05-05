@@ -245,7 +245,7 @@ magma_zgeqrf_expert_batched(
 
     magmablasSetKernelStream(NULL);
 
-    for(i=0; i<min_mn;i+=nb)
+    for(i=0; i < min_mn; i += nb)
     {
             ib = min(nb, min_mn-i);  
             //===============================================

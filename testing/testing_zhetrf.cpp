@@ -471,7 +471,8 @@ double get_LTLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
         printf("%d ", p[i] );
     }
     printf( "];\n" );
-    magma_free_cpu(p);*/
+    magma_free_cpu(p);
+    */
     // extract T
     for (int i=0; i < N; i++) {
         int istart = max(0, i-nb);

@@ -119,7 +119,7 @@ magma_zgetrf_batched(
     magma_int_t ib, i, k, pm;
     magma_int_t nb = BATRF_NB;
     magma_int_t gemm_crossover = nb > 32 ? 127 : 160;
-    // magma_int_t gemm_crossover = n;// use only stream gemm
+    // magma_int_t gemm_crossover = n; // use only stream gemm
 
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
@@ -155,7 +155,7 @@ magma_zgetrf_batched(
     magma_int_t **pivinfo_array    = NULL;
     magma_int_t *pivinfo           = NULL; 
     magmaDoubleComplex* dinvA      = NULL;
-    magmaDoubleComplex* dwork      = NULL;// dinvA and dwork are workspace in ztrsm
+    magmaDoubleComplex* dwork      = NULL; // dinvA and dwork are workspace in ztrsm
     magmaDoubleComplex **cpuAarray = NULL;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
@@ -256,7 +256,7 @@ magma_zgetrf_batched(
         setup_pivinfo_batched(pivinfo_array, dipiv_displ, pm, ib, batchCount, queue);
         adjust_ipiv_batched(dipiv_displ, ib, i, batchCount, queue);
 
-        // stepinit_ipiv(pivinfo_array, pm, batchCount);// for debug and check swap, it create an ipiv
+        // stepinit_ipiv(pivinfo_array, pm, batchCount); // for debug and check swap, it create an ipiv
 
 
 #if 0

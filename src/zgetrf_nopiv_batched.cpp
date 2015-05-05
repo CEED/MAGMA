@@ -110,7 +110,7 @@ magma_zgetrf_nopiv_batched(
     magma_int_t ib, i, k, pm;
     magma_int_t nb = BATRF_NB;
     magma_int_t gemm_crossover = nb > 32 ? 127 : 160;
-    // magma_int_t gemm_crossover = 0;// use only stream gemm
+    // magma_int_t gemm_crossover = 0; // use only stream gemm
 
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
@@ -141,7 +141,7 @@ magma_zgetrf_nopiv_batched(
     magma_int_t invA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = max(m,n)*nb;
     magmaDoubleComplex* dinvA      = NULL;
-    magmaDoubleComplex* dwork      = NULL;// dinvA and dwork are workspace in ztrsm
+    magmaDoubleComplex* dwork      = NULL; // dinvA and dwork are workspace in ztrsm
     magmaDoubleComplex **cpuAarray = NULL;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );

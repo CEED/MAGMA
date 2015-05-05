@@ -381,11 +381,9 @@ zjacobispmvupdate_bw_kernel(
     magmaDoubleComplex *t, 
     magmaDoubleComplex *b, 
     magmaDoubleComplex *d, 
-    magmaDoubleComplex *x ){
-
-
-
-    int row_tmp = blockDim.x * blockIdx.x + threadIdx.x ;
+    magmaDoubleComplex *x )
+{
+    int row_tmp = blockDim.x * blockIdx.x + threadIdx.x;
     int row = num_rows-1 - row_tmp;
     int j;
 

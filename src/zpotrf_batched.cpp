@@ -107,7 +107,7 @@ magma_zpotrf_batched(
 
     magma_int_t j, k, ib;
     magma_int_t nb = POTRF_NB;
-    magma_int_t gemm_crossover = 127;//nb > 32 ? 127 : 160;
+    magma_int_t gemm_crossover = 127; //nb > 32 ? 127 : 160;
 
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
@@ -137,7 +137,7 @@ magma_zpotrf_batched(
     magma_int_t invA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = n*nb;
     magmaDoubleComplex* dinvA      = NULL;
-    magmaDoubleComplex* dwork      = NULL;// dinvA and dwork are workspace in ztrsm
+    magmaDoubleComplex* dwork      = NULL; // dinvA and dwork are workspace in ztrsm
     magmaDoubleComplex **cpuAarray = NULL;
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
