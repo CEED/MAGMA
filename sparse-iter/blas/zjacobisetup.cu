@@ -387,7 +387,7 @@ zjacobispmvupdate_bw_kernel(
     int row = num_rows-1 - row_tmp;
     int j;
 
-    if( row>0 ){
+    if( row>-1 ){
         magmaDoubleComplex dot = MAGMA_Z_ZERO;
         int start = drowptr[ row ];
         int end = drowptr[ row+1 ];
