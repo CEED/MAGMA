@@ -33,7 +33,6 @@
 */
 int main( int argc, char** argv)
 {
-
     TESTING_INIT();
 
     real_Double_t   mgpu_time;
@@ -127,7 +126,6 @@ int main( int argc, char** argv)
             }
 
             if ( opts.warmup ) {
-
                 // ==================================================================
                 // Warmup using MAGMA. I prefer to use smalltest to warmup A-
                 // ==================================================================
