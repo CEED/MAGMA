@@ -99,12 +99,12 @@ magma_zbicgstab_merge(
     CHECK( magma_zvinit( &q, Magma_DEV, dofs*6, 1, c_zero, queue ));
 
     // q = rr|r|p|v|s|t
-    rr.memory_location = Magma_DEV; rr.dval = NULL; rr.num_rows = rr.nnz = dofs; rr.num_cols = 1;rr.storage_type = Magma_DENSE;
-    r.memory_location = Magma_DEV; r.dval = NULL; r.num_rows = r.nnz = dofs; r.num_cols = 1;r.storage_type = Magma_DENSE;
-    p.memory_location = Magma_DEV; p.dval = NULL; p.num_rows = p.nnz = dofs; p.num_cols = 1;p.storage_type = Magma_DENSE;
-    v.memory_location = Magma_DEV; v.dval = NULL; v.num_rows = v.nnz = dofs; v.num_cols = 1;v.storage_type = Magma_DENSE;
-    s.memory_location = Magma_DEV; s.dval = NULL; s.num_rows = s.nnz = dofs; s.num_cols = 1;s.storage_type = Magma_DENSE;
-    t.memory_location = Magma_DEV; t.dval = NULL; t.num_rows = t.nnz = dofs; t.num_cols = 1;t.storage_type = Magma_DENSE;
+    rr.memory_location = Magma_DEV; rr.dval = NULL; rr.num_rows = rr.nnz = dofs; rr.num_cols = 1; rr.storage_type = Magma_DENSE;
+    r.memory_location = Magma_DEV; r.dval = NULL; r.num_rows = r.nnz = dofs; r.num_cols = 1; r.storage_type = Magma_DENSE;
+    p.memory_location = Magma_DEV; p.dval = NULL; p.num_rows = p.nnz = dofs; p.num_cols = 1; p.storage_type = Magma_DENSE;
+    v.memory_location = Magma_DEV; v.dval = NULL; v.num_rows = v.nnz = dofs; v.num_cols = 1; v.storage_type = Magma_DENSE;
+    s.memory_location = Magma_DEV; s.dval = NULL; s.num_rows = s.nnz = dofs; s.num_cols = 1; s.storage_type = Magma_DENSE;
+    t.memory_location = Magma_DEV; t.dval = NULL; t.num_rows = t.nnz = dofs; t.num_cols = 1; t.storage_type = Magma_DENSE;
 
     rr.dval = q(0);
     r.dval = q(1);
@@ -134,7 +134,7 @@ magma_zbicgstab_merge(
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
     magma_zsetvector( 8, skp_h, 1, skp, 1 );
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));             // z = A r
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) );// den = z dot r
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z dot r
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
         r0 = ATOLERANCE;
     if ( nom < r0 ) {
@@ -243,5 +243,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* zbicgstab_merge */
-
-

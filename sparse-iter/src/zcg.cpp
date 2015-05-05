@@ -88,7 +88,7 @@ magma_zcg(
     betanom = nom0;
     nom  = nom0 * nom0;                                // nom = r' * r
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) );// den = p dot q
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) ); // den = p dot q
     solver_par->init_res = nom0;
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
@@ -192,5 +192,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* magma_zcg */
-
-

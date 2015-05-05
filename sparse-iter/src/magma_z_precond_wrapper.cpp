@@ -80,7 +80,6 @@ magma_z_precond(
                 CHECK( magma_zbaiter( A, b, x, &psolver_par, queue )); break;
         default:
                 CHECK( magma_zcg_res( A, b, x, &psolver_par, queue )); break;
-
     }
 cleanup:
     return info;
@@ -124,7 +123,6 @@ magma_z_precondsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-    
     // make sure RHS is a dense matrix
     if ( b.storage_type != Magma_DENSE ) {
         printf( "error: sparse RHS not yet supported.\n" );
@@ -425,5 +423,3 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     return info;
 }
-
-

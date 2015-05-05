@@ -147,8 +147,3 @@ cleanup:
     magma_zmfree( &C, queue );
     return info;
 }
-
-
-
-
-

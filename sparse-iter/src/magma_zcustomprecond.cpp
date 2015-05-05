@@ -101,8 +101,3 @@ magma_zapplycustomprecond_r(
     
     return info;
 }
-
-
-
-
-

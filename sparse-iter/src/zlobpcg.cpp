@@ -81,8 +81,8 @@ magma_zlobpcg(
 
 #define magma_z_bspmv_tuned(m, n, alpha, A, X, beta, AX, queue)       {        \
             magma_z_matrix x={Magma_CSR}, ax={Magma_CSR};                                       \
-            x.memory_location = Magma_DEV;  x.num_rows = m; x.num_cols = n; x.major = MagmaColMajor;  x.nnz = m*n;  x.dval = X;     x.storage_type = Magma_DENSE;\
-            ax.memory_location= Magma_DEV; ax.num_rows = m; ax.num_cols = n; ax.major = MagmaColMajor;  ax.nnz = m*n; ax.dval = AX;     ax.storage_type = Magma_DENSE;    \
+            x.memory_location = Magma_DEV;  x.num_rows = m;  x.num_cols = n;  x.major = MagmaColMajor;   x.nnz = m*n;  x.dval = X;    x.storage_type = Magma_DENSE; \
+            ax.memory_location= Magma_DEV; ax.num_rows = m; ax.num_cols = n; ax.major = MagmaColMajor;  ax.nnz = m*n; ax.dval = AX;  ax.storage_type = Magma_DENSE; \
             CHECK( magma_z_spmv(alpha, A, x, beta, ax, queue ));                   \
 }
 

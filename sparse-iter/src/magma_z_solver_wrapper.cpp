@@ -120,5 +120,3 @@ magma_z_solver(
 cleanup:
     return info; 
 }
-
-

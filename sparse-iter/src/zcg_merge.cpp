@@ -98,7 +98,7 @@ magma_zcg_merge(
     // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1) ;                     // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1);                      // x = 0
     //CHECK(  magma_zresidualvec( A, b, *x, &r, nom0, queue));
     magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
     magma_zcopy( dofs, r.dval, 1, d.dval, 1 );                    // d = r
@@ -228,5 +228,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* magma_zcg_merge */
-
-

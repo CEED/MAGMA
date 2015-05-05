@@ -116,7 +116,7 @@ magma_zbicgstab_merge2(
     t.dval = q(5);
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1) ;                            // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1);                             // x = 0
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     magma_zcopy( dofs, r.dval, 1, q(0), 1 );                            // rr = r
     magma_zcopy( dofs, r.dval, 1, q(1), 1 );                            // q = r
@@ -138,7 +138,7 @@ magma_zbicgstab_merge2(
     magma_zsetvector( 8, skp_h, 1, skp, 1 );
 
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));             // z = A r
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) );// den = z dot r
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z dot r
 
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
         r0 = ATOLERANCE;
@@ -240,5 +240,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* zbicgstab_merge2 */
-
-

@@ -291,5 +291,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* magma_zbpcg */
-
-

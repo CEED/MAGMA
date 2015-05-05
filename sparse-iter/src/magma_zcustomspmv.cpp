@@ -57,12 +57,5 @@ magma_zcustomspmv(
     // vector access via x.dval, y.dval
     // sizes are x.num_rows, x.num_cols
     
-
     return info;
-
 }
-
-
-
-
-

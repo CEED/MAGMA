@@ -72,7 +72,7 @@ magma_zjacobi(
     
     double nom0 = 0.0;
 
-    magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, ACSR={Magma_CSR} ;
+    magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, ACSR={Magma_CSR};
     
     CHECK( magma_zmconvert(A, &ACSR, A.storage_type, Magma_CSR, queue ) );
 
@@ -353,7 +353,6 @@ magma_zjacobisetup_vector(
     magma_z_matrix diag={Magma_CSR}, c_t={Magma_CSR}, b_h={Magma_CSR}, tmp={Magma_CSR};
     
     if ( b.memory_location == Magma_CPU ) {
-
         CHECK( magma_zvinit( &c_t, Magma_CPU, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
 
         CHECK( magma_zmtransfer( b, &b_h, b.memory_location, Magma_CPU, queue ));
@@ -361,7 +360,6 @@ magma_zjacobisetup_vector(
 
         for( magma_int_t rowindex=0; rowindex<b.num_rows; rowindex++ ) {
             c_t.val[rowindex] = b_h.val[rowindex] / diag.val[rowindex];
-
         }
         CHECK( magma_zmtransfer( c_t, c, Magma_CPU, b.memory_location, queue ));
     }
@@ -457,7 +455,6 @@ magma_zjacobisetup(
             }
         }
         c_t.val[rowindex] = b_h.val[rowindex] / diag.val[rowindex];
-
     }
 
     CHECK( magma_z_csr_compressor(&B.val, &B.drow, &B.dcol,

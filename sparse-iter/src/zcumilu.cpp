@@ -188,9 +188,8 @@ magma_zcumilugeneratesolverinfo(
     magma_z_matrix hA={Magma_CSR}, hL={Magma_CSR}, hU={Magma_CSR};
     
     if (precond->L.memory_location != Magma_DEV ){
-        
         CHECK( magma_zmtransfer( precond->M, &hA,
-            precond->M.memory_location, Magma_CPU, queue ));
+        precond->M.memory_location, Magma_CPU, queue ));
 
         hL.diagorder_type = Magma_UNITY;
         CHECK( magma_zmconvert( hA, &hL , Magma_CSR, Magma_CSRL, queue ));
@@ -202,7 +201,6 @@ magma_zcumilugeneratesolverinfo(
         magma_zmfree(&hA, queue );
         magma_zmfree(&hL, queue );
         magma_zmfree(&hU, queue );
-        
     }
     
     // CUSPARSE context //
@@ -799,12 +797,3 @@ cleanup:
     cusparseDestroy( cusparseHandle );
     return info; 
 }
-
-
-
-
-
-
-
-
-

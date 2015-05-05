@@ -101,7 +101,7 @@ magma_zpcg(
     magma_zcopy( dofs, h.dval, 1, p.dval, 1 );                    // p = h
     nom = MAGMA_Z_REAL( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) );// den = p dot q
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) ); // den = p dot q
     solver_par->init_res = nom0;
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
@@ -139,7 +139,7 @@ magma_zpcg(
         gammanew = MAGMA_Z_REAL( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
                                                             // gn = < r,h>
 
-        if ( solver_par->numiter==1 ) {
+        if ( solver_par->numiter == 1 ) {
             magma_zcopy( dofs, h.dval, 1, p.dval, 1 );                    // p = h
         } else {
             beta = MAGMA_Z_MAKE(gammanew/gammaold, 0.);       // beta = gn/go
@@ -159,7 +159,7 @@ magma_zpcg(
         res = magma_dznrm2( dofs, r.dval, 1 );
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
-            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
@@ -185,7 +185,7 @@ magma_zpcg(
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
-            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
@@ -199,7 +199,7 @@ magma_zpcg(
     }
     else {
         if ( solver_par->verbose > 0 ) {
-            if ( (solver_par->numiter)%solver_par->verbose==0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
@@ -220,5 +220,3 @@ cleanup:
     solver_par->info = info;
     return info;
 }   /* magma_zcg */
-
-

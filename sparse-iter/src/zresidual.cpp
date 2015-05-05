@@ -74,9 +74,7 @@ magma_zresidual(
         *res =  magma_dznrm2(dofs, r.dval, 1);            // res = ||r||
         //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
         //printf( "relative residual: %e\n", *res );
-
     } else if ((b.num_rows*b.num_cols)%A.num_rows== 0 ) {
-        
         CHECK( magma_zvinit( &r, Magma_DEV, b.num_rows,b.num_cols, zero, queue ));
 
         CHECK( magma_z_spmv( one, A, x, zero, r, queue ));           // r = A x
@@ -87,7 +85,6 @@ magma_zresidual(
         }
         //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
         //printf( "relative residual: %e\n", *res );
-
     } else {
         printf("error: dimensions do not match.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
@@ -98,4 +95,3 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     return info;
 }
-

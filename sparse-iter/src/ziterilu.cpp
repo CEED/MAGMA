@@ -212,7 +212,6 @@ cleanup:
     magma_zmfree( &RU, queue );
 
     return info;
-
 }
 
 
@@ -372,7 +371,6 @@ magma_zitericsetup(
     magma_zmfree( &d_h, queue );
     
     return info;
-
 }
 
 
@@ -438,7 +436,6 @@ cleanup:
     magma_zmfree(&hALt, queue );
     
     return info;
-
 }
 
 
@@ -491,7 +488,6 @@ magma_zapplyiteric_l(
 
 cleanup:
     return info;
-
 }
 
 
@@ -545,5 +541,4 @@ magma_zapplyiteric_r(
     
 cleanup:
     return info;
-
 }
