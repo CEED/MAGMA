@@ -18,6 +18,7 @@ my $beta     = 0;
 
 # in alphabetic order
 my @files2delete = qw(
+    ReleaseChecklist
     BugsToFix.txt
     Makefile.gen
     Release-ToDo-1.1.txt
@@ -58,7 +59,7 @@ my @files2delete = qw(
     make.inc.ig.pgi
     multi-gpu-dynamic-deprecated
     quark
-    
+    scripts
 
     sparse-iter/python
     sparse-iter/src/zciterref.cpp
@@ -66,7 +67,7 @@ my @files2delete = qw(
     sparse-iter/src/zcpgmres.cpp
     sparse-iter/src/zcpir.cpp
     sparse-iter/src/zbpcg_tmp.cpp
-	sparse-iter/testing/test_matrices
+    sparse-iter/testing/test_matrices
  
 
     src/obsolete

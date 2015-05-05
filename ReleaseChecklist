@@ -1,0 +1,62 @@
+Check done by tools/checklist.csh
+=================================
+Prototypes in .cpp files? Move to headers!
+
+C's malloc or free used anywhere?
+
+C++ new or delete used anywhere?
+
+C++ fstream, iostream, cout used anywhere?
+
+System headers included directly in cpp files, instead of via common_magma.h?
+(There are a few exceptions allowed.)
+
+CUDA or CUBLAS functions used without MAGMA wrappers?
+(Some don't have wrappers yet.)
+
+Any instances of (N+nb-1)/nb, etc. creep back in (ceildiv, roundup)?
+
+Style guide compliance (spaces, etc.)
+
+
+Manual checking of code
+=================================
+All new functions documented accurately?
+
+All new functions in testing/run_tests.py?
+All new functions in sparse-iter/testing/run_tests.py?
+
+All functions pass run_tests.py?
+
+
+Compilation checks
+=================================
+Documentation
+	cd docs && ./groups.sh -- any groups unused or undefined?
+	(currently QUARK undefined; geqrf_tile unused)
+	
+	cd docs && make
+	check errors in output_err
+
+Compile & run with -DNDEBUG (no asserts)
+	This is how MathWorks compiles it.
+
+Compile & run on:
+	Linux
+		icc, gcc
+		MKL
+		MKL ILP64
+		ACML 5 or 6
+		OpenBLAS
+	MacOS using gcc & veclib
+	Windows using CMake & MKL
+	
+	CUDA 5.0
+	CUDA 5.5
+	CUDA 6.0
+	CUDA 6.5
+	CUDA 7.0
+	
+	pgi compilers?
+
+Any compiler warnings?
