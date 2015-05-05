@@ -15,7 +15,9 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef HAVE_CBLAS
 #include <cblas.h>
+#endif
 
 // make sure that asserts are enabled
 #undef NDEBUG
@@ -111,7 +113,9 @@ int main( int argc, char** argv )
     magmaDoubleComplex x2_m, x2_c, x2_f;  // complex x for magma, cblas, fortran blas respectively
     double x_m, x_c, x_f;  // x for magma, cblas, fortran blas respectively
     
-    //MAGMA_UNUSED( x_f  );
+    MAGMA_UNUSED( x_c  );
+    MAGMA_UNUSED( x_f  );
+    MAGMA_UNUSED( x2_c );
     MAGMA_UNUSED( x2_f );
     
     magma_opts opts;
@@ -134,6 +138,10 @@ int main( int argc, char** argv )
             "\n" );
     
     // tell user about disabled functions
+    #ifndef HAVE_CBLAS
+        printf( "n/a: HAVE_CBLAS not defined, so no cblas functions tested.\n\n" );
+    #endif
+    
     #if defined( MAGMA_WITH_MKL )
         printf( "n/a: cblas_zdotc and cblas_zdotu disabled with MKL (segfaults).\n\n" );
     #endif
@@ -182,8 +190,12 @@ int main( int argc, char** argv )
                     for( int j = 0; j < k; ++j ) {
                         x_m = magma_cblas_dzasum( m, A(0,j), incx );
                         
-                        x_c = cblas_dzasum( m, A(0,j), incx );
-                        error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                        #ifdef HAVE_CBLAS
+                            x_c = cblas_dzasum( m, A(0,j), incx );
+                            error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                        #else
+                            error_cblas = MAGMA_D_NAN;
+                        #endif
                         
                         x_f = blasf77_dzasum( &m, A(0,j), &incx );
                         error_fblas = max( error_fblas, fabs( (x_m - x_f) / (m*x_f) ));
@@ -210,8 +222,12 @@ int main( int argc, char** argv )
                     for( int j = 0; j < k; ++j ) {
                         x_m = magma_cblas_dznrm2( m, A(0,j), incx );
                         
-                        x_c = cblas_dznrm2( m, A(0,j), incx );
-                        error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                        #ifdef HAVE_CBLAS
+                            x_c = cblas_dznrm2( m, A(0,j), incx );
+                            error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                        #else
+                            error_cblas = MAGMA_D_NAN;
+                        #endif
                         
                         x_f = blasf77_dznrm2( &m, A(0,j), &incx );
                         error_fblas = max( error_fblas, fabs( (x_m - x_f) / (m*x_f) ));
@@ -237,7 +253,7 @@ int main( int argc, char** argv )
                     x2_m = magma_cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
                     
                     // crashes on MKL 11.1.2, ILP64
-                    #if ! defined( MAGMA_WITH_MKL )
+                    #if defined(HAVE_CBLAS) && ! defined( MAGMA_WITH_MKL )
                         #ifdef COMPLEX
                         cblas_zdotc_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
                         #else
@@ -281,7 +297,7 @@ int main( int argc, char** argv )
                     x2_m = magma_cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
                     
                     // crashes on MKL 11.1.2, ILP64
-                    #if ! defined( MAGMA_WITH_MKL )
+                    #if defined(HAVE_CBLAS) && ! defined( MAGMA_WITH_MKL )
                         #ifdef COMPLEX
                         cblas_zdotu_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
                         #else
