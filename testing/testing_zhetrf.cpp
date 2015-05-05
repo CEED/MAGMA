@@ -145,8 +145,12 @@ double get_residual_aasen(
     for (int i=0; i<n; i++)
     {
         int istart = max(0, i-nb);
-        for (int j=istart; j<=i; j++) T(i,j) = A(i,j);
-        for (int j=istart; j<i;  j++) T(j,i) = MAGMA_Z_CNJG(A(i,j));
+        for (int j=istart; j<=i; j++) {
+            T(i,j) = A(i,j);
+        }
+        for (int j=istart; j<i;  j++) {
+            T(j,i) = MAGMA_Z_CNJG(A(i,j));
+        }
     }
     // extract L
     for (int i=0; i<min(n,nb); i++) 
@@ -155,7 +159,9 @@ double get_residual_aasen(
     }
     for (int i=nb; i<n; i++)
     {
-        for (int j=0; j<i-nb; j++) L(i,nb+j) = A(i,j);
+        for (int j=0; j<i-nb; j++) {
+            L(i,nb+j) = A(i,j);
+        }
         L(i,i) = c_one;
     }
 
@@ -485,7 +491,9 @@ double get_LTLt_error(int nopiv, magma_uplo_t uplo, magma_int_t N,
     }
     for (int i=nb; i<N; i++)
     {
-        for (int j=0; j<i-nb; j++) L(i,nb+j) = LT(i,j);
+        for (int j=0; j<i-nb; j++) {
+            L(i,nb+j) = LT(i,j);
+        }
         L(i,i) = c_one;
     }
     //printf( "L=" );
