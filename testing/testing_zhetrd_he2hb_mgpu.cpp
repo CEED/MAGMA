@@ -21,14 +21,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
-#if defined(USEACML)
-#include <omp.h>
-#endif
-
 #define PRECISION_z
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
@@ -201,12 +193,7 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime();
                 int nt = min(12, opts.nthread);
 
-                #if defined(USEMKL)
-                mkl_set_num_threads(nt);
-                #endif
-                #if defined(USEACML)
-                omp_set_num_threads(nt);
-                #endif
+                magma_set_lapack_numthreads(nt);
 
                 #if defined(PRECISION_z) || defined (PRECISION_c)
                 lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, rwork2, &info );
@@ -241,12 +228,7 @@ int main( int argc, char** argv)
                              h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
                 cpu_time = magma_wtime() - cpu_time;
                 printf("  Finish CHECK - results timing= %f\n", cpu_time);
-                #if defined(USEMKL)
-                mkl_set_num_threads(1);
-                #endif
-                #if defined(USEACML)
-                omp_set_num_threads(1);
-                #endif
+                magma_set_lapack_numthreads(1);
 
                 printf("\n");
                 printf(" ================================================================================================================\n");

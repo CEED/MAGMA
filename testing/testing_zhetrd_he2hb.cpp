@@ -25,14 +25,6 @@
 #include "testings.h"
 #include "magma_threadsetting.h"
 
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
-
-#if defined(USEACML)
-#include <omp.h>
-#endif
-
 #define PRECISION_z
 
 
@@ -207,11 +199,14 @@ int main( int argc, char** argv)
                =================================================================== */
             /*
             if ( opts.check ) {
-                FILE        *fp;
+                FILE *fp;
     
                 printf("Writing input matrix in matlab_i_mat.txt ...\n");
                 fp = fopen ("matlab_i_mat.txt", "w");
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
+                if ( fp == NULL ) {
+                    printf("Couldn't open output file\n");
+                    return -1;
+                }
     
                 for (j=0; j < N; j++) {
                     for (k=0; k < N; k++) {
@@ -227,7 +222,10 @@ int main( int argc, char** argv)
     
                 printf("Writing output matrix in matlab_o_mat.txt ...\n");
                 fp = fopen ("matlab_o_mat.txt", "w");
-                if ( fp == NULL ) { printf("Couldn't open output file\n"); exit(1); }
+                if ( fp == NULL ) {
+                    printf("Couldn't open output file\n");
+                    return -1;
+                }
     
                 for (j=0; j < N; j++) {
                     for (k=0; k < N; k++) {
@@ -268,13 +266,8 @@ int main( int argc, char** argv)
                 /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
                 cpu_time = magma_wtime();
                 i= min(12, THREADS);
-    
-                #if defined(USEMKL)
-                mkl_set_num_threads( i );
-                #endif
-                #if defined(USEACML)
-                omp_set_num_threads(i);
-                #endif
+                
+                magma_set_lapack_numthreads( i );
     
                 lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2,
                     #if defined(PRECISION_z) || defined (PRECISION_c)
@@ -318,12 +311,7 @@ int main( int argc, char** argv)
                 zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2, D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
                 cpu_time = magma_wtime() - cpu_time;
                 printf("  Finish CHECK - results timing= %f\n", cpu_time);
-                #if defined(USEMKL)
-                mkl_set_num_threads( 1 );
-                #endif
-                #if defined(USEACML)
-                omp_set_num_threads(1);
-                #endif
+                magma_set_lapack_numthreads( 1 );
     
                 printf("\n");
                 printf(" ================================================================================================================\n");
