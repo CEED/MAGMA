@@ -65,7 +65,7 @@ int main(  int argc, char** argv )
     cusparseMatDescr_t descr = NULL;
     
     #ifdef MAGMA_WITH_MKL
-        magma_int_t *pntre=NULL;
+        magma_index_t *pntre=NULL;
     #endif
     
     magma_int_t i, j;
