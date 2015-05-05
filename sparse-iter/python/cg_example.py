@@ -39,4 +39,3 @@ print (endTime-startTime)
 
 matrix_free(ctypes.byref(A))
 matrix_free(ctypes.byref(B))
-
