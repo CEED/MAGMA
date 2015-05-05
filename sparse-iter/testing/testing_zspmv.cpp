@@ -65,7 +65,7 @@ int main(  int argc, char** argv )
     cusparseMatDescr_t descr = NULL;
     
     #ifdef MAGMA_WITH_MKL
-        magma_index_t *pntre=NULL;
+        magma_int_t *pntre=NULL;
     #endif
     
     magma_int_t i, j;
@@ -106,7 +106,7 @@ int main(  int argc, char** argv )
 
         #ifdef MAGMA_WITH_MKL
             // calling MKL with CSR
-            CHECK( magma_index_malloc_cpu( &pntre, hA.num_rows + 1 ) );
+            CHECK( magma_imalloc_cpu( &pntre, hA.num_rows + 1 ) );
             pntre[0] = 0;
             for (j=0; j<hA.num_rows; j++ ) {
                 pntre[j] = hA.row[j+1];
