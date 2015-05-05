@@ -17,7 +17,9 @@
 #include "common_magma.h"
 #include "magma_timer.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 int magma_get_dlaed3_k() { return 512; }
 
@@ -62,7 +64,10 @@ void magma_dirange(
     return;
 }
 
+#ifdef __cplusplus
 }  // end extern "C"
+#endif
+
 
 /**
     Purpose

@@ -16,12 +16,16 @@
 #include "common_magma.h"
 #include "magma_timer.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 magma_int_t magma_get_dlaex3_m_k()  { return  512; }
 magma_int_t magma_get_dlaex3_m_nb() { return 1024; }
 
+#ifdef __cplusplus
 }  // end extern "C"
+#endif
 
 /**
     Purpose
