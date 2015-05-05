@@ -158,7 +158,7 @@ magma_zmconvert(
 {
     magma_int_t info = 0;
 
-    magma_int_t *length=NULL;
+    magma_index_t *length=NULL;
     
     magma_z_matrix hA={Magma_CSR}, hB={Magma_CSR};
     magma_z_matrix A_d={Magma_CSR}, B_d={Magma_CSR};
