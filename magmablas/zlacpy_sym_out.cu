@@ -23,9 +23,9 @@
 */
 static __device__
 void zlacpy_sym_out_full_device(
-    magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     int ind = blockIdx.x*BLK_X + threadIdx.x;
     int iby = blockIdx.y*BLK_Y;
@@ -60,9 +60,9 @@ void zlacpy_sym_out_full_device(
 */
 static __device__
 void zlacpy_sym_out_lower_device(
-    magma_int_t m, magma_int_t n, magma_int_t *rows, magma_int_t *perm,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n, magma_int_t *rows, magma_int_t *perm,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     int ind = blockIdx.x*BLK_X + threadIdx.x; // row
     int iby = blockIdx.y*BLK_Y;               // col
@@ -107,9 +107,9 @@ void zlacpy_sym_out_lower_device(
 */
 static __device__
 void zlacpy_sym_out_upper_device(
-    magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     int ind = blockIdx.x*BLK_X + threadIdx.x;
     int iby = blockIdx.y*BLK_Y;
@@ -142,27 +142,27 @@ void zlacpy_sym_out_upper_device(
 */
 __global__
 void zlacpy_sym_out_full_kernel(
-    magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     zlacpy_sym_out_full_device(m, n, dA, ldda, dB, lddb);
 }
 
 __global__
 void zlacpy_sym_out_lower_kernel(
-    magma_int_t m, magma_int_t n, magma_int_t *rows, magma_int_t *perm,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n, magma_int_t *rows, magma_int_t *perm,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     zlacpy_sym_out_lower_device(m, n, rows, perm, dA, ldda, dB, lddb);
 }
 
 __global__
 void zlacpy_sym_out_upper_kernel(
-    magma_int_t m, magma_int_t n,
-    const magmaDoubleComplex *dA, magma_int_t ldda,
-    magmaDoubleComplex       *dB, magma_int_t lddb )
+    int m, int n,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     zlacpy_sym_out_upper_device(m, n, dA, ldda, dB, lddb);
 }
