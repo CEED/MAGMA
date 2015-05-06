@@ -134,7 +134,7 @@ int main( int argc, char** argv)
                 }
               
                 printf("%5d      %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e   %s\n",
-                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., err,  (error < tol ? "ok" : "failed"));
+                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., err,  (err < tol ? "ok" : "failed"));
                 status += ! (err < tol);
             }
             else {
