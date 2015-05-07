@@ -77,6 +77,9 @@ magma_zsolverinfo(
             case  Magma_ITERREF:
                     printf("%%   Iterative refinement performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_JACOBI:
+                    printf("%%  Jacobi performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
     
@@ -209,6 +212,16 @@ magma_zsolverinfo(
                 }
                 printf("%%======================================================="
                         "======%%\n"); break;
+            case  Magma_JACOBI:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d    ||    %e    ||    %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
             default:
                 printf("%%======================================================="
                         "======%%\n"); break;
@@ -239,7 +252,7 @@ magma_zsolverinfo(
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;
         case  Magma_JACOBI:
-            printf("%% CG solver summary:\n"); break;
+            printf("%% Jacobi solver summary:\n"); break;
         case  Magma_BAITER:
             printf("%% Block-asynchronous iteration solver summary:\n"); break;
         case  Magma_LOBPCG:

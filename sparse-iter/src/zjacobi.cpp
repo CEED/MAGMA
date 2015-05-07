@@ -86,31 +86,46 @@ magma_zjacobi(
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK(  magma_zresidualvec( ACSR, b, *x, &r, &residual, queue));
     solver_par->init_res = residual;
-    solver_par->res_vec = NULL;
-    solver_par->timing = NULL;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t) residual;
+    }
     nom0 = residual;
 
     // Jacobi setup
     CHECK( magma_zjacobisetup_diagscal( ACSR, &d, queue ));
     magma_z_solver_par jacobiiter_par;
-    jacobiiter_par.maxiter = solver_par->maxiter;
+    jacobiiter_par.maxiter = solver_par->verbose;
 
     tempo1 = magma_sync_wtime( queue );
 
+    solver_par->numiter = 0;
     // Jacobi iterator
-    CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));
-
+    do
+    {
+        solver_par->numiter = solver_par->numiter+solver_par->verbose;
+        CHECK( magma_zjacobiiter_sys( A, b, d, r, x, &jacobiiter_par, queue ) );
+        //CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
+        CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
+        tempo2 = magma_sync_wtime( queue );
+        if ( solver_par->verbose > 0 ) {
+            solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
+                = (real_Double_t) residual;
+            solver_par->timing[(solver_par->numiter)/solver_par->verbose]
+                = (real_Double_t) tempo2-tempo1;
+        }
+    }
+    while ( solver_par->numiter+1 <= solver_par->maxiter );
+       
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
     solver_par->final_res = residual;
-    solver_par->numiter = solver_par->maxiter;
 
     if ( solver_par->init_res > solver_par->final_res )
         info = MAGMA_SUCCESS;
     else
         info = MAGMA_DIVERGENCE;
-    
+
 cleanup:
     magma_zmfree( &r, queue );
     magma_zmfree( &d, queue );
