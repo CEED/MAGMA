@@ -350,7 +350,10 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         magma_queue_sync( stream[0] );
                         trace_cpu_start( 0, "getrf", "getrf" );
                         lapackf77_zgetrf( &ib, &jb, A(j+1,j), &lda, &ipiv[(1+j)*nb], &iinfo);
-                        if (iinfo != 0) printf( " zgetrf failed with %d\n",iinfo );
+                        if (iinfo != 0) {
+                            printf( " zgetrf failed with %d\n", (int) iinfo );
+                            // TODO handle error
+                        }
                         trace_cpu_end( 0 );
                         // copy to GPU (all columns, not just L part)
                         magma_zsetmatrix_async( ib, jb, A(j+1,j), lda, dA(j+1,j), ldda,
