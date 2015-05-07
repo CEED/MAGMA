@@ -16,6 +16,9 @@
 #
 #GPU_TARGET ?= Fermi Kepler
 
+# --------------------
+# programs
+
 CC        = icc
 CXX       = icpc
 NVCC      = nvcc
@@ -24,6 +27,10 @@ FORT      = ifort
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
+
+
+# --------------------
+# flags
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
@@ -35,12 +42,20 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all -warn nounused
 NVCCFLAGS = -O3         -DADD_           -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)                  -openmp
 
+
+# --------------------
+# libraries
+
 # old MKL
 #LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lcublas -lcudart -lstdc++ -lm
 
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # icc with MKL 10.3, Intel threads
 LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm
+
+
+# --------------------
+# directories
 
 # define library directories preferably in your environment, or here.
 # for MKL run, e.g.: source /opt/intel/composerxe/mkl/bin/mklvars.sh intel64

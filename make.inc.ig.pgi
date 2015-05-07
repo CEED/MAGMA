@@ -16,6 +16,9 @@
 #
 #GPU_TARGET ?= Fermi Kepler
 
+# --------------------
+# programs
+
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
@@ -24,6 +27,10 @@ FORT      = pgfortran
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
+
+
+# --------------------
+# flags
 
 NOMAIN    = -Mnomain
 
@@ -37,7 +44,15 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -m64
 NVCCFLAGS = -O3         -DADD_ -m64 -Xcompiler "$(FPIC)" -DUNIX
 LDFLAGS   =     $(FPIC)
 
+
+# --------------------
+# libraries
+
 LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
+
+
+# --------------------
+# directories
 
 # define library directories preferably in your environment, or here.
 #CUDADIR  ?= /usr/local/cuda

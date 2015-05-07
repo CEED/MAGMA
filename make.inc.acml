@@ -16,6 +16,9 @@
 #
 #GPU_TARGET ?= Fermi Kepler
 
+# --------------------
+# programs
+
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
@@ -24,6 +27,10 @@ FORT      = gfortran
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
+
+
+# --------------------
+# flags
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
@@ -35,6 +42,10 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)              -fopenmp
 
+
+# --------------------
+# libraries
+
 # MAGMA no longer needs -lcblas
 # for ACML 4
 #LIB      = -lacml_mp -lacml_mv -lcublas -lcudart -lstdc++ -lm
@@ -42,6 +53,10 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # for ACML >= 5
 # requires gcc & gfortran >= 4.6
 LIB       = -lacml_mp           -lcublas -lcudart -lstdc++ -lm -lgfortran
+
+
+# --------------------
+# directories
 
 # define library directories preferably in your environment, or here.
 #ACMLDIR  ?= /opt/acml

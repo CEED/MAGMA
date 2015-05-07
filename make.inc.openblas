@@ -16,6 +16,9 @@
 #
 #GPU_TARGET ?= Fermi Kepler
 
+# --------------------
+# programs
+
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
@@ -24,6 +27,10 @@ FORT      = gfortran
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
+
+
+# --------------------
+# flags
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
@@ -35,8 +42,16 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)              -fopenmp
 
+
+# --------------------
+# libraries
+
 # gcc with OpenBLAS (includes LAPACK)
 LIB       = -lopenblas -lcublas -lcudart
+
+
+# --------------------
+# directories
 
 # define library directories preferably in your environment, or here.
 #OPENBLASDIR ?= /usr/local/openblas

@@ -16,6 +16,9 @@
 #
 #GPU_TARGET ?= Fermi Kepler
 
+# --------------------
+# programs
+
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
@@ -24,6 +27,10 @@ FORT      = gfortran
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
+
+
+# --------------------
+# flags
 
 # use -m32 to compile with 32-bit long & pointers.
 # use -m64 to compile with 64-bit long & pointers (lp64). int is still 32-bit.
@@ -50,7 +57,15 @@ LDFLAGS   = -m64     $(FPIC)
 # MacOS likes the library's path to be set
 INSTALL_NAME = -install_name @rpath/
 
+
+# --------------------
+# libraries
+
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
+
+
+# --------------------
+# directories
 
 # define library directories preferably in your environment, or here.
 #CUDADIR ?= /usr/local/cuda
