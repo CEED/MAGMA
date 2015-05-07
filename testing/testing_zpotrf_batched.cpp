@@ -83,6 +83,8 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
+            cudaMemset(dinfo_magma,0, batchCount * sizeof(magma_int_t));
+
             zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount, opts.queue);
             gpu_time = magma_sync_wtime(NULL);
             info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount, opts.queue);
