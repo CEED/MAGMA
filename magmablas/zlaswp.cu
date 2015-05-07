@@ -16,7 +16,7 @@
 
 // MAX_PIVOTS is maximum number of pivots to apply in each kernel launch
 // NTHREADS is number of threads in a block
-// 64 and 256 are better on Kepler; 
+// 64 and 256 are better on Kepler;
 //#define MAX_PIVOTS 64
 //#define NTHREADS   256
 #define MAX_PIVOTS 32
@@ -65,40 +65,40 @@ __global__ void zlaswp_kernel(
     Arguments:
     ==========
     @param[in]
-    n        INTEGER
-             The number of columns of the matrix A.
+    n       INTEGER
+            The number of columns of the matrix A.
     
     @param[in,out]
-    dAT      COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,N)
-             On entry, the matrix of column dimension N to which the row
-             interchanges will be applied.
-             On exit, the permuted matrix.
+    dAT     COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,N)
+            On entry, the matrix of column dimension N to which the row
+            interchanges will be applied.
+            On exit, the permuted matrix.
     
     @param[in]
-    ldda     INTEGER
-             The leading dimension of the array A. ldda >= n.
+    ldda    INTEGER
+            The leading dimension of the array A. ldda >= n.
     
     @param[in]
-    k1       INTEGER
-             The first element of IPIV for which a row interchange will
-             be done. (Fortran one-based index: 1 <= k1 .)
+    k1      INTEGER
+            The first element of IPIV for which a row interchange will
+            be done. (Fortran one-based index: 1 <= k1 .)
     
     @param[in]
-    k2       INTEGER
-             The last element of IPIV for which a row interchange will
-             be done. (Fortran one-based index: 1 <= k2 .)
+    k2      INTEGER
+            The last element of IPIV for which a row interchange will
+            be done. (Fortran one-based index: 1 <= k2 .)
     
     @param[in]
-    ipiv     INTEGER array, on CPU, dimension (K2*abs(INCI))
-             The vector of pivot indices.  Only the elements in positions
-             K1 through K2 of IPIV are accessed.
-             IPIV(K) = L implies rows K and L are to be interchanged.
+    ipiv    INTEGER array, on CPU, dimension (K2*abs(INCI))
+            The vector of pivot indices.  Only the elements in positions
+            K1 through K2 of IPIV are accessed.
+            IPIV(K) = L implies rows K and L are to be interchanged.
     
     @param[in]
-    inci     INTEGER
-             The increment between successive values of IPIV.
-             Currently, INCI > 0.
-             TODO: If INCI is negative, the pivots are applied in reverse order.
+    inci    INTEGER
+            The increment between successive values of IPIV.
+            Currently, INCI > 0.
+            TODO: If INCI is negative, the pivots are applied in reverse order.
 
     @param[in]
     queue   magma_queue_t
@@ -133,7 +133,7 @@ magmablas_zlaswp_q(
         magma_xerbla( __func__, -(info) );
         return;  //info;
     }
-  
+    
     dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
     zlaswp_params_t params;
@@ -273,7 +273,7 @@ magmablas_zlaswpx_q(
     if ( n < 0 )
         info = -1;
     else if ( k1 < 0 )
-        info = -4;  
+        info = -4;
     else if ( k2 < 0 || k2 < k1 )
         info = -5;
     else if ( inci <= 0 )
@@ -419,7 +419,7 @@ magmablas_zlaswp2_q(
     if ( n < 0 )
         info = -1;
     else if ( k1 < 0 )
-        info = -4;  
+        info = -4;
     else if ( k2 < 0 || k2 < k1 )
         info = -5;
     else if ( inci <= 0 )
