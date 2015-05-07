@@ -169,8 +169,8 @@ int main( int argc, char** argv )
         maxn = max( max( m, n ), k ) * maxinc;
         ld = max( 1, maxn );
         size = ld*maxn;
-        magma_zmalloc_pinned( &A,  size );  assert( A   != NULL );
-        magma_zmalloc_pinned( &B,  size );  assert( B   != NULL );
+        TESTING_MALLOC_CPU( A, magmaDoubleComplex, size );
+        TESTING_MALLOC_CPU( B, magmaDoubleComplex, size );
         
         // initialize matrices
         lapackf77_zlarnv( &ione, ISEED, &size, A );
@@ -326,8 +326,8 @@ int main( int argc, char** argv )
         }
         
         // cleanup
-        magma_free_pinned( A );
-        magma_free_pinned( B );
+        TESTING_FREE_CPU( A );
+        TESTING_FREE_CPU( B );
         fflush( stdout );
     }  // itest, incx, incy
     
