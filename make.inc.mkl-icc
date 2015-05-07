@@ -47,11 +47,13 @@ LDFLAGS   =     $(FPIC)                  -openmp
 # libraries
 
 # old MKL
-#LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lcublas -lcudart -lstdc++ -lm
+#LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lstdc++ -lm
 
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # icc with MKL 10.3, Intel threads
-LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm
+LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lstdc++ -lm
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

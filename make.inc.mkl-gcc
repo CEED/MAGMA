@@ -48,13 +48,15 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # gcc with MKL 10.3, sequential version
-#LIB       = -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lcublas -lcudart -lstdc++ -lm -lgfortran
+#LIB       = -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lstdc++ -lm -lgfortran
 
 # gcc with MKL 10.3, GNU threads
-#LIB       = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -lgfortran
+#LIB       = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lstdc++ -lm -lgfortran
 
 # gcc with MKL 10.3, Intel threads
-LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -liomp5 -lgfortran
+LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lstdc++ -lm -liomp5 -lgfortran
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

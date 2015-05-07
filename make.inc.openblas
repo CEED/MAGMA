@@ -47,7 +47,9 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # libraries
 
 # gcc with OpenBLAS (includes LAPACK)
-LIB       = -lopenblas -lcublas -lcudart
+LIB       = -lopenblas
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

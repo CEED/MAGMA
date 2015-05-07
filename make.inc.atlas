@@ -52,7 +52,9 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # MAGMA no longer needs -lcblas
 # Depending on how ATLAS and LAPACK were compiled, you may need one or more of:
 # -lifcore -ldl -lf2c -lgfortran
-LIB       = -llapack -lf77blas -latlas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
+LIB       = -llapack -lf77blas -latlas -lstdc++ -lm -lgfortran -lifcore
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

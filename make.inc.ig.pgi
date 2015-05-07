@@ -48,7 +48,9 @@ LDFLAGS   =     $(FPIC)
 # --------------------
 # libraries
 
-LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
+LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm
+
+LIB      += -lcublas -lcudart -lcudafor
 
 
 # --------------------

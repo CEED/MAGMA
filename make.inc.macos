@@ -61,7 +61,9 @@ INSTALL_NAME = -install_name @rpath/
 # --------------------
 # libraries
 
-LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
+LIB       = -framework Accelerate -lstdc++ -lm
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

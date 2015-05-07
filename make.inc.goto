@@ -50,7 +50,9 @@ LDFLAGS   =     $(FPIC)
 # --------------------
 # libraries
 
-LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm
+LIB       = -lgoto  -lpthread -llapack -lm
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------

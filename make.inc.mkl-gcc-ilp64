@@ -65,7 +65,9 @@ CFLAGS   += -std=c99
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # gcc with MKL 10.3, Intel threads, 64-bit int
 # note -DMAGMA_ILP64 or -DMKL_ILP64, and -fdefault-integer-8 in FFLAGS above
-LIB       = -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -liomp5 -lgfortran
+LIB       = -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -lpthread -lstdc++ -lm -liomp5 -lgfortran
+
+LIB      += -lcublas -lcudart
 
 
 # --------------------
