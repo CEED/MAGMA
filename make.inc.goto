@@ -43,12 +43,10 @@ LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm
 
 # define library directories preferably in your environment, or here.
 #GOTODIR  ?= /opt/gotoblas
-#CBLASDIR ?= /opt/CBLAS
 #CUDADIR  ?= /usr/local/cuda
 -include make.check-cuda
 
 LIBDIR    = -L$(CUDADIR)/lib64 \
             -L$(GOTODIR)/GotoBLAS \
-            -L$(CBLASDIR)/lib
 
 INC       = -I$(CUDADIR)/include

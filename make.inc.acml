@@ -35,23 +35,22 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)              -fopenmp
 
+# MAGMA no longer needs -lcblas
 # for ACML 4
-#LIB      = -lacml_mp -lacml_mv -lcblas -lcublas -lcudart -lstdc++ -lm
+#LIB      = -lacml_mp -lacml_mv -lcublas -lcudart -lstdc++ -lm
 
 # for ACML >= 5
 # requires gcc & gfortran >= 4.6
-LIB       = -lacml_mp -lcblas -lcublas -lcudart -lstdc++ -lm -lgfortran
+LIB       = -lacml_mp           -lcublas -lcudart -lstdc++ -lm -lgfortran
 
 # define library directories preferably in your environment, or here.
 #ACMLDIR  ?= /opt/acml
-#CBLASDIR ?= /opt/CBLAS
 #CUDADIR  ?= /usr/local/cuda
 -include make.check-acml
 -include make.check-cuda
 
 LIBDIR    = -L$(CUDADIR)/lib64 \
             -L$(ACMLDIR)/gfortran64_mp/lib \
-            -L$(CBLASDIR)/lib
 
 INC       = -I$(CUDADIR)/include \
             -I$(ACMLDIR)/gfortran64_mp/include

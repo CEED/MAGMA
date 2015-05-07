@@ -38,9 +38,10 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -O3         -DADD_       -Xcompiler "$(FPIC)"
 LDFLAGS   =     $(FPIC)              -fopenmp
 
+# MAGMA no longer needs -lcblas
 # Depending on how ATLAS and LAPACK were compiled, you may need one or more of:
 # -lifcore -ldl -lf2c -lgfortran
-LIB       = -llapack -lf77blas -lcblas -latlas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
+LIB       = -llapack -lf77blas -latlas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
 
 # define library directories preferably in your environment, or here.
 #LAPACKDIR ?= /opt/lapack

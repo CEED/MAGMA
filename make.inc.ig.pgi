@@ -39,7 +39,9 @@ LDFLAGS   =     $(FPIC)
 
 LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
 
-CUDADIR   = /mnt/scratch/cuda-3.1
+# define library directories preferably in your environment, or here.
+#CUDADIR  ?= /usr/local/cuda
+-include make.check-cuda
 
 LIBDIR    = -L$(CUDADIR)/lib64 \
             -L$(MKLROOT)/lib/em64t
