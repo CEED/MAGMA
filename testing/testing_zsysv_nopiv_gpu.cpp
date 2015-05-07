@@ -77,10 +77,10 @@ int main(int argc, char **argv)
             
             bool nopiv = true;
             if ( nopiv ) {
-                magma_zmake_hpd_sym( N, h_A, lda );  // SPD / HPD does not require pivoting
+                magma_zmake_spd( N, h_A, lda );  // SPD does not require pivoting
             }
             else {
-                magma_zmake_symmetric( N, h_A, lda );  // symmetric/Hermitian generally requires pivoting
+                magma_zmake_symmetric( N, h_A, lda );  // symmetric generally requires pivoting
             }
             
             magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );

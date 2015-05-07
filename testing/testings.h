@@ -135,18 +135,14 @@ void flops_init();
  * Functions and data structures used for testing.
  */
 void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_symmetric( magma_int_t N, magmaFloatComplex* A, magma_int_t lda );
-void magma_dmake_symmetric( magma_int_t N, double* A, magma_int_t lda );
-void magma_smake_symmetric( magma_int_t N, float* A, magma_int_t lda );
+void magma_cmake_symmetric( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
 void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
 void magma_cmake_hermitian( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
 void magma_dmake_symmetric( magma_int_t N, double*             A, magma_int_t lda );
 void magma_smake_symmetric( magma_int_t N, float*              A, magma_int_t lda );
 
-void magma_zmake_hpd_sym( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
-void magma_cmake_hpd_sym( magma_int_t N, magmaFloatComplex* A, magma_int_t lda );
-void magma_dmake_hpd_sym( magma_int_t N, double* A, magma_int_t lda );
-void magma_smake_hpd_sym( magma_int_t N, float* A, magma_int_t lda );
+void magma_zmake_spd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
+void magma_cmake_spd( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
 void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
 void magma_cmake_hpd( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
 void magma_dmake_hpd( magma_int_t N, double*             A, magma_int_t lda );

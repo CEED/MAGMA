@@ -14,12 +14,14 @@
 
 #include "testings.h"
 
+#define COMPLEX
+
 #define A(i,j)  A[i + j*lda]
 
 // --------------------
 // Make a matrix symmetric/Hermitian.
 // Makes diagonal real.
-// Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
+// Sets Aji = conj( Aij ) for j < i, that is, copy & conjugate lower triangle to upper triangle.
 extern "C"
 void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
@@ -49,12 +51,11 @@ void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
     }
 }
 
-#define COMPLEX
 #ifdef COMPLEX
 // --------------------
-// Make a matrix symmetric
-// Makes diagonal real.
-// Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
+// Make a matrix complex-symmetric
+// Dose NOT make diagonal real.
+// Sets Aji = Aij for j < i, that is, copy lower triangle to upper triangle.
 extern "C"
 void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
@@ -68,11 +69,11 @@ void magma_zmake_symmetric( magma_int_t N, magmaDoubleComplex* A, magma_int_t ld
 
 
 // --------------------
-// Make a matrix symmetric positive definite.
-// Increases diagonal by N, and makes it real.
-// Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
+// Make a matrix complex-symmetric positive definite.
+// Increases diagonal by N. Does NOT make diagonal real.
+// Sets Aji = Aij for j < i, that is, copy lower triangle to upper triangle.
 extern "C"
-void magma_zmake_hpd_sym( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
+void magma_zmake_spd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
     for( i=0; i < N; ++i ) {
