@@ -426,10 +426,6 @@ magma_zwrite_csr_mtx(
         // and flip the row and col pointer in the output
         
         CHECK( magma_z_cucsrtranspose( A, &B, queue ));
-        magma_zprint_matrix( A, queue );
-        
-        
-        magma_zprint_matrix( B, queue );
         
         // TODO avoid duplicating this code below.
         printf("# Writing sparse matrix to file (%s):", filename);
@@ -443,7 +439,7 @@ magma_zwrite_csr_mtx(
         }
             
         #define COMPLEX
-        printf("check1\n");
+
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
@@ -501,7 +497,7 @@ magma_zwrite_csr_mtx(
              
             
         #define COMPLEX
-        printf("check1\n");
+
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
