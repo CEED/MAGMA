@@ -32,7 +32,7 @@ int main(  int argc, char** argv )
     magma_int_t info = 0;
     TESTING_INIT();
     magma_queue_t queue=NULL;
-    magma_queue_create( /*devices[ opts->device ],*/ &queue );
+    magma_queue_create( &queue );
     
     int i=1;
 

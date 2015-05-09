@@ -31,7 +31,7 @@ int main(  int argc, char** argv )
     magma_int_t info = 0;
     // set queue for old dense routines
     magma_queue_t queue=NULL;
-    magma_queue_create( /*devices[ opts->device ],*/ &queue );
+    magma_queue_create( &queue );
     magmablasGetKernelStream( &queue );
 
     TESTING_INIT();

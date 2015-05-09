@@ -33,7 +33,7 @@ int main(  int argc, char** argv )
     TESTING_INIT();
     
     magma_queue_t queue=NULL;
-    magma_queue_create( /*devices[ opts->device ],*/ &queue );
+    magma_queue_create( &queue );
 
     real_Double_t res;
     magma_z_matrix A={Magma_CSR}, B={Magma_CSR}, B2={Magma_CSR}, 
