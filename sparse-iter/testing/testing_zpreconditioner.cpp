@@ -34,25 +34,21 @@ int main(  int argc, char** argv )
 
     magma_zopts zopts;
     magma_queue_t queue=NULL;
-    magma_queue_create( &queue );
+    magma_queue_create( /*devices[ opts->device ],*/ &queue );
     
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magma_z_matrix A={Magma_CSR}, B={Magma_CSR}, B_d={Magma_CSR};
-    magma_z_matrix x={Magma_CSR}, b={Magma_CSR};
+    magma_z_matrix x={Magma_CSR}, b={Magma_CSR}, t={Magma_CSR};
+    
+    //Chronometry
+    real_Double_t tempo1, tempo2;
     
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
 
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
-
-    if ( zopts.solver_par.solver != Magma_PCG &&
-         zopts.solver_par.solver != Magma_PGMRES &&
-         zopts.solver_par.solver != Magma_PBICGSTAB &&
-         zopts.solver_par.solver != Magma_ITERREF  &&
-         zopts.solver_par.solver != Magma_LOBPCG )
-        zopts.precond_par.solver = Magma_NONE;
 
     CHECK( magma_zsolverinfo_init( &zopts.solver_par, &zopts.precond_par, queue ));
 
@@ -64,9 +60,8 @@ int main(  int argc, char** argv )
         } else {                        // file-matrix test
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
-        printf("data%s = [\n", argv[i]);
 
-        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
+        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
 
@@ -82,16 +77,42 @@ int main(  int argc, char** argv )
 
         // vectors and initial guess
         CHECK( magma_zvinit( &b, Magma_DEV, A.num_cols, 1, one, queue ));
-        //magma_zvinit( &x, Magma_DEV, A.num_cols, 1, one, queue );
-        //magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
-        //magma_zmfree(&x, queue );
         CHECK( magma_zvinit( &x, Magma_DEV, A.num_cols, 1, zero, queue ));
+        CHECK( magma_zvinit( &t, Magma_DEV, A.num_cols, 1, zero, queue ));
         
-        info = magma_z_solver( B_d, b, &x, &zopts, queue );
+        //preconditioner
+        CHECK( magma_z_precondsetup( B_d, b, &zopts.precond_par, queue ) );
+        
+        double residual;
+        CHECK( magma_zresidual( B_d, b, x, &residual, queue ));
+        zopts.solver_par.init_res = residual;
+        printf("data = [\n");
+        
+        printf("%%runtime left preconditioner:\n");
+        tempo1 = magma_sync_wtime( queue );
+        info = magma_z_applyprecond_left( B_d, b, &t, &zopts.precond_par, queue ); 
+        tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
-            printf("error: solver returned: %s (%d).\n",
+            printf("error: preconditioner returned: %s (%d).\n",
                 magma_strerror( info ), info );
         }
+        printf("%.8e\n", (real_Double_t) tempo2-tempo1 );
+        
+        printf("%%runtime right preconditioner:\n");
+        tempo1 = magma_sync_wtime( queue );
+        info = magma_z_applyprecond_right( B_d, t, &x, &zopts.precond_par, queue ); 
+        tempo2 = magma_sync_wtime( queue );
+        if( info != 0 ){
+            printf("error: preconditioner returned: %s (%d).\n",
+                magma_strerror( info ), info );
+        }
+        printf("%.8e\n", (real_Double_t) tempo2-tempo1 );
+        
+        
+        printf("];\n");
+        CHECK( magma_zresidual( B_d, b, x, &residual, queue ));
+        zopts.solver_par.final_res = residual;
+        
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
 
         magma_zmfree(&B_d, queue );
@@ -99,7 +120,8 @@ int main(  int argc, char** argv )
         magma_zmfree(&A, queue );
         magma_zmfree(&x, queue );
         magma_zmfree(&b, queue );
-        printf("];\n\n");
+        magma_zmfree(&t, queue );
+
         i++;
     }
 
@@ -113,6 +135,7 @@ cleanup:
     magma_zmfree(&A, queue );
     magma_zmfree(&x, queue );
     magma_zmfree(&b, queue );
+    magma_zmfree(&t, queue );
     magma_zsolverinfo_free( &zopts.solver_par, &zopts.precond_par, queue );
     magma_queue_destroy( queue );
     TESTING_FINALIZE();

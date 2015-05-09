@@ -34,10 +34,10 @@ ZSRC += \
 	testing_zmadd.cpp			\
 
 # ----------
-# iterative solvers
+# iterative solvers and preconditioners
 ZSRC += \
 	testing_zsolver.cpp			\
-
+	testing_zpreconditioner.cpp	\
 
 # ----------
 # Mixed-precision solvers
@@ -56,7 +56,8 @@ ZSRC += \
 
 # debugging
 ZSRC += \
-#	testing_zbug.cpp	\
+#	testing_zluwrite.cpp	\
+#   testing_zbug.cpp	\
 #	testing_zsolver_debug.cpp	\
 #	testing_spmvELLRT.cpp 		\
 #	testing_zcdebug.cpp			\
