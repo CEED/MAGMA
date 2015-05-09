@@ -52,9 +52,9 @@ int main( int argc, char** argv)
     magma_trans_t trans[] = { MagmaTrans };
     #endif
 
-    printf("Inplace transpose requires M == N.\n");
-    printf("Trans     M     N   CPU GByte/s (ms)    GPU GByte/s (ms)  check   Inplace GB/s (ms)  check\n");
-    printf("==========================================================================================\n");
+    printf("%% Inplace transpose requires M == N.\n");
+    printf("%% Trans     M     N   CPU GByte/s (ms)    GPU GByte/s (ms)  check   Inplace GB/s (ms)  check\n");
+    printf("%%=========================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int itran = 0; itran < ntrans; ++itran ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

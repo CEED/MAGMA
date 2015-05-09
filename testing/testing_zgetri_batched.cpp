@@ -57,8 +57,8 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("batchCount      M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
-    printf("====================================================================================================\n");
+    printf("%% batchCount    M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
+    printf("%%===================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
     
       for( int iter = 0; iter < opts.niter; ++iter ) {

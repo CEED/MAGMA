@@ -57,11 +57,9 @@ int main( int argc, char** argv)
 
     //double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("trans = %s\n", lapack_trans_const(opts.transA) );
-
-    printf("BatchCount    M     N     MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error\n");
-
-    printf("===================================================================================================\n");
+    printf("%% trans = %s\n", lapack_trans_const(opts.transA) );
+    printf("%% BatchCount  M     N     MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error\n");
+    printf("%%==================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];

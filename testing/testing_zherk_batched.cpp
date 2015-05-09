@@ -58,12 +58,12 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("If running lapack (option --lapack), MAGMA error is computed\n"
-           "relative to CPU BLAS result.\n\n");
-    printf("uplo = %s, transA = %s\n",
+    printf("%% If running lapack (option --lapack), MAGMA error is computed\n"
+           "%% relative to CPU BLAS result.\n\n");
+    printf("%% uplo = %s, transA = %s\n",
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
-    printf(" BatchCount    N     K   MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error \n");
-    printf("=========================================================================================================\n");
+    printf("%% BatchCount   N     K   MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error \n");
+    printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -161,7 +161,7 @@ int main( int argc, char** argv)
                 printf("%5d %5d %5d  %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
                        (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time,
-                       cpu_perf,    1000.*cpu_time,
+                       cpu_perf,   1000.*cpu_time,
                        magma_error, (magma_error < tol ? "ok" : "failed"));
 
                 status += ! (magma_error < tol);

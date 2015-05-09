@@ -49,9 +49,9 @@ int main( int argc, char** argv)
 
     nrhs = opts.nrhs;
     
-    printf("                                                            ||b-Ax|| / (N||A||)   ||dx-x||/(N||A||)\n");
-    printf("    M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU                         \n");
-    printf("===================================================================================================\n");
+    printf("%%                                                           ||b-Ax|| / (N||A||)   ||dx-x||/(N||A||)\n");
+    printf("%%   M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU                         \n");
+    printf("%%==================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];

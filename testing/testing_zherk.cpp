@@ -52,12 +52,12 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("If running lapack (option --lapack), CUBLAS error is computed\n"
-           "relative to CPU BLAS result.\n\n");
-    printf("uplo = %s, transA = %s\n",
+    printf("%% If running lapack (option --lapack), CUBLAS error is computed\n"
+           "%% relative to CPU BLAS result.\n\n");
+    printf("%% uplo = %s, transA = %s\n",
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
-    printf("    N     K   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
-    printf("==================================================================\n");
+    printf("%%   N     K   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
+    printf("%%=================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

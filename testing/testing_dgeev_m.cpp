@@ -69,8 +69,8 @@ int main( int argc, char** argv)
     opts.tolerance = max( 60., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("    N   CPU Time (sec)   GPU Time (sec)   ||R||_F / ||A||_F\n");
-    printf("===========================================================\n");
+    printf("%%   N   CPU Time (sec)   GPU Time (sec)   ||R||_F / ||A||_F\n");
+    printf("%%==========================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

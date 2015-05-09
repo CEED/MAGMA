@@ -73,10 +73,10 @@ int main( int argc, char** argv )
     // this is the NB hard coded into ztrtri_diag.
     nb = 128;
     
-    printf("uplo = %s, diag = %s\n",
+    printf("%% uplo = %s, diag = %s\n",
            lapack_uplo_const(opts.uplo), lapack_diag_const(opts.diag) );
-    printf("    N  MAGMA Gflop/s (ms)   MAGMA error\n");
-    printf("=======================================\n");
+    printf("%%   N  MAGMA Gflop/s (ms)   MAGMA error\n");
+    printf("%%======================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

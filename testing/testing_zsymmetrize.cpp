@@ -41,9 +41,9 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
 
-    printf("uplo = %s\n", lapack_uplo_const(opts.uplo) );
-    printf("    N   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
-    printf("=====================================================\n");
+    printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
+    printf("%%   N   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
+    printf("%%====================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

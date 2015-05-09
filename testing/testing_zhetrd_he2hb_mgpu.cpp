@@ -66,7 +66,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex_ptr da[MagmaMaxGPUs], dT1[MagmaMaxGPUs];
     if ((distblk == 0) || (distblk < opts.nb))
         distblk = max(256, opts.nb);
-    printf("voici ngpu %d distblk %d NB %d nstream %d\n ",
+    printf("%% ngpu %d, distblk %d, NB %d, nstream %d\n",
            (int) opts.ngpu, (int) distblk, (int) opts.nb, (int) nstream);
 
     for( magma_int_t dev = 0; dev < opts.ngpu; ++dev ) {
@@ -252,7 +252,7 @@ int main( int argc, char** argv)
 #endif  // CHECKEIG
 
             printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, 0.0, gpu_time );
-            printf("============================================================================\n\n\n");
+            printf("%%===========================================================================\n\n\n");
 
             TESTING_FREE_CPU( tau    );
 

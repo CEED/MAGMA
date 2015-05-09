@@ -49,8 +49,8 @@ int main( int argc, char** argv )
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("    M     N     K   storev   side   direct   trans    ||R||_F / ||HC||_F\n");
-    printf("========================================================================\n");
+    printf("%%   M     N     K   storev   side   direct   trans    ||R||_F / ||HC||_F\n");
+    printf("%%=======================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       M = opts.msize[itest];
       N = opts.nsize[itest];

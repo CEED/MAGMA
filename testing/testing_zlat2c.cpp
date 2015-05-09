@@ -50,8 +50,8 @@ int main( int argc, char** argv )
     
     magma_uplo_t uplo[] = { MagmaLower, MagmaUpper };
     
-    printf("func    uplo     N     CPU GB/s (ms)       GPU GB/s (ms)     ||R||_F\n");
-    printf("=====================================================================\n");
+    printf("%% func   uplo     N     CPU GB/s (ms)       GPU GB/s (ms)     ||R||_F\n");
+    printf("%%====================================================================\n");
     for( int iuplo = 0; iuplo < 2; ++iuplo ) {
       for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

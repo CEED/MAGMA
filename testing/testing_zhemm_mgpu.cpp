@@ -84,9 +84,9 @@ int main( int argc, char** argv)
         }
     }
 
-    printf( "nb %d, ngpu %d, nstream %d version %d\n", (int) nb, (int) opts.ngpu, (int) nstream, (int) opts.version );
-    printf("    M     N    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
-    printf("=========================================================================================================\n");
+    printf("%% nb %d, ngpu %d, nstream %d version %d\n", (int) nb, (int) opts.ngpu, (int) nstream, (int) opts.version );
+    printf("%%   M     N    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
+    printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       M = opts.msize[itest];
       N = opts.nsize[itest];

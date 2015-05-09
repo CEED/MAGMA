@@ -44,10 +44,10 @@ int main( int argc, char** argv)
     mstride = 2*nb;
     nstride = 3*nb;
     
-    printf("uplo = %s, nb = %d, mstride = %d, nstride = %d\n",
+    printf("%% uplo = %s, nb = %d, mstride = %d, nstride = %d\n",
             lapack_uplo_const(opts.uplo), (int) nb, (int) mstride, (int) nstride );
-    printf("    N ntile   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
-    printf("===========================================================\n");
+    printf("%%   N ntile   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");
+    printf("%%==========================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

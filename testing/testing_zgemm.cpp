@@ -51,24 +51,24 @@ int main( int argc, char** argv)
 
     #ifdef HAVE_CUBLAS
         // for CUDA, we can check MAGMA vs. CUBLAS, without running LAPACK
-        printf("If running lapack (option --lapack), MAGMA and %s error are both computed\n"
-               "relative to CPU BLAS result. Else, MAGMA error is computed relative to %s result.\n\n",
+        printf("%% If running lapack (option --lapack), MAGMA and %s error are both computed\n"
+               "%% relative to CPU BLAS result. Else, MAGMA error is computed relative to %s result.\n\n",
                 g_platform_str, g_platform_str );
-        printf("transA = %s, transB = %s\n",
+        printf("%% transA = %s, transB = %s\n",
                lapack_trans_const(opts.transA),
                lapack_trans_const(opts.transB) );
-        printf("    M     N     K   MAGMA Gflop/s (ms)  %s Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  %s error\n",
+        printf("%%   M     N     K   MAGMA Gflop/s (ms)  %s Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  %s error\n",
                 g_platform_str, g_platform_str );
     #else
         // for others, we need LAPACK for check
         opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
-        printf("transA = %s, transB = %s\n",
+        printf("%% transA = %s, transB = %s\n",
                lapack_trans_const(opts.transA),
                lapack_trans_const(opts.transB) );
-        printf("    M     N     K   %s Gflop/s (ms)   CPU Gflop/s (ms)  %s error\n",
+        printf("%%   M     N     K   %s Gflop/s (ms)   CPU Gflop/s (ms)  %s error\n",
                 g_platform_str, g_platform_str );
     #endif
-    printf("=========================================================================================================\n");
+    printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];

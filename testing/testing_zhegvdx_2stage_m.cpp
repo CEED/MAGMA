@@ -67,13 +67,13 @@ int main( int argc, char** argv)
         opts.jobz = MagmaVec;
     }
 
-    printf("using: ngpu = %d, itype = %d, jobz = %s, range = %s, uplo = %s, opts.check = %d, fraction = %6.4f\n",
+    printf("%% ngpu = %d, itype = %d, jobz = %s, range = %s, uplo = %s, opts.check = %d, fraction = %6.4f\n",
            (int) opts.ngpu, (int) opts.itype,
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
            (int) opts.check, opts.fraction);
     
-    printf("    N     M   ngpu   MGPU Time (sec)\n");
-    printf("====================================\n");
+    printf("%%   N     M   ngpu   MGPU Time (sec)\n");
+    printf("%%===================================\n");
     magma_int_t threads = magma_get_parallel_numthreads();
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

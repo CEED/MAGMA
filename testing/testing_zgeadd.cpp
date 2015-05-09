@@ -50,8 +50,8 @@ int main( int argc, char** argv)
     //magmablas_zgeadd(  M,  N, alpha, d_A, M-1,  d_B, ldda );
     //magmablas_zgeadd(  M,  N, alpha, d_A, ldda, d_B, N-1  );
 
-    printf("    M     N   CPU GFlop/s (ms)    GPU GFlop/s (ms)    |Bl-Bm|/|Bl|\n");
-    printf("=========================================================================\n");
+    printf("%%   M     N   CPU GFlop/s (ms)    GPU GFlop/s (ms)    |Bl-Bm|/|Bl|\n");
+    printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];

@@ -150,12 +150,12 @@ int main( int argc, char** argv )
         printf( "n/a: blasf77_zdotc and blasf77_zdotu disabled on MacOS (segfaults).\n\n" );
     #endif
     
-    printf( "                                           Error w.r.t.   Error w.r.t.\n"
-            "    M     N     K  incx  incy   Function   CBLAS          Fortran BLAS\n"
-            "=======================================================================\n" );
+    printf( "%%                                          Error w.r.t.   Error w.r.t.\n"
+            "%%   M     N     K  incx  incy   Function   CBLAS          Fortran BLAS\n"
+            "%%======================================================================\n" );
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         if ( itest > 0 ) {
-            printf( "-----------------------------------------------------------------------\n" );
+            printf( "%%----------------------------------------------------------------------\n" );
         }
         
         m = opts.msize[itest];

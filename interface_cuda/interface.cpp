@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -104,7 +105,7 @@ void magma_print_environment()
 {
     magma_int_t major, minor, micro;
     magma_version( &major, &minor, &micro );
-    printf( "MAGMA %d.%d.%d %s compiled for CUDA capability >= %.1f\n",
+    printf( "%% MAGMA %d.%d.%d %s compiled for CUDA capability >= %.1f\n",
             (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100. );
     
     int cuda_runtime, cuda_driver;
@@ -113,7 +114,7 @@ void magma_print_environment()
     check_error( err );
     err = cudaRuntimeGetVersion( &cuda_runtime );
     check_error( err );
-    printf( "CUDA runtime %d, driver %d. ", cuda_runtime, cuda_driver );
+    printf( "%% CUDA runtime %d, driver %d. ", cuda_runtime, cuda_driver );
     
 #if defined(_OPENMP)
     int omp_threads = 0;
@@ -152,7 +153,7 @@ void magma_print_environment()
         cudaDeviceProp prop;
         err = cudaGetDeviceProperties( &prop, dev );
         check_error( err );
-        printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
+        printf( "%% device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
                 dev,
                 prop.name,
                 prop.clockRate / 1000.,
@@ -170,6 +171,9 @@ void magma_print_environment()
                    MIN_CUDA_ARCH/100., dev, arch/100. );
         }
     }
+    
+    time_t t = time( NULL );
+    printf( "%% %s", ctime( &t ));
 }
 
 

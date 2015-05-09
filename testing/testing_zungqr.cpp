@@ -55,8 +55,8 @@ int main( int argc, char** argv )
     printf("1 - uses precomputed zlarft matrices (default)\n");
     printf("2 - recomputes the zlarft matrices on the fly\n\n");
 
-    printf("    m     n     k   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R|| / ||A||\n");
-    printf("=========================================================================\n");
+    printf("%%   m     n     k   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R|| / ||A||\n");
+    printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             m = opts.msize[itest];

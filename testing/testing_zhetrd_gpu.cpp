@@ -65,9 +65,9 @@ int main( int argc, char** argv)
     printf("1 - uses ZHEMV from CUBLAS (default)\n");
     printf("2 - uses ZHEMV from MAGMA BLAS that requires extra space\n\n");
 
-    printf("uplo = %s\n", lapack_uplo_const(opts.uplo) );
-    printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
-    printf("===========================================================================\n");
+    printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
+    printf("%% N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
+    printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

@@ -47,8 +47,8 @@ int main( int argc, char** argv)
     double sfmin = lapackf77_dlamch("sfmin");
     double bignum = 1 / sfmin;
     
-    printf("uplo      M     N    CPU GByte/s (ms)    GPU GByte/s (ms)   check\n");
-    printf("====================================================================\n");
+    printf("%% uplo    M     N    CPU GByte/s (ms)    GPU GByte/s (ms)   check\n");
+    printf("%%===================================================================\n");
     for( int iuplo = 0; iuplo < 3; ++iuplo ) {
       for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

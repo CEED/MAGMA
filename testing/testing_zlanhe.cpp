@@ -82,8 +82,8 @@ int main( int argc, char** argv)
     printf( "\nNote: using single thread to work around MKL zlanhe bug.\n\n" );
     #endif
     
-    printf("    N   norm   uplo   CPU GByte/s (ms)    GPU GByte/s (ms)        error    error      nan      inf\n");
-    printf("==================================================================================================\n");
+    printf("%%   N   norm   uplo   CPU GByte/s (ms)    GPU GByte/s (ms)        error    error      nan      inf\n");
+    printf("%%=================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int inorm = 0; inorm < 3; ++inorm ) {
       for( int iuplo = 0; iuplo < 2; ++iuplo ) {

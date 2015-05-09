@@ -70,11 +70,11 @@ int main(int argc, char **argv)
     magma_int_t offsets[] = { 0, 1, 31, 32, 33, 63, 64, 65, 100, 200 };
     magma_int_t noffsets = sizeof(offsets) / sizeof(*offsets);
     
-    printf("uplo = %s, ngpu %d, block size = %d, offset %d\n",
+    printf("%% uplo = %s, ngpu %d, block size = %d, offset %d\n",
             lapack_uplo_const(opts.uplo), (int) opts.ngpu, (int) nb, (int) offset );
-    printf( "                  BLAS                CUBLAS              MAGMA 1 GPU         MAGMA MGPU       Error rel  Error rel\n"
-            "    N  offset     Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)   to CUBLAS  to LAPACK\n"
-            "===================================================================================================================\n" );
+    printf( "%%                 BLAS                CUBLAS              MAGMA 1 GPU         MAGMA MGPU       Error rel  Error rel\n"
+            "%%   N  offset     Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)      Gflop/s (msec)   to CUBLAS  to LAPACK\n"
+            "%%==================================================================================================================\n" );
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       
       // comment out these two lines & end of loop to test a specific offset

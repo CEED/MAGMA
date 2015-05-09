@@ -59,11 +59,11 @@ int main( int argc, char** argv)
     magma_vec_t jobs[] = { MagmaNoVec, MagmaSomeVec, MagmaOverwriteVec, MagmaAllVec };
     
     if ( opts.check && ! opts.all && (jobz == MagmaNoVec)) {
-        printf( "NOTE: some checks require that singular vectors are computed;\n"
-                "      set jobz (option -U[NASO]) to be S, O, or A.\n\n" );
+        printf( "%% NOTE: some checks require that singular vectors are computed;\n"
+                "%%       set jobz (option -U[NASO]) to be S, O, or A.\n\n" );
     }
-    printf("jobz     M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S sorted\n");
-    printf("======================================================================================================\n");
+    printf("%% jobz   M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S sorted\n");
+    printf("%%=====================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int ijobz = 0; ijobz < 4; ++ijobz ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

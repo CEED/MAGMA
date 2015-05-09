@@ -45,8 +45,8 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
-    printf("Epsilon(double): %8.6e\n"
-           "Epsilon(single): %8.6e\n\n",
+    printf("%% Epsilon(double): %8.6e\n"
+           "%% Epsilon(single): %8.6e\n\n",
            lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
     magma_int_t status = 0;
 
@@ -57,9 +57,9 @@ int main( int argc, char** argv)
     
     nrhs = opts.nrhs;
     
-    printf("                    CPU Gflop/s   GPU  Gflop/s                         |b-Ax|| / (N||A||)   ||dx-x||/(N||A||)\n");
-    printf("    M     N  NRHS    double        double    single     mixed   Iter   CPU        GPU                        \n");
-    printf("=============================================================================================================\n");
+    printf("%%                   CPU Gflop/s   GPU  Gflop/s                         |b-Ax|| / (N||A||)   ||dx-x||/(N||A||)\n");
+    printf("%%   M     N  NRHS    double        double    single     mixed   Iter   CPU        GPU                        \n");
+    printf("%%============================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];

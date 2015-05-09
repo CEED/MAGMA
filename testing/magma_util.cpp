@@ -129,7 +129,7 @@ const char* lockfile = "/tmp/icl-lock";
 
 // --------------------
 const char *usage_short =
-"Usage: %s [options] [-h|--help]\n\n";
+"%% Usage: %s [options] [-h|--help]\n\n";
 
 const char *usage =
 "Options are:\n"

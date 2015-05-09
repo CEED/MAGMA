@@ -564,28 +564,31 @@ int main( int argc, char** argv)
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    
+    // TODO: this doesn't work. Options need to be added to parse_opts()
     for( int i = 1; i < argc; ++i ) {
         if ( strcmp("--cpu-panel", argv[i]) == 0) cpu_panel = 1;
         if ( strcmp("--gpu-panel", argv[i]) == 0) cpu_panel = 0;
     }
+    
     switch (opts.version) {
         case 1:
             cpu = 1;
-            printf( "\nCPU-Interface to Bunch-Kauffman on GPU" );
+            printf( "\n%% CPU-Interface to Bunch-Kauffman on GPU" );
             break;
         case 2:
             //gpu = 1;
-            printf( "\nGPU-Interface to Bunch-Kauffman on GPU" );
+            printf( "\n%% GPU-Interface to Bunch-Kauffman on GPU" );
             printf( "\n not yet..\n\n" );
             return 0;
             break;
         case 3:
             nopiv = 1;
-            printf( "\nCPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
+            printf( "\n%% CPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
             break;
         case 4:
             nopiv_gpu = 1;
-            printf( "\nGPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
+            printf( "\n%% GPU-Interface to hybrid Non-pivoted LDLt (A is SPD)" );
             break;
         //case 5:
         //    row = 1;
@@ -593,10 +596,10 @@ int main( int argc, char** argv)
         //    break;
         case 6:
             aasen = 1;
-            printf( "\nCPU-Interface to Aasen's (%s)",(cpu_panel ? "CPU panel" : "GPU panel") );
+            printf( "\n%% CPU-Interface to Aasen's (%s)",(cpu_panel ? "CPU panel" : "GPU panel") );
             break;
         default:
-            printf( " version = %d not supported\n\n", (int) opts.version );
+            printf( "\nversion = %d not supported\n\n", (int) opts.version );
             return 0;
     }
     printf( " (%s)\n", lapack_uplo_const(opts.uplo) );
@@ -605,12 +608,12 @@ int main( int argc, char** argv)
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
     if ( opts.check == 2 ) {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
     else {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |PAP'-LDL'|/(N*|A|)\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |PAP'-LDL'|/(N*|A|)\n");
     }
-    printf("=========================================================================\n");
+    printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

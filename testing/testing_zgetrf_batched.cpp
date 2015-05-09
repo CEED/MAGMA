@@ -97,8 +97,8 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     magma_int_t columns;
     
-    printf("BatchCount      M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
-    printf("=========================================================================\n");
+    printf("%% BatchCount    M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
+    printf("%%========================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
     
       for( int iter = 0; iter < opts.niter; ++iter ) {

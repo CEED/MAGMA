@@ -44,8 +44,8 @@ int main( int argc, char** argv )
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("func       M     N     CPU GB/s (ms)       GPU GB/s (ms)     ||R||_F\n");
-    printf("=====================================================================\n");
+    printf("%% func     M     N     CPU GB/s (ms)       GPU GB/s (ms)     ||R||_F\n");
+    printf("%%====================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             m = opts.msize[itest];

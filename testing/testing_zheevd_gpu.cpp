@@ -58,11 +58,11 @@ int main( int argc, char** argv)
     // checking NoVec requires LAPACK
     opts.lapack |= (opts.check && opts.jobz == MagmaNoVec);
     
-    printf("using: jobz = %s, uplo = %s\n",
+    printf("%% jobz = %s, uplo = %s\n",
            lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo));
 
-    printf("    N   CPU Time (sec)   GPU Time (sec)\n");
-    printf("=======================================\n");
+    printf("%%   N   CPU Time (sec)   GPU Time (sec)\n");
+    printf("%%======================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

@@ -76,8 +76,8 @@ int main( int argc, char** argv)
     if (NE < 1)
         NE  = 64; //N;  //magma_get_zhetrd_he2hb_nb(N);  // N not yet initialized
 
-    printf("  N    GPU GFlop/s   \n");
-    printf("=====================\n");
+    printf("%% N    GPU GFlop/s   \n");
+    printf("%%====================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -335,7 +335,7 @@ int main( int argc, char** argv)
 #endif
             
             printf("  Total N %5d  gflops %6.2f        timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
-            printf("============================================================================\n\n\n");
+            printf("%%===========================================================================\n\n\n");
             
             /* Memory clean up */
             TESTING_FREE_CPU( h_A );

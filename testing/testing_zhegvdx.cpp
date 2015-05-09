@@ -64,12 +64,12 @@ int main( int argc, char** argv)
         fprintf( stderr, "WARNING: cannot currently check results when not computing vectors (option -JN).\n" );
     }
     
-    printf("using: itype = %d, jobz = %s, uplo = %s, check = %d, fraction = %6.4f\n",
+    printf("%% itype = %d, jobz = %s, uplo = %s, check = %d, fraction = %6.4f\n",
            (int) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
            (int) opts.check, opts.fraction);
 
-    printf("    N     M   GPU Time (sec)\n");
-    printf("============================\n");
+    printf("%%   N     M   GPU Time (sec)\n");
+    printf("%%===========================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

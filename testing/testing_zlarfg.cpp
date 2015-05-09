@@ -44,8 +44,8 @@ int main( int argc, char** argv)
     
     magma_queue_t queue = 0;
 
-    printf("    N    nb    CPU GFLop/s (ms)    GPU GFlop/s (ms)   error      tau error\n");
-    printf("==========================================================================\n");
+    printf("%%   N    nb    CPU GFLop/s (ms)    GPU GFlop/s (ms)   error      tau error\n");
+    printf("%%=========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

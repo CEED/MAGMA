@@ -50,8 +50,8 @@ int main( int argc, char** argv)
     // of different norms. See similar code in testing_zlanhe.cpp.
     magma_norm_t norm[] = { MagmaMaxNorm, MagmaOneNorm, MagmaInfNorm };
     
-    printf("    M     N   norm   CPU GByte/s (ms)    GPU GByte/s (ms)        error    error      nan      inf\n");
-    printf("=================================================================================================\n");
+    printf("%%   M     N   norm   CPU GByte/s (ms)    GPU GByte/s (ms)        error    error      nan      inf\n");
+    printf("%%================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int inorm = 0; inorm < 3; ++inorm ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

@@ -71,12 +71,12 @@ int main( int argc, char** argv)
         opts.jobz = MagmaVec;
     }
 
-    printf("using: itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f\n",
+    printf("%% itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f\n",
            (int) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
            (int) opts.check, opts.fraction);
 
-    printf("    N     M  GPU Time (sec)  ||I-Q'Q||/.  ||A-QDQ'||/.  ||D-D_magma||/.\n");
-    printf("=======================================================================\n");
+    printf("%%   N     M  GPU Time (sec)  ||I-Q'Q||/.  ||A-QDQ'||/.  ||D-D_magma||/.\n");
+    printf("%%======================================================================\n");
     magma_int_t threads = magma_get_parallel_numthreads();
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -190,7 +190,7 @@ int main( int argc, char** argv)
                 //printf("        Size of the Matrix %d by %d\n", (int) N, (int) N);
                 //printf("\n");
                 //printf(" The matrix A is randomly generated for each test.\n");
-                //printf("============\n");
+                //printf("%%===========\n");
                 //printf(" The relative machine precision (eps) is %8.2e\n",eps);
                 //printf(" Computational tests pass if scaled residuals are less than 60.\n");
               

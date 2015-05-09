@@ -68,7 +68,7 @@ int main( int argc, char** argv )
         m = opts.msize[itest];
         n = opts.nsize[itest];
         k = opts.ksize[itest];
-        printf("=========================================================================\n");
+        printf("%%========================================================================\n");
         printf( "m=%d, n=%d, k=%d\n", (int) m, (int) n, (int) k );
         
         // allocate matrices
@@ -93,7 +93,7 @@ int main( int argc, char** argv )
         lapackf77_zlarnv( &ione, ISEED, &size, B  );
         lapackf77_zlarnv( &ione, ISEED, &size, C  );
         
-        printf( "========== Level 1 BLAS ==========\n" );
+        printf( "%%========= Level 1 BLAS ==========\n" );
         
         // ----- test ZSWAP
         // swap columns 2 and 3 of dA, then copy to C2 and compare with A
@@ -131,7 +131,7 @@ int main( int argc, char** argv )
         printf( "izamax            diff %.2g\n", error );
         printf( "\n" );
         
-        printf( "========== Level 2 BLAS ==========\n" );
+        printf( "%%========= Level 2 BLAS ==========\n" );
         
         // ----- test ZGEMV
         // c = alpha*A*b + beta*c,  with A m*n; b,c m or n-vectors
@@ -234,7 +234,7 @@ int main( int argc, char** argv )
         }}}
         printf( "\n" );
         
-        printf( "========== Level 3 BLAS ==========\n" );
+        printf( "%%========= Level 3 BLAS ==========\n" );
         
         // ----- test ZGEMM
         // C = alpha*A*B + beta*C,  with A m*k or k*m; B k*n or n*k; C m*n

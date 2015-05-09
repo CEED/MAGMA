@@ -46,14 +46,14 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf( "version %d\n", (int) opts.version );
+    printf( "%% version %d\n", (int) opts.version );
     if ( opts.version == 2 ) {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
-        printf("===============================================================================\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
+        printf("%%==============================================================================\n");
     }
     else {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)    |b - A*x|\n");
-        printf("================================================================\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)    |b - A*x|\n");
+        printf("%%===============================================================\n");
     }
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

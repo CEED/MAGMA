@@ -46,14 +46,14 @@ int main( int argc, char** argv )
     double tol, eps = lapackf77_dlamch("E");
     tol = opts.tolerance * eps;
 
-    printf("ngpu %d\n", (int) opts.ngpu );
+    printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
-        printf("================================================================================================\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
+        printf("%%===============================================================================================\n");
     }
     else {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
-        printf("==========================================================================\n");
+        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
+        printf("%%=========================================================================\n");
     }
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

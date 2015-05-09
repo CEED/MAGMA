@@ -48,9 +48,9 @@ int main( int argc, char** argv)
     mstride = 2*mb;
     nstride = 3*nb;
     
-    printf("mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
-    printf("    M    N ntile   CPU GFlop/s (ms)    GPU GFlop/s (ms)    check\n");
-    printf("=================================================================\n");
+    printf("%% mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
+    printf("%%   M    N ntile   CPU GFlop/s (ms)    GPU GFlop/s (ms)    check\n");
+    printf("%%================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
