@@ -16,7 +16,7 @@
 
 // --------------------
 static const char *usage_sparse_short =
-"Usage: %s [options] [-h|--help]  matrices\n\n";
+"%% Usage: %s [options] [-h|--help]  matrices\n\n";
 
 static const char *usage_sparse =
 "Options are:\n"
