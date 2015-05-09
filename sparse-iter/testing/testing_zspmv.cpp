@@ -175,9 +175,9 @@ int main(  int argc, char** argv )
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
         if ( res < .000001 )
-            printf("# tester spmv ELL:  ok\n");
+            printf("%% tester spmv ELL:  ok\n");
         else
-            printf("# tester spmv ELL:  failed\n");
+            printf("%% tester spmv ELL:  failed\n");
         magma_zmfree( &hcheck, queue );
 
         // convert to SELLP and copy to GPU
@@ -198,11 +198,11 @@ int main(  int argc, char** argv )
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
-        printf("# |x-y|_F = %8.2e\n", res);
+        printf("%% |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester spmv SELL-P:  ok\n");
+            printf("%% tester spmv SELL-P:  ok\n");
         else
-            printf("# tester spmv SELL-P:  failed\n");
+            printf("%% tester spmv SELL-P:  failed\n");
         magma_zmfree( &hcheck, queue );
 
         magma_zmfree(&dA_SELLP, queue );
@@ -240,11 +240,11 @@ int main(  int argc, char** argv )
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
-        printf("# |x-y|_F = %8.2e\n", res);
+        printf("%% |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester spmv cuSPARSE CSR:  ok\n");
+            printf("%% tester spmv cuSPARSE CSR:  ok\n");
         else
-            printf("# tester spmv cuSPARSE CSR:  failed\n");
+            printf("%% tester spmv cuSPARSE CSR:  failed\n");
         magma_zmfree( &hcheck, queue );
         magma_zmfree( &dy, queue );
         CHECK( magma_zvinit( &dy, Magma_DEV, hA.num_rows, 1, c_zero, queue ));
@@ -267,11 +267,11 @@ int main(  int argc, char** argv )
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
-        printf("# |x-y|_F = %8.2e\n", res);
+        printf("%% |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester spmv cuSPARSE HYB:  ok\n");
+            printf("%% tester spmv cuSPARSE HYB:  ok\n");
         else
-            printf("# tester spmv cuSPARSE HYB:  failed\n");
+            printf("%% tester spmv cuSPARSE HYB:  failed\n");
         magma_zmfree( &hcheck, queue );
 
         cusparseDestroyMatDescr( descrA );

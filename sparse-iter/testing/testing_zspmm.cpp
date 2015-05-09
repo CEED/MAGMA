@@ -77,9 +77,9 @@ int main(  int argc, char** argv )
         } else
             break;
     }
-    printf( "\n#    usage: ./run_zspmm"
-        " [ --blocksize %d --alignment %d (for SELLP) ]"
-        " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
+    printf("\n#    usage: ./run_zspmm"
+           " [ --blocksize %d --alignment %d (for SELLP) ]"
+           " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
 
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
@@ -90,7 +90,7 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &hA,  argv[i], queue ));
         }
 
-        printf( "# matrix info: %d-by-%d with %d nonzeros\n",
+        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
                             (int) hA.num_rows,(int) hA.num_cols,(int) hA.nnz );
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
@@ -217,11 +217,11 @@ int main(  int argc, char** argv )
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
-        printf("# |x-y|_F = %8.2e\n", res);
+        printf("%% |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester spmm SELL-P:  ok\n");
+            printf("%% tester spmm SELL-P:  ok\n");
         else
-            printf("# tester spmm SELL-P:  failed\n");
+            printf("%% tester spmm SELL-P:  failed\n");
         magma_zmfree( &hcheck, queue );
         magma_zmfree(&dA_SELLP, queue );
 
@@ -258,11 +258,11 @@ int main(  int argc, char** argv )
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ )
             res=res + MAGMA_Z_REAL(hcheck.val[k]) - MAGMA_Z_REAL(hrefvec.val[k]);
-        printf("# |x-y|_F = %8.2e\n", res);
+        printf("%% |x-y|_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester spmm cuSPARSE:  ok\n");
+            printf("%% tester spmm cuSPARSE:  ok\n");
         else
-            printf("# tester spmm cuSPARSE:  failed\n");
+            printf("%% tester spmm cuSPARSE:  failed\n");
         magma_zmfree( &hcheck, queue );
 
         cusparseDestroyMatDescr( descr ); 

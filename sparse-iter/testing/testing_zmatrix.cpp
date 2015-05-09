@@ -55,7 +55,7 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
 
-        printf( "# matrix info: %d-by-%d with %d nonzeros\n",
+        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
                             (int) Z.num_rows,(int) Z.num_cols,(int) Z.nnz );
 
         // scale matrix
@@ -86,11 +86,11 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtranspose( AT, &A2, queue ));
         magma_zmfree(&AT, queue );
         CHECK( magma_zmdiff( A, A2, &res, queue));
-        printf("# ||A-B||_F = %8.2e\n", res);
+        printf("%% ||A-B||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester:  ok\n");
+            printf("%% tester:  ok\n");
         else
-            printf("# tester:  failed\n");
+            printf("%% tester:  failed\n");
 
         magma_zmfree(&A, queue );
         magma_zmfree(&A2, queue );

@@ -52,7 +52,7 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "# matrix info: %d-by-%d with %d nonzeros\n",
+        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
         // filename for temporary matrix storage
@@ -86,18 +86,18 @@ int main(  int argc, char** argv )
         CHECK( magma_zcsrset( m, n, row, col, val, &A3, queue ));
 
         CHECK( magma_zmdiff( A, A2, &res, queue ));
-        printf("# ||A-B||_F = %8.2e\n", res);
+        printf("%% ||A-B||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester IO:  ok\n");
+            printf("%% tester IO:  ok\n");
         else
-            printf("# tester IO:  failed\n");
+            printf("%% tester IO:  failed\n");
 
         CHECK( magma_zmdiff( A, A3, &res, queue ));
-        printf("# ||A-B||_F = %8.2e\n", res);
+        printf("%% ||A-B||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester matrix interface:  ok\n");
+            printf("%% tester matrix interface:  ok\n");
         else
-            printf("# tester matrix interface:  failed\n");
+            printf("%% tester matrix interface:  failed\n");
 
         magma_zmfree(&A, queue );
         magma_zmfree(&A2, queue );

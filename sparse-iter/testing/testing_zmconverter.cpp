@@ -55,7 +55,7 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
 
-        printf( "# matrix info: %d-by-%d with %d nonzeros\n",
+        printf("%% matrix info: %d-by-%d with %d nonzeros\n",
                             (int) Z.num_rows,(int) Z.num_cols,(int) Z.nnz );
         
         // convert to be non-symmetric
@@ -116,21 +116,21 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtranspose( AT, &A2, queue ));
         
         CHECK( magma_zmdiff( A, A2, &res, queue));
-        printf("# ||A-A2||_F = %8.2e\n", res);
+        printf("%% ||A-A2||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# conversion tester:  ok\n");
+            printf("%% conversion tester:  ok\n");
         else
-            printf("# conversion tester:  failed\n");
+            printf("%% conversion tester:  failed\n");
         
         CHECK( magma_zmlumerge( A2, B, &Z2, queue ));
 
         
         CHECK( magma_zmdiff( Z, Z2, &res, queue));
-        printf("# ||Z-Z2||_F = %8.2e\n", res);
+        printf("%% ||Z-Z2||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# LUmerge tester:  ok\n");
+            printf("%% LUmerge tester:  ok\n");
         else
-            printf("# LUmerge tester:  failed\n");
+            printf("%% LUmerge tester:  failed\n");
 
 
         magma_zmfree(&A, queue );

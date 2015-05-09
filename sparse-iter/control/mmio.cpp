@@ -32,8 +32,8 @@ int mm_read_unsymmetric_sparse(
  
     if (mm_read_banner(f, &matcode) != 0)
     {
-        printf("#mm_read_unsymetric: Could not process Matrix Market banner ");
-        printf("# in file [%s]\n", fname);
+        printf("%% mm_read_unsymetric: Could not process Matrix Market banner ");
+        printf("%% in file [%s]\n", fname);
         info = -1;
     }
  
@@ -42,8 +42,8 @@ int mm_read_unsymmetric_sparse(
     if ( !(mm_is_real(matcode) && mm_is_matrix(matcode) &&
             mm_is_sparse(matcode)))
     {
-        fprintf(stderr, "#Sorry, this application does not support ");
-        fprintf(stderr, "#Market Market type: [%s]\n",
+        fprintf(stderr, "%% Sorry, MAGMA-sparse does not support ");
+        fprintf(stderr, "%% Market Market type: [%s]\n",
                 mm_typecode_to_str(matcode));
         info = -1;
     }
@@ -52,7 +52,7 @@ int mm_read_unsymmetric_sparse(
  
     if (mm_read_mtx_crd_size(f, &M, &N, &nz) !=0)
     {
-        fprintf(stderr, "#read_unsymmetric_sparse(): could not parse matrix size.\n");
+        fprintf(stderr, "%% read_unsymmetric_sparse(): could not parse matrix size.\n");
         info = -1;
     }
  

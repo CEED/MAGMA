@@ -86,7 +86,7 @@ int main(  int argc, char** argv )
     printf( " > MAGMA dotc: %.2e seconds %.2e GFLOP/s\n",
                                     (end-start)/100, FLOPS*100/1e9/(end-start) );
 
-    printf("# tester BLAS:  ok\n");
+    printf("%% tester BLAS:  ok\n");
 
 
     magma_zmfree( &a, queue);

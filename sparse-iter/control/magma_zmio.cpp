@@ -96,19 +96,19 @@ magma_int_t read_z_csr_from_mtx(
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
-        printf("# Unable to open file %s\n", filename);
+        printf("%% Unable to open file %s\n", filename);
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
-        printf("#Could not process lMatrix Market banner.\n");
+        printf("%% Could not process Matrix Market banner.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
-        printf("#Invalid lMatrix Market file.\n");
+        printf("%% Invalid Matrix Market file.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
@@ -118,9 +118,9 @@ magma_int_t read_z_csr_from_mtx(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("#Sorry, this application does not support ");
-        printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
-        printf("#Only real-valued or pattern coordinate matrices are supported\n");
+        printf("%% Sorry, MAGMA-sparse does not support ");
+        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
@@ -428,7 +428,7 @@ magma_zwrite_csr_mtx(
         CHECK( magma_z_cucsrtranspose( A, &B, queue ));
         
         // TODO avoid duplicating this code below.
-        printf("# Writing sparse matrix to file (%s):", filename);
+        printf("%% Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
         fp = fopen (filename, "w");
@@ -485,7 +485,7 @@ magma_zwrite_csr_mtx(
             printf(" done\n");
     }
     else {
-        printf("# Writing sparse matrix to file (%s):", filename);
+        printf("%% Writing sparse matrix to file (%s):", filename);
         fflush(stdout);
         
         fp = fopen (filename, "w");
@@ -991,19 +991,19 @@ magma_z_csr_mtx(
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
-        printf("#Unable to open file %s\n", filename);
+        printf("%% Unable to open file %s\n", filename);
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
-        printf("#Could not process lMatrix Market banner: %s.\n", matcode);
+        printf("%% Could not process Matrix Market banner: %s.\n", matcode);
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
-        printf("#Invalid lMatrix Market file.\n");
+        printf("%% Invalid Matrix Market file.\n");
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
@@ -1013,9 +1013,9 @@ magma_z_csr_mtx(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("#Sorry, this application does not support ");
-        printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
-        printf("#Only real-valued or pattern coordinate matrices are supported\n");
+        printf("%% Sorry, MAGMA-sparse does not support ");
+        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
@@ -1037,7 +1037,7 @@ magma_z_csr_mtx(
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
     CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
 
-    printf("# Reading sparse matrix from file (%s):", filename);
+    printf("%% Reading sparse matrix from file (%s):", filename);
     fflush(stdout);
     if (mm_is_real(matcode) || mm_is_integer(matcode)) {
         for(magma_int_t i = 0; i < A->nnz; ++i) {
@@ -1307,19 +1307,19 @@ magma_z_csr_mtxsymm(
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
-        printf("#Unable to open file %s\n", filename);
+        printf("%% Unable to open file %s\n", filename);
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
     
     if (mm_read_banner(fid, &matcode) != 0) {
-        printf("#Could not process lMatrix Market banner.\n");
+        printf("%% Could not process Matrix Market banner.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
     
     if (!mm_is_valid(matcode)) {
-        printf("#Invalid lMatrix Market file.\n");
+        printf("%% Invalid Matrix Market file.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
@@ -1329,9 +1329,9 @@ magma_z_csr_mtxsymm(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("#Sorry, this application does not support ");
-        printf("#Market Market type: [%s]\n", mm_typecode_to_str(matcode));
-        printf("#Only real-valued or pattern coordinate matrices are supported\n");
+        printf("%% Sorry, MAGMA-sparse does not support ");
+        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
@@ -1353,7 +1353,7 @@ magma_z_csr_mtxsymm(
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
     CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
     
-    printf("# Reading sparse matrix from file (%s):", filename);
+    printf("%% Reading sparse matrix from file (%s):", filename);
     fflush(stdout);
 
     if (mm_is_real(matcode) || mm_is_integer(matcode)) {

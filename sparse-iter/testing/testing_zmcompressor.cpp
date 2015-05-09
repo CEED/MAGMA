@@ -93,11 +93,11 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtranspose( AT, &A2, queue ));
         magma_zmfree(&AT, queue );
         CHECK( magma_zmdiff( A, A2, &res, queue ));
-        printf("# ||A-B||_F = %8.2e\n", res);
+        printf("%% ||A-B||_F = %8.2e\n", res);
         if ( res < .000001 )
-            printf("# tester matrix compressor:  ok\n");
+            printf("%% tester matrix compressor:  ok\n");
         else
-            printf("# tester matrix compressor:  failed\n");
+            printf("%% tester matrix compressor:  failed\n");
 
         magma_zmfree(&A, queue );
         magma_zmfree(&A2, queue );
