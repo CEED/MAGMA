@@ -117,7 +117,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -127,7 +127,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -137,7 +137,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -147,7 +147,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -157,7 +157,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -167,7 +167,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -177,7 +177,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -187,7 +187,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -197,7 +197,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -207,7 +207,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
@@ -217,7 +217,7 @@ magma_zsolverinfo(
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d    ||    %e    ||    %f\n",
+                    printf("   %4d          %e          %f\n",
                        (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
                 }
                 printf("%%======================================================="
