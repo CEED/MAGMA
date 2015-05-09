@@ -74,12 +74,12 @@ ZSRC += \
 	testing_zpotri.cpp	\
 
 # ----------
-# symmetric indefinite
+# Symmetric indefinite, CPU interface
 ZSRC += \
 	testing_zhesv.cpp	\
 	testing_zsysv_nopiv_gpu.cpp	\
 	testing_zhetrf.cpp	\
-	
+
 # ----------
 # LU, GPU interface
 ZSRC += \
