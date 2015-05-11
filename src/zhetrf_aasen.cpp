@@ -72,7 +72,7 @@
                   positive definite, and the factorization could not be
                   completed.
 
-    @ingroup magma_zposv_comp
+    @ingroup magma_zhesv_comp
     ********************************************************************/
 extern "C" magma_int_t
 magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,

@@ -64,7 +64,7 @@
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_driver
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgesv_rbt_batched(
