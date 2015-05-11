@@ -184,9 +184,6 @@ magma_zidr(
     }
     solver_par->restart = s;
 
-    // set tolerance
-    solver_par->epsilon = 1e-8;
-
     // set max iterations
     solver_par->maxiter = MIN(2 * A.num_cols, solver_par->maxiter);
 
