@@ -64,7 +64,7 @@ int main(  int argc, char** argv )
         } else {                        // file-matrix test
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
-        printf("data%s = [\n", argv[i]);
+        printf("data = [\n");
 
         printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );

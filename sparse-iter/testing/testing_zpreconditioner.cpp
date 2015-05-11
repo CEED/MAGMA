@@ -40,6 +40,7 @@ int main(  int argc, char** argv )
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magma_z_matrix A={Magma_CSR}, B={Magma_CSR}, B_d={Magma_CSR};
     magma_z_matrix x={Magma_CSR}, b={Magma_CSR}, t={Magma_CSR};
+    magma_z_matrix x1={Magma_CSR}, x2={Magma_CSR};
     
     //Chronometry
     real_Double_t tempo1, tempo2;
@@ -61,7 +62,7 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
+        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
 
@@ -79,7 +80,9 @@ int main(  int argc, char** argv )
         CHECK( magma_zvinit( &b, Magma_DEV, A.num_cols, 1, one, queue ));
         CHECK( magma_zvinit( &x, Magma_DEV, A.num_cols, 1, zero, queue ));
         CHECK( magma_zvinit( &t, Magma_DEV, A.num_cols, 1, zero, queue ));
-        
+        CHECK( magma_zvinit( &x1, Magma_DEV, A.num_cols, 1, zero, queue ));
+        CHECK( magma_zvinit( &x2, Magma_DEV, A.num_cols, 1, zero, queue ));
+                        
         //preconditioner
         CHECK( magma_z_precondsetup( B_d, b, &zopts.precond_par, queue ) );
         
@@ -90,26 +93,33 @@ int main(  int argc, char** argv )
         
         printf("%%runtime left preconditioner:\n");
         tempo1 = magma_sync_wtime( queue );
-        info = magma_z_applyprecond_left( B_d, b, &t, &zopts.precond_par, queue ); 
+        info = magma_z_applyprecond_left( B_d, b, &x1, &zopts.precond_par, queue ); 
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
             printf("error: preconditioner returned: %s (%d).\n",
                 magma_strerror( info ), info );
         }
-        printf("%.8e\n", (real_Double_t) tempo2-tempo1 );
+        CHECK( magma_zresidual( B_d, b, x1, &residual, queue ));
+        printf("%.8e  %.8e\n", (real_Double_t) tempo2-tempo1, (real_Double_t) residual );
         
         printf("%%runtime right preconditioner:\n");
         tempo1 = magma_sync_wtime( queue );
-        info = magma_z_applyprecond_right( B_d, t, &x, &zopts.precond_par, queue ); 
+        info = magma_z_applyprecond_right( B_d, b, &x2, &zopts.precond_par, queue ); 
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
             printf("error: preconditioner returned: %s (%d).\n",
                 magma_strerror( info ), info );
         }
-        printf("%.8e\n", (real_Double_t) tempo2-tempo1 );
+        CHECK( magma_zresidual( B_d, b, x2, &residual, queue ));
+        printf("%.8e  %.8e\n", (real_Double_t) tempo2-tempo1, (real_Double_t) residual );
         
         
         printf("];\n");
+        
+        info = magma_z_applyprecond_left( B_d, b, &t, &zopts.precond_par, queue ); 
+        info = magma_z_applyprecond_right( B_d, t, &x, &zopts.precond_par, queue ); 
+
+                
         CHECK( magma_zresidual( B_d, b, x, &residual, queue ));
         zopts.solver_par.final_res = residual;
         
@@ -119,6 +129,8 @@ int main(  int argc, char** argv )
         magma_zmfree(&B, queue );
         magma_zmfree(&A, queue );
         magma_zmfree(&x, queue );
+        magma_zmfree(&x1, queue );
+        magma_zmfree(&x2, queue );
         magma_zmfree(&b, queue );
         magma_zmfree(&t, queue );
 
@@ -134,6 +146,8 @@ cleanup:
     magma_zmfree(&B, queue );
     magma_zmfree(&A, queue );
     magma_zmfree(&x, queue );
+    magma_zmfree(&x1, queue );
+    magma_zmfree(&x2, queue );
     magma_zmfree(&b, queue );
     magma_zmfree(&t, queue );
     magma_zsolverinfo_free( &zopts.solver_par, &zopts.precond_par, queue );
