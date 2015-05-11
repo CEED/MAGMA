@@ -84,6 +84,8 @@ magma_z_solver(
                     CHECK( magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_PGMRES:
                     CHECK( magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
+            case  Magma_IDR:
+                    CHECK( magma_zidr( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_LOBPCG:
                     CHECK( magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_ITERREF:

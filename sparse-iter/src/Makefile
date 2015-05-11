@@ -27,7 +27,8 @@ ZSRC += \
 	zcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
-	zbicgstab_merge2.cpp\
+	zbicgstab_merge2.cpp	\
+	zidr.cpp	\
 	ziterref.cpp		\
 	zjacobi.cpp			\
 	zbaiter.cpp			\
@@ -63,8 +64,9 @@ ZSRC += \
 	ziterilu.cpp			\
 
 
-# orthogonalization schemes    
+# orthogonalization schemes and wrappers to dense MAGMA
 ZSRC += \
+	magma_zqr_wrapper.cpp	\
 #	zorthomgs.cpp		\
 
 # backward communication for SpMV and Preconditioner

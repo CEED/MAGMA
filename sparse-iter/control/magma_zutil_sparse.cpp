@@ -41,6 +41,7 @@ static const char *usage_sparse =
 "               8   LOBPCG\n"
 "               9   Jacobi\n"
 "               10  Block-asynchronous Iteration\n"
+"               11  IDR\n"
 "               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 " --precond x   Possibility to choose a preconditioner:\n"
@@ -166,6 +167,7 @@ magma_zparse_opts(
                         opts->solver_par.num_eigenvalues = 16; break;
                 case 9: opts->solver_par.solver = Magma_JACOBI; break;
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
+                case 11: opts->solver_par.solver = Magma_IDR; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {

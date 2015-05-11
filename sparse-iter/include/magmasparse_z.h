@@ -628,6 +628,12 @@ magma_zfgmres(
     magma_queue_t queue );
 
 magma_int_t
+magma_zidr(
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zjacobi(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par,
@@ -1050,6 +1056,19 @@ magma_zmlumerge(
     magma_z_matrix L, 
     magma_z_matrix U,
     magma_z_matrix *A, 
+    magma_queue_t queue );
+
+
+/*/////////////////////////////////////////////////////////////////////////////
+ -- MAGMA_SPARSE wrappers to dense MAGMA
+*/
+magma_int_t
+magma_zqr(
+    magma_int_t m, 
+    magma_int_t n, 
+    magma_z_matrix A, 
+    magma_z_matrix *Q, 
+    magma_z_matrix *R, 
     magma_queue_t queue );
 
 
