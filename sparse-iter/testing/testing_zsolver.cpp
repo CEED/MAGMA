@@ -89,7 +89,7 @@ int main(  int argc, char** argv )
         
         info = magma_z_solver( B_d, b, &x, &zopts, queue );
         if( info != 0 ){
-            printf("error: solver returned: %s (%d).\n",
+            printf("%%error: solver returned: %s (%d).\n",
                 magma_strerror( info ), info );
         }
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
