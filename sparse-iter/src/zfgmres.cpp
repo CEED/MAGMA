@@ -39,7 +39,7 @@
 static void
 GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleComplex *cs, magmaDoubleComplex *sn)
 {
-    if (dy == MAGMA_Z_ZERO) {
+    /*if (dy == MAGMA_Z_ZERO) {
         *cs = MAGMA_Z_ONE;
         *sn = MAGMA_Z_ZERO;
     } else if (MAGMA_Z_ABS((dy)) > MAGMA_Z_ABS((dx))) {
@@ -50,11 +50,11 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
         magmaDoubleComplex temp = dy / dx;
         *cs = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp ));
         *sn = temp * (*cs);
-    }
+    }*/
 
-  //  real_Double_t rho = sqrt(MAGMA_Z_REAL(MAGMA_Z_CNJG(dx)*dx + MAGMA_Z_CNJG(dy)*dy));
-  //  *cs = dx / rho;
-  //  *sn = dy / rho;
+    real_Double_t rho = sqrt(MAGMA_Z_REAL(MAGMA_Z_CNJG(dx)*dx + MAGMA_Z_CNJG(dy)*dy));
+    *cs = dx / rho;
+    *sn = dy / rho;
 }
 
 static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, magmaDoubleComplex cs, magmaDoubleComplex sn)
