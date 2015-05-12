@@ -102,6 +102,7 @@ int main( int argc, char** argv)
             
             /* warm up run */
             if ( opts.warmup ) {
+                if (opts.ngpu == 1) {
                 magma_zheevd( opts.jobz, opts.uplo,
                               N, h_R, lda, w1,
                               h_work, lwork,
@@ -110,6 +111,17 @@ int main( int argc, char** argv)
                               #endif
                               iwork, liwork,
                               &info );
+                } else {
+                magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
+                              N, h_R, lda, w1,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, lrwork,
+                              #endif
+                              iwork, liwork,
+                              &info );
+                }
+
                 if (info != 0)
                     printf("magma_zheevd returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
@@ -120,14 +132,25 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zheevd( opts.jobz, opts.uplo,
-                          N, h_R, lda, w1,
-                          h_work, lwork,
-                          #ifdef COMPLEX
-                          rwork, lrwork,
-                          #endif
-                          iwork, liwork,
-                          &info );
+            if (opts.ngpu == 1) {
+                magma_zheevd( opts.jobz, opts.uplo,
+                              N, h_R, lda, w1,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, lrwork,
+                              #endif
+                              iwork, liwork,
+                              &info );
+            } else {
+                magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
+                              N, h_R, lda, w1,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, lrwork,
+                              #endif
+                              iwork, liwork,
+                              &info );
+            }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
                 printf("magma_zheevd returned error %d: %s.\n",
