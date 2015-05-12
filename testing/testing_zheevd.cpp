@@ -103,23 +103,23 @@ int main( int argc, char** argv)
             /* warm up run */
             if ( opts.warmup ) {
                 if (opts.ngpu == 1) {
-                magma_zheevd( opts.jobz, opts.uplo,
-                              N, h_R, lda, w1,
-                              h_work, lwork,
-                              #ifdef COMPLEX
-                              rwork, lrwork,
-                              #endif
-                              iwork, liwork,
-                              &info );
+                    magma_zheevd( opts.jobz, opts.uplo,
+                                  N, h_R, lda, w1,
+                                  h_work, lwork,
+                                  #ifdef COMPLEX
+                                  rwork, lrwork,
+                                  #endif
+                                  iwork, liwork,
+                                  &info );
                 } else {
-                magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
-                              N, h_R, lda, w1,
-                              h_work, lwork,
-                              #ifdef COMPLEX
-                              rwork, lrwork,
-                              #endif
-                              iwork, liwork,
-                              &info );
+                    magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
+                                  N, h_R, lda, w1,
+                                  h_work, lwork,
+                                  #ifdef COMPLEX
+                                  rwork, lrwork,
+                                  #endif
+                                  iwork, liwork,
+                                  &info );
                 }
 
                 if (info != 0)
