@@ -556,6 +556,7 @@ subs = {
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
     ('sfgmres',        'dfgmres',        'cfgmres',        'zfgmres'         ),
     ('sidr',           'didr',           'cidr',           'zidr'            ),
+    ('spidr',          'dpidr',          'cpidr',          'zpidr'           ),
     ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),

@@ -42,8 +42,10 @@ static const char *usage_sparse =
 "               9   Jacobi\n"
 "               10  Block-asynchronous Iteration\n"
 "               11  IDR\n"
+"               11  PIDR\n"
 "               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
+"               For IDR: Number of distinct subspaces (1,2,4,8).\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               0   no preconditioner\n"
 "               1   Jacobi\n"
@@ -58,6 +60,9 @@ static const char *usage_sparse =
 "                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
 "                   --piter k     Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
+"                   7   IDR\n"
+" --piter x     Number of relaxation steps for approximate triangular solve (ILU case).\n"
+" --psweeps x   Number of iterative ILU sweeps for to generate preconditioner (iterative ILU case).\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
@@ -168,6 +173,7 @@ magma_zparse_opts(
                 case 9: opts->solver_par.solver = Magma_JACOBI; break;
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
                 case 11: opts->solver_par.solver = Magma_IDR; break;
+                case 12: opts->solver_par.solver = Magma_PIDR; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
@@ -183,6 +189,7 @@ magma_zparse_opts(
                 case 4: opts->precond_par.solver = Magma_BICGSTAB; break;
                 case 5: opts->precond_par.solver = Magma_GMRES; break;
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
+                case 7: opts->precond_par.solver = Magma_IDR; break;
             }
         } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );

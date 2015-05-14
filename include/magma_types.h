@@ -479,7 +479,8 @@ typedef enum {
     Magma_LOBPCG       = 450,
     Magma_NONE         = 451,
     Magma_FUNCTION     = 452,
-    Magma_IDR          = 453
+    Magma_IDR          = 453,
+    Magma_PIDR          = 454
 } magma_solver_type;
 
 typedef enum {

@@ -77,6 +77,9 @@ magma_zsolverinfo(
             case  Magma_IDR:
                     printf("%%   IDR(%d) performance analysis every %d iteration\n",
                                                 (int) solver_par->restart, (int) k); break;
+            case  Magma_PIDR:
+                    printf("%%   IDR(%d) performance analysis every %d iteration\n",
+                                                (int) solver_par->restart, (int) k); break;
             case  Magma_ITERREF:
                     printf("%%   Iterative refinement performance analysis every %d iteration\n",
                                                                         (int) k); break;
@@ -216,6 +219,16 @@ magma_zsolverinfo(
                 }
                 printf("%%======================================================="
                         "======%%\n"); break;
+            case  Magma_PIDR:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d          %e          %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
             case  Magma_ITERREF:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
@@ -265,6 +278,8 @@ magma_zsolverinfo(
             printf("%% PGMRES(%d) solver summary:\n", solver_par->restart); break;
         case  Magma_IDR:
             printf("%% IDR(%d) solver summary:\n", solver_par->restart); break;
+        case  Magma_PIDR:
+            printf("%% PIDR(%d) solver summary:\n", solver_par->restart); break;
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;
         case  Magma_JACOBI:
