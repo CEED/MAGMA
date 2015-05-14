@@ -164,7 +164,7 @@ magma_zpidr(
     magma_z_matrix dlu = {Magma_CSR};
 
     // local performance variables
-    long long int gpumem = 0;
+    magma_int_t gpumem = 0;
 
     // chronometry
     real_Double_t tempo1, tempo2;
