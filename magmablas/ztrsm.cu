@@ -100,11 +100,21 @@
     dB      COMPLEX_16 array of dimension ( lddb, n ).
             Before entry, the leading m by n part of the array B must
             contain the right-hand side matrix B.
+            On exit, contents in the leading m by n part are destroyed.
 
     @param[in]
     lddb    INTEGER.
             On entry, lddb specifies the first dimension of B.
             lddb >= max( 1, m ).
+
+    @param[out]
+    dX      COMPLEX_16 array of dimension ( lddx, n ).
+            On exit, it contains the m by n solution matrix X.
+
+    @param[in]
+    lddx    INTEGER.
+            On entry, lddx specifies the first dimension of X.
+            lddx >= max( 1, m ).
 
     @param[in]
     flag    BOOLEAN.
@@ -113,13 +123,13 @@
 
     @param
     d_dinvA (workspace) on device.
-            If side == MagmaLeft,  d_dinvA must be of size >= ceil(m/NB)*NB*NB,
-            If side == MagmaRight, d_dinvA must be of size >= ceil(n/NB)*NB*NB,
+            If side == MagmaLeft,  d_dinvA must be of size dinvA_length >= ceil(m/NB)*NB*NB,
+            If side == MagmaRight, d_dinvA must be of size dinvA_length >= ceil(n/NB)*NB*NB,
             where NB = 128.
 
-    @param[out]
-    dX      COMPLEX_16 array of dimension ( m, n ).
-            On exit it contain the solution matrix X.
+    @param[in]
+    dinvA_length   INTEGER.
+            On entry, dinvA_length specifies the size of d_dinvA.
 
     @ingroup magma_zblas3
     ********************************************************************/
@@ -130,8 +140,9 @@ void magmablas_ztrsm_outofplace(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr       dX, magma_int_t lddx,
     magma_int_t flag,
-    magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX)
+    magmaDoubleComplex_ptr d_dinvA, magma_int_t dinvA_length )
 {
     #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
     #define dB(i_, j_) (dB + (i_) + (j_)*lddb)
@@ -145,6 +156,14 @@ void magmablas_ztrsm_outofplace(
     magma_int_t i, jb;
     magma_int_t nrowA = (side == MagmaLeft ? m : n);
 
+    magma_int_t min_dinvA_length;
+    if ( side == MagmaLeft ) {
+        min_dinvA_length = magma_roundup( m, NB )*NB;
+    }
+    else {
+        min_dinvA_length = magma_roundup( n, NB )*NB;
+    }
+    
     magma_int_t info = 0;
     if ( side != MagmaLeft && side != MagmaRight ) {
         info = -1;
@@ -162,6 +181,10 @@ void magmablas_ztrsm_outofplace(
         info = -9;
     } else if (lddb < max(1,m)) {
         info = -11;
+    } else if (lddx < max(1,m)) {
+        info = -13;
+    } else if (dinvA_length < min_dinvA_length) {
+        info = -16;
     }
 
     if (info != 0) {
@@ -181,7 +204,7 @@ void magmablas_ztrsm_outofplace(
         if (transA == MagmaNoTrans) {
             if (uplo == MagmaLower) {
                 // left, lower no-transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = min(NB, m);
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, m );
                 if (NB < m) {
@@ -199,7 +222,7 @@ void magmablas_ztrsm_outofplace(
             }
             else {
                 // left, upper no-transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = (m % NB == 0) ? NB : (m % NB);
                 i = m-jb;
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
@@ -219,7 +242,7 @@ void magmablas_ztrsm_outofplace(
         else {  // transA == MagmaTrans || transA == MagmaConjTrans
             if (uplo == MagmaLower) {
                 // left, lower transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = (m % NB == 0) ? NB : (m % NB);
                 i = m-jb;
                 magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
@@ -237,7 +260,7 @@ void magmablas_ztrsm_outofplace(
             }
             else {
                 // left, upper transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = min(NB, m);
                 magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, m );
                 if (NB < m) {
@@ -263,7 +286,7 @@ void magmablas_ztrsm_outofplace(
         if (transA == MagmaNoTrans) {
             if (uplo == MagmaLower) {
                 // right, lower no-transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = (n % NB == 0) ? NB : (n % NB);
                 i = n-jb;
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
@@ -281,7 +304,7 @@ void magmablas_ztrsm_outofplace(
             }
             else {
                 // right, upper no-transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = min(NB, n);
                 magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, m );
                 if (NB < n) {
@@ -301,7 +324,7 @@ void magmablas_ztrsm_outofplace(
         else { // transA == MagmaTrans || transA == MagmaConjTrans
             if (uplo == MagmaLower) {
                 // right, lower transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = min(NB, n);
                 magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, m );
                 if (NB < n) {
@@ -319,7 +342,7 @@ void magmablas_ztrsm_outofplace(
             }
             else {
                 // right, upper transpose
-                // handle first block seperately with alpha
+                // handle first block separately with alpha
                 jb = (n % NB == 0) ? NB : (n % NB);
                 i = n-jb;
                 magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
@@ -339,7 +362,11 @@ void magmablas_ztrsm_outofplace(
     }
 }
 
+
 /**
+    Similar to magmablas_ztrsm_outofplace, but copies result dX back to dB,
+    as in classical ztrsm interface.
+    
     @see magmablas_ztrsm_outofplace
     @ingroup magma_zblas3
     ********************************************************************/
@@ -350,17 +377,22 @@ void magmablas_ztrsm_work(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr       dX, magma_int_t lddx,
     magma_int_t flag,
-    magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX)
+    magmaDoubleComplex_ptr d_dinvA, magma_int_t dinvA_length )
 {
-
     magmablas_ztrsm_outofplace( side, uplo, transA, diag, m, n, alpha,
-                                dA, ldda, dB, lddb, 1, d_dinvA, dX );
+                                dA, ldda, dB, lddb, dX, lddx, flag, d_dinvA, dinvA_length );
     // copy X to B
-    magmablas_zlacpy( MagmaFull, m, n, dX, m, dB, lddb );
+    magmablas_zlacpy( MagmaFull, m, n, dX, lddx, dB, lddb );
 }
 
+
 /**
+    Similar to magmablas_ztrsm_outofplace, but allocates dX and d_dinvA
+    internally. This makes it a synchronous call, whereas
+    magmablas_ztrsm_outofplace and magmablas_ztrsm_work are asynchronous.
+    
     @see magmablas_ztrsm_work
     @ingroup magma_zblas3
     ********************************************************************/
@@ -398,27 +430,29 @@ void magmablas_ztrsm(
         return;
     }
 
-    magmaDoubleComplex_ptr d_dinvA, dX;
-    magma_int_t size_dinvA;
-    magma_int_t size_x = m*n;
+    magmaDoubleComplex_ptr d_dinvA=NULL, dX=NULL;
+    magma_int_t lddx = magma_roundup( m, 32 );
+    magma_int_t size_x = lddx*n;
+    magma_int_t dinvA_length;
     if ( side == MagmaLeft ) {
-        size_dinvA = magma_roundup( m, NB )*NB;
+        dinvA_length = magma_roundup( m, NB )*NB;
     }
     else {
-        size_dinvA = magma_roundup( n, NB )*NB;
+        dinvA_length = magma_roundup( n, NB )*NB;
     }
 
-    magma_zmalloc( &d_dinvA, size_dinvA );
+    magma_zmalloc( &d_dinvA, dinvA_length );
     magma_zmalloc( &dX, size_x );
     if ( d_dinvA == NULL || dX == NULL ) {
         info = MAGMA_ERR_DEVICE_ALLOC;
         magma_xerbla( __func__, -(info) );
+        // continue to free
     }
     else {
-        magmablas_zlaset(MagmaFull, size_dinvA, 1, MAGMA_Z_ZERO, MAGMA_Z_ZERO, d_dinvA, size_dinvA);
-        magmablas_zlaset(MagmaFull, m, n, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dX, m);
+        magmablas_zlaset(MagmaFull, dinvA_length, 1, MAGMA_Z_ZERO, MAGMA_Z_ZERO, d_dinvA, dinvA_length);
+        magmablas_zlaset(MagmaFull, m, n, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dX, lddx);
         magmablas_ztrsm_work( side, uplo, transA, diag, m, n, alpha,
-                              dA, ldda, dB, lddb, 1, d_dinvA, dX );
+                              dA, ldda, dB, lddb, dX, lddx, 1, d_dinvA, dinvA_length );
     }
 
     magma_free( d_dinvA );

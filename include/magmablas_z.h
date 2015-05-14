@@ -754,7 +754,9 @@ magmablas_ztrsm_outofplace(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb,
-    magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX );
+    magmaDoubleComplex_ptr       dX, magma_int_t lddx,
+    magma_int_t flag,
+    magmaDoubleComplex_ptr d_dinvA, magma_int_t dinvA_length );
 
 void
 magmablas_ztrsm_work(
@@ -763,7 +765,9 @@ magmablas_ztrsm_work(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb,
-    magma_int_t flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dX );
+    magmaDoubleComplex_ptr       dX, magma_int_t lddx,
+    magma_int_t flag,
+    magmaDoubleComplex_ptr d_dinvA, magma_int_t dinvA_length );
 
 
   /*
