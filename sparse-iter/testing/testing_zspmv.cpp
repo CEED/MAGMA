@@ -146,6 +146,11 @@ int main(  int argc, char** argv )
 
         // copy matrix to GPU
         CHECK( magma_zmtransfer( hA, &dA, Magma_CPU, Magma_DEV, queue ));
+        
+        // warmup
+        for (j=0; j<10; j++)
+            CHECK( magma_z_spmv( c_one, dA, dx, c_zero, dy, queue ));
+
         // SpMV on GPU (CSR) -- this is the reference!
         start = magma_sync_wtime( queue );
         for (j=0; j<10; j++)
@@ -153,6 +158,7 @@ int main(  int argc, char** argv )
         end = magma_sync_wtime( queue );
         printf( " > MAGMA: %.2e seconds %.2e GFLOP/s    (standard CSR).\n",
                                         (end-start)/10, FLOPS*10/(end-start) );
+        
         magma_zmfree(&dA, queue );
         CHECK( magma_zmtransfer( dy, &hrefvec , Magma_DEV, Magma_CPU, queue ));
 

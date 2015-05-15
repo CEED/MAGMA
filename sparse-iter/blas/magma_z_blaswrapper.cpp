@@ -74,7 +74,7 @@ magma_z_spmv(
     cusparseMatDescr_t descr = 0;
     // make sure RHS is a dense matrix
     if ( x.storage_type != Magma_DENSE ) {
-         printf("error: only dense vectors are supported.\n");
+         printf("error: only dense vectors are supported for SpMV.\n");
          info = MAGMA_ERR_NOT_SUPPORTED;
          goto cleanup;
     }
