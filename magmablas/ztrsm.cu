@@ -177,12 +177,20 @@ void magmablas_ztrsm_outofplace(
         info = -5;
     } else if (n < 0) {
         info = -6;
+    } else if (dA == NULL) {
+        info = -8;
     } else if (ldda < max(1,nrowA)) {
         info = -9;
+    } else if (dB == NULL) {
+        info = -10;
     } else if (lddb < max(1,m)) {
         info = -11;
+    } else if (dX == NULL) {
+        info = -12;
     } else if (lddx < max(1,m)) {
         info = -13;
+    } else if (d_dinvA == NULL) {
+        info = -15;
     } else if (dinvA_length < min_dinvA_length) {
         info = -16;
     }
@@ -206,17 +214,17 @@ void magmablas_ztrsm_outofplace(
                 // left, lower no-transpose
                 // handle first block separately with alpha
                 jb = min(NB, m);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, m );
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, lddx );
                 if (NB < m) {
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-NB, n, NB, c_neg_one, dA(NB,0), ldda, dX, m, alpha, dB(NB,0), lddb );
+                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-NB, n, NB, c_neg_one, dA(NB,0), ldda, dX, lddx, alpha, dB(NB,0), lddb );
 
                     // remaining blocks
                     for( i=NB; i < m; i += NB ) {
                         jb = min(m-i, NB);
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                         if (i+NB >= m)
                             break;
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i-NB, n, NB, c_neg_one, dA(i+NB,i), ldda, dX(i,0), m, c_one, dB(i+NB,0), lddb );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i-NB, n, NB, c_neg_one, dA(i+NB,i), ldda, dX(i,0), lddx, c_one, dB(i+NB,0), lddb );
                     }
                 }
             }
@@ -225,16 +233,16 @@ void magmablas_ztrsm_outofplace(
                 // handle first block separately with alpha
                 jb = (m % NB == 0) ? NB : (m % NB);
                 i = m-jb;
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                 if (i-NB >= 0) {
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, i, n, jb, c_neg_one, dA(0,i), ldda, dX(i,0), m, alpha, dB, lddb );
+                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, i, n, jb, c_neg_one, dA(0,i), ldda, dX(i,0), lddx, alpha, dB, lddb );
 
                     // remaining blocks
                     for( i=m-jb-NB; i >= 0; i -= NB ) {
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, NB, n, NB, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, NB, n, NB, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                         if (i-NB < 0)
                             break;
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, i, n, NB, c_neg_one, dA(0,i), ldda, dX(i,0), m, c_one, dB, lddb );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, i, n, NB, c_neg_one, dA(0,i), ldda, dX(i,0), lddx, c_one, dB, lddb );
                     }
                 }
             }
@@ -245,16 +253,16 @@ void magmablas_ztrsm_outofplace(
                 // handle first block separately with alpha
                 jb = (m % NB == 0) ? NB : (m % NB);
                 i = m-jb;
-                magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                 if (i-NB >= 0) {
-                    magma_zgemm( transA, MagmaNoTrans, i, n, jb, c_neg_one, dA(i,0), ldda, dX(i,0), m, alpha, dB, lddb );
+                    magma_zgemm( transA, MagmaNoTrans, i, n, jb, c_neg_one, dA(i,0), ldda, dX(i,0), lddx, alpha, dB, lddb );
 
                     // remaining blocks
                     for( i=m-jb-NB; i >= 0; i -= NB ) {
-                        magma_zgemm( transA, MagmaNoTrans, NB, n, NB, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                        magma_zgemm( transA, MagmaNoTrans, NB, n, NB, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                         if (i-NB < 0)
                             break;
-                        magma_zgemm( transA, MagmaNoTrans, i, n, NB, c_neg_one, dA(i,0), ldda, dX(i,0), m, c_one, dB, lddb );
+                        magma_zgemm( transA, MagmaNoTrans, i, n, NB, c_neg_one, dA(i,0), ldda, dX(i,0), lddx, c_one, dB, lddb );
                     }
                 }
             }
@@ -262,17 +270,17 @@ void magmablas_ztrsm_outofplace(
                 // left, upper transpose
                 // handle first block separately with alpha
                 jb = min(NB, m);
-                magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, m );
+                magma_zgemm( transA, MagmaNoTrans, jb, n, jb, alpha, d_dinvA(0), NB, dB, lddb, c_zero, dX, lddx );
                 if (NB < m) {
-                    magma_zgemm( transA, MagmaNoTrans, m-NB, n, NB, c_neg_one, dA(0,NB), ldda, dX, m, alpha, dB(NB,0), lddb );
+                    magma_zgemm( transA, MagmaNoTrans, m-NB, n, NB, c_neg_one, dA(0,NB), ldda, dX, lddx, alpha, dB(NB,0), lddb );
 
                     // remaining blocks
                     for( i=NB; i < m; i += NB ) {
                         jb = min(m-i, NB);
-                        magma_zgemm( transA, MagmaNoTrans, jb, n, jb, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), m );
+                        magma_zgemm( transA, MagmaNoTrans, jb, n, jb, c_one, d_dinvA(i), NB, dB(i,0), lddb, c_zero, dX(i,0), lddx );
                         if (i+NB >= m)
                             break;
-                        magma_zgemm( transA, MagmaNoTrans, m-i-NB, n, NB, c_neg_one, dA(i,i+NB), ldda, dX(i,0), m, c_one, dB(i+NB,0), lddb );
+                        magma_zgemm( transA, MagmaNoTrans, m-i-NB, n, NB, c_neg_one, dA(i,i+NB), ldda, dX(i,0), lddx, c_one, dB(i+NB,0), lddb );
                     }
                 }
             }
@@ -289,16 +297,16 @@ void magmablas_ztrsm_outofplace(
                 // handle first block separately with alpha
                 jb = (n % NB == 0) ? NB : (n % NB);
                 i = n-jb;
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                 if (i-NB >= 0) {
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, i, jb, c_neg_one, dX(0,i), m, dA(i,0), ldda, alpha, dB, lddb );
+                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, i, jb, c_neg_one, dX(0,i), lddx, dA(i,0), ldda, alpha, dB, lddb );
 
                     // remaining blocks
                     for( i=n-jb-NB; i >= 0; i -= NB ) {
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, NB, NB, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, NB, NB, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                         if (i-NB < 0)
                             break;
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, i, NB, c_neg_one, dX(0,i), m, dA(i,0), ldda, c_one, dB, lddb );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, i, NB, c_neg_one, dX(0,i), lddx, dA(i,0), ldda, c_one, dB, lddb );
                     }
                 }
             }
@@ -306,17 +314,17 @@ void magmablas_ztrsm_outofplace(
                 // right, upper no-transpose
                 // handle first block separately with alpha
                 jb = min(NB, n);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, m );
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, lddx );
                 if (NB < n) {
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, n-NB, NB, c_neg_one, dX, m, dA(0,NB), ldda, alpha, dB(0,NB), lddb );
+                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, n-NB, NB, c_neg_one, dX, lddx, dA(0,NB), ldda, alpha, dB(0,NB), lddb );
 
                     // remaining blocks
                     for( i=NB; i < n; i += NB ) {
                         jb = min(NB, n-i);
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, jb, jb, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                         if (i+NB >= n)
                             break;
-                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, n-i-NB, NB, c_neg_one, dX(0,i), m, dA(i,i+NB), ldda, c_one, dB(0,i+NB), lddb );
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, n-i-NB, NB, c_neg_one, dX(0,i), lddx, dA(i,i+NB), ldda, c_one, dB(0,i+NB), lddb );
                     }
                 }
             }
@@ -326,17 +334,17 @@ void magmablas_ztrsm_outofplace(
                 // right, lower transpose
                 // handle first block separately with alpha
                 jb = min(NB, n);
-                magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, m );
+                magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB, lddb, d_dinvA(0), NB, c_zero, dX, lddx );
                 if (NB < n) {
-                    magma_zgemm( MagmaNoTrans, transA, m, n-NB, NB, c_neg_one, dX, m, dA(NB,0), ldda, alpha, dB(0,NB), lddb );
+                    magma_zgemm( MagmaNoTrans, transA, m, n-NB, NB, c_neg_one, dX, lddx, dA(NB,0), ldda, alpha, dB(0,NB), lddb );
 
                     // remaining blocks
                     for( i=NB; i < n; i += NB ) {
                         jb = min(NB, n-i);
-                        magma_zgemm( MagmaNoTrans, transA, m, jb, jb, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                        magma_zgemm( MagmaNoTrans, transA, m, jb, jb, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                         if (i+NB >= n)
                             break;
-                        magma_zgemm( MagmaNoTrans, transA, m, n-i-NB, NB, c_neg_one, dX(0,i), m, dA(NB+i,i), ldda, c_one, dB(0,i+NB), lddb );
+                        magma_zgemm( MagmaNoTrans, transA, m, n-i-NB, NB, c_neg_one, dX(0,i), lddx, dA(NB+i,i), ldda, c_one, dB(0,i+NB), lddb );
                     }
                 }
             }
@@ -345,16 +353,16 @@ void magmablas_ztrsm_outofplace(
                 // handle first block separately with alpha
                 jb = (n % NB == 0) ? NB : (n % NB);
                 i = n-jb;
-                magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                magma_zgemm( MagmaNoTrans, transA, m, jb, jb, alpha, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                 if (i-NB >= 0) {
-                    magma_zgemm( MagmaNoTrans, transA, m, i, jb, c_neg_one, dX(0,i), m, dA(0,i), ldda, alpha, dB, lddb );
+                    magma_zgemm( MagmaNoTrans, transA, m, i, jb, c_neg_one, dX(0,i), lddx, dA(0,i), ldda, alpha, dB, lddb );
 
                     // remaining blocks
                     for( i=n-jb-NB; i >= 0; i -= NB ) {
-                        magma_zgemm( MagmaNoTrans, transA, m, NB, NB, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), m );
+                        magma_zgemm( MagmaNoTrans, transA, m, NB, NB, c_one, dB(0,i), lddb, d_dinvA(i), NB, c_zero, dX(0,i), lddx );
                         if (i-NB < 0)
                             break;
-                        magma_zgemm( MagmaNoTrans, transA, m, i, NB, c_neg_one, dX(0,i), m, dA(0,i), ldda, c_one, dB, lddb );
+                        magma_zgemm( MagmaNoTrans, transA, m, i, NB, c_neg_one, dX(0,i), lddx, dA(0,i), ldda, c_one, dB, lddb );
                     }
                 }
             }
@@ -419,8 +427,12 @@ void magmablas_ztrsm(
         info = -5;
     } else if (n < 0) {
         info = -6;
+    } else if (dA == NULL) {
+        info = -8;
     } else if (ldda < max(1,nrowA)) {
         info = -9;
+    } else if (dB == NULL) {
+        info = -10;
     } else if (lddb < max(1,m)) {
         info = -11;
     }
