@@ -12,7 +12,7 @@
 */
 
 #include "common_magmasparse.h"
-
+#include <cuda_profiler_api.h>
 #include <assert.h>
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
@@ -61,7 +61,7 @@
 #define printMatrix(s,m)
 #elif MYDEBUG == 2
 #define printD(...) printf(__VA_ARGS__)
-#define printMatrix(s,m) magma_zmatrixInfo(s,m)
+#define printMatrix(s,m) magma_zmatrixInfo_acc(s,m)
 #else
 #define printD(...)
 #define printMatrix(s,m)
@@ -81,7 +81,7 @@
 
 
 extern "C" void
-magma_zmatrixInfo(
+magma_zmatrixInfo_acc(
     const char *s,
     magma_z_matrix A ) {
 
@@ -98,7 +98,7 @@ magma_zmatrixInfo(
 
 
 extern "C" magma_int_t
-magma_zidr(
+magma_zidr_acc(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
@@ -154,6 +154,15 @@ magma_zidr(
     magma_z_matrix dc = {Magma_CSR};
     magma_z_matrix dv1 = {Magma_CSR}, dv = {Magma_CSR};
 
+    // arrays for scalar products
+    magma_z_matrix dskp = {Magma_CSR}, skp = {Magma_CSR};
+    
+    //workspace for merged dot product
+    magmaDoubleComplex *d1=NULL, *d2=NULL;
+    d1 = NULL;
+    d2 = NULL;
+
+    
     // local performance variables
     long long int gpumem = 0;
 
@@ -251,11 +260,30 @@ magma_zidr(
     magma_zprint_gpu( dP.num_rows, dP.num_cols, dP.dval, dP.num_rows );
 #endif
 
+    // t = 0
+    // make t twice as large to contain both, dt and dr
+    CHECK( magma_zvinit( &dt, Magma_DEV, A.num_rows, 2*b.num_cols, c_zero, queue ));
+    dt.num_cols = b.num_cols;
+    gpumem += dt.nnz * sizeof(magmaDoubleComplex);
+
     // initial residual
     // r = b - A x
     CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
+    // redirect the dr.dval to the second part of dt
+    magma_free( dr.dval );
+    dr.dval = dt.dval+b.num_rows*b.num_cols;
     CHECK(  magma_zresidualvec( A, b, *x, &dr, &nrmr, queue));
-
+    
+    // allocate memory for the scalar products
+    CHECK( magma_zvinit( &dskp, Magma_DEV, 2, 1, c_zero, queue ));
+    gpumem += dskp.nnz * sizeof(magmaDoubleComplex);
+    CHECK( magma_zvinit( &skp, Magma_CPU, 2, 1, c_zero, queue ));
+    
+    // workspace for merged dot product
+    CHECK( magma_zmalloc( &d1, b.num_rows*b.num_cols*(2) ));
+    CHECK( magma_zmalloc( &d2, b.num_rows*b.num_cols*(2) ));
+    
+    
     printMatrix("R" , dr);
     gpumem += dr.nnz * sizeof(magmaDoubleComplex);
 
@@ -298,10 +326,6 @@ magma_zidr(
     CHECK( magma_zvinit( &df, Magma_DEV, dP.num_cols, dr.num_cols, c_zero, queue ));
     gpumem += df.nnz * sizeof(magmaDoubleComplex);
 
-    // t = 0
-    CHECK( magma_zvinit( &dt, Magma_DEV, A.num_rows, dr.num_cols, c_zero, queue ));
-    gpumem += dt.nnz * sizeof(magmaDoubleComplex);
-
     // c = 0
     CHECK( magma_zvinit( &dc, Magma_DEV, dM.num_cols, df.num_cols, c_zero, queue ));
     gpumem += dc.nnz * sizeof(magmaDoubleComplex);
@@ -328,7 +352,7 @@ magma_zidr(
     
     innerflag = 0;
     solver_par->numiter = 0;
-
+cudaProfilerStart();
     // start iteration
     do
     {
@@ -490,6 +514,7 @@ magma_zidr(
         // computation of a new omega
         // om = omega(t, r, angle);
 //---------------------------------------
+        /*
         // |t|
         dof = dt.num_rows * dt.num_cols;
         nrmt = magma_dznrm2( dof, dt.dval, inc );
@@ -504,7 +529,29 @@ magma_zidr(
         om = tr / (nrmt * nrmt);
         if ( rho < angle )
             om = om * angle / rho;
+        */
 //---------------------------------------
+// replace by merged dot product
+//---------------------------------------
+        // |t|
+        dof = dt.num_rows * dt.num_cols;
+        CHECK( magma_zmdotc( dof, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
+        magma_zgetvector( 2 , dskp.dval, 1, skp.val, 1 );
+        
+        nrmt = sqrt(MAGMA_Z_REAL(skp.val[0]));
+        tr = skp.val[1];
+        
+        // rho = abs(tr / (|t| * |r|))
+        rho = fabs( MAGMA_Z_REAL(tr) / (nrmt * nrmr) );
+
+        // om = tr / (|t| * |t|)
+        om = tr / (nrmt * nrmt);
+        if ( rho < angle )
+            om = om * angle / rho;
+//---------------------------------------
+
+
+
         printD("omega: k .................... %d, (%f, %f)\n", k, MAGMA_Z_REAL(om), MAGMA_Z_IMAG(om));
         if ( MAGMA_Z_EQUAL(om, MAGMA_Z_ZERO) ) {
             info = MAGMA_DIVERGENCE;
@@ -549,7 +596,7 @@ magma_zidr(
 #endif
     }
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
-
+cudaProfilerStop();
     // get last iteration timing
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
@@ -582,7 +629,7 @@ cleanup:
     magma_zmfree(&P1, queue);
     magma_zmfree(&dP1, queue);
     magma_zmfree(&dP, queue);
-    magma_zmfree(&dr, queue);
+    //magma_zmfree(&dr, queue);
     magma_zmfree(&dG, queue);
     magma_zmfree(&dU, queue);
     magma_zmfree(&dM1, queue);
@@ -592,6 +639,10 @@ cleanup:
     magma_zmfree(&dc, queue);
     magma_zmfree(&dv1, queue);
     magma_zmfree(&dv, queue);
+    magma_zmfree(&dskp, queue);
+    magma_zmfree(&skp, queue);
+    magma_free( d1 );
+    magma_free( d2 );
     magma_free_pinned(piv);
 
     magmablasSetKernelStream( orig_queue );

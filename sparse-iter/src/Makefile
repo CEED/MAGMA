@@ -29,6 +29,7 @@ ZSRC += \
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
 	zidr.cpp	\
+	zidr_acc.cpp	\
 	ziterref.cpp		\
 	zjacobi.cpp			\
 	zbaiter.cpp			\
