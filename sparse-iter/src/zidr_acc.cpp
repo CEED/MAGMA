@@ -53,7 +53,7 @@
     @ingroup magmasparse_zposv
     ********************************************************************/
 
-#define MYDEBUG 0
+#define MYDEBUG o
 #define WRITEP 0
 
 #if MYDEBUG == 1
@@ -138,7 +138,6 @@ magma_zidr_acc(
     double angle;
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
-    magmaDoubleComplex alpha;
     magmaDoubleComplex beta;
     magmaDoubleComplex mkk;
     magmaDoubleComplex fk;
@@ -156,6 +155,7 @@ magma_zidr_acc(
 
     // arrays for scalar products
     magma_z_matrix dskp = {Magma_CSR}, skp = {Magma_CSR};
+    magma_z_matrix dalpha = {Magma_CSR}, alpha = {Magma_CSR};
     
     //workspace for merged dot product
     magmaDoubleComplex *d1=NULL, *d2=NULL;
@@ -277,12 +277,17 @@ magma_zidr_acc(
     // allocate memory for the scalar products
     CHECK( magma_zvinit( &dskp, Magma_DEV, 2, 1, c_zero, queue ));
     gpumem += dskp.nnz * sizeof(magmaDoubleComplex);
+    CHECK( magma_zvinit( &dalpha, Magma_DEV, s, 1, c_zero, queue ));
+    gpumem += dalpha.nnz * sizeof(magmaDoubleComplex);
+    
+    // also on CPU
     CHECK( magma_zvinit( &skp, Magma_CPU, 2, 1, c_zero, queue ));
+    CHECK( magma_zvinit( &alpha, Magma_CPU, s, 1, c_zero, queue ));
     
     // workspace for merged dot product
     CHECK( magma_zmalloc( &d1, b.num_rows*b.num_cols*(2) ));
     CHECK( magma_zmalloc( &d2, b.num_rows*b.num_cols*(2) ));
-    
+    gpumem += b.num_rows*b.num_cols*(4) * sizeof(magmaDoubleComplex);
     
     printMatrix("R" , dr);
     gpumem += dr.nnz * sizeof(magmaDoubleComplex);
@@ -413,29 +418,38 @@ cudaProfilerStart();
 //---------------------------------------
             printMatrix("G", dG);
 
-
             // bi-orthogonalize the new basis vectors
             for ( i = 0; i < k; ++i ) {
 
                 // alpha = P(:,i)' G(:,k) / M(i,i)
 //---------------------------------------
                 // alpha = P(:,i)' G(:,k)
-                alpha = magma_zdotc( dP.num_rows, &dP.dval[i*dP.num_rows], inc, &dG.dval[k*dG.num_rows], inc );
+                //alpha = magma_zdotc( dP.num_rows, &dP.dval[i*dP.num_rows], inc, &dG.dval[k*dG.num_rows], inc );
+                
+                CHECK( magma_zmdotc( dP.num_rows, 1, &dP.dval[i*dP.num_rows], &dG.dval[k*dG.num_rows], d1, d2, (dalpha.dval)+i, queue ));
+                magma_zgetvector( 1, (dalpha.dval)+i, inc, (alpha.val)+i, inc );
                 
                 // alpha = alpha / M(i,i)
                 magma_zgetvector( 1, &dM.dval[i*dM.num_rows+i], inc, &mkk, inc );
-                alpha = alpha / mkk;
+                alpha.val[i] = alpha.val[i] / mkk;
+                
 //---------------------------------------
-                printD("bi-ortho: i, k, alpha ...................%d, %d, (%f, %f)\n", i, k, MAGMA_Z_REAL(alpha), MAGMA_Z_IMAG(alpha));
+                printD("bi-ortho: i, k, alpha ...................%d, %d, (%f, %f)\n", i, k, MAGMA_Z_REAL(alpha.val[i]), MAGMA_Z_IMAG(alpha.val[i]));
 
                 // G(:,k) = G(:,k) - alpha * G(:,i)
-                magma_zaxpy( dG.num_rows, -alpha, &dG.dval[i*dG.num_rows], inc, &dG.dval[k*dG.num_rows], inc );
+                magma_zaxpy( dG.num_rows, -alpha.val[i], &dG.dval[i*dG.num_rows], inc, &dG.dval[k*dG.num_rows], inc );
                 printMatrix("G", dG);
 
                 // U(:,k) = U(:,k) - alpha * U(:,i)
-                magma_zaxpy( dU.num_rows, -alpha, &dU.dval[i*dU.num_rows], inc, &dU.dval[k*dU.num_rows], inc );
-                printMatrix("U", dU);
+                // take this out of the loop
             }
+            // U(:,k) = U(:,k) - alpha * U(:,i) outside the loop using GEMV
+            // copy scalars alpha needed for gemv to device
+            magma_zsetvector( k, alpha.val, inc, dalpha.dval, inc );
+            magmablas_zgemv( MagmaNoTrans, dU.num_rows, k, c_n_one, &dU.dval[0], dU.num_rows, &dalpha.dval[0], inc, c_one, &dU.dval[k*dU.num_rows], inc );
+            printMatrix("U", dU);
+            
+            
 
             // new column of M = P'G, first k-1 entries are zero
             // Note: need to verify that first k-1 entries are zero
@@ -640,7 +654,9 @@ cleanup:
     magma_zmfree(&dv1, queue);
     magma_zmfree(&dv, queue);
     magma_zmfree(&dskp, queue);
+    magma_zmfree(&dalpha, queue);
     magma_zmfree(&skp, queue);
+    magma_zmfree(&alpha, queue);
     magma_free( d1 );
     magma_free( d2 );
     magma_free_pinned(piv);
