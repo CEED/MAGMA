@@ -138,7 +138,6 @@ magma_zidr_acc(
     double angle;
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
-    magmaDoubleComplex beta;
     magmaDoubleComplex mkk;
     magmaDoubleComplex fk;
 
@@ -156,6 +155,7 @@ magma_zidr_acc(
     // arrays for scalar products
     magma_z_matrix dskp = {Magma_CSR}, skp = {Magma_CSR};
     magma_z_matrix dalpha = {Magma_CSR}, alpha = {Magma_CSR};
+    magma_z_matrix dbeta = {Magma_CSR}, beta = {Magma_CSR};
     
     //workspace for merged dot product
     magmaDoubleComplex *d1=NULL, *d2=NULL;
@@ -279,10 +279,13 @@ magma_zidr_acc(
     gpumem += dskp.nnz * sizeof(magmaDoubleComplex);
     CHECK( magma_zvinit( &dalpha, Magma_DEV, s, 1, c_zero, queue ));
     gpumem += dalpha.nnz * sizeof(magmaDoubleComplex);
+    CHECK( magma_zvinit( &dbeta, Magma_DEV, s, 1, c_zero, queue ));
+    gpumem += dbeta.nnz * sizeof(magmaDoubleComplex);
     
     // also on CPU
     CHECK( magma_zvinit( &skp, Magma_CPU, 2, 1, c_zero, queue ));
     CHECK( magma_zvinit( &alpha, Magma_CPU, s, 1, c_zero, queue ));
+    CHECK( magma_zvinit( &beta, Magma_CPU, s, 1, c_zero, queue ));
     
     // workspace for merged dot product
     CHECK( magma_zmalloc( &d1, b.num_rows*b.num_cols*(2) ));
@@ -363,6 +366,9 @@ cudaProfilerStart();
     {
         solver_par->numiter++;
     
+        // set the U matrix to zero if using x-update outside shadow space
+        //magma_zscal( dU.num_rows*dU.num_cols, MAGMA_Z_ZERO, dU.dval, inc );
+        
         // new RHS for small systems
         // f = (r' P)' = P' r
         magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.num_rows, dr.dval, inc, c_zero, df.dval, inc );
@@ -461,6 +467,7 @@ cudaProfilerStart();
             // check M(k,k) == 0
             magma_zgetvector( 1, &dM.dval[k*dM.num_rows+k], inc, &mkk, inc );
             if ( MAGMA_Z_EQUAL(mkk, MAGMA_Z_ZERO) ) {
+                s = k; // for the x-update outside the loop
                 info = MAGMA_DIVERGENCE;
                 innerflag = 1;
                 break;
@@ -468,16 +475,14 @@ cudaProfilerStart();
 
             // beta = f(k) / M(k,k)
             magma_zgetvector( 1, &df.dval[k], inc, &fk, inc );
-            beta = fk / mkk;
-            printD("beta: k ...................%d, (%f, %f)\n", k, MAGMA_Z_REAL(beta), MAGMA_Z_IMAG(beta));
+            beta.val[k] = fk / mkk;
+            printD("beta: k ...................%d, (%f, %f)\n", k, MAGMA_Z_REAL(beta.val[k]), MAGMA_Z_IMAG(beta.val[k]));
 
-            // x = x + beta * U(:,k)
-            magma_zaxpy( x->num_rows, beta, &dU.dval[k*dU.num_rows], inc, x->dval, inc );
-            printMatrix("X", *x);
+
 
             // make r orthogonal to q_i, i = 1..k
             // r = r - beta * G(:,k)
-            magma_zaxpy( dr.num_rows, -beta, &dG.dval[k*dG.num_rows], inc, dr.dval, inc );
+            magma_zaxpy( dr.num_rows, -beta.val[k], &dG.dval[k*dG.num_rows], inc, dr.dval, inc );
             printMatrix("R", dr);
 
             // |r|
@@ -497,6 +502,7 @@ cudaProfilerStart();
 
             // check convergence or iteration limit
             if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+                s = k; // for the x-update outside the loop
                 innerflag = 1;
                 break;
             }
@@ -504,14 +510,26 @@ cudaProfilerStart();
             // new f = P' r (first k components are zero)
             if ( (k + 1) < s ) {
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)
-                magma_zaxpy( sk - 1, -beta, &dM.dval[k*dM.num_rows+(k+1)], inc, &df.dval[k+1], inc );
+                magma_zaxpy( sk - 1, -beta.val[k], &dM.dval[k*dM.num_rows+(k+1)], inc, &df.dval[k+1], inc );
                 printMatrix("F", df);
             }
 
             // iter = iter + 1
             solver_par->numiter++;
         }
-
+        // update solution approximation x
+        /*
+        for ( k = 0; k < s; ++k ) {
+            // x = x + beta * U(:,k)
+            magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.num_rows], inc, x->dval, inc );
+            printMatrix("X", *x);
+        }
+        */
+        // replace by gemv
+        magma_zsetvector( s, beta.val, inc, dbeta.dval, inc );
+        magmablas_zgemv( MagmaNoTrans, dU.num_rows, s, c_one, &dU.dval[0], dU.num_rows, &dbeta.dval[0], inc, c_one, &x->dval[0], inc );
+ 
+        
         // check convergence or iteration limit or invalid of inner loop
         if ( innerflag == 1 ) {
             break;
@@ -636,6 +654,8 @@ cudaProfilerStop();
     // print local stats
     printf("GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
 #endif
+
+printf("info:%d\n", info);
     
     
 cleanup:
@@ -643,7 +663,6 @@ cleanup:
     magma_zmfree(&P1, queue);
     magma_zmfree(&dP1, queue);
     magma_zmfree(&dP, queue);
-    //magma_zmfree(&dr, queue);
     magma_zmfree(&dG, queue);
     magma_zmfree(&dU, queue);
     magma_zmfree(&dM1, queue);
@@ -655,8 +674,10 @@ cleanup:
     magma_zmfree(&dv, queue);
     magma_zmfree(&dskp, queue);
     magma_zmfree(&dalpha, queue);
+    magma_zmfree(&dbeta, queue);
     magma_zmfree(&skp, queue);
     magma_zmfree(&alpha, queue);
+    magma_zmfree(&beta, queue);
     magma_free( d1 );
     magma_free( d2 );
     magma_free_pinned(piv);
