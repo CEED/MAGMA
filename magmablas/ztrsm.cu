@@ -146,7 +146,7 @@ void magmablas_ztrsm_outofplace(
 {
     #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
     #define dB(i_, j_) (dB + (i_) + (j_)*lddb)
-    #define dX(i_, j_) (dX + (i_) + (j_)*m)
+    #define dX(i_, j_) (dX + (i_) + (j_)*lddx)
     #define d_dinvA(i_) (d_dinvA + (i_)*NB)
 
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -461,8 +461,8 @@ void magmablas_ztrsm(
         // continue to free
     }
     else {
-        magmablas_zlaset(MagmaFull, dinvA_length, 1, MAGMA_Z_ZERO, MAGMA_Z_ZERO, d_dinvA, dinvA_length);
-        magmablas_zlaset(MagmaFull, m, n, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dX, lddx);
+        magmablas_zlaset( MagmaFull, dinvA_length, 1, MAGMA_Z_ZERO, MAGMA_Z_ZERO, d_dinvA, dinvA_length );
+        magmablas_zlaset( MagmaFull, m, n, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dX, lddx );
         magmablas_ztrsm_work( side, uplo, transA, diag, m, n, alpha,
                               dA, ldda, dB, lddb, dX, lddx, 1, d_dinvA, dinvA_length );
     }
