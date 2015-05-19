@@ -1437,6 +1437,25 @@ magma_zbicgmerge4(
     magma_queue_t queue );
 
 magma_int_t
+magma_zidr_smooting_1(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex_ptr drs,
+    magmaDoubleComplex_ptr dr, 
+    magmaDoubleComplex_ptr dt, 
+    magma_queue_t queue );
+
+magma_int_t
+magma_zidr_smooting_2(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dxs, 
+    magma_queue_t queue );
+
+
+magma_int_t
 magma_zcgmerge_spmv1( 
     magma_z_matrix A,
     magmaDoubleComplex_ptr d1,

@@ -29,6 +29,7 @@ ZSRC := \
 	zmdot.cu				\
 	zmergebicgstab.cu		\
 	zmergebicgstab2.cu		\
+    zmergeidr.cu            \
 	zmergecg.cu				\
 	zmgecsrmv.cu			\
 	zmgeellmv.cu			\
