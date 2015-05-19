@@ -23,7 +23,9 @@
     -------
 
     This is a wrapper to call MAGMA QR on the data structure of sparse matrices.
-    Output matrices Q and R reside on the same memory location as matrix A. 
+    Output matrices Q and R reside on the same memory location as matrix A.
+    On exit, Q is a M-by-N matrix in lda-by-N space.
+    On exit, R is a min(M,N)-by-N upper trapezoidal matrix. 
 
 
     Arguments
@@ -60,7 +62,7 @@
 extern "C" magma_int_t
 magma_zqr(
     magma_int_t m, magma_int_t n,
-    magma_z_matrix A, magma_z_matrix *Q, magma_z_matrix *R,
+    magma_z_matrix A, magma_int_t lda, magma_z_matrix *Q, magma_z_matrix *R,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -70,7 +72,7 @@ magma_zqr(
 
     // local variables
     magma_int_t inc = 1;
-    magma_int_t ldda = MAX(1,m);    // multiple of 16 for coalesced accesses 
+    //magma_int_t ldda = MAX(1,m);    // multiple of 16 for coalesced accesses 
     magma_int_t k = MIN(m,n);
     magma_int_t ldt;
     magma_int_t nb;
@@ -84,43 +86,43 @@ magma_zqr(
 
     // query number of blocks required for QR factorization
     nb = magma_get_zgeqrf_nb(m);
-    ldt = (2 * k + magma_roundup(n, 32) * 32) * nb;
+    ldt = (2 * k + magma_roundup(n, 32)) * nb;
     CHECK( magma_zmalloc( &dT, ldt ) );
 
     // get copy of matrix array
     if ( A.memory_location == Magma_DEV ) {
         dA = A.dval;
     } else {
-        CHECK( magma_zmalloc( &dA, ldda * n ) );
-        magma_zsetvector( ldda * n, A.val, inc, dA, inc );
+        CHECK( magma_zmalloc( &dA, lda * n ) );
+        magma_zsetvector( lda * n, A.val, inc, dA, inc );
     }
 
     // QR factorization
-    magma_zgeqrf_gpu( ldda, n, dA, ldda, tau, dT, &info );  
+    magma_zgeqrf_gpu( m, n, dA, lda, tau, dT, &info );  
 
     // construct R matrix
     if ( R != NULL ) {
         if ( A.memory_location == Magma_DEV ) {
-            CHECK( magma_zvinit( R, Magma_DEV, ldda, n, c_zero, queue ) );
-            magmablas_zlacpy( MagmaUpper, k, n, dA, ldda, R->dval, ldda );
+            CHECK( magma_zvinit( R, Magma_DEV, lda, n, c_zero, queue ) );
+            magmablas_zlacpy( MagmaUpper, k, n, dA, lda, R->dval, lda );
         } else {
-            CHECK( magma_zvinit( &dR1, Magma_DEV, ldda, n, c_zero, queue ) );
-            magmablas_zlacpy( MagmaUpper, k, n, dA, ldda, dR1.dval, ldda );
-            CHECK( magma_zvinit( R, Magma_CPU, ldda, n, c_zero, queue ) );
-            magma_zgetvector( ldda * n, dR1.dval, inc, R->val, inc );
+            CHECK( magma_zvinit( &dR1, Magma_DEV, lda, n, c_zero, queue ) );
+            magmablas_zlacpy( MagmaUpper, k, n, dA, lda, dR1.dval, lda );
+            CHECK( magma_zvinit( R, Magma_CPU, lda, n, c_zero, queue ) );
+            magma_zgetvector( lda * n, dR1.dval, inc, R->val, inc );
         }
     }
 
     // construct Q matrix
     if ( Q != NULL ) {
-        magma_zungqr_gpu( ldda, n, k, dA, ldda, tau, dT, nb, &info ); 
+        magma_zungqr_gpu( m, n, k, dA, lda, tau, dT, nb, &info ); 
 
         if ( A.memory_location == Magma_DEV ) {
-            CHECK( magma_zvinit( Q, Magma_DEV, ldda, n, c_zero, queue ) );
-            magma_zcopy( ldda * n, dA, inc, Q->dval, inc );
+            CHECK( magma_zvinit( Q, Magma_DEV, lda, n, c_zero, queue ) );
+            magma_zcopy( lda * n, dA, inc, Q->dval, inc );
         } else {
-            CHECK( magma_zvinit( Q, Magma_CPU, ldda, n, c_zero, queue ) );
-            magma_zgetvector( ldda * n, dA, inc, Q->val, inc );
+            CHECK( magma_zvinit( Q, Magma_CPU, lda, n, c_zero, queue ) );
+            magma_zgetvector( lda * n, dA, inc, Q->val, inc );
         }
     }
 

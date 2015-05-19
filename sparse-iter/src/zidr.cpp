@@ -12,11 +12,11 @@
 */
 
 #include "common_magmasparse.h"
-
+#include <cuda_profiler_api.h>
 #include <assert.h>
 
-#define RTOLERANCE     lapackf77_dlamch( "E" )
-#define ATOLERANCE     lapackf77_dlamch( "E" )
+//#define RTOLERANCE     lapackf77_dlamch( "E" )
+//#define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /**
@@ -46,6 +46,7 @@
     @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
+
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -54,7 +55,7 @@
     ********************************************************************/
 
 #define MYDEBUG 0
-#define WRITEP 0
+#define WRITEP 1
 
 #if MYDEBUG == 1
 #define printD(...) printf(__VA_ARGS__)
@@ -69,15 +70,6 @@
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
-// Notes:
-// 2. Overlap kernels using cuBLAS streams
-//
-// 3. Build dependency graph of IDR(s)-biortho
-//
-// 4. Apparently, some precision is lost using MAGMA when compared to MATLAB, probably is that matrices are not displayed with full precision on screen.
-//
-// 5. Optimize: merge kernels, reuse arrays, concurrent kernels
 
 
 extern "C" void
@@ -117,6 +109,10 @@ magma_zidr(
     const magmaDoubleComplex c_one = MAGMA_Z_ONE;
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
+    // internal user parameters
+    magma_int_t smoothing = 1;   // 1 = enable, 0 = disabled
+    double angle = 0.7;          // [0-1]
+
     // local variables
     magma_int_t info = 0;
     magma_int_t iseed[4] = { 0, 0, 0, 1 };
@@ -135,9 +131,9 @@ magma_zidr(
     double nrmt;
     double rho;
     double tolb;
-    double angle;
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
+    magmaDoubleComplex gamma;
     magmaDoubleComplex alpha;
     magmaDoubleComplex beta;
     magmaDoubleComplex mkk;
@@ -153,6 +149,8 @@ magma_zidr(
     magma_z_matrix dt = {Magma_CSR};
     magma_z_matrix dc = {Magma_CSR};
     magma_z_matrix dv1 = {Magma_CSR}, dv = {Magma_CSR};
+    magma_z_matrix dxs = {Magma_CSR};
+    magma_z_matrix drs = {Magma_CSR};
 
     // local performance variables
     long long int gpumem = 0;
@@ -182,9 +180,6 @@ magma_zidr(
 
     // set max iterations
     solver_par->maxiter = MIN(2 * A.num_cols, solver_par->maxiter);
-
-    // initial angle
-    angle = 0.7;
 
     // initial solution vector
     // x = 0
@@ -232,7 +227,7 @@ magma_zidr(
     // P = ortho(P1)
     if ( dP1.num_cols > 1 ) {
         // P = magma_zqr(P1), QR factorization
-        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, &dP, NULL, queue ) );
+        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, dP1.ld, &dP, NULL, queue ) );
     } else {
         // P = P1 / |P1|
         dof = dP1.num_rows * dP1.num_cols;        // can remove
@@ -268,15 +263,25 @@ magma_zidr(
     // relative tolerance
     // Note: shouldn't it be nrmb instead of nrmr?
     tolb = nrmb * solver_par->epsilon;
-    //tolb = nrmr * solver_par->epsilon;
-    if ( tolb < ATOLERANCE ) {
-        tolb = ATOLERANCE;
-    }
+    // tolb = nrmr * solver_par->epsilon;
+    //if ( tolb < ATOLERANCE ) {
+    //    tolb = ATOLERANCE;
+    //}
     // check if initial is guess good enough
     if ( nrmr <= tolb ) {
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
         goto cleanup;
+    }
+
+    if ( smoothing == 1 ) {
+        // set smoothing solution vector
+        CHECK( magma_zmtransfer( *x, &dxs, Magma_DEV, Magma_DEV, queue ));
+        gpumem += dxs.nnz * sizeof(magmaDoubleComplex);
+
+        // set smoothing residual vector
+        CHECK( magma_zmtransfer( dr, &drs, Magma_DEV, Magma_DEV, queue ));
+        gpumem += drs.nnz * sizeof(magmaDoubleComplex);
     }
 
     // G(n,s) = 0
@@ -329,6 +334,7 @@ magma_zidr(
     innerflag = 0;
     solver_par->numiter = 0;
 
+cudaProfilerStart();
     // start iteration
     do
     {
@@ -442,9 +448,44 @@ magma_zidr(
             magma_zaxpy( dr.num_rows, -beta, &dG.dval[k*dG.num_rows], inc, dr.dval, inc );
             printMatrix("R", dr);
 
-            // |r|
-            nrmr = magma_dznrm2( dofb, dr.dval, inc );
-            printD("norm(r): k ...................%d, %f\n", k, nrmr);
+            if ( smoothing != 1 ) {
+                // |r|
+                nrmr = magma_dznrm2( dofb, dr.dval, inc );
+                printD("norm(r): k ...................%d, %f\n", k, nrmr);
+            } else {
+                // smoothing operation
+//---------------------------------------
+                // t = rs - r
+                magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+                magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+
+                // |t|
+                dof = dt.num_rows * dt.num_cols;
+                nrmt = magma_dznrm2( dof, dt.dval, inc );
+
+                // gamma = t' rs
+                gamma = magma_zdotc( dt.num_rows, dt.dval, inc, drs.dval, inc );
+
+                // gamma = gamma / (|t| * |t|)
+                gamma = gamma / (nrmt * nrmt);
+
+                // rs = rs - gamma * t
+                magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
+                printMatrix("RS", drs);
+
+                // t = xs - x
+                magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+                magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+
+                // xs = xs - gamma * t
+                magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+                printMatrix("XS", dxs);
+
+                // |rs|
+                nrmr = magma_dznrm2( dofb, drs.dval, inc );           
+                printD("norm(rs): k ...................%d, %f\n", k, nrmr);
+            }
+//---------------------------------------
 
             // store current timing and residual
             if ( solver_par->verbose > 0 ) {
@@ -521,9 +562,44 @@ magma_zidr(
         magma_zaxpy(dr.num_rows, -om, dt.dval, inc, dr.dval, inc);
         printMatrix("R", dr);
 
-        // residual norm
-        nrmr = magma_dznrm2( dofb, dr.dval, inc );
-        printD("norm(r): k ...................%d, %f\n", k, nrmr);
+        if ( smoothing != 1 ) {
+            // residual norm
+            nrmr = magma_dznrm2( dofb, dr.dval, inc );
+            printD("norm(r): k ...................%d, %f\n", k, nrmr);
+        } else {
+            // smoothing operation
+//---------------------------------------
+            // t = rs - r
+            magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+            magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+
+            // |t|
+            dof = dt.num_rows * dt.num_cols;
+            nrmt = magma_dznrm2( dof, dt.dval, inc );
+
+            // gamma = t' rs
+            gamma = magma_zdotc( dt.num_rows, dt.dval, inc, drs.dval, inc );
+
+            // gamma = gamma / (|t| * |t|)
+            gamma = gamma / (nrmt * nrmt);
+
+            // rs = rs - gamma * t
+            magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
+            printMatrix("RS", drs);
+
+            // t = xs - x
+            magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+            magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+
+            // xs = xs - gamma * t
+            magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+            printMatrix("XS", dxs);
+
+            // |rs|
+            nrmr = magma_dznrm2( dofb, drs.dval, inc );           
+            printD("norm(rs): k ...................%d, %f\n", k, nrmr);
+        }
+//---------------------------------------
 
         // store current timing and residual
         if ( solver_par->verbose > 0 ) {
@@ -549,6 +625,11 @@ magma_zidr(
 #endif
     }
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
+
+    if ( smoothing == 1 ) {
+        magma_zcopy( x->num_rows * x->num_cols, dxs.dval, 1, x->dval, 1 );
+    }
+cudaProfilerStop();
 
     // get last iteration timing
     tempo2 = magma_sync_wtime( queue );
@@ -579,20 +660,22 @@ magma_zidr(
     
 cleanup:
     // free resources
-    magma_zmfree(&P1, queue);
-    magma_zmfree(&dP1, queue);
-    magma_zmfree(&dP, queue);
-    magma_zmfree(&dr, queue);
-    magma_zmfree(&dG, queue);
-    magma_zmfree(&dU, queue);
-    magma_zmfree(&dM1, queue);
-    magma_zmfree(&dM, queue);
-    magma_zmfree(&df, queue);
-    magma_zmfree(&dt, queue);
-    magma_zmfree(&dc, queue);
-    magma_zmfree(&dv1, queue);
-    magma_zmfree(&dv, queue);
-    magma_free_pinned(piv);
+    magma_zmfree( &P1, queue );
+    magma_zmfree( &dP1, queue );
+    magma_zmfree( &dP, queue );
+    magma_zmfree( &dr, queue );
+    magma_zmfree( &dG, queue );
+    magma_zmfree( &dU, queue );
+    magma_zmfree( &dM1, queue );
+    magma_zmfree( &dM, queue );
+    magma_zmfree( &df, queue );
+    magma_zmfree( &dt, queue );
+    magma_zmfree( &dc, queue );
+    magma_zmfree( &dv1, queue );
+    magma_zmfree( &dv, queue );
+    magma_zmfree( &dxs, queue );
+    magma_zmfree( &drs, queue );
+    magma_free_pinned( piv );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;

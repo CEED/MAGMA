@@ -61,7 +61,7 @@
     ********************************************************************/
 
 #define MYDEBUG 0
-#define WRITEP 0
+#define WRITEP 1
 
 #if MYDEBUG == 1
 #define printD(...) printf(__VA_ARGS__)
@@ -241,7 +241,7 @@ magma_zpidr(
     // P = ortho(P1)
     if ( dP1.num_cols > 1 ) {
         // P = magma_zqr(P1), QR factorization
-        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, &dP, NULL, queue ) );
+        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, dP1.num_rows, &dP, NULL, queue ) );
     } else {
         // P = P1 / |P1|
         dof = dP1.num_rows * dP1.num_cols;        // can remove
@@ -278,9 +278,9 @@ magma_zpidr(
     // Note: shouldn't it be nrmb instead of nrmr?
     tolb = nrmb * solver_par->epsilon;
     //tolb = nrmr * solver_par->epsilon;
-    if ( tolb < ATOLERANCE ) {
-        tolb = ATOLERANCE;
-    }
+    //if ( tolb < ATOLERANCE ) {
+    //    tolb = ATOLERANCE;
+    //}
     // check if initial is guess good enough
     if ( nrmr <= tolb ) {
         solver_par->final_res = solver_par->init_res;
