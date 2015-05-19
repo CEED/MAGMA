@@ -1080,6 +1080,7 @@ magma_zqr(
     magma_int_t m, 
     magma_int_t n, 
     magma_z_matrix A, 
+    magma_int_t lda, 
     magma_z_matrix *Q, 
     magma_z_matrix *R, 
     magma_queue_t queue );
