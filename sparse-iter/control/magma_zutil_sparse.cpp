@@ -42,7 +42,7 @@ static const char *usage_sparse =
 "               9   Jacobi\n"
 "               10  Block-asynchronous Iteration\n"
 "               11  IDR\n"
-"               11  PIDR\n"
+"               12  PIDR\n"
 "               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
