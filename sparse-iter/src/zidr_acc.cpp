@@ -115,14 +115,14 @@ magma_zidr_acc(
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
     // internal user options
-    magma_int_t smoothing = 0;   // 1 = enable, 0 = disabled
-    double angle = 0.7;          // [0-1]
+    const magma_int_t smoothing = 0;   // 1 = enable, 0 = disabled
+    const double angle = 0.7;          // [0-1]
 
     // local variables
     magma_int_t info = 0;
-    magma_int_t inc = 1;
+    const magma_int_t inc = 1;
     magma_int_t iseed[4] = { 0, 0, 0, 1 };
-    magma_int_t dofb = b.num_rows * b.num_cols;
+    const magma_int_t dofb = b.num_rows * b.num_cols;
     magma_int_t s;
     magma_int_t dof;
     magma_int_t distr;
@@ -263,6 +263,7 @@ magma_zidr_acc(
 
 #if WRITEP == 1
     // Note: write P matrix to file to use in MATLAB for validation
+    printf("P = ");
     magma_zprint_gpu( dP.num_rows, dP.num_cols, dP.dval, dP.ld );
 #endif
 
@@ -518,9 +519,12 @@ cudaProfilerStart();
             } else {
                 // smoothing operation
 //---------------------------------------
+                //----MERGED---///
                 // t = rs - r
-                magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-                magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+                //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+                //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+                //----MERGED---///
+                magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dt.dval, queue );
 
                 // |t|
                 dof = dt.num_rows * dt.num_cols;
@@ -536,12 +540,15 @@ cudaProfilerStart();
                 magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
                 printMatrix("RS", drs);
 
+                //----MERGED---///
                 // t = xs - x
-                magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
-                magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+                //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+                //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
 
                 // xs = xs - gamma * t
-                magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+                //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+                //----MERGED---///
+                magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
                 printMatrix("XS", dxs);
 
                 // |rs|
@@ -642,9 +649,12 @@ cudaProfilerStart();
         } else {
             // smoothing operation
 //---------------------------------------
+            //----MERGED---///
             // t = rs - r
-            magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-            magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+            //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+            //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+            //----MERGED---///
+            magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dt.dval, queue );
 
             // |t|
             dof = dt.num_rows * dt.num_cols;
@@ -660,12 +670,15 @@ cudaProfilerStart();
             magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
             printMatrix("RS", drs);
 
+            //----MERGED---///
             // t = xs - x
-            magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
-            magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+            //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+            //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
 
             // xs = xs - gamma * t
-            magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+            //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+            //----MERGED---///
+            magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
             printMatrix("XS", dxs);
 
             // |rs|
@@ -727,7 +740,7 @@ cudaProfilerStop();
 
 #if MYDEBUG > 0 || WRITEP == 1
     // print local stats
-    printf("GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
+    printf("%%GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
 #endif
     
 cleanup:

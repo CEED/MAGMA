@@ -1437,7 +1437,7 @@ magma_zbicgmerge4(
     magma_queue_t queue );
 
 magma_int_t
-magma_zidr_smooting_1(  
+magma_zidr_smoothing_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
     magmaDoubleComplex_ptr drs,
@@ -1446,7 +1446,7 @@ magma_zidr_smooting_1(
     magma_queue_t queue );
 
 magma_int_t
-magma_zidr_smooting_2(  
+magma_zidr_smoothing_2(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
     magmaDoubleComplex omega,

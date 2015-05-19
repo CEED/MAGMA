@@ -21,7 +21,7 @@
 /* -------------------------------------------------------------------------- */
 
 __global__ void
-magma_zidr_smooting_1_kernel(  
+magma_zidr_smoothing_1_kernel(  
     int num_rows,
     int num_cols,
     magmaDoubleComplex *drs,
@@ -76,7 +76,7 @@ magma_zidr_smooting_1_kernel(
 
 extern "C" 
 magma_int_t
-magma_zidr_smooting_1(  
+magma_zidr_smoothing_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
     magmaDoubleComplex_ptr drs,
@@ -86,7 +86,7 @@ magma_zidr_smooting_1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zidr_smooting_1_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, drs, dr, dt);
+    magma_zidr_smoothing_1_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, drs, dr, dt);
 
    return MAGMA_SUCCESS;
 }
@@ -94,7 +94,7 @@ magma_zidr_smooting_1(
 
 
 __global__ void
-magma_zidr_smooting_2_kernel(  
+magma_zidr_smoothing_2_kernel(  
     int num_rows,
     int num_cols,
     magmaDoubleComplex omega,
@@ -150,7 +150,7 @@ magma_zidr_smooting_2_kernel(
 
 extern "C" 
 magma_int_t
-magma_zidr_smooting_2(  
+magma_zidr_smoothing_2(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
     magmaDoubleComplex omega,
@@ -160,7 +160,7 @@ magma_zidr_smooting_2(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zidr_smooting_2_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, omega, dx, dxs);
+    magma_zidr_smoothing_2_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, omega, dx, dxs);
 
    return MAGMA_SUCCESS;
 }

@@ -66,7 +66,6 @@ int main(  int argc, char** argv )
         } else {                        // file-matrix test
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
-        printf("data = [\n");
 
         printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
@@ -94,14 +93,15 @@ int main(  int argc, char** argv )
             printf("%%error: solver returned: %s (%d).\n",
                 magma_strerror( info ), info );
         }
+        printf("data = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
+        printf("];\n\n");
 
         magma_zmfree(&B_d, queue );
         magma_zmfree(&B, queue );
         magma_zmfree(&A, queue );
         magma_zmfree(&x, queue );
         magma_zmfree(&b, queue );
-        printf("];\n\n");
         i++;
     }
 
