@@ -57,6 +57,8 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
+    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+
     printf("%% batchCount    M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
     printf("%%===================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -96,14 +98,14 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, opts.queue);
-            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, opts.queue);
-            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount, opts.queue);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
+            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, queue);
+            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, min(M,N), batchCount, queue);
 
-            gpu_time = magma_sync_wtime(0);
-            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, opts.queue);
+            gpu_time = magma_sync_wtime(queue);
+            info1 = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, queue);
             info2 = magma_zgetri_outofplace_batched( min(M,N), dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount, opts.queue);
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime(queue) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
