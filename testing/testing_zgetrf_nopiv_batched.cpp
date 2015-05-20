@@ -91,6 +91,8 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check;
 
+    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+
     batchCount = opts.batchcount;
     magma_int_t columns;
     
@@ -128,10 +130,10 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, opts.queue);
-            magma_time = magma_sync_wtime(0);
-            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, opts.queue);
-            magma_time = magma_sync_wtime(0) - magma_time;
+            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, queue);
+            magma_time = magma_sync_wtime(queue);
+            info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, queue);
+            magma_time = magma_sync_wtime(queue) - magma_time;
             magma_perf = gflops / magma_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
