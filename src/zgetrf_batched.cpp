@@ -136,7 +136,7 @@ magma_zgetrf_batched(
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
 #else
-    cublasHandle_t myhandle=queue;
+    cublasHandle_t myhandle=NULL;
 #endif
 
     magma_int_t     **dipiv_displ   = NULL;

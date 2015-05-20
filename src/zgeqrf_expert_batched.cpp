@@ -179,7 +179,7 @@ magma_zgeqrf_expert_batched(
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
 #else
-    cublasHandle_t myhandle=queue;
+    cublasHandle_t myhandle=NULL;
 #endif
 
     magmaDoubleComplex **dW0_displ = NULL;
