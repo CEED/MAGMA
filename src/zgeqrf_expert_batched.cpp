@@ -170,7 +170,7 @@ magma_zgeqrf_expert_batched(
 
     // FORCING queue to NULL
     magma_queue_t inputqueue=queue;
-    if(queue != 0 || queue != NULL){
+    if( queue != NULL ){
         printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
         queue = NULL;
         magmablasSetKernelStream(NULL);

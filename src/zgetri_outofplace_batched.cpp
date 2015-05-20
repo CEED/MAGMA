@@ -101,7 +101,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_int_t nb = 256; //256; // BATRF_NB;
     // FORCING queue to NULL
     magma_queue_t inputqueue=queue;
-    if(queue != 0 || queue != NULL){
+    if( queue != NULL ){
         printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
         queue = NULL;
         magmablasSetKernelStream(NULL);
