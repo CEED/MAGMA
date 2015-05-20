@@ -56,6 +56,7 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     cublasHandle_t handle = opts.handle;
 
+    magma_queue_t queue = NULL;
     //double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("%% If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
@@ -129,12 +130,12 @@ int main( int argc, char** argv)
             zset_pointer(B_array, d_B, lddb, 0, 0, lddb*Bn, batchCount, opts.queue);
             zset_pointer(C_array, d_C, lddc, 0, 0, lddc*N,  batchCount, opts.queue);
 
-            magma_time = magma_sync_wtime( NULL );
+            magma_time = magma_sync_wtime(opts.queue);
             magmablas_zgemm_batched(opts.transA, opts.transB, M, N, K,
                              alpha, A_array, ldda,
                                     B_array, lddb,
                              beta,  C_array, lddc, batchCount, opts.queue);
-            magma_time = magma_sync_wtime( NULL ) - magma_time;
+            magma_time = magma_sync_wtime(opts.queue) - magma_time;
             magma_perf = gflops / magma_time;
             magma_zgetmatrix( M, N*batchCount, d_C, lddc, h_Cmagma, ldc );
             
@@ -143,15 +144,17 @@ int main( int argc, char** argv)
                =================================================================== */
 
             magma_zsetmatrix( M, N*batchCount, h_C, ldc, d_C, lddc );
+
+            cublasSetStream(handle, queue);
             
-            cublas_time = magma_sync_wtime( NULL );
+            cublas_time = magma_sync_wtime( queue );
 
             cublasZgemmBatched(handle, cublas_trans_const(opts.transA), cublas_trans_const(opts.transB), M, N, K,
                                &alpha, (const magmaDoubleComplex**) A_array, ldda,
                                (const magmaDoubleComplex**) B_array, lddb,
                                &beta,  C_array, lddc, batchCount );
 
-            cublas_time = magma_sync_wtime( NULL ) - cublas_time;
+            cublas_time = magma_sync_wtime( queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
             magma_zgetmatrix( M, N*batchCount, d_C, lddc, h_Ccublas, ldc );
