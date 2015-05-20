@@ -51,6 +51,8 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
+    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+
     printf("%% BatchCount   N      CPU GFlop/s (ms)      GPU GFlop/s (ms)    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("%%=======================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -85,10 +87,10 @@ int main( int argc, char** argv)
                =================================================================== */
             cudaMemset(dinfo_magma,0, batchCount * sizeof(magma_int_t));
 
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount, opts.queue);
-            gpu_time = magma_sync_wtime(NULL);
-            info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount, opts.queue);
-            gpu_time = magma_sync_wtime(NULL) - gpu_time;
+            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
+            gpu_time = magma_sync_wtime(queue);
+            info = magma_zpotrf_batched( opts.uplo, N, d_A_array, ldda, dinfo_magma, batchCount, queue);
+            gpu_time = magma_sync_wtime(queue) - gpu_time;
             gpu_perf = gflops / gpu_time;
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_magma, 1, cpu_info, 1);
             for (int i=0; i < batchCount; i++)
