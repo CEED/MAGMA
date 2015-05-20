@@ -73,6 +73,8 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
+    magma_queue_t queue = opts.queue;
+
     printf("%% side = %s, uplo = %s, transA = %s, diag = %s \n",
            lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
            lapack_trans_const(opts.transA), lapack_diag_const(opts.diag) );
@@ -130,8 +132,8 @@ int main( int argc, char** argv)
             magma_zmalloc( &dinvA, dinvA_batchSize * batchCount);
             magma_zmalloc( &dwork, dwork_batchSize * batchCount );
     
-            zset_pointer(dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, opts.queue);
-            zset_pointer(dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, opts.queue);
+            zset_pointer(dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, queue);
+            zset_pointer(dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, queue);
 
             memset(h_Bmagma, 0, batchCount*ldb*N*sizeof(magmaDoubleComplex));
             magmablas_zlaset( MagmaFull, lddb, N*batchCount, c_zero, c_zero, dwork, lddb);
@@ -160,11 +162,11 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Ak, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M,  N*batchCount, h_B, ldb, d_B, lddb );
 
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*Ak, batchCount, opts.queue);
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue);
-            zset_pointer(dwork_array, dwork, lddb, 0, 0, lddb*N, batchCount, opts.queue);
+            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*Ak, batchCount, queue);
+            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, queue);
+            zset_pointer(dwork_array, dwork, lddb, 0, 0, lddb*N, batchCount, queue);
 
-            magma_time = magma_sync_wtime( NULL );
+            magma_time = magma_sync_wtime( queue );
             #if 1
                 magmablas_ztrsm_outofplace_batched(
                     opts.side, opts.uplo, opts.transA, opts.diag, 1,
@@ -175,8 +177,8 @@ int main( int argc, char** argv)
                     dinvA_array,  dinvA_batchSize,
                     dW1_displ,   dW2_displ,
                     dW3_displ,   dW4_displ,
-                    1, batchCount, opts.queue);
-                magma_time = magma_sync_wtime( NULL ) - magma_time;
+                    1, batchCount, queue);
+                magma_time = magma_sync_wtime( queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
             #else
@@ -185,8 +187,8 @@ int main( int argc, char** argv)
                     M, N, alpha,
                     d_A_array, ldda,
                     d_B_array, lddb,
-                    batchCount, opts.queue );
-                magma_time = magma_sync_wtime( NULL ) - magma_time;
+                    batchCount, queue );
+                magma_time = magma_sync_wtime( queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
             #endif
@@ -195,20 +197,22 @@ int main( int argc, char** argv)
                Performs operation using CUBLAS
                =================================================================== */
             magma_zsetmatrix( M, N*batchCount, h_B, ldb, d_B, lddb );
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue);
+            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, queue);
 
+            cublasHandle_t myhandle=opts.handle;
+            cublasSetStream(myhandle, queue);
             // CUBLAS version <= 6.0 has magmaDoubleComplex **            dA_array, no cast needed.
             // CUBLAS version    6.5 has magmaDoubleComplex const**       dA_array, requiring cast.
             // Correctly, it should be   magmaDoubleComplex const* const* dA_array, to avoid requiring cast.
             #if CUDA_VERSION >= 6050
-                cublas_time = magma_sync_wtime( NULL );
+                cublas_time = magma_sync_wtime( queue );
                 cublasZtrsmBatched(
-                    opts.handle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
+                    myhandle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
                     cublas_trans_const(opts.transA), cublas_diag_const(opts.diag),
                     M, N, &alpha,
                     (const magmaDoubleComplex**) d_A_array, ldda,
                     d_B_array, lddb, batchCount);
-                cublas_time = magma_sync_wtime( NULL ) - cublas_time;
+                cublas_time = magma_sync_wtime( queue ) - cublas_time;
                 cublas_perf = gflops / cublas_time;
             #endif
 
