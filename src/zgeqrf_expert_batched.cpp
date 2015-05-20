@@ -12,6 +12,7 @@
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#include "cublas_v2.h"
 
 #define PRECISION_z
 
@@ -122,7 +123,7 @@ magma_zgeqrf_expert_batched(
     magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue)
 {
 #define dA(i, j)  (dA + (i) + (j)*ldda)   // A(i, j) means at i row, j column
-
+    
     /* Local Parameter */
     magma_int_t nb = 32;
     magma_int_t nnb = 8;
@@ -163,9 +164,15 @@ magma_zgeqrf_expert_batched(
     magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0;
     magma_int_t ldw, offset; 
 
+    magma_queue_t inputqueue=queue;
+    if(queue != 0 || queue != NULL){
+        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
+        queue = NULL;
+        magmablasSetKernelStream(NULL);
+    }
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
-
+    cublasSetStream(myhandle, queue);
 
     magmaDoubleComplex **dW0_displ = NULL;
     magmaDoubleComplex **dW1_displ = NULL;
@@ -231,8 +238,6 @@ magma_zgeqrf_expert_batched(
         magmablas_zlaset_q(MagmaFull, lddt, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue);
     }
     */
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
     magma_int_t streamid;
     const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
@@ -333,6 +338,8 @@ magma_zgeqrf_expert_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync(); 
+                    //for(int s=0; s<nbstreams; s++)
+                    //    magma_queue_sync(stream[s]);
                     magmablasSetKernelStream(NULL);
                 }
                 //-------------------------------------------
@@ -371,7 +378,8 @@ magma_zgeqrf_expert_batched(
     for(k=0; k<nbstreams; k++){
         magma_queue_destroy( stream[k] );
     }
-    magmablasSetKernelStream(cstream);
+    queue =  inputqueue;
+    magmablasSetKernelStream(queue);
     cublasDestroy_v2(myhandle);
 
     magma_free(dW0_displ);
