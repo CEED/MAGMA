@@ -19,10 +19,10 @@ __global__ void
 zdiagcheck_kernel( 
     int num_rows, 
     int num_cols, 
-    magmaDoubleComplex * dval, 
-    magma_index_t * drowptr, 
-    magma_index_t * dcolind,
-    magma_index_t * dinfo )
+    magmaDoubleComplex_ptr dval, 
+    magmaIndex_ptr drowptr, 
+    magmaIndex_ptr dcolind,
+    magma_int_t * dinfo )
 {
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
@@ -80,8 +80,8 @@ magma_zdiagcheck(
     dim3 grid( magma_ceildiv( dA.num_rows, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
     
-    CHECK( magma_index_malloc( &dinfo, 1 ) );
-    CHECK( magma_index_malloc_cpu( &hinfo, 1 ) );
+    CHECK( magma_imalloc( &dinfo, 1 ) );
+    CHECK( magma_imalloc_cpu( &hinfo, 1 ) );
     hinfo[0] = 0;
     magma_index_setvector( 1, hinfo, 1, dinfo, 1 );
     zdiagcheck_kernel<<< grid, threads, 0, queue >>>
