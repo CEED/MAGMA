@@ -9,6 +9,7 @@
        @author Tingxing Dong
        @author Azzam Haidar
 */
+#define USE_CUOPT
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
@@ -343,9 +344,12 @@ magma_zgeqrf_expert_batched(
                     // finishing the update at least of the next panel
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
-                    //magma_device_sync(); 
+                    //magma_device_sync();
+                    //if(queue != NULL)
+                    //{ 
                     //for(int s=0; s<nbstreams; s++)
                     //    magma_queue_sync(stream[s]);
+                    //}
                     magmablasSetKernelStream(NULL);
                 }
                 //-------------------------------------------
