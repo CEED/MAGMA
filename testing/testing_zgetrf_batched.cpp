@@ -94,6 +94,8 @@ int main( int argc, char** argv)
     magma_int_t     status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
+    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    
     batchCount = opts.batchcount;
     magma_int_t columns;
     
@@ -136,12 +138,12 @@ int main( int argc, char** argv)
                =================================================================== */
 
             magma_zsetmatrix( M, columns, h_R, lda, dA, ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount, opts.queue);
-            set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount, opts.queue);
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount, queue);
+            set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount, queue);
             
-            magma_time = magma_sync_wtime(0);
+            magma_time = magma_sync_wtime(queue);
             info = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array,  dinfo_magma, batchCount, opts.queue);
-            magma_time = magma_sync_wtime(0) - magma_time;
+            magma_time = magma_sync_wtime(queue) - magma_time;
             magma_perf = gflops / magma_time;
             
             magma_zgetmatrix( M, N*batchCount, dA, ldda, h_Amagma, lda );
@@ -164,19 +166,22 @@ int main( int argc, char** argv)
                =================================================================== */
 
             magma_zsetmatrix( M, columns, h_R, lda, dA,  ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount, queue);
 
-            cublas_time = magma_sync_wtime(0);
+            cublasHandle_t myhandle=opts.handle;
+            cublasSetStream(myhandle, queue);
+            
+            cublas_time = magma_sync_wtime(queue);
             if (M == N )
             {
-                cublasZgetrfBatched( opts.handle, N, dA_array, ldda, dipiv_cublas,  dinfo_cublas, batchCount);
+                cublasZgetrfBatched( myhandle, N, dA_array, ldda, dipiv_cublas,  dinfo_cublas, batchCount);
                 cublas_enable = 1;
             }
             else
             {
                 printf("M != N, CUBLAS required M == N; CUBLAS is disabled\n");
             }
-            cublas_time = magma_sync_wtime(0) - cublas_time;
+            cublas_time = magma_sync_wtime(queue) - cublas_time;
             cublas_perf = gflops / cublas_time;
 
             /* =====================================================================
