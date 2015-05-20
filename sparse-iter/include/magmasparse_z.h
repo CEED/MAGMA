@@ -1071,6 +1071,11 @@ magma_zmlumerge(
     magma_z_matrix *A, 
     magma_queue_t queue );
 
+magma_int_t
+magma_zdiagcheck(
+    magma_z_matrix dA,
+    magma_queue_t queue );
+
 
 /*/////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE wrappers to dense MAGMA

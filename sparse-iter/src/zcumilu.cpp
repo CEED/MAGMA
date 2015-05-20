@@ -10,6 +10,7 @@
        @precisions normal z -> s d c
 */
 #include "common_magmasparse.h"
+#include <cuda.h>  // for CUDA_VERSION
 
 #define PRECISION_z
 
@@ -49,6 +50,10 @@ magma_zcumilusetup(
     cusparseMatDescr_t descrA=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
+#if CUDA_VERSION >= 7000
+    csrilu02Info_t info_M=NULL;
+    void *pBuffer = NULL;
+#endif
     
     //magma_zprint_matrix(A, queue );
     // copy matrix into preconditioner parameter
@@ -78,6 +83,40 @@ magma_zcumilusetup(
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrA, CUSPARSE_DIAG_TYPE_NON_UNIT ));
     CHECK_CUSPARSE( cusparseSetMatIndexBase( descrA, CUSPARSE_INDEX_BASE_ZERO ));
     CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &(precond->cuinfo) ));
+    // use kernel to manually check for zeros n the diagonal
+    CHECK( magma_zdiagcheck( precond->M, queue ) );
+    
+#if CUDA_VERSION >= 7000
+    // this version has the bug fixed where a zero on the diagonal causes a crash
+    CHECK_CUSPARSE( cusparseCreateCsrilu02Info(&info_M) );
+    magma_int_t buffersize;
+    magma_int_t structural_zero;
+    magma_int_t numerical_zero;
+    
+    CHECK_CUSPARSE(
+    cusparseZcsrilu02_bufferSize( cusparseHandle,
+                         precond->M.num_rows, precond->M.nnz, descrA,
+                         precond->M.dval, precond->M.drow, precond->M.dcol,
+                         info_M,
+                         &buffersize ) );
+    
+    CHECK( cudaMalloc((void**)&pBuffer, buffersize) );
+
+    CHECK_CUSPARSE( cusparseZcsrilu02_analysis( cusparseHandle,
+            precond->M.num_rows, precond->M.nnz, descrA,
+            precond->M.dval, precond->M.drow, precond->M.dcol,
+            info_M, CUSPARSE_SOLVE_POLICY_NO_LEVEL, pBuffer ));
+    
+    CHECK_CUSPARSE( cusparseXcsrilu02_zeroPivot( cusparseHandle, info_M, &numerical_zero ) );
+    CHECK_CUSPARSE( cusparseXcsrilu02_zeroPivot( cusparseHandle, info_M, &structural_zero ) );
+    
+    CHECK_CUSPARSE(
+    cusparseZcsrilu02( cusparseHandle,
+                         precond->M.num_rows, precond->M.nnz, descrA,
+                         precond->M.dval, precond->M.drow, precond->M.dcol,
+                         info_M, CUSPARSE_SOLVE_POLICY_NO_LEVEL, pBuffer) );
+#else
+    // this version contains the bug but is needed for backward compability
     CHECK_CUSPARSE( cusparseZcsrsm_analysis( cusparseHandle,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 precond->M.num_rows, precond->M.nnz, descrA,
@@ -89,6 +128,7 @@ magma_zcumilusetup(
                       precond->M.drow,
                       precond->M.dcol,
                       precond->cuinfo ));
+#endif
 
     CHECK( magma_zmtransfer( precond->M, &hA, Magma_DEV, Magma_CPU, queue ));
 
@@ -137,6 +177,10 @@ magma_zcumilusetup(
 
     
 cleanup:
+#if CUDA_VERSION >= 7000
+    cudaFree( pBuffer );
+    cusparseDestroyCsrilu02Info( info_M );
+#endif
     cusparseDestroySolveAnalysisInfo( precond->cuinfo );
     cusparseDestroyMatDescr( descrA );
     cusparseDestroyMatDescr( descrL );
@@ -442,6 +486,10 @@ magma_zcumiccsetup(
     cusparseMatDescr_t descrA=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
+#if CUDA_VERSION >= 7000
+    csric02Info_t info_M=NULL;
+    void *pBuffer = NULL;
+#endif
     
     magma_z_matrix hA={Magma_CSR}, hACSR={Magma_CSR}, U={Magma_CSR};
     CHECK( magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue ));
@@ -464,11 +512,48 @@ magma_zcumiccsetup(
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
     CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrA ));
+    CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &(precond->cuinfo) ));
+    // use kernel to manually check for zeros n the diagonal
+    CHECK( magma_zdiagcheck( precond->M, queue ) );
+        
+#if CUDA_VERSION >= 7000
+    // this version has the bug fixed where a zero on the diagonal causes a crash
+    CHECK_CUSPARSE( cusparseCreateCsric02Info(&info_M) );
+    CHECK_CUSPARSE( cusparseSetMatType( descrA, CUSPARSE_MATRIX_TYPE_GENERAL ));
+    CHECK_CUSPARSE( cusparseSetMatIndexBase( descrA, CUSPARSE_INDEX_BASE_ZERO ));
+    magma_int_t buffersize;
+    magma_int_t structural_zero;
+    magma_int_t numerical_zero;
+    
+    CHECK_CUSPARSE(
+    cusparseZcsric02_bufferSize( cusparseHandle,
+                         precond->M.num_rows, precond->M.nnz, descrA,
+                         precond->M.dval, precond->M.drow, precond->M.dcol,
+                         info_M,
+                         &buffersize ) );
+    
+    CHECK( cudaMalloc((void**)&pBuffer, buffersize) );
+
+    CHECK_CUSPARSE( cusparseZcsric02_analysis( cusparseHandle,
+            precond->M.num_rows, precond->M.nnz, descrA,
+            precond->M.dval, precond->M.drow, precond->M.dcol,
+            info_M, CUSPARSE_SOLVE_POLICY_NO_LEVEL, pBuffer ));
+    CHECK_CUSPARSE( cusparseXcsric02_zeroPivot( cusparseHandle, info_M, &numerical_zero ) );
+    CHECK_CUSPARSE( cusparseXcsric02_zeroPivot( cusparseHandle, info_M, &structural_zero ) );
+
+    CHECK_CUSPARSE(
+    cusparseZcsric02( cusparseHandle,
+                         precond->M.num_rows, precond->M.nnz, descrA,
+                         precond->M.dval, precond->M.drow, precond->M.dcol,
+                         info_M, CUSPARSE_SOLVE_POLICY_NO_LEVEL, pBuffer) );    
+
+#else
+    // this version contains the bug but is needed for backward compability
     CHECK_CUSPARSE( cusparseSetMatType( descrA, CUSPARSE_MATRIX_TYPE_SYMMETRIC ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrA, CUSPARSE_DIAG_TYPE_NON_UNIT ));
     CHECK_CUSPARSE( cusparseSetMatIndexBase( descrA, CUSPARSE_INDEX_BASE_ZERO ));
     CHECK_CUSPARSE( cusparseSetMatFillMode( descrA, CUSPARSE_FILL_MODE_LOWER ));
-    CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &(precond->cuinfo) ));
+    
     CHECK_CUSPARSE( cusparseZcsrsm_analysis( cusparseHandle,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 precond->M.num_rows, precond->M.nnz, descrA,
@@ -480,6 +565,8 @@ magma_zcumiccsetup(
                       precond->M.drow,
                       precond->M.dcol,
                       precond->cuinfo ));
+#endif
+
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrL ));
     CHECK_CUSPARSE( cusparseSetMatType( descrL, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrL, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -500,7 +587,7 @@ magma_zcumiccsetup(
         CUSPARSE_OPERATION_TRANSPOSE, precond->M.num_rows,
         precond->M.nnz, descrU,
         precond->M.dval, precond->M.drow, precond->M.dcol, precond->cuinfoU ));
-    
+
     if( precond->maxiter < 50 ){
         //prepare for iterative solves
         
@@ -548,6 +635,10 @@ magma_zcumiccsetup(
 */
 
 cleanup:
+#if CUDA_VERSION >= 7000
+    cudaFree( pBuffer );
+    cusparseDestroyCsric02Info( info_M );
+#endif
     cusparseDestroySolveAnalysisInfo( precond->cuinfo );
     cusparseDestroyMatDescr( descrL );
     cusparseDestroyMatDescr( descrU );
@@ -555,7 +646,7 @@ cleanup:
     cusparseDestroy( cusparseHandle );
     magma_zmfree(&U, queue );
     magma_zmfree(&hA, queue );
-    
+
     return info;
 }
 
