@@ -151,6 +151,7 @@ magma_zidr_acc(
     magma_z_matrix dM1 = {Magma_CSR}, dM = {Magma_CSR};
     magma_z_matrix df = {Magma_CSR};
     magma_z_matrix dt = {Magma_CSR};
+    magma_z_matrix dtt = {Magma_CSR};
     magma_z_matrix dc = {Magma_CSR};
     magma_z_matrix dv1 = {Magma_CSR}, dv = {Magma_CSR};
     magma_z_matrix dxs = {Magma_CSR};
@@ -282,7 +283,7 @@ magma_zidr_acc(
     CHECK( magma_zresidualvec( A, b, *x, &dr, &nrmr, queue));
     
     // allocate memory for the scalar products
-    CHECK( magma_zvinit( &dskp, Magma_DEV, 2, 1, c_zero, queue ));
+    CHECK( magma_zvinit( &dskp, Magma_DEV, 4, 1, c_zero, queue ));
     gpumem += dskp.nnz * sizeof(magmaDoubleComplex);
     CHECK( magma_zvinit( &dalpha, Magma_DEV, s, 1, c_zero, queue ));
     gpumem += dalpha.nnz * sizeof(magmaDoubleComplex);
@@ -290,7 +291,7 @@ magma_zidr_acc(
     gpumem += dbeta.nnz * sizeof(magmaDoubleComplex);
     
     // also on CPU
-    CHECK( magma_zvinit( &skp, Magma_CPU, 2, 1, c_zero, queue ));
+    CHECK( magma_zvinit( &skp, Magma_CPU, 4, 1, c_zero, queue ));
     CHECK( magma_zvinit( &alpha, Magma_CPU, s, 1, c_zero, queue ));
     CHECK( magma_zvinit( &beta, Magma_CPU, s, 1, c_zero, queue ));
     
@@ -326,9 +327,20 @@ magma_zidr_acc(
         CHECK( magma_zmtransfer( *x, &dxs, Magma_DEV, Magma_DEV, queue ));
         gpumem += dxs.nnz * sizeof(magmaDoubleComplex);
 
+        
+        CHECK( magma_zvinit( &drs, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
+        CHECK( magma_zvinit( &dtt, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
+        dtt.num_cols = b.num_cols;
+        // redirect the dr.dval to the second part of dt
+        magma_free( drs.dval );
+        drs.dval = dtt.dval+b.num_rows*b.num_cols;
+        gpumem += dtt.nnz * sizeof(magmaDoubleComplex);
+        dtt.nnz = dtt.num_rows*dtt.num_cols;
+        magma_zcopy( dr.num_rows*dr.num_cols, dr.dval, 1, drs.dval, 1 );
+        
         // set smoothing residual vector
-        CHECK( magma_zmtransfer( dr, &drs, Magma_DEV, Magma_DEV, queue ));
-        gpumem += drs.nnz * sizeof(magmaDoubleComplex);
+        //CHECK( magma_zmtransfer( dr, &drs, Magma_DEV, Magma_DEV, queue ));
+        //gpumem += drs.nnz * sizeof(magmaDoubleComplex);
     }
 
     // G(n,s) = 0
@@ -524,20 +536,28 @@ cudaProfilerStart();
                 //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
                 //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
                 //----MERGED---///
-                magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dt.dval, queue );
-
+                magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
+                /*
                 // |t|
-                dof = dt.num_rows * dt.num_cols;
-                nrmt = magma_dznrm2( dof, dt.dval, inc );
+                dof = dtt.num_rows * dtt.num_cols;
+                nrmt = magma_dznrm2( dof, dtt.dval, inc );
 
                 // gamma = t' rs
-                gamma = magma_zdotc( dt.num_rows, dt.dval, inc, drs.dval, inc );
+                gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc );
 
                 // gamma = gamma / (|t| * |t|)
                 gamma = gamma / (nrmt * nrmt);
-
+                */
+                // merge into mdot
+                CHECK( magma_zmdotc( dof, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+                magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
+                // |t|
+                nrmt = sqrt( MAGMA_Z_REAL ( skp.val[2] ) );
+                // gamma = gamma / (|t| * |t|)
+                gamma = skp.val[3] / skp.val[2];
+                
                 // rs = rs - gamma * t
-                magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
+                magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
                 printMatrix("RS", drs);
 
                 //----MERGED---///
@@ -654,20 +674,28 @@ cudaProfilerStart();
             //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
             //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
             //----MERGED---///
-            magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dt.dval, queue );
-
+            magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
+            /*
             // |t|
             dof = dt.num_rows * dt.num_cols;
-            nrmt = magma_dznrm2( dof, dt.dval, inc );
+            nrmt = magma_dznrm2( dof, dtt.dval, inc );
 
             // gamma = t' rs
-            gamma = magma_zdotc( dt.num_rows, dt.dval, inc, drs.dval, inc );
+            gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc );
 
             // gamma = gamma / (|t| * |t|)
             gamma = gamma / (nrmt * nrmt);
+            */
+            // merge into mdot
+            CHECK( magma_zmdotc( dof, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+            magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
+            // |t|
+            nrmt = sqrt( MAGMA_Z_REAL( skp.val[2] ) );
+            // gamma = gamma / (|t| * |t|)
+            gamma = skp.val[3] / skp.val[2];
 
             // rs = rs - gamma * t
-            magma_zaxpy( drs.num_rows, -gamma, dt.dval, inc, drs.dval, inc );
+            magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
             printMatrix("RS", drs);
 
             //----MERGED---///
@@ -757,7 +785,7 @@ cleanup:
     magma_zmfree( &dv1, queue );
     magma_zmfree( &dv, queue );
     magma_zmfree( &dxs, queue );
-    magma_zmfree( &drs, queue );
+    magma_zmfree( &dtt, queue );
     magma_zmfree( &dskp, queue );
     magma_zmfree( &dalpha, queue );
     magma_zmfree( &dbeta, queue );
