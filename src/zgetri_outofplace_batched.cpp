@@ -10,8 +10,12 @@
 
        @precisions normal z -> s d c
 */
+
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#if defined(USE_CUOPT)    
+#include "cublas_v2.h"
+#endif
 
 /**
     Purpose
@@ -95,6 +99,20 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
     magma_int_t ib, j;
     magma_int_t nb = 256; //256; // BATRF_NB;
+    // FORCING queue to NULL
+    magma_queue_t inputqueue=queue;
+    if(queue != 0 || queue != NULL){
+        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
+        queue = NULL;
+        magmablasSetKernelStream(NULL);
+    }
+#if defined(USE_CUOPT)    
+    cublasHandle_t myhandle;
+    cublasCreate_v2(&myhandle);
+    cublasSetStream(myhandle, queue);
+#else
+    cublasHandle_t myhandle=queue;
+#endif
 
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
@@ -143,9 +161,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magmablas_zlaset_q(MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue);
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvdiagA_array, dinvdiagA, TRI_NB, 0, 0, invdiagA_msize, batchCount, queue);
-
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
 
     //printf(" I am after malloc getri\n");
 
@@ -201,7 +216,12 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     // Apply column interchanges
     magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount, queue);
 
-    magma_queue_sync(cstream);
+    magma_queue_sync(queue);
+    queue =  inputqueue;
+    magmablasSetKernelStream(queue);
+#if defined(USE_CUOPT)    
+    cublasDestroy_v2(myhandle);
+#endif
 
     magma_free(dA_displ);
     magma_free(dW1_displ);

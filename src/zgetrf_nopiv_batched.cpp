@@ -10,8 +10,12 @@
 
    @precisions normal z -> s d c
  */
+
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#if defined(USE_CUOPT)    
+#include "cublas_v2.h"
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -112,11 +116,19 @@ magma_zgetrf_nopiv_batched(
     magma_int_t gemm_crossover = nb > 32 ? 127 : 160;
     // magma_int_t gemm_crossover = 0; // use only stream gemm
 
+    // FORCING queue to NULL
+    magma_queue_t inputqueue=queue;
+    if(queue != 0 || queue != NULL){
+        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
+        queue = NULL;
+        magmablasSetKernelStream(NULL);
+    }
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
+    cublasSetStream(myhandle, queue);
 #else
-    cublasHandle_t myhandle=NULL;
+    cublasHandle_t myhandle=queue;
 #endif
  
 
@@ -172,8 +184,6 @@ magma_zgetrf_nopiv_batched(
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
     // printf(" I am in zgetrfbatched\n");
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
     magma_int_t streamid;
     const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
@@ -189,12 +199,9 @@ magma_zgetrf_nopiv_batched(
 
     for(i = 0; i < min_mn; i+=nb) 
     {
-        magmablasSetKernelStream(NULL);
 
         ib = min(nb, min_mn-i);
         pm = m-i;
-
-
         magma_zdisplace_pointers(dA_displ, dA_array, lda, i, i, batchCount, queue);
         zset_pointer(dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue);
 #if 0
@@ -275,6 +282,9 @@ magma_zgetrf_nopiv_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync(); 
+                    //for(int s=0; s<nbstreams; s++)
+                    //    magma_queue_sync(stream[s]);
+                    magmablasSetKernelStream(NULL);
                 }
                 //-------------------------------------------
                 //          USE BATCHED GEMM
@@ -297,18 +307,15 @@ magma_zgetrf_nopiv_batched(
     }// end of for
 
 fin:
-    magma_queue_sync(NULL);
-
-    for(i=0; i<nbstreams; i++){
-        magma_queue_destroy( stream[i] );
+    magma_queue_sync(queue);
+    for(k=0; k<nbstreams; k++){
+        magma_queue_destroy( stream[k] );
     }
-    magmablasSetKernelStream(cstream);
-
-
+    queue =  inputqueue;
+    magmablasSetKernelStream(queue);
 #if defined(USE_CUOPT)    
     cublasDestroy_v2(myhandle);
 #endif
-
 
     magma_free(dA_displ);
     magma_free(dW0_displ);

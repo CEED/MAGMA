@@ -12,6 +12,9 @@
 */
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#if defined(USE_CUOPT)    
+#include "cublas_v2.h"
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
@@ -110,8 +113,8 @@ magma_zgetrf_batched(
 
 #if defined(ENABLE_TIMER3)
     real_Double_t   tall=0.0, tloop=0., talloc=0., tdalloc=0.;
-    tall   = magma_sync_wtime(0);
-    talloc = magma_sync_wtime(0);
+    tall   = magma_sync_wtime(queue);
+    talloc = magma_sync_wtime(queue);
 #endif
 
     magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
@@ -121,11 +124,19 @@ magma_zgetrf_batched(
     magma_int_t gemm_crossover = nb > 32 ? 127 : 160;
     // magma_int_t gemm_crossover = n; // use only stream gemm
 
+    // FORCING queue to NULL
+    magma_queue_t inputqueue=queue;
+    if(queue != 0 || queue != NULL){
+        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
+        queue = NULL;
+        magmablasSetKernelStream(NULL);
+    }
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
+    cublasSetStream(myhandle, queue);
 #else
-    cublasHandle_t myhandle=NULL;
+    cublasHandle_t myhandle=queue;
 #endif
 
     magma_int_t     **dipiv_displ   = NULL;
@@ -196,8 +207,6 @@ magma_zgetrf_batched(
 
 
     // printf(" I am in zgetrfbatched\n");
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
     magma_int_t streamid;
     const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
@@ -210,15 +219,13 @@ magma_zgetrf_batched(
 
 #if defined(ENABLE_TIMER3)
     printf(" I am after malloc\n");
-    talloc = magma_sync_wtime(0) - talloc;
-    tloop  = magma_sync_wtime(0);
+    talloc = magma_sync_wtime(queue) - talloc;
+    tloop  = magma_sync_wtime(queue);
 #endif
 
 
     for(i = 0; i < min_mn; i+=nb) 
     {
-        magmablasSetKernelStream(NULL);
-
         ib = min(nb, min_mn-i);
         pm = m-i;
         magma_idisplace_pointers(dipiv_displ, ipiv_array, ldda, i, 0, batchCount, queue);
@@ -329,6 +336,9 @@ magma_zgetrf_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync(); 
+                    //for(int s=0; s<nbstreams; s++)
+                    //    magma_queue_sync(stream[s]);
+                    magmablasSetKernelStream(NULL);
                 }
                 //-------------------------------------------
                 //          USE BATCHED GEMM
@@ -351,23 +361,21 @@ magma_zgetrf_batched(
     }// end of for
 
 fin:
-    magma_queue_sync(NULL);
-
+    magma_queue_sync(queue);
 #if defined(ENABLE_TIMER3)
-    tloop   = magma_sync_wtime(0) - tloop;
-    tdalloc = magma_sync_wtime(0);
-
+    tloop   = magma_sync_wtime(queue) - tloop;
+    tdalloc = magma_sync_wtime(queue);
 #endif
-
-    for(i=0; i<nbstreams; i++){
-        magma_queue_destroy( stream[i] );
+    for(k=0; k<nbstreams; k++){
+        magma_queue_destroy( stream[k] );
     }
-    magmablasSetKernelStream(cstream);
-
-
+    queue =  inputqueue;
+    magmablasSetKernelStream(queue);
 #if defined(USE_CUOPT)    
     cublasDestroy_v2(myhandle);
 #endif
+
+
 
     magma_free(dA_displ);
     magma_free(dW0_displ);
@@ -385,8 +393,8 @@ fin:
     magma_free(pivinfo);
 
 #if defined(ENABLE_TIMER3)
-    tdalloc = magma_sync_wtime(0) - tdalloc;
-    tall = magma_sync_wtime(0) - tall;
+    tdalloc = magma_sync_wtime(queue) - tdalloc;
+    tall = magma_sync_wtime(queue) - tall;
     printf("here is the timing from inside zgetrf_batched talloc: %10.5f  tloop: %10.5f tdalloc: %10.5f tall: %10.5f sum: %10.5f\n", talloc, tloop, tdalloc, tall, talloc+tloop+tdalloc );
 #endif
     

@@ -12,7 +12,9 @@
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#if defined(USE_CUOPT)    
 #include "cublas_v2.h"
+#endif
 
 #define PRECISION_z
 
@@ -163,16 +165,22 @@ magma_zgeqrf_expert_batched(
 
     magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0;
     magma_int_t ldw, offset; 
+    magma_int_t gemm_crossover = 100; 
 
+    // FORCING queue to NULL
     magma_queue_t inputqueue=queue;
     if(queue != 0 || queue != NULL){
         printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
         queue = NULL;
         magmablasSetKernelStream(NULL);
     }
+#if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
+#else
+    cublasHandle_t myhandle=queue;
+#endif
 
     magmaDoubleComplex **dW0_displ = NULL;
     magmaDoubleComplex **dW1_displ = NULL;
@@ -248,8 +256,6 @@ magma_zgeqrf_expert_batched(
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1);
 
 
-    magmablasSetKernelStream(NULL);
-
     for(i=0; i < min_mn; i += nb)
     {
             ib = min(nb, min_mn-i);  
@@ -313,7 +319,7 @@ magma_zgeqrf_expert_batched(
                 //-------------------------------------------
                 //          USE STREAM  GEMM
                 //-------------------------------------------
-                if( (m-i) > 100  && (n-i-ib) > 100)   
+                if( (m-i) > gemm_crossover  && (n-i-ib) > gemm_crossover)   
                 { 
                     // But since the code use the NULL stream everywhere, 
                     // so I don't need it, because the NULL stream do the sync by itself
@@ -375,12 +381,15 @@ magma_zgeqrf_expert_batched(
 
     }
 
+    magma_queue_sync(queue);
     for(k=0; k<nbstreams; k++){
         magma_queue_destroy( stream[k] );
     }
     queue =  inputqueue;
     magmablasSetKernelStream(queue);
+#if defined(USE_CUOPT)    
     cublasDestroy_v2(myhandle);
+#endif
 
     magma_free(dW0_displ);
     magma_free(dW1_displ);

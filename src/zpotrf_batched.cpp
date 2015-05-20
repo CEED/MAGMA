@@ -12,6 +12,9 @@
 */
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#if defined(USE_CUOPT)    
+#include "cublas_v2.h"
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
@@ -109,11 +112,19 @@ magma_zpotrf_batched(
     magma_int_t nb = POTRF_NB;
     magma_int_t gemm_crossover = 127; //nb > 32 ? 127 : 160;
 
+    // FORCING queue to NULL
+    magma_queue_t inputqueue=queue;
+    if(queue != 0 || queue != NULL){
+        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
+        queue = NULL;
+        magmablasSetKernelStream(NULL);
+    }
 #if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
+    cublasSetStream(myhandle, queue);
 #else
-    cublasHandle_t myhandle=NULL;
+    cublasHandle_t myhandle=queue;
 #endif
 
     magmaDoubleComplex **dA_displ   = NULL;
@@ -168,8 +179,6 @@ magma_zpotrf_batched(
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
 
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
     magma_int_t streamid;
     const magma_int_t nbstreams=32;
     magma_queue_t stream[nbstreams];
@@ -178,7 +187,6 @@ magma_zpotrf_batched(
     }
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
 
-    magmablasSetKernelStream(NULL);
 
     if (uplo == MagmaUpper) {
         printf("Upper side is unavailable \n");
@@ -251,8 +259,10 @@ magma_zpotrf_batched(
                      // finishing the update at least of the next panel
                      // BUT no need for it as soon as the other portion of the code 
                      // use the NULL stream which do the sync by itself 
-                     //magma_device_sync(); 
-                     magmablasSetKernelStream(NULL);
+                    //magma_device_sync(); 
+                    //for(int s=0; s<nbstreams; s++)
+                    //    magma_queue_sync(stream[s]);
+                    magmablasSetKernelStream(NULL);
                 }
                 else
                 {
@@ -276,17 +286,15 @@ magma_zpotrf_batched(
     }
 
 fin:
-    magma_queue_sync(NULL);
+    magma_queue_sync(queue);
     for(k=0; k<nbstreams; k++){
         magma_queue_destroy( stream[k] );
     }
-    magmablasSetKernelStream(cstream);
-
-
+    queue =  inputqueue;
+    magmablasSetKernelStream(queue);
 #if defined(USE_CUOPT)    
     cublasDestroy_v2(myhandle);
 #endif
-
 
     magma_free(dA_displ);
     magma_free(dW0_displ);
