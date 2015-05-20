@@ -110,12 +110,12 @@ int main( int argc, char** argv)
             zset_pointer(X_array, d_X, 1, 0, 0, incx*Xm, batchCount, opts.queue);
             zset_pointer(Y_array, d_Y, 1, 0, 0, incy*Ym, batchCount, opts.queue);
 
-            magma_time = magma_sync_wtime( NULL );
+            magma_time = magma_sync_wtime(opts.queue);
             magmablas_zgemv_batched(opts.transA, M, N,
                              alpha, A_array, ldda,
                                     X_array, incx,
                              beta,  Y_array, incy, batchCount, opts.queue);
-            magma_time = magma_sync_wtime( NULL ) - magma_time;
+            magma_time = magma_sync_wtime(opts.queue) - magma_time;
             magma_perf = gflops / magma_time;
             magma_zgetvector( Ym*batchCount, d_Y, incy, h_Ymagma, incy );
             
