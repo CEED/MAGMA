@@ -55,7 +55,7 @@
     ********************************************************************/
 
 #define MYDEBUG 0
-#define WRITEP 1
+#define WRITEP 0
 
 #if MYDEBUG == 1
 #define printD(...) printf(__VA_ARGS__)
@@ -115,7 +115,7 @@ magma_zidr_acc(
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
     // internal user options
-    const magma_int_t smoothing = 0;   // 1 = enable, 0 = disabled
+    const magma_int_t smoothing = 1;   // 1 = enable, 0 = disabled
     const double angle = 0.7;          // [0-1]
 
     // local variables
@@ -329,7 +329,7 @@ magma_zidr_acc(
 
         
         CHECK( magma_zvinit( &drs, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
-        CHECK( magma_zvinit( &dtt, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
+        CHECK( magma_zvinit( &dtt, Magma_DEV, dr.num_rows, 2*dr.num_cols, c_zero, queue ));
         dtt.num_cols = b.num_cols;
         // redirect the dr.dval to the second part of dt
         magma_free( drs.dval );
@@ -519,6 +519,10 @@ cudaProfilerStart();
             beta.val[k] = fk / mkk;
             printD("beta: k ...................%d, (%f, %f)\n", k, MAGMA_Z_REAL(beta.val[k]), MAGMA_Z_IMAG(beta.val[k]));
 
+            // x = x + beta * U(:,k)
+            //magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.num_rows], inc, x->dval, inc );
+            //printMatrix("X", *x);
+            
             // make r orthogonal to q_i, i = 1..k
             // r = r - beta * G(:,k)
             magma_zaxpy( dr.num_rows, -beta.val[k], &dG.dval[k*dG.ld], 1, dr.dval, 1 );
@@ -533,8 +537,8 @@ cudaProfilerStart();
 //---------------------------------------
                 //----MERGED---///
                 // t = rs - r
-                //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-                //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+                //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dtt.dval, inc );
+                //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dtt.dval, inc );
                 //----MERGED---///
                 magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
                 /*
@@ -555,7 +559,7 @@ cudaProfilerStart();
                 nrmt = sqrt( MAGMA_Z_REAL ( skp.val[2] ) );
                 // gamma = gamma / (|t| * |t|)
                 gamma = skp.val[3] / skp.val[2];
-                
+
                 // rs = rs - gamma * t
                 magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
                 printMatrix("RS", drs);
@@ -568,7 +572,7 @@ cudaProfilerStart();
                 // xs = xs - gamma * t
                 //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
                 //----MERGED---///
-                magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
+                magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, gamma, x->dval, dxs.dval, queue );
                 printMatrix("XS", dxs);
 
                 // |rs|
@@ -671,8 +675,8 @@ cudaProfilerStart();
 //---------------------------------------
             //----MERGED---///
             // t = rs - r
-            //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-            //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+            //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dtt.dval, inc );
+            //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dtt.dval, inc );
             //----MERGED---///
             magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
             /*
@@ -706,7 +710,7 @@ cudaProfilerStart();
             // xs = xs - gamma * t
             //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
             //----MERGED---///
-            magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
+            magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, gamma, x->dval, dxs.dval, queue );
             printMatrix("XS", dxs);
 
             // |rs|
