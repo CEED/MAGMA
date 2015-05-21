@@ -249,15 +249,16 @@ static __device__ void zpotf2_device(int m, int n,
         //magma_sum_reduce_n(iter, tx, sum); //tried on K40: if m=32 n=32 the time went from 61ms to 70ms when switching to reduce_n. n=16 time=28.
         //magma_sum_reduce_inlined(iter, tx, sum); //tried on K40: similar to magma_sum_reduce<POTF2_TILE_SIZE>(tx, sum);
         
+        __shared__ double xreal;
         if (tx == 0) {
-              double xreal = MAGMA_Z_REAL(sdata_A[iter + iter * m]);        
+              xreal = MAGMA_Z_REAL(sdata_A[iter + iter * m]);        
               sdata_A[iter + iter * m] = MAGMA_Z_MAKE(sqrt(xreal - sum[0]), 0);
-              if(sdata_A[iter + iter * m] == MAGMA_Z_ZERO){
+              if(xreal <= MAGMA_D_ZERO){
                   *info = iter + gbstep + 1;
               }
         }
         __syncthreads();
-        if(sdata_A[iter + iter * m] == MAGMA_Z_ZERO) return;
+        if(xreal == MAGMA_D_ZERO) return;
         __syncthreads();
 
         //zlacgv conjugates a complex vector of length iter. //TODO
