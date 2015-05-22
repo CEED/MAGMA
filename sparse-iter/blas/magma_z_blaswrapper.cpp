@@ -185,12 +185,13 @@ magma_z_spmv(
                     &alpha, descr, A.dval, A.drow, A.dcol,
                     x.dval, A.num_cols, &beta, y.dval, A.num_cols);
                 } else if ( x.major == MagmaRowMajor) {
-                    cusparseZcsrmm2(cusparseHandle,
+                    /*cusparseZcsrmm2(cusparseHandle,
                     CUSPARSE_OPERATION_NON_TRANSPOSE,
                     CUSPARSE_OPERATION_TRANSPOSE,
                     A.num_rows,   num_vecs, A.num_cols, A.nnz,
                     &alpha, descr, A.dval, A.drow, A.dcol,
                     x.dval, A.num_cols, &beta, y.dval, A.num_cols);
+                    */
                 }
              } else if ( A.storage_type == Magma_SELLP ) {
                 if ( x.major == MagmaRowMajor) {
