@@ -86,7 +86,7 @@ magma_zidr_smoothing_1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zidr_smoothing_1_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, drs, dr, dt);
+    magma_zidr_smoothing_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, drs, dr, dt );
 
    return MAGMA_SUCCESS;
 }
@@ -104,8 +104,8 @@ magma_zidr_smoothing_2_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            dxs[ i+j*num_rows ] = dxs[ i+j*num_rows ] - omega * dxs[ i+j*num_rows ]
-                    + omega * dx[ i+j*num_rows ] ;;
+            dxs[ i+j*num_rows ] = dxs[ i+j*num_rows ] + omega * ( dxs[ i+j*num_rows ]
+                    + dx[ i+j*num_rows ] );
         }
     }
 }
@@ -160,7 +160,7 @@ magma_zidr_smoothing_2(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zidr_smoothing_2_kernel<<<Gs, Bs, 0>>>( num_rows, num_cols, omega, dx, dxs);
+    magma_zidr_smoothing_2_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, omega, dx, dxs);
 
    return MAGMA_SUCCESS;
 }
