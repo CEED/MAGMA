@@ -489,10 +489,10 @@ magma_zmdotc(
     int b = 1;        
 
     if (k>1) {
-        magma_zblockdot_kernel<<<Gs, Bs, Ms>>>( Gs.x, n, k, v, r, d1 );
+        magma_zblockdot_kernel<<<Gs, Bs, Ms, queue>>>( Gs.x, n, k, v, r, d1 );
     }
     else {
-        magma_zdot_kernel<<<Gs, Bs, Ms>>>( Gs.x, n, v, r, d1 );
+        magma_zdot_kernel<<<Gs, Bs, Ms, queue>>>( Gs.x, n, v, r, d1 );
     }
 /*
     // not necessary to zero GPU mem

@@ -105,7 +105,7 @@ magma_zidr_smoothing_2_kernel(
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
             dxs[ i+j*num_rows ] = dxs[ i+j*num_rows ] + omega * ( dxs[ i+j*num_rows ]
-                    + dx[ i+j*num_rows ] );
+                    - dx[ i+j*num_rows ] );
         }
     }
 }
