@@ -54,7 +54,7 @@
     @ingroup magmasparse_zposv
     ********************************************************************/
 
-#define MYDEBUG 3   // 0 = no printing, 1 = print scalars, 2 = print all (few iters), >2 = prints all (all iters)
+#define MYDEBUG 0   // 0 = no printing, 1 = print scalars, 2 = print all (few iters), >2 = prints all (all iters)
 #define WRITEP 1
 
 #if MYDEBUG == 0
@@ -225,6 +225,7 @@ magma_zidr(
 
     // transfer P1 to device
     CHECK( magma_zmtransfer( P1, &dP1, Magma_CPU, Magma_DEV, queue ));
+    dP1.major = P1.major;
     magma_zmfree( &P1, queue );
 
     // P = ortho(P1)
@@ -238,7 +239,7 @@ magma_zidr(
         nrm = 1.0 / nrm;
         magma_zdscal( dof, nrm, dP1.dval, inc );
         CHECK( magma_zmtransfer( dP1, &dP, Magma_DEV, Magma_DEV, queue ));
-        dP.major = P1.major;
+        dP.major = dP1.major;
     }
     magma_zmfree(&dP1, queue );
 //---------------------------------------
@@ -287,10 +288,12 @@ magma_zidr(
     if ( smoothing == 1 ) {
         // set smoothing solution vector
         CHECK( magma_zmtransfer( *x, &dxs, Magma_DEV, Magma_DEV, queue ));
+        dxs.major = x->major;
         gpumem += dxs.nnz * sizeof(magmaDoubleComplex);
 
         // set smoothing residual vector
         CHECK( magma_zmtransfer( dr, &drs, Magma_DEV, Magma_DEV, queue ));
+        drs.major = dr.major;
         gpumem += drs.nnz * sizeof(magmaDoubleComplex);
     }
 
@@ -379,7 +382,7 @@ cudaProfilerStart();
             // v1 = v1 - G(:,k:s) c(k:s)
             magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, &dG.dval[k*dG.num_rows], dG.num_rows, &dc.dval[k], inc, c_one, dv1.dval, inc );
 //---------------------------------------
-            printMatrix("V1", dv1);
+            printMatrix("V", dv1);
 
             // compute new U
             // U(:,k) = om * v1 + U(:,k:s) c(k:s)
@@ -424,8 +427,12 @@ cudaProfilerStart();
 
                 // U(:,k) = U(:,k) - alpha * U(:,i)
                 magma_zaxpy( dU.num_rows, -alpha, &dU.dval[i*dU.num_rows], inc, &dU.dval[k*dU.num_rows], inc );
+            }
+#if MYDEBUG > 0
+            if ( k > 0 ) {
                 printMatrix("U", dU);
             }
+#endif
 
             // new column of M = P'G, first k-1 entries are zero
             // M(k:s,k) = (G(:,k)' P(:,k:s))' = P(:,k:s)' G(:,k)
@@ -546,7 +553,6 @@ cudaProfilerStart();
 
         // v = r
         magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, inc, dv.dval, inc );
-        printMatrix("V", dv);
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
