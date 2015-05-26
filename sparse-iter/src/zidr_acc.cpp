@@ -854,7 +854,7 @@ magmablasSetKernelStream( queues[1] );
             // Q1
             magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
             printMatrix("RS", drs);
-
+            
             // xs = xs - gamma * (xs - x) 
             // Q0
             magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, gamma, x->dval, dxs.dval, queues[0] );

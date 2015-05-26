@@ -22,7 +22,7 @@ zdiagcheck_kernel(
     magmaDoubleComplex_ptr dval, 
     magmaIndex_ptr drowptr, 
     magmaIndex_ptr dcolind,
-    magma_int_t * dinfo )
+    magma_index_t * dinfo )
 {
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
@@ -74,9 +74,9 @@ magma_zdiagcheck(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    magma_int_t *hinfo = NULL;
+    magma_index_t *hinfo = NULL;
     
-    magma_int_t * dinfo = NULL;
+    magma_index_t * dinfo = NULL;
     dim3 grid( magma_ceildiv( dA.num_rows, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
     
