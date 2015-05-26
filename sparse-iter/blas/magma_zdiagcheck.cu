@@ -22,7 +22,7 @@ zdiagcheck_kernel(
     magmaDoubleComplex_ptr dval, 
     magmaIndex_ptr drowptr, 
     magmaIndex_ptr dcolind,
-    magma_index_t * dinfo )
+    magma_int_t * dinfo )
 {
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
@@ -74,20 +74,20 @@ magma_zdiagcheck(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    magma_index_t *hinfo = NULL;
+    magma_int_t *hinfo = NULL;
     
-    magma_index_t * dinfo = NULL;
+    magma_int_t * dinfo = NULL;
     dim3 grid( magma_ceildiv( dA.num_rows, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
     
     CHECK( magma_imalloc( &dinfo, 1 ) );
     CHECK( magma_imalloc_cpu( &hinfo, 1 ) );
     hinfo[0] = 0;
-    magma_index_setvector( 1, hinfo, 1, dinfo, 1 );
+    magma_isetvector( 1, hinfo, 1, dinfo, 1 );
     zdiagcheck_kernel<<< grid, threads, 0, queue >>>
     ( dA.num_rows, dA.num_cols, dA.dval, dA.drow, dA.dcol, dinfo );
     info = hinfo[0];
-    magma_index_getvector( 1, dinfo, 1, hinfo, 1 ); 
+    magma_igetvector( 1, dinfo, 1, hinfo, 1 ); 
     info = hinfo[0];
     
 cleanup:
