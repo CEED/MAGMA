@@ -89,9 +89,9 @@ magma_zcumilusetup(
 #if CUDA_VERSION >= 7000
     // this version has the bug fixed where a zero on the diagonal causes a crash
     CHECK_CUSPARSE( cusparseCreateCsrilu02Info(&info_M) );
-    magma_int_t buffersize;
-    magma_int_t structural_zero;
-    magma_int_t numerical_zero;
+    int buffersize;
+    int structural_zero;
+    int numerical_zero;
     
     CHECK_CUSPARSE(
     cusparseZcsrilu02_bufferSize( cusparseHandle,
@@ -521,9 +521,9 @@ magma_zcumiccsetup(
     CHECK_CUSPARSE( cusparseCreateCsric02Info(&info_M) );
     CHECK_CUSPARSE( cusparseSetMatType( descrA, CUSPARSE_MATRIX_TYPE_GENERAL ));
     CHECK_CUSPARSE( cusparseSetMatIndexBase( descrA, CUSPARSE_INDEX_BASE_ZERO ));
-    magma_int_t buffersize;
-    magma_int_t structural_zero;
-    magma_int_t numerical_zero;
+    int buffersize;
+    int structural_zero;
+    int numerical_zero;
     
     CHECK_CUSPARSE(
     cusparseZcsric02_bufferSize( cusparseHandle,
