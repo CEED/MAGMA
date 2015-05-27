@@ -105,7 +105,6 @@ magma_zidr(
     // set queue for old dense routines
     magma_queue_t orig_queue = NULL;
     magmablasGetKernelStream( &orig_queue );
-    queue = orig_queue;
 
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
@@ -160,11 +159,21 @@ magma_zidr(
     magma_z_matrix drs = {Magma_CSR};
     magma_z_matrix dbeta = {Magma_CSR}, beta = {Magma_CSR};
 
+    // queue variables
+    const magma_queue_t squeue = 0;    // synchronous kernel queues
+
     // performance variables
     long long int gpumem = 0;
 
     // chronometry
     real_Double_t tempo1, tempo2;
+   
+    // set synchrounous kernel queues
+    queue = squeue;
+    printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
+
+// Set to Q
+    magmablasSetKernelStream( queue );
 
     // initial s space
     // hack --> use "--restart" option as the shadow space number
@@ -366,10 +375,12 @@ cudaProfilerStart();
             // f(k:s) = M(k:s,k:s) c(k:s)
 //---------------------------------------
             // c(k:s) = f(k:s)
-            magma_zcopy( sk, &df.dval[k], inc, &dc.dval[k], inc );
+            //magma_zcopy( sk, &df.dval[k], inc, &dc.dval[k], inc );
+            magma_zcopyvector( sk, &df.dval[k], inc, &dc.dval[k], inc );
 
             // M1 = M
-            magma_zcopy( dM.num_rows * dM.num_cols, dM.dval, inc, dM1.dval, inc );
+            //magma_zcopy( dM.num_rows * dM.num_cols, dM.dval, inc, dM1.dval, inc );
+            magma_zcopyvector( dM.num_rows * dM.num_cols, dM.dval, inc, dM1.dval, inc );
 
             // c(k:s) = M1(k:s,k:s) \ c(k:s)
             CHECK( magma_zgesv_gpu( sk, dc.num_cols, &dM1.dval[k*dM1.num_rows+k], dM1.num_rows, piv, &dc.dval[k], dc.num_rows, &info ) );
@@ -379,7 +390,8 @@ cudaProfilerStart();
             // v1 = r - G(:,k:s) c(k:s)
 //---------------------------------------
             // v1 = r
-            magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, inc, dv1.dval, inc );
+            //magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, inc, dv1.dval, inc );
+            magma_zcopyvector( dr.num_rows * dr.num_cols, dr.dval, inc, dv1.dval, inc );
 
             // v1 = v1 - G(:,k:s) c(k:s)
             magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, &dG.dval[k*dG.num_rows], dG.num_rows, &dc.dval[k], inc, c_one, dv1.dval, inc );
@@ -393,7 +405,8 @@ cudaProfilerStart();
             magmablas_zgemv( MagmaNoTrans, dU.num_rows, sk, c_one, &dU.dval[k*dU.num_rows], dU.num_rows, &dc.dval[k], inc, om, dv1.dval, inc );
 
             // U(:,k) = v1
-            magma_zcopy( dU.num_rows, dv1.dval, inc, &dU.dval[k*dU.num_rows], inc );
+            //magma_zcopy( dU.num_rows, dv1.dval, inc, &dU.dval[k*dU.num_rows], inc );
+            magma_zcopyvector( dU.num_rows, dv1.dval, inc, &dU.dval[k*dU.num_rows], inc );
 //---------------------------------------
             printMatrix("U", dU);
 
@@ -404,7 +417,8 @@ cudaProfilerStart();
             CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dv, queue ));
 
             // G(:,k) = v
-            magma_zcopy( dG.num_rows, dv.dval, inc, &dG.dval[k*dG.num_rows], inc );
+            //magma_zcopy( dG.num_rows, dv.dval, inc, &dG.dval[k*dG.num_rows], inc );
+            magma_zcopyvector( dG.num_rows, dv.dval, inc, &dG.dval[k*dG.num_rows], inc );
 //---------------------------------------
             printMatrix("G", dG);
 
@@ -481,7 +495,8 @@ cudaProfilerStart();
                 // smoothing operation
 //---------------------------------------
                 // t = rs - r
-                magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+                //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+                magma_zcopyvector( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
                 magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
 
                 // |t|
@@ -499,7 +514,8 @@ cudaProfilerStart();
                 printMatrix("RS", drs);
 
                 // t = xs - x
-                magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+                //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+                magma_zcopyvector( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
                 magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
 
                 // xs = xs - gamma * t
@@ -554,7 +570,8 @@ cudaProfilerStart();
         }
 
         // v = r
-        magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, inc, dv.dval, inc );
+        //magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, inc, dv.dval, inc );
+        magma_zcopyvector( dr.num_rows * dr.num_cols, dr.dval, inc, dv.dval, inc );
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
@@ -603,7 +620,8 @@ cudaProfilerStart();
             // smoothing operation
 //---------------------------------------
             // t = rs - r
-            magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+            //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
+            magma_zcopyvector( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
             magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
 
             // |t|
@@ -621,7 +639,8 @@ cudaProfilerStart();
             printMatrix("RS", drs);
 
             // t = xs - x
-            magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+            //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
+            magma_zcopyvector( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
             magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
 
             // xs = xs - gamma * t
@@ -660,8 +679,10 @@ cudaProfilerStart();
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
 
     if ( smoothing > 0 ) {
-        magma_zcopy( dr.num_rows * dr.num_cols, drs.dval, 1, dr.dval, 1 );
-        magma_zcopy( x->num_rows * x->num_cols, dxs.dval, 1, x->dval, 1 );
+        //magma_zcopy( dr.num_rows * dr.num_cols, drs.dval, 1, dr.dval, 1 );
+        magma_zcopyvector( dr.num_rows * dr.num_cols, drs.dval, 1, dr.dval, 1 );
+        //magma_zcopy( x->num_rows * x->num_cols, dxs.dval, 1, x->dval, 1 );
+        magma_zcopyvector( x->num_rows * x->num_cols, dxs.dval, 1, x->dval, 1 );
     }
 
 cudaProfilerStop();
@@ -692,11 +713,8 @@ cudaProfilerStop();
     }
 //---------------------------------------
 
-#if MYDEBUG != 0
     // print local stats
     printD("GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
-#endif
-    
     
 cleanup:
     // free resources
