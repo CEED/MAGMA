@@ -54,20 +54,24 @@
     @ingroup magmasparse_zposv
     ********************************************************************/
 
-#define MYDEBUG 0   // 0 = no printing, 1 = print scalars, 2 = print all (few iters), >2 = prints all (all iters)
-#define WRITEP 1
+// -1 = no print but write iniital p
+//  0 = no printing
+//  1 = print scalars
+//  2 = print all (few iters)
+// >2 = prints all (all iters)
+#define MYDEBUG 0
 
-#if MYDEBUG == 0
+#if MYDEBUG <= 0
 #define printD(...)
 #define printMatrix(s,m)
 #elif MYDEBUG == 1
-#define printD(...) printf(__VA_ARGS__)
+#define printD(...) printf("%% " __VA_ARGS__)
 #define printMatrix(s,m)
 #elif MYDEBUG == 2
-#define printD(...) printf(__VA_ARGS__)
+#define printD(...) printf("%% " __VA_ARGS__)
 #define printMatrix(s,m) magma_zmatrixInfo(s,m)
 #else
-#define printD(...) printf(__VA_ARGS__)
+#define printD(...) printf("%% " __VA_ARGS__)
 #define printMatrix(s,m) magma_zmatrixInfo(s,m)
 #endif
 
@@ -80,11 +84,11 @@ magma_zmatrixInfo(
     const char *s,
     magma_z_matrix A ) {
 
-    printf(" %s dims = %d x %d\n", s, A.num_rows, A.num_cols);
-    printf(" %s location = %d = %s\n", s, A.memory_location, (A.memory_location == Magma_CPU) ? "CPU" : "DEV");
-    printf(" %s storage = %d = %s\n", s, A.storage_type, (A.storage_type == Magma_CSR) ? "CSR" : "DENSE");
-    printf(" %s major = %d = %s\n", s, A.major, (A.major == MagmaRowMajor) ? "row" : "column");
-    printf(" %s nnz = %d\n", s, A.nnz);
+    printD(" %s dims = %d x %d\n", s, A.num_rows, A.num_cols);
+    printD(" %s location = %d = %s\n", s, A.memory_location, (A.memory_location == Magma_CPU) ? "CPU" : "DEV");
+    printD(" %s storage = %d = %s\n", s, A.storage_type, (A.storage_type == Magma_CSR) ? "CSR" : "DENSE");
+    printD(" %s major = %d = %s\n", s, A.major, (A.major == MagmaRowMajor) ? "row" : "column");
+    printD(" %s nnz = %d\n", s, A.nnz);
     if (A.memory_location == Magma_DEV)
         magma_zprint_gpu( A.num_rows, A.num_cols, A.dval, A.num_rows );
     else
@@ -101,13 +105,14 @@ magma_zidr(
     // set queue for old dense routines
     magma_queue_t orig_queue = NULL;
     magmablasGetKernelStream( &orig_queue );
+    queue = orig_queue;
 
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
     solver_par->numiter = 0;
     solver_par->info = MAGMA_SUCCESS;
 
-    // local constants
+    // constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     const magmaDoubleComplex c_one = MAGMA_Z_ONE;
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
@@ -141,7 +146,7 @@ magma_zidr(
     magmaDoubleComplex mkk;
     magmaDoubleComplex fk;
 
-    // local matrices and vectors
+    // matrices and vectors
     magma_z_matrix P1 = {Magma_CSR}, dP1 = {Magma_CSR}, dP = {Magma_CSR};
     magma_z_matrix dr = {Magma_CSR};
     magma_z_matrix dG = {Magma_CSR};
@@ -155,20 +160,11 @@ magma_zidr(
     magma_z_matrix drs = {Magma_CSR};
     magma_z_matrix dbeta = {Magma_CSR}, beta = {Magma_CSR};
 
-    // local performance variables
+    // performance variables
     long long int gpumem = 0;
 
     // chronometry
     real_Double_t tempo1, tempo2;
-
-    gpumem += (A.nnz * sizeof(magmaDoubleComplex)) + (A.nnz * sizeof(magma_index_t)) + ((A.num_rows + 1) * sizeof(magma_index_t));
-
-    // check if matrix A is square
-    if ( A.num_rows != A.num_cols ) {
-        printD("Error! matrix must be square.\n");
-        info = MAGMA_ERR;
-        goto cleanup;
-    }
 
     // initial s space
     // hack --> use "--restart" option as the shadow space number
@@ -182,7 +178,15 @@ magma_zidr(
     solver_par->restart = s;
 
     // set max iterations
-    solver_par->maxiter = MIN(2 * A.num_cols, solver_par->maxiter);
+    solver_par->maxiter = MIN( 2 * A.num_cols, solver_par->maxiter );
+
+    // check if matrix A is square
+    if ( A.num_rows != A.num_cols ) {
+        printD("Error! matrix must be square.\n");
+        info = MAGMA_ERR;
+        goto cleanup;
+    }
+    gpumem += (A.nnz * sizeof(magmaDoubleComplex)) + (A.nnz * sizeof(magma_index_t)) + ((A.num_rows + 1) * sizeof(magma_index_t));
 
     // initial solution vector
     // x = 0
@@ -198,16 +202,42 @@ magma_zidr(
 
     // |b|
     nrmb = magma_dznrm2( b.num_rows, b.dval, inc );
+    printD("init norm(b) ..........%lg\n", nrmb);
 
     // check for |b| == 0
-    printD("init norm(b) ..........%lg\n", nrmb);
     if ( nrmb == 0.0 ) {
         printD("RHS is zero, exiting...\n");
-        magma_zscal( x->num_rows*x->num_cols, MAGMA_Z_ZERO, x->dval, inc );
+        magma_zscal( x->num_rows * x->num_cols, MAGMA_Z_ZERO, x->dval, inc );
         solver_par->init_res = 0.0;
         solver_par->final_res = 0.0;
         solver_par->iter_res = 0.0;
         solver_par->runtime = 0.0;
+        goto cleanup;
+    }
+
+    // relative tolerance
+    tolb = nrmb * solver_par->epsilon;
+    if ( tolb < ATOLERANCE ) {
+        tolb = ATOLERANCE;
+    }
+
+    CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
+    gpumem += dr.nnz * sizeof(magmaDoubleComplex);
+
+    // r = b - A x
+    CHECK(  magma_zresidualvec( A, b, *x, &dr, &nrmr, queue ));
+    printMatrix("R", dr);
+    
+    // |r|
+    solver_par->init_res = nrmr;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t)nrmr;
+    }
+   
+    // check if initial is guess good enough
+    if ( nrmr <= tolb ) {
+        solver_par->final_res = solver_par->init_res;
+        solver_par->iter_res = solver_par->init_res;
         goto cleanup;
     }
 
@@ -231,7 +261,7 @@ magma_zidr(
     // P = ortho(P1)
     if ( dP1.num_cols > 1 ) {
         // P = magma_zqr(P1), QR factorization
-        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, dP1.ld, &dP, NULL, queue ) );
+        CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, dP1.ld, &dP, NULL, queue ));
     } else {
         // P = P1 / |P1|
         dof = dP1.num_rows * dP1.num_cols;        // can remove
@@ -246,46 +276,18 @@ magma_zidr(
     printMatrix("P", dP);
     gpumem += dP.nnz * sizeof(magmaDoubleComplex);
 
-#if WRITEP == 1
+#if MYDEBUG == -1
     // Note: write P matrix to file to use in MATLAB for validation
     printf("P = ");
     magma_zprint_gpu( dP.num_rows, dP.num_cols, dP.dval, dP.num_rows );
 #endif
 
-    // initial residual
-    // r = b - A x
-    CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
-    CHECK(  magma_zresidualvec( A, b, *x, &dr, &nrmr, queue));
-
-    printMatrix("R" , dr);
-    gpumem += dr.nnz * sizeof(magmaDoubleComplex);
-    
     // allocate memory for the scalar products
-    CHECK( magma_zvinit( &dbeta, Magma_DEV, s, 1, c_zero, queue ));
-
-    // also on CPU
     CHECK( magma_zvinit( &beta, Magma_CPU, s, 1, c_zero, queue ));
+    CHECK( magma_zvinit( &dbeta, Magma_DEV, s, 1, c_zero, queue ));
+    gpumem += dbeta.nnz * sizeof(magmaDoubleComplex);
 
-    // |r|
-    solver_par->init_res = nrmr;
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = (real_Double_t)nrmr;
-    }
-   
-    // relative tolerance
-    tolb = nrmb * solver_par->epsilon;
-    if ( tolb < ATOLERANCE ) {
-        tolb = ATOLERANCE;
-    }
-
-    // check if initial is guess good enough
-    if ( nrmr <= tolb ) {
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
-        goto cleanup;
-    }
-
-    if ( smoothing == 1 ) {
+    if ( smoothing > 0 ) {
         // set smoothing solution vector
         CHECK( magma_zmtransfer( *x, &dxs, Magma_DEV, Magma_DEV, queue ));
         dxs.major = x->major;
@@ -310,7 +312,7 @@ magma_zidr(
     CHECK( magma_zvinit( &dM1, Magma_DEV, s, s, c_zero, queue ));
     CHECK( magma_zvinit( &dM, Magma_DEV, s, s, c_zero, queue ));
     magmablas_zlaset( MagmaFull, s, s, c_zero, c_one, dM.dval, s );
-    gpumem += 2 * dM.nnz * sizeof(magmaDoubleComplex);
+    gpumem += (dM1.nnz + dM.nnz) * sizeof(magmaDoubleComplex);
 
     // f = 0
     CHECK( magma_zvinit( &df, Magma_DEV, dP.num_cols, dr.num_cols, c_zero, queue ));
@@ -321,14 +323,14 @@ magma_zidr(
     gpumem += dt.nnz * sizeof(magmaDoubleComplex);
 
     // c = 0
-    CHECK( magma_zvinit( &dc, Magma_DEV, dM.num_cols, df.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &dc, Magma_DEV, dM.num_cols, dr.num_cols, c_zero, queue ));
     gpumem += dc.nnz * sizeof(magmaDoubleComplex);
 
     // v1 = 0
     // v = 0
     CHECK( magma_zvinit( &dv1, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &dv, Magma_DEV, dr.num_rows, dr.num_cols, c_zero, queue ));
-    gpumem += 2 * dv.nnz * sizeof(magmaDoubleComplex);
+    gpumem += (dv1.nnz + dv.nnz) * sizeof(magmaDoubleComplex);
 
     // piv = 0
     CHECK( magma_imalloc_pinned(&piv, s));
@@ -523,7 +525,7 @@ cudaProfilerStart();
 
             // check convergence or iteration limit
             if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
-                s = k;
+                s = k; // for the x-update outside the loop
                 innerflag = 1;
                 break;
             }
@@ -690,9 +692,9 @@ cudaProfilerStop();
     }
 //---------------------------------------
 
-#if MYDEBUG > 0 || WRITEP == 1
+#if MYDEBUG != 0
     // print local stats
-    printf("GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
+    printD("GPU memory = %f MB\n", (real_Double_t)gpumem / (1<<20));
 #endif
     
     
