@@ -319,7 +319,7 @@ const char *magma2lapack_constants[] =
 };
 
 extern "C"
-const char* lapack_const( int magma_const )
+const char* lapack_const_str( int magma_const )
 {
     assert( magma_const >= Magma2lapack_Min );
     assert( magma_const <= Magma2lapack_Max );

@@ -606,9 +606,14 @@ magma_storev_t magma_storev_const( char lapack_char );
 
 // --------------------
 // Convert MAGMA constants to LAPACK(E) constants.
-// The generic lapack_const works for all cases, but the specific routines
+// The generic lapack_const_str works for all cases, but the specific routines
 // (e.g., lapack_trans_const) do better error checking.
-const char* lapack_const       ( int            magma_const );
+
+// magma  defines lapack_const_str, which returns char* to call lapack (Fortran interface).
+// plasma defines lapack_const, which is roughly the same as MAGMA's lapacke_const
+// (returns a char instead of char*) to call lapacke (C interface).
+
+const char* lapack_const_str   ( int            magma_const );
 const char* lapack_bool_const  ( magma_bool_t   magma_const );
 const char* lapack_order_const ( magma_order_t  magma_const );
 const char* lapack_trans_const ( magma_trans_t  magma_const );
@@ -625,7 +630,7 @@ const char* lapack_vect_const  ( magma_vect_t   magma_const );
 const char* lapack_direct_const( magma_direct_t magma_const );
 const char* lapack_storev_const( magma_storev_t magma_const );
 
-static inline char lapacke_const       ( int magma_const            ) { return *lapack_const       ( magma_const ); }
+static inline char lapacke_const       ( int magma_const            ) { return *lapack_const_str   ( magma_const ); }
 static inline char lapacke_bool_const  ( magma_bool_t   magma_const ) { return *lapack_bool_const  ( magma_const ); }
 static inline char lapacke_order_const ( magma_order_t  magma_const ) { return *lapack_order_const ( magma_const ); }
 static inline char lapacke_trans_const ( magma_trans_t  magma_const ) { return *lapack_trans_const ( magma_const ); }
