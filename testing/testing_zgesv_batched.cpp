@@ -22,6 +22,10 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesv_batched
@@ -66,7 +70,7 @@ int main(int argc, char **argv)
             ldb    = lda;
             ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             lddb   = ldda;
-            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) / 1e9 * batchCount;
+            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) * batchCount / 1e9 ;
             
             sizeA = lda*N*batchCount;
             sizeB = ldb*nrhs*batchCount;
@@ -75,7 +79,7 @@ int main(int argc, char **argv)
             TESTING_MALLOC_CPU( h_B, magmaDoubleComplex, sizeB );
             TESTING_MALLOC_CPU( h_X, magmaDoubleComplex, sizeB );
             TESTING_MALLOC_CPU( work, double,      N);
-            TESTING_MALLOC_CPU( ipiv, magma_int_t, N);
+            TESTING_MALLOC_CPU( ipiv, magma_int_t, batchCount*N);
             TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N*batchCount    );
@@ -148,16 +152,44 @@ int main(int argc, char **argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                for (magma_int_t s=0; s < batchCount; s++)
-                {
-                    lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv, h_B + s * ldb * nrhs, &ldb, &info );
-                }
+                //#define BATCHED_DISABLE_PARCPU
+                #ifndef BATCHED_DISABLE_PARCPU 
+                    magma_int_t nthreads=1;
+                    #if defined(_OPENMP)
+                    nthreads = magma_get_lapack_numthreads();
+                    #pragma omp parallel  num_threads(nthreads)
+                    {
+                    magma_set_lapack_numthreads(1);
+                    #endif
+                    magma_int_t cnt, thid, offset, ipivoff, locinfo, rhsoff;
+                    for(cnt=0; cnt<batchCount; cnt+=nthreads){
+                        #if defined(_OPENMP)
+                        thid    = omp_get_thread_num();
+                        #endif
+                        offset  = (thid+cnt)*N*lda;
+                        rhsoff  = (thid+cnt)*nrhs*ldb;
+                        ipivoff = (thid+cnt)*N;
+                        if( (thid+cnt) < batchCount) 
+                        {
+                            lapackf77_zgesv( &N, &nrhs, h_A + offset, &lda, ipiv + ipivoff, h_B + rhsoff, &ldb, &locinfo );
+                            if(locinfo != 0)
+                                printf("Parallel-Batched lapackf77_zgesv matrix %d returned err %d: %s.\n", (int) thid+cnt, (int) locinfo, magma_strerror( locinfo ));
+                        }
+                    }
+                    #if defined(_OPENMP)
+                    }
+                    magma_set_lapack_numthreads(nthreads);
+                    #endif
+                #else
+                    for (magma_int_t s=0; s < batchCount; s++)
+                    {
+                        lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv + s * N, h_B + s * ldb * nrhs, &ldb, &info );
+                        if (info != 0)
+                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n", (int) s, (int) info, magma_strerror( info ));
+                    }
+                #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
-                    printf("lapackf77_zgesv returned err %d: %s.\n",
-                           (int) info, magma_strerror( info ));
-                
                 printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int)batchCount, (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
                         err, (err < tol ? "ok" : "failed"));
