@@ -119,7 +119,7 @@ magma_zqr(
 
         if ( A.memory_location == Magma_DEV ) {
             CHECK( magma_zvinit( Q, Magma_DEV, lda, n, c_zero, queue ) );
-            magma_zcopy( lda * n, dA, inc, Q->dval, inc );
+            magma_zcopyvector( lda * n, dA, inc, Q->dval, inc );
         } else {
             CHECK( magma_zvinit( Q, Magma_CPU, lda, n, c_zero, queue ) );
             magma_zgetvector( lda * n, dA, inc, Q->val, inc );
