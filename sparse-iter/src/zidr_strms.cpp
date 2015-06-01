@@ -113,7 +113,7 @@ magma_zmatrixInfo_strms(
 
 
 extern "C" magma_int_t
-magma_zidr_strsm(
+magma_zidr_strm(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
