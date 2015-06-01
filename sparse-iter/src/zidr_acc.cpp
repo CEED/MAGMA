@@ -102,7 +102,7 @@ magma_zmatrixInfo_acc(
 
 
 extern "C" magma_int_t
-magma_zidr_acc(
+magma_zidr(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
@@ -133,6 +133,7 @@ magma_zidr_acc(
     magma_int_t dofr = A.num_rows * b.num_cols;
     magma_int_t dofM; 
     magma_int_t dofP;
+    magma_int_t doft;
     magma_int_t inc = 1;
     magma_int_t s;
     magma_int_t distr;
@@ -226,7 +227,7 @@ magma_zidr_acc(
     // check for |b| == 0
     if ( nrmb == 0.0 ) {
         printD("RHS is zero, exiting...\n");
-        magma_zscal( x->num_rows * x->num_cols, MAGMA_Z_ZERO, x->dval, 1 );
+        magma_zscal( dofx, MAGMA_Z_ZERO, x->dval, 1 );
         solver_par->init_res = 0.0;
         solver_par->final_res = 0.0;
         solver_par->iter_res = 0.0;
@@ -248,6 +249,7 @@ magma_zidr_acc(
     dt.num_rows = b.num_rows;
     dt.num_cols = b.num_cols;
     dt.nnz = dt.num_rows * dt.num_cols;
+    doft = dt.ld * dt.num_cols;
 
     // redirect the dr.dval to the second part of dt
     CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
@@ -566,7 +568,7 @@ cudaProfilerStart();
                 */
                 // merge into mdot
                 //CHECK( magma_zmdotc( dofr, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
-                CHECK( magma_zmdotc( dtt.ld * dtt.num_cols, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+                CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
                 magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
                 // |t|
                 //nrmt = sqrt( MAGMA_Z_REAL ( skp.val[2] ) );
@@ -647,7 +649,7 @@ cudaProfilerStart();
 //---------------------------------------
         // |t|
         //CHECK( magma_zmdotc( dofr, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
-        CHECK( magma_zmdotc( dt.ld * dt.num_cols, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
+        CHECK( magma_zmdotc( doft, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
         magma_zgetvector( 2 , dskp.dval, 1, skp.val, 1 );
         nrmt = sqrt(MAGMA_Z_REAL(skp.val[0]));
 
@@ -661,7 +663,7 @@ cudaProfilerStart();
         // om = tr / (|t| * |t|)
         om = tr / (nrmt * nrmt);
         if ( rho < angle )
-            om = om * angle / rho;
+            om = om * (angle / rho);
 //---------------------------------------
         printD("omega: k .................... %d, (%lg, %lg)\n", k, MAGMA_Z_REAL(om), MAGMA_Z_IMAG(om));
         if ( MAGMA_Z_EQUAL(om, MAGMA_Z_ZERO) ) {
@@ -706,7 +708,7 @@ cudaProfilerStart();
             */
             // merge into mdot
             //CHECK( magma_zmdotc( dofr, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
-            CHECK( magma_zmdotc( dtt.ld * dtt.num_cols, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+            CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
             magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
             // |t|
             //nrmt = sqrt( MAGMA_Z_REAL( skp.val[2] ) );
