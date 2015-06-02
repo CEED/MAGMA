@@ -919,7 +919,7 @@ magma_queue_sync( queues[0] );
 
         // check convergence or iteration limit or invalid of inner loop
         if ( innerflag > 0 ) {
-            printf("IDR exited from inner loop.\n");
+            printD("IDR exited from inner loop.\n");
             break;
         }
 
@@ -945,7 +945,7 @@ magma_queue_sync( queues[0] );
         printD("omega: k .................... %d, (%lg, %lg)\n", k, MAGMA_Z_REAL(om[0]), MAGMA_Z_IMAG(om[0]));
         if ( MAGMA_Z_EQUAL(om[0], MAGMA_Z_ZERO) ) {
             info = MAGMA_DIVERGENCE;
-            printf("IDR exited from outer loop, divergence.\n");
+            printD("IDR exited from outer loop, divergence.\n");
             break;
         }
 
@@ -1040,7 +1040,7 @@ magma_queue_sync( queues[0] );
 
         // check convergence or iteration limit
         if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
-            printf("IDR exited from outer loop, convergence.\n");
+            printD("IDR exited from outer loop, convergence.\n");
             break;
         }
 
