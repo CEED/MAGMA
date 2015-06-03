@@ -105,8 +105,9 @@ void magma_print_environment()
 {
     magma_int_t major, minor, micro;
     magma_version( &major, &minor, &micro );
-    printf( "%% MAGMA %d.%d.%d %s compiled for CUDA capability >= %.1f\n",
-            (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100. );
+    printf( "%% MAGMA %d.%d.%d %s compiled for CUDA capability >= %.1f, %d-bit magma_int_t, %d-bit pointer.\n",
+            (int) major, (int) minor, (int) micro, MAGMA_VERSION_STAGE, MIN_CUDA_ARCH/100.,
+            (int) (8*sizeof(magma_int_t)), (int) (8*sizeof(void*)) );
     
     int cuda_runtime, cuda_driver;
     cudaError_t err;
