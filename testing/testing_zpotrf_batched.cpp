@@ -80,6 +80,8 @@ int main( int argc, char** argv)
             
             magma_int_t columns = N * batchCount;
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &(columns), h_A, &lda, h_R, &lda );
+
+
             magma_zsetmatrix( N, columns, h_A, lda, d_A, ldda );
 
             /* ====================================================================
@@ -97,10 +99,16 @@ int main( int argc, char** argv)
             {
                 if (cpu_info[i] != 0 ) {
                     printf("magma_zpotrf_batched matrix %d returned internal error %d\n", i, (int)cpu_info[i] );
+                    status = -1;
                 }
             }
-            if (info != 0)
-                printf("magma_zpotrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+            if(status == -1)  goto cleanup;
+
+            if (info != 0){
+                //printf("magma_zpotrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+                status = -1;
+            }                
+            if(status == -1)  goto cleanup;
 
             if ( opts.lapack ) {
 
@@ -110,13 +118,13 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime();
                 for (int i=0; i < batchCount; i++)
                 {
-                   lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + i * lda * N, &lda, &info );
+                    lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + i * lda * N, &lda, &info );
+                    if (info != 0)
+                        printf("lapackf77_zpotrf returned error %d: %s.\n",
+                               (int) info, magma_strerror( info ));
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
-                    printf("lapackf77_zpotrf returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
 
                 /* =====================================================================
                    Check the result compared to LAPACK
@@ -145,13 +153,17 @@ int main( int argc, char** argv)
                 printf("%5d      %5d    ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
                        (int)batchCount, (int) N, gpu_perf, gpu_time*1000. );
             }
+cleanup:
             TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_PIN( h_R );
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_A_array );
             TESTING_FREE_DEV( dinfo_magma );
+            if(status==-1) break;
         }
+        if(status==-1) break;
+
         if ( opts.niter > 1 ) {
             printf( "\n" );
         }
