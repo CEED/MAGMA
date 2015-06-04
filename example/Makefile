@@ -9,11 +9,13 @@ CUDADIR      ?= /usr/local/cuda
 OPENBLASDIR  ?= /usr/local/openblas
 
 CC            = gcc
+FORT          = gfortran
 LD            = gcc
 CFLAGS        = -Wall
 LDFLAGS       = -Wall
 
-MAGMA_CFLAGS := -DADD_ -I$(MAGMADIR)/include -I$(CUDADIR)/include
+MAGMA_CFLAGS   := -DADD_ -I$(MAGMADIR)/include -I$(CUDADIR)/include
+MAGMA_F90FLAGS := -I$(MAGMADIR)/include -Dmagma_devptr_t="integer(kind=8)"
 
 MAGMA_LIBS   := -L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
                 -lmagma -lcublas -lcudart -lopenblas
@@ -24,11 +26,29 @@ MAGMA_LIBS   := -L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
 
 all: example
 
+clean:
+	-rm -f example example_f *.o *.mod
+
+.SUFFIXES:
+
+
+# ----------------------------------------
+# C example
 %.o: %.c
 	$(CC) $(CFLAGS) $(MAGMA_CFLAGS) -c -o $@ $<
 
-example: example.o zfill.o
+example: example.o
 	$(LD) $(LDFLAGS) -o $@ $^ $(MAGMA_LIBS)
 
-clean:
-	-rm -f example *.o
+
+# ----------------------------------------
+# Fortran example
+# this uses capital .F90 to preprocess to define magma_devptr_t
+%.o: %.F90
+	$(FORT) $(F90FLAGS) $(MAGMA_F90FLAGS) -c -o $@ $<
+
+fortran.o: $(CUDADIR)/src/fortran.c
+	$(CC) $(CFLAGS) $(MAGMA_CFLAGS) -DCUBLAS_GFORTRAN -c -o $@ $<
+
+example_f: example_f.o fortran.o
+	$(FORT) $(LDFLAGS) -o $@ $^ $(MAGMA_LIBS)
