@@ -285,14 +285,15 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                            &start_k, &stop_k, &step_k );
             if ( info == 9 ) {
                 // matched --range m1:m2:mstep,n1:n2:nstep,k1:k2:kstep
-                magma_assert( start_m >= 0 && stop_m >= 0 && step_m != 0 &&
-                              start_n >= 0 && stop_n >= 0 && step_n != 0 &&
-                              start_k >= 0 && stop_k >= 0 && step_k != 0,
-                              "error: --range %s is invalid; ensure start >= 0, stop >= 0, step != 0.\n", argv[i] );
+                magma_assert( start_m >= 0 && stop_m >= 0 &&
+                              start_n >= 0 && stop_n >= 0 &&
+                              start_k >= 0 && stop_k >= 0 &&
+                              (step_m != 0 || step_n != 0 || step_k != 0),
+                              "error: --range %s is invalid; ensure start >= 0, stop >= 0, at least one step != 0.\n", argv[i] );
                 for( int m = start_m, n = start_n, k = start_k;
-                     (step_m > 0 ? m <= stop_m : m >= stop_m) &&
-                     (step_n > 0 ? n <= stop_n : n >= stop_n) &&
-                     (step_k > 0 ? k <= stop_k : k >= stop_k);
+                     (step_m >= 0 ? m <= stop_m : m >= stop_m) &&
+                     (step_n >= 0 ? n <= stop_n : n >= stop_n) &&
+                     (step_k >= 0 ? k <= stop_k : k >= stop_k);
                      m += step_m, n += step_n, k += step_k )
                 {
                     magma_assert( ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
@@ -306,12 +307,13 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             }
             else if ( info == 6 ) {
                 // matched --range m1:m2:mstep,n1:n2:nstep
-                magma_assert( start_m >= 0 && stop_m >= 0 && step_m != 0 &&
-                              start_n >= 0 && stop_n >= 0 && step_n != 0,
-                              "error: --range %s is invalid; ensure start >= 0, stop >= 0, step != 0.\n", argv[i] );
+                magma_assert( start_m >= 0 && stop_m >= 0 &&
+                              start_n >= 0 && stop_n >= 0 &&
+                              (step_m != 0 || step_n != 0),
+                              "error: --range %s is invalid; ensure start >= 0, stop >= 0, at least one step != 0.\n", argv[i] );
                 for( int m = start_m, n = start_n;
-                     (step_m > 0 ? m <= stop_m : m >= stop_m) &&
-                     (step_n > 0 ? n <= stop_n : n >= stop_n);
+                     (step_m >= 0 ? m <= stop_m : m >= stop_m) &&
+                     (step_n >= 0 ? n <= stop_n : n >= stop_n);
                      m += step_m, n += step_n )
                 {
                     magma_assert( ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
@@ -328,7 +330,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                 magma_assert( start_m >= 0 && stop_m >= 0 && step_m != 0,
                               "error: --range %s is invalid; ensure start >= 0, stop >= 0, step != 0.\n", argv[i] );
                 for( int m = start_m;
-                     (step_m > 0 ? m <= stop_m : m >= stop_m);
+                     (step_m >= 0 ? m <= stop_m : m >= stop_m);
                      m += step_m )
                 {
                     magma_assert( ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
