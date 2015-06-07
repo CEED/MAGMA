@@ -120,6 +120,7 @@ ZSRC += \
 # QR, CPU interface
 ZSRC += \
 	testing_zgelqf.cpp	\
+	testing_zgels.cpp       \
 	testing_zgeqlf.cpp	\
 	testing_zgeqp3.cpp	\
 	testing_zgeqrf.cpp	\
