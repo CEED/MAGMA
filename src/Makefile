@@ -114,6 +114,7 @@ ZSRC += \
 # QR, CPU interface
 ZSRC += \
 	zgelqf.cpp		\
+	zgels.cpp               \
 	zgeqlf.cpp		\
 	zgeqrf-v4.cpp		\
 	zgeqrf.cpp		\
