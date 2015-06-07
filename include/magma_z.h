@@ -122,6 +122,14 @@ magma_zgelqf(
     magma_int_t *info);
 
 magma_int_t
+magma_zgels(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr A, magma_int_t lda,
+    magmaDoubleComplex_ptr B, magma_int_t ldb,
+    magmaDoubleComplex *hwork, magma_int_t lwork,
+    magma_int_t *info);
+
+magma_int_t
 magma_zgeqlf(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A,    magma_int_t lda,
