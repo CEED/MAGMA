@@ -89,12 +89,6 @@ magmablas_zgemm_batched_k32(
 
 
 
-void 
-magmablas_zherk_NC_batched( magma_trans_t TRANSA, magma_trans_t TRANSB, int m , int n , int k , 
-                       magmaDoubleComplex alpha, magmaDoubleComplex **dA_array, int lda, 
-                       magmaDoubleComplex **B_array, int ldb, 
-                       magmaDoubleComplex beta,        magmaDoubleComplex **C_array, int ldc, 
-                       magma_int_t batchCount);
 
 void
 magmablas_zherk_batched(
