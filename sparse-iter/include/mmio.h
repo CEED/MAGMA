@@ -19,7 +19,7 @@
 
 typedef char MM_typecode[4];
 
-void mm_snprintf_typecode( char *buffer, int buflen, MM_typecode matcode );
+void mm_snprintf_typecode( char *buffer, size_t buflen, MM_typecode matcode );
 
 int mm_read_banner(FILE *f, MM_typecode *matcode);
 int mm_read_mtx_crd_size(FILE *f, magma_index_t *M, magma_index_t *N, 

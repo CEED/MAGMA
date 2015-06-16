@@ -486,7 +486,7 @@ int mm_write_mtx_crd(char fname[], magma_index_t M, magma_index_t N, magma_index
 }
   
 
-void mm_snprintf_typecode( char *buffer, int buflen, MM_typecode matcode )
+void mm_snprintf_typecode( char *buffer, size_t buflen, MM_typecode matcode )
 {
     const char *types[4];
     //int error =0;
