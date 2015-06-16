@@ -16,59 +16,28 @@ my $revision = "";
 my $rc       = 0;  # release candidate
 my $beta     = 0;
 
-# in alphabetic order
+# In alphabetic order
+# Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
 my @files2delete = qw(
     ReleaseChecklist
-    BugsToFix.txt
     Makefile.gen
-    Release-ToDo-1.1.txt
-    Release-ToDo.txt
-    cmake_modules
     contrib
     control/sizeptr
     
-    docs/dp-cpu.jpg
-    docs/dp-cpu.ps
-    docs/dp-gpu.jpg
-    docs/dp-gpu.ps
-    docs/gnuplots
-    docs/magma-v02.pdf
-    docs/magma.pdf
-    docs/magma.tex
-    docs/myplot
-    docs/o.gif
-    docs/o.jpeg
-    docs/o.jpg
-    docs/o.pdf
-    docs/sp-cpu.jpg
-    docs/sp-cpu.pdf
-    docs/sp-cpu.ps
-    docs/sp-gpu.jpg
-    docs/sp-gpu.ps
     docs/Doxyfile-fast
-    docs/biblio.bib
-    docs/magma-performance
-    docs/magma-v02.tex
     docs/output_err
     
     include/Makefile
     magmablas/obsolete
-    magmablas/zhemm_1gpu.cpp
-    magmablas/zhemm_1gpu_old.cpp
     make.icl
+    make.inc
     make.inc.ig.pgi
     multi-gpu-dynamic-deprecated
     quark
     scripts
 
     sparse-iter/python
-    sparse-iter/src/zciterref.cpp
-    sparse-iter/src/zcpbicgstab.cpp
-    sparse-iter/src/zcpgmres.cpp
-    sparse-iter/src/zcpir.cpp
-    sparse-iter/src/zbpcg_tmp.cpp
     sparse-iter/testing/test_matrices
- 
 
     src/obsolete
     testing/*.txt
@@ -77,9 +46,6 @@ my @files2delete = qw(
     testing/testing_zgetrf_gpu_f.cuf
     tools
 );
-# Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
-#src/magma_zf77.cpp
-#src/magma_zf77pgi.cpp
 
 
 sub myCmd
@@ -109,25 +75,91 @@ sub MakeRelease
         $stage = "beta$beta";
     }
 
+    # Require recent doxygen, say >= 1.8.
+    # ICL machines have ancient versions of doxygen (1.4 and 1.6);
+    # the docs don't work at all.
+    my $doxygen = `doxygen --version`;
+    chomp $doxygen;
+    my($v) = $doxygen =~ m/^(\d+\.\d+)\.\d+$/;
+    my $doxygen_require = 1.8;
+    if ( $v < $doxygen_require ) {
+        print <<EOT;
+=====================================================================
+WARNING: MAGMA requires doxygen version $doxygen_require; installed version is $doxygen.
+The documentation will not be generated correctly.
+Look in /mnt/sw/doxygen for a recent release.
+Enter 'ignore' to acknowledge, or control-C to go fix the problem.
+=====================================================================
+EOT
+        do {
+            $_ = <STDIN>;
+        } while( not m/\bignore\b/ );
+    }
+
+    # svn export won't remove an existing directory,
+    # causing old files to get mixed in with updated ones. Force user to fix it.
     my $RELEASE_PATH = $ENV{PWD}."/magma-$version";
     if ( -e $RELEASE_PATH ) {
         die( "RELEASE_PATH $RELEASE_PATH already exists.\nPlease delete it or use different version.\n" );
     }
-
+    
     # Save current directory
     my $dir = `pwd`;
     chomp $dir;
 
-    $cmd = "svn export --force $revision $user $svn $RELEASE_PATH";
-    myCmd($cmd);
+    if ( not $rc and not $beta ) {
+        print <<EOT;
+Is this the final tar file for this release (that is, the release has been
+thoroughly tested), and you want to update version in magma.h in SVN (yes/no)?
+EOT
+        $_ = <STDIN>;
+        if ( m/\b(y|yes)\b/ ) {
+            # If run as ./tools/MakeMagmaRelease.pl, no need to change dir;
+            # if run as ./MakeMagmaRelease.pl, cd up to trunk, adjust includes, then cd back.
+            if ( $dir =~ m|/tools$| ) {
+                chdir "..";
+            }
+            $cmd = "perl -pi -e 's/VERSION_MAJOR +[0-9]+/VERSION_MAJOR $major/; "
+                 .             " s/VERSION_MINOR +[0-9]+/VERSION_MINOR $minor/; "
+                 .             " s/VERSION_MICRO +[0-9]+/VERSION_MICRO $micro/;' "
+                 .             " include/magma_types.h";
+            myCmd($cmd);
+            myCmd("perl -pi -e 's/PROJECT_NUMBER +=.*/PROJECT_NUMBER         = $major.$minor.$micro/' docs/Doxyfile");
+            myCmd("svn diff include/magma_types.h docs/Doxyfile");
+            print "Commit these changes now (yes/no)?\n";
+            $_ = <STDIN>;
+            if ( m/\b(y|yes)\b/ ) {
+                myCmd("svn commit -m 'version $major.$minor.$micro' include/magma_types.h");
+            }
+            
+            print "Tag release in SVN (yes/no)?\n";
+            $_ = <STDIN>;
+            if ( m/\b(y|yes)\b/ ) {
+                myCmd("svn copy -m 'version $major.$minor.$micro tag' ^/trunk ^/tags/release-$major.$minor.$micro");
+            }
+            
+            # allow user to see that it went successfully
+            print "Type enter to continue\n";
+            $_ = <STDIN>;
+            
+            chdir $dir;
+        }
+    }
 
+    # Export current SVN
+    myCmd("svn export --force $revision $user $svn $RELEASE_PATH");
+
+    print "cd $RELEASE_PATH\n";
     chdir $RELEASE_PATH;
 
-    # Change version in magma.h
-    myCmd("perl -pi -e 's/VERSION_MAJOR +[0-9]+/VERSION_MAJOR $major/' include/magma_types.h");
-    myCmd("perl -pi -e 's/VERSION_MINOR +[0-9]+/VERSION_MINOR $minor/' include/magma_types.h");
-    myCmd("perl -pi -e 's/VERSION_MICRO +[0-9]+/VERSION_MICRO $micro/' include/magma_types.h");
-    myCmd("perl -pi -e 's/VERSION_STAGE +.+/VERSION_STAGE \"$stage\"/' include/magma_types.h");
+    # Change version in magma.h (in export, not in the SVN itself)
+    # See similar replacement above (minus stage)
+    $cmd = "perl -pi -e 's/VERSION_MAJOR +[0-9]+/VERSION_MAJOR $major/; "
+         .             " s/VERSION_MINOR +[0-9]+/VERSION_MINOR $minor/; "
+         .             " s/VERSION_MICRO +[0-9]+/VERSION_MICRO $micro/; "
+         .             " s/VERSION_STAGE +.+/VERSION_STAGE \"$stage\"/;' "
+         .             " include/magma_types.h";
+    myCmd($cmd);
     myCmd("perl -pi -e 's/PROJECT_NUMBER +=.*/PROJECT_NUMBER         = $major.$minor.$micro/' docs/Doxyfile");
 
     # Change the version and date in comments
@@ -154,13 +186,11 @@ sub MakeRelease
 
     # Compile the documentation
     print "Compile the documentation\n";
-    system("make -C ./docs");
+    myCmd("make -C ./docs");
     myCmd("rm -f make.inc");
 
     # Remove non-required files (e.g., Makefile.gen)
-    foreach my $file (@files2delete) {
-        myCmd("rm -rf $RELEASE_PATH/$file");
-    }
+    myCmd("rm -rf @files2delete");
 
     # Remove the lines relative to include directory in root Makefile
     myCmd("perl -ni -e 'print unless /cd include/' $RELEASE_PATH/Makefile");
@@ -180,21 +210,6 @@ sub MakeRelease
     chomp $DIRNAME;
     chomp $BASENAME;
     myCmd("(cd $DIRNAME && tar cvzf ${BASENAME}.tar.gz $BASENAME)");
-    
-    # Require recent doxygen, say >= 1.8.
-    # ICL machines has ancient versions of doxygen (1.4 and 1.6);
-    # the docs don't work at all.
-    my $doxygen = `doxygen --version`;
-    chomp $doxygen;
-    my($v) = $doxygen =~ m/^(\d+\.\d+)\.\d+$/;
-    my $doxygen_require = 1.8;
-    if ( $v < $doxygen_require ) {
-        print "\n\n\n" .
-              "=====================================================\n" .
-              "  WARNING: doxygen version $doxygen < $doxygen_require\n" .
-              "  The documentation may not be generated correctly.  \n" .
-              "=====================================================\n";
-    }
 }
 
 #sub MakeInstallerRelease {
