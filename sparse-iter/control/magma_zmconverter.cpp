@@ -226,7 +226,7 @@ magma_zmconvert(
                 // fill in information for B
                 B->storage_type = Magma_CSR;
                 B->memory_location = A.memory_location;
-                B->fill_mode = Magma_LOWER;
+                B->fill_mode = MagmaLower;
                 B->num_rows = A.num_rows;
                 B->num_cols = A.num_cols;
                 B->diameter = A.diameter;
@@ -273,7 +273,7 @@ magma_zmconvert(
             else if (  new_format == Magma_CSRU ) {
                 // fill in information for B
                 *B = A;
-                B->fill_mode = Magma_UPPER;
+                B->fill_mode = MagmaUpper;
                 magma_int_t numzeros=0;
                 for( magma_int_t i=0; i < A.num_rows; i++) {
                     for( magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {

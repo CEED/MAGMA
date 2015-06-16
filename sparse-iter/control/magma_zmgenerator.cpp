@@ -76,7 +76,7 @@ magma_zmgenerator(
     
     B.num_rows = n;
     B.num_cols = n;
-    B.fill_mode = Magma_FULL;
+    B.fill_mode = MagmaFull;
     B.memory_location = Magma_CPU;
     B.storage_type = Magma_ELLPACKT;
     B.max_nnz_row = (2*offdiags+1);

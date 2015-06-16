@@ -259,14 +259,14 @@ magma_z_cucsrtranspose(
         B->num_cols        = A.num_rows;  // transposed
         B->nnz             = A.nnz;
         
-        if ( A.fill_mode == Magma_FULL ) {
-            B->fill_mode = Magma_FULL;
+        if ( A.fill_mode == MagmaFull ) {
+            B->fill_mode = MagmaFull;
         }
-        else if ( A.fill_mode == Magma_LOWER ) {
-            B->fill_mode = Magma_UPPER;
+        else if ( A.fill_mode == MagmaLower ) {
+            B->fill_mode = MagmaUpper;
         }
-        else if ( A.fill_mode == Magma_UPPER ) {
-            B->fill_mode = Magma_LOWER;
+        else if ( A.fill_mode == MagmaUpper ) {
+            B->fill_mode = MagmaLower;
         }
         
         B->dval = NULL;

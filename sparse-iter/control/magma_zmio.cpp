@@ -1033,7 +1033,7 @@ magma_z_csr_mtx(
     A->num_rows        = num_rows;
     A->num_cols        = num_cols;
     A->nnz             = num_nonzeros;
-    A->fill_mode       = Magma_FULL;
+    A->fill_mode       = MagmaFull;
     
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
@@ -1351,7 +1351,7 @@ magma_z_csr_mtxsymm(
     A->num_rows        = num_rows;
     A->num_cols        = num_cols;
     A->nnz             = num_nonzeros;
-    A->fill_mode       = Magma_FULL;
+    A->fill_mode       = MagmaFull;
   
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
