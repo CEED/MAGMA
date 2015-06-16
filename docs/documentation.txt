@@ -604,7 +604,9 @@ enum CBLAS_SIDE      | cblas_side_const   | ( side  )  |  Map MagmaLeft,     Mag
 Driver and computational routines, and a few BLAS/auxiliary routines, currently
 return errors both as a return value and in the info argument. The return value
 and info should always be identical. In general, the meaning is as given in this
-table. Predefined error codes are large negative numbers.
+table. Predefined error codes are large negative numbers. Using the symbolic
+constants below is preferred, but the numeric values can be found in
+include/magma_types.h.
 
 Info                       |  Description
 -----------                |  -----------
