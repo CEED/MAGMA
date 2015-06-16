@@ -17,36 +17,38 @@ setenv HEADERS "`egrep '\.h' files.txt`"
 
 echo "============================================================ required fixes"
 
-# aasen needs fix
+# fixed
 echo "========== no prototypes in cpp files; put in headers                      *** required fix ***"
 perl -n0777e 'if ( m/extern "C"\s+\w+\s+(\w+)\([^)]*\) *;/ ) { print "$ARGV: $1\n"; }' $FILES
 echo
 
-# fixed except magmablas/*gemm*.h -- some of these DO get multiply included!
+# fixed
 echo "========== headers not protecting against multiple inclusion               *** required fix ***"
-egrep '^#ifndef \w+_([hH]_?|HPP)\b' -L $HEADERS
-egrep '^#define \w+_([hH]_?|HPP)\b' -L $HEADERS
+egrep '^#ifndef \w+_([hH]_?|HPP)\b' -L $HEADERS | egrep -v 'gemm_stencil_defs\.h'
+echo
+egrep '^#define \w+_([hH]_?|HPP)\b' -L $HEADERS | egrep -v 'gemm_stencil_defs\.h'
 echo
 
-# fixed except sparse mmio
+# fixed
 echo "========== C malloc, instead of magma_*malloc_cpu                          *** required fix ***"
 egrep '\b(malloc|calloc|realloc|reallocf|valloc|strdup) *\(' $FILES | egrep -v 'quark|alloc.cpp'
 echo
 
-# fixed except sparse mmio
+# fixed
 echo "========== C free, instead of magma_free_cpu                               *** required fix ****"
 egrep '^ *free *\('                    $FILES | egrep -v 'quark|alloc.cpp'
 echo
 
 # fixed except trevc3; needs rewrite to fix
+# zheevr has "A new O(n^2)..."
 echo "========== C++ new, instead of magma_*malloc_cpu                           *** required fix (currently only thread_queue & trevc3_mt use it) ***"
-egrep '= *new\b'                       $FILES
-egrep '\bnew +\w+\('                   $FILES
+egrep '= *new\b'                       $FILES | egrep -v 'thread_queue|trevc3_mt|A new O\(n\^2\)'
+egrep '\bnew +\w+\('                   $FILES | egrep -v 'thread_queue|trevc3_mt|A new O\(n\^2\)'
 echo
 
 # fixed except trevc3; needs rewrite to fix
 echo "========== C++ delete,  instead of magma_free_cpu                          *** required fix (currently only thread_queue uses it) ***"
-egrep '^ *delete\b'                    $FILES
+egrep '^ *delete\b'                    $FILES | egrep -v 'thread_queue'
 echo
 
 # fixed
@@ -89,8 +91,8 @@ egrep 'GPUSHMEM'                       $FILES | egrep -v 'checklist.csh'
 echo
 
 # fixed
-echo "========== CUDA driver routines (cu[A-Z]*; MathWorks cannot use these)"
-grep 'cu[A-Z]\w+ *\(' `cat files.txt` $FILES \
+echo "========== CUDA driver routines (cu[A-Z]*; MathWorks cannot use these)     *** required fix ***"
+egrep 'cu[A-Z]\w+ *\(' `cat files.txt` $FILES \
     | egrep -v 'make_cuComplex|make_cuDoubleComplex|make_cuFloatComplex|cuComplexDoubleToFloat|cuComplexFloatToDouble|cuGetErrorString|cuConj|cuC(real|imag|add|sub|mul|div|addf|subf|mulf|divf|fmaf|abs|fma)'
 echo
 
@@ -104,12 +106,43 @@ echo "========== exit, instead of returning error code                          
 egrep '\bexit *\( *-?\w+ *\)'          $FILES | egrep -v 'trace.cpp|quark|magma_util.cpp|testings.h|\.py'
 echo
 
-# fixed except sparse
+# fixed
 echo "========== old formulas for ceildiv & roundup                              *** required fix ***"
 ./tools/checklist_ceildiv.pl           $FILES | egrep -v 'checklist_ceildiv.pl|documentation.txt|magma\.h|\.f:|\.F90:'
 echo
 
+# fixed
+echo "========== sprintf; use snprintf for safety                                *** required fix ***"
+egrep sprintf `cat files.txt` | egrep -v 'checklist.csh|\.pl|quark|strlcpy'
+echo
 
+# fixed
+echo "========== routines in wrong documentation groups (in src)                 *** requried fix ***"
+cd src
+echo "driver:"
+egrep ingroup *gesv* *posv* *gels* *hesv* *sysv* *geev* *heev* *syev* *gesvd* *gesdd* | egrep -v driver
+echo "comp:"
+egrep ingroup *getrf* *potrf* *geqrf* *hetrf* *sytrf* | egrep -v comp
+echo "aux:"
+egrep ingroup *getf2* *potf2* *geqr2* *[sdcz]la*      | egrep -v aux
+cd ..
+echo
+
+# fixed
+echo "========== routines in wrong documentation groups (2nd check)              *** requried fix ***"
+echo "driver:"
+egrep 'ingroup.*_driver' $FILES -l | egrep -v 'checklist.csh|[sdcz](gesv|posv|gels|gesvd|gesdd|syev|heev|geev|hegvd|hesv|sygvd|hegvr|hegvx|sysv|cgeqrsv_gpu)'
+echo "comp:"
+egrep 'ingroup.*_comp'   $FILES -l | egrep -v 'checklist.csh|[sdcz](getrf|potrf|geqrf|hetrf|sytrf|gerbt|getri|getrs|potri|trtri|potrs|gelqf|geqlf|geqrs|geqp3|stedx|trevc|hetrs|sytrs|gehrd|hetrd|gebrd|hegst|gegqr|ungqr|unghr|ungtr|unmlq|unmql|unmqr|unmbr|unmtr)'
+echo "aux:"
+egrep 'ingroup.*_aux'    $FILES -l | egrep -v 'checklist.csh|[sdcz](getf2|potf2|geqr2|la)'
+echo
+
+# needs lots of work; also lots of exceptions
+echo "========== int instead of magma_int_t                                      *** required fix ***"
+egrep '\bint\b' $HEADERS \
+    | egrep -v 'quark|magma_timer\.h|magmawinthread\.h|pthread_barrier\.h|cblas\.h|typedef int +magma_|const char\* func, const char\* file, int line|int mm_'
+echo
 
 echo
 echo
