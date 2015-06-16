@@ -83,16 +83,16 @@ magma_int_t read_z_csr_from_mtx(
     const char *filename,
     magma_queue_t queue )
 {
+    char buffer[ 1024 ];
     magma_int_t info = 0;
-    
-    FILE *fid;
-    MM_typecode matcode;
     
     magma_index_t *coo_col=NULL, *coo_row=NULL;
     magmaDoubleComplex *coo_val=NULL;
     magma_index_t *new_col=NULL, *new_row=NULL;
     magmaDoubleComplex *new_val=NULL;
     
+    FILE *fid;
+    MM_typecode matcode;
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
@@ -118,8 +118,9 @@ magma_int_t read_z_csr_from_mtx(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("%% Sorry, MAGMA-sparse does not support ");
-        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
+        printf("%% Sorry, MAGMA-sparse does not support\n");
+        printf("%% Market Market type: [%s]\n", buffer );
         printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
@@ -136,7 +137,6 @@ magma_int_t read_z_csr_from_mtx(
     *n_row    = num_rows;
     *n_col    = num_cols;
     *nnz      = num_nonzeros;
-
 
     CHECK( magma_index_malloc_cpu( &coo_col, *nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, *nnz ) );
@@ -837,7 +837,7 @@ magma_zprint_matrix(
     magma_z_matrix C={Magma_CSR};
 
     if ( A.memory_location == Magma_CPU ) {
-        printf("visualizing matrix of size %d %d with %d nonzeros:\n",
+        printf("visualizing matrix of size %d x %d with %d nonzeros:\n",
             (int) A.num_rows, (int) A.num_cols, (int) A.nnz);
         
         if ( A.storage_type == Magma_DENSE ) {
@@ -973,6 +973,7 @@ magma_z_csr_mtx(
     const char *filename,
     magma_queue_t queue )
 {
+    char buffer[ 1024 ];
     magma_int_t info = 0;
 
     int csr_compressor = 0;       // checks for zeros in original file
@@ -1013,16 +1014,19 @@ magma_z_csr_mtx(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("%% Sorry, MAGMA-sparse does not support ");
-        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
+        printf("%% Sorry, MAGMA-sparse does not support\n");
+        printf("%% Market Market type: [%s]\n", buffer );
         printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_FOUND;
         goto cleanup;
     }
 
     magma_index_t num_rows, num_cols, num_nonzeros;
-    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0)
+    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0) {
         info = MAGMA_ERR_UNKNOWN;
+        // TODO: goto cleanup ?
+    }
     
     A->storage_type    = Magma_CSR;
     A->memory_location = Magma_CPU;
@@ -1031,14 +1035,13 @@ magma_z_csr_mtx(
     A->nnz             = num_nonzeros;
     A->fill_mode       = Magma_FULL;
     
-
-
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
     CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
 
     printf("%% Reading sparse matrix from file (%s):", filename);
     fflush(stdout);
+    
     if (mm_is_real(matcode) || mm_is_integer(matcode)) {
         for(magma_int_t i = 0; i < A->nnz; ++i) {
             magma_index_t ROW, COL;
@@ -1292,6 +1295,7 @@ magma_z_csr_mtxsymm(
     const char *filename,
     magma_queue_t queue )
 {
+    char buffer[ 1024 ];
     magma_int_t info = 0;
     
     magma_z_matrix B={Magma_CSR};
@@ -1303,7 +1307,6 @@ magma_z_csr_mtxsymm(
 
     FILE *fid;
     MM_typecode matcode;
-      
     fid = fopen(filename, "r");
     
     if (fid == NULL) {
@@ -1329,16 +1332,19 @@ magma_z_csr_mtxsymm(
              && mm_is_coordinate(matcode)
              && mm_is_sparse(matcode) ) )
     {
-        printf("%% Sorry, MAGMA-sparse does not support ");
-        printf("%% Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        mm_snprintf_typecode( buffer, sizeof(buffer), matcode );
+        printf("%% Sorry, MAGMA-sparse does not support\n");
+        printf("%% Market Market type: [%s]\n", buffer );
         printf("%% Only real-valued or pattern coordinate matrices are supported\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
     
     magma_index_t num_rows, num_cols, num_nonzeros;
-    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0)
+    if (mm_read_mtx_crd_size(fid, &num_rows, &num_cols, &num_nonzeros) != 0) {
         info = MAGMA_ERR_NOT_FOUND;
+        // TODO: goto cleanup ?
+    }
     
     A->storage_type    = Magma_CSR;
     A->memory_location = Magma_CPU;
@@ -1347,8 +1353,6 @@ magma_z_csr_mtxsymm(
     A->nnz             = num_nonzeros;
     A->fill_mode       = Magma_FULL;
   
-    
-    
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, A->nnz ) );
     CHECK( magma_zmalloc_cpu( &coo_val, A->nnz ) );
