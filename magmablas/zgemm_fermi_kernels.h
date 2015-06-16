@@ -1,3 +1,6 @@
+#ifndef ZGEMM_FERMI_KERNELS_H
+#define ZGEMM_FERMI_KERNELS_H
+
 /*
     -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -188,3 +191,5 @@
 
 #undef COMPLEX
 #undef DOUBLE
+
+#endif        //  #ifndef ZGEMM_FERMI_KERNELS_H

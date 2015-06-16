@@ -1,3 +1,6 @@
+#ifndef SGEMM_FERMI_KERNELS_BATCHED_K32_H
+#define SGEMM_FERMI_KERNELS_BATCHED_K32_H
+
 /*
     -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -190,3 +193,5 @@
 #include "gemm_kernel_batched.cuh"
 #include "herk_kernel_batched.cuh"
 
+
+#endif        //  #ifndef SGEMM_FERMI_KERNELS_BATCHED_K32_H

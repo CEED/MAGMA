@@ -1,3 +1,6 @@
+#ifndef SGEMM_FERMI_KERNELS_H
+#define SGEMM_FERMI_KERNELS_H
+
 /*
     -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -185,3 +188,5 @@
 #define version trans_cn
 #include "gemm_stencil.cuh"
 #include "gemm_kernel.cuh"
+
+#endif        //  #ifndef SGEMM_FERMI_KERNELS_H

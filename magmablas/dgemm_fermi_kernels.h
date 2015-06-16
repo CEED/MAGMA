@@ -1,3 +1,6 @@
+#ifndef DGEMM_FERMI_KERNELS_H
+#define DGEMM_FERMI_KERNELS_H
+
 /*
     -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -187,3 +190,5 @@
 #include "gemm_kernel.cuh"
 
 #undef DOUBLE
+
+#endif        //  #ifndef DGEMM_FERMI_KERNELS_H
