@@ -126,7 +126,7 @@ magma_ziteric_csr(
     int blocksize1 = 128;
     int blocksize2 = 1;
 
-    int dimgrid1 = ( A.nnz + blocksize1 -1 ) / blocksize1;
+    int dimgrid1 = magma_ceildiv( A.nnz, blocksize1 );
     int dimgrid2 = 1;
     int dimgrid3 = 1;
 
