@@ -37,11 +37,15 @@ Documentation
 	
 	cd docs && make
 	check errors in output_err
+	open docs/html/index.html and browse through Modules to see that things look right
 
 Compile & run with -DNDEBUG (no asserts)
 	This is how MathWorks compiles it.
 
 Compile & run on:
+	This script will compile and save output from each make.inc file:
+	tools/checklist_builds.csh [ acml atlas mkl-gcc mkl-icc mkl-gcc-ilp64 mkl-icc-ilp64 ... ]
+	
 	Linux
 		icc, gcc
 		MKL
@@ -60,3 +64,46 @@ Compile & run on:
 	pgi compilers?
 
 Any compiler warnings?
+
+
+Posting tar files
+=================================
+# e.g., for release 1.2.3, optionally beta 4 or release candidate 5
+
+# (1) generate tar file
+
+./tools/MakeMagmaRelease.pl 1.2.3 [-b 4] [-c 5]
+
+When making the final tar file (i.e., after all release testing), this asks to
+automatically update the version in magma.h in the SVN & tag the release.
+
+# (2) copy and make group writable, world readable
+
+scp magma-1.2.3.tar.gz zoot:/mnt/projectsfiles/magma/downloads/
+ssh zoot
+cd /mnt/projectsfiles/magma/downloads
+chmod 664 magma-1.2.3.tar.gz
+
+# (3) install web documentation (still on zoot)
+
+cd /mnt/projectsfiles/magma
+
+# move old out of the way
+mv doxygen doxygen-old
+
+# move new into place
+tar -zxvf downloads/magma-1.2.3.tar.gz magma-1.2.3/docs/html
+mv magma-1.2.3/docs/html doxygen
+chmod -R a+rX,g+w doxygen
+rm -rf magma-1.2.3
+
+# check online
+http://icl.cs.utk.edu/magma/
+click on Documentation, which should go to here:
+http://icl.cs.utk.edu/projectsfiles/magma/doxygen/
+
+# after everything looks good, remove old docs
+/bin/rm -rf doxygen-old
+
+# (4) post announcement
+verify that you can download it via web browser (i.e., link is correct)
