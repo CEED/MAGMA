@@ -4,10 +4,11 @@ MAGMA README FILE
 
 * Further documentation is provided in docs/html/index.html.
 
-* To INSTALL MAGMA, modify the make.inc file to indicate where 
-  CUDA, CPU BLAS, and LAPACK are installed on your system. Examples are given
-  in make.inc.mkl-*, make.inc.acml, make.inc.atlas, and make.inc.macos
-  showing how to link to MKL, ACML, ATLAS, and MacOS veclib BLAS, respectively.
+* To INSTALL MAGMA, modify the make.inc file to indicate your C/C++ compiler,
+  Fortran compiler, and where CUDA, CPU BLAS, and LAPACK are installed on your
+  system. Examples are given in make.inc.acml, make.inc.atlas, make.inc.macos,
+  make.inc.mkl-*, make.inc.openblas showing how to link to ACML, ATLAS, MacOS
+  veclib, MKL, and OpenBLAS, respectively.
   
   All the make.inc files assume $CUDADIR is set in your environment.
   For bash (sh), put in ~/.bashrc (with your system's path):
@@ -48,6 +49,11 @@ MAGMA README FILE
   For csh/tcsh, put in ~/.cshrc:
       setenv OPENBLASDIR /opt/openblas
   
+* Building without Fortran
+
+  MAGMA can be built without Fortran by commenting out FORT in the make.inc file.
+  However, some testers will not be able to check their results.
+
 * Building a Shared Library
 
   By default now, all make.inc files add the -fPIC option to CFLAGS, FFLAGS,
