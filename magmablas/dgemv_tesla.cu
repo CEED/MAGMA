@@ -11,6 +11,7 @@
 #define num_threads 64
 #define gemv_bs 64
 
+
 __global__ void
 dgemv_kernel_tesla(
     int m, int n, int n1,
@@ -53,127 +54,6 @@ dgemv_kernel_tesla(
         y[ind] = res;
 }
 
-extern "C" void
-magmablas_dgemvt_tesla(
-    magma_int_t m, magma_int_t n, double alpha,
-    const double *A, magma_int_t lda,
-    const double *x,
-    double       *y );
-
-/**
-    Purpose
-    -------
-    This routine computes:
-    1) y =       A   x      if trans == MagmaNoTrans, alpha == 1, beta == 0,
-                            and incx == incy == 1 (using magmablas code)
-    2) y = alpha A^T x      if trans == MagmaTrans, beta == 0,
-                            and incx == incy == 1 (using magmablas code)
-    3) y = alpha A^TRANS x + beta y
-                            otherwise, using CUBLAS.
-
-    Arguments
-    ----------
-    @param[in]
-    trans   magma_trans_t
-            On entry, TRANS specifies the operation to be performed as
-            follows:
-      -     = MagmaNoTrans:    y := alpha*A  *x + beta*y
-      -     = MagmaTrans:      y := alpha*A^T*x + beta*y
-      -     = MagmaConjTrans:  y := alpha*A^T*x + beta*y
-            
-    @param[in]
-    m       INTEGER
-            On entry, M specifies the number of rows of the matrix A.
-            
-    @param[in]
-    n       INTEGER
-            On entry, N specifies the number of columns of the matrix A
-            
-    @param[in]
-    alpha   DOUBLE PRECISION
-            On entry, ALPHA specifies the scalar alpha.
-            
-    @param[in]
-    A       DOUBLE PRECISION array of dimension (LDA, N) on the GPU.
-            
-    @param[in]
-    lda     INTEGER
-            LDA specifies the leading dimension of A.
-            
-    @param[in]
-    x       DOUBLE PRECISION array of dimension
-            n if trans == 'n'
-            m if trans == 't'
-            
-    @param[in]
-    incx    Specifies the increment for the elements of X.
-            INCX must not be zero.
-        
-    @param[in]
-    beta    DOUBLE PRECISION
-            On entry, BETA specifies the scalar beta. When BETA is
-            supplied as zero then Y need not be set on input.
-            
-    @param[out]
-    y       DOUBLE PRECISION array of dimension
-            m if trans == 'n'
-            n if trans == 't'
-            
-    @param[in]
-    incy    Specifies the increment for the elements of Y.
-            INCY must not be zero.
-
-    @ingroup magma_dblas2
-    ********************************************************************/
-extern "C" void
-magmablas_dgemv_tesla(
-    magma_trans_t trans, magma_int_t m, magma_int_t n,
-    double alpha,
-    const double *A, magma_int_t lda,
-    const double *x, magma_int_t incx,
-    double beta,
-    double       *y, magma_int_t incy)
-{
-    magma_int_t info = 0;
-    if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
-        info = -1;
-    else if ( m < 0 )
-        info = -2;
-    else if ( n < 0 )
-        info = -3;
-    else if ( lda < m )
-        info = -6;
-    else if ( incx == 0 )
-        info = -8;
-    else if ( incy == 0 )
-        info = -11;
-    
-    if (info != 0) {
-        magma_xerbla( __func__, -(info) );
-        return;  //info;
-    }
-    
-    if ( incx == 1 && incy == 1 && beta == 0 ) {
-        if ( trans == MagmaNoTrans ) {
-            if ( alpha == 1. ) {
-                magma_int_t blocks = magma_ceildiv( m, num_threads );
-                dim3 grid( blocks, 1, 1 );
-                dim3 threads( num_threads, 1, 1 );
-                dgemv_kernel_tesla<<< grid, threads, 0, magma_stream >>>
-                    (m, n, (n/gemv_bs)*gemv_bs, A, lda, x, y);
-            }
-            else {
-                magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
-            }
-        }
-        else {
-            magmablas_dgemvt_tesla(m, n, alpha, A, lda, x, y);
-        }
-    }
-    else {
-        magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
-    }
-}
 
 __global__ void
 dgemvt_kernel1_tesla(
@@ -265,6 +145,7 @@ dgemvt_kernel1_tesla(
         y[ind] = alpha*res;
     }
 }
+
 
 __global__ void
 dgemvt_kernel2_tesla(
@@ -383,6 +264,7 @@ dgemvt_kernel2_tesla(
         y[ind] = alpha*res;
     }
 }
+
 
 /**
     Purpose
@@ -526,6 +408,122 @@ magmablas_dgemvt_tesla(
         magmablas_dgemvt2_tesla(m, n, alpha, A, lda, x, y);
     else
         magmablas_dgemvt1_tesla(m, n, alpha, A, lda, x, y);
+}
+
+
+/**
+    Purpose
+    -------
+    This routine computes:
+    1) y =       A   x      if trans == MagmaNoTrans, alpha == 1, beta == 0,
+                            and incx == incy == 1 (using magmablas code)
+    2) y = alpha A^T x      if trans == MagmaTrans, beta == 0,
+                            and incx == incy == 1 (using magmablas code)
+    3) y = alpha A^TRANS x + beta y
+                            otherwise, using CUBLAS.
+
+    Arguments
+    ----------
+    @param[in]
+    trans   magma_trans_t
+            On entry, TRANS specifies the operation to be performed as
+            follows:
+      -     = MagmaNoTrans:    y := alpha*A  *x + beta*y
+      -     = MagmaTrans:      y := alpha*A^T*x + beta*y
+      -     = MagmaConjTrans:  y := alpha*A^T*x + beta*y
+            
+    @param[in]
+    m       INTEGER
+            On entry, M specifies the number of rows of the matrix A.
+            
+    @param[in]
+    n       INTEGER
+            On entry, N specifies the number of columns of the matrix A
+            
+    @param[in]
+    alpha   DOUBLE PRECISION
+            On entry, ALPHA specifies the scalar alpha.
+            
+    @param[in]
+    A       DOUBLE PRECISION array of dimension (LDA, N) on the GPU.
+            
+    @param[in]
+    lda     INTEGER
+            LDA specifies the leading dimension of A.
+            
+    @param[in]
+    x       DOUBLE PRECISION array of dimension
+            n if trans == 'n'
+            m if trans == 't'
+            
+    @param[in]
+    incx    Specifies the increment for the elements of X.
+            INCX must not be zero.
+        
+    @param[in]
+    beta    DOUBLE PRECISION
+            On entry, BETA specifies the scalar beta. When BETA is
+            supplied as zero then Y need not be set on input.
+            
+    @param[out]
+    y       DOUBLE PRECISION array of dimension
+            m if trans == 'n'
+            n if trans == 't'
+            
+    @param[in]
+    incy    Specifies the increment for the elements of Y.
+            INCY must not be zero.
+
+    @ingroup magma_dblas2
+    ********************************************************************/
+extern "C" void
+magmablas_dgemv_tesla(
+    magma_trans_t trans, magma_int_t m, magma_int_t n,
+    double alpha,
+    const double *A, magma_int_t lda,
+    const double *x, magma_int_t incx,
+    double beta,
+    double       *y, magma_int_t incy)
+{
+    magma_int_t info = 0;
+    if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
+        info = -1;
+    else if ( m < 0 )
+        info = -2;
+    else if ( n < 0 )
+        info = -3;
+    else if ( lda < m )
+        info = -6;
+    else if ( incx == 0 )
+        info = -8;
+    else if ( incy == 0 )
+        info = -11;
+    
+    if (info != 0) {
+        magma_xerbla( __func__, -(info) );
+        return;  //info;
+    }
+    
+    if ( incx == 1 && incy == 1 && beta == 0 ) {
+        if ( trans == MagmaNoTrans ) {
+            if ( alpha == 1. ) {
+                magma_int_t blocks = magma_ceildiv( m, num_threads );
+                dim3 grid( blocks, 1, 1 );
+                dim3 threads( num_threads, 1, 1 );
+                dgemv_kernel_tesla<<< grid, threads, 0, magma_stream >>>
+                    (m, n, (n/gemv_bs)*gemv_bs, A, lda, x, y);
+            }
+            else {
+                magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+            }
+        }
+        else {
+            magmablas_dgemvt_tesla(m, n, alpha, A, lda, x, y);
+        }
+    }
+    else {
+        magma_dgemv( trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+    }
 }
 
 #undef num_threads
