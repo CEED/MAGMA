@@ -9,26 +9,29 @@ MAGMA README FILE
   in make.inc.mkl-*, make.inc.acml, make.inc.atlas, and make.inc.macos
   showing how to link to MKL, ACML, ATLAS, and MacOS veclib BLAS, respectively.
   
-  The make.inc files assume $CUDADIR is set in your environment.
+  All the make.inc files assume $CUDADIR is set in your environment.
   For bash (sh), put in ~/.bashrc (with your system's path):
       export CUDADIR=/usr/loca/cuda
   For csh/tcsh, put in ~/.cshrc:
       setenv CUDADIR /usr/local/cuda
+  MAGMA is tested with CUDA >= 5.5. Some functionality requires a newer version.
   
   The MKL make.inc files assume $MKLROOT is set in your environment.
   For bash (sh), put in ~/.bashrc (with your system's path):
       source /opt/intel/composerxe/mkl/bin/mklvars.sh intel64
   For csh/tcsh, put in ~/.cshrc:
       source /opt/intel/composerxe/mkl/bin/mklvars.csh intel64
+  MAGMA is tested with MKL 11.2.3 (2015), both LP64 and ILP64;
+  other versions may work.
   
-  The ACML make.inc file assumes $ACMLDIR and $CBLASDIR are set in your environment.
-  If not installed, install CBLAS from http://www.netlib.org/blas/
+  The ACML make.inc file assumes $ACMLDIR is set in your environment.
   For bash (sh), put in ~/.bashrc (with your system's path):
-      export ACMLDIR=/opt/acml-4.4.0/gfortran64_mp
-      export CBLASDIR=/opt/CBLAS
+      export ACMLDIR=/opt/acml-5.3.1
   For csh/tcsh, put in ~/.cshrc:
-      setenv ACMLDIR  /opt/acml-4.4.0/gfortran64_mp
-      setenv CBLASDIR /opt/CBLAS
+      setenv ACMLDIR  /opt/acml-5.3.1
+  MAGMA is tested with ACML 5.3.1; other versions may work.
+  See comments in make.inc.acml regarding ACML 4;
+  a couple testers fail to compile with ACML 4.
   
   The ATLAS make.inc file assumes $ATLASDIR and $LAPACKDIR are set in your environment.
   If not installed, install LAPACK from http://www.netlib.org/lapack/
@@ -38,6 +41,12 @@ MAGMA README FILE
   For csh/tcsh, put in ~/.cshrc:
       setenv ATLASDIR  /opt/atlas
       setenv LAPACKDIR /opt/LAPACK
+
+  The OpenBLAS make.inc file assumes $OPENBLASDIR is set in your environment.
+  For bash (sh), put in ~/.bashrc (with your system's path):
+      export OPENBLASDIR=/opt/openblas
+  For csh/tcsh, put in ~/.cshrc:
+      setenv OPENBLASDIR /opt/openblas
   
 * Building a Shared Library
 
