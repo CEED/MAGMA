@@ -358,10 +358,10 @@ zlarft_gemv_loop_inside_kernel_batched(
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemv_loop_inside(
-    int n, int k, 
+    magma_int_t n, magma_int_t k, 
     magmaDoubleComplex *tau, 
-    magmaDoubleComplex *v, int ldv, 
-    magmaDoubleComplex *T, int ldt)
+    magmaDoubleComplex *v, magma_int_t ldv, 
+    magmaDoubleComplex *T, magma_int_t ldt)
 {
 
     dim3 grid(1);
@@ -371,10 +371,10 @@ void magmablas_zlarft_gemv_loop_inside(
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemv_loop_inside_batched(
-    int n, int k, 
+    magma_int_t n, magma_int_t k, 
     magmaDoubleComplex **tau_array, 
-    magmaDoubleComplex **v_array, int ldv, 
-    magmaDoubleComplex **T_array, int ldt, magma_int_t batchCount, magma_queue_t queue)
+    magmaDoubleComplex **v_array, magma_int_t ldv, 
+    magmaDoubleComplex **T_array, magma_int_t ldt, magma_int_t batchCount, magma_queue_t queue)
 {
 
     dim3 grid(1, 1, batchCount);
