@@ -70,7 +70,7 @@ int main(int argc, char **argv)
             ldb    = lda;
             ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
             lddb   = ldda;
-            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) * batchCount / 1e9 ;
+            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) * batchCount / 1e9;
             
             sizeA = lda*N*batchCount;
             sizeB = ldb*nrhs*batchCount;
