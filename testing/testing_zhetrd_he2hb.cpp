@@ -25,14 +25,10 @@
 #include "testings.h"
 #include "magma_threadsetting.h"
 
+// TODO include checkdiag.h if needed.
+
 #define PRECISION_z
 
-
-#if defined(PRECISION_z) || defined(PRECISION_d)
-extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
-                       magmaDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
-                    magmaDoubleComplex *Z, int  *LDZ, magmaDoubleComplex *WORK, double *RWORK, double *RESU);
-#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd_he2hb

@@ -21,13 +21,9 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
+// TODO include checkdiag.h if needed.
 
-#if defined(PRECISION_z) || defined(PRECISION_d)
-extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
-                       magmaDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
-                    magmaDoubleComplex *Z, int  *LDZ, magmaDoubleComplex *WORK, double *RWORK, double *RESU);
-#endif
+#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd_he2hb
