@@ -213,11 +213,12 @@ magma_zhetrd(
     magmaDoubleComplex *dwork2 = dwork + 2*lddw*nb;
     #endif
 
-    //if (n < 2048)
-    //    nx = n;
-    //else
-    //    nx = 512;
-    nx = min( 128, n );  // nx <= n is required
+    // nx <= n is required
+    // use LAPACK for n < 3000, otherwise switch at 512
+    if (n < 3000)
+        nx = n;
+    else
+        nx = 512;
 
     // clear out dwork in case it has NANs (used as y in zhemv)
     // rest of dwork (used as work in magmablas_zhemv) doesn't need to be cleared

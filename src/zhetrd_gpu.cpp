@@ -206,12 +206,13 @@ magma_zhetrd_gpu(
         return *info;
     }
 
-    //if (n < 2048)
-    //    nx = n;
-    //else
-    //    nx = 512;
-    nx = min( 128, n );  // nx <= n is required
-    
+    // nx <= n is required
+    // use LAPACK for n < 3000, otherwise switch at 512
+    if (n < 3000)
+        nx = n;
+    else
+        nx = 512;
+
     magmaDoubleComplex_ptr dwork;
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, lddw*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
