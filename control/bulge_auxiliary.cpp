@@ -58,9 +58,9 @@ extern "C" {
     // Auxiliary functions for 2-stage eigensolvers //
     //////////////////////////////////////////////////
 
-    void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2)
+    void cmp_vals(magma_int_t n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2)
     {
-        int i;
+        magma_int_t i;
         double curv, maxv, sumv;
 
         maxv = 0.0;

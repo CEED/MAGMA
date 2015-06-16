@@ -29,7 +29,6 @@
 
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
-extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
 extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
                        magmaDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
                     magmaDoubleComplex *Z, int  *LDZ, magmaDoubleComplex *WORK, double *RWORK, double *RESU);
