@@ -165,7 +165,8 @@ __global__ void zlacgv_kernel_batched(int n, magmaDoubleComplex **x_array, int i
     }
 }
 
-void magma_zlacgv_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, int offset, int batchCount, magma_queue_t queue)
+extern "C" void 
+magma_zlacgv_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t offset, magma_int_t batchCount, magma_queue_t queue)
 {
 /*
     Purpose
