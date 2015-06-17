@@ -38,7 +38,7 @@ typedef struct magma_z_matrix{
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
     magma_diagorder_t  diagorder_type;          // opt: only needed for factorization matrices
-    magma_fillmode_t   fill_mode;               // fill mode full/lower/upper
+    magma_uplo_t   fill_mode;               // fill mode full/lower/upper
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns
     magma_int_t        nnz;                     // opt: number of nonzeros
@@ -79,7 +79,7 @@ typedef struct magma_c_matrix{
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
     magma_diagorder_t  diagorder_type;          // opt: only needed for factorization matrices
-    magma_fillmode_t   fill_mode;               // fill mode full/lower/upper
+    magma_uplo_t   fill_mode;               // fill mode full/lower/upper
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns
     magma_int_t        nnz;                     // opt: number of nonzeros
@@ -121,7 +121,7 @@ typedef struct magma_d_matrix{
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
     magma_diagorder_t  diagorder_type;          // opt: only needed for factorization matrices
-    magma_fillmode_t   fill_mode;               // fill mode full/lower/upper
+    magma_uplo_t   fill_mode;               // fill mode full/lower/upper
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns
     magma_int_t        nnz;                     // opt: number of nonzeros
@@ -163,7 +163,7 @@ typedef struct magma_s_matrix{
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
     magma_diagorder_t  diagorder_type;          // opt: only needed for factorization matrices
-    magma_fillmode_t   fill_mode;               // fill mode full/lower/upper
+    magma_uplo_t   fill_mode;               // fill mode full/lower/upper
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns
     magma_int_t        nnz;                     // opt: number of nonzeros
