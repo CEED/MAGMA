@@ -13,10 +13,6 @@
 
 #include "common_magmasparse.h"
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
-
 
 /**
     Purpose
@@ -72,8 +68,7 @@ magma_zqr(
 
     // local variables
     magma_int_t inc = 1;
-    //magma_int_t ldda = MAX(1,m);    // multiple of 16 for coalesced accesses 
-    magma_int_t k = MIN(m,n);
+    magma_int_t k = min(m,n);
     magma_int_t ldt;
     magma_int_t nb;
     magmaDoubleComplex *tau = NULL;
