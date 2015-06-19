@@ -518,7 +518,7 @@ magma_zmdotc(
         while( Gs.x > 1 ) {
             Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
-            magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+            magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
                         ( Gs.x, n, k, aux1, aux2 );
             Gs_next.x = Gs_next.x /2;
             Gs.x = Gs_next.x;
@@ -531,7 +531,7 @@ magma_zmdotc(
         while( Gs.x > 1 ) {
             Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
-            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
                         ( Gs.x, n, aux1, aux2 );
             Gs_next.x = Gs_next.x /2;
             Gs.x = Gs_next.x;
@@ -543,7 +543,7 @@ magma_zmdotc(
 
 
     for( int j=0; j<k; j++) {
-            magma_zcopyvector( 1, aux1+j*n, 1, skp+j, 1 );
+            magma_zcopyvector_async( 1, aux1+j*n, 1, skp+j, 1, queue );
     }
 
    magmablasSetKernelStream( orig_queue );
