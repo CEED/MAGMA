@@ -75,7 +75,7 @@ magma_zvinit(
     x->memory_location = mem_loc;
     x->sym = Magma_GENERAL;
     x->diagorder_type = Magma_VALUE;
-    x->fill_mode = Magma_FULL;
+    x->fill_mode = MagmaFull;
     x->num_rows = num_rows;
     x->num_cols = num_cols;
     x->nnz = num_rows*num_cols;
