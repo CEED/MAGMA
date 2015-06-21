@@ -109,9 +109,9 @@ magma_zjacobi(
     {
         solver_par->numiter = solver_par->numiter+jacobiiter_par.maxiter;
         //CHECK( magma_zjacobiiter_sys( A, b, d, r, x, &jacobiiter_par, queue ) );
-        CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
+        CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));
         //CHECK( magma_zjacobispmvupdate_bw(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
-        CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
+        CHECK(  magma_zresidualvec( ACSR, b, *x, &r, &residual, queue));
         tempo2 = magma_sync_wtime( queue );
         if ( solver_par->verbose > 0 ) {
             solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
@@ -121,7 +121,7 @@ magma_zjacobi(
         }
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
-       
+
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
