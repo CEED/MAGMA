@@ -123,7 +123,7 @@ magma_zparse_opts(
     opts->solver_par.maxiter = 1000;
     opts->solver_par.verbose = 0;
     opts->solver_par.version = 0;
-    opts->solver_par.restart = 30;
+    opts->solver_par.restart = 50;
     opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_NONE;
     opts->precond_par.epsilon = 0.01;
@@ -172,8 +172,10 @@ magma_zparse_opts(
                         opts->solver_par.num_eigenvalues = 16; break;
                 case 9: opts->solver_par.solver = Magma_JACOBI; break;
                 case 10: opts->solver_par.solver = Magma_BAITER; break;
-                case 11: opts->solver_par.solver = Magma_IDR; break;
-                case 12: opts->solver_par.solver = Magma_PIDR; break;
+                case 11: opts->solver_par.solver = Magma_IDR; 
+                         opts->solver_par.restart = 4; break;
+                case 12: opts->solver_par.solver = Magma_PIDR;
+                         opts->solver_par.restart = 4; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
@@ -223,6 +225,7 @@ magma_zparse_opts(
             break;
         }
     }
+    
     // ensure to take a symmetric preconditioner for the PCG
     if ( opts->solver_par.solver == Magma_PCG
         && opts->precond_par.solver == Magma_ILU )
