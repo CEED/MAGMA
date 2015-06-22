@@ -79,7 +79,7 @@ magma_ziterref(
     magma_int_t dofs = A.num_rows*b.num_cols;
 
     // solver variables
-    double nom, nom0, r0;
+    double nom, nom0;
     
     // workspace
     magma_z_matrix r={Magma_CSR}, z={Magma_CSR};
@@ -99,9 +99,8 @@ magma_ziterref(
     nom = nom0 * nom0;
     solver_par->init_res = nom0;
 
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
-        r0 = ATOLERANCE;
-    if ( nom < r0 ) {
+    if( nom0 < solver_par->atol ||
+        nom0/solver_par->init_res < solver_par->rtol ){
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
         goto cleanup;
@@ -137,7 +136,8 @@ magma_ziterref(
             }
         }
 
-        if (  nom  < r0 ) {
+        if( nom < solver_par->atol ||
+            nom/solver_par->init_res < solver_par->rtol ){
             break;
         }
     }
@@ -159,7 +159,8 @@ magma_ziterref(
             }
         }
         info = MAGMA_SLOW_CONVERGENCE;
-        if( solver_par->iter_res < solver_par->rtol*solver_par->init_res ){
+        if( solver_par->iter_res < solver_par->atol ||
+            solver_par->iter_res/solver_par->init_res < solver_par->rtol ){
             info = MAGMA_SUCCESS;
         }
     }
