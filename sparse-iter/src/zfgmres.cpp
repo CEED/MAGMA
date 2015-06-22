@@ -39,7 +39,8 @@
 static void
 GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleComplex *cs, magmaDoubleComplex *sn)
 {
-    /*if (dy == MAGMA_Z_ZERO) {
+#if defined(PRECISION_s) | defined(PRECISION_d)
+    if (dy == MAGMA_Z_ZERO) {
         *cs = MAGMA_Z_ONE;
         *sn = MAGMA_Z_ZERO;
     } else if (MAGMA_Z_ABS((dy)) > MAGMA_Z_ABS((dx))) {
@@ -50,24 +51,29 @@ GeneratePlaneRotation(magmaDoubleComplex dx, magmaDoubleComplex dy, magmaDoubleC
         magmaDoubleComplex temp = dy / dx;
         *cs = MAGMA_Z_ONE / magma_zsqrt( ( MAGMA_Z_ONE + temp*temp ));
         *sn = temp * (*cs);
-    }*/
-    
-    // below the code Joss provided me with - this works. No idea why the above code fails.
+    }
+#else   
+    // below the code Joss Knight from MathWorks provided me with - this works. 
+    // No idea why the above code fails for complex - maybe rounding.
     real_Double_t rho = sqrt(MAGMA_Z_REAL(MAGMA_Z_CNJG(dx)*dx + MAGMA_Z_CNJG(dy)*dy));
     *cs = dx / rho;
     *sn = dy / rho;
+#endif
 }
 
 static void ApplyPlaneRotation(magmaDoubleComplex *dx, magmaDoubleComplex *dy, magmaDoubleComplex cs, magmaDoubleComplex sn)
 {
- //   magmaDoubleComplex temp = (*dx);
- //   *dx =  cs * (*dx) + sn * (*dy);
- //   *dy = -sn * temp + cs * (*dy);
-
-     // below the code Joss provided me with - this works. No idea why the above code fails.
+#if defined(PRECISION_s) | defined(PRECISION_d)
+      magmaDoubleComplex temp = (*dx);
+      *dx =  cs * (*dx) + sn * (*dy);
+      *dy = -sn * temp + cs * (*dy);
+#else  
+    // below the code Joss Knight from MathWorks provided me with - this works. 
+    // No idea why the above code fails for complex - maybe rounding.
     magmaDoubleComplex temp  =  MAGMA_Z_CNJG(cs) * (*dx) +  MAGMA_Z_CNJG(sn) * (*dy);
     *dy = -(sn) * (*dx) + cs * (*dy);
     *dx = temp;
+#endif
 }
 
 
