@@ -197,7 +197,7 @@ magma_zbicgstab_merge2(
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
-    CHECK( magma_zresidual( A, b, *x, &residual, queue ));
+    CHECK( magma_zresidual( A, b, *x, &residual, NULL ));
     solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 

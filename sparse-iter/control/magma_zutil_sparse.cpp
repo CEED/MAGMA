@@ -13,6 +13,7 @@
 */
 #include "common_magmasparse.h"
 
+#define PRECISION_z
 
 // --------------------
 static const char *usage_sparse_short =
@@ -119,7 +120,11 @@ magma_zparse_opts(
     opts->input_location = Magma_CPU;
     opts->output_location = Magma_CPU;
     opts->scaling = Magma_NOSCALE;
-    opts->solver_par.epsilon = 10e-16;
+    #if defined(PRECISION_z) | defined(PRECISION_d)
+        opts->solver_par.epsilon = 10e-10;
+    #else
+        opts->solver_par.epsilon = 10e-5;
+    #endif
     opts->solver_par.maxiter = 1000;
     opts->solver_par.verbose = 0;
     opts->solver_par.version = 0;

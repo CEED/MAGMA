@@ -165,7 +165,7 @@ magma_zbicgstab(
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
-    CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, queue));
+    CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, NULL));
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
