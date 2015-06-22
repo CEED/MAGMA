@@ -60,7 +60,7 @@ magma_z_precond(
     
     // set up precond parameters as solver parameters
     magma_z_solver_par psolver_par;
-    psolver_par.epsilon = precond->epsilon;
+    psolver_par.rtol = precond->rtol;
     psolver_par.maxiter = precond->maxiter;
     psolver_par.restart = precond->restart;
     psolver_par.verbose = 0;

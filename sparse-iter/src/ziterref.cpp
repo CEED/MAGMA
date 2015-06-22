@@ -99,7 +99,7 @@ magma_ziterref(
     nom = nom0 * nom0;
     solver_par->init_res = nom0;
 
-    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
+    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
         r0 = ATOLERANCE;
     if ( nom < r0 ) {
         solver_par->final_res = solver_par->init_res;
@@ -159,7 +159,7 @@ magma_ziterref(
             }
         }
         info = MAGMA_SLOW_CONVERGENCE;
-        if( solver_par->iter_res < solver_par->epsilon*solver_par->init_res ){
+        if( solver_par->iter_res < solver_par->rtol*solver_par->init_res ){
             info = MAGMA_SUCCESS;
         }
     }

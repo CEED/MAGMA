@@ -57,7 +57,8 @@ static const char *usage_sparse =
 "                   4   BiCGSTAB\n"
 "                   5   GMRES\n"
 "                   6   Block-asynchronous Iteration\n"
-"                   --ptol eps    Relative resiudal stopping criterion for preconditioner.\n"
+"                   --patol atol  Absolute residual stopping criterion for preconditioner.\n"
+"                   --prtol rtol  Relative residual stopping criterion for preconditioner.\n"
 "                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
 "                   --piter k     Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
@@ -67,7 +68,8 @@ static const char *usage_sparse =
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
-" --tol eps     Set a relative residual stopping criterion.\n";
+" --atol atol   Set an absolute residual stopping criterion.\n"
+" --rtol rtol   Set a relative residual stopping criterion.\n";
 
 
 
@@ -121,9 +123,11 @@ magma_zparse_opts(
     opts->output_location = Magma_CPU;
     opts->scaling = Magma_NOSCALE;
     #if defined(PRECISION_z) | defined(PRECISION_d)
-        opts->solver_par.epsilon = 10e-10;
+        opts->solver_par.atol = 1e-16;
+        opts->solver_par.rtol = 1e-10;
     #else
-        opts->solver_par.epsilon = 10e-5;
+        opts->solver_par.atol = 1e-8;
+        opts->solver_par.rtol = 1e-5;
     #endif
     opts->solver_par.maxiter = 1000;
     opts->solver_par.verbose = 0;
@@ -131,7 +135,13 @@ magma_zparse_opts(
     opts->solver_par.restart = 50;
     opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_NONE;
-    opts->precond_par.epsilon = 0.01;
+    #if defined(PRECISION_z) | defined(PRECISION_d)
+        opts->precond_par.atol = 1e-16;
+        opts->precond_par.rtol = 1e-10;
+    #else
+        opts->precond_par.atol = 1e-8;
+        opts->precond_par.rtol = 1e-5;
+    #endif
     opts->precond_par.maxiter = 100;
     opts->precond_par.restart = 10;
     opts->precond_par.levels = 0;
@@ -198,8 +208,10 @@ magma_zparse_opts(
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
                 case 7: opts->precond_par.solver = Magma_IDR; break;
             }
-        } else if ( strcmp("--ptol", argv[i]) == 0 && i+1 < argc ) {
-            sscanf( argv[++i], "%lf", &opts->precond_par.epsilon );
+        } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
+            sscanf( argv[++i], "%lf", &opts->precond_par.atol );
+        } else if ( strcmp("--prtol", argv[i]) == 0 && i+1 < argc ) {
+            sscanf( argv[++i], "%lf", &opts->precond_par.rtol );
         } else if ( strcmp("--piter", argv[i]) == 0 && i+1 < argc ) {
             opts->precond_par.maxiter = atoi( argv[++i] );
         } else if ( strcmp("--psweeps", argv[i]) == 0 && i+1 < argc ) {
@@ -214,8 +226,10 @@ magma_zparse_opts(
             opts->solver_par.verbose = atoi( argv[++i] );
         }  else if ( strcmp("--maxiter", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.maxiter = atoi( argv[++i] );
-        } else if ( strcmp("--tol", argv[i]) == 0 && i+1 < argc ) {
-            sscanf( argv[++i], "%lf", &opts->solver_par.epsilon );
+        } else if ( strcmp("--atol", argv[i]) == 0 && i+1 < argc ) {
+            sscanf( argv[++i], "%lf", &opts->solver_par.atol );
+        } else if ( strcmp("--rtol", argv[i]) == 0 && i+1 < argc ) {
+            sscanf( argv[++i], "%lf", &opts->solver_par.rtol );
         } else if ( strcmp("--ev", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.num_eigenvalues = atoi( argv[++i] );
         } else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {

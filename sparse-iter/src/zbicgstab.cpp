@@ -98,7 +98,7 @@ magma_zbicgstab(
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));              // z = A r
     den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z' * r
 
-    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE )
+    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
         r0 = ATOLERANCE;
     if ( nom < r0 ) {
         solver_par->final_res = solver_par->init_res;
@@ -156,9 +156,10 @@ magma_zbicgstab(
             }
         }
 
-        if ( res/nom0  < solver_par->epsilon ) {
+        if ( res/nom0 <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
+        
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
@@ -181,7 +182,8 @@ magma_zbicgstab(
             }
         }
         info = MAGMA_SLOW_CONVERGENCE;
-        if( solver_par->iter_res < solver_par->epsilon*solver_par->init_res ){
+        if( solver_par->iter_res < solver_par->rtol*solver_par->init_res ||
+            solver_par->iter_res < solver_par->atol ) {
             info = MAGMA_SUCCESS;
         }
     }

@@ -274,8 +274,8 @@ magma_zpidr(
    
     // relative tolerance
     // Note: shouldn't it be nrmb instead of nrmr?
-    tolb = nrmb * solver_par->epsilon;
-    //tolb = nrmr * solver_par->epsilon;
+    tolb = nrmb * solver_par->rtol;
+    //tolb = nrmr * solver_par->rtol;
     //if ( tolb < ATOLERANCE ) {
     //    tolb = ATOLERANCE;
     //}

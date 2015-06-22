@@ -147,7 +147,7 @@ magma_zbpcg(
 
     solver_par->init_res = nom0[0];
     
-    if ( (r0[0] = nom[0] * solver_par->epsilon) < ATOLERANCE )
+    if ( (r0[0] = nom[0] * solver_par->rtol) < ATOLERANCE )
         r0[0] = ATOLERANCE;
     // check positive definite
     if (den[0] <= 0.0) {
@@ -222,7 +222,7 @@ magma_zbpcg(
         }
 
 
-        if (  res[0]/nom0[0]  < solver_par->epsilon ) {
+        if (  res[0]/nom0[0]  < solver_par->rtol ) {
             break;
         }
     }
@@ -246,7 +246,7 @@ magma_zbpcg(
             }
         }
         info = MAGMA_SLOW_CONVERGENCE;
-        if( solver_par->iter_res < solver_par->epsilon*solver_par->init_res ){
+        if( solver_par->iter_res < solver_par->rtol*solver_par->init_res ){
             info = MAGMA_SUCCESS;
         }
     }

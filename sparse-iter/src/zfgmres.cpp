@@ -176,7 +176,7 @@ magma_zfgmres(
 
     solver_par->init_res = nom;
     
-    if ( ( nom * solver_par->epsilon) < ATOLERANCE )
+    if ( ( nom * solver_par->rtol) < ATOLERANCE )
         r0 = ATOLERANCE;
     
     solver_par->numiter = 0;
@@ -197,7 +197,7 @@ magma_zfgmres(
             solver_par->init_res = MAGMA_Z_REAL( beta );
             resid0 = MAGMA_Z_REAL( beta );
         
-            if ( (r0 = resid0 * solver_par->epsilon) < ATOLERANCE )
+            if ( (r0 = resid0 * solver_par->rtol) < ATOLERANCE )
                 r0 = ATOLERANCE;
             if ( resid0 < r0 ) {
                 solver_par->final_res = solver_par->init_res;
@@ -268,7 +268,7 @@ magma_zfgmres(
                             = (real_Double_t) tempo2-tempo1;
                 }
             }
-            if (rel_resid <= solver_par->epsilon){
+            if (rel_resid <= solver_par->rtol || betanom <= solver_par->atol ){
                 break;
             }
         }
@@ -289,7 +289,7 @@ magma_zfgmres(
             magma_zaxpy(dofs, s[j], W(j), 1, x->dval, 1);
         }
     }
-    while (rel_resid > solver_par->epsilon
+    while (rel_resid > solver_par->rtol
                 && solver_par->numiter+1 <= solver_par->maxiter);
 
     tempo2 = magma_sync_wtime( queue );
@@ -311,7 +311,8 @@ magma_zfgmres(
             }
         }
         info = MAGMA_SLOW_CONVERGENCE;
-        if( solver_par->iter_res < solver_par->epsilon*solver_par->init_res ){
+        if( solver_par->iter_res < solver_par->rtol*solver_par->init_res ||
+            solver_par->iter_res < solver_par->atol ) {
             info = MAGMA_SUCCESS;
         }
     }

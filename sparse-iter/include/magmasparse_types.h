@@ -277,7 +277,8 @@ typedef struct magma_z_solver_par{
 
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
-    double             epsilon;                 // relative residual stopping criterion
+    double             atol;                     // absolute residual stopping criterion
+    double             rtol;                    // relative residual stopping criterion
     magma_int_t        maxiter;                 // upper iteration limit
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
@@ -315,7 +316,8 @@ typedef struct magma_c_solver_par{
 
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
-    float              epsilon;                 // relative residual stopping criterion
+    float              atol;                     // absolute residual stopping criterion
+    float              rtol;                    // relative residual stopping criterion
     magma_int_t        maxiter;                 // upper iteration limit
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
@@ -353,7 +355,8 @@ typedef struct magma_d_solver_par{
 
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
-    double             epsilon;                 // relative residual stopping criterion
+    double             atol;                     // absolute residual stopping criterion
+    double             rtol;                    // relative residual stopping criterion
     magma_int_t        maxiter;                 // upper iteration limit
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
@@ -391,7 +394,8 @@ typedef struct magma_s_solver_par{
 
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
-    float              epsilon;                 // relative residual stopping criterion
+    float              atol;                     // absolute residual stopping criterion
+    float              rtol;                    // relative residual stopping criterion
     magma_int_t        maxiter;                 // upper iteration limit
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
@@ -435,7 +439,8 @@ typedef struct magma_z_preconditioner{
     magma_int_t             levels;
     magma_int_t             sweeps;
     magma_precision         format;
-    double                  epsilon;  
+    double                  atol;                
+    double                  rtol;    
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
@@ -469,7 +474,8 @@ typedef struct magma_c_preconditioner{
     magma_int_t             levels;
     magma_int_t             sweeps;
     magma_precision         format;
-    float                   epsilon;  
+    float                   atol;                
+    float                   rtol;               
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
@@ -504,7 +510,8 @@ typedef struct magma_d_preconditioner{
     magma_int_t             levels;
     magma_int_t             sweeps;
     magma_precision         format;
-    double                  epsilon;  
+    double                  atol;                
+    double                  rtol; 
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
@@ -539,7 +546,8 @@ typedef struct magma_s_preconditioner{
     magma_int_t             levels;
     magma_int_t             sweeps;
     magma_precision         format;
-    float                   epsilon;  
+    float                   atol;                
+    float                   rtol;    
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;

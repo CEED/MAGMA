@@ -263,7 +263,7 @@ magma_zidr_strm(
     }
 
     // relative tolerance
-    tolb = nrmb * solver_par->epsilon;
+    tolb = nrmb * solver_par->rtol;
     if ( tolb < ATOLERANCE ) {
         tolb = ATOLERANCE;
     }
