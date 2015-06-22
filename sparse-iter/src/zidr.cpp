@@ -94,7 +94,6 @@ magma_zidr(
     double nrmr;
     double nrmt;
     double rho;
-    double tolb;
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
     magmaDoubleComplex gamma;
@@ -155,12 +154,6 @@ magma_zidr(
         goto cleanup;
     }
 
-    // relative tolerance
-    tolb = nrmb * solver_par->rtol;
-    if ( tolb < ATOLERANCE ) {
-        tolb = ATOLERANCE;
-    }
-
     // r = b - A x
     CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zresidualvec( A, b, *x, &dr, &nrmr, queue ));
@@ -172,7 +165,8 @@ magma_zidr(
     }
    
     // check if initial is guess good enough
-    if ( nrmr <= tolb ) {
+    if ( nrmr <= solver_par->atol ||
+        nrmr/nrmb <= solver_par->rtol ) {
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
         goto cleanup;
@@ -370,7 +364,9 @@ magma_zidr(
             }
 
             // check convergence or iteration limit
-            if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+            if ( nrmr <= solver_par->atol ||
+                nrmr/nrmb <= solver_par->rtol || 
+                solver_par->numiter >= solver_par->maxiter ) {
                 s = k; // for the x-update outside the loop
                 innerflag = 1;
                 break;
@@ -476,7 +472,9 @@ magma_zidr(
         }
 
         // check convergence or iteration limit
-        if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+        if ( nrmr <= solver_par->atol ||
+            nrmr/nrmb <= solver_par->rtol || 
+            solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
         

@@ -140,7 +140,6 @@ magma_zpidr(
     double nrmr;
     double nrmt;
     double rho;
-    double tolb;
     double angle;
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
@@ -271,16 +270,10 @@ magma_zpidr(
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t)nrmr;
     }
-   
-    // relative tolerance
-    // Note: shouldn't it be nrmb instead of nrmr?
-    tolb = nrmb * solver_par->rtol;
-    //tolb = nrmr * solver_par->rtol;
-    //if ( tolb < ATOLERANCE ) {
-    //    tolb = ATOLERANCE;
-    //}
+
     // check if initial is guess good enough
-    if ( nrmr <= tolb ) {
+    if ( nrmr <= solver_par->atol ||
+        nrmr/nrmb <= solver_par->rtol ) {
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
         goto cleanup;
@@ -477,7 +470,9 @@ magma_zpidr(
             }
 
             // check convergence or iteration limit
-            if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+            if ( nrmr <= solver_par->atol ||
+                nrmr/nrmb <= solver_par->rtol || 
+                solver_par->numiter >= solver_par->maxiter ) {
                 innerflag = 1;
                 break;
             }
@@ -564,7 +559,9 @@ magma_zpidr(
         }
 
         // check convergence or iteration limit
-        if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+        if ( nrmr <= solver_par->atol ||
+            nrmr/nrmb <= solver_par->rtol || 
+            solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
 
