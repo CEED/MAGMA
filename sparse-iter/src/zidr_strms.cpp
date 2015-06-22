@@ -156,7 +156,6 @@ magma_zidr_strm(
     double nrmr;
     double nrmt;
     double rho;
-    double tolb;
     magmaDoubleComplex *om = NULL;
     magmaDoubleComplex *gamma = NULL;
     magmaDoubleComplex *mkk = NULL;
@@ -262,12 +261,6 @@ magma_zidr_strm(
         goto cleanup;
     }
 
-    // relative tolerance
-    tolb = nrmb * solver_par->rtol;
-    if ( tolb < ATOLERANCE ) {
-        tolb = ATOLERANCE;
-    }
-
     // t = 0
     // make t twice as large to contain both, dt and dr
     ldd = magma_roundup( b.num_rows, 32 );
@@ -294,7 +287,8 @@ magma_zidr_strm(
     }
 
     // check if initial is guess good enough
-    if ( nrmr <= tolb ) {
+    if ( nrmr <= solver_par->atol ||
+        nrmr/nrmb <= solver_par->rtol ) {
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
         goto cleanup;
@@ -859,7 +853,9 @@ cudaProfilerStart();
             }
 
             // check convergence or iteration limit
-            if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+            if ( nrmr <= solver_par->atol ||
+                nrmr/nrmb <= solver_par->rtol || 
+                solver_par->numiter >= solver_par->maxiter ) {
                 s = k; // for the x-update outside the loop
                 innerflag = 2;
                 break;
@@ -1038,7 +1034,9 @@ magma_queue_sync( queues[0] );
         }
 
         // check convergence or iteration limit
-        if ( nrmr <= tolb || solver_par->numiter >= solver_par->maxiter ) {
+        if ( nrmr <= solver_par->atol ||
+            nrmr/nrmb <= solver_par->rtol || 
+            solver_par->numiter >= solver_par->maxiter ) {
             printD("IDR exited from outer loop, convergence.\n");
             break;
         }

@@ -59,7 +59,7 @@
     ********************************************************************/
 
 #define MYDEBUG 0
-#define WRITEP 1
+#define WRITEP 0
 
 #if MYDEBUG == 1
 #define printD(...) printf(__VA_ARGS__)
