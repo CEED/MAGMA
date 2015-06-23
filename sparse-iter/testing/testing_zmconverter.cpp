@@ -106,11 +106,6 @@ int main(  int argc, char** argv )
         magma_zmfree(&AT, queue );
         CHECK( magma_zmconvert( AT2, &AT, Magma_CSRD, Magma_CSR, queue ));
         magma_zmfree(&AT2, queue );
-        //BCSR
-        CHECK( magma_zmconvert( AT, &AT2, Magma_CSR, Magma_BCSR, queue ));
-        magma_zmfree(&AT, queue );
-        CHECK( magma_zmconvert( AT2, &AT, Magma_BCSR, Magma_CSR, queue ));
-        magma_zmfree(&AT2, queue );
         
         // transpose
         CHECK( magma_zmtranspose( AT, &A2, queue ));
