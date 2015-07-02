@@ -25,6 +25,9 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
+ 1.6.3 - July 2015
+    * Added magmaf_wtime for consistency with other Fortran interfaces; deprecated magma_wtime_f.
+
  1.6.2 - May 4, 2015
     * Added magma_{s,d,c,z}sqrt for real and complex scalar square root.
     * Added magma_ceildiv and magma_roundup.

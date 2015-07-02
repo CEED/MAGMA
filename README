@@ -1,6 +1,6 @@
-==================
+===================
 MAGMA README FILE
-==================
+===================
 
 * Further documentation is provided in docs/html/index.html.
 
@@ -112,10 +112,10 @@ MAGMA README FILE
 
 * To TUNE MAGMA, you can modify the blocking factors for the algorithms of
   interest in file 'control/get_nb.cpp'. The default values are tuned for
-  general Tesla (1.x), Fermi (2.x), and Kepler (3.x) GPUs. If you have 
-  a Fermi (C2050), you can also compare your performance to what we get, 
-  given in file 'testing/results_fermi.txt', as an easy check for your 
-  installation.
+  general Tesla (1.x), Fermi (2.x), and Kepler (3.x) GPUs.
+  
+  Performance results are included in results/vA.B.C/cudaX.Y-zzz/*.txt
+  for MAGMA version A.B.C, CUDA version X.Y, and GPU zzz.
 
 * To RUN EXPERIMENTAL MAGMA, go to directory 'exp' and type 'make'.  Then 
   type 'export MKL_NUM_THREADS=1'.  Next go to directory 'testing'.  
