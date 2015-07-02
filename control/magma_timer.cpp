@@ -21,7 +21,8 @@
 #endif
 
 #if defined(ADD_)
-#  define magma_wtime_f        magma_wtime_f_
+#  define magmaf_wtime        magmaf_wtime_
+#  define magma_wtime_f       magma_wtime_f_   /* deprecated name */
 #elif defined(NOCHANGE)
 #endif
 
@@ -93,6 +94,14 @@ double magma_sync_wtime( magma_queue_t queue )
 }
 
 // version callable from Fortran stores seconds in time.
+extern "C"
+void magmaf_wtime(double *time)
+{
+    *time = magma_wtime();
+}
+
+// version callable from Fortran stores seconds in time.
+// @deprecated name; @see magmaf_wtime
 extern "C"
 void magma_wtime_f(double *time)
 {

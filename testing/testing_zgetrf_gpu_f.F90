@@ -77,9 +77,9 @@
       call cublas_set_matrix(n, nrhs, size_of_elt, h_B, lda, devptrB, ldda)
 
 !---- Call magma LU ----------------
-      call magma_wtime_f(tstart)
+      call magmaf_wtime(tstart)
       call magmaf_zgetrf_gpu(n, n, devptrA, ldda, ipiv, info)
-      call magma_wtime_f(tend)
+      call magmaf_wtime(tend)
 
       if ( info .ne. 0 )  then
          write(*,*) "Info : ", info

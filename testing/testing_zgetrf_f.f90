@@ -55,9 +55,9 @@
       X(:) = B(:)
 
 !---- Call magma LU ----------------
-      call magma_wtime_f(tstart)
+      call magmaf_wtime(tstart)
       call magmaf_zgetrf(n, n, A, lda, ipiv, info)
-      call magma_wtime_f(tend)
+      call magmaf_wtime(tend)
 
       if ( info .ne. 0 )  then
          write(*,*) "Info : ", info
