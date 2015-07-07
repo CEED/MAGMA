@@ -109,6 +109,7 @@ magma_int_t read_z_csr_from_mtx(
     magmaDoubleComplex *coo_val=NULL;
     magma_index_t *new_col=NULL, *new_row=NULL;
     magmaDoubleComplex *new_val=NULL;
+    magma_int_t hermitian = 0;
     
     std::vector< std::pair< magma_index_t, magmaDoubleComplex > > rowval;
     
@@ -160,7 +161,7 @@ magma_int_t read_z_csr_from_mtx(
     *n_row    = num_rows;
     *n_col    = num_cols;
     *nnz      = num_nonzeros;
-
+    
     CHECK( magma_index_malloc_cpu( &coo_col, *nnz ) );
     CHECK( magma_index_malloc_cpu( &coo_row, *nnz ) );
     CHECK( magma_zmalloc_cpu( &coo_val, *nnz ) );
@@ -208,7 +209,13 @@ magma_int_t read_z_csr_from_mtx(
     printf(" done. Converting to CSR:");
     fflush(stdout);
     
-    if (mm_is_symmetric(matcode)) { // duplicate off diagonal entries
+
+    if( mm_is_hermitian(matcode) ) {
+        hermitian = 1;
+        printf("hermitian case!\n\n\n");
+    }
+    if ( mm_is_symmetric(matcode) || mm_is_hermitian(matcode) ) { 
+                                        // duplicate off diagonal entries
         printf("\n%% Detected symmetric case.");
         
         magma_index_t off_diagonals = 0;
@@ -233,7 +240,7 @@ magma_int_t read_z_csr_from_mtx(
                 ptr++;
                 new_col[ptr] = coo_row[i];
                 new_row[ptr] = coo_col[i];
-                new_val[ptr] = coo_val[i];
+                new_val[ptr] = (hermitian == 0) ? coo_val[i] : conj(coo_val[i]);
                 ptr++;
             } else {
                 new_row[ptr] = coo_row[i];
@@ -967,7 +974,8 @@ magma_z_csr_mtx(
     magmaDoubleComplex *new_val = NULL;
     magma_index_t* new_row = NULL;
     magma_index_t* new_col = NULL;
-
+    magma_int_t hermitian = 0;
+    
     std::vector< std::pair< magma_index_t, magmaDoubleComplex > > rowval;
     
     FILE *fid = NULL;
@@ -1070,7 +1078,12 @@ magma_z_csr_mtx(
     
     A->sym = Magma_GENERAL;
 
-    if (mm_is_symmetric(matcode)) { // duplicate off diagonal entries
+
+    if( mm_is_hermitian(matcode) ) {
+        hermitian = 1;
+    }
+    if ( mm_is_symmetric(matcode) || mm_is_hermitian(matcode) ) { 
+                                        // duplicate off diagonal entries
         printf("\n%% Detected symmetric case.");
         A->sym = Magma_SYMMETRIC;
         magma_index_t off_diagonals = 0;
@@ -1095,7 +1108,7 @@ magma_z_csr_mtx(
                 ptr++;
                 new_col[ptr] = coo_row[i];
                 new_row[ptr] = coo_col[i];
-                new_val[ptr] = coo_val[i];
+                new_val[ptr] = (hermitian == 0) ? coo_val[i] : conj(coo_val[i]);
                 ptr++;
             } else {
                 new_row[ptr] = coo_row[i];
@@ -1351,7 +1364,8 @@ magma_z_csr_mtxsymm(
     
     A->sym = Magma_GENERAL;
 
-    if (mm_is_symmetric(matcode)) { // do not duplicate off diagonal entries!
+    if ( mm_is_symmetric(matcode) || mm_is_hermitian(matcode) ) { 
+            // do not duplicate off diagonal entries!
         A->sym = Magma_SYMMETRIC;
     } // end symmetric case
     
