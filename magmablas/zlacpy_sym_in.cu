@@ -5,9 +5,11 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> s d c
        @author Mark Gates
        @author Azzam Haidar
+       
+       @precisions normal z -> s d c
+
 */
 #include "common_magma.h"
 
@@ -19,7 +21,7 @@
     Each block has BLK_X threads.
     Each thread loops across one row, updating BLK_Y entries.
 
-    Code similar to zlaset.
+    Code similar to zlaset, zlacpy, zlag2c, clag2z, zgeadd.
 */
 static __device__
 void zlacpy_sym_in_full_device(
@@ -56,7 +58,7 @@ void zlacpy_sym_in_full_device(
     Similar to zlacpy_full, but updates only the diagonal and below.
     Blocks that are fully above the diagonal exit immediately.
 
-    Code similar to zlaset.
+    Code similar to zlaset, zlacpy, zlat2c, clat2z.
 */
 static __device__
 void zlacpy_sym_in_lower_device(
@@ -105,7 +107,7 @@ void zlacpy_sym_in_lower_device(
     Similar to zlacpy_full, but updates only the diagonal and above.
     Blocks that are fully below the diagonal exit immediately.
 
-    Code similar to zlaset.
+    Code similar to zlaset, zlacpy, zlat2c, clat2z.
 */
 static __device__
 void zlacpy_sym_in_upper_device(
@@ -139,8 +141,10 @@ void zlacpy_sym_in_upper_device(
     }
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////
 /*
-    kernel wrapper to call the device function.
+    kernel wrappers to call the device functions.
 */
 __global__
 void zlacpy_sym_in_full_kernel(
@@ -180,13 +184,12 @@ void zlacpy_sym_in_upper_kernel(
     
     Arguments
     ---------
-    
     @param[in]
     uplo    magma_uplo_t
             Specifies the part of the matrix dA to be copied to dB.
       -     = MagmaUpper:      Upper triangular part
       -     = MagmaLower:      Lower triangular part
-            Otherwise:  All of the matrix dA
+      -     = MagmaFull:       All of the matrix dA
     
     @param[in]
     m       INTEGER
@@ -198,7 +201,7 @@ void zlacpy_sym_in_upper_kernel(
     
     @param[in]
     dA      COMPLEX_16 array, dimension (LDDA,N)
-            The m by n matrix dA.
+            The M-by-N matrix dA.
             If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
             if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
     
@@ -208,7 +211,7 @@ void zlacpy_sym_in_upper_kernel(
     
     @param[out]
     dB      COMPLEX_16 array, dimension (LDDB,N)
-            The m by n matrix dB.
+            The M-by-N matrix dB.
             On exit, dB = dA in the locations specified by UPLO.
     
     @param[in]
@@ -230,7 +233,9 @@ magmablas_zlacpy_sym_in_q(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    if ( m < 0 )
+    if ( uplo != MagmaLower && uplo != MagmaUpper && uplo != MagmaFull )
+        info = -1;
+    else if ( m < 0 )
         info = -2;
     else if ( n < 0 )
         info = -3;
@@ -241,11 +246,12 @@ magmablas_zlacpy_sym_in_q(
     
     if ( info != 0 ) {
         magma_xerbla( __func__, -(info) );
-        return;
+        return;  //info;
     }
     
-    if ( m == 0 || n == 0 )
+    if ( m == 0 || n == 0 ) {
         return;
+    }
     
     dim3 threads( BLK_X, 1 );
     dim3 grid( magma_ceildiv(m, BLK_X), magma_ceildiv(n, BLK_Y) );
@@ -260,6 +266,7 @@ magmablas_zlacpy_sym_in_q(
         zlacpy_sym_in_full_kernel <<< grid, threads, 0, queue >>> ( m, n, dA, ldda, dB, lddb );
     }
 }
+
 
 /**
     @see magmablas_zlacpy_q
