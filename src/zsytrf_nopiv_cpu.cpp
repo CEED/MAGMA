@@ -19,8 +19,6 @@
 #define  C(i, j) ( C[(j)*ldc  + (i)])
 #define  D(i)    ( D[(i)*incD] )
 
-
-
 // trailing submatrix update with inner-blocking 
 int zsyrk_d(magma_uplo_t uplo, magma_int_t m, magma_int_t n,
             magmaDoubleComplex alpha, magmaDoubleComplex *A, magma_int_t lda,
@@ -57,34 +55,29 @@ int zsyrk_d(magma_uplo_t uplo, magma_int_t m, magma_int_t n,
         return MAGMA_SUCCESS;
     }
 
-    if ( uplo == MagmaLower )
-    {
-        for(int j=0; j<m; j++)
-        {
-            for(int i=j; i<m; i++)
-            {
+    if ( uplo == MagmaLower ) {
+        for (int j=0; j < m; j++) {
+            for (int i=j; i < m; i++) {
                 magmaDoubleComplex tmp = MAGMA_Z_ZERO;
                 Aik = A+i;
                 Dkk = D;
                 Akj = A+j;
-                for(int k=0; k<n; k++, Aik+=lda, Dkk+=incD, Akj+=lda )
-                {
+                for (int k=0; k < n; k++) {
                     tmp += (*Aik) * (*Dkk) * ( *Akj );
+                    Aik += lda; 
+                    Dkk += incD; 
+                    Akj += lda;
                 }
                 C(i, j) = beta * C(i, j) + alpha * tmp;
             }
         }
     }
-    else
-    {
-        for(int j=0; j<m; j++)
-        {
-            for(int i=0; i<=j; i++)
-            {
+    else {
+        for (int j=0; j < m; j++) {
+            for (int i=0; i <= j; i++) {
                 magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-                for(int k=0; k<n; k++)
-                {
-                    tmp += A(i, k) * D( k ) * conj( A(k, j) );
+                for (int k=0; k < n; k++) {
+                    tmp += A(i, k) * D( k ) * A(k, j);
                 }
                 C(i, j) = beta * C(i, j) + alpha * tmp;
             }
@@ -126,21 +119,19 @@ int zsyrk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
         return MAGMA_SUCCESS;
     }
 
-    if ( uplo == MagmaLower )
-    {
-         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
-                        &n, &n, &k,
-                        &c_mone, A,    &lda,
-                                 work, &ldw,
-                        &c_one,  C,    &ldc );
+    if ( uplo == MagmaLower ) {
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
+                       &n, &n, &k,
+                       &c_mone, A,    &lda,
+                                work, &ldw,
+                       &c_one,  C,    &ldc );
     }
-    else
-    {
-         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
-                        &n, &n, &k,
-                        &c_mone, work, &ldw,
-                                 A,    &lda,
-                        &c_one,  C,    &ldc );
+    else {
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
+                       &n, &n, &k,
+                       &c_mone, work, &ldw,
+                                A,    &lda,
+                       &c_one,  C,    &ldc );
     }
     return MAGMA_SUCCESS;
 }
@@ -159,19 +150,18 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
     magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
     magmaDoubleComplex Akk;
+    magmaDoubleComplex zone = MAGMA_Z_ONE;
     magmaDoubleComplex alpha;
 
-    magmaDoubleComplex zone = MAGMA_Z_ONE;
-    if ( uplo == MagmaLower )
-    {
+    if ( uplo == MagmaLower ) {
         /* Diagonal element */
         Akk  = *A;
 
         /* Pointer on first extra diagonal element */
         Ak1k = A + 1;
 
-        for (magma_int_t k=n-1; k>0; k--) {
-            if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
+        for (magma_int_t k=n-1; k > 0; k--) {
+            if ( MAGMA_Z_ABS(Akk) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
             }
@@ -183,7 +173,7 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             // update remaining
             alpha = -( Akk );
             lapackf77_zsyr(MagmaLowerStr, &k, 
-                    &alpha, Ak1k, &ione, Ak1k + lda, &lda);
+                           &alpha, Ak1k, &ione, Ak1k + lda, &lda);
 
             /* Move to next diagonal element */
             Ak1k += lda;
@@ -197,8 +187,8 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
         /* Pointer on first extra diagonal element */
         Ak1k = A + lda;
 
-        for (magma_int_t k=n-1; k>0; k--) {
-            if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
+        for (magma_int_t k=n-1; k > 0; k--) {
+            if ( MAGMA_Z_ABS(Akk) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
             }
@@ -210,16 +200,8 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             // update remaining
             alpha = - ( Akk );
 
-            #if defined(PRECISION_z) | defined(PRECISION_c)
-            lapackf77_zlacgv(&k, Ak1k, &lda);
-            #endif
-
             lapackf77_zsyr(MagmaUpperStr, &k, 
                          &alpha, Ak1k, &lda, Ak1k + 1, &lda);
-
-            #if defined(PRECISION_z) | defined(PRECISION_c)
-            lapackf77_zlacgv(&k, Ak1k, &lda);
-            #endif
 
             /* Move to next diagonal element */
             Ak1k ++;
