@@ -16,62 +16,57 @@
 
 /**
     Purpose
-    -------
-    ZPOTRF computes the Cholesky factorization of a complex Hermitian
-    positive definite matrix A. This version does not require work
-    space on the GPU passed as input. GPU memory is allocated in the
-    routine.
-
-    The factorization has the form
-        A = U**H * U,  if uplo = MagmaUpper, or
-        A = L  * L**H, if uplo = MagmaLower,
-    where U is an upper triangular matrix and L is lower triangular.
-
-    This is the block version of the algorithm, calling Level 3 BLAS.
-    
-    If the current stream is NULL, this version replaces it with a new
-    stream to overlap computation with communication.
+    =======
+ 
+    ZHETRF_AASEN computes the factorization of a complex Hermitian matrix A
+    based on a communication-avoiding variant of the Aasen's algorithm .  
+    The form of the factorization is
+ 
+     A = U*D*U**H  or  A = L*D*L**H
+ 
+    where U (or L) is a product of permutation and unit upper (lower)
+    triangular matrices, and D is Hermitian and banded matrix of the
+    band width equal to the block size.
 
     Arguments
     ---------
     @param[in]
-    uplo    magma_uplo_t
-      -     = MagmaUpper:  Upper triangle of A is stored;
-      -     = MagmaLower:  Lower triangle of A is stored.
-
+    UPLO    CHARACTER*1
+      -     = 'U':  Upper triangle of A is stored;
+      -     = 'L':  Lower triangle of A is stored.
+ 
     @param[in]
-    n       INTEGER
+    N       INTEGER
             The order of the matrix A.  N >= 0.
-
+  
     @param[in,out]
-    A       COMPLEX_16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If uplo = MagmaUpper, the leading
+    A       COMPLEX*16 array, dimension (LDA,N)
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If uplo = MagmaLower, the
+            triangular part of A is not referenced.  If UPLO = 'L', the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
     \n
-            On exit, if INFO = 0, the factor U or L from the Cholesky
-            factorization A = U**H * U or A = L * L**H.
-    \n
-            Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using magma_malloc_pinned.
-
+            On exit, the banded matrix D and the triangular factor U or L.
+ 
     @param[in]
-    lda     INTEGER
+    LDA     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
+ 
+    @param[out]
+    IPIV    INTEGER array, dimension (N)
+            Details of the interchanges.
 
     @param[out]
-    info    INTEGER
+    INFO    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
-                  or another error occured, such as memory allocation failed.
-      -     > 0:  if INFO = i, the leading minor of order i is not
-                  positive definite, and the factorization could not be
-                  completed.
-
+      -     > 0:  if INFO = i, D(i,i) is exactly zero.  The factorization
+                  has been completed, but the block diagonal matrix D is
+                  exactly singular, and division by zero will occur if it
+                  is used to solve a system of equations.
     @ingroup magma_zhesv_comp
     ********************************************************************/
 extern "C" magma_int_t
