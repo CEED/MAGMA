@@ -183,7 +183,7 @@ magma_zidr_strm(
     // queue variables
     const magma_queue_t squeue = 0;    // synchronous kernel queues
     const magma_int_t nqueues = 3;     // number of queues
-    magma_queue_t *queues = NULL;    
+    magma_queue_t queues[nqueues];    
     magma_int_t q1flag = 0;
 
     // performance variables
@@ -194,7 +194,6 @@ magma_zidr_strm(
 
     // set asynchronous kernel queues
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
-    queues = (magma_queue_t *)malloc( nqueues * sizeof(magma_queue_t) );
     cudaStreamCreateWithFlags( &(queues[0]), cudaStreamNonBlocking );
     if ( queue != squeue ) {
         queues[1] = queue;
