@@ -7,7 +7,7 @@
 setenv NUMA  "./run numactl --interleave=all"
 
 # square
-setenv SIZES "-N 100 -N 1000 --range 10:90:10 --range 100:900:100 --range 1000:9000:1000 --range 10000:20000:2000"
+setenv SIZES "-N 123 -N 1234 --range 10:90:10 --range 100:900:100 --range 1000:9000:1000 --range 10000:20000:2000"
 
 # 3:1 ratio
 setenv SIZES "$SIZES -N 300,100 -N 600,200 -N 900,300 -N 1200,400 -N 1500,500 -N 1800,600 -N 2100,700 -N 2400,800 -N 2700,900"
