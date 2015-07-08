@@ -24,6 +24,8 @@ versions = [
 	trunk,
 ]
 
+trunk.version = 'magma'
+
 # get nice distribution of colors from purple (old versions) to red (new versions)
 x = linspace( 0, 1, len(versions) )
 rainbow = matplotlib.cm.get_cmap('rainbow')
@@ -41,8 +43,12 @@ figsize = [9, 7]
 
 
 # ----------------------------------------------------------------------
-g_subplots = True
-g_figure   = None
+if ( not locals().has_key('g_subplots')):
+	g_subplots = True
+if ( not locals().has_key('g_figure')):
+	g_figure   = None
+if ( not locals().has_key('g_log')):
+	g_log      = True
 
 
 # --------------------
@@ -145,45 +151,79 @@ symv_cublas_error  = 11
 
 
 # ----------------------------------------------------------------------
-def plot_getrf_data( data, style='.-', color='y', label=None ):
-	pp.semilogx( data[:,getrf_m], data[:,getrf_gpu_flops], style, color=color, label=label );
+def plot_getrf_data( data, style='.-', color='y', label=None, idx=getrf_gpu_flops ):
+	if ( g_log ):
+		pp.semilogx( data[:,getrf_m], data[:,idx], style, color=color, label=label )
+	else:
+		pp.plot(     data[:,getrf_m], data[:,idx], style, color=color, label=label )
 # end
 
 def plot_getrf_labels( title=None ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	pp.ylabel( r'Gflop/s' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
-def plot_getrf( versions ):
+def plot_getrf( versions, cpu=True, gpu=True, lapack=True ):
 	figure( 1 )
 	clf( 2, 2 )
 	
 	for v in versions:
-		if not v.__dict__.has_key('sgetrf'): continue
-		
-		subplot( 2, 2, 1 )
-		plot_getrf_data( v.sgetrf,     '.-', color=v.color, label=v.version+' sgetrf'     )
-		plot_getrf_data( v.sgetrf_gpu, 'x-', color=v.color, label=v.version+' sgetrf_gpu' )
-		
-		subplot( 2, 2, 2 )
-		plot_getrf_data( v.dgetrf,     '.-', color=v.color, label=v.version+' dgetrf'     )
-		plot_getrf_data( v.dgetrf_gpu, 'x-', color=v.color, label=v.version+' dgetrf_gpu' )
-		
-		subplot( 2, 2, 3 )
-		plot_getrf_data( v.cgetrf,     '.-', color=v.color, label=v.version+' cgetrf'     )
-		plot_getrf_data( v.cgetrf_gpu, 'x-', color=v.color, label=v.version+' cgetrf_gpu' )
-		
-		subplot( 2, 2, 4 )
-		plot_getrf_data( v.zgetrf,     '.-', color=v.color, label=v.version+' zgetrf'     )
-		plot_getrf_data( v.zgetrf_gpu, 'x-', color=v.color, label=v.version+' zgetrf_gpu' )
+		if ( cpu and v.__dict__.has_key('sgetrf')):
+			subplot( 2, 2, 1 )
+			plot_getrf_data( v.sgetrf,     '.-', color=v.color, label=v.version+' sgetrf'     )
+			
+			subplot( 2, 2, 2 )
+			plot_getrf_data( v.dgetrf,     '.-', color=v.color, label=v.version+' dgetrf'     )
+			
+			subplot( 2, 2, 3 )
+			plot_getrf_data( v.cgetrf,     '.-', color=v.color, label=v.version+' cgetrf'     )
+			
+			subplot( 2, 2, 4 )
+			plot_getrf_data( v.zgetrf,     '.-', color=v.color, label=v.version+' zgetrf'     )
+			
+		if ( gpu and v.__dict__.has_key('sgetrf_gpu')):
+			subplot( 2, 2, 1 )
+			plot_getrf_data( v.sgetrf_gpu, 'x-', color=v.color, label=v.version+' sgetrf_gpu' )
+			
+			subplot( 2, 2, 2 )
+			plot_getrf_data( v.dgetrf_gpu, 'x-', color=v.color, label=v.version+' dgetrf_gpu' )
+			
+			subplot( 2, 2, 3 )
+			plot_getrf_data( v.cgetrf_gpu, 'x-', color=v.color, label=v.version+' cgetrf_gpu' )
+			
+			subplot( 2, 2, 4 )
+			plot_getrf_data( v.zgetrf_gpu, 'x-', color=v.color, label=v.version+' zgetrf_gpu' )
 	# end
+	
+	# plot lapack last; stop after 1st occurence
+	for v in versions[-1::-1]:
+		if ( lapack and v.__dict__.has_key('sgetrf') and not isnan( v.sgetrf[0,getrf_cpu_flops] )):
+			print( 'found LAPACK in', v.version )
+			subplot( 2, 2, 1 )
+			plot_getrf_data( v.sgetrf, 'k+-', color='k', label='MKL sgetrf', idx=getrf_cpu_flops )
+			
+			subplot( 2, 2, 2 )
+			plot_getrf_data( v.dgetrf, 'k+-', color='k', label='MKL dgetrf', idx=getrf_cpu_flops )
+			
+			subplot( 2, 2, 3 )
+			plot_getrf_data( v.cgetrf, 'k+-', color='k', label='MKL cgetrf', idx=getrf_cpu_flops )
+			
+			subplot( 2, 2, 4 )
+			plot_getrf_data( v.zgetrf, 'k+-', color='k', label='MKL zgetrf', idx=getrf_cpu_flops )
+			break
+	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_getrf_labels()
@@ -193,45 +233,79 @@ def plot_getrf( versions ):
 
 
 # ----------------------------------------------------------------------
-def plot_potrf_data( data, style='.-', color='y', label=None ):
-	pp.semilogx( data[:,potrf_n], data[:,potrf_gpu_flops], style, color=color, label=label );
+def plot_potrf_data( data, style='.-', color='y', label=None, idx=potrf_gpu_flops ):
+	if ( g_log ):
+		pp.semilogx( data[:,potrf_n], data[:,idx], style, color=color, label=label )
+	else:
+		pp.plot(     data[:,potrf_n], data[:,idx], style, color=color, label=label )
 # end
 
 def plot_potrf_labels( title=None ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	pp.ylabel( r'Gflop/s' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
-def plot_potrf( versions ):
-	figure( 1 )
+def plot_potrf( versions, cpu=True, gpu=True, lapack=True ):
+	figure( 2 )
 	clf( 2, 2 )
 	
 	for v in versions:
-		if not v.__dict__.has_key('spotrf'): continue
-		
-		subplot( 2, 2, 1 )
-		plot_potrf_data( v.spotrf,     '.-', color=v.color, label=v.version+' spotrf'     )
-		plot_potrf_data( v.spotrf_gpu, 'x-', color=v.color, label=v.version+' spotrf_gpu' )
-		
-		subplot( 2, 2, 2 )
-		plot_potrf_data( v.dpotrf,     '.-', color=v.color, label=v.version+' dpotrf'     )
-		plot_potrf_data( v.dpotrf_gpu, 'x-', color=v.color, label=v.version+' dpotrf_gpu' )
-		
-		subplot( 2, 2, 3 )
-		plot_potrf_data( v.cpotrf,     '.-', color=v.color, label=v.version+' cpotrf'     )
-		plot_potrf_data( v.cpotrf_gpu, 'x-', color=v.color, label=v.version+' cpotrf_gpu' )
-		
-		subplot( 2, 2, 4 )
-		plot_potrf_data( v.zpotrf,     '.-', color=v.color, label=v.version+' zpotrf'     )
-		plot_potrf_data( v.zpotrf_gpu, 'x-', color=v.color, label=v.version+' zpotrf_gpu' )
+		if ( cpu and v.__dict__.has_key('sgetrf')):
+			subplot( 2, 2, 1 )
+			plot_potrf_data( v.spotrf,     '.-', color=v.color, label=v.version+' spotrf'     )
+			
+			subplot( 2, 2, 2 )
+			plot_potrf_data( v.dpotrf,     '.-', color=v.color, label=v.version+' dpotrf'     )
+			
+			subplot( 2, 2, 3 )
+			plot_potrf_data( v.cpotrf,     '.-', color=v.color, label=v.version+' cpotrf'     )
+			
+			subplot( 2, 2, 4 )
+			plot_potrf_data( v.zpotrf,     '.-', color=v.color, label=v.version+' zpotrf'     )
+			
+		if ( gpu and v.__dict__.has_key('sgetrf_gpu')):
+			subplot( 2, 2, 1 )
+			plot_potrf_data( v.spotrf_gpu, 'x-', color=v.color, label=v.version+' spotrf_gpu' )
+			
+			subplot( 2, 2, 2 )
+			plot_potrf_data( v.dpotrf_gpu, 'x-', color=v.color, label=v.version+' dpotrf_gpu' )
+			
+			subplot( 2, 2, 3 )
+			plot_potrf_data( v.cpotrf_gpu, 'x-', color=v.color, label=v.version+' cpotrf_gpu' )
+			
+			subplot( 2, 2, 4 )
+			plot_potrf_data( v.zpotrf_gpu, 'x-', color=v.color, label=v.version+' zpotrf_gpu' )
 	# end
+	
+	# plot lapack last; stop after 1st occurence
+	for v in versions[-1::-1]:
+		if ( lapack and v.__dict__.has_key('spotrf') and not isnan( v.spotrf[0,potrf_cpu_flops] )):
+			print( 'found LAPACK in', v.version )
+			subplot( 2, 2, 1 )
+			plot_potrf_data( v.spotrf, 'k+-', color='k', label='MKL spotrf', idx=potrf_cpu_flops )
+			
+			subplot( 2, 2, 2 )
+			plot_potrf_data( v.dpotrf, 'k+-', color='k', label='MKL dpotrf', idx=potrf_cpu_flops )
+			
+			subplot( 2, 2, 3 )
+			plot_potrf_data( v.cpotrf, 'k+-', color='k', label='MKL cpotrf', idx=potrf_cpu_flops )
+			
+			subplot( 2, 2, 4 )
+			plot_potrf_data( v.zpotrf, 'k+-', color='k', label='MKL zpotrf', idx=potrf_cpu_flops )
+			break
+	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_potrf_labels()
@@ -241,45 +315,79 @@ def plot_potrf( versions ):
 
 
 # ----------------------------------------------------------------------
-def plot_geqrf_data( data, style='.-', color='y', label=None ):
-	pp.semilogx( data[:,geqrf_m], data[:,geqrf_gpu_flops], style, color=color, label=label );
+def plot_geqrf_data( data, style='.-', color='y', label=None, idx=geqrf_gpu_flops ):
+	if ( g_log ):
+		pp.semilogx( data[:,geqrf_m], data[:,idx], style, color=color, label=label )
+	else:
+		pp.plot(     data[:,geqrf_m], data[:,idx], style, color=color, label=label )
 # end
 
 def plot_geqrf_labels( title=None ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	pp.ylabel( r'Gflop/s' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
-def plot_geqrf( versions ):
-	figure( 1 )
+def plot_geqrf( versions, cpu=True, gpu=True, lapack=True ):
+	figure( 3 )
 	clf( 2, 2 )
 	
 	for v in versions:
-		if not v.__dict__.has_key('sgeqrf'): continue
-		
-		subplot( 2, 2, 1 )
-		plot_geqrf_data( v.sgeqrf,     '.-', color=v.color, label=v.version+' sgeqrf'     )
-		plot_geqrf_data( v.sgeqrf_gpu, 'x-', color=v.color, label=v.version+' sgeqrf_gpu' )
-		
-		subplot( 2, 2, 2 )
-		plot_geqrf_data( v.dgeqrf,     '.-', color=v.color, label=v.version+' dgeqrf'     )
-		plot_geqrf_data( v.dgeqrf_gpu, 'x-', color=v.color, label=v.version+' dgeqrf_gpu' )
-		
-		subplot( 2, 2, 3 )
-		plot_geqrf_data( v.cgeqrf,     '.-', color=v.color, label=v.version+' cgeqrf'     )
-		plot_geqrf_data( v.cgeqrf_gpu, 'x-', color=v.color, label=v.version+' cgeqrf_gpu' )
-		
-		subplot( 2, 2, 4 )
-		plot_geqrf_data( v.zgeqrf,     '.-', color=v.color, label=v.version+' zgeqrf'     )
-		plot_geqrf_data( v.zgeqrf_gpu, 'x-', color=v.color, label=v.version+' zgeqrf_gpu' )
+		if ( cpu and v.__dict__.has_key('sgetrf')):
+			subplot( 2, 2, 1 )
+			plot_geqrf_data( v.sgeqrf,     '.-', color=v.color, label=v.version+' sgeqrf'     )
+			
+			subplot( 2, 2, 2 )
+			plot_geqrf_data( v.dgeqrf,     '.-', color=v.color, label=v.version+' dgeqrf'     )
+			
+			subplot( 2, 2, 3 )
+			plot_geqrf_data( v.cgeqrf,     '.-', color=v.color, label=v.version+' cgeqrf'     )
+			
+			subplot( 2, 2, 4 )
+			plot_geqrf_data( v.zgeqrf,     '.-', color=v.color, label=v.version+' zgeqrf'     )
+			
+		if ( gpu and v.__dict__.has_key('sgetrf_gpu')):
+			subplot( 2, 2, 1 )
+			plot_geqrf_data( v.sgeqrf_gpu, 'x-', color=v.color, label=v.version+' sgeqrf_gpu' )
+			
+			subplot( 2, 2, 2 )
+			plot_geqrf_data( v.dgeqrf_gpu, 'x-', color=v.color, label=v.version+' dgeqrf_gpu' )
+			
+			subplot( 2, 2, 3 )
+			plot_geqrf_data( v.cgeqrf_gpu, 'x-', color=v.color, label=v.version+' cgeqrf_gpu' )
+			
+			subplot( 2, 2, 4 )
+			plot_geqrf_data( v.zgeqrf_gpu, 'x-', color=v.color, label=v.version+' zgeqrf_gpu' )
 	# end
+	
+	# plot lapack last; stop after 1st occurence
+	for v in versions[-1::-1]:
+		if ( lapack and v.__dict__.has_key('sgeqrf') and not isnan( v.sgeqrf[0,geqrf_cpu_flops] )):
+			print( 'found LAPACK in', v.version )
+			subplot( 2, 2, 1 )
+			plot_geqrf_data( v.sgeqrf, 'k+-', color='k', label='MKL sgeqrf', idx=geqrf_cpu_flops )
+			
+			subplot( 2, 2, 2 )
+			plot_geqrf_data( v.dgeqrf, 'k+-', color='k', label='MKL dgeqrf', idx=geqrf_cpu_flops )
+			
+			subplot( 2, 2, 3 )
+			plot_geqrf_data( v.cgeqrf, 'k+-', color='k', label='MKL cgeqrf', idx=geqrf_cpu_flops )
+			
+			subplot( 2, 2, 4 )
+			plot_geqrf_data( v.zgeqrf, 'k+-', color='k', label='MKL zgeqrf', idx=geqrf_cpu_flops )
+			break
+	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_geqrf_labels()
@@ -289,34 +397,41 @@ def plot_geqrf( versions ):
 
 
 # ----------------------------------------------------------------------
-def plot_geev_data( data, vec, style='.-', color='y', label=None ):
+def plot_geev_data( data, vec, style='.-', color='y', label=None, idx=geev_gpu_time ):
 	n = data[:,geev_n]
-	t = data[:,geev_gpu_time]
+	t = data[:,idx]
 	if ( vec ):
 		gflop = 1e-9 * 10/3. * n**3 # TODO
 	else:
 		gflop = 1e-9 * 10/3. * n**3 # TODO
-	pp.semilogx( n, gflop/t, style, color=color, label=label );
+	if ( g_log ):
+		pp.semilogx( n, gflop/t, style, color=color, label=label )
+	else:
+		pp.plot(     n, gflop/t, style, color=color, label=label )
 # end
 
 def plot_geev_labels( title, vec ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	if ( vec ):
 		pp.ylabel( r'Gflop/s   $\frac{10n^3}{3t}$ TODO' )
 	else:
 		pp.ylabel( r'Gflop/s   $\frac{10n^3}{3t}$ TODO' )
 	#pp.ylabel( 'time (sec)' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
-def plot_geev( versions ):
-	figure( 1 )
+def plot_geev( versions, lapack=True ):
+	figure( 4 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -334,6 +449,25 @@ def plot_geev( versions ):
 		subplot( 2, 2, 4 )
 		plot_geev_data( v.zgeev_RN, False, '.-', color=v.color, label=v.version+' zgeev' )
 	# end
+	
+	# plot lapack last; stop after 1st occurence
+	for v in versions[-1::-1]:
+		if ( lapack and v.__dict__.has_key('sgeev_RN') and not isnan( v.sgeev_RN[0,geev_cpu_time] )):
+			print( 'found LAPACK in', v.version )
+			subplot( 2, 2, 1 )
+			plot_geev_data( v.sgeev_RN, 'k+-', color='k', label='MKL sgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 2 )
+			plot_geev_data( v.dgeev_RN, 'k+-', color='k', label='MKL dgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 3 )
+			plot_geev_data( v.cgeev_RN, 'k+-', color='k', label='MKL cgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 4 )
+			plot_geev_data( v.zgeev_RN, 'k+-', color='k', label='MKL zgeev', idx=geev_cpu_time )
+			break
+	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_geev_labels( 'no vectors', False )
@@ -341,7 +475,7 @@ def plot_geev( versions ):
 	resize( figsize, 2, 2 )
 	
 	# --------------------
-	figure( 2 )
+	figure( 5 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -359,6 +493,25 @@ def plot_geev( versions ):
 		subplot( 2, 2, 4 )
 		plot_geev_data( v.zgeev_RV, True, '.-', color=v.color, label=v.version+' zgeev' )
 	# end
+	
+	# plot lapack last; stop after 1st occurence
+	for v in versions[-1::-1]:
+		if ( lapack and v.__dict__.has_key('sgeev_RV') and not isnan( v.sgeev_RV[0,geev_cpu_time] )):
+			print( 'found LAPACK in', v.version )
+			subplot( 2, 2, 1 )
+			plot_geev_data( v.sgeev_RV, 'k+-', color='k', label='MKL sgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 2 )
+			plot_geev_data( v.dgeev_RV, 'k+-', color='k', label='MKL dgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 3 )
+			plot_geev_data( v.cgeev_RV, 'k+-', color='k', label='MKL cgeev', idx=geev_cpu_time )
+			
+			subplot( 2, 2, 4 )
+			plot_geev_data( v.zgeev_RV, 'k+-', color='k', label='MKL zgeev', idx=geev_cpu_time )
+			break
+	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_geev_labels( 'with right vectors', True )
@@ -375,27 +528,36 @@ def plot_syev_data( data, vec, style='.-', color='y', label=None, idx=syev_gpu_t
 		gflop = 1e-9 * 14/3. * n**3
 	else:
 		gflop = 1e-9 * 4/3. * n**3
-	pp.semilogx( n, gflop/t, style, color=color, label=label );
+	
+	if ( g_log ):
+		pp.semilogx( n, gflop/t, style, color=color, label=label )
+	else:
+		pp.plot(     n, gflop/t, style, color=color, label=label )
 # end
 
 def plot_syev_labels( title, vec ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	if ( vec ):
 		pp.ylabel( r'Gflop/s   $\frac{14}{3} n^3 / t$' )  # TODO
 	else:
 		pp.ylabel( r'Gflop/s   $\frac{4}{3} n^3 / t$' )
 	#pp.ylabel( 'time (sec)' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
 def plot_syev( versions, classic=True, classic_gpu=True, bulge=True, lapack=True ):
-	figure( 1 )
+	figure( 6 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -440,20 +602,20 @@ def plot_syev( versions, classic=True, classic_gpu=True, bulge=True, lapack=True
 	# end
 	
 	# plot lapack last; stop after 1st occurence
-	for v in versions:
+	for v in versions[-1::-1]:
 		if ( lapack and v.__dict__.has_key('ssyevd_JN') and not isnan( v.ssyevd_JN[0,syev_cpu_time] )):
 			print( 'found LAPACK in', v.version )
 			subplot( 2, 2, 1 )
-			plot_syev_data( v.ssyevd_JN,     False, 'k+-', color='k', label='lapack ssyevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 2 )                                             
-			plot_syev_data( v.dsyevd_JN,     False, 'k+-', color='k', label='lapack dsyevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 3 )                                             
-			plot_syev_data( v.cheevd_JN,     False, 'k+-', color='k', label='lapack cheevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 4 )                                             
-			plot_syev_data( v.zheevd_JN,     False, 'k+-', color='k', label='lapack zheevd', idx=syev_cpu_time )
+			plot_syev_data( v.ssyevd_JN,     False, 'k+-', color='k', label='MKL ssyevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 2 )
+			plot_syev_data( v.dsyevd_JN,     False, 'k+-', color='k', label='MKL dsyevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 3 )
+			plot_syev_data( v.cheevd_JN,     False, 'k+-', color='k', label='MKL cheevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 4 )
+			plot_syev_data( v.zheevd_JN,     False, 'k+-', color='k', label='MKL zheevd', idx=syev_cpu_time )
 			break
 	# end
 	
@@ -464,7 +626,7 @@ def plot_syev( versions, classic=True, classic_gpu=True, bulge=True, lapack=True
 	resize( figsize, 2, 2 )
 	
 	# --------------------
-	figure( 2 )
+	figure( 7 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -509,20 +671,20 @@ def plot_syev( versions, classic=True, classic_gpu=True, bulge=True, lapack=True
 	# end
 	
 	# plot lapack last; stop after 1st occurence
-	for v in versions:
+	for v in versions[-1::-1]:
 		if ( lapack and v.__dict__.has_key('ssyevd_JV') and not isnan( v.ssyevd_JV[0,syev_cpu_time] )):
 			print( 'found LAPACK in', v.version )
 			subplot( 2, 2, 1 )
-			plot_syev_data( v.ssyevd_JV,     True, 'k+-', color='k', label='lapack ssyevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 2 )                                             
-			plot_syev_data( v.dsyevd_JV,     True, 'k+-', color='k', label='lapack dsyevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 3 )                                             
-			plot_syev_data( v.cheevd_JV,     True, 'k+-', color='k', label='lapack cheevd', idx=syev_cpu_time )
-			                                               
-			subplot( 2, 2, 4 )                                             
-			plot_syev_data( v.zheevd_JV,     True, 'k+-', color='k', label='lapack zheevd', idx=syev_cpu_time )
+			plot_syev_data( v.ssyevd_JV,     True, 'k+-', color='k', label='MKL ssyevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 2 )
+			plot_syev_data( v.dsyevd_JV,     True, 'k+-', color='k', label='MKL dsyevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 3 )
+			plot_syev_data( v.cheevd_JV,     True, 'k+-', color='k', label='MKL cheevd', idx=syev_cpu_time )
+			
+			subplot( 2, 2, 4 )
+			plot_syev_data( v.zheevd_JV,     True, 'k+-', color='k', label='MKL zheevd', idx=syev_cpu_time )
 			break
 	# end
 	
@@ -535,7 +697,7 @@ def plot_syev( versions, classic=True, classic_gpu=True, bulge=True, lapack=True
 
 
 # ----------------------------------------------------------------------
-def plot_gesvd_data( data, vec, style='.-', color='y', label=None, ratio=1 ):
+def plot_gesvd_data( data, vec, style='.-', color='y', label=None, ratio=1, idx=svd_gpu_time ):
 	(ii,) = where( data[:,svd_m] == ratio*data[:,svd_n] )
 	mn = zeros(( len(ii), 2 ))
 	mn[:,0] = data[ii,svd_m]
@@ -555,35 +717,42 @@ def plot_gesvd_data( data, vec, style='.-', color='y', label=None, ratio=1 ):
 		gflop = 1e-9 * 2*M*N*(M + 3*N)
 	else:
 		gflop = 1e-9 * 4*N**2*(3*M - N)/3
-	t = data[ii,svd_gpu_time]
+	t = data[ii,idx]
 	
-	pp.semilogx( N, gflop/t, style, color=color, label=label );
+	if ( g_log ):
+		pp.semilogx( N, gflop/t, style, color=color, label=label )
+	else:
+		pp.plot(     N, gflop/t, style, color=color, label=label )
 # end
 
 def plot_gesvd_labels( title, vec, square ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size, max(M,N)' )
 	if ( vec ):
 		if ( square ):
-			pp.ylabel( r'Gflop/s   $\frac{8n^3}{t}$' )
+			pp.ylabel( r'Gflop/s   $8n^3/t$' )
 		else:
-			pp.ylabel( r'Gflop/s   $\frac{2mn(m + 3n)}{t}$' )
+			pp.ylabel( r'Gflop/s   $2mn(m + 3n)/t$' )
 	else:
 		if ( square ):
-			pp.ylabel( r'Gflop/s   $\frac{8n^3}{3t}$' )
+			pp.ylabel( r'Gflop/s   $\frac{8}{3}n^3/t$' )
 		else:
-			pp.ylabel( r'Gflop/s   $\frac{4n^2(3m - n)}{3t}$' )
+			pp.ylabel( r'Gflop/s   $\frac{4}{3}n^2(3m - n)/t$' )
 	#pp.ylabel( 'time (sec)' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size, max(M,N), log scale' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size, max(M,N)' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
-def plot_gesvd( versions, ratio=1 ):
-	figure( 1 )
+def plot_gesvd( versions, ratio=1, lapack=True ):
+	figure( 8 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -606,12 +775,12 @@ def plot_gesvd( versions, ratio=1 ):
 	n = 1     if (ratio >= 1) else 1/ratio
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
-		plot_gesvd_labels( 'no vectors, M:N ratio %.3g:%.3g' % (m,n), False )
+		plot_gesvd_labels( 'no vectors, M:N ratio %.3g:%.3g' % (m,n), vec=False, square=(ratio == 1) )
 	# end
 	resize( figsize, 2, 2 )
 	
 	# --------------------
-	figure( 2 )
+	figure( 9 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -634,13 +803,13 @@ def plot_gesvd( versions, ratio=1 ):
 	n = 1     if (ratio >= 1) else 1/ratio
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
-		plot_gesvd_labels( 'some vectors, M:N ratio %.3g:%.3g' % (m,n), True )
+		plot_gesvd_labels( 'some vectors, M:N ratio %.3g:%.3g' % (m,n), vec=True, square=(ratio == 1) )
 	# end
 	resize( figsize, 2, 2 )
 # end
 
-def plot_gesdd( versions, ratio=1 ):
-	figure( 3 )
+def plot_gesdd( versions, ratio=1, lapack=True ):
+	figure( 10 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -663,12 +832,12 @@ def plot_gesdd( versions, ratio=1 ):
 	n = 1     if (ratio >= 1) else 1/ratio
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
-		plot_gesvd_labels( 'no vectors, M:N ratio %.3g:%.3g' % (m,n), False )
+		plot_gesvd_labels( 'no vectors, M:N ratio %.3g:%.3g' % (m,n), vec=False, square=(ratio == 1) )
 	# end
 	resize( figsize, 2, 2 )
 	
 	# --------------------
-	figure( 4 )
+	figure( 11 )
 	clf( 2, 2 )
 	
 	for v in versions:
@@ -691,7 +860,7 @@ def plot_gesdd( versions, ratio=1 ):
 	n = 1     if (ratio >= 1) else 1/ratio
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
-		plot_gesvd_labels( 'some vectors, M:N ratio %.3g:%.3g' % (m,n), True )
+		plot_gesvd_labels( 'some vectors, M:N ratio %.3g:%.3g' % (m,n), vec=True, square=(ratio == 1) )
 	# end
 	resize( figsize, 2, 2 )
 # end
@@ -700,26 +869,38 @@ def plot_gesdd( versions, ratio=1 ):
 # ----------------------------------------------------------------------
 def plot_symv_data( data, style='.-', color='y', label=None, first=False ):
 	if ( first ):
-		pp.semilogx( data[:,symv_n], data[:,symv_atomics_flops], 'k--', color='#aaaaaa', label='cublas atomics' )
-		pp.semilogx( data[:,symv_n], data[:,symv_cublas_flops],  'k-.', color='#aaaaaa', label='cublas'  )
-		pp.semilogx( data[:,symv_n], data[:,symv_cpu_flops],     'k-',                   label='MKL'     )
-	pp.semilogx( data[:,symv_n], data[:,symv_gpu_flops], style, color=color, label=label )
+		if ( g_log ):
+			pp.semilogx( data[:,symv_n], data[:,symv_atomics_flops], 'k--', color='#aaaaaa', label='cublas atomics' )
+			pp.semilogx( data[:,symv_n], data[:,symv_cublas_flops],  'k-.', color='#aaaaaa', label='cublas'  )
+			pp.semilogx( data[:,symv_n], data[:,symv_cpu_flops],     'k-',                   label='MKL'     )
+		else:
+			pp.plot(     data[:,symv_n], data[:,symv_atomics_flops], 'k--', color='#aaaaaa', label='cublas atomics' )
+			pp.plot(     data[:,symv_n], data[:,symv_cublas_flops],  'k-.', color='#aaaaaa', label='cublas'  )
+			pp.plot(     data[:,symv_n], data[:,symv_cpu_flops],     'k-',                   label='MKL'     )
+	if ( g_log ):
+		pp.semilogx( data[:,symv_n], data[:,symv_gpu_flops], style, color=color, label=label )
+	else:
+		pp.plot(     data[:,symv_n], data[:,symv_gpu_flops], style, color=color, label=label )
 # end
 
 def plot_symv_labels( title=None ):
 	if ( title ):
 		pp.title( title )
 	pp.legend( loc='upper left' )
-	pp.xlabel( r'size (log scale)' )
 	pp.ylabel( r'Gflop/s' )
-	xticks = [ 10, 100, 1000, 10000 ]
+	if ( g_log ):
+		pp.xlabel( r'matrix size (log scale)' )
+		xticks = [ 10, 100, 1000, 10000 ]
+	else:
+		pp.xlabel( r'matrix size' )
+		xticks = range( 0, 20001, 4000 )
 	pp.xticks( xticks, xticks )
 	pp.xlim( 9, 20000 )
 	pp.grid( True )
 # end
 
 def plot_symv( versions ):
-	figure( 1 )
+	figure( 12 )
 	clf( 2, 2 )
 	
 	first = True
@@ -739,6 +920,7 @@ def plot_symv( versions ):
 		plot_symv_data( v.zhemv, '-', color=v.color, label=v.version+' zhemv', first=first )
 		first = False
 	# end
+	
 	for i in xrange( 1, 5 ):
 		subplot( 2, 2, i )
 		plot_symv_labels()
@@ -748,15 +930,34 @@ def plot_symv( versions ):
 
 
 # ----------------------------------------------------------------------
-print('''Available plots:
-plot_symv(  versions )
-plot_getrf( versions )
-plot_potrf( versions )
-plot_geqrf( versions )
-plot_geev(  versions )
-plot_syev(  versions, classic=True, classic_gpu=True, bulge=True, lapack=True )
-plot_gesvd( versions, ratio=1 ); where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
-plot_gesdd( versions, ratio=1 ); where ratio m:N in { 1, 3, 100, 1/3., 1/100. }
+def plot_all( versions, lapack=True, cpu=True, gpu=True, bulge=True, ratio=1 ):
+	plot_getrf( versions, lapack=lapack, cpu=cpu, gpu=gpu )
+	plot_potrf( versions, lapack=lapack, cpu=cpu, gpu=gpu )
+	plot_geqrf( versions, lapack=lapack, cpu=cpu, gpu=gpu )
+	plot_geev(  versions, lapack=lapack )
+	plot_syev(  versions, lapack=lapack, classic=cpu, classic_gpu=gpu, bulge=bulge )
+	plot_gesvd( versions, lapack=lapack, ratio=ratio )
+	plot_gesdd( versions, lapack=lapack, ratio=ratio )
+	plot_symv(  versions )
+# end
+
+
+# ----------------------------------------------------------------------
+print('''Global settings:
+g_subplots  # True for subplots, False for 4 separate figures
+g_log       # True for semilogx, False for linear plot
+
+Available plots:
+plot_getrf( versions, lapack=True, cpu=True, gpu=True )
+plot_potrf( versions, lapack=True, cpu=True, gpu=True )
+plot_geqrf( versions, lapack=True, cpu=True, gpu=True )
+plot_geev(  versions, lapack=True )
+plot_syev(  versions, lapack=True, classic=True, classic_gpu=True, bulge=True )
+plot_gesvd( versions, lapack=True, ratio=1 ); where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
+plot_gesdd( versions, lapack=True, ratio=1 ); where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
+plot_symv(  versions, lapack=True )
+
+plot_all(   versions, lapack=True, cpu=True, gpu=True, bulge=True )
 
 Available versions:''')
 
