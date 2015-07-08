@@ -145,9 +145,16 @@ int main( int argc, char** argv )
                 printf("invalid lwork %d, lwork_max %d\n", (int) lwork, (int) lwork_max );
             
             gpu_time = magma_sync_wtime( 0 );  // sync needed for L,N and R,T cases
-            magma_zunmqr_gpu( side[iside], trans[itran],
-                              m, n, k,
-                              dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
+            if ( opts.version == 1 ) {
+                magma_zunmqr_gpu( side[iside], trans[itran],
+                                  m, n, k,
+                                  dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
+            }
+            else if ( opts.version == 2 ) {
+                magma_zunmqr2_gpu( side[iside], trans[itran],
+                                   m, n, k,
+                                   dA, lda, tau, dC, ldc, W, lwork, &info );
+            }
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
