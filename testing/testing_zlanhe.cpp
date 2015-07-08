@@ -14,8 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <algorithm>  // for std::swap
-
 // includes, project
 #include "magma.h"
 #include "magma_lapack.h"
@@ -175,11 +173,16 @@ int main( int argc, char** argv)
             
             magma_int_t i = rand() % N;
             magma_int_t j = rand() % N;
+            magma_int_t tmp;
             if ( uplo[iuplo] == MagmaLower && i < j ) {
-                std::swap( i, j );
+                tmp = i;
+                i = j;
+                j = tmp;
             }
             else if ( uplo[iuplo] == MagmaUpper && i > j ) {
-                std::swap( i, j );
+                tmp = i;
+                i = j;
+                j = tmp;
             }
                 
             *h_A(i,j) = MAGMA_Z_NAN;
