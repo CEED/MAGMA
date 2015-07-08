@@ -14,7 +14,7 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZHESV solves a system of linear equations
        A * X = B
     where A is an n-by-n hermitian matrix and X and B are n-by-nrhs matrices.
     The LU decomposition with no pivoting is

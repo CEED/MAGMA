@@ -14,7 +14,7 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZSYSV solves a system of linear equations
        A * X = B
     where A is an n-by-n symmetric matrix and X and B are n-by-nrhs matrices.
     The LU decomposition with no pivoting is

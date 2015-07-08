@@ -21,6 +21,8 @@
 /**
     Purpose
     -------
+    ZUNMBR multiplies by Q or P as part of the SVD decomposition.
+    
     If VECT = MagmaQ, ZUNMBR overwrites the general complex M-by-N matrix C with
                                  SIDE = MagmaLeft     SIDE = MagmaRight
     TRANS = MagmaNoTrans:        Q*C                  C*Q

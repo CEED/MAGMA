@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    Solves the least squares problem
+    ZGEQRS solves the least squares problem
            min || A*X - C ||
     using the QR factorization A = Q*R computed by ZGEQRF3_GPU.
 

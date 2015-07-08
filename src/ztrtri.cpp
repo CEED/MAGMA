@@ -59,7 +59,7 @@
       -     > 0: if INFO = i, A(i,i) is exactly zero.  The triangular
                     matrix is singular and its inverse cannot be computed.
 
-    @ingroup magma_zgesv_aux
+    @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
 magma_ztrtri(

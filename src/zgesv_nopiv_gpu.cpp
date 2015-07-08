@@ -13,11 +13,10 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZGESV solves a system of linear equations
         A * X = B
     where A is a general n-by-n matrix and X and B are n-by-nrhs matrices.
-    The LU decomposition with no pivoting is
-    used to factor A as
+    The LU decomposition with no pivoting is used to factor A as
         A = L * U,
     where L is unit lower triangular, and U is
     upper triangular.  The factored form of A is then used to solve the

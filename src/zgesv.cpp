@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZGESV solves a system of linear equations
        A * X = B
     where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
     The LU decomposition with partial pivoting and row interchanges is

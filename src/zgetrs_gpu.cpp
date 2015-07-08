@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZGETRS solves a system of linear equations
       A * X = B,  A**T * X = B,  or  A**H * X = B
     with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
 

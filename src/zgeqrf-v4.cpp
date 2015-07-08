@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    ZGEQRF4 computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
+    ZGEQRF computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * R using multiple GPUs. This version does not require work space on the GPU
     passed as input. GPU memory is allocated in the routine.
 

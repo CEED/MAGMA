@@ -23,7 +23,7 @@
 /**
     Purpose
     -------
-    ZHEEVD_2STAGE computes all eigenvalues and, optionally, eigenvectors of a
+    ZHEEVDX_2STAGE computes all eigenvalues and, optionally, eigenvectors of a
     complex Hermitian matrix A. It uses a two-stage algorithm for the tridiagonalization.
     If eigenvectors are desired, it uses a divide and conquer algorithm.
 

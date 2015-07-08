@@ -14,9 +14,9 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations A*X = B with a complex
-    symmetric matrix A using the factorization A = U*D*U**H or
-    A = L*D*L**T computed by ZSYTRF_NOPIV_GPU.
+    ZSYTRS solves a system of linear equations A*X = B with a complex
+    symmetric matrix A using the factorization A = U * D * U**H or
+    A = L * D * L**T computed by ZSYTRF_NOPIV_GPU.
     
     Arguments
     ---------

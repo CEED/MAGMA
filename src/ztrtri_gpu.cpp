@@ -60,7 +60,7 @@
                     matrix is singular and its inverse cannot be computed.
                  (Singularity check is currently disabled.)
 
-    @ingroup magma_zgesv_aux
+    @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
 magma_ztrtri_gpu(

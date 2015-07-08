@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    ZGEQRF2_MGPU computes a QR factorization of a complex M-by-N matrix A:
+    ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R. This is a GPU interface of the routine.
 
     Arguments

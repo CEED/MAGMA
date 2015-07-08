@@ -35,7 +35,7 @@ init_butterfly(
 /**
     Purpose
     -------
-    Solves a system of linear equations
+    ZGERBT solves a system of linear equations
        A * X = B
     where A is a general n-by-n matrix and X and B are n-by-nrhs matrices.
     Random Butterfly Tranformation is applied on A and B, then

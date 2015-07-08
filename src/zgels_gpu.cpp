@@ -13,7 +13,7 @@
 /**
     Purpose
     -------
-    Solves the overdetermined, least squares problem
+    ZGELS solves the overdetermined, least squares problem
            min || A*X - C ||
     using the QR factorization A.
     The underdetermined problem (m < n) is not currently handled.

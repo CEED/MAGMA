@@ -105,7 +105,8 @@ void magma_zbulge_id_data_init(magma_zbulge_id_data *id_data, magma_int_t id, ma
 /**
     Purpose
     -------
-
+    ZHETRD_HB2ST reduces a Hermitian band matrix to symmetric tridiagonal
+    via bulge chasing.
 
     Arguments
     ---------

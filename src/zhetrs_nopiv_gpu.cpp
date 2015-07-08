@@ -14,9 +14,9 @@
 /**
     Purpose
     -------
-    Solves a system of linear equations A*X = B with a complex
-    Hermitian matrix A using the factorization A = U*D*U**H or
-    A = L*D*L**H computed by ZHETRF_NOPIV_GPU.
+    ZHETRS solves a system of linear equations A*X = B with a complex
+    Hermitian matrix A using the factorization A = U * D * U**H or
+    A = L * D * L**H computed by ZHETRF_NOPIV_GPU.
     
     Arguments
     ---------

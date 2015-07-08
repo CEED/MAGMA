@@ -15,7 +15,7 @@
 /**
     Purpose
     -------
-    ZPOTRF_OOC computes the Cholesky factorization of a complex Hermitian
+    ZPOTRF computes the Cholesky factorization of a complex Hermitian
     positive definite matrix A. This version does not require work
     space on the GPU passed as input. GPU memory is allocated in the
     routine. The matrix A may exceed the GPU memory.

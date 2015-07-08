@@ -92,7 +92,7 @@
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
 
-    @ingroup magma_zgeqrf_comp
+    @ingroup magma_zgeqrf_aux
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgeqr2x_gpu(
