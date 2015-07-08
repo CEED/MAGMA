@@ -53,6 +53,7 @@ ZSRC += \
 	zcgesv_gpu.cpp		\
 	zcgetrs_gpu.cpp		\
 	\
+	zgerfs_nopiv_gpu.cpp	\
 	zgesv_gpu.cpp		\
 	zgesv_nopiv_gpu.cpp	\
 	zgetrf_gpu.cpp		\

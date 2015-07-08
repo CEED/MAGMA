@@ -1160,6 +1160,16 @@ magma_zgerbt_gpu(
     magma_int_t *info);
 
 magma_int_t
+magma_zgerfs_nopiv_gpu(
+    magma_trans_t trans, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr dX, magma_int_t lddx,
+    magmaDoubleComplex_ptr dworkd, magmaDoubleComplex_ptr dAF,
+    magma_int_t *iter,
+    magma_int_t *info);
+
+magma_int_t
 magma_zgessm_gpu(
     magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
     magma_int_t *ipiv,
