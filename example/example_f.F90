@@ -1,6 +1,7 @@
 !! This is a simple standalone example. See README.txt
 
 module example_f
+use magma
 implicit none
 contains
 
@@ -98,11 +99,18 @@ subroutine cpu_interface( n, nrhs )
     call zfill_matrix( n, n, A, lda )
     call zfill_rhs( n, nrhs, X, ldx )
     
+    ! Solve using LU factorization
     call magmaf_zgesv( n, 1, A, lda, ipiv, X, lda, info )
     if ( info .ne. 0 ) then
         print "(a,i5)", "magma_zgesv failed with info=", info
     end if
     
+    ! Instead, for least squares, or if preferred over LU, use QR
+    !call magmaf_zgels( MagmaNoTrans, n, n, 1, A, lda, X, lda, work, lwork, info )
+    
+    ! Instead, if A is SPD (symmetric/Hermitian positive definite), use Cholesky
+    !call magmaf_zposv( MagmaLower, n, 1, A, lda, X, lda, info )
+	
     !! TODO: use result in X
     
 !! cleanup:
