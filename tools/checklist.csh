@@ -165,6 +165,12 @@ echo
 echo
 echo
 
+# in src: dsyevdx_2stage, zhetrf_aasen, ztsqrt, ztstrf need fixing
+# lots of exceptions elsewhere
+echo "========== routine name in docs doesn't match filename                     *** should be fixed ***"
+perl -n0777 -e 'while( m|Purpose\s+-+\s+(\w+)|g ) { $a = $1; $a =~ tr/A-Z/a-z/; if ( not $ARGV =~ m/$a/ ) { print "$ARGV\n"; } }' $FILES
+echo
+
 
 echo "============================================================ informational"
 
