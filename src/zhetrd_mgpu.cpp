@@ -261,12 +261,12 @@ magma_zhetrd_mgpu(
         goto CLEANUP;
     }
 
-    // crossover point: use CPU code for last nx columns
-    //if (n < 2048)
-    //    nx = n;
-    //else
-    //    nx = 512;
-    nx = min( 128, n );  // nx <= n is required
+    // nx <= n is required
+    // use LAPACK for n < 3000, otherwise switch at 512
+    if (n < 3000)
+        nx = n;
+    else
+        nx = 512;
 
     if (upper) {
         /* Copy the matrix to the GPU */
