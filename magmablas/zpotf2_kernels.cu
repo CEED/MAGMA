@@ -68,12 +68,12 @@ __global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int in
 
     if (tx == 0) {
         double xreal = MAGMA_Z_REAL(x[n*incx]);        
-        //MAGMA_Z_SET2REAL(x[n*incx], sqrt(xreal - sdata[0]));
         x[n*incx] = MAGMA_Z_MAKE(sqrt(xreal - sdata[0]), 0);
-        if(x[n*incx] == MAGMA_Z_ZERO){
+        if(xreal <= MAGMA_D_ZERO){
             info_array[blockIdx.z] = offset + gbstep + 1;
         }
     }
+
 }
 
 
@@ -259,7 +259,7 @@ static __device__ void zpotf2_device(int m, int n,
               }
         }
         __syncthreads();
-        if(xreal == MAGMA_D_ZERO) return;
+        if(xreal <= MAGMA_D_ZERO) return;
         __syncthreads();
 
         //zlacgv conjugates a complex vector of length iter. //TODO
