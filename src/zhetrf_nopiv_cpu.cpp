@@ -145,56 +145,62 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
     /**/
     magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
-    magmaDoubleComplex Akk;
+    magmaDoubleComplex *Akk = NULL;
     double done = 1.0;
     double alpha;
 
     if ( uplo == MagmaLower ) {
         /* Diagonal element */
-        Akk  = *A;
+        Akk  = A;
 
         /* Pointer on first extra diagonal element */
         Ak1k = A + 1;
 
         for (magma_int_t k=n-1; k > 0; k--) {
-            if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
+            alpha = MAGMA_Z_REAL( *Akk );
+            if ( fabs(alpha) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
             }
+            *Akk = MAGMA_Z_MAKE(alpha, 0.0);
 
             // scale off-diagonals
-            alpha = done / MAGMA_Z_REAL( Akk );
+            alpha = done / alpha;
             blasf77_zdscal(&k, &alpha, Ak1k, &ione);
 
             // update remaining
-            alpha = - MAGMA_Z_REAL( Akk );
+            alpha = - MAGMA_Z_REAL( *Akk );
             blasf77_zher(MagmaLowerStr, &k,
                          &alpha, Ak1k, &ione, Ak1k + lda, &lda);
 
             /* Move to next diagonal element */
-            Ak1k += lda;
-            Akk = *Ak1k;
-            Ak1k++;
+            if (k > 1) { 
+                Ak1k += lda;
+                Akk = Ak1k;
+                Ak1k++;
+            }
         }
     } else {
         /* Diagonal element */
-        Akk  = *A;
+        Akk  = A;
 
         /* Pointer on first extra diagonal element */
         Ak1k = A + lda;
 
         for (magma_int_t k=n-1; k > 0; k--) {
-            if ( fabs(Akk) < lapackf77_dlamch("Epsilon") ) {
+            alpha = MAGMA_Z_REAL( *Akk );
+            if ( fabs(alpha) < lapackf77_dlamch("Epsilon") ) {
                 info = k;
                 return info;
             }
+            *Akk = MAGMA_Z_MAKE(alpha, 0.0);
 
             // scale off-diagonals
-            alpha = done / MAGMA_Z_REAL( Akk );
+            alpha = done / alpha;
             blasf77_zdscal(&k, &alpha, Ak1k, &lda);
 
             // update remaining
-            alpha = - MAGMA_Z_REAL( Akk );
+            alpha = - MAGMA_Z_REAL( *Akk );
 
             #if defined(PRECISION_z) | defined(PRECISION_c)
             lapackf77_zlacgv(&k, Ak1k, &lda);
@@ -206,9 +212,11 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             #endif
 
             /* Move to next diagonal element */
-            Ak1k ++;
-            Akk = *Ak1k;
-            Ak1k += lda;
+            if (k > 1) {
+                Ak1k ++;
+                Akk = Ak1k;
+                Ak1k += lda;
+            }
         }
     }
     return info;
