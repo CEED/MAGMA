@@ -16,27 +16,10 @@
 #include <string.h>
 #include <math.h>
 
-
 // includes, project
-
 #include "magma.h"
 #include "magma_lapack.h"
-#include "magma_threadsetting.h"
-#include "plasma.h"
 #include "testings.h"
-
-#if 0
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#endif
-
-
 
 #define COMPLEX
 
@@ -46,7 +29,7 @@
 */
 int main( int argc, char** argv)
 {
-    //TESTING_INIT();
+    TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
@@ -58,7 +41,7 @@ int main( int argc, char** argv)
     #endif
     magma_int_t *iwork;
     
-    magma_int_t M, N, N_U, M_VT, lda, ldu, ldv, n2, min_mn, max_mn, info, lwork;
+    magma_int_t M, N, N_U, M_VT, lda, ldu, ldv, n2, min_mn, max_mn, info, nb, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_vec_t jobz;
@@ -75,44 +58,10 @@ int main( int argc, char** argv)
     
     magma_vec_t jobs[] = { MagmaNoVec, MagmaSomeVec, MagmaOverwriteVec, MagmaAllVec };
     
-    /* Initialize Plasma */
-    magma_int_t sched   = opts.sched;
-    magma_int_t nthreads = opts.nthread;
-    magma_int_t nb      = opts.nb;
-    magma_int_t ib      = opts.ib;
-    magma_int_t rh      = opts.rh;
-    magma_int_t conv    = opts.conv;
-
-    PLASMA_Init( nthreads );
-
-    if ( sched )
-        PLASMA_Set(PLASMA_SCHEDULING_MODE, PLASMA_DYNAMIC_SCHEDULING );
-    else
-        PLASMA_Set(PLASMA_SCHEDULING_MODE, PLASMA_STATIC_SCHEDULING );
-
-    PLASMA_Disable(PLASMA_AUTOTUNING);
-    PLASMA_Set(PLASMA_TILE_SIZE,        nb );
-    PLASMA_Set(PLASMA_INNER_BLOCK_SIZE, ib );
-    /* Householder mode */
-    if ( rh < 1) {
-        PLASMA_Set(PLASMA_HOUSEHOLDER_MODE, PLASMA_FLAT_HOUSEHOLDER);
-    } else {
-        PLASMA_Set(PLASMA_HOUSEHOLDER_MODE, PLASMA_TREE_HOUSEHOLDER);
-        PLASMA_Set(PLASMA_HOUSEHOLDER_SIZE, rh);
-    }
-    /* Layout conversion */
-    PLASMA_Set(PLASMA_TRANSLATION_MODE, (conv == 0 ? PLASMA_INPLACE:PLASMA_OUTOFPLACE) );
-
-
-
-
     if ( opts.check && ! opts.all && (jobz == MagmaNoVec)) {
         printf( "%% NOTE: some checks require that singular vectors are computed;\n"
                 "%%       set jobz (option -U[NASO]) to be S, O, or A.\n\n" );
     }
-    printf("%%=====================================================================================================\n");
-    printf("%% nthreads %5d  sched %3d  nb %3d  ib %3d  rh %1d conv %1d \n",nthreads,sched,nb,ib,rh,conv);
-    printf("%%=====================================================================================================\n");
     printf("%% jobz   M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S sorted\n");
     printf("%%=====================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -137,6 +86,7 @@ int main( int argc, char** argv)
             ldu = M;
             ldv = M_VT;
             n2 = lda*N;
+            nb = magma_get_zgesvd_nb(N);
             
             // x and y abbreviations used in zgesdd and dgesdd documentation
             magma_int_t x = max(M,N);
@@ -151,13 +101,12 @@ int main( int argc, char** argv)
             switch( opts.svd_work ) {
                 case 0: {  // query for workspace size
                     lwork = -1;
-                    lapackf77_zgesdd( lapack_vec_const(jobz), &M, &N,
-                                  NULL, &lda, NULL, NULL, &ldu, NULL, &ldv, dummy, &lwork,
+                    magma_zgesdd( jobz, M, N,
+                                  NULL, lda, NULL, NULL, ldu, NULL, ldv, dummy, lwork,
                                   #ifdef COMPLEX
                                   NULL,
                                   #endif
                                   NULL, &info );
-
                     lwork = (int) MAGMA_Z_REAL( dummy[0] );
                     break;
                 }
@@ -236,12 +185,15 @@ int main( int argc, char** argv)
                     break;
                 }
             }
+            
             TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, lda*N );
             TESTING_MALLOC_CPU( VT,    magmaDoubleComplex, ldv*N );   // N x N (jobz=A) or min(M,N) x N
             TESTING_MALLOC_CPU( U,     magmaDoubleComplex, ldu*N_U ); // M x M (jobz=A) or M x min(M,N)
             TESTING_MALLOC_CPU( S1,    double, min_mn );
             TESTING_MALLOC_CPU( S2,    double, min_mn );
-            TESTING_MALLOC_CPU( h_R,    magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
             
             #ifdef COMPLEX
                 if (jobz == MagmaNoVec) {
@@ -256,33 +208,26 @@ int main( int argc, char** argv)
                     lrwork = max( 5*min_mn*min_mn + 5*min_mn,
                                   2*max_mn*min_mn + 2*min_mn*min_mn + min_mn );
                 }
+                TESTING_MALLOC_CPU( rwork, double, lrwork );
             #endif
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
-
-            PLASMA_desc *T;
-            PLASMA_Alloc_Workspace_zgesdd(M, N, &T);
-            PLASMA_enum jobu  = jobz == MagmaNoVec ? PlasmaNoVec : PlasmaSomeVec;
-            PLASMA_enum jobvt = jobz == MagmaNoVec ? PlasmaNoVec : PlasmaSomeVec;
-
+            
             /* ====================================================================
-               Performs operation using PLASMA
+               Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-
-            /* PLASMA ZGESDD */
-            info = PLASMA_zgesdd(jobu, jobvt, M, N, h_R, lda, S1, T, U, ldu, VT, ldv);
-            info=0;
-            if(info!=0){
-                    printf("PLASMA_zgesdd returned error %d: %s.\n",
-                           (int) info, magma_strerror( info ));
-            }
-
+            magma_zgesdd( jobz, M, N,
+                          h_R, lda, S1, U, ldu, VT, ldv, h_work, lwork,
+                          #ifdef COMPLEX
+                          rwork,
+                          #endif
+                          iwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
-                printf("plasma_zgesdd returned error %d: %s.\n",
+                printf("magma_zgesdd returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
 
             double eps = lapackf77_dlamch( "E" );
@@ -383,13 +328,6 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
-                TESTING_MALLOC_CPU( h_work, magmaDoubleComplex, lwork );
-                #ifdef COMPLEX
-                TESTING_MALLOC_CPU( rwork, double, lrwork );
-                #endif
-
-//                magma_set_lapack_numthreads(nthreads);
                 cpu_time = magma_wtime();
                 lapackf77_zgesdd( lapack_vec_const(jobz), &M, &N,
                                   h_A, &lda, S2, U, &ldu, VT, &ldv, h_work, &lwork,
@@ -401,11 +339,7 @@ int main( int argc, char** argv)
                 if (info != 0)
                     printf("lapackf77_zgesdd returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
-                TESTING_FREE_CPU( h_work );
-                TESTING_FREE_CPU( iwork );
-                #ifdef COMPLEX
-                TESTING_FREE_CPU( rwork );
-                #endif
+                
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
@@ -442,7 +376,11 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( U   );
             TESTING_FREE_CPU( S1  );
             TESTING_FREE_CPU( S2  );
-            TESTING_FREE_CPU( h_R    );
+            #ifdef COMPLEX
+            TESTING_FREE_CPU( rwork );
+            #endif
+            TESTING_FREE_PIN( h_R    );
+            TESTING_FREE_PIN( h_work );
             fflush( stdout );
         }}
         if ( opts.all || opts.niter > 1 ) {
@@ -450,6 +388,6 @@ int main( int argc, char** argv)
         }
     }
 
-    PLASMA_Finalize();
+    TESTING_FINALIZE();
     return status;
 }
