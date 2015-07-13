@@ -195,7 +195,6 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     int k = -1;
     
     // fill in default values
-
     opts->batchcount = 1000;
     opts->device   = 0;
     opts->align    = 32;
@@ -230,12 +229,6 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->jobvr     = MagmaNoVec;  // geev:  no right eigen vectors
     opts->jobvl     = MagmaNoVec;  // geev:  no left  eigen vectors
     
-    opts->nb  = 160;
-    opts->ib  = 40;
-    opts->rh  = 0;
-    opts->sched = 0;
-    opts->conv  = 0;
-
     #ifdef USE_FLOCK
     opts->flock_op = LOCK_SH;  // default shared lock
     #endif
@@ -389,16 +382,6 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             magma_assert( opts->nb > 0,
                           "error: --nb %s is invalid; ensure nb > 0.\n", argv[i] );
         }
-        else if ( strcmp("--ib",      argv[i]) == 0 && i+1 < argc ) {
-            opts->ib = atoi( argv[++i] );
-            magma_assert( opts->ib > 0,
-                          "error: --ib %s is invalid; ensure ib > 0.\n", argv[i] );
-        }
-        else if ( strcmp("--rh",      argv[i]) == 0 && i+1 < argc ) {
-            opts->rh = atoi( argv[++i] );
-            magma_assert( opts->rh >= 0,
-                          "error: --rh %s is invalid; ensure rh >= 0.\n", argv[i] );
-        }
         else if ( strcmp("--ngpu",    argv[i]) == 0 && i+1 < argc ) {
             opts->ngpu = atoi( argv[++i] );
             magma_assert( opts->ngpu <= MagmaMaxGPUs,
@@ -534,9 +517,6 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         
         else if ( strcmp("-RN", argv[i]) == 0 ) { opts->jobvr = MagmaNoVec; }
         else if ( strcmp("-RV", argv[i]) == 0 ) { opts->jobvr = MagmaVec;   }
-        else if ( strcmp("-dyn", argv[i]) == 0 ) { opts->sched = 1;   }
-        else if ( strcmp("--inplace", argv[i]) == 0 ) { opts->conv = 0;   }
-        else if ( strcmp("--outplace", argv[i]) == 0 ) { opts->conv = 1;   }
         
         // ----- misc
         else if ( strcmp("-x",          argv[i]) == 0 ||
