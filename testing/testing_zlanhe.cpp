@@ -14,6 +14,10 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef MAGMA_WITH_MKL
+#include <mkl_service.h>  // mkl_version
+#endif
+
 // includes, project
 #include "magma.h"
 #include "magma_lapack.h"
@@ -125,8 +129,13 @@ int main( int argc, char** argv)
                =================================================================== */
             #ifdef MAGMA_WITH_MKL
             // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
+            // appears to be corrected in 11.2.3
+            MKLVersion mkl_version;
+            mkl_get_version( &mkl_version );
             int threads = magma_get_lapack_numthreads();
-            magma_set_lapack_numthreads( 1 );
+            if ( mkl_version.MajorVersion <= 11 && mkl_version.MinorVersion < 2 ) {
+                magma_set_lapack_numthreads( 1 );
+            }
             #endif
             
             cpu_time = magma_wtime();
@@ -238,7 +247,7 @@ int main( int argc, char** argv)
         printf( "* Warning: LAPACK failed INF test\n" );
     }
     if ( mkl_warning ) {
-        printf("* MKL (e.g., 11.1.0) has a bug in zlanhe with multiple threads.\n"
+        printf("* MKL (e.g., 11.1.0) has a bug in zlanhe with multiple threads; corrected in 11.2.x.\n"
                "  Try again with MKL_NUM_THREADS=1.\n" );
     }
     
