@@ -141,11 +141,11 @@ magma_int_t magmaf_get_zhegst_nb_m( magma_int_t *m )
     return magma_get_zhegst_nb_m( *m );
 }
 
-#define magmaf_get_zbulge_nb FORTRAN_NAME( magmaf_get_zbulge_nb, MAGMAF_GET_ZBULGE_NB )
-void magmaf_get_zbulge_nb(
+#define magmaf_zbulge_get_nb FORTRAN_NAME( magmaf_zbulge_get_nb, MAGMAF_GET_ZBULGE_NB )
+void magmaf_zbulge_get_nb(
     magma_int_t *m, magma_int_t *nbthreads )
 {
-    magma_get_zbulge_nb(
+    magma_zbulge_get_nb(
         *m, *nbthreads );
 }
 

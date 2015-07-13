@@ -223,8 +223,8 @@ magma_zhetrd_he2hb(
     
     trace_init( 1, 1, 3, stream );
 
-    magmaDoubleComplex *hT = work + lwork - nb*nb;
     lwork -= nb*nb;
+    magmaDoubleComplex *hT = work + lwork;
     memset( hT, 0, nb*nb*sizeof(magmaDoubleComplex));
 
     magmablasSetKernelStream( stream[0] );
@@ -426,7 +426,6 @@ magma_zhetrd_he2hb(
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
     magma_free( dA );
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     magmablasSetKernelStream( orig_stream );
     magma_set_lapack_numthreads( orig_threads );

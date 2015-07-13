@@ -211,10 +211,9 @@ ZSRC += \
 	zbulge_back.cpp		\
 	zungqr_2stage_gpu.cpp	\
 	zunmqr_gpu_2stage.cpp	\
-	dsyevdx_2stage.cpp	\
 	dsygvdx_2stage.cpp	\
-	zheevdx_2stage.cpp	\
 	zhegvdx_2stage.cpp	\
+	zheevdx_2stage.cpp	\
 	\
 	zbulge_back_m.cpp	\
 	zbulge_applyQ_v2_m.cpp	\
@@ -224,7 +223,10 @@ ZSRC += \
 	zhegvdx_2stage_m.cpp	\
 	zhetrd_he2hb_mgpu.cpp	\
 	zhetrd_he2hb_mgpu_spec.cpp	\
-
+	core_zlarfy.cpp	\
+	core_zhbtype1cb.cpp	\
+	core_zhbtype2cb.cpp	\
+	core_zhbtype3cb.cpp	\
 # generalized symmetric eigenvalues
 ZSRC += \
 	dsygvd.cpp		\

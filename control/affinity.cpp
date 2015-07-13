@@ -8,7 +8,7 @@
        @author Raffaele Solca
 
 */
-#ifdef MAGMA_SETAFFINITY
+#ifndef MAGMA_NOAFFINITY
 
 #include "affinity.h"
 
@@ -80,4 +80,4 @@ void affinity_set::print_set(int id, const char* s)
 #endif
 }
 
-#endif  // MAGMA_SETAFFINITY
+#endif  // MAGMA_NOAFFINITY

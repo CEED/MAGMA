@@ -14,6 +14,7 @@
  * --------------------------------------------------------- */
 #include "magmablas.h"
 #include "magma_batched.h"
+#include "magma_bulge.h"
 
 /* ------------------------------------------------------------
  * MAGMA functions

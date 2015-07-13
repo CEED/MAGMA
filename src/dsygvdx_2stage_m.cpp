@@ -268,8 +268,8 @@ magma_dsygvdx_2stage_m(
         }
     }
 
-    magma_int_t nb = magma_get_dbulge_nb(n, parallel_threads);
-    magma_int_t lq2 = magma_dbulge_get_lq2(n, parallel_threads);
+    magma_int_t nb = magma_dbulge_get_nb(n, parallel_threads);
+    magma_int_t lq2 = magma_dbulge_get_lq2(n, parallel_threads, wantz);
 
     if (wantz) {
         lwmin  = lq2 + 1 + 6*n + 2*n*n;

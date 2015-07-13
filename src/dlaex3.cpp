@@ -316,8 +316,8 @@ magma_dlaex3(
     /////////////////////////////////////////////////////////////////////////////////
     //openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-    magma_timer_t time=0;
-    timer_start( time );
+    //magma_timer_t time=0;
+    //timer_start( time );
 
     #pragma omp parallel private(i, j, tmp, temp)
     {
@@ -430,15 +430,15 @@ magma_dlaex3(
     if (*info != 0)
         return *info;
 
-    timer_stop( time );
-    timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
+    //timer_stop( time );
+    //timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #else
     /////////////////////////////////////////////////////////////////////////////////
     // Non openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-    magma_timer_t time=0;
-    timer_start( time );
+   // magma_timer_t time=0;
+   // timer_start( time );
 
     for (i = 0; i < k; ++i)
         dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
@@ -510,13 +510,13 @@ magma_dlaex3(
         }
     }
 
-    timer_stop( time );
-    timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
+    //timer_stop( time );
+    //timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #endif //_OPENMP
     // Compute the updated eigenvectors.
 
-    timer_start( time );
+    //timer_start( time );
     magma_queue_sync( NULL );
 
     if (rk != 0) {
@@ -552,8 +552,8 @@ magma_dlaex3(
         } else
             lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
     }
-    timer_stop( time );
-    timer_printf( "gemms = %6.2f\n", time );
+    //timer_stop( time );
+    //timer_printf( "gemms = %6.2f\n", time );
 
     return *info;
 } /* magma_dlaex3 */

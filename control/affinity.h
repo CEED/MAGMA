@@ -5,13 +5,14 @@
        Univ. of Colorado, Denver
        @date
 
+       @author Azzam Haidar
        @author Raffaele Solca
 
 */
 #ifndef MAGMA_AFFINITY_H
 #define MAGMA_AFFINITY_H
 
-#ifdef MAGMA_SETAFFINITY
+#ifndef MAGMA_NOAFFINITY
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -44,9 +45,9 @@ private:
 };
 
 #else
-#error "Affinity requires Linux glibc version >= 2.3.3, which isn't available. Remove -DMAGMA_SETAFFINITY from CFLAGS in make.inc."
+#error "Affinity requires Linux glibc version >= 2.3.3, which isn't available. Please add -DMAGMA_NOAFFINITY to the CFLAGS in make.inc."
 #endif
 
-#endif  // MAGMA_SETAFFINITY
+#endif  // MAGMA_NOAFFINITY
 
 #endif  // MAGMA_AFFINITY_H

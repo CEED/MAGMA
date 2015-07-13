@@ -165,6 +165,11 @@ typedef struct magma_opts
     magma_int_t nmax;
     magma_int_t kmax;
     magma_int_t batchcount;
+    magma_int_t ib;
+    magma_int_t rh;
+    magma_int_t th;
+    magma_int_t sched;
+    magma_int_t conv;
     
     // scalars
     magma_int_t device;

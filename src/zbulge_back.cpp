@@ -51,6 +51,7 @@ void magma_zapplyQ_data_init(
     magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
     magmaDoubleComplex *T, magma_int_t ldt, magmaDoubleComplex *dE, magma_int_t ldde)
 {
+
     zapplyQ_data->threads_num = threads_num;
     zapplyQ_data->n = n;
     zapplyQ_data->ne = ne;
@@ -136,7 +137,7 @@ magma_zbulge_back(
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-//n_gpu=ne;
+n_gpu=ne;
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -242,7 +243,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
     // it need that all threads setting it to 1.
     magma_set_lapack_numthreads(1);
 
-#ifdef MAGMA_SETAFFINITY
+#ifndef MAGMA_NOAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY
     affinity_set print_set;
@@ -305,7 +306,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
         #endif
     } // END if my_core_id
 
-#ifdef MAGMA_SETAFFINITY
+#ifndef MAGMA_NOAFFINITY
     //restore old affinity
     sched_setaffinity(0, sizeof(old_set), &old_set);
 #ifdef PRINTAFFINITY

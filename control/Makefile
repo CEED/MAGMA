@@ -14,6 +14,7 @@ ZSRC := \
 	magma_znan_inf.cpp	\
 	zpanel_to_q.cpp	\
 	zprint.cpp	\
+	magma_zbulge.cpp	\
 
 ifeq ($(PGIFORTRAN), 0)
 ZSRC += \
@@ -29,7 +30,7 @@ endif
 SRC := \
 	affinity.cpp		\
 	auxiliary.cpp		\
-	bulge_auxiliary.cpp	\
+	magma_bulge.cpp	\
 	connection_mgpu.cpp	\
 	constants.cpp		\
 	get_nb.cpp		\

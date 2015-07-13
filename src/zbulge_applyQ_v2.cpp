@@ -140,8 +140,9 @@ magma_zbulge_applyQ_v2(
 
     // performance loss if the reflector are applied to a big number of eigenvectors (~10000)
     // => apply the reflectors to blocks of eigenvectors.
+    magma_int_t sz_bl = NE;
     //magma_int_t nr_bl = magma_ceildiv(NE,10000);        //nr of blocks
-    magma_int_t sz_bl = NE; //magma_ceildiv(NE,nr_bl*64)*64; //maximum size of blocks (to have blocks of around the same size and multiple of 64)
+    //magma_int_t sz_bl = magma_ceildiv(NE,nr_bl*64)*64; //maximum size of blocks (to have blocks of around the same size and multiple of 64)
     magma_int_t ib;                                      //size of current block
 
 
@@ -151,7 +152,7 @@ magma_zbulge_applyQ_v2(
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
     #ifdef ENABLE_DEBUG
-    printf("  APPLY Q_v22 GPU with  N %d, NE %d,  NB %d, Vblksiz %d, versionL %d versionR %d  SIDE %c \n",
+    printf("  APPLY Q_v22 GPU with  N %5d, NE %5d,  NB %5d, Vblksiz %5d, versionL %5d versionR %5d  SIDE %5d \n",
            N, NE, NB, Vblksiz, versionL, versionR, side);
     #endif
 

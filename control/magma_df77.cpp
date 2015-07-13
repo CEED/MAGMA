@@ -149,11 +149,11 @@ magma_int_t magmaf_get_dsygst_nb_m( magma_int_t *m )
     return magma_get_dsygst_nb_m( *m );
 }
 
-#define magmaf_get_dbulge_nb FORTRAN_NAME( magmaf_get_dbulge_nb, MAGMAF_GET_DBULGE_NB )
-void magmaf_get_dbulge_nb(
+#define magmaf_dbulge_get_nb FORTRAN_NAME( magmaf_dbulge_get_nb, MAGMAF_GET_DBULGE_NB )
+void magmaf_dbulge_get_nb(
     magma_int_t *m, magma_int_t *nbthreads )
 {
-    magma_get_dbulge_nb(
+    magma_dbulge_get_nb(
         *m, *nbthreads );
 }
 

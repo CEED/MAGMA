@@ -12,7 +12,6 @@
  */
 
 #include "common_magma.h"
-#include "magma_bulge.h"
 
 #define PRECISION_z
 
@@ -103,6 +102,7 @@ magma_ztrdtype1cbHLsym_withQ_v2(
 #undef A
 #undef V
 #undef TAU
+
 
 ///////////////////////////////////////////////////////////
 //                  TYPE 1-LPK Householder
@@ -198,4 +198,5 @@ magma_ztrdtype3cbHLsym_withQ_v2(
 #undef A
 #undef V
 #undef TAU
+
 ///////////////////////////////////////////////////////////

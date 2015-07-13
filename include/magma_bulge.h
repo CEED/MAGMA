@@ -10,6 +10,10 @@
 #define MAGMA_BULGE_H
 
 #include "magma_types.h"
+#include "magma_zbulge.h"
+#include "magma_cbulge.h"
+#include "magma_dbulge.h"
+#include "magma_sbulge.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +36,8 @@ extern "C" {
     void magma_bulge_findpos113(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *myblkid);
 
     magma_int_t magma_bulge_get_blkcnt(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz);
+
+    void findVTpos(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid);
 
 #ifdef __cplusplus
 }

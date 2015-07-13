@@ -35,10 +35,11 @@ int main(int argc, char **argv)
     TESTING_INIT();
 
     real_Double_t   gflops, cpu_perf, cpu_time, gpu_perf, gpu_time;
-    double          err = 0.0, Rnorm, Anorm, Xnorm, *work;
+    double          err = 0.0, lerr = 0.0;
+    double          Rnorm, Anorm, Xnorm, *work;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *h_A, *h_B, *h_X;
+    magmaDoubleComplex *h_A, *h_B, *h_X, *h_B0;
     magmaDoubleComplex_ptr d_A, d_B;
     magma_int_t *dipiv, *dinfo_array;
     magma_int_t *ipiv, *cpu_info;
@@ -60,9 +61,13 @@ int main(int argc, char **argv)
 
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;
-
-    printf("%% BatchCount  N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
-    printf("%%===============================================================================\n");
+    if(opts.lapack){
+        printf("%% BatchCount  N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||  ||B - AX|| / N*||A||*||X||_CPU\n");
+        printf("%%=========================================================================================================================\n");
+    }else{
+        printf("%% BatchCount  N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+        printf("%%=========================================================================================\n");
+    }
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -77,6 +82,7 @@ int main(int argc, char **argv)
 
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, sizeA );
             TESTING_MALLOC_CPU( h_B, magmaDoubleComplex, sizeB );
+            TESTING_MALLOC_CPU( h_B0, magmaDoubleComplex, sizeB );
             TESTING_MALLOC_CPU( h_X, magmaDoubleComplex, sizeB );
             TESTING_MALLOC_CPU( work, double,      N);
             TESTING_MALLOC_CPU( ipiv, magma_int_t, batchCount*N);
@@ -97,6 +103,8 @@ int main(int argc, char **argv)
             
             magma_zsetmatrix( N, N*batchCount,    h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, nrhs*batchCount, h_B, ldb, d_B, lddb );
+            magma_int_t columns = nrhs * batchCount;
+            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &columns, h_B, &ldb, h_B0, &ldb );
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -151,6 +159,12 @@ int main(int argc, char **argv)
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
+                magmaDoubleComplex *h_A0;
+                TESTING_MALLOC_CPU( h_A0, magmaDoubleComplex, sizeA );
+                columns= N*batchCount;
+                lapackf77_zlacpy( "F", &N, &columns, h_A,  &lda, h_A0, &lda );
+                columns= nrhs*batchCount;
+                lapackf77_zlacpy( "F", &N, &columns, h_B0, &ldb, h_B,  &ldb );
                 cpu_time = magma_wtime();
                 //#define BATCHED_DISABLE_PARCPU
                 #ifndef BATCHED_DISABLE_PARCPU 
@@ -190,9 +204,28 @@ int main(int argc, char **argv)
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+
+                for (magma_int_t s=0; s < batchCount; s++)
+                {
+                    Xnorm = lapackf77_zlange("I", &N, &nrhs, h_B + s * ldb * nrhs, &ldb, work);
+                    blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &nrhs, &N,
+                               &c_one,     h_A0 + s * lda * N, &lda,
+                                           h_B + s * ldb * nrhs, &ldb,
+                               &c_neg_one, h_B0 + s * ldb * nrhs, &ldb);
+                
+                    Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B0 + s * ldb * nrhs, &ldb, work);
+                    double error = Rnorm/(N*Anorm*Xnorm);
+                    
+                    if ( isnan(error) || isinf(error) ) {
+                        lerr = error;
+                        break;
+                    }
+                    lerr = max(lerr, error);
+                }
+                TESTING_FREE_CPU( h_A0 );
+                printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s   %20.2e   %s\n",
                         (int)batchCount, (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        err, (err < tol ? "ok" : "failed"));
+                        err, (err < tol ? "ok" : "failed"), lerr, (lerr < tol ? "ok" : "failed"));
             }
             else {
                 printf( "%10d    %5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
@@ -201,6 +234,7 @@ int main(int argc, char **argv)
             }
             
             TESTING_FREE_CPU( h_A );
+            TESTING_FREE_CPU( h_B0);
             TESTING_FREE_CPU( h_B );
             TESTING_FREE_CPU( h_X );
             TESTING_FREE_CPU( work );

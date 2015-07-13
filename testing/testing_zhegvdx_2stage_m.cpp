@@ -80,12 +80,10 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             n2     = N*N;
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            lwork  = magma_zbulge_get_lq2(N, threads) + 2*N + N*N;
-            lrwork = 1 + 5*N +2*N*N;
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, lrwork, liwork);
             #else
-            lwork  = magma_zbulge_get_lq2(N, threads) + 1 + 6*N + 2*N*N;
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, liwork);
             #endif
-            liwork = 3 + 5*N;
 
             //magma_int_t NB = 96; //magma_bulge_get_nb(N);
             //magma_int_t sizvblg = magma_zbulge_get_lq2(N, threads);

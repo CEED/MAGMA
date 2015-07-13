@@ -262,13 +262,12 @@ magma_zheevdx_2stage_m(
         }
     }
 
-    magma_int_t nb = magma_get_zbulge_nb(n, parallel_threads);
+    magma_int_t nb      = magma_zbulge_get_nb(n, parallel_threads);
     magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb, parallel_threads);
-
-    magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz;
-    magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-    magma_int_t lq2 = magma_zbulge_get_lq2(n, parallel_threads);
+    magma_int_t blkcnt  = magma_bulge_get_blkcnt(n, nb, Vblksiz);
+    magma_int_t lq2     = magma_zbulge_get_lq2(n, parallel_threads, wantz);
+    magma_int_t ldt     = Vblksiz;
+    magma_int_t ldv     = nb + Vblksiz;
 
     if (wantz) {
         lwmin  = lq2 + 2*n + n*n;
