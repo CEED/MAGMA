@@ -23,7 +23,6 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-#include "magma_zbulge.h"
 #include "magma_threadsetting.h"
 
 #define PRECISION_z
@@ -81,31 +80,14 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             n2     = N*N;
-            /*
-            #if defined(PRECISION_z) || defined(PRECISION_c)
-            lwork  = magma_zbulge_get_lq2(N, threads, (opts.jobz== MagmaVec) ) + (opts.jobz== MagmaVec ? 2*N + N*N : N * magma_get_zbulge_nb(n, threads) + 1);
-            lrwork = (opts.jobz== MagmaVec ? 1 + 5*N +2*N*N : N);
-            #else
-            lwork  = magma_zbulge_get_lq2(N, threads, (opts.jobz== MagmaVec) ) + (opts.jobz== MagmaVec ? 1 + 6*N + 2*N*N : N * max(2,magma_get_zbulge_nb(N, threads)) + 1);
-            #endif
-            liwork = (opts.jobz== MagmaVec ? 3 + 5*N : 1);
-            */
+
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
+                                     &lwork, 
+                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     &lrwork, 
+                                     #endif
+                                     &liwork);
             
-            #if defined(PRECISION_z) || defined(PRECISION_c)
-            lwork  = magma_zbulge_get_lq2(N, threads, (opts.jobz == MagmaVec) ) + 2*N + N*N;
-            lrwork = 1 + 5*N +2*N*N;
-            #else
-            lwork  = magma_zbulge_get_lq2(N, threads, (opts.jobz == MagmaVec) ) + 1 + 6*N + 2*N*N;
-            #endif
-            liwork = 3 + 5*N;
-            
-            /*
-            #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zbulge_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, lrwork, liwork);
-            #else
-            magma_zbulge_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, liwork);
-            #endif
-            */
             /* Allocate host memory for the matrix */
             TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, n2 );
             TESTING_MALLOC_CPU( w1,    double, N );

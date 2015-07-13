@@ -82,12 +82,12 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             n2     = N*N;
-            #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, lrwork, liwork);
-            #else
-            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, liwork);
-            #endif
-
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
+                                     &lwork, 
+                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     &lrwork, 
+                                     #endif
+                                     &liwork);
             /* Allocate host memory for the matrix */
             TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2 );
             TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, n2 );

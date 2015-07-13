@@ -79,12 +79,12 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
             n2     = N*N;
-            #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, lrwork, liwork);
-            #else
-            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), lwork, liwork);
-            #endif
-
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
+                                     &lwork, 
+                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     &lrwork, 
+                                     #endif
+                                     &liwork);
             //magma_int_t NB = 96; //magma_bulge_get_nb(N);
             //magma_int_t sizvblg = magma_zbulge_get_lq2(N, threads);
             //magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N;

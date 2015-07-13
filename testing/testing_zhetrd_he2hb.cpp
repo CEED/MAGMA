@@ -145,19 +145,24 @@ int main( int argc, char** argv)
             magma_int_t *iwork;
             magma_int_t /*nb,*/ /*lwork,*/ liwork;
             magma_int_t threads = magma_get_parallel_numthreads();
+
             #if defined(PRECISION_z) || defined(PRECISION_c)
-                double *rwork;
-                magma_int_t lrwork;
-                lwork  = magma_zbulge_get_lq2(N, threads) + 2*N + N*N;
-                lrwork = 1 + 5*N +2*N*N;
-                TESTING_MALLOC_PIN( rwork, double, lrwork );
-            #else
-                lwork  = magma_zbulge_get_lq2(N, threads) + 1 + 6*N + 2*N*N;
+            double *rwork;
+            magma_int_t lrwork;
             #endif
-            liwork = 3 + 5*N;
-            //nb = magma_get_zhetrd_nb(N);
+
+            magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
+                                     &lwork, 
+                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     &lrwork, 
+                                     #endif
+                                     &liwork);
+
             TESTING_MALLOC_PIN( hh_work, magmaDoubleComplex, lwork  );
             TESTING_MALLOC_CPU( iwork,   magma_int_t,        liwork );
+            #if defined(PRECISION_z) || defined(PRECISION_c)
+            TESTING_MALLOC_PIN( rwork, double, lrwork );
+            #endif
     
             if (ngpu == 1) {
                 printf("calling zheevdx_2stage 1 GPU\n");
