@@ -31,7 +31,7 @@
     b           magma_z_matrix
                 input RHS b
 
-    @param[in][out]
+    @param[in,out]
     precond     magma_z_preconditioner*
                 preconditioner parameters
                 
@@ -240,7 +240,7 @@ cleanup:
     b           magma_z_matrix
                 input RHS b
 
-    @param[in][out]
+    @param[in,out]
     precond     magma_z_preconditioner*
                 preconditioner parameters
                 
