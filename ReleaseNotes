@@ -28,6 +28,11 @@ single (s), double (d), single-complex (c), double-complex (z).
  1.6.3 - July 2015
     * Added magmaf_wtime for consistency with other Fortran interfaces; deprecated magma_wtime_f.
 
+    MAGMA sparse
+    * Added Induced Dimension Reduction Iterative solver (IDR).
+    * Added iterative sparse triangular solves for 
+      incomplete factorization preconditioners.
+
  1.6.2 - May 4, 2015
     * Added magma_{s,d,c,z}sqrt for real and complex scalar square root.
     * Added magma_ceildiv and magma_roundup.

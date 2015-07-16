@@ -51,7 +51,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -290,7 +290,7 @@ cleanup:
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zaux
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -394,7 +394,7 @@ cleanup:
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_z
+    @ingroup magmasparse_zblas
     ********************************************************************/
 
 extern "C" magma_int_t
