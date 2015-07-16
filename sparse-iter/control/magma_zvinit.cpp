@@ -33,6 +33,10 @@
     @param[in]
     num_rows    magma_int_t
                 desired length of vector
+                
+    @param[in]
+    num_cols    magma_int_t
+                desired width of vector-block (columns of dense matrix)
 
     @param[in]
     values      magmaDoubleComplex

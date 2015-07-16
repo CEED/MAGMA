@@ -26,6 +26,10 @@
     @param[in]
     A           magma_z_matrix
                 input matrix A
+                
+    @param[in]
+    b           magma_z_matrix
+                input RHS b
 
     @param[in][out]
     precond     magma_z_preconditioner*
@@ -231,6 +235,10 @@ cleanup:
     @param[in]
     A           magma_z_matrix
                 input matrix A
+                
+    @param[in]
+    b           magma_z_matrix
+                input RHS b
 
     @param[in][out]
     precond     magma_z_preconditioner*
@@ -384,13 +392,18 @@ magma_zitericsetup(
 
     Arguments
     ---------
+    
+    @param[in]
+    A           magma_z_matrix
+                input matrix A, current target system
 
     @param[in]
-    precond         magma_z_preconditioner*
-                    preconditioner parameters
+    precond     magma_z_preconditioner*
+                preconditioner parameters
 
     @param[in]
-    magma_int_t     number of updates
+    updates     magma_int_t 
+                number of updates
     
     @param[in]
     queue       magma_queue_t

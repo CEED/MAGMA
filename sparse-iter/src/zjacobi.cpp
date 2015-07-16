@@ -606,10 +606,6 @@ cleanup:
     M           magma_z_matrix
                 input matrix M = D^(-1) * (L+U)
 
-    @param[in]
-    c           magma_z_matrix
-                c = D^(-1) * b
-
     @param[in,out]
     x           magma_z_matrix*
                 iteration vector x
@@ -619,7 +615,7 @@ cleanup:
                 solver parameters
 
     @param[in]
-    solver_par  magma_z_precond_par*
+    precond     magma_z_precond_par*
                 precond parameters
     @param[in]
     queue       magma_queue_t
@@ -630,8 +626,10 @@ cleanup:
 
 extern "C" magma_int_t
 magma_zjacobiiter_precond(
-    magma_z_matrix M, magma_z_matrix *x,
-    magma_z_solver_par *solver_par, magma_z_preconditioner *precond,
+    magma_z_matrix M, 
+    magma_z_matrix *x,
+    magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -682,12 +680,21 @@ cleanup:
     ---------
 
     @param[in]
-    M           magma_z_matrix
+    A           magma_z_matrix
                 input matrix M = D^(-1) * (L+U)
-
+                
     @param[in]
-    c           magma_z_matrix
-                c = D^(-1) * b
+    b           magma_z_matrix
+                input RHS b
+                
+    @param[in]
+    d           magma_z_matrix
+                input matrix diagonal elements diag(A)
+                
+    @param[in]
+    t           magma_z_matrix
+                temporary vector
+
 
     @param[in,out]
     x           magma_z_matrix*

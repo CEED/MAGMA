@@ -357,6 +357,10 @@ cleanup:
     res         real_Double_t*
                 IC residual
                 
+    @param[out]
+    nonlinres   real_Double_t*
+                nonlinear residual
+                
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -589,11 +593,7 @@ cleanup:
                 sparse matrix in CSR
 
     @param[out]
-    L           magma_z_matrix*
-                sparse matrix in CSR
-
-    @param[out]
-    U           magma_z_matrix*
+    B           magma_z_matrix*
                 sparse matrix in CSR
                 
     @param[in]

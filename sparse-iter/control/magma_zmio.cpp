@@ -356,29 +356,8 @@ cleanup:
     ---------
 
     @param[in]
-    n_row       magma_int_t
-                number of rows in matrix
-                
-    @param[in]
-    n_col       magma_int_t
-                number of columns in matrix
-                
-    @param[in]
-    nnz         magma_int_t
-                number of nonzeros in matrix
-                
-    @param[in]
-    val         magmaDoubleComplex**
-                value array of CSR
-                TODO: why are these ** pointers? Wouldn't * pointers work?
-
-    @param[in]
-    row         magma_index_t**
-                row pointer of CSR
-
-    @param[in]
-    col         magma_index_t**
-                column indices of CSR
+    A           magma_z_matrix
+                matrix to write out
 
     @param[in]
     MajorType   magma_index_t

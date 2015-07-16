@@ -568,12 +568,6 @@ magma_zcg_merge(
     magma_z_matrix *x, magma_z_solver_par *solver_par,
     magma_queue_t queue );
 
-magma_int_t 
-magma_zgmres(
-    magma_z_matrix A, magma_z_matrix b, 
-    magma_z_matrix *x, magma_z_solver_par *solver_par,
-    magma_queue_t queue );
-
 magma_int_t
 magma_zbicgstab(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x, 
@@ -608,13 +602,6 @@ magma_zbpcg(
 
 magma_int_t
 magma_zpbicgstab(
-    magma_z_matrix A, magma_z_matrix b, 
-    magma_z_matrix *x, magma_z_solver_par *solver_par, 
-    magma_z_preconditioner *precond_par,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zpgmres(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
@@ -677,13 +664,6 @@ magma_ziterref(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par, 
     magma_z_preconditioner *precond_par,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zilu(
-    magma_z_matrix A, magma_z_matrix b, 
-    magma_z_matrix *x, magma_z_solver_par *solver_par, 
-    magma_int_t *ipiv,
     magma_queue_t queue );
 
 magma_int_t
@@ -814,20 +794,6 @@ magma_zjacobiiter_sys(
     magma_z_matrix *x,  
     magma_z_solver_par *solver_par,
     magma_queue_t queue );
-
-magma_int_t
-magma_zpastixsetup(
-    magma_z_matrix A, magma_z_matrix b,
-    magma_z_preconditioner *precond,
-    magma_queue_t queue );
-
-
-magma_int_t
-magma_zapplypastix(
-    magma_z_matrix b, magma_z_matrix *x, 
-    magma_z_preconditioner *precond,
-    magma_queue_t queue );
-
 
 // custom preconditioner
 magma_int_t
