@@ -39,6 +39,10 @@
     A           magma_z_matrix
                 input matrix A
                 
+    @param[in]
+    lda         magma_int_t
+                leading dimension matrix A
+                
     @param[in,out]
     Q           magma_z_matrix*
                 input matrix Q
@@ -58,7 +62,10 @@
 extern "C" magma_int_t
 magma_zqr(
     magma_int_t m, magma_int_t n,
-    magma_z_matrix A, magma_int_t lda, magma_z_matrix *Q, magma_z_matrix *R,
+    magma_z_matrix A, 
+    magma_int_t lda, 
+    magma_z_matrix *Q, 
+    magma_z_matrix *R,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
