@@ -88,10 +88,9 @@ int main(int argc, char **argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            gpu_time = magma_wtime();
-
+            gpu_time = magma_sync_wtime(NULL);
             magma_zhesv_nopiv_gpu( opts.uplo, N, nrhs, d_A, ldda, d_B, lddb, &info );
-            gpu_time = magma_wtime() - gpu_time;
+            gpu_time = magma_sync_wtime(NULL) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zgesv_gpu returned error %d: %s.\n",
