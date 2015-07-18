@@ -445,7 +445,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 #define expertmyss_cond_wait(m, n, val) \
 { \
     while (prog[(m)] != (val)) \
-    pthread_yield(); \
+    magma_yield(); \
     for(kk=0;kk<100; kk++) \
     __asm__ volatile ("nop;" :::);\
 }
@@ -487,7 +487,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 { \
     while (prog[(m)] != (val)) \
     { \
-        pthread_yield(); \
+        magma_yield(); \
     } \
 }
 #define myss_init(m, n, init_val) \
