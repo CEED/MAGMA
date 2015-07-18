@@ -18,6 +18,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+    magma_int_t magma_yield();
 
     magma_int_t magma_bulge_get_nb(magma_int_t n);
 
