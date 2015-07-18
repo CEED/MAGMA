@@ -5,7 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> s d c
        @author Azzam Haidar
        
        Work in progress.

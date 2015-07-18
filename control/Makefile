@@ -43,6 +43,7 @@ SRC := \
 	thread_queue.cpp	\
 	trace.cpp		\
 	xerbla.cpp		\
+	magmaos.cpp		\
 
 # ilaenv was previously used by gesdd; it was the only required Fortran dependence
 #	ilaenv_f77.f		\
