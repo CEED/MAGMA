@@ -110,8 +110,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
-#else
-    cublasHandle_t myhandle=NULL;
 #endif
 
     magmaDoubleComplex **dA_displ   = NULL;
