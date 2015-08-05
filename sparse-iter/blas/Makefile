@@ -52,7 +52,6 @@ ZSRC += \
 	
 # Tester routines
 ZSRC += \
-	zgecsrmv_batched.cu				\
 
 # ------------------------------------------------------------
 -include Makefile.local

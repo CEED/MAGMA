@@ -94,11 +94,6 @@ magma_z_spmv(
              if ( A.storage_type == Magma_CSR
                             || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
-                 //printf("using CSR kernel for SpMV: ");
-                 //magma_zgecsrmv_batched( MagmaNoTrans, A.num_rows, A.num_cols, A.nnz, alpha,
-                   //              A.dval, A.drow, A.dcol, x.dval, beta, y.dval, queue );
-                 //magma_zprint_vector(y,0,10,queue);
-                 //printf("done.\n");
               CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
               CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
               CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
