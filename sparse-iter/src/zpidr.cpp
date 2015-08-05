@@ -88,13 +88,13 @@
 extern "C" void
 magma_zmatrixInfo2(
     const char *s,
-    magma_z_matrix A ) {
-
-    printf(" %s dims = %d x %d\n", s, A.num_rows, A.num_cols);
+    magma_z_matrix A )
+{
+    printf(" %s dims = %d x %d\n", s, int(A.num_rows), int(A.num_cols));
     printf(" %s location = %d = %s\n", s, A.memory_location, (A.memory_location == Magma_CPU) ? "CPU" : "DEV");
     printf(" %s storage = %d = %s\n", s, A.storage_type, (A.storage_type == Magma_CSR) ? "CSR" : "DENSE");
     printf(" %s major = %d = %s\n", s, A.major, (A.major == MagmaRowMajor) ? "row" : "column");
-    printf(" %s nnz = %d\n", s, A.nnz);
+    printf(" %s nnz = %d\n", s, int(A.nnz));
     if (A.memory_location == Magma_DEV)
         magma_zprint_gpu( A.num_rows, A.num_cols, A.dval, A.num_rows );
     else

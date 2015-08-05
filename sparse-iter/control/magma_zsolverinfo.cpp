@@ -103,13 +103,13 @@ magma_zsolverinfo(
             case  Magma_BAITER:
                     printf("%%   Preconditioner used: Block-asynchronous iteration.\n"); break;
             case  Magma_ILU:
-                    printf("%%   Preconditioner used: ILU(%d).\n", precond_par->levels); break;
+                    printf("%%   Preconditioner used: ILU(%d).\n", int(precond_par->levels)); break;
             case  Magma_AILU:
-                    printf("%%   Preconditioner used: iterative ILU(%d).\n", precond_par->levels); break;
+                    printf("%%   Preconditioner used: iterative ILU(%d).\n", int(precond_par->levels)); break;
             case  Magma_ICC:
-                    printf("%%   Preconditioner used: IC(%d).\n", precond_par->levels); break;
+                    printf("%%   Preconditioner used: IC(%d).\n", int(precond_par->levels)); break;
             case  Magma_AICC:
-                    printf("%%   Preconditioner used: iterative IC(%d).\n", precond_par->levels); break;
+                    printf("%%   Preconditioner used: iterative IC(%d).\n", int(precond_par->levels)); break;
             default:
                   break;
     
@@ -273,13 +273,13 @@ magma_zsolverinfo(
         case  Magma_BICGSTABMERGE2:
             printf("%% BiCGSTAB solver summary:\n"); break;
         case  Magma_GMRES:
-            printf("%% GMRES(%d) solver summary:\n", solver_par->restart); break;
+            printf("%% GMRES(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_PGMRES:
-            printf("%% PGMRES(%d) solver summary:\n", solver_par->restart); break;
+            printf("%% PGMRES(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_IDR:
-            printf("%% IDR(%d) solver summary:\n", solver_par->restart); break;
+            printf("%% IDR(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_PIDR:
-            printf("%% PIDR(%d) solver summary:\n", solver_par->restart); break;
+            printf("%% PIDR(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;
         case  Magma_JACOBI:

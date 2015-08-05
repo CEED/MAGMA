@@ -102,7 +102,7 @@ magma_zcsrsplit(
                         nnz_offd++;
                 }
                 if( check == 0 ){
-                    printf("error: matrix contains zero on diagonal at (%d,%d).\n", i, i);
+                    printf("error: matrix contains zero on diagonal at (%d,%d).\n", int(i), int(i));
                     info = -1;
                     goto cleanup;
                 }

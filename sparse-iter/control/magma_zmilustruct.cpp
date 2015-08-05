@@ -223,8 +223,8 @@ void magma_zsymbolic_ilu(
         while (next < i)
         {
             if (knzl >= *nzl) {
-                printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzl, knzl);
-                printf("Increase STORAGE parameter.");
+                printf("ILU: STORAGE parameter value %d<%d too small.\n", int(*nzl), int(knzl));
+                printf("Increase STORAGE parameter.\n");
                 info = -1;
                 goto cleanup;
             }
@@ -248,7 +248,7 @@ void magma_zsymbolic_ilu(
         {
             if (knzu >= *nzu) {
                 printf("ILU: STORAGE parameter value %d<%d too small.\n", *nzu, knzu);
-                printf("Increase STORAGE parameter.");
+                printf("Increase STORAGE parameter.\n");
                 info = -1;
                 goto cleanup;
             }

@@ -410,7 +410,7 @@ magma_zwrite_csr_mtx(
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
-        fprintf( fp, "%d %d %d\n", B.num_cols, B.num_rows, B.nnz);
+        fprintf( fp, "%d %d %d\n", int(B.num_cols), int(B.num_rows), int(B.nnz));
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
@@ -468,7 +468,7 @@ magma_zwrite_csr_mtx(
         #ifdef COMPLEX
         // complex case
         fprintf( fp, "%%%%MatrixMarket matrix coordinate complex general\n" );
-        fprintf( fp, "%d %d %d\n", A.num_cols, A.num_rows, A.nnz);
+        fprintf( fp, "%d %d %d\n", int(A.num_cols), int(A.num_rows), int(A.nnz));
         
         // TODO what's the difference between i (or i+1) and rowindex?
         magma_index_t i=0, j=0, rowindex=1;
