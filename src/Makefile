@@ -115,7 +115,7 @@ ZSRC += \
 # QR, CPU interface
 ZSRC += \
 	zgelqf.cpp		\
-	zgels.cpp               \
+	zgels.cpp		\
 	zgeqlf.cpp		\
 	zgeqrf-v4.cpp		\
 	zgeqrf.cpp		\
@@ -137,8 +137,8 @@ ZSRC += \
 ZSRC += \
 	zhesv.cpp		\
 	zhetrf.cpp		\
-	zhetrf_aasen.cpp     \
-	zhetrf_nopiv.cpp	 \
+	zhetrf_aasen.cpp	\
+	zhetrf_nopiv.cpp	\
 	zhetrf_nopiv_cpu.cpp	\
 	zsytrf_nopiv_cpu.cpp	\
 	zhetrf_nopiv_gpu.cpp	\
@@ -223,10 +223,11 @@ ZSRC += \
 	zhegvdx_2stage_m.cpp	\
 	zhetrd_he2hb_mgpu.cpp	\
 	zhetrd_he2hb_mgpu_spec.cpp	\
-	core_zlarfy.cpp	\
+	core_zlarfy.cpp		\
 	core_zhbtype1cb.cpp	\
 	core_zhbtype2cb.cpp	\
 	core_zhbtype3cb.cpp	\
+
 # generalized symmetric eigenvalues
 ZSRC += \
 	dsygvd.cpp		\
