@@ -115,11 +115,13 @@ int main(int argc, char **argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgesv_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
+                    printf("magma_zgesv_batched matrix %d returned internal error %d\n", i, int(cpu_info[i]) );
                 }
             }
-            if (info != 0)
-                printf("magma_zgesv_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+            if (info != 0) {
+                printf("magma_zgesv_batched returned argument error %d: %s.\n",
+                        int(info), magma_strerror( info ));
+            }
             
             //=====================================================================
             // Residual
@@ -173,7 +175,8 @@ int main(int argc, char **argv)
                         {
                             lapackf77_zgesv( &N, &nrhs, h_A + offset, &lda, ipiv + ipivoff, h_B + rhsoff, &ldb, &locinfo );
                             if(locinfo != 0)
-                                printf("Parallel-Batched lapackf77_zgesv matrix %d returned err %d: %s.\n", (int) thid+cnt, (int) locinfo, magma_strerror( locinfo ));
+                                printf("Parallel-Batched lapackf77_zgesv matrix %d returned err %d: %s.\n",
+                                       int(thid+cnt), int(locinfo), magma_strerror( locinfo ));
                         }
                     }
                     #if defined(_OPENMP)
@@ -185,18 +188,18 @@ int main(int argc, char **argv)
                     {
                         lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv + s * N, h_B + s * ldb * nrhs, &ldb, &info );
                         if (info != 0)
-                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n", (int) s, (int) info, magma_strerror( info ));
+                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n", int(s), int(info), magma_strerror( info ));
                     }
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int)batchCount, (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
+                        int(batchCount), int(N), int(nrhs), cpu_perf, cpu_time, gpu_perf, gpu_time,
                         err, (err < tol ? "ok" : "failed"));
             }
             else {
                 printf( "%10d    %5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
-                        (int)batchCount, (int) N, (int) nrhs, gpu_perf, gpu_time,
+                        int(batchCount), int(N), int(nrhs), gpu_perf, gpu_time,
                         err, (err < tol ? "ok" : "failed"));
             }
             
