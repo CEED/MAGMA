@@ -74,8 +74,6 @@
 #define printMatrix(s,m,q) magma_zmatrixInfo_strms(s,m,q)
 #endif
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
 // Comments:
 // 1. queues - when receiving queue in magma_zidr function, one does not knows if queue is stream 0 (synchronous) or stream # (asynchronous). For this reason, I create the necessary queues needed and ignore the queue parameter. In the serial version of magma_zidr I set the queue parameter to the same queue as cuBLAS library. Also, queues will be used in OpenCL so we should use 0 instead of NULL for portability.
@@ -223,7 +221,7 @@ magma_zidr_strm(
     solver_par->restart = s;
 
     // set max iterations
-    solver_par->maxiter = MIN( 2 * A.num_cols, solver_par->maxiter );
+    solver_par->maxiter = min( 2 * A.num_cols, solver_par->maxiter );
 
     // check if matrix A is square
     if ( A.num_rows != A.num_cols ) {

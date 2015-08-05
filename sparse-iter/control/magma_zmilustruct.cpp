@@ -21,7 +21,6 @@
  * [l, u] = ilu_mex(a, level, omega, storage);
  *****************************************************************************/
 
-#define MIN(x,y) ((x)<(y) ? (x) : (y))
 #define mwIndex magma_index_t
 
 void magma_zshell_sort(
@@ -205,7 +204,7 @@ void magma_zsymbolic_ilu(
                     oldlst = nxtlst;
                     nxtlst = lnklst[oldlst];
                     newlev = curlev[row] + levels[ii] + 1;
-                    curlev[jau[ii]] = MIN(curlev[jau[ii]], newlev);
+                    curlev[jau[ii]] = min( curlev[jau[ii]], newlev );
                     ii++;
                 }
                 else /* (jau[ii] > nxtlst) */

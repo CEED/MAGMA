@@ -74,9 +74,6 @@
 #define printMatrix(s,m) magma_zmatrixInfo_acc(s,m)
 #endif
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
 
 extern "C" void
 magma_zmatrixInfo_acc(
@@ -181,7 +178,7 @@ magma_zidr_acc(
     queue = squeue;
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
 
-// Set to Q
+    // Set to Q
     magmablasSetKernelStream( queue );
 
     // initial s space
@@ -196,7 +193,7 @@ magma_zidr_acc(
     solver_par->restart = s;
 
     // set max iterations
-    solver_par->maxiter = MIN( 2 * A.num_cols, solver_par->maxiter );
+    solver_par->maxiter = min( 2 * A.num_cols, solver_par->maxiter );
 
     // check if matrix A is square
     if ( A.num_rows != A.num_cols ) {

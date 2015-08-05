@@ -72,8 +72,6 @@
 #define printMatrix(s,m)
 #endif
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
 // Notes:
 // 2. Overlap kernels using cuBLAS streams
@@ -187,7 +185,7 @@ magma_zpidr(
     solver_par->restart = s;
 
     // set max iterations
-    solver_par->maxiter = MIN(2 * A.num_cols, solver_par->maxiter);
+    solver_par->maxiter = min(2 * A.num_cols, solver_par->maxiter);
 
     // initial angle
     angle = 0.7;
