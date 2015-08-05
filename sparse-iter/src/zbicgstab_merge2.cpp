@@ -71,7 +71,8 @@ magma_zbicgstab_merge2(
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, *skp_h={0};
-    double nom, nom0, betanom, den;
+    double nom, nom0, betanom;
+    //double den;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -138,7 +139,7 @@ magma_zbicgstab_merge2(
     magma_zsetvector( 8, skp_h, 1, skp, 1 );
 
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));             // z = A r
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z dot r
+    //den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z dot r
 
     if( nom0 < solver_par->atol ||
         nom0/solver_par->init_res < solver_par->rtol ){

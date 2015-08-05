@@ -137,7 +137,7 @@ magma_zlobpcg(
     double residualTolerance  = solver_par->rtol;
     magma_int_t maxIterations = solver_par->maxiter;
     double tmp;
-    double r0;
+    double r0=0;  // set in 1st iteration
 
     // === Set some constants & defaults ===
     magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
@@ -509,7 +509,8 @@ magma_zlobpcg(
             magma_dgetmatrix(1, 1, residualNorms(0, iterationNumber), 1,  &tmp, 1);
             if ( iterationNumber == 1 ) {
                 solver_par->init_res = tmp;
-                if ( (r0 = tmp * solver_par->rtol) < ATOLERANCE )
+                r0 = tmp * solver_par->rtol;
+                if ( r0 < ATOLERANCE )
                     r0 = ATOLERANCE;
             }
             solver_par->final_res = tmp;

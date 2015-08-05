@@ -70,7 +70,7 @@ magma_zjacobi(
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     
-    double nom0 = 0.0;
+    //double nom0 = 0.0;
 
     magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, ACSR={Magma_CSR};
     
@@ -89,7 +89,7 @@ magma_zjacobi(
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t) residual;
     }
-    nom0 = residual;
+    //nom0 = residual;
 
     // Jacobi setup
     CHECK( magma_zjacobisetup_diagscal( ACSR, &d, queue ));

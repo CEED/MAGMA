@@ -75,7 +75,7 @@ magma_zpcg(
     
     // solver variables
     magmaDoubleComplex alpha, beta;
-    double nom, nom0, r0, gammaold, gammanew, den, res;
+    double nom, nom0, r0, gammaold=1, gammanew, den, res;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;

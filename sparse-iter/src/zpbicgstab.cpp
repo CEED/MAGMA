@@ -95,7 +95,8 @@ magma_zpbicgstab(
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
-    double nom, betanom, nom0, r0, den, res;
+    double nom, betanom, nom0, r0, res;
+    //double den;
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
@@ -106,7 +107,7 @@ magma_zpbicgstab(
     solver_par->init_res = nom0;
 
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));              // z = A r
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z' * r
+    //den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z' * r
 
     if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
         r0 = ATOLERANCE;

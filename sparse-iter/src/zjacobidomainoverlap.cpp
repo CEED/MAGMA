@@ -66,7 +66,7 @@ magma_zjacobidomainoverlap(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
                                                 c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows*b.num_cols;
-    double nom0 = 0.0;
+    //double nom0 = 0.0;
     // generate the domain overlap
     magma_int_t num_ind = 0;
     magma_index_t *indices={0}, *hindices={0};
@@ -94,7 +94,7 @@ magma_zjacobidomainoverlap(
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_z_spmv( c_one, A, *x, c_zero, r, queue ));          // r = A x
     magma_zaxpy(dofs,  c_mone, b.dval, 1, r.dval, 1);           // r = r - b
-    nom0 = magma_dznrm2(dofs, r.dval, 1);                      // den = || r ||
+    //nom0 = magma_dznrm2(dofs, r.dval, 1);                      // den = || r ||
 
     // Jacobi setup
     CHECK( magma_zjacobisetup_diagscal( A, &d, queue ));

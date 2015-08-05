@@ -141,7 +141,7 @@ magma_zfgmres(
     magma_int_t i, j, k;
     magmaDoubleComplex beta;
     
-    double rel_resid, resid0, r0=0.0, betanom = 0.0, nom;
+    double rel_resid, resid0=1, r0=0.0, betanom = 0.0, nom;
     
     magma_z_matrix v_t={Magma_CSR}, w_t={Magma_CSR}, t={Magma_CSR}, t2={Magma_CSR}, V={Magma_CSR}, W={Magma_CSR};
     v_t.memory_location = Magma_DEV;
@@ -197,7 +197,8 @@ magma_zfgmres(
             solver_par->init_res = MAGMA_Z_REAL( beta );
             resid0 = MAGMA_Z_REAL( beta );
         
-            if ( (r0 = resid0 * solver_par->rtol) < ATOLERANCE )
+            r0 = resid0 * solver_par->rtol;
+            if ( r0 < ATOLERANCE )
                 r0 = ATOLERANCE;
             if ( resid0 < r0 ) {
                 solver_par->final_res = solver_par->init_res;
