@@ -404,9 +404,7 @@ if ( opts.blas ):
 # auxiliary
 aux = (
 	('testing_zgeadd',                 '-c',  mn,   ''),
-	('testing_zgeadd_batched',         '-c',  mn,   ''),
 	('testing_zlacpy',                 '-c',  mn,   ''),
-	('testing_zlacpy_batched',         '-c',  mn,   'TODO implement uplo'),
 	('testing_zlag2c',                 '-c',  mn,   ''),
 	('testing_zlange',                 '-c',  mn,   ''),
 	
@@ -475,6 +473,12 @@ chol = (
 
 # ----------
 # Symmetric Indefinite
+	('testing_zhesv',               '-L -c',  n,    ''),
+	('testing_zhesv',               '-U -c',  n,    ''),
+	
+	('testing_zsysv_nopiv_gpu',     '-L -c',  n,    ''),
+	('testing_zsysv_nopiv_gpu',     '-U -c',  n,    ''),
+	
 	# Bunch-Kauffman
 	('testing_zhetrf', '-L --version 1 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 1 -c2',  n,    ''),
@@ -506,6 +510,7 @@ lu = (
 # ----------
 # LU, CPU interface
 	('testing_zgesv',                  '-c',  n,    ''),
+	('testing_zgesv_rbt',              '-c',  n,    ''),
 	('testing_zgetrf',                '-c2',  n,    ''),
 )
 if ( opts.lu ):
@@ -545,6 +550,7 @@ qr = (
 # ----------
 # QR, CPU interface
 	('testing_zgelqf',                 '-c',  mn,   ''),
+	('testing_zgels',                  '-c',  mn,   ''),
 	('testing_zgeqlf',                 '-c',  mn,   ''),
 	('testing_zgeqp3',                 '-c',  mn,   ''),
 	('testing_zgeqrf',                '-c2',  mn,   ''),
@@ -734,17 +740,59 @@ if ( opts.svd ):
 
 # ----------
 # batched (BLAS, LU, etc.)
+b = '--batch ' + opts.batch + ' '
 batched = (
-    # ----------
-    # Cholesky,
-	('testing_zpotrf_batched',  '--batch ' + opts.batch + ' -L   -c',  n,   ''),
-	('testing_zposv_batched',   '--batch ' + opts.batch + ' -L   -c',  n,   ''),
-    # LU,
-	('testing_zgetrf_batched',  '--batch ' + opts.batch + '   -c',  n,   ''),
-	('testing_zgesv_batched',   '--batch ' + opts.batch + '   -c',  n,   ''),
-	('testing_zgetri_batched',  '--batch ' + opts.batch + '   -c',  n,   ''),
-    # QR,
-	('testing_zgeqrf_batched',  '--batch ' + opts.batch + '   -c',  mn,   ''),
+	('testing_zgeadd_batched',        b + '               -c',  mn,   ''),
+	                                                      
+	('testing_zgemv_batched',         b + '               -c',  mn,   ''),
+	('testing_zgemv_batched',         b + '-T             -c',  mn,   ''),
+	('testing_zgemv_batched',         b + '-C             -c',  mn,   ''),
+	                                                      
+	('testing_zgemm_batched',         b + '-NN            -c',  mn,   ''),
+	('testing_zgemm_batched',         b + '-NC            -c',  mn,   ''),
+	('testing_zgemm_batched',         b + '-CN            -c',  mn,   ''),
+	('testing_zgemm_batched',         b + '-CC            -c',  mn,   ''),
+	
+	('testing_ztrsm_batched',         b + '-SL -L    -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -L    -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -L -C -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -L -C -DU  -c',  mn,   ''),
+	                                                             
+	('testing_ztrsm_batched',         b + '-SL -U    -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -U    -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -U -C -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SL -U -C -DU  -c',  mn,   ''),
+	                                                             
+	('testing_ztrsm_batched',         b + '-SR -L    -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -L    -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -L -C -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -L -C -DU  -c',  mn,   ''),
+	                                                             
+	('testing_ztrsm_batched',         b + '-SR -U    -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -U    -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -U -C -DN  -c',  mn,   ''),
+	('testing_ztrsm_batched',         b + '-SR -U -C -DU  -c',  mn,   ''),
+	
+	('testing_zgesv_batched',         b + '               -c',  mn,   ''),
+	('testing_zgesv_nopiv_batched',   b + '               -c',  mn,   ''),
+	('testing_zgetrf_batched',        b + '              -c2',  mn,   ''),
+	('testing_zgetrf_nopiv_batched',  b + '              -c2',  mn,   ''),
+	('testing_zgetri_batched',        b + '               -c',  mn,   ''),
+	
+	('testing_zherk_batched',         b + '-L             -c',  mn,   ''),
+	('testing_zherk_batched',         b + '-L -C          -c',  mn,   ''),
+	('testing_zherk_batched',         b + '-U             -c',  mn,   ''),
+	('testing_zherk_batched',         b + '-U -C          -c',  mn,   ''),
+	
+	('testing_zlacpy_batched',        b + '               -c',  mn,   ''),
+	                                                      
+	('testing_zposv_batched',         b + '-L             -c',  n,    ''),
+	('testing_zposv_batched',         b + '-U             -c',  n,    ''),
+	                                                                  
+	('testing_zpotrf_batched',        b + '-L             -c2', n,    ''),
+	('testing_zpotrf_batched',        b + '-U             -c2', n,    ''),
+	                                                                  
+	('testing_zgeqrf_batched',        b + '               -c',  mn,   ''),
 )
 if ( opts.batched ):
 	tests += batched

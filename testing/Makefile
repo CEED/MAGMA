@@ -48,12 +48,13 @@ ZSRC := \
 	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
-	testing_veclib.cpp	\
 	\
 	testing_auxiliary.cpp	\
 	testing_constants.cpp	\
 	testing_operators.cpp	\
 	testing_parse_opts.cpp	\
+
+	#testing_veclib.cpp	\
 
 # ----------
 # Cholesky, GPU interface
