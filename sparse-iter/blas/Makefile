@@ -49,7 +49,10 @@ ZSRC += \
 	zcompact.cu				\
 	magma_zmcsrcompressor_gpu.cu	\
 	magma_zdiagcheck.cu		\
-
+	
+# Tester routines
+ZSRC += \
+	zgecsrmv_batched.cu				\
 
 # ------------------------------------------------------------
 -include Makefile.local

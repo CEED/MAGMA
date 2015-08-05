@@ -27,7 +27,9 @@ void magma_zshell_sort(
   const magma_int_t n,
   magma_int_t x[]);
 
-void magma_zsymbolic_ilu(
+extern "C"
+magma_int_t
+magma_zsymbolic_ilu(
   const magma_int_t levinc,
   const magma_int_t n,
   magma_int_t *nzl,
@@ -102,7 +104,9 @@ void magma_zshell_sort(
 // assumes no zero rows
 */
 
-void magma_zsymbolic_ilu(
+extern "C"
+magma_int_t
+magma_zsymbolic_ilu(
   const magma_int_t levfill,                 /* level of fill */
   const magma_int_t n,                       /* order of matrix */
   magma_int_t *nzl,                          /* input-output */
@@ -276,6 +280,8 @@ cleanup:
     magma_free_cpu(curlev);
     magma_free_cpu(levels);
     magma_free_cpu(iwork);
+    
+    return info;
 }
 
 

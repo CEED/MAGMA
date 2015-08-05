@@ -95,17 +95,18 @@ magma_z_spmv(
                             || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
                  //printf("using CSR kernel for SpMV: ");
-                 //magma_zgecsrmv( MagmaNoTrans, A.num_rows, A.num_cols, alpha,
-                 //                A.dval, A.drow, A.dcol, x.dval, beta, y.dval );
+                 //magma_zgecsrmv_batched( MagmaNoTrans, A.num_rows, A.num_cols, A.nnz, alpha,
+                   //              A.dval, A.drow, A.dcol, x.dval, beta, y.dval, queue );
+                 //magma_zprint_vector(y,0,10,queue);
                  //printf("done.\n");
-                CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
-                CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
-
-                CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
-                CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));
-
-                cusparseZcsrmv( cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+              CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
+              CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+              CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
+            
+              CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
+              CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));
+            
+              cusparseZcsrmv( cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE,
                             A.num_rows, A.num_cols, A.nnz, &alpha, descr,
                             A.dval, A.drow, A.dcol, x.dval, &beta, y.dval );
              }

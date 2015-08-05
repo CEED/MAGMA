@@ -1080,6 +1080,19 @@ magma_zgecsrmv(
     magma_queue_t queue );
 
 magma_int_t 
+magma_zgecsrmv_batched(
+    magma_trans_t transA,
+    magma_int_t m, magma_int_t n, magma_int_t offset,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_ptr dval,
+    magmaIndex_ptr drowptr,
+    magmaIndex_ptr dcolind,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy,
+    magma_queue_t queue );
+
+magma_int_t 
 magma_zgecsrmv_shift(
     magma_trans_t transA,
     magma_int_t m, magma_int_t n,
