@@ -106,7 +106,7 @@
                   but the factor U is exactly singular, so the solution
                   could not be computed.
 
-    @ingroup magma_zgesv_driver
+    @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
 magma_zgerfs_nopiv_gpu(
