@@ -34,26 +34,25 @@ int main(  int argc, char** argv )
     magma_queue_create( &queue );
     magmablasGetKernelStream( &queue );
 
-    TESTING_INIT();
+    const magmaDoubleComplex one  = MAGMA_Z_MAKE(1.0, 0.0);
+    const magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
+    magmaDoubleComplex alpha;
 
+    TESTING_INIT();
 
     magma_z_matrix a={Magma_CSR}, b={Magma_CSR}, x={Magma_CSR}, y={Magma_CSR}, skp={Magma_CSR};
 
-        printf("%%================================================================================================================================================\n");
-        printf("\n");
-        printf("            |                            runtime                             |                              GFLOPS\n");
-        printf("%% n num_vecs |  CUDOT       CUGEMV       MAGMAGEMV       MDOT       MDGM      |      CUDOT       CUGEMV      MAGMAGEMV       MDOT       MDGM      \n");
-        printf("%%------------------------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("%%================================================================================================================================================\n");
+    printf("\n");
+    printf("            |                            runtime                             |                              GFLOPS\n");
+    printf("%% n num_vecs |  CUDOT       CUGEMV       MAGMAGEMV       MDOT       MDGM      |      CUDOT       CUGEMV      MAGMAGEMV       MDOT       MDGM      \n");
+    printf("%%------------------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("\n");
 
-    for( magma_int_t num_vecs=5; num_vecs<6; num_vecs+=1 ) {
-        for( magma_int_t n=10000; n<100000001; n=n+10000 ) {
+    for( magma_int_t num_vecs=5; num_vecs < 6; num_vecs += 1 ) {
+        for( magma_int_t n=10000; n < 100000001; n += 10000 ) {
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
-
-            magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
-            magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
-            magmaDoubleComplex alpha;
 
             #define ENABLE_TIMER
             #ifdef ENABLE_TIMER
@@ -163,6 +162,11 @@ int main(  int argc, char** argv )
         printf("%%================================================================================================================================================\n");
         printf("\n");
         printf("\n");
+    }
+    
+    // use alpha to silence compiler warnings
+    if ( isnan( real( alpha ))) {
+        info = -1;
     }
 
 cleanup:
