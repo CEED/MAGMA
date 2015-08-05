@@ -228,7 +228,7 @@ magma_zheevdx_2stage(
     indeig = (range == MagmaRangeI);
 
     /* determine the number of threads and other parameter */
-    magma_int_t Vblksiz, ldv, ldt, blkcnt, sizTAU2, sizT2, sizV2, sizTAU1, sizZ, ldz;
+    magma_int_t Vblksiz, ldv, ldt, blkcnt, sizTAU2, sizT2, sizV2, sizTAU1, ldz;
     magma_int_t parallel_threads = magma_get_parallel_numthreads();
     magma_int_t nb               = magma_zbulge_get_nb(n, parallel_threads);
     magma_int_t lwstg2           = magma_zbulge_getlwstg2( n, parallel_threads, wantz, 
@@ -236,7 +236,9 @@ magma_zheevdx_2stage(
                                                            &sizTAU2, &sizT2, &sizV2);
     sizTAU1                      = n;
     ldz                          = n;
-    sizZ                         = wantz == 0 ? 0 : n*ldz;
+
+    //magma_int_t sizZ;
+    //sizZ                         = wantz == 0 ? 0 : n*ldz;
 
     #ifdef COMPLEX
     lquery = (lwork == -1 || lrwork == -1 || liwork == -1);
