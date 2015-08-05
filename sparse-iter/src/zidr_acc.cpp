@@ -78,8 +78,8 @@
 extern "C" void
 magma_zmatrixInfo_acc(
     const char *s,
-    magma_z_matrix A ) {
-
+    magma_z_matrix A )
+{
     printD(" %s dims = %d x %d\n", s, A.num_rows, A.num_cols);
     printD(" %s location = %d = %s\n", s, A.memory_location, (A.memory_location == Magma_CPU) ? "CPU" : "DEV");
     printD(" %s storage = %d = %s\n", s, A.storage_type, (A.storage_type == Magma_CSR) ? "CSR" : "DENSE");
@@ -465,7 +465,6 @@ cudaProfilerStart();
 
             // bi-orthogonalize the new basis vectors
             for ( i = 0; i < k; ++i ) {
-
                 // alpha = P(:,i)' G(:,k) / M(i,i)
 //---------------------------------------
                 // alpha = P(:,i)' G(:,k)
@@ -523,8 +522,8 @@ cudaProfilerStart();
                 // |r|
                 nrmr = magma_dznrm2( dofb, dr.dval, inc );
                 printD("norm(r): k ...................%d, %lg\n", k, nrmr);
-
-            } else if ( smoothing == 0 ) {
+            }
+            else if ( smoothing == 0 ) {
                 // x = x + beta * U(:,k)
                 magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1 );
                 printMatrix("X", *x);
@@ -677,8 +676,8 @@ cudaProfilerStart();
             // residual norm
             nrmr = magma_dznrm2( dofb, dr.dval, inc );
             printD("norm(r): k ...................%d, %lg\n", k, nrmr);
-
-        } else {
+        }
+        else {
             // smoothing operation
 //---------------------------------------
             //----MERGED---///

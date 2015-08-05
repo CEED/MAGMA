@@ -426,7 +426,6 @@ magma_zpotrf_m(
             
             /* upload the off-diagonal big panel */
             magma_zdtohpo( ngpu, uplo, n, JB, J, J, nb, JB, A, lda, dwork, lddla, stream, &iinfo);
-        
         } /* end of for J */
     } /* if upper */
     } /* if nb */

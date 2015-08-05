@@ -250,7 +250,6 @@ magma_dstedx_m(
         if (alleig) {
             start = 0;
             while ( start < n ) {
-
                 // Let FINISH be the position of the next subdiagonal entry
                 // such that E( END ) <= TINY or FINISH = N if no such
                 // subdiagonal exists.  The matrix identified by the elements

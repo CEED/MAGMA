@@ -402,7 +402,6 @@ magma_zpidr(
 
             // bi-orthogonalize the new basis vectors
             for ( i = 0; i < k; ++i ) {
-
                 // alpha = P(:,i)' G(:,k) / M(i,i)
 //---------------------------------------
                 // alpha = P(:,i)' G(:,k)

@@ -405,5 +405,4 @@ void magmablas_zhemm_mgpu_spec(
     // put back the input gpu and its input stream 
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
-
 }

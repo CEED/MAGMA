@@ -126,7 +126,6 @@ magmablas_zgemv_conjv(
 
     zgemv_conjv_kernel<<< grid, threads, 0, magma_stream >>>
             (m, n, alpha, dA, ldda, dx, incx, beta, dy, incy);
-
 }
 
 #undef num_threads

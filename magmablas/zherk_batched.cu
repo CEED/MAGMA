@@ -138,7 +138,6 @@ magmablas_zherk_batched(
     double beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount, magma_queue_t queue )
 {
-
     if( k <= 32 ) {
         magmablas_zherk_batched_k32(
                   uplo, trans, n, k,

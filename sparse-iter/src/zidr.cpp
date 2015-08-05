@@ -59,7 +59,6 @@ magma_zidr(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-
     magma_int_t info = 0;
 
     // set queue for old dense routines
@@ -323,8 +322,8 @@ magma_zidr(
             if ( smoothing == 0 ) {
                 // |r|
                 nrmr = magma_dznrm2( b.num_rows * b.num_cols, dr.dval, 1 );
-
-            } else if ( smoothing == 1 ) {
+            }
+            else if ( smoothing == 1 ) {
                 // x = x + beta * U(:,k)
                 magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1 );
 
@@ -432,8 +431,8 @@ magma_zidr(
         if ( smoothing == 0 ) {
             // residual norm
             nrmr = magma_dznrm2( b.num_rows * b.num_cols, dr.dval, 1 );
-
-        } else if ( smoothing == 1 ) {
+        }
+        else if ( smoothing == 1 ) {
             // smoothing operation
 //---------------------------------------
             // t = rs - r
@@ -477,7 +476,6 @@ magma_zidr(
             solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
-        
     }
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
 

@@ -76,8 +76,8 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
         __syncthreads();
         if ( xnorm != 0 && j < n-1)
             dx[j] = MAGMA_Z_MUL(dxi, scale);
-
-    } else {
+    }
+    else {
         *dtau = MAGMA_Z_ZERO;
         *dAkk = *dx0; 
     }

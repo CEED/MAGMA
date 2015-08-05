@@ -292,7 +292,6 @@ magma_zgetrf_m(
                                 dPT(d,1,(jj/nb)%2), nb, c_one, dAT(d,ib+1,0), ldn_local );
                         }
                         magma_event_record( event[d][(jj/nb)%2], stream[d][1] );
-                    
                     } /* end of for each block-columns in a big-panel */
                 }
             } /* end of for each previous big-panels */

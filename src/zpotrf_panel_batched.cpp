@@ -86,7 +86,6 @@ magma_zpotrf_recpanel_batched(
     magma_int_t *info_array, magma_int_t gbstep, 
     magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
-
     // Quick return if possible
     if (m ==0 || n == 0) {
         return 1;
@@ -119,8 +118,6 @@ magma_zpotrf_recpanel_batched(
                            dW3_displ, dW4_displ,
                            info_array, gbstep,
                            batchCount, myhandle, queue);
-
-
     }
     else{
         // split A over two [A A2]

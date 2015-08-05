@@ -195,11 +195,8 @@ magma_zgetrf_nopiv_batched(
 
     //printf(" I am after malloc\n");
 
-
-
     for(i = 0; i < min_mn; i+=nb) 
     {
-
         ib = min(nb, min_mn-i);
         pm = m-i;
         magma_zdisplace_pointers(dA_displ, dA_array, lda, i, i, batchCount, queue);
@@ -330,5 +327,4 @@ fin:
     magma_free_cpu(cpuAarray);
 
     return arginfo;
-
 }

@@ -88,8 +88,8 @@ extern "C" void
 magma_zmatrixInfo_strms(
     const char *s,
     magma_z_matrix A,
-    magma_queue_t queue ) {
-
+    magma_queue_t queue )
+{
     magma_queue_sync( queue );
 
     printD(" %s dims = %d x %d\n", s, A.num_rows, A.num_cols);
@@ -513,8 +513,8 @@ cudaProfilerStart();
                 // Q1
                 magmablas_zgemv( MagmaConjTrans, dP.num_rows, s, c_one, dP.dval, dP.ld, dg.dval, 1, c_zero, dM.dval, 1 );
                 printMatrix("M", dM, queues[1]);
-
-            } else {
+            }
+            else {
                 if ( smoothing >= 0 ) {
                     // x = x + beta * U(:,k)
                     // Q0
@@ -665,14 +665,14 @@ cudaProfilerStart();
                     // v1 = r
                     // Q0
                     magma_zcopyvector_async( dofr, dr.dval, 1, dv1.dval, 1, queues[0] );
-
-                } else {
+                }
+                else {
                     // v = r
                     // Q1
                     magma_zcopyvector_async( dofr, dr.dval, 1, dv.dval, 1, queues[1] );
                 }
-
-            } else if ( smoothing == 0 ) {
+            }
+            else if ( smoothing == 0 ) {
                 // make r orthogonal to q_i, i = 1..k
                 // r = r - beta * G(:,k)
                 // Q1
@@ -732,14 +732,14 @@ cudaProfilerStart();
                     // v1 = r
                     // Q0
                     magma_zcopyvector_async( dofr, dr.dval, 1, dv1.dval, 1, queues[0] );
-
-                } else {
+                }
+                else {
                     // v = r
                     // Q1
                     magma_zcopyvector_async( dofr, dr.dval, 1, dv.dval, 1, queues[1] );
                 }
-
-            } else {
+            }
+            else {
                 // make r orthogonal to q_i, i = 1..k
                 // r = r - beta * G(:,k)
                 // Q1
@@ -830,8 +830,8 @@ cudaProfilerStart();
                 // v1 = r
                 // Q0
                 magma_zcopyvector_async( dofr, dr.dval, 1, dv1.dval, 1, queues[0] );
-
-              } else {
+              }
+              else {
                 // v = r
                 // Q1
                 magma_zcopyvector_async( dofr, dr.dval, 1, dv.dval, 1, queues[1] );
@@ -1064,7 +1064,6 @@ magma_queue_sync( queues[0] );
 // v = r
             magma_queue_sync( queues[0] );
         } else {
-
            // v = r
            // Q1
            magma_zcopyvector_async( dofr, dr.dval, 1, dv.dval, 1, queues[1] );

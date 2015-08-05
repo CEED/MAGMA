@@ -212,11 +212,7 @@ magma_zgetrs_nopiv_batched(
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue);
-
     }
-
-
-
 
     magma_queue_sync(cstream);
 

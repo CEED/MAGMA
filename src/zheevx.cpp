@@ -417,5 +417,4 @@ magma_zheevx(
     work[1] = MAGMA_Z_MAKE( lopt, 0 );
     
     return *info;
-    
 } /* magma_zheevx */

@@ -78,7 +78,6 @@ magma_zgetf2_nopiv_batched(
     cublasHandle_t myhandle, magma_queue_t queue)
 
 {
-
     magma_int_t arginfo = 0;
     if (m < 0) {
         arginfo = -1;
@@ -158,7 +157,6 @@ magma_zgetf2_nopiv_batched(
     //magma_free_cpu(cpuAarray);
 
     return 0;
-
 }
 
 

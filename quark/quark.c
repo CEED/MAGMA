@@ -1720,7 +1720,6 @@ static void quark_address_set_node_initial_gatherv_check_and_launch(Quark *quark
             quark_check_and_queue_ready_task( quark, next_task, worker_rank );
             pthread_mutex_unlock_task( &next_task->task_mutex );
         }
-
     }
 }
 

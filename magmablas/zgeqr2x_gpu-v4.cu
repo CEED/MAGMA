@@ -140,7 +140,6 @@ magma_zgeqr2x4_gpu(
 
     for (magma_int_t b=0; b < k; b += BS) {
         for (i = b; i < min(k, b+BS); ++i) {
-
             /*   Apply H**H to A(:,i) from the left */
             if (i-b > 0) {
                 /* Compute the (i-1)th column of T */

@@ -208,7 +208,6 @@ eztrace_convert_quark_init()
 
         /* plasma quark */
         addEntityValue ("wait", QUARK_STATE, "wait", GTG_BLACK );
-
     }
     return 0;
 }
@@ -235,13 +234,11 @@ handle_quark_events(struct fxt_ev_64 *ev)
         }
 
     return 1;
-
 }
 
 void
 eztrace_convert_quark_finalize()
 {
-
 }
 
 

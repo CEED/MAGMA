@@ -349,7 +349,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
     // bind threads 
     CPU_ZERO( &set );
     CPU_SET( my_core_id, &set );
-    sched_setaffinity( 0, sizeof(set), &set) ;
+    sched_setaffinity( 0, sizeof(set), &set);
 #endif
     magma_set_lapack_numthreads(1);
     magma_set_omp_numthreads(1);
@@ -446,32 +446,32 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 { \
     while (prog[(m)] != (val)) \
     magma_yield(); \
-    for(kk=0;kk<100; kk++) \
-    __asm__ volatile ("nop;" :::);\
+    for(kk=0; kk < 100; kk++) \
+    __asm__ volatile ("nop;" :::); \
 }
 
 #define expertmyss_cond_set(m, n, val) \
 { \
     prog[(m)*(64/sizeof(magma_int_t))] = (val); \
-    __asm__ volatile ("" ::: "memory");\
+    __asm__ volatile ("" ::: "memory"); \
 }
 #define expertmyss_init(m, n, init_val) \
 { \
     if (my_core_id == 0) { \
-        magma_malloc_cpu((void**) &prog, ( (m)*(64/sizeof(int)) ) * sizeof(magma_int_t));\
+        magma_malloc_cpu((void**) &prog, ( (m)*(64/sizeof(int)) ) * sizeof(magma_int_t)); \
         memset((magma_int_t*)prog, 0, (m)*(64/sizeof(magma_int_t))); \
     } \
-    pthread_barrier_init(&myptbarrier, NULL, cores_num);\
-    pthread_barrier_wait(&myptbarrier);\
-    barrier(my_core_id, cores_num);\
+    pthread_barrier_init(&myptbarrier, NULL, cores_num); \
+    pthread_barrier_wait(&myptbarrier); \
+    barrier(my_core_id, cores_num); \
 }
 #define expertmyss_finalize() \
 { \
-    pthread_barrier_wait(&myptbarrier);\
-    pthread_barrier_destroy(&myptbarrier);\
-    barrier(my_core_id, cores_num);\
+    pthread_barrier_wait(&myptbarrier); \
+    pthread_barrier_destroy(&myptbarrier); \
+    barrier(my_core_id, cores_num); \
     if (my_core_id == 0) \
-    magma_free_cpu((void *) prog);\
+    magma_free_cpu((void *) prog); \
 }
 
 
@@ -480,7 +480,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 #define myss_cond_set(m, n, val) \
 { \
     prog[(m)] = (val); \
-    __asm__ volatile ("" ::: "memory");\
+    __asm__ volatile ("" ::: "memory"); \
 }
 
 #define myss_cond_wait(m, n, val) \
@@ -493,16 +493,16 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 #define myss_init(m, n, init_val) \
 { \
     if (my_core_id == 0) { \
-        magma_malloc_cpu((void**) &prog,  (m) * sizeof(magma_int_t));\
+        magma_malloc_cpu((void**) &prog,  (m) * sizeof(magma_int_t)); \
         memset((magma_int_t*)prog, 0, (m)); \
     } \
-    pthread_barrier_wait(myptbarrier);\
+    pthread_barrier_wait(myptbarrier); \
 }
 #define myss_finalize() \
 { \
-    pthread_barrier_wait(myptbarrier);\
+    pthread_barrier_wait(myptbarrier); \
     if (my_core_id == 0) \
-    magma_free_cpu((void *) prog);\
+    magma_free_cpu((void *) prog); \
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -545,7 +545,7 @@ static void magma_ztile_bulge_parallel(
     magma_zmalloc_cpu(&work, nb);
     /* Some tunning for the bulge chasing code
      * see technical report for details */
-    /* grsiz   = 2;*/
+    /* grsiz   = 2; */
     if( wantz == 0 ) {
         shift = 3;
     } else {
@@ -585,12 +585,12 @@ static void magma_ztile_bulge_parallel(
         thed = min( (stt + thgrsiz -1), (n-1));
         for (i = stt; i <= n-1; i++){
             ed = min(i,thed);
-            if(stt>ed) break;
+            if(stt > ed) break;
             for (m = 1; m <=stepercol; m++){
-                st=stt;
-                for (sweepid = st; sweepid <=ed; sweepid++){
+                st = stt;
+                for (sweepid = st; sweepid <= ed; sweepid++){
 
-                    for (k = 1; k <=grsiz; k++){
+                    for (k = 1; k <= grsiz; k++){
                         myid = (i-sweepid)*(stepercol*grsiz) +(m-1)*grsiz + k;
                         if(myid%2 ==0){
                             colpt      = (myid/2)*nb+1+sweepid-1;
@@ -598,7 +598,7 @@ static void magma_ztile_bulge_parallel(
                             edind      = min(colpt,n);
                             blklastind = colpt;
                         } else {
-                            colpt      = ((myid+1)/2)*nb + 1 +sweepid -1 ;
+                            colpt      = ((myid+1)/2)*nb + 1 +sweepid -1;
                             stind      = colpt-nb+1;
                             edind      = min(colpt,n);
                             if( (stind>=edind-1) && (edind==n) )
@@ -610,7 +610,6 @@ static void magma_ztile_bulge_parallel(
 
                         if(my_core_id==coreid) {
                             if(myid==1) {
-
                                 myss_cond_wait(myid+shift-1, 0, sweepid-1);
                                 magma_zhbtype1cb(n, nb, A, lda, V, ldv, TAU, stind-1, edind-1, sweepid-1, Vblksiz, wantz, work);
                                 myss_cond_set(myid, 0, sweepid);
@@ -646,7 +645,7 @@ static void magma_ztile_bulge_parallel(
     } /* END for thgrid=1:thgrnb */
 
     /* finalize static sched */
-    //myss_finalize();// initialized at top level so freed there
+    //myss_finalize(); // initialized at top level so freed there
 
 
     magma_free_cpu(work);

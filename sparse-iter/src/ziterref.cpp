@@ -117,7 +117,6 @@ magma_ziterref(
     // start iteration
     for( solver_par->numiter= 1; solver_par->numiter<solver_par->maxiter;
                                                     solver_par->numiter++ ) {
-
         magma_zscal( dofs, MAGMA_Z_MAKE(1./nom, 0.), r.dval, 1);  // scale it
         CHECK( magma_z_precond( A, r, &z, precond_par, queue )); // inner solver:  A * z = r
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1);  // scale it

@@ -28,7 +28,6 @@ zgeqrf_copy_upper_kernel_batched(
                   magmaDoubleComplex **dV_array,    int ldv,
                   magmaDoubleComplex **dR_array,    int ldr)
 {
-
     magmaDoubleComplex *dV = dV_array[blockIdx.x];
     magmaDoubleComplex *dR = dR_array[blockIdx.x];
 
@@ -58,7 +57,6 @@ void zgeqrf_copy_upper_batched(
       if( nb >= n) return;
 
       zgeqrf_copy_upper_kernel_batched<<<batchCount, n, 0, queue>>>(n, nb, dV_array, ldv, dR_array, ldr);
-
 }
 
 
@@ -75,10 +73,8 @@ magma_zlarfb_zgemm_batched(
                   magma_int_t batchCount, magma_queue_t queue)
 
 {
-
     // W is workspace size of W is nb * n 
     // W = V^H * A. V is stored in A(i:m, i:ib)
-
     
     if( m <=0 || n <= 0 || k <=0 ) return 1;
 
@@ -127,5 +123,4 @@ magma_zlarfb_zgemm_batched(
           
 #endif       
     return 0;
-
 }

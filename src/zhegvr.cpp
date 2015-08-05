@@ -426,7 +426,6 @@ magma_zhegvr(
         }
         
         magma_zgetmatrix( n, *m, dZ, lddz, Z, ldz );
-        
     }
     
     magma_queue_sync( stream );

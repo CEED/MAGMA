@@ -270,7 +270,6 @@ magma_int_t magma_dlaqtrsd(
             }
             
             //printf( "real x=\n%s\n", buf );
-            
         }  // end real eigenvalue
         else {
             // ------------------------------------------------------------
@@ -401,7 +400,6 @@ magma_int_t magma_dlaqtrsd(
             }
             
             //printf( "complex x=\n%s\n", buf );
-            
         }  // end complex eigenvalue
     }  // end notran
     else { // transposed

@@ -32,8 +32,8 @@ extern "C" {
 
 
 
-typedef struct magma_z_matrix{
-
+typedef struct magma_z_matrix
+{
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
@@ -70,11 +70,10 @@ typedef struct magma_z_matrix{
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
     magma_int_t        ld;                      // opt: leading dimension for dense
+} magma_z_matrix;
 
-}magma_z_matrix;
-
-typedef struct magma_c_matrix{
-
+typedef struct magma_c_matrix
+{
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
@@ -111,12 +110,11 @@ typedef struct magma_c_matrix{
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
     magma_int_t        ld;                      // opt: leading dimension for dense
+} magma_c_matrix;
 
-}magma_c_matrix;
 
-
-typedef struct magma_d_matrix{
-
+typedef struct magma_d_matrix
+{
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
@@ -153,12 +151,11 @@ typedef struct magma_d_matrix{
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
     magma_int_t        ld;                      // opt: leading dimension for dense
+} magma_d_matrix;
 
-}magma_d_matrix;
 
-
-typedef struct magma_s_matrix{
-
+typedef struct magma_s_matrix
+{
     magma_storage_t    storage_type;            // matrix format - CSR, ELL, SELL-P
     magma_location_t   memory_location;         // CPU or DEV
     magma_symmetry_t   sym;                     // opt: indicate symmetry
@@ -195,8 +192,7 @@ typedef struct magma_s_matrix{
     magma_int_t        alignment;               // opt: info for SELL-P/BCSR
     magma_order_t      major;                   // opt: row/col major for dense matrices
     magma_int_t        ld;                      // opt: leading dimension for dense
-    
-}magma_s_matrix;
+} magma_s_matrix;
 
 
 // for backwards compatability, make these aliases.
@@ -211,8 +207,8 @@ typedef magma_c_matrix magma_c_vector;
 typedef magma_z_matrix magma_z_vector;
 
 /*
-typedef struct magma_z_vector{
-
+typedef struct magma_z_vector
+{
     magma_location_t   memory_location;         // CPU or DEV
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
@@ -222,11 +218,10 @@ typedef struct magma_z_vector{
         magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
     };
     magma_order_t      major;                   // storage type:Row/Column-Major
+} magma_z_vector;
 
-}magma_z_vector;
-
-typedef struct magma_c_vector{
-
+typedef struct magma_c_vector
+{
     magma_location_t   memory_location;         // CPU or DEV
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
@@ -236,12 +231,11 @@ typedef struct magma_c_vector{
         magmaFloatComplex_ptr   dval;           // array containing values in DEV case
     };
     magma_order_t      major;                   // storage type:Row/Column-Major
+} magma_c_vector;
 
-}magma_c_vector;
 
-
-typedef struct magma_d_vector{
-
+typedef struct magma_d_vector
+{
     magma_location_t   memory_location;         // CPU or DEV
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
@@ -251,12 +245,11 @@ typedef struct magma_d_vector{
         magmaDouble_ptr         dval;           // array containing values in DEV case
     };
     magma_order_t      major;                   // storage type:Row/Column-Major
+} magma_d_vector;
 
-}magma_d_vector;
 
-
-typedef struct magma_s_vector{
-
+typedef struct magma_s_vector
+{
     magma_location_t   memory_location;         // CPU or DEV
     magma_int_t        num_rows;                // number of rows
     magma_int_t        num_cols;                // number of columns (in case of a block of vectors)
@@ -266,15 +259,14 @@ typedef struct magma_s_vector{
         magmaFloat_ptr          dval;           // array containing values in DEV case
     };
     magma_order_t      major;                   // storage type:Row/Column-Major
-
-}magma_s_vector;
+} magma_s_vector;
 */
 
 
 //*****************     solver parameters     ********************************//
 
-typedef struct magma_z_solver_par{
-
+typedef struct magma_z_solver_par
+{
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
     double             atol;                     // absolute residual stopping criterion
@@ -296,24 +288,23 @@ typedef struct magma_z_solver_par{
     magmaDoubleComplex_ptr      eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
-//---------------------------------
-// the input for verbose is:
-// 0 = production mode
-// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
-// k-th iteration 
-//
-// the output of info is:
-//  0 = convergence (stopping criterion met)
-// -1 = no convergence
-// -2 = convergence but stopping criterion not met within maxiter
-//--------------------------------
-
-}magma_z_solver_par;
-
+    //---------------------------------
+    // the input for verbose is:
+    // 0 = production mode
+    // k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+    // k-th iteration 
+    //
+    // the output of info is:
+    //  0 = convergence (stopping criterion met)
+    // -1 = no convergence
+    // -2 = convergence but stopping criterion not met within maxiter
+    //--------------------------------
+} magma_z_solver_par;
 
 
-typedef struct magma_c_solver_par{
 
+typedef struct magma_c_solver_par
+{
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
     float              atol;                     // absolute residual stopping criterion
@@ -335,24 +326,23 @@ typedef struct magma_c_solver_par{
     magmaFloatComplex_ptr       eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
-//---------------------------------
-// the input for verbose is:
-// 0 = production mode
-// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
-// k-th iteration 
-//
-// the output of info is:
-//  0 = convergence (stopping criterion met)
-// -1 = no convergence
-// -2 = convergence but stopping criterion not met within maxiter
-//--------------------------------
-
-}magma_c_solver_par;
-
+    //---------------------------------
+    // the input for verbose is:
+    // 0 = production mode
+    // k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+    // k-th iteration 
+    //
+    // the output of info is:
+    //  0 = convergence (stopping criterion met)
+    // -1 = no convergence
+    // -2 = convergence but stopping criterion not met within maxiter
+    //--------------------------------
+} magma_c_solver_par;
 
 
-typedef struct magma_d_solver_par{
 
+typedef struct magma_d_solver_par
+{
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
     double             atol;                     // absolute residual stopping criterion
@@ -374,24 +364,23 @@ typedef struct magma_d_solver_par{
     magmaDouble_ptr             eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
-//---------------------------------
-// the input for verbose is:
-// 0 = production mode
-// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
-// k-th iteration 
-//
-// the output of info is:
-//  0 = convergence (stopping criterion met)
-// -1 = no convergence
-// -2 = convergence but stopping criterion not met within maxiter
-//--------------------------------
-
-}magma_d_solver_par;
-
+    //---------------------------------
+    // the input for verbose is:
+    // 0 = production mode
+    // k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+    // k-th iteration 
+    //
+    // the output of info is:
+    //  0 = convergence (stopping criterion met)
+    // -1 = no convergence
+    // -2 = convergence but stopping criterion not met within maxiter
+    //--------------------------------
+} magma_d_solver_par;
 
 
-typedef struct magma_s_solver_par{
 
+typedef struct magma_s_solver_par
+{
     magma_solver_type  solver;                  // solver type
     magma_int_t        version;                 // sometimes there are different versions
     float              atol;                     // absolute residual stopping criterion
@@ -413,28 +402,27 @@ typedef struct magma_s_solver_par{
     magmaFloat_ptr              eigenvectors;   // feedback: array containing eigenvectors on DEV
     magma_int_t        info;                    // feedback: did the solver converge etc.
 
-//---------------------------------
-// the input for verbose is:
-// 0 = production mode
-// k>0 = convergence and timing is monitored in *res_vec and *timeing every  
-// k-th iteration 
-//
-// the output of info is:
-//       0          Success.
-//      -117        Not supported.
-//      -201        No convergence within iteration limit. 
-//      -202        No convergence.
-//      -203        Operator A is not positive definite.
-//--------------------------------
-
-}magma_s_solver_par;
+    //---------------------------------
+    // the input for verbose is:
+    // 0 = production mode
+    // k>0 = convergence and timing is monitored in *res_vec and *timeing every  
+    // k-th iteration 
+    //
+    // the output of info is:
+    //       0          Success.
+    //      -117        Not supported.
+    //      -201        No convergence within iteration limit. 
+    //      -202        No convergence.
+    //      -203        Operator A is not positive definite.
+    //--------------------------------
+} magma_s_solver_par;
 
 
 
 //************            preconditioner parameters       ********************//
 
-typedef struct magma_z_preconditioner{
-
+typedef struct magma_z_preconditioner
+{
     magma_solver_type       solver;
     magma_int_t             levels;
     magma_int_t             sweeps;
@@ -465,11 +453,10 @@ typedef struct magma_z_preconditioner{
     magma_int_t*            iparm;
     double*                 dparm;
 #endif
+} magma_z_preconditioner;
 
-}magma_z_preconditioner;
-
-typedef struct magma_c_preconditioner{
-
+typedef struct magma_c_preconditioner
+{
     magma_solver_type       solver;
     magma_int_t             levels;
     magma_int_t             sweeps;
@@ -500,12 +487,11 @@ typedef struct magma_c_preconditioner{
     magma_int_t*            iparm;
     float*                  dparm;
 #endif
+} magma_c_preconditioner;
 
-}magma_c_preconditioner;
 
-
-typedef struct magma_d_preconditioner{
-
+typedef struct magma_d_preconditioner
+{
     magma_solver_type       solver;
     magma_int_t             levels;
     magma_int_t             sweeps;
@@ -536,12 +522,11 @@ typedef struct magma_d_preconditioner{
     magma_int_t*            iparm;
     double*                 dparm;
 #endif
+} magma_d_preconditioner;
 
-}magma_d_preconditioner;
 
-
-typedef struct magma_s_preconditioner{
-
+typedef struct magma_s_preconditioner
+{
     magma_solver_type       solver;
     magma_int_t             levels;
     magma_int_t             sweeps;
@@ -572,8 +557,7 @@ typedef struct magma_s_preconditioner{
     magma_int_t*            iparm;
     float*                  dparm;
 #endif
-
-}magma_s_preconditioner;
+} magma_s_preconditioner;
 
 
 //##############################################################################
@@ -582,8 +566,8 @@ typedef struct magma_s_preconditioner{
 //
 //##############################################################################
 
-typedef struct magma_zopts{
-
+typedef struct magma_zopts
+{
     magma_z_solver_par      solver_par;
     magma_z_preconditioner  precond_par;
     magma_storage_t         input_format;
@@ -593,11 +577,10 @@ typedef struct magma_zopts{
     magma_location_t        input_location;
     magma_location_t        output_location;
     magma_scale_t           scaling;
+} magma_zopts;
 
-}magma_zopts;
-
-typedef struct magma_copts{
-
+typedef struct magma_copts
+{
     magma_c_solver_par      solver_par;
     magma_c_preconditioner  precond_par;
     magma_storage_t         input_format;
@@ -607,11 +590,10 @@ typedef struct magma_copts{
     magma_location_t        input_location;
     magma_location_t        output_location;
     magma_scale_t           scaling;
+} magma_copts;
 
-}magma_copts;
-
-typedef struct magma_dopts{
-
+typedef struct magma_dopts
+{
     magma_d_solver_par      solver_par;
     magma_d_preconditioner  precond_par;
     magma_storage_t         input_format;
@@ -621,11 +603,10 @@ typedef struct magma_dopts{
     magma_location_t        input_location;
     magma_location_t        output_location;
     magma_scale_t           scaling;
+} magma_dopts;
 
-}magma_dopts;
-
-typedef struct magma_sopts{
-
+typedef struct magma_sopts
+{
     magma_s_solver_par      solver_par;
     magma_s_preconditioner  precond_par;
     magma_storage_t         input_format;
@@ -635,8 +616,7 @@ typedef struct magma_sopts{
     magma_location_t        input_location;
     magma_location_t        output_location;
     magma_scale_t           scaling;
-
-}magma_sopts;
+} magma_sopts;
 
 #ifdef __cplusplus
 }

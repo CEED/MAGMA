@@ -456,7 +456,6 @@ magma_zjacobispmvupdate_bw(
     magma_z_matrix *x,
     magma_queue_t queue )
 {
-
     // local variables
     //magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     //magmaDoubleComplex c_one = MAGMA_Z_ONE;
@@ -471,7 +470,6 @@ magma_zjacobispmvupdate_bw(
         // merged in one implies asynchronous update
         zjacobispmvupdate_bw_kernel<<< grid, threads, 0 >>>
             ( t.num_rows, t.num_cols, A.dval, A.drow, A.dcol, t.dval, b.dval, d.dval, x->dval );
-
     }
 
     return MAGMA_SUCCESS;

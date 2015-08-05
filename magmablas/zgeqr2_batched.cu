@@ -29,12 +29,11 @@ zlarfg_device(
     magmaDoubleComplex* dalpha, magmaDoubleComplex* dx, int incx,
     magmaDoubleComplex* dtau,  double* swork, double* sscale, magmaDoubleComplex* scale)
 {
-
     const int tx = threadIdx.x;
 
     magmaDoubleComplex tmp;
     
-    // find max of [dalpha, dx], to use as scaling to avoid unnecesary under- and overflow    
+    // find max of [dalpha, dx], to use as scaling to avoid unnecesary under- and overflow
 
     if ( tx == 0 ) {
         tmp = *dalpha;
@@ -77,7 +76,6 @@ zlarfg_device(
             }
         }
         magma_sum_reduce<BLOCK_SIZE>( tx, swork );
-
     }
     
     if ( tx == 0 ) {
@@ -110,7 +108,6 @@ zlarfg_device(
             }
         }
     }
-
 }
 
 
@@ -122,9 +119,7 @@ static __device__
 void zlarfx_device( int m, int n,  magmaDoubleComplex *v, magmaDoubleComplex *tau,
                          magmaDoubleComplex *dc, magma_int_t ldc, magmaDoubleComplex* sum)
 {
-
-
-    if(n <=0) return;
+    if(n <= 0) return;
     if (MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) )  return; // check singularity
 
     const int tx = threadIdx.x;
@@ -153,42 +148,38 @@ void zlarfx_device( int m, int n,  magmaDoubleComplex *v, magmaDoubleComplex *ta
         magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
         /*  C := C - v * w  */
         if(tx<BLOCK_SIZE)
-        {    
+        {
            for( int j = tx+1; j<m; j += BLOCK_SIZE )
                  dc[j+ldc*k] += z__1 * v[j];
         }
         if(tx==0) dc[0+ldc*k] += z__1;
 
         __syncthreads();
-
-
-    } 
+    }
 }
 
 
 //==============================================================================
 
 static __device__
-void zgeqr2_device( magma_int_t m, magma_int_t n, 
+void zgeqr2_device( magma_int_t m, magma_int_t n,
                                magmaDoubleComplex* dA, magma_int_t lda,
-                               magmaDoubleComplex *dtau, 
+                               magmaDoubleComplex *dtau,
                                magmaDoubleComplex *dv,
                                magmaDoubleComplex *sum,
                                double *swork,
                                magmaDoubleComplex *scale,
                                double *sscale)
 {
+   //lapack zlarfg, compute the norm, scale and generate the householder vector
+   zlarfg_device(m, dv, &(dv[1]), 1, dtau, swork, sscale, scale);
 
+   __syncthreads();
 
-       //lapack zlarfg, compute the norm, scale and generate the householder vector   
-       zlarfg_device(m, dv, &(dv[1]), 1, dtau, swork, sscale, scale); 
+   //update the trailing matix with the householder
+   zlarfx_device(m, n, dv, dtau, dA, lda, sum);
 
-       __syncthreads();
-
-       //update the trailing matix with the householder
-       zlarfx_device(m, n, dv, dtau, dA, lda, sum);
-
-       __syncthreads();
+   __syncthreads();
 }
 
 //==============================================================================
@@ -200,7 +191,6 @@ __global__
 void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_int_t lda,
                                magmaDoubleComplex **dtau_array)
 {
-
     magmaDoubleComplex* dA = dA_array[blockIdx.z];
     magmaDoubleComplex* dtau = dtau_array[blockIdx.z];
 
@@ -228,18 +218,15 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
  
     for(int s=0; s<min(m,n); s++)
     {
-
        zgeqr2_device(m-s, n-(s+1),
                                &(sdata[s+(s+1)*m]), m,
-                               dtau+s, 
+                               dtau+s,
                                &(sdata[s+s*m]),
                                sum,
                                swork,
                                &scale,
                                &sscale);
-
-
-    }// end of s
+    } // end of s
 
     //copy back to global memory
     for(int s=0; s < n; s++)
@@ -249,7 +236,6 @@ void zgeqr2_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magm
             dA[j + s * lda] = sdata[j + s * m];
         }
     }
-
 }
 
 
@@ -263,7 +249,6 @@ __global__
 void zgeqr2_column_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_int_t lda,
                                magmaDoubleComplex **dtau_array)
 {
-
     magmaDoubleComplex* dA = dA_array[blockIdx.z];
     magmaDoubleComplex* dtau = dtau_array[blockIdx.z];
 
@@ -288,10 +273,10 @@ void zgeqr2_column_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_arra
 
        __syncthreads();
 
-       //sdata is written 
+       //sdata is written
        zgeqr2_device(m-s, n-(s+1),
                                &(dA[s+(s+1)*lda]), lda,
-                               dtau+s, 
+                               dtau+s,
                                sdata,
                                sum,
                                swork,
@@ -305,15 +290,13 @@ void zgeqr2_column_sm_kernel_batched( int m, int n, magmaDoubleComplex** dA_arra
 
        __syncthreads();
     }
-
- 
 }
+
 
 __global__
 void zgeqr2_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_int_t lda,
                                magmaDoubleComplex **dtau_array)
 {
-
     magmaDoubleComplex* dA = dA_array[blockIdx.z];
     magmaDoubleComplex* dtau = dtau_array[blockIdx.z];
 
@@ -327,19 +310,15 @@ void zgeqr2_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_i
 
     for(int s=0; s<min(m,n); s++)
     {
-
        zgeqr2_device(m-s, n-(s+1),
                                &(dA[s+(s+1)*lda]), lda,
-                               dtau+s, 
+                               dtau+s,
                                &(dA[s+s*lda]),
                                sum,
                                swork,
                                &scale,
                                &sscale);
-
     }
-
- 
 }
 
 
@@ -403,7 +382,7 @@ void zgeqr2_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_i
 
 
     @param
-    dwork   (workspace) COMPLEX_16 array, dimension (N) * ( sizeof(double) + sizeof(magmaDoubleComplex)) 
+    dwork   (workspace) COMPLEX_16 array, dimension (N) * ( sizeof(double) + sizeof(magmaDoubleComplex))
 
     @param[out]
     info    INTEGER
@@ -431,7 +410,6 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
                   magma_int_t lda, magmaDoubleComplex **dtau_array,
                   magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue)
 {
-    
     magma_int_t k;
 
     /* Check arguments */
@@ -448,14 +426,13 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
         return arginfo;
     }
 
-
     k = min(m,n);
 
     dim3 blocks(1, 1, batchCount);
     dim3 threads(BLOCK_SIZE);
 
-    if(sizeof(magmaDoubleComplex)*(m*k) <= 42000 /*sizeof(magmaDoubleComplex) * 128 * k*/) // there are some static shared memory besides of dynamic ones 
-    {   
+    if(sizeof(magmaDoubleComplex)*(m*k) <= 42000 /*sizeof(magmaDoubleComplex) * 128 * k*/) // there are some static shared memory besides of dynamic ones
+    {
         //load panel in shared memory and factorize it and copy back to gloabl memory
         //intend for small panel to avoid overfill of shared memory.
         //this kernel is composed of device routine and thus clean
@@ -464,8 +441,8 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
     }
     else
     {
-        //load one column vector in shared memory and householder it and used it to update trailing matrix which is global memory 
-        // one vector is normally smaller than  48K shared memory   
+        //load one column vector in shared memory and householder it and used it to update trailing matrix which is global memory
+        // one vector is normally smaller than  48K shared memory
         if(sizeof(magmaDoubleComplex)*(m) < 42000)
             zgeqr2_column_sm_kernel_batched<<< blocks, threads, sizeof(magmaDoubleComplex)*(m), queue >>>
                                       (m, k, dA_array, lda, dtau_array);
@@ -475,10 +452,8 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
                                       (m, k, dA_array, lda, dtau_array);
     }
 
-
     return arginfo;
-
-} 
+}
 
 
 

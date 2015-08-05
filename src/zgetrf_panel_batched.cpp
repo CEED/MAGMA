@@ -28,7 +28,6 @@ magma_zgetrf_recpanel_batched(
     magma_int_t *info_array, magma_int_t gbstep,  
     magma_int_t batchCount,  cublasHandle_t myhandle, magma_queue_t queue)
 {
-
     //magma_int_t DEBUG = 3;
     // Quick return if possible
     if (m ==0 || n == 0) {
@@ -140,8 +139,6 @@ magma_zgetrf_recpanel_batched(
                            dW1_displ, ldda,
                            n1, n,
                            dpivinfo_array, batchCount, queue);
-
-        
     }
 
     magma_free(dA_displ);

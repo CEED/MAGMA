@@ -178,8 +178,6 @@ return;
             magma_int_t nbblkoffst = offset/nb;
             magma_int_t nbblk      = magma_ceildiv(i, nb);
             for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-
-
                 magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-stdev+ngpu)%ngpu) ?  1:0 );
                 magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
 
@@ -549,5 +547,4 @@ return;
 
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
-
 }

@@ -24,7 +24,6 @@ static __device__
 void zlarft_gemvcolwise_device( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
                          magmaDoubleComplex *c, int ldc, magmaDoubleComplex *T, int ldt, int step )
 {
-
     const int thblk =  blockIdx.x;
     if (thblk > step)
         return;
@@ -69,6 +68,8 @@ void zlarft_gemvcolwise_device( int m, magmaDoubleComplex *v, magmaDoubleComplex
         *(T+thblk) = MAGMA_Z_ZERO;
     }
 }
+
+
 //===================================================================================================
 __global__
 void zlarft_gemvcolwise_kernel( int m, magmaDoubleComplex *v, int ldv, magmaDoubleComplex *tau,
@@ -76,6 +77,8 @@ void zlarft_gemvcolwise_kernel( int m, magmaDoubleComplex *v, int ldv, magmaDoub
 {
     zlarft_gemvcolwise_device(m, v+step+step*ldv, tau+step, v+step, ldv, T+step*ldt, ldt, step);
 }
+
+
 //===================================================================================================
 __global__
 void zlarft_gemvcolwise_kernel_batched( int m, magmaDoubleComplex **v_array, int ldv, magmaDoubleComplex **tau_array,
@@ -84,6 +87,8 @@ void zlarft_gemvcolwise_kernel_batched( int m, magmaDoubleComplex **v_array, int
     int batchid = blockIdx.z;
     zlarft_gemvcolwise_device(m, v_array[batchid]+step+step*ldv, tau_array[batchid]+step, v_array[batchid]+step, ldv, T_array[batchid]+step*ldt, ldt, step);
 }
+
+
 //===================================================================================================
 extern "C" 
 void magmablas_zlarft_gemvcolwise(
@@ -95,8 +100,9 @@ void magmablas_zlarft_gemvcolwise(
     dim3 grid( step+1, 1, 1 );
     dim3 threads( BLOCK_SIZE );
     zlarft_gemvcolwise_kernel<<< grid, threads, 0, magma_stream >>>( m, v, ldv, tau, T, ldt, step);
-
 }
+
+
 //===================================================================================================
 extern "C" 
 void magmablas_zlarft_gemvcolwise_batched(
@@ -108,7 +114,6 @@ void magmablas_zlarft_gemvcolwise_batched(
     dim3 grid( step+1, 1, batchCount );
     dim3 threads( BLOCK_SIZE );
     zlarft_gemvcolwise_kernel_batched<<< grid, threads, 0, queue >>>( m, v_array, ldv, tau_array, T_array, ldt, step);
-
 }
 //===================================================================================================
 
@@ -182,7 +187,6 @@ zlarft_gemvrowwise_kernel(
     magmaDoubleComplex *v, int ldv, 
     magmaDoubleComplex *T, int ldt)
 {
-
     magmaDoubleComplex *W =  T +i*ldt;
 
     magmaDoubleComplex *sdata = (magmaDoubleComplex*)shared_data;
@@ -190,6 +194,7 @@ zlarft_gemvrowwise_kernel(
     zlarft_gemvrowwise_device(m, i, tau+i, v+i, ldv,  v+i+i*ldv, 1,  
                            T+i+i*ldt , ldt, W, sdata);
 }
+
 
 //===================================================================================================
 __global__ void
@@ -199,7 +204,6 @@ zlarft_gemvrowwise_kernel_batched(
     magmaDoubleComplex **v_array, int ldv, 
     magmaDoubleComplex **T_array, int ldt)
 {
-
     int batchid = blockIdx.z;
 
     magmaDoubleComplex *W =  T_array[batchid] +i*ldt;
@@ -210,6 +214,7 @@ zlarft_gemvrowwise_kernel_batched(
                            T_array[batchid] +i+i*ldt , ldt, W, sdata);
 }
 
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemvrowwise(
@@ -219,15 +224,13 @@ void magmablas_zlarft_gemvrowwise(
     magmaDoubleComplex *T, magma_int_t ldt,
     magmaDoubleComplex *W)
 {
-
     dim3 grid(1);
-
-
     dim3 threads(zgemv_bs, max(i,1), 1);
-
 
     zlarft_gemvrowwise_kernel <<< grid, threads, sizeof(magmaDoubleComplex)*zgemv_bs*(i+1), magma_stream>>>(m, i, tau, v, ldv, T, ldt);
 }
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemvrowwise_batched(
@@ -237,7 +240,6 @@ void magmablas_zlarft_gemvrowwise_batched(
     magmaDoubleComplex **T_array, magma_int_t ldt,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
     dim3 grid(1, 1, batchCount);
     dim3 threads(zgemv_bs, max(i,1), 1);
 
@@ -276,7 +278,6 @@ zlarft_gemv_loop_inside_device(
  
     for(int i=1; i < k; i++)
     {
-
         int m = n-i; 
 
         magmaDoubleComplex *v_ptr = v;
@@ -329,9 +330,10 @@ zlarft_gemv_loop_inside_device(
        #endif
      
        v_ptr -= i;
-
-    }// end of loop k
+    } // end of loop k
 }
+
+
 //===================================================================================================
 __global__ void
 zlarft_gemv_loop_inside_kernel(
@@ -342,6 +344,8 @@ zlarft_gemv_loop_inside_kernel(
 {
     zlarft_gemv_loop_inside_device(n, k, tau, v, ldv, T, ldt);
 }
+
+
 //===================================================================================================
 __global__ void
 zlarft_gemv_loop_inside_kernel_batched(
@@ -353,8 +357,8 @@ zlarft_gemv_loop_inside_kernel_batched(
     int batchid = blockIdx.z;
     zlarft_gemv_loop_inside_device(n, k, tau_array[batchid], v_array[batchid], ldv, T_array[batchid], ldt);
 }
-//===================================================================================================
-//===================================================================================================
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemv_loop_inside(
@@ -363,11 +367,12 @@ void magmablas_zlarft_gemv_loop_inside(
     magmaDoubleComplex *v, magma_int_t ldv, 
     magmaDoubleComplex *T, magma_int_t ldt)
 {
-
     dim3 grid(1);
     dim3 threads(zgemv_bs, max(k,1), 1);
     zlarft_gemv_loop_inside_kernel<<<grid, threads, sizeof(magmaDoubleComplex) * (zgemv_bs*(k+1)), magma_stream>>>(n, k, tau, v, ldv, T, ldt); 
 }
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_gemv_loop_inside_batched(
@@ -376,14 +381,11 @@ void magmablas_zlarft_gemv_loop_inside_batched(
     magmaDoubleComplex **v_array, magma_int_t ldv, 
     magmaDoubleComplex **T_array, magma_int_t ldt, magma_int_t batchCount, magma_queue_t queue)
 {
-
     dim3 grid(1, 1, batchCount);
     dim3 threads(zgemv_bs, max(k,1), 1);
     zlarft_gemv_loop_inside_kernel_batched<<<grid, threads, sizeof(magmaDoubleComplex) * (zgemv_bs*(k+1)), queue>>>(n, k, tau_array, v_array, ldv, T_array, ldt); 
 }
 //===================================================================================================
-
-
 
 
 
@@ -452,8 +454,9 @@ zlarft_ztrmv_sm32x32_device(
     {
        Tout[tx + s * ldtout] = sdata[tx + s*n];
     }
-
 }
+
+
 //===================================================================================================
 __global__ void 
 zlarft_ztrmv_sm32x32_kernel(
@@ -462,6 +465,8 @@ zlarft_ztrmv_sm32x32_kernel(
 {
     zlarft_ztrmv_sm32x32_device( n, k, tau, Tin, ldtin, Tout, ldtout);
 }
+
+
 //===================================================================================================
 __global__ void 
 zlarft_ztrmv_sm32x32_kernel_batched(
@@ -472,6 +477,8 @@ zlarft_ztrmv_sm32x32_kernel_batched(
     zlarft_ztrmv_sm32x32_device( n, k, tau_array[batchId], Tin_array[batchId], ldtin, Tout_array[batchId], ldtout);
 }
 //===================================================================================================
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_ztrmv_sm32x32(
@@ -480,11 +487,12 @@ void magmablas_zlarft_ztrmv_sm32x32(
     magmaDoubleComplex *Tin, magma_int_t ldtin, 
     magmaDoubleComplex *Tout, magma_int_t ldtout)
 {
-
     dim3 grid(1);
     dim3 threads(max(m,1), 1, 1);
     zlarft_ztrmv_sm32x32_kernel <<< grid, threads, sizeof(magmaDoubleComplex)*(m*m), magma_stream >>> (m, n,  tau, Tin, ldtin, Tout, ldtout);
 }
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_ztrmv_sm32x32_batched(
@@ -494,7 +502,6 @@ void magmablas_zlarft_ztrmv_sm32x32_batched(
     magmaDoubleComplex **Tout_array, magma_int_t ldtout,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
     dim3 grid(1, 1, batchCount);
     dim3 threads(max(m,1), 1, 1);
     zlarft_ztrmv_sm32x32_kernel_batched <<< grid, threads, sizeof(magmaDoubleComplex)*(m*m), queue >>> (m, n,  tau_array, Tin_array, ldtin, Tout_array, ldtout);
@@ -544,8 +551,8 @@ zlarft_recztrmv_sm32x32_device(
     {
        Trec[tx + s * ldtrec] = sdata[tx + s*n];
     }
-
 }
+
 
 //===================================================================================================
 __global__ void 
@@ -555,6 +562,8 @@ zlarft_recztrmv_sm32x32_kernel(
 {
     zlarft_recztrmv_sm32x32_device(m, n, tau, Trec, ldtrec, Ttri, ldttri);
 }
+
+
 //===================================================================================================
 __global__ void 
 zlarft_recztrmv_sm32x32_kernel_batched(
@@ -564,6 +573,8 @@ zlarft_recztrmv_sm32x32_kernel_batched(
     int batchId = blockIdx.z;
     zlarft_recztrmv_sm32x32_device(m, n, tau_array[batchId], Trec_array[batchId], ldtrec, Ttri_array[batchId], ldttri);
 }
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_recztrmv_sm32x32(
@@ -572,11 +583,12 @@ void magmablas_zlarft_recztrmv_sm32x32(
     magmaDoubleComplex *Trec, magma_int_t ldtrec, 
     magmaDoubleComplex *Ttri, magma_int_t ldttri)
 {
-
     dim3 grid(1);
     dim3 threads(max(m,1), 1, 1);
     zlarft_recztrmv_sm32x32_kernel <<< grid, threads, sizeof(magmaDoubleComplex)*(m*n), magma_stream >>> (m, n,  tau, Trec, ldtrec, Ttri, ldttri);
 }
+
+
 //===================================================================================================
 extern "C"
 void magmablas_zlarft_recztrmv_sm32x32_batched(
@@ -586,7 +598,6 @@ void magmablas_zlarft_recztrmv_sm32x32_batched(
     magmaDoubleComplex **Ttri_array, magma_int_t ldttri,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
     dim3 grid(1, 1, batchCount);
     dim3 threads(max(m,1), 1, 1);
     zlarft_recztrmv_sm32x32_kernel_batched <<< grid, threads, sizeof(magmaDoubleComplex)*(m*n), queue >>> (m, n,  tau_array, Trec_array, ldtrec, Ttri_array, ldttri);

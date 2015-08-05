@@ -27,11 +27,10 @@ extern "C" {
 static hwloc_topology_t quark_topology = NULL; /* Topology object */
 static volatile int     quark_nbr = 0;
 
-void quark_topology_init(){
-
+void quark_topology_init()
+{
     pthread_mutex_lock(&mutextopo);
     if (!topo_initialized) {
-
         /* Allocate and initialize topology object.  */
         hwloc_topology_init(&quark_topology);
 
@@ -47,8 +46,8 @@ void quark_topology_init(){
     pthread_mutex_unlock(&mutextopo);
 }
 
-void quark_topology_finalize(){
-
+void quark_topology_finalize()
+{
     pthread_mutex_lock(&mutextopo);
     quark_nbr--;
     if ((topo_initialized ==1) && (quark_nbr == 0)) {

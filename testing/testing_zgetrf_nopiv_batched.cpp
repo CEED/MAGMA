@@ -99,9 +99,7 @@ int main( int argc, char** argv)
     printf("%% BatchCount    M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
     printf("%%========================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
-    
-      for( int iter = 0; iter < opts.niter; ++iter ) {
-            
+        for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
             N = opts.nsize[i];
             min_mn = min(M, N);
@@ -180,8 +178,7 @@ int main( int argc, char** argv)
             }
 
             double err = 0.0;
-            if ( opts.check ) {
-               
+            if ( opts.check ) {               
                 // initialize ipiv to 1,2,3,4,5,6
                 for (int i=0; i < batchCount; i++)
                 {

@@ -27,7 +27,6 @@ void zlaswp_rowparallel_devfunc(
                               magmaDoubleComplex *dout, int ldo,
                               magma_int_t* pivinfo)
 {
-
     //int height = k2- k1;
     //int height = blockDim.x;
     unsigned int tid = threadIdx.x;
@@ -74,9 +73,7 @@ void zlaswp_rowparallel_kernel(
                                 magmaDoubleComplex *doutput, int ldo,
                                 magma_int_t*  pivinfo)
 {
-
     zlaswp_rowparallel_devfunc(n, width, height, dinput, ldi, doutput, ldo, pivinfo);
-
 }
 //=================================================================================================
 
@@ -103,7 +100,6 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
                        magma_int_t **pivinfo_array, 
                        magma_int_t batchCount, magma_queue_t queue)
 {
-
     if (n == 0 ) return;
     int height = k2-k1;
     if ( height  > 1024) 
@@ -122,8 +118,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
     else
     {
         zlaswp_rowparallel_kernel_batched<<< grid, height, sizeof(magmaDoubleComplex) * height * SWP_WIDTH , queue >>>
-                                            (n, SWP_WIDTH, height, input_array, ldi, output_array, ldo, pivinfo_array ); 
- 
+                                            (n, SWP_WIDTH, height, input_array, ldi, output_array, ldo, pivinfo_array );
     }
 }
 
@@ -145,8 +140,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
     int height = k2-k1;
     if ( height  > MAX_NTHREADS) 
     {
-       printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n,MAX_NTHREADS);
-
+       printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n, MAX_NTHREADS);
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
@@ -195,8 +189,7 @@ __global__ void zlaswp_rowserial_kernel_batched( int n, magmaDoubleComplex **dA_
     k1--;
     k2--;
 
-    if ( tid < n) {
-
+    if (tid < n) {
         magmaDoubleComplex A1;
 
         for( int i1 = k1; i1 < k2; i1++ ) 
@@ -222,15 +215,13 @@ magma_zlaswp_rowserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, mag
                    magma_int_t **ipiv_array, 
                    magma_int_t batchCount, magma_queue_t queue)
 {
-
-    if (n == 0 ) return;
+    if (n == 0) return;
 
     int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);
 
     zlaswp_rowserial_kernel_batched<<< grid, max(BLK_SIZE, n), 0, queue >>>(
-        n, dA_array, lda, k1, k2, ipiv_array); 
-
+        n, dA_array, lda, k1, k2, ipiv_array);
 }
 
 
@@ -289,13 +280,11 @@ magma_zlaswp_columnserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, 
                    magma_int_t **ipiv_array, 
                    magma_int_t batchCount, magma_queue_t queue)
 {
-
     if (n == 0 ) return;
 
     int blocks = magma_ceildiv( n, BLK_SIZE );
     dim3  grid(blocks, 1, batchCount);
 
     zlaswp_columnserial_kernel_batched<<< grid, min(BLK_SIZE, n), 0, queue >>>(
-        n, dA_array, lda, k1, k2, ipiv_array); 
-
+        n, dA_array, lda, k1, k2, ipiv_array);
 }

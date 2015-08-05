@@ -88,7 +88,6 @@ magma_zsolverinfo(
                                                                         (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
-    
         }
         
         switch( precond_par->solver ) {
@@ -112,7 +111,6 @@ magma_zsolverinfo(
                     printf("%%   Preconditioner used: iterative IC(%d).\n", int(precond_par->levels)); break;
             default:
                   break;
-    
         }
         
             printf("%%======================================================="
@@ -452,7 +450,6 @@ magma_zsolverinfo_free(
         cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
         precond_par->cuinfoL = NULL;
         precond_par->cuinfoU = NULL;
-
     }
     if ( precond_par->LD.val != NULL ) {
         if ( precond_par->LD.memory_location == Magma_DEV )

@@ -31,7 +31,6 @@ zgemvn_device(
     const magmaDoubleComplex * __restrict__ x, int incx, magmaDoubleComplex beta,
     magmaDoubleComplex       * __restrict__ y, int incy)
 {
-
     int ind = blockIdx.x*BLK_X + threadIdx.x;
     if ( ind < m ) {
         A += ind;
@@ -45,7 +44,6 @@ zgemvn_device(
         
         y[ind*incy] = alpha*res + beta*y[ind*incy];
     }
-
 }
 
 __global__ void
@@ -89,7 +87,6 @@ zgemvt_device(
     const magmaDoubleComplex * __restrict__ x, int incx, magmaDoubleComplex beta,
     magmaDoubleComplex       * __restrict__ y, int incy)
 {
-
     int tx = threadIdx.x;
 
     __shared__ magmaDoubleComplex sdata[BLK_X];
@@ -115,7 +112,6 @@ zgemvt_device(
     if ( tx == 0 ) {
         y[blockIdx.y*incy] = alpha*sdata[0] + beta*y[blockIdx.y*incy];
     }
-
 }
 
 
@@ -159,7 +155,6 @@ zgemvc_device(
     const magmaDoubleComplex * __restrict__ x, int incx, magmaDoubleComplex beta,
     magmaDoubleComplex       * __restrict__ y, int incy)
 {
-
     int tx = threadIdx.x;
 
     __shared__ magmaDoubleComplex sdata[BLK_X];
@@ -185,7 +180,6 @@ zgemvc_device(
     if ( tx == 0 ) {
         y[blockIdx.y*incy] = alpha*sdata[0] + beta*y[blockIdx.y*incy];
     }
-
 }
 
 __global__ void

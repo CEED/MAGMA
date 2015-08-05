@@ -410,7 +410,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         //    printf( "%d ",perm[k] );
                         //}
                         //printf( "\n" );
-
                     }
                     for (magma_int_t k=(1+j)*nb; k < (1+j)*nb+min(jb,ib); k++) {
                         ipiv[k] += (j+1)*nb;

@@ -160,7 +160,6 @@ magma_zbicgstab(
         if ( res/nom0 <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     

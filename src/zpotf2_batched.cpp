@@ -91,7 +91,6 @@ magma_zpotf2_batched(
     magma_int_t *info_array, magma_int_t gbstep, 
     magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
-
     magma_int_t j;
 
     // Quick return if possible
@@ -127,7 +126,6 @@ magma_zpotf2_batched(
                            dA_displ, lda,
                            dW_displ, dB_displ, dC_displ, 
                            info_array, gbstep, batchCount, queue);
-
             }
 #if 1
 

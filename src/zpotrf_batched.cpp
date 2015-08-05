@@ -253,7 +253,6 @@ magma_zpotrf_batched(
                             (const magmaDoubleComplex*) cpuAarray[k] + j+ib+j*ldda, ldda, 
                             d_beta,
                             cpuAarray[k] + j+ib+(j+ib)*ldda, ldda);
-
                      }
                      // need to synchronise to be sure that panel do not start before
                      // finishing the update at least of the next panel

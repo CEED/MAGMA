@@ -35,7 +35,6 @@ extern __shared__ int int_sdata[];
 __device__ int 
 izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared_x, int *shared_idx)
 {
-
     int tx = threadIdx.x;
     magmaDoubleComplex res;
     double  res1;
@@ -59,7 +58,6 @@ izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared
                 shared_x[tx] = res1;
                 shared_idx[tx] = tx + s * zamax;   
             }
-           
         }
         __syncthreads();
     }
@@ -69,14 +67,14 @@ izamax_devfunc(int length, const magmaDoubleComplex *x, int incx, double *shared
     else
         magma_getidmax_n(min(zamax,length), tx, shared_x, shared_idx);
     return shared_idx[0];
-
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void 
 izamax_kernel_batched(int length, int chunk, magmaDoubleComplex **x_array, int incx, 
                    int step, int lda, magma_int_t** ipiv_array, magma_int_t *info_array, int gbstep)
 {
-
     magmaDoubleComplex *x_start = x_array[blockIdx.z];
     const magmaDoubleComplex *x = &(x_start[step + step * lda]); 
 
@@ -94,8 +92,6 @@ izamax_kernel_batched(int length, int chunk, magmaDoubleComplex **x_array, int i
             info_array[blockIdx.z] = shared_idx[0] + step + gbstep + 1;
         }
     }
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +102,6 @@ tree_izamax_kernel_batched(int length, magmaDoubleComplex **x_array, int incx,
                    int step, int lda, magma_int_t** ipiv_array, magma_int_t *info_array, int gbstep, 
                    double** data_pool_array, magma_int_t** id_pool_array)
 {
-
     magmaDoubleComplex *x_start = x_array[blockIdx.z];
     const magmaDoubleComplex *x = &(x_start[step + step * lda]); 
 
@@ -140,11 +135,7 @@ tree_izamax_kernel_batched(int length, magmaDoubleComplex **x_array, int incx,
             data_pool[blockIdx.x] = shared_x[0]; 
             id_pool[blockIdx.x] = local_max_id;
         }
-
-
     } 
-
-
 }
 
 
@@ -187,7 +178,6 @@ tree_izamax_kernel2_batched(int n, int step,  magma_int_t** ipiv_array, magma_in
             if(shared_x[0] == MAGMA_D_ZERO)
                 info_array[blockIdx.z] = shared_idx[0] + step + gbstep + 1;
     } 
-
 }
 
 
@@ -261,8 +251,7 @@ magma_int_t magma_izamax_batched(magma_int_t length,
         magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step,  magma_int_t lda,
         magma_int_t** ipiv_array, magma_int_t *info_array, magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
 {
-  
-    if(length == 0 ) return 0;
+      if(length == 0 ) return 0;
 
 #if 1
         dim3 grid(1, 1, batchCount);
@@ -278,7 +267,6 @@ magma_int_t magma_izamax_batched(magma_int_t length,
         int chunk = magma_ceildiv( length, zamax );
         izamax_kernel_batched<<< grid, zamax, zamax * (sizeof(double) + sizeof(magma_int_t)), queue >>>
                       (length, chunk, x_array, incx, step, lda, ipiv_array, info_array, gbstep);
-
     }
     else
     {
@@ -295,7 +283,6 @@ magma_int_t magma_izamax_batched(magma_int_t length,
 __global__
 void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step, magma_int_t** ipiv_array)
 {
-
     magmaDoubleComplex *x = x_array[blockIdx.z];
     magma_int_t *ipiv = ipiv_array[blockIdx.z];
 
@@ -317,8 +304,9 @@ void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int
         x[jp + incx*id] = x[step + incx*id];
         x[step + incx*id] = tmp;
     }
-
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C"
 magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step, 
@@ -341,7 +329,6 @@ magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
 __global__
 void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_array, int lda, magma_int_t *info_array, int gbstep)
 {
-
     // checkinfo to avoid computation of the singular matrix
     if(info_array[blockIdx.z] != 0 ) return;
 
@@ -480,7 +467,6 @@ magma_zgetf2trsm_batched(magma_int_t ib, magma_int_t n, magmaDoubleComplex **dA_
 static __device__ void 
 zupdate_device(int m, int step, magmaDoubleComplex* x, int ldx,  magmaDoubleComplex *A, int lda)
 {
-
     int tid = threadIdx.x;
     int nchunk = magma_ceildiv( m, MAX_NTHREADS );    
     int indx;
@@ -501,7 +487,6 @@ zupdate_device(int m, int step, magmaDoubleComplex* x, int ldx,  magmaDoubleComp
     }
 
     //printf("         @ step %d tid %d adding %5.3f to A %5.3f make it %5.3f\n",step,tid,-reg,A[tid],A[tid]-reg);
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -590,7 +575,6 @@ zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoub
         }            
     }
     __syncthreads();
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

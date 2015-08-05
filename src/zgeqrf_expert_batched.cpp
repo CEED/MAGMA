@@ -369,9 +369,7 @@ magma_zgeqrf_expert_batched(
                                 dW4_displ,  ldw,
                                 dW5_displ, ldw,
                                 batchCount, myhandle, queue);
-               
                 }
-
             }// update the trailing matrix 
             //===============================================
 
@@ -382,7 +380,6 @@ magma_zgeqrf_expert_batched(
             {
                 magmablas_zlacpy_batched(MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue);
             }
-
     }
 
     magma_queue_sync(queue);
@@ -408,5 +405,4 @@ magma_zgeqrf_expert_batched(
     magma_free_cpu(cpuTarray);
 
     return arginfo;
-           
 }

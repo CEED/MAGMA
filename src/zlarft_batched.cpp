@@ -22,7 +22,6 @@ extern "C" void
 magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, magmaDoubleComplex **v_array, magma_int_t ldv,
                     magmaDoubleComplex **tau_array, magmaDoubleComplex **T_array, magma_int_t ldt, magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
-
     if( k <= 0) return;
 
      //==================================
@@ -173,8 +172,7 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
         prev_n =  j;
         mycol  =  min(nb, k-j);
         // note that myrow = prev_n + mycol;
-        if(prev_n>0 && mycol>0){
-
+        if(prev_n > 0 && mycol > 0) {
             if (DEBUG == 3) {
                 printf("doing gemm on the rectangular portion of size %d %d of T(%d,%d)\n",
                         (int) prev_n, (int) mycol, 0, (int) j );
@@ -230,7 +228,6 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
                 magma_zdisplace_pointers(dW3_displ, tau_array,  1, j, 0, batchCount, queue);
                 magma_zdisplace_pointers(dW2_displ, T_array,     ldt, j, j, batchCount, queue);
                 magmablas_zlarft_ztrmv_sm32x32_batched(mycol, mycol, dW3_displ, dW1_displ, ldtstep, dW2_displ, ldt, batchCount, queue);
-
             }
         }
     }// end of j

@@ -50,7 +50,6 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
             *dA   = *dx0;
         }
         else {
-
 #if (defined(PRECISION_s) || defined(PRECISION_d))
             // no need to compute the norm as it is passed as input
             double beta  = xnorm; // sqrt( alpha*alpha + xnorm*xnorm );

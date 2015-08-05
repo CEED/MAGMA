@@ -126,7 +126,6 @@ magma_zhesv(
     /* Compute the factorization A = U*D*U' or A = L*D*L'. */
     magma_zhetrf( uplo, n, A, lda, ipiv, info );
     if ( *info == 0 ) {
-
         /* Solve the system A*X = B, overwriting B with X. */
         lapackf77_zhetrs( (upper ? MagmaUpperStr: MagmaLowerStr),
                            &n, &nrhs, A, &lda, ipiv, B, &ldb, info );

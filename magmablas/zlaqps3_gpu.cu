@@ -79,7 +79,6 @@ void magma_zscale_kernel(int n, magmaDoubleComplex* dx0,
 
    lsum = 0;
    for( int k = i; k < n; k += BLOCK_SIZE ) {
-
         #if (defined(PRECISION_s) || defined(PRECISION_d))
              re = dx[k];
              lsum += re*re;
@@ -192,7 +191,6 @@ magma_zgemv_kernel_adjust(int n, int k, magmaDoubleComplex * A, int lda,
            // get norm of dx
            lsum = 0;
            for( int k = i; k < n1; k += BLOCK_SIZE2 ) {
-
                #if (defined(PRECISION_s) || defined(PRECISION_d))
                    re = dx[k];
                    lsum += re*re;
@@ -236,23 +234,21 @@ magmablas_dznrm2_check_kernel(int m, magmaDoubleComplex *da, int ldda,
 
     lsum = 0;
     for( int j = i; j < m; j += BLOCK_SIZE ) {
-
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-        re = dx[j];
-        lsum += re*re;
-#else
-        re = MAGMA_Z_REAL( dx[j] );
-        double im = MAGMA_Z_IMAG( dx[j] );
-        lsum += re*re + im*im;
-#endif
-
+        #if (defined(PRECISION_s) || defined(PRECISION_d))
+            re = dx[j];
+            lsum += re*re;
+        #else
+            re = MAGMA_Z_REAL( dx[j] );
+            double im = MAGMA_Z_IMAG( dx[j] );
+            lsum += re*re + im*im;
+        #endif
     }
     sum[i] = lsum;
     magma_sum_reduce< BLOCK_SIZE >( i, sum );
 
-    if (i==0){
-      dxnorm[blockIdx.x]  = sqrt(sum[0]);
-      dxnorm2[blockIdx.x] = sqrt(sum[0]);
+    if (i==0) {
+        dxnorm[blockIdx.x]  = sqrt(sum[0]);
+        dxnorm2[blockIdx.x] = sqrt(sum[0]);
     }
 }
 

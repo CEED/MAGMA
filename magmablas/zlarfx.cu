@@ -78,7 +78,6 @@ void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
     {
         *(T+blockIdx.x) = MAGMA_Z_ZERO;
     }
-
 }
 
 //==============================================================================

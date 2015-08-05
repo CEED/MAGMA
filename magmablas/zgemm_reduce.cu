@@ -38,8 +38,7 @@ void zgemm_reduce_kernel(
 #if (__CUDA_ARCH__ >= 200)
     const int tx = threadIdx.x;
     
-    if (blockIdx.x*BLK_M + threadIdx.y < m && blockIdx.y*BLK_N + threadIdx.z < n){
-    
+    if (blockIdx.x*BLK_M + threadIdx.y < m && blockIdx.y*BLK_N + threadIdx.z < n) {
         dA += (blockIdx.x*BLK_M + threadIdx.y) * lda;
         dB += (blockIdx.y*BLK_N + threadIdx.z) * ldb;
         dC +=  blockIdx.x*BLK_M + blockIdx.y*BLK_N * ldc;

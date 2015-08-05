@@ -61,10 +61,8 @@ int main( int argc, char** argv)
 
     printf("%% batchCount    M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
     printf("%%===================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
-    
-      for( int iter = 0; iter < opts.niter; ++iter ) {
-            
+    for( int i = 0; i < opts.ntest; ++i ) {    
+        for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
             N = opts.nsize[i];
             min_mn = min(M, N);

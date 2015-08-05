@@ -28,7 +28,6 @@ extern "C" {
         maxv = 0.0;
         sumv = 0.0;
         for (i = 0; i < n; ++i) {
-
             curv = fabs( wr1[i] - wr2[i]);
             sumv += curv;
             if (maxv < curv) maxv = curv;
@@ -46,7 +45,7 @@ extern "C" {
         magma_int_t locblknb   = 0;
         magma_int_t prevblkcnt = 0;
         magma_int_t myblknb    = 0;
-        magma_int_t lstGblkid  = magma_ceildiv((n-1),Vblksiz)-1;//nbGblk-1;
+        magma_int_t lstGblkid  = magma_ceildiv( n-1, Vblksiz ) - 1; //nbGblk-1;
         magma_int_t myGblkid   = sweep/Vblksiz;
 
         // go forward and for each Gblk(a column of blocks) before my Gblk compute its number of blk.
@@ -246,8 +245,6 @@ extern "C" {
             *blkcnt      = *blkcnt + myblknb;
             //printf("voici  nbcolblk %d    master sweep %d     blkcnt %d \n",nbcolblk, mastersweep,*blkcnt);
         }
-        *LDV= NB+Vblksiz;
+        *LDV = NB+Vblksiz;
     }
-
-
 }

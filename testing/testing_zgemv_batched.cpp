@@ -145,9 +145,7 @@ int main( int argc, char** argv)
                 // |C_magma - C_lapack| / |C_lapack|
                 magma_error = 0.0;
 
-                for (int s=0; s < batchCount; s++)
-                {
-
+                for (int s=0; s < batchCount; s++) {
                     double Anorm = lapackf77_zlange( "F", &M, &N, h_A + s * lda * N, &lda, work );
                     double Xnorm = lapackf77_zlange( "F", &Xm, &ione, h_X + s * Xm, &Xm, work );
                     
@@ -161,17 +159,16 @@ int main( int argc, char** argv)
                     magma_error = max(fabs(magma_err), magma_error);
                 }
 
-                    printf("%10d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %8.2e  \n",
-                       (int) batchCount, (int) M, (int) N,
-                       magma_perf,  1000.*magma_time,
-                       cpu_perf,    1000.*cpu_time,
-                       magma_error);
+                printf("%10d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %8.2e  \n",
+                   (int) batchCount, (int) M, (int) N,
+                   magma_perf,  1000.*magma_time,
+                   cpu_perf,    1000.*cpu_time,
+                   magma_error);
             }
             else {
-
-                    printf("%10d %5d %5d  %7.2f (%7.2f)    ---   (  ---  )    ---\n",
-                       (int) batchCount, (int) M, (int) N,
-                       magma_perf,  1000.*magma_time);
+                printf("%10d %5d %5d  %7.2f (%7.2f)    ---   (  ---  )    ---\n",
+                   (int) batchCount, (int) M, (int) N,
+                   magma_perf,  1000.*magma_time);
             }
             
             TESTING_FREE_CPU( h_A  );

@@ -111,7 +111,6 @@ int main( int argc, char** argv)
             if(status == -1)  goto cleanup;
 
             if ( opts.lapack ) {
-
                 /* =====================================================================
                    Performs operation using LAPACK
                    =================================================================== */

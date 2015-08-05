@@ -73,7 +73,6 @@ __global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int in
             info_array[blockIdx.z] = offset + gbstep + 1;
         }
     }
-
 }
 
 
@@ -87,7 +86,6 @@ void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
 */
     if (n > MAX_NTHREADS) {
         printf("n = %d > %d is not supported in zpotf2_zdotc\n", (int) n, (int) MAX_NTHREADS);
-        
     }
     int threadSize;
 
@@ -400,7 +398,6 @@ magma_zpotf2_tile_batched(
     magmaDoubleComplex **dA_array, magma_int_t lda,
     magma_int_t *info_array, magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
 {
-
     magma_int_t arginfo = 0;
     
     if ( uplo != MagmaUpper && uplo != MagmaLower) {
@@ -445,7 +442,6 @@ magma_zpotf2_tile(
     magmaDoubleComplex *dA, magma_int_t lda,
     magma_int_t *info)
 {
-
     *info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower) {
         *info = -1;

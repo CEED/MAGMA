@@ -176,7 +176,6 @@ magma_zhetrf(
     trace_gpu_end( 0, 0 );
 
     if ( upper ) {
-
         /* Factorize A as U*D*U' using the upper triangle of A
 
            K is the main loop index, decreasing from N to 1 in steps of
@@ -189,14 +188,12 @@ magma_zhetrf(
             kb = min(nb, nk);
 
             if ( k+1 > nb ) {
-
                 /* Factorize columns k-kb+1:k of A and use blocked code to
                    update columns 1:k-kb */
 
                 magma_zlahef_gpu( MagmaUpper, nk, kb, &kb, A( 0, 0 ), lda, dA( 0, 0 ), ldda,
                                   &ipiv[0], dW, ldda, stream, event, &iinfo );
             } else {
-
                 /* Use unblocked code to factorize columns 1:k of A */
 
                 magma_queue_sync( stream[0] );
@@ -210,7 +207,6 @@ magma_zhetrf(
             if ( *info == 0 && iinfo > 0 ) *info = iinfo;
         }
     } else {
-
         /* Factorize A as L*D*L' using the lower triangle of A
 
            K is the main loop index, increasing from 1 to N in steps of
@@ -225,8 +221,8 @@ magma_zhetrf(
                    update columns k+kb:n */
                 magma_zlahef_gpu( MagmaLower, nk, nb, &kb, A( k, k ), lda, dA( k, k ), ldda,
                                   &ipiv[k], dW, ldda, stream, event, &iinfo );
-
-            } else {
+            }
+            else {
                 /* Use unblocked code to factorize columns k:n of A */
                 magma_queue_sync( stream[0] );
                 magma_zgetmatrix( nk,nk, dA(k,k),ldda, A(k,k),lda );

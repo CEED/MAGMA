@@ -141,7 +141,6 @@ magmablas_zgemm_batched(
     magmaDoubleComplex beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount, magma_queue_t queue )
 {
-
     //if( (k < 32) || (k == 32 && m < 256) || (k == 32 && n < 256) || (k == 32 && transA==MagmaTrans) || (k == 32 && transA==MagmaConjTrans) || (m <= 32 && n <= 32) ) {
     if( (k <= 32) || (m <= 32 && n <= 32) ) {
         magmablas_zgemm_batched_k32(

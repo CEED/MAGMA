@@ -165,7 +165,6 @@ int main( int argc, char** argv)
                                 #endif
                                 iwork, liwork, 
                                 &info);
-           
             } else {
                 //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
                 magma_zheevdx_2stage_m(opts.ngpu, opts.jobz, range, opts.uplo, N, 

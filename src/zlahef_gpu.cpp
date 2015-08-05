@@ -142,7 +142,6 @@ magma_zlahef_gpu(
     alpha = ( d_one+sqrt( d_seven ) ) / d_eight;
 
     if ( upper ) {
-
         /* Factorize the trailing columns of A using the upper triangle
            of A and working backwards, and compute the matrix W = U12*D
            for use in updating A11 (note that conjg(W) is actually stored)
@@ -153,7 +152,6 @@ magma_zlahef_gpu(
 
         int k, kw = 0;
         for (k = n-1; k+1 > max(n-nb+1, nb); k -= kstep) {
-
             kw = nb - (n-k);
 
             /* Copy column K of A to column KW of W and update it */
@@ -202,9 +200,7 @@ magma_zlahef_gpu(
             }
 
             if ( max( abs_akk, colmax ) == 0.0 ) {
-
                 /* Column K is zero: set INFO and continue */
-
                 if ( *info == 0 ) *info = k;
 
                 kp = k;
@@ -216,12 +212,9 @@ magma_zlahef_gpu(
                 #endif
             } else {
                 if ( abs_akk >= alpha*colmax ) {
-
                     /* no interchange, use 1-by-1 pivot block */
-
                     kp = k;
                 } else {
-
                     /* Copy column imax to column KW-1 of W and update it */
                     magmablasSetKernelStream( queues[0] );
                     magma_zcopy( imax+1, &dA( 0, imax ), 1, &dW( 0, kw-1 ), 1 );
@@ -264,25 +257,19 @@ magma_zlahef_gpu(
                     }
 
                     if ( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
-
                         /* no interchange, use 1-by-1 pivot block */
-
                         kp = k;
                     } else if ( fabs( MAGMA_Z_REAL( Zimax ) ) >= alpha*rowmax ) {
-
                         /* interchange rows and columns K and imax, use 1-by-1
                            pivot block */
-
                         kp = imax;
 
                         /* copy column KW-1 of W to column KW */
                         magmablasSetKernelStream( queues[0] );
                         magma_zcopy( k+1, &dW( 0, kw-1 ), 1, &dW( 0, kw ), 1 );
                     } else {
-
                         /* interchange rows and columns K-1 and imax, use 2-by-2
                            pivot block */
-
                         kp = imax;
                         kstep = 2;
                     }
@@ -293,7 +280,6 @@ magma_zlahef_gpu(
                 /* Updated column kp is already stored in column kkW of W */
 
                 if ( kp != kk ) {
-
                     /* Interchange rows kk and kp in last kk columns of A and W */
                     // note: row-swap A(:,kk)
                     magmablas_zswap( n-kk, &dA( kk, kk ),  ldda, &dA( kp, kk ),  ldda );
@@ -317,15 +303,10 @@ magma_zlahef_gpu(
                 }
 
                 if ( kstep == 1 ) {
-
                     /* 1-by-1 pivot block D(k): column KW of W now holds
-
                        W(k) = U(k)*D(k)
-
                        where U(k) is the k-th column of U
-
                        Store U(k) in column k of A */
-
                     magmablasSetKernelStream( queues[0] );
                     magma_zcopy( k+1, &dW( 0, kw ), 1, &dA( 0, k ), 1 );
                     if ( k > 0 ) {
@@ -341,26 +322,18 @@ magma_zlahef_gpu(
                         #endif
                     }
                 } else {
-
                     /* 2-by-2 pivot block D(k): columns KW and KW-1 of W now
                        hold
-
                        ( W(k-1) W(k) ) = ( U(k-1) U(k) )*D(k)
-
                        where U(k) and U(k-1) are the k-th and (k-1)-th columns
                        of U */
-
                     magmablasSetKernelStream( queues[0] );
                     if ( k > 1 ) {
-
                         /* Store U(k) and U(k-1) in columns k and k-1 of A */
-
                         magmablas_zlascl_2x2( MagmaUpper, k-1, &dW(0, kw-1), lddw, &dA(0,k-1), ldda, &iinfo );
- 
                     }
 
                     /* Copy D(k) to A */
-
                     magma_zcopymatrix( 2,2, &dW( k-1, kw-1 ), lddw, &dA( k-1, k-1 ), ldda );
 
                     /* Conjugate W(k) and W(k-1) */
@@ -457,9 +430,8 @@ magma_zlahef_gpu(
 
         /* Set KB to the number of columns factorized */
         *kb = n - (k+1);
-
-    } else {
-
+    }
+    else {
         /* Factorize the leading columns of A using the lower triangle
            of A and working forwards, and compute the matrix W = L21*D
            for use in updating A22 (note that conjg(W) is actually stored)
@@ -468,7 +440,6 @@ magma_zlahef_gpu(
 
         int k;
         for (k = 0; k < min(nb-1,n); k += kstep) {
-
             /* Copy column K of A to column K of W and update it */
 
             /* -------------------------------------------------------------- */
@@ -517,13 +488,12 @@ magma_zlahef_gpu(
                 trace_gpu_end( 0, 0 );
                 magma_zgetvector( 1, &dW( imax, k ), 1, &Z, 1 );
                 colmax = MAGMA_Z_ABS1( Z );
-
-            } else {
+            }
+            else {
                 colmax = d_zero;
             }
 
             if ( max( abs_akk, colmax ) == 0.0 ) {
-
                 /* Column K is zero: set INFO and continue */
 
                 if ( *info == 0 ) *info = k;
@@ -537,13 +507,10 @@ magma_zlahef_gpu(
                 #endif
             } else {
                 if ( abs_akk >= alpha*colmax ) {
-
                     /* no interchange, use 1-by-1 pivot block */
-
                     kp = k;
                 } else {
                     /* Copy column imax to column K+1 of W and update it */
-
                     magmablasSetKernelStream( queues[0] );
                     trace_gpu_start( 0, 0, "copy", "copy" );
                     #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -594,11 +561,9 @@ magma_zlahef_gpu(
                     }
 
                     if ( abs_akk >= alpha*colmax*( colmax / rowmax ) ) {
-
                         /* no interchange, use 1-by-1 pivot block */
                         kp = k;
                     } else if ( fabs( MAGMA_Z_REAL( Zimax ) ) >= alpha*rowmax ) {
-
                         /* interchange rows and columns K and imax, use 1-by-1
                            pivot block */
                         kp = imax;
@@ -609,10 +574,8 @@ magma_zlahef_gpu(
                         magma_zcopy( n-k, &dW( k, k+1 ), 1, &dW( k, k ), 1 );
                         trace_gpu_end( 0, 0 );
                     } else {
-
                         /* interchange rows and columns K+1 and imax, use 2-by-2
                            pivot block */
-
                         kp = imax;
                         kstep = 2;
                     }
@@ -623,7 +586,6 @@ magma_zlahef_gpu(
                 /* Updated column kp is already stored in column kk of W */
 
                 if ( kp != kk ) {
-
                     /* Copy non-updated column kk to column kp */
 
                     /* ------------------------------------------------------------------ */
@@ -652,13 +614,9 @@ magma_zlahef_gpu(
                 }
 
                 if ( kstep == 1 ) {
-
                     /* 1-by-1 pivot block D(k): column k of W now holds
-
                        W(k) = L(k)*D(k)
-
                        where L(k) is the k-th column of L
-
                        Store L(k) in column k of A */
                     magmablasSetKernelStream( queues[0] );
                     trace_gpu_start( 0, 0, "copy", "copy" );
@@ -679,14 +637,10 @@ magma_zlahef_gpu(
                         #endif
                     }
                 } else {
-
                     /* 2-by-2 pivot block D(k): columns k and k+1 of W now hold
-
                      ( W(k) W(k+1) ) = ( L(k) L(k+1) )*D(k)
-
                     where L(k) and L(k+1) are the k-th and (k+1)-th columns
                     of L */
-
                     magmablasSetKernelStream( queues[0] );
                     trace_gpu_start( 0, 0, "scal", "scal-2" );
                     if (n > k+2)
