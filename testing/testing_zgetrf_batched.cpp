@@ -31,7 +31,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
                     magmaDoubleComplex *A,  magma_int_t lda,
                     magmaDoubleComplex *LU, magma_int_t *IPIV)
 {
-    magma_int_t min_mn = min(M,N);
+    magma_int_t min_mn = min(M, N);
     magma_int_t ione   = 1;
     magma_int_t i, j;
     magmaDoubleComplex alpha = MAGMA_Z_ONE;
@@ -76,9 +76,8 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf=0, cpu_time=0;
+    real_Double_t   gflops, magma_perf, magma_time, cublas_perf=0, cublas_time=0, cpu_perf=0, cpu_time=0;
     double          error=0.0;
-    magma_int_t cublas_enable = 0;
     magmaDoubleComplex *h_A, *h_R, *h_Amagma;
     magmaDoubleComplex *dA;
     magmaDoubleComplex **dA_array = NULL;
@@ -159,13 +158,16 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
+                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n",
+                            i, int(cpu_info[i]) );
                 }
             }
             
-            if (info != 0)
-                printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
-
+            if (info != 0) {
+                printf("magma_zgetrf_batched returned argument error %d: %s.\n",
+                        int(info), magma_strerror( info ));
+            }
+            
             /* ====================================================================
                Performs operation using CUBLAS
                =================================================================== */
@@ -177,13 +179,10 @@ int main( int argc, char** argv)
             cublasSetStream(myhandle, queue);
             
             cublas_time = magma_sync_wtime(queue);
-            if (M == N )
-            {
+            if (M == N ) {
                 cublasZgetrfBatched( myhandle, N, dA_array, ldda, dipiv_cublas,  dinfo_cublas, batchCount);
-                cublas_enable = 1;
             }
-            else
-            {
+            else {
                 printf("M != N, CUBLAS required M == N; CUBLAS is disabled\n");
             }
             cublas_time = magma_sync_wtime(queue) - cublas_time;
@@ -201,23 +200,24 @@ int main( int argc, char** argv)
                     nthreads = magma_get_lapack_numthreads();
                     #pragma omp parallel  num_threads(nthreads)
                     {
-                    magma_set_lapack_numthreads(1);
-                    #endif
-                    magma_int_t cnt, thid, offset, ipivoff, locinfo;
-                    for(cnt=0; cnt<batchCount; cnt+=nthreads){
-                        #if defined(_OPENMP)
-                        thid    = omp_get_thread_num();
+                        magma_set_lapack_numthreads(1);
                         #endif
-                        offset  = (thid+cnt)*N*lda;
-                        ipivoff = (thid+cnt)*min_mn;                  
-                        if( (thid+cnt) < batchCount) 
-                        {
-                            lapackf77_zgetrf(&M, &N, h_A + offset, &lda, ipiv + ipivoff, &locinfo);
-                            if(locinfo != 0)
-                                    printf("Parallel-Batched lapackf77_zgetrf matrix %d returned err %d: %s.\n", (int) thid+cnt, (int) locinfo, magma_strerror( locinfo ));
+                        magma_int_t cnt, thid=0, offset, ipivoff, locinfo;
+                        for(cnt=0; cnt < batchCount; cnt += nthreads) {
+                            #if defined(_OPENMP)
+                            thid    = omp_get_thread_num();
+                            #endif
+                            offset  = (thid+cnt)*N*lda;
+                            ipivoff = (thid+cnt)*min_mn;                  
+                            if ( thid+cnt < batchCount ) {
+                                lapackf77_zgetrf(&M, &N, h_A + offset, &lda, ipiv + ipivoff, &locinfo);
+                                if (locinfo != 0) {
+                                    printf("Parallel-Batched lapackf77_zgetrf matrix %d returned err %d: %s.\n",
+                                            int(thid+cnt), int(locinfo), magma_strerror( locinfo ));
+                                }
+                            }
                         }
-                    }
-                    #if defined(_OPENMP)
+                        #if defined(_OPENMP)
                     }
                     magma_set_lapack_numthreads(nthreads);
                     #endif
@@ -225,8 +225,10 @@ int main( int argc, char** argv)
                     for (magma_int_t s=0; s < batchCount; s++)
                     {
                         lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &info);
-                        if (info != 0)
-                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n", (int) s, (int) info, magma_strerror( info ));
+                        if (info != 0) {
+                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n",
+                                    int(s), int(info), magma_strerror( info ));
+                        }
                     }
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
@@ -238,29 +240,31 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 printf("%10d   %5d  %5d     %7.2f (%7.2f)   %7.2f (%7.2f)    %7.2f (%7.2f)",
-                       (int) batchCount, (int) M, (int) N, cpu_perf, cpu_time*1000., magma_perf, magma_time*1000., cublas_perf*cublas_enable, cublas_time*1000.*cublas_enable  );
+                       int(batchCount), int(M), int(N),
+                       cpu_perf, cpu_time*1000.,
+                       magma_perf, magma_time*1000.,
+                       cublas_perf, cublas_time*1000.  );
             }
             else {
                 printf("%10d   %5d  %5d     ---   (  ---  )   %7.2f (%7.2f)    %7.2f (%7.2f)",
-                       (int) batchCount, (int) M, (int) N, magma_perf, magma_time*1000., cublas_perf*cublas_enable, cublas_time*1000.*cublas_enable );
+                       int(batchCount), int(M), int(N),
+                       magma_perf, magma_time*1000.,
+                       cublas_perf, cublas_time*1000. );
             }
 
             double err = 0.0;
             if ( opts.check ) {
                 magma_getvector( min_mn * batchCount, sizeof(magma_int_t), dipiv_magma, 1, ipiv, 1 );
                 int stop=0;
-                for (int i=0; i < batchCount; i++)
-                {
-                    
+                for (int i=0; i < batchCount; i++) {
                     for (int k=0; k < min_mn; k++) {
-                        if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M )
-                        {
-                                printf("error for matrix %d ipiv @ %d = %d\n",i,k,(int)ipiv[i*min_mn+k]);
-                                stop=1;
+                        if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M ) {
+                            printf("error for matrix %d ipiv @ %d = %d\n", i, k, int(ipiv[i*min_mn+k]));
+                            stop = 1;
                         }
                     }
                     if (stop == 1) {
-                        err=-1.0;
+                        err = -1.0;
                         break;
                     }
                     
@@ -269,7 +273,7 @@ int main( int argc, char** argv)
                         err = error;
                         break;
                     }
-                    err = max(fabs(error),err);
+                    err = max(fabs(error), err);
                 }
                 printf("   %8.2e   %s\n", err, (err < tol ? "ok" : "failed") );
                 status += ! (error < tol);

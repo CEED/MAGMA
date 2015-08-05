@@ -52,7 +52,7 @@ int main( int argc, char** argv)
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
     magma_int_t ione     = 1;
-    magma_int_t ISEED[4] = {0,0,0,1};;
+    magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t info_ortho     = 0;
     magma_int_t info_solution  = 0;
     magma_int_t info_reduction = 0;
@@ -196,15 +196,15 @@ int main( int argc, char** argv)
                 //printf("\n");
                 //printf(" The matrix A is randomly generated for each test.\n");
                 //printf("============\n");
-                //printf(" The relative machine precision (eps) is %8.2e\n",eps);
+                //printf(" The relative machine precision (eps) is %8.2e\n", eps);
                 //printf(" Computational tests pass if scaled residuals are less than 60.\n");
               
                 /* Check the orthogonality, reduction and the eigen solutions */
                 if (opts.jobz == MagmaVec) {
                     info_ortho = check_orthogonality(N, N, h_R, N, eps);
                     info_reduction = check_reduction(opts.uplo, N, 1, h_A, w1, N, h_R, eps);
-                }else{
-                    printf("  %24s"," ");
+                } else {
+                    printf("  %24s", " ");
                 }
                 //printf("------ CALLING LAPACK ZHEEVD TO COMPUTE only eigenvalue and verify elementswise -------  \n");
                 lapackf77_zheevd("N", "L", &N, 
@@ -390,9 +390,9 @@ static magma_int_t check_solution(magma_int_t N, double *E1, double *E2, double 
         maxeig = max(maxtmp, maxeig);
         maxdif  = max(resid,  maxdif );
     }
-    maxtmp = maxdif / max(unfl, eps*max(maxeig,maxdif));
+    maxtmp = maxdif / max(unfl, eps*max(maxeig, maxdif));
 
-    printf("  %12.2e", maxdif / (max(maxeig,maxdif)) );
+    printf("  %12.2e", maxdif / (max(maxeig, maxdif)) );
     //printf(" ======================================================\n");
     //printf(" | D - eigcomputed | / (|D| * N * eps) : %15.3E \n",  maxtmp );
     //printf(" ======================================================\n");

@@ -108,9 +108,9 @@ int main( int argc, char** argv)
                             h_A + j * lda,                       lda,
                             d_lA[k] + j / (nb * ngpu) * nb * ldda, ldda);
                 }
-            /*} else {
-            }*/
-
+            //} else {
+            //}
+            
             gpu_time = magma_wtime();
             //magma_zpotrf_mgpu(ngpu, opts.uplo, N, d_lA, ldda, &info);
             magma_zpotrf_mgpu_right(ngpu, opts.uplo, N, d_lA, ldda, &info);

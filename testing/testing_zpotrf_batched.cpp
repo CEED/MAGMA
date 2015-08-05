@@ -87,7 +87,7 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            cudaMemset(dinfo_magma,0, batchCount * sizeof(magma_int_t));
+            cudaMemset(dinfo_magma, 0, batchCount * sizeof(magma_int_t));
 
             zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
             gpu_time = magma_sync_wtime(queue);
@@ -104,7 +104,7 @@ int main( int argc, char** argv)
             }
             if(status == -1)  goto cleanup;
 
-            if (info != 0){
+            if (info != 0) {
                 //printf("magma_zpotrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
                 status = -1;
             }                
