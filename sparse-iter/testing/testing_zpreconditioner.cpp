@@ -97,10 +97,10 @@ int main(  int argc, char** argv )
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
             printf("error: preconditioner returned: %s (%d).\n",
-                magma_strerror( info ), info );
+                magma_strerror( info ), int(info) );
         }
         CHECK( magma_zresidual( B_d, b, x1, &residual, queue ));
-        printf("%.8e  %.8e\n", (real_Double_t) tempo2-tempo1, (real_Double_t) residual );
+        printf("%.8e  %.8e\n", tempo2-tempo1, residual );
         
         printf("%%runtime right preconditioner:\n");
         tempo1 = magma_sync_wtime( queue );
@@ -108,10 +108,10 @@ int main(  int argc, char** argv )
         tempo2 = magma_sync_wtime( queue );
         if( info != 0 ){
             printf("error: preconditioner returned: %s (%d).\n",
-                magma_strerror( info ), info );
+                magma_strerror( info ), int(info) );
         }
         CHECK( magma_zresidual( B_d, b, x2, &residual, queue ));
-        printf("%.8e  %.8e\n", (real_Double_t) tempo2-tempo1, (real_Double_t) residual );
+        printf("%.8e  %.8e\n", tempo2-tempo1, residual );
         
         
         printf("];\n");

@@ -89,9 +89,9 @@ int main(  int argc, char** argv )
         CHECK( magma_zvinit( &x, Magma_DEV, A.num_cols, 1, zero, queue ));
         
         info = magma_z_solver( B_d, b, &x, &zopts, queue );
-        if( info != 0 ){
+        if( info != 0 ) {
             printf("%%error: solver returned: %s (%d).\n",
-                magma_strerror( info ), info );
+                magma_strerror( info ), int(info) );
         }
         printf("data = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );

@@ -140,17 +140,17 @@ int main(  int argc, char** argv )
             //Chronometry
             #ifdef ENABLE_TIMER
             printf("%d  %d  %e  %e  %e  %e  %e  %e  %e  %e  %e  %e\n",
-                    n, num_vecs,
+                    int(n), int(num_vecs),
                     cudot_time/iters,
                     (cugemv_time)/iters,
                     (magmagemv_time)/iters,
                     (mdot_time)/iters,
                     (mdgm_time)/iters,
-                    (double)(computations)/(cudot_time*(1.e+09)),
-                    (double)(computations)/(cugemv_time*(1.e+09)),
-                    (double)(computations)/(magmagemv_time*(1.e+09)),
-                    (double)(computations)/(mdot_time*(1.e+09)),
-                    (double)(computations)/(mdgm_time*(1.e+09)) );
+                    computations/(cudot_time*1e9),
+                    computations/(cugemv_time*1e9),
+                    computations/(magmagemv_time*1e9),
+                    computations/(mdot_time*1e9),
+                    computations/(mdgm_time*1e9) );
             #endif
 
             magma_zmfree(&a, queue );
