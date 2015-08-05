@@ -281,4 +281,3 @@ magmablas_zlacpy_sym_in(
 {
     magmablas_zlacpy_sym_in_q( uplo, m, n, rows, perm, dA, ldda, dB, lddb, magma_stream );
 }
-

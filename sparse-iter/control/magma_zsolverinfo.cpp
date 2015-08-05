@@ -662,5 +662,3 @@ cleanup:
     magma_free_cpu( initial_guess );
     return info;
 }
-
-

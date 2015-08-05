@@ -84,6 +84,3 @@ void magma_zdisplace_pointers(magmaDoubleComplex **output_array,
 */
     zdisplace_pointers_kernel<<<batchCount, 1, 0, queue>>>(output_array, input_array, lda, row, column);
 }
-
-
-

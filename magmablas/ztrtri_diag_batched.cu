@@ -189,5 +189,3 @@ magmablas_ztrtri_diag_batched(
         }
     }
 }
-
-

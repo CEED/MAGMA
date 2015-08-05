@@ -430,4 +430,3 @@ int quark_getenv_int(char* name, int defval)
 #ifdef __cplusplus
 }
 #endif
-

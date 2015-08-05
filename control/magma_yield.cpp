@@ -59,4 +59,3 @@ magma_int_t magma_yield()
     return MAGMA_ERR_NOT_SUPPORTED;
 #endif
 }
-

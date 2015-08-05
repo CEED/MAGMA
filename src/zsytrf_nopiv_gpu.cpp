@@ -266,4 +266,3 @@ magma_zsytrf_nopiv_gpu(
     magmablasSetKernelStream( orig_stream );
     return MAGMA_SUCCESS;
 } /* magma_zsytrf_nopiv */
-

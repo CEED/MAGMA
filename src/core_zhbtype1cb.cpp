@@ -139,5 +139,3 @@ magma_zhbtype1cb(magma_int_t n, magma_int_t nb,
 #undef A
 #undef V
 #undef TAU
-
-

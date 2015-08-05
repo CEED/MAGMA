@@ -593,7 +593,6 @@ void magmablas_ztrsm_batched(
                     dX_displ, dinvA_displ,
                     resetozero, batchCount, queue );
 
-
     magma_free( dinvA );
     magma_free( dX );
     magma_free(dA_displ);
@@ -602,8 +601,4 @@ void magmablas_ztrsm_batched(
     magma_free(dinvA_displ);
     magma_free(dinvA_array);
     magma_free(dX_array);
-
-
 }
-
-

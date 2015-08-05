@@ -407,4 +407,3 @@ static magma_int_t check_solution(magma_int_t N, double *E1, double *E2, double 
     }
     return info_solution;
 }
-

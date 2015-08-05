@@ -483,4 +483,3 @@ magma_zpotf2_tile(
 
     return *info;
 }
-

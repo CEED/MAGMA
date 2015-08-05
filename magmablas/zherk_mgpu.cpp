@@ -201,4 +201,3 @@ magma_zherk_mgpu2(
 #undef dB
 #undef dC
 #undef STREAM_ID
-

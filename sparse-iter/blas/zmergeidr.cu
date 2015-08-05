@@ -164,4 +164,3 @@ magma_zidr_smoothing_2(
 
    return MAGMA_SUCCESS;
 }
-

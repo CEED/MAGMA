@@ -170,5 +170,3 @@ magmablas_zapply_transpose_vector_kernel_batched(
     magmablas_zapply_transpose_vector_devfunc(n, du+offsetu, db_array[batchid]+offsetb);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-

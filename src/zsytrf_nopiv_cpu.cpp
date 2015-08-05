@@ -330,4 +330,3 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
 
     return *info;
 }
-

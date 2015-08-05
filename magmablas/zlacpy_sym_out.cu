@@ -279,4 +279,3 @@ magmablas_zlacpy_sym_out(
 {
     magmablas_zlacpy_sym_out_q( uplo, m, n, rows, perm, dA, ldda, dB, lddb, magma_stream );
 }
-

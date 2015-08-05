@@ -410,8 +410,3 @@ magma_zgeqrf_expert_batched(
     return arginfo;
            
 }
-
-
-
-
-

@@ -16,7 +16,7 @@
 
 /***************************************************************************//**
  *
- * @ingroup magma_magmaDoubleComplex
+ * @ingroup magma_zaux3
  *
  *  magma_zlarfy applies an elementary reflector, or Householder matrix, H,
  *  to a n-by-n hermitian matrix C, from both the left and the right.
@@ -76,7 +76,7 @@ magma_zlarfy(
     dtmp = magma_cblas_zdotc(n, work, ione, V, ione);
     /*
     dtmp = c_zero;
-    for (magma_int_t j = 0; j < n ; j++)
+    for (magma_int_t j = 0; j < n; j++)
         dtmp = dtmp + MAGMA_Z_CNJG(work[j]) * V[j];
     */
 
@@ -89,5 +89,3 @@ magma_zlarfy(
     /* performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A */
     blasf77_zher2("L", &n, &c_neg_one, work, &ione, V, &ione, A, &lda);
 }
-
-

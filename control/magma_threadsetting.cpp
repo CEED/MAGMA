@@ -266,4 +266,3 @@ void magma_set_omp_numthreads(magma_int_t threads)
     #endif
 
 */
-

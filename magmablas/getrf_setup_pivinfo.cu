@@ -1,4 +1,4 @@
-/*
+    /*
     -- MAGMA (version 1.4) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -169,14 +169,3 @@ adjust_ipiv( magma_int_t *ipiv,
     }
     adjust_ipiv_kernel<<<1, m, 0, queue>>>(ipiv, m, offset);
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -483,5 +483,3 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n, magmaDoubleComplex **dA_array
 
 
 //==============================================================================
-
-

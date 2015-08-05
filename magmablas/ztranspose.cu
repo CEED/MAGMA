@@ -297,4 +297,3 @@ magmablas_ztranspose_batched(
 {
     magmablas_ztranspose_batched_q( m, n, dA_array, ldda, dAT_array, lddat, batchCount, magma_stream );
 }
-

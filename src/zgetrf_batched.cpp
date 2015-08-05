@@ -375,8 +375,6 @@ fin:
     cublasDestroy_v2(myhandle);
 #endif
 
-
-
     magma_free(dA_displ);
     magma_free(dW0_displ);
     magma_free(dW1_displ);
@@ -399,10 +397,4 @@ fin:
 #endif
     
     return arginfo;
-
 }
-
-
-
-
-

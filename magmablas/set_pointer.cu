@@ -108,5 +108,3 @@ void magma_idisplace_pointers(magma_int_t **output_array,
 */
     idisplace_pointers_kernel<<<batchCount, 1, 0, queue>>>(output_array, input_array, lda, row, column);
 }
-
-

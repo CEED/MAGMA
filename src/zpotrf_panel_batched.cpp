@@ -303,7 +303,3 @@ magma_zpotrf_rectile_batched(
     magma_free(dA_displ);
     return 0;
 }
-
-
-
-

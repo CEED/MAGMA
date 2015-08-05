@@ -592,5 +592,3 @@ void magmablas_zlarft_recztrmv_sm32x32_batched(
     zlarft_recztrmv_sm32x32_kernel_batched <<< grid, threads, sizeof(magmaDoubleComplex)*(m*n), queue >>> (m, n,  tau_array, Trec_array, ldtrec, Ttri_array, ldttri);
 }
 //===================================================================================================
-
-

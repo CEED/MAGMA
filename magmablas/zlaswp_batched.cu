@@ -299,4 +299,3 @@ magma_zlaswp_columnserial_batched(magma_int_t n, magmaDoubleComplex** dA_array, 
         n, dA_array, lda, k1, k2, ipiv_array); 
 
 }
-

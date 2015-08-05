@@ -129,6 +129,3 @@ magma_zlarfb_zgemm_batched(
     return 0;
 
 }
-
-
-
