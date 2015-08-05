@@ -57,7 +57,7 @@ int main( int argc, char** argv)
     cublasHandle_t handle = opts.handle;
 
     magma_queue_t queue = opts.queue;
-    //double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("%% If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "%% relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
@@ -211,25 +211,28 @@ int main( int argc, char** argv)
                     cublas_error = max(fabs(cublas_err), cublas_error);
                 }
 
-                    printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  \n",
-                       (int) batchCount, (int) M, (int) N, (int) K,
-                       magma_perf,  1000.*magma_time,
-                       cublas_perf, 1000.*cublas_time,
-                       cpu_perf,    1000.*cpu_time,
-                       magma_error, cublas_error);
+                bool okay = (magma_error < tol);
+                status += ! okay;
+                printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
+                   (int) batchCount, (int) M, (int) N, (int) K,
+                   magma_perf,  1000.*magma_time,
+                   cublas_perf, 1000.*cublas_time,
+                   cpu_perf,    1000.*cpu_time,
+                   magma_error, cublas_error, (okay ? "ok" : "failed"));
             }
             else {
                 // compute relative error for magma, relative to cublas
+                Cnorm = lapackf77_zlange( "M", &M, &NN, h_Ccublas, &ldc, work );
+                blasf77_zaxpy( &sizeC, &c_neg_one, h_Ccublas, &ione, h_Cmagma, &ione );
+                magma_error = lapackf77_zlange( "M", &M, &NN, h_Cmagma, &ldc, work ) / Cnorm;
 
-                    Cnorm = lapackf77_zlange( "M", &M, &NN, h_Ccublas, &ldc, work );
-                    blasf77_zaxpy( &sizeC, &c_neg_one, h_Ccublas, &ione, h_Cmagma, &ione );
-                    magma_error = lapackf77_zlange( "M", &M, &NN, h_Cmagma, &ldc, work ) / Cnorm;
-
-                    printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   ---   (  ---  )    %8.2e     ---\n",
-                       (int) batchCount, (int) M, (int) N, (int) K,
-                       magma_perf,  1000.*magma_time,
-                       cublas_perf, 1000.*cublas_time,
-                       magma_error );
+                bool okay = (magma_error < tol);
+                status += ! okay;
+                printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   ---   (  ---  )    %8.2e     ---  %s\n",
+                   (int) batchCount, (int) M, (int) N, (int) K,
+                   magma_perf,  1000.*magma_time,
+                   cublas_perf, 1000.*cublas_time,
+                   magma_error, (okay ? "ok" : "failed") );
             }
             
             TESTING_FREE_CPU( h_A  );

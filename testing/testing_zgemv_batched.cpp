@@ -55,7 +55,7 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     opts.lapack |= opts.check;
 
-    //double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     printf("%% trans = %s\n", lapack_trans_const(opts.transA) );
     printf("%% BatchCount  M     N     MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error\n");
@@ -141,7 +141,7 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                // compute relative error for both magma  relative to lapack,
+                // compute relative error for magma, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
                 magma_error = 0.0;
 
@@ -159,11 +159,13 @@ int main( int argc, char** argv)
                     magma_error = max(fabs(magma_err), magma_error);
                 }
 
-                printf("%10d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %8.2e  \n",
+                bool okay = (magma_error < tol);
+                status += ! okay;
+                printf("%10d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %8.2e  %s\n",
                    (int) batchCount, (int) M, (int) N,
                    magma_perf,  1000.*magma_time,
                    cpu_perf,    1000.*cpu_time,
-                   magma_error);
+                   magma_error, (okay ? "ok" : "failed"));
             }
             else {
                 printf("%10d %5d %5d  %7.2f (%7.2f)    ---   (  ---  )    ---\n",

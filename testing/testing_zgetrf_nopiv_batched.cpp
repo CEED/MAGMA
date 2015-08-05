@@ -86,6 +86,7 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t batchCount = 1;
+    magma_int_t status = 0;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -96,6 +97,8 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     magma_int_t columns;
     
+    double tol = opts.tolerance * lapackf77_dlamch("E");
+
     printf("%% BatchCount    M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
     printf("%%========================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -108,21 +111,30 @@ int main( int argc, char** argv)
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGETRF( M, N ) / 1e9 * batchCount;
             
-            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
-            TESTING_MALLOC_CPU(    ipiv, magma_int_t,     min_mn * batchCount);
-            TESTING_MALLOC_CPU(    h_A,  magmaDoubleComplex, n2     );
-            TESTING_MALLOC_PIN( h_R,  magmaDoubleComplex, n2     );
-            TESTING_MALLOC_DEV(  dA_magma,  magmaDoubleComplex, ldda*N * batchCount);
-            TESTING_MALLOC_DEV(  dipiv_magma,  magma_int_t, min_mn * batchCount);
-            TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
+            TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount );
+            TESTING_MALLOC_CPU( ipiv, magma_int_t,     min_mn * batchCount );
+            TESTING_MALLOC_CPU( h_A,  magmaDoubleComplex, n2 );
+            TESTING_MALLOC_CPU( h_R,  magmaDoubleComplex, n2 );
+            
+            TESTING_MALLOC_DEV( dA_magma,  magmaDoubleComplex, ldda*N * batchCount );
+            TESTING_MALLOC_DEV( dipiv_magma,  magma_int_t, min_mn * batchCount );
+            TESTING_MALLOC_DEV( dinfo_magma,  magma_int_t, batchCount );
 
-            magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
-            magma_malloc((void**)&dipiv_array, batchCount * sizeof(*dipiv_array));
+            TESTING_MALLOC_DEV( dA_array,    void*, batchCount );
+            TESTING_MALLOC_DEV( dipiv_array, void*, batchCount );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            // make it diagonally dominant, to not need pivoting
+            for( int s=0; s < batchCount; ++s ) {
+                for( int i=0; i < min_mn; ++i ) {
+                    h_A[ i + i*lda + s*lda*N ] = MAGMA_Z_MAKE(
+                        MAGMA_Z_REAL( h_A[ i + i*lda + s*lda*N ] ) + N,
+                        MAGMA_Z_IMAG( h_A[ i + i*lda + s*lda*N ] ));
+                }
+            }
             columns = N * batchCount;
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &columns, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &columns, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, columns, h_R, lda, dA_magma, ldda );
             
             /* ====================================================================
@@ -138,31 +150,29 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
+                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n", i, (int)cpu_info[i] );
                 }
             }
-            if (info != 0)
-                printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
-
-            /* ====================================================================
-               Performs operation using CUBLAS
-               =================================================================== */
+            if (info != 0) {
+                printf("magma_zgetrf_batched returned argument error %d: %s.\n",
+                        (int) info, magma_strerror( info ));
+            }
 
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                //#pragma unroll
-                for (int i=0; i < batchCount; i++)
-                {
-                  lapackf77_zgetrf(&M, &N, h_A + i*lda*N, &lda, ipiv + i * min_mn, &info);
+                for (int i=0; i < batchCount; i++) {
+                    lapackf77_zgetrf(&M, &N, h_A + i*lda*N, &lda, ipiv + i * min_mn, &info);
+                    assert( info == 0 );
                 }
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgetrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
             }
             
             /* =====================================================================
@@ -178,8 +188,8 @@ int main( int argc, char** argv)
             }
 
             double err = 0.0;
-            if ( opts.check ) {               
-                // initialize ipiv to 1,2,3,4,5,6
+            if ( opts.check ) {
+                // initialize ipiv to 1, 2, 3, ...
                 for (int i=0; i < batchCount; i++)
                 {
                     for (int k=0; k < min_mn; k++) {
@@ -190,14 +200,16 @@ int main( int argc, char** argv)
                 magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
                 for (int i=0; i < batchCount; i++)
                 {
-                  error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);
-                  if ( isnan(error) || isinf(error) ) {
-                      err = error;
-                      break;
-                  }
-                  err = max(fabs(error),err);
+                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);
+                    if ( isnan(error) || isinf(error) ) {
+                        err = error;
+                        break;
+                    }
+                    err = max( fabs(error), err );
                 }
-                 printf("   %8.2e\n", err );
+                bool okay = (err < tol);
+                status += ! okay;
+                printf("   %8.2e  %s\n", err, (okay ? "ok" : "failed") );
             }
             else {
                 printf("     ---  \n");
@@ -206,7 +218,8 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_CPU( h_A );
-            TESTING_FREE_PIN( h_R );
+            TESTING_FREE_CPU( h_R );
+
             TESTING_FREE_DEV( dA_magma );
             TESTING_FREE_DEV( dinfo_magma );
             TESTING_FREE_DEV( dipiv_magma );
@@ -218,5 +231,5 @@ int main( int argc, char** argv)
         }
     }
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }
