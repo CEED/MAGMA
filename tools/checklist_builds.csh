@@ -47,13 +47,13 @@ foreach build ( $* )
     $make clean >& /dev/null
 
     echo "$make lib " `date`
-    ($make lib  >! $builds/$build/lib-out.txt) >&! $builds/$build/lib-err.txt
+    ($make lib  >! $builds/$build/out-lib.txt) >&! $builds/$build/err-lib.txt
     if ( $? ) then
        echo "FAILED"
     endif
 
     echo "$make test -k" `date`
-    ($make test >! $builds/$build/test-out.txt) >&! $builds/$build/test-err.txt
+    ($make test >! $builds/$build/out-test.txt) >&! $builds/$build/err-test.txt
     if ( $? ) then
         echo "FAILED"
     endif
@@ -61,13 +61,13 @@ foreach build ( $* )
     cd sparse-iter
     echo "sparse:"
     echo "$make lib " `date`
-    ($make lib  >! ../$builds/$build/sparse-lib-out.txt) >&! ../$builds/$build/sparse-lib-err.txt
+    ($make lib  >! ../$builds/$build/out-sparse-lib.txt) >&! ../$builds/$build/err-sparse-lib.txt
     if ( $? ) then
         echo "FAILED"
     endif
 
     echo "$make test -k" `date`
-    ($make test >! ../$builds/$build/sparse-test-out.txt) >&! ../$builds/$build/sparse-test-err.txt
+    ($make test >! ../$builds/$build/out-sparse-test.txt) >&! ../$builds/$build/err-sparse-test.txt
     if ( $? ) then
         echo "FAILED"
     endif
