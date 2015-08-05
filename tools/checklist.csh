@@ -58,10 +58,10 @@ echo
 
 # fixed
 echo "========== define PRECISION_{s, d, c, z} outside s, d, c, z files, resp.   *** required fix ***"
-egrep '^ *# *define +PRECISION_s' */[dcz]*.{h,c,cu,cpp} sparse-iter/*/[dcz]*.{h,c,cu,cpp} sparse-iter/*/magma_[dcz]*.{h,c,cu,cpp} -l
-egrep '^ *# *define +PRECISION_d' */[scz]*.{h,c,cu,cpp} sparse-iter/*/[scz]*.{h,c,cu,cpp} sparse-iter/*/magma_[scz]*.{h,c,cu,cpp} -l
-egrep '^ *# *define +PRECISION_c' */[sdz]*.{h,c,cu,cpp} sparse-iter/*/[sdz]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdz]*.{h,c,cu,cpp} -l | egrep -v 'scnrm2.cu'
-egrep '^ *# *define +PRECISION_z' */[sdc]*.{h,c,cu,cpp} sparse-iter/*/[sdc]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdc]*.{h,c,cu,cpp} -l | egrep -v 'dznrm2.cu'
+egrep '^ *# *define +PRECISION_s' */[dcz]*.{h,c,cu,cpp} sparse-iter/*/[dcz]*.{h,c,cu,cpp} sparse-iter/*/magma_[dcz]*.{h,c,cu,cpp} -l | egrep -v 'core_s'
+egrep '^ *# *define +PRECISION_d' */[scz]*.{h,c,cu,cpp} sparse-iter/*/[scz]*.{h,c,cu,cpp} sparse-iter/*/magma_[scz]*.{h,c,cu,cpp} -l | egrep -v 'core_d'
+egrep '^ *# *define +PRECISION_c' */[sdz]*.{h,c,cu,cpp} sparse-iter/*/[sdz]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdz]*.{h,c,cu,cpp} -l | egrep -v 'core_c|scnrm2.cu'
+egrep '^ *# *define +PRECISION_z' */[sdc]*.{h,c,cu,cpp} sparse-iter/*/[sdc]*.{h,c,cu,cpp} sparse-iter/*/magma_[sdc]*.{h,c,cu,cpp} -l | egrep -v 'core_z|dznrm2.cu'
 echo
 
 # fixed
@@ -133,7 +133,7 @@ echo "========== routines in wrong documentation groups (2nd check)             
 echo "driver:"
 egrep 'ingroup.*_driver' $FILES -l | egrep -v 'checklist.csh|[sdcz](gesv|posv|gels|gesvd|gesdd|syev|heev|geev|hegvd|hesv|sygvd|hegvr|hegvx|sysv|cgeqrsv_gpu)'
 echo "comp:"
-egrep 'ingroup.*_comp'   $FILES -l | egrep -v 'checklist.csh|[sdcz](getrf|potrf|geqrf|hetrf|sytrf|gerbt|getri|getrs|potri|trtri|potrs|gelqf|geqlf|geqrs|geqp3|stedx|trevc|hetrs|sytrs|gehrd|hetrd|gebrd|hegst|gegqr|ungqr|unghr|ungtr|unmlq|unmql|unmqr|unmbr|unmtr)'
+egrep 'ingroup.*_comp'   $FILES -l | egrep -v 'checklist.csh|[sdcz](getrf|potrf|geqrf|hetrf|sytrf|gerbt|gerfs|getri|getrs|potri|trtri|potrs|gelqf|geqlf|geqrs|geqp3|stedx|trevc|hetrs|sytrs|gehrd|hetrd|gebrd|hegst|gegqr|ungqr|unghr|ungtr|unmlq|unmql|unmqr|unmbr|unmtr)'
 echo "aux:"
 egrep 'ingroup.*_aux'    $FILES -l | egrep -v 'checklist.csh|[sdcz](getf2|potf2|geqr2|la)'
 echo
