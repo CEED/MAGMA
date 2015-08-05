@@ -36,14 +36,14 @@ SRC := \
 	get_nb.cpp		\
 	magma_threadsetting.cpp	\
 	magma_timer.cpp		\
-	magmawinthread.cpp	\
+	magma_yield.cpp		\
+	magma_winthread.cpp	\
 	pthread_barrier.cpp	\
 	strlcpy.cpp		\
 	sqrt.cpp		\
 	thread_queue.cpp	\
 	trace.cpp		\
 	xerbla.cpp		\
-	magmaos.cpp		\
 
 # ilaenv was previously used by gesdd; it was the only required Fortran dependence
 #	ilaenv_f77.f		\

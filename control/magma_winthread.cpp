@@ -1,6 +1,6 @@
 /**
  *
- * magmawinthread.cpp
+ * magma_winthread.cpp
  *
  *  This file handles the mapping from pthreads calls to windows threads.
  *  MAGMA is a software package provided by Univ. of Tennessee,
@@ -16,7 +16,7 @@
  **/
 #if defined( _WIN32 ) || defined( _WIN64 )
 
-#include "magmawinthread.h"
+#include "magma_winthread.h"
 
 #include <limits.h>
 
@@ -26,8 +26,8 @@
 #include <stdio.h>
 #include <magma.h>
 
-CRITICAL_SECTION magmawinthread_static_initializer_check_lock;
-static int magmawinthread_initialized = 0;
+CRITICAL_SECTION magma_winthread_static_initializer_check_lock;
+static int magma_winthread_initialized = 0;
 
 extern "C"
 MAGMA_DLLPORT unsigned int MAGMA_CDECL pthread_self_id(void) {
@@ -64,14 +64,14 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_init(pthread_mutex_t *mutex, const p
 static int pthread_mutex_check_for_static_initialization( pthread_mutex_t *mutex ) {
     int retval = 0;
     /* This should be called once to initialize some structures */
-    if ( magmawinthread_initialized == 0 ) {
-        magmawinthread_initialized = 1;
-        InitializeCriticalSection( &magmawinthread_static_initializer_check_lock );
+    if ( magma_winthread_initialized == 0 ) {
+        magma_winthread_initialized = 1;
+        InitializeCriticalSection( &magma_winthread_static_initializer_check_lock );
     }
-    EnterCriticalSection( &magmawinthread_static_initializer_check_lock );
+    EnterCriticalSection( &magma_winthread_static_initializer_check_lock );
     if ( *mutex == PTHREAD_MUTEX_INITIALIZER )
         retval = pthread_mutex_init( mutex, NULL );
-    LeaveCriticalSection( &magmawinthread_static_initializer_check_lock );
+    LeaveCriticalSection( &magma_winthread_static_initializer_check_lock );
     return retval;
 }
 

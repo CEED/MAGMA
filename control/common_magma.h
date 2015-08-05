@@ -25,7 +25,7 @@
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 
-    #include "magmawinthread.h"
+    #include "magma_winthread.h"
     #include <windows.h>
     #include <limits.h>
     #include <io.h>

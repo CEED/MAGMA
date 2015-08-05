@@ -1,6 +1,6 @@
 /**
  *
- * magmawinthread.h
+ * magma_winthread.h
  *
  *  This file handles the mapping from pthreads calls to windows threads.
  *  MAGMA is a software package provided by Univ. of Tennessee,
@@ -14,8 +14,8 @@
  * replaced by MAGMA.
  *
  **/
-#ifndef MAGMAWINTHREAD_H
-#define MAGMAWINTHREAD_H
+#ifndef MAGMA_WINTHREAD_H
+#define MAGMA_WINTHREAD_H
 
 #if (defined( _WIN32 ) || defined( _WIN64 )) && ! defined( __MINGW32__ )
 
@@ -78,4 +78,4 @@ MAGMA_DLLPORT unsigned int MAGMA_CDECL pthread_self_id(void);
 
 #endif /* (_WIN32 || _WIN64) && ! __MINGW32__ */
 
-#endif /* MAGMAWINTHREAD_H */
+#endif /* MAGMA_WINTHREAD_H */
