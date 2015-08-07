@@ -12,6 +12,8 @@
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 #include "cublas_v2.h"
+#define COMPLEX
+
 /**
     Purpose
     -------
@@ -199,8 +201,11 @@ magma_zgetrs_batched(
 
     }
     else{
-
+        #ifdef COMPLEX
+        if(nrhs > 0)
+        #else
         if(nrhs > 1)
+        #endif
         {
             /* Solve A**T * X = B  or  A**H * X = B. */
             // solve 
