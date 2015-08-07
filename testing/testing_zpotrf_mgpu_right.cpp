@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     magma_int_t nb, nk, n_local, ldn_local;
 
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     ngpu0 = opts.ngpu;
 
     printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );

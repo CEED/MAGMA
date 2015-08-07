@@ -46,7 +46,7 @@ int main( int argc, char** argv)
     magma_int_t distblk = 0;
 
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     magma_int_t WANTZ = (opts.jobz == MagmaVec);
     double tol = opts.tolerance * lapackf77_dlamch("E");

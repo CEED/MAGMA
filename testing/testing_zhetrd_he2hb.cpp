@@ -61,7 +61,7 @@ int main( int argc, char** argv)
     magma_int_t ngpu = 1;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     NB = opts.nb;
     if (NB < 1)

@@ -3,7 +3,7 @@
 int main( int argc, char** argv )
 {
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         printf( "m %5d, n %5d, k %5d\n",

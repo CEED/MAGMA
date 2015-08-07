@@ -50,8 +50,8 @@ int main( int argc, char** argv)
 
     magma_int_t batchCount;
 
-    magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    magma_opts opts( MagmaOptsBatched );
+    opts.parse_opts( argc, argv );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     batchCount = opts.batchcount;
     double tol = opts.tolerance * lapackf77_dlamch("E");

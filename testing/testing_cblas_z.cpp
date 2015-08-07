@@ -120,7 +120,7 @@ int main( int argc, char** argv )
     MAGMA_UNUSED( x2_m );
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     opts.tolerance = max( 100., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");

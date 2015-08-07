@@ -42,7 +42,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex_ptr dA;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     printf("%% func     M     N     CPU GB/s (ms)       GPU GB/s (ms)     ||R||_F\n");
     printf("%%====================================================================\n");

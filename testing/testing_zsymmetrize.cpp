@@ -39,7 +39,7 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
 
     printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
     printf("%%   N   CPU GByte/s (ms)    GPU GByte/s (ms)    check\n");

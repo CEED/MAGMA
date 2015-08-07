@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     bool mkl_warning = false;
 
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     

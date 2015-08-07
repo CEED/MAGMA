@@ -564,7 +564,7 @@ int main( int argc, char** argv)
     magma_int_t     cpu = 0, nopiv = 0, nopiv_gpu = 0, row = 0, aasen = 0;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     // TODO: this doesn't work. Options need to be added to parse_opts()
     for( int i = 1; i < argc; ++i ) {

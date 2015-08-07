@@ -59,7 +59,7 @@ int main( int argc, char** argv )
     magma_int_t err;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     magmablasSetKernelStream( opts.queue );  // opts.handle also uses opts.queue
     
     printf( "Compares magma wrapper function to cublas function; all diffs should be exactly 0.\n\n" );

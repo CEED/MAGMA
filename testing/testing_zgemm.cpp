@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 

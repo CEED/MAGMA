@@ -154,8 +154,20 @@ void magma_assert_warn( bool condition, const char* msg, ... );
 
 #define MAX_NTEST 1050
 
-typedef struct magma_opts
+typedef enum {
+    MagmaOptsDefault = 0,
+    MagmaOptsBatched = 1000
+} magma_opts_t;
+
+class magma_opts
 {
+public:
+    // constructor
+    magma_opts( magma_opts_t flag=MagmaOptsDefault );
+    
+    // parse command line
+    void parse_opts( int argc, char** argv );
+    
     // matrix size
     magma_int_t ntest;
     magma_int_t msize[ MAX_NTEST ];
@@ -165,6 +177,10 @@ typedef struct magma_opts
     magma_int_t nmax;
     magma_int_t kmax;
     magma_int_t batchcount;
+    
+    magma_int_t default_nstart;
+    magma_int_t default_nend;
+    magma_int_t default_nstep;
     
     // scalars
     magma_int_t device;
@@ -215,9 +231,7 @@ typedef struct magma_opts
     // misc
     int flock_op;   // shared or exclusive lock
     int flock_fd;   // lock file
-} magma_opts;
-
-void parse_opts( int argc, char** argv, magma_opts *opts );
+};
 
 extern const char* g_platform_str;
 

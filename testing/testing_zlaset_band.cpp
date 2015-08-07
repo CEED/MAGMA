@@ -43,7 +43,7 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     nb = (opts.nb == 0 ? 32 : opts.nb);
 

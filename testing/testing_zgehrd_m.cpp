@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     eps   = lapackf77_dlamch( "E" );
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     

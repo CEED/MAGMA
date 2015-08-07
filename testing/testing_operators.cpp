@@ -145,7 +145,7 @@ int main( int argc, char** argv)
     bool                 eq3;
 
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
 
     // most operators are simple, so should be exactly the same.
     // some operators (divide, abs) have different implementations, so may differ slightly, within tol.

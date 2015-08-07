@@ -46,7 +46,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex_ptr dA;
     
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     magma_uplo_t uplo[] = { MagmaLower, MagmaUpper };
     

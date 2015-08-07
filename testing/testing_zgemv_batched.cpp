@@ -55,8 +55,8 @@ int main( int argc, char** argv)
     magmaDoubleComplex **X_array = NULL;
     magmaDoubleComplex **Y_array = NULL;
 
-    magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    magma_opts opts( MagmaOptsBatched );
+    opts.parse_opts( argc, argv );
     batchCount = opts.batchcount;
     opts.lapack |= opts.check;
 

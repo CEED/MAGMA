@@ -106,11 +106,11 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
 
-    magma_int_t batchCount = 1;
+    magma_int_t batchCount;
     magma_int_t column;
 
-    magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    magma_opts opts( MagmaOptsBatched );
+    opts.parse_opts( argc, argv );
     batchCount = opts.batchcount;
 
     double tol = opts.tolerance * lapackf77_dlamch("E");

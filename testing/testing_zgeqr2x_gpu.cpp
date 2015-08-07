@@ -48,7 +48,7 @@ int main( int argc, char** argv)
     #define BLOCK_SIZE 64
 
     magma_opts opts;
-    parse_opts( argc, argv, &opts );
+    opts.parse_opts( argc, argv );
     
     double tol = 10. * opts.tolerance * lapackf77_dlamch("E");
     
