@@ -56,9 +56,13 @@ ztrsv_backwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
             {
                  a = A[ (n-1) + (n-1) * lda - tx - step * lda];//rowwise access data in a coalesced way
             }
-            else
+            else if(transA == MagmaTrans)
             {    
                  a = A[ (n-1) + (n-1) * lda - tx * lda  - step];//columwise access data, not in a coalesced way
+            }
+            else
+            {    
+                 a = MAGMA_Z_CNJG( A[ (n-1) + (n-1) * lda - tx * lda  - step] );//columwise access data, not in a coalesced way
             }
 
             if(tx == step)
@@ -111,9 +115,13 @@ ztrsv_forwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
             {
                  a = A[tx + step * lda];//rowwise access data in a coalesced way
             }
-            else
+            else if(transA == MagmaTrans)
             {    
                  a = A[ tx * lda  + step];//columwise access data, not in a coalesced way
+            }
+            else
+            {    
+                 a = MAGMA_Z_CNJG( A[ tx * lda  + step] );//columwise access data, not in a coalesced way
             }
 
             if(tx == step)
@@ -244,30 +252,58 @@ ztrsv_trans_device(
  
     if (uplo == MagmaLower)
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {    
-            int jb = min(BLOCK_SIZE, n-i);
-            col -= jb;
-            // zgemvc is used in tranposed cose
-            gemvc_template_device<magmaDoubleComplex, 16, 8, 10000, 1>(i, jb, MAGMA_Z_ONE, A(col+jb, col), lda, sx+col+jb, 1, MAGMA_Z_ONE, sx+col, 1);
-            __syncthreads();
-
-            ztrsv_backwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
-            __syncthreads();
+        if (transA == MagmaTrans)
+        {
+            for(int i=0; i<n; i+=BLOCK_SIZE)
+            {    
+                int jb = min(BLOCK_SIZE, n-i);
+                col -= jb;
+                // zgemvc is used in tranposed cose
+                gemvc_template_device<magmaDoubleComplex, 16, 8, 1000000, 0>(i, jb, MAGMA_Z_ONE, A(col+jb, col), lda, sx+col+jb, 1, MAGMA_Z_ONE, sx+col, 1);
+                __syncthreads();
+                ztrsv_backwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
+                __syncthreads();
+            }
+        }
+        else
+        {
+            for(int i=0; i<n; i+=BLOCK_SIZE)
+            {    
+                int jb = min(BLOCK_SIZE, n-i);
+                col -= jb;
+                // zgemvc is used in tranposed cose
+                gemvc_template_device<magmaDoubleComplex, 16, 8, 1000000, 1>(i, jb, MAGMA_Z_ONE, A(col+jb, col), lda, sx+col+jb, 1, MAGMA_Z_ONE, sx+col, 1);
+                __syncthreads();
+                ztrsv_backwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
+                __syncthreads();
+            }
         }
     }
     else
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {    
-            int jb = min(BLOCK_SIZE, n-i);
-            col = i;
-
-            gemvc_template_device<magmaDoubleComplex, 16, 8, 10000, 1>(i, jb, MAGMA_Z_ONE, A(0, col), lda, sx, 1, MAGMA_Z_ONE, sx+col, 1);
-            __syncthreads();   
-
-            ztrsv_forwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
-            __syncthreads();
+        if (transA == MagmaTrans)
+        {
+            for(int i=0; i<n; i+=BLOCK_SIZE)
+            {    
+                int jb = min(BLOCK_SIZE, n-i);
+                col = i;
+                gemvc_template_device<magmaDoubleComplex, 16, 8, 1000000, 0>(i, jb, MAGMA_Z_ONE, A(0, col), lda, sx, 1, MAGMA_Z_ONE, sx+col, 1);
+                __syncthreads();   
+                ztrsv_forwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
+                __syncthreads();
+            }
+        }
+        else
+        {
+            for(int i=0; i<n; i+=BLOCK_SIZE)
+            {    
+                int jb = min(BLOCK_SIZE, n-i);
+                col = i;
+                gemvc_template_device<magmaDoubleComplex, 16, 8, 1000000, 1>(i, jb, MAGMA_Z_ONE, A(0, col), lda, sx, 1, MAGMA_Z_ONE, sx+col, 1);
+                __syncthreads();   
+                ztrsv_forwards_tri_device(transA, diag, jb, A(col, col), lda, b+col, incb, sx+col);
+                __syncthreads();
+            }
         }
     }
 
