@@ -788,7 +788,7 @@ batched = (
 	('testing_zgesv_nopiv_batched',   b + '               -c',  mn,   ''),
 	('testing_zgetrf_batched',        b + '              -c2',  mn,   ''),
 	('testing_zgetrf_nopiv_batched',  b + '              -c2',  mn,   ''),
-	('testing_zgetri_batched',        b + '               -c',  mn,   ''),
+	('testing_zgetri_batched',        b + '               -c',  n,   ''),
 	
 	('testing_zherk_batched',         b + '-L             -c',  mn,   ''),
 	('testing_zherk_batched',         b + '-L -C          -c',  mn,   ''),
