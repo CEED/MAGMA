@@ -22,8 +22,14 @@
        
        The batched version uses gemm_kernel_batched.cuh instead of gemm_kernel.cuh.
 */
+#if defined(ENABLE_CUGEM)    
+#include "cublas_v2.h"
+#endif
+#include "cublas_v2.h"
+
 #include "common_magma.h"
 #include "commonblas_z.h"
+
 
 #define PRECISION_z
 
@@ -133,30 +139,31 @@
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C" void
-magmablas_zgemm_batched(
-    magma_trans_t transA, magma_trans_t transB, magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
-    magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount, magma_queue_t queue )
+magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB, 
+                     magma_int_t m, magma_int_t n, magma_int_t k,
+                     magmaDoubleComplex alpha,
+                     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
+                     magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
+                     magmaDoubleComplex beta,
+                     magmaDoubleComplex **dC_array, magma_int_t lddc, 
+                     magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle )
 {
-    //if( (k < 32) || (k == 32 && m < 256) || (k == 32 && n < 256) || (k == 32 && transA==MagmaTrans) || (k == 32 && transA==MagmaConjTrans) || (m <= 32 && n <= 32) ) {
-    if( (k <= 32) || (m <= 32 && n <= 32) ) {
-        magmablas_zgemm_batched_k32(
-                  transA, transB, m, n, k,
-                  alpha, dA_array, ldda,
-                         dB_array, lddb,
-                  beta,  dC_array, lddc,
-                  batchCount, queue );
+    magma_int_t use_cublas = magma_zrecommend_cublas_gemm_batched(transA, transB, m, n, k);
+
+    if(use_cublas){
+        cublasZgemmBatched(myhandle, cublas_trans_const(transA), cublas_trans_const(transB),
+                     m, n, k,
+                     &alpha, (const magmaDoubleComplex**)dA_array,    ldda,
+                             (const magmaDoubleComplex**)dB_array,    lddb,
+                     &beta, dC_array, lddc, batchCount);
     }
     else{
-        magmablas_zgemm_batched_lg(
-                  transA, transB, m, n, k,
-                  alpha, dA_array, ldda,
-                         dB_array, lddb,
-                  beta,  dC_array, lddc,
-                  batchCount, queue );
+        magmablas_zgemm_batched(
+                    transA, transB, m, n, k,
+                    alpha, dA_array, ldda,
+                    dB_array, lddb,
+                    beta, dC_array, lddc, 
+                    batchCount, queue );
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////

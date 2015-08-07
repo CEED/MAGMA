@@ -198,7 +198,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     int k = -1;
     
     // fill in default values
-    opts->batchcount = 1000;
+    opts->batchcount = 300;
     opts->device   = 0;
     opts->align    = 32;
     opts->nb       = 0;  // auto

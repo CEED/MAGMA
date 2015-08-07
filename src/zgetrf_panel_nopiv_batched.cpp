@@ -49,7 +49,7 @@ magma_zgetrf_panel_nopiv_batched(
     if (arginfo != 0) return arginfo;
     if((m-nb) > 0){
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, nb, 0, batchCount, queue);
-        magmablas_ztrsm_work_batched(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+        magmablas_ztrsm_work_batched( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                               1, m-nb, nb, 
                               MAGMA_Z_ONE,
                               dA_array,    ldda, 
@@ -58,7 +58,7 @@ magma_zgetrf_panel_nopiv_batched(
                               dinvA_array, dinvA_length, 
                               dW1_displ,   dW2_displ, 
                               dW3_displ,   dW4_displ,
-                              1, batchCount, queue);
+                              1, batchCount, queue, myhandle);
     }
 #endif
     return 0;
@@ -133,7 +133,7 @@ magma_zgetrf_recpanel_nopiv_batched(
         //printf("calling update A2 with             m=%d n=%d k=%d\n",m2,n2,n1);
         
         magma_zdisplace_pointers(dW5_displ, dA_array, ldda, p1, p2, batchCount, queue); 
-        magmablas_ztrsm_work_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
+        magmablas_ztrsm_work_batched( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
                               n1, n2,
                               MAGMA_Z_ONE,
                               dA_displ,    ldda, // dA
@@ -142,15 +142,15 @@ magma_zgetrf_recpanel_nopiv_batched(
                               dinvA_array, dinvA_length,
                               dW1_displ,   dW2_displ, 
                               dW3_displ,   dW4_displ,
-                              1, batchCount, queue);
+                              1, batchCount, queue, myhandle);
 
         magma_zdisplace_pointers(dW1_displ, dA_array, ldda, p2, 0, batchCount, queue); 
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p2, p2, batchCount, queue); 
-        magmablas_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m2, n2, n1, 
-                              MAGMA_Z_NEG_ONE, dW1_displ, ldda, 
-                              dW5_displ, ldda, 
-                              MAGMA_Z_ONE,  dA_displ, ldda, 
-                              batchCount, queue);
+        magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m2, n2, n1, 
+                             MAGMA_Z_NEG_ONE, dW1_displ, ldda, 
+                             dW5_displ, ldda, 
+                             MAGMA_Z_ONE,  dA_displ, ldda, 
+                             batchCount, queue, myhandle);
         // panel on A2
         //printf("calling recursive panel on A2 with m=%d nb=%d min_recpnb %d\n",m2,n2,min_recpnb);
         arginfo = magma_zgetrf_recpanel_nopiv_batched(

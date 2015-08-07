@@ -27,6 +27,10 @@
 #include "testings.h"
 #include "batched_kernel_param.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
 
 void get_QR_error(magma_int_t M, magma_int_t N, magma_int_t min_mn,
                     magmaDoubleComplex *h_R,  magmaDoubleComplex *h_A, magma_int_t lda,
@@ -111,7 +115,7 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
 
     printf("%% BatchCount   M    N     MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub \n");
     printf("%%============================================================================================================================================================ \n");
@@ -208,15 +212,25 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.check ) {
                 cpu_time = magma_wtime();
-
-                for (int i=0; i < batchCount; i++)
+                // #define BATCHED_DISABLE_PARCPU
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
+                for (magma_int_t s=0; s < batchCount; s++)
                 {
-                    lapackf77_zgeqrf(&M, &N, h_A + i*lda*N, &lda, tau + i*min_mn, h_work + i * lwork, &lwork, &info);
-                  
-                    /* lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
-                                     &M, &N, h_A + i*lda*N, &lda, tau + i*min_mn, h_work + i * lwork, &N); */
+                    magma_int_t locinfo;
+                    lapackf77_zgeqrf(&M, &N, h_A + s * lda * N, &lda, tau + s * min_mn, h_work + s * lwork, &lwork, &locinfo);
+                    if (locinfo != 0)
+                        printf("lapackf77_zgeqrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
                 }
 
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
+                
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)

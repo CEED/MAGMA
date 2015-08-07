@@ -23,6 +23,9 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#include "magma_threadsetting.h"  // to work around MKL bug
+
+#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zherk_batched
@@ -64,6 +67,14 @@ int main( int argc, char** argv)
            "%% relative to CPU BLAS result.\n\n");
     printf("%% uplo = %s, transA = %s\n",
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
+    #if defined(PRECISION_c) || defined (PRECISION_z)
+    if(opts.transA == MagmaTrans)
+    {
+        opts.transA = MagmaConjTrans; 
+        printf("%% WARNING: transA = MagmaTrans changed to MagmaConjTrans\n");
+    }
+    #endif
+    
     printf("%% BatchCount   N     K   MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error \n");
     printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -94,7 +105,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( h_C,  magmaDoubleComplex, sizeC );
             TESTING_MALLOC_CPU( h_Cmagma,  magmaDoubleComplex, sizeC  );
             
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*An*batchCount );
+            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*Ak*batchCount );
             TESTING_MALLOC_DEV( d_C, magmaDoubleComplex, lddc*N*batchCount );
 
             magma_malloc((void**)&A_array, batchCount * sizeof(*A_array));
@@ -103,6 +114,10 @@ int main( int argc, char** argv)
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeC, h_C );
+            for (int i=0; i < batchCount; i++)
+            {
+               magma_zmake_hpd( N, h_C + i * ldc * N, ldc ); // need modification
+            }
             
             /* =====================================================================
                Performs operation using MAGMABLAS
@@ -143,7 +158,14 @@ int main( int argc, char** argv)
             /* =====================================================================
                Check the result
                =================================================================== */
-            if ( opts.check ) {
+            if ( opts.lapack ) {
+                
+                #ifdef MAGMA_WITH_MKL
+                // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
+                int threads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads( 1 );
+                #endif
+                
                 // compute relative error for magma, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
                 sizeC = ldc*N;
@@ -160,6 +182,11 @@ int main( int argc, char** argv)
                     magma_error = max(magma_error, current_error);
                 }
 
+                #ifdef MAGMA_WITH_MKL
+                // end single thread to work around MKL bug
+                magma_set_lapack_numthreads( threads );
+                #endif
+                
                 printf("%5d %5d %5d  %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
                        (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time,

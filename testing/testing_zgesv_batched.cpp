@@ -56,7 +56,8 @@ int main(int argc, char **argv)
     parse_opts( argc, argv, &opts );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
+
 
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;
@@ -154,44 +155,24 @@ int main(int argc, char **argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                //#define BATCHED_DISABLE_PARCPU
-                #ifndef BATCHED_DISABLE_PARCPU 
-                    magma_int_t nthreads=1;
-                    #if defined(_OPENMP)
-                    nthreads = magma_get_lapack_numthreads();
-                    #pragma omp parallel  num_threads(nthreads)
-                    {
-                        magma_set_lapack_numthreads(1);
-                        #endif
-                        magma_int_t cnt, thid=0, offset, ipivoff, locinfo, rhsoff;
-                        for(cnt=0; cnt < batchCount; cnt += nthreads) {
-                            #if defined(_OPENMP)
-                            thid    = omp_get_thread_num();
-                            #endif
-                            offset  = (thid+cnt)*N*lda;
-                            rhsoff  = (thid+cnt)*nrhs*ldb;
-                            ipivoff = (thid+cnt)*N;
-                            if( (thid+cnt) < batchCount) 
-                            {
-                                lapackf77_zgesv( &N, &nrhs, h_A + offset, &lda, ipiv + ipivoff, h_B + rhsoff, &ldb, &locinfo );
-                                if(locinfo != 0)
-                                    printf("Parallel-Batched lapackf77_zgesv matrix %d returned err %d: %s.\n",
-                                           int(thid+cnt), int(locinfo), magma_strerror( locinfo ));
-                            }
-                        }
-                    #if defined(_OPENMP)
+                // #define BATCHED_DISABLE_PARCPU
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
+                for (magma_int_t s=0; s < batchCount; s++)
+                {
+                    magma_int_t locinfo;
+                    lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv + s * N, h_B + s * ldb * nrhs, &ldb, &locinfo );
+                    if (locinfo != 0) {
+                        printf("lapackf77_zgesv matrix %d returned err %d: %s.\n",
+                                int(s), int(locinfo), magma_strerror( locinfo ));
                     }
+                }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
                     magma_set_lapack_numthreads(nthreads);
-                    #endif
-                #else
-                    for (magma_int_t s=0; s < batchCount; s++)
-                    {
-                        lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv + s * N, h_B + s * ldb * nrhs, &ldb, &info );
-                        if (info != 0) {
-                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n",
-                                    int(s), int(info), magma_strerror( info ));
-                        }
-                    }
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;

@@ -23,6 +23,11 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zposv_batched
 */
@@ -51,7 +56,7 @@ int main(int argc, char **argv)
     parse_opts( argc, argv, &opts );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
 
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;
@@ -148,15 +153,27 @@ int main(int argc, char **argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
+                // #define BATCHED_DISABLE_PARCPU
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
                 for (magma_int_t s=0; s < batchCount; s++)
                 {
-                    lapackf77_zposv( lapack_uplo_const(opts.uplo), &N, &nrhs, h_A + s * lda * N, &lda, h_B + s * ldb * nrhs, &ldb, &info );
+                    magma_int_t locinfo;
+                    lapackf77_zposv( lapack_uplo_const(opts.uplo), &N, &nrhs, h_A + s * lda * N, &lda, h_B + s * ldb * nrhs, &ldb, &locinfo );
+                    if (locinfo != 0){
+                        printf("lapackf77_zposv matrix %d returned err %d: %s.\n", 
+                               int(s), int(locinfo), magma_strerror( locinfo ));
+                        }
                 }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
-                    printf("lapackf77_zposv returned err %d: %s.\n",
-                           (int) info, magma_strerror( info ));
                 
                 printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int)batchCount, (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,

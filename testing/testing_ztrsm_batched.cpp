@@ -25,6 +25,11 @@
 #include "magma_lapack.h"
 #include "batched_kernel_param.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
+
 #define h_A(i,j,s) (h_A + (i) + (j)*lda + (s)*lda*Ak)
 
 
@@ -177,7 +182,7 @@ int main( int argc, char** argv)
                     dinvA_array,  dinvA_batchSize,
                     dW1_displ,   dW2_displ,
                     dW3_displ,   dW4_displ,
-                    1, batchCount, queue);
+                    1, batchCount, queue, opts.handle);
                 magma_time = magma_sync_wtime( queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
@@ -187,7 +192,7 @@ int main( int argc, char** argv)
                     M, N, alpha,
                     d_A_array, ldda,
                     d_B_array, lddb,
-                    batchCount, queue );
+                    batchCount, queue, opts.handle );
                 magma_time = magma_sync_wtime( queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
@@ -199,12 +204,12 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N*batchCount, h_B, ldb, d_B, lddb );
             zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, queue);
 
-            cublasHandle_t myhandle=opts.handle;
-            cublasSetStream(myhandle, queue);
             // CUBLAS version <= 6.0 has magmaDoubleComplex **            dA_array, no cast needed.
             // CUBLAS version    6.5 has magmaDoubleComplex const**       dA_array, requiring cast.
             // Correctly, it should be   magmaDoubleComplex const* const* dA_array, to avoid requiring cast.
             #if CUDA_VERSION >= 6050
+                cublasHandle_t myhandle=opts.handle;
+                cublasSetStream(myhandle, queue);
                 cublas_time = magma_sync_wtime( queue );
                 cublasZtrsmBatched(
                     myhandle, cublas_side_const(opts.side), cublas_uplo_const(opts.uplo),
@@ -223,6 +228,12 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
                 for (int s=0; s < batchCount; s++) {
                     blasf77_ztrsm(
                         lapack_side_const(opts.side), lapack_uplo_const(opts.uplo),
@@ -231,6 +242,9 @@ int main( int argc, char** argv)
                         h_A       + s * lda * Ak, &lda,
                         h_Blapack + s * ldb * N,  &ldb );
                 }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
             }

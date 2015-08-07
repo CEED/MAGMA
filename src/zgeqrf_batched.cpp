@@ -6,8 +6,8 @@
        November 2011
 
        @precisions normal z -> s d c
-       @author Tingxing Dong
        @author Azzam Haidar
+       @author Tingxing Dong
 */
 
 #include "common_magma.h"
@@ -90,7 +90,7 @@ magma_zgeqrf_batched(
 
 
     /* Local Parameter */
-    magma_int_t nb = 32;
+    magma_int_t nb = magma_get_zgeqrf_batched_nb(m);
     magma_int_t min_mn = min(m, n);
 
     /* Check arguments */

@@ -11,6 +11,7 @@
 */
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+#include "cublas_v2.h"
 /**
     Purpose
     -------
@@ -103,6 +104,10 @@ magma_zgetrs_nopiv_batched(
         return info;
     }
 
+    cublasHandle_t myhandle;
+    cublasCreate_v2(&myhandle);
+    cublasSetStream(myhandle, queue);
+
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dB_displ  = NULL;
     magmaDoubleComplex **dW1_displ  = NULL;
@@ -157,64 +162,104 @@ magma_zgetrs_nopiv_batched(
     magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
     magma_zdisplace_pointers(dB_displ, dB_array, lddb, 0, 0, batchCount, queue);
 
-    magma_queue_t cstream;
-    magmablasGetKernelStream(&cstream);
-
-    //printf(" I am after malloc getri\n");
-
     if (notran) {
-        // solve dwork = L^-1 * NRHS
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
-                n, nrhs,
-                MAGMA_Z_ONE,
-                dA_displ,       ldda, // dA
-                dB_displ,      lddb, // dB
-                dwork_array,        n, // dX //output
-                dinvA_array,  invA_msize, 
-                dW1_displ,   dW2_displ, 
-                dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+        if(nrhs > 1)
+        {
+            // solve dwork = L^-1 * NRHS
+            magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
+                    n, nrhs,
+                    MAGMA_Z_ONE,
+                    dA_displ,       ldda, // dA
+                    dB_displ,      lddb, // dB
+                    dwork_array,        n, // dX //output
+                    dinvA_array,  invA_msize, 
+                    dW1_displ,   dW2_displ, 
+                    dW3_displ,   dW4_displ,
+                    1, batchCount, queue, myhandle);
 
-        // solve X = U^-1 * dwork
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
-                n, nrhs,
-                MAGMA_Z_ONE,
-                dA_displ,       ldda, // dA
-                dwork_array,        n, // dB 
-                dB_displ,   lddb, // dX //output
-                dinvA_array,  invA_msize, 
-                dW1_displ,   dW2_displ, 
-                dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+            // solve X = U^-1 * dwork
+            magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
+                    n, nrhs,
+                    MAGMA_Z_ONE,
+                    dA_displ,       ldda, // dA
+                    dwork_array,        n, // dB 
+                    dB_displ,   lddb, // dX //output
+                    dinvA_array,  invA_msize, 
+                    dW1_displ,   dW2_displ, 
+                    dW3_displ,   dW4_displ,
+                    1, batchCount, queue, myhandle);
+        }
+        else
+        {
+            // solve dwork = L^-1 * NRHS
+            magmablas_ztrsv_outofplace_batched(MagmaLower, MagmaNoTrans, MagmaUnit, 
+                    n, 
+                    dA_displ,       ldda, // dA
+                    dB_displ,      1, // dB
+                    dwork_array,   // dX //output
+                    batchCount, queue, 0);
+
+            // solve X = U^-1 * dwork
+            magmablas_ztrsv_outofplace_batched(MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                    n, 
+                    dA_displ,       ldda, // dA
+                    dwork_array,        1, // dB 
+                    dB_displ,   // dX //output
+                    batchCount, queue, 0);
+        }
     }
     else{
-        /* Solve A**T * X = B  or  A**H * X = B. */
-        // solve 
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, trans, MagmaUnit, 1,
-                n, nrhs,
-                MAGMA_Z_ONE,
-                dA_displ,       ldda, // dA
-                dB_displ,      lddb, // dB
-                dwork_array,        n, // dX //output
-                dinvA_array,  invA_msize, 
-                dW1_displ,   dW2_displ, 
-                dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+        if(nrhs > 1)
+        {
+            /* Solve A**T * X = B  or  A**H * X = B. */
+            // solve 
+            magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, trans, MagmaUnit, 1,
+                    n, nrhs,
+                    MAGMA_Z_ONE,
+                    dA_displ,       ldda, // dA
+                    dB_displ,      lddb, // dB
+                    dwork_array,        n, // dX //output
+                    dinvA_array,  invA_msize, 
+                    dW1_displ,   dW2_displ, 
+                    dW3_displ,   dW4_displ,
+                    1, batchCount, queue, myhandle);
 
-        // solve 
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, trans, MagmaNonUnit, 1,
-                n, nrhs,
-                MAGMA_Z_ONE,
-                dA_displ,       ldda, // dA
-                dwork_array,        n, // dB 
-                dB_displ,   lddb, // dX //output
-                dinvA_array,  invA_msize, 
-                dW1_displ,   dW2_displ, 
-                dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+            // solve 
+            magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, trans, MagmaNonUnit, 1,
+                    n, nrhs,
+                    MAGMA_Z_ONE,
+                    dA_displ,       ldda, // dA
+                    dwork_array,        n, // dB 
+                    dB_displ,   lddb, // dX //output
+                    dinvA_array,  invA_msize, 
+                    dW1_displ,   dW2_displ, 
+                    dW3_displ,   dW4_displ,
+                    1, batchCount, queue, myhandle);
+        }
+        else
+        {
+            /* Solve A**T * X = B  or  A**H * X = B. */
+            // solve 
+            magmablas_ztrsv_outofplace_batched(MagmaUpper, trans, MagmaUnit, 
+                    n, 
+                    dA_displ,       ldda, // dA
+                    dB_displ,      1, // dB
+                    dwork_array,   // dX //output
+                    batchCount, queue, 0);
+            // solve 
+            magmablas_ztrsv_outofplace_batched(MagmaLower, trans, MagmaNonUnit,
+                    n, 
+                    dA_displ,       ldda, // dA
+                    dwork_array,       1, // dB 
+                    dB_displ,   // dX //output
+                    batchCount, queue, 0);
+        }
+
     }
 
-    magma_queue_sync(cstream);
+    magmablasSetKernelStream(queue);
+    magma_queue_sync(queue);
+    cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dB_displ);
@@ -226,6 +271,6 @@ magma_zgetrs_nopiv_batched(
     magma_free(dwork_array);
     magma_free( dinvA );
     magma_free( dwork );
-    
+
     return info;
 }

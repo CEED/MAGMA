@@ -83,7 +83,7 @@ magma_zgetrf_recpanel_batched(
                            dX_array, n1,
                            0, n1,
                            dpivinfo_array, batchCount, queue);
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
+        magmablas_ztrsm_outofplace_batched( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
                               n1, n2,
                               MAGMA_Z_ONE,
                               dA_displ,    ldda, // dA
@@ -92,31 +92,18 @@ magma_zgetrf_recpanel_batched(
                               dinvA_array, dinvA_length,
                               dW1_displ,   dW2_displ, 
                               dW3_displ,   dW4_displ,
-                              0, batchCount, queue);
+                              0, batchCount, queue, myhandle);
 
         magma_zdisplace_pointers(dW1_displ, dA_array, ldda, p2, 0, batchCount, queue); 
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p2, p2, batchCount, queue); 
 
         //if(DEBUG>0)printf("calling update A2(%d,%d) -= A(%d,%d)*A(%d,%d)  with             m=%d n=%d k=%d ldda %d\n",p2,p2,p2,0,p1,p2,m2,n2,n1,ldda);
 
-#if 0
-        magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
-        magmaDoubleComplex one  = MAGMA_Z_ONE;
-        cublasZgemmBatched(myhandle, CUBLAS_OP_N, CUBLAS_OP_N, m2, n2, n1,
-                                     &neg_one, (const magmaDoubleComplex**) dW1_displ, ldda,
-                                               (const magmaDoubleComplex**) dW5_displ, ldda,
-                                     &one,  dA_displ, ldda, batchCount );
-
-
-#else
-
-        magmablas_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m2, n2, n1, 
-                              MAGMA_Z_NEG_ONE, dW1_displ, ldda, 
-                              dW5_displ, ldda, 
-                              MAGMA_Z_ONE,  dA_displ, ldda, 
-                              batchCount, queue);
-#endif
-
+        magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m2, n2, n1, 
+                             MAGMA_Z_NEG_ONE, dW1_displ, ldda, 
+                             dW5_displ, ldda, 
+                             MAGMA_Z_ONE,  dA_displ, ldda, 
+                             batchCount, queue, myhandle);
         // panel on A2
         //if(DEBUG>0)printf("calling recursive panel on A2 with m=%d nb=%d min_recpnb %d\n",m2,n2,min_recpnb);
         magma_idisplace_pointers(dipiv_displ, dipiv_array, 1, p2, 0, batchCount, queue);

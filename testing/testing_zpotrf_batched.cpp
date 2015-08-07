@@ -22,6 +22,11 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf_batched
 */
@@ -51,7 +56,7 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
 
     printf("%% BatchCount   N      CPU GFlop/s (ms)      GPU GFlop/s (ms)    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("%%=======================================================\n");
@@ -81,7 +86,6 @@ int main( int argc, char** argv)
             magma_int_t columns = N * batchCount;
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &(columns), h_A, &lda, h_R, &lda );
 
-
             magma_zsetmatrix( N, columns, h_A, lda, d_A, ldda );
 
             /* ====================================================================
@@ -98,7 +102,8 @@ int main( int argc, char** argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zpotrf_batched matrix %d returned internal error %d\n", i, (int)cpu_info[i] );
+                    printf("magma_zpotrf_batched matrix %d returned diag error %d\n", i, (int)cpu_info[i] );
+                    //status = -1;
                     status = -1;
                 }
             }
@@ -110,21 +115,33 @@ int main( int argc, char** argv)
             }                
             if(status == -1)  goto cleanup;
 
+
+            /* =====================================================================
+               Performs operation using LAPACK
+               =================================================================== */
             if ( opts.lapack ) {
-                /* =====================================================================
-                   Performs operation using LAPACK
-                   =================================================================== */
                 cpu_time = magma_wtime();
-                for (int i=0; i < batchCount; i++)
+                // #define BATCHED_DISABLE_PARCPU
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
+                for (magma_int_t s=0; s < batchCount; s++)
                 {
-                    lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + i * lda * N, &lda, &info );
-                    if (info != 0)
-                        printf("lapackf77_zpotrf returned error %d: %s.\n",
-                               (int) info, magma_strerror( info ));
+                    magma_int_t locinfo;
+                    lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + s * lda * N, &lda, &locinfo );
+                    if (locinfo != 0)
+                        printf("lapackf77_zpotrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
                 }
+
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
+            
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */

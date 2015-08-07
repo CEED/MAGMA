@@ -9,15 +9,12 @@
        @author Tingxing Dong
        @author Azzam Haidar
 */
-#define USE_CUOPT
+#define PRECISION_z
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
-#if defined(USE_CUOPT)    
 #include "cublas_v2.h"
-#endif
 
-#define PRECISION_z
 
 
 /**
@@ -128,7 +125,8 @@ magma_zgeqrf_expert_batched(
 #define dA(i, j)  (dA + (i) + (j)*ldda)   // A(i, j) means at i row, j column
     
     /* Local Parameter */
-    magma_int_t nb = 32;
+    magma_int_t nb = magma_get_zgeqrf_batched_nb(m);
+    
     magma_int_t nnb = 8;
     magma_int_t min_mn = min(m, n);
 
@@ -164,24 +162,13 @@ magma_zgeqrf_expert_batched(
     }
 
 
-    magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0;
+    magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0, use_stream;
     magma_int_t ldw, offset; 
-    magma_int_t gemm_crossover = 100; 
 
-    // FORCING queue to NULL
-    magma_queue_t inputqueue=queue;
-    if( queue != NULL ){
-        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
-        queue = NULL;
-        magmablasSetKernelStream(NULL);
-    }
-#if defined(USE_CUOPT)    
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
-#else
-    cublasHandle_t myhandle=NULL;
-#endif
+
 
     magmaDoubleComplex **dW0_displ = NULL;
     magmaDoubleComplex **dW1_displ = NULL;
@@ -248,7 +235,7 @@ magma_zgeqrf_expert_batched(
     }
     */
     magma_int_t streamid;
-    const magma_int_t nbstreams=32;
+    const magma_int_t nbstreams=10;
     magma_queue_t stream[nbstreams];
     for(i=0; i<nbstreams; i++){
         magma_queue_create( &stream[i] );
@@ -320,16 +307,17 @@ magma_zgeqrf_expert_batched(
                 //-------------------------------------------
                 //          USE STREAM  GEMM
                 //-------------------------------------------
-                if( (m-i) > gemm_crossover  && (n-i-ib) > gemm_crossover)   
+                use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
+                if( use_stream )   
                 { 
                     // But since the code use the NULL stream everywhere, 
                     // so I don't need it, because the NULL stream do the sync by itself
                     //magma_device_sync(); 
+                    magma_queue_sync(queue); 
                     for(k=0; k<batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
                         magmablasSetKernelStream(stream[streamid]);
-                        
                         // the stream gemm must take cpu pointer 
                         magma_zlarfb_gpu_gemm(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                     m-i, n-i-ib, ib,
@@ -345,12 +333,11 @@ magma_zgeqrf_expert_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync();
-                    //if(queue != NULL)
-                    //{ 
-                    //for(int s=0; s<nbstreams; s++)
-                    //    magma_queue_sync(stream[s]);
-                    //}
-                    magmablasSetKernelStream(NULL);
+                    if( queue != NULL ){
+                        for(magma_int_t s=0; s<nbstreams; s++)
+                            magma_queue_sync(stream[s]);
+                    }
+                    magmablasSetKernelStream(queue);
                 }
                 //-------------------------------------------
                 //          USE BATCHED GEMM
@@ -360,7 +347,7 @@ magma_zgeqrf_expert_batched(
                     //direct trailing matrix in dW1_displ
                     magma_zdisplace_pointers(dW1_displ, dA_array, ldda, i, i+ib, batchCount, queue); 
 
-                    magma_zlarfb_gemm_batched(
+                    magma_zlarfb_gemm_batched( 
                                 MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
                                 m-i, n-i-ib, ib,
                                 (const magmaDoubleComplex**)dW0_displ, ldda,
@@ -368,7 +355,7 @@ magma_zgeqrf_expert_batched(
                                 dW1_displ,  ldda,
                                 dW4_displ,  ldw,
                                 dW5_displ, ldw,
-                                batchCount, myhandle, queue);
+                                batchCount, queue, myhandle);
                 }
             }// update the trailing matrix 
             //===============================================
@@ -382,15 +369,12 @@ magma_zgeqrf_expert_batched(
             }
     }
 
+    magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     for(k=0; k<nbstreams; k++){
         magma_queue_destroy( stream[k] );
     }
-    queue =  inputqueue;
-    magmablasSetKernelStream(queue);
-#if defined(USE_CUOPT)    
     cublasDestroy_v2(myhandle);
-#endif
 
     magma_free(dW0_displ);
     magma_free(dW1_displ);

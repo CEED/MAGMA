@@ -15,6 +15,9 @@ ZHDR := \
 	commonblas_z.h		\
 	ztrtri.h		\
 	zgerbt.h		\
+	zpotf2_devicesfunc.cuh		\
+	zlarfg_devicesfunc.cuh		\
+	ztrsv_devicesfunc.cuh 		\
 
 # additional dependencies
 strtri_diag.$(o_ext): strtri.h
@@ -99,7 +102,7 @@ ZSRC := \
 	ztrtri_lower.cu		\
 	ztrtri_upper.cu		\
 	zlarft_kernels.cu		\
-
+	ztrsv.cu		\
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
 	dgemm_tesla.cu		\
@@ -144,24 +147,35 @@ ZSRC += \
 ZSRC += \
 	zgeadd_batched.cu		\
 	zgemm_batched.cu		\
-	zgemm_fermi_batched.cu		\
-	zgemm_fermi_batched_k32.cu	\
 	zgerbt_func_batched.cu		\
 	zgetf2_kernels.cu		\
-	zherk_batched.cu		\
-	zherk_fermi_batched.cu		\
-	zherk_fermi_batched_k32.cu	\
 	zlaswp_batched.cu		\
+	zpotf2_kernels_old.cu		\
 	zpotf2_kernels.cu		\
 	zset_pointer.cu			\
 	ztrsm_batched.cu		\
 	ztrtri_diag_batched.cu		\
 	zgeqr2_kernels.cu		\
 	zgeqr2_batched.cu		\
+	zherk_batched.cu		\
+	zswapdblk_batched.cu   \
+	ztrsv_batched.cu 	\
 
 SRC += \
 	set_pointer.cu			\
 	getrf_setup_pivinfo.cu		\
+	zgemv_batched_core.cu		\
+	cgemv_batched_core.cu		\
+	dgemv_batched_core.cu		\
+	sgemv_batched_core.cu		\
+	zgemm_batched_core.cu		\
+	cgemm_batched_core.cu		\
+	dgemm_batched_core.cu		\
+	sgemm_batched_core.cu		\
+	ssyrk_batched_core.cu      \
+	dsyrk_batched_core.cu      \
+	cherk_batched_core.cu      \
+	zherk_batched_core.cu      \
 
 
 # ------------------------------------------------------------
@@ -193,29 +207,55 @@ clean:
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
+# additional dependencies
+spotf2_kernels.$(o_ext): spotf2_devicesfunc.cuh
+dpotf2_kernels.$(o_ext): dpotf2_devicesfunc.cuh
+cpotf2_kernels.$(o_ext): cpotf2_devicesfunc.cuh
+zpotf2_kernels.$(o_ext): zpotf2_devicesfunc.cuh
+spotf2_kernels_var.$(o_ext): spotf2_devicesfunc.cuh
+dpotf2_kernels_var.$(o_ext): dpotf2_devicesfunc.cuh
+cpotf2_kernels_var.$(o_ext): cpotf2_devicesfunc.cuh
+zpotf2_kernels_var.$(o_ext): zpotf2_devicesfunc.cuh
 
 # extra include dependencies
+ztrsv_batched.$(o_ext): ztrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ctrsv_batched.$(o_ext): ctrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+dtrsv_batched.$(o_ext): dtrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+strsv_batched.$(o_ext): strsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+
+ztrsv.$(o_ext): ztrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ctrsv.$(o_ext): ctrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+dtrsv.$(o_ext): dtrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+strsv.$(o_ext): strsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+
+zgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
+cgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
+dgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
+sgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
+
+
+zgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+cgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+dgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+sgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+
+zgemm_batched_core.$(o_ext): gemm_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+cgemm_batched_core.$(o_ext): gemm_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+dgemm_batched_core.$(o_ext): gemm_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+sgemm_batched_core.$(o_ext): gemm_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+
+zherk_batched_core.$(o_ext): herk_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+cherk_batched_core.$(o_ext): herk_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+dsyrk_batched_core.$(o_ext): herk_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+ssyrk_batched_core.$(o_ext): herk_template_kernel_batched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+
+sgemm_vbatched.$(o_ext): gemm_template_kernel_vbatched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+dgemm_vbatched.$(o_ext): gemm_template_kernel_vbatched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+cgemm_vbatched.$(o_ext): gemm_template_kernel_vbatched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+zgemm_vbatched.$(o_ext): gemm_template_kernel_vbatched.cuh gemm_template_device.cuh gemm_template_device_defs.cuh
+
 zgemm_fermi.$(o_ext): zgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
 cgemm_fermi.$(o_ext): cgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
 dgemm_fermi.$(o_ext): dgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
 sgemm_fermi.$(o_ext): sgemm_fermi_kernels.h gemm_stencil.cuh gemm_kernel.cuh gemm_stencil_defs.h
 
-zgemm_fermi_batched.$(o_ext): zgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-cgemm_fermi_batched.$(o_ext): cgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-dgemm_fermi_batched.$(o_ext): dgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-sgemm_fermi_batched.$(o_ext): sgemm_fermi_kernels_batched.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-
-zgemm_fermi_batched_k32.$(o_ext): zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-cgemm_fermi_batched_k32.$(o_ext): cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-dgemm_fermi_batched_k32.$(o_ext): dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-sgemm_fermi_batched_k32.$(o_ext): sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh gemm_kernel_batched.cuh gemm_stencil_defs.h
-
-zherk_fermi_batched.$(o_ext): zgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-cherk_fermi_batched.$(o_ext): cgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-dsyrk_fermi_batched.$(o_ext): dgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-ssyrk_fermi_batched.$(o_ext): sgemm_fermi_kernels_batched.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-
-zherk_fermi_batched_k32.$(o_ext): zgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-cherk_fermi_batched_k32.$(o_ext): cgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-dsyrk_fermi_batched_k32.$(o_ext): dgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h
-ssyrk_fermi_batched_k32.$(o_ext): sgemm_fermi_kernels_batched_k32.h gemm_stencil.cuh herk_kernel_batched.cuh gemm_stencil_defs.h

@@ -609,3 +609,175 @@ magma_int_t magma_zcomputecolumn_batched(magma_int_t m, magma_int_t paneloffset,
     return 0;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void
+kernel_zgetf2_sm_batched(
+    magma_int_t m, magma_int_t ib,
+    magmaDoubleComplex **dA_array, magma_int_t lda,
+    magma_int_t **ipiv_array,
+    magma_int_t *info)
+{
+
+
+    magma_int_t *ipiv = ipiv_array[blockIdx.z];
+
+    int tx = threadIdx.x;
+
+    magmaDoubleComplex *shared_A = shared_data;
+
+    magmaDoubleComplex *A = dA_array[blockIdx.z];
+
+    double *shared_x = (double*)(shared_A + m * ib);
+    int *shared_idx = (int*)(shared_x + zamax);
+
+    magmaDoubleComplex res ;
+
+    int length;
+
+    __shared__ int jp;
+
+// load data to shared memory
+    if(tx < m)
+    {
+        #pragma unroll 8
+        for(int i=0; i<ib; i++)
+        {
+           shared_A[tx + i * m] = A[tx + i * lda];
+
+           //printf("shared_A=%f ", shared_A[tx + i * m]);
+        }
+    }
+    __syncthreads();
+
+
+    for(int j=0 ; j<ib; j++)
+    {
+        length = m - j;
+
+        int offset =  j + j*m;
+
+//======================================
+        //find max
+        if(tx < zamax)
+        {
+                if( tx < length)
+                {
+                       res = shared_A[tx + offset];
+
+                      // printf("res=%f\n", res);
+
+                       shared_x[tx] = fabs(MAGMA_Z_REAL(res)) + fabs(MAGMA_Z_IMAG(res));
+
+                       shared_idx[tx] = tx;
+                }
+                else
+                {
+                       shared_x[tx] = 0.0;
+                       shared_idx[tx] = 0;
+                }
+        }
+        __syncthreads();
+
+
+        if(length >= zamax) // there are more than 128 threads working ==> all shared_x shared_idx are initialized here so I can call the fixed getidmax
+            magma_getidmax<zamax>(tx, shared_x, shared_idx);
+        else
+            magma_getidmax_n(min(zamax,length), tx, shared_x, shared_idx);
+
+         if(tx == 0)
+         {
+                  jp = shared_idx[0];
+
+
+                  if(shared_A[jp + offset] == 0.0) printf("error, A(jp,j) == 0.0\n");
+
+                  ipiv[j]  = j + (jp + 1); // Fortran Indexing 
+                  //if(blockIdx.x == 1) printf("jp=%d   ", jp + j + 1);
+         }
+
+
+         __syncthreads();
+//======================================
+         if( jp != 0) //swap
+         {
+            if (tx < ib) {
+                //printf("A[jp]= %f, A[j]=%f, jp=%d\n", shared_A[jp + j + tx*m], shared_A[j + tx*m], jp);
+
+               magmaDoubleComplex tmp = shared_A[jp + j + tx*m];
+               shared_A[jp + j + tx*m] = shared_A[j + tx*m];
+               shared_A[j + tx*m] = tmp;
+
+            }
+         }
+
+         __syncthreads();
+
+//======================================
+// Ger
+         if (tx < length && tx > 0)
+         {
+                res = shared_A[tx + offset];
+
+                res *= MAGMA_Z_DIV(MAGMA_Z_ONE, shared_A[0 + offset]); // scaling
+
+                shared_A[tx + offset] = res;
+
+                #pragma unroll 8
+                for(int i=1; i < ib-j; i++) 
+                {
+                    shared_A[tx + i*m + offset] += (MAGMA_Z_NEG_ONE) * shared_A[i*m + offset] * res;
+
+                    //printf("res= %f, shared_A=%f\n", res, shared_A[i*m + offset]);
+                }
+         }
+         __syncthreads();
+
+
+     } // end of j
+
+//======================================
+    // write back
+    if(tx < m)
+    {
+             #pragma unroll 8
+            for(int i=0; i<ib; i++)
+            {
+              A[tx + i * lda] =  shared_A[tx + i * m];
+            }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+extern "C"
+magma_int_t  magma_zgetf2_sm_batched(
+    magma_int_t m, magma_int_t ib,
+    magmaDoubleComplex **dA_array, magma_int_t lda,
+    magma_int_t **ipiv_array,
+    magma_int_t *info, 
+    magma_int_t batchCount, magma_queue_t queue)
+{
+/*
+    load entire matrix (m*ib) into shared memory and factorize it with pivoting and copy back.
+
+
+*/
+
+    size_t shared_size = sizeof(magmaDoubleComplex) * m * ib + (zamax) * (sizeof(double) + sizeof(int)) + sizeof(int);
+
+    if(shared_size > 47000)
+    {
+        printf("Shared memory in zgetf2 = %d, exceeds 48K, kernel can not lauched succesfully\n", shared_size);
+        return 1;
+    }
+
+    dim3 grid(1,1, batchCount);
+
+    kernel_zgetf2_sm_batched<<<grid, max(max(zamax, m), ib), shared_size, queue>>>
+                                                        ( m, ib, dA_array, lda, ipiv_array, info);
+
+
+    return 0;
+}
+
+

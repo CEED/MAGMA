@@ -44,6 +44,9 @@ SRC := \
 	thread_queue.cpp	\
 	trace.cpp		\
 	xerbla.cpp		\
+	get_batched_gemm_decision.cpp	\
+	get_batched_crossover.cpp		\
+	
 
 # ilaenv was previously used by gesdd; it was the only required Fortran dependence
 #	ilaenv_f77.f		\

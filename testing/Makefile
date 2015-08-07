@@ -194,7 +194,7 @@ ZSRC += \
 	testing_zposv_batched.cpp	\
 	testing_zpotrf_batched.cpp	\
 	testing_zgeqrf_batched.cpp	\
-
+    testing_ztrsv_batched.cpp  \
 # ----------
 # utilities
 ZSRC += \

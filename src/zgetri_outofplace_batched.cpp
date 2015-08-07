@@ -13,9 +13,7 @@
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
-#if defined(USE_CUOPT)    
 #include "cublas_v2.h"
-#endif
 
 /**
     Purpose
@@ -99,18 +97,10 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
     magma_int_t ib, j;
     magma_int_t nb = 256; //256; // BATRF_NB;
-    // FORCING queue to NULL
-    magma_queue_t inputqueue=queue;
-    if( queue != NULL ){
-        printf("   WARNING batched routines requires NULL stream forcing the stream to NULL\n");
-        queue = NULL;
-        magmablasSetKernelStream(NULL);
-    }
-#if defined(USE_CUOPT)    
+
     cublasHandle_t myhandle;
     cublasCreate_v2(&myhandle);
     cublasSetStream(myhandle, queue);
-#endif
 
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
@@ -133,7 +123,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
     magmaDoubleComplex* dinvdiagA;
     magmaDoubleComplex* dwork; // dinvdiagA and dwork are workspace in ztrsm
-    magma_int_t invdiagA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
+    magma_int_t invdiagA_msize = magma_roundup( n, BATRI_NB )*BATRI_NB;
     magma_int_t dwork_msize = n*nb;
     magma_zmalloc( &dinvdiagA, invdiagA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
@@ -182,7 +172,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, j, j, batchCount, queue);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount, queue);
         
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
+        magmablas_ztrsm_outofplace_batched( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
                 n-j, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
@@ -191,7 +181,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+                1, batchCount, queue, myhandle);
         
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 2 \n",j);
@@ -199,7 +189,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         magma_zdisplace_pointers(dW5_displ, dwork_array, n, 0, 0, batchCount, queue);
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, 0, j, batchCount, queue);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
-        magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
+        magmablas_ztrsm_outofplace_batched( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 1,
                 n, ib,
                 MAGMA_Z_ONE,
                 dA_displ,       ldda, // dA
@@ -208,18 +198,15 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount, queue);
+                1, batchCount, queue, myhandle);
     }
 
     // Apply column interchanges
     magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount, queue);
 
-    magma_queue_sync(queue);
-    queue =  inputqueue;
     magmablasSetKernelStream(queue);
-#if defined(USE_CUOPT)    
+    magma_queue_sync(queue);
     cublasDestroy_v2(myhandle);
-#endif
 
     magma_free(dA_displ);
     magma_free(dW1_displ);

@@ -98,7 +98,7 @@ int main( int argc, char** argv)
     magma_int_t     status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
     
     batchCount = opts.batchcount;
     magma_int_t columns;
@@ -169,7 +169,6 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using CUBLAS
                =================================================================== */
-
             magma_zsetmatrix( M, columns, h_R, lda, dA,  ldda );
             zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount, queue);
 
@@ -185,50 +184,29 @@ int main( int argc, char** argv)
             }
             cublas_time = magma_sync_wtime(queue) - cublas_time;
             cublas_perf = gflops / cublas_time;
-
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 // #define BATCHED_DISABLE_PARCPU
-                #ifndef BATCHED_DISABLE_PARCPU 
-                    magma_int_t nthreads=1;
-                    #if defined(_OPENMP)
-                    nthreads = magma_get_lapack_numthreads();
-                    #pragma omp parallel  num_threads(nthreads)
-                    {
-                        magma_set_lapack_numthreads(1);
-                        #endif
-                        magma_int_t cnt, thid=0, offset, ipivoff, locinfo;
-                        for(cnt=0; cnt < batchCount; cnt += nthreads) {
-                            #if defined(_OPENMP)
-                            thid    = omp_get_thread_num();
-                            #endif
-                            offset  = (thid+cnt)*N*lda;
-                            ipivoff = (thid+cnt)*min_mn;                  
-                            if ( thid+cnt < batchCount ) {
-                                lapackf77_zgetrf(&M, &N, h_A + offset, &lda, ipiv + ipivoff, &locinfo);
-                                if (locinfo != 0) {
-                                    printf("Parallel-Batched lapackf77_zgetrf matrix %d returned err %d: %s.\n",
-                                            int(thid+cnt), int(locinfo), magma_strerror( locinfo ));
-                                }
-                            }
-                        }
-                        #if defined(_OPENMP)
-                    }
-                    magma_set_lapack_numthreads(nthreads);
-                    #endif
-                #else
-                    for (magma_int_t s=0; s < batchCount; s++)
-                    {
-                        lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &info);
-                        if (info != 0) {
-                            printf("lapackf77_zgesv matrix %d returned err %d: %s.\n",
-                                    int(s), int(info), magma_strerror( info ));
-                        }
-                    }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
                 #endif
+                for (magma_int_t s=0; s < batchCount; s++)
+                {
+                    magma_int_t locinfo;
+                    lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &locinfo);
+                    if (locinfo != 0)
+                        printf("lapackf77_zgetrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
+                }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
+                
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
             }

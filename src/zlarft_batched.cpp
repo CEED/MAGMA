@@ -11,6 +11,7 @@
 #include "common_magma.h"
 #define  max_shared_bsiz 32
 
+#define RFT_MAG_GEM
 
 static    magmaDoubleComplex one   = MAGMA_Z_ONE;
 static    magmaDoubleComplex zero  = MAGMA_Z_ZERO;
@@ -19,8 +20,11 @@ static    magmaDoubleComplex zero  = MAGMA_Z_ZERO;
 //===================================================================================================================
 //===================================================================================================================
 extern "C" void
-magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, magmaDoubleComplex **v_array, magma_int_t ldv,
-                    magmaDoubleComplex **tau_array, magmaDoubleComplex **T_array, magma_int_t ldt, magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
+magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, 
+                    magmaDoubleComplex **v_array, magma_int_t ldv,
+                    magmaDoubleComplex **tau_array, 
+                    magmaDoubleComplex **T_array, magma_int_t ldt, 
+                    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
     if( k <= 0) return;
 
@@ -30,15 +34,17 @@ magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, magmaDoubleComplex **
 #define USE_GEMV2
 #define use_gemm_larft_sm32
 
-#if defined(use_gemm_larft_sm32)
-    //magmablas_zgemm_batched( MagmaConjTrans, MagmaNoTrans, k, k, n, MAGMA_Z_ONE, v_array, ldv, v_array, ldv, MAGMA_Z_ZERO, T_array, ldt, batchCount, queue);
-    cublasZgemmBatched(myhandle, CUBLAS_OP_C, CUBLAS_OP_N, k, k, n,
-                             &one, (const magmaDoubleComplex**) v_array, ldv,
-                                    (const magmaDoubleComplex**) v_array, ldv,
-                             &zero,  T_array, ldt, batchCount);
-
-    magmablas_zlaset_batched(MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, T_array, ldt, batchCount, queue);
-#else
+    #if defined(use_gemm_larft_sm32)
+    magma_zgemm_batched( MagmaConjTrans, MagmaNoTrans, 
+                         k, k, n, 
+                         MAGMA_Z_ONE, v_array, ldv, 
+                         v_array, ldv, 
+                         MAGMA_Z_ZERO, T_array, ldt, 
+                         batchCount, queue, myhandle);
+    magmablas_zlaset_batched(MagmaLower, k, k, 
+            MAGMA_Z_ZERO, MAGMA_Z_ZERO, 
+            T_array, ldt, batchCount, queue);
+    #else
     #if 1
     for(int i=0; i<k; i++)
     {
@@ -60,7 +66,7 @@ magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, magmaDoubleComplex **
         //seems to be very slow when k=32 while the one by one loop above is faster
         zlarft_gemv_loop_inside_kernel_batched(n, k, tau_array, v_array, ldv, T_array, ldt, batchCount, queue); 
     #endif
-#endif
+    #endif
      //==================================
      //          TRMV
      //==================================
@@ -75,7 +81,6 @@ magma_zlarft_sm32x32_batched(magma_int_t n, magma_int_t k, magmaDoubleComplex **
 //===================================================================================================================
 //===================================================================================================================
 //===================================================================================================================
-#define RFT_MAG_GEM
 extern "C" magma_int_t
 magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T, 
                 magmaDoubleComplex **v_array, magma_int_t ldv,
@@ -134,19 +139,12 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
     //GEMV compute the whole triangular upper portion of T (phase 1)
     // TODO addcublas to check perf
 
-#ifdef RFT_MAG_GEM
-    magmablas_zgemm_batched( MagmaConjTrans, MagmaNoTrans, 
-            k, k, n, 
-            one,  v_array, ldv, 
-                  v_array, ldv, 
-            zero, dTstep_array, ldtstep, 
-            batchCount, queue);
-#else
-    cublasZgemmBatched(myhandle, CUBLAS_OP_C, CUBLAS_OP_N, k, k, n,
-                             &one, (const magmaDoubleComplex**) v_array, ldv,
-                                    (const magmaDoubleComplex**) v_array, ldv,
-                             &zero, dTstep_array, ldtstep, batchCount);
-#endif
+    magma_zgemm_batched( MagmaConjTrans, MagmaNoTrans, 
+                         k, k, n, 
+                         one,  v_array, ldv, 
+                               v_array, ldv, 
+                         zero, dTstep_array, ldtstep, 
+                         batchCount, queue, myhandle);
 
     magmablas_zlaset_batched(MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dTstep_array, ldtstep, batchCount, queue);
     // no need for it as T is expected to be lower zero
@@ -180,20 +178,12 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
 
             magma_zdisplace_pointers(dW1_displ, dTstep_array, ldtstep, 0, j, batchCount, queue);
             magma_zdisplace_pointers(dW2_displ, T_array,     ldt, 0, j, batchCount, queue);
-#ifdef RFT_MAG_GEM
-            magmablas_zgemm_batched( MagmaNoTrans, MagmaNoTrans, 
-                    prev_n, mycol, prev_n, 
-                    one,  T_array, ldt, 
-                          dW1_displ, ldtstep, 
-                    zero, dW2_displ, ldt, 
-                    batchCount, queue );
-#else
-            cublasZgemmBatched(myhandle, CUBLAS_OP_N, CUBLAS_OP_N, 
-                    prev_n, mycol, prev_n,
-                    &one, (const magmaDoubleComplex**) T_array, ldt,
-                          (const magmaDoubleComplex**) dW1_displ, ldtstep,
-                    &zero, dW2_displ, ldt, batchCount);
-#endif
+            magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, 
+                                 prev_n, mycol, prev_n, 
+                                 one,  T_array, ldt, 
+                                       dW1_displ, ldtstep, 
+                                 zero, dW2_displ, ldt, 
+                                 batchCount, queue, myhandle);
 
             // update my rectangular portion (prev_n,mycol) using sequence of gemv 
             magma_zdisplace_pointers(dW1_displ, dTstep_array, ldtstep, j, j, batchCount, queue);

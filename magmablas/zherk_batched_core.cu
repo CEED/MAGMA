@@ -5,31 +5,25 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> s d c
+       @precisions normal z
 
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
        @author Azzam Haidar
-
-       [zcds]gemm_fermi.cu          defines the CPU driver.
-       [zcds]gemm_fermi_kernels.h   defines the block sizes for each precision.
-       gemm_stencil_defs.h          defines types and functions for precision-independent code.
+       @author Ahmad Abdelfattah
        
-       These files are included multiple times, once for each transpose version.
-       herk_stencil.cuh             defines the GPU kernel (device function).
-       herk_kernel_batched.cuh              defines the GPU kernel (global function).
-       
-       The batched version uses herk_kernel_batched.cuh instead of herk_kernel.cuh.
 */
-#include "common_magma.h"
-#include "commonblas_z.h"
 
+#include "common_magma.h"
 #define PRECISION_z
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-#include "zgemm_fermi_kernels_batched_k32.h"
+#include "herk_template_kernel_batched.cuh"
+#include "gemm_config/zgemm_param_nn.h"
+#include "gemm_config/zgemm_param_nt.h"
+#include "gemm_config/zgemm_param_tn.h"
+#include "gemm_config/zgemm_param_tt.h"
+#define version(s,v) s ## _V_ ## v
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -132,13 +126,15 @@
             max( 1, m ).
     @ingroup magma_zblas3
     ********************************************************************/
-extern "C" void
-magmablas_zherk_batched_k32(
-    magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
+void
+magmablas_zherk_batched(
+    magma_uplo_t uplo, magma_trans_t trans, 
+    magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
     double beta,
-    magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount, magma_queue_t queue )
+    magmaDoubleComplex **dC_array, magma_int_t lddc, 
+    magma_int_t batchCount, magma_queue_t queue )
 {
     magmaDoubleComplex cbeta  = MAGMA_Z_MAKE( beta, 0. );
     magmaDoubleComplex calpha = MAGMA_Z_MAKE( alpha, 0. );
@@ -146,7 +142,11 @@ magmablas_zherk_batched_k32(
     magma_int_t info = 0;
     if      ( uplo != MagmaUpper && uplo != MagmaLower )
         info = -1;
+    #if defined(PRECISION_c) || defined(PRECISION_z) 
+    else if ( trans != MagmaNoTrans && trans != MagmaConjTrans )
+    #else 
     else if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
+    #endif
         info = -2;
     else if ( n < 0 )
         info = -3;
@@ -172,88 +172,45 @@ magmablas_zherk_batched_k32(
     // CUDA ARCH 2.x (Fermi) version
     if ( n <= 0 || k <= 0 )
         return;
-    
+
+    // we have two shapes only (nc or cn)
+    magma_int_t shape;
+    if      (trans == MagmaNoTrans)   {shape = 0;} // nc
+    else                              {shape = 1;} // cn
+        
+    //TODO: probably the texture init code should be placed here
+
     size_t offsetA = 0;
-    int TransA = 0, TransB = 0;
-
-    if      ( trans == MagmaNoTrans )
-        #if defined(PRECISION_z) || defined(PRECISION_c)     
-        TransB = 2;
-        #else
-        TransB = 1;
-        #endif
-    else if ( trans == MagmaTrans || trans == MagmaConjTrans)
-        #if defined(PRECISION_z) || defined(PRECISION_c)     
-        TransA = 2;
-        #else
-        TransA = 1;
-        #endif
-
-
-    #ifdef TEXTURE_1D
-        size_t sizeA = (size_t) ldda * (size_t) (!TransA ? k : n);
-
-        size_t CUBLAS_MAX_1DBUF_SIZE = ((1 << 27) - 512);
-        if ( sizeA >= CUBLAS_MAX_1DBUF_SIZE )
-        {
-            printf("not supported \n"); // TODO call cublas
-            return;
-        }
-        // Set textures parameters
-        tex_ref_A.normalized = false;
-        tex_ref_A.filterMode = cudaFilterModePoint;
-        tex_ref_A.addressMode[0] = cudaAddressModeClamp;
-
-        // Bind A and B to texture references
-        cudaError_t err;
-        err = cudaBindTexture(&offsetA, tex_ref_A, dA_array[0], sizeA*sizeof(magmaDoubleComplex));
-        if ( err != cudaSuccess ) {
-            fprintf( stderr, "cannot bind A to texture: %s (%d)\n", cudaGetErrorString(err), err );
-            return;
-        }
-    #endif
-
-    // Set up grids
-    dim3 dimBlock(DIM_X, DIM_Y);
-
+    size_t offsetB = 0;
     offsetA = offsetA/sizeof(magmaDoubleComplex);
- 
-    if ( TransA == 0 && TransB == 1 ) {
-        dim3 dimGrid( magma_ceildiv( n, BLK_M_nt ),
-                      magma_ceildiv( n, BLK_N_nt ),
-                      batchCount );
-        magmablas_z_herk_kernel_fermi_nt_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
-            (int)offsetA, (int)offsetA );
+    offsetB = offsetB/sizeof(magmaDoubleComplex);
+    
+    switch(shape)
+    {
+        case 0: // nc
+            {
+                if(k <= 8)
+                {
+                    // version 58
+                    herk_template_batched_nt<magmaDoubleComplex, version(NT,58), 0, 1>
+                    (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
+                }
+                else
+                {
+                    // version 29
+                    herk_template_batched_nt<magmaDoubleComplex, version(NT,29), 0, 1>
+                    (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
+                }
+            }
+            break;
+        case 1: // cn
+            {
+                // version 72
+                herk_template_batched_tn<magmaDoubleComplex, version(TN,72), 1, 0>
+                (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
+            }
+            break;
+        default:; // propose something
     }
-    else if ( TransA == 0 && TransB == 2 ) {
-        dim3 dimGrid( magma_ceildiv( n, BLK_M_nc ),
-                      magma_ceildiv( n, BLK_N_nc ),
-                      batchCount );
-         magmablas_z_herk_kernel_fermi_nc_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
-            (int)offsetA, (int)offsetA );
-    }
-    else if ( TransA == 1 && TransB == 0 ) {
-        dim3 dimGrid( magma_ceildiv( n, BLK_M_tn ),
-                      magma_ceildiv( n, BLK_N_tn ),
-                      batchCount );
-         magmablas_z_herk_kernel_fermi_tn_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
-            (int)offsetA, (int)offsetA );
-    }
-    else if ( TransA == 2 && TransB == 0 ) {
-        dim3 dimGrid( magma_ceildiv( n, BLK_M_cn ),
-                      magma_ceildiv( n, BLK_N_cn ),
-                      batchCount );
-         magmablas_z_herk_kernel_fermi_cn_batched<<< dimGrid, dimBlock, 0, queue >>>(
-            uplo, n, k, dA_array, ldda, dA_array, ldda, dC_array, lddc, calpha, cbeta,
-            (int)offsetA, (int)offsetA );
-    }
-
-    #ifdef TEXTURE_1D
-        cudaUnbindTexture( tex_ref_A );
-    #endif
 }
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////

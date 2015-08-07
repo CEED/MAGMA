@@ -23,6 +23,11 @@
 #include "magma.h"
 #include "magma_lapack.h"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#include "magma_threadsetting.h"
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgemm_batched
 */
@@ -124,6 +129,12 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                magma_int_t nthreads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads(1);
+                magma_set_omp_numthreads(nthreads);
+                #pragma omp parallel for schedule(dynamic)
+                #endif
                 for (int i=0; i < batchCount; i++)
                 {
                    blasf77_zgemv(
@@ -133,6 +144,9 @@ int main( int argc, char** argv)
                                        h_X + i*Xm, &incx,
                                &beta,  h_Y + i*Ym, &incy );
                 }
+                #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
+                    magma_set_lapack_numthreads(nthreads);
+                #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
             }

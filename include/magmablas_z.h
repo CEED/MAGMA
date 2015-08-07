@@ -603,6 +603,28 @@ magmablas_zswapdblk(
   /*
    * Level 2 BLAS (alphabetical order)
    */
+void magmablas_ztrsv(
+    magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
+    magma_int_t n,
+    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
+    magmaDoubleComplex *b, magma_int_t incb,
+    magma_queue_t queue);
+
+void magmablas_ztrsv_work_batched(
+    magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
+    magma_int_t n,
+    magmaDoubleComplex ** A_array, magma_int_t lda,
+    magmaDoubleComplex **b_array, magma_int_t incb,
+    magmaDoubleComplex **x_array,
+    magma_int_t batchCount, magma_queue_t queue);
+
+void magmablas_ztrsv_outofplace(
+    magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
+    magma_int_t n,
+    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
+    magmaDoubleComplex *b, magma_int_t incb,
+    magmaDoubleComplex *x, magma_queue_t queue, magma_int_t flag);
+
 void
 magmablas_zgemv(
     magma_trans_t trans, magma_int_t m, magma_int_t n,
@@ -611,7 +633,6 @@ magmablas_zgemv(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr       dy, magma_int_t incy );
-
 
 void
 magmablas_zgemv_conjv(

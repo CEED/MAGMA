@@ -57,7 +57,8 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
+
 
     printf("%% batchCount    M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
     printf("%%===================================================================================================\n");

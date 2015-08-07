@@ -131,27 +131,18 @@
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C" void
-magmablas_zherk_batched(
+magma_zherk_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
     double alpha,
     magmaDoubleComplex const * const * dA_array, magma_int_t ldda,
     double beta,
     magmaDoubleComplex **dC_array, magma_int_t lddc, magma_int_t batchCount, magma_queue_t queue )
 {
-    if( k <= 32 ) {
-        magmablas_zherk_batched_k32(
-                  uplo, trans, n, k,
-                  alpha, dA_array, ldda,
-                  beta,  dC_array, lddc,
-                  batchCount, queue );
-    }
-    else{
-        magmablas_zherk_batched_lg(
-                  uplo, trans, n, k,
-                  alpha, dA_array, ldda,
-                  beta,  dC_array, lddc,
-                  batchCount, queue );
-    }
+    magmablas_zherk_batched(
+    uplo, trans, n, k,
+    alpha, dA_array, ldda,
+    beta, dC_array, lddc, 
+    batchCount, queue );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

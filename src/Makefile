@@ -346,3 +346,19 @@ clean:
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
+
+# additional dependencies
+spotrf_batched.$(o_ext): ../control/batched_kernel_param.h
+dpotrf_batched.$(o_ext): ../control/batched_kernel_param.h
+cpotrf_batched.$(o_ext): ../control/batched_kernel_param.h
+zpotrf_batched.$(o_ext): ../control/batched_kernel_param.h
+#
+sgetrf_batched.$(o_ext): ../control/batched_kernel_param.h
+dgetrf_batched.$(o_ext): ../control/batched_kernel_param.h
+cgetrf_batched.$(o_ext): ../control/batched_kernel_param.h
+zgetrf_batched.$(o_ext): ../control/batched_kernel_param.h
+#
+sgeqrf_batched.$(o_ext): ../control/batched_kernel_param.h
+dgeqrf_batched.$(o_ext): ../control/batched_kernel_param.h
+cgeqrf_batched.$(o_ext): ../control/batched_kernel_param.h
+zgeqrf_batched.$(o_ext): ../control/batched_kernel_param.h

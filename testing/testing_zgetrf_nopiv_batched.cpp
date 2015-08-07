@@ -92,7 +92,8 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     //opts.lapack |= opts.check;
 
-    magma_queue_t queue = NULL; // The batched routine requires stream NULL
+    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
+
 
     batchCount = opts.batchcount;
     magma_int_t columns;
