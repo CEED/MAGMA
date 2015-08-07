@@ -424,24 +424,24 @@ int main( int argc, char** argv )
     printf( "LAPACK -> magma_xxxxx_const     %s\n", (s == gStatus ? "ok" : "failed"));
 
     // ------------------------------------------------------------
-    #ifdef HAVE_clAmdBlas
+    #ifdef HAVE_clBLAS
     s = gStatus;
-    check( amdblas_order_const( MagmaRowMajor      ) == clAmdBlasRowMajor    );
-    check( amdblas_order_const( MagmaColMajor      ) == clAmdBlasColumnMajor );
+    check( clblas_order_const( MagmaRowMajor      ) == clblasRowMajor    );
+    check( clblas_order_const( MagmaColMajor      ) == clblasColumnMajor );
 
-    check( amdblas_trans_const( MagmaNoTrans       ) == clAmdBlasNoTrans     );
-    check( amdblas_trans_const( MagmaTrans         ) == clAmdBlasTrans       );
-    check( amdblas_trans_const( MagmaConjTrans     ) == clAmdBlasConjTrans   );
+    check( clblas_trans_const( MagmaNoTrans       ) == clblasNoTrans     );
+    check( clblas_trans_const( MagmaTrans         ) == clblasTrans       );
+    check( clblas_trans_const( MagmaConjTrans     ) == clblasConjTrans   );
 
-    check( amdblas_uplo_const(  MagmaUpper         ) == clAmdBlasUpper       );
-    check( amdblas_uplo_const(  MagmaLower         ) == clAmdBlasLower       );
+    check( clblas_uplo_const(  MagmaUpper         ) == clblasUpper       );
+    check( clblas_uplo_const(  MagmaLower         ) == clblasLower       );
 
-    check( amdblas_diag_const(  MagmaNonUnit       ) == clAmdBlasNonUnit     );
-    check( amdblas_diag_const(  MagmaUnit          ) == clAmdBlasUnit        );
+    check( clblas_diag_const(  MagmaNonUnit       ) == clblasNonUnit     );
+    check( clblas_diag_const(  MagmaUnit          ) == clblasUnit        );
 
-    check( amdblas_side_const(  MagmaLeft          ) == clAmdBlasLeft        );
-    check( amdblas_side_const(  MagmaRight         ) == clAmdBlasRight       );
-    printf( "MAGMA  -> amdblas_xxxxx_const   %s\n", (s == gStatus ? "ok" : "failed"));
+    check( clblas_side_const(  MagmaLeft          ) == clblasLeft        );
+    check( clblas_side_const(  MagmaRight         ) == clblasRight       );
+    printf( "MAGMA  -> clblas_xxxxx_const   %s\n", (s == gStatus ? "ok" : "failed"));
     #endif
 
 
