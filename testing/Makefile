@@ -1,4 +1,3 @@
-
 #//////////////////////////////////////////////////////////////////////////////
 #   -- MAGMA (version 1.1) --
 #      Univ. of Tennessee, Knoxville
@@ -24,7 +23,6 @@ ZSRC := \
 	testing_ztrmv.cpp	\
 	testing_ztrsm.cpp	\
 	testing_ztrsv.cpp	\
-	testing_ztrtri_diag.cpp	\
 	\
 	testing_zhemm_mgpu.cpp	\
 	testing_zhemv_mgpu.cpp	\
@@ -48,6 +46,7 @@ ZSRC := \
 	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
+	testing_ztrtri_diag.cpp	\
 	\
 	testing_auxiliary.cpp	\
 	testing_constants.cpp	\
