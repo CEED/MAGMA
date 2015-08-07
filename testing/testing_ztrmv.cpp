@@ -84,13 +84,21 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Ak, Ak, h_A, lda, d_A, ldda );
             magma_zsetvector( N, h_x, 1, d_x, 1 );
             
-            cublas_time = magma_sync_wtime( NULL );
-            cublasZtrmv( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA),
-                         cublas_diag_const(opts.diag),
-                         N,
-                         d_A, ldda,
-                         d_x, 1 );
-            cublas_time = magma_sync_wtime( NULL ) - cublas_time;
+            magmablasSetKernelStream( opts.queue );  // opts.handle also uses opts.queue
+            cublas_time = magma_sync_wtime( opts.queue );
+            #ifdef HAVE_CUBLAS
+                cublasZtrmv( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA),
+                             cublas_diag_const(opts.diag),
+                             N,
+                             d_A, ldda,
+                             d_x, 1 );
+            #else
+                magma_ztrmv( opts.uplo, opts.transA, opts.diag,
+                             N,
+                             d_A, 0, ldda,
+                             d_x, 0, 1, opts.queue );
+            #endif
+            cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
             magma_zgetvector( N, d_x, 1, h_xcublas, 1 );

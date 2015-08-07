@@ -105,12 +105,20 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Bn, Bk, h_B, ldb, d_B, lddb );
             magma_zsetmatrix( N, N, h_C, ldc, d_C, lddc );
             
-            cublas_time = magma_sync_wtime( NULL );
-            cublasZher2k( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA), N, K,
-                          &alpha, d_A, ldda,
-                                  d_B, lddb,
-                          &beta,  d_C, lddc );
-            cublas_time = magma_sync_wtime( NULL ) - cublas_time;
+            magmablasSetKernelStream( opts.queue );  // opts.handle also uses opts.queue
+            cublas_time = magma_sync_wtime( opts.queue );
+            #ifdef HAVE_CUBLAS
+                cublasZher2k( opts.handle, cublas_uplo_const(opts.uplo), cublas_trans_const(opts.transA), N, K,
+                              &alpha, d_A, ldda,
+                                      d_B, lddb,
+                              &beta,  d_C, lddc );
+            #else
+                magma_zher2k( opts.uplo, opts.transA, N, K,
+                              alpha, d_A, 0, ldda,
+                                     d_B, 0, lddb,
+                              beta,  d_C, 0, lddc, opts.queue );
+            #endif
+            cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
             
             magma_zgetmatrix( N, N, d_C, lddc, h_Ccublas, ldc );

@@ -30,8 +30,8 @@ int main(int argc, char **argv)
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     const magma_int_t        ione      = 1;
     
-    real_Double_t   gflops, magma_perf, magma_time, cpu_perf, cpu_time;
-    double          magma_error, work[1];
+    real_Double_t   gflops, magma_perf=0, magma_time=0, cpu_perf, cpu_time;
+    double          magma_error=0, work[1];
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t N, lda, ldda, sizeA, sizeX, sizeY, blocks, ldwork;
     magma_int_t incx = 1;
@@ -98,22 +98,25 @@ int main(int argc, char **argv)
             /* =====================================================================
                Performs operation using MAGMABLAS
                =================================================================== */
-            magma_zsetmatrix( N, N, A, lda, dA, ldda );
-            magma_zsetvector( N, X, incx, dX, incx );
-            magma_zsetvector( N, Y, incy, dY, incy );
-            
-            magma_time = magma_sync_wtime( 0 );
-            if ( opts.version == 1 ) {
-                magmablas_zsymv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
-            }
-            else {
-                // non-work interface (has added overhead)
-                magmablas_zsymv( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy );
-            }
-            magma_time = magma_sync_wtime( 0 ) - magma_time;
-            magma_perf = gflops / magma_time;
-            
-            magma_zgetvector( N, dY, incy, Ymagma, incy );
+            #ifdef HAVE_CUBLAS
+                magma_zsetmatrix( N, N, A, lda, dA, ldda );
+                magma_zsetvector( N, X, incx, dX, incx );
+                magma_zsetvector( N, Y, incy, dY, incy );
+                
+                magmablasSetKernelStream( opts.queue );
+                magma_time = magma_sync_wtime( opts.queue );
+                if ( opts.version == 1 ) {
+                    magmablas_zsymv_work( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy, dwork, ldwork, opts.queue );
+                }
+                else {
+                    // non-work interface (has added overhead)
+                    magmablas_zsymv( opts.uplo, N, alpha, dA, ldda, dX, incx, beta, dY, incy );
+                }
+                magma_time = magma_sync_wtime( opts.queue ) - magma_time;
+                magma_perf = gflops / magma_time;
+                
+                magma_zgetvector( N, dY, incy, Ymagma, incy );
+            #endif
             
             /* =====================================================================
                Performs operation using CPU BLAS
