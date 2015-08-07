@@ -40,7 +40,7 @@ ZSRC := \
 
 # Iterative factorizations
 ZSRC += \
-	ziterilu.cu	\
+	ziterilu_kernels.cu	\
 	ziteric.cu	\
 
 
