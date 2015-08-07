@@ -773,6 +773,17 @@ batched = (
 	('testing_ztrsm_batched',         b + '-SR -U -C -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -U -C -DU  -c',  mn,   ''),
 	
+	# lower/upper, no-trans/conj-trans, non-unit/unit diag
+	('testing_ztrsv_batched',         b + '-L    -DN  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-L    -DU  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-L -C -DN  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-L -C -DU  -c',  n,    ''),
+	                                      
+	('testing_ztrsv_batched',         b + '-U    -DN  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-U    -DU  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-U -C -DN  -c',  n,    ''),
+	('testing_ztrsv_batched',         b + '-U -C -DU  -c',  n,    ''),
+
 	('testing_zgesv_batched',         b + '               -c',  mn,   ''),
 	('testing_zgesv_nopiv_batched',   b + '               -c',  mn,   ''),
 	('testing_zgetrf_batched',        b + '              -c2',  mn,   ''),
