@@ -29,7 +29,7 @@ T op( T& x )
 }
 
 
-template<class T, const int BLK_X, const int BLK_Y, const int TILE_SIZE> 
+template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE> 
 static __device__ void
 gemvn_template_device(
     int m, int n, T alpha,
@@ -42,24 +42,24 @@ gemvn_template_device(
 
     int num_threads = blockDim.x * blockDim.y * blockDim.z;
     
-    if(BLK_X * BLK_Y != num_threads) return;// need to launch exactly the same number of threads as template parameters indicate
+    if(DIM_X * DIM_Y != num_threads) return;// need to launch exactly the same number of threads as template parameters indicate
 
     int thread_id = threadIdx.x + threadIdx.y * blockDim.x;
 
     // threads are all configurated locally
-    int tx = thread_id % BLK_X;
-    int ty = thread_id / BLK_X;
+    int tx = thread_id % DIM_X;
+    int ty = thread_id / DIM_X;
 
     int ind = blockIdx.x*TILE_SIZE + tx;
 
-    __shared__ T sdata[BLK_X * BLK_Y];
+    __shared__ T sdata[DIM_X * DIM_Y];
 
 
     int st = blockIdx.x * TILE_SIZE;
 
-    int ed = min(st+TILE_SIZE, magma_roundup(m,BLK_X));
+    int ed = min(st+TILE_SIZE, magma_roundup(m,DIM_X));
     
-    int iters = (ed-st)/BLK_X;
+    int iters = (ed-st)/DIM_X;
 
     for(int i=0; i<iters; i++)
     {   
@@ -69,13 +69,13 @@ gemvn_template_device(
         
         if(ind < m )
         {
-            for(int col=ty; col<n; col+=BLK_Y)
+            for(int col=ty; col<n; col+=DIM_Y)
             {       
                 res += A[col*lda] * x[col*incx];
             }
         }
 
-        if(BLK_X >= num_threads) // indicated 1D threads configuration. Shared memory is not needed, reduction is done naturally
+        if(DIM_X >= num_threads) // indicated 1D threads configuration. Shared memory is not needed, reduction is done naturally
         {
 
             if(ty == 0 && ind < m)
@@ -85,21 +85,21 @@ gemvn_template_device(
         }
         else 
         {
-            sdata[ty + tx * BLK_Y] = res;
+            sdata[ty + tx * DIM_Y] = res;
 
             __syncthreads(); 
 
-            if( BLK_Y > 16)
+            if( DIM_Y > 16)
             { 
-                magma_sum_reduce< BLK_Y >( ty, sdata + tx * BLK_Y);
+                magma_sum_reduce< DIM_Y >( ty, sdata + tx * DIM_Y);
             }
             else
             {
                 if(ty == 0 && ind < m)
                 {
-                    for(int i=1; i< BLK_Y; i++)
+                    for(int i=1; i< DIM_Y; i++)
                     {
-                        sdata[tx * BLK_Y] += sdata[i + tx * BLK_Y]; 
+                        sdata[tx * DIM_Y] += sdata[i + tx * DIM_Y]; 
                     }   
         
                 }
@@ -107,7 +107,7 @@ gemvn_template_device(
 
             if(ty == 0 && ind < m)
             {
-                y[ind*incy] = alpha*sdata[tx * BLK_Y] + beta*y[ind*incy];
+                y[ind*incy] = alpha*sdata[tx * DIM_Y] + beta*y[ind*incy];
             }
 
             __syncthreads();
@@ -117,7 +117,7 @@ gemvn_template_device(
  
         if( ind < m) A -= ind;
 
-        ind += BLK_X;
+        ind += DIM_X;
 
     }
 }
@@ -129,7 +129,7 @@ gemvn_template_device(
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-template<class T, const int BLK_X, const int BLK_Y, const int TILE_SIZE,  int CONJA> 
+template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE,  int CONJA> 
 static __device__ void
 gemvc_template_device(
     int m, int n, T alpha,
@@ -142,18 +142,18 @@ gemvc_template_device(
 
     int num_threads = blockDim.x * blockDim.y * blockDim.z;
     
-    if(BLK_X * BLK_Y != num_threads) return;// need to launch exactly the same number of threads as template parameters indicate
+    if(DIM_X * DIM_Y != num_threads) return;// need to launch exactly the same number of threads as template parameters indicate
 
     int thread_id = threadIdx.x + threadIdx.y * blockDim.x;
 
     // threads are all configurated locally
-    int tx = thread_id % BLK_X;
-    int ty = thread_id / BLK_X;
+    int tx = thread_id % DIM_X;
+    int ty = thread_id / DIM_X;
 
-    __shared__ T sdata[BLK_X * BLK_Y];
+    __shared__ T sdata[DIM_X * DIM_Y];
 
     T res;
-    int mfull = (m / BLK_X) * BLK_X;
+    int mfull = (m / DIM_X) * DIM_X;
      
     int start = blockIdx.y * TILE_SIZE + ty;
     int iters;
@@ -162,46 +162,46 @@ gemvc_template_device(
 
     #ifdef usefixedcondition
         /*fixed condition*/
-        iters = TILE_SIZE / BLK_Y;
+        iters = TILE_SIZE / DIM_Y;
     #else
         /* flexible condition based on global n (has drops when size is roughly bigger than TILE_SIZE)*/
-        //int iters = magma_ceildiv(min(n,TILE_SIZE), BLK_Y);
+        //int iters = magma_ceildiv(min(n,TILE_SIZE), DIM_Y);
 
         /* flexible condition based on my local nloc=ed-st*/
         int st = blockIdx.y * TILE_SIZE;
-        //int ed = magma_ceildiv( min(n, st + TILE_SIZE), BLK_Y ) * BLK_Y; 
-        int ed = min(st+TILE_SIZE, magma_roundup(n,BLK_Y));
-        iters = (ed-st)/BLK_Y;
+        //int ed = magma_ceildiv( min(n, st + TILE_SIZE), DIM_Y ) * DIM_Y; 
+        int ed = min(st+TILE_SIZE, magma_roundup(n,DIM_Y));
+        iters = (ed-st)/DIM_Y;
     #endif
 
 
     if(tx < m) A += tx;
     
     for(int i = 0; i< iters; i++)// at 2Gflops/ overhead
-    //for(int col=start; col < (blockIdx.y+1)*TILE_SIZE; col+= BLK_Y)// at least 3Gflop/s overhead
+    //for(int col=start; col < (blockIdx.y+1)*TILE_SIZE; col+= DIM_Y)// at least 3Gflop/s overhead
     {
 
-        int col = start + i * BLK_Y;
+        int col = start + i * DIM_Y;
 
         if( col < n) A += col*lda;
 
         res = make_FloatingPoint(0.0, 0.0);
 
         // partial sums
-        for(int i=0; i < mfull; i += BLK_X) {
+        for(int i=0; i < mfull; i += DIM_X) {
             res += op<CONJA>(A[i]) * x[(tx + i)*incx];
         }
         if ( tx + mfull < m ) {
             res += op<CONJA>(A[mfull]) * x[(tx + mfull)*incx];
         }
 
-        sdata[tx + ty * BLK_X] = res;
+        sdata[tx + ty * DIM_X] = res;
 
         // tree reduction of partial sums,
-        // from BLK_X sums to ... 128 to 64 to 32 ... to 1 sum in sdata[0]
-        if( BLK_X > 16)
+        // from DIM_X sums to ... 128 to 64 to 32 ... to 1 sum in sdata[0]
+        if( DIM_X > 16)
         { 
-            magma_sum_reduce< BLK_X >( tx, sdata + ty * BLK_X);
+            magma_sum_reduce< DIM_X >( tx, sdata + ty * DIM_X);
         }
         else
         {
@@ -209,9 +209,9 @@ gemvc_template_device(
 
             if(tx == 0 && col < n)
             {
-                for(int i=1; i<m && i < BLK_X; i++)
+                for(int i=1; i<m && i < DIM_X; i++)
                 {
-                    sdata[0 + ty * BLK_X] += sdata[i + ty * BLK_X];
+                    sdata[0 + ty * DIM_X] += sdata[i + ty * DIM_X];
                 }
             }
             __syncthreads();
@@ -219,7 +219,7 @@ gemvc_template_device(
         }
 
         if ( tx == 0 && col < n) {
-            y[col*incy] = alpha*sdata[0 + ty * BLK_X] + beta*y[col*incy];
+            y[col*incy] = alpha*sdata[0 + ty * DIM_X] + beta*y[col*incy];
         }
 
         __syncthreads();

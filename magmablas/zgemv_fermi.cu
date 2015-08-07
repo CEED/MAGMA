@@ -25,7 +25,7 @@
 #define version(s,v) s ## _V_ ## v
 
 
-template<const int BLK_X, const int BLK_Y, const int TILE_SIZE>
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 __global__ void
 zgemvn_template_kernel_fermi(
     int m, int n, magmaDoubleComplex alpha,
@@ -35,12 +35,12 @@ zgemvn_template_kernel_fermi(
 {
 #if (__CUDA_ARCH__ >= 200)
 
-    gemvn_template_device<magmaDoubleComplex, BLK_X, BLK_Y, TILE_SIZE>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+    gemvn_template_device<magmaDoubleComplex, DIM_X, DIM_Y, TILE_SIZE>(m, n, alpha, A, lda, x, incx, beta, y, incy);
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
 
 
-template<const int BLK_X, const int BLK_Y, const int TILE_SIZE>
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void
 zgemvn_template_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
@@ -50,9 +50,9 @@ zgemvn_template_fermi(
 {
 
     dim3 grid( magma_ceildiv(m, TILE_SIZE) );
-    dim3 threads( BLK_X, BLK_Y, 1 );
+    dim3 threads( DIM_X, DIM_Y, 1 );
 
-    zgemvn_template_kernel_fermi<BLK_X, BLK_Y, TILE_SIZE><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+    zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
 
 }
 
@@ -60,7 +60,7 @@ zgemvn_template_fermi(
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template<const int BLK_X, const int BLK_Y, const int TILE_SIZE, int CONJA>
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE, int CONJA>
 __global__ void
 zgemvc_template_kernel_fermi(
     int m, int n, magmaDoubleComplex alpha,
@@ -69,12 +69,12 @@ zgemvc_template_kernel_fermi(
     magmaDoubleComplex       *y, int incy)
 {
 #if (__CUDA_ARCH__ >= 200)
-    gemvc_template_device<magmaDoubleComplex, BLK_X, BLK_Y, TILE_SIZE, CONJA>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+    gemvc_template_device<magmaDoubleComplex, DIM_X, DIM_Y, TILE_SIZE, CONJA>(m, n, alpha, A, lda, x, incx, beta, y, incy);
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
 
 
-template<const int BLK_X, const int BLK_Y, const int TILE_SIZE>
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void
 zgemvc_template_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
@@ -84,15 +84,15 @@ zgemvc_template_fermi(
 {
 
     dim3 grid    ( 1,  magma_ceildiv(n, TILE_SIZE),  1 );
-    dim3 threads ( BLK_X, BLK_Y, 1 );
+    dim3 threads ( DIM_X, DIM_Y, 1 );
 
     if(CONJA == 1)
     {
-        zgemvc_template_kernel_fermi<BLK_X, BLK_Y, TILE_SIZE, 1><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+        zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 1><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
     else
     {
-        zgemvc_template_kernel_fermi<BLK_X, BLK_Y, TILE_SIZE, 0><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+        zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 0><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 
 }
