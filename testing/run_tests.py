@@ -285,9 +285,9 @@ mnk    = n + tall + wide + mnk
 tests = []
 
 
-# ----------
-# BLAS
 blas = (
+	# ----------
+	# BLAS
 	# no-trans/conj-trans; there are other combinations with trans
 	('testing_zgemm',   '-l -NN         -c',  mnk,  ''),
 	('testing_zgemm',   '-l -NC         -c',  mnk,  ''),
@@ -400,9 +400,9 @@ blas = (
 if ( opts.blas ):
 	tests += blas
 
-# ----------
-# auxiliary
 aux = (
+	# ----------
+	# auxiliary
 	('testing_zgeadd',                 '-c',  mn,   ''),
 	('testing_zlacpy',                 '-c',  mn,   ''),
 	('testing_zlag2c',                 '-c',  mn,   ''),
@@ -439,9 +439,9 @@ aux = (
 if ( opts.aux ):
 	tests += aux
 
-# ----------
-# Cholesky, GPU interface
 chol = (
+	# ----------
+	# Cholesky, GPU interface
 	('testing_zcposv_gpu',       '-L    -c',  n,    ''),
 	('testing_zcposv_gpu',       '-U    -c',  n,    ''),
 	
@@ -459,9 +459,9 @@ chol = (
 	
 	('testing_zpotrf_mgpu',      '-L    -c',  n,    ''),
 	('testing_zpotrf_mgpu',      '-U    -c',  n,    ''),
-
-# ----------
-# Cholesky, CPU interface
+	
+	# ----------
+	# Cholesky, CPU interface
 	('testing_zposv',            '-L    -c',  n,    ''),
 	('testing_zposv',            '-U    -c',  n,    ''),
 	
@@ -470,9 +470,9 @@ chol = (
 	
 	('testing_zpotri',           '-L    -c',  n,    ''),
 	('testing_zpotri',           '-U    -c',  n,    ''),
-
-# ----------
-# Symmetric Indefinite
+	
+	# ----------
+	# Symmetric Indefinite
 	('testing_zhesv',               '-L -c',  n,    ''),
 	('testing_zhesv',               '-U -c',  n,    ''),
 	
@@ -490,16 +490,16 @@ chol = (
 	# no-pivot LDLt, GPU interface
 	('testing_zhetrf', '-L --version 4 -c2',  n,    ''),
 	('testing_zhetrf', '-U --version 4 -c2',  n,    ''),
-
+	
 	# Aasen's
 	('testing_zhetrf', '-L --version 6 -c2',  n,    ''),
 )
 if ( opts.chol ):
 	tests += chol
 
-# ----------
-# LU, GPU interface
 lu = (
+	# ----------
+	# LU, GPU interface
 	('testing_zcgesv_gpu',             '-c',  n,    ''),
 	('testing_zgesv_gpu',              '-c',  n,    ''),
 	('testing_zgetrf_gpu',            '-c2',  n,    ''),
@@ -507,8 +507,8 @@ lu = (
 	('testing_zgetri_gpu',             '-c',  n,    ''),
 	('testing_zgetrf_mgpu',           '-c2',  n,    ''),
 	
-# ----------
-# LU, CPU interface
+	# ----------
+	# LU, CPU interface
 	('testing_zgesv',                  '-c',  n,    ''),
 	('testing_zgesv_rbt',              '-c',  n,    ''),
 	('testing_zgetrf',                '-c2',  n,    ''),
@@ -516,9 +516,9 @@ lu = (
 if ( opts.lu ):
 	tests += lu
 
-# ----------
-# QR and least squares, GPU interface
 qr = (
+	# ----------
+	# QR and least squares, GPU interface
 	('testing_zcgeqrsv_gpu',           '-c',  mn,   ''),
 	
 	('testing_zgegqr_gpu', '--version 1 -c',  mn,   ''),
@@ -547,8 +547,8 @@ qr = (
 	('testing_zunmqr_gpu',             '-c',  mnk,  ''),
 	('testing_zgeqrf_mgpu',           '-c2',  mn,   ''),
 	
-# ----------
-# QR, CPU interface
+	# ----------
+	# QR, CPU interface
 	('testing_zgelqf',                 '-c',  mn,   ''),
 	('testing_zgels',                  '-c',  mn,   ''),
 	('testing_zgeqlf',                 '-c',  mn,   ''),
@@ -563,9 +563,9 @@ qr = (
 if ( opts.qr ):
 	tests += qr
 
-# ----------
-# symmetric eigenvalues, GPU interface
 syev = (
+	# ----------
+	# symmetric eigenvalues, GPU interface
 	# no-vectors/vectors, lower/upper
 	('testing_zheevd_gpu',      '-L -JN -c',  n,    ''),
 	('testing_zheevd_gpu',      '-U -JN -c',  n,    ''),
@@ -582,8 +582,8 @@ syev = (
 	('testing_zhetrd_mgpu',     '-L     -c',  n,    ''),
 	('testing_zhetrd_mgpu',     '-U     -c',  n,    ''),
 	
-# ----------
-# symmetric eigenvalues, CPU interface
+	# ----------
+	# symmetric eigenvalues, CPU interface
 	# no vectors/vectors, lower/upper
 	('testing_zheevd',          '-L -JN -c',  n,    ''),
 	('testing_zheevd',          '-U -JN -c',  n,    ''),
@@ -594,8 +594,8 @@ syev = (
 	('testing_zhetrd',          '-L     -c',  n,    ''),
 	('testing_zhetrd',          '-U     -c',  n,    ''),
 	
-# ----------
-# symmetric eigenvalues, 2-stage
+	# ----------
+	# symmetric eigenvalues, 2-stage
 	#('testing_zhetrd_he2hb',       '-L -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage'),
 	#('testing_zhetrd_he2hb',       '-U -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage. upper not implemented'),
 	
@@ -607,14 +607,14 @@ syev = (
 if ( opts.syev ):
 	tests += syev
 
-# ----------
-# generalized symmetric eigenvalues
 sygv = (
+	# ----------
+	# generalized symmetric eigenvalues
 	# no-vector/vector, lower/upper, itypes
 	('testing_zhegvd',           '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JN --itype 3 -c',  n,  ''),
-	                                                          
+	
 	('testing_zhegvd',           '-U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvd',           '-U -JN --itype 3 -c',  n,  ''),
@@ -631,7 +631,7 @@ sygv = (
 	('testing_zhegvd_m',         '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvd_m',         '-L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvd_m',         '-L -JN --itype 3 -c',  n,  ''),
-	                                                          
+	
 	('testing_zhegvd_m',         '-U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvd_m',         '-U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvd_m',         '-U -JN --itype 3 -c',  n,  ''),
@@ -648,7 +648,7 @@ sygv = (
 	('testing_zhegvdx',          '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JN --itype 3 -c',  n,  ''),
-	                                                          
+	
 	('testing_zhegvdx',          '-U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JN --itype 3 -c',  n,  ''),
@@ -698,9 +698,9 @@ sygv = (
 if ( opts.sygv ):
 	tests += sygv
 
-# ----------
-# non-symmetric eigenvalues
 geev = (
+	# ----------
+	# non-symmetric eigenvalues
 	# right & left no-vector/vector; not all combos are tested here
 	#('testing_dgeev',                   '',  n,    ''),  # covered by testing_zgeev
 	('testing_zgeev',          '-RN -LN -c',  n,    ''),
@@ -716,9 +716,9 @@ geev = (
 if ( opts.geev ):
 	tests += geev
 
-# ----------
-# SVD
 svd = (
+	# ----------
+	# SVD
 	# U & V none/some/overwrite/all
 	# gesdd only has one jobz (taken from -U), while
 	# gesvd can set U & V independently; not all combos are tested here
@@ -738,16 +738,16 @@ svd = (
 if ( opts.svd ):
 	tests += svd
 
-# ----------
-# batched (BLAS, LU, etc.)
 b = '--batch ' + opts.batch + ' '
 batched = (
+	# ----------
+	# batched (BLAS, LU, etc.)
 	('testing_zgeadd_batched',        b + '               -c',  mn,   ''),
-	                                                      
+	
 	('testing_zgemv_batched',         b + '               -c',  mn,   ''),
 	('testing_zgemv_batched',         b + '-T             -c',  mn,   ''),
 	('testing_zgemv_batched',         b + '-C             -c',  mn,   ''),
-	                                                      
+	
 	('testing_zgemm_batched',         b + '-NN            -c',  mn,   ''),
 	('testing_zgemm_batched',         b + '-NC            -c',  mn,   ''),
 	('testing_zgemm_batched',         b + '-CN            -c',  mn,   ''),
@@ -757,17 +757,17 @@ batched = (
 	('testing_ztrsm_batched',         b + '-SL -L    -DU  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SL -L -C -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SL -L -C -DU  -c',  mn,   ''),
-	                                                             
+	
 	('testing_ztrsm_batched',         b + '-SL -U    -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SL -U    -DU  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SL -U -C -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SL -U -C -DU  -c',  mn,   ''),
-	                                                             
+	
 	('testing_ztrsm_batched',         b + '-SR -L    -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -L    -DU  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -L -C -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -L -C -DU  -c',  mn,   ''),
-	                                                             
+	
 	('testing_ztrsm_batched',         b + '-SR -U    -DN  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -U    -DU  -c',  mn,   ''),
 	('testing_ztrsm_batched',         b + '-SR -U -C -DN  -c',  mn,   ''),
@@ -796,13 +796,13 @@ batched = (
 	('testing_zherk_batched',         b + '-U -C          -c',  mn,   ''),
 	
 	('testing_zlacpy_batched',        b + '               -c',  mn,   ''),
-	                                                      
+	
 	('testing_zposv_batched',         b + '-L             -c',  n,    ''),
 	('testing_zposv_batched',         b + '-U             -c',  n,    ''),
-	                                                                  
+	
 	('testing_zpotrf_batched',        b + '-L             -c2', n,    ''),
 	('testing_zpotrf_batched',        b + '-U             -c2', n,    ''),
-	                                                                  
+	
 	('testing_zgeqrf_batched',        b + '               -c',  mn,   ''),
 )
 if ( opts.batched ):
@@ -865,7 +865,7 @@ def run( cmd ):
 			okay += 1
 		if re.search( 'failed', line ):
 			fail += 1
-		if re.search( 'exit|memory mapping error|CUDA runtime error|illegal value|ERROR SUMMARY: [1-9]', line ):
+		if re.search( 'exit|memory mapping error|CUDA runtime error|CL_INVALID|illegal value|ERROR SUMMARY: [1-9]', line ):
 			error += 1
 	# end
 	
