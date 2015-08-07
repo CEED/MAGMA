@@ -47,6 +47,7 @@ int main( int argc, char** argv)
     magma_int_t N, n2, lda, ldda, info, info1, info2;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
+    
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;
@@ -60,9 +61,6 @@ int main( int argc, char** argv)
     // TODO: should compute ||I - A*A^{-1}|| / (n*||A||*||A^{-1}||)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
-
-    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
-
 
     printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
     printf("%%===================================================================================================\n");
@@ -99,14 +97,14 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, queue);
-            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, queue);
-            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, N, batchCount, queue);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            zset_pointer(dinvA_array, d_invA, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            set_ipointer(dipiv_array, d_ipiv, 1, 0, 0, N, batchCount, opts.queue);
 
-            gpu_time = magma_sync_wtime(queue);
-            info1 = magma_zgetrf_batched( N, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, queue);
+            gpu_time = magma_sync_wtime( opts.queue );
+            info1 = magma_zgetrf_batched( N, N, dA_array, ldda, dipiv_array, dinfo_array, batchCount, opts.queue);
             info2 = magma_zgetri_outofplace_batched( N, dA_array, ldda, dipiv_array, dinvA_array, ldda, dinfo_array, batchCount, opts.queue);
-            gpu_time = magma_sync_wtime(queue) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"

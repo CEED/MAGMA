@@ -191,7 +191,7 @@ int main( int argc, char** argv)
                 init_matrix( M, N, h_A, lda );
                 
                 cpu_time = magma_wtime();
-                lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
+                lapackf77_zgetrf( &M, &N, h_A, &lda, ipiv, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -205,7 +205,7 @@ int main( int argc, char** argv)
             init_matrix( M, N, h_A, lda );
             
             gpu_time = magma_wtime();
-            magma_zgetrf( M, N, h_A, lda, ipiv, &info);
+            magma_zgetrf( M, N, h_A, lda, ipiv, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)

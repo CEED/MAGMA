@@ -71,7 +71,7 @@ int main( int argc, char** argv)
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -95,12 +95,12 @@ int main( int argc, char** argv)
                 TESTING_MALLOC_CPU( rwork, double, N );
                 #endif
                 
-                lapackf77_zlacpy(MagmaUpperLowerStr, &N, &N, h_R, &lda, h_Q, &lda);
+                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_R, &lda, h_Q, &lda );
                 for( int j = 0; j < N-1; ++j )
                     for( int i = j+2; i < N; ++i )
                         h_R[i+j*lda] = MAGMA_Z_ZERO;
                 
-                magma_zunghr(N, ione, N, h_Q, lda, tau, dT, nb, &info);
+                magma_zunghr( N, ione, N, h_Q, lda, tau, dT, nb, &info );
                 if (info != 0) {
                     printf("magma_zunghr returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));

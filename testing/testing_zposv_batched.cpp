@@ -107,9 +107,9 @@ int main(int argc, char **argv)
             zset_pointer(dA_array, d_A, ldda, 0, 0, ldda*N, batchCount, queue);
             zset_pointer(dB_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, queue);
 
-            gpu_time = magma_sync_wtime(queue);
+            gpu_time = magma_sync_wtime( opts.queue );
             info = magma_zposv_batched(opts.uplo, N, nrhs, dA_array, ldda, dB_array, lddb, dinfo_array, batchCount, queue);
-            gpu_time = magma_sync_wtime(queue) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);

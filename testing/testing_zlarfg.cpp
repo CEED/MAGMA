@@ -42,8 +42,6 @@ int main( int argc, char** argv)
     // does larfg on nb columns, one after another
     nb = (opts.nb > 0 ? opts.nb : 64);
     
-    magma_queue_t queue = 0;
-
     printf("%%   N    nb    CPU GFLop/s (ms)    GPU GFlop/s (ms)   error      tau error\n");
     printf("%%=========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -69,12 +67,13 @@ int main( int argc, char** argv)
                Performs operation using MAGMABLAS
                =================================================================== */
             magma_zsetmatrix( N, nb, h_x, N, d_x, ldda );
-    
-            gpu_time = magma_sync_wtime( queue );
+            
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             for( int j = 0; j < nb; ++j ) {
                 magmablas_zlarfg( N, &d_x[0+j*ldda], &d_x[1+j*ldda], ione, &d_tau[j] );
             }
-            gpu_time = magma_sync_wtime( queue ) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             
             magma_zgetmatrix( N, nb, d_x, ldda, h_x2, N );

@@ -75,7 +75,7 @@ int main( int argc, char** argv)
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
             if ( opts.warmup ) {
-                magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
+                magma_zgeqrf( M, N, h_R, lda, tau, h_work, lwork, &info );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             }
 
@@ -83,7 +83,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
+            magma_zgeqrf( M, N, h_R, lda, tau, h_work, lwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)

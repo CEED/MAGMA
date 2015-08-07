@@ -95,10 +95,11 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M, N, h_B, ldb, d_B, lddb );
             
-            gpu_time = magma_sync_wtime( 0 );
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             //magmablas_zlacpy( uplo[iuplo], M-2, N-2, d_A+1+ldda, ldda, d_B+1+lddb, lddb );  // inset by 1 row & col
             magmablas_zlacpy( uplo[iuplo], M, N, d_A, ldda, d_B, lddb );
-            gpu_time = magma_sync_wtime( 0 ) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             
             /* =====================================================================

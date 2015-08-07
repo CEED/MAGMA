@@ -94,19 +94,18 @@ int main(int argc, char **argv)
             magma_zsetvector( Xm, X, incx, dX, incx );
             magma_zsetvector( Ym, Y, incy, dY, incy );
             
+            magmablasSetKernelStream( opts.queue );  // opts.handle also uses opts.queue
+            dev_time = magma_sync_wtime( opts.queue );
             #ifdef HAVE_CUBLAS
-                dev_time = magma_sync_wtime( 0 );
                 cublasZgemv( opts.handle, cublas_trans_const(opts.transA),
                              M, N, &alpha, dA, lda, dX, incx, &beta, dY, incy );
-                dev_time = magma_sync_wtime( 0 ) - dev_time;
             #else
-                dev_time = magma_sync_wtime( opts.queue );
                 magma_zgemv( opts.transA, M, N,
-                             &alpha, dA, lda,
-                                     dX, incx,
-                             &beta,  dY, incy );
-                dev_time = magma_sync_wtime( opts.queue ) - dev_time;
+                             alpha, dA, lda,
+                                    dX, incx,
+                             beta,  dY, incy );
             #endif
+            dev_time = magma_sync_wtime( opts.queue ) - dev_time;
             dev_perf = gflops / dev_time;
             
             magma_zgetvector( Ym, dY, incy, Ydev, incy );
@@ -117,9 +116,9 @@ int main(int argc, char **argv)
             #ifdef HAVE_CUBLAS
                 magma_zsetvector( Ym, Y, incy, dY, incy );
                 
-                magma_time = magma_sync_wtime( 0 );
+                magma_time = magma_sync_wtime( opts.queue );
                 magmablas_zgemv( opts.transA, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
-                magma_time = magma_sync_wtime( 0 ) - magma_time;
+                magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 
                 magma_zgetvector( Ym, dY, incy, Ymagma, incy );

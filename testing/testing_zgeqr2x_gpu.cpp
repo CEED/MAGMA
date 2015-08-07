@@ -52,9 +52,9 @@ int main( int argc, char** argv)
     
     double tol = 10. * opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t stream[2];
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
+    magma_queue_t queues[2];
+    magma_queue_create( &queues[0] );
+    magma_queue_create( &queues[1] );
 
     printf("%% version %d\n", (int) opts.version );
     printf("%% M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R - Q^H*A||   ||R_T||\n");
@@ -123,14 +123,15 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            gpu_time = magma_sync_wtime(0);
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
     
             if (opts.version == 1)
-                magma_zgeqr2x_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x_gpu( M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info );
             else if (opts.version == 2)
-                magma_zgeqr2x2_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x2_gpu( M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info );
             else if (opts.version == 3)
-                magma_zgeqr2x3_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info);
+                magma_zgeqr2x3_gpu( M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info );
             else {
                 printf( "call magma_zgeqr2x4_gpu\n" );
                 /*
@@ -139,13 +140,9 @@ int main( int argc, char** argv)
                   Doing two streams in parallel is slower than doing them sequentially
                   Queuing happens on the NULL stream - user defined buffers are smaller?
                 */
-                magma_zgeqr2x4_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, NULL, &info);
-                //magma_zgeqr2x4_gpu(M, N, d_A, ldda, dtau, d_T, ddA, dwork, &info, stream[1]);
-                //magma_zgeqr2x4_gpu(M, N, d_A2, ldda, dtau2, d_T2, ddA2, dwork2, &info, stream[0]);
-                //magma_zgeqr2x4_gpu(M, N, d_A2, ldda, dtau2, d_T2, ddA2, dwork2, &info, NULL);
-                //gflops *= 2;
+                magma_zgeqr2x4_gpu( M, N, d_A, ldda, dtau, d_T, ddA, dwork, opts.queue, &info );
             }
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
 
             if (info != 0) {
@@ -276,8 +273,8 @@ int main( int argc, char** argv)
         }
     }
     
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
+    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queues[1] );
 
     TESTING_FINALIZE();
     return status;

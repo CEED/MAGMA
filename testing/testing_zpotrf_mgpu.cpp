@@ -98,7 +98,8 @@ int main( int argc, char** argv )
             if ( opts.uplo == MagmaUpper ) {
                 ldda = magma_roundup( N, nb );
                 magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
-            } else {
+            }
+            else {
                 ldda = (1+N/(nb*ngpu))*nb;
                 magma_zsetmatrix_1D_row_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
             }
@@ -113,7 +114,8 @@ int main( int argc, char** argv )
             
             if ( opts.uplo == MagmaUpper ) {
                 magma_zgetmatrix_1D_col_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
-            } else {
+            }
+            else {
                 magma_zgetmatrix_1D_row_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
             }
             

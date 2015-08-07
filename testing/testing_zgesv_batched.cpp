@@ -56,8 +56,6 @@ int main(int argc, char **argv)
     parse_opts( argc, argv, &opts );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
-    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
-
 
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;
@@ -102,14 +100,14 @@ int main(int argc, char **argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda*N, batchCount, queue);
-            zset_pointer(dB_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, queue);
-            set_ipointer(dipiv_array, dipiv, 1, 0, 0, N, batchCount, queue);
+            zset_pointer(dA_array, d_A, ldda, 0, 0, ldda*N, batchCount, opts.queue);
+            zset_pointer(dB_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue);
+            set_ipointer(dipiv_array, dipiv, 1, 0, 0, N, batchCount, opts.queue);
 
-            gpu_time = magma_sync_wtime(queue);
+            gpu_time = magma_sync_wtime( opts.queue );
             //magma_zgesv_gpu( N, nrhs, d_A, ldda, ipiv, d_B, lddb, &info );
-            info = magma_zgesv_batched(N, nrhs, dA_array, ldda, dipiv_array, dB_array, lddb, dinfo_array, batchCount, queue);
-            gpu_time = magma_sync_wtime(queue) - gpu_time;
+            info = magma_zgesv_batched(N, nrhs, dA_array, ldda, dipiv_array, dB_array, lddb, dinfo_array, batchCount, opts.queue);
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);

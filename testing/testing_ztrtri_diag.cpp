@@ -111,9 +111,10 @@ int main( int argc, char** argv )
                =================================================================== */
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
             
-            magma_time = magma_sync_wtime( NULL );
+            magmablasSetKernelStream( opts.queue );
+            magma_time = magma_sync_wtime( opts.queue );
             magmablas_ztrtri_diag( opts.uplo, opts.diag, N, d_A, ldda, d_dinvA );
-            magma_time = magma_sync_wtime( NULL ) - magma_time;
+            magma_time = magma_sync_wtime( opts.queue ) - magma_time;
             magma_perf = gflops / magma_time;
             
             magma_zgetvector( size_inv, d_dinvA, 1, h_dinvA, 1 );

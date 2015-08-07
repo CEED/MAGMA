@@ -61,8 +61,6 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
    
-    magma_queue_t queue = opts.queue;
-
     printf("%% If running lapack (option --lapack), MAGMA error is computed\n"
            "%% relative to CPU BLAS result.\n\n");
     printf("%% uplo = %s, transA = %s\n",
@@ -125,15 +123,15 @@ int main( int argc, char** argv)
             magma_zsetmatrix( An, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N*batchCount, h_C, ldc, d_C, lddc );
             
-            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, queue);
-            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, queue);
+            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, opts.queue);
+            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, opts.queue);
 
-            magma_time = magma_sync_wtime( queue );
+            magma_time = magma_sync_wtime( opts.queue );
             magmablas_zherk_batched(opts.uplo, opts.transA, N, K,
                              alpha, A_array, ldda,
-                             beta,  C_array, lddc, batchCount, queue);
+                             beta,  C_array, lddc, batchCount, opts.queue);
                              
-            magma_time = magma_sync_wtime( queue ) - magma_time;
+            magma_time = magma_sync_wtime( opts.queue ) - magma_time;
             magma_perf = gflops / magma_time;
             
             magma_zgetmatrix( N, NN, d_C, lddc, h_Cmagma, ldc );
@@ -169,7 +167,7 @@ int main( int argc, char** argv)
                 // compute relative error for magma, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
                 sizeC = ldc*N;
-                magma_error = MAGMA_D_ZERO;
+                magma_error = 0;
                 for (int i=0; i < batchCount; i++)
                 {
                     Cnorm = lapackf77_zlanhe("fro", lapack_uplo_const(opts.uplo), &N, h_C+i*ldc*N, &ldc, work);

@@ -107,13 +107,14 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            gpu_time = magma_sync_wtime( 0 );
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             
             int mm = M - 2*inset;
             int nn = N - 2*inset;
             magmablas_zlaset_band( uplo[iuplo], mm, nn, nb, offdiag, diag, d_A(inset,inset), ldda );
             
-            gpu_time = magma_sync_wtime( 0 ) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             
             /* =====================================================================

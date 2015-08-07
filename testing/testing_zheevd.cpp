@@ -111,7 +111,8 @@ int main( int argc, char** argv)
                                   #endif
                                   iwork, liwork,
                                   &info );
-                } else {
+                }
+                else {
                     magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
                                   N, h_R, lda, w1,
                                   h_work, lwork,
@@ -141,7 +142,8 @@ int main( int argc, char** argv)
                               #endif
                               iwork, liwork,
                               &info );
-            } else {
+            }
+            else {
                 magma_zheevd_m( opts.ngpu, opts.jobz, opts.uplo,
                               N, h_R, lda, w1,
                               h_work, lwork,

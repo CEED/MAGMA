@@ -91,9 +91,10 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA zlat2c
                =================================================================== */
-            gpu_time = magma_sync_wtime(0);
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             magmablas_zlat2c( uplo[iuplo], n, dA, ldda, dSA, ldda, &info );
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0)
                 printf("magmablas_zlat2c returned error %d: %s.\n",
@@ -160,9 +161,9 @@ int main( int argc, char** argv )
                =================================================================== */
             magma_csetmatrix( n, n, SA, lda, dSA, ldda );
             
-            gpu_time = magma_sync_wtime(0);
+            gpu_time = magma_sync_wtime( opts.queue );
             magmablas_clat2z( uplo[iuplo], n, dSA, ldda, dA, ldda, &info );
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0)
                 printf("magmablas_clat2z returned error %d: %s.\n",

@@ -125,12 +125,13 @@ int main( int argc, char** argv)
             #ifdef HAVE_CUBLAS
                 magma_zsetmatrix( M, N, h_C, ldc, d_C, lddc );
                 
-                magma_time = magma_sync_wtime( NULL );
+                magmablasSetKernelStream( opts.queue );
+                magma_time = magma_sync_wtime( opts.queue );
                 magmablas_zgemm( opts.transA, opts.transB, M, N, K,
                                  alpha, d_A, ldda,
                                         d_B, lddb,
                                  beta,  d_C, lddc );
-                magma_time = magma_sync_wtime( NULL ) - magma_time;
+                magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 
                 magma_zgetmatrix( M, N, d_C, lddc, h_Cmagma, ldc );
@@ -141,21 +142,20 @@ int main( int argc, char** argv)
                =================================================================== */
             magma_zsetmatrix( M, N, h_C, ldc, d_C, lddc );
             
+            dev_time = magma_sync_wtime( opts.queue );
             #ifdef HAVE_CUBLAS
-                dev_time = magma_sync_wtime( NULL );
+                // opts.handle also uses opts.queue
                 cublasZgemm( opts.handle, cublas_trans_const(opts.transA), cublas_trans_const(opts.transB), M, N, K,
                              &alpha, d_A, ldda,
                                      d_B, lddb,
                              &beta,  d_C, lddc );
-                dev_time = magma_sync_wtime( NULL ) - dev_time;
             #else
-                dev_time = magma_sync_wtime( opts.queue );
                 magma_zgemm( opts.transA, opts.transB, M, N, K,
                              alpha, d_A, 0, ldda,
                                     d_B, 0, lddb,
                              beta,  d_C, 0, lddc, opts.queue );
-                dev_time = magma_sync_wtime( opts.queue ) - dev_time;
             #endif
+            dev_time = magma_sync_wtime( opts.queue ) - dev_time;
             dev_perf = gflops / dev_time;
             
             magma_zgetmatrix( M, N, d_C, lddc, h_Cdev, ldc );

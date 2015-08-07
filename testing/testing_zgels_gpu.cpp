@@ -162,14 +162,15 @@ int main( int argc, char** argv )
                    (int) M, (int) N, (int) nrhs,
                    cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error, error );
             
+            bool okay;
             if ( M == N ) {
-                printf( "   %s\n", (gpu_error < tol && error < tol ? "ok" : "failed"));
-                status += ! (gpu_error < tol && error < tol);
+                okay = (gpu_error < tol && error < tol);
             }
             else {
-                printf( "   %s\n", (error < tol ? "ok" : "failed"));
-                status += ! (error < tol);
+                okay = (error < tol);
             }
+            status += ! okay;
+            printf( "   %s\n", (okay ? "ok" : "failed"));
 
             TESTING_FREE_CPU( tau    );
             TESTING_FREE_CPU( h_A    );

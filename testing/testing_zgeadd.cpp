@@ -76,9 +76,10 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M, N, h_B, lda, d_B, ldda );
             
-            gpu_time = magma_sync_wtime( NULL );
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             magmablas_zgeadd( M, N, alpha, d_A, ldda, d_B, ldda );
-            gpu_time = magma_sync_wtime( NULL ) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             
             /* =====================================================================

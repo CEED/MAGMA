@@ -79,7 +79,7 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime();
             magma_zgebrd( M, N, h_Q, lda,
                           diag, offdiag, tauq, taup,
-                          h_work, lhwork, &info);
+                          h_work, lhwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)

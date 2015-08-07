@@ -62,7 +62,7 @@ int main(int argc, char **argv)
             
             TESTING_MALLOC_CPU( h_A,  magmaDoubleComplex, lda*N    );
             TESTING_MALLOC_CPU( h_LU, magmaDoubleComplex, lda*N    );
-            TESTING_MALLOC_CPU( h_B0,  magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC_CPU( h_B0, magmaDoubleComplex, ldb*nrhs );
             TESTING_MALLOC_CPU( h_B,  magmaDoubleComplex, ldb*nrhs );
             TESTING_MALLOC_CPU( h_X,  magmaDoubleComplex, ldb*nrhs );
             TESTING_MALLOC_CPU( work, double,             N        );
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
             // copy A to LU and B to X; save A and B for residual
             lapackf77_zlacpy( "F", &N, &N,    h_A, &lda, h_LU, &lda );
             lapackf77_zlacpy( "F", &N, &nrhs, h_B, &ldb, h_X,  &ldb );
-            lapackf77_zlacpy( "F", &N, &nrhs, h_B, &ldb, h_B0,  &ldb );
+            lapackf77_zlacpy( "F", &N, &nrhs, h_B, &ldb, h_B0, &ldb );
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -103,13 +103,14 @@ int main(int argc, char **argv)
             
             Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, work);
             error = Rnorm/(N*Anorm*Xnorm);
-            status += ! (error < tol);
+            bool okay = (error < tol);
+            status += ! okay;
             
             /* ====================================================================
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                lapackf77_zlacpy( "F", &N, &N,    h_A, &lda, h_LU, &lda );
+                lapackf77_zlacpy( "F", &N, &N,    h_A,  &lda, h_LU, &lda );
                 lapackf77_zlacpy( "F", &N, &nrhs, h_B0, &ldb, h_X,  &ldb );
 
                 cpu_time = magma_wtime();
@@ -129,14 +130,16 @@ int main(int argc, char **argv)
                 
                 Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B0, &ldb, work);
                 lerror = Rnorm/(N*Anorm*Xnorm);
-                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s   %20.2e   %s\n",
+                bool lokay = (lerror < tol);
+                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %-6s           %8.2e   %s\n",
                         (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        error, (error < tol ? "ok" : "failed"),lerror, (lerror < tol ? "ok" : "failed"));
+                        error, (okay ? "ok" : "failed"),
+                        lerror, (lokay ? "ok" : "failed"));
             }
             else {
                 printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int) N, (int) nrhs, gpu_perf, gpu_time,
-                        error, (error < tol ? "ok" : "failed"));
+                        error, (okay ? "ok" : "failed"));
             }
             
             TESTING_FREE_CPU( h_A  );

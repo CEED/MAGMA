@@ -19,6 +19,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#include "magma_operators.h"  // for MAGMA_Z_DIV
 
 /* ================================================================================================== */
 
@@ -655,19 +656,16 @@ int main( int argc, char** argv)
             //magma_zprint(N,N,h_A,lda);
             if (nopiv) {
                 // CPU-interface to non-piv LDLt
-                magma_setdevice(0);
                 gpu_time = magma_wtime();
                 magma_zhetrf_nopiv( opts.uplo, N, h_A, lda, &info);
                 gpu_time = magma_wtime() - gpu_time;
             } else if (cpu) {
                 // CPU-interface to Bunch-Kauffman LDLt
-                magma_setdevice(0);
                 gpu_time = magma_wtime();
                 magma_zhetrf( opts.uplo, N, h_A, lda, ipiv, &info);
                 gpu_time = magma_wtime() - gpu_time;
             } else if (nopiv_gpu) {
                 // GPU-interface to non-piv LDLt
-                magma_setdevice(0);
                 magma_int_t ldda = magma_roundup( N, opts.align );
                 magmaDoubleComplex_ptr d_A;
                 if (MAGMA_SUCCESS != magma_zmalloc( &d_A, N*ldda  )) {
@@ -682,22 +680,19 @@ int main( int argc, char** argv)
                 magma_free( d_A );
             } else if (aasen) {
                 // CPU-interface to Aasen's LTLt
-                magma_setdevice(0);
                 gpu_time = magma_wtime();
                 magma_zhetrf_aasen( opts.uplo, cpu_panel, N, h_A, lda, ipiv, &info);
                 gpu_time = magma_wtime() - gpu_time;
             } else if (row) {
-                magma_setdevice(0);
                 //magma_zhetrf_gpu_row( opts.uplo, N, h_A, lda, ipiv, work, lwork, &info);
             } else {
-                magma_setdevice(0);
                 //magma_zhetrf_hybrid( opts.uplo, N, h_A, lda, ipiv, work, lwork, &info);
             }
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zhetrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
-
+            
             /* =====================================================================
                Check the factorization
                =================================================================== */

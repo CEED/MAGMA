@@ -32,6 +32,16 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
+    // OpenCL use:  cl_mem  , offset  (two arguments);
+    // else   use:  pointer + offset  (one argument).
+    #ifdef HAVE_clBLAS
+        #define d_A(i_, j_)   d_A, ((i_) + (j_)*ldda)
+        #define d_B(i_, j_)   d_B, ((i_) + (j_)*lddb)
+    #else
+        #define d_A(i_, j_)  (d_A + (i_) + (j_)*ldda)
+        #define d_B(i_, j_)  (d_B + (i_) + (j_)*lddb)
+    #endif
+    
     real_Double_t    gbytes, gpu_perf, gpu_time, gpu_perf2=0, gpu_time2=0, cpu_perf, cpu_time;
     double           error, error2, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
@@ -85,7 +95,7 @@ int main( int argc, char** argv)
                     h_B[i + j*ldb] = MAGMA_Z_MAKE( i + j/10000., j );
                 }
             }
-            magma_zsetmatrix( N, M, h_B, ldb, d_B, lddb );
+            magma_zsetmatrix( N, M, h_B, ldb, d_B(0,0), lddb );
             
             /* =====================================================================
                Performs operation using naive out-of-place algorithm
@@ -114,37 +124,42 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA, out-of-place
                =================================================================== */
-            magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
-            magma_zsetmatrix( N, M, h_B, ldb, d_B, lddb );
+            magma_zsetmatrix( M, N, h_A, lda, d_A(0,0), ldda );
+            magma_zsetmatrix( N, M, h_B, ldb, d_B(0,0), lddb );
             
-            gpu_time = magma_sync_wtime( 0 );
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             if ( trans[itran] == MagmaTrans ) {
-                //magmablas_ztranspose( M-2, N-2, d_A+1+ldda, ldda, d_B+1+lddb, lddb );  // inset by 1 row & col
-                magmablas_ztranspose( M, N, d_A, ldda, d_B, lddb );
+                //magmablas_ztranspose( M-2, N-2, d_A(1,1), ldda, d_B(1,1), lddb );  // inset by 1 row & col
+                magmablas_ztranspose( M, N, d_A(0,0), ldda, d_B(0,0), lddb );
             }
+            #ifdef HAVE_CUBLAS
             else {
-                //magmablas_ztranspose_conj( M-2, N-2, d_A+1+ldda, ldda, d_B+1+lddb, lddb );  // inset by 1 row & col
-                magmablas_ztranspose_conj( M, N, d_A, ldda, d_B, lddb );
+                //magmablas_ztranspose_conj( M-2, N-2, d_A(1,1), ldda, d_B(1,1), lddb );  // inset by 1 row & col
+                magmablas_ztranspose_conj( M, N, d_A(0,0), ldda, d_B(0,0), lddb );
             }
-            gpu_time = magma_sync_wtime( 0 ) - gpu_time;
+            #endif
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             
             /* ====================================================================
                Performs operation using MAGMA, in-place
                =================================================================== */
             if ( M == N ) {
-                magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
+                magma_zsetmatrix( M, N, h_A, lda, d_A(0,0), ldda );
                 
-                gpu_time2 = magma_sync_wtime( 0 );
+                gpu_time2 = magma_sync_wtime( opts.queue );
                 if ( trans[itran] == MagmaTrans ) {
-                    //magmablas_ztranspose_inplace( N-2, d_A+1+ldda, ldda );  // inset by 1 row & col
-                    magmablas_ztranspose_inplace( N, d_A, ldda );
+                    //magmablas_ztranspose_inplace( N-2, d_A(1,1), ldda );  // inset by 1 row & col
+                    magmablas_ztranspose_inplace( N, d_A(0,0), ldda );
                 }
+                #ifdef HAVE_CUBLAS
                 else {
-                    //magmablas_ztranspose_conj_inplace( N-2, d_A+1+ldda, ldda );  // inset by 1 row & col
-                    magmablas_ztranspose_conj_inplace( N, d_A, ldda );
+                    //magmablas_ztranspose_conj_inplace( N-2, d_A(1,1), ldda );  // inset by 1 row & col
+                    magmablas_ztranspose_conj_inplace( N, d_A(0,0), ldda );
                 }
-                gpu_time2 = magma_sync_wtime( 0 ) - gpu_time2;
+                #endif
+                gpu_time2 = magma_sync_wtime( opts.queue ) - gpu_time2;
                 gpu_perf2 = gbytes / gpu_time2;
             }
             
@@ -153,13 +168,13 @@ int main( int argc, char** argv)
                =================================================================== */
             // check out-of-place transpose (d_B)
             size = ldb*M;
-            magma_zgetmatrix( N, M, d_B, lddb, h_R, ldb );
+            magma_zgetmatrix( N, M, d_B(0,0), lddb, h_R, ldb );
             blasf77_zaxpy( &size, &c_neg_one, h_B, &ione, h_R, &ione );
             error = lapackf77_zlange("f", &N, &M, h_R, &ldb, work );
             
             if ( M == N ) {
                 // also check in-place tranpose (d_A)
-                magma_zgetmatrix( N, M, d_A, ldda, h_R, ldb );
+                magma_zgetmatrix( N, M, d_A(0,0), ldda, h_R, ldb );
                 blasf77_zaxpy( &size, &c_neg_one, h_B, &ione, h_R, &ione );
                 error2 = lapackf77_zlange("f", &N, &M, h_R, &ldb, work );
     

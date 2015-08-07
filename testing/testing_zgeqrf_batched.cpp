@@ -91,7 +91,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, magma_perf, magma_time, cublas_perf=0, cublas_time=0, cpu_perf, cpu_time;
-    double           magma_error=0.0, cublas_error=0.0, magma_error2=0.0, cublas_error2=0.0, error, error2;
+    double           magma_error, cublas_error, magma_error2, cublas_error2, error, error2;
 
     magmaDoubleComplex *h_A, *h_R, *h_Amagma, *tau, *h_work, tmp[1];
     magmaDoubleComplex *d_A, *dtau_magma, *dtau_cublas;
@@ -115,8 +115,6 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
-
     printf("%% BatchCount   M    N     MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub \n");
     printf("%%============================================================================================================================================================ \n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -165,14 +163,14 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             magma_zsetmatrix( M, column, h_R, lda,  d_A, ldda );
-            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, queue);
-            zset_pointer(dtau_array, dtau_magma, 1, 0, 0, min_mn, batchCount, queue);
+            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue);
+            zset_pointer(dtau_array, dtau_magma, 1, 0, 0, min_mn, batchCount, opts.queue);
     
-            magma_time = magma_sync_wtime(queue);
+            magma_time = magma_sync_wtime( opts.queue );
     
-            info = magma_zgeqrf_batched(M, N, dA_array, ldda, dtau_array, dinfo_magma, batchCount, queue);
+            info = magma_zgeqrf_batched(M, N, dA_array, ldda, dtau_array, dinfo_magma, batchCount, opts.queue);
 
-            magma_time = magma_sync_wtime(queue) - magma_time;
+            magma_time = magma_sync_wtime( opts.queue ) - magma_time;
             magma_perf = gflops / magma_time;
 
             magma_zgetmatrix( M, column, d_A, ldda, h_Amagma, lda);
@@ -187,19 +185,16 @@ int main( int argc, char** argv)
 
             /* cublasZgeqrfBatched is only available from CUBLAS v6.5 */
             #if CUDA_VERSION >= 6050
-            cublasHandle_t myhandle=opts.handle;
-            cublasSetStream(myhandle, queue);
-
             magma_zsetmatrix( M, column, h_R, lda,  d_A, ldda );
-            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, queue);
-            zset_pointer(dtau_array, dtau_cublas, 1, 0, 0, min_mn, batchCount, queue);
+            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue);
+            zset_pointer(dtau_array, dtau_cublas, 1, 0, 0, min_mn, batchCount, opts.queue);
 
-            cublas_time = magma_sync_wtime(queue);
+            cublas_time = magma_sync_wtime( opts.queue );
     
             int cublas_info;  // int, not magma_int_t
-            cublasZgeqrfBatched(myhandle, M, N, dA_array, ldda, dtau_array, &cublas_info, batchCount);
+            cublasZgeqrfBatched( opts.handle, M, N, dA_array, ldda, dtau_array, &cublas_info, batchCount);
 
-            cublas_time = magma_sync_wtime(queue) - cublas_time;
+            cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
 
             if (cublas_info != 0)
@@ -250,6 +245,8 @@ int main( int argc, char** argv)
                 TESTING_MALLOC_CPU( work, double,             min_mn );
 
                 /* check magma result */
+                magma_error  = 0;
+                magma_error2 = 0;
                 magma_zgetvector(min_mn*batchCount, dtau_magma, 1, tau, 1);
                 for (int i=0; i < batchCount; i++)
                 {
@@ -268,6 +265,8 @@ int main( int argc, char** argv)
 
                 /* check cublas result */
                 #if CUDA_VERSION >= 6050
+                cublas_error  = 0;
+                cublas_error2 = 0;
                 magma_zgetvector(min_mn*batchCount, dtau_magma, 1, tau, 1);
                 magma_zgetmatrix( M, column, d_A, ldda, h_A, lda);
                 for (int i=0; i < batchCount; i++)

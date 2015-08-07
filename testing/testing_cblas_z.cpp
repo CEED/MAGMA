@@ -117,6 +117,7 @@ int main( int argc, char** argv )
     MAGMA_UNUSED( x_f  );
     MAGMA_UNUSED( x2_c );
     MAGMA_UNUSED( x2_f );
+    MAGMA_UNUSED( x2_m );
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );

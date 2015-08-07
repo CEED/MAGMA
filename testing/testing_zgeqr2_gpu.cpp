@@ -87,11 +87,12 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            gpu_time = magma_sync_wtime( 0 );
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
 
             magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
 
-            gpu_time = magma_sync_wtime( 0 ) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zgeqr2_gpu returned error %d: %s.\n",

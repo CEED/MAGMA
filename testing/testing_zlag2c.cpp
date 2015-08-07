@@ -38,7 +38,7 @@ int main( int argc, char** argv )
     magma_int_t status = 0;
     magmaFloatComplex   *SA, *SR;
     magmaDoubleComplex   *A,  *R;
-    magmaFloatComplex  *dSA;
+    magmaFloatComplex_ptr dSA;
     magmaDoubleComplex_ptr dA;
     
     magma_opts opts;
@@ -84,9 +84,10 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA zlag2c
                =================================================================== */
-            gpu_time = magma_sync_wtime(0);
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
             magmablas_zlag2c( m, n, dA, ldda, dSA, ldda, &info );
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0)
                 printf("magmablas_zlag2c returned error %d: %s.\n",
@@ -132,9 +133,9 @@ int main( int argc, char** argv )
                =================================================================== */
             magma_csetmatrix( m, n, SA, lda, dSA, ldda );
             
-            gpu_time = magma_sync_wtime(0);
+            gpu_time = magma_sync_wtime( opts.queue );
             magmablas_clag2z( m, n, dSA, ldda, dA, ldda, &info );
-            gpu_time = magma_sync_wtime(0) - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (info != 0)
                 printf("magmablas_clag2z returned error %d: %s.\n",
