@@ -602,9 +602,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     #endif
 
     #ifdef HAVE_CUBLAS
-    // handle for directly calling cublas
     magma_setdevice( opts->device );
-    cublasCreate( &opts->handle );
     #endif
     
     // create queues on this device
@@ -621,6 +619,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     
     #ifdef HAVE_CUBLAS
     // handle for directly calling cublas
+    cublasCreate( &opts->handle );
     cublasSetStream( opts->handle, opts->queue );
     #endif
 }
