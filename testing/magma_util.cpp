@@ -20,7 +20,9 @@
 #include <sys/stat.h>  // fchmod
 #endif
 
+#if defined(HAVE_CUBLAS)
 #include <cuda_runtime_api.h>
+#endif
 
 #include "testings.h"
 #include "magma.h"
@@ -30,7 +32,7 @@
 #if   defined(HAVE_CUBLAS)
     const char* g_platform_str = "cuBLAS";
 
-#elif defined(HAVE_clAmdBlas)
+#elif defined(HAVE_clBLAS)
     const char* g_platform_str = "clBLAS";
 
 #elif defined(HAVE_MIC)
@@ -162,6 +164,7 @@ const char *usage =
 "  --nrhs x         Number of right hand sides, default 1.\n"
 "  --nstream x      Number of CUDA streams, default 1.\n"
 "  --ngpu x         Number of GPUs, default 1. Also set with $MAGMA_NUM_GPUS.\n"
+"  --nsub x         Number of submatrices, default 1.\n"
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
 "  --nthread x      Number of CPU threads, default 1.\n"
 "  --offset x       Offset from beginning of matrix, default 0.\n"
@@ -202,6 +205,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->nrhs     = 1;
     opts->nstream  = 1;
     opts->ngpu     = magma_num_gpus();
+    opts->nsub     = 1;
     opts->niter    = 1;
     opts->nthread  = 1;
     opts->offset   = 0;
@@ -399,6 +403,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                 setenv( "MAGMA_NUM_GPUS", argv[i], true );
             #endif
         }
+        else if ( strcmp("--nsub", argv[i]) == 0 && i+1 < argc ) {
+            opts->nsub = atoi( argv[++i] );
+            magma_assert( opts->nsub > 0,
+                          "error: --nsub %s is invalid; ensure nsub > 0.\n", argv[i] );
+        }
         else if ( strcmp("--nstream", argv[i]) == 0 && i+1 < argc ) {
             opts->nstream = atoi( argv[++i] );
             magma_assert( opts->nstream > 0,
@@ -592,23 +601,24 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->flock_fd = open_lockfile( lockfile, opts->flock_op );
     #endif
     
-    #ifdef HAVE_CUBLAS
-    // handle for directly calling cublas
-    magma_setdevice( opts->device );
-    cublasCreate( &opts->handle );
-    #endif
-    
     // create queues on this device
     magma_int_t num;
     magma_device_t devices[ MagmaMaxGPUs ];
     magma_getdevices( devices, MagmaMaxGPUs, &num );
     
     // 2 queues + 1 extra NULL entry to catch errors
-    magma_queue_create( /*devices[ opts->device ],*/ &opts->queues2[ 0 ] );
-    magma_queue_create( /*devices[ opts->device ],*/ &opts->queues2[ 1 ] );
+    magma_queue_create( &opts->queues2[ 0 ] );
+    magma_queue_create( &opts->queues2[ 1 ] );
     opts->queues2[ 2 ] = NULL;
     
     opts->queue = opts->queues2[ 0 ];
+    
+    #ifdef HAVE_CUBLAS
+    // handle for directly calling cublas
+    magma_setdevice( opts->device );
+    cublasCreate( &opts->handle );
+    cublasSetStream( opts->handle, opts->queue );
+    #endif
 }
 // end parse_opts
 

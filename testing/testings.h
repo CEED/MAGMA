@@ -173,6 +173,7 @@ typedef struct magma_opts
     magma_int_t nrhs;
     magma_int_t nstream;
     magma_int_t ngpu;
+    magma_int_t nsub;
     magma_int_t niter;
     magma_int_t nthread;
     magma_int_t offset;
