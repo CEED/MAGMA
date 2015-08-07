@@ -600,6 +600,12 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     #ifdef USE_FLOCK
     opts->flock_fd = open_lockfile( lockfile, opts->flock_op );
     #endif
+
+    #ifdef HAVE_CUBLAS
+    // handle for directly calling cublas
+    magma_setdevice( opts->device );
+    cublasCreate( &opts->handle );
+    #endif
     
     // create queues on this device
     magma_int_t num;
