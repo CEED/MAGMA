@@ -42,14 +42,14 @@ __global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int in
     magmaDoubleComplex res = MAGMA_Z_ZERO;
 
     if (tx < n) {
-       res = x[tx*incx];
+        res = x[tx*incx];
     }
 
     sdata[tx] = MAGMA_Z_REAL(res * MAGMA_Z_CNJG(res));
 
     __syncthreads();
 
-    for(int s = blockDim.x/2; s > 32; s >>= 1 ) {
+    for (int s = blockDim.x/2; s > 32; s >>= 1 ) {
         if (tx < s) {
             sdata[tx] += sdata[tx+s];
         }
@@ -69,25 +69,22 @@ __global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int in
     if (tx == 0) {
         double xreal = MAGMA_Z_REAL(x[n*incx]);        
         x[n*incx] = MAGMA_Z_MAKE(sqrt(xreal - sdata[0]), 0);
-        if(xreal <= MAGMA_D_ZERO){
+        if (xreal <= MAGMA_D_ZERO) {
             info_array[blockIdx.z] = offset + gbstep + 1;
         }
     }
-
 }
 
 
 void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t offset, magma_int_t *info_array, magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
 {
-/*
+    /*
     Specialized Zdotc
     1) performs zdotc sum = x[0:n-1]*conj(x[0:n-1])
     2) updates x[n] = sqrt(x[n]-sum);
-
-*/
+    */
     if (n > MAX_NTHREADS) {
         printf("n = %d > %d is not supported in zpotf2_zdotc\n", (int) n, (int) MAX_NTHREADS);
-        
     }
     int threadSize;
 
@@ -117,7 +114,7 @@ void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
 __global__ void zdscal_kernel_batched(int n, magmaDoubleComplex **x_array, int incx, int offset, magma_int_t *info_array)
 {
     // checkinfo to avoid computation of the singular matrix
-    if(info_array[blockIdx.z] != 0 ) return;
+    if (info_array[blockIdx.z] != 0 ) return;
 
     int id = threadIdx.x;
     magmaDoubleComplex *x = x_array[blockIdx.z]+offset;
@@ -130,7 +127,7 @@ __global__ void zdscal_kernel_batched(int n, magmaDoubleComplex **x_array, int i
 
     __syncthreads();
 
-    if ( id < n && id >0) {
+    if ( id < n && id > 0) {
         x[id*incx] = x[id*incx] * factor;
         //printf("x=%f", x[id*incx]);
     }
@@ -139,10 +136,9 @@ __global__ void zdscal_kernel_batched(int n, magmaDoubleComplex **x_array, int i
 
 void magma_zpotf2_zdscal_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t offset, magma_int_t *info_array, magma_int_t batchCount, magma_queue_t queue)
 {
-/*
+    /*
     Specialized Zdscal perform x[1:n-1]/x[0]
-
-*/
+    */
     dim3 grid(1, 1, batchCount);
     dim3 threads(n, 1, 1); 
 
@@ -160,9 +156,10 @@ __global__ void zlacgv_kernel_batched(int n, magmaDoubleComplex **x_array, int i
         x[id*incx] = MAGMA_Z_CNJG(x[id*incx]);
     }
 }
+
 void magma_zlacgv_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t offset, magma_int_t batchCount, magma_queue_t queue)
 {
-/*
+    /*
     Purpose
     =======
 
@@ -199,13 +196,13 @@ static __device__ void zpotf2_device(int m, int n,
                               magmaDoubleComplex alpha, 
                               magmaDoubleComplex beta, magma_int_t *info, int gbstep)
 {
-/*
+    /*
     Each thread block load entire A into shared memory
     factorize it and copy back. n must be small enough to fit shared memory.
     n is checked by a macro POTF2_TILE_SIZE before the kernel. 
-*/
+    */
     // checkinfo to avoid computation of the singular matrix
-    if(*info != 0 ) return;
+    if (*info != 0 ) return;
 
     int tx = threadIdx.x;
     magmaDoubleComplex *sdata_A = shared_data;
@@ -213,23 +210,23 @@ static __device__ void zpotf2_device(int m, int n,
     __shared__ double sum[POTF2_TILE_SIZE];
 
     // load A into sdata_A
-    if(tx < m)
+    if (tx < m)
     {
-        for(int i=0; i<n; i++)
+        for (int i=0; i < n; i++)
         {  
              sdata_A[tx + i * m] =  A[tx + i * lda];
         }
     }
     __syncthreads();
 
-    for(int iter=0; iter<n; iter++)
+    for (int iter=0; iter < n; iter++)
     {
         double res = MAGMA_D_ZERO;
         magmaDoubleComplex res1 = MAGMA_Z_ZERO;
 
         //1) performs zdotc sum = A[iter, 0:iter-1]*conj(A[iter, 0:iter-1])
         //2) updates A[iter,iter] = sqrt(A[iter,iter]-sum);
-        if(tx<iter)
+        if (tx < iter)
         {
             res = MAGMA_Z_REAL (sdata_A[iter + tx * m] * MAGMA_Z_CNJG(sdata_A[iter + tx * m]));         
             sum[tx] = res;
@@ -245,30 +242,30 @@ static __device__ void zpotf2_device(int m, int n,
         
         __shared__ double xreal;
         if (tx == 0) {
-              xreal = MAGMA_Z_REAL(sdata_A[iter + iter * m]);        
-              sdata_A[iter + iter * m] = MAGMA_Z_MAKE(sqrt(xreal - sum[0]), 0);
-              if(xreal <= MAGMA_D_ZERO){
-                  *info = iter + gbstep + 1;
-              }
+            xreal = MAGMA_Z_REAL(sdata_A[iter + iter * m]);        
+            sdata_A[iter + iter * m] = MAGMA_Z_MAKE(sqrt(xreal - sum[0]), 0);
+            if (xreal <= MAGMA_D_ZERO) {
+                *info = iter + gbstep + 1;
+            }
         }
         __syncthreads();
-        if(xreal <= MAGMA_D_ZERO) return;
+        if (xreal <= MAGMA_D_ZERO) return;
         __syncthreads();
 
         //zlacgv conjugates a complex vector of length iter. //TODO
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        if(tx < iter)
+        if (tx < iter)
         {
-             sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
+            sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
         }
         __syncthreads();  
         #endif
   
         // zgemv  
         // Compute elements iter:n-1 of column iter = A(iter:n,0:iter-1) * A(iter-1,0:iter-1) (row).
-        if(tx < m && tx > iter)
+        if (tx < m && tx > iter)
         {
-            for(int j=0; j < iter; j++)
+            for (int j=0; j < iter; j++)
             {
                 res1 += sdata_A[tx + j * m]  *  sdata_A[iter + j * m]; // TODO move the zlacgv conj to be done automatically here implicitly.
             }   
@@ -278,9 +275,9 @@ static __device__ void zpotf2_device(int m, int n,
 
         //zlacgv conjugates a complex vector of length iter.
         #if defined(PRECISION_z) || defined(PRECISION_c)
-        if(tx < iter)
+        if (tx < iter)
         {
-             sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
+            sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
         }
         __syncthreads();  
         #endif
@@ -298,9 +295,9 @@ static __device__ void zpotf2_device(int m, int n,
     }// end of iter
 
     //copy sdata_A to A
-    if(tx < m)
+    if (tx < m)
     {
-        for(int i=0; i<n; i++)
+        for (int i=0; i < n; i++)
         {  
              A[tx + i * lda] = sdata_A[tx + i * m];
         }
@@ -314,11 +311,11 @@ __global__ void zpotf2_kernel_batched(int m, int n,
                               magmaDoubleComplex beta, 
                               magma_int_t *info_array, int gbstep)
 {
-/*
+    /*
     Each thread block load entire dA_array[blockIdx.z] into shared memory
     factorize it and copy back. n must be small enough to fit shared memory.
     n is checked by a macro POTF2_TILE_SIZE before the kernel. 
-*/
+    */
     int batchid = blockIdx.z;
     zpotf2_device(m, n, dA_array[batchid], lda, alpha, beta, &(info_array[batchid]), gbstep);
 }
@@ -393,7 +390,6 @@ magma_zpotf2_tile_batched(
     magmaDoubleComplex **dA_array, magma_int_t lda,
     magma_int_t *info_array, magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
 {
-
     magma_int_t arginfo = 0;
     
     if ( uplo != MagmaUpper && uplo != MagmaLower) {
@@ -438,7 +434,6 @@ magma_zpotf2_tile(
     magmaDoubleComplex *dA, magma_int_t lda,
     magma_int_t *info)
 {
-
     *info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower) {
         *info = -1;
@@ -476,4 +471,3 @@ magma_zpotf2_tile(
 
     return *info;
 }
-

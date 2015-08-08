@@ -47,7 +47,7 @@ __global__ void ztranspose_conj_inplace_odd( int n, magmaDoubleComplex *matrix, 
     jj *= NB;
 
     magmaDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
-    if( ii == jj ) {
+    if ( ii == jj ) {
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = MAGMA_Z_CNJG( *A );
         }
@@ -109,7 +109,7 @@ __global__ void ztranspose_conj_inplace_even( int n, magmaDoubleComplex *matrix,
     jj *= NB;
 
     magmaDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
-    if( ii == jj ) {
+    if ( ii == jj ) {
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = MAGMA_Z_CNJG( *A );
         }
@@ -187,7 +187,7 @@ magmablas_ztranspose_conj_inplace_q(
     
     // need 1/2 * (nblock+1) * nblock to cover lower triangle and diagonal of matrix.
     // block assignment differs depending on whether nblock is odd or even.
-    if( nblock % 2 == 1 ) {
+    if ( nblock % 2 == 1 ) {
         dim3 grid( nblock, (nblock+1)/2 );
         ztranspose_conj_inplace_odd<<< grid, threads, 0, queue >>>( n, dA, ldda );
     }

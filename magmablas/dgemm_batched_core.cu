@@ -139,7 +139,6 @@ magmablas_dgemm_batched(
     double **dC_array, magma_int_t lddc, 
     magma_int_t batchCount, magma_queue_t queue )
 {
-
     magma_int_t info = 0;
     if      ( transA != MagmaNoTrans && transA != MagmaTrans && transA != MagmaConjTrans )
         info = -1;
@@ -175,15 +174,15 @@ magmablas_dgemm_batched(
 
 
     magma_int_t shape;
-    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   {shape = 0;} // nn
-    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     {shape = 1;} // nt
-    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) {shape = 2;} // nc
-    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   {shape = 3;} // tn
-    else if (transA == MagmaTrans     && transB == MagmaTrans)     {shape = 4;} // tt
-    else if (transA == MagmaTrans     && transB == MagmaConjTrans) {shape = 5;} // tc
-    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   {shape = 6;} // cn
-    else if (transA == MagmaConjTrans && transB == MagmaTrans)     {shape = 7;} // ct
-    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) {shape = 8;} // cc
+    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   { shape = 0; } // nn
+    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     { shape = 1; } // nt
+    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) { shape = 2; } // nc
+    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   { shape = 3; } // tn
+    else if (transA == MagmaTrans     && transB == MagmaTrans)     { shape = 4; } // tt
+    else if (transA == MagmaTrans     && transB == MagmaConjTrans) { shape = 5; } // tc
+    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   { shape = 6; } // cn
+    else if (transA == MagmaConjTrans && transB == MagmaTrans)     { shape = 7; } // ct
+    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) { shape = 8; } // cc
     
     //TODO: probably the texture init code should be placed here
 
@@ -196,21 +195,21 @@ magmablas_dgemm_batched(
     {
         case 0: // nn
             {
-                if(k < 32)
+                if (k < 32)
                 {
-                    if(k==8 && n==24)
-                    gemm_template_batched_nn<double, version(NN,32), 0, 0>
-                    (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
-                    else if (n<32)
-                    gemm_template_batched_nn<double, version(NN,49), 0, 0>
-                    (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
+                    if (k == 8 && n == 24)
+                        gemm_template_batched_nn<double, version(NN,32), 0, 0>
+                        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
+                    else if (n < 32)
+                        gemm_template_batched_nn<double, version(NN,49), 0, 0>
+                        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                     else
-                    gemm_template_batched_nn<double, version(NN,111), 0, 0>
-                    (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
+                        gemm_template_batched_nn<double, version(NN,111), 0, 0>
+                        (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 80)
+                    if (m < 80)
                     {
                         gemm_template_batched_nn<double, version(NN,93), 0, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -225,14 +224,14 @@ magmablas_dgemm_batched(
             break;
         case 1: // nt
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_nt<double, version(NT,160), 0, 0>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_nt<double, version(NT,160), 0, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -247,14 +246,14 @@ magmablas_dgemm_batched(
             break;
         case 2: // nc
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_nt<double, version(NT,160), 0, 1>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_nt<double, version(NT,160), 0, 1>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -269,14 +268,14 @@ magmablas_dgemm_batched(
             break;
         case 3: // tn
             {
-                if(k < 64)
+                if (k < 64)
                 {
                     gemm_template_batched_tn<double, version(TN,207), 0, 0>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tn<double, version(TN,207), 0, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -291,14 +290,14 @@ magmablas_dgemm_batched(
             break;
         case 6: // cn
             {
-                if(k < 64)
+                if (k < 64)
                 {
                     gemm_template_batched_tn<double, version(TN,207), 1, 0>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tn<double, version(TN,207), 1, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -313,14 +312,14 @@ magmablas_dgemm_batched(
             break;
         case 4: // tt
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_tt<double, version(TT,81), 0, 0>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tt<double, version(TT,81), 0, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -335,14 +334,14 @@ magmablas_dgemm_batched(
             break;
         case 5: // tc
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_tt<double, version(TT,81), 0, 1>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tt<double, version(TT,81), 0, 1>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -357,14 +356,14 @@ magmablas_dgemm_batched(
             break;
         case 7: // ct
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_tt<double, version(TT,81), 1, 0>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tt<double, version(TT,81), 1, 0>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
@@ -379,14 +378,14 @@ magmablas_dgemm_batched(
             break;
         case 8: // cc
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     gemm_template_batched_tt<double, version(TT,81), 1, 1>
                     (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(m < 256)
+                    if (m < 256)
                     {
                         gemm_template_batched_tt<double, version(TT,81), 1, 1>
                         (m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB, batchCount, queue);

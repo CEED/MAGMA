@@ -151,7 +151,7 @@ magmablas_ztrtri_diag_q(
         ztrtri_diag_upper_kernel<<< nblocks, IB, 0, queue >>>( diag, n, dA, ldda, d_dinvA );
 
         // update the inverse up to the size of IB
-        for( int jb=IB; jb < NB; jb*=2 ) {
+        for( int jb=IB; jb < NB; jb *= 2 ) {
             int kb = jb*2;
             int npages = magma_ceildiv( n, kb );
             dim3 threads( (jb <= 32 ? jb/4 : 16), 4 );

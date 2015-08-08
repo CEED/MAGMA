@@ -175,8 +175,8 @@ magmablas_zherk_batched(
 
     // we have two shapes only (nc or cn)
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nc
-    else                              {shape = 1;} // cn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nc
+    else                              { shape = 1; } // cn
         
     //TODO: probably the texture init code should be placed here
 
@@ -189,7 +189,7 @@ magmablas_zherk_batched(
     {
         case 0: // nc
             {
-                if(k <= 8)
+                if (k <= 8)
                 {
                     // version 58
                     herk_template_batched_nt<magmaDoubleComplex, version(NT,58), 0, 1>

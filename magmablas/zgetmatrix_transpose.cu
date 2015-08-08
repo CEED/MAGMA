@@ -40,12 +40,12 @@ magmablas_zgetmatrix_transpose_q(
         return;
 
     // TODO standard check arguments
-    if (lda < m || ldda < n || lddwork < m){
+    if (lda < m || ldda < n || lddwork < m) {
         printf("Wrong arguments in zgetmatrix_transpose.\n");
         return;
     }
 
-    for(i=0; i < n; i += nb) {
+    for (i=0; i < n; i += nb) {
         /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
         ib = min(n-i, nb);
         

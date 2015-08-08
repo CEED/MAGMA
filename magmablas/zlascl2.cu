@@ -24,7 +24,7 @@ zlascl2_full(int m, int n, const double* D, magmaDoubleComplex* A, int lda)
     double mul = D[ind];
     A += ind;
     if (ind < m) {
-        for(int j=0; j < n; j++ )
+        for (int j=0; j < n; j++ )
             A[j*lda] *= mul;
     }
 }
@@ -42,7 +42,7 @@ zlascl2_lower(int m, int n, const double* D, magmaDoubleComplex* A, int lda)
     double mul = D[ind];
     A += ind;
     if (ind < m) {
-        for(int j=0; j <= break_d; j++ )
+        for (int j=0; j <= break_d; j++ )
             A[j*lda] *= mul;
     }
 }
@@ -58,7 +58,7 @@ zlascl2_upper(int m, int n, const double *D, magmaDoubleComplex* A, int lda)
     double mul = D[ind];
     A += ind;
     if (ind < m) {
-        for(int j=n-1; j >= ind; j--)
+        for (int j=n-1; j >= ind; j--)
             A[j*lda] *= mul;
     }
 }

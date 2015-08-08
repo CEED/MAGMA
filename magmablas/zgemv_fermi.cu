@@ -48,12 +48,10 @@ zgemvn_template_fermi(
     const magmaDoubleComplex * __restrict__ x, magma_int_t incx, magmaDoubleComplex beta,
     magmaDoubleComplex       *y, magma_int_t incy)
 {
-
     dim3 grid( magma_ceildiv(m, TILE_SIZE) );
     dim3 threads( DIM_X, DIM_Y, 1 );
 
     zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
-
 }
 
 
@@ -82,11 +80,10 @@ zgemvc_template_fermi(
     const magmaDoubleComplex * __restrict__ x, magma_int_t incx, magmaDoubleComplex beta,
     magmaDoubleComplex       *y, magma_int_t incy, magma_int_t CONJA)
 {
-
     dim3 grid    ( 1,  magma_ceildiv(n, TILE_SIZE),  1 );
     dim3 threads ( DIM_X, DIM_Y, 1 );
 
-    if(CONJA == 1)
+    if (CONJA == 1)
     {
         zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 1><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
@@ -94,7 +91,6 @@ zgemvc_template_fermi(
     {
         zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 0><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
-
 }
 
 
@@ -211,35 +207,28 @@ magmablas_zgemv(
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
     if ( trans == MagmaNoTrans ) {
-        if(m <= 256){
+        if (m <= 256) {
             zgemvn_template_fermi<version(N, 137)>
                 ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
         }
-        else{
+        else {
             zgemvn_template_fermi<version(N, 140)>
                 ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
         }
-
     }
-    else{
-
+    else {
         magma_int_t CONJA = -1;
 
         if ( trans == MagmaConjTrans ) {
             CONJA = 1;
-        }else if( trans == MagmaTrans ) {
+        } else if ( trans == MagmaTrans ) {
             CONJA = 0;
         }
-        else{
-            return ;
+        else {
+            return;
         }       
 
         zgemvc_template_fermi<version(T, 189)>
             ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, CONJA );
-
     }
-
 }
-
-
-

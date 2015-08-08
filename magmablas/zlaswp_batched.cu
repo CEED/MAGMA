@@ -36,7 +36,7 @@ void zlaswp_rowparallel_devfunc(
 
     if (blockIdx.x == gridDim.x -1)
     {
-       width = n - blockIdx.x * SWP_WIDTH;
+        width = n - blockIdx.x * SWP_WIDTH;
     }
 
     if (tid < height)
@@ -44,10 +44,10 @@ void zlaswp_rowparallel_devfunc(
         int mynewroworig = pivinfo[tid]-1; //-1 to get the index in C
         int itsreplacement = pivinfo[mynewroworig] -1; //-1 to get the index in C
         #pragma unroll
-        for(int i=0; i<width; i++)
+        for (int i=0; i < width; i++)
         {
-          sdata[ tid + i * height ]    = dA[ mynewroworig + i * lda ];
-          dA[ mynewroworig + i * lda ] = dA[ itsreplacement + i * lda ];
+            sdata[ tid + i * height ]    = dA[ mynewroworig + i * lda ];
+            dA[ mynewroworig + i * lda ] = dA[ itsreplacement + i * lda ];
         }
     }
     __syncthreads();
@@ -56,9 +56,9 @@ void zlaswp_rowparallel_devfunc(
     {
         // copy back the upper swapped portion of A to dout 
         #pragma unroll
-        for(int i=0; i<width; i++)
+        for (int i=0; i < width; i++)
         {
-           dout[tid + i * ldo] = sdata[tid + i * height];
+            dout[tid + i * ldo] = sdata[tid + i * height];
         }
     }
 }
@@ -104,7 +104,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
     int height = k2-k1;
     if ( height  > 1024) 
     {
-       printf(" n=%d > 1024, not supported \n", n);
+        printf(" n=%d > 1024, not supported \n", n);
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
@@ -117,7 +117,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
     }
     else
     {
-        zlaswp_rowparallel_kernel_batched<<< grid, height, sizeof(magmaDoubleComplex) * height * SWP_WIDTH , queue >>>
+        zlaswp_rowparallel_kernel_batched<<< grid, height, sizeof(magmaDoubleComplex) * height * SWP_WIDTH, queue >>>
                                             (n, SWP_WIDTH, height, input_array, ldi, output_array, ldo, pivinfo_array );
     }
 }
@@ -140,7 +140,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
     int height = k2-k1;
     if ( height  > MAX_NTHREADS) 
     {
-       printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n, MAX_NTHREADS);
+        printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n, MAX_NTHREADS);
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
@@ -153,7 +153,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
     }
     else
     {
-        zlaswp_rowparallel_kernel<<< grid, height, sizeof(magmaDoubleComplex) * height * SWP_WIDTH , queue >>>
+        zlaswp_rowparallel_kernel<<< grid, height, sizeof(magmaDoubleComplex) * height * SWP_WIDTH, queue >>>
                                     (n, SWP_WIDTH, height, input, ldi, output, ldo, pivinfo ); 
     }
 }
@@ -192,7 +192,7 @@ __global__ void zlaswp_rowserial_kernel_batched( int n, magmaDoubleComplex **dA_
     if (tid < n) {
         magmaDoubleComplex A1;
 
-        for( int i1 = k1; i1 < k2; i1++ ) 
+        for (int i1 = k1; i1 < k2; i1++) 
         {
             int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
             if ( i2 != i1)
@@ -244,7 +244,7 @@ __global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **
         magmaDoubleComplex A1;
         if (k1 <= k2)
         {
-            for( int i1 = k1; i1 <= k2; i1++ ) 
+            for (int i1 = k1; i1 <= k2; i1++) 
             {
                 int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
                 if ( i2 != i1)
@@ -254,9 +254,9 @@ __global__ void zlaswp_columnserial_kernel_batched( int n, magmaDoubleComplex **
                     dA[i2 * lda + tid] = A1;
                 }
             }
-        }else
+        } else
         {
-            for( int i1 = k1; i1 >= k2; i1-- ) 
+            for (int i1 = k1; i1 >= k2; i1--) 
             {
                 int i2 = d_ipiv[i1] - 1;  // Fortran index, switch i1 and i2
                 if ( i2 != i1)

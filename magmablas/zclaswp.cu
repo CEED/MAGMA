@@ -27,7 +27,7 @@ zclaswp_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA, int
         
         newind = ipiv[0];
         
-        for(int i=0; i < n; i++) {
+        for (int i=0; i < n; i++) {
             res = MAGMA_C_MAKE( (float)cuCreal(A[newind+i*lda]),
                                 (float)cuCimag(A[newind+i*lda]) );
             SA[i*lda] = res; 
@@ -48,7 +48,7 @@ zclaswp_inv_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA,
 
         newind = ipiv[0];
 
-        for(int i=0; i < n; i++) {
+        for (int i=0; i < n; i++) {
             res = MAGMA_Z_MAKE( (double)cuCrealf(SA[newind+i*lda]),
                                 (double)cuCimagf(SA[newind+i*lda]) );
             A[i*lda] = res;

@@ -38,14 +38,14 @@ magmablas_zgetmatrix_transpose_mgpu(
     if ( (m == 0) || (n == 0) )
         return;
 
-    if (lda < m || ngpu*ldda < n || lddw < m){
+    if (lda < m || ngpu*ldda < n || lddw < m) {
         printf( "Wrong arguments in magmablas_zgetmatrix_transpose_mgpu (%d<%d), (%d*%d<%d), or (%d<%d).\n",
                 (int) lda, (int) m, (int) ngpu, (int) ldda, (int) n, (int) lddw, (int) m );
         return;
     }
     
     /* Move data from GPU to CPU using two buffers; first transpose the data on the GPU */
-    for(j=0; j < n; j += nb){
+    for (j=0; j < n; j += nb) {
         d       = (j/nb)%ngpu;
         j_local = (j/nb)/ngpu;
         id      = j_local%nstreams;

@@ -22,7 +22,7 @@ zlascl_diag_lower(int m, int n, magmaDoubleComplex const* D, int ldd,
 
     A += ind;
     if (ind < m) {
-        for(int j=0; j < n; j++ )
+        for (int j=0; j < n; j++ )
             A[j*lda] /= D[j + j*ldd];
     }
 }
@@ -38,7 +38,7 @@ zlascl_diag_upper(int m, int n, magmaDoubleComplex const* D, int ldd,
 
     A += ind;
     if (ind < m) {
-        for(int j=0; j < n; j++ )
+        for (int j=0; j < n; j++ )
             A[j*lda] /= D[ind + ind*ldd];
     }
 }

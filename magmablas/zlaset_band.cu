@@ -163,7 +163,7 @@ void zlaset_band_lower(
             If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
             if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
             On exit, A(i,j) = ALPHA, 1 <= i <= m, 1 <= j <= n where i != j, abs(i-j) < k;
-                     A(i,i) = BETA , 1 <= i <= min(m,n)
+            and      A(i,i) = BETA,  1 <= i <= min(m,n)
     
     @param[in]
     ldda    INTEGER

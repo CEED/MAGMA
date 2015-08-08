@@ -40,14 +40,11 @@ void gemvn_template_batched(
     T beta, T** dy_array, magma_int_t incy,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
-
     dim3 grid    ( magma_ceildiv(m, TILE_SIZE), 1, batchCount );                                                
     dim3 threads ( DIM_X, DIM_Y);
-                                                  
+    
     gemvn_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, queue >>>                    
-            ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );        
-
+            ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );
 }
 
 
@@ -74,16 +71,15 @@ void gemvc_template_batched(
     magma_int_t CONJA,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
     dim3 grid    ( 1, magma_ceildiv(n, TILE_SIZE), batchCount );                                                
     dim3 threads ( DIM_X, DIM_Y);
-                         
-    if(CONJA == 1)
+    
+    if (CONJA == 1)
     {                         
         gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, 1><<< grid, threads, 0, queue >>>                    
                 ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );        
     }
-    else if(CONJA == 0)
+    else if (CONJA == 0)
     {
         gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, 0><<< grid, threads, 0, queue >>>                    
                 ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );       
@@ -92,4 +88,3 @@ void gemvc_template_batched(
 
 
 #endif
-

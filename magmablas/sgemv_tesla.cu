@@ -32,7 +32,7 @@ sgemv_kernel_tesla(
         
         __syncthreads();
         #pragma unroll
-        for(int j=0; j < gemv_bs; j++) {
+        for (int j=0; j < gemv_bs; j++) {
             res += A[0]*buff[j];
             A += lda;
         }
@@ -43,7 +43,7 @@ sgemv_kernel_tesla(
         buff[threadIdx.x] = x[n1];
         
         __syncthreads();
-        for(int j=0; j < (n-n1); j++) {
+        for (int j=0; j < (n-n1); j++) {
             res += A[0]*buff[j];
             A += lda;
         }
@@ -75,7 +75,7 @@ sgemv_kernel2_tesla(
         
         __syncthreads();
         #pragma unroll
-        for(int j=0; j < gemv_bs; j++) {
+        for (int j=0; j < gemv_bs; j++) {
             res += A[0]*buff[j];
             A += lda;
         }
@@ -86,7 +86,7 @@ sgemv_kernel2_tesla(
         buff[threadIdx.x] = x[n1*incx];
         
         __syncthreads();
-        for(int j=0; j < (n-n1); j++) {
+        for (int j=0; j < (n-n1); j++) {
             res += A[0]*buff[j];
             A += lda;
         }
@@ -158,7 +158,7 @@ sgemvt_kernel1_tesla(
     const int iny = threadIdx.y;
     
     int ind  = iny + __mul24(blockIdx.x,32);
-        ind  = inx + __mul24(ind,lda);
+    ind      = inx + __mul24(ind,lda);
     int ind2 = inx + __mul24(iny,32);
     
     A += ind;
@@ -172,25 +172,25 @@ sgemvt_kernel1_tesla(
     for( int i=0; i < m1; i += gemv_bs ) {
         buff[ind2] = x[i];
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for (int j=0; j < 16; j++)
             la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
         
         __syncthreads();
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for (int j=0; j < 16; j++)
             res += la[inx][iny*16+j]*buff[j+iny*16];
         
         A += 32;
         
         //===============================================
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for (int j=0; j < 16; j++)
             la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
         
         __syncthreads();
         
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for (int j=0; j < 16; j++)
             res += la[inx][iny*16+j]*buff[j+32+iny*16];
         A += 32;
     }
@@ -202,30 +202,30 @@ sgemvt_kernel1_tesla(
             buff[ind2] = x[m1];
         
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for (int j=0; j < 16; j++)
             la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
         
         __syncthreads();
         
         if ( m-m1 > 16 ) {
             #pragma unroll
-            for(int j=0; j < 16; j++)
+            for (int j=0; j < 16; j++)
                 res += la[inx][iny*16+j]*buff[j+iny*16];
             
             A += 32;
             #pragma unroll
-            for(int j=0; j < 16; j++)
+            for (int j=0; j < 16; j++)
                 la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
             
             __syncthreads();
             
             #pragma unroll
-            for(int j=0; j < 16; j++)
+            for (int j=0; j < 16; j++)
                 res += la[inx][iny*16+j]*buff[j+32+iny*16];
         }
         else {
             #pragma unroll
-            for(int j=0; j < 16; j++)
+            for (int j=0; j < 16; j++)
                 res += la[inx][iny*16+j]*buff[j+iny*16];
         }
     }
@@ -250,7 +250,7 @@ sgemvt_kernel2_tesla(
     const int iny = threadIdx.y;
     
     int ind  = iny + __mul24(blockIdx.x,16);
-        ind  = inx + __mul24(ind,lda);
+    ind      = inx + __mul24(ind,lda);
     int ind2 = inx + __mul24(iny,16);
     if ( ind2 > 31 )
         ind2 -= 32;
@@ -269,25 +269,25 @@ sgemvt_kernel2_tesla(
     for( int i=0; i < m1; i += 32 ) {
         buff[ind2] = x[i];
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for (int j=0; j < 4; j++)
             la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
         
         __syncthreads();
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for (int j=0; j < 4; j++)
             res += la[inx][iny*4+j]*buff[j+iny*4];
         
         A += 16;
         __syncthreads();
         //===========================================
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for (int j=0; j < 4; j++)
             la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
         
         __syncthreads();
         
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for (int j=0; j < 4; j++)
             res += la[inx][iny*4+j]*buff[j+16+iny*4];
         A += 16;
     }
@@ -301,7 +301,7 @@ sgemvt_kernel2_tesla(
         
         __syncthreads();
         #pragma unroll
-        for(int j=0; j < 4; j++) {
+        for (int j=0; j < 4; j++) {
             if ( inx >= (m-m1) )
                 la[iny+__mul24(j,4)][inx] = 0;
             else
@@ -311,7 +311,7 @@ sgemvt_kernel2_tesla(
         __syncthreads();
         if ( m-m1 > 4 ) {
             #pragma unroll
-            for(int j=0; j < 4; j++) {
+            for (int j=0; j < 4; j++) {
                 ind = j+iny*4;
                 res += la[inx][ind]*buff[ind];
             }
@@ -319,7 +319,7 @@ sgemvt_kernel2_tesla(
             A += 16;
             __syncthreads();
             #pragma unroll
-            for(int j=0; j < 4; j++) {
+            for (int j=0; j < 4; j++) {
                 if ( inx+16 >= (m-m1) )
                     la[iny+__mul24(j,4)][inx] = 0;
                 else
@@ -329,14 +329,14 @@ sgemvt_kernel2_tesla(
             __syncthreads();
             
             #pragma unroll
-            for(int j=0; j < 4; j++) {
+            for (int j=0; j < 4; j++) {
                 ind = j+iny*4;
                 res += la[inx][ind]*buff[16+ind];
             }
         }
         else {
             #pragma unroll
-            for(int j=0; j < 4; j++) {
+            for (int j=0; j < 4; j++) {
                 ind = j+iny*4;
                 res += la[inx][ind]*buff[ind];
             }

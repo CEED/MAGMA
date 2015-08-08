@@ -32,7 +32,7 @@ zswapdblk_kernel( int nb,
     magmaDoubleComplex tmp;
 
     #pragma unroll
-    for( int i = 0; i < nb; i++ ){
+    for( int i = 0; i < nb; i++ ) {
         tmp        = dA[i*ldda];
         dA[i*ldda] = dB[i*lddb];
         dB[i*lddb] = tmp;

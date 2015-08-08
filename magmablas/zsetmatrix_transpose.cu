@@ -40,7 +40,7 @@ magmablas_zsetmatrix_transpose_q(
         return;
 
     // TODO standard check arguments
-    if (lda < m || ldda < n || lddwork < m){
+    if (lda < m || ldda < n || lddwork < m) {
         printf("Wrong arguments in %s.\n", __func__);
         return;
     }
@@ -52,7 +52,7 @@ magmablas_zsetmatrix_transpose_q(
                             dwork(0,(j%2)*nb), lddwork, queues[j%2] );
     j++;
 
-    for(i=nb; i < n; i += nb) {
+    for (i=nb; i < n; i += nb) {
         /* Move data from CPU to GPU in the second panel in the dwork buffer */
         ib = min(n-i, nb);
         magma_zsetmatrix_async( m, ib,

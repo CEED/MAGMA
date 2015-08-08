@@ -24,12 +24,11 @@ static inline __device__ void zpotf2_sminout_anywidth_device(const int m, const 
     const int tx = threadIdx.x;
     magmaDoubleComplex factor;
     #pragma unroll
-    for(int iter=0; iter<n; iter++)
+    for (int iter=0; iter < n; iter++)
     {
-
         //sqrt(diag) and zdscal
         #ifdef ENABLE_COND1
-        if( tx >= iter && tx < m )
+        if ( tx >= iter && tx < m )
         {
         #endif
             double xreal = sqrt(MAGMA_Z_REAL(A[iter + iter * lda]));
@@ -39,7 +38,7 @@ static inline __device__ void zpotf2_sminout_anywidth_device(const int m, const 
         #endif
         __syncthreads();
         #ifdef ENABLE_COND1
-        if( tx >= iter && tx < m )
+        if ( tx >= iter && tx < m )
         {
         #endif
             A[ tx + iter * lda ] *= factor;
@@ -52,11 +51,11 @@ static inline __device__ void zpotf2_sminout_anywidth_device(const int m, const 
 
         // zlacgv: TODO, zherk
         #ifdef ENABLE_COND1
-        if( tx > iter && tx < m )
+        if ( tx > iter && tx < m )
         {
         #endif
             #pragma unroll 
-            for(int j=iter+1; j < n; j++)
+            for (int j=iter+1; j < n; j++)
             {
                 A [tx + j * lda] -= A[tx + iter * lda]  *  MAGMA_Z_CNJG(A[iter * lda + j]);
             }   
@@ -75,11 +74,11 @@ static inline __device__ void zpotf2_sminout_fixsize_device(const int m, magmaDo
     //__shared__ magmaDoubleComplex row[POTF2_NB];
 
     #pragma unroll
-    for(int iter=0; iter<POTF2_NB; iter++)
+    for (int iter=0; iter < POTF2_NB; iter++)
     {
         //sqrt(diag) and zdscal
         #ifdef ENABLE_COND2
-        if( tx >= iter && tx < m )
+        if ( tx >= iter && tx < m )
         {
         #endif
             double xreal = sqrt(MAGMA_Z_REAL(A[iter + iter * lda]));
@@ -89,14 +88,14 @@ static inline __device__ void zpotf2_sminout_fixsize_device(const int m, magmaDo
         #endif
         __syncthreads();
         #ifdef ENABLE_COND2
-        if( tx >= iter && tx < m )
+        if ( tx >= iter && tx < m )
         {
         #endif
             A[ tx + iter * lda ] *= factor;
 
             //A[ tx + iter * lda ]  = tx == iter ? MAGMA_Z_MAKE(xreal, 0.0) : A[ tx + iter * lda ] * factor;
-            //if(tx<POTF2_NB) row[ tx ] = MAGMA_Z_CNJG( A[ tx + iter * lda ] );
-            //if(tx<POTF2_NB) A[ iter + tx * lda ] = MAGMA_Z_CNJG( A[ tx + iter * lda ] );
+            //if (tx < POTF2_NB) row[ tx ] = MAGMA_Z_CNJG( A[ tx + iter * lda ] );
+            //if (tx < POTF2_NB) A[ iter + tx * lda ] = MAGMA_Z_CNJG( A[ tx + iter * lda ] );
         #ifdef ENABLE_COND2
         }
         #endif
@@ -106,11 +105,11 @@ static inline __device__ void zpotf2_sminout_fixsize_device(const int m, magmaDo
 
         // zherk
         #ifdef ENABLE_COND2
-        if( tx > iter && tx < m )
+        if ( tx > iter && tx < m )
         {
         #endif
             #pragma unroll
-            for(int j=iter+1; j < POTF2_NB; j++)
+            for (int j=iter+1; j < POTF2_NB; j++)
             {
                 A [tx + j * lda] -= A[tx + iter * lda]  *  MAGMA_Z_CNJG(A[iter * lda + j]);
                 //A [tx + j * lda] -= A[tx + iter * lda]  *  row[j];
@@ -131,7 +130,6 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
         const magmaDoubleComplex* __restrict__ A0, const int lda,
         magmaDoubleComplex *sC, magmaDoubleComplex  *sB)
 {
-
     const int tx = threadIdx.x;
     magmaDoubleComplex rC[POTF2_NB];
     magmaDoubleComplex rA[POTF2_NB]; 
@@ -139,11 +137,11 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
 
     // prefetch next block. 
     #ifdef ENABLE_COND4
-    if(tx < m) 
+    if (tx < m) 
     {
     #endif
         #pragma unroll
-        for(int i=0; i<POTF2_NB; i++)
+        for (int i=0; i < POTF2_NB; i++)
         {
             rp[i] = A0[tx + i * lda];
         }
@@ -152,7 +150,7 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
     #endif
 
     #pragma unroll
-    for(int i=0;i<POTF2_NB;i++)
+    for (int i=0; i < POTF2_NB; i++)
     {
         rC[i] = MAGMA_Z_ZERO;
     }
@@ -162,15 +160,15 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
 
     // accumulate 
     #pragma unroll
-    for(int iter=0; iter<k; iter+=POTF2_NB)
+    for (int iter=0; iter < k; iter += POTF2_NB)
     {
         #ifdef ENABLE_COND4
-        if(tx < m) 
+        if (tx < m) 
         {
         #endif
             // rp to rA
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 rA[i] = rp[i];
             }
@@ -179,10 +177,10 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
         #endif
 
         // rA to sB
-        if(tx < POTF2_NB) 
+        if (tx < POTF2_NB) 
         {      
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 sB[tx + i * POTF2_NB] = MAGMA_Z_CNJG(rp[i]);
             }
@@ -190,13 +188,13 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
 
         __syncthreads();
 
-        // prefetch next block. Azzam ;)
+        // prefetch next block. Azzam
         #ifdef ENABLE_COND4
-        if(tx < m )  
+        if (tx < m )  
         {      
         #endif
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 rp[i] = A0[tx + (i+(iter+POTF2_NB)) * lda];
             }
@@ -207,13 +205,13 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
 
         // multiply current block
         #ifdef ENABLE_COND4
-        if(tx < m) 
+        if (tx < m) 
         {
         #endif
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 #pragma unroll
-                for(int col=0; col<POTF2_NB; col++)
+                for (int col=0; col < POTF2_NB; col++)
                 {
                     // A0 is multiplied by POTF2_NB times
                     rC[col] +=  rA[i] * sB[col + i * POTF2_NB];
@@ -227,11 +225,11 @@ static inline __device__ void zgemm_v20_1_fixsize_device(int m, int k,
 
     // finalyzing gemm.
     #ifdef ENABLE_COND4
-    if(tx < m) 
+    if (tx < m) 
     {
     #endif
         #pragma unroll
-        for(int i=0;i<POTF2_NB;i++)
+        for (int i=0; i < POTF2_NB; i++)
         {
             sC[tx + i *m] = rp[i] - rC[i];
         }
@@ -246,7 +244,6 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
         const magmaDoubleComplex* __restrict__ A0, int lda,
         magmaDoubleComplex *sC, magmaDoubleComplex  *sB)
 {
-
     const int tx = threadIdx.x;
     magmaDoubleComplex rC[POTF2_NB];
     magmaDoubleComplex rA[POTF2_NB]; 
@@ -256,11 +253,11 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
 
     // prefetch next block. 
     #ifdef ENABLE_COND5
-    if(tx < m) 
+    if (tx < m) 
     {
     #endif
         #pragma unroll
-        for(int i=0; i<POTF2_NB; i++)
+        for (int i=0; i < POTF2_NB; i++)
         {
             rp[i] = A0[min(bound_A, tx + i * lda)];
         }
@@ -269,7 +266,7 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
     #endif
 
     #pragma unroll
-    for(int i=0;i<POTF2_NB;i++)
+    for (int i=0; i < POTF2_NB; i++)
     {
         rC[i] = MAGMA_Z_ZERO;
     }
@@ -279,15 +276,15 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
 
     // accumulate 
     #pragma unroll
-    for(int iter=0; iter<k; iter+=POTF2_NB)
+    for (int iter=0; iter < k; iter += POTF2_NB)
     {
         #ifdef ENABLE_COND5
-        if(tx < m) 
+        if (tx < m) 
         {
         #endif
             // rp to rA
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 rA[i] = rp[i];
             }
@@ -296,10 +293,10 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
         #endif
 
         // rA to sB
-        if(tx < POTF2_NB) 
+        if (tx < POTF2_NB) 
         {      
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 sB[tx + i * POTF2_NB] = MAGMA_Z_CNJG(rp[i]);
             }
@@ -307,13 +304,13 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
 
         __syncthreads();
 
-        // prefetch next block. Azzam ;)
+        // prefetch next block. Azzam
         #ifdef ENABLE_COND5
-        if(tx < m )  
+        if (tx < m )  
         {      
         #endif
             #pragma unroll
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 rp[i] = A0[min(bound_A, tx + (i+(iter+POTF2_NB)) * lda)]; // min(bound,xxx) is to avoid reading out of bound
             }
@@ -324,13 +321,13 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
 
         // multiply current block
         #ifdef ENABLE_COND5
-        if(tx < m) 
+        if (tx < m) 
         {
         #endif
-            for(int i=0; i<POTF2_NB; i++)
+            for (int i=0; i < POTF2_NB; i++)
             {
                 #pragma unroll
-                for(int col=0; col<POTF2_NB; col++)
+                for (int col=0; col < POTF2_NB; col++)
                 {
                     // A0 is multiplied by POTF2_NB times
                     rC[col] +=  rA[i] * sB[col + i * POTF2_NB];
@@ -344,18 +341,19 @@ static inline __device__ void zgemm_v20_1_anywidth_device(int m, int n, int k,
 
     // finalyzing gemm.
     #ifdef ENABLE_COND5
-    if(tx < m) 
+    if (tx < m) 
     {
     #endif
         #pragma unroll
-        for(int i=0;i<POTF2_NB;i++)
+        for (int i=0; i < POTF2_NB; i++)
         {
             sC[tx + i *m] = rp[i] - rC[i];
         }
     #ifdef ENABLE_COND5
     }
     #endif
-    __syncthreads();}
+    __syncthreads();
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -371,7 +369,7 @@ static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,
 {
     // checkinfo to avoid computation of the singular matrix
     #ifndef BATCH_DISABLE_CHECKING
-    if(*info != 0 ) return;
+    if (*info != 0 ) return;
     #endif
 
     const int tx = threadIdx.x;
@@ -391,12 +389,12 @@ static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,
     #ifndef BATCH_DISABLE_CHECKING
     const int ty = threadIdx.y;
     __shared__ int cleanup[MAX_NTCOL];
-    if( tx == 0) {
+    if ( tx == 0) {
         cleanup[ty] = 0;
         #pragma unroll
-        for(int i=0; i<POTF2_NB; i++)
+        for (int i=0; i < POTF2_NB; i++)
         {
-            if(MAGMA_Z_REAL(sdata_A[i + i * m]) <= MAGMA_D_ZERO )
+            if (MAGMA_Z_REAL(sdata_A[i + i * m]) <= MAGMA_D_ZERO )
             {
                 #if 0
                 if (cleanup[ty] == 0) *info = i + gbstep + 1;
@@ -410,7 +408,7 @@ static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,
         }
     }
     __syncthreads();
-    if(cleanup[ty] == 1) return;
+    if (cleanup[ty] == 1) return;
     #endif
     //----------------------------------------------------
 
@@ -419,16 +417,16 @@ static inline __device__ void zpotf2_smlpout_fixwidth_device(const int m,
 
     //copy sdata_A to A
     #ifdef ENABLE_COND6
-    if(tx < m)
+    if (tx < m)
     {
     #endif
         #pragma unroll
-        for(int i=0; i<POTF2_NB; i++)
+        for (int i=0; i < POTF2_NB; i++)
         {  
             #ifdef BATCH_DISABLE_CLEANUP
             A[tx + i * lda] = sdata_A[tx + i * m];
             #else
-            if(tx>=i) A[tx + i * lda] = sdata_A[tx + i * m];
+            if (tx >= i) A[tx + i * lda] = sdata_A[tx + i * m];
             #endif
         }
     #ifdef ENABLE_COND6
@@ -443,7 +441,7 @@ static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const 
 {
     // checkinfo to avoid computation of the singular matrix
     #ifndef BATCH_DISABLE_CHECKING
-    if(*info != 0 ) return;
+    if (*info != 0 ) return;
     #endif
     const int tx = threadIdx.x;
     magmaDoubleComplex *sdata_A = shared_data + threadIdx.y * (m+POTF2_NB)*POTF2_NB;
@@ -461,12 +459,12 @@ static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const 
     #ifndef BATCH_DISABLE_CHECKING
     const int ty = threadIdx.y;
     __shared__ int cleanup[MAX_NTCOL];
-    if( tx == 0) {
+    if ( tx == 0) {
         cleanup[ty] = 0;
         #pragma unroll
-        for(int i=0; i<n; i++)
+        for (int i=0; i < n; i++)
         {
-            if(MAGMA_Z_REAL(sdata_A[i + i * m]) <= MAGMA_D_ZERO )
+            if (MAGMA_Z_REAL(sdata_A[i + i * m]) <= MAGMA_D_ZERO )
             {
                 #if 0
                 if (cleanup[ty] == 0) *info = i + gbstep + 1;
@@ -480,7 +478,7 @@ static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const 
         }
     }
     __syncthreads();
-    if(cleanup[ty] == 1) return;
+    if (cleanup[ty] == 1) return;
     #endif
     //----------------------------------------------------
     zpotf2_sminout_anywidth_device(m, n, sdata_A, m);
@@ -489,16 +487,16 @@ static inline __device__ void zpotf2_smlpout_anywidth_device(const int m, const 
 
     //copy sdata_A to A
     #ifdef ENABLE_COND6
-    if(tx < m)
+    if (tx < m)
     {
     #endif
         #pragma unroll
-        for(int i=0; i<n; i++)
+        for (int i=0; i < n; i++)
         {  
             #ifdef BATCH_DISABLE_CLEANUP
             A[tx + i * lda] = sdata_A[tx + i * m];
             #else
-            if(tx>=i) A[tx + i * lda] = sdata_A[tx + i * m];
+            if (tx >= i) A[tx + i * lda] = sdata_A[tx + i * m];
             #endif
         }
     #ifdef ENABLE_COND6

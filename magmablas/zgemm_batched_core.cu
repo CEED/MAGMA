@@ -173,15 +173,15 @@ magmablas_zgemm_batched(
         return;
 
     magma_int_t shape;
-    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   {shape = 0;} // nn
-    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     {shape = 1;} // nt
-    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) {shape = 2;} // nc
-    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   {shape = 3;} // tn
-    else if (transA == MagmaTrans     && transB == MagmaTrans)     {shape = 4;} // tt
-    else if (transA == MagmaTrans     && transB == MagmaConjTrans) {shape = 5;} // tc
-    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   {shape = 6;} // cn
-    else if (transA == MagmaConjTrans && transB == MagmaTrans)     {shape = 7;} // ct
-    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) {shape = 8;} // cc
+    if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   { shape = 0; } // nn
+    else if (transA == MagmaNoTrans   && transB == MagmaTrans)     { shape = 1; } // nt
+    else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) { shape = 2; } // nc
+    else if (transA == MagmaTrans     && transB == MagmaNoTrans)   { shape = 3; } // tn
+    else if (transA == MagmaTrans     && transB == MagmaTrans)     { shape = 4; } // tt
+    else if (transA == MagmaTrans     && transB == MagmaConjTrans) { shape = 5; } // tc
+    else if (transA == MagmaConjTrans && transB == MagmaNoTrans)   { shape = 6; } // cn
+    else if (transA == MagmaConjTrans && transB == MagmaTrans)     { shape = 7; } // ct
+    else if (transA == MagmaConjTrans && transB == MagmaConjTrans) { shape = 8; } // cc
     
     //TODO: probably the texture init code should be placed here
 
@@ -200,7 +200,7 @@ magmablas_zgemm_batched(
             break;
         case 1: // nt
             {
-                if(k <= 8)
+                if (k <= 8)
                 {
                     // version 58
                     gemm_template_batched_nt<magmaDoubleComplex, version(NT,58), 0, 0>
@@ -216,7 +216,7 @@ magmablas_zgemm_batched(
             break;
         case 2: // nc
             {
-                if(k <= 8)
+                if (k <= 8)
                 {
                     // version 58
                     gemm_template_batched_nt<magmaDoubleComplex, version(NT,58), 0, 1>

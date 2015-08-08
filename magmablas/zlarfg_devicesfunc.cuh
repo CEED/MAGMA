@@ -31,7 +31,6 @@ zlarfg_device(
     magmaDoubleComplex* dalpha, magmaDoubleComplex* dx, int incx,
     magmaDoubleComplex* dtau,  double* swork, double* sscale, magmaDoubleComplex* scale)
 {
-
     const int tx = threadIdx.x;
 
     magmaDoubleComplex tmp;
@@ -49,7 +48,7 @@ zlarfg_device(
     else {
         swork[tx] = 0;
     }
-    if(tx<BLOCK_SIZE)
+    if (tx < BLOCK_SIZE)
     {
         for( int j = tx; j < n-1; j += BLOCK_SIZE ) {
             tmp = dx[j*incx];
@@ -69,9 +68,9 @@ zlarfg_device(
     
     // sum norm^2 of dx/sscale
     // dx has length n-1
-    if(tx<BLOCK_SIZE) swork[tx] = 0;
+    if (tx < BLOCK_SIZE) swork[tx] = 0;
     if ( *sscale > 0 ) {
-        if(tx<BLOCK_SIZE)
+        if (tx < BLOCK_SIZE)
         {
             for( int j = tx; j < n-1; j += BLOCK_SIZE ) {
                 tmp = dx[j*incx] / *sscale;
@@ -79,7 +78,6 @@ zlarfg_device(
             }
         }
         magma_sum_reduce<BLOCK_SIZE>( tx, swork );
-
     }
     
     if ( tx == 0 ) {
@@ -105,16 +103,14 @@ zlarfg_device(
     // scale x (if norm was not 0)
     __syncthreads();
     if ( swork[0] != 0 ) {
-        if(tx<BLOCK_SIZE)
+        if (tx < BLOCK_SIZE)
         {
             for( int j = tx; j < n-1; j += BLOCK_SIZE ) {
                 dx[j*incx] *= *scale;
             }
         }
     }
-
 }
 
 
 #endif /* MAGMABLAS_ZLARFG_DEVICES_Z_H  */
-

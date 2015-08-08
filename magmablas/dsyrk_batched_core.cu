@@ -172,8 +172,8 @@ magmablas_dsyrk_batched(
 
     // we have two shapes only (nt or tn)
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nt
-    else                              {shape = 1;} // tn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nt
+    else                              { shape = 1; } // tn
     
     //TODO: probably the texture init code should be placed here
 
@@ -186,14 +186,14 @@ magmablas_dsyrk_batched(
     {
         case 0: // nt
             {
-                if(k < 128)
+                if (k < 128)
                 {
                     herk_template_batched_nt<double, version(NT,160), 0, 0>
                     (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(n < 256)
+                    if (n < 256)
                     {
                         herk_template_batched_nt<double, version(NT,160), 0, 0>
                         (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
@@ -208,14 +208,14 @@ magmablas_dsyrk_batched(
             break;
         case 1: // tn
             {
-                if(k < 64)
+                if (k < 64)
                 {
                     herk_template_batched_tn<double, version(TN,207), 0, 0>
                     (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(n < 256)
+                    if (n < 256)
                     {
                         herk_template_batched_tn<double, version(TN,207), 0, 0>
                         (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);

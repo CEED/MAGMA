@@ -31,7 +31,7 @@ __global__ void magmagpu_zlacpy_cnjg( magmagpu_zlacpy_cnjg_params_t params )
     unsigned int x = threadIdx.x + blockDim.x*blockIdx.x;
     unsigned int offset1 = x*params.lda1;
     unsigned int offset2 = x*params.lda2;
-    if( x < params.n )
+    if ( x < params.n )
     {
         magmaDoubleComplex *A1  = params.A1 + offset1;
         magmaDoubleComplex *A2  = params.A2 + offset2;

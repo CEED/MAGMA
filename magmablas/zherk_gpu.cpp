@@ -35,8 +35,8 @@ void magmablas_zherk_gpu(
     }
 
     if (uplo == MagmaUpper) {
-            printf("Error not supported\n");
-            return;
+        printf("Error not supported\n");
+        return;
     }
 
     magma_int_t ib, ioff;

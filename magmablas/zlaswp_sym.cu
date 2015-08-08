@@ -37,7 +37,7 @@ typedef struct {
 __global__ void zlaswp_sym_kernel( zlaswp_sym_params_t params )
 {
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
-    if( tid < params.n ) {
+    if ( tid < params.n ) {
         for( int ii = params.j0; ii < params.npivots; ++ii ) {
             int i1 = ii;
             int i2 = params.ipiv[ii];
@@ -58,7 +58,7 @@ __global__ void zlaswp_sym_kernel( zlaswp_sym_params_t params )
                 A2 = params.dA + tid*params.lda + i2;
             } else if (tid == i2) {
                 // diagonal swap: done by i1-th thread
-            } else if (tid >i2) {
+            } else if (tid > i2) {
                 // column swap: (tid,i1) <-> (tid,i2)
                 A1 = params.dA + i1*params.lda + tid;
                 A2 = params.dA + i2*params.lda + tid;

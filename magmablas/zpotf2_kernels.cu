@@ -43,17 +43,18 @@ __global__ void zpotf2_smlpout_fixwidth_kernel_batched(int m,
         int localstep, int gbstep, magma_int_t *info_array, const int batchCount)
 {
     const int batchid = blockIdx.z * blockDim.y + threadIdx.y;
-    if(batchid >= batchCount) return;
+    if (batchid >= batchCount) return;
     zpotf2_smlpout_fixwidth_device(m, dA_array[batchid]+localstep, dA_array[batchid]+localstep+localstep*lda, lda, localstep, gbstep, &(info_array[batchid]));
-
 }
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void zpotf2_smlpout_anywidth_kernel_batched(int m, int n, 
         magmaDoubleComplex **dA_array, int lda, 
         int localstep, int gbstep, magma_int_t *info_array, const int batchCount)
 {
     const int batchid = blockIdx.z * blockDim.y + threadIdx.y;
-    if(batchid >= batchCount) return;
+    if (batchid >= batchCount) return;
     zpotf2_smlpout_anywidth_device(m, n, dA_array[batchid]+localstep, dA_array[batchid]+localstep+localstep*lda, lda, localstep, gbstep, &(info_array[batchid]));
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,15 +103,14 @@ magma_zpotrf_lpout_batched(
 
     magma_int_t  ib, rows;
     
-    for(magma_int_t j = 0; j < n; j+= POTF2_NB) {
-        
+    for (magma_int_t j = 0; j < n; j += POTF2_NB) {
         ib   = min(POTF2_NB, n-j);
         rows = roundup_m-j;
         
         // tuning ntcol
         magma_int_t ntcol;  // for z precision, the best tuning is at NTCOL = 1 for all sizes
-        if(rows > 64) ntcol = 1;
-        else if(rows > 32) ntcol = NTCOL2;
+        if (rows > 64) ntcol = 1;
+        else if (rows > 32) ntcol = NTCOL2;
         else ntcol = NTCOL1;
         // end of tuning ntcol
         
@@ -120,7 +120,7 @@ magma_zpotrf_lpout_batched(
         magma_int_t shared_mem_size = ntcol * (sizeof(magmaDoubleComplex)*(nbth+POTF2_NB)*POTF2_NB);
         dim3 threads(nbth, ntcol);
         
-        if(shared_mem_size > 47000) 
+        if (shared_mem_size > 47000) 
         {
             arginfo = -33;
             magma_xerbla( __func__, -(arginfo) );
@@ -130,7 +130,7 @@ magma_zpotrf_lpout_batched(
         if (ib == POTF2_NB)
         {
             zpotf2_smlpout_fixwidth_kernel_batched<<<dimGrid, threads, shared_mem_size, queue >>>(rows, dA_array, lda, j, gbstep, info_array, batchCount);
-        }else{
+        } else {
             zpotf2_smlpout_anywidth_kernel_batched<<<dimGrid, threads, shared_mem_size, queue >>>(rows, ib, dA_array, lda, j, gbstep, info_array, batchCount);
         }
     }
@@ -138,4 +138,3 @@ magma_zpotrf_lpout_batched(
     return arginfo;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
-

@@ -56,7 +56,7 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
             beta  = -copysign( beta, alpha );
  
             // todo: deal with badly scaled vectors (see lapack's larfg)
-            if (j==0){
+            if (j == 0) {
                 *dtau = (beta - alpha) / beta;
                 //*dx0  = 1.; //cannot be done here because raise condition all threadblock need to read it for alpha
                 *dA   = beta;
@@ -69,7 +69,7 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
             beta  = -copysign( beta, alphar );
 
             // todo: deal with badly scaled vectors (see lapack's larfg)
-            if (j==0){
+            if (j == 0) {
                 *dtau = MAGMA_Z_MAKE((beta - alphar)/beta, -alphai/beta);
                 //*dx0  = MAGMA_Z_MAKE(  1., 0.); //cannot be done here because raise condition all threadblock need to read it for alpha
                 *dA   = MAGMA_Z_MAKE(beta, 0.);
@@ -86,7 +86,7 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
     if ( xnorm != 0 && j < n-1)
         dx[j] = MAGMA_Z_MUL(dxi, scale);
 
-    if (j<it){
+    if (j < it) {
         *( dA-it+j) = *(dx0-it+j);
         *(dx0-it+j) = MAGMA_Z_MAKE(0., 0.);
     }
@@ -150,7 +150,7 @@ magma_zlarfgtx_gpu(
     /*  Generate the elementary reflector H(iter)  */
     magma_zlarfgx_gpu(n, dx0, dx, dtau, dxnorm, dA, iter);
     
-    if (iter==0) {
+    if (iter == 0) {
         magmaDoubleComplex tt = MAGMA_Z_ONE;
         magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, T+iter+iter*ldt, 1);
         magma_zsetmatrix(1,1, &tt,1, dx0,1);

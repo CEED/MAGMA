@@ -175,8 +175,8 @@ magmablas_cherk_batched(
 
     // we have two shapes only (nc or cn)
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nc
-    else                              {shape = 1;} // cn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nc
+    else                              { shape = 1; } // cn
         
     //TODO: probably the texture init code should be placed here
 
@@ -189,14 +189,14 @@ magmablas_cherk_batched(
     {
         case 0: // nc
             {
-                if(k < 64)
+                if (k < 64)
                 {
                     herk_template_batched_nt<magmaFloatComplex, version(NT,338), 0, 1>
                     (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
                 }
                 else
                 {
-                    if(n < 128)
+                    if (n < 128)
                     {
                         herk_template_batched_nt<magmaFloatComplex, version(NT,338), 0, 1>
                         (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);
@@ -211,7 +211,7 @@ magmablas_cherk_batched(
             break;
         case 1: // cn
             {
-                if(k < 16)
+                if (k < 16)
                 {
                     herk_template_batched_tn<magmaFloatComplex, version(TN,282), 1, 0>
                     (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);

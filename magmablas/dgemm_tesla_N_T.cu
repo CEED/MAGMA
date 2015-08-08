@@ -168,15 +168,15 @@ dgemm_kernel_N_T_64_16_4_16_4(
 
         __syncthreads();
 
-        for(int i=0; i < k; i++) {
+        for (int i=0; i < k; i++) {
             daxpy( Ap[i], &Bb[i][0], Cb );
         }
     }
 
-    if ( (iby+16)>=n) {
+    if ( (iby+16) >= n) {
         lda = n-iby;
     }
-    else{
+    else {
         lda = 16;
     }
 

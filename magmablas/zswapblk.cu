@@ -26,7 +26,7 @@ typedef struct {
 __global__ void magmagpu_zswapblkrm( magmagpu_zswapblk_params_t params )
 {
     unsigned int y = threadIdx.x + blockDim.x*blockIdx.x;
-    if( y < params.n )
+    if ( y < params.n )
     {
         magmaDoubleComplex *A = params.A + y - params.ldda;
         magmaDoubleComplex *B = params.B + y;
@@ -49,7 +49,7 @@ __global__ void magmagpu_zswapblkcm( magmagpu_zswapblk_params_t params )
     unsigned int y = threadIdx.x + blockDim.x*blockIdx.x;
     unsigned int offset1 = y*params.ldda;
     unsigned int offset2 = y*params.lddb;
-    if( y < params.n )
+    if ( y < params.n )
     {
         magmaDoubleComplex *A = params.A + offset1 - 1;
         magmaDoubleComplex *B = params.B + offset2;
@@ -90,7 +90,7 @@ magmablas_zswapblk_q(
         return;
     
     if ( order == MagmaColMajor ) {
-        for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+        for( k=(i1-1); k < i2; k += BLOCK_SIZE )
         {
             magma_int_t sb = min(BLOCK_SIZE, i2-k);
             magmagpu_zswapblk_params_t params = { dA+k, dB, n, ldda, lddb, sb };
@@ -106,7 +106,7 @@ magmablas_zswapblk_q(
         }
     }
     else {
-        for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+        for( k=(i1-1); k < i2; k += BLOCK_SIZE )
         {
             magma_int_t sb = min(BLOCK_SIZE, i2-k);
             magmagpu_zswapblk_params_t params = { dA+k*ldda, dB, n, ldda, lddb, sb };

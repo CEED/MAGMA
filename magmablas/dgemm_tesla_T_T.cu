@@ -188,7 +188,7 @@ dgemm_kernel_T_T_64_16_16_16_4(
         Bb[tx][ty+12] = B[s4];
         __syncthreads();
 
-        for(int i=0; i < k; i++) {
+        for (int i=0; i < k; i++) {
             daxpy( A[0], &Bb[i+0][0], Cb );
             A += lda;
         }

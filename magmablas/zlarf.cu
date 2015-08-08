@@ -34,11 +34,11 @@ void magma_zlarf_kernel( int m, const magmaDoubleComplex *dv, const magmaDoubleC
         magmaDoubleComplex tmp;
 
         /* perform  w := v**H * C  */
-        if (tx==0)
+        if (tx == 0)
             tmp = dc[0]; //since V[0] should be one
         else
             tmp = MAGMA_Z_ZERO;
-        for( int j = tx+1; j < m; j += BLOCK_SIZE ){
+        for( int j = tx+1; j < m; j += BLOCK_SIZE ) {
             tmp += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
         }
         sum[tx] = tmp;
@@ -50,7 +50,7 @@ void magma_zlarf_kernel( int m, const magmaDoubleComplex *dv, const magmaDoubleC
         for( int j = m-tx-1; j > 0; j -= BLOCK_SIZE )
              dc[j] += tmp * dv[j];
 
-        if(tx==0) dc[0] += tmp;
+        if (tx == 0) dc[0] += tmp;
     }
 }
 
@@ -72,8 +72,8 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComp
     
             /*  w := v**H * C  */
             lsum = MAGMA_Z_ZERO;
-            for( int j = i; j < m; j += BLOCK_SIZEx ){
-                if (j==0)
+            for( int j = i; j < m; j += BLOCK_SIZEx ) {
+                if (j == 0)
                    lsum += MAGMA_Z_MUL( MAGMA_Z_ONE, dc[j] );
                 else
                    lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
@@ -85,9 +85,9 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComp
             __syncthreads();
             magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*dtau) * sum[0][col];
             for( int j = m-i-1; j >= 0; j -= BLOCK_SIZEx ) {
-                 if (j==0)
+                if (j == 0)
                     dc[j] += z__1;
-                 else
+                else
                     dc[j] += z__1 * dv[j];
             }
         }

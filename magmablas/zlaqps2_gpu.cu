@@ -143,7 +143,7 @@ magma_zlaqps2_gpu(
         pvt = k - 1 + magma_idamax( n-k, &dvn1[k], ione );
 
         if (pvt != k) {
-             magmablas_zswap( k+1, dF(pvt,0), lddf, dF(k,0), lddf);
+            magmablas_zswap( k+1, dF(pvt,0), lddf, dF(k,0), lddf);
 
             itemp     = jpvt[pvt];
             jpvt[pvt] = jpvt[k];
@@ -221,15 +221,15 @@ magma_zlaqps2_gpu(
         }
 
         /* Update partial column norms. */
-        if (rk < min(m, n+offset)-1){
-           magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &dvn1[k+1], 
-                                             &dvn2[k+1], dA(rk,k+1), ldda, lsticcs); 
-
-           #if defined(PRECISION_d) || defined(PRECISION_z)
-               magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-           #else
-               magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-           #endif
+        if (rk < min(m, n+offset)-1) {
+            magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &dvn1[k+1], 
+                                              &dvn2[k+1], dA(rk,k+1), ldda, lsticcs); 
+            
+            #if defined(PRECISION_d) || defined(PRECISION_z)
+                magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+            #else
+                magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+            #endif
         }
 
         //*dA(rk, k) = Akk;
@@ -260,7 +260,7 @@ magma_zlaqps2_gpu(
     }
 
     /* Recomputation of difficult columns. */
-    if( lsticc > 0 ) {
+    if ( lsticc > 0 ) {
         // printf( " -- recompute dnorms --\n" );
         magmablas_dznrm2_check(m-rk-1, n-*kb, dA(rk+1,*kb), ldda,
                                &dvn1[*kb], lsticcs);

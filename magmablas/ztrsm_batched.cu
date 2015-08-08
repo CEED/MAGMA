@@ -137,13 +137,12 @@ void magmablas_ztrsm_outofplace_batched(
     magma_int_t resetozero, 
     magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle)
 {
-/*
+    /*
     #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
     #define dB(i_, j_) (dB + (i_) + (j_)*lddb)
     #define dX(i_, j_) (dX + (i_) + (j_)*m)
     #define d_dinvA(i_) (d_dinvA + (i_)*TRI_NB)
-
-*/
+    */
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -176,7 +175,7 @@ void magmablas_ztrsm_outofplace_batched(
     else {
         size_dinvA = magma_roundup( n, TRI_NB )*TRI_NB;
     }
-    if(dinvA_length < size_dinvA) info = -19;
+    if (dinvA_length < size_dinvA) info = -19;
 
     if (info != 0) {
         magma_xerbla( __func__, -(info) );

@@ -27,12 +27,12 @@ zgeqrf_copy_upper_kernel_batched(
 
     int column = (tid / nb + 1) * nb; 
     
-    if( tid < n && column < n) 
+    if ( tid < n && column < n) 
     {
-       for(int i=column; i<n; i++)
-       {
-          dR[tid + i * ldr]  =  dV[tid + i * ldv];  
-       }
+        for (int i=column; i < n; i++)
+        {
+            dR[tid + i * ldr]  =  dV[tid + i * ldv];  
+        }
     }
 }
 
@@ -42,12 +42,10 @@ void zgeqrf_copy_upper_batched(
                   magmaDoubleComplex **dR_array,    magma_int_t ldr,
           magma_int_t batchCount, magma_queue_t queue)
 {
-   /* 
+    /* 
         copy some data in dV to dR
-   */
-
-      if( nb >= n) return;
-
-      zgeqrf_copy_upper_kernel_batched<<<batchCount, n, 0, queue>>>(n, nb, dV_array, ldv, dR_array, ldr);
+    */
+    if ( nb >= n) return;
+    
+    zgeqrf_copy_upper_kernel_batched<<<batchCount, n, 0, queue>>>(n, nb, dV_array, ldv, dR_array, ldr);
 }
-

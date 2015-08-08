@@ -41,33 +41,32 @@ ztrsv_backwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
     magmaDoubleComplex *sx)
 
 {
-/*
-   assume sx is in shared memory
-*/
+    /*
+       assume sx is in shared memory
+    */
     int tx = threadIdx.x; 
     magmaDoubleComplex a; 
 
-    for(int step=0; step<n; step++)
+    for (int step=0; step < n; step++)
     {
-        if(tx < n) 
+        if (tx < n) 
         {
-
-            if(transA == MagmaNoTrans)
+            if (transA == MagmaNoTrans)
             {
-                 a = A[ (n-1) + (n-1) * lda - tx - step * lda];//rowwise access data in a coalesced way
+                a = A[ (n-1) + (n-1) * lda - tx - step * lda];  //rowwise access data in a coalesced way
             }
-            else if(transA == MagmaTrans)
+            else if (transA == MagmaTrans)
             {    
-                 a = A[ (n-1) + (n-1) * lda - tx * lda  - step];//columwise access data, not in a coalesced way
+                a = A[ (n-1) + (n-1) * lda - tx * lda  - step]; //columwise access data, not in a coalesced way
             }
             else
             {    
-                 a = MAGMA_Z_CNJG( A[ (n-1) + (n-1) * lda - tx * lda  - step] );//columwise access data, not in a coalesced way
+                 a = MAGMA_Z_CNJG( A[ (n-1) + (n-1) * lda - tx * lda  - step] ); //columwise access data, not in a coalesced way
             }
 
-            if(tx == step)
+            if (tx == step)
             {
-                if(diag == MagmaUnit)
+                if (diag == MagmaUnit)
                 {
                     sx[n-1-tx] = (b[n-1-tx] - sx[n-1-tx]); 
                 }
@@ -78,14 +77,12 @@ ztrsv_backwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
             }
             __syncthreads(); //there should be a sych here but can be avoided if BLOCK_SIZE =32
 
-            if(tx > step)
+            if (tx > step)
             {
                 sx[n-1-tx] += a * sx[n-1-step];
             }
-
         }
     }        
-
 }
 
 //==============================================================================
@@ -100,33 +97,32 @@ ztrsv_forwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
     magmaDoubleComplex *sx)
 
 {
-/*
-   assume sx is in shared memory
-*/
+    /*
+       assume sx is in shared memory
+    */
     int tx = threadIdx.x; 
     magmaDoubleComplex a; 
 
-    for(int step=0; step<n; step++)
+    for (int step=0; step < n; step++)
     {
-        if(tx < n) //hard code to BLOCK_SIZE and test divisible case only make 1Gflop/s difference
+        if (tx < n) //hard code to BLOCK_SIZE and test divisible case only make 1Gflop/s difference
         {
-
-            if(transA == MagmaNoTrans)
+            if (transA == MagmaNoTrans)
             {
-                 a = A[tx + step * lda];//rowwise access data in a coalesced way
+                a = A[tx + step * lda]; //rowwise access data in a coalesced way
             }
-            else if(transA == MagmaTrans)
+            else if (transA == MagmaTrans)
             {    
-                 a = A[ tx * lda  + step];//columwise access data, not in a coalesced way
+                a = A[ tx * lda  + step]; //columwise access data, not in a coalesced way
             }
             else
             {    
-                 a = MAGMA_Z_CNJG( A[ tx * lda  + step] );//columwise access data, not in a coalesced way
+                a = MAGMA_Z_CNJG( A[ tx * lda  + step] ); //columwise access data, not in a coalesced way
             }
 
-            if(tx == step)
+            if (tx == step)
             {
-                if(diag == MagmaUnit)
+                if (diag == MagmaUnit)
                 {
                     sx[tx] = (b[tx] - sx[tx]); 
                 }
@@ -138,14 +134,12 @@ ztrsv_forwards_tri_device(magma_trans_t transA, magma_diag_t diag, int n,
             __syncthreads(); //there should be a sych here but can be avoided if BLOCK_SIZE =32
 
 
-            if(tx > step)
+            if (tx > step)
             {
                 sx[tx] += a * sx[step];
             }
-
         }
     }        
-
 }
 //==============================================================================
 
@@ -157,22 +151,20 @@ ztrsv_notrans_device(
     magmaDoubleComplex *b, int incb, 
     magmaDoubleComplex *x, int flag = 0)
 {
-
-
     int tx = threadIdx.x;
     int col = n;
     magmaDoubleComplex *sx = (magmaDoubleComplex*)shared_data;
 
-    if(flag == 0)
+    if (flag == 0)
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
+        for (int j = tx; j < n; j += BLOCK_SIZE)
         { 
             sx[j] = MAGMA_Z_ZERO;
         }
     }
     else
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
+        for (int j = tx; j < n; j += BLOCK_SIZE)
         { 
             sx[j] = x[j]; 
         }
@@ -181,7 +173,7 @@ ztrsv_notrans_device(
 
     if (uplo == MagmaUpper)
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
+        for (int i=0; i < n; i += BLOCK_SIZE)
         {    
             int jb = min(BLOCK_SIZE, n-i);
             col -= jb;
@@ -195,7 +187,7 @@ ztrsv_notrans_device(
     }
     else 
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
+        for (int i=0; i < n; i += BLOCK_SIZE)
         {          
             int jb = min(BLOCK_SIZE, n-i);
             col = i;
@@ -209,12 +201,11 @@ ztrsv_notrans_device(
     }
 
 
-    for( int j = tx; j < n; j += BLOCK_SIZE )
+    for (int j = tx; j < n; j += BLOCK_SIZE)
     { 
         x[j] = sx[j]; // write to x in reverse order
     }
     __syncthreads();
-
 }
 
 
@@ -234,16 +225,16 @@ ztrsv_trans_device(
     int col = n;
     magmaDoubleComplex *sx = (magmaDoubleComplex*)shared_data;
 
-    if(flag == 0)
+    if (flag == 0)
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
+        for (int j = tx; j < n; j += BLOCK_SIZE)
         { 
             sx[j] = MAGMA_Z_ZERO;
         }
     }
     else
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
+        for (int j = tx; j < n; j += BLOCK_SIZE)
         { 
             sx[j] = x[j]; 
         }
@@ -254,7 +245,7 @@ ztrsv_trans_device(
     {
         if (transA == MagmaTrans)
         {
-            for(int i=0; i<n; i+=BLOCK_SIZE)
+            for (int i=0; i < n; i += BLOCK_SIZE)
             {    
                 int jb = min(BLOCK_SIZE, n-i);
                 col -= jb;
@@ -267,7 +258,7 @@ ztrsv_trans_device(
         }
         else
         {
-            for(int i=0; i<n; i+=BLOCK_SIZE)
+            for (int i=0; i < n; i += BLOCK_SIZE)
             {    
                 int jb = min(BLOCK_SIZE, n-i);
                 col -= jb;
@@ -283,7 +274,7 @@ ztrsv_trans_device(
     {
         if (transA == MagmaTrans)
         {
-            for(int i=0; i<n; i+=BLOCK_SIZE)
+            for (int i=0; i < n; i += BLOCK_SIZE)
             {    
                 int jb = min(BLOCK_SIZE, n-i);
                 col = i;
@@ -295,7 +286,7 @@ ztrsv_trans_device(
         }
         else
         {
-            for(int i=0; i<n; i+=BLOCK_SIZE)
+            for (int i=0; i < n; i += BLOCK_SIZE)
             {    
                 int jb = min(BLOCK_SIZE, n-i);
                 col = i;
@@ -308,12 +299,11 @@ ztrsv_trans_device(
     }
 
 
-    for( int j = tx; j < n; j += BLOCK_SIZE )
+    for (int j = tx; j < n; j += BLOCK_SIZE)
     { 
         x[j] = sx[j]; // write to x in reverse order
     }
     __syncthreads();
-
 }
 
 

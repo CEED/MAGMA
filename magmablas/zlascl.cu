@@ -24,7 +24,7 @@ zlascl_full(int m, int n, double mul, magmaDoubleComplex* A, int lda)
 
     A += ind;
     if (ind < m) {
-        for(int j=0; j < n; j++ )
+        for (int j=0; j < n; j++ )
             A[j*lda] *= mul;
     }
 }
@@ -41,7 +41,7 @@ zlascl_lower(int m, int n, double mul, magmaDoubleComplex* A, int lda)
 
     A += ind;
     if (ind < m) {
-        for(int j=0; j <= break_d; j++ )
+        for (int j=0; j <= break_d; j++ )
             A[j*lda] *= mul;
     }
 }
@@ -56,7 +56,7 @@ zlascl_upper(int m, int n, double mul, magmaDoubleComplex* A, int lda)
 
     A += ind;
     if (ind < m) {
-        for(int j=n-1; j >= ind; j--)
+        for (int j=n-1; j >= ind; j--)
             A[j*lda] *= mul;
     }
 }
@@ -171,7 +171,7 @@ magmablas_zlascl_q(
     int cnt = 0;
     while( ! done ) {
         cfrom1 = cfromc*smlnum;
-        if( cfrom1 == cfromc ) {
+        if ( cfrom1 == cfromc ) {
             // cfromc is an inf.  Multiply by a correctly signed zero for
             // finite ctoc, or a nan if ctoc is infinite.
             mul  = ctoc / cfromc;
@@ -180,19 +180,19 @@ magmablas_zlascl_q(
         }
         else {
             cto1 = ctoc / bignum;
-            if( cto1 == ctoc ) {
+            if ( cto1 == ctoc ) {
                 // ctoc is either 0 or an inf.  In both cases, ctoc itself
                 // serves as the correct multiplication factor.
                 mul  = ctoc;
                 done = true;
                 cfromc = 1;
             }
-            else if( fabs(cfrom1) > fabs(ctoc) && ctoc != 0 ) {
+            else if ( fabs(cfrom1) > fabs(ctoc) && ctoc != 0 ) {
                 mul  = smlnum;
                 done = false;
                 cfromc = cfrom1;
             }
-            else if( fabs(cto1) > fabs(cfromc) ) {
+            else if ( fabs(cto1) > fabs(cfromc) ) {
                 mul  = bignum;
                 done = false;
                 ctoc = cto1;

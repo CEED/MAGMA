@@ -204,7 +204,7 @@ dgemm_kernel_T_N_32_32_8_8_8(
         ABb[tx+24][ty] = Ap[3];
         __syncthreads();
 
-        for(int i=0; i < k; i++) {
+        for (int i=0; i < k; i++) {
             daxpy( ABb[idt][i], &Bb[i][l], Cb );
         }
     }

@@ -16,6 +16,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "gemm_template_device_defs.cuh"
 #include "gemm_template_device.cuh"
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
@@ -29,7 +31,7 @@ void gemm_template_batched_nn_kernel(
     T alpha, T beta,
     int offsetA, int offsetB )
 {
-    //if( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
+    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
     int batchid = blockIdx.z;
     
     /*
@@ -44,6 +46,8 @@ void gemm_template_batched_nn_kernel(
     gemm_template_device_nn<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
@@ -57,7 +61,7 @@ void gemm_template_batched_nt_kernel(
     T alpha, T beta,
     int offsetA, int offsetB )
 {
-    //if( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
+    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
     int batchid = blockIdx.z;
     
     /*
@@ -72,6 +76,8 @@ void gemm_template_batched_nt_kernel(
     gemm_template_device_nt<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
@@ -85,7 +91,7 @@ void gemm_template_batched_tn_kernel(
     T alpha, T beta,
     int offsetA, int offsetB )
 {
-    //if( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
+    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
     int batchid = blockIdx.z;
     
     /*
@@ -100,6 +106,8 @@ void gemm_template_batched_tn_kernel(
     gemm_template_device_tn<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
@@ -113,7 +121,7 @@ void gemm_template_batched_tt_kernel(
     T alpha, T beta,
     int offsetA, int offsetB )
 {
-    //if( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
+    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
     int batchid = blockIdx.z;
     
     /*
@@ -128,6 +136,8 @@ void gemm_template_batched_tt_kernel(
     gemm_template_device_tt<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
     ( M, N, K, Aarray[batchid], LDA, Barray[batchid], LDB, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // kernel wrappers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +160,8 @@ void gemm_template_batched_nn(
     gemm_template_batched_nn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // NT, NC 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +182,8 @@ void gemm_template_batched_nt(
     gemm_template_batched_nt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TN, CN 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,6 +204,8 @@ void gemm_template_batched_tn(
     gemm_template_batched_tn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TT, TC, CT, CC
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,6 +226,5 @@ void gemm_template_batched_tt(
     gemm_template_batched_tt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
     <<<dimGrid, dimBlock, 0, queue>>>(m, n, k, dA_array, ldda, dB_array, lddb, dC_array, lddc, alpha, beta, offsetA, offsetB);
 }
-
 
 #endif //GEMM_TEMPLATE_KERNEL_BATCHED_CUH

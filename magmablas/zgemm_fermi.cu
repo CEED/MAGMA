@@ -197,7 +197,7 @@ magmablas_zgemm(
         TransA = 1;
     else if ( transA == MagmaNoTrans )
         TransA = 0;
-                    
+    
     if      ( transB == MagmaTrans )
         TransB = 1;
     else if ( transB == MagmaNoTrans )

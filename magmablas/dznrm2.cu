@@ -46,7 +46,7 @@ magmablas_dznrm2_kernel( int m, magmaDoubleComplex *dA, int ldda, double *dxnorm
     sum[tx] = lsum;
     magma_sum_reduce< BLOCK_SIZE >( tx, sum );
     
-    if (tx==0)
+    if (tx == 0)
         dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 
@@ -80,7 +80,7 @@ magmablas_dznrm2_check_kernel( int m, magmaDoubleComplex *dA, int ldda, double *
     sum[tx] = lsum;
     magma_sum_reduce< BLOCK_SIZE >( tx, sum );
     
-    if (tx==0)
+    if (tx == 0)
         dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 

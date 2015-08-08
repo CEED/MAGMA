@@ -90,7 +90,7 @@ zgemm_kernel_16(
         zaxpy16( rA[1], &sB[ 1][0], rC );  rA[1] = A[ 5*lda];
         zaxpy16( rA[2], &sB[ 2][0], rC );  rA[2] = A[ 6*lda];
         zaxpy16( rA[3], &sB[ 3][0], rC );  rA[3] = A[ 7*lda];
-                                                     
+        
         zaxpy16( rA[0], &sB[ 4][0], rC );  rA[0] = A[ 8*lda];
         zaxpy16( rA[1], &sB[ 5][0], rC );  rA[1] = A[ 9*lda];
         zaxpy16( rA[2], &sB[ 6][0], rC );  rA[2] = A[10*lda];

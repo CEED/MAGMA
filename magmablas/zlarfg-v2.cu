@@ -28,9 +28,9 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
     magmaDoubleComplex dxi;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-    if( n <= 1 ) {
+    if ( n <= 1 ) {
 #else
-    if( n <= 0 ) {
+    if ( n <= 0 ) {
 #endif
         *dtau = MAGMA_Z_ZERO;
         *dAkk = *dx0;

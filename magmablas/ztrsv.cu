@@ -38,9 +38,7 @@ ztrsv_notrans_kernel_outplace(
     magmaDoubleComplex *x,
     int flag=0)
 {
-
     ztrsv_notrans_device(uplo, transA, diag, n, A, lda, b, incb, x, flag);
-
 }
 
 //==============================================================================
@@ -58,9 +56,7 @@ ztrsv_trans_kernel_outplace(
     magmaDoubleComplex *x,
     int flag=0)
 {
-
     ztrsv_trans_device(uplo, transA, diag, n, A, lda, b, incb, x, flag);
-
 }
  
 //==============================================================================
@@ -77,7 +73,6 @@ magmablas_ztrsv_outofplace(
     magmaDoubleComplex *x, magma_queue_t queue,
     magma_int_t flag=0)
 {
-
     /* Check arguments */
     magma_int_t info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower ) {
@@ -105,16 +100,14 @@ magmablas_ztrsv_outofplace(
     dim3 threads(BLOCK_SIZE);
 
 
-    if(transA == MagmaNoTrans)
+    if (transA == MagmaNoTrans)
     {
-        ztrsv_notrans_kernel_outplace<<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>(uplo, transA, diag, n, A, lda, b, incb, x, flag); 
-
+        ztrsv_notrans_kernel_outplace<<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>(uplo, transA, diag, n, A, lda, b, incb, x, flag);
     }
     else
     {
         ztrsv_trans_kernel_outplace<<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>(uplo, transA, diag, n, A, lda, b, incb, x, flag); 
     }
-
 }
 
 
@@ -130,7 +123,6 @@ magmablas_ztrsv_recursive_outofplace(
     magmaDoubleComplex *b, magma_int_t incb, 
     magmaDoubleComplex *x, magma_queue_t queue)
 {
-
     /* Check arguments */
     magma_int_t info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower ) {
@@ -159,10 +151,9 @@ magmablas_ztrsv_recursive_outofplace(
 
     magma_int_t col = n;
 
-    if(transA == MagmaNoTrans)
+    if (transA == MagmaNoTrans)
     {
-
-        for(magma_int_t i=0; i<n; i+= NB)
+        for (magma_int_t i=0; i < n; i += NB)
         {    
             magma_int_t jb = min(NB, n-i);
 
@@ -171,8 +162,7 @@ magmablas_ztrsv_recursive_outofplace(
                 col -= jb;
                 //assume x_array contains zero elements, magmablas_zgemv will cause slow down
                 magma_zgemv(MagmaNoTrans, jb, i, MAGMA_Z_ONE, A(col, col+jb), lda, 
-                                x+col+jb, 1, MAGMA_Z_ONE, x+col, 1);                  
-
+                                x+col+jb, 1, MAGMA_Z_ONE, x+col, 1);
             }
             else
             {          
@@ -182,14 +172,11 @@ magmablas_ztrsv_recursive_outofplace(
             }
 
             magmablas_ztrsv_outofplace(uplo, transA, diag, jb, A(col, col), lda, b+col, incb, x+col, queue, i);
-                            
         }
-
     }
     else
     {
-
-        for(magma_int_t i=0; i<n; i+=NB)
+        for (magma_int_t i=0; i < n; i += NB)
         {    
             magma_int_t jb = min(NB, n-i);
 
@@ -202,16 +189,13 @@ magmablas_ztrsv_recursive_outofplace(
             else
             {
                 col = i;
-                 
+                
                 magma_zgemv(MagmaConjTrans, i, jb, MAGMA_Z_ONE, A(0, col), lda, x, 1, MAGMA_Z_ONE, x+col, 1);                  
-           }           
+            }           
      
-           magmablas_ztrsv_outofplace(uplo, transA, diag, jb, A(col, col), lda, b+col, incb, x+col, queue, i);
+            magmablas_ztrsv_outofplace(uplo, transA, diag, jb, A(col, col), lda, b+col, incb, x+col, queue, i);
         }
-
     }
-
-
 }
 
 
@@ -303,7 +287,6 @@ magmablas_ztrsv(
     magmaDoubleComplex *b, magma_int_t incb, 
     magma_queue_t queue)
 {
-
     magma_int_t size_x = n * incb;
 
     magmaDoubleComplex *x=NULL;
@@ -317,8 +300,6 @@ magmablas_ztrsv(
     magmablas_zlacpy( MagmaFull, n, 1, x, n, b, n);
 
     magma_free(x);
-
 }
 
 //==============================================================================
-

@@ -103,7 +103,7 @@ magma_zgetf2_gpu(
     magma_int_t min_mn = min(m, n);
     magma_int_t j, jp;
     
-    for( j=0; j < min_mn; j++ ) {
+    for (j=0; j < min_mn; j++) {
         cudaDeviceSetCacheConfig( cudaFuncCachePreferShared );
 
         // Find pivot and test for singularity.
@@ -147,9 +147,9 @@ void kernel_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
 
 void magma_zgetf2_swap(magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx)
 {
-/*
+    /*
     zswap two row vectors: ith and jth
-*/
+    */
     dim3 threads(zswap_bs, 1, 1);
     int num_blocks = magma_ceildiv( n, zswap_bs );
     dim3 grid(num_blocks,1);
@@ -184,7 +184,7 @@ void kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
         A[tid] = reg;
 
         #pragma unroll
-        for(int i=1; i < n; i++) {
+        for (int i=1; i < n; i++) {
             A[tid + i*lda] += (MAGMA_Z_NEG_ONE) * shared_y[i] * reg;
         }
     }
@@ -193,14 +193,12 @@ void kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
 
 void magma_zscal_zgeru(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda)
 {
-/*
-
+    /*
     Specialized kernel which merged zscal and zgeru the two kernels
     1) zscale the first column vector A(1:M-1,0) with 1/A(0,0);
     2) Performe a zgeru Operation for trailing matrix of A(1:M-1,1:N-1) += alpha*x*y**T, where 
        alpha := -1.0; x := A(1:M-1,0) and y:= A(0,1:N-1);
-
-*/
+    */
     dim3 threads(zgeru_bs, 1, 1);
     int num_blocks = magma_ceildiv( m, zgeru_bs );
     dim3 grid(num_blocks,1);

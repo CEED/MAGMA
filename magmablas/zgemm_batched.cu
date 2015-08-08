@@ -146,14 +146,14 @@ magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB,
 {
     magma_int_t use_cublas = magma_zrecommend_cublas_gemm_batched(transA, transB, m, n, k);
 
-    if(use_cublas){
+    if (use_cublas) {
         cublasZgemmBatched(myhandle, cublas_trans_const(transA), cublas_trans_const(transB),
                      m, n, k,
                      &alpha, (const magmaDoubleComplex**)dA_array,    ldda,
                              (const magmaDoubleComplex**)dB_array,    lddb,
                      &beta, dC_array, lddc, batchCount);
     }
-    else{
+    else {
         magmablas_zgemm_batched(
                     transA, transB, m, n, k,
                     alpha, dA_array, ldda,

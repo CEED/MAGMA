@@ -21,7 +21,7 @@ void batched_gemm_kernel_name(precision)(
     FloatingPoint_t alpha, FloatingPoint_t beta,
     int offsetA, int offsetB )
 {
-    //if( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
+    //if ( blockIdx.y > blockIdx.x ) return; //for lower blkx > blky do not have to compute
     int batchid = blockIdx.z;
     #ifdef TEXTURE_1D
     int matrixA_size = gridDim.z > 1 ?  Aarray[1] - Aarray[0] : 0;

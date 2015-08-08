@@ -121,19 +121,19 @@ magmablas_dgemv_batched(
     }    
                                                                                    
     if ( trans == MagmaNoTrans ) {                                                   
-        if(max(m, n) <= 96){ // small size                         
-            if(m < n){ // Fat or square matrix
-                if( m<=16) 
+        if (max(m, n) <= 96) { // small size                         
+            if (m < n) { // Fat or square matrix
+                if ( m <= 16) 
                 {
                     gemvn_template_batched<double, version(N, 72)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if( m<=32)            
+                else if ( m <= 32)            
                 {
                     gemvn_template_batched<double, version(N, 100)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if( m<=64)            
+                else if ( m <= 64)            
                 {
                     gemvn_template_batched<double, version(N, 122)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
@@ -143,13 +143,13 @@ magmablas_dgemv_batched(
                     gemvn_template_batched<double, version(N, 135)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }  
-            }else{   // Tall or square matrix
-                if ( n<=16) 
+            } else {   // Tall or square matrix
+                if ( n <= 16) 
                 {    
                     gemvn_template_batched<double, version(N, 128)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if ( n<=64) 
+                else if ( n <= 64) 
                 {
                     gemvn_template_batched<double, version(N, 132)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
@@ -161,24 +161,24 @@ magmablas_dgemv_batched(
                 }  
             }
         }
-        else{ // big size
-            if(m < n){ // Fat matrix
-                if(m <= 8)
+        else { // big size
+            if (m < n) { // Fat matrix
+                if (m <= 8)
                 {
                     gemvn_template_batched<double, version(N, 79)>              
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if(m <= 16)
+                else if (m <= 16)
                 {
                     gemvn_template_batched<double, version(N, 70)>               
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if(m <= 32)
+                else if (m <= 32)
                 {
                     gemvn_template_batched<double, version(N, 104)>               
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
-                else if(m <= 32)
+                else if (m <= 32)
                 {
                     gemvn_template_batched<double, version(N, 124)>               
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
@@ -189,8 +189,8 @@ magmablas_dgemv_batched(
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }
-            else{ // (m > n) Tall matrix
-                if(m <= 256)
+            else { // (m > n) Tall matrix
+                if (m <= 256)
                 {
                     gemvn_template_batched<double, version(N, 137)>             
                         ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
@@ -202,20 +202,19 @@ magmablas_dgemv_batched(
                 }
             }
         }// big size        
-     }
-     else{                                                 
-
+    }
+    else {
         magma_int_t CONJA = -1;
 
         if ( trans == MagmaConjTrans ) {
             CONJA = 1;
-        }else {
+        } else {
             CONJA = 0;
         }
 
 
-        if(max(m, n) <= 96){ // small size                              
-            if(m <= 16)
+        if (max(m, n) <= 96) { // small size                              
+            if (m <= 16)
             {
                 gemvc_template_batched<double, version(T, 42)>             
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
@@ -225,10 +224,9 @@ magmablas_dgemv_batched(
                 gemvc_template_batched<double, version(T, 47)>             
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
             }
-
-        }else{ // big size
-            if(m <= n){ //  Fat or square matrix
-                if(m <=64)
+        } else { // big size
+            if (m <= n) { //  Fat or square matrix
+                if (m <= 64)
                 {
                     gemvc_template_batched<double, version(T, 47)>             
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
@@ -238,9 +236,8 @@ magmablas_dgemv_batched(
                     gemvc_template_batched<double, version(T, 91)>             
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
                 }
-
-            }else{ // (m > n) Tall matrix
-                if(n <= 64)
+            } else { // (m > n) Tall matrix
+                if (n <= 64)
                 {
                     gemvc_template_batched<double, version(T, 90)>             
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
@@ -251,8 +248,7 @@ magmablas_dgemv_batched(
                         (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
                 }
             }
-        }        
-     }                   
-
+        }
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////

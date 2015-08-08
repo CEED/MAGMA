@@ -251,7 +251,7 @@ void zlaset_upper_kernel_batched(
             If UPLO = MagmaUpper, only the upper triangle or trapezoid is accessed;
             if UPLO = MagmaLower, only the lower triangle or trapezoid is accessed.
             On exit, A(i,j) = OFFDIAG, 1 <= i <= m, 1 <= j <= n, i != j;
-                     A(i,i) = DIAG,    1 <= i <= min(m,n)
+            and      A(i,i) = DIAG,    1 <= i <= min(m,n)
     
     @param[in]
     ldda    INTEGER

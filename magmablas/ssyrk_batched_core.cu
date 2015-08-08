@@ -172,8 +172,8 @@ magmablas_ssyrk_batched(
 
     // we have two shapes only (nt or tn)
     magma_int_t shape;
-    if      (trans == MagmaNoTrans)   {shape = 0;} // nt
-    else                              {shape = 1;} // tn
+    if      (trans == MagmaNoTrans)   { shape = 0; } // nt
+    else                              { shape = 1; } // tn
     
     //TODO: probably the texture init code should be placed here
 
@@ -192,7 +192,7 @@ magmablas_ssyrk_batched(
             break;
         case 1: // tn
             {
-                if(k < 64)
+                if (k < 64)
                 {
                     herk_template_batched_tn<float, version(TN,654), 0, 0>
                     (uplo, n, k, dA_array, ldda, dC_array, lddc, calpha, cbeta, offsetA, offsetB, batchCount, queue);

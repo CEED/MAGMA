@@ -35,10 +35,10 @@ zswapdblk_batched_kernel( int nb, int n_mod_nb,
 
     magmaDoubleComplex tmp;
     
-    if(bx < gridDim.x-1)
+    if (bx < gridDim.x-1)
     {
         #pragma unroll
-        for( int i = 0; i < nb; i++ ){
+        for( int i = 0; i < nb; i++ ) {
             tmp        = dA[i*ldda];
             dA[i*ldda] = dB[i*lddb];
             dB[i*lddb] = tmp;
@@ -46,7 +46,7 @@ zswapdblk_batched_kernel( int nb, int n_mod_nb,
     }
     else
     {
-        for( int i = 0; i < n_mod_nb; i++ ){
+        for( int i = 0; i < n_mod_nb; i++ ) {
             tmp        = dA[i*ldda];
             dA[i*ldda] = dB[i*lddb];
             dB[i*lddb] = tmp;
@@ -139,7 +139,7 @@ magmablas_zswapdblk_batched_q(
         return;  //info;
     }
     
-    if(n_mod_nb == 0)nblocks += 1; // a dummy thread block for cleanup code
+    if (n_mod_nb == 0) nblocks += 1; // a dummy thread block for cleanup code
     
     dim3 dimGrid(nblocks, 1, batchCount);
     

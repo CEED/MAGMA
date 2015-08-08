@@ -120,7 +120,7 @@ dgemm_kernel_N_N_64_16_16_16_4_special(
     } while (B < Bend);
 
     #pragma unroll 16
-    for(int i=0; i < 16; i++) {
+    for (int i=0; i < 16; i++) {
         C[0] = alpha * Cb[i] + beta * C[0];
         C += ldc;
     }
