@@ -114,7 +114,7 @@ magma_zpotrf_lpout_batched(
         else ntcol = NTCOL1;
         // end of tuning ntcol
         
-        const magma_int_t nTB = magma_ceildiv( batchCount, ntcol ); //(batchCount+ntcol-1)/ntcol;
+        const magma_int_t nTB = magma_ceildiv( batchCount, ntcol );
         dim3 dimGrid(1, 1, nTB);
         magma_int_t nbth = rows;
         magma_int_t shared_mem_size = ntcol * (sizeof(magmaDoubleComplex)*(nbth+POTF2_NB)*POTF2_NB);

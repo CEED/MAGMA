@@ -116,7 +116,7 @@ magmablas_zswapdblk_batched_q(
     magmaDoubleComplex **dB_array, magma_int_t lddb, magma_int_t incb,
     magma_int_t batchCount, magma_queue_t queue )
 {
-    magma_int_t nblocks = (n + nb - 1) / nb;
+    magma_int_t nblocks = magma_ceildiv( n, nb );
     magma_int_t n_mod_nb = n % nb;
     
     magma_int_t info = 0;
