@@ -49,7 +49,7 @@
    A thread can unlock the CPU if it has nothing to do to let
    another thread of less priority running for example for I/O.
  */
-magma_int_t magma_yield() 
+magma_int_t magma_yield()
 {
 #if (defined MAGMA_OS_LINUX) || (defined MAGMA_OS_FREEBSD) || (defined MAGMA_OS_MACOS) || (defined MAGMA_OS_AIX)
     return sched_yield();

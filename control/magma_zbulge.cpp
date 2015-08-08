@@ -10,14 +10,14 @@
 
 */
 #include "common_magma.h"
-#define COMPLEX 
+#define COMPLEX
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" magma_int_t 
+extern "C" magma_int_t
 magma_zbulge_get_lq2(magma_int_t n, magma_int_t threads, magma_int_t wantz)
 {
-    if( wantz == 0 ) 
+    if (wantz == 0)
         return 2*n*2;
 
     magma_int_t nb = magma_zbulge_get_nb(n, threads);
@@ -30,8 +30,8 @@ magma_zbulge_get_lq2(magma_int_t n, magma_int_t threads, magma_int_t wantz)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" void 
-magma_zbulge_get_VTsiz(magma_int_t n, magma_int_t nb, magma_int_t threads, 
+extern "C" void
+magma_zbulge_get_VTsiz(magma_int_t n, magma_int_t nb, magma_int_t threads,
         magma_int_t *Vblksiz, magma_int_t *ldv, magma_int_t *ldt)
 {
     Vblksiz[0] = magma_zbulge_get_Vblksiz(n, nb, threads);
@@ -41,10 +41,10 @@ magma_zbulge_get_VTsiz(magma_int_t n, magma_int_t nb, magma_int_t threads,
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" magma_int_t 
-magma_zbulge_getstg2size(magma_int_t n, magma_int_t nb, magma_int_t wantz, 
-                         magma_int_t Vblksiz, magma_int_t ldv, magma_int_t ldt, 
-                         magma_int_t *blkcnt, magma_int_t *sizTAU2, 
+extern "C" magma_int_t
+magma_zbulge_getstg2size(magma_int_t n, magma_int_t nb, magma_int_t wantz,
+                         magma_int_t Vblksiz, magma_int_t ldv, magma_int_t ldt,
+                         magma_int_t *blkcnt, magma_int_t *sizTAU2,
                          magma_int_t *sizT2, magma_int_t *sizV2)
 {
     blkcnt[0]  = magma_bulge_get_blkcnt(n, nb, Vblksiz);
@@ -56,9 +56,9 @@ magma_zbulge_getstg2size(magma_int_t n, magma_int_t nb, magma_int_t wantz,
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" magma_int_t 
-magma_zbulge_getlwstg2(magma_int_t n, magma_int_t threads, magma_int_t wantz, 
-                       magma_int_t *Vblksiz, magma_int_t *ldv, magma_int_t *ldt, 
+extern "C" magma_int_t
+magma_zbulge_getlwstg2(magma_int_t n, magma_int_t threads, magma_int_t wantz,
+                       magma_int_t *Vblksiz, magma_int_t *ldv, magma_int_t *ldt,
                        magma_int_t *blkcnt, magma_int_t *sizTAU2,
                        magma_int_t *sizT2, magma_int_t *sizV2)
 {
@@ -69,9 +69,9 @@ magma_zbulge_getlwstg2(magma_int_t n, magma_int_t threads, magma_int_t wantz,
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" void 
-magma_zheevdx_getworksize(magma_int_t n, magma_int_t threads, 
-        magma_int_t wantz, 
+extern "C" void
+magma_zheevdx_getworksize(magma_int_t n, magma_int_t threads,
+        magma_int_t wantz,
         magma_int_t *lwmin,
         #ifdef COMPLEX
         magma_int_t *lrwmin,

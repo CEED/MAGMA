@@ -29,7 +29,7 @@ extern "C" {
 */
 void magma_get_zpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_t *recnb)
 {
-    if(n <= ZPOTRF_SWITCH)
+    if (n <= ZPOTRF_SWITCH)
     {
         *nb    = ZPOTRF_SWITCH;
         *recnb = ZPOTRF_SWITCH;
@@ -41,19 +41,19 @@ void magma_get_zpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_
 }
 void magma_get_cpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_t *recnb)
 {
-    if(n <= CPOTRF_SWITCH)
+    if (n <= CPOTRF_SWITCH)
     {
         *nb    = CPOTRF_SWITCH;
         *recnb = CPOTRF_SWITCH;
         return;
     }
     
-    if( n <= 256 )
+    if (n <= 256)
     {
         *nb    = 256;
         *recnb = 256;
     }
-    else{
+    else {
         *nb    = 128;
         *recnb =  32;
     }
@@ -62,18 +62,18 @@ void magma_get_cpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_
 
 void magma_get_dpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_t *recnb)
 {
-    if(n <= DPOTRF_SWITCH)
+    if (n <= DPOTRF_SWITCH)
     {
         *nb    = DPOTRF_SWITCH;
         *recnb = DPOTRF_SWITCH;
         return;
     }
-    if( n <= 384 )
+    if (n <= 384)
     {
         *nb    = 384;
         *recnb = 384;
     }
-    else{
+    else {
         *nb    = 128;
         *recnb =  32;
     }
@@ -82,18 +82,18 @@ void magma_get_dpotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_
 
 void magma_get_spotrf_batched_nbparam(magma_int_t n, magma_int_t *nb, magma_int_t *recnb)
 {
-    if(n <= SPOTRF_SWITCH)
+    if (n <= SPOTRF_SWITCH)
     {
         *nb    = SPOTRF_SWITCH;
         *recnb = SPOTRF_SWITCH;
         return;
     }
-    if( n <= 464 )
+    if (n <= 464)
     {
         *nb    = 512;
         *recnb = 512;
     }
-    else{
+    else {
         *nb    = 256;
         *recnb =  64;
     }

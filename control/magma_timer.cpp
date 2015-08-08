@@ -29,7 +29,7 @@
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Emulate gettimeofday on Windows.
-*/ 
+*/
 #if defined( _WIN32 ) || defined( _WIN64 )
 #ifndef _TIMEZONE_DEFINED
 #define _TIMEZONE_DEFINED

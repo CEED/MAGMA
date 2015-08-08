@@ -3,7 +3,7 @@
 !      Univ. of California, Berkeley
 !      Univ. of Colorado, Denver
 !      @date
-!      
+!
 !      @author Mark Gates
 
 !     Wrapper around LAPACK ilaenv,

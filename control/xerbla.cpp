@@ -47,7 +47,7 @@
     @ingroup magma_util
     ********************************************************************/
 extern "C"
-void magma_xerbla(const char *srname , magma_int_t minfo)
+void magma_xerbla(const char *srname, magma_int_t minfo)
 {
     // the first 3 cases are unusual for calling xerbla;
     // normally runtime errors are passed back in info.

@@ -26,8 +26,8 @@ extern "C" {
 #endif
 
 typedef struct pthread_s {
-  HANDLE hThread;
-  unsigned int uThId;
+    HANDLE hThread;
+    unsigned int uThId;
 } pthread_t;
 
 typedef HANDLE pthread_mutex_t;
@@ -36,10 +36,10 @@ typedef int pthread_attr_t;
 typedef int pthread_condattr_t;
 
 typedef struct pthread_cond_s {
-  HANDLE hSem;
-  HANDLE hEvt;
-  CRITICAL_SECTION cs;
-  int waitCount; /* waiting thread counter */
+    HANDLE hSem;
+    HANDLE hEvt;
+    CRITICAL_SECTION cs;
+    int waitCount; /* waiting thread counter */
 } pthread_cond_t;
 
 typedef int pthread_attr_t;

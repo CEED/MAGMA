@@ -280,7 +280,7 @@ void trace_finalize( const char* filename, const char* cssfile )
                     cudaEventElapsedTime( &start, glog.gpu_first[t], glog.gpu_start[t][i] );
                     start *= 1e-3;  // ms to seconds
                 #endif
-                cudaEventElapsedTime( &end  , glog.gpu_first[t], glog.gpu_end  [t][i] );
+                cudaEventElapsedTime( &end, glog.gpu_first[t], glog.gpu_end  [t][i] );
                 end   *= 1e-3;  // ms to seconds
                 fprintf( trace_file, format,
                          left + start*xscale,

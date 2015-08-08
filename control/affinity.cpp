@@ -67,8 +67,8 @@ void affinity_set::print_set(int id, const char* s)
 
     int nrcpu = 0;
 
-    for(int icpu=0; nrcpu < cpu_count && icpu < CPU_SETSIZE; ++icpu) {
-        if( CPU_ISSET( icpu, &set )) {
+    for (int icpu=0; nrcpu < cpu_count && icpu < CPU_SETSIZE; ++icpu) {
+        if ( CPU_ISSET( icpu, &set )) {
             charcnt += snprintf( &(cpustring[charcnt]), sizeof(cpustring)-charcnt, "%d,", icpu );
             ++nrcpu;
         }

@@ -19,19 +19,19 @@
 
 #define POTRF_NB         128     // blocking in main algorithm 128 if using recursive panel or 32 if using standard panel
 #define POTF2_NB           8     // blocking size in panel factorization
-#define POTF2_TILE_SIZE   32     
+#define POTF2_TILE_SIZE   32
 #define MAX_POTF2_SM     128
 #define               VERSION20
 
 
 
 #define BATRF_NB         128
-#define BATRF_RECNB       32    
+#define BATRF_RECNB       32
 #define BATF2_NB           8
-#define BASWP_WIDTH        4 
-#define SWP_WIDTH          4 
+#define BASWP_WIDTH        4
+#define SWP_WIDTH          4
 
-#define BAQRF_NB         32    
+#define BAQRF_NB         32
 
 #define BATRI_NB         128        // ztrsm_nb should be >= BATRF_NB
 #define TRI_NB           128        // ztrsm_nb should match the NB in BATRF_NB

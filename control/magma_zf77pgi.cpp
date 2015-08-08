@@ -107,7 +107,7 @@ void MAGMA_ZHETRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, dou
 { magma_zhetrd( uplo[0], *n, A, *lda, d, e, tau, work, *lwork, da, info); }
 
 
-/* //////////////////////////////////////////////////////////////////////////// 
+/* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA function definitions / Data on GPU
 */
 void MAGMA_ZUNMQR_GPU(char *side, char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, double2 *a, magma_int_t *lda, double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *nb, magma_int_t *info)

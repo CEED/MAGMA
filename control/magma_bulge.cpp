@@ -54,7 +54,7 @@ extern "C" {
         for (prevGblkid = lstGblkid; prevGblkid > myGblkid; prevGblkid--)
         {
             mastersweep  = prevGblkid * Vblksiz;
-            if(prevGblkid==lstGblkid)
+            if (prevGblkid == lstGblkid)
                 locblknb = magma_ceildiv((n-(mastersweep+1)),nb);
             else
                 locblknb = magma_ceildiv((n-(mastersweep+2)),nb);
@@ -63,10 +63,10 @@ extern "C" {
         //===================================================
         /*
         // for best performance, the if condiiton inside the loop
-        // is only for prevblkid==lastblkid so I can unroll this
+        // is only for prevblkid == lastblkid so I can unroll this
         // out of the loop and so remove the if condition.
         //===================================================
-        // for prevGblkid==lstGblkid
+        // for prevGblkid == lstGblkid
         mastersweep  = lstGblkid * Vblksiz;
         locblknb     = magma_ceildiv((n-(mastersweep+1)),nb);
         prevblkcnt   = prevblkcnt + locblknb;
@@ -112,7 +112,7 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        if(applyQver==113)
+        if (applyQver == 113)
             magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
         else
             magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
@@ -127,7 +127,7 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        if(applyQver==113)
+        if (applyQver == 113)
             magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
         else
             magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
@@ -143,7 +143,7 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        if(applyQver==113)
+        if (applyQver == 113)
             magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
         else
             magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
@@ -165,7 +165,7 @@ extern "C" {
         for (colblk = 0; colblk<nbcolblk; colblk++)
         {
             mastersweep = colblk * Vblksiz;
-            if(colblk == (nbcolblk-1))
+            if (colblk == (nbcolblk-1))
                 myblknb = magma_ceildiv((n-(mastersweep+1)),nb);
             else
                 myblknb = magma_ceildiv((n-(mastersweep+2)),nb);
@@ -237,7 +237,7 @@ extern "C" {
         for (colblk = 0; colblk<nbcolblk; colblk++)
         {
             mastersweep = colblk * Vblksiz;
-            if(colblk == (nbcolblk-1))
+            if (colblk == (nbcolblk-1))
                 myblknb = magma_ceildiv((N-(mastersweep+1)),NB);
             else
                 myblknb = magma_ceildiv((N-(mastersweep+2)),NB);
