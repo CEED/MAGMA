@@ -122,7 +122,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     magma_event_t event[5];
     magma_queue_t orig_stream;
     magmablasGetKernelStream( &orig_stream );
-    for (int i=0; i<num_streams; i++) {
+    for (int i=0; i < num_streams; i++) {
         magma_queue_create( &stream[i] );
         magma_event_create( &event[i]  );
     }
@@ -157,7 +157,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     magma_int_t *dinfo_magma, *dipiv_magma;
     magmaDoubleComplex **dA_array = NULL;
     magma_int_t **dipiv_array = NULL;
-    if(MAGMA_SUCCESS != magma_imalloc( &dipiv_magma, nb) ||
+    if (MAGMA_SUCCESS != magma_imalloc( &dipiv_magma, nb) ||
        MAGMA_SUCCESS != magma_imalloc( &dinfo_magma, 1) ||
        MAGMA_SUCCESS != magma_malloc( (void**)&dA_array, sizeof(*dA_array) ) ||
        MAGMA_SUCCESS != magma_malloc( (void**)&dipiv_array, sizeof(*dipiv_array))) {
@@ -200,7 +200,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 //
                 trace_gpu_start( 0, 0, "gemm", "compH" );
                 trace_gpu_start( 0, 1, "gemm", "compH" );
-                for (magma_int_t i=1; i<j; i++)
+                for (magma_int_t i=1; i < j; i++)
                 {
                     //printf( " > compute H(%d,%d)\n",i,j);
                     // > H(i,j) = T(i,i) * L(j,i)', Y
@@ -226,7 +226,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 // * make sure they are done
                 magma_queue_wait_event( stream[0], event[1] );
                 magma_queue_wait_event( stream[1], event[0] );
-                for (magma_int_t i=1; i<j; i++)
+                for (magma_int_t i=1; i < j; i++)
                 {
                     // H(i,j) = W(i)+.5*H(i,j)
                     magmablasSetKernelStream(stream[(i-1)%2]);
@@ -242,7 +242,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 // * make sure they are done
                 magma_queue_wait_event( stream[0], event[1] );
                 magma_queue_wait_event( stream[1], event[0] );
-                for (magma_int_t i=1; i<j; i++)
+                for (magma_int_t i=1; i < j; i++)
                 {
                     // W(i) += .5*H(i,j)
                     magmablasSetKernelStream(stream[(i-1)%2]);
@@ -257,7 +257,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                     #endif
 
                     // > H(i,j) += T(i,i-1) * L(j,i-1)', X
-                    if (i > 1) // if i==1, then L(j,i-1) = 0
+                    if (i > 1) // if i == 1, then L(j,i-1) = 0
                     {
                         // W(i+1) = T(i,i-1)*L(j,i-1)'
                         magma_zgemm(MagmaNoTrans, MagmaConjTrans,
@@ -385,13 +385,13 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                        1, min(jb,ib), &ipiv[(j+1)*nb], 1 );
                     // symmetric pivot
                     {
-                        for (magma_int_t ii=0; ii<min(jb,ib); ii++) {
+                        for (magma_int_t ii=0; ii < min(jb,ib); ii++) {
                             magma_int_t piv = perm[ipiv[(j+1)*nb+ii]-1];
                             perm[ipiv[(j+1)*nb+ii]-1] = perm[ii];
                             perm[ii] = piv;
                         }
                         magma_int_t count = 0;
-                        for (magma_int_t ii=0; ii<n; ii++) {
+                        for (magma_int_t ii=0; ii < n; ii++) {
                             if (perm[ii] != ii) {
                                 rows[2*count] = perm[ii];
                                 rows[2*count+1] = ii;
@@ -418,7 +418,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 }
             }
             // copy back to CPU
-            for (magma_int_t j=0; j<magma_ceildiv(n, nb); j++)
+            for (magma_int_t j=0; j < magma_ceildiv(n, nb); j++)
             {
                 magma_int_t jb = min(nb, n-j*nb);
                 //#define COPY_BACK_BY_BLOCK_COL
@@ -439,7 +439,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         }
     }
     
-    for (int i=0; i<num_streams; i++) {
+    for (int i=0; i < num_streams; i++) {
         magma_queue_sync( stream[i] );
         magma_queue_destroy( stream[i] );
         magma_event_destroy( event[i] );

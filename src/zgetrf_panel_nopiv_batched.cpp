@@ -28,7 +28,7 @@ magma_zgetrf_panel_nopiv_batched(
     //===============================================
     //  panel factorization
     //===============================================
-    if(m < nb){
+    if (m < nb) {
         printf("magma_zgetrf_panel_nopiv_batched_q m < nb %d < %d \n",(int) m, (int) nb);
         return -101;
     }
@@ -47,7 +47,7 @@ magma_zgetrf_panel_nopiv_batched(
                        dW1_displ, dW2_displ, dW3_displ,
                        info_array, gbstep, batchCount, myhandle, queue);
     if (arginfo != 0) return arginfo;
-    if((m-nb) > 0){
+    if ((m-nb) > 0) {
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, nb, 0, batchCount, queue);
         magmablas_ztrsm_work_batched( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                               1, m-nb, nb, 
@@ -93,8 +93,8 @@ magma_zgetrf_recpanel_nopiv_batched(
     magma_malloc((void**)&dA_displ,   batchCount * sizeof(*dA_displ));
     
     magma_int_t panel_nb = n;
-    if(panel_nb <= min_recpnb){
-        // if(DEBUG>0)printf("calling bottom panel recursive with m=%d nb=%d\n",m,n);
+    if (panel_nb <= min_recpnb) {
+        // if (DEBUG > 0)printf("calling bottom panel recursive with m=%d nb=%d\n",m,n);
         //  panel factorization
         //magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount);
         arginfo = magma_zgetrf_panel_nopiv_batched(
@@ -107,7 +107,7 @@ magma_zgetrf_recpanel_nopiv_batched(
                            info_array, gbstep, batchCount, myhandle, queue);
         if (arginfo != 0) return arginfo;
     }
-    else{
+    else {
         // split A over two [A A2]
         // panel on A1, update on A2 then panel on A1    
         magma_int_t n1 = n/2;

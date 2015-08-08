@@ -31,8 +31,8 @@
  *  Parallel reduction to condensed forms for symmetric eigenvalue problems
  *  using aggregated fine-grained and memory-aware kernels. In Proceedings
  *  of 2011 International Conference for High Performance Computing,
- *  Networking, Storage and Analysis (SC '11). ACM, New York, NY, USA, ,
- *  Article 8 , 11 pages.
+ *  Networking, Storage and Analysis (SC '11). ACM, New York, NY, USA,
+ *  Article 8, 11 pages.
  *  http://doi.acm.org/10.1145/2063384.2063394
  *
  *******************************************************************************
@@ -88,7 +88,7 @@
  *
  * @return
  *          \retval MAGMA_SUCCESS successful exit
- *          \retval <0 if -i, the i-th argument had an illegal value
+ *          \retval < 0 if -i, the i-th argument had an illegal value
  *
  ******************************************************************************/
 
@@ -111,7 +111,7 @@ magma_zhbtype2cb(magma_int_t n, magma_int_t nb,
     magma_int_t ione = 1;
     const magmaDoubleComplex c_one    =  MAGMA_Z_ONE;
 
-    if( wantz == 0 ) {
+    if ( wantz == 0 ) {
         vpos   = (sweep%2)*n + st;
         taupos = (sweep%2)*n + st;
     } else {
@@ -125,13 +125,13 @@ magma_zhbtype2cb(magma_int_t n, magma_int_t nb,
     len = ed-st+1;
     lem = J2-J1+1;
 
-    if( lem > 0 ) {
+    if ( lem > 0 ) {
         /* Apply remaining right commming from the top block */
         lapackf77_zlarfx("R", &lem, &len, V(vpos), TAU(taupos), A(J1, st), &ldx, work);
     }
 
-    if( lem > 1 ) {
-        if( wantz == 0 ) {
+    if ( lem > 1 ) {
+        if ( wantz == 0 ) {
             vpos   = (sweep%2)*n + J1;
             taupos = (sweep%2)*n + J1;
         } else {

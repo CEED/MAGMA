@@ -20,7 +20,7 @@
     The LU decomposition with no pivoting is
     used to factor A as
     The factorization has the form   
-       A = U^T * D * U , if UPLO = 'U', or   
+       A = U^T * D * U,  if UPLO = 'U', or   
        A = L  * D * L^T, if UPLO = 'L',   
     where U is an upper triangular matrix, L is lower triangular, and
     D is a diagonal matrix.
@@ -85,7 +85,7 @@ magma_zsysv_nopiv_gpu(magma_uplo_t uplo,  magma_int_t n, magma_int_t nrhs,
     int   upper = (uplo == MagmaUpper);
     if (! upper && uplo != MagmaLower) {
       *info = -1;
-    }else if (n < 0) {
+    } else if (n < 0) {
         *info = -2;
     } else if (nrhs < 0) {
         *info = -3;

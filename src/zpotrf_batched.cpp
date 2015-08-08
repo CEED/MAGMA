@@ -81,7 +81,7 @@ magma_zpotrf_lg_batched(
     double d_alpha = -1.0;
     double d_beta  = 1.0;
 
-    if( n > 2048 ){
+    if ( n > 2048 ) {
         #ifndef MAGMA_NOWARNING
         printf("=========================================================================================\n");
         printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
@@ -154,7 +154,7 @@ magma_zpotrf_lg_batched(
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
     magma_queue_t stream[nbstreams];
-    for(k=0; k<nbstreams; k++){
+    for (k=0; k < nbstreams; k++) {
         magma_queue_create( &stream[k] );
     }
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
@@ -164,7 +164,7 @@ magma_zpotrf_lg_batched(
         goto fin;
     }
     else {
-        for(j = 0; j < n; j+=nb) {
+        for (j = 0; j < n; j += nb) {
             ib = min(nb, n-j);
 #if 1
             //===============================================
@@ -175,7 +175,7 @@ magma_zpotrf_lg_batched(
             zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
 
-            if(recnb == nb)
+            if (recnb == nb)
             {
                 arginfo = magma_zpotrf_panel_batched(
                                    uplo, n-j, ib,
@@ -186,7 +186,7 @@ magma_zpotrf_lg_batched(
                                    dW3_displ, dW4_displ,
                                    info_array, j, batchCount, myhandle, queue);
             }
-            else{
+            else {
                 //arginfo = magma_zpotrf_rectile_batched(
                 arginfo = magma_zpotrf_recpanel_batched(
                                    uplo, n-j, ib, recnb,
@@ -197,7 +197,7 @@ magma_zpotrf_lg_batched(
                                    dW3_displ, dW4_displ, 
                                    info_array, j, batchCount, myhandle, queue);
             }
-            if(arginfo != 0 ) goto fin;
+            if (arginfo != 0 ) goto fin;
             //===============================================
             // end of panel
             //===============================================
@@ -205,9 +205,9 @@ magma_zpotrf_lg_batched(
 #if 1
             //real_Double_t gpu_time;
             //gpu_time = magma_sync_wtime(NULL);
-            if( (n-j-ib) > 0){
+            if ( (n-j-ib) > 0) {
                 use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaConjTrans, n-j-ib, n-j-ib, ib);
-                if(use_stream)
+                if (use_stream)
                 { 
                     //-------------------------------------------
                     //          USE STREAM  HERK
@@ -218,7 +218,7 @@ magma_zpotrf_lg_batched(
                     //magma_queue_sync(NULL); 
                     /* you must know the matrix layout inorder to do it */  
                     magma_queue_sync(queue); 
-                    for(k=0; k<batchCount; k++)
+                    for (k=0; k < batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
                         magmablasSetKernelStream(stream[streamid]);
@@ -234,8 +234,8 @@ magma_zpotrf_lg_batched(
                      // BUT no need for it as soon as the other portion of the code 
                      // use the NULL stream which do the sync by itself 
                      //magma_device_sync(); 
-                     if( queue != NULL ){
-                         for(magma_int_t s=0; s<nbstreams; s++)
+                     if ( queue != NULL ) {
+                         for (magma_int_t s=0; s < nbstreams; s++)
                              magma_queue_sync(stream[s]);
                      }
                      magmablasSetKernelStream(queue);
@@ -264,7 +264,7 @@ magma_zpotrf_lg_batched(
 fin:
     magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    for(k=0; k<nbstreams; k++){
+    for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( stream[k] );
     }
     cublasDestroy_v2(myhandle);
@@ -291,7 +291,6 @@ magma_zpotrf_batched(
     magmaDoubleComplex **dA_array, magma_int_t ldda,
     magma_int_t *info_array,  magma_int_t batchCount, magma_queue_t queue)
 {
-
     cudaMemset(info_array, 0, batchCount*sizeof(magma_int_t));
     magma_int_t arginfo = 0;
     
@@ -316,7 +315,7 @@ magma_zpotrf_batched(
 
     magma_int_t crossover = magma_get_zpotrf_batched_crossover();
 
-    if(n > crossover )
+    if (n > crossover )
     {   
         // The memory allocation/deallocation inside this routine takes about 3-4ms 
         arginfo = magma_zpotrf_lg_batched(uplo, n, dA_array, ldda, info_array, batchCount, queue);
@@ -337,4 +336,3 @@ magma_zpotrf_batched(
 
     return arginfo;
 }
-

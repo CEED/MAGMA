@@ -118,7 +118,7 @@ magma_zgesv_rbt_batched(
 
 
     info = magma_zgetrf_nopiv_batched( n, n, dA_array, ldda, info_array, batchCount, queue);
-    if ( (info != MAGMA_SUCCESS) ){
+    if ( info != MAGMA_SUCCESS ) {
         return info;
     }
 
@@ -127,9 +127,9 @@ magma_zgesv_rbt_batched(
     magma_int_t *cpu_info = NULL;
     magma_imalloc_cpu( &cpu_info, batchCount );
     magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
-    for(int i=0; i<batchCount; i++)
+    for (int i=0; i < batchCount; i++)
     {
-        if(cpu_info[i] != 0 ){
+        if (cpu_info[i] != 0 ) {
             printf("magma_zgetrf_batched matrix %d returned error %d\n",i, (int)cpu_info[i] );
             info = cpu_info[i];
             magma_free_cpu (cpu_info);
@@ -152,7 +152,7 @@ magma_zgesv_rbt_batched(
 
     magma_zsetvector(2*n, hv, 1, dv, 1);
 
-    for(int i = 0; i < nrhs; i++)
+    for (int i = 0; i < nrhs; i++)
         magmablas_zprbt_mv_batched(n, dv, dB_array+(i), batchCount, queue);
 
  //   magma_zgetmatrix(n, nrhs, db, nn, B, ldb);

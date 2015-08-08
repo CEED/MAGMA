@@ -167,7 +167,7 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             }
 
             // scale off-diagonals
-            alpha = MAGMA_Z_DIV(zone , Akk );
+            alpha = MAGMA_Z_DIV( zone, Akk );
             blasf77_zscal(&k, &alpha, Ak1k, &ione);
 
             // update remaining
@@ -237,7 +237,7 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
     }
 
     if ( uplo == MagmaLower ) {
-        for(magma_int_t i = 0; i < n; i += ib) {
+        for (magma_int_t i = 0; i < n; i += ib) {
             magma_int_t sb = min(n-i, ib);
 
             /* Factorize the diagonal block */
@@ -256,7 +256,7 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                            &A(i+sb, i), &lda);
 
                 /* Scale the block to divide by D */
-                for (magma_int_t k=0; k<sb; k++) {
+                for (magma_int_t k=0; k < sb; k++) {
                     #define ZSYRK_D_WORKSPACE
                     #ifdef ZSYRK_D_WORKSPACE
                     for (magma_int_t ii=i+sb; ii < n; ii++) {
@@ -282,7 +282,7 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
             }
         }
     } else {
-        for(magma_int_t i = 0; i < n; i += ib) {
+        for (magma_int_t i = 0; i < n; i += ib) {
             magma_int_t sb = min(n-i, ib);
 
             /* Factorize the diagonal block */
@@ -301,14 +301,14 @@ zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
                            &A(i, i+sb), &lda);
 
                 /* Scale the block to divide by D */
-                for (magma_int_t k=0; k<sb; k++) {
+                for (magma_int_t k=0; k < sb; k++) {
                     #define ZSYRK_D_WORKSPACE
                     #ifdef ZSYRK_D_WORKSPACE
                     for (magma_int_t ii=i+sb; ii < n; ii++) {
                         A(ii, i+k) = A(i+k, ii);
                     }
                     #endif
-                    alpha = MAGMA_Z_DIV(zone , A(i+k, i+k));
+                    alpha = MAGMA_Z_DIV( zone, A(i+k, i+k) );
                     blasf77_zscal(&height, &alpha, &A(i+k, i+sb), &lda);
                 }
 

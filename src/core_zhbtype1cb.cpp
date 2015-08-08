@@ -31,8 +31,8 @@
  *  Parallel reduction to condensed forms for symmetric eigenvalue problems
  *  using aggregated fine-grained and memory-aware kernels. In Proceedings
  *  of 2011 International Conference for High Performance Computing,
- *  Networking, Storage and Analysis (SC '11). ACM, New York, NY, USA, ,
- *  Article 8 , 11 pages.
+ *  Networking, Storage and Analysis (SC '11). ACM, New York, NY, USA,
+ *  Article 8, 11 pages.
  *  http://doi.acm.org/10.1145/2063384.2063394
  *
  *******************************************************************************
@@ -85,7 +85,7 @@
  *
  * @return
  *          \retval MAGMA_SUCCESS successful exit
- *          \retval <0 if -i, the i-th argument had an illegal value
+ *          \retval < 0 if -i, the i-th argument had an illegal value
  *
  ******************************************************************************/
 /***************************************************************************
@@ -111,7 +111,7 @@ magma_zhbtype1cb(magma_int_t n, magma_int_t nb,
      * note that in case no eigenvector required V and T are stored
      * on a vector of size n
      * */
-     if( wantz == 0 ) {
+     if ( wantz == 0 ) {
          vpos   = (sweep%2)*n + st;
          taupos = (sweep%2)*n + st;
      } else {

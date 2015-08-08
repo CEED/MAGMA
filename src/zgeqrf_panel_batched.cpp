@@ -30,12 +30,11 @@ magma_zgeqrf_panel_batched(
         magma_int_t *info_array,
         magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
-
     magma_int_t j, jb;
     magma_int_t ldw = nb; 
     magma_int_t minmn = min(m,n); 
 
-    for( j=0; j<minmn; j+=nb)
+    for( j=0; j < minmn; j += nb)
     {
         jb = min(nb, minmn-j);
 
@@ -62,9 +61,8 @@ magma_zgeqrf_panel_batched(
         magmablas_zlaset_batched(MagmaUpper, jb, jb, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
 
 
-        if( (n-j-jb) > 0) //update the trailing matrix inside the panel
+        if ( (n-j-jb) > 0) //update the trailing matrix inside the panel
         {
-
             magma_zlarft_sm32x32_batched(m-j, jb,
                     dW0_displ, ldda,
                     dW2_displ,
@@ -85,11 +83,10 @@ magma_zgeqrf_panel_batched(
                     dW3_displ, ldw,
                     batchCount, queue, myhandle);
         }
-
     }
 
-    // copy the remaining portion of dR from dA in case m<n
-    if( m < n )
+    // copy the remaining portion of dR from dA in case m < n
+    if ( m < n )
     {
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, 0, minmn, batchCount, queue); 
         magma_zdisplace_pointers(dW3_displ, dR_array, ldr, 0, minmn, batchCount, queue); 
@@ -105,4 +102,3 @@ magma_zgeqrf_panel_batched(
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-

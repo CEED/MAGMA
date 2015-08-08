@@ -29,7 +29,7 @@ magma_zpotrf_panel_batched(
     //===============================================
     //  panel factorization
     //===============================================
-    if(n<nb){
+    if (n < nb) {
         printf("magma_zpotrf_panel error n < nb %d < %d \n",(int) n, (int) nb);
         return -101;
     }
@@ -51,7 +51,7 @@ magma_zpotrf_panel_batched(
                        info_array, gbstep,
                        batchCount, myhandle, queue);
 
-    if((n-nb) > 0){
+    if ((n-nb) > 0) {
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, nb, 0, batchCount, queue);
         magmablas_ztrsm_work_batched(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                               1, n-nb, nb, 
@@ -98,7 +98,7 @@ magma_zpotrf_recpanel_batched(
        magma_xerbla( __func__, -(arginfo) );
        return arginfo;
     }
-    if(m<n){
+    if (m < n) {
         printf("error m < n %d < %d \n", (int) m, (int) n);
         arginfo = -101;
         magma_xerbla( __func__, -(arginfo) );
@@ -111,7 +111,7 @@ magma_zpotrf_recpanel_batched(
     magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
     magma_int_t panel_nb = n;
-    if(panel_nb <= min_recpnb){
+    if (panel_nb <= min_recpnb) {
         //printf("calling bottom panel recursive with m=%d nb=%d\n",m,n);
         //  panel factorization
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
@@ -125,7 +125,7 @@ magma_zpotrf_recpanel_batched(
                            info_array, gbstep,
                            batchCount, myhandle, queue);
     }
-    else{
+    else {
         // split A over two [A A2]
         // panel on A1, update on A2 then panel on A1    
         magma_int_t n1 = n/2;
@@ -196,14 +196,14 @@ magma_zpotrf_rectile_batched(
     //magma_int_t DEBUG=0;
 
     // Quick return if possible
-    if (m ==0 || n == 0) {
+    if (m == 0 || n == 0) {
         return 1;
     }
     if (uplo == MagmaUpper) {
        printf("Upper side is unavailable \n");
        return -100;
     }
-    if(m<n){
+    if (m < n) {
         printf("error m < n %d < %d \n", (int) m, (int) n);
         return -101;
     }
@@ -214,8 +214,8 @@ magma_zpotrf_rectile_batched(
     magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex beta  = MAGMA_Z_ONE;
     magma_int_t panel_nb = n;
-    if(panel_nb <= min_recpnb){
-        // if(DEBUG==1) printf("calling bottom panel recursive with n=%d\n",(int) panel_nb);
+    if (panel_nb <= min_recpnb) {
+        // if (DEBUG == 1) printf("calling bottom panel recursive with n=%d\n",(int) panel_nb);
         //  panel factorization
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
         magma_zpotrf_panel_batched(
@@ -228,7 +228,7 @@ magma_zpotrf_rectile_batched(
                            info_array, gbstep,
                            batchCount, myhandle, queue);
     }
-    else{
+    else {
         // split A over two [A11 A12;  A21 A22; A31 A32]
         // panel on tile A11, 
         // trsm on A21, using A11
@@ -240,7 +240,7 @@ magma_zpotrf_rectile_batched(
         magma_int_t p2 = n1;
 
         // panel on A11
-        //if(DEBUG==1) printf("calling recursive panel on A11=A(%d,%d) with n=%d min_recpnb %d\n",(int) p1, (int) p1, (int) n1, (int) min_recpnb);
+        //if (DEBUG == 1) printf("calling recursive panel on A11=A(%d,%d) with n=%d min_recpnb %d\n",(int) p1, (int) p1, (int) n1, (int) min_recpnb);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p1, p1, batchCount, queue);        
         magma_zpotrf_rectile_batched(
                            uplo, n1, n1, min_recpnb,
@@ -253,7 +253,7 @@ magma_zpotrf_rectile_batched(
                            batchCount, myhandle, queue);
 
         // TRSM on A21
-        //if(DEBUG==1) printf("calling trsm on A21=A(%d,%d) using A11==A(%d,%d) with m=%d k=%d \n",p2,p1,p1,p1,n2,n1);
+        //if (DEBUG == 1) printf("calling trsm on A21=A(%d,%d) using A11 == A(%d,%d) with m=%d k=%d \n",p2,p1,p1,p1,n2,n1);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, p1, p1, batchCount, queue);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, p2, p1, batchCount, queue);
         magmablas_ztrsm_work_batched(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
@@ -267,7 +267,7 @@ magma_zpotrf_rectile_batched(
                               dW3_displ,   dW4_displ,
                               0, batchCount, queue, myhandle);
         // update A22
-        //if(DEBUG==1) printf("calling update A22=A(%d,%d) using A21==A(%d,%d) with m=%d n=%d k=%d\n",p2,p2,p2,p1,n2,n2,n1);
+        //if (DEBUG == 1) printf("calling update A22=A(%d,%d) using A21 == A(%d,%d) with m=%d n=%d k=%d\n",p2,p2,p2,p1,n2,n2,n1);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, p2, p1, batchCount, queue);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, p2, p2, batchCount, queue);        // NEED TO BE REPLACED BY HERK
         magma_zgemm_batched( MagmaNoTrans, MagmaConjTrans, n2, n2, n1,
@@ -277,7 +277,7 @@ magma_zpotrf_rectile_batched(
                              batchCount, queue, myhandle);
 
         // panel on A22
-        //if(DEBUG==1) printf("calling recursive panel on A22=A(%d,%d) with n=%d min_recpnb %d\n",p2,p2,n2,min_recpnb);
+        //if (DEBUG == 1) printf("calling recursive panel on A22=A(%d,%d) with n=%d min_recpnb %d\n",p2,p2,n2,min_recpnb);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, p2, p2, batchCount, queue);        
         magma_zpotrf_rectile_batched(
                            uplo, n2, n2, min_recpnb,
@@ -290,9 +290,9 @@ magma_zpotrf_rectile_batched(
                            batchCount, myhandle, queue);
     }
 
-    if(m>n){
+    if (m > n) {
         // TRSM on A3:
-        //if(DEBUG==1) printf("calling trsm AT THE END on A3=A(%d,%d): using A1222==A(%d,%d) with m=%d k=%d \n",n,0,0,0,m-n,n);
+        //if (DEBUG == 1) printf("calling trsm AT THE END on A3=A(%d,%d): using A1222 == A(%d,%d) with m=%d k=%d \n",n,0,0,0,m-n,n);
         magma_zdisplace_pointers(dA_displ,  dA_array, ldda, 0, 0, batchCount, queue);        
         magma_zdisplace_pointers(dW0_displ, dA_array, ldda, n, 0, batchCount, queue);
         magmablas_ztrsm_work_batched(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,

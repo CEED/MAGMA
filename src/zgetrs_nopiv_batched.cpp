@@ -164,7 +164,7 @@ magma_zgetrs_nopiv_batched(
     magma_zdisplace_pointers(dB_displ, dB_array, lddb, 0, 0, batchCount, queue);
 
     if (notran) {
-        if(nrhs > 1)
+        if (nrhs > 1)
         {
             // solve dwork = L^-1 * NRHS
             magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
@@ -209,11 +209,11 @@ magma_zgetrs_nopiv_batched(
                     batchCount, queue, 0);
         }
     }
-    else{
+    else {
         #ifdef COMPLEX
-        if(nrhs > 0)
+        if (nrhs > 0)
         #else
-        if(nrhs > 1)
+        if (nrhs > 1)
         #endif
         {
             /* Solve A**T * X = B  or  A**H * X = B. */
@@ -259,7 +259,6 @@ magma_zgetrs_nopiv_batched(
                     dB_displ,   // dX //output
                     batchCount, queue, 0);
         }
-
     }
 
     magmablasSetKernelStream(queue);

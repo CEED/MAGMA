@@ -409,7 +409,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
     //=========================
     // compute the T's to be used when applying Q2
     //=========================
-    if( wantz > 0 ) {
+    if ( wantz > 0 ) {
         #ifdef ENABLE_TIMER
         if (my_core_id == 0)
             timeT = magma_wtime();
@@ -446,7 +446,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 { \
     while (prog[(m)] != (val)) \
     magma_yield(); \
-    for(kk=0; kk < 100; kk++) \
+    for (kk=0; kk < 100; kk++) \
     __asm__ volatile ("nop;" :::); \
 }
 
@@ -546,13 +546,13 @@ static void magma_ztile_bulge_parallel(
     /* Some tunning for the bulge chasing code
      * see technical report for details */
     /* grsiz   = 2; */
-    if( wantz == 0 ) {
+    if ( wantz == 0 ) {
         shift = 3;
     } else {
         shift = 3; /* it was 5 before see above for explanation*/
     }
 
-    if( grsiz == 1 )
+    if ( grsiz == 1 )
         colblktile = 1;
     else
         colblktile = grsiz/2;
@@ -562,8 +562,8 @@ static void magma_ztile_bulge_parallel(
     allcoresnb = min( cores_num, maxrequiredcores );
     thgrsiz = n;
     #if defined (ENABLE_DEBUG)
-    if(my_core_id==0){
-        if(cores_num > maxrequiredcores)
+    if (my_core_id == 0) {
+        if (cores_num > maxrequiredcores)
         {
             printf("==================================================================================\n");
             printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
@@ -580,19 +580,19 @@ static void magma_ztile_bulge_parallel(
     stepercol =  i*grsiz == shift ? i:i+1;
     i       = (n-1)/thgrsiz;
     thgrnb  = i*thgrsiz == (n-1) ? i:i+1;
-    for (thgrid = 1; thgrid<=thgrnb; thgrid++){
+    for (thgrid = 1; thgrid <= thgrnb; thgrid++) {
         stt  = (thgrid-1)*thgrsiz+1;
         thed = min( (stt + thgrsiz -1), (n-1));
-        for (i = stt; i <= n-1; i++){
+        for (i = stt; i <= n-1; i++) {
             ed = min(i,thed);
-            if(stt > ed) break;
-            for (m = 1; m <=stepercol; m++){
+            if (stt > ed) break;
+            for (m = 1; m <= stepercol; m++) {
                 st = stt;
-                for (sweepid = st; sweepid <= ed; sweepid++){
-
-                    for (k = 1; k <= grsiz; k++){
+                for (sweepid = st; sweepid <= ed; sweepid++)
+                {
+                    for (k = 1; k <= grsiz; k++) {
                         myid = (i-sweepid)*(stepercol*grsiz) +(m-1)*grsiz + k;
-                        if(myid%2 ==0){
+                        if (myid%2 == 0) {
                             colpt      = (myid/2)*nb+1+sweepid-1;
                             stind      = colpt-nb+1;
                             edind      = min(colpt,n);
@@ -601,40 +601,40 @@ static void magma_ztile_bulge_parallel(
                             colpt      = ((myid+1)/2)*nb + 1 +sweepid -1;
                             stind      = colpt-nb+1;
                             edind      = min(colpt,n);
-                            if( (stind>=edind-1) && (edind==n) )
+                            if ( (stind >= edind-1) && (edind == n) )
                                 blklastind=n;
                             else
                                 blklastind=0;
                         }
                         coreid = (stind/colpercore)%allcoresnb;
 
-                        if(my_core_id==coreid) {
-                            if(myid==1) {
+                        if (my_core_id == coreid) {
+                            if (myid == 1) {
                                 myss_cond_wait(myid+shift-1, 0, sweepid-1);
                                 magma_zhbtype1cb(n, nb, A, lda, V, ldv, TAU, stind-1, edind-1, sweepid-1, Vblksiz, wantz, work);
                                 myss_cond_set(myid, 0, sweepid);
 
-                                if(blklastind >= (n-1)) {
+                                if (blklastind >= (n-1)) {
                                     for (j = 1; j <= shift; j++)
                                         myss_cond_set(myid+j, 0, sweepid);
                                 }
                             } else {
                                 myss_cond_wait(myid-1,       0, sweepid);
                                 myss_cond_wait(myid+shift-1, 0, sweepid-1);
-                                if(myid%2 == 0){
+                                if (myid%2 == 0) {
                                     magma_zhbtype2cb(n, nb, A, lda, V, ldv, TAU, stind-1, edind-1, sweepid-1, Vblksiz, wantz, work);
-                                }else{
+                                } else {
                                     magma_zhbtype3cb(n, nb, A, lda, V, ldv, TAU, stind-1, edind-1, sweepid-1, Vblksiz, wantz, work);
                                 }
                                 myss_cond_set(myid, 0, sweepid);
-                                if(blklastind >= (n-1)) {
+                                if (blklastind >= (n-1)) {
                                     for (j = 1; j <= shift+allcoresnb; j++)
                                         myss_cond_set(myid+j, 0, sweepid);
                                 }
-                            } /* END if myid==1 */
-                        } /* END if my_core_id==coreid */
+                            } /* END if myid == 1 */
+                        } /* END if my_core_id == coreid */
 
-                        if(blklastind >= (n-1)) {
+                        if (blklastind >= (n-1)) {
                             stt++;
                             break;
                         }

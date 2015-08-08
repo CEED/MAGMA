@@ -157,7 +157,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     // set dinvdiagA to identity
     magmablas_zlaset_batched(MagmaUpperLower, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount, queue);
 
-    for(j = 0; j < n; j+=nb) {
+    for (j = 0; j < n; j += nb) {
         ib = min(nb, n-j);
         // dinvdiagA * Piv' = I * U^-1 * L^-1 = U^-1 * L^-1 * I
         // Azzam : optimization can be done:

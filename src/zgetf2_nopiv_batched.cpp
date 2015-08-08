@@ -105,32 +105,32 @@ magma_zgetf2_nopiv_batched(
     magma_int_t min_mn = min(m, n);
     magma_int_t gbj, panelj, step, ib;
 
-    for( panelj=0; panelj < min_mn; panelj+=nb) 
+    for( panelj=0; panelj < min_mn; panelj += nb) 
     {
         ib = min(nb, min_mn-panelj);
 
-        for(step=0; step < ib; step++){
+        for (step=0; step < ib; step++) {
             gbj = panelj+step;
 #if 0
             size_t required_shmem_size = ((m-panelj)*ib)*sizeof(magmaDoubleComplex);
-            if( required_shmem_size >  (MAX_SHARED_ALLOWED*1024))
+            if ( required_shmem_size >  (MAX_SHARED_ALLOWED*1024))
 #else
-            if( (m-panelj) > 0)
+            if ( (m-panelj) > 0)
 #endif
             {
                 // Compute elements J+1:M of J-th column.
                 if (gbj < m) {
                     arginfo = magma_zscal_zgeru_batched(m-gbj, ib-step, gbj, dA_array, lda, info_array, gbstep, batchCount, queue);
-                    if(arginfo != 0 ) return arginfo;
+                    if (arginfo != 0 ) return arginfo;
                 }
             }
-            else{
+            else {
                 // TODO
             }
         }
 
 
-        if( (n-panelj-ib) > 0){
+        if ( (n-panelj-ib) > 0) {
             // continue the update of the selected ib row column panelj+ib:n(TRSM)
             magma_zgetf2trsm_batched(ib, n-panelj-ib, dA_array, panelj, lda, batchCount, queue);
             // do the blocked DGER = DGEMM for the remaining panelj+ib:n columns
@@ -143,7 +143,6 @@ magma_zgetf2_nopiv_batched(
                                  dW1_displ, lda, 
                                  one,  dW2_displ, lda, 
                                  batchCount, queue, myhandle);
-
         }
     }
 

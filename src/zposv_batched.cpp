@@ -106,7 +106,7 @@ magma_zposv_batched(
     }
 
     info = magma_zpotrf_batched( uplo, n, dA_array, ldda, dinfo_array, batchCount, queue);
-    if ( (info != MAGMA_SUCCESS) ){
+    if ( info != MAGMA_SUCCESS ) {
         return info;
     }
 
@@ -116,9 +116,9 @@ magma_zposv_batched(
     magma_int_t *cpu_info = NULL;
     magma_imalloc_cpu( &cpu_info, batchCount );
     magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
-    for(int i=0; i<batchCount; i++)
+    for (int i=0; i < batchCount; i++)
     {
-        if(cpu_info[i] != 0 ){
+        if (cpu_info[i] != 0 ) {
             printf("magma_zpotrf_batched matrix %d returned error %d\n",i, (int)cpu_info[i] );
             info = cpu_info[i];
             magma_free_cpu (cpu_info);

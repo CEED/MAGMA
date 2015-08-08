@@ -51,9 +51,9 @@
 
     @param[in,out]
     dR_array COMPLEX_16 array on the GPU, dimension (LDDR, N/NB)
-             dR should be of size (LDDR, N) when provide_RT>0 and 
+             dR should be of size (LDDR, N) when provide_RT > 0 and 
              of size (LDDT, NB) otherwise. NB is the local blocking size.
-             On exit, the elements of R are stored in dR only when provide_RT>0.
+             On exit, the elements of R are stored in dR only when provide_RT > 0.
 
     @param[in]
     lddr     INTEGER
@@ -66,9 +66,9 @@
 
     @param[in,out]
     dT_array COMPLEX_16 array on the GPU, dimension (LDDT, N/NB)
-             dT should be of size (LDDT, N) when provide_RT>0 and 
+             dT should be of size (LDDT, N) when provide_RT > 0 and 
              of size (LDDT, NB) otherwise. NB is the local blocking size.
-             On exit, the elements of T are stored in dT only when provide_RT>0.
+             On exit, the elements of T are stored in dT only when provide_RT > 0.
 
     @param[in]
     lddt     INTEGER
@@ -153,9 +153,9 @@ magma_zgeqrf_expert_batched(
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        if(min_mn == 0 ) return arginfo;
+        if (min_mn == 0 ) return arginfo;
 
-    if( m >  2048 || n > 2048 ){
+    if ( m >  2048 || n > 2048 ) {
         printf("=========================================================================================\n");
         printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
         printf("=========================================================================================\n");
@@ -219,11 +219,11 @@ magma_zgeqrf_expert_batched(
 
     magma_zdisplace_pointers(dR_displ, dR_array, lddr, 0, 0, batchCount, queue); 
     magma_zdisplace_pointers(dT_displ, dT_array, lddt, 0, 0, batchCount, queue); 
-    // set dR and dT to zero. if provide_RT==0 only a tile of size nbxnb is used and overwritten at each step
-    magmablas_zlaset_batched(MagmaFull, lddr, (provide_RT>0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR_displ, lddr, batchCount, queue); 
-    magmablas_zlaset_batched(MagmaFull, lddt, (provide_RT>0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT_displ, lddt, batchCount, queue);
+    // set dR and dT to zero. if provide_RT == 0 only a tile of size nbxnb is used and overwritten at each step
+    magmablas_zlaset_batched(MagmaFull, lddr, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR_displ, lddr, batchCount, queue); 
+    magmablas_zlaset_batched(MagmaFull, lddt, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT_displ, lddt, batchCount, queue);
     /*
-    if( provide_RT > 0 )
+    if ( provide_RT > 0 )
     {
         magmablas_zlaset_q(MagmaFull, lddr, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue);
         magmablas_zlaset_q(MagmaFull, lddt, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue);
@@ -237,14 +237,14 @@ magma_zgeqrf_expert_batched(
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
     magma_queue_t stream[nbstreams];
-    for(i=0; i<nbstreams; i++){
+    for (i=0; i < nbstreams; i++) {
         magma_queue_create( &stream[i] );
     }
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1);
 
 
-    for(i=0; i < min_mn; i += nb)
+    for (i=0; i < min_mn; i += nb)
     {
             ib = min(nb, min_mn-i);  
             //===============================================
@@ -253,10 +253,10 @@ magma_zgeqrf_expert_batched(
 
             magma_zdisplace_pointers(dW0_displ, dA_array, ldda, i, i, batchCount, queue); 
             magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue);
-            if( provide_RT > 0 )
+            if ( provide_RT > 0 )
             {
                 offset_RT = i;
-                magma_zdisplace_pointers(dR_displ, dR_array, lddr, (provide_RT==1 ? offset_RT:0), offset_RT, batchCount, queue); 
+                magma_zdisplace_pointers(dR_displ, dR_array, lddr, (provide_RT == 1 ? offset_RT:0), offset_RT, batchCount, queue); 
                 magma_zdisplace_pointers(dT_displ, dT_array, lddt, 0, offset_RT, batchCount, queue); 
             }
 
@@ -281,7 +281,7 @@ magma_zgeqrf_expert_batched(
             //===============================================
             // update trailing matrix
             //===============================================
-            if( (n-ib-i) > 0)
+            if ( (n-ib-i) > 0)
             {
                 //dwork is used in panel factorization and trailing matrix update
                 //reset dW4_displ
@@ -308,13 +308,13 @@ magma_zgeqrf_expert_batched(
                 //          USE STREAM  GEMM
                 //-------------------------------------------
                 use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
-                if( use_stream )   
+                if ( use_stream )   
                 { 
                     // But since the code use the NULL stream everywhere, 
                     // so I don't need it, because the NULL stream do the sync by itself
                     //magma_device_sync(); 
                     magma_queue_sync(queue); 
-                    for(k=0; k<batchCount; k++)
+                    for (k=0; k < batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
                         magmablasSetKernelStream(stream[streamid]);
@@ -333,8 +333,8 @@ magma_zgeqrf_expert_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync();
-                    if( queue != NULL ){
-                        for(magma_int_t s=0; s<nbstreams; s++)
+                    if ( queue != NULL ) {
+                        for (magma_int_t s=0; s < nbstreams; s++)
                             magma_queue_sync(stream[s]);
                     }
                     magmablasSetKernelStream(queue);
@@ -363,7 +363,7 @@ magma_zgeqrf_expert_batched(
             // copy dR back to V after the trailing matrix update, 
             // only when provide_RT=0 otherwise the nbxnb block of V is set to diag=1/0
             // The upper portion of V could be set totaly to 0 here
-            if( provide_RT == 0 )
+            if ( provide_RT == 0 )
             {
                 magmablas_zlacpy_batched(MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue);
             }
@@ -371,7 +371,7 @@ magma_zgeqrf_expert_batched(
 
     magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    for(k=0; k<nbstreams; k++){
+    for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( stream[k] );
     }
     cublasDestroy_v2(myhandle);

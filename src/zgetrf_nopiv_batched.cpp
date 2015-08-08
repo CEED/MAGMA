@@ -98,9 +98,9 @@ magma_zgetrf_nopiv_batched(
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        if(min_mn == 0 ) return arginfo;
+        if (min_mn == 0 ) return arginfo;
 
-    if( m >  2048 || n > 2048 ){
+    if ( m >  2048 || n > 2048 ) {
         #ifndef MAGMA_NOWARNING
         printf("=========================================================================================\n");
         printf("   WARNING batched routines are designed for small sizes it might be better to use the\n   Native/Hybrid classical routines if you want performance\n");
@@ -175,7 +175,7 @@ magma_zgetrf_nopiv_batched(
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
     magma_queue_t stream[nbstreams];
-    for(i=0; i<nbstreams; i++){
+    for (i=0; i < nbstreams; i++) {
         magma_queue_create( &stream[i] );
     }
     magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
@@ -183,7 +183,7 @@ magma_zgetrf_nopiv_batched(
 
     //printf(" I am after malloc\n");
 
-    for(i = 0; i < min_mn; i+=nb) 
+    for (i = 0; i < min_mn; i += nb) 
     {
         ib = min(nb, min_mn-i);
         pm = m-i;
@@ -213,12 +213,12 @@ magma_zgetrf_nopiv_batched(
                 batchCount, myhandle, queue);   
 #endif
 
-        if(arginfo != 0 ) goto fin;
+        if (arginfo != 0 ) goto fin;
 
 #define RUN_ALL
 #ifdef RUN_ALL
 
-        if( (i + ib) < n)
+        if ( (i + ib) < n)
         {
             // swap right side and trsm     
             //magma_zdisplace_pointers(dA_displ, dA_array, lda, i, i+ib, batchCount);
@@ -237,16 +237,16 @@ magma_zgetrf_nopiv_batched(
                     dW3_displ,   dW4_displ,
                     1, batchCount, queue, myhandle);
 
-            if( (i + ib) < m)
+            if ( (i + ib) < m)
             {    
-                // if gemm size is >160 use a streamed classical cublas gemm since it is faster
-                // the batched is faster only when M=N<=160 for K40c
+                // if gemm size is > 160 use a streamed classical cublas gemm since it is faster
+                // the batched is faster only when M=N <= 160 for K40c
                 //-------------------------------------------
                 //          USE STREAM  GEMM
                 //-------------------------------------------
                 use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
 
-                if(use_stream)
+                if (use_stream)
                 { 
                     //printf("caling streamed dgemm %d %d %d \n", m-i-ib, n-i-ib, ib);
 
@@ -255,7 +255,7 @@ magma_zgetrf_nopiv_batched(
                     // so I don't need it, because the NULL stream do the sync by itself
                     // magma_queue_sync(NULL);
                     magma_queue_sync(queue); 
-                    for(k=0; k<batchCount; k++)
+                    for (k=0; k < batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
                         magmablasSetKernelStream(stream[streamid]);
@@ -270,8 +270,8 @@ magma_zgetrf_nopiv_batched(
                     // BUT no need for it as soon as the other portion of the code 
                     // use the NULL stream which do the sync by itself 
                     //magma_device_sync(); 
-                     if( queue != NULL ){
-                         for(magma_int_t s=0; s<nbstreams; s++)
+                     if ( queue != NULL ) {
+                         for (magma_int_t s=0; s < nbstreams; s++)
                              magma_queue_sync(stream[s]);
                      }
                      magmablasSetKernelStream(queue);
@@ -291,15 +291,15 @@ magma_zgetrf_nopiv_batched(
                                          one,  dW2_displ, lda, 
                                          batchCount, queue, myhandle);
                 } // end of batched/stream gemm
-            } // end of  if( (i + ib) < m) 
-        } // end of if( (i + ib) < n)
+            } // end of if ( (i + ib) < m) 
+        } // end of if ( (i + ib) < n)
 #endif
     }// end of for
 
 fin:
     magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    for(k=0; k<nbstreams; k++){
+    for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( stream[k] );
     }
     cublasDestroy_v2(myhandle);

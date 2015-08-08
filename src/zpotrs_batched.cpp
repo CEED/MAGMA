@@ -145,9 +145,9 @@ magma_zpotrs_batched(
 
     if ( uplo == MagmaUpper) {
         #ifdef COMPLEX
-        if(nrhs > 0)
+        if (nrhs > 0)
         #else
-        if(nrhs > 1)
+        if (nrhs > 1)
         #endif
         {
             // A = U^T U
@@ -193,14 +193,13 @@ magma_zpotrs_batched(
                     dwork_array,        1, // dB 
                     dB_array,   // dX //output
                     batchCount, queue, 0);
-
         }
     }
-    else{
+    else {
         #ifdef COMPLEX
-        if(nrhs > 0)
+        if (nrhs > 0)
         #else
-        if(nrhs > 1)
+        if (nrhs > 1)
         #endif
         {
             // A = L L^T

@@ -152,7 +152,7 @@ magma_zgetrs_batched(
     if (notran) {
         magma_zlaswp_rowserial_batched(nrhs, dB_array, lddb, 1, n, dipiv_array, batchCount, queue);
 
-        if(nrhs > 1)
+        if (nrhs > 1)
         {
             // solve dwork = L^-1 * NRHS
             magmablas_ztrsm_outofplace_batched(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 1,
@@ -177,7 +177,6 @@ magma_zgetrs_batched(
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue, myhandle);
-       
        }
        else
        {
@@ -196,15 +195,13 @@ magma_zgetrs_batched(
                 dwork_array,        1, // dB 
                 dB_array,    // dX //output
                 batchCount, queue, 0);
-       
        }
-
     }
-    else{
+    else {
         #ifdef COMPLEX
-        if(nrhs > 0)
+        if (nrhs > 0)
         #else
-        if(nrhs > 1)
+        if (nrhs > 1)
         #endif
         {
             /* Solve A**T * X = B  or  A**H * X = B. */
@@ -231,11 +228,9 @@ magma_zgetrs_batched(
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue, myhandle);
-
         }
         else
         {
-
             /* Solve A**T * X = B  or  A**H * X = B. */
             // solve 
             magmablas_ztrsv_outofplace_batched(MagmaUpper, trans, MagmaUnit, 

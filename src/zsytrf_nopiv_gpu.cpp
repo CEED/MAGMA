@@ -22,7 +22,7 @@
     matrix A.
 
     The factorization has the form   
-       A = U^T * D * U , if UPLO = 'U', or   
+       A = U^T * D * U,  if UPLO = 'U', or   
        A = L  * D * L^T, if UPLO = 'L',   
     where U is an upper triangular matrix, L is lower triangular, and
     D is a diagonal matrix.
@@ -138,7 +138,7 @@ magma_zsytrf_nopiv_gpu(
         //=========================================================
         // Compute the LDLt factorization A = U'*D*U without pivoting.
         // main loop
-        for (j=0; j<n; j += nb) {
+        for (j=0; j < n; j += nb) {
             jb = min(nb, (n-j));
             
             // copy A(j,j) back to CPU
@@ -153,7 +153,7 @@ magma_zsytrf_nopiv_gpu(
             trace_cpu_start( 0, "potrf", "potrf" );
             zsytrf_nopiv_cpu(MagmaUpper, jb, ib, A(j, j), nb, info);
             trace_cpu_end( 0 );
-            if (*info != 0){
+            if (*info != 0) {
                 *info = *info + j;
                 break;
             }
@@ -182,13 +182,13 @@ magma_zsytrf_nopiv_gpu(
                 
                 // update the trailing submatrix with U and W
                 trace_gpu_start( 0, 0, "gemm", "gemm" );
-                for (k=j+jb; k<n; k+=nb) {
+                for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
                     magma_zgemm(MagmaTrans, MagmaNoTrans, kb, n-k, jb,
                                 mzone, dWt(0, k), nb, 
                                        dA(j, k), ldda,
                                 zone,  dA(k, k), ldda);
-                    if (k==j+jb)
+                    if (k == j+jb)
                         magma_event_record( event, stream[0] );
                 }
                 trace_gpu_end( 0, 0 );
@@ -198,7 +198,7 @@ magma_zsytrf_nopiv_gpu(
         //=========================================================
         // Compute the LDLt factorization A = L*D*L' without pivoting.
         // main loop
-        for (j=0; j<n; j+=nb) {
+        for (j=0; j < n; j += nb) {
             jb = min(nb, (n-j));
             
             // copy A(j,j) back to CPU
@@ -213,7 +213,7 @@ magma_zsytrf_nopiv_gpu(
             trace_cpu_start( 0, "potrf", "potrf" );
             zsytrf_nopiv_cpu(MagmaLower, jb, ib, A(j, j), nb, info);
             trace_cpu_end( 0 );
-            if (*info != 0){
+            if (*info != 0) {
                 *info = *info + j;
                 break;
             }
@@ -242,13 +242,13 @@ magma_zsytrf_nopiv_gpu(
                 
                 // update the trailing submatrix with L and W
                 trace_gpu_start( 0, 0, "gemm", "gemm" );
-                for (k=j+jb; k<n; k+=nb) {
+                for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
                     magma_zgemm(MagmaNoTrans, MagmaTrans, n-k, kb, jb,
                                 mzone, dA(k, j), ldda, 
                                        dW(k, 0), ldda,
                                 zone,  dA(k, k), ldda);
-                    if (k==j+jb)
+                    if (k == j+jb)
                         magma_event_record( event, stream[0] );
                 }
                 trace_gpu_end( 0, 0 );

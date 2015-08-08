@@ -284,6 +284,3 @@ magma_zlarfb_gemm_batched(
     }
     return MAGMA_SUCCESS;
 } /* magma_zlarfb */
-
-
-
