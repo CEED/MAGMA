@@ -100,7 +100,7 @@ magma_zcumilusetup(
                          info_M,
                          &buffersize ) );
     
-    CHECK( cudaMalloc((void**)&pBuffer, buffersize) );
+    CHECK( magma_malloc((void**)&pBuffer, buffersize) );
 
     CHECK_CUSPARSE( cusparseZcsrilu02_analysis( cusparseHandle,
             precond->M.num_rows, precond->M.nnz, descrA,
@@ -178,7 +178,7 @@ magma_zcumilusetup(
     
 cleanup:
 #if CUDA_VERSION >= 7000
-    cudaFree( pBuffer );
+    magma_free( pBuffer );
     cusparseDestroyCsrilu02Info( info_M );
 #endif
     cusparseDestroySolveAnalysisInfo( precond->cuinfo );
@@ -532,7 +532,7 @@ magma_zcumiccsetup(
                          info_M,
                          &buffersize ) );
     
-    CHECK( cudaMalloc((void**)&pBuffer, buffersize) );
+    CHECK( magma_malloc((void**)&pBuffer, buffersize) );
 
     CHECK_CUSPARSE( cusparseZcsric02_analysis( cusparseHandle,
             precond->M.num_rows, precond->M.nnz, descrA,
@@ -636,7 +636,7 @@ magma_zcumiccsetup(
 
 cleanup:
 #if CUDA_VERSION >= 7000
-    cudaFree( pBuffer );
+    magma_free( pBuffer );
     cusparseDestroyCsric02Info( info_M );
 #endif
     cusparseDestroySolveAnalysisInfo( precond->cuinfo );
