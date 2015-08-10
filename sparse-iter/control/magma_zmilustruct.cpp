@@ -23,55 +23,7 @@
 
 #define mwIndex magma_index_t
 
-void magma_zshell_sort(
-  const magma_int_t n,
-  magma_int_t x[]);
 
-extern "C"
-magma_int_t
-magma_zsymbolic_ilu(
-  const magma_int_t levinc,
-  const magma_int_t n,
-  magma_int_t *nzl,
-  magma_int_t *nzu,
-  const mwIndex *ia,
-  const mwIndex *ja,
-  mwIndex *ial,
-  mwIndex *jal,
-  mwIndex *iau,
-  mwIndex *jau);
-
-
-/******************************************************************************
- *
- * MEX function
- *
- *****************************************************************************/
-
-void magma_zmexFunction(magma_int_t nlhs, magma_int_t n, magmaDoubleComplex omega,
-                 magma_int_t levfill, magma_int_t storage,
-                magma_index_t * ial, magma_index_t *jal, magmaDoubleComplex *al,
-                magma_index_t * iau, magma_index_t *jau, magmaDoubleComplex *au,
-                magma_int_t nrhs,
-                magma_index_t * ia, magma_index_t *ja, magmaDoubleComplex *a )
-{
-    /* matrix is stored in CSC format, 0-based */
-
-    magma_int_t nzl, nzu;
-
-    
-    nzl = storage;
-    nzu = storage;
-
-
-    /* the following will fail and return to matlab if insufficient storage */
-    magma_zsymbolic_ilu(levfill, n, &nzl, &nzu, ia, ja, ial, jal, iau, jau);
-}
-
-/* shell sort
-// stable, so it is fast if already sorted
-// sorts x[0:n-1] in place, ascending order.
-*/
 
 void magma_zshell_sort(
   const magma_int_t n, magma_index_t *x)
@@ -283,6 +235,39 @@ cleanup:
     
     return info;
 }
+
+
+
+/******************************************************************************
+ *
+ * MEX function
+ *
+ *****************************************************************************/
+
+void magma_zmexFunction(magma_int_t nlhs, magma_int_t n, magmaDoubleComplex omega,
+                 magma_int_t levfill, magma_int_t storage,
+                magma_index_t * ial, magma_index_t *jal, magmaDoubleComplex *al,
+                magma_index_t * iau, magma_index_t *jau, magmaDoubleComplex *au,
+                magma_int_t nrhs,
+                magma_index_t * ia, magma_index_t *ja, magmaDoubleComplex *a )
+{
+    /* matrix is stored in CSC format, 0-based */
+
+    magma_int_t nzl, nzu;
+
+    
+    nzl = storage;
+    nzu = storage;
+
+
+    /* the following will fail and return to matlab if insufficient storage */
+    magma_zsymbolic_ilu(levfill, n, &nzl, &nzu, ia, ja, ial, jal, iau, jau);
+}
+
+/* shell sort
+// stable, so it is fast if already sorted
+// sorts x[0:n-1] in place, ascending order.
+*/
 
 
 
