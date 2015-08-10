@@ -154,7 +154,7 @@ magma_zgeqp3_gpu(
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, nb );
+    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, n+1 );
 
     nfxd = 0;
     /* Move initial columns up front.
