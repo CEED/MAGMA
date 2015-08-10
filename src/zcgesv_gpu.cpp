@@ -231,7 +231,7 @@ magma_zcgesv_gpu(
             *iter = -3;
             goto FALLBACK;
         }
-        swp2pswp( trans, n, ipiv, newipiv );
+        magma_swp2pswp( trans, n, ipiv, newipiv );
         magma_setvector( n, sizeof(magma_int_t), newipiv, 1, dipiv, 1 );
         magma_free_cpu( newipiv );
     }

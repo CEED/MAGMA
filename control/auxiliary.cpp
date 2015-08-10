@@ -117,7 +117,7 @@ magma_int_t magma_num_gpus( void )
       has to be done sequentially.
 */
 extern "C"
-void swp2pswp( magma_trans_t trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv)
+void magma_swp2pswp( magma_trans_t trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv)
 {
     magma_int_t i, newind, ind;
     magma_int_t    notran = (trans == MagmaNoTrans);
