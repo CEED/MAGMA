@@ -86,11 +86,12 @@ magma_zbicgmerge1(
     magmaDoubleComplex_ptr skp,
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r, 
-    magmaDoubleComplex_ptr p )
+    magmaDoubleComplex_ptr p,
+    magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
-    magma_zbicgmerge1_kernel<<<Gs, Bs, 0>>>( n, skp, v, r, p );
+    magma_zbicgmerge1_kernel<<<Gs, Bs, 0, queue>>>( n, skp, v, r, p );
 
    return MAGMA_SUCCESS;
 }
@@ -159,12 +160,13 @@ magma_zbicgmerge2(
     magmaDoubleComplex_ptr skp, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr v, 
-    magmaDoubleComplex_ptr s )
+    magmaDoubleComplex_ptr s,
+    magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
 
-    magma_zbicgmerge2_kernel<<<Gs, Bs, 0>>>( n, skp, r, v, s );
+    magma_zbicgmerge2_kernel<<<Gs, Bs, 0, queue>>>( n, skp, r, v, s );
 
    return MAGMA_SUCCESS;
 }
@@ -179,7 +181,8 @@ magma_zbicgmerge3_kernel(
     magmaDoubleComplex * se,
     magmaDoubleComplex * t,
     magmaDoubleComplex * x, 
-    magmaDoubleComplex * r )
+    magmaDoubleComplex * r,
+    )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     magmaDoubleComplex alpha=skp[0];
@@ -252,7 +255,8 @@ magma_zbicgmerge3(
     magmaDoubleComplex_ptr s,
     magmaDoubleComplex_ptr t,
     magmaDoubleComplex_ptr x, 
-    magmaDoubleComplex_ptr r )
+    magmaDoubleComplex_ptr r,
+    magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );

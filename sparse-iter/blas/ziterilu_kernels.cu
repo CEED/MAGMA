@@ -100,18 +100,18 @@ magma_ziterilu_csr_kernel(
     A           magma_z_matrix
                 input matrix A determing initial guess & processing order
 
-    @param[in][out]
+    @param[in,out]
     L           magma_z_matrix
                 input/output matrix L containing the ILU approximation
 
-    @param[in][out]
+    @param[in,out]
     U           magma_z_matrix
                 input/output matrix U containing the ILU approximation
-                
+                              
     @param[in]
-    A_CSR       magma_z_matrix
-                input/output matrix containing the IC approximation
-
+    queue       magma_queue_t
+                Queue to execute in.
+                
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 

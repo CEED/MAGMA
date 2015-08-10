@@ -63,7 +63,7 @@ magmaint_zlag2c_sparse(
     lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
     
-    @param[in][out]
+    @param[in,out]
     SA      COMPLEX array, dimension (LDSA,N)
             On exit, if INFO=0, the M-by-N coefficient matrix SA; if
             INFO>0, the content of SA is unspecified.
@@ -72,7 +72,7 @@ magmaint_zlag2c_sparse(
     ldsa    INTEGER
             The leading dimension of the array SA.  LDSA >= max(1,M).
     
-    @param[in][out]
+    @param[in,out]
     info    INTEGER
       -     = 0:  successful exit.
       -     < 0:  if INFO = -i, the i-th argument had an illegal value

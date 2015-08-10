@@ -210,14 +210,6 @@ zjacobiupdate_kernel(  int num_rows,
 
     Arguments
     ---------
-
-    @param[in]
-    num_rows    magma_int_t
-                number of rows
-                
-    @param[in]
-    num_cols    magma_int_t
-                number of cols
                 
     @param[in]
     t           magma_z_matrix
