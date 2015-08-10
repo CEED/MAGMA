@@ -476,6 +476,9 @@ chol = (
 	('testing_zhesv',               '-L -c',  n,    ''),
 	('testing_zhesv',               '-U -c',  n,    ''),
 	
+	('testing_zhesv_nopiv_gpu',     '-L -c',  n,    ''),
+	('testing_zhesv_nopiv_gpu',     '-U -c',  n,    ''),
+	
 	('testing_zsysv_nopiv_gpu',     '-L -c',  n,    ''),
 	('testing_zsysv_nopiv_gpu',     '-U -c',  n,    ''),
 	
@@ -783,7 +786,7 @@ batched = (
 	('testing_ztrsv_batched',         b + '-U    -DU  -c',  n,    ''),
 	('testing_ztrsv_batched',         b + '-U -C -DN  -c',  n,    ''),
 	('testing_ztrsv_batched',         b + '-U -C -DU  -c',  n,    ''),
-
+	
 	('testing_zgesv_batched',         b + '               -c',  mn,   ''),
 	('testing_zgesv_nopiv_batched',   b + '               -c',  mn,   ''),
 	('testing_zgetrf_batched',        b + '              -c2',  mn,   ''),
