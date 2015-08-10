@@ -255,9 +255,9 @@ magma_zunmql(
             /* 1) set lower triangle of panel in A to identity,
                2) copy the panel from A to the GPU, and
                3) restore A                                      */
-            zpanel_to_q( MagmaLower, ib, A(nq_i-ib,i), lda, T2 );
+            magma_zpanel_to_q( MagmaLower, ib, A(nq_i-ib,i), lda, T2 );
             magma_zsetmatrix( nq_i,  ib, A(0,      i), lda, dV, nq_i );
-            zq_to_panel( MagmaLower, ib, A(nq_i-ib,i), lda, T2 );
+            magma_zq_to_panel( MagmaLower, ib, A(nq_i-ib,i), lda, T2 );
             
             if (left) {
                 /* H or H**H is applied to C(1:m-k+i+ib-1,1:n) */

@@ -1668,12 +1668,12 @@ void magma_zprint_gpu(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda );
 
-void zpanel_to_q(
+void magma_zpanel_to_q(
     magma_uplo_t uplo, magma_int_t ib,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *work );
 
-void zq_to_panel(
+void magma_zq_to_panel(
     magma_uplo_t uplo, magma_int_t ib,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *work );

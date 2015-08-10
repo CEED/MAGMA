@@ -193,7 +193,7 @@ magma_zgeqrf2_mgpu(
                               &rows, &ib,
                               hpanel(i), &ldhpanel, tau+i, hwork, &ib );
 
-            zpanel_to_q( MagmaUpper, ib, hpanel(i), ldhpanel, hwork + ib*ib );
+            magma_zpanel_to_q( MagmaUpper, ib, hpanel(i), ldhpanel, hwork + ib*ib );
             // Send the current panel back to the GPUs
             for( dev=0; dev < ngpu; dev++ ) {
                 magma_setdevice( dev );
@@ -210,12 +210,12 @@ magma_zgeqrf2_mgpu(
                 magma_queue_sync( stream[dev][0] );
             }
 
-            // TODO: if zpanel_to_q copied whole block, wouldn't need to restore
+            // TODO: if magma_zpanel_to_q copied whole block, wouldn't need to restore
             // -- just send the copy to the GPUs.
             // TODO: also, could zero out the lower triangle and use Azzam's larfb w/ gemm.
             
             /* Restore the panel */
-            zq_to_panel( MagmaUpper, ib, hpanel(i), ldhpanel, hwork + ib*ib );
+            magma_zq_to_panel( MagmaUpper, ib, hpanel(i), ldhpanel, hwork + ib*ib );
 
             if (i + ib < n) {
                 /* Send the T matrix to the GPU. */

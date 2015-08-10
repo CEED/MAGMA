@@ -181,7 +181,7 @@ magma_zgeqrf2_gpu(
                               &rows, &ib,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
-            zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
+            magma_zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
 
             /* download the i-th V matrix */
             magma_zsetmatrix_async( rows, ib, work_ref(i), ldwork, dA(i,i), ldda, stream[0] );
@@ -198,14 +198,14 @@ magma_zgeqrf2_gpu(
                                       rows, ib, ib,
                                       dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
-                    zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
+                    magma_zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
                 }
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                       rows, n-i-ib, ib,
                                       dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
-                    zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
+                    magma_zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
                     magma_zsetmatrix_async( ib, ib,
                                             work_ref(i), ldwork,
                                             dA(i,i),     ldda, stream[1] );

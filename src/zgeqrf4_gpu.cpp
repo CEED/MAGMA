@@ -165,9 +165,9 @@ magma_zgeqrf2_gpu(
                               &rows, &ib,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
-            zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
+            magma_zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
             magma_zsetmatrix( rows, ib, work_ref(i), ldwork, dA(i,i), ldda );
-            zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
+            magma_zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
 
             if (i + ib < n) {
                 magma_zsetmatrix( ib, ib, hwork, ib, dwork, lddwork );

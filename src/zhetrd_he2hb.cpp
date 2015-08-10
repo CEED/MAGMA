@@ -256,13 +256,13 @@ magma_zhetrd_he2hb(
             
             /*   Get the current panel (no need for the 1st iteration) */
             if (i > 1 ) {
-                // zpanel_to_q copy the upper oof diagonal part of
+                // magma_zpanel_to_q copy the upper oof diagonal part of
                 // the matrix to work to be restored later. acctually
                 //  the zero's and one's putted are not used this is only
                 //   because we don't have a function that copy only the
                 //    upper part of A to be restored after copying the
                 //    lookahead panel that has been computted from GPU to CPU.
-                zpanel_to_q(MagmaUpper, pn-1, A(i, i+1), lda, work);
+                magma_zpanel_to_q(MagmaUpper, pn-1, A(i, i+1), lda, work);
 
                 trace_gpu_start( 0, 1, "get", "get panel" );
                 //magma_queue_sync( stream[0] );
@@ -282,7 +282,7 @@ magma_zhetrd_he2hb(
                 trace_cpu_start( 0, "sync", "sync on 1" );
                 magma_queue_sync( stream[1] );
                 trace_cpu_end( 0 );
-                zq_to_panel(MagmaUpper, pn-1, A(i, i+1), lda, work);
+                magma_zq_to_panel(MagmaUpper, pn-1, A(i, i+1), lda, work);
             }
 
             /* ==========================================================
@@ -304,7 +304,7 @@ magma_zhetrd_he2hb(
 
             /* Prepare V - put 0s in the upper triangular part of the panel
                (and 1s on the diagonal), temporaly storing the original in work */
-            zpanel_to_q(MagmaUpper, pk, A(indi, indj), lda, work);
+            magma_zpanel_to_q(MagmaUpper, pk, A(indi, indj), lda, work);
             trace_cpu_end( 0 );
 
             /* Send V from the CPU to the GPU */
@@ -327,7 +327,7 @@ magma_zhetrd_he2hb(
             /* dwork = V T */
             trace_cpu_start( 0, "sync", "sync on 0" );
             // this sync is done here to be sure that the copy has been finished
-            // because below we made a restore zq_to_panel and this restore need
+            // because below we made a restore magma_zq_to_panel and this restore need
             // to ensure that the copy has been finished. we did it here to allow
             // overlapp of restore with next gemm and symm.
             magma_queue_sync( stream[0] );
@@ -348,7 +348,7 @@ magma_zhetrd_he2hb(
                         c_zero, dW, pm);
             trace_gpu_end( 0, 2 );
             /* restore the panel */
-            zq_to_panel(MagmaUpper, pk, A(indi, indj), lda, work);
+            magma_zq_to_panel(MagmaUpper, pk, A(indi, indj), lda, work);
             
             /* dwork = V*T already ==> dwork' = T'*V'
              * compute T'*V'*X ==> dwork'*W ==>
@@ -410,13 +410,13 @@ magma_zhetrd_he2hb(
         /* Send the last block to the CPU */
         pk = min(pm,pn);
         if (1 <= n-nb) {
-            zpanel_to_q(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
+            magma_zpanel_to_q(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
             trace_gpu_start( 0, 2, "get", "get last block" );
             magma_zgetmatrix( pk, pk,
                               dA(n-pk+1, n-pk+1), ldda,
                               A(n-pk+1, n-pk+1),  lda );
             trace_gpu_end( 0, 2 );
-            zq_to_panel(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
+            magma_zq_to_panel(MagmaUpper, pk-1, A(n-pk+1, n-pk+2), lda, work);
         }
     }// end of LOWER
     

@@ -195,7 +195,7 @@ magma_zgeqrf_ooc(
                                     work,  ib,
                                     dwork, lddwork, stream[1] );
 
-            zpanel_to_q(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
+            magma_zpanel_to_q(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
             magma_zsetmatrix_async( rows, ib,
                                     A(j,j), lda,
                                     ptr,        rows, stream[1] );
@@ -206,7 +206,7 @@ magma_zgeqrf_ooc(
                               ptr, rows, dwork,    lddwork,
                               dA(j, 0), ldda, dwork+ib, lddwork);
 
-            zq_to_panel(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
+            magma_zq_to_panel(MagmaUpper, ib, A(j,j), lda, work+ib*ib);
         }
 
         /* 3. Do a QR on the current part */

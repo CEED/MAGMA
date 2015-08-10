@@ -210,11 +210,11 @@ magma_zgeqlf(
                                   &rows, &ib,
                                   A(0, cols), &lda, tau + i, work, &ib);
 
-                zpanel_to_q( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
+                magma_zpanel_to_q( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
                 magma_zsetmatrix( rows, ib,
                                   A(0,cols),  lda,
                                   dA(0,cols), ldda );
-                zq_to_panel( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
+                magma_zq_to_panel( MagmaLower, ib, A(rows-ib,cols), lda, work+ib*ib);
 
                 // Send the triangular part on the GPU
                 magma_zsetmatrix( ib, ib, work, ib, dwork(0), lddwork );
