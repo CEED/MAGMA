@@ -54,21 +54,6 @@ __global__ void zdisplace_pointers_kernel(magmaDoubleComplex **output_array,
 
 
 extern "C"
-void zset_array(magmaDoubleComplex **output_array,
-               magmaDoubleComplex **input_array, magma_int_t lda,
-               magma_int_t row, magma_int_t column, 
-               magma_int_t batchCount, magma_queue_t queue)
-
-{
-    /*
-    compute the offset for all the matrices and save the displacment of the new pointer on output_array.
-    input_array contains the pointers to the initial position.
-    output_array[i] = input_array[i] + row + lda * column; 
-    */
-    zdisplace_pointers_kernel<<<batchCount, 1, 0, queue>>>(output_array, input_array, lda, row, column);
-}
-
-extern "C"
 void magma_zdisplace_pointers(magmaDoubleComplex **output_array,
                magmaDoubleComplex **input_array, magma_int_t lda,
                magma_int_t row, magma_int_t column, 
