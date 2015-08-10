@@ -17,7 +17,7 @@ ZHDR := \
 	zgerbt.h		\
 	zpotf2_devicesfunc.cuh		\
 	zlarfg_devicesfunc.cuh		\
-	ztrsv_template_device.cuh 		\
+	ztrsv_template_device.cuh	\
 
 # additional dependencies
 strtri_diag.$(o_ext): strtri.h
@@ -25,23 +25,20 @@ dtrtri_diag.$(o_ext): dtrtri.h
 ctrtri_diag.$(o_ext): ctrtri.h
 ztrtri_diag.$(o_ext): ztrtri.h
 
-# additional dependencies
 sgerbt.$(o_ext): sgerbt.h
 dgerbt.$(o_ext): dgerbt.h
 cgerbt.$(o_ext): cgerbt.h
 zgerbt.$(o_ext): zgerbt.h
 
-# additional batched dependencies
-strtri_diag_batched.$(o_ext): strtri.h
-dtrtri_diag_batched.$(o_ext): dtrtri.h
-ctrtri_diag_batched.$(o_ext): ctrtri.h
-ztrtri_diag_batched.$(o_ext): ztrtri.h
-
-# additional batched dependencies
 sgerbt_batched.$(o_ext): sgerbt.h
 dgerbt_batched.$(o_ext): dgerbt.h
 cgerbt_batched.$(o_ext): cgerbt.h
 zgerbt_batched.$(o_ext): zgerbt.h
+
+strtri_diag_batched.$(o_ext): strtri.h
+dtrtri_diag_batched.$(o_ext): dtrtri.h
+ctrtri_diag_batched.$(o_ext): ctrtri.h
+ztrtri_diag_batched.$(o_ext): ztrtri.h
 
 
 # alphabetic order by base name (ignoring precision)
@@ -103,6 +100,7 @@ ZSRC := \
 	ztrtri_upper.cu		\
 	zlarft_kernels.cu		\
 	ztrsv.cu		\
+
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
 	dgemm_tesla.cu		\
@@ -158,8 +156,8 @@ ZSRC += \
 	zgeqr2_kernels.cu		\
 	zgeqr2_batched.cu		\
 	zherk_batched.cu		\
-	zswapdblk_batched.cu   \
-	ztrsv_batched.cu 	\
+	zswapdblk_batched.cu	\
+	ztrsv_batched.cu		\
 
 SRC += \
 	set_pointer.cu			\
@@ -172,10 +170,10 @@ SRC += \
 	cgemm_batched_core.cu		\
 	dgemm_batched_core.cu		\
 	sgemm_batched_core.cu		\
-	ssyrk_batched_core.cu      \
-	dsyrk_batched_core.cu      \
-	cherk_batched_core.cu      \
-	zherk_batched_core.cu      \
+	ssyrk_batched_core.cu		\
+	dsyrk_batched_core.cu		\
+	cherk_batched_core.cu		\
+	zherk_batched_core.cu		\
 
 
 # ------------------------------------------------------------
@@ -232,7 +230,6 @@ zgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
 cgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
 dgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
 sgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
-
 
 zgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
 cgemv_batched_core.$(o_ext): gemv_template_kernel_batched.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
