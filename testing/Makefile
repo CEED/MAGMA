@@ -77,6 +77,7 @@ ZSRC += \
 # Symmetric indefinite, CPU interface
 ZSRC += \
 	testing_zhesv.cpp	\
+	testing_zhesv_nopiv_gpu.cpp	\
 	testing_zsysv_nopiv_gpu.cpp	\
 	testing_zhetrf.cpp	\
 
