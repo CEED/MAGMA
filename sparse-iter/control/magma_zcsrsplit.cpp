@@ -82,8 +82,8 @@ magma_zcsrsplit(
     
     if (  A.memory_location == Magma_CPU &&
             (   A.storage_type == Magma_CSR ||
-                A.storage_type == Magma_CSRCOO ) ) {
-
+                A.storage_type == Magma_CSRCOO ) )
+    {
         nnz_diag = nnz_offd = 0;
         // Count the new number of nonzeroes in the two matrices
         for( i=0; i<A.num_rows; i+=bsize ){

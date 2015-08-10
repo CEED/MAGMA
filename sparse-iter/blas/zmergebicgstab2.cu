@@ -389,9 +389,9 @@ magma_zbicgmerge_spmv2_kernel(
             temp[Idx] = s[i] * tmp2;
             temp[Idx+blockDim.x] = tmp2 * tmp2;
     }
-    else{
+    else {
         for( j=0; j<2; j++)
-            temp[Idx+j*blockDim.x] =MAGMA_Z_MAKE( 0.0, 0.0);
+            temp[Idx+j*blockDim.x] = MAGMA_Z_MAKE( 0.0, 0.0);
     }
     __syncthreads();
     if ( Idx < 128 ){
@@ -601,9 +601,9 @@ magma_zbicgmerge_xrbeta_kernel(
             temp[Idx] = rr[i] * tmp2;
             temp[Idx+blockDim.x] = tmp2 * tmp2;
     }
-    else{
+    else {
         for( j=0; j<2; j++)
-            temp[Idx+j*blockDim.x] =MAGMA_Z_MAKE( 0.0, 0.0);
+            temp[Idx+j*blockDim.x] = MAGMA_Z_MAKE( 0.0, 0.0);
     }
     __syncthreads();
     if ( Idx < 128 ){

@@ -30,8 +30,8 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
     int i, j, start, end;
 
     if (index < n) {
-        start=rowR[index];
-        end  =rowR[index+1];
+        start = rowR[index];
+        end   = rowR[index+1];
 
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
         magmaDoubleComplex bl, tmp = zero, v = zero; 
@@ -46,8 +46,8 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
         for( i=start; i<end; i++ )
              v += valR[i] * x[ colR[i] ];
 
-        start=rowD[index];
-        end  =rowD[index+1];
+        start = rowD[index];
+        end   = rowD[index+1];
 
         #pragma unroll
         for( i=start; i<end; i++ )
@@ -101,8 +101,8 @@ magma_zbajac_csr_kernel(
         bl = b[index];
 #endif
 
-        start=rowR[index];
-        end  =rowR[index+1];
+        start = rowR[index];
+        end   = rowR[index+1];
 
         #pragma unroll
         for( i=start; i<end; i++ )
@@ -110,8 +110,8 @@ magma_zbajac_csr_kernel(
 
         v =  bl - v;
 
-        start=rowD[index];
-        end  =rowD[index+1];
+        start = rowD[index];
+        end   = rowD[index+1];
 
         #pragma unroll
         for( i=start; i<end; i++ )

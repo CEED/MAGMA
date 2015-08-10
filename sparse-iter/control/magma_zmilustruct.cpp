@@ -409,7 +409,7 @@ magma_zsymbilu(
             }
         }
     }
-    else{
+    else {
         magma_storage_t A_storage = A->storage_type;
         magma_location_t A_location = A->memory_location;
         CHECK( magma_zmtransfer( *A, &hA, A->memory_location, Magma_CPU, queue ));

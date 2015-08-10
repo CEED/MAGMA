@@ -134,7 +134,7 @@ magma_sparse_matrix_clag2z(
         else
             info = MAGMA_ERR_NOT_SUPPORTED;
     }
-    else{
+    else {
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 cleanup:

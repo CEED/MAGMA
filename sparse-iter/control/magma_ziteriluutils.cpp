@@ -246,7 +246,7 @@ magma_zilures(
         LL.diagorder_type = Magma_UNITY;
         CHECK( magma_zmconvert( L, &LL, Magma_CSR, Magma_CSRL, queue ));
     }
-    else if( L.row[1]==0 ){ // strictly lower triangular
+    else if ( L.row[1]==0 ){ // strictly lower triangular
         //printf("L strictly lower triangular.\n");
         CHECK( magma_zmtransfer( L, &LL, Magma_CPU, Magma_CPU, queue ));
         magma_free_cpu( LL.col );
@@ -269,7 +269,7 @@ magma_zilures(
         }
         LL.row[LL.num_rows] = z;
     }
-    else{
+    else {
         printf("error: L neither lower nor strictly lower triangular!\n");
     }
 
@@ -665,7 +665,7 @@ magma_zmLdiagadd(
         LL.diagorder_type = Magma_UNITY;
         CHECK( magma_zmconvert( *L, &LL, Magma_CSR, Magma_CSRL, queue ));
     }
-    else if( L->row[1]==0 ){ // strictly lower triangular
+    else if ( L->row[1]==0 ){ // strictly lower triangular
         //printf("L strictly lower triangular.\n");
         CHECK( magma_zmtransfer( *L, &LL, Magma_CPU, Magma_CPU, queue ));
         magma_free_cpu( LL.col );
@@ -689,7 +689,7 @@ magma_zmLdiagadd(
         LL.row[LL.num_rows] = z;
         LL.nnz = z;
     }
-    else{
+    else {
         printf("error: L neither lower nor strictly lower triangular!\n");
     }
     magma_zmfree( L, queue );

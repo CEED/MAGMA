@@ -74,7 +74,7 @@ magma_zmdiff(
 
         (*res) =  sqrt((*res));
     }
-    else{
+    else {
         printf("error: mdiff only supported for CSR matrices on the CPU.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
     }

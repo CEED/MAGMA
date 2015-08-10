@@ -191,11 +191,11 @@ magma_zmconvert(
     magmaDoubleComplex zero = MAGMA_Z_MAKE( 0.0, 0.0 );
 
     // check whether matrix on CPU
-    if ( A.memory_location == Magma_CPU ) {
-        
+    if ( A.memory_location == Magma_CPU )
+    {
         // CSR to anything
-        if ( old_format == Magma_CSR ) {
-            
+        if ( old_format == Magma_CSR )
+        {
             // CSR to CSR
             if ( new_format == Magma_CSR ) {
                 // fill in information for B

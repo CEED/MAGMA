@@ -102,7 +102,7 @@ magma_z_solver(
                     printf("error: solver class not supported.\n"); break;
         }
     }
-    else{
+    else {
   // preconditioner
         if ( zopts->solver_par.solver != Magma_ITERREF ) {
             int stat = magma_z_precondsetup( A, b, &zopts->precond_par, queue );

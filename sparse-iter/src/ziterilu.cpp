@@ -129,7 +129,7 @@ magma_ziterilusetup(
 
     if( RL.nnz != 0 )
         CHECK( magma_zmtransfer( RL, &precond->L, Magma_CPU, Magma_DEV , queue ));
-    else{
+    else {
         precond->L.nnz = 0;
         precond->L.val = NULL;
         precond->L.col = NULL;
@@ -139,7 +139,7 @@ magma_ziterilusetup(
 
     if( RU.nnz != 0 )
         CHECK( magma_zmtransfer( RU, &precond->U, Magma_CPU, Magma_DEV , queue ));
-    else{
+    else {
         precond->U.nnz = 0;
         precond->L.val = NULL;
         precond->L.col = NULL;

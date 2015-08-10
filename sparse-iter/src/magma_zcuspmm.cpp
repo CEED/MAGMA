@@ -85,8 +85,8 @@ magma_zcuspmm(
         && ( A.storage_type == Magma_CSR ||
              A.storage_type == Magma_CSRCOO )
         && ( B.storage_type == Magma_CSR ||
-             B.storage_type == Magma_CSRCOO ) ) {
-            
+             B.storage_type == Magma_CSRCOO ) )
+    {
         // CUSPARSE context /
         CHECK_CUSPARSE( cusparseCreate( &handle ));
         CHECK_CUSPARSE( cusparseSetStream( handle, queue ));

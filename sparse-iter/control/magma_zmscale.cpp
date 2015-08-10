@@ -91,7 +91,7 @@ magma_zmscale(
                 A->val[z] = A->val[z] * tmp[A->col[z]] * tmp[A->rowidx[z]];
             }
         }
-        else{
+        else {
             printf( "error: scaling not supported.\n" );
             info = MAGMA_ERR_NOT_SUPPORTED;
         }

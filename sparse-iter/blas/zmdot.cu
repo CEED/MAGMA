@@ -111,9 +111,9 @@ magma_zblockdot_kernel(
         for( j=0; j<k; j++)
             temp[Idx+j*blockDim.x] = v[i+j*n] * r[i];
     }
-    else{
+    else {
         for( j=0; j<k; j++)
-            temp[Idx+j*blockDim.x] =MAGMA_Z_MAKE( 0.0, 0.0);
+            temp[Idx+j*blockDim.x] = MAGMA_Z_MAKE( 0.0, 0.0);
     }
     __syncthreads();
     if ( Idx < 128 ){

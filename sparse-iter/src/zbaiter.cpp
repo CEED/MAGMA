@@ -105,7 +105,7 @@ magma_zbaiter(
     if ( solver_par->init_res > solver_par->final_res ){
         info = MAGMA_SUCCESS;
     }
-    else{
+    else {
         info = MAGMA_DIVERGENCE;
     }
     

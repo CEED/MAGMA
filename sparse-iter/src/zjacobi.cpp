@@ -97,7 +97,7 @@ magma_zjacobi(
     if ( solver_par->verbose > 0 ) {
         jacobiiter_par.maxiter = solver_par->verbose;
     }
-    else{
+    else {
         jacobiiter_par.maxiter = solver_par->maxiter;
     }
 

@@ -66,9 +66,9 @@ magma_ziterilu_csr_kernel(
         s += sp;
         __syncthreads();
         
-        if ( i>j )        // modify l entry
+        if ( i > j )      // modify l entry
             valL[il-1] =  s / valU[rowptrU[j+1]-1];
-        else{             // modify u entry
+        else {            // modify u entry
             valU[iu-1] = s;
         }
     }

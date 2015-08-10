@@ -94,12 +94,12 @@ magma_zmlumerge(
             A->row[A->num_rows] = z;
             A->nnz = z;
         }
-        else{
+        else {
             printf("error: matrix not on CPU.\n"); 
             info = MAGMA_ERR_NOT_SUPPORTED;
         }
     }
-    else{
+    else {
             printf("error: matrix in wrong format.\n"); 
             info = MAGMA_ERR_NOT_SUPPORTED;
     }
