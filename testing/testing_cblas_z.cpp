@@ -71,30 +71,33 @@ magmaDoubleComplex blasf77_zdotu( const magma_int_t* n,
 double gTol = 0;
 int gStatus = 0;
 
+const double SKIPPED_FLAG = -1;
+
 void output(
     const char* routine,
     int m, int n, int k, int incx, int incy,
-    double error_cblas, double error_fblas )
+    double error_cblas, double error_fblas, double error_inline )
 {
-    // NAN is special flag indicating not implemented -- it isn't an error
-    bool okay = (isnan(error_cblas) || error_cblas < gTol) &&
-                (isnan(error_fblas) || error_fblas < gTol);
+    // SKIPPED_FLAG indicates skipped, e.g., zdotc with MKL -- it isn't an error
+    bool okay = (error_cblas  == SKIPPED_FLAG || error_cblas  < gTol) &&
+                (error_fblas  == SKIPPED_FLAG || error_fblas  < gTol) &&
+                (error_inline < gTol);
     gStatus += ! okay;
     
     printf( "%5d %5d %5d %5d %5d   %-8s",
             m, n, k, incx, incy, routine );
     
-    if ( isnan(error_cblas) )
+    if ( error_cblas == SKIPPED_FLAG )
         printf( "   %8s", "n/a" );
     else
         printf( "   %#8.3g", error_cblas );
     
-    if ( isnan(error_fblas) )
+    if ( error_fblas == SKIPPED_FLAG )
         printf( "       %8s", "n/a" );
     else
         printf( "       %#8.3g", error_fblas );
     
-    printf( "   %s\n", (okay ? "ok" : "failed") );
+    printf( "       %#8.3g   %s\n", error_inline, (okay ? "ok" : "failed") );
 }
 
 
@@ -107,11 +110,15 @@ int main( int argc, char** argv )
     magma_int_t ione = 1;
     
     magmaDoubleComplex  *A, *B;
-    double error_cblas, error_fblas;
+    double error_cblas, error_fblas, error_inline;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t m, n, k, size, maxn, ld;
-    magmaDoubleComplex x2_m, x2_c, x2_f;  // complex x for magma, cblas, fortran blas respectively
-    double x_m, x_c, x_f;  // x for magma, cblas, fortran blas respectively
+    
+    // complex x for magma, cblas, fortran, inline blas respectively
+    magmaDoubleComplex x2_m, x2_c, x2_f, x2_i;
+    
+    // real    x for magma, cblas, fortran, inline blas respectively
+    double x_m, x_c, x_f, x_i;
     
     MAGMA_UNUSED( x_c  );
     MAGMA_UNUSED( x_f  );
@@ -143,17 +150,17 @@ int main( int argc, char** argv )
         printf( "n/a: HAVE_CBLAS not defined, so no cblas functions tested.\n\n" );
     #endif
     
-    #if defined( MAGMA_WITH_MKL )
-        printf( "n/a: cblas_zdotc and cblas_zdotu disabled with MKL (segfaults).\n\n" );
+    #if defined(MAGMA_WITH_MKL)
+        printf( "n/a: cblas_zdotc, cblas_zdotu, blasf77_zdotc, and blasf77_zdotu are disabled with MKL, due to segfaults.\n\n" );
     #endif
     
-    #if defined( __APPLE__ )
-        printf( "n/a: blasf77_zdotc and blasf77_zdotu disabled on MacOS (segfaults).\n\n" );
+    #if defined(__APPLE__)
+        printf( "n/a: blasf77_zdotc and blasf77_zdotu are disabled on MacOS, due to segfaults.\n\n" );
     #endif
     
-    printf( "%%                                          Error w.r.t.   Error w.r.t.\n"
-            "%%   M     N     K  incx  incy   Function   CBLAS          Fortran BLAS\n"
-            "%%======================================================================\n" );
+    printf( "%%                                          Error w.r.t.   Error w.r.t.   Error w.r.t.\n"
+            "%%   M     N     K  incx  incy   Function   CBLAS          Fortran BLAS   inline\n"
+            "%%====================================================================================\n" );
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         if ( itest > 0 ) {
             printf( "%%----------------------------------------------------------------------\n" );
@@ -186,24 +193,33 @@ int main( int argc, char** argv )
                 
                 // get one-norm of column j of A
                 if ( incx > 0 && incx == incy ) {  // positive, no incy
-                    error_cblas = 0;
-                    error_fblas = 0;
+                    error_cblas  = 0;
+                    error_fblas  = 0;
+                    error_inline = 0;
                     for( int j = 0; j < k; ++j ) {
                         x_m = magma_cblas_dzasum( m, A(0,j), incx );
                         
                         #ifdef HAVE_CBLAS
                             x_c = cblas_dzasum( m, A(0,j), incx );
-                            error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                            error_cblas = max( error_cblas, fabs(x_m - x_c) / fabs(m*x_c) );
                         #else
-                            error_cblas = MAGMA_D_NAN;
+                            x_c = 0;
+                            error_cblas = SKIPPED_FLAG;
                         #endif
                         
                         x_f = blasf77_dzasum( &m, A(0,j), &incx );
-                        error_fblas = max( error_fblas, fabs( (x_m - x_f) / (m*x_f) ));
+                        error_fblas = max( error_fblas, fabs(x_m - x_f) / fabs(m*x_f) );
                         
-                        //printf( "xm %.8e, xc %.8e, xf %.8e\n", x_m, x_c, x_f );
+                        // inline implementation
+                        x_i = 0;
+                        for( int i=0; i < m; ++i ) {
+                            x_i += MAGMA_Z_ABS1( *A(i*incx,j) );  // |real(Aij)| + |imag(Aij)|
+                        }
+                        error_inline = max( error_inline, fabs(x_m - x_i) / fabs(m*x_i) );
+                        
+                        //printf( "dzasum xm %.8e, xc %.8e, xf %.8e, xi %.8e\n", x_m, x_c, x_f, x_i );
                     }
-                    output( "dzasum", m, n, k, incx, incy, error_cblas, error_fblas );
+                    output( "dzasum", m, n, k, incx, incy, error_cblas, error_fblas, error_inline );
                 }
             }
         }
@@ -218,22 +234,36 @@ int main( int argc, char** argv )
                 magma_int_t incy = inc[iincy];
                 
                 if ( incx > 0 && incx == incy ) {  // positive, no incy
-                    error_cblas = 0;
-                    error_fblas = 0;
+                    error_cblas  = 0;
+                    error_fblas  = 0;
+                    error_inline = 0;
                     for( int j = 0; j < k; ++j ) {
                         x_m = magma_cblas_dznrm2( m, A(0,j), incx );
                         
                         #ifdef HAVE_CBLAS
                             x_c = cblas_dznrm2( m, A(0,j), incx );
-                            error_cblas = max( error_cblas, fabs( (x_m - x_c) / (m*x_c) ));
+                            error_cblas = max( error_cblas, fabs(x_m - x_c) / fabs(m*x_c) );
                         #else
-                            error_cblas = MAGMA_D_NAN;
+                            x_c = 0;
+                            error_cblas = SKIPPED_FLAG;
                         #endif
                         
                         x_f = blasf77_dznrm2( &m, A(0,j), &incx );
-                        error_fblas = max( error_fblas, fabs( (x_m - x_f) / (m*x_f) ));
+                        error_fblas = max( error_fblas, fabs(x_m - x_f) / fabs(m*x_f) );
+                        
+                        // inline implementation (poor -- doesn't scale)
+                        x_i = 0;
+                        for( int i=0; i < m; ++i ) {
+                            x_i += real( *A(i*incx,j) ) * real( *A(i*incx,j) )
+                                +  imag( *A(i*incx,j) ) * imag( *A(i*incx,j) );
+                            // same: real( conj( *A(i*incx,j) ) * *A(i*incx,j) );
+                        }
+                        x_i = sqrt( x_i );
+                        error_inline = max( error_inline, fabs(x_m - x_i) / fabs(m*x_i) );
+                        
+                        //printf( "dznrm2 xm %.8e, xc %.8e, xf %.8e, xi %.8e\n", x_m, x_c, x_f, x_i );
                     }
-                    output( "dznrm2", m, n, k, incx, incy, error_cblas, error_fblas );
+                    output( "dznrm2", m, n, k, incx, incy, error_cblas, error_fblas, error_inline );
                 }
             }
         }
@@ -247,38 +277,51 @@ int main( int argc, char** argv )
             for( int iincy = 0; iincy < ninc; ++iincy ) {
                 magma_int_t incy = inc[iincy];
                 
-                error_cblas = 0;
-                error_fblas = 0;
+                error_cblas  = 0;
+                error_fblas  = 0;
+                error_inline = 0;
                 for( int j = 0; j < k; ++j ) {
                     // MAGMA implementation, not just wrapper
                     x2_m = magma_cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
                     
-                    // crashes on MKL 11.1.2, ILP64
-                    #if defined(HAVE_CBLAS) && ! defined( MAGMA_WITH_MKL )
+                    // crashes with MKL 11.1.2, ILP64
+                    #if defined(HAVE_CBLAS) && ! defined(MAGMA_WITH_MKL)
                         #ifdef COMPLEX
                         cblas_zdotc_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
                         #else
                         x2_c = cblas_zdotc( m, A(0,j), incx, B(0,j), incy );
                         #endif
-                        error_cblas = max( error_cblas, fabs( x2_m - x2_c ) / fabs( m*x2_c ));
+                        error_cblas = max( error_cblas, fabs(x2_m - x2_c) / fabs(m*x2_c) );
                     #else
-                        error_cblas = MAGMA_D_NAN;
+                        x2_c = MAGMA_Z_ZERO;
+                        error_cblas = SKIPPED_FLAG;
                     #endif
                     
-                    // crashes on MacOS 10.9
-                    #if ! defined( __APPLE__ )
+                    // crashes with MKL 11.2.3 and MacOS 10.9
+                    #if (! defined(COMPLEX) || ! defined(MAGMA_WITH_MKL)) && ! defined(__APPLE__)
                         x2_f = blasf77_zdotc( &m, A(0,j), &incx, B(0,j), &incy );
-                        error_fblas = max( error_fblas, fabs( x2_m - x2_f ) / fabs( m*x2_f ));
+                        error_fblas = max( error_fblas, fabs(x2_m - x2_f) / fabs(m*x2_f) );
                     #else
-                        error_fblas = MAGMA_D_NAN;
+                        x2_f = MAGMA_Z_ZERO;
+                        error_fblas = SKIPPED_FLAG;
                     #endif
-                        
-                    //printf( "xm %.8e + %.8ei, xc %.8e + %.8ei, xf %.8e + %.8ei\n",
+                    
+                    // inline implementation
+                    x2_i = MAGMA_Z_ZERO;
+                    magma_int_t A_offset = (incx > 0 ? 0 : (-n + 1)*incx);
+                    magma_int_t B_offset = (incy > 0 ? 0 : (-n + 1)*incy);
+                    for( int i=0; i < m; ++i ) {
+                        x2_i += conj( *A(A_offset + i*incx,j) ) * *B(B_offset + i*incy,j);
+                    }
+                    error_inline = max( error_inline, fabs(x2_m - x2_i) / fabs(m*x2_i) );
+                    
+                    //printf( "zdotc xm %.8e + %.8ei, xc %.8e + %.8ei, xf %.8e + %.8ei, xi %.8e + %.8ei\n",
                     //        real(x2_m), imag(x2_m),
                     //        real(x2_c), imag(x2_c),
-                    //        real(x2_f), imag(x2_f) );
+                    //        real(x2_f), imag(x2_f),
+                    //        real(x2_i), imag(x2_i) );
                 }
-                output( "zdotc", m, n, k, incx, incy, error_cblas, error_fblas );
+                output( "zdotc", m, n, k, incx, incy, error_cblas, error_fblas, error_inline );
             }
         }
         printf( "\n" );
@@ -291,38 +334,51 @@ int main( int argc, char** argv )
             for( int iincy = 0; iincy < ninc; ++iincy ) {
                 magma_int_t incy = inc[iincy];
                 
-                error_cblas = 0;
-                error_fblas = 0;
+                error_cblas  = 0;
+                error_fblas  = 0;
+                error_inline = 0;
                 for( int j = 0; j < k; ++j ) {
                     // MAGMA implementation, not just wrapper
                     x2_m = magma_cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
                     
-                    // crashes on MKL 11.1.2, ILP64
-                    #if defined(HAVE_CBLAS) && ! defined( MAGMA_WITH_MKL )
+                    // crashes with MKL 11.1.2, ILP64
+                    #if defined(HAVE_CBLAS) && ! defined(MAGMA_WITH_MKL)
                         #ifdef COMPLEX
                         cblas_zdotu_sub( m, A(0,j), incx, B(0,j), incy, &x2_c );
                         #else
                         x2_c = cblas_zdotu( m, A(0,j), incx, B(0,j), incy );
                         #endif
-                        error_cblas = max( error_cblas, fabs( x2_m - x2_c ) / fabs( m*x2_c ));
+                        error_cblas = max( error_cblas, fabs(x2_m - x2_c) / fabs(m*x2_c) );
                     #else
-                        error_cblas = MAGMA_D_NAN;
+                        x2_c = MAGMA_Z_ZERO;
+                        error_cblas = SKIPPED_FLAG;
                     #endif
                     
-                    // crashes on MacOS 10.9
-                    #if ! defined( __APPLE__ )
+                    // crashes with MKL 11.2.3 and MacOS 10.9
+                    #if (! defined(COMPLEX) || ! defined(MAGMA_WITH_MKL)) && ! defined(__APPLE__)
                         x2_f = blasf77_zdotu( &m, A(0,j), &incx, B(0,j), &incy );
-                        error_fblas = max( error_fblas, fabs( x2_m - x2_f ) / fabs( m*x2_f ));
+                        error_fblas = max( error_fblas, fabs(x2_m - x2_f) / fabs(m*x2_f) );
                     #else
-                        error_fblas = MAGMA_D_NAN;
+                        x2_f = MAGMA_Z_ZERO;
+                        error_fblas = SKIPPED_FLAG;
                     #endif
-                        
-                    //printf( "xm %.8e + %.8ei, xc %.8e + %.8ei, xf %.8e + %.8ei\n",
+                    
+                    // inline implementation
+                    x2_i = MAGMA_Z_ZERO;
+                    magma_int_t A_offset = (incx > 0 ? 0 : (-n + 1)*incx);
+                    magma_int_t B_offset = (incy > 0 ? 0 : (-n + 1)*incy);
+                    for( int i=0; i < m; ++i ) {
+                        x2_i += *A(A_offset + i*incx,j) * *B(B_offset + i*incy,j);
+                    }
+                    error_inline = max( error_inline, fabs(x2_m - x2_i) / fabs(m*x2_i) );
+                    
+                    //printf( "zdotu xm %.8e + %.8ei, xc %.8e + %.8ei, xf %.8e + %.8ei, xi %.8e + %.8ei\n",
                     //        real(x2_m), imag(x2_m),
                     //        real(x2_c), imag(x2_c),
-                    //        real(x2_f), imag(x2_f) );
+                    //        real(x2_f), imag(x2_f),
+                    //        real(x2_i), imag(x2_i) );
                 }
-                output( "zdotu", m, n, k, incx, incy, error_cblas, error_fblas );
+                output( "zdotu", m, n, k, incx, incy, error_cblas, error_fblas, error_inline );
             }
         }
         
