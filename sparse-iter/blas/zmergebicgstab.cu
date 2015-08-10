@@ -181,7 +181,7 @@ magma_zbicgmerge3_kernel(
     magmaDoubleComplex * se,
     magmaDoubleComplex * t,
     magmaDoubleComplex * x, 
-    magmaDoubleComplex * r,
+    magmaDoubleComplex * r
     )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -260,7 +260,7 @@ magma_zbicgmerge3(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
-    magma_zbicgmerge3_kernel<<<Gs, Bs, 0>>>( n, skp, p, s, t, x, r );
+    magma_zbicgmerge3_kernel<<<Gs, Bs, 0, queue>>>( n, skp, p, s, t, x, r );
 
    return MAGMA_SUCCESS;
 }
