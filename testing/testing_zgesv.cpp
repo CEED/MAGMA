@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     if(opts.lapack){
         printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||  ||B - AX|| / N*||A||*||X||_CPU\n");
         printf("%%================================================================================================================\n");
-    }else{
+    } else {
         printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
         printf("%%===============================================================================\n");
     }

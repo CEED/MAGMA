@@ -157,7 +157,6 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             if ( opts.lapack ) {
-                
                 #ifdef MAGMA_WITH_MKL
                 // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
                 int threads = magma_get_lapack_numthreads();
