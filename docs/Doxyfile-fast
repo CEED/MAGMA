@@ -990,6 +990,8 @@ INPUT                  = \
 	../control/common_magma.h              \
 	../control/connection_mgpu.cpp         \
 	../control/constants.cpp               \
+	../control/get_batched_crossover.cpp      \
+	../control/get_batched_gemm_decision.cpp  \
 	../control/get_nb.cpp                  \
 	../control/ilaenv.cpp                  \
 	../control/ilaenv_f77.f                \
@@ -1007,13 +1009,14 @@ INPUT                  = \
 	../control/magma_threadsetting.h       \
 	../control/magma_timer.cpp                \
 	../control/magma_timer.h                  \
+	../control/magma_winthread.cpp            \
+	../control/magma_winthread.h              \
+	../control/magma_yield.cpp                \
 	../control/magma_zbulge.cpp               \
 	../control/magma_zf77.cpp              \
 	../control/magma_zf77pgi.cpp           \
 	../control/magma_zfortran.F90          \
 	../control/magma_znan_inf.cpp             \
-	../control/magmawinthread.cpp          \
-	../control/magmawinthread.h            \
 	../control/pthread_barrier.cpp         \
 	../control/pthread_barrier.h           \
 	../control/sizeptr.c                   \
@@ -1034,15 +1037,15 @@ INPUT                  = \
 	../interface_cuda/interface.cpp                  \
 	../interface_cuda/set_get.cpp                    \
 	../interface_cuda/zset_get.cpp                   \
+	../magmablas/cgemm_batched_core.cu          \
 	../magmablas/cgemm_fermi_kernels.h          \
-	../magmablas/cgemm_fermi_kernels_batched.h  \
-	../magmablas/cgemm_fermi_kernels_batched_k32.h \
+	../magmablas/cgemv_batched_core.cu          \
+	../magmablas/cherk_batched_core.cu          \
 	../magmablas/clag2z.cu                      \
 	../magmablas/clat2z.cu                      \
 	../magmablas/commonblas_z.h                 \
+	../magmablas/dgemm_batched_core.cu          \
 	../magmablas/dgemm_fermi_kernels.h          \
-	../magmablas/dgemm_fermi_kernels_batched.h  \
-	../magmablas/dgemm_fermi_kernels_batched_k32.h \
 	../magmablas/dgemm_tesla.cu                 \
 	../magmablas/dgemm_tesla_N_N.cu             \
 	../magmablas/dgemm_tesla_N_N_special.cu     \
@@ -1052,20 +1055,49 @@ INPUT                  = \
 	../magmablas/dgemm_tesla_T_T_special.cu     \
 	../magmablas/dgemm_tesla_a_0.cu             \
 	../magmablas/dgemm_tesla_ab_0.cu            \
+	../magmablas/dgemv_batched_core.cu          \
 	../magmablas/dgemv_tesla.cu                 \
+	../magmablas/dsyrk_batched_core.cu          \
 	../magmablas/dznrm2.cu                      \
+	../magmablas/gemm_config                    \
+	../magmablas/gemm_config/cgemm_param_nn.h   \
+	../magmablas/gemm_config/cgemm_param_nt.h   \
+	../magmablas/gemm_config/cgemm_param_tn.h   \
+	../magmablas/gemm_config/cgemm_param_tt.h   \
+	../magmablas/gemm_config/dgemm_param_nn.h   \
+	../magmablas/gemm_config/dgemm_param_nt.h   \
+	../magmablas/gemm_config/dgemm_param_tn.h   \
+	../magmablas/gemm_config/dgemm_param_tt.h   \
+	../magmablas/gemm_config/sgemm_param_nn.h   \
+	../magmablas/gemm_config/sgemm_param_nt.h   \
+	../magmablas/gemm_config/sgemm_param_tn.h   \
+	../magmablas/gemm_config/sgemm_param_tt.h   \
+	../magmablas/gemm_config/zgemm_param_nn.h   \
+	../magmablas/gemm_config/zgemm_param_nt.h   \
+	../magmablas/gemm_config/zgemm_param_tn.h   \
+	../magmablas/gemm_config/zgemm_param_tt.h   \
 	../magmablas/gemm_kernel.cuh                \
 	../magmablas/gemm_kernel_batched.cuh        \
 	../magmablas/gemm_stencil.cuh               \
 	../magmablas/gemm_stencil_defs.h            \
+	../magmablas/gemm_template_device.cuh       \
+	../magmablas/gemm_template_device_defs.cuh  \
+	../magmablas/gemm_template_kernel_batched.cuh \
+	../magmablas/gemv_config                    \
+	../magmablas/gemv_config/gemvn_param.h      \
+	../magmablas/gemv_config/gemvt_param.h      \
+	../magmablas/gemv_template_device.cuh       \
+	../magmablas/gemv_template_kernel_batched.cuh \
 	../magmablas/getrf_setup_pivinfo.cu         \
 	../magmablas/herk_kernel_batched.cuh        \
+	../magmablas/herk_template_kernel_batched.cuh \
 	../magmablas/magma_templates.h              \
 	../magmablas/set_pointer.cu                 \
+	../magmablas/sgemm_batched_core.cu          \
 	../magmablas/sgemm_fermi_kernels.h          \
-	../magmablas/sgemm_fermi_kernels_batched.h  \
-	../magmablas/sgemm_fermi_kernels_batched_k32.h \
+	../magmablas/sgemv_batched_core.cu          \
 	../magmablas/sgemv_tesla.cu                 \
+	../magmablas/ssyrk_batched_core.cu          \
 	../magmablas/stream.cu                      \
 	../magmablas/zaxpycp.cu                     \
 	../magmablas/zbcyclic.cu                    \
@@ -1074,13 +1106,11 @@ INPUT                  = \
 	../magmablas/zgeadd.cu                      \
 	../magmablas/zgeadd_batched.cu              \
 	../magmablas/zgemm_batched.cu               \
+	../magmablas/zgemm_batched_core.cu          \
 	../magmablas/zgemm_fermi.cu                 \
-	../magmablas/zgemm_fermi_batched.cu         \
-	../magmablas/zgemm_fermi_batched_k32.cu     \
 	../magmablas/zgemm_fermi_kernels.h          \
-	../magmablas/zgemm_fermi_kernels_batched.h  \
-	../magmablas/zgemm_fermi_kernels_batched_k32.h \
 	../magmablas/zgemm_reduce.cu                \
+	../magmablas/zgemv_batched_core.cu          \
 	../magmablas/zgemv_conjv.cu                 \
 	../magmablas/zgemv_fermi.cu                 \
 	../magmablas/zgeqr2.cu                      \
@@ -1104,8 +1134,7 @@ INPUT                  = \
 	../magmablas/zher2k_mgpu.cpp                \
 	../magmablas/zher2k_mgpu_spec.cpp           \
 	../magmablas/zherk_batched.cu               \
-	../magmablas/zherk_fermi_batched.cu         \
-	../magmablas/zherk_fermi_batched_k32.cu     \
+	../magmablas/zherk_batched_core.cu          \
 	../magmablas/zherk_gpu.cpp                  \
 	../magmablas/zherk_mgpu.cpp                 \
 	../magmablas/zlacpy.cu                      \
@@ -1121,6 +1150,7 @@ INPUT                  = \
 	../magmablas/zlarfbx.cu                     \
 	../magmablas/zlarfg-v2.cu                   \
 	../magmablas/zlarfg.cu                      \
+	../magmablas/zlarfg_devicesfunc.cuh         \
 	../magmablas/zlarfgx-v2.cu                  \
 	../magmablas/zlarft_kernels.cu              \
 	../magmablas/zlarfx.cu                      \
@@ -1135,13 +1165,16 @@ INPUT                  = \
 	../magmablas/zlaswp_sym.cu                  \
 	../magmablas/zlat2c.cu                      \
 	../magmablas/zpotf2.cu                      \
+	../magmablas/zpotf2_devicesfunc.cuh         \
 	../magmablas/zpotf2_kernels.cu              \
+	../magmablas/zpotf2_kernels_old.cu          \
 	../magmablas/zset_pointer.cu                \
 	../magmablas/zsetmatrix_transpose.cu        \
 	../magmablas/zsetmatrix_transpose_mgpu.cu   \
 	../magmablas/zswap.cu                       \
 	../magmablas/zswapblk.cu                    \
 	../magmablas/zswapdblk.cu                   \
+	../magmablas/zswapdblk_batched.cu           \
 	../magmablas/zsymmetrize.cu                 \
 	../magmablas/zsymmetrize_tiles.cu           \
 	../magmablas/zsymv.cu                       \
@@ -1152,6 +1185,9 @@ INPUT                  = \
 	../magmablas/ztranspose_inplace.cu          \
 	../magmablas/ztrsm.cu                       \
 	../magmablas/ztrsm_batched.cu               \
+	../magmablas/ztrsv.cu                       \
+	../magmablas/ztrsv_batched.cu               \
+	../magmablas/ztrsv_devicesfunc.cuh          \
 	../magmablas/ztrtri.h                       \
 	../magmablas/ztrtri_diag.cu                 \
 	../magmablas/ztrtri_diag_batched.cu         \
@@ -1237,7 +1273,7 @@ INPUT                  = \
 	../sparse-iter/blas/zgesellcmmv.cu             \
 	../sparse-iter/blas/zgesellcmv.cu              \
 	../sparse-iter/blas/ziteric.cu                     \
-	../sparse-iter/blas/ziterilu.cu                    \
+	../sparse-iter/blas/ziterilu_kernels.cu            \
 	../sparse-iter/blas/zjacobisetup.cu            \
 	../sparse-iter/blas/zlag2c_sparse.cu           \
 	../sparse-iter/blas/zlobpcg_maxpy.cu           \
