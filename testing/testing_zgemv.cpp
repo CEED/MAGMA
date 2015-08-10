@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     double          magma_error, dev_error, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t M, N, Xm, Ym, lda, sizeA, sizeX, sizeY;
+    magma_int_t M, N, Xm, Ym, lda, ldda, sizeA, sizeX, sizeY;
     magma_int_t incx = 1;
     magma_int_t incy = 1;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -57,7 +57,8 @@ int main(int argc, char **argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
             N = opts.nsize[itest];
-            lda    = magma_roundup( M, opts.align );  // multiple of 32 by default
+            lda    = M;
+            ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZGEMV( M, N ) / 1e9;
 
             if ( opts.transA == MagmaNoTrans ) {
@@ -78,7 +79,7 @@ int main(int argc, char **argv)
             TESTING_MALLOC_CPU( Ydev,    magmaDoubleComplex, sizeY );
             TESTING_MALLOC_CPU( Ymagma,  magmaDoubleComplex, sizeY );
             
-            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, sizeA );
+            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, ldda*N );
             TESTING_MALLOC_DEV( dX, magmaDoubleComplex, sizeX );
             TESTING_MALLOC_DEV( dY, magmaDoubleComplex, sizeY );
             
@@ -90,7 +91,7 @@ int main(int argc, char **argv)
             /* =====================================================================
                Performs operation using CUBLAS
                =================================================================== */
-            magma_zsetmatrix( M, N, A, lda, dA, lda );
+            magma_zsetmatrix( M, N, A, lda, dA, ldda );
             magma_zsetvector( Xm, X, incx, dX, incx );
             magma_zsetvector( Ym, Y, incy, dY, incy );
             
@@ -98,10 +99,10 @@ int main(int argc, char **argv)
             dev_time = magma_sync_wtime( opts.queue );
             #ifdef HAVE_CUBLAS
                 cublasZgemv( opts.handle, cublas_trans_const(opts.transA),
-                             M, N, &alpha, dA, lda, dX, incx, &beta, dY, incy );
+                             M, N, &alpha, dA, ldda, dX, incx, &beta, dY, incy );
             #else
                 magma_zgemv( opts.transA, M, N,
-                             alpha, dA, lda,
+                             alpha, dA, ldda,
                                     dX, incx,
                              beta,  dY, incy );
             #endif
@@ -117,7 +118,7 @@ int main(int argc, char **argv)
                 magma_zsetvector( Ym, Y, incy, dY, incy );
                 
                 magma_time = magma_sync_wtime( opts.queue );
-                magmablas_zgemv( opts.transA, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
+                magmablas_zgemv( opts.transA, M, N, alpha, dA, ldda, dX, incx, beta, dY, incy );
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 

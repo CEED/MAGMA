@@ -99,8 +99,8 @@ int main( int argc, char** argv)
             
             ldb = M;
             
-            ldda = lda = magma_roundup( lda, opts.align );  // multiple of 32 by default
-            lddb = ldb = magma_roundup( ldb, opts.align );  // multiple of 32 by default
+            ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
+            lddb = magma_roundup( ldb, opts.align );  // multiple of 32 by default
 
             sizeA = lda*Ak*batchCount;
             sizeB = ldb*N*batchCount;

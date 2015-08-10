@@ -85,7 +85,7 @@ int main( int argc, char** argv)
 
             lda = Ak = N;
             
-            ldda = lda = magma_roundup( lda, 32);//opts.align );  // multiple of 32 by default
+            ldda = magma_roundup( lda, opts.align );  // multiple of 32 by default
 
             sizeA = lda*Ak*batchCount;
             sizeB = N*batchCount;
@@ -210,7 +210,6 @@ int main( int argc, char** argv)
             magma_error  = 0;
             cublas_error = 0;
             for (int s=0; s < batchCount; s++) {
-             
                 // error for CUBLAS
                 normA = lapackf77_zlange( "F", &N, &N, h_A + s * lda * Ak, &lda, work );
 
@@ -256,7 +255,6 @@ int main( int argc, char** argv)
             }
 
             if ( opts.lapack ) {
-
                 printf("%5d     %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)       %8.2e   %8.2e   %s\n",
                         (int)batchCount, (int) N,
                         magma_perf,  1000.*magma_time,

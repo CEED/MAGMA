@@ -63,7 +63,8 @@ int main( int argc, char** argv)
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N   = opts.nsize[i];
-            ldda = lda = magma_roundup( N, opts.align );  // multiple of 32 by default
+            lda = N;
+            ldda = magma_roundup( N, opts.align );  // multiple of 32 by default
             n2  = lda* N  * batchCount;
 
             gflops = batchCount * FLOPS_ZPOTRF( N ) / 1e9;
