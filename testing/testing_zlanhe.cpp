@@ -81,7 +81,15 @@ int main( int argc, char** argv)
 #endif
 
     #ifdef MAGMA_WITH_MKL
-    printf( "\nNote: using single thread to work around MKL zlanhe bug.\n\n" );
+    // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
+    // appears to be corrected in 11.2.3
+    MKLVersion mkl_version;
+    mkl_get_version( &mkl_version );
+    int threads = magma_get_lapack_numthreads();
+    bool mkl_single_thread = (mkl_version.MajorVersion <= 11 && mkl_version.MinorVersion < 2);
+    if ( mkl_single_thread ) {
+        printf( "\nNote: using single thread to work around MKL zlanhe bug.\n\n" );
+    }
     #endif
     
     printf("%%   N   norm   uplo   CPU GByte/s (ms)    GPU GByte/s (ms)        error    error      nan      inf\n");
@@ -128,12 +136,8 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             #ifdef MAGMA_WITH_MKL
-            // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
-            // appears to be corrected in 11.2.3
-            MKLVersion mkl_version;
-            mkl_get_version( &mkl_version );
-            int threads = magma_get_lapack_numthreads();
-            if ( mkl_version.MajorVersion <= 11 && mkl_version.MinorVersion < 2 ) {
+            if ( mkl_single_thread ) {
+                // use single thread to work around MKL bug
                 magma_set_lapack_numthreads( 1 );
             }
             #endif
@@ -150,8 +154,10 @@ int main( int argc, char** argv)
                        norm_lapack, magma_strerror( (int) norm_lapack ));
             
             #ifdef MAGMA_WITH_MKL
-            // end single thread to work around MKL bug
-            magma_set_lapack_numthreads( threads );
+            if ( mkl_single_thread ) {
+                // end single thread to work around MKL bug
+                magma_set_lapack_numthreads( threads );
+            }
             #endif
             
             /* =====================================================================
@@ -241,10 +247,10 @@ int main( int argc, char** argv)
     }
     
     if ( lapack_nan_fail ) {
-        printf( "* Warning: LAPACK failed NAN test; upgrade to LAPACK version >= 3.4.2 (Sep. 2012)\n" );
+        printf( "* Warning: LAPACK failed NAN propagation test; upgrade to LAPACK version >= 3.4.2 (Sep. 2012)\n" );
     }
     if ( lapack_inf_fail ) {
-        printf( "* Warning: LAPACK failed INF test\n" );
+        printf( "* Warning: LAPACK failed INF propagation test\n" );
     }
     if ( mkl_warning ) {
         printf("* MKL (e.g., 11.1.0) has a bug in zlanhe with multiple threads; corrected in 11.2.x.\n"
