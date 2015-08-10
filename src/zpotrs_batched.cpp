@@ -13,7 +13,6 @@
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 #include "cublas_v2.h"
-#define COMPLEX
 /**
     Purpose
     -------
@@ -144,11 +143,7 @@ magma_zpotrs_batched(
 
 
     if ( uplo == MagmaUpper) {
-        #ifdef COMPLEX
-        if (nrhs > 0)
-        #else
         if (nrhs > 1)
-        #endif
         {
             // A = U^T U
             // solve U^{T}X = B ==> dworkX = U^-T * B
@@ -196,11 +191,7 @@ magma_zpotrs_batched(
         }
     }
     else {
-        #ifdef COMPLEX
-        if (nrhs > 0)
-        #else
         if (nrhs > 1)
-        #endif
         {
             // A = L L^T
             // solve LX= B ==> dwork = L^{-1} B
