@@ -14,7 +14,7 @@
 
 
 // each implementation of MAGMA defines HAVE_* appropriately.
-#if ! defined(HAVE_CUBLAS) && ! defined(HAVE_clAmdBlas) && ! defined(HAVE_MIC)
+#if ! defined(HAVE_CUBLAS) && ! defined(HAVE_clBLAS) && ! defined(HAVE_MIC)
 #define HAVE_CUBLAS
 #endif
 
@@ -86,8 +86,8 @@ typedef double real_Double_t;
     #define MAGMA_C_ABS1(a)       (fabsf((a).x) + fabsf((a).y))
     #define MAGMA_C_CNJG(a)       cuConjf(a)
     
-#elif defined(HAVE_clAmdBlas)
-    #include <clAmdBlas.h>
+#elif defined(HAVE_clBLAS)
+    #include <clBLAS.h>
     
     typedef cl_command_queue  magma_queue_t;
     typedef cl_event          magma_event_t;
@@ -101,6 +101,7 @@ typedef double real_Double_t;
     #define MAGMA_Z_IMAG(a)       (a).y
     #define MAGMA_Z_ADD(a, b)     MAGMA_Z_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_Z_SUB(a, b)     MAGMA_Z_MAKE((a).x-(b).x, (a).y-(b).y)
+    #define MAGMA_Z_DIV(a, b)     ((a)/(b))
     #define MAGMA_Z_ABS(a)        magma_cabs(a)
     #define MAGMA_Z_ABS1(a)       (fabs((a).x) + fabs((a).y))
     #define MAGMA_Z_CNJG(a)       MAGMA_Z_MAKE((a).x, -(a).y)
@@ -110,6 +111,7 @@ typedef double real_Double_t;
     #define MAGMA_C_IMAG(a)       (a).y
     #define MAGMA_C_ADD(a, b)     MAGMA_C_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_C_SUB(a, b)     MAGMA_C_MAKE((a).x-(b).x, (a).y-(b).y)
+    #define MAGMA_C_DIV(a, b)     ((a)/(b))
     #define MAGMA_C_ABS(a)        magma_cabsf(a)
     #define MAGMA_C_ABS1(a)       (fabsf((a).x) + fabsf((a).y))
     #define MAGMA_C_CNJG(a)       MAGMA_C_MAKE((a).x, -(a).y)
@@ -138,7 +140,6 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r, i)    std::complex<double>(r,i)
     #define MAGMA_Z_REAL(x)       (x).real()
     #define MAGMA_Z_IMAG(x)       (x).imag()
-    #define MAGMA_Z_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_Z_ADD(a, b)     ((a)+(b))
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
     #define MAGMA_Z_ABS(a)        abs(a)
@@ -146,12 +147,10 @@ typedef double real_Double_t;
     #define MAGMA_Z_DIV(a, b)     ((a)/(b))
     #define MAGMA_Z_ABS1(a)       (fabs((a).real()) + fabs((a).imag())) 
     #define MAGMA_Z_CNJG(a)       conj(a)
-    #define MAGMA_Z_DSCALE(v,t,s) ((v) = (t)/(s))
 
     #define MAGMA_C_MAKE(r, i)    std::complex<float> (r,i)
     #define MAGMA_C_REAL(x)       (x).real()
     #define MAGMA_C_IMAG(x)       (x).imag()
-    #define MAGMA_C_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_C_ADD(a, b)     ((a)+(b))
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
     #define MAGMA_C_ABS(a)        abs(a)
@@ -159,9 +158,8 @@ typedef double real_Double_t;
     #define MAGMA_C_DIV(a, b)     ((a)/(b))
     #define MAGMA_C_ABS1(a)       (fabs((a).real()) + fabs((a).imag()))
     #define MAGMA_C_CNJG(a)       conj(a)
-    #define MAGMA_C_SSCALE(v,t,s) ((v) = (t)/(s))
 #else
-    #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. For example, add -DHAVE_CUBLAS to CFLAGS, or #define HAVE_CUBLAS before #include <magma.h>. In MAGMA, this happens in Makefile.internal."
+    #error "One of HAVE_CUBLAS, HAVE_clBLAS, or HAVE_MIC must be defined. For example, add -DHAVE_CUBLAS to CFLAGS, or #define HAVE_CUBLAS before #include <magma.h>. In MAGMA, this happens in Makefile.internal."
 #endif
 
 #define MAGMA_Z_EQUAL(a,b)        (MAGMA_Z_REAL(a)==MAGMA_Z_REAL(b) && MAGMA_Z_IMAG(a)==MAGMA_Z_IMAG(b))
@@ -173,7 +171,6 @@ typedef double real_Double_t;
 #define MAGMA_D_MAKE(r,i)         (r)
 #define MAGMA_D_REAL(x)           (x)
 #define MAGMA_D_IMAG(x)           (0.0)
-#define MAGMA_D_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_D_ADD(a, b)         ((a) + (b))
 #define MAGMA_D_SUB(a, b)         ((a) - (b))
 #define MAGMA_D_MUL(a, b)         ((a) * (b))
@@ -183,12 +180,10 @@ typedef double real_Double_t;
 #define MAGMA_D_CNJG(a)           (a)
 #define MAGMA_D_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_D_NEGATE(a)         (-a)
-#define MAGMA_D_DSCALE(v, t, s)   (v) = (t)/(s)
 
 #define MAGMA_S_MAKE(r,i)         (r)
 #define MAGMA_S_REAL(x)           (x)
 #define MAGMA_S_IMAG(x)           (0.0)
-#define MAGMA_S_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_S_ADD(a, b)         ((a) + (b))
 #define MAGMA_S_SUB(a, b)         ((a) - (b))
 #define MAGMA_S_MUL(a, b)         ((a) * (b))
@@ -198,7 +193,6 @@ typedef double real_Double_t;
 #define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_EQUAL(a,b)        ((a) == (b))
 #define MAGMA_S_NEGATE(a)         (-a)
-#define MAGMA_S_SSCALE(v, t, s)   (v) = (t)/(s)
 
 #define MAGMA_Z_ZERO              MAGMA_Z_MAKE( 0.0, 0.0)
 #define MAGMA_Z_ONE               MAGMA_Z_MAKE( 1.0, 0.0)
@@ -228,7 +222,7 @@ typedef double real_Double_t;
 #define CBLAS_SADDR(a)  &(a)
 #endif
 
-#if defined(HAVE_clAmdBlas)
+#if defined(HAVE_clBLAS)
     // OpenCL uses opaque memory references on GPU
     typedef cl_mem magma_ptr;
     typedef cl_mem magmaInt_ptr;
@@ -278,6 +272,7 @@ typedef double real_Double_t;
 
 #define MagmaMaxGPUs 8
 #define MagmaMaxDevices 8
+
 
 // ----------------------------------------
 // Return codes
@@ -531,7 +526,7 @@ typedef enum {
 
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK
-// todo: use translators instead? lapack_const( MagmaUpper )
+// todo: use translators instead? lapack_const_str( MagmaUpper )
 #define MagmaRowMajorStr      "Row"
 #define MagmaColMajorStr      "Col"
 
@@ -642,13 +637,13 @@ static inline char lapacke_storev_const( magma_storev_t magma_const ) { return *
 
 
 // --------------------
-// Convert MAGMA constants to clAmdBlas constants.
-#if defined(HAVE_clAmdBlas)
-clAmdBlasOrder       amdblas_order_const( magma_order_t order );
-clAmdBlasTranspose   amdblas_trans_const( magma_trans_t trans );
-clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t  uplo  );
-clAmdBlasDiag        amdblas_diag_const ( magma_diag_t  diag  );
-clAmdBlasSide        amdblas_side_const ( magma_side_t  side  );
+// Convert MAGMA constants to clBLAS constants.
+#if defined(HAVE_clBLAS)
+clblasOrder          clblas_order_const( magma_order_t order );
+clblasTranspose      clblas_trans_const( magma_trans_t trans );
+clblasUplo           clblas_uplo_const ( magma_uplo_t  uplo  );
+clblasDiag           clblas_diag_const ( magma_diag_t  diag  );
+clblasSide           clblas_side_const ( magma_side_t  side  );
 #endif
 
 
