@@ -65,7 +65,7 @@ magma_zlobpcg_shift_kernel(
     shift       magma_int_t
                 shift number
 
-    @param[in/out]
+    @param[in,out]
     x           magmaDoubleComplex_ptr 
                 input/output vector x
 

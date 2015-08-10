@@ -205,7 +205,7 @@ magma_zbicgstab_alphakernel(
     dv          magmaDoubleComplex_ptr
                 output vector v
 
-    @param[in/out]
+    @param[in,out]
     skp         magmaDoubleComplex_ptr
                 array for parameters ( skp[0]=alpha )
 
@@ -502,7 +502,7 @@ magma_zbicgstab_omegakernel(
     dt          magmaDoubleComplex_ptr
                 output vector t
 
-    @param[in/out]
+    @param[in,out]
     skp         magmaDoubleComplex_ptr
                 array for parameters
 

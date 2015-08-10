@@ -68,7 +68,7 @@ magma_zlobpcg_maxpy_kernel(
     X           magmaDoubleComplex_ptr 
                 input vector X
 
-    @param[in/out]
+    @param[in,out]
     Y           magmaDoubleComplex_ptr 
                 input/output vector Y
 

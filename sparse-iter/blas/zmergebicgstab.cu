@@ -58,24 +58,24 @@ magma_zbicgmerge1_kernel(
                 dimension n
 
     @param[in]
-    skp         magmaDoubleComplex_ptr 
+    skp         magmaDoubleComplex_ptr
                 set of scalar parameters
 
     @param[in]
-    v           magmaDoubleComplex_ptr 
-                input v
+    v           magmaDoubleComplex_ptr
+                input vector v
 
     @param[in]
-    r           magmaDoubleComplex_ptr 
-                input r
+    r           magmaDoubleComplex_ptr
+                input vector r
 
-    @param[in/out]
+    @param[in,out]
     p           magmaDoubleComplex_ptr 
-                input/output p
+                input/output vector p
 
     @param[in]
     queue       magma_queue_t
-                Queue to execute in.
+                queue to execute in.
 
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
@@ -136,19 +136,19 @@ magma_zbicgmerge2_kernel(
 
     @param[in]
     r           magmaDoubleComplex_ptr 
-                input r
+                input vector r
 
     @param[in]
     v           magmaDoubleComplex_ptr 
-                input v
+                input vector v
 
-    @param[s]
+    @param[out]
     s           magmaDoubleComplex_ptr 
-                output s
+                output vector s
 
     @param[in]
     queue       magma_queue_t
-                Queue to execute in.
+                queue to execute in.
 
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
@@ -229,11 +229,11 @@ magma_zbicgmerge3_kernel(
     t           magmaDoubleComplex_ptr 
                 input t
 
-    @param[in/out]
+    @param[in,out]
     x           magmaDoubleComplex_ptr 
                 input/output x
 
-    @param[in/out]
+    @param[in,out]
     r           magmaDoubleComplex_ptr 
                 input/output r
 
@@ -314,7 +314,7 @@ magma_zbicgmerge4_kernel_3(
     type        int
                 kernel type
 
-    @param[in/out]
+    @param[in,out]
     skp         magmaDoubleComplex_ptr 
                 vector with parameters
 

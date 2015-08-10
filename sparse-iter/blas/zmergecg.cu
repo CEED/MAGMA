@@ -1109,11 +1109,11 @@ magma_zcg_d_kernel(
     d2          magmaDoubleComplex_ptr 
                 temporary vector
 
-    @param[in/out]
+    @param[in,out]
     dx          magmaDoubleComplex_ptr
                 input vector x
 
-    @param[in/out]
+    @param[in,out]
     dr          magmaDoubleComplex_ptr 
                 input/output vector r
 
