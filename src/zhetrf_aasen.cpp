@@ -31,12 +31,12 @@
     Arguments
     ---------
     @param[in]
-    UPLO    CHARACTER*1
+    uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
       -     = 'L':  Lower triangle of A is stored.
  
     @param[in]
-    N       INTEGER
+    n       INTEGER
             The order of the matrix A.  N >= 0.
   
     @param[in,out]
@@ -52,15 +52,15 @@
             On exit, the banded matrix D and the triangular factor U or L.
  
     @param[in]
-    LDA     INTEGER
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
  
     @param[out]
-    IPIV    INTEGER array, dimension (N)
+    ipiv    INTEGER array, dimension (N)
             Details of the interchanges.
 
     @param[out]
-    INFO    INTEGER
+    info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
       -     > 0:  if INFO = i, D(i,i) is exactly zero.  The factorization

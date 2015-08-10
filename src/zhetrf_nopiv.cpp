@@ -33,12 +33,12 @@
     Arguments
     ---------
     @param[in]
-    UPLO    CHARACTER*1
+    uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
       -     = 'L':  Lower triangle of A is stored.
 
     @param[in]
-    N       INTEGER
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
@@ -57,11 +57,11 @@
             Higher performance is achieved if A is in pinned memory.
 
     @param[in]
-    LDA     INTEGER
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
     @param[out]
-    INFO    INTEGER
+    info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   if INFO = -6, the GPU memory allocation failed

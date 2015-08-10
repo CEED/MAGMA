@@ -31,12 +31,12 @@
     Arguments
     ---------
     @param[in]
-    UPLO    CHARACTER*1
+    uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
       -     = 'L':  Lower triangle of A is stored.
  
     @param[in]
-    N       INTEGER
+    n       INTEGER
             The order of the matrix A.  N >= 0.
   
     @param[in,out]
@@ -53,11 +53,11 @@
             to obtain the factor U or L (see below for further details).
  
     @param[in]
-    LDA     INTEGER
+    lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
  
     @param[out]
-    IPIV    INTEGER array, dimension (N)
+    ipiv    INTEGER array, dimension (N)
             Details of the interchanges and the block structure of D.
             If IPIV(k) > 0, then rows and columns k and IPIV(k) were
             interchanged and D(k,k) is a 1-by-1 diagonal block.
@@ -68,7 +68,7 @@
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
 
     @param[out]
-    INFO    INTEGER
+    info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
       -     > 0:  if INFO = i, D(i,i) is exactly zero.  The factorization

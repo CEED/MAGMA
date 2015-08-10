@@ -31,16 +31,16 @@
     Arguments
     ---------
     @param[in]
-    UPLO    CHARACTER*1
+    uplo    CHARACTER*1
       -     = 'U':  Upper triangle of A is stored;
       -     = 'L':  Lower triangle of A is stored.
 
     @param[in]
-    N       INTEGER
+    n       INTEGER
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -56,11 +56,11 @@
             allocated using cudaMallocHost.
 
     @param[in]
-    LDA     INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+    ldda    INTEGER
+            The leading dimension of the array A.  LDDA >= max(1,N).
 
     @param[out]
-    INFO    INTEGER
+    info    INTEGER
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   if INFO = -6, the GPU memory allocation failed
