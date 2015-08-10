@@ -207,14 +207,14 @@ magmablas_ztrsv_recursive_outofplace(
     -------
     ztrsv solves one of the matrix equations on gpu
 
-        op(A)*X = B,   or   X*op(A) = B,
+        op(A)*x = b,   or   x*op(A) = b,
 
-    where alpha is a scalar, X and B are vectors, A is a unit, or
+    where alpha is a scalar, x and b are vectors, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
         op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
 
-    The vector X is overwritten on B.
+    The vector x is overwritten on b.
 
 
     Arguments
@@ -247,7 +247,7 @@ magmablas_ztrsv_recursive_outofplace(
             On entry, n N specifies the order of the matrix A. n >= 0.
 
     @param[in]
-    A      COMPLEX_16 array of dimension ( lda, n )
+    A       COMPLEX_16 array of dimension ( lda, n )
             Before entry with uplo = MagmaUpper, the leading n by n
             upper triangular part of the array A must contain the upper
             triangular matrix and the strictly lower triangular part of
@@ -260,13 +260,13 @@ magmablas_ztrsv_recursive_outofplace(
             A are not referenced either, but are assumed to be unity.
 
     @param[in]
-    lda    INTEGER.
+    lda     INTEGER.
             On entry, lda specifies the first dimension of A.
             lda >= max( 1, n ).
 
     @param[in]
-    B      COMPLEX_16 array of dimension  n
-            On exit, B is overwritten with the solution vector X.
+    b       COMPLEX_16 array of dimension  n
+            On exit, b is overwritten with the solution vector x.
 
     @param[in]
     incb    INTEGER.
@@ -277,8 +277,6 @@ magmablas_ztrsv_recursive_outofplace(
 
     @ingroup magma_zblas2
     ********************************************************************/
-
-
 extern "C" void
 magmablas_ztrsv(
     magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
