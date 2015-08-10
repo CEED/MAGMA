@@ -17,7 +17,7 @@ ZHDR := \
 	zgerbt.h		\
 	zpotf2_devicesfunc.cuh		\
 	zlarfg_devicesfunc.cuh		\
-	ztrsv_devicesfunc.cuh 		\
+	ztrsv_template_device.cuh 		\
 
 # additional dependencies
 strtri_diag.$(o_ext): strtri.h

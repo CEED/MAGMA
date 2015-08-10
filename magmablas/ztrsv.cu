@@ -14,18 +14,24 @@
 #include "common_magma.h"
 #include "magma_templates.h"
 
+
 #define PRECISION_z
 
 
 
-#define NB 256  //NB is the 1st level blocking in recursive blocking, BLOCK_SIZE is the 2ed level, NB=256, BLOCK_SIZE=64 is optimal for batched
-#define BLOCK_SIZE 128
+#define NB 256  //NB is the 1st level blocking in recursive blocking, NUM_THREADS is the 2ed level, NB=256, NUM_THREADS=64 is optimal for batched
 
-#include "ztrsv_devicesfunc.cuh"
+#define NUM_THREADS 128 //64 //128
 
+
+#include "ztrsv_template_device.cuh"
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
+
 extern __shared__ magmaDoubleComplex shared_data[];
+
+
+
 
 //==============================================================================
 
@@ -38,7 +44,14 @@ ztrsv_notrans_kernel_outplace(
     magmaDoubleComplex *x,
     int flag=0)
 {
-    ztrsv_notrans_device(uplo, transA, diag, n, A, lda, b, incb, x, flag);
+    if(flag == 0 )
+    {
+        ztrsv_notrans_device<128, 128, 1, 1000000, 0>(uplo, transA, diag, n, A, lda, b, incb, x);
+    }
+    else
+    {
+        ztrsv_notrans_device<128, 128, 1, 1000000, 1>(uplo, transA, diag, n, A, lda, b, incb, x);
+    }
 }
 
 //==============================================================================
@@ -56,7 +69,28 @@ ztrsv_trans_kernel_outplace(
     magmaDoubleComplex *x,
     int flag=0)
 {
-    ztrsv_trans_device(uplo, transA, diag, n, A, lda, b, incb, x, flag);
+   if(flag == 0 )
+    {
+        if(transA == MagmaConjTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 1, 0>(uplo, transA, diag, n, A, lda, b, incb, x);
+        }
+        else
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 0, 0>(uplo, transA, diag, n, A, lda, b, incb, x);
+        }
+    }
+    else
+    {
+        if(transA == MagmaConjTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 1, 1>(uplo, transA, diag, n, A, lda, b, incb, x);
+        }
+        else
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 0, 1>(uplo, transA, diag, n, A, lda, b, incb, x);
+        }
+    }
 }
  
 //==============================================================================
@@ -97,7 +131,7 @@ magmablas_ztrsv_outofplace(
         return;
 
     dim3 blocks(1, 1, 1);
-    dim3 threads(BLOCK_SIZE);
+    dim3 threads(NUM_THREADS);
 
 
     if (transA == MagmaNoTrans)

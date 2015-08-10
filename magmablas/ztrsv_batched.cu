@@ -20,9 +20,10 @@
 
 
 #define NB 256  //NB is the 1st level blocking in recursive blocking, BLOCK_SIZE is the 2ed level, NB=256, BLOCK_SIZE=64 is optimal for batched
-#define BLOCK_SIZE 128
 
-#include "ztrsv_devicesfunc.cuh"
+#define NUM_THREADS 128 //64 //128
+
+#include "ztrsv_template_device.cuh"
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
@@ -41,7 +42,14 @@ ztrsv_notrans_kernel_outplace_batched(
     int flag=0)
 {
     int batchid = blockIdx.z;
-    ztrsv_notrans_device(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid],flag);
+    if(flag == 0 )
+    {
+        ztrsv_notrans_device<128, 128, 1, 1000000, 0>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+    }
+    else
+    {
+        ztrsv_notrans_device<128, 128, 1, 1000000, 1>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+    }
 }
 
 
@@ -58,7 +66,28 @@ ztrsv_trans_kernel_outplace_batched(
     int flag=0)
 {
     int batchid = blockIdx.z;
-    ztrsv_trans_device(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid], flag);
+    if(flag == 0 )
+    {
+        if(transA == MagmaConjTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 1, 0>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+        }
+        else if (transA == MagmaTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 0, 0>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+        }
+    }
+    else
+    {
+        if(transA == MagmaConjTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 1, 1>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+        }
+        else if (transA == MagmaTrans)
+        {
+            ztrsv_trans_device<32, 16, 8, 1000000, 0, 1>(uplo, transA, diag, n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
+        }
+    }
 }  
 
 
@@ -99,7 +128,7 @@ magmablas_ztrsv_outofplace_batched(
         return;
 
     dim3 blocks(1, 1, batchCount);
-    dim3 threads(BLOCK_SIZE);
+    dim3 threads(NUM_THREADS);
 
     if (transA == MagmaNoTrans)
     {
@@ -230,12 +259,12 @@ magmablas_ztrsv_recursive_outofplace_batched(
 
 
             //assume x_array contains zero elements
-            magmablas_zgemv_batched(MagmaConjTrans, i, jb, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);            
-         
+            magmablas_zgemv_batched(transA, i, jb, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);            
+           
             magma_zdisplace_pointers(dW0_displ, A_array, lda,  col, col, batchCount, queue);
             magma_zdisplace_pointers(dW1_displ, b_array, 1, col*incb,   0, batchCount, queue);
             magma_zdisplace_pointers(dW2_displ, x_array, 1,    col,   0, batchCount, queue);
-    
+           
             magmablas_ztrsv_outofplace_batched(uplo, transA, diag, jb, dW0_displ, lda, dW1_displ, incb, dW2_displ, batchCount, queue, i);
         }
     }
