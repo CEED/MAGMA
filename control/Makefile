@@ -28,6 +28,7 @@ endif
 
 # alphabetic order
 SRC := \
+	abs.cpp				\
 	affinity.cpp		\
 	auxiliary.cpp		\
 	magma_bulge.cpp	\
