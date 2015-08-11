@@ -31,9 +31,11 @@ SRC := \
 	abs.cpp				\
 	affinity.cpp		\
 	auxiliary.cpp		\
-	magma_bulge.cpp	\
+	magma_bulge.cpp		\
 	connection_mgpu.cpp	\
 	constants.cpp		\
+	get_batched_crossover.cpp		\
+	get_batched_gemm_decision.cpp	\
 	get_nb.cpp		\
 	magma_threadsetting.cpp	\
 	magma_timer.cpp		\
@@ -45,9 +47,6 @@ SRC := \
 	thread_queue.cpp	\
 	trace.cpp		\
 	xerbla.cpp		\
-	get_batched_gemm_decision.cpp	\
-	get_batched_crossover.cpp		\
-	
 
 # ilaenv was previously used by gesdd; it was the only required Fortran dependence
 #	ilaenv_f77.f		\
