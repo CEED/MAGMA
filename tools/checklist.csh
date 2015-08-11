@@ -14,8 +14,27 @@ svn st -vq | perl -pi -e 's/^.{41}//' | sort \
 
 setenv FILES   "`cat files.txt`"
 setenv HEADERS "`egrep '\.h' files.txt`"
+setenv MAKEFILES    "`egrep Makefile files.txt | egrep -v sparse-iter`"
+setenv MAKEFILES_SP "`egrep Makefile files.txt | egrep    sparse-iter`"
 
 echo "============================================================ required fixes"
+
+# fixed
+# both foo.cu and foo.cpp -> foo.o; can't add two foo.o to same libbar.a file
+# check dense and sparse separately, as they go into different libmagma.a and
+# libmagma_sparse.a files, and both have error.o
+echo "========== no duplicate object filenames                                   *** required fix ***"
+egrep -h '^\s+\w+\.(cpp|cu|f|f90|F90)' $MAKEFILES \
+    | perl -pe 's/\.(cpp|cu|f|f90|F90)/.o/; s/[ \t]+/ /g;' | sort | uniq -c | egrep -v '^ +1 '
+egrep -h '^\s+\w+\.(cpp|cu|f|f90|F90)' $MAKEFILES_SP \
+    | perl -pe 's/\.(cpp|cu|f|f90|F90)/.o/; s/[ \t]+/ /g;' | sort | uniq -c | egrep -v '^ +1 '
+echo
+
+# fixed
+# use 'svn propdel svn:executable [files]' to remove
+echo "========== no execute bit on source files                                  *** required fix ***"
+find $FILES -perm +a+x \! -name '*.pl' \! -name '*.csh' \! -name '*.py' \! -name '*.sh'
+echo
 
 # fixed
 echo "========== no prototypes in cpp files; put in headers                      *** required fix ***"
@@ -138,6 +157,11 @@ echo "aux:"
 egrep 'ingroup.*_aux'    $FILES -l | egrep -v 'checklist.csh|[sdcz](getf2|potf2|geqr2|la)'
 echo
 
+# fixed
+echo "========== sync_wtime of NULL stream (excluding _mgpu codes)               *** required fix ***"
+egrep sync_wtime testing/*.cpp | egrep -v 'sync_wtime\( opts.queue \)' | egrep -v '_mgpu.cpp'
+echo
+
 # needs lots of work; also lots of exceptions
 echo "========== int instead of magma_int_t                                      *** required fix ***"
 egrep '\bint\b' $HEADERS \
@@ -154,15 +178,13 @@ egrep '(cuda|cublas)[a-zA-Z]\w+ *\('   $FILES \
     | egrep -v 'testing_z([a-z]+)(_\w+)?\.cpp:.*cublasZ\1'
 echo
 
-echo "========== system includes                                                 *** should be fixed ***"
-egrep 'include *<' $FILES | egrep -v 'testing/|\.h: *#include|(plasma|core_blas|cublas_v2|omp)\.h' | egrep -v 'quark'
+echo "========== system includes                                                 *** should be fixed (with a number of exceptions) ***"
+egrep '^ *# *include *<' $FILES | egrep -v 'testing/|\.h: *#include|(plasma|core_blas|cublas_v2|omp)\.h' | egrep -v 'quark'
 echo
 
 # fixed
 echo "========== device sync, instead of queue sync                              *** should be fixed ***"
 egrep '(magma_device_sync|cudaDeviceSynchronize)' $FILES | egrep -v 'interface.cpp'
-echo
-echo
 echo
 
 # in src: dsyevdx_2stage, zhetrf_aasen, ztsqrt, ztstrf need fixing
@@ -193,6 +215,11 @@ echo
 # mostly fixed; some exceptions
 echo "========== extraneous newlines before }"
 perl -n0777e 'if ( m/\n *\n( *\}.*)/ ) { print "$ARGV: $1\n"; }' $FILES
+echo
+
+# fixed
+echo "========== lacking newline at EOF"
+perl -n0777e 'if ( ! m/\n$/ ) { print "$ARGV\n"; }' $FILES
 echo
 
 # fixed
