@@ -128,6 +128,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     }
     magmablasSetKernelStream(stream[0]);
 
+    /* TODO fix memory leaks, e.g., if last malloc fails */
     magma_int_t lddw = nb*(1+magma_ceildiv(n, nb));
     ldda = magma_roundup(n, 32);
     if (MAGMA_SUCCESS != magma_zmalloc( &work, magma_roundup(n, nb) *ldda ) ||
@@ -158,9 +159,9 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     magmaDoubleComplex **dA_array = NULL;
     magma_int_t **dipiv_array = NULL;
     if (MAGMA_SUCCESS != magma_imalloc( &dipiv_magma, nb) ||
-       MAGMA_SUCCESS != magma_imalloc( &dinfo_magma, 1) ||
-       MAGMA_SUCCESS != magma_malloc( (void**)&dA_array, sizeof(*dA_array) ) ||
-       MAGMA_SUCCESS != magma_malloc( (void**)&dipiv_array, sizeof(*dipiv_array))) {
+        MAGMA_SUCCESS != magma_imalloc( &dinfo_magma, 1) ||
+        MAGMA_SUCCESS != magma_malloc( (void**)&dA_array, sizeof(*dA_array) ) ||
+        MAGMA_SUCCESS != magma_malloc( (void**)&dipiv_array, sizeof(*dipiv_array))) {
         /* alloc failed for perm info */
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;

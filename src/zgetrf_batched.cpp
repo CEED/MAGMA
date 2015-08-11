@@ -227,24 +227,24 @@ magma_zgetrf_batched(
         //===============================================
         if (recnb == nb)
         {
-        arginfo = magma_zgetf2_batched(
-                pm, ib,
-                dA_displ, ldda,
-                dW1_displ, dW2_displ, dW3_displ,
-                dipiv_displ, 
-                info_array, i, batchCount, myhandle, queue);   
+            arginfo = magma_zgetf2_batched(
+                    pm, ib,
+                    dA_displ, ldda,
+                    dW1_displ, dW2_displ, dW3_displ,
+                    dipiv_displ, 
+                    info_array, i, batchCount, myhandle, queue);   
         }
         else {
-        arginfo = magma_zgetrf_recpanel_batched(
-                pm, ib, recnb,
-                dA_displ, ldda,
-                dipiv_displ, pivinfo_array,
-                dwork_array, nb, 
-                dinvA_array, invA_msize, 
-                dW0_displ, dW1_displ, dW2_displ, 
-                dW3_displ, dW4_displ,
-                info_array, i, 
-                batchCount, myhandle, queue);  
+            arginfo = magma_zgetrf_recpanel_batched(
+                    pm, ib, recnb,
+                    dA_displ, ldda,
+                    dipiv_displ, pivinfo_array,
+                    dwork_array, nb, 
+                    dinvA_array, invA_msize, 
+                    dW0_displ, dW1_displ, dW2_displ, 
+                    dW3_displ, dW4_displ,
+                    info_array, i, 
+                    batchCount, myhandle, queue);  
         } 
         if (arginfo != 0 ) goto fin;
         //===============================================

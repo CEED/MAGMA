@@ -59,9 +59,9 @@ magma_zlarfy(
     const magmaDoubleComplex *V, const magmaDoubleComplex *TAU,
     magmaDoubleComplex *work)
 {
-/*
+    /*
     work (workspace) double complex array, dimension n
-*/
+    */
 
     static magma_int_t ione = 1;
     static magmaDoubleComplex c_zero   =  MAGMA_Z_ZERO;

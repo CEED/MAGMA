@@ -84,7 +84,7 @@ magma_zsysv_nopiv_gpu(magma_uplo_t uplo,  magma_int_t n, magma_int_t nrhs,
     *info = 0;
     int   upper = (uplo == MagmaUpper);
     if (! upper && uplo != MagmaLower) {
-      *info = -1;
+        *info = -1;
     } else if (n < 0) {
         *info = -2;
     } else if (nrhs < 0) {

@@ -90,11 +90,11 @@ magma_zsytrf_nopiv_gpu(
 
     *info = 0;
     if (! upper && uplo != MagmaLower) {
-      *info = -1;
+        *info = -1;
     } else if (n < 0) {
-      *info = -2;
+        *info = -2;
     } else if (ldda < max(1,n)) {
-      *info = -4;
+        *info = -4;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );

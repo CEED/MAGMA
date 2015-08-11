@@ -99,11 +99,11 @@
     ---------------
     The matrix Q is represented as a product of elementary reflectors
 
-       Q = H(1) H(2) . . . H(k), where k = min(m,n).
+        Q = H(1) H(2) . . . H(k), where k = min(m,n).
 
     Each H(i) has the form
 
-       H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v'
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
@@ -246,127 +246,127 @@ magma_zgeqrf_expert_batched(
 
     for (i=0; i < min_mn; i += nb)
     {
-            ib = min(nb, min_mn-i);  
-            //===============================================
-            // panel factorization
-            //===============================================
+        ib = min(nb, min_mn-i);  
+        //===============================================
+        // panel factorization
+        //===============================================
 
-            magma_zdisplace_pointers(dW0_displ, dA_array, ldda, i, i, batchCount, queue); 
-            magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue);
-            if ( provide_RT > 0 )
-            {
-                offset_RT = i;
-                magma_zdisplace_pointers(dR_displ, dR_array, lddr, (provide_RT == 1 ? offset_RT:0), offset_RT, batchCount, queue); 
-                magma_zdisplace_pointers(dT_displ, dT_array, lddt, 0, offset_RT, batchCount, queue); 
-            }
+        magma_zdisplace_pointers(dW0_displ, dA_array, ldda, i, i, batchCount, queue); 
+        magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue);
+        if ( provide_RT > 0 )
+        {
+            offset_RT = i;
+            magma_zdisplace_pointers(dR_displ, dR_array, lddr, (provide_RT == 1 ? offset_RT:0), offset_RT, batchCount, queue); 
+            magma_zdisplace_pointers(dT_displ, dT_array, lddt, 0, offset_RT, batchCount, queue); 
+        }
 
+        //dwork is used in panel factorization and trailing matrix update
+        //dW4_displ, dW5_displ are used as workspace and configured inside
+        magma_zgeqrf_panel_batched(m-i, ib, jb, 
+                                   dW0_displ, ldda, 
+                                   dW2_displ, 
+                                   dT_displ, lddt, 
+                                   dR_displ, lddr,
+                                   dW1_displ,
+                                   dW3_displ,
+                                   dwork, 
+                                   dW4_displ, dW5_displ,
+                                   info_array,
+                                   batchCount, myhandle, queue);
+           
+        //===============================================
+        // end of panel
+        //===============================================
+
+        //===============================================
+        // update trailing matrix
+        //===============================================
+        if ( (n-ib-i) > 0)
+        {
             //dwork is used in panel factorization and trailing matrix update
-            //dW4_displ, dW5_displ are used as workspace and configured inside
-            magma_zgeqrf_panel_batched(m-i, ib, jb, 
-                                       dW0_displ, ldda, 
-                                       dW2_displ, 
-                                       dT_displ, lddt, 
-                                       dR_displ, lddr,
-                                       dW1_displ,
-                                       dW3_displ,
-                                       dwork, 
-                                       dW4_displ, dW5_displ,
-                                       info_array,
-                                       batchCount, myhandle, queue);
-               
-            //===============================================
-            // end of panel
-            //===============================================
+            //reset dW4_displ
+            ldw = nb;
+            zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
+            offset = ldw*n*batchCount;
+            zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
 
-            //===============================================
-            // update trailing matrix
-            //===============================================
-            if ( (n-ib-i) > 0)
-            {
-                //dwork is used in panel factorization and trailing matrix update
-                //reset dW4_displ
-                ldw = nb;
-                zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
-                offset = ldw*n*batchCount;
-                zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
+            // set the diagonal of v as one and the upper triangular part as zero already set inside geqrf_panel
+            //magmablas_zlaset_batched(MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
+            //magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue); 
 
-                // set the diagonal of v as one and the upper triangular part as zero already set inside geqrf_panel
-                //magmablas_zlaset_batched(MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
-                //magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue); 
+            // it is faster since it is using BLAS-3 GEMM routines, different from lapack implementation 
+            magma_zlarft_batched(m-i, ib, 0,
+                             dW0_displ, ldda,
+                             dW2_displ,
+                             dT_displ, lddt, 
+                             dW4_displ, nb*lddt,
+                             batchCount, myhandle, queue);
 
-                // it is faster since it is using BLAS-3 GEMM routines, different from lapack implementation 
-                magma_zlarft_batched(m-i, ib, 0,
-                                 dW0_displ, ldda,
-                                 dW2_displ,
-                                 dT_displ, lddt, 
-                                 dW4_displ, nb*lddt,
-                                 batchCount, myhandle, queue);
-
-                
-                // perform C = (I-V T^H V^H) * C, C is the trailing matrix
-                //-------------------------------------------
-                //          USE STREAM  GEMM
-                //-------------------------------------------
-                use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
-                if ( use_stream )   
-                { 
-                    // But since the code use the NULL stream everywhere, 
-                    // so I don't need it, because the NULL stream do the sync by itself
-                    //magma_device_sync(); 
-                    magma_queue_sync(queue); 
-                    for (k=0; k < batchCount; k++)
-                    {
-                        streamid = k%nbstreams;                                       
-                        magmablasSetKernelStream(stream[streamid]);
-                        // the stream gemm must take cpu pointer 
-                        magma_zlarfb_gpu_gemm(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                                    m-i, n-i-ib, ib,
-                                    cpuAarray[k] + i + i * ldda, ldda, 
-                                    cpuTarray[k] + offset_RT*lddt, lddt,
-                                    cpuAarray[k] + i + (i+ib) * ldda, ldda,
-                                    dwork + nb * n * k, -1,
-                                    dwork + nb * n * batchCount + nb * n * k, -1);
-                    }
-
-                    // need to synchronise to be sure that panel does not start before
-                    // finishing the update at least of the next panel
-                    // BUT no need for it as soon as the other portion of the code 
-                    // use the NULL stream which do the sync by itself 
-                    //magma_device_sync();
-                    if ( queue != NULL ) {
-                        for (magma_int_t s=0; s < nbstreams; s++)
-                            magma_queue_sync(stream[s]);
-                    }
-                    magmablasSetKernelStream(queue);
-                }
-                //-------------------------------------------
-                //          USE BATCHED GEMM
-                //-------------------------------------------
-                else
+            
+            // perform C = (I-V T^H V^H) * C, C is the trailing matrix
+            //-------------------------------------------
+            //          USE STREAM  GEMM
+            //-------------------------------------------
+            use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
+            if ( use_stream )   
+            { 
+                // But since the code use the NULL stream everywhere, 
+                // so I don't need it, because the NULL stream do the sync by itself
+                //magma_device_sync(); 
+                magma_queue_sync(queue); 
+                for (k=0; k < batchCount; k++)
                 {
-                    //direct trailing matrix in dW1_displ
-                    magma_zdisplace_pointers(dW1_displ, dA_array, ldda, i, i+ib, batchCount, queue); 
-
-                    magma_zlarfb_gemm_batched( 
-                                MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+                    streamid = k%nbstreams;                                       
+                    magmablasSetKernelStream(stream[streamid]);
+                    // the stream gemm must take cpu pointer 
+                    magma_zlarfb_gpu_gemm(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                 m-i, n-i-ib, ib,
-                                (const magmaDoubleComplex**)dW0_displ, ldda,
-                                (const magmaDoubleComplex**)dT_displ, lddt,
-                                dW1_displ,  ldda,
-                                dW4_displ,  ldw,
-                                dW5_displ, ldw,
-                                batchCount, queue, myhandle);
+                                cpuAarray[k] + i + i * ldda, ldda, 
+                                cpuTarray[k] + offset_RT*lddt, lddt,
+                                cpuAarray[k] + i + (i+ib) * ldda, ldda,
+                                dwork + nb * n * k, -1,
+                                dwork + nb * n * batchCount + nb * n * k, -1);
                 }
-            }// update the trailing matrix 
-            //===============================================
 
-            // copy dR back to V after the trailing matrix update, 
-            // only when provide_RT=0 otherwise the nbxnb block of V is set to diag=1/0
-            // The upper portion of V could be set totaly to 0 here
-            if ( provide_RT == 0 )
-            {
-                magmablas_zlacpy_batched(MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue);
+                // need to synchronise to be sure that panel does not start before
+                // finishing the update at least of the next panel
+                // BUT no need for it as soon as the other portion of the code 
+                // use the NULL stream which do the sync by itself 
+                //magma_device_sync();
+                if ( queue != NULL ) {
+                    for (magma_int_t s=0; s < nbstreams; s++)
+                        magma_queue_sync(stream[s]);
+                }
+                magmablasSetKernelStream(queue);
             }
+            //-------------------------------------------
+            //          USE BATCHED GEMM
+            //-------------------------------------------
+            else
+            {
+                //direct trailing matrix in dW1_displ
+                magma_zdisplace_pointers(dW1_displ, dA_array, ldda, i, i+ib, batchCount, queue); 
+
+                magma_zlarfb_gemm_batched( 
+                            MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+                            m-i, n-i-ib, ib,
+                            (const magmaDoubleComplex**)dW0_displ, ldda,
+                            (const magmaDoubleComplex**)dT_displ, lddt,
+                            dW1_displ,  ldda,
+                            dW4_displ,  ldw,
+                            dW5_displ, ldw,
+                            batchCount, queue, myhandle);
+            }
+        }// update the trailing matrix 
+        //===============================================
+
+        // copy dR back to V after the trailing matrix update, 
+        // only when provide_RT=0 otherwise the nbxnb block of V is set to diag=1/0
+        // The upper portion of V could be set totaly to 0 here
+        if ( provide_RT == 0 )
+        {
+            magmablas_zlacpy_batched(MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue);
+        }
     }
 
     magmablasSetKernelStream(queue);

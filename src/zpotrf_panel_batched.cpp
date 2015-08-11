@@ -93,10 +93,10 @@ magma_zpotrf_recpanel_batched(
         return arginfo;
     }
     if (uplo == MagmaUpper) {
-       printf("Upper side is unavailable \n");
-       arginfo = -1;
-       magma_xerbla( __func__, -(arginfo) );
-       return arginfo;
+        printf("Upper side is unavailable \n");
+        arginfo = -1;
+        magma_xerbla( __func__, -(arginfo) );
+        return arginfo;
     }
     if (m < n) {
         printf("error m < n %d < %d \n", (int) m, (int) n);
@@ -147,8 +147,8 @@ magma_zpotrf_recpanel_batched(
                            info_array, gbstep,
                            batchCount, myhandle, queue);
         if (arginfo != 0) {
-           magma_free(dA_displ);
-           return arginfo;
+            magma_free(dA_displ);
+            return arginfo;
         }
 
         // update A2
@@ -200,8 +200,8 @@ magma_zpotrf_rectile_batched(
         return 1;
     }
     if (uplo == MagmaUpper) {
-       printf("Upper side is unavailable \n");
-       return -100;
+        printf("Upper side is unavailable \n");
+        return -100;
     }
     if (m < n) {
         printf("error m < n %d < %d \n", (int) m, (int) n);

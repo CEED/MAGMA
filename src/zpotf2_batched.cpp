@@ -107,7 +107,7 @@ magma_zpotf2_batched(
     magma_int_t crossover = magma_get_zpotrf_batched_crossover();
 
     if (uplo == MagmaUpper) {
-       printf("Upper side is unavailable \n");
+        printf("Upper side is unavailable \n");
     }
     else {
         if ( n <= crossover )
@@ -125,12 +125,12 @@ magma_zpotf2_batched(
                                    info_array, gbstep, batchCount, queue);
                 }
                 else {
-                     magma_zdisplace_pointers(dA_displ, dA_array, lda, j, j, batchCount, queue); 
-                     magma_zpotf2_ztrsm_batched(
-                               uplo, rows, ib,
-                               dA_displ, lda,
-                               dW_displ, dB_displ, dC_displ, 
-                               info_array, gbstep, batchCount, queue);
+                    magma_zdisplace_pointers(dA_displ, dA_array, lda, j, j, batchCount, queue); 
+                    magma_zpotf2_ztrsm_batched(
+                              uplo, rows, ib,
+                              dA_displ, lda,
+                              dW_displ, dB_displ, dC_displ, 
+                              info_array, gbstep, batchCount, queue);
                 }
                 #if 1
                 //#define RIGHT_LOOKING

@@ -24,7 +24,7 @@ magma_zgetrf_panel_nopiv_batched(
     magma_int_t *info_array, magma_int_t gbstep,  
     magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue )
 {
-     magma_int_t arginfo = 0;
+    magma_int_t arginfo = 0;
     //===============================================
     //  panel factorization
     //===============================================

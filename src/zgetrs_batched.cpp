@@ -17,7 +17,7 @@
     Purpose
     -------
     ZGETRS solves a system of linear equations
-      A * X = B,  A**T * X = B,  or  A**H * X = B
+        A * X = B,  A**T * X = B,  or  A**H * X = B
     with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
 
     Arguments
@@ -125,7 +125,7 @@ magma_zgetrs_batched(
     magmaDoubleComplex* dwork      = NULL; // dinvA and dwork are workspace in ztrsm
     magma_zmalloc( &dinvA, invA_msize * batchCount);
     magma_zmalloc( &dwork, dwork_msize * batchCount );
-   /* check allocation */
+    /* check allocation */
     if ( dW1_displ == NULL || dW2_displ == NULL || dW3_displ   == NULL || dW4_displ   == NULL || 
          dinvA_array == NULL || dwork_array == NULL || dinvA     == NULL || dwork     == NULL ) {
         magma_free(dW1_displ);
@@ -176,9 +176,9 @@ magma_zgetrs_batched(
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue, myhandle);
-       }
-       else
-       {
+        }
+        else
+        {
             // solve dwork = L^-1 * 1
             magmablas_ztrsv_outofplace_batched(MagmaLower, MagmaNoTrans, MagmaUnit,
                 n, 
@@ -194,7 +194,7 @@ magma_zgetrs_batched(
                 dwork_array,        1, // dB 
                 dB_array,    // dX //output
                 batchCount, queue, 0);
-       }
+        }
     }
     else {
         if (nrhs > 1)
