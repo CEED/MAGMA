@@ -148,12 +148,12 @@ zgemvc_template_fermi(
             INCX must not be zero.
   
     @param[in]
-    beta    DOUBLE REAL
+    beta    COMPLEX_16
             On entry, BETA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
 
     @param[out]
-    dy      DOUBLE PRECISION array of dimension
+    dy      COMPLEX_16 array of dimension
             m if trans == MagmaNoTrans
             n if trans == MagmaTrans or MagmaConjTrans
 
@@ -161,7 +161,7 @@ zgemvc_template_fermi(
     incy    Specifies the increment for the elements of Y.
             INCY must not be zero.
 
-    @ingroup magma_dblas2
+    @ingroup magma_zblas2
     ********************************************************************/
 extern "C" void
 magmablas_zgemv(
