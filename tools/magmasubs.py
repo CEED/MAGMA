@@ -640,6 +640,7 @@ subs = {
     ('lapack_s',       'lapack_d',       'lapack_s',       'lapack_d'        ),
     ('MAGMABLAS_S',    'MAGMABLAS_D',    'MAGMABLAS_C',    'MAGMABLAS_Z'     ),
     ('magmablas_s',    'magmablas_d',    'magmablas_c',    'magmablas_z'     ),
+    ('magmablas_s',    'magmablas_d',    'magmablas_s',    'magmablas_d'     ),
     ('magmaf_s',       'magmaf_d',       'magmaf_c',       'magmaf_z'        ),
     ('magma_get_s',    'magma_get_d',    'magma_get_c',    'magma_get_z'     ),
     ('magma_ps',       'magma_pd',       'magma_pc',       'magma_pz'        ),
@@ -647,6 +648,8 @@ subs = {
     ('MAGMA_S',        'MAGMA_D',        'MAGMA_C',        'MAGMA_Z'         ),
     ('MAGMA_s',        'MAGMA_d',        'MAGMA_c',        'MAGMA_z'         ),
     ('magma_s',        'magma_d',        'magma_c',        'magma_z'         ),
+    ('magma_s',        'magma_d',        'magma_sc',       'magma_dz'        ),
+    ('magma_s',        'magma_d',        'magma_s',        'magma_d'         ),
     ('magmasparse_s',  'magmasparse_d',  'magmasparse_c',  'magmasparse_z'   ),
     ('morse_ps',       'morse_pd',       'morse_pc',       'morse_pz'        ),
     ('MORSE_S',        'MORSE_D',        'MORSE_C',        'MORSE_Z'         ),
@@ -669,8 +672,9 @@ subs = {
     ('workspace_s',    'workspace_d',    'workspace_c',    'workspace_z'     ),
     ('QUARK_Insert_Task_s', 'QUARK_Insert_Task_d', 'QUARK_Insert_Task_c', 'QUARK_Insert_Task_z' ),
 
-    # magma_[get_]d -> magma_[get_]s, so revert _sevice to _device
+    # magma_[get_]d -> magma_[get_]s, so revert _sevice to _device, etc.
     ('_device',        '_sevice',        '_device',        '_sevice'         ),
+    ('magma_devptr_t', 'magma_sevptr_t', 'magma_devptr_t', 'magma_sevptr_t'  ),
     ('magma_diag',     'magma_siag',     'magma_diag',     'magma_siag'      ),
     ('magma_direct',   'magma_sirect',   'magma_direct',   'magma_sirect'    ),
     ('lapack_diag',    'lapack_siag',    'lapack_diag',    'lapack_siag'     ),

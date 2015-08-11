@@ -258,11 +258,7 @@ magma_zlobpcg(
                magma_zaxpy(m, MAGMA_Z_MAKE(-evalues[i],0), blockX+i*m, 1, blockR+i*m, 1);
             }
   */
-            #if defined(PRECISION_z) || defined(PRECISION_d)
-                magma_dsetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
-            #else
-                magma_ssetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
-            #endif
+            magma_dsetmatrix( 3*n, 1, evalues, 3*n, eval_gpu, 3*n );
 
             CHECK( magma_zlobpcg_res( m, n, eval_gpu, blockX, blockR, eval_gpu, queue ));
 

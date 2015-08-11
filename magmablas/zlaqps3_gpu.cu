@@ -394,15 +394,7 @@ magma_zlaqps3_gpu(
             itemp     = jpvt[pvt];
             jpvt[pvt] = jpvt[k];
             jpvt[k]   = itemp;
-            #if (defined(PRECISION_d) || defined(PRECISION_z))
-                //magma_dswap( 1, &dvn1[pvt], 1, &dvn1[k], 1 );
-                //magma_dswap( 1, &dvn2[pvt], 1, &dvn2[k], 1 );
-                magma_dswap( 2, &dvn1[pvt], n+offset, &dvn1[k], n+offset);
-            #else
-                //magma_sswap( 1, &dvn1[pvt], 1, &dvn1[k], 1 );
-                //magma_sswap( 1, &dvn2[pvt], 1, &dvn2[k], 1 );
-                magma_sswap(2, &dvn1[pvt], n+offset, &dvn1[k], n+offset);
-            #endif
+            magma_dswap( 2, &dvn1[pvt], n+offset, &dvn1[k], n+offset );
         }
 
         /* Apply previous Householder reflectors to column K:
@@ -468,11 +460,7 @@ magma_zlaqps3_gpu(
                 &dvn2[k+1], dA(rk,k+1), ldda, lsticcs); 
         }
 
-        #if defined(PRECISION_d) || defined(PRECISION_z)
-            magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #else
-            magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #endif
+        magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
 */
 
         if (k >= n-1)

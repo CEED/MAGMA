@@ -148,15 +148,7 @@ magma_zlaqps2_gpu(
             itemp     = jpvt[pvt];
             jpvt[pvt] = jpvt[k];
             jpvt[k]   = itemp;
-            #if (defined(PRECISION_d) || defined(PRECISION_z))
-                //magma_dswap( 1, &dvn1[pvt], 1, &dvn1[k], 1 );
-                //magma_dswap( 1, &dvn2[pvt], 1, &dvn2[k], 1 );
-                magma_dswap( 2, &dvn1[pvt], n+offset, &dvn1[k], n+offset);
-            #else
-                //magma_sswap( 1, &dvn1[pvt], 1, &dvn1[k], 1 );
-                //magma_sswap( 1, &dvn2[pvt], 1, &dvn2[k], 1 );
-                magma_sswap(2, &dvn1[pvt], n+offset, &dvn1[k], n+offset);
-            #endif
+            magma_dswap( 2, &dvn1[pvt], n+offset, &dvn1[k], n+offset );
 
             magmablas_zswap( m, dA(0,pvt), ione, dA(0, k), ione );
         }
@@ -225,11 +217,7 @@ magma_zlaqps2_gpu(
             magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &dvn1[k+1], 
                                               &dvn2[k+1], dA(rk,k+1), ldda, lsticcs); 
             
-            #if defined(PRECISION_d) || defined(PRECISION_z)
-                magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-            #else
-                magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-            #endif
+            magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
         }
 
         //*dA(rk, k) = Akk;
@@ -264,11 +252,7 @@ magma_zlaqps2_gpu(
         // printf( " -- recompute dnorms --\n" );
         magmablas_dznrm2_check(m-rk-1, n-*kb, dA(rk+1,*kb), ldda,
                                &dvn1[*kb], lsticcs);
-#if defined(PRECISION_d) || defined(PRECISION_z)
-        magma_dcopymatrix( n-*kb, 1, &dvn1[*kb], n, &dvn2[*kb], n);
-#else   
-        magma_scopymatrix( n-*kb, 1, &dvn1[*kb], n, &dvn2[*kb], n);
-#endif  
+        magma_dcopymatrix( n-*kb, 1, &dvn1[*kb], n, &dvn2[*kb], n );
     }
     magma_free(lsticcs);
     

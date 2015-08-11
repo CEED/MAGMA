@@ -25,14 +25,6 @@ extern "C" {
    *  local auxiliary routines
    */
 void 
-zset_pointer_int(magma_int_t **output_array,
-        magma_int_t *input,
-        magma_int_t lda,
-        magma_int_t row, magma_int_t column, 
-        magma_int_t batch_offset,
-        magma_int_t batchCount, magma_queue_t queue);
-
-void 
 zset_pointer(magmaDoubleComplex **output_array,
                  magmaDoubleComplex *input,
                  magma_int_t lda,
