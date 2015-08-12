@@ -317,6 +317,8 @@ typedef double real_Double_t;
 #define MAGMA_ERR_CUSPARSE_MATRIX_TYPE_NOT_SUPPORTED  -3008
 #define MAGMA_ERR_CUSPARSE_ZERO_PIVOT                 -3009
 
+// some template parameter
+#define MagmaBigTileSize 1000000    
 
 // ----------------------------------------
 // parameter constants

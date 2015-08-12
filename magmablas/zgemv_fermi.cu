@@ -25,6 +25,8 @@
 #define version(s,v) s ## _V_ ## v
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// NoTrans kernel
 template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 __global__ void
 zgemvn_template_kernel_fermi(
@@ -38,27 +40,9 @@ zgemvn_template_kernel_fermi(
     gemvn_template_device<magmaDoubleComplex, DIM_X, DIM_Y, TILE_SIZE>(m, n, alpha, A, lda, x, incx, beta, y, incy);
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
-
-
-template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
-void
-zgemvn_template_fermi(
-    magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
-    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
-    const magmaDoubleComplex * __restrict__ x, magma_int_t incx, magmaDoubleComplex beta,
-    magmaDoubleComplex       *y, magma_int_t incy)
-{
-    dim3 grid( magma_ceildiv(m, TILE_SIZE) );
-    dim3 threads( DIM_X, DIM_Y, 1 );
-
-    zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
-}
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
-
-template<const int DIM_X, const int DIM_Y, const int TILE_SIZE, int CONJA>
+// Trans/ConjTans kernel
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE, magma_trans_t trans>
 __global__ void
 zgemvc_template_kernel_fermi(
     int m, int n, magmaDoubleComplex alpha,
@@ -67,29 +51,47 @@ zgemvc_template_kernel_fermi(
     magmaDoubleComplex       *y, int incy)
 {
 #if (__CUDA_ARCH__ >= 200)
-    gemvc_template_device<magmaDoubleComplex, DIM_X, DIM_Y, TILE_SIZE, CONJA>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+    gemvc_template_device< magmaDoubleComplex, DIM_X, DIM_Y, TILE_SIZE, trans >(m, n, alpha, A, lda, x, incx, beta, y, incy);
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// NoTrans CPU driver
 template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void
-zgemvc_template_fermi(
+zgemvn_template_fermi(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
     const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
     const magmaDoubleComplex * __restrict__ x, magma_int_t incx, magmaDoubleComplex beta,
-    magmaDoubleComplex       *y, magma_int_t incy, magma_int_t CONJA)
+    magmaDoubleComplex       *y, magma_int_t incy, magma_queue_t queue)
+{
+    dim3 grid( magma_ceildiv(m, TILE_SIZE) );
+    dim3 threads( DIM_X, DIM_Y, 1 );
+
+    zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, queue >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+// Trans/ConjTans CPU driver
+template<const int DIM_X, const int DIM_Y, const int TILE_SIZE>
+void
+zgemvc_template_fermi(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
+    const magmaDoubleComplex * __restrict__ x, magma_int_t incx, magmaDoubleComplex beta,
+    magmaDoubleComplex       *y, magma_int_t incy, magma_queue_t queue)
 {
     dim3 grid    ( 1,  magma_ceildiv(n, TILE_SIZE),  1 );
     dim3 threads ( DIM_X, DIM_Y, 1 );
 
-    if (CONJA == 1)
+    if (trans == MagmaConjTrans)
     {
-        zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 1><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+        zgemvc_template_kernel_fermi< DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans ><<< grid, threads, 0, queue >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
     else
     {
-        zgemvc_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE, 0><<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
+        zgemvc_template_kernel_fermi< DIM_X, DIM_Y, TILE_SIZE, MagmaTrans ><<< grid, threads, 0, queue >>>(m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
 
@@ -164,12 +166,14 @@ zgemvc_template_fermi(
     @ingroup magma_zblas2
     ********************************************************************/
 extern "C" void
-magmablas_zgemv(
-    magma_trans_t trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+magmablas_zgemv_q(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, 
+    magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr dy, magma_int_t incy)
+    magmaDoubleComplex_ptr dy, magma_int_t incy, 
+    magma_queue_t queue)
 {
     magma_int_t info = 0;
     if ( trans != MagmaNoTrans && trans != MagmaTrans && trans != MagmaConjTrans )
@@ -209,26 +213,27 @@ magmablas_zgemv(
     if ( trans == MagmaNoTrans ) {
         if (m <= 256) {
             zgemvn_template_fermi<version(N, 137)>
-                ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
+                ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, queue );
         }
         else {
             zgemvn_template_fermi<version(N, 140)>
-                ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
+                ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, queue );
         }
     }
     else {
-        magma_int_t CONJA = -1;
-
-        if ( trans == MagmaConjTrans ) {
-            CONJA = 1;
-        } else if ( trans == MagmaTrans ) {
-            CONJA = 0;
-        }
-        else {
-            return;
-        }       
-
         zgemvc_template_fermi<version(T, 189)>
-            ( m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, CONJA );
+            ( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, queue );
     }
+}
+
+
+extern "C" void
+magmablas_zgemv(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy, magma_int_t incy)
+{
+    magmablas_zgemv_q( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, magma_stream);
 }

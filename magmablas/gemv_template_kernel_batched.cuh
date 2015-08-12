@@ -48,7 +48,7 @@ void gemvn_template_batched(
 }
 
 
-template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE, int CONJA> 
+template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE, magma_trans_t trans> 
 __global__ void
 gemvc_kernel_batched(
     int m, int n, T alpha,
@@ -58,30 +58,29 @@ gemvc_kernel_batched(
 {
     int batchid = blockIdx.z;
 
-    gemvc_template_device<T, DIM_X, DIM_Y, TILE_SIZE, CONJA>(m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
+    gemvc_template_device<T, DIM_X, DIM_Y, TILE_SIZE, trans>(m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
 }
 
 
 template <class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void gemvc_template_batched(
-    magma_int_t m, magma_int_t n, T alpha,
+    magma_trans_t trans, magma_int_t m, magma_int_t n, T alpha,
     T const * const * dA_array, magma_int_t ldda,
     T const * const * dx_array, magma_int_t incx,
     T beta, T** dy_array, magma_int_t incy,
-    magma_int_t CONJA,
     magma_int_t batchCount, magma_queue_t queue)
 {
     dim3 grid    ( 1, magma_ceildiv(n, TILE_SIZE), batchCount );                                                
     dim3 threads ( DIM_X, DIM_Y);
     
-    if (CONJA == 1)
+    if (trans == MagmaConjTrans)
     {                         
-        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, 1><<< grid, threads, 0, queue >>>                    
+        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans><<< grid, threads, 0, queue >>>                    
                 ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );        
     }
-    else if (CONJA == 0)
+    else if (trans == MagmaTrans)
     {
-        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, 0><<< grid, threads, 0, queue >>>                    
+        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaTrans><<< grid, threads, 0, queue >>>                    
                 ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );       
     }
 }

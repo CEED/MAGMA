@@ -204,48 +204,39 @@ magmablas_dgemv_batched(
         }// big size        
     }
     else {
-        magma_int_t CONJA = -1;
-
-        if ( trans == MagmaConjTrans ) {
-            CONJA = 1;
-        } else {
-            CONJA = 0;
-        }
-
-
         if (max(m, n) <= 96) { // small size                              
             if (m <= 16)
             {
                 gemvc_template_batched<double, version(T, 42)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
             }
             else
             {
                 gemvc_template_batched<double, version(T, 47)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
             }
         } else { // big size
             if (m <= n) { //  Fat or square matrix
                 if (m <= 64)
                 {
                     gemvc_template_batched<double, version(T, 47)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<double, version(T, 91)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             } else { // (m > n) Tall matrix
                 if (n <= 64)
                 {
                     gemvc_template_batched<double, version(T, 90)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<double, version(T, 91)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }
         }

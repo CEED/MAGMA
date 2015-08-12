@@ -17,11 +17,11 @@
 #include "gemm_template_device_defs.cuh"// use make_FloatingPoint
 
 // op<trans>( x ) returns x or conj(x).
-template< const int conjugate, typename T >
+template< const magma_trans_t conjugate, typename T >
 __host__ __device__ static inline
 T op( T& x )
 {
-    if (conjugate == 1) {
+    if (conjugate == Magma_ConjTrans) {
         return conj(x);
     } else {
         return x;
@@ -124,7 +124,7 @@ gemvn_template_device(
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
-template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE,  int CONJA> 
+template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE,  magma_trans_t trans> 
 static __device__ void
 gemvc_template_device(
     int m, int n, T alpha,
@@ -152,8 +152,7 @@ gemvc_template_device(
     int start = blockIdx.y * TILE_SIZE + ty;
     int iters;
 
-    #define usefixedcondition 0
-
+    //#define usefixedcondition
     #ifdef usefixedcondition
         /*fixed condition*/
         iters = TILE_SIZE / DIM_Y;
@@ -181,13 +180,15 @@ gemvc_template_device(
         res = make_FloatingPoint(0.0, 0.0);
 
         // partial sums
-        for (int i=0; i < mfull; i += DIM_X) {
-            res += op<CONJA>(A[i]) * x[(tx + i)*incx];
+        if(col < n)
+        {    
+            for (int i=0; i < mfull; i += DIM_X) {
+                res += op<trans>(A[i]) * x[(tx + i)*incx];
+            }
+            if ( tx + mfull < m ) {
+                res += op<trans>(A[mfull]) * x[(tx + mfull)*incx];
+            }
         }
-        if ( tx + mfull < m ) {
-            res += op<CONJA>(A[mfull]) * x[(tx + mfull)*incx];
-        }
-
         sdata[tx + ty * DIM_X] = res;
 
         // tree reduction of partial sums,

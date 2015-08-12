@@ -213,7 +213,7 @@ magmablas_sgemv_batched(
         if (max(m, n) <= 96) // small size
         {                              
             gemvc_template_batched<float, version(T, 46)>             
-                (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );    
+                ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );    
         }
         else // big size
         {
@@ -222,12 +222,12 @@ magmablas_sgemv_batched(
                 if (m <= 64)
                 {
                     gemvc_template_batched<float, version(T, 47)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<float, version(T, 133)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }                           
             else// (m > n) Tall matrix
@@ -235,12 +235,12 @@ magmablas_sgemv_batched(
                 if (n <= 8)
                 {
                     gemvc_template_batched<float, version(T, 130)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<float, version(T, 131)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }
         }        

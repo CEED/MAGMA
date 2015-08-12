@@ -197,28 +197,17 @@ magmablas_cgemv_batched(
             }
         }// big size        
     } else {
-        magma_int_t CONJA = -1;
-
-        if ( trans == MagmaConjTrans ) {
-            CONJA = 1;
-        } else if ( trans == MagmaTrans ) {
-            CONJA = 0;
-        }
-        else {
-            return;
-        }                                                 
-          
         if (max(m, n) <= 96) // small size
         {
             if (n <= 8)
             {
                 gemvc_template_batched<magmaFloatComplex, version(T, 42)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
             }
             else
             {
                 gemvc_template_batched<magmaFloatComplex, version(T, 46)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
             }
         }
         else // big size
@@ -228,12 +217,12 @@ magmablas_cgemv_batched(
                 if (m <= 64)
                 {
                     gemvc_template_batched<magmaFloatComplex, version(T, 47)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<magmaFloatComplex, version(T, 90)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }                           
             else// (m > n) Tall matrix
@@ -241,12 +230,12 @@ magmablas_cgemv_batched(
                 if (n <= 8)
                 {
                     gemvc_template_batched<magmaFloatComplex, version(T, 130)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
                 else
                 {
                     gemvc_template_batched<magmaFloatComplex, version(T, 90)>             
-                        (m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, CONJA, batchCount, queue );
+                        ( trans, m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy, batchCount, queue );
                 }
             }
         }        

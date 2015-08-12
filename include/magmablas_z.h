@@ -626,6 +626,16 @@ void magmablas_ztrsv_outofplace(
     magmaDoubleComplex *x, magma_queue_t queue, magma_int_t flag);
 
 void
+magmablas_zgemv_q(
+    magma_trans_t trans, magma_int_t m, magma_int_t n, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy, magma_int_t incy, 
+    magma_queue_t queue);
+
+void
 magmablas_zgemv(
     magma_trans_t trans, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
