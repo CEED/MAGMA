@@ -64,6 +64,7 @@ ZSRC += \
 	testing_zpotrf_gpu.cpp	\
 	testing_zpotf2_gpu.cpp	\
 	testing_zpotri_gpu.cpp	\
+	testing_ztrtri_gpu.cpp	\
 	\
 	testing_zpotrf_mgpu.cpp	\
 
@@ -72,6 +73,7 @@ ZSRC += \
 	testing_zposv.cpp	\
 	testing_zpotrf.cpp	\
 	testing_zpotri.cpp	\
+	testing_ztrtri.cpp	\
 
 # ----------
 # Symmetric indefinite, CPU interface
