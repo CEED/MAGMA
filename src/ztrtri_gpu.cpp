@@ -68,7 +68,7 @@ magma_ztrtri_gpu(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t *info)
 {
-#define dA(i, j) (dA+(j)*ldda + (i))
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
 
     /* Local variables */
     const char* uplo_ = lapack_uplo_const( uplo );
@@ -124,34 +124,33 @@ magma_ztrtri_gpu(
     magma_queue_create( &stream[1] );
 
     if (nb <= 1 || nb >= n) {
-        magma_zgetmatrix( n, n, dA, ldda, work, n );
+        magma_zgetmatrix( n, n, dA(0,0), ldda, work, n );
         lapackf77_ztrtri( uplo_, diag_, &n, work, &n, info );
-        magma_zsetmatrix( n, n, work, n, dA, ldda );
+        magma_zsetmatrix( n, n, work, n, dA(0,0), ldda );
     }
     else {
         if (upper) {
             /* Compute inverse of upper triangular matrix */
             for (j=0; j < n; j += nb) {
-                jb = min(nb, (n-j));
+                jb = min(nb, n-j);
 
                 /* Compute rows 1:j-1 of current block column */
                 magma_ztrmm( MagmaLeft, MagmaUpper,
-                             MagmaNoTrans, MagmaNonUnit, j, jb,
+                             MagmaNoTrans, diag, j, jb,
                              c_one, dA(0,0), ldda, dA(0, j), ldda );
 
                 magma_ztrsm( MagmaRight, MagmaUpper,
-                             MagmaNoTrans, MagmaNonUnit, j, jb,
+                             MagmaNoTrans, diag, j, jb,
                              c_neg_one, dA(j,j), ldda, dA(0, j), ldda );
 
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
                                         work,     jb, stream[1] );
-
                 magma_queue_sync( stream[1] );
 
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri( MagmaUpperStr, diag_, &jb, work, &jb, info );
-
+                
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
                                         dA(j, j), ldda, stream[0] );
@@ -162,28 +161,26 @@ magma_ztrtri_gpu(
             nn = ((n-1)/nb)*nb+1;
 
             for (j=nn-1; j >= 0; j -= nb) {
-                jb = min(nb,(n-j));
-
-                if ((j+jb) < n) {
+                jb = min(nb, n-j);
+                
+                if (j+jb < n) {
                     /* Compute rows j+jb:n of current block column */
                     magma_ztrmm( MagmaLeft, MagmaLower,
-                                 MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
+                                 MagmaNoTrans, diag, (n-j-jb), jb,
                                  c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda );
 
                     magma_ztrsm( MagmaRight, MagmaLower,
-                                 MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
+                                 MagmaNoTrans, diag, (n-j-jb), jb,
                                  c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda );
                 }
-
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
                                         work,     jb, stream[1] );
-
                 magma_queue_sync( stream[1] );
 
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri( MagmaLowerStr, diag_, &jb, work, &jb, info );
-
+                
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
                                         dA(j, j), ldda, stream[0] );

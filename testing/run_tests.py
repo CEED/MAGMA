@@ -457,6 +457,12 @@ chol = (
 	('testing_zpotri_gpu',       '-L    -c',  n,    ''),
 	('testing_zpotri_gpu',       '-U    -c',  n,    ''),
 	
+	# lower/upper, unit/non-unit
+	('testing_ztrtri_gpu',      '-L -DU -c',  n,    ''),
+	('testing_ztrtri_gpu',      '-L -DN -c',  n,    ''),
+	('testing_ztrtri_gpu',      '-U -DU -c',  n,    ''),
+	('testing_ztrtri_gpu',      '-U -DN -c',  n,    ''),
+	
 	('testing_zpotrf_mgpu',      '-L    -c',  n,    ''),
 	('testing_zpotrf_mgpu',      '-U    -c',  n,    ''),
 	

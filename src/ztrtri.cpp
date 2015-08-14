@@ -138,11 +138,11 @@ magma_ztrtri(
 
                 /* Compute rows 1:j-1 of current block column */
                 magma_ztrmm( MagmaLeft, MagmaUpper,
-                             MagmaNoTrans, MagmaNonUnit, j, jb,
+                             MagmaNoTrans, diag, j, jb,
                              c_one, dA(0,0), ldda, dA(0, j),ldda);
 
                 magma_ztrsm( MagmaRight, MagmaUpper,
-                             MagmaNoTrans, MagmaNonUnit, j, jb,
+                             MagmaNoTrans, diag, j, jb,
                              c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
                 magma_zgetmatrix_async( jb, jb,
@@ -177,11 +177,11 @@ magma_ztrtri(
 
                     /* Compute rows j+jb:n of current block column */
                     magma_ztrmm( MagmaLeft, MagmaLower,
-                                 MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
+                                 MagmaNoTrans, diag, (n-j-jb), jb,
                                  c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda );
 
                     magma_ztrsm( MagmaRight, MagmaLower,
-                                 MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
+                                 MagmaNoTrans, diag, (n-j-jb), jb,
                                  c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda );
 
                     magma_zgetmatrix_async( n-j-jb, jb,

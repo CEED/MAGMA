@@ -68,7 +68,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.warmup ) {
                 magma_zpotrf( opts.uplo, N, h_R, lda, &info );
-                magma_ztrtri( opts.uplo, MagmaNonUnit, N, h_R, lda, &info );
+                magma_ztrtri( opts.uplo, opts.diag, N, h_R, lda, &info );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
             }
             
@@ -79,7 +79,7 @@ int main( int argc, char** argv)
             //h_R[ 10 + 10*lda ] = MAGMA_Z_MAKE( 0.0, 0.0 );
             
             gpu_time = magma_wtime();
-            magma_ztrtri( opts.uplo, MagmaNonUnit, N, h_R, lda, &info );
+            magma_ztrtri( opts.uplo, opts.diag, N, h_R, lda, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -93,7 +93,7 @@ int main( int argc, char** argv)
                 lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 
                 cpu_time = magma_wtime();
-                lapackf77_ztrtri( lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, h_A, &lda, &info );
+                lapackf77_ztrtri( lapack_uplo_const(opts.uplo), lapack_diag_const(opts.diag), &N, h_A, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)

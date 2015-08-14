@@ -57,7 +57,7 @@ int main( int argc, char** argv)
             
             TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2 );
             TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2 );
-            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N * 2 );  // DEBUGGING !!!!
+            TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -68,9 +68,9 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             /* factorize matrix */
-            //lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
+            lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
-            magma_zpotrf_gpu( opts.uplo, N, d_A, ldda, &info );
+            //magma_zpotrf_gpu( opts.uplo, N, d_A, ldda, &info );
             
             // check for exact singularity
             //magma_zgetmatrix( N, N, d_A, ldda, h_R, lda );
@@ -78,7 +78,7 @@ int main( int argc, char** argv)
             //magma_zsetmatrix( N, N, h_R, lda, d_A, ldda );
             
             gpu_time = magma_wtime();
-            magma_ztrtri_gpu( opts.uplo, MagmaNonUnit, N, d_A, ldda, &info );
+            magma_ztrtri_gpu( opts.uplo, opts.diag, N, d_A, ldda, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -89,10 +89,11 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );  // done above
+                // done above
+                //lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, &info );
                 
                 cpu_time = magma_wtime();
-                lapackf77_ztrtri( lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, h_A, &lda, &info );
+                lapackf77_ztrtri( lapack_uplo_const(opts.uplo), lapack_diag_const(opts.diag), &N, h_A, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
