@@ -171,13 +171,15 @@ magmablas_clat2z_q(
         return;
     }
     
-    dim3 threads( BLK_X );
+    dim3 threads( BLK_X, 1 );
     dim3 grid( magma_ceildiv( n, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
-    if (uplo == MagmaLower)
+    if (uplo == MagmaLower) {
         clat2z_lower<<< grid, threads, 0, queue >>> (n, SA, ldsa, A, lda);
-    else if (uplo == MagmaUpper)                                         
+    }
+    else if (uplo == MagmaUpper) {
         clat2z_upper<<< grid, threads, 0, queue >>> (n, SA, ldsa, A, lda);
+    }
 }
 
 
