@@ -20,6 +20,7 @@
     
     @ingroup magma_zaux0
     ********************************************************************/
+extern "C"
 magmaDoubleComplex magma_zsqrt( magmaDoubleComplex x )
 {
     std::complex<double> y = std::sqrt( std::complex<double>( real(x), imag(x) ));
@@ -35,6 +36,7 @@ magmaDoubleComplex magma_zsqrt( magmaDoubleComplex x )
     
     @ingroup magma_caux0
     ********************************************************************/
+extern "C"
 magmaFloatComplex magma_csqrt( magmaFloatComplex x )
 {
     std::complex<float> y = std::sqrt( std::complex<float>( real(x), imag(x) ));
