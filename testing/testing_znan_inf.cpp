@@ -29,7 +29,8 @@ int main( int argc, char** argv)
 
     #define hA(i,j) (hA + (i) + (j)*lda)
     
-    magmaDoubleComplex *hA, *dA;
+    magmaDoubleComplex *hA;
+    magmaDoubleComplex_ptr dA;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t M, N, lda, ldda, size;

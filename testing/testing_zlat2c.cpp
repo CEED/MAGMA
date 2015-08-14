@@ -42,7 +42,7 @@ int main( int argc, char** argv )
     magma_int_t status = 0;
     magmaFloatComplex   *SA, *SR;
     magmaDoubleComplex   *A,  *R;
-    magmaFloatComplex  *dSA;
+    magmaFloatComplex_ptr  dSA;
     magmaDoubleComplex_ptr dA;
     
     magma_opts opts;
