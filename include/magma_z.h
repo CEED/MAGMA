@@ -386,10 +386,11 @@ magma_zhegvx(
     magma_int_t *info);
 
 magma_int_t
-magma_zhesv(magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
-            magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
-            magmaDoubleComplex *B, magma_int_t ldb,
-            magma_int_t *info );
+magma_zhesv(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t nrhs,
+    magmaDoubleComplex *A, magma_int_t lda, magma_int_t *ipiv,
+    magmaDoubleComplex *B, magma_int_t ldb,
+    magma_int_t *info );
 
 magma_int_t
 magma_zhetrd(
@@ -473,7 +474,8 @@ magma_int_t
 magma_zlahef_gpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magma_int_t *kb,
     magmaDoubleComplex    *hA, magma_int_t lda,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *ipiv,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_int_t *ipiv,
     magmaDoubleComplex_ptr dW, magma_int_t lddw,
     magma_queue_t queues[], magma_event_t event[],
     magma_int_t *info);
@@ -1190,7 +1192,7 @@ magma_zgesv_nopiv_gpu(
     magma_int_t n, magma_int_t nrhs, 
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr dB, magma_int_t lddb, 
-                 magma_int_t *info);
+    magma_int_t *info);
 
 magma_int_t
 magma_zgetf2_gpu(

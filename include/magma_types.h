@@ -142,9 +142,9 @@ typedef double real_Double_t;
     #define MAGMA_Z_IMAG(x)       (x).imag()
     #define MAGMA_Z_ADD(a, b)     ((a)+(b))
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
-    #define MAGMA_Z_ABS(a)        abs(a)
     #define MAGMA_Z_MUL(a, b)     ((a)*(b))
     #define MAGMA_Z_DIV(a, b)     ((a)/(b))
+    #define MAGMA_Z_ABS(a)        abs(a)
     #define MAGMA_Z_ABS1(a)       (fabs((a).real()) + fabs((a).imag())) 
     #define MAGMA_Z_CNJG(a)       conj(a)
 
@@ -153,9 +153,9 @@ typedef double real_Double_t;
     #define MAGMA_C_IMAG(x)       (x).imag()
     #define MAGMA_C_ADD(a, b)     ((a)+(b))
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
-    #define MAGMA_C_ABS(a)        abs(a)
     #define MAGMA_C_MUL(a, b)     ((a)*(b))
     #define MAGMA_C_DIV(a, b)     ((a)/(b))
+    #define MAGMA_C_ABS(a)        abs(a)
     #define MAGMA_C_ABS1(a)       (fabs((a).real()) + fabs((a).imag()))
     #define MAGMA_C_CNJG(a)       conj(a)
 #else
