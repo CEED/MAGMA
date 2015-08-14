@@ -477,6 +477,12 @@ chol = (
 	('testing_zpotri',           '-L    -c',  n,    ''),
 	('testing_zpotri',           '-U    -c',  n,    ''),
 	
+	# lower/upper, unit/non-unit
+	('testing_ztrtri',          '-L -DU -c',  n,    ''),
+	('testing_ztrtri',          '-L -DN -c',  n,    ''),
+	('testing_ztrtri',          '-U -DU -c',  n,    ''),
+	('testing_ztrtri',          '-U -DN -c',  n,    ''),
+	
 	# ----------
 	# Symmetric Indefinite
 	('testing_zhesv',               '-L -c',  n,    ''),
