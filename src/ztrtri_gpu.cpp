@@ -119,9 +119,9 @@ magma_ztrtri_gpu(
         return *info;
     }
 
-    magma_queue_t stream[2];
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
+    magma_queue_t queues[2];
+    magma_queue_create( &queues[0] );
+    magma_queue_create( &queues[1] );
 
     if (nb <= 1 || nb >= n) {
         magma_zgetmatrix( n, n, dA(0,0), ldda, work, n );
@@ -145,15 +145,15 @@ magma_ztrtri_gpu(
 
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
-                                        work,     jb, stream[1] );
-                magma_queue_sync( stream[1] );
+                                        work,     jb, queues[1] );
+                magma_queue_sync( queues[1] );
 
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri( MagmaUpperStr, diag_, &jb, work, &jb, info );
                 
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
-                                        dA(j, j), ldda, stream[0] );
+                                        dA(j, j), ldda, queues[0] );
             }
         }
         else {
@@ -175,21 +175,21 @@ magma_ztrtri_gpu(
                 }
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
-                                        work,     jb, stream[1] );
-                magma_queue_sync( stream[1] );
+                                        work,     jb, queues[1] );
+                magma_queue_sync( queues[1] );
 
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri( MagmaLowerStr, diag_, &jb, work, &jb, info );
                 
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
-                                        dA(j, j), ldda, stream[0] );
+                                        dA(j, j), ldda, queues[0] );
             }
         }
     }
 
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
+    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queues[1] );
     magma_free_pinned( work );
 
     return *info;

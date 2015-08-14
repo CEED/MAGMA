@@ -121,9 +121,9 @@ magma_ztrtri(
         return *info;
     }
 
-    magma_queue_t stream[2];
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
+    magma_queue_t queues[2];
+    magma_queue_create( &queues[0] );
+    magma_queue_create( &queues[1] );
 
     if (nb <= 1 || nb >= n)
         lapackf77_ztrtri(uplo_, diag_, &n, A, &lda, info);
@@ -147,13 +147,13 @@ magma_ztrtri(
 
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
-                                        A(j, j),  lda, stream[1] );
+                                        A(j, j),  lda, queues[1] );
 
                 magma_zgetmatrix_async( j, jb,
                                         dA(0, j), ldda,
-                                        A(0, j),  lda, stream[0] );
+                                        A(0, j),  lda, queues[0] );
 
-                magma_queue_sync( stream[1] );
+                magma_queue_sync( queues[1] );
 
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, A(j,j), &lda, info);
@@ -186,13 +186,13 @@ magma_ztrtri(
 
                     magma_zgetmatrix_async( n-j-jb, jb,
                                             dA(j+jb, j), ldda,
-                                            A(j+jb, j),  lda, stream[1] );
+                                            A(j+jb, j),  lda, queues[1] );
 
                     magma_zgetmatrix_async( jb, jb,
                                             dA(j,j), ldda,
-                                            A(j,j),  lda, stream[0] );
+                                            A(j,j),  lda, queues[0] );
 
-                    magma_queue_sync( stream[0] );
+                    magma_queue_sync( queues[0] );
                 }
 
                 /* Compute inverse of current diagonal block */
@@ -205,8 +205,8 @@ magma_ztrtri(
         }
     }
 
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
+    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queues[1] );
     magma_free( dA );
 
     return *info;
