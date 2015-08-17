@@ -199,17 +199,6 @@ magmablas_sgemv_batched(
         }// big size        
     }
     else {
-        magma_int_t CONJA = -1;
-
-        if ( trans == MagmaConjTrans ) {
-            CONJA = 1;
-        } else if ( trans == MagmaTrans ) {
-            CONJA = 0;
-        }
-        else {
-            return;
-        }                                                 
-          
         if (max(m, n) <= 96) // small size
         {                              
             gemvc_template_batched<float, version(T, 46)>             
