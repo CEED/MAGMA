@@ -54,7 +54,8 @@ int main( int argc, char** argv)
 
     magma_int_t batchCount = opts.batchcount;
     magma_int_t columns;
-    double error=0.0, rwork[1];
+    double  error  = 0.0, rwork[1];
+    double *norm_A = NULL;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t     status = 0;
     // need looser bound (3000*eps instead of 30*eps) for tests
@@ -62,10 +63,10 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N    tolerance )\n");
-    printf("%%===================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {    
-        for( int iter = 0; iter < opts.niter; ++iter ) {
+    printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R||_F / (N*||A||_F)     )\n");
+    printf("%%=============================================================================================\n");
+    for( magma_int_t i = 0; i < opts.ntest; ++i ) {    
+        for( magma_int_t iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
             lda    = N;
             n2     = lda*N * batchCount;
@@ -94,6 +95,14 @@ int main( int argc, char** argv)
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &columns, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( N, columns, h_R, lda, d_A, ldda );
 
+            if ( opts.check ) {
+                TESTING_MALLOC_CPU( norm_A, double, batchCount);
+                for (magma_int_t i=0; i < batchCount; i++)
+                {
+                    norm_A[i] = lapackf77_zlange( "f", &N, &N, h_A+ i * lda*N, &lda, rwork );
+                }
+            }
+
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
@@ -109,7 +118,7 @@ int main( int argc, char** argv)
 
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
             magma_getvector( batchCount, sizeof(magma_int_t), dinfo_array, 1, cpu_info, 1);
-            for (int i=0; i < batchCount; i++)
+            for (magma_int_t i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
                     printf("magma_zgetrf_batched matrix %d returned error %d\n", i, (int)cpu_info[i] );
@@ -156,53 +165,50 @@ int main( int argc, char** argv)
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-            }
-            /* =====================================================================
-               Check the factorization
-               =================================================================== */
-            if ( opts.lapack ) {
                 printf("%10d %6d %6d   %7.2f (%7.2f)   %7.2f (%7.2f)",
                        (int) batchCount, (int) N, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
+                /* =====================================================================
+                   Check the factorization
+                   =================================================================== */
+                double err = 0.0;
+                if ( opts.check ) {
+                    magma_getvector( N * batchCount, sizeof(magma_int_t), d_ipiv, 1, ipiv, 1 );
+                    magma_zgetmatrix( N, N*batchCount, d_invA, ldda, h_R, lda );
+                    magma_int_t stop=0;
+                    n2     = lda*N;
+                    for (magma_int_t i=0; i < batchCount; i++)
+                    {
+                        for (magma_int_t k=0; k < N; k++) {
+                            if (ipiv[i*N+k] < 1 || ipiv[i*N+k] > N )
+                            {
+                                printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*N+k]);
+                                stop=1;
+                            }
+                        }
+                        if (stop == 1) {
+                            err=-1.0;
+                            break;
+                        }
+                        blasf77_zaxpy( &n2, &c_neg_one, h_A+ i * lda*N, &ione, h_R+ i * lda*N, &ione );
+                        error = lapackf77_zlange( "f", &N, &N, h_R+ i * lda*N, &lda, rwork ) / (N*norm_A[i]);
+                        if ( isnan(error) || isinf(error) ) {
+                            err = error;
+                            break;
+                        }
+                        err = max(fabs(error), err);
+                    }
+                    printf("   %18.2e   %10.2e   %s\n", err, (err < tol ? "ok" : "failed") );
+                    status += ! (error < tol);
+                }
+                else {
+                    printf("     ---  \n");
+                }
             }
             else {
                 printf("%10d %6d %6d     ---   (  ---  )   %7.2f (%7.2f)",
                        (int) batchCount, (int) N, (int) N, gpu_perf, gpu_time*1000. );
             }
 
-            double err = 0.0;
-            if ( opts.check ) {
-                magma_getvector( N * batchCount, sizeof(magma_int_t), d_ipiv, 1, ipiv, 1 );
-                magma_zgetmatrix( N, N*batchCount, d_invA, ldda, h_R, lda );
-                int stop=0;
-                n2     = lda*N;
-                for (int i=0; i < batchCount; i++)
-                {
-                    for (int k=0; k < N; k++) {
-                        if (ipiv[i*N+k] < 1 || ipiv[i*N+k] > N )
-                        {
-                            printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*N+k]);
-                            stop=1;
-                        }
-                    }
-                    if (stop == 1) {
-                        err=-1.0;
-                        break;
-                    }
-                    error = lapackf77_zlange( "f", &N, &N, h_A+ i * lda*N, &lda, rwork );
-                    blasf77_zaxpy( &n2, &c_neg_one, h_A+ i * lda*N, &ione, h_R+ i * lda*N, &ione );
-                    error = lapackf77_zlange( "f", &N, &N, h_R+ i * lda*N, &lda, rwork ) / (N*error);
-                    if ( isnan(error) || isinf(error) ) {
-                        err = error;
-                        break;
-                    }
-                    err = max(fabs(error), err);
-                }
-                printf("   %18.2e   %10.2e   %s\n", err, tol, (err < tol ? "ok" : "failed") );
-                status += ! (error < tol);
-            }
-            else {
-                printf("     ---  \n");
-            }
 
             TESTING_FREE_CPU( cpu_info );
             TESTING_FREE_CPU( ipiv );
