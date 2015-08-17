@@ -32,157 +32,151 @@ extern __shared__ magmaDoubleComplex shared_data[];
 
 //==============================================================================
 /*
-   used in upper nontranspose and lower transpose
+    used in upper nontranspose and lower transpose
 */
-template<magma_trans_t transA, magma_diag_t diag> 
-static __device__ void 
+template<magma_trans_t transA, magma_diag_t diag>
+static __device__ void
 ztrsv_backwards_tri_device( int n,
-    const magmaDoubleComplex * __restrict__ A, int lda, 
+    const magmaDoubleComplex * __restrict__ A, int lda,
     magmaDoubleComplex       * __restrict__ b, int incb,
     magmaDoubleComplex *sx)
 
 {
-/*
-   assume sx is in shared memory
-*/
-    int tx = threadIdx.x; 
-    magmaDoubleComplex a; 
+    /*
+    assume sx is in shared memory
+    */
+    int tx = threadIdx.x;
+    magmaDoubleComplex a;
 
-    for(int step=0; step<n; step++)
+    for (int step=0; step < n; step++)
     {
-        if(tx < n) 
+        if (tx < n)
         {
-
-            if(transA == MagmaNoTrans)
+            if (transA == MagmaNoTrans)
             {
-                 a = A[ (n-1) + (n-1) * lda - tx - step * lda];//rowwise access data in a coalesced way
+                a = A[ (n-1) + (n-1) * lda - tx - step * lda]; // rowwise access data in a coalesced way
             }
-            else if(transA == MagmaTrans)
-            {    
-                 a = A[ (n-1) + (n-1) * lda - tx * lda  - step];//columwise access data, not in a coalesced way
+            else if (transA == MagmaTrans)
+            {
+                a = A[ (n-1) + (n-1) * lda - tx * lda  - step]; // columwise access data, not in a coalesced way
             }
             else
-            {    
-                 a = MAGMA_Z_CNJG(A[ (n-1) + (n-1) * lda - tx * lda  - step]);//columwise access data, not in a coalesced way
+            {
+                a = MAGMA_Z_CNJG(A[ (n-1) + (n-1) * lda - tx * lda  - step]); // columwise access data, not in a coalesced way
             }
 
 
-            if(tx == step)
+            if (tx == step)
             {
-                if(diag == MagmaUnit)
+                if (diag == MagmaUnit)
                 {
-                    sx[n-1-tx] = (b[n-1-tx] - sx[n-1-tx]); 
+                    sx[n-1-tx] = (b[n-1-tx] - sx[n-1-tx]);
                 }
                 else
                 {
-                    sx[n-1-tx] = (b[n-1-tx] - sx[n-1-tx])/a; 
+                    sx[n-1-tx] = (b[n-1-tx] - sx[n-1-tx])/a;
                 }
             }
-         }
-         __syncthreads(); //there should be a sych here but can be avoided if BLOCK_SIZE =32
+        }
+        __syncthreads(); // there should be a sych here but can be avoided if BLOCK_SIZE =32
 
-         if(tx < n) 
-         {
-            if(tx > step)
+        if (tx < n)
+        {
+            if (tx > step)
             {
                 sx[n-1-tx] += a * sx[n-1-step];
             }
-
         }
-    }        
-
+    }
 }
 
 //==============================================================================
 /*
-   used in lower nontranspose and upper transpose
+    used in lower nontranspose and upper transpose
 */
 
-template<magma_trans_t transA, magma_diag_t diag> 
-static __device__ void 
+template<magma_trans_t transA, magma_diag_t diag>
+static __device__ void
 ztrsv_forwards_tri_device(int n,
-    const magmaDoubleComplex * __restrict__ A, int lda, 
+    const magmaDoubleComplex * __restrict__ A, int lda,
     magmaDoubleComplex       * __restrict__ b, int incb,
     magmaDoubleComplex *sx)
 
 {
-/*
-   assume sx is in shared memory
-*/
-    int tx = threadIdx.x; 
-    magmaDoubleComplex a; 
+    /*
+    assume sx is in shared memory
+    */
+    int tx = threadIdx.x;
+    magmaDoubleComplex a;
 
-    for(int step=0; step<n; step++)
+    for (int step=0; step < n; step++)
     {
-        if(tx < n) //hard code to BLOCK_SIZE and test divisible case only make 1Gflop/s difference
+        if (tx < n) // hard code to BLOCK_SIZE and test divisible case only make 1Gflop/s difference
         {
-
-            if(transA == MagmaNoTrans)
+            if (transA == MagmaNoTrans)
             {
-                 a = A[tx + step * lda];//rowwise access data in a coalesced way
+                a = A[tx + step * lda]; // rowwise access data in a coalesced way
             }
-            else  if(transA == MagmaTrans)
-            {    
-                 a = A[ tx * lda  + step];//columwise access data, not in a coalesced way
+            else  if (transA == MagmaTrans)
+            {
+                a = A[ tx * lda  + step]; // columwise access data, not in a coalesced way
             }
             else
-            {    
-                 a = MAGMA_Z_CNJG(A[ tx * lda  + step]);//columwise access data, not in a coalesced way
+            {
+                a = MAGMA_Z_CNJG(A[ tx * lda  + step]); // columwise access data, not in a coalesced way
             }
 
 
-            if(tx == step)
+            if (tx == step)
             {
-                if(diag == MagmaUnit)
+                if (diag == MagmaUnit)
                 {
-                    sx[tx] = (b[tx] - sx[tx]); 
+                    sx[tx] = (b[tx] - sx[tx]);
                 }
                 else
                 {
-                    sx[tx] = (b[tx] - sx[tx])/a; 
+                    sx[tx] = (b[tx] - sx[tx])/a;
                 }
             }
         }
-        __syncthreads(); //there should be a sych here but can be avoided if BLOCK_SIZE =32
+        __syncthreads(); // there should be a sych here but can be avoided if BLOCK_SIZE =32
 
-        if(tx < n) 
+        if (tx < n)
         {
-            if(tx > step)
+            if (tx > step)
             {
                 sx[tx] += a * sx[step];
             }
-
         }
-    }        
-
+    }
 }
+
+
 //==============================================================================
-template<const int BLOCK_SIZE, const int BLK_X, const int BLK_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag> 
+template<const int BLOCK_SIZE, const int BLK_X, const int BLK_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag>
 static __device__ void
 ztrsv_notrans_device(
-    int n, 
+    int n,
     const magmaDoubleComplex * __restrict__ A, int lda,
-    magmaDoubleComplex *b, int incb, 
+    magmaDoubleComplex *b, int incb,
     magmaDoubleComplex *x)
 {
-
-
     int tx = threadIdx.x;
     int col = n;
     magmaDoubleComplex *sx = (magmaDoubleComplex*)shared_data;
 
-    if(flag == 0)
+    if (flag == 0)
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
-        { 
+        for ( int j = tx; j < n; j += BLOCK_SIZE )
+        {
             sx[j] = MAGMA_Z_ZERO;
         }
     }
     else
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
-        { 
-            sx[j] = x[j]; 
+        for ( int j = tx; j < n; j += BLOCK_SIZE )
+        {
+            sx[j] = x[j];
         }
     }
     __syncthreads();
@@ -190,8 +184,8 @@ ztrsv_notrans_device(
 
     if (uplo == MagmaUpper)
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {    
+        for (int i=0; i < n; i += BLOCK_SIZE)
+        {
             int jb = min(BLOCK_SIZE, n-i);
             col -= jb;
 
@@ -202,10 +196,10 @@ ztrsv_notrans_device(
             __syncthreads();
         }
     }
-    else 
+    else
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {          
+        for (int i=0; i < n; i += BLOCK_SIZE)
+        {
             int jb = min(BLOCK_SIZE, n-i);
             col = i;
 
@@ -218,50 +212,49 @@ ztrsv_notrans_device(
     }
 
 
-    for( int j = tx; j < n; j += BLOCK_SIZE )
-    { 
+    for ( int j = tx; j < n; j += BLOCK_SIZE )
+    {
         x[j] = sx[j]; // write to x in reverse order
     }
     __syncthreads();
-
 }
 
 
 
 //==============================================================================
 
-template<const int BLOCK_SIZE, const int BLK_X, const int BLK_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag > 
+template<const int BLOCK_SIZE, const int BLK_X, const int BLK_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag >
 static __device__ void
 ztrsv_trans_device(
-    int n, 
+    int n,
     const magmaDoubleComplex * __restrict__ A, int lda,
-    magmaDoubleComplex *b, int incb, 
+    magmaDoubleComplex *b, int incb,
     magmaDoubleComplex *x)
 {
     int tx = threadIdx.x;
     int col = n;
     magmaDoubleComplex *sx = (magmaDoubleComplex*)shared_data;
 
-    if(flag == 0)
+    if (flag == 0)
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
-        { 
+        for ( int j = tx; j < n; j += BLOCK_SIZE )
+        {
             sx[j] = MAGMA_Z_ZERO;
         }
     }
     else
     {
-        for( int j = tx; j < n; j += BLOCK_SIZE )
-        { 
-            sx[j] = x[j]; 
+        for ( int j = tx; j < n; j += BLOCK_SIZE )
+        {
+            sx[j] = x[j];
         }
     }
     __syncthreads();
  
     if (uplo == MagmaLower)
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {    
+        for (int i=0; i < n; i += BLOCK_SIZE)
+        {
             int jb = min(BLOCK_SIZE, n-i);
             col -= jb;
             // zgemvc is used in tranposed cose
@@ -274,27 +267,25 @@ ztrsv_trans_device(
     }
     else
     {
-        for(int i=0; i<n; i+=BLOCK_SIZE)
-        {    
+        for (int i=0; i < n; i += BLOCK_SIZE)
+        {
             int jb = min(BLOCK_SIZE, n-i);
             col = i;
 
             gemvc_template_device<magmaDoubleComplex, BLK_X, BLK_Y, TILE_SIZE, trans>(i, jb, MAGMA_Z_ONE, A(0, col), lda, sx, 1, MAGMA_Z_ONE, sx+col, 1);
-            __syncthreads();   
+            __syncthreads();
 
             ztrsv_forwards_tri_device<trans, diag>(jb, A(col, col), lda, b+col, incb, sx+col);
             __syncthreads();
         }
     }
 
-
-    for( int j = tx; j < n; j += BLOCK_SIZE )
-    { 
+    for ( int j = tx; j < n; j += BLOCK_SIZE )
+    {
         x[j] = sx[j]; // write to x in reverse order
     }
     __syncthreads();
-
 }
 
 
-#endif //MAGMABLAS_TRSV_TEMPLATE_H
+#endif // MAGMABLAS_TRSV_TEMPLATE_H

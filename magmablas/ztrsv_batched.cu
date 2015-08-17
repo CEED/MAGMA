@@ -39,12 +39,12 @@ extern __shared__ magmaDoubleComplex shared_data[];
 
 //==============================================================================
 
-template< const int BLOCK_SIZE, const int DIM_X, const int DIM_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag> 
+template< const int BLOCK_SIZE, const int DIM_X, const int DIM_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag>
 __global__ void
 ztrsv_notrans_kernel_outplace_batched(
-    int n, 
+    int n,
     magmaDoubleComplex **A_array, int lda,
-    magmaDoubleComplex **b_array, int incb, 
+    magmaDoubleComplex **b_array, int incb,
     magmaDoubleComplex **x_array)
 {
     int batchid = blockIdx.z;
@@ -55,18 +55,17 @@ ztrsv_notrans_kernel_outplace_batched(
 
  
 //==============================================================================
-template<const int BLOCK_SIZE, const int DIM_X, const int DIM_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag> 
+template<const int BLOCK_SIZE, const int DIM_X, const int DIM_Y,  const int TILE_SIZE, const int flag, const magma_uplo_t uplo, const magma_trans_t trans, const magma_diag_t diag>
 __global__ void
 ztrsv_trans_kernel_outplace_batched(
-    int n, 
+    int n,
     magmaDoubleComplex **A_array, int lda,
-    magmaDoubleComplex **b_array, int incb, 
+    magmaDoubleComplex **b_array, int incb,
     magmaDoubleComplex **x_array)
 {
-
     int batchid = blockIdx.z;
     ztrsv_trans_device<BLOCK_SIZE, DIM_X, DIM_Y, TILE_SIZE, flag, uplo, trans, diag>(n, A_array[batchid], lda, b_array[batchid], incb, x_array[batchid]);
-}  
+}
 
 
 
@@ -75,10 +74,10 @@ ztrsv_trans_kernel_outplace_batched(
 extern "C" void
 magmablas_ztrsv_outofplace_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
-    magma_int_t n, 
+    magma_int_t n,
     magmaDoubleComplex ** A_array, magma_int_t lda,
-    magmaDoubleComplex **b_array, magma_int_t incb, 
-    magmaDoubleComplex **x_array, 
+    magmaDoubleComplex **b_array, magma_int_t incb,
+    magmaDoubleComplex **x_array,
     magma_int_t batchCount, magma_queue_t queue,
     magma_int_t flag)
 {
@@ -111,123 +110,123 @@ magmablas_ztrsv_outofplace_batched(
 
 
 
-    if(trans == MagmaNoTrans)
-    { 
-        if(uplo == MagmaUpper)
-        {         
+    if (trans == MagmaNoTrans)
+    {
+        if (uplo == MagmaUpper)
+        {
             if (diag == MagmaNonUnit)
             {
-                if(flag ==0){
+                if (flag == 0) {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 0, MagmaUpper, MagmaNoTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 1, MagmaUpper, MagmaNoTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-            }    
+            }
             else if (diag == MagmaUnit)
             {
-                if(flag ==0){
+                if (flag == 0) {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 0, MagmaUpper, MagmaNoTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 1, MagmaUpper, MagmaNoTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-            }    
-        } 
+            }
+        }
         else //Lower
         {
             if (diag == MagmaNonUnit)
-            {  
-                if(flag ==0)
+            {
+                if (flag == 0)
                 {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 0, MagmaLower, MagmaNoTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 1, MagmaLower, MagmaNoTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
-                } 
-            }    
+                }
+            }
             else if (diag == MagmaUnit)
             {
-                if(flag ==0)
+                if (flag == 0)
                 {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 0, MagmaLower, MagmaNoTrans, MagmaUnit>
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_notrans_kernel_outplace_batched< BLOCK_SIZE_N, DIM_X_N, DIM_Y_N, MagmaBigTileSize, 1, MagmaLower, MagmaNoTrans, MagmaUnit>
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
-                } 
+                }
             }
         }
-    }        
-    else if(trans == MagmaTrans)
+    }
+    else if (trans == MagmaTrans)
     {
-        if(uplo == MagmaUpper)
-        {         
-            if (diag == MagmaNonUnit){
-                if(flag ==0)
+        if (uplo == MagmaUpper)
+        {
+            if (diag == MagmaNonUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 0, MagmaUpper, MagmaTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaUpper, MagmaTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
-                } 
-            }    
-            else if (diag == MagmaUnit){
-                if(flag ==0)
+                }
+            }
+            else if (diag == MagmaUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 0, MagmaUpper, MagmaTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaUpper, MagmaTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
                 }
             }
-        } 
+        }
         else
         {
-            if (diag == MagmaNonUnit){
-                if(flag ==0)
+            if (diag == MagmaNonUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T,MagmaBigTileSize, 0, MagmaLower, MagmaTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaLower, MagmaTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-            }    
-            else if (diag == MagmaUnit){
-                if(flag ==0)
+            }
+            else if (diag == MagmaUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T,MagmaBigTileSize, 0, MagmaLower, MagmaTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaLower, MagmaTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
@@ -235,60 +234,60 @@ magmablas_ztrsv_outofplace_batched(
             }
         }
     }
-    else if(trans == MagmaConjTrans)
+    else if (trans == MagmaConjTrans)
     {
-        if(uplo == MagmaUpper)
-        {         
-            if (diag == MagmaNonUnit){
-                if(flag ==0)
+        if (uplo == MagmaUpper)
+        {
+            if (diag == MagmaNonUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 0, MagmaUpper, MagmaConjTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaUpper, MagmaConjTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-            }    
-            else if (diag == MagmaUnit){
-                if(flag ==0)
+            }
+            else if (diag == MagmaUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 0, MagmaUpper, MagmaConjTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaUpper, MagmaConjTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
                 }
             }
-        } 
+        }
         else
         {
-            if (diag == MagmaNonUnit){
-                if(flag ==0)
+            if (diag == MagmaNonUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T,MagmaBigTileSize, 0, MagmaLower, MagmaConjTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaLower, MagmaConjTrans, MagmaNonUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-            }    
-            else if (diag == MagmaUnit){
-                if(flag ==0)
+            }
+            else if (diag == MagmaUnit) {
+                if (flag == 0)
                 {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T,MagmaBigTileSize, 0, MagmaLower, MagmaConjTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
-                        (n, A_array, lda, b_array, incb, x_array); 
+                        (n, A_array, lda, b_array, incb, x_array);
                 }
-                else{
+                else {
                     ztrsv_trans_kernel_outplace_batched< BLOCK_SIZE_T, DIM_X_T, DIM_Y_T, MagmaBigTileSize, 1, MagmaLower, MagmaConjTrans, MagmaUnit >
                         <<<blocks, threads, sizeof(magmaDoubleComplex)*(n), queue>>>
                         (n, A_array, lda, b_array, incb, x_array);
@@ -305,13 +304,12 @@ magmablas_ztrsv_outofplace_batched(
 extern "C" void
 magmablas_ztrsv_recursive_outofplace_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
-    magma_int_t n, 
+    magma_int_t n,
     magmaDoubleComplex **A_array, magma_int_t lda,
-    magmaDoubleComplex **b_array, magma_int_t incb, 
-    magmaDoubleComplex **x_array, 
+    magmaDoubleComplex **b_array, magma_int_t incb,
+    magmaDoubleComplex **x_array,
     magma_int_t batchCount, magma_queue_t queue)
 {
-
     /* Check arguments */
     magma_int_t info = 0;
     if ( uplo != MagmaUpper && uplo != MagmaLower ) {
@@ -351,7 +349,7 @@ magmablas_ztrsv_recursive_outofplace_batched(
     alloc += magma_malloc((void**)&dW1_displ,  batchCount * sizeof(*dW1_displ));
     alloc += magma_malloc((void**)&dW2_displ,  batchCount * sizeof(*dW2_displ));
 
-    if(alloc != 0)
+    if (alloc != 0)
     {
         magma_free( dW0_displ );
         magma_free( dW1_displ );
@@ -363,11 +361,10 @@ magmablas_ztrsv_recursive_outofplace_batched(
 
     magma_int_t col = n;
 
-    if(trans == MagmaNoTrans)
+    if (trans == MagmaNoTrans)
     {
-
-        for(magma_int_t i=0; i<n; i+= NB)
-        {    
+        for (magma_int_t i=0; i < n; i+= NB)
+        {
             magma_int_t jb = min(NB, n-i);
 
             if (uplo == MagmaUpper)
@@ -377,35 +374,30 @@ magmablas_ztrsv_recursive_outofplace_batched(
                 magma_zdisplace_pointers(dW0_displ, A_array, lda, col, col+jb, batchCount, queue);
                 magma_zdisplace_pointers(dW1_displ, x_array, 1, col+jb, 0,     batchCount, queue);
                 magma_zdisplace_pointers(dW2_displ, x_array, 1, col,    0,     batchCount, queue);
-
             }
             else
-            {          
+            {
                 col = i;
-                 
+                
                 magma_zdisplace_pointers(dW0_displ, A_array, lda, col, 0, batchCount, queue);
                 magma_zdisplace_pointers(dW1_displ, x_array, 1,   0,   0, batchCount, queue);
                 magma_zdisplace_pointers(dW2_displ, x_array, 1,   col, 0, batchCount, queue);
-
-           }
-
-           //assume x_array contains zero elements
-           magmablas_zgemv_batched(MagmaNoTrans, jb, i, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);                  
-
-           magma_zdisplace_pointers(dW0_displ, A_array, lda,  col, col, batchCount, queue);
-           magma_zdisplace_pointers(dW1_displ, b_array, 1, col*incb,   0, batchCount, queue);
-           magma_zdisplace_pointers(dW2_displ, x_array, 1,    col,   0, batchCount, queue);
-
-           magmablas_ztrsv_outofplace_batched(uplo, trans, diag,jb, dW0_displ, lda, dW1_displ, incb, dW2_displ, batchCount, queue, i);
-                            
+            }
+            
+            //assume x_array contains zero elements
+            magmablas_zgemv_batched(MagmaNoTrans, jb, i, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);
+            
+            magma_zdisplace_pointers(dW0_displ, A_array, lda,  col, col, batchCount, queue);
+            magma_zdisplace_pointers(dW1_displ, b_array, 1, col*incb,   0, batchCount, queue);
+            magma_zdisplace_pointers(dW2_displ, x_array, 1,    col,   0, batchCount, queue);
+            
+            magmablas_ztrsv_outofplace_batched(uplo, trans, diag,jb, dW0_displ, lda, dW1_displ, incb, dW2_displ, batchCount, queue, i);
         }
-
     }
     else
     {
-
-        for(magma_int_t i=0; i<n; i+=NB)
-        {    
+        for (magma_int_t i=0; i < n; i += NB)
+        {
             magma_int_t jb = min(NB, n-i);
 
             if (uplo == MagmaLower)
@@ -415,37 +407,32 @@ magmablas_ztrsv_recursive_outofplace_batched(
                 magma_zdisplace_pointers(dW0_displ, A_array, lda, col+jb, col, batchCount, queue);
                 magma_zdisplace_pointers(dW1_displ, x_array, 1, col+jb, 0,     batchCount, queue);
                 magma_zdisplace_pointers(dW2_displ, x_array, 1, col,    0,     batchCount, queue);
-
             }
             else
             {
                 col = i;
-                 
+                
                 magma_zdisplace_pointers(dW0_displ, A_array, lda, 0, col,  batchCount, queue);
                 magma_zdisplace_pointers(dW1_displ, x_array, 1,   0,   0, batchCount, queue);
                 magma_zdisplace_pointers(dW2_displ, x_array, 1,   col, 0, batchCount, queue);
-           }       
+            }
 
 
-        //assume x_array contains zero elements
-        
-        magmablas_zgemv_batched(trans, i, jb, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);            
-     
-        magma_zdisplace_pointers(dW0_displ, A_array, lda,  col, col, batchCount, queue);
-        magma_zdisplace_pointers(dW1_displ, b_array, 1, col*incb,   0, batchCount, queue);
-        magma_zdisplace_pointers(dW2_displ, x_array, 1,    col,   0, batchCount, queue);
-
-        magmablas_ztrsv_outofplace_batched(uplo, trans, diag, jb, dW0_displ, lda, dW1_displ, incb, dW2_displ, batchCount, queue, i);
-
+            //assume x_array contains zero elements
+            
+            magmablas_zgemv_batched(trans, i, jb, MAGMA_Z_ONE, dW0_displ, lda, dW1_displ, 1, MAGMA_Z_ONE, dW2_displ, 1, batchCount, queue);
+            
+            magma_zdisplace_pointers(dW0_displ, A_array, lda,  col, col, batchCount, queue);
+            magma_zdisplace_pointers(dW1_displ, b_array, 1, col*incb,   0, batchCount, queue);
+            magma_zdisplace_pointers(dW2_displ, x_array, 1,    col,   0, batchCount, queue);
+            
+            magmablas_ztrsv_outofplace_batched(uplo, trans, diag, jb, dW0_displ, lda, dW1_displ, incb, dW2_displ, batchCount, queue, i);
         }
-
     }
-
 
     magma_free(dW0_displ);
     magma_free(dW1_displ);
     magma_free(dW2_displ);
-
 }
 
 //==============================================================================
@@ -454,10 +441,10 @@ magmablas_ztrsv_recursive_outofplace_batched(
 extern "C" void
 magmablas_ztrsv_work_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
-    magma_int_t n, 
+    magma_int_t n,
     magmaDoubleComplex **A_array, magma_int_t lda,
-    magmaDoubleComplex **b_array, magma_int_t incb, 
-    magmaDoubleComplex **x_array, 
+    magmaDoubleComplex **b_array, magma_int_t incb,
+    magmaDoubleComplex **x_array,
     magma_int_t batchCount, magma_queue_t queue)
 {
     //magmablas_zlaset_batched(MagmaFull, n, incb, MAGMA_Z_ZERO, MAGMA_Z_ZERO, x_array, n, batchCount, queue);
@@ -553,9 +540,9 @@ magmablas_ztrsv_work_batched(
 extern "C" void
 magmablas_ztrsv_batched(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
-    magma_int_t n, 
+    magma_int_t n,
     magmaDoubleComplex **A_array, magma_int_t lda,
-    magmaDoubleComplex **b_array, magma_int_t incb, 
+    magmaDoubleComplex **b_array, magma_int_t incb,
     magma_int_t batchCount,
     magma_queue_t queue)
 {
