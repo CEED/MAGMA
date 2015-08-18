@@ -141,7 +141,7 @@ int main( int argc, char** argv)
                     printf("lapackf77_zgetri returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
-                TESTING_MALLOC_CPU( work,  magmaDoubleComplex, lwork  );
+                TESTING_MALLOC_CPU( work,  magmaDoubleComplex, lwork*batchCount  );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &columns, h_R, &lda, h_A, &lda );
                 cpu_time = magma_wtime();
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -157,7 +157,7 @@ int main( int argc, char** argv)
                     if (locinfo != 0)
                         printf("lapackf77_zgetrf returned error %d: %s.\n",
                            (int) locinfo, magma_strerror( locinfo ));
-                    lapackf77_zgetri(&N, h_A + i * lda*N, &lda, ipiv + i * N, work, &lwork, &locinfo );
+                    lapackf77_zgetri(&N, h_A + i * lda*N, &lda, ipiv + i * N, work+i*lwork, &lwork, &locinfo );
                     if (locinfo != 0)
                         printf("lapackf77_zgetri returned error %d: %s.\n",
                            (int) locinfo, magma_strerror( locinfo ));
