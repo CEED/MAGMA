@@ -813,10 +813,10 @@ batched = (
 	('testing_zlacpy_batched',        b + '               -c',  mn,   ''),
 	
 	('testing_zposv_batched',         b + '-L             -c',  n,    ''),
-	('testing_zposv_batched',         b + '-U             -c',  n,    ''),
+	('#testing_zposv_batched',        b + '-U             -c',  n,    'upper not implemented'),
 	
 	('testing_zpotrf_batched',        b + '-L             -c2', n,    ''),
-	('testing_zpotrf_batched',        b + '-U             -c2', n,    ''),
+	('#testing_zpotrf_batched',       b + '-U             -c2', n,    'upper not implemented'),
 	
 	('testing_zgeqrf_batched',        b + '               -c',  mn,   ''),
 )
