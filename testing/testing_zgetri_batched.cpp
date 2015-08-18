@@ -125,7 +125,7 @@ int main( int argc, char** argv)
             for (magma_int_t i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned error %d\n", i, (int)cpu_info[i] );
+                    printf("magma_zgetrf_batched matrix %d returned error %d\n", (int) i, (int)cpu_info[i] );
                 }
             }
             if (info1 != 0) printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info1, magma_strerror( info1 ));
