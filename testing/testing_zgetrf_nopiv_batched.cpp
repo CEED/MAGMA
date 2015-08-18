@@ -123,7 +123,7 @@ int main( int argc, char** argv)
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            // make it diagonally dominant, to not need pivoting
+            // make A diagonally dominant, to not need pivoting
             for( int s=0; s < batchCount; ++s ) {
                 for( int i=0; i < min_mn; ++i ) {
                     h_A[ i + i*lda + s*lda*N ] = MAGMA_Z_MAKE(

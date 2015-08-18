@@ -83,7 +83,14 @@ int main(int argc, char **argv)
             sizeB = ldb*nrhs*batchCount;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-            
+            // make A diagonally dominant, to not need pivoting
+            for( int s=0; s < batchCount; ++s ) {
+                for( int i=0; i < N; ++i ) {
+                    h_A[ i + i*lda + s*lda*N ] = MAGMA_Z_MAKE(
+                        MAGMA_Z_REAL( h_A[ i + i*lda + s*lda*N ] ) + N,
+                        MAGMA_Z_IMAG( h_A[ i + i*lda + s*lda*N ] ));
+                }
+            }
             columns = N * batchCount;
             magma_zsetmatrix( N, columns,    h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, nrhs*batchCount, h_B, ldb, d_B, lddb );
