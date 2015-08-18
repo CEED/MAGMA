@@ -224,6 +224,7 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( dipiv_magma );
             TESTING_FREE_DEV( dipiv_array );
             TESTING_FREE_DEV( dA_array );
+            fflush( stdout );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

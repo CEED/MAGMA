@@ -181,6 +181,7 @@ cleanup:
             TESTING_FREE_DEV( dinfo_magma );
             if (status == -1)
                 break;
+            fflush( stdout );
         }
         if (status == -1)
             break;
