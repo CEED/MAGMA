@@ -77,7 +77,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf=0, cublas_time=0, cpu_perf=0, cpu_time=0;
-    double          error=0.0;
+    double          error;
     magmaDoubleComplex *h_A, *h_R, *h_Amagma;
     magmaDoubleComplex *dA;
     magmaDoubleComplex **dA_array = NULL;
@@ -101,8 +101,8 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
     magma_int_t columns;
     
-    printf("%% BatchCount    M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
-    printf("%%========================================================================\n");
+    printf("%% BatchCount   M     N    CPU GFlop/s (ms)   MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   ||PA-LU||/(||A||*N)\n");
+    printf("%%==========================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
@@ -196,7 +196,7 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &locinfo);
                     if (locinfo != 0)
-                        printf("lapackf77_zgetrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zgetrf matrix %d returned error %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
                     magma_set_lapack_numthreads(nthreads);
@@ -210,47 +210,46 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%10d   %5d  %5d     %7.2f (%7.2f)   %7.2f (%7.2f)    %7.2f (%7.2f)",
+                printf("%10d %5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
                        int(batchCount), int(M), int(N),
                        cpu_perf, cpu_time*1000.,
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000.  );
             }
             else {
-                printf("%10d   %5d  %5d     ---   (  ---  )   %7.2f (%7.2f)    %7.2f (%7.2f)",
+                printf("%10d %5d %5d     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
                        int(batchCount), int(M), int(N),
                        magma_perf, magma_time*1000.,
                        cublas_perf, cublas_time*1000. );
             }
 
-            double err = 0.0;
             if ( opts.check ) {
                 magma_getvector( min_mn * batchCount, sizeof(magma_int_t), dipiv_magma, 1, ipiv, 1 );
-                int stop=0;
+                error = 0;
                 for (int i=0; i < batchCount; i++) {
                     for (int k=0; k < min_mn; k++) {
                         if (ipiv[i*min_mn+k] < 1 || ipiv[i*min_mn+k] > M ) {
                             printf("error for matrix %d ipiv @ %d = %d\n", i, k, int(ipiv[i*min_mn+k]));
-                            stop = 1;
+                            error = -1;
                         }
                     }
-                    if (stop == 1) {
-                        err = -1.0;
+                    if (error == -1) {
                         break;
                     }
                     
-                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_Amagma + i * lda*N, ipiv + i * min_mn);
-                    if ( isnan(error) || isinf(error) ) {
-                        err = error;
+                    double err = get_LU_error( M, N, h_R + i * lda*N, lda, h_Amagma + i * lda*N, ipiv + i * min_mn);
+                    if ( isnan(err) || isinf(err) ) {
+                        error = err;
                         break;
                     }
-                    err = max(fabs(error), err);
+                    error = max( err, error );
                 }
-                printf("   %8.2e   %s\n", err, (err < tol ? "ok" : "failed") );
-                status += ! (error < tol);
+                bool okay = (error < tol);
+                status += ! okay;
+                printf("   %8.2e   %s\n", error, (okay ? "ok" : "failed") );
             }
             else {
-                printf("     ---  \n");
+                printf("     ---\n");
             }
             
             TESTING_FREE_CPU( cpu_info );

@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     TESTING_INIT();
 
     real_Double_t   gflops, cpu_perf, cpu_time, gpu_perf, gpu_time;
-    double          err = 0.0, Rnorm, Anorm, Xnorm, *work;
+    double          error, Rnorm, Anorm, Xnorm, *work;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B, *h_X;
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;
 
-    printf("%% BatchCount  N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
-    printf("%%===============================================================================\n");
+    printf("%% BatchCount   N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+    printf("%%============================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -127,6 +127,7 @@ int main(int argc, char **argv)
             //=====================================================================
             magma_zgetmatrix( N, nrhs*batchCount, d_B, lddb, h_X, ldb );
 
+            error = 0;
             for (magma_int_t s=0; s < batchCount; s++)
             {
                 Anorm = lapackf77_zlange("I", &N, &N,    h_A + s * lda * N, &lda, work);
@@ -138,15 +139,16 @@ int main(int argc, char **argv)
                            &c_neg_one, h_B + s * ldb * nrhs, &ldb);
             
                 Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B + s * ldb * nrhs, &ldb, work);
-                double error = Rnorm/(N*Anorm*Xnorm);
+                double err = Rnorm/(N*Anorm*Xnorm);
                 
-                if ( isnan(error) || isinf(error) ) {
-                    err = error;
+                if ( isnan(err) || isinf(err) ) {
+                    error = err;
                     break;
                 }
-                err = max(err, error);
+                error = max( err, error );
             }
-            status += ! (err < tol);
+            bool okay = (error < tol);
+            status += ! okay;
 
             /* ====================================================================
                Performs operation using LAPACK
@@ -165,7 +167,7 @@ int main(int argc, char **argv)
                     magma_int_t locinfo;
                     lapackf77_zgesv( &N, &nrhs, h_A + s * lda * N, &lda, ipiv + s * N, h_B + s * ldb * nrhs, &ldb, &locinfo );
                     if (locinfo != 0) {
-                        printf("lapackf77_zgesv matrix %d returned err %d: %s.\n",
+                        printf("lapackf77_zgesv matrix %d returned error %d: %s.\n",
                                 int(s), int(locinfo), magma_strerror( locinfo ));
                     }
                 }
@@ -174,14 +176,14 @@ int main(int argc, char **argv)
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                printf( "%10d    %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                printf( "%10d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         int(batchCount), int(N), int(nrhs), cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        err, (err < tol ? "ok" : "failed"));
+                        error, (okay ? "ok" : "failed"));
             }
             else {
-                printf( "%10d    %5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
+                printf( "%10d %5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e   %s\n",
                         int(batchCount), int(N), int(nrhs), gpu_perf, gpu_time,
-                        err, (err < tol ? "ok" : "failed"));
+                        error, (okay ? "ok" : "failed"));
             }
             
             TESTING_FREE_CPU( h_A );

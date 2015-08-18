@@ -91,7 +91,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, magma_perf, magma_time, cublas_perf=0, cublas_time=0, cpu_perf, cpu_time;
-    double           magma_error, cublas_error, magma_error2, cublas_error2, error, error2;
+    double           magma_error, cublas_error, magma_error2, cublas_error2;
 
     magmaDoubleComplex *h_A, *h_R, *h_Amagma, *tau, *h_work, tmp[1];
     magmaDoubleComplex *d_A, *dtau_magma, *dtau_cublas;
@@ -115,8 +115,8 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%% BatchCount   M    N     MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub \n");
-    printf("%%============================================================================================================================================================ \n");
+    printf("%% BatchCount   M     N   MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)    CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub\n");
+    printf("%%============================================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M     = opts.msize[itest];
@@ -219,7 +219,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zgeqrf(&M, &N, h_A + s * lda * N, &lda, tau + s * min_mn, h_work + s * lwork, &lwork, &locinfo);
                     if (locinfo != 0)
-                        printf("lapackf77_zgeqrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zgeqrf matrix %d returned error %d: %s.\n",
+                               (int) s, (int) locinfo, magma_strerror( locinfo ));
                 }
 
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -250,38 +251,40 @@ int main( int argc, char** argv)
                 magma_zgetvector(min_mn*batchCount, dtau_magma, 1, tau, 1);
                 for (int i=0; i < batchCount; i++)
                 {
+                    double err, err2;
                     get_QR_error(M, N, min_mn,
                              h_Amagma + i*lda*N, h_R + i*lda*N, lda, tau + i*min_mn,
                              Q, ldq, R, ldr, h_work, lwork,
-                             work, &error, &error2);
+                             work, &err, &err2);
 
-                    if ( isnan(error) || isinf(error) ) {
-                        magma_error = error;
+                    if ( isnan(err) || isinf(err) ) {
+                        magma_error = err;
                         break;
                     }
-                    magma_error  = max( fabs(error),  magma_error  );
-                    magma_error2 = max( fabs(error2), magma_error2 );
+                    magma_error  = max( err,  magma_error  );
+                    magma_error2 = max( err2, magma_error2 );
                 }
 
                 /* check cublas result */
-                #if CUDA_VERSION >= 6050
                 cublas_error  = 0;
                 cublas_error2 = 0;
+                #if CUDA_VERSION >= 6050
                 magma_zgetvector(min_mn*batchCount, dtau_magma, 1, tau, 1);
                 magma_zgetmatrix( M, column, d_A, ldda, h_A, lda);
                 for (int i=0; i < batchCount; i++)
                 {
+                    double err, err2;
                     get_QR_error(M, N, min_mn,
                              h_A + i*lda*N, h_R + i*lda*N, lda, tau + i*min_mn,
                              Q, ldq, R, ldr, h_work, lwork,
-                             work, &error, &error2);
+                             work, &err, &err2);
 
-                    if ( isnan(error) || isinf(error) ) {
-                        cublas_error = error;
+                    if ( isnan(err) || isinf(err) ) {
+                        cublas_error = err;
                         break;
                     }
-                    cublas_error  = max( fabs(error),  cublas_error  );
-                    cublas_error2 = max( fabs(error2), cublas_error2 );
+                    cublas_error  = max( err,  cublas_error  );
+                    cublas_error2 = max( err2, cublas_error2 );
                 }
                 #endif
 
@@ -293,7 +296,7 @@ int main( int argc, char** argv)
                 //bool okay_cublas = (cublas_error < tol && cublas_error2 < tol);
                 status += ! okay;
 
-                printf("%5d       %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %15.2e   %15.2e   %15.2e   %15.2e   %s\n",
+                printf("%10d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %15.2e   %15.2e   %15.2e   %15.2e   %s\n",
                        (int)batchCount, (int) M, (int) N,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time,
@@ -303,7 +306,7 @@ int main( int argc, char** argv)
                        (okay ? "ok" : "failed") );
             }
             else {
-                printf("%5d       %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)      ---   (  ---  )   ---  \n",
+                printf("%10d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   ---\n",
                        (int)batchCount, (int) M, (int) N,
                        magma_perf,  1000.*magma_time,
                        cublas_perf, 1000.*cublas_time );

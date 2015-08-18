@@ -30,7 +30,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           error, work[1];
+    double           error, norm, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_B;
     magmaDoubleComplex_ptr d_A, d_B;
@@ -123,15 +123,16 @@ int main( int argc, char** argv)
                =================================================================== */
             magma_zgetmatrix( M, N, d_B, ldda, h_A, lda );
             
-            error = lapackf77_zlange( "F", &M, &N, h_B, &lda, work );
+            norm  = lapackf77_zlange( "F", &M, &N, h_B, &lda, work );
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_B, &ione);
-            error = lapackf77_zlange("f", &M, &N, h_B, &lda, work) / error;
+            error = lapackf77_zlange("f", &M, &N, h_B, &lda, work) / norm;
+            bool okay = (error < tol);
+            status += ! okay;
 
             printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                    (int) M, (int) N, (int) ntile,
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
-                   error, (error < tol ? "ok" : "failed"));
-            status += ! (error < tol);
+                   error, (okay ? "ok" : "failed"));
             
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_CPU( h_B );

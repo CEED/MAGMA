@@ -35,7 +35,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cpu_perf=0., cpu_time=0.;
-    double          current_error, magma_error, Cnorm, work[1];
+    double          magma_error, Cnorm, work[1];
     magma_int_t N, K;
     magma_int_t Ak, An;
     magma_int_t sizeA, sizeC;
@@ -73,8 +73,8 @@ int main( int argc, char** argv)
     }
     #endif
     
-    printf("%% BatchCount   N     K   MAGMA Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error \n");
-    printf("%%========================================================================================================\n");
+    printf("%% BatchCount   N     K   MAGMA Gflop/s (ms)    CPU Gflop/s (ms)   MAGMA error\n");
+    printf("%%============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
@@ -171,12 +171,12 @@ int main( int argc, char** argv)
                 {
                     Cnorm = lapackf77_zlanhe("fro", lapack_uplo_const(opts.uplo), &N, h_C+i*ldc*N, &ldc, work);
                     blasf77_zaxpy( &sizeC, &c_neg_one, h_C+i*ldc*N, &ione, h_Cmagma+i*ldc*N, &ione );
-                    current_error = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma+i*ldc*N, &ldc, work ) / Cnorm;
-                    if ( isnan(current_error) || isinf(current_error) ) {
-                        magma_error = current_error;
+                    double err = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma+i*ldc*N, &ldc, work ) / Cnorm;
+                    if ( isnan(err) || isinf(err) ) {
+                        magma_error = err;
                         break;
                     }
-                    magma_error = max(magma_error, current_error);
+                    magma_error = max( err, magma_error );
                 }
 
                 #ifdef MAGMA_WITH_MKL
@@ -184,16 +184,16 @@ int main( int argc, char** argv)
                 magma_set_lapack_numthreads( threads );
                 #endif
                 
-                printf("%5d %5d %5d  %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e   %s\n",
+                bool okay = (magma_error < tol);
+                status += ! okay;
+                printf("%10d %5d %5d    %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                        (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time,
                        cpu_perf,   1000.*cpu_time,
-                       magma_error, (magma_error < tol ? "ok" : "failed"));
-
-                status += ! (magma_error < tol);
+                       magma_error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5d %5d %5d   %7.2f (%7.2f)    ---   (  ---  )    ---     ---\n",
+                printf("%10d %5d %5d    %7.2f (%7.2f)     ---   (  ---  )     ---\n",
                        (int) batchCount, (int) N, (int) K,
                        magma_perf, 1000.*magma_time);
             }

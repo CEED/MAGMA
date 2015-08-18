@@ -54,7 +54,7 @@ int main( int argc, char** argv)
 
     magma_int_t batchCount = opts.batchcount;
     magma_int_t columns;
-    double  error  = 0.0, rwork[1];
+    double  error, rwork[1];
     double *norm_A = NULL;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t     status = 0;
@@ -63,8 +63,8 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R||_F / (N*||A||_F)     \n");
-    printf("%%=============================================================================================\n");
+    printf("%% batchCount   N    CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R||_F / (N*||A||_F)\n");
+    printf("%%===============================================================================\n");
     for( magma_int_t i = 0; i < opts.ntest; ++i ) {    
         for( magma_int_t iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
@@ -128,6 +128,7 @@ int main( int argc, char** argv)
             }
             if (info1 != 0) printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info1, magma_strerror( info1 ));
             if (info2 != 0) printf("magma_zgetri_batched returned argument error %d: %s.\n", (int) info2, magma_strerror( info2 ));
+            
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
@@ -167,48 +168,48 @@ int main( int argc, char** argv)
                 #endif
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                printf("%10d %6d %6d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) batchCount, (int) N, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
+                printf("%10d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (int) batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
+                
                 /* =====================================================================
                    Check the factorization
                    =================================================================== */
-                double err = 0.0;
                 if ( opts.check ) {
                     magma_getvector( N * batchCount, sizeof(magma_int_t), d_ipiv, 1, ipiv, 1 );
                     magma_zgetmatrix( N, N*batchCount, d_invA, ldda, h_R, lda );
-                    magma_int_t stop=0;
                     n2     = lda*N;
+                    error = 0;
                     for (magma_int_t i=0; i < batchCount; i++)
                     {
                         for (magma_int_t k=0; k < N; k++) {
                             if (ipiv[i*N+k] < 1 || ipiv[i*N+k] > N )
                             {
                                 printf("error for matrix %d ipiv @ %d = %d\n", (int) i, (int) k, (int) ipiv[i*N+k]);
-                                stop=1;
+                                error = -1;
                             }
                         }
-                        if (stop == 1) {
-                            err=-1.0;
+                        if (error == -1) {
                             break;
                         }
                         blasf77_zaxpy( &n2, &c_neg_one, h_A+ i * lda*N, &ione, h_R+ i * lda*N, &ione );
-                        error = lapackf77_zlange( "f", &N, &N, h_R+ i * lda*N, &lda, rwork ) / (N*norm_A[i]);
-                        if ( isnan(error) || isinf(error) ) {
-                            err = error;
+                        double err = lapackf77_zlange( "f", &N, &N, h_R+ i * lda*N, &lda, rwork ) / (N*norm_A[i]);
+                        if ( isnan(err) || isinf(err) ) {
+                            error = err;
                             break;
                         }
-                        err = max(fabs(error), err);
+                        error = max( err, error );
                     }
-                    printf("   %18.2e   %s\n", err, (err < tol ? "ok" : "failed") );
-                    status += ! (err < tol);
+                    bool okay = (error < tol);
+                    status += ! okay;
+                    printf("   %8.2e   %s\n", error, (okay ? "ok" : "failed") );
                 }
                 else {
                     printf("     ---  \n");
                 }
             }
             else {
-                printf("%10d %6d %6d     ---   (  ---  )   %7.2f (%7.2f)\n",
-                       (int) batchCount, (int) N, (int) N, gpu_perf, gpu_time*1000. );
+                printf("%10d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
+                       (int) batchCount, (int) N, gpu_perf, gpu_time*1000. );
             }
 
 

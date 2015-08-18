@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     nstride = 3*nb;
     
     printf("%% mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
-    printf("%%   M    N ntile   CPU GFlop/s (ms)    GPU GFlop/s (ms)    check\n");
+    printf("%%   M     N ntile    CPU GFlop/s (ms)    GPU GFlop/s (ms)   check\n");
     printf("%%================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -120,12 +120,13 @@ int main( int argc, char** argv)
             
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_B, &ione);
             error = lapackf77_zlange("f", &M, &N, h_B, &lda, work);
+            bool okay = (error == 0);
+            status += ! okay;
 
             printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
                    (int) M, (int) N, (int) ntile,
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
-                   (error == 0. ? "ok" : "failed") );
-            status += ! (error == 0.);
+                   (okay ? "ok" : "failed") );
             
             TESTING_FREE_CPU( h_A );
             TESTING_FREE_CPU( h_B );

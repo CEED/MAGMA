@@ -97,8 +97,8 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% BatchCount    M     N     CPU GFlop/s (ms)    MAGMA GFlop/s (ms)  CUBLAS GFlop/s (ms)  ||PA-LU||/(||A||*N)\n");
-    printf("%%========================================================================\n");
+    printf("%% BatchCount   M     N    CPU GFlop/s (ms)   MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)   ||PA-LU||/(||A||*N)\n");
+    printf("%%==========================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
@@ -177,15 +177,14 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.lapack ) {
-                printf("%10d   %5d  %5d     %7.2f (%7.2f)   %7.2f (%7.2f)    %7.2f (%7.2f)",
+                printf("%10d %5d %5d   %7.2f (%7.2f)    %7.2f (%7.2f)     %7.2f (%7.2f)",
                        (int) batchCount, (int) M, (int) N, cpu_perf, cpu_time*1000., magma_perf, magma_time*1000., cublas_perf*cublas_enable, cublas_time*1000.*cublas_enable  );
             }
             else {
-                printf("%10d   %5d  %5d     ---   (  ---  )   %7.2f (%7.2f)    %7.2f (%7.2f)",
+                printf("%10d %5d %5d     ---   (  ---  )    %7.2f (%7.2f)     %7.2f (%7.2f)",
                        (int) batchCount, (int) M, (int) N, magma_perf, magma_time*1000., cublas_perf*cublas_enable, cublas_time*1000.*cublas_enable );
             }
 
-            double err = 0.0;
             if ( opts.check ) {
                 // initialize ipiv to 1, 2, 3, ...
                 for (int i=0; i < batchCount; i++)
@@ -196,18 +195,20 @@ int main( int argc, char** argv)
                 }
 
                 magma_zgetmatrix( M, N*batchCount, dA_magma, ldda, h_A, lda );
+                error = 0;
                 for (int i=0; i < batchCount; i++)
                 {
-                    error = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);
-                    if ( isnan(error) || isinf(error) ) {
-                        err = error;
+                    double err;
+                    err = get_LU_error( M, N, h_R + i * lda*N, lda, h_A + i * lda*N, ipiv + i * min_mn);
+                    if ( isnan(err) || isinf(err) ) {
+                        error = err;
                         break;
                     }
-                    err = max( fabs(error), err );
+                    error = max( err, error );
                 }
-                bool okay = (err < tol);
+                bool okay = (error < tol);
                 status += ! okay;
-                printf("   %8.2e  %s\n", err, (okay ? "ok" : "failed") );
+                printf("   %8.2e  %s\n", error, (okay ? "ok" : "failed") );
             }
             else {
                 printf("     ---  \n");

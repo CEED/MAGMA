@@ -75,8 +75,8 @@ int main( int argc, char** argv)
     printf("%% uplo = %s, transA = %s, diag = %s \n",
            lapack_uplo_const(opts.uplo),
            lapack_trans_const(opts.transA), lapack_diag_const(opts.diag) );
-    printf("%% BatchCount  N    MAGMA Gflop/s (ms)   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)      MAGMA     CUBLAS   error\n");
-    printf("%%===========================================================================================================\n");
+    printf("%% BatchCount   N   MAGMA Gflop/s (ms)   CUBLAS Gflop/s (ms)    CPU Gflop/s (ms)      MAGMA   CUBLAS error\n");
+    printf("%%========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.msize[itest];
@@ -173,6 +173,8 @@ int main( int argc, char** argv)
                     d_b_array, N, batchCount);
                 cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
                 cublas_perf = gflops / cublas_time;
+            #else
+                MAGMA_UNUSED( alpha );
             #endif
 
             magma_zgetmatrix( N, batchCount, d_b, N, h_bcublas, N );
@@ -206,12 +208,13 @@ int main( int argc, char** argv)
             /* =====================================================================
                Check the result
                =================================================================== */
-               // ||b - Ax|| / (||A||*||x||)
+            // ||b - Ax|| / (||A||*||x||)
             magma_error  = 0;
             cublas_error = 0;
             for (int s=0; s < batchCount; s++) {
                 // error for CUBLAS
                 normA = lapackf77_zlange( "F", &N, &N, h_A + s * lda * Ak, &lda, work );
+                double err;
 
                 #if CUDA_VERSION >= 6050
                 normx = lapackf77_zlange( "F", &N, &ione, h_bcublas + s * N, &ione, work );
@@ -222,16 +225,15 @@ int main( int argc, char** argv)
 
                 blasf77_zaxpy( &N, &c_neg_one, h_b + s * N, &ione, h_bcublas + s * N, &ione );
                 normr = lapackf77_zlange( "F", &N, &ione, h_bcublas + s * N, &N, work );
-                double cublas_err = normr / (normA*normx);
+                err = normr / (normA*normx);
                 
-                if ( isnan(cublas_err) || isinf(cublas_err) ) {
+                if ( isnan(err) || isinf(err) ) {
                     printf("error for matrix %d cublas_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
-                            s, cublas_err, normr, normx, normA);
-                    cublas_error = cublas_err;
+                            s, err, normr, normx, normA);
+                    cublas_error = err;
                     break;
                 }
-                cublas_error = max(fabs(cublas_err), cublas_error);
-
+                cublas_error = max( err, cublas_error );
                 #endif
 
                 // error for MAGMA
@@ -243,35 +245,35 @@ int main( int argc, char** argv)
 
                 blasf77_zaxpy( &N, &c_neg_one, h_b + s * N, &ione, h_bmagma + s * N, &ione );
                 normr = lapackf77_zlange( "F", &N, &ione, h_bmagma + s * N, &N, work );
-                double magma_err = normr / (normA*normx);
+                err = normr / (normA*normx);
 
-                if ( isnan(magma_err) || isinf(magma_err) ) {
+                if ( isnan(err) || isinf(err) ) {
                     printf("error for matrix %d magma_error = %7.2f where normr=%7.2f normx=%7.2f and normA=%7.2f\n", 
-                            s, magma_err, normr, normx, normA);
-                    magma_error = magma_err;
+                            s, err, normr, normx, normA);
+                    magma_error = err;
                     break;
                 }
-                magma_error = max(fabs(magma_err), magma_error);
+                magma_error = max( err, magma_error );
             }
+            bool okay = (magma_error < tol && cublas_error < tol);
+            status += ! okay;
 
             if ( opts.lapack ) {
-                printf("%5d     %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)       %8.2e   %8.2e   %s\n",
+                printf("%10d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e   %s\n",
                         (int)batchCount, (int) N,
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         cpu_perf,    1000.*cpu_time,
                         magma_error, cublas_error,
-                        (magma_error < tol && cublas_error < tol? "ok" : "failed"));
-                status += ! (magma_error < tol && cublas_error < tol);
+                        (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5d     %5d   %7.2f (%7.2f)   %7.2f (%7.2f)       ---   (  ---  )       %8.2e   %8.2e     ---      %s\n",
+                printf("%10d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )   %8.2e   %8.2e   %s\n",
                         (int)batchCount, (int) N,
                         magma_perf,  1000.*magma_time,
                         cublas_perf, 1000.*cublas_time,
                         magma_error, cublas_error,
-                        (magma_error < tol && cublas_error < tol ? "ok" : "failed"));
-                status += ! (magma_error < tol && cublas_error < tol);
+                        (okay ? "ok" : "failed"));
             }
             
             TESTING_FREE_CPU( h_A );

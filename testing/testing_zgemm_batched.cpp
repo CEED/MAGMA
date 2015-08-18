@@ -36,7 +36,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double          magma_error, cublas_error, magma_err, cublas_err, Cnorm, work[1];
+    double          magma_error, cublas_error, Cnorm, work[1];
     magma_int_t M, N, K;
     magma_int_t Am, An, Bm, Bn;
     magma_int_t sizeA, sizeB, sizeC;
@@ -68,8 +68,8 @@ int main( int argc, char** argv)
            "%% transA = %s, transB = %s\n",
            lapack_trans_const(opts.transA),
            lapack_trans_const(opts.transB));
-    printf("%% BatchCount  M     N     K   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)  CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
-    printf("%%========================================================================================================\n");
+    printf("%% BatchCount   M     N     K   MAGMA Gflop/s (ms)   CUBLAS Gflop/s (ms)    CPU Gflop/s (ms)   MAGMA error  CUBLAS error\n");
+    printf("%%======================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[itest];
@@ -194,37 +194,38 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 // compute relative error for both magma & cublas, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                magma_error = 0.0;
-                cublas_error = 0.0;
-
+                magma_error  = 0;
+                cublas_error = 0;
                 for (int s=0; s < batchCount; s++)
                 {
                     magma_int_t C_batchSize = ldc * N;
  
                     Cnorm = lapackf77_zlange( "M", &M, &N, h_C + s*C_batchSize, &ldc, work );
 
+                    // ----- magma error
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C + s*C_batchSize, &ione, h_Cmagma + s*C_batchSize, &ione );
-                    magma_err = lapackf77_zlange( "M", &M, &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm;
+                    double err = lapackf77_zlange( "M", &M, &N, h_Cmagma + s*C_batchSize, &ldc, work ) / Cnorm;
 
-                    if ( isnan(magma_err) || isinf(magma_err) ) {
-                      magma_error = magma_err;
-                      break;
+                    if ( isnan(err) || isinf(err) ) {
+                        magma_error = err;
+                        break;
                     }
-                    magma_error = max(fabs(magma_err), magma_error);
+                    magma_error = max( err, magma_error );
 
+                    // ----- cublas error
                     blasf77_zaxpy( &C_batchSize, &c_neg_one, h_C + s*C_batchSize, &ione, h_Ccublas + s*C_batchSize, &ione );
-                    cublas_err = lapackf77_zlange( "M", &M, &N, h_Ccublas + s*C_batchSize, &ldc, work ) / Cnorm;
+                    err = lapackf77_zlange( "M", &M, &N, h_Ccublas + s*C_batchSize, &ldc, work ) / Cnorm;
                     
-                   if ( isnan(cublas_err) || isinf(cublas_err) ) {
-                      cublas_error = cublas_err;
-                      break;
+                    if ( isnan(err) || isinf(err) ) {
+                        cublas_error = err;
+                        break;
                     }
-                    cublas_error = max(fabs(cublas_err), cublas_error);
+                    cublas_error = max( err, cublas_error );
                 }
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
+                printf("%10d %5d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)   %7.2f (%7.2f)      %8.2e     %8.2e  %s\n",
                    (int) batchCount, (int) M, (int) N, (int) K,
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,
@@ -239,7 +240,7 @@ int main( int argc, char** argv)
 
                 bool okay = (magma_error < tol);
                 status += ! okay;
-                printf("%10d %5d %5d %5d  %7.2f (%7.2f)    %7.2f (%7.2f)   ---   (  ---  )    %8.2e     ---  %s\n",
+                printf("%10d %5d %5d %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     ---   (  ---  )    %8.2e     ---  %s\n",
                    (int) batchCount, (int) M, (int) N, (int) K,
                    magma_perf,  1000.*magma_time,
                    cublas_perf, 1000.*cublas_time,

@@ -58,8 +58,8 @@ int main( int argc, char** argv)
 
     magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
 
-    printf("%% BatchCount   N      CPU GFlop/s (ms)      GPU GFlop/s (ms)    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
-    printf("%%=======================================================\n");
+    printf("%% BatchCount   N    CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
+    printf("%%===================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N   = opts.nsize[i];
@@ -104,17 +104,15 @@ int main( int argc, char** argv)
             {
                 if (cpu_info[i] != 0 ) {
                     printf("magma_zpotrf_batched matrix %d returned diag error %d\n", i, (int)cpu_info[i] );
-                    //status = -1;
                     status = -1;
                 }
             }
-            if(status == -1)  goto cleanup;
-
             if (info != 0) {
                 //printf("magma_zpotrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
                 status = -1;
             }                
-            if(status == -1)  goto cleanup;
+            if (status == -1)
+                goto cleanup;
 
 
             /* =====================================================================
@@ -134,7 +132,8 @@ int main( int argc, char** argv)
                     magma_int_t locinfo;
                     lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + s * lda * N, &lda, &locinfo );
                     if (locinfo != 0)
-                        printf("lapackf77_zpotrf matrix %d returned err %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
+                        printf("lapackf77_zpotrf matrix %d returned error %d: %s.\n",
+                               (int) s, (int) locinfo, magma_strerror( locinfo ));
                 }
 
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -143,31 +142,34 @@ int main( int argc, char** argv)
             
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
+                
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
                 magma_zgetmatrix( N, columns, d_A, ldda, h_R, lda );
                 magma_int_t NN = lda*N;
-                char const uplo = 'l'; // lapack_uplo_const(opts.uplo)
-                double err = 0.0;
+                const char* uplo = lapack_uplo_const(opts.uplo);
+                error = 0;
                 for (int i=0; i < batchCount; i++)
                 {
-                    error = lapackf77_zlanhe("f", &uplo, &N, h_A + i * lda*N, &lda, work);
+                    double err = lapackf77_zlanhe("f", uplo, &N, h_A + i * lda*N, &lda, work);
                     blasf77_zaxpy(&NN, &c_neg_one, h_A + i * lda*N, &ione, h_R + i  * lda*N, &ione);
-                    error = lapackf77_zlanhe("f", &uplo, &N, h_R + i * lda*N, &lda, work) / error;
-                    if ( isnan(error) || isinf(error) ) {
-                        err = error;
+                    err = lapackf77_zlanhe("f", uplo, &N, h_R + i * lda*N, &lda, work) / err;
+                    if ( isnan(err) || isinf(err) ) {
+                        error = err;
                         break;
                     }
-                    err = max( fabs(error), err );
+                    error = max( err, error );
                 }
+                bool okay = (error < tol);
+                status += ! okay;
               
-                printf("%5d      %5d    %7.2f (%7.2f)     %7.2f (%7.2f)     %8.2e   %s\n",
-                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., err,  (err < tol ? "ok" : "failed"));
-                status += ! (err < tol);
+                printf("%10d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
+                       (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
+                       error, (okay ? "ok" : "failed"));
             }
             else {
-                printf("%5d      %5d    ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
+                printf("%10d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
                        (int)batchCount, (int) N, gpu_perf, gpu_time*1000. );
             }
 cleanup:
@@ -177,9 +179,11 @@ cleanup:
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_A_array );
             TESTING_FREE_DEV( dinfo_magma );
-            if(status==-1) break;
+            if (status == -1)
+                break;
         }
-        if(status==-1) break;
+        if (status == -1)
+            break;
 
         if ( opts.niter > 1 ) {
             printf( "\n" );
