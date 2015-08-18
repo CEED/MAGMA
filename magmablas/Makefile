@@ -216,15 +216,15 @@ cpotf2_kernels_var.$(o_ext): cpotf2_devicesfunc.cuh
 zpotf2_kernels_var.$(o_ext): zpotf2_devicesfunc.cuh
 
 # extra include dependencies
-ztrsv_batched.$(o_ext): ztrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-ctrsv_batched.$(o_ext): ctrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-dtrsv_batched.$(o_ext): dtrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-strsv_batched.$(o_ext): strsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ztrsv_batched.$(o_ext): ztrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ctrsv_batched.$(o_ext): ctrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+dtrsv_batched.$(o_ext): dtrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+strsv_batched.$(o_ext): strsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
 
-ztrsv.$(o_ext): ztrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-ctrsv.$(o_ext): ctrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-dtrsv.$(o_ext): dtrsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
-strsv.$(o_ext): strsv_devicesfunc.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ztrsv.$(o_ext): ztrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+ctrsv.$(o_ext): ctrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+dtrsv.$(o_ext): dtrsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
+strsv.$(o_ext): strsv_template_device.cuh gemv_template_device.cuh gemm_template_device_defs.cuh
 
 zgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
 cgemv_fermi.$(o_ext): gemv_template_device.cuh gemm_template_device_defs.cuh
