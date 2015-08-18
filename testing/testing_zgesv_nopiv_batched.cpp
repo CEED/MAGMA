@@ -95,7 +95,7 @@ int main(int argc, char **argv)
             zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue);
             
             gpu_time = magma_sync_wtime( opts.queue );
-            magma_zgesv_nopiv_batched( N, nrhs, d_A_array, ldda, d_B_array, lddb, dinfo_magma, batchCount, opts.queue );
+            info = magma_zgesv_nopiv_batched( N, nrhs, d_A_array, ldda, d_B_array, lddb, dinfo_magma, batchCount, opts.queue );
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             // check correctness of results throught "dinfo_magma" and correctness of argument throught "info"
@@ -103,11 +103,11 @@ int main(int argc, char **argv)
             for (int i=0; i < batchCount; i++)
             {
                 if (cpu_info[i] != 0 ) {
-                    printf("magma_zgetrf_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
+                    printf("magma_zgesv_nopiv_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
                 }
             }
             if (info != 0)
-                printf("magma_zgetrf_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+                printf("magma_zgesv_nopiv_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
             
             //=====================================================================
             // Residual
