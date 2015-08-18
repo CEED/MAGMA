@@ -63,7 +63,7 @@ int main( int argc, char** argv)
     opts.tolerance = max( 3000., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R||_F / (N*||A||_F)     )\n");
+    printf("%% batchCount    N     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R||_F / (N*||A||_F)     \n");
     printf("%%=============================================================================================\n");
     for( magma_int_t i = 0; i < opts.ntest; ++i ) {    
         for( magma_int_t iter = 0; iter < opts.niter; ++iter ) {
@@ -71,7 +71,9 @@ int main( int argc, char** argv)
             lda    = N;
             n2     = lda*N * batchCount;
             ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
-            //gflops = (FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRI( N ))/ 1e9 * batchCount; // This is the correct flops but since this getri_batched is based on 2 trsm = getrs and to know the real flops I am using the getrs one
+            // This is the correct flops but since this getri_batched is based on
+            // 2 trsm = getrs and to know the real flops I am using the getrs one
+            //gflops = (FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRI( N ))/ 1e9 * batchCount;
             gflops = (FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, N ))/ 1e9 * batchCount;
 
             TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
@@ -197,15 +199,15 @@ int main( int argc, char** argv)
                         }
                         err = max(fabs(error), err);
                     }
-                    printf("   %18.2e   %10.2e   %s\n", err, (err < tol ? "ok" : "failed") );
-                    status += ! (error < tol);
+                    printf("   %18.2e   %s\n", err, (err < tol ? "ok" : "failed") );
+                    status += ! (err < tol);
                 }
                 else {
                     printf("     ---  \n");
                 }
             }
             else {
-                printf("%10d %6d %6d     ---   (  ---  )   %7.2f (%7.2f)",
+                printf("%10d %6d %6d     ---   (  ---  )   %7.2f (%7.2f)\n",
                        (int) batchCount, (int) N, (int) N, gpu_perf, gpu_time*1000. );
             }
 
