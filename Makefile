@@ -33,9 +33,12 @@ endif
 .PHONY: all lib libmagma test clean cleanall install shared static
 
 .DEFAULT_GOAL := all
-all: lib test
+all: lib test sparse
 
 static: libmagma
+
+sparse: lib
+	( cd sparse-iter && $(MAKE) )
 
 libmagma:
 	@echo ======================================== magmablas
