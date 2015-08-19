@@ -34,13 +34,12 @@ int main(  int argc, char** argv )
     magma_queue_t queue=NULL;
     magma_queue_create( &queue );
     
-    int i=1;
-
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
     magma_z_matrix A={Magma_CSR}, B_d={Magma_CSR};
     magma_z_matrix x={Magma_CSR}, b={Magma_CSR};
 
+    int i=1;
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;

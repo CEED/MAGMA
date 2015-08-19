@@ -47,15 +47,10 @@ void magmablas_zhemm_mgpu_spec(
     magma_int_t lddwork = lddc;
     assert( dworksiz >= (2*n*lddwork) );
 
-
-
-
-        
     magma_device_t cdev;
     magma_getdevice( &cdev );
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
-
 
     magma_int_t dev, devperm, myblk, mycolsize, myblkoffst;
     magma_int_t gdev, gcolsize, gmaster, gngpu;
@@ -73,7 +68,6 @@ void magmablas_zhemm_mgpu_spec(
     magma_int_t remm        = m- fstblksiz;
     magma_int_t nbblkoffst  = offset/nb;
 
-
     magma_int_t nblstblks = -1;
     magma_int_t devlstblk = -1;
     magma_int_t lstblksiz = remm%nb;
@@ -87,7 +81,6 @@ void magmablas_zhemm_mgpu_spec(
     magma_int_t gpuisactive[MagmaMaxGPUs];
     memset(gpuisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
     memset(cmplxisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
-
 
     //*******************************
     //  each GPU make a GEMM with the
@@ -129,7 +122,6 @@ void magmablas_zhemm_mgpu_spec(
             }
             mycolsize = min(mycolsize, m);
 
-        
             if (mycolsize > 0) {
                 if (masterdev == -1) masterdev     = dev;
                 //printf("dev %d devperm %d on cmplx %d  master %d nbblk %d myblk %d m %d n %d mycolsize %d stdev %d fstblksize %d lastdev %d lastsize %d dA(%d, %d, %d) ==> dwork(%d, %d)\n", dev, devperm, cmplxid, masterdev, nbblk, myblk, m, n, mycolsize, stdev, fstblksiz, devlstblk, remm%nb, dev, offset, myblkoffst, dev, maxgsize*dev);
@@ -151,15 +143,12 @@ void magmablas_zhemm_mgpu_spec(
         }
     }
 
-
-
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_queue_sync( queues[ dev ][ dev ] );
     }
 */
-
 
     //*******************************
     //  each Master GPU has the final
@@ -227,7 +216,6 @@ void magmablas_zhemm_mgpu_spec(
             }// end if mycolsize > 0
         }// for idev
     }// for cmplxid
-
 
     //printf("=======================================================================\n");
     //printf("                master wait and resend internally                      \n");
@@ -331,8 +319,6 @@ void magmablas_zhemm_mgpu_spec(
                         magmablas_zlacpy( MagmaFull, ib, n, &dwork[dev][maxgsize*gdev+lcblki], gcolsize, &dC[dev][gbblki], lddc);
                     }// end blki
                 }
-
-
                 
                 for( magma_int_t k = 0; k < nbcmplx; ++k ) {
                     gngpu   = gnode[k][MagmaMaxGPUs];
@@ -386,13 +372,7 @@ void magmablas_zhemm_mgpu_spec(
         }// end loop over idev of cmplxid
     }// end loop of the cmplx
 
-
-
-
-
-
-
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_device_sync();
     }

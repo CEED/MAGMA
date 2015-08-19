@@ -8,8 +8,6 @@
        @precisions normal z -> s d c
        @author Mark Gates
        @author Azzam Haidar
-       
-       This still has poor performance. Work in progress.
 */
 #include "common_magma.h"
 #include "magma_bulge.h"
@@ -49,30 +47,28 @@ void magmablas_zhemm_mgpu_com(
     assert( lddc >= m );
     assert( nqueue >= ngpu );
     assert( nbevents >= ngpu*ngpu );
-   
     
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     magmaDoubleComplex_ptr dwork2[MagmaMaxGPUs];
 
-
     magma_int_t maxgsize    = n*m;
     magma_int_t lddwork = lddc;
     magma_int_t ldwork  = m;
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    magma_int_t dev;
+    
+    for( dev = 0; dev < ngpu; ++dev ) {
         dwork2[dev] = dwork[dev]+n*lddwork;  // size of dwork2 is maxgsize*ngpu
     }
     assert( dworksiz >= (n*lddwork+maxgsize*ngpu) );
     assert( worksiz  >= (n*ldwork) );
-
         
     magma_device_t cdev;
     magma_getdevice( &cdev );
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
-
-    magma_int_t dev, devperm, myblk, mycolsize, myblkoffst;
+    magma_int_t devperm, myblk, mycolsize, myblkoffst;
     magma_int_t gmaster;
     magma_int_t masterdev, lcdev, lccolsize, myngpu;
 
@@ -86,7 +82,6 @@ void magmablas_zhemm_mgpu_com(
     magma_int_t nbblk       = magma_ceildiv((m+blockoffset), nb);
     magma_int_t remm        = m- fstblksiz;
     magma_int_t nbblkoffst  = offset/nb;
-
 
     magma_int_t nblstblks = -1;
     magma_int_t devlstblk = -1;
@@ -102,8 +97,7 @@ void magmablas_zhemm_mgpu_com(
     memset(gpuisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
     memset(cmplxisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
 
-
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magmablasSetKernelStream( queues[ dev ][ 0 ] );
         cudaMemset(dwork(dev,0,0), 0, (lddwork)*(n)*sizeof(magmaDoubleComplex) );
@@ -118,35 +112,32 @@ void magmablas_zhemm_mgpu_com(
     // 1. symmetrize
     if (blockoffset > 0) {
         newoffset  = offset+fstblksiz; // newoffset is adjusted over nb
-        magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > stdev?1:0);
+        myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > stdev ? 1 : 0);
         //printf("STDEV %d  voici offset %d remm %d   myblockoffset %d    siz %d \n", stdev, offset, remm, myblkoffst, fstblksiz);
         magma_setdevice( stdev );
         magmablasSetKernelStream( queues[ stdev ][ 0 ] );
         magmablas_zsymmetrize_tiles(  MagmaLower,  fstblksiz,  dA(stdev, offset, myblkoffst*nb+blockoffset),  ldda,  1,  ngpu*nb,  nb  );         
     }
 
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_int_t newstdev      = (newoffset/nb)%ngpu;
-        magma_int_t nbblk = remm/nb; // number of block of size nb. if m%nb > 0 then a last block exist and is of size ib=m%nb
-        magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-newstdev+ngpu)%ngpu) ?  1:0 );
-        magma_int_t devperm   = (dev-newstdev+ngpu)%ngpu;
-        magma_int_t nbblkoffst = newoffset/nb;
-        magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
+        nbblk = remm/nb; // number of block of size nb. if m%nb > 0 then a last block exist and is of size ib=m%nb
+        myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-newstdev+ngpu)%ngpu) ?  1:0 );
+        devperm   = (dev-newstdev+ngpu)%ngpu;
+        nbblkoffst = newoffset/nb;
+        myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev ? 1 : 0);
         //printf("dev %d  devperm %d   newoffset %d  rowoff %d    coloff %d    myblk %d  \n", dev, devperm, newoffset, newoffset+devperm*nb, myblkoffst*nb, myblk);
         magma_setdevice( dev );
         magmablasSetKernelStream( queues[ dev ][ 0 ] );
         magmablas_zsymmetrize_tiles(  MagmaLower,  nb,  dA(dev, newoffset+devperm*nb, myblkoffst*nb),  ldda,  myblk,  ngpu*nb,  nb  );
         if (remm%nb > 0) {
-            magma_int_t nblstblks = (nbblk+1)%ngpu;
-            magma_int_t devlstblk = (nblstblks-1+ngpu)%ngpu;
+            nblstblks = (nbblk+1)%ngpu;
+            devlstblk = (nblstblks-1+ngpu)%ngpu;
             //printf("==> siz %d devperm %d,    devlstblk %d,    newoffset+nbblk*nb %d,   myblkoffst*nb+ myblk*nb %d\n", remm % nb, devperm, devlstblk, newoffset+nbblk*nb, myblkoffst*nb+ myblk*nb);
             if (devperm == devlstblk)
                 magmablas_zsymmetrize(  MagmaLower,  remm % nb,  dA(dev, newoffset+nbblk*nb, myblkoffst*nb+ myblk*nb),  ldda );  // last partial tile
         }
     }
-
-
-    
 
 /*
     magma_int_t siz = m+offset;
@@ -166,7 +157,6 @@ void magmablas_zhemm_mgpu_com(
 return;
 */
     
-
     // ROW GEMM transpose a row and make a gemm with a block
     // if only 1 GPU used the ROW GEMM is integrated with the 
     // COL GEMM (better accuracy observed) and better perf
@@ -175,11 +165,11 @@ return;
             magma_int_t ib     = min( nb, m-i );      // block size
             magma_int_t ioff   = i + offset;          // start global index in parent matrix
             //magma_int_t dev    = (ioff / nb) % ngpu;
-            magma_int_t nbblkoffst = offset/nb;
-            magma_int_t nbblk      = magma_ceildiv(i, nb);
-            for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-                magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-stdev+ngpu)%ngpu) ?  1:0 );
-                magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
+            nbblkoffst = offset/nb;
+            nbblk      = magma_ceildiv(i, nb);
+            for( dev = 0; dev < ngpu; ++dev ) {
+                myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-stdev+ngpu)%ngpu) ?  1:0 );
+                myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev ? 1 : 0);
 
                 magma_int_t myrowsize = myblk * nb;
                 magma_int_t coloffset = myblkoffst*nb;
@@ -198,13 +188,12 @@ return;
                 }
             }
         }
-        for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+        for( dev = 0; dev < ngpu; ++dev ) {
             magma_setdevice( dev );
             magma_event_record(redevents[dev][1], queues[dev][1]);
         }
     }
     
-
     // COL GEMM
     // blockoffset is offset within first block; for subsequent blocks it is 0
     if (blockoffset > 0) {
@@ -220,14 +209,12 @@ return;
                         beta,  dC(stdev,0,0),     lddc );
     }
    
-
-
     // COL GEMM
     for( magma_int_t i = fstblksiz; i < m; i += nb ) {
         magma_int_t ib     = min( nb, m-i );      // block size
         magma_int_t ioff   = i + offset;          // start global index in parent matrix
         magma_int_t iblock = (ioff / nb) / ngpu;  // local block id
-        magma_int_t dev    = (ioff / nb) % ngpu;
+        dev    = (ioff / nb) % ngpu;
         magma_int_t di     = iblock*nb;           // local index in parent matrix
         
         //printf("DEV %d COL GEMM i %d      ioff %d  di %d m-i %d    n %d   ib %d \n", dev, i, ioff, di, m-i, n, ib);
@@ -261,15 +248,13 @@ return;
                          c_one, dC(dev,0,0),    lddc );
         }
     }
-
-
     
     if (ngpu > 1) {
-        for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-            magma_int_t nbblk    = magma_ceildiv((m+blockoffset), nb);
+        for( dev = 0; dev < ngpu; ++dev ) {
+            nbblk    = magma_ceildiv((m+blockoffset), nb);
             magma_int_t nbblkrow = nbblk-1; 
-            magma_int_t devperm  = (dev-stdev+ngpu)%ngpu;
-            magma_int_t myblk = (nbblkrow/ngpu) + (nbblkrow%ngpu > devperm ?  1:0 );
+            devperm  = (dev-stdev+ngpu)%ngpu;
+            myblk = (nbblkrow/ngpu) + (nbblkrow%ngpu > devperm ?  1:0 );
             magma_int_t myrowsize = myblk * nb;
             if (dev == stdev) {
                 myrowsize = myrowsize - blockoffset;
@@ -303,9 +288,6 @@ return;
         }
     }
 
-
-
-
     // ===========================================================
     //             COMMUNICATION ALL_REDUCE_SUM 
     // ===========================================================
@@ -320,9 +302,9 @@ return;
         for( magma_int_t idev = 0; idev < myngpu; ++idev ) {
             dev         = gnode[cmplxid][idev];
             devperm     = (dev-stdev+ngpu)%ngpu;
-            myblk       = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
+            myblk       = (nbblk/ngpu) + (nbblk%ngpu > devperm ? 1 : 0 );
             mycolsize   = myblk*nb;
-            myblkoffst  = nb*((nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0));            
+            myblkoffst  = nb*((nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev ? 1 : 0));            
             if (dev == stdev) {
                 mycolsize  -=  blockoffset;
                 myblkoffst +=  blockoffset;     // local index in parent matrix
@@ -343,7 +325,7 @@ return;
         }
     }
 /*
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_device_sync();
     }
@@ -389,7 +371,7 @@ return;
         }// end of if masterdev != -1 maening complex is active
     }// for cmplxid
 /*
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_device_sync();
     }
@@ -454,7 +436,7 @@ return;
         }// end of if masterdev != -1 maening complex is active
     }// for cmplxid
 /*
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_device_sync();
     }
@@ -515,12 +497,11 @@ return;
         }// end of if masterdev != -1 maening complex is active
     }// for cmplxid
 /*
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+    for( dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_device_sync();
     }
 */
-
 
     for( magma_int_t cmplxid = 0; cmplxid < nbcmplx; ++cmplxid ) {
         myngpu    = gnode[cmplxid][MagmaMaxGPUs];
@@ -539,8 +520,6 @@ return;
         }// end of if masterdev != -1 maening complex is active
     }// for cmplxid
 
-
- 
    //printf("****************************************************\n");
    //printf("                      finish zhemm                   \n");
    //printf("****************************************************\n");

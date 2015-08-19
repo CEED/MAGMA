@@ -235,7 +235,7 @@ magma_zilures(
 
     magmaDoubleComplex tmp;
     real_Double_t tmp2;
-    magma_int_t i,j,k;
+    magma_int_t i, j, k;
     
     magmaDoubleComplex one = MAGMA_Z_MAKE( 1.0, 0.0 );
 
@@ -255,9 +255,9 @@ magma_zilures(
         CHECK( magma_zmalloc_cpu( &LL.val, LL.nnz ));
         CHECK( magma_index_malloc_cpu( &LL.col, LL.nnz ));
         magma_int_t z=0;
-        for( magma_int_t i=0; i<L.num_rows; i++){
+        for (i=0; i < L.num_rows; i++) {
             LL.row[i] = z;
-            for( magma_int_t j=L.row[i]; j<L.row[i+1]; j++){
+            for (j=L.row[i]; j < L.row[i+1]; j++) {
                 LL.val[z] = L.val[j];
                 LL.col[z] = L.col[j];
                 z++;

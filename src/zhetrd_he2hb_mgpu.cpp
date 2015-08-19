@@ -169,7 +169,6 @@ magma_zhetrd_he2hb_mgpu(
     assert (nqueue >= 3);
     assert (nqueue >= (ngpu+1));
 
-
     *info = 0;
     int upper = (uplo == MagmaUpper);
     lquery = (lwork == -1);
@@ -241,8 +240,8 @@ magma_zhetrd_he2hb_mgpu(
         dwork[dev]    = dw[dev]      + nb*lddw;
         dworkbis[dev] = dwork[dev]   + nb*ldda;
         magmablasSetKernelStream( queues[ dev ][ 0 ] );
-        for( magma_int_t i = 0; i < nbevents; ++i ) {
-            cudaEventCreateWithFlags(&redevents[dev][i],cudaEventDisableTiming);
+        for( i = 0; i < nbevents; ++i ) {
+            cudaEventCreateWithFlags( &redevents[dev][i], cudaEventDisableTiming );
         }
     }
     magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);

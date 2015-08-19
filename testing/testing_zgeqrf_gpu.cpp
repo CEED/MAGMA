@@ -166,13 +166,9 @@ int main( int argc, char** argv)
                    Check the result by solving consistent linear system, A*x = b.
                    Only for versions 1 & 3 with M >= N.
                    =================================================================== */
-                magma_int_t lwork;
+                magma_int_t lwork2;
                 magmaDoubleComplex *x, *b, *hwork;
                 magmaDoubleComplex_ptr d_B;
-                const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
-                const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-                const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-                const magma_int_t ione = 1;
 
                 // initialize RHS, b = A*random
                 TESTING_MALLOC_CPU( x, magmaDoubleComplex, N );
@@ -188,13 +184,13 @@ int main( int argc, char** argv)
                     magma_zgeqrs_gpu( M, N, 1,
                                       d_A, ldda, tau, dT,
                                       d_B, M, tmp, -1, &info );
-                    lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
-                    TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork );
+                    lwork2 = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
+                    TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork2 );
 
                     // solve linear system
                     magma_zgeqrs_gpu( M, N, 1,
                                       d_A, ldda, tau, dT,
-                                      d_B, M, hwork, lwork, &info );
+                                      d_B, M, hwork, lwork2, &info );
                     if (info != 0)
                         printf("magma_zgeqrs returned error %d: %s.\n",
                                (int) info, magma_strerror( info ));
@@ -206,13 +202,13 @@ int main( int argc, char** argv)
                     magma_zgeqrs3_gpu( M, N, 1,
                                        d_A, ldda, tau, dT,
                                        d_B, M, tmp, -1, &info );
-                    lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
-                    TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork );
+                    lwork2 = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
+                    TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork2 );
 
                     // solve linear system
                     magma_zgeqrs3_gpu( M, N, 1,
                                        d_A, ldda, tau, dT,
-                                       d_B, M, hwork, lwork, &info );
+                                       d_B, M, hwork, lwork2, &info );
                     if (info != 0)
                         printf("magma_zgeqrs3 returned error %d: %s.\n",
                                (int) info, magma_strerror( info ));

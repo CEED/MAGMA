@@ -241,8 +241,8 @@ magma_zhetrd_he2hb_mgpu_spec(
         dwork[dev]    = dw[dev]      + nb*lddw;
         dworkbis[dev] = dwork[dev]   + nb*ldda;
         magmablasSetKernelStream( queues[ dev ][ 0 ] );
-        for( magma_int_t i = 0; i < nbevents; ++i ) {
-            cudaEventCreateWithFlags(&redevents[dev][i],cudaEventDisableTiming);
+        for( i = 0; i < nbevents; ++i ) {
+            cudaEventCreateWithFlags( &redevents[dev][i], cudaEventDisableTiming );
         }
     }
     magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);

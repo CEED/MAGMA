@@ -70,7 +70,6 @@ int main(  int argc, char** argv )
         printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
-
         // for the eigensolver case
         zopts.solver_par.ev_length = A.num_rows;
         CHECK( magma_zeigensolverinfo_init( &zopts.solver_par, queue ));
@@ -104,10 +103,6 @@ int main(  int argc, char** argv )
         magma_zmfree(&b, queue );
         i++;
     }
-
-
-    
-
 
 cleanup:
     magma_zmfree(&B_d, queue );

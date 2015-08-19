@@ -137,10 +137,6 @@ int main(  int argc, char** argv )
         i++;
     }
 
-
-    
-
-
 cleanup:
     magma_zmfree(&B_d, queue );
     magma_zmfree(&B, queue );

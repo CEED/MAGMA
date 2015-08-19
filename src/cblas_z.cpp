@@ -180,7 +180,7 @@ magmaDoubleComplex magma_cblas_zdotc(
         magma_int_t ix=0, iy=0;
         if ( incx < 0 ) { ix = (-n + 1)*incx; }
         if ( incy < 0 ) { iy = (-n + 1)*incy; }
-        for( magma_int_t i=0; i < n; ++i ) {
+        for( i=0; i < n; ++i ) {
             value += conj( x[ix] ) * y[iy];
             ix += incx;
             iy += incy;
@@ -234,7 +234,7 @@ magmaDoubleComplex magma_cblas_zdotu(
         magma_int_t ix=0, iy=0;
         if ( incx < 0 ) { ix = (-n + 1)*incx; }
         if ( incy < 0 ) { iy = (-n + 1)*incy; }
-        for( magma_int_t i=0; i < n; ++i ) {
+        for( i=0; i < n; ++i ) {
             value += x[ix] * y[iy];
             ix += incx;
             iy += incy;

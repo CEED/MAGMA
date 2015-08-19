@@ -111,7 +111,7 @@ magma_zgetrf2_mgpu(
     magma_int_t iinfo, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
     magma_int_t i, j, d, dd, rows, cols, s, ldpan[MagmaMaxGPUs];
-    magma_int_t id, j_local, j_local2, nb0, nb1, h = 2+ngpu;
+    magma_int_t id, j_local, j_local2, ldda, loff, nb0, nb1, h = 2+ngpu;
     magmaDoubleComplex *d_panel[MagmaMaxGPUs], *panel_local[MagmaMaxGPUs];
 
     /* Check arguments */
@@ -293,10 +293,10 @@ magma_zgetrf2_mgpu(
         
             if ( d == (j+1) % ngpu ) {
                 /* Set the local index where the current panel is */
-                int loff    = j+1;
-                int j_local = (j+1)/ngpu;
-                int ldda    = maxm - (j+1)*nb;
-                int cols    = m - (j+1)*nb;
+                /*int*/ loff    = j+1;
+                /*int*/ j_local = (j+1)/ngpu;
+                /*int*/ ldda    = maxm - (j+1)*nb;
+                /*int*/ cols    = m - (j+1)*nb;
                 nb0 = min(nb, mindim - (j+1)*nb); /* size of the diagonal block */
                 trace_gpu_end( d, 1 );
                 
@@ -321,8 +321,8 @@ magma_zgetrf2_mgpu(
     
         /* update the remaining matrix by gpu owning the next panel */
         if ( (j+1) < s ) {
-            int j_local = (j+1)/ngpu;
-            int rows  = m - (j+1)*nb;
+            /*int*/ j_local = (j+1)/ngpu;
+            /*int*/ rows  = m - (j+1)*nb;
             
             d = (j+1) % ngpu;
             magma_setdevice(d);

@@ -127,7 +127,6 @@ int main(  int argc, char** argv )
         else
             printf("%% LUmerge tester:  failed\n");
 
-
         magma_zmfree(&A, queue );
         magma_zmfree(&A2, queue );
         magma_zmfree(&AT, queue );

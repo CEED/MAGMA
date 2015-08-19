@@ -345,7 +345,7 @@ magma_zmconvert(
                 
                 for(magma_int_t i=0; i < A.num_rows; i++) {
                     for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
-                            B->row[j] = i;
+                        B->row[j] = i;
                     }
                 }
             }
@@ -359,7 +359,7 @@ magma_zmconvert(
                 
                 for(magma_int_t i=0; i < A.num_rows; i++) {
                     for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
-                            B->rowidx[j] = i;
+                        B->rowidx[j] = i;
                     }
                 }
             }
@@ -390,8 +390,7 @@ magma_zmconvert(
                 CHECK( magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows ));
                 CHECK( magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows ));
                 
-                
-                for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
+                for( i=0; i < (maxrowlength*A.num_rows); i++) {
                     B->val[i] = MAGMA_Z_MAKE(0., 0.);
                     B->col[i] =  -1;
                 }
@@ -433,9 +432,9 @@ magma_zmconvert(
                 CHECK( magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows ));
                 CHECK( magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows ));
                 
-                for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
+                for( i=0; i < (maxrowlength*A.num_rows); i++) {
                     B->val[i] = MAGMA_Z_MAKE(0., 0.);
-                    B->col[i] =  -1;
+                    B->col[i] = -1;
                 }
     
                 for( i=0; i < A.num_rows; i++ ) {
@@ -478,7 +477,7 @@ magma_zmconvert(
                 CHECK( magma_index_malloc_cpu( &B->col, maxrowlength*A.num_rows ));
                 
                 
-                for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++) {
+                for( i=0; i < (maxrowlength*A.num_rows); i++) {
                     B->val[i] = MAGMA_Z_MAKE(0., 0.);
                     B->col[i] =  -1;
                 }
@@ -531,8 +530,7 @@ magma_zmconvert(
                 CHECK( magma_index_malloc_cpu( &B->col, rowlength*A.num_rows ));
                 CHECK( magma_index_malloc_cpu( &B->row, A.num_rows ));
                 
-                
-                for( magma_int_t i=0; i < rowlength*A.num_rows; i++) {
+                for( i=0; i < rowlength*A.num_rows; i++) {
                     B->val[i] = MAGMA_Z_MAKE(0., 0.);
                     B->col[i] =  0;
                 }
@@ -857,7 +855,6 @@ magma_zmconvert(
                 magma_int_t threads_per_row = A.alignment;
                 magma_int_t rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
                 // conversion
-                magma_index_t *row_tmp;
                 CHECK( magma_index_malloc_cpu( &row_tmp, A.num_rows+1 ));
                 //fill the row-pointer
                 for( magma_int_t i=0; i < A.num_rows+1; i++ )

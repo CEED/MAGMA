@@ -314,17 +314,17 @@ void magma_opts::parse_opts( int argc, char** argv )
                               start_k >= 0 && stop_k >= 0 &&
                               (step_m != 0 || step_n != 0 || step_k != 0),
                               "error: --range %s is invalid; ensure start >= 0, stop >= 0, at least one step != 0.\n", argv[i] );
-                for( int m = start_m, n = start_n, k = start_k;
-                     (step_m >= 0 ? m <= stop_m : m >= stop_m) &&
-                     (step_n >= 0 ? n <= stop_n : n >= stop_n) &&
-                     (step_k >= 0 ? k <= stop_k : k >= stop_k);
-                     m += step_m, n += step_n, k += step_k )
+                for( int lm = start_m, ln = start_n, lk = start_k;
+                     (step_m >= 0 ? lm <= stop_m : lm >= stop_m) &&
+                     (step_n >= 0 ? ln <= stop_n : ln >= stop_n) &&
+                     (step_k >= 0 ? lk <= stop_k : lk >= stop_k);
+                     lm += step_m, ln += step_n, lk += step_k )
                 {
                     magma_assert( this->ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
                                   argv[1], MAX_NTEST );
-                    this->msize[ this->ntest ] = m;
-                    this->nsize[ this->ntest ] = n;
-                    this->ksize[ this->ntest ] = k;
+                    this->msize[ this->ntest ] = lm;
+                    this->nsize[ this->ntest ] = ln;
+                    this->ksize[ this->ntest ] = lk;
                     this->ntest++;
                 }
                 continue;
@@ -335,16 +335,16 @@ void magma_opts::parse_opts( int argc, char** argv )
                               start_n >= 0 && stop_n >= 0 &&
                               (step_m != 0 || step_n != 0),
                               "error: --range %s is invalid; ensure start >= 0, stop >= 0, at least one step != 0.\n", argv[i] );
-                for( int m = start_m, n = start_n;
-                     (step_m >= 0 ? m <= stop_m : m >= stop_m) &&
-                     (step_n >= 0 ? n <= stop_n : n >= stop_n);
-                     m += step_m, n += step_n )
+                for( int lm = start_m, ln = start_n;
+                     (step_m >= 0 ? lm <= stop_m : lm >= stop_m) &&
+                     (step_n >= 0 ? ln <= stop_n : ln >= stop_n);
+                     lm += step_m, ln += step_n )
                 {
                     magma_assert( this->ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
                                   argv[1], MAX_NTEST );
-                    this->msize[ this->ntest ] = m;
-                    this->nsize[ this->ntest ] = n;
-                    this->ksize[ this->ntest ] = n;
+                    this->msize[ this->ntest ] = lm;
+                    this->nsize[ this->ntest ] = ln;
+                    this->ksize[ this->ntest ] = ln;
                     this->ntest++;
                 }
                 continue;
@@ -353,15 +353,15 @@ void magma_opts::parse_opts( int argc, char** argv )
                 // matched --range n1:n2:nstep
                 magma_assert( start_m >= 0 && stop_m >= 0 && step_m != 0,
                               "error: --range %s is invalid; ensure start >= 0, stop >= 0, step != 0.\n", argv[i] );
-                for( int m = start_m;
-                     (step_m >= 0 ? m <= stop_m : m >= stop_m);
-                     m += step_m )
+                for( int lm = start_m;
+                     (step_m >= 0 ? lm <= stop_m : lm >= stop_m);
+                     lm += step_m )
                 {
                     magma_assert( this->ntest < MAX_NTEST, "error: --range %s exceeded maximum number of tests (%d).\n",
                                   argv[1], MAX_NTEST );
-                    this->msize[ this->ntest ] = m;
-                    this->nsize[ this->ntest ] = m;
-                    this->ksize[ this->ntest ] = m;
+                    this->msize[ this->ntest ] = lm;
+                    this->nsize[ this->ntest ] = lm;
+                    this->ksize[ this->ntest ] = lm;
                     this->ntest++;
                 }
                 continue;

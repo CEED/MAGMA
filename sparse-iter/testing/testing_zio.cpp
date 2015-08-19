@@ -104,7 +104,6 @@ int main(  int argc, char** argv )
         magma_zmfree(&A4, queue );
         magma_zmfree(&A5, queue );
 
-
         i++;
     }
     

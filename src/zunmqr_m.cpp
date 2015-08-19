@@ -175,7 +175,6 @@ magma_zunmqr_m(
         nw = m;
     }
 
-
     if (! left && side != MagmaRight) {
         *info = -1;
     } else if (! notran && trans != Magma_ConjTrans) {
@@ -254,7 +253,7 @@ magma_zunmqr_m(
     if (left) {
         //copy C to mgpus
         for (magma_int_t i = 0; i < nbl; ++i) {
-            magma_int_t igpu = i%ngpu;
+            igpu = i % ngpu;
             magma_setdevice(igpu);
             magma_int_t kb = min(nb_l, n-i*nb_l);
             magma_zsetmatrix_async( m, kb,
@@ -327,7 +326,7 @@ magma_zunmqr_m(
 
         //copy C from mgpus
         for (magma_int_t i = 0; i < nbl; ++i) {
-            magma_int_t igpu = i%ngpu;
+            igpu = i % ngpu;
             magma_setdevice(igpu);
             magma_int_t kb = min(nb_l, n-i*nb_l);
             magma_zgetmatrix( m, kb,

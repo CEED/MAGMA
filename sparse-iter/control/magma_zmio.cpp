@@ -897,7 +897,7 @@ magma_zprint_matrix(
         }
     }
     else {
-        magma_z_matrix C={Magma_CSR};
+        //magma_z_matrix C={Magma_CSR};
         CHECK( magma_zmtransfer( A, &C, A.memory_location, Magma_CPU, queue ));
         CHECK( magma_zprint_matrix(  C, queue ));
     }
