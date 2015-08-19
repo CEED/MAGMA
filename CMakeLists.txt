@@ -80,6 +80,10 @@ if ( CUDA_FOUND )
 	    set( GPU_TARGET "${GPU_TARGET} sm30 sm35" )
 	endif()
 	
+	if ( ${GPU_TARGET} MATCHES Maxwell )
+	    set( GPU_TARGET "${GPU_TARGET} sm50" )
+	endif()
+	
 	message( "   GPU_TARGET_NEW ${GPU_TARGET}" )
 	
 	if ( ${GPU_TARGET} MATCHES sm10 )
@@ -127,8 +131,17 @@ if ( CUDA_FOUND )
 		message( "   compile for CUDA arch 3.5 (Kepler)" )
 	endif()
 	
+	if ( ${GPU_TARGET} MATCHES sm50 )
+		if ( NOT MIN_ARCH )
+			set( MIN_ARCH 500 )
+		endif()
+		set( NV_SM "${NV_SM} -gencode arch=compute_50,code=sm_50" )
+		set( NV_COMP        "-gencode arch=compute_50,code=compute_50" )
+		message( "   compile for CUDA arch 5.0 (Maxwell)" )
+	endif()
+	
 	if ( NOT MIN_ARCH )
-		message( FATAL_ERROR "GPU_TARGET must contain one or more of Tesla, Fermi, Kepler, or sm{10,13,20,30,35}." )
+		message( FATAL_ERROR "GPU_TARGET must contain one or more of Tesla, Fermi, Kepler, Maxwell, or sm{10,13,20,30,35,50}." )
 	endif()
 	
 	set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DHAVE_CUBLAS ${NV_SM} ${NV_COMP}" )
@@ -179,8 +192,8 @@ if ( WIN32 )
 	#     -std=c99 is not implemented, so skip that
 	string( REGEX REPLACE " */W3" "" CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}"   )
 	string( REGEX REPLACE " */W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
-	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -W4 -MP" )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP" )
+	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -W4 -MP -DMAGMA_NOAFFINITY" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP -DMAGMA_NOAFFINITY" )
 else()
 	# Primarily for gcc / nvcc:
 	# Ignore unused static functions in headers.
@@ -197,6 +210,9 @@ if ( CMAKE_HOST_APPLE )
 	include( ${CMAKE_SOURCE_DIR}/blas_fix/CMake )
 	add_library( blas_fix ${blas_fix_ALLSRC} )
 	list( APPEND LIBS blas_fix )
+	
+	set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -DMAGMA_NOAFFINITY" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAGMA_NOAFFINITY" )
 	
 	# previously, just compile as 32-bit, but CUDA 6.5 no longer has 32-bit FAT libraries
 	## set( CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -m32" )
@@ -313,6 +329,7 @@ list( APPEND sparse_ALLSRC ${sparse-iter_src_ALLSRC} ${sparse-iter_control_ALLSR
 
 # sparse doesn't have Fortran at the moment, so no need for above shenanigans
 include_directories( sparse-iter/include )
+include_directories( sparse-iter/control )
 include_directories( testing )
 cuda_add_library( magma_sparse ${sparse_ALLSRC} )
 target_link_libraries( magma_sparse
