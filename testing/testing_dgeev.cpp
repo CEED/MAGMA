@@ -74,7 +74,7 @@ int main( int argc, char** argv)
     magmaDoubleComplex *w1copy, *w2copy;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     double tnrm, result[9];
-    magma_int_t N, n2, lda, nb, lwork, info;
+    magma_int_t N, n2, lda, nb, lwork, lwork2, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double ulp, ulpinv, error;
@@ -107,9 +107,9 @@ int main( int argc, char** argv)
             lda   = N;
             n2    = lda*N;
             nb    = magma_get_dgehrd_nb(N);
-            lwork = N*(2 + nb);
+            lwork = N*(2 + 2*nb);
             // generous workspace - required by dget22
-            lwork = max( lwork, N*(5 + 2*N) );
+            lwork2 = max( lwork, N*(5 + 2*N) );
             
             TESTING_MALLOC_CPU( w1copy, magmaDoubleComplex, N );
             TESTING_MALLOC_CPU( w2copy, magmaDoubleComplex, N );
@@ -122,7 +122,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_R, double, n2 );
             TESTING_MALLOC_PIN( VL,  double, n2 );
             TESTING_MALLOC_PIN( VR,  double, n2 );
-            TESTING_MALLOC_PIN( h_work, double, lwork );
+            TESTING_MALLOC_PIN( h_work, double, lwork2 );
             
             /* Initialize the matrix */
             lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
@@ -279,7 +279,7 @@ int main( int argc, char** argv)
             }
             if ( opts.check == 2 ) {
                 // more extensive tests
-                // this is really slow because it calls magma_zgeev multiple times
+                // this is really slow because it calls magma_dgeev multiple times
                 double *LRE, DUM;
                 TESTING_MALLOC_PIN( LRE, double, n2 );
                 
@@ -293,7 +293,7 @@ int main( int argc, char** argv)
                              VL, lda, VR, lda,
                              h_work, lwork, &info );
                 if (info != 0)
-                    printf("magma_zgeev (case V, V) returned error %d: %s.\n",
+                    printf("magma_dgeev (case V, V) returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 
                 // ----------

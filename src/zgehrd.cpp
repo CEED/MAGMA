@@ -62,9 +62,8 @@
 
     @param[in]
     lwork   INTEGER
-            The length of the array WORK.  LWORK >= max(1,N).
-            For optimum performance LWORK >= N*NB, where NB is the
-            optimal blocksize.
+            The length of the array WORK.  LWORK >= N*NB,
+            where NB is the optimal blocksize.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -161,7 +160,7 @@ magma_zgehrd(
         *info = -3;
     } else if (lda < max(1,n)) {
         *info = -5;
-    } else if (lwork < max(1,n) && ! lquery) {
+    } else if (lwork < iws && ! lquery) {
         *info = -8;
     }
     if (*info != 0) {
@@ -181,10 +180,11 @@ magma_zgehrd(
         return *info;
     }
 
+    // Now requires lwork >= iws; else dT won't be computed in unblocked code.
     // If not enough workspace, use unblocked code
-    if ( lwork < iws ) {
-        nb = 1;
-    }
+    //if ( lwork < iws ) {
+    //    nb = 1;
+    //}
 
     if (nb == 1 || nb > nh) {
         // Use unblocked code below

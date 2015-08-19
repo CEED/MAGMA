@@ -114,8 +114,8 @@
 
     @param[in]
     lwork   INTEGER
-            The dimension of the array WORK.  LWORK >= (2+nb)*N.
-            For optimal performance, LWORK >= (2+2*nb)*N.
+            The dimension of the array WORK.  LWORK >= (2 +   nb)*N.
+            For optimal performance,          LWORK >= (2 + 2*nb)*N.
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
