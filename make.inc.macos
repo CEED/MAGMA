@@ -22,7 +22,7 @@
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
-FORT      = gfortran
+#FORT      = gfortran
 
 ARCH      = ar
 ARCHFLAGS = cr
@@ -51,7 +51,7 @@ FPIC      = -fPIC
 CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wshadow -DMAGMA_NOAFFINITY
 FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
-NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "$(FPIC)"
+NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
 LDFLAGS   = -m64     $(FPIC)
 
 # MacOS likes the library's path to be set
