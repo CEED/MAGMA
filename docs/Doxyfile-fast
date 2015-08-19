@@ -983,6 +983,7 @@ INPUT                  = \
 	../src/zunmtr.cpp                 \
 	../src/zunmtr_gpu.cpp             \
 	../src/zunmtr_m.cpp               \
+	../control/abs.cpp                        \
 	../control/affinity.cpp                \
 	../control/affinity.h                  \
 	../control/auxiliary.cpp               \
@@ -1187,7 +1188,7 @@ INPUT                  = \
 	../magmablas/ztrsm_batched.cu               \
 	../magmablas/ztrsv.cu                       \
 	../magmablas/ztrsv_batched.cu               \
-	../magmablas/ztrsv_devicesfunc.cuh          \
+	../magmablas/ztrsv_template_device.cuh      \
 	../magmablas/ztrtri.h                       \
 	../magmablas/ztrtri_diag.cu                 \
 	../magmablas/ztrtri_diag_batched.cu         \
