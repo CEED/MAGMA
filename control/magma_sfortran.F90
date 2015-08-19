@@ -80,10 +80,10 @@ integer function magmaf_get_ssygst_nb_m( m )
     integer :: m
 end function magmaf_get_ssygst_nb_m
 
-subroutine magmaf_get_sbulge_nb( m, nbthreads )
+subroutine magmaf_sbulge_get_nb( m, nbthreads )
     integer          :: m
     integer          :: nbthreads
-end subroutine magmaf_get_sbulge_nb
+end subroutine magmaf_sbulge_get_nb
 
 subroutine magmaf_sbulge_get_Vblksiz( m, nb, nbthreads )
     integer          :: m
@@ -1784,6 +1784,22 @@ subroutine magmaf_sprint_gpu( m, n, dA, ldda )
     magma_devptr_t   :: dA
     integer          :: ldda
 end subroutine magmaf_sprint_gpu
+
+subroutine magmaf_spanel_to_q( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    real             :: A(*)
+    integer          :: lda
+    real             :: work(*)
+end subroutine magmaf_spanel_to_q
+
+subroutine magmaf_sq_to_panel( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    real             :: A(*)
+    integer          :: lda
+    real             :: work(*)
+end subroutine magmaf_sq_to_panel
 
 end interface
 

@@ -80,10 +80,10 @@ integer function magmaf_get_dsygst_nb_m( m )
     integer :: m
 end function magmaf_get_dsygst_nb_m
 
-subroutine magmaf_get_dbulge_nb( m, nbthreads )
+subroutine magmaf_dbulge_get_nb( m, nbthreads )
     integer          :: m
     integer          :: nbthreads
-end subroutine magmaf_get_dbulge_nb
+end subroutine magmaf_dbulge_get_nb
 
 subroutine magmaf_dbulge_get_Vblksiz( m, nb, nbthreads )
     integer          :: m
@@ -1784,6 +1784,22 @@ subroutine magmaf_dprint_gpu( m, n, dA, ldda )
     magma_devptr_t   :: dA
     integer          :: ldda
 end subroutine magmaf_dprint_gpu
+
+subroutine magmaf_dpanel_to_q( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    double precision :: A(*)
+    integer          :: lda
+    double precision :: work(*)
+end subroutine magmaf_dpanel_to_q
+
+subroutine magmaf_dq_to_panel( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    double precision :: A(*)
+    integer          :: lda
+    double precision :: work(*)
+end subroutine magmaf_dq_to_panel
 
 end interface
 

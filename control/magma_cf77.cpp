@@ -141,7 +141,7 @@ magma_int_t magmaf_get_chegst_nb_m( magma_int_t *m )
     return magma_get_chegst_nb_m( *m );
 }
 
-#define magmaf_cbulge_get_nb FORTRAN_NAME( magmaf_cbulge_get_nb, MAGMAF_GET_CBULGE_NB )
+#define magmaf_cbulge_get_nb FORTRAN_NAME( magmaf_cbulge_get_nb, MAGMAF_CBULGE_GET_NB )
 void magmaf_cbulge_get_nb(
     magma_int_t *m, magma_int_t *nbthreads )
 {
@@ -2435,6 +2435,30 @@ void magmaf_cprint_gpu(
     magma_cprint_gpu(
         *m, *n,
         magma_cdevptr(dA), *ldda );
+}
+
+#define magmaf_cpanel_to_q FORTRAN_NAME( magmaf_cpanel_to_q, MAGMAF_CPANEL_TO_Q )
+void magmaf_cpanel_to_q(
+    const char* uplo, magma_int_t *ib,
+    magmaFloatComplex *A, magma_int_t *lda,
+    magmaFloatComplex *work )
+{
+    magma_cpanel_to_q(
+        magma_uplo_const(*uplo), *ib,
+        A, *lda,
+        work );
+}
+
+#define magmaf_cq_to_panel FORTRAN_NAME( magmaf_cq_to_panel, MAGMAF_CQ_TO_PANEL )
+void magmaf_cq_to_panel(
+    const char* uplo, magma_int_t *ib,
+    magmaFloatComplex *A, magma_int_t *lda,
+    magmaFloatComplex *work )
+{
+    magma_cq_to_panel(
+        magma_uplo_const(*uplo), *ib,
+        A, *lda,
+        work );
 }
 
 

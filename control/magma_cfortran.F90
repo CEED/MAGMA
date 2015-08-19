@@ -77,10 +77,10 @@ integer function magmaf_get_chegst_nb_m( m )
     integer :: m
 end function magmaf_get_chegst_nb_m
 
-subroutine magmaf_get_cbulge_nb( m, nbthreads )
+subroutine magmaf_cbulge_get_nb( m, nbthreads )
     integer          :: m
     integer          :: nbthreads
-end subroutine magmaf_get_cbulge_nb
+end subroutine magmaf_cbulge_get_nb
 
 subroutine magmaf_cbulge_get_Vblksiz( m, nb, nbthreads )
     integer          :: m
@@ -1971,6 +1971,22 @@ subroutine magmaf_cprint_gpu( m, n, dA, ldda )
     magma_devptr_t   :: dA
     integer          :: ldda
 end subroutine magmaf_cprint_gpu
+
+subroutine magmaf_cpanel_to_q( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    complex          :: A(*)
+    integer          :: lda
+    complex          :: work(*)
+end subroutine magmaf_cpanel_to_q
+
+subroutine magmaf_cq_to_panel( uplo, ib, A, lda, work )
+    character        :: uplo
+    integer          :: ib
+    complex          :: A(*)
+    integer          :: lda
+    complex          :: work(*)
+end subroutine magmaf_cq_to_panel
 
 end interface
 
