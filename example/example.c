@@ -35,6 +35,8 @@ void zfill_matrix(
                                    rand() / ((double) RAND_MAX) );  // imag part
         }
     }
+    
+    #undef A
 }
 
 

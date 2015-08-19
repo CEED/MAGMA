@@ -24,7 +24,20 @@ MAGMA_LIBS   := -L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
 # MAGMA_CFLAGS := $(shell pkg-config --cflags magma)
 # MAGMA_LIBS   := $(shell pkg-config --libs   magma)
 
-all: example
+
+# ----------------------------------------
+default:
+	@echo "Available make targets are:"
+	@echo "  make all       # compiles both example and example_f"
+	@echo "  make c         # compiles example"
+	@echo "  make fortran   # compiles example_f"
+	@echo "  make clean     # deletes executables and object files"
+
+all: example example_f
+
+c: example
+
+fortran: example_f
 
 clean:
 	-rm -f example example_f *.o *.mod
