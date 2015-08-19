@@ -246,11 +246,12 @@ int main( int argc, char** argv)
       printf( "\n" );
     }
     
+    // don't print "failed" here because then run_tests.py thinks MAGMA failed
     if ( lapack_nan_fail ) {
-        printf( "* Warning: LAPACK failed NAN propagation test; upgrade to LAPACK version >= 3.4.2 (Sep. 2012)\n" );
+        printf( "* Warning: LAPACK did not pass NAN propagation test; upgrade to LAPACK version >= 3.4.2 (Sep. 2012)\n" );
     }
     if ( lapack_inf_fail ) {
-        printf( "* Warning: LAPACK failed INF propagation test\n" );
+        printf( "* Warning: LAPACK did not pass INF propagation test\n" );
     }
     if ( mkl_warning ) {
         printf("* MKL (e.g., 11.1.0) has a bug in zlanhe with multiple threads; corrected in 11.2.x.\n"
