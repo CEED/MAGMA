@@ -79,6 +79,17 @@ MAGMA README FILE
       make test
   will create a static library lib/libmagma.a, and testing drivers in 'testing'.
   
+* Building MAGMA sparse
+
+  After building MAGMA (as above), running:
+      cd sparse-iter
+      make
+  or
+      make lib
+      make test
+  will create a shared library lib/libmagma_sparse.so, static library lib/libmagma_sparse.a,
+  and testing drivers in 'sparse-iter/testing'.
+  
 * Install
 
   To install libraries and include files in a given prefix, run:
