@@ -245,7 +245,6 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 extern "C"
 magma_int_t magma_izamax_batched(magma_int_t length, 
         magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step,  magma_int_t lda,
@@ -277,9 +276,8 @@ magma_int_t magma_izamax_batched(magma_int_t length,
     return 0;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 __global__
 void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step, magma_int_t** ipiv_array)
 {
@@ -325,6 +323,7 @@ magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
     return 0;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__
 void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_array, int lda, magma_int_t *info_array, int gbstep)
@@ -362,6 +361,7 @@ void zscal_zgeru_kernel_batched(int m, int n, int step, magmaDoubleComplex **dA_
     }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C"
 magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t step,
@@ -374,8 +374,7 @@ magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t 
     1) zscale the first column vector A(1:M-1,0) with 1/A(0,0);
     2) Performe a zgeru Operation for trailing matrix of A(1:M-1,1:N-1) += alpha*x*y**T, where 
        alpha := -1.0; x := A(1:M-1,0) and y:= A(0,1:N-1);
-
-*/
+    */
     if ( n == 0) return 0;
     if ( n  > MAX_NTHREADS) 
     {
@@ -390,6 +389,8 @@ magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t 
     zscal_zgeru_kernel_batched<<< grid, min(m, MAX_NTHREADS), shared_size, queue>>>(m, n, step, dA_array, lda, info_array, gbstep);
     return 0;
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__
 void zgetf2trsm_kernel_batched(int ib, int n, magmaDoubleComplex **dA_array, int step, int lda)
@@ -438,6 +439,8 @@ void zgetf2trsm_kernel_batched(int ib, int n, magmaDoubleComplex **dA_array, int
         }
     }
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C" void
 magma_zgetf2trsm_batched(magma_int_t ib, magma_int_t n, magmaDoubleComplex **dA_array,  magma_int_t step, magma_int_t lda,
@@ -488,6 +491,7 @@ zupdate_device(int m, int step, magmaDoubleComplex* x, int ldx,  magmaDoubleComp
     //printf("         @ step %d tid %d adding %5.3f to A %5.3f make it %5.3f\n",step,tid,-reg,A[tid],A[tid]-reg);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static __device__ void 
 zscal5_device(int m, magmaDoubleComplex* x, magmaDoubleComplex alpha)
@@ -507,6 +511,8 @@ zscal5_device(int m, magmaDoubleComplex* x, magmaDoubleComplex alpha)
     }
     __syncthreads();
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void 
 zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoubleComplex **dA_array, int lda, magma_int_t **ipiv_array, magma_int_t *info_array, int gbstep)
@@ -576,6 +582,7 @@ zcomputecolumn_kernel_shared_batched(int m, int paneloffset, int step, magmaDoub
     __syncthreads();
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 extern "C"
 magma_int_t magma_zcomputecolumn_batched(magma_int_t m, magma_int_t paneloffset, magma_int_t step, 
@@ -605,6 +612,8 @@ magma_int_t magma_zcomputecolumn_batched(magma_int_t m, magma_int_t paneloffset,
 
     return 0;
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void
@@ -631,7 +640,7 @@ kernel_zgetf2_sm_batched(
 
     __shared__ int jp;
 
-// load data to shared memory
+    // load data to shared memory
     if (tx < m)
     {
         #pragma unroll 8
@@ -650,7 +659,7 @@ kernel_zgetf2_sm_batched(
 
         int offset =  j + j*m;
 
-//======================================
+        //======================================
         //find max
         if (tx < zamax)
         {
@@ -686,7 +695,8 @@ kernel_zgetf2_sm_batched(
             //if (blockIdx.x == 1) printf("jp=%d   ", jp + j + 1);
         }
         __syncthreads();
-//======================================
+        
+        //======================================
         if ( jp != 0) //swap
         {
             if (tx < ib) {
@@ -699,8 +709,8 @@ kernel_zgetf2_sm_batched(
         }
         __syncthreads();
 
-//======================================
-// Ger
+        //======================================
+        // Ger
         if (tx < length && tx > 0)
         {
             res = shared_A[tx + offset];
@@ -720,7 +730,7 @@ kernel_zgetf2_sm_batched(
         __syncthreads();
     } // end of j
 
-//======================================
+    //======================================
     // write back
     if (tx < m)
     {
@@ -749,7 +759,7 @@ magma_int_t  magma_zgetf2_sm_batched(
 
     if (shared_size > 47000)
     {
-        printf("Shared memory in zgetf2 = %d, exceeds 48K, kernel can not lauched succesfully\n", shared_size);
+        printf("Shared memory in zgetf2 = %d, exceeds 48K, kernel can not lauched succesfully\n", (int) shared_size);
         return 1;
     }
 
