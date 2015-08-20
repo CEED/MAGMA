@@ -117,7 +117,6 @@ ZSRC += \
 	zgelqf.cpp		\
 	zgels.cpp		\
 	zgeqlf.cpp		\
-	zgeqrf-v4.cpp		\
 	zgeqrf.cpp		\
 	zgeqrf_ooc.cpp		\
 	zungqr.cpp		\
@@ -129,6 +128,7 @@ ZSRC += \
 	zgeqp3.cpp		\
 	zlaqps.cpp		\
 	\
+	zgeqrf_m.cpp		\
 	zungqr_m.cpp		\
 	zunmqr_m.cpp		\
 

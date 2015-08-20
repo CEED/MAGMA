@@ -165,7 +165,7 @@ magma_zgeqrf_ooc(
     magma_int_t *info);
 
 magma_int_t
-magma_zgeqrf4(
+magma_zgeqrf_m(
     magma_int_t ngpu,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *A,    magma_int_t lda,

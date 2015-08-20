@@ -145,7 +145,7 @@ magma_zgeqrf(
     magma_int_t ngpu = magma_num_gpus();
     if ( ngpu > 1 ) {
         /* call multiple-GPU interface  */
-        return magma_zgeqrf4(ngpu, m, n, A, lda, tau, work, lwork, info);
+        return magma_zgeqrf_m(ngpu, m, n, A, lda, tau, work, lwork, info);
     }
 
     // allocate space for dA, dwork, and dT
