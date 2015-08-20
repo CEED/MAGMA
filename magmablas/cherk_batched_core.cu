@@ -174,7 +174,7 @@ magmablas_cherk_batched(
         return;
 
     // we have two shapes only (nc or cn)
-    magma_int_t shape;
+    magma_int_t shape = 0;
     if      (trans == MagmaNoTrans)   { shape = 0; } // nc
     else                              { shape = 1; } // cn
         

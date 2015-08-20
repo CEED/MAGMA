@@ -171,7 +171,7 @@ magmablas_dsyrk_batched(
         return;
 
     // we have two shapes only (nt or tn)
-    magma_int_t shape;
+    magma_int_t shape = 0;
     if      (trans == MagmaNoTrans)   { shape = 0; } // nt
     else                              { shape = 1; } // tn
     

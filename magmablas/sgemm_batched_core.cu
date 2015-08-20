@@ -172,7 +172,7 @@ magmablas_sgemm_batched(
     if ( m <= 0 || n <= 0 || k <= 0 )
         return;
 
-    magma_int_t shape;
+    magma_int_t shape = 0;
     if      (transA == MagmaNoTrans   && transB == MagmaNoTrans)   { shape = 0; } // nn
     else if (transA == MagmaNoTrans   && transB == MagmaTrans)     { shape = 1; } // nt
     else if (transA == MagmaNoTrans   && transB == MagmaConjTrans) { shape = 2; } // nc
