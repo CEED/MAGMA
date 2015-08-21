@@ -16,7 +16,7 @@
 */
 
 #include "common_magma.h"
-#include "ztrtri.h"
+#include "ztrtri.cuh"
 /*
     This inverts the diagonal IB by IB inner blocks of A,
     and stores the results in d_dinvA.

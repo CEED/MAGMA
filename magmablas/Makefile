@@ -13,17 +13,17 @@ include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR := \
 	commonblas_z.h		\
-	ztrtri.h		\
+	ztrtri.cuh		\
 	zgerbt.h		\
 	zpotf2_devicesfunc.cuh		\
 	zlarfg_devicesfunc.cuh		\
 	ztrsv_template_device.cuh	\
 
 # additional dependencies
-strtri_diag.$(o_ext): strtri.h
-dtrtri_diag.$(o_ext): dtrtri.h
-ctrtri_diag.$(o_ext): ctrtri.h
-ztrtri_diag.$(o_ext): ztrtri.h
+strtri_diag.$(o_ext): strtri.cuh
+dtrtri_diag.$(o_ext): dtrtri.cuh
+ctrtri_diag.$(o_ext): ctrtri.cuh
+ztrtri_diag.$(o_ext): ztrtri.cuh
 
 sgerbt.$(o_ext): sgerbt.h
 dgerbt.$(o_ext): dgerbt.h
@@ -35,10 +35,10 @@ dgerbt_batched.$(o_ext): dgerbt.h
 cgerbt_batched.$(o_ext): cgerbt.h
 zgerbt_batched.$(o_ext): zgerbt.h
 
-strtri_diag_batched.$(o_ext): strtri.h
-dtrtri_diag_batched.$(o_ext): dtrtri.h
-ctrtri_diag_batched.$(o_ext): ctrtri.h
-ztrtri_diag_batched.$(o_ext): ztrtri.h
+strtri_diag_batched.$(o_ext): strtri.cuh
+dtrtri_diag_batched.$(o_ext): dtrtri.cuh
+ctrtri_diag_batched.$(o_ext): ctrtri.cuh
+ztrtri_diag_batched.$(o_ext): ztrtri.cuh
 
 
 # alphabetic order by base name (ignoring precision)
@@ -80,7 +80,7 @@ ZSRC := \
 	zlat2c.cu		\
 	clat2z.cu		\
 	dznrm2.cu		\
-	stream.cu		\
+	stream.cpp		\
 	zswap.cu		\
 	zswapblk.cu		\
 	zswapdblk.cu		\
@@ -92,8 +92,8 @@ ZSRC := \
 	ztranspose_conj.cu		\
 	ztranspose_inplace.cu	\
 	ztranspose_conj_inplace.cu	\
-	zgetmatrix_transpose.cu	\
-	zsetmatrix_transpose.cu	\
+	zgetmatrix_transpose.cpp	\
+	zsetmatrix_transpose.cpp	\
 	ztrsm.cu		\
 	ztrtri_diag.cu		\
 	ztrtri_lower.cu		\
@@ -103,7 +103,7 @@ ZSRC := \
 
 # Tesla-specific (CUDA arch 1.x) codes
 ZSRC += \
-	dgemm_tesla.cu		\
+	dgemm_tesla.cpp		\
 	dgemm_tesla_a_0.cu	\
 	dgemm_tesla_ab_0.cu	\
 	dgemm_tesla_N_N.cu	\
@@ -123,9 +123,9 @@ ZSRC += \
 
 # multi-GPU
 ZSRC += \
-	zbcyclic.cu			\
-	zgetmatrix_transpose_mgpu.cu	\
-	zsetmatrix_transpose_mgpu.cu	\
+	zbcyclic.cpp		\
+	zgetmatrix_transpose_mgpu.cpp	\
+	zsetmatrix_transpose_mgpu.cpp	\
 	zhemv_mgpu.cu			\
 	zhemv_mgpu_upper.cu		\
 	zhemm_mgpu.cpp			\
@@ -137,25 +137,25 @@ ZSRC += \
 # panels for one-sided factorizations in CUDA
 ZSRC += \
 	zgetf2.cu		\
-	zgeqr2.cu		\
+	zgeqr2.cpp		\
 	zgeqr2x_gpu-v4.cu	\
 	zpotf2.cu		\
 
 # batched files, alphabetic order by base name (ignoring precision)
 ZSRC += \
 	zgeadd_batched.cu		\
-	zgemm_batched.cu		\
+	zgemm_batched.cpp		\
 	zgerbt_func_batched.cu		\
 	zgetf2_kernels.cu		\
 	zlaswp_batched.cu		\
 	zpotf2_kernels_old.cu		\
 	zpotf2_kernels.cu		\
 	zset_pointer.cu			\
-	ztrsm_batched.cu		\
+	ztrsm_batched.cpp		\
 	ztrtri_diag_batched.cu		\
 	zgeqr2_kernels.cu		\
 	zgeqr2_batched.cu		\
-	zherk_batched.cu		\
+	zherk_batched.cpp		\
 	zswapdblk_batched.cu	\
 	ztrsv_batched.cu		\
 

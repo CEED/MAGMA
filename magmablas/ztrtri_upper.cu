@@ -17,7 +17,7 @@
 */
 
 #include "common_magma.h"
-#include "ztrtri.h"
+#include "ztrtri.cuh"
 
 
 /*

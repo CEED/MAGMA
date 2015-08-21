@@ -12,7 +12,7 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#include "ztrtri.h"  // get NB from ztrtri
+#include "ztrtri.cuh"  // get NB from ztrtri
 
 /**
     Purpose
