@@ -301,8 +301,11 @@ add_library( testing ${TEST_SRC} )
 
 # ----------------------------------------
 # compile lapacktest library
+# Here, we only want _SRC files, not _ALLSRC files:
+# _ALLSRC includes [SDCZ]SRC, which has magma_[sdcz]_no_fortran.cpp,
+# while _SRC has all the Fortran files from LAPACK.
 include( ${CMAKE_SOURCE_DIR}/testing/lin/CMake )
-add_library( lapacktest ${testing_lin_ALLSRC} )
+add_library( lapacktest ${testing_lin_SRC} )
 
 
 # ----------------------------------------
