@@ -250,7 +250,7 @@ subroutine magmaf_dgeqrf_ooc( m, n, A, lda, tau, work, lwork, info )
     integer          :: info
 end subroutine magmaf_dgeqrf_ooc
 
-subroutine magmaf_dgeqrf4( ngpu, m, n, A, lda, tau, work, lwork, info )
+subroutine magmaf_dgeqrf_m( ngpu, m, n, A, lda, tau, work, lwork, info )
     integer          :: ngpu
     integer          :: m
     integer          :: n
@@ -260,7 +260,7 @@ subroutine magmaf_dgeqrf4( ngpu, m, n, A, lda, tau, work, lwork, info )
     double precision :: work(*)
     integer          :: lwork
     integer          :: info
-end subroutine magmaf_dgeqrf4
+end subroutine magmaf_dgeqrf_m
 
 subroutine magmaf_dgesdd( jobz, m, n, A, lda, s, U, ldu, VT, ldvt, work, lwork, iwork,  &
         info )

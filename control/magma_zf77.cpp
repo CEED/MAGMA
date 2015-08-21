@@ -343,15 +343,15 @@ void magmaf_zgeqrf_ooc(
         info );
 }
 
-#define magmaf_zgeqrf4 FORTRAN_NAME( magmaf_zgeqrf4, MAGMAF_ZGEQRF4 )
-void magmaf_zgeqrf4(
+#define magmaf_zgeqrf_m FORTRAN_NAME( magmaf_zgeqrf_m, MAGMAF_ZGEQRF_M )
+void magmaf_zgeqrf_m(
     magma_int_t *ngpu, magma_int_t *m, magma_int_t *n,
     magmaDoubleComplex *A, magma_int_t *lda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex *work, magma_int_t *lwork,
     magma_int_t *info )
 {
-    magma_zgeqrf4(
+    magma_zgeqrf_m(
         *ngpu, *m, *n,
         A, *lda,
         tau,
@@ -2359,7 +2359,7 @@ void magmaf_zunmqr2_gpu(
     devptr_t *dA, magma_int_t *ldda,
     magmaDoubleComplex *tau,
     devptr_t *dC, magma_int_t *lddc,
-    magmaDoubleComplex *wA, magma_int_t *ldwa,
+    magmaDoubleComplex    *wA, magma_int_t *ldwa,
     magma_int_t *info )
 {
     magma_zunmqr2_gpu(
@@ -2377,7 +2377,7 @@ void magmaf_zunmtr_gpu(
     devptr_t *dA, magma_int_t *ldda,
     magmaDoubleComplex *tau,
     devptr_t *dC, magma_int_t *lddc,
-    magmaDoubleComplex *wA, magma_int_t *ldwa,
+    magmaDoubleComplex    *wA, magma_int_t *ldwa,
     magma_int_t *info )
 {
     magma_zunmtr_gpu(

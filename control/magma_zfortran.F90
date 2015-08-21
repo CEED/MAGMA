@@ -219,7 +219,7 @@ subroutine magmaf_zgeqrf_ooc( m, n, A, lda, tau, work, lwork, info )
     integer          :: info
 end subroutine magmaf_zgeqrf_ooc
 
-subroutine magmaf_zgeqrf4( ngpu, m, n, A, lda, tau, work, lwork, info )
+subroutine magmaf_zgeqrf_m( ngpu, m, n, A, lda, tau, work, lwork, info )
     integer          :: ngpu
     integer          :: m
     integer          :: n
@@ -229,7 +229,7 @@ subroutine magmaf_zgeqrf4( ngpu, m, n, A, lda, tau, work, lwork, info )
     complex*16       :: work(*)
     integer          :: lwork
     integer          :: info
-end subroutine magmaf_zgeqrf4
+end subroutine magmaf_zgeqrf_m
 
 subroutine magmaf_zgesdd( jobz, m, n, A, lda, s, U, ldu, VT, ldvt, work, lwork, rwork,  &
         iwork, info )

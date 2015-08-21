@@ -393,15 +393,15 @@ void magmaf_sgeqrf_ooc(
         info );
 }
 
-#define magmaf_sgeqrf4 FORTRAN_NAME( magmaf_sgeqrf4, MAGMAF_SGEQRF4 )
-void magmaf_sgeqrf4(
+#define magmaf_sgeqrf_m FORTRAN_NAME( magmaf_sgeqrf_m, MAGMAF_SGEQRF_M )
+void magmaf_sgeqrf_m(
     magma_int_t *ngpu, magma_int_t *m, magma_int_t *n,
     float *A, magma_int_t *lda,
     float *tau,
     float *work, magma_int_t *lwork,
     magma_int_t *info )
 {
-    magma_sgeqrf4(
+    magma_sgeqrf_m(
         *ngpu, *m, *n,
         A, *lda,
         tau,
@@ -2181,7 +2181,7 @@ void magmaf_sormqr2_gpu(
     devptr_t *dA, magma_int_t *ldda,
     float *tau,
     devptr_t *dC, magma_int_t *lddc,
-    float *wA, magma_int_t *ldwa,
+    float    *wA, magma_int_t *ldwa,
     magma_int_t *info )
 {
     magma_sormqr2_gpu(
@@ -2199,7 +2199,7 @@ void magmaf_sormtr_gpu(
     devptr_t *dA, magma_int_t *ldda,
     float *tau,
     devptr_t *dC, magma_int_t *lddc,
-    float *wA, magma_int_t *ldwa,
+    float    *wA, magma_int_t *ldwa,
     magma_int_t *info )
 {
     magma_sormtr_gpu(
