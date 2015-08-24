@@ -452,6 +452,9 @@ do { \
     } \
 } while(0)
 
+// __asm__ volatile ("" ::: "memory") is a compiler fence (but not a hardware memory fence),
+// to prohibit load/store reordering across that point.
+// However, inline assemble (asm) isn't available on Microsoft VS x64.
 #define expertmyss_cond_set(m, n, val) \
 do { \
     prog[(m)*(64/sizeof(magma_int_t))] = (val); \
@@ -481,11 +484,10 @@ do { \
 
 
 
-
+// see also __asm__ volatile ("" ::: "memory") in expertmyss_cond_set above
 #define myss_cond_set(m, n, val) \
 do { \
     prog[(m)] = (val); \
-    __asm__ volatile ("" ::: "memory"); \
 } while(0)
 
 #define myss_cond_wait(m, n, val) \
