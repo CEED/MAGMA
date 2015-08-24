@@ -71,7 +71,7 @@ magma_ziteric_csr_kernel(
 
         // modify entry
         if (i == j)
-            val[il-1] = MAGMA_Z_MAKE(sqrt(abs(MAGMA_Z_REAL(s))), 0.0);
+            val[il-1] = MAGMA_Z_MAKE( sqrt( fabs( MAGMA_Z_REAL(s) )), 0.0 );
         else
             val[il-1] =  s / val[iu-1];
     }
