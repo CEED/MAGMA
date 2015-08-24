@@ -69,6 +69,14 @@
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
 
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t

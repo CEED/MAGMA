@@ -1,21 +1,20 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 1.5) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
+       
+       @author Azzam Haidar
+       @author Tingxing Dong
 
        @precisions normal z -> s d c
-       @author Tingxing Dong
-       @author Azzam Haidar
 */
 #define PRECISION_z
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 #include "cublas_v2.h"
-
-
 
 /**
     Purpose
@@ -34,7 +33,8 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA_array COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    dA_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N)
              On entry, the M-by-N matrix A.
              On exit, the elements on and above the diagonal of the array
              contain the min(M,N)-by-N upper trapezoidal matrix R (R is
@@ -50,7 +50,8 @@
              divisible by 16.
 
     @param[in,out]
-    dR_array COMPLEX_16 array on the GPU, dimension (LDDR, N/NB)
+    dR_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDR, N/NB)
              dR should be of size (LDDR, N) when provide_RT > 0 and 
              of size (LDDT, NB) otherwise. NB is the local blocking size.
              On exit, the elements of R are stored in dR only when provide_RT > 0.
@@ -65,7 +66,8 @@
              divisible by 16.
 
     @param[in,out]
-    dT_array COMPLEX_16 array on the GPU, dimension (LDDT, N/NB)
+    dT_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDT, N/NB)
              dT should be of size (LDDT, N) when provide_RT > 0 and 
              of size (LDDT, NB) otherwise. NB is the local blocking size.
              On exit, the elements of T are stored in dT only when provide_RT > 0.
@@ -78,9 +80,10 @@
              divisible by 16.
 
     @param[out]
-    tau     COMPLEX_16 array, dimension (min(M,N))
-            The scalar factors of the elementary reflectors (see Further
-            Details).
+    dtau_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array, dimension (min(M,N))
+             The scalar factors of the elementary reflectors (see Further
+             Details).
 
     @param[in]
     provide_RT INTEGER
@@ -90,10 +93,18 @@
                provide_RT = 2 the nbxnb diag block of R and of T are provided in output. 
 
     @param[out]
-    info    INTEGER
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     Further Details
     ---------------

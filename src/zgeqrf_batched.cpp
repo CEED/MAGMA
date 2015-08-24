@@ -1,13 +1,14 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 1.5) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
-
-       @precisions normal z -> s d c
+       @date
+       
        @author Azzam Haidar
        @author Tingxing Dong
+
+       @precisions normal z -> s d c
 */
 
 #include "common_magma.h"
@@ -33,32 +34,41 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the M-by-N matrix A.
-            On exit, the elements on and above the diagonal of the array
-            contain the min(M,N)-by-N upper trapezoidal matrix R (R is
-            upper triangular if m >= n); the elements below the diagonal,
-            with the array TAU, represent the orthogonal matrix Q as a
-            product of min(m,n) elementary reflectors (see Further
-            Details).
+    dA_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N)
+             On entry, the M-by-N matrix A.
+             On exit, the elements on and above the diagonal of the array
+             contain the min(M,N)-by-N upper trapezoidal matrix R (R is
+             upper triangular if m >= n); the elements below the diagonal,
+             with the array TAU, represent the orthogonal matrix Q as a
+             product of min(m,n) elementary reflectors (see Further
+             Details).
 
     @param[in]
     ldda     INTEGER
-            The leading dimension of the array dA.  LDDA >= max(1,M).
-            To benefit from coalescent memory accesses LDDA must be
-            divisible by 16.
+             The leading dimension of the array dA.  LDDA >= max(1,M).
+             To benefit from coalescent memory accesses LDDA must be
+             divisible by 16.
 
     @param[out]
-    tau     COMPLEX_16 array, dimension (min(M,N))
-            The scalar factors of the elementary reflectors (see Further
-            Details).
-
+    dtau_array Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array, dimension (min(M,N))
+             The scalar factors of the elementary reflectors (see Further
+             Details).
 
     @param[out]
-    info    INTEGER
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     Further Details
     ---------------

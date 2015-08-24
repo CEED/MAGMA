@@ -34,7 +34,8 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    dA_array Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the factors L and U from the factorization
             A = P*L*U as computed by ZGETRF_GPU.
             On exit, if INFO = 0, the inverse of the original matrix A.
@@ -44,28 +45,38 @@
             The leading dimension of the array A.  LDDA >= max(1,N).
 
     @param[in]
-    ipiv    INTEGER array, dimension (N)
-            The pivot indices from ZGETRF; for 1 <= i <= N, row i of the
+    dipiv_array Array of pointers, dimension (batchCount), for corresponding matrices.
+            Each is an INTEGER array, dimension (N)
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
     @param[out]
-    dwork   (workspace) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
+    dinvA_array Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array on the GPU, dimension (LDDIA,N)
+            It contains the inverse of the matrix
   
     @param[in]
-    lwork   INTEGER
-            The dimension of the array DWORK.  LWORK >= N*NB, where NB is
-            the optimal blocksize returned by magma_get_zgetri_nb(n).
-    \n
-            Unlike LAPACK, this version does not currently support a
-            workspace query, because the workspace is on the GPU.
+    lddia   INTEGER
+            The leading dimension of the array invA_array.  LDDIA >= max(1,N).
 
     @param[out]
-    info    INTEGER
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
-      -     > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
-                  singular and its cannot be computed.
+                  or another error occured, such as memory allocation failed.
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                  has been completed, but the factor U is exactly
+                  singular, and division by zero will occur if it is used
+                  to solve a system of equations.
 
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+                  
     @ingroup magma_zgesv_comp
     ********************************************************************/
 extern "C" magma_int_t
