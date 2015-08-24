@@ -14,6 +14,7 @@ my $svn      = "https://icl.cs.utk.edu/svn/magma/trunk";
 my $user     = "";
 my $revision = "";
 my $rc       = 0;  # release candidate
+my $alpha    = 0;
 my $beta     = 0;
 
 # In alphabetic order
@@ -70,6 +71,10 @@ sub MakeRelease
         $version .= "-rc$rc";
         $stage = "rc$rc";
     }
+    if ( $alpha > 0 ) {
+        $version .= "-alpha$alpha";
+        $stage = "alpha$alpha";
+    }
     if ( $beta > 0 ) {
         $version .= "-beta$beta";
         $stage = "beta$beta";
@@ -107,7 +112,7 @@ EOT
     my $dir = `pwd`;
     chomp $dir;
 
-    if ( not $rc and not $beta ) {
+    if ( not $rc and not $alpha and not $beta ) {
         print <<EOT;
 Is this the final tar file for this release (that is, the release has been
 thoroughly tested), and you want to update version in magma.h in SVN (yes/no)?
@@ -242,6 +247,7 @@ sub Usage
 {
     print "MakeRelease.pl [options] major.minor.micro\n";
     print "   -h            Print this help\n";
+    print "   -a alpha      Alpha version\n";
     print "   -b beta       Beta version\n";
     print "   -c candidate  Release candidate number\n";
     print "   -r revision   Choose svn revision number\n";
@@ -250,14 +256,20 @@ sub Usage
 }
 
 my %opts;
-getopts("hu:b:r:s:c:",\%opts);
+getopts("ha:b:c:r:s:u:",\%opts);
 
 if ( defined $opts{h}  ) {
     Usage();
     exit;
 }
-if ( defined $opts{u} ) {
-    $user = "--username $opts{u}";
+if ( defined $opts{a} ) {
+    $alpha = $opts{a};
+}
+if ( defined $opts{b} ) {
+    $beta = $opts{b};
+}
+if ( defined $opts{c} ) {
+    $rc = $opts{c};
 }
 if ( defined $opts{r} ) {
     $revision = "-r $opts{r}";
@@ -265,11 +277,8 @@ if ( defined $opts{r} ) {
 if ( defined $opts{s} ) {
     $svn = $opts{s};
 }
-if ( defined $opts{c} ) {
-    $rc = $opts{c};
-}
-if ( defined $opts{b} ) {
-    $beta = $opts{b};
+if ( defined $opts{u} ) {
+    $user = "--username $opts{u}";
 }
 if ( ($#ARGV + 1) != 1 ) {
     Usage();
