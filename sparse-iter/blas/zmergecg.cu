@@ -869,7 +869,7 @@ magma_zcgmerge_spmv1(
                 printf("error: too much shared memory requested.\n");
 
             dim3 block( A.blocksize, A.alignment, 1);
-            int dimgrid1 = sqrt(A.numblocks);
+            int dimgrid1 = int( sqrt( double( A.numblocks )));
             int dimgrid2 = magma_ceildiv( A.numblocks, dimgrid1 );
 
             dim3 gridsellp( dimgrid1, dimgrid2, 1);
@@ -920,7 +920,7 @@ magma_zcgmerge_spmv1(
     if ( arch < 200 && num_threads > 256 )
         printf("error: too much shared memory requested.\n");
 
-    int dimgrid1 = sqrt( double(num_blocks) );
+    int dimgrid1 = int( sqrt( double( num_blocks )));
     int dimgrid2 = magma_ceildiv( num_blocks, dimgrid1 );
     dim3 gridellrt( dimgrid1, dimgrid2, 1);
 

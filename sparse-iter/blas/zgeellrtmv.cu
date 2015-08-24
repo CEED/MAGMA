@@ -265,7 +265,7 @@ magma_zgeellrtmv(
     if ( arch < 200 && num_threads > 256 )
         printf("error: too much shared memory requested.\n");
 
-    int dimgrid1 = (int) sqrt( (double) num_blocks );
+    int dimgrid1 = int( sqrt( double( num_blocks )));
     int dimgrid2 = magma_ceildiv( num_blocks, dimgrid1 );
     dim3 grid( dimgrid1, dimgrid2, 1);
 
