@@ -443,20 +443,23 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define expertmyss_cond_wait(m, n, val) \
-{ \
-    while (prog[(m)] != (val)) \
-    magma_yield(); \
-    for (kk=0; kk < 100; kk++) \
-    __asm__ volatile ("nop;" :::); \
-}
+do { \
+    while (prog[(m)] != (val)) { \
+        magma_yield(); \
+    } \
+    for (kk=0; kk < 100; kk++) { \
+        __asm__ volatile ("nop;" :::); \
+    } \
+} while(0)
 
 #define expertmyss_cond_set(m, n, val) \
-{ \
+do { \
     prog[(m)*(64/sizeof(magma_int_t))] = (val); \
     __asm__ volatile ("" ::: "memory"); \
-}
+} while(0)
+
 #define expertmyss_init(m, n, init_val) \
-{ \
+do { \
     if (my_core_id == 0) { \
         magma_malloc_cpu((void**) &prog, ( (m)*(64/sizeof(int)) ) * sizeof(magma_int_t)); \
         memset((magma_int_t*)prog, 0, (m)*(64/sizeof(magma_int_t))); \
@@ -464,46 +467,52 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
     pthread_barrier_init(&myptbarrier, NULL, cores_num); \
     pthread_barrier_wait(&myptbarrier); \
     barrier(my_core_id, cores_num); \
-}
+} while(0)
+
 #define expertmyss_finalize() \
-{ \
+do { \
     pthread_barrier_wait(&myptbarrier); \
     pthread_barrier_destroy(&myptbarrier); \
     barrier(my_core_id, cores_num); \
-    if (my_core_id == 0) \
-    magma_free_cpu((void *) prog); \
-}
+    if (my_core_id == 0) { \
+        magma_free_cpu((void *) prog); \
+    } \
+} while(0)
 
 
 
 
 #define myss_cond_set(m, n, val) \
-{ \
+do { \
     prog[(m)] = (val); \
     __asm__ volatile ("" ::: "memory"); \
-}
+} while(0)
 
 #define myss_cond_wait(m, n, val) \
-{ \
+do { \
     while (prog[(m)] != (val)) \
     { \
         magma_yield(); \
     } \
-}
+} while(0)
+
 #define myss_init(m, n, init_val) \
-{ \
+do { \
     if (my_core_id == 0) { \
         magma_malloc_cpu((void**) &prog,  (m) * sizeof(magma_int_t)); \
         memset((magma_int_t*)prog, 0, (m)); \
     } \
     pthread_barrier_wait(myptbarrier); \
-}
+} while(0)
+
 #define myss_finalize() \
-{ \
+do { \
     pthread_barrier_wait(myptbarrier); \
-    if (my_core_id == 0) \
-    magma_free_cpu((void *) prog); \
-}
+    if (my_core_id == 0) { \
+        magma_free_cpu((void *) prog); \
+    } \
+} while(0)
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
