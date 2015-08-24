@@ -14,20 +14,20 @@ magma_cabs(magmaDoubleComplex z)
 {
     double x = fabs( real( z ));
     double y = fabs( imag( z ));
-    double big, small;
+    double big, little;  // "small" reserved in Windows. Ugh.
     if ( x > y ) {
-        big   = x;
-        small = y;
+        big    = x;
+        little = y;
     }
     else {
-        big   = y;
-        small = x;
+        big    = y;
+        little = x;
     }
     if ( big == 0 || isinf(big) ) {
-        return big + small;  // add to propagate nan
+        return big + little;  // add to propagate nan
     }
-    small /= big;
-    return big * sqrt( 1 + small*small );
+    little /= big;
+    return big * sqrt( 1 + little*little );
 }
 
 // --------------------
@@ -36,18 +36,18 @@ magma_cabsf(magmaFloatComplex z)
 {
     float x = fabs( real( z ));
     float y = fabs( imag( z ));
-    float big, small;
+    float big, little;
     if ( x > y ) {
-        big   = x;
-        small = y;
+        big    = x;
+        little = y;
     }
     else {
-        big   = y;
-        small = x;
+        big    = y;
+        little = x;
     }
     if ( big == 0 || isinf(big) ) {
-        return big + small;  // add to propagate nan
+        return big + little;  // add to propagate nan
     }
-    small /= big;
-    return big * sqrt( 1 + small*small );
+    little /= big;
+    return big * sqrt( 1 + little*little );
 }
