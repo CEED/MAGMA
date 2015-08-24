@@ -829,14 +829,13 @@ INPUT                  = \
 	../src/zgeqr2x_gpu-v2.cpp         \
 	../src/zgeqr2x_gpu-v3.cpp         \
 	../src/zgeqr2x_gpu.cpp            \
-	../src/zgeqrf-v4.cpp              \
 	../src/zgeqrf.cpp                 \
 	../src/zgeqrf2_gpu.cpp            \
 	../src/zgeqrf3_gpu.cpp            \
-	../src/zgeqrf4_gpu.cpp            \
 	../src/zgeqrf_batched.cpp             \
 	../src/zgeqrf_expert_batched.cpp      \
 	../src/zgeqrf_gpu.cpp             \
+	../src/zgeqrf_m.cpp                   \
 	../src/zgeqrf_mgpu.cpp            \
 	../src/zgeqrf_ooc.cpp             \
 	../src/zgeqrf_panel_batched.cpp       \
@@ -1047,7 +1046,7 @@ INPUT                  = \
 	../magmablas/commonblas_z.h                 \
 	../magmablas/dgemm_batched_core.cu          \
 	../magmablas/dgemm_fermi_kernels.h          \
-	../magmablas/dgemm_tesla.cu                 \
+	../magmablas/dgemm_tesla.cpp                \
 	../magmablas/dgemm_tesla_N_N.cu             \
 	../magmablas/dgemm_tesla_N_N_special.cu     \
 	../magmablas/dgemm_tesla_N_T.cu             \
@@ -1099,14 +1098,14 @@ INPUT                  = \
 	../magmablas/sgemv_batched_core.cu          \
 	../magmablas/sgemv_tesla.cu                 \
 	../magmablas/ssyrk_batched_core.cu          \
-	../magmablas/stream.cu                      \
+	../magmablas/stream.cpp                     \
 	../magmablas/zaxpycp.cu                     \
-	../magmablas/zbcyclic.cu                    \
+	../magmablas/zbcyclic.cpp                   \
 	../magmablas/zcaxpycp.cu                    \
 	../magmablas/zclaswp.cu                     \
 	../magmablas/zgeadd.cu                      \
 	../magmablas/zgeadd_batched.cu              \
-	../magmablas/zgemm_batched.cu               \
+	../magmablas/zgemm_batched.cpp              \
 	../magmablas/zgemm_batched_core.cu          \
 	../magmablas/zgemm_fermi.cu                 \
 	../magmablas/zgemm_fermi_kernels.h          \
@@ -1114,7 +1113,7 @@ INPUT                  = \
 	../magmablas/zgemv_batched_core.cu          \
 	../magmablas/zgemv_conjv.cu                 \
 	../magmablas/zgemv_fermi.cu                 \
-	../magmablas/zgeqr2.cu                      \
+	../magmablas/zgeqr2.cpp                     \
 	../magmablas/zgeqr2_batched.cu              \
 	../magmablas/zgeqr2_kernels.cu              \
 	../magmablas/zgeqr2x_gpu-v4.cu              \
@@ -1124,8 +1123,8 @@ INPUT                  = \
 	../magmablas/zgerbt_kernels.cu              \
 	../magmablas/zgetf2.cu                      \
 	../magmablas/zgetf2_kernels.cu              \
-	../magmablas/zgetmatrix_transpose.cu        \
-	../magmablas/zgetmatrix_transpose_mgpu.cu   \
+	../magmablas/zgetmatrix_transpose.cpp       \
+	../magmablas/zgetmatrix_transpose_mgpu.cpp  \
 	../magmablas/zhemm_mgpu.cpp                 \
 	../magmablas/zhemm_mgpu_spec.cpp            \
 	../magmablas/zhemv.cu                       \
@@ -1134,7 +1133,7 @@ INPUT                  = \
 	../magmablas/zhemv_upper.cu                 \
 	../magmablas/zher2k_mgpu.cpp                \
 	../magmablas/zher2k_mgpu_spec.cpp           \
-	../magmablas/zherk_batched.cu               \
+	../magmablas/zherk_batched.cpp              \
 	../magmablas/zherk_batched_core.cu          \
 	../magmablas/zherk_gpu.cpp                  \
 	../magmablas/zherk_mgpu.cpp                 \
@@ -1170,8 +1169,8 @@ INPUT                  = \
 	../magmablas/zpotf2_kernels.cu              \
 	../magmablas/zpotf2_kernels_old.cu          \
 	../magmablas/zset_pointer.cu                \
-	../magmablas/zsetmatrix_transpose.cu        \
-	../magmablas/zsetmatrix_transpose_mgpu.cu   \
+	../magmablas/zsetmatrix_transpose.cpp       \
+	../magmablas/zsetmatrix_transpose_mgpu.cpp  \
 	../magmablas/zswap.cu                       \
 	../magmablas/zswapblk.cu                    \
 	../magmablas/zswapdblk.cu                   \
@@ -1185,11 +1184,11 @@ INPUT                  = \
 	../magmablas/ztranspose_conj_inplace.cu     \
 	../magmablas/ztranspose_inplace.cu          \
 	../magmablas/ztrsm.cu                       \
-	../magmablas/ztrsm_batched.cu               \
+	../magmablas/ztrsm_batched.cpp              \
 	../magmablas/ztrsv.cu                       \
 	../magmablas/ztrsv_batched.cu               \
 	../magmablas/ztrsv_template_device.cuh      \
-	../magmablas/ztrtri.h                       \
+	../magmablas/ztrtri.cuh                     \
 	../magmablas/ztrtri_diag.cu                 \
 	../magmablas/ztrtri_diag_batched.cu         \
 	../magmablas/ztrtri_lower.cu                \
