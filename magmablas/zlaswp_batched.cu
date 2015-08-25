@@ -140,7 +140,7 @@ magma_zlaswp_rowparallel_q( magma_int_t n,
     int height = k2-k1;
     if ( height  > MAX_NTHREADS) 
     {
-        printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", n, MAX_NTHREADS);
+        printf(" height=%d > %d, magma_zlaswp_rowparallel_q not supported \n", int(n), int(MAX_NTHREADS) );
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );

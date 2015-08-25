@@ -300,10 +300,10 @@ void magmablas_zlaset_q(
     
     magma_int_t mm, nn;
     if (uplo == MagmaLower) {
-        for( int i=0; i < super_grid.x; ++i ) {
+        for( unsigned int i=0; i < super_grid.x; ++i ) {
             mm = (i == super_grid.x-1 ? m % super_NB : super_NB);
             grid.x = magma_ceildiv( mm, BLK_X );
-            for( int j=0; j < super_grid.y && j <= i; ++j ) {  // from left to diagonal
+            for( unsigned int j=0; j < super_grid.y && j <= i; ++j ) {  // from left to diagonal
                 nn = (j == super_grid.y-1 ? n % super_NB : super_NB);
                 grid.y = magma_ceildiv( nn, BLK_Y );
                 if ( i == j ) {  // diagonal super block
@@ -318,10 +318,10 @@ void magmablas_zlaset_q(
         }
     }
     else if (uplo == MagmaUpper) {
-        for( int i=0; i < super_grid.x; ++i ) {
+        for( unsigned int i=0; i < super_grid.x; ++i ) {
             mm = (i == super_grid.x-1 ? m % super_NB : super_NB);
             grid.x = magma_ceildiv( mm, BLK_X );
-            for( int j=i; j < super_grid.y; ++j ) {  // from diagonal to right
+            for( unsigned int j=i; j < super_grid.y; ++j ) {  // from diagonal to right
                 nn = (j == super_grid.y-1 ? n % super_NB : super_NB);
                 grid.y = magma_ceildiv( nn, BLK_Y );
                 if ( i == j ) {  // diagonal super block
@@ -347,10 +347,10 @@ void magmablas_zlaset_q(
             assert( err == cudaSuccess );
         }
         else {
-            for( int i=0; i < super_grid.x; ++i ) {
+            for( unsigned int i=0; i < super_grid.x; ++i ) {
                 mm = (i == super_grid.x-1 ? m % super_NB : super_NB);
                 grid.x = magma_ceildiv( mm, BLK_X );
-                for( int j=0; j < super_grid.y; ++j ) {  // full row
+                for( unsigned int j=0; j < super_grid.y; ++j ) {  // full row
                     nn = (j == super_grid.y-1 ? n % super_NB : super_NB);
                     grid.y = magma_ceildiv( nn, BLK_Y );
                     if ( i == j ) {  // diagonal super block

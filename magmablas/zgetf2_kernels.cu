@@ -378,7 +378,7 @@ magma_int_t magma_zscal_zgeru_batched(magma_int_t m, magma_int_t n, magma_int_t 
     if ( n == 0) return 0;
     if ( n  > MAX_NTHREADS) 
     {
-        printf("magma_zscal_zgeru_batched nb=%d, > %d, not supported \n",n, MAX_NTHREADS);
+        printf("magma_zscal_zgeru_batched nb=%d, > %d, not supported \n", int(n), int(MAX_NTHREADS) );
         return -15;
     }
 
@@ -759,7 +759,7 @@ magma_int_t  magma_zgetf2_sm_batched(
 
     if (shared_size > 47000)
     {
-        printf("Shared memory in zgetf2 = %d, exceeds 48K, kernel can not lauched succesfully\n", (int) shared_size);
+        printf("Shared memory in zgetf2 = %d, exceeds 48K, kernel can not lauched succesfully\n", int(shared_size) );
         return 1;
     }
 

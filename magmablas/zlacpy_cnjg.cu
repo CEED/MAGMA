@@ -42,20 +42,22 @@ __global__ void magmagpu_zlacpy_cnjg( magmagpu_zlacpy_cnjg_params_t params )
 
 extern "C" void 
 magmablas_zlacpy_cnjg_q(
-    magma_int_t n, magmaDoubleComplex *dA1, magma_int_t lda1, 
+    magma_int_t n,
+    magmaDoubleComplex *dA1, magma_int_t lda1, 
     magmaDoubleComplex *dA2, magma_int_t lda2,
     magma_queue_t queue )
 {
     int blocksize = 64;
     dim3 blocks( magma_ceildiv( n, blocksize ) );
-    magmagpu_zlacpy_cnjg_params_t params = { dA1, dA2, n, lda1, lda2 };
+    magmagpu_zlacpy_cnjg_params_t params = { dA1, dA2, int(n), int(lda1), int(lda2) };
     magmagpu_zlacpy_cnjg<<< blocks, blocksize, 0, queue >>>( params );
 }
 
 
 extern "C" void 
 magmablas_zlacpy_cnjg(
-    magma_int_t n, magmaDoubleComplex *dA1, magma_int_t lda1, 
+    magma_int_t n,
+    magmaDoubleComplex *dA1, magma_int_t lda1, 
     magmaDoubleComplex *dA2, magma_int_t lda2)
 {
     magmablas_zlacpy_cnjg_q( n, dA1, lda1, dA2, lda2, magma_stream );

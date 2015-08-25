@@ -93,7 +93,7 @@ magmablas_zswapblk_q(
         for( k=(i1-1); k < i2; k += BLOCK_SIZE )
         {
             magma_int_t sb = min(BLOCK_SIZE, i2-k);
-            magmagpu_zswapblk_params_t params = { dA+k, dB, n, ldda, lddb, sb };
+            magmagpu_zswapblk_params_t params = { dA+k, dB, int(n), int(ldda), int(lddb), int(sb) };
             for( magma_int_t j = 0; j < sb; j++ )
             {
                 im = ipiv[(k+j)*inci] - 1;
@@ -109,7 +109,7 @@ magmablas_zswapblk_q(
         for( k=(i1-1); k < i2; k += BLOCK_SIZE )
         {
             magma_int_t sb = min(BLOCK_SIZE, i2-k);
-            magmagpu_zswapblk_params_t params = { dA+k*ldda, dB, n, ldda, lddb, sb };
+            magmagpu_zswapblk_params_t params = { dA+k*ldda, dB, int(n), int(ldda), int(lddb), int(sb) };
             for( magma_int_t j = 0; j < sb; j++ )
             {
                 im = ipiv[(k+j)*inci] - 1;

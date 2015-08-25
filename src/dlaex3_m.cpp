@@ -218,7 +218,7 @@ magma_dlaex3_m(
     magma_int_t ineg_one = -1;
 
     magma_int_t iil, iiu, rk;
-    magma_int_t n1_loc, n2_loc, ib, nb, ib2, igpu;
+    magma_int_t n1_loc, n2_loc, nb, ib2, igpu;
     magma_int_t ni_loc[MagmaMaxGPUs];
 
     magma_int_t i, ind, iq2, j, n12, n2, n23, tmp;
@@ -564,7 +564,7 @@ magma_dlaex3_m(
         }
         else {
             //use the gpus
-            ib = min(nb, rk);
+            magma_int_t ib = min(nb, rk);
             for (igpu = 0; igpu < ngpu-1; igpu += 2) {
                 if (n23 != 0) {
                     magma_setdevice(igpu+1);

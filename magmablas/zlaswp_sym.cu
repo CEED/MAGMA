@@ -166,8 +166,8 @@ magmablas_zlaswp_sym_q(
     
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, k2-k );
-        // fields are:                 dA  n  lda j0  npivots
-        zlaswp_sym_params_t params = { dA, n, lda, k, k+npivots };
+        // fields are:                 dA      n       lda       j0      npivots
+        zlaswp_sym_params_t params = { dA, int(n), int(lda), int(k), int(k+npivots) };
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - 1;
         }
