@@ -25,7 +25,7 @@
     system of equations A * X = B.
 
     This is a batched version that solves batchCount N-by-N matrices in parallel.
-    dA, dB, ipiv, and info become arrays with one entry per matrix.
+    dA, dB, and info become arrays with one entry per matrix.
 
     Arguments
     ---------
