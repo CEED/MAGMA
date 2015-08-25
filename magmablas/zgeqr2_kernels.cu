@@ -14,17 +14,6 @@
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 
-/*
-
-    Purpose
-    -------
-    These are internal routines that might have many assumption.
-    They are used in zgeqrf_batched.cpp   
-    No documentation is available today.
-
-    @ingroup magma_zgeqrf_comp
-
-*/
 
 
 __global__ void
@@ -48,6 +37,17 @@ zgeqrf_copy_upper_kernel_batched(
         }
     }
 }
+/*
+
+    Purpose
+    -------
+    These are internal routines that might have many assumption.
+    They are used in zgeqrf_batched.cpp   
+    No documentation is available today.
+
+    @ingroup magma_zgeqrf_comp
+
+*/
 
 void zgeqrf_copy_upper_batched(                
                   magma_int_t n, magma_int_t nb,
