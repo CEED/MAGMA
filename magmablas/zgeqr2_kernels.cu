@@ -10,8 +10,21 @@
 
    @precisions normal z -> s d c
 */
+
 #include "common_magma.h"
 #include "batched_kernel_param.h"
+
+/*
+
+    Purpose
+    -------
+    These are internal routines that might have many assumption.
+    They are used in zgeqrf_batched.cpp   
+    No documentation is available today.
+
+    @ingroup magma_zgeqrf_comp
+
+*/
 
 
 __global__ void

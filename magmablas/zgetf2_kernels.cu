@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2011
+       @date
 
        @author Azzam Haidar
        @author Tingxing Dong
@@ -16,6 +16,18 @@
 #include "batched_kernel_param.h"
 #include "magma_templates.h"
 
+/*
+
+    Purpose
+    -------
+    These are internal routines that might have many assumption.
+    They are used in zgetf2_batched.cpp   
+    No documentation is available today.
+
+    @ingroup magma_zgesv_comp
+
+*/
+
 
 #define PRECISION_z
 
@@ -25,10 +37,6 @@
 extern __shared__ magmaDoubleComplex shared_data[];
 extern __shared__ double sdata[];
 extern __shared__ int int_sdata[];
-
-/*
-    routines in this file are used by zgetf2_batched.cu
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
