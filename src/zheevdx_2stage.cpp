@@ -228,12 +228,14 @@ magma_zheevdx_2stage(
     indeig = (range == MagmaRangeI);
 
     /* determine the number of threads and other parameter */
-    magma_int_t Vblksiz, ldv, ldt, blkcnt, sizTAU2, sizT2, sizV2, sizTAU1, ldz;
+    magma_int_t Vblksiz, ldv, ldt, blkcnt, sizTAU2, sizT2, sizV2, sizTAU1, ldz, lwstg1, lda2;
     magma_int_t parallel_threads = magma_get_parallel_numthreads();
     magma_int_t nb               = magma_zbulge_get_nb(n, parallel_threads);
     magma_int_t lwstg2           = magma_zbulge_getlwstg2( n, parallel_threads, wantz, 
                                                            &Vblksiz, &ldv, &ldt, &blkcnt, 
                                                            &sizTAU2, &sizT2, &sizV2);
+    lwstg1                       = magma_bulge_getlwstg1( n, nb, &lda2 ); // lwstg1=nb*n but since used also to store the band A2 so it is 2nb*n;
+
     sizTAU1                      = n;
     ldz                          = n;
 
@@ -274,11 +276,11 @@ magma_zheevdx_2stage(
 
     #ifdef COMPLEX
     if (wantz) {
-        lwmin  = lwstg2 + 2*n + max(n*nb, n*n);
+        lwmin  = lwstg2 + 2*n + max(lwstg1, n*n);
         lrwmin = 1 + 5*n + 2*n*n;
         liwmin = 5*n + 3;
     } else {
-        lwmin  = lwstg2 + n + n*nb;
+        lwmin  = lwstg2 + n + lwstg1;
         lrwmin = n;
         liwmin = 1;
     }
@@ -299,10 +301,10 @@ magma_zheevdx_2stage(
     }
     #else
     if (wantz) {
-        lwmin  = lwstg2 + 1 + 6*n + max(n*nb, 2*n*n);
+        lwmin  = lwstg2 + 1 + 6*n + max(lwstg1, 2*n*n);
         liwmin = 5*n + 3;
     } else {
-        lwmin  = lwstg2 + 2*n + n*nb;
+        lwmin  = lwstg2 + 2*n + lwstg1;
         liwmin = 1;
     }
 
@@ -414,7 +416,6 @@ magma_zheevdx_2stage(
     magma_int_t sizE_onwork   = n;
     #endif
     
-    magma_int_t lwstg1  = nb*n;
     magmaDoubleComplex *TAU1  = work + sizE_onwork;
     magmaDoubleComplex *TAU2  = TAU1 + sizTAU1;
     magmaDoubleComplex *V2    = TAU2 + sizTAU2;
@@ -424,10 +425,10 @@ magma_zheevdx_2stage(
     magmaDoubleComplex *Z     = Wstg1;
     #ifdef COMPLEX
     double *Wedc              = E + n; 
-    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n;
+    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n;//used only for wantz>0
     #else
     double *Wedc              = Wstg1 + n*n;
-    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC;
+    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC;//used only for wantz>0
     #endif
 
 
@@ -447,7 +448,6 @@ magma_zheevdx_2stage(
     timer_start( time );
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
-    magma_int_t lda2 = 2*nb; //nb+1+(nb-1);
     memset(A2, 0, n*lda2*sizeof(magmaDoubleComplex));
 
     for (magma_int_t j = 0; j < n-nb; j++) {

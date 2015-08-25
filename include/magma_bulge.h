@@ -20,6 +20,7 @@ extern "C" {
 #endif
     
     magma_int_t magma_yield();
+    magma_int_t magma_bulge_getlwstg1(magma_int_t n, magma_int_t nb, magma_int_t *lda2);
 
     magma_int_t magma_bulge_get_nb(magma_int_t n);
 

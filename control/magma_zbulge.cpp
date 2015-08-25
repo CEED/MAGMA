@@ -78,6 +78,7 @@ magma_zheevdx_getworksize(magma_int_t n, magma_int_t threads,
         #endif
         magma_int_t *liwmin)
 {
+    magma_int_t lda2=0;
     magma_int_t Vblksiz;
     magma_int_t ldv;
     magma_int_t ldt;
@@ -85,25 +86,26 @@ magma_zheevdx_getworksize(magma_int_t n, magma_int_t threads,
     magma_int_t sizTAU2;
     magma_int_t sizT2;
     magma_int_t sizV2;
-    magma_int_t lwstg2 = magma_zbulge_getlwstg2( n, threads, wantz, &Vblksiz, &ldv, &ldt, &blkcnt, &sizTAU2, &sizT2, &sizV2);
-    magma_int_t nb               = magma_zbulge_get_nb(n, threads);
+    magma_int_t nb     = magma_zbulge_get_nb( n, threads );
+    magma_int_t lwstg1 = magma_bulge_getlwstg1( n, nb, &lda2 );
+    magma_int_t lwstg2 = magma_zbulge_getlwstg2( n, threads, wantz, &Vblksiz, &ldv, &ldt, &blkcnt, &sizTAU2, &sizT2, &sizV2 );
 
     #ifdef COMPLEX
     if (wantz) {
-        *lwmin  = lwstg2 + 2*n + max(n*nb, n*n);
+        *lwmin  = lwstg2 + 2*n + max(lwstg1, n*n);
         *lrwmin = 1 + 5*n + 2*n*n;
         *liwmin = 5*n + 3;
     } else {
-        *lwmin  = lwstg2 + n + n*nb;
+        *lwmin  = lwstg2 + n + lwstg1;
         *lrwmin = n;
         *liwmin = 1;
     }
     #else
     if (wantz) {
-        *lwmin  = lwstg2 + 1 + 6*n + max(n*nb, 2*n*n);
+        *lwmin  = lwstg2 + 1 + 6*n + max(lwstg1, 2*n*n);
         *liwmin = 5*n + 3;
     } else {
-        *lwmin  = lwstg2 + 2*n + n*nb;
+        *lwmin  = lwstg2 + 2*n + lwstg1;
         *liwmin = 1;
     }
     #endif

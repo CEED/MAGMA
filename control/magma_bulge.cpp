@@ -154,7 +154,7 @@ extern "C" {
         *Tpos   = myblkid*Vblksiz*ldt + locj*ldt + locj;
         *blkid  = myblkid;
     }
-
+////////////////////////////////////////////////////////////////////////////////
     magma_int_t magma_bulge_get_blkcnt(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz)
     {
         magma_int_t colblk, nbcolblk;
@@ -174,8 +174,13 @@ extern "C" {
         }
         return blkcnt;
     }
-
-
+////////////////////////////////////////////////////////////////////////////////
+magma_int_t magma_bulge_getlwstg1(magma_int_t n, magma_int_t nb, magma_int_t *lda2)
+{
+    lda2[0] = 2*nb; //nb+1+nb-1
+    return n*lda2[0];
+}
+////////////////////////////////////////////////////////////////////////////////
 
 
     ///////////////////
