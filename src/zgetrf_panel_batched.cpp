@@ -12,9 +12,14 @@
 */
 #include "common_magma.h"
 
+/**
+    Purpose
+    -------
+    this is an internal routine that might have many assumption.
+    No documentation is available today.
 
-
-////////////////////////////////////////////////////////////////////////////////////////
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zgetrf_recpanel_batched(
     magma_int_t m, magma_int_t n, magma_int_t min_recpnb,    
