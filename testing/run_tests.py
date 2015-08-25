@@ -158,6 +158,8 @@ parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
 parser.add_option('-l', '--large',      action='store_true', dest='large',      help='run large  tests, N > 1000')
+parser.add_option('-N',                 action='append',     dest='N',          help='run specific sizes; repeatable', default=[])
+parser.add_option(      '--range',      action='append',     dest='range',      help='run specific sizes; repeatable', default=[])
 
 parser.add_option(      '--blas',       action='store_true', dest='blas',       help='run BLAS tests')
 parser.add_option(      '--aux',        action='store_true', dest='aux',        help='run auxiliary routine tests')
@@ -275,6 +277,18 @@ if opts.large:
 # ----------
 mn     = n + tall + wide
 mnk    = n + tall + wide + mnk
+
+# ----------
+# specific sizes override everything else
+print 'opts.N', opts.N
+print 'opts.range', opts.range
+if ( opts.N or opts.range ):
+	n    = ' '.join( map( lambda x: '-N '+x, opts.N ) + map( lambda x: '--range '+x, opts.range ))
+	mn   = n
+	mnk  = n
+	tall = ''
+	wide = ''
+# endif
 
 
 # ----------------------------------------------------------------------
