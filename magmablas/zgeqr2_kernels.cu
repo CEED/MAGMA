@@ -43,7 +43,43 @@ zgeqrf_copy_upper_kernel_batched(
     -------
     These are internal routines that might have many assumption.
     They are used in zgeqrf_batched.cpp   
-    No documentation is available today.
+
+    Copy part of the data in dV to dR
+    
+    Arguments
+    ---------
+    @param[in]
+    n       INTEGER
+            The order of the matrix .  N >= 0.
+
+    @param[in]
+    nb      INTEGER
+            Tile size in matrix.  nb <= N.
+
+    @param[in]
+    dV_array    Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N).
+
+    @param[in]
+    lddv    INTEGER
+            The leading dimension of each array V.  LDDV >= max(1,N).
+
+
+    @param[in,out]
+    dR_array    Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array on the GPU, dimension (LDDR,N).
+
+    @param[in]
+    lddr    INTEGER
+            The leading dimension of each array R.  LDDR >= max(1,N).
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zgeqrf_comp
 
