@@ -66,15 +66,16 @@ int main( int argc, char** argv)
         range = MagmaRangeI;
 
     if ( opts.check && opts.jobz == MagmaNoVec ) {
-        fprintf( stderr, "WARNING checking all results requires vectors (option -JV); setting jobz=V is recommended otherwise only eigenvalues are checked\n" );
+        fprintf( stderr, "%% WARNING checking all results requires vectors (option -JV);\n"
+                 "setting jobz=V is recommended otherwise only eigenvalues are checked\n" );
     }
 
-    printf("using: itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f\n",
+    printf("%% using: itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f, ngpu %d\n",
            (int) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           (int) opts.check, opts.fraction);
+           (int) opts.check, opts.fraction, (int) opts.ngpu );
 
-    printf("    N     M  GPU Time (sec)  ||I-Q'Q||_oo/N  ||A-QDQ'||_oo/(||A||_oo.N).  |D-D_magma|/(|D| * N)\n");
-    printf("=======================================================================\n");
+    printf("%%   N     M  GPU Time (sec)  ||I-Q'Q||_oo/N  ||A-QDQ'||_oo/(||A||_oo.N).  |D-D_magma|/(|D| * N)\n");
+    printf("%%=======================================================================\n");
     magma_int_t threads = magma_get_parallel_numthreads();
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -103,7 +104,6 @@ int main( int argc, char** argv)
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             magma_zmake_hermitian( N, h_A, N );
-
 
             magma_int_t m1 = 0;
             double vl = 0;
@@ -146,7 +146,6 @@ int main( int argc, char** argv)
                                     &info);
                 }
             }
-
 
             // ===================================================================
             // Performs operation using MAGMA
