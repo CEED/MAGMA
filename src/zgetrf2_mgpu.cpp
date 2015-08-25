@@ -236,13 +236,13 @@ magma_zgetrf2_mgpu(
             
             /* storage for panel */
             if ( d == id ) {
-                /* the panel belond to this gpu */
+                /* the panel belongs to this gpu */
                 panel_local[d] = dAT(d,j,j_local);
                 ldpan[d] = lddat;
                 /* next column */
                 j_local2 = j_local+1;
             } else {
-                /* the panel belong to another gpu */
+                /* the panel belongs to another gpu */
                 panel_local[d] = d_panel[d];
                 ldpan[d] = nb;
                 /* next column */
@@ -400,7 +400,7 @@ magma_zgetrf2_mgpu(
             j_local2 = j_local;
             if ( d < id ) j_local2++;
             if ( d == id ) {
-                /* the panel belond to this gpu */
+                /* the panel belongs to this gpu */
                 panel_local[d] = dAT(d,s,j_local);
                 
                 /* next column */
@@ -415,7 +415,7 @@ magma_zgetrf2_mgpu(
                                  dAT(d,s,j_local)+nb0, lddat);
                 }
             } else if ( n_local[d] > j_local2*nb ) {
-                /* the panel belong to another gpu */
+                /* the panel belongs to another gpu */
                 panel_local[d] = d_panel[d];
                 
                 /* next column */
