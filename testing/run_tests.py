@@ -641,10 +641,17 @@ syev = (
 	#('testing_zhetrd_he2hb',       '-L -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage'),
 	#('testing_zhetrd_he2hb',       '-U -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage. upper not implemented'),
 	
-	#('testing_zheevdx_2stage', '-L -JN -c',  n,    '-c implies -JV'),
-	#('testing_zheevdx_2stage', '-U -JN -c',  n,    '-c implies -JV'),
+	('testing_zheevdx_2stage',  '-L -JN -c',  n,    ''),
+	('#testing_zheevdx_2stage', '-U -JN -c',  n,    'upper not implemented'),
 	('testing_zheevdx_2stage',  '-L -JV -c',  n,    ''),
 	('#testing_zheevdx_2stage', '-U -JV -c',  n,    'upper not implemented'),
+	
+	# same tester for multi-GPU version
+	# TODO test multi-GPU version with ngpu=1
+	('testing_zheevdx_2stage',  ngpu + '-L -JN -c',  n,    ''),
+	('#testing_zheevdx_2stage', ngpu + '-U -JN -c',  n,    'upper not implemented'),
+	('testing_zheevdx_2stage',  ngpu + '-L -JV -c',  n,    ''),
+	('#testing_zheevdx_2stage', ngpu + '-U -JV -c',  n,    'upper not implemented'),
 )
 if ( opts.syev ):
 	tests += syev
@@ -704,13 +711,14 @@ sygv = (
 	('testing_zhegvdx',          '-U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes
-	#('testing_zhegvdx_2stage',  '-L -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage',  '-L -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage',  '-L -JN --itype 3 -c',  n,  '-c implies -JV'),
-	
-	#('testing_zhegvdx_2stage',  '-U -JN --itype 1 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage',  '-U -JN --itype 2 -c',  n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage',  '-U -JN --itype 3 -c',  n,  '-c implies -JV'),
+	# TODO: add -c
+	('testing_zhegvdx_2stage',   '-L -JN --itype 1',  n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',   '-L -JN --itype 2',  n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',   '-L -JN --itype 3',  n,  '-c implies -JV'),
+	                              
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 1',  n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 2',  n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 3',  n,  '-c implies -JV, upper not implemented'),
 	
 	('testing_zhegvdx_2stage',   '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx_2stage',   '-L -JV --itype 2 -c',  n,  ''),
@@ -721,13 +729,14 @@ sygv = (
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 3 -c',  n,  'upper not implemented'),
 	
 	# lower/upper, no-vector/vector, itypes
-	#('testing_zhegvdx_2stage_m', ngpu + '-L -JN --itype 1 -c', n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage_m', ngpu + '-L -JN --itype 2 -c', n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage_m', ngpu + '-L -JN --itype 3 -c', n,  '-c implies -JV'),
+	# TODO: add -c
+	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 1', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 2', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 3', n,  '-c implies -JV'),
 	
-	#('testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 1 -c', n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 2 -c', n,  '-c implies -JV'),
-	#('testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 3 -c', n,  '-c implies -JV'),
+	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 1', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 2', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 3', n,  '-c implies -JV, upper not implemented'),
 	
 	('testing_zhegvdx_2stage_m',  ngpu + '-L -JV --itype 1 -c', n,  ''),
 	('testing_zhegvdx_2stage_m',  ngpu + '-L -JV --itype 2 -c', n,  ''),
@@ -790,7 +799,7 @@ for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
 	# end
 # end
 if ( opts.mgpu ):
-    tests += mgpu
+	tests += mgpu
 
 batched = (
 	# ----------

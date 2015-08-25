@@ -67,7 +67,7 @@ int main( int argc, char** argv)
 
     if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "%% WARNING checking all results requires vectors (option -JV);\n"
-                 "setting jobz=V is recommended otherwise only eigenvalues are checked\n" );
+                 "%% setting jobz=V is recommended otherwise only eigenvalues are checked\n" );
     }
 
     printf("%% using: itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f, ngpu %d\n",
