@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
+   -- MAGMA (version 1.5) --
+   Univ. of Tennessee, Knoxville
+   Univ. of California, Berkeley
+   Univ. of Colorado, Denver
+   @date
 
    @author Azzam Haidar
    @author Adrien Remy
@@ -15,55 +15,64 @@
 #include "batched_kernel_param.h"
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-/*  -- MAGMA (version 1.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2011
-
-    ZGETF2 computes an LU factorization of a general m-by-n matrix A
-    using partial pivoting with row interchanges.
+///////////////////////////////////////////////////////////////////////////////////////
+/**
+    Purpose
+    -------
+    ZGETF2 computes an LU factorization of a general M-by-N matrix A without pivoting
 
     The factorization has the form
-        A = P * L * U
-    where P is a permutation matrix, L is lower triangular with unit
+        A = L * U
+    where L is lower triangular with unit
     diagonal elements (lower trapezoidal if m > n), and U is upper
     triangular (upper trapezoidal if m < n).
 
-    This is the right-looking Level 2 BLAS version of the algorithm.
+    This is the right-looking Level 3 BLAS version of the algorithm.
+
+    This is a batched version that factors batchCount M-by-N matrices in parallel.
+    dA, and info become arrays with one entry per matrix.
 
     Arguments
-    =========
+    ---------
+    @param[in]
+    m       INTEGER
+            The number of rows of each matrix A.  M >= 0.
 
-    M       (input) INTEGER
-            The number of rows of the matrix A.  M >= 0.
+    @param[in]
+    n       INTEGER
+            The number of columns of each matrix A.  N >= 0.
 
-    N       (input) INTEGER
-            The number of columns of the matrix A.  N >= 0 and N <= 1024.
-            On CUDA architecture 1.x cards, N <= 512.
-
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
-            On entry, the m by n matrix to be factored.
+    @param[in,out]
+    dA_array    Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N).
+            On entry, each pointer is an M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    LDA     (input) INTEGER
-            The leading dimension of the array A.  LDA >= max(1,M).
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of each array A.  LDDA >= max(1,M).
 
-    IPIV    (output) INTEGER array, dimension (min(M,N))
-            The pivot indices; for 1 <= i <= min(M,N), row i of the
-            matrix was interchanged with row IPIV(i).
+    @param[out]
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+                  or another error occured, such as memory allocation failed.
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                  has been completed, but the factor U is exactly
+                  singular, and division by zero will occur if it is used
+                  to solve a system of equations.
 
-    INFO    (output) INTEGER
-            = 0: successful exit
-            < 0: if INFO = -k, the k-th argument had an illegal value
-            > 0: if INFO = k, U(k,k) is exactly zero. The factorization
-                 has been completed, but the factor U is exactly
-                 singular, and division by zero will occur if it is used
-                 to solve a system of equations.
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
 
-    ===================================================================== */
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
 
 extern "C" magma_int_t
 magma_zgetf2_nopiv_batched(
