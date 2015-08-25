@@ -1,15 +1,16 @@
 /*
-    -- MAGMA (version 1.4) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2013
-       
-       @author Azzam Haidar
-       @author Tingxing Dong
+   -- MAGMA (version 1.5) --
+   Univ. of Tennessee, Knoxville
+   Univ. of California, Berkeley
+   Univ. of Colorado, Denver
+   @date
 
-       @precisions normal z -> s d c
+   @author Azzam Haidar
+   @author Tingxing Dong
+
+   @precisions normal z -> s d c
 */
+
 #include "common_magma.h"
 
 /**
