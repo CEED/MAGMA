@@ -946,7 +946,7 @@ magma_zcgmerge_spmv1(
                                                  A.alignment, real_row_length );
     }
     else {
-        printf("error: alignment %d not supported.\n", A.alignment);
+        printf("error: alignment %d not supported.\n", int(A.alignment) );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
         // in case of using ELLRT, we can't efficiently merge the 

@@ -890,7 +890,7 @@ magma_zgesellpmv(
                 dval, dcolind, drowptr, dx, beta, dy );
 
         else {
-            printf("error: alignment %d not supported.\n", alignment);
+            printf("error: alignment %d not supported.\n", int(alignment) );
             return MAGMA_ERR_NOT_SUPPORTED;
         }
     #endif

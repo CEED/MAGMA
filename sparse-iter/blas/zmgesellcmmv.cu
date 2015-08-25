@@ -1326,7 +1326,7 @@ magma_zmgesellpmv(
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
         else {
-            printf("error: alignment %d not supported.\n", alignment);
+            printf("error: alignment %d not supported.\n", int(alignment) );
             return MAGMA_ERR_NOT_SUPPORTED;
         }
     } else {
@@ -1381,7 +1381,7 @@ magma_zmgesellpmv(
                 dval, dcolind, drowptr, dx, beta, dy );
         }
         else {
-            printf("error: alignment %d not supported.\n", alignment);
+            printf("error: alignment %d not supported.\n", int(alignment) );
             return MAGMA_ERR_NOT_SUPPORTED;
         }
     }

@@ -288,7 +288,7 @@ magma_zgeellrtmv(
                                                  alignment, real_row_length );
     }
     else {
-        printf("error: alignment %d not supported.\n", alignment);
+        printf("error: alignment %d not supported.\n", int(alignment) );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
 

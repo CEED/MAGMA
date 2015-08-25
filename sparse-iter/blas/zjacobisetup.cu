@@ -592,7 +592,7 @@ magma_zjacobispmvupdateselect(
 
     dim3 grid( magma_ceildiv( num_updates, BLOCK_SIZE ));
     magma_int_t threads = BLOCK_SIZE;
-        printf("num updates:%d %d %d \n", num_updates, threads, grid.x);
+    printf("num updates:%d %d %d\n", int(num_updates), int(threads), int(grid.x) );
 
     for( magma_int_t i=0; i<maxiter; i++ ) {
         zjacobispmvupdateselect_kernel<<< grid, threads, 0 >>>
