@@ -22,7 +22,7 @@
 CC        = gcc
 CXX       = g++
 NVCC      = nvcc
-#FORT      = gfortran
+FORT      = gfortran
 
 ARCH      = ar
 ARCHFLAGS = cr
