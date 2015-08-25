@@ -15,6 +15,10 @@
 
 #define PRECISION_z
 /////////////////////////////////////////////////////////////////
+/**
+    \n
+    This is an internal routine.
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotf2_ztrsm_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,
@@ -80,6 +84,10 @@ magma_zpotf2_ztrsm_batched(
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+    \n
+    This is an internal routine.
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotf2_batched(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,

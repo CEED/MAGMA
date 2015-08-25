@@ -37,22 +37,32 @@
             of the matrix B.  NRHS >= 0.
 
     @param[in]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            The triangular factor U or L from the Cholesky factorization
-            A = U**H*U or A = L*L**H, as computed by ZPOTRF.
+    dA_array    Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDA,N)
+             The triangular factor U or L from the Cholesky factorization
+             A = U**H*U or A = L*L**H, as computed by ZPOTRF.
 
     @param[in]
     ldda    INTEGER
-            The leading dimension of the array A.  LDDA >= max(1,N).
+            The leading dimension of each array A.  LDDA >= max(1,N).
 
     @param[in,out]
-    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
-            On entry, the right hand side matrix B.
-            On exit, the solution matrix X.
+    dB_array      Array of pointers, dimension (batchCount).
+             Each is a COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+             On entry, each pointer is a right hand side matrix B.
+             On exit, the corresponding solution matrix X.
 
     @param[in]
     lddb    INTEGER
-            The leading dimension of the array B.  LDDB >= max(1,N).
+            The leading dimension of each array B.  LDDB >= max(1,N).
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @param[out]
     info    INTEGER

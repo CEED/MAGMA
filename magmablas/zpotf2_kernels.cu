@@ -61,6 +61,10 @@ __global__ void zpotf2_smlpout_anywidth_kernel_batched(int m, int n,
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+    \n
+    This is an internal routine.
+    ********************************************************************/
 extern "C" magma_int_t
 magma_zpotrf_lpout_batched(
         magma_uplo_t uplo, magma_int_t n, 
