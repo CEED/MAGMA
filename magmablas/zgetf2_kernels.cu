@@ -216,8 +216,9 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
 
     if ( num_blocks > zamax) 
     {
-        printf("length(=%d), num_blocks(=%d) is too big > zamax(=%d), the second layer reduction can not be launched, Plz incread zamax \n", length, num_blocks, zamax);
-    } 
+        printf("length(=%d), num_blocks(=%d) is too big > zamax(=%d), the second layer reduction can not be launched, Plz incread zamax \n",
+               int(length), int(num_blocks), int(zamax));
+    }
     else
     {
         // first level tree reduction
@@ -315,7 +316,7 @@ magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
     */
     if ( n  > MAX_NTHREADS) 
     {
-        printf("magma_zswap_batched nb=%d, > %d, not supported \n",n, MAX_NTHREADS);
+        printf("magma_zswap_batched nb=%d, > %d, not supported\n", int(n), int(MAX_NTHREADS) );
         return -15;
     }
     dim3 grid(1,1, batchCount);

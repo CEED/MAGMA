@@ -104,7 +104,7 @@ magma_zlaswp_rowparallel_batched( magma_int_t n,
     int height = k2-k1;
     if ( height  > 1024) 
     {
-        printf(" n=%d > 1024, not supported \n", n);
+        printf(" n=%d > 1024, not supported \n", int(n) );
     }
 
     int blocks = magma_ceildiv( n, SWP_WIDTH );
