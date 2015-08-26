@@ -15,7 +15,7 @@
 #include "magma_templates.h"
 #include "batched_kernel_param.h"
 
-#define BLOCK_SIZE 512
+#define BLOCK_SIZE 256
 
 
 #define dA(a_1,a_2) (dA  + (a_1) + (a_2)*(local_lda))
