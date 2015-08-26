@@ -255,10 +255,77 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+    Purpose
+    -------
+
+    IZAMAX find the index of max absolute value of elements in x and store the index in ipiv 
+
+    This is an internal routine that might have many assumption.
+
+    Arguments
+    ---------
+
+    @param[in]
+    length       INTEGER
+            On entry, length specifies the size of vector x. length >= 0.
+
+
+    @param[in]
+    dx_array     Array of pointers, dimension (batchCount).
+            Each is a COMPLEX_16 array of dimension
+
+
+    @param[in]
+    incx    Specifies the increment for the elements of X.
+            INCX must not be zero.
+
+    @param[in]
+    step    INTEGER
+            the offset of ipiv
+
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of each array A, internal use to find the starting position of x.
+
+    @param[out]
+    ipiv_array  Array of pointers, dimension (batchCount), for corresponding matrices.
+            Each is an INTEGER array, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
+            matrix was interchanged with row IPIV(i).
+
+    @param[out]
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+                  or another error occured, such as memory allocation failed.
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                  has been completed, but the factor U is exactly
+                  singular, and division by zero will occur if it is used
+                  to solve a system of equations.
+
+    @param[in]
+    gstep    INTEGER
+            the offset of info, internal use
+
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_zgesv_comp
+    ********************************************************************/
+
 extern "C"
 magma_int_t magma_izamax_batched(magma_int_t length, 
-        magmaDoubleComplex **x_array, magma_int_t incx, magma_int_t step,  magma_int_t lda,
-        magma_int_t** ipiv_array, magma_int_t *info_array, magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
+                                 magmaDoubleComplex **x_array, magma_int_t incx, 
+                                 magma_int_t step,  magma_int_t lda,
+                                 magma_int_t** ipiv_array, magma_int_t *info_array, 
+                                 magma_int_t gbstep, magma_int_t batchCount, magma_queue_t queue)
 {
     if (length == 0 ) return 0;
 
