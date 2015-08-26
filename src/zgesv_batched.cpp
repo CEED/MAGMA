@@ -50,7 +50,7 @@
             The leading dimension of each array A.  LDDA >= max(1,M).
 
     @param[out]
-    ipiv_array  Array of pointers, dimension (batchCount), for corresponding matrices.
+    dipiv_array  Array of pointers, dimension (batchCount), for corresponding matrices.
             Each is an INTEGER array, dimension (min(M,N))
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
@@ -69,7 +69,7 @@
 
 
     @param[out]
-    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
+    dinfo_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value
                   or another error occured, such as memory allocation failed.
