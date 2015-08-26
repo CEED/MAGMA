@@ -64,6 +64,15 @@
     lddb    INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
+    @param[out]
+    info_array  Array of INTEGERs, dimension (batchCount), for corresponding matrices.
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+                  or another error occured, such as memory allocation failed.
+      -     > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+                  has been completed, but the factor U is exactly
+                  singular, and division by zero will occur if it is used
+                  to solve a system of equations.
 
     @param[in]
     batchCount  INTEGER

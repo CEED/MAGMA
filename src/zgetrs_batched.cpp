@@ -55,7 +55,7 @@
 
 
     @param[out]
-    ipiv_array  Array of pointers, dimension (batchCount), for corresponding matrices.
+    dipiv_array  Array of pointers, dimension (batchCount), for corresponding matrices.
             Each is an INTEGER array, dimension (min(M,N))
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
