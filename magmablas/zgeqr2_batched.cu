@@ -241,15 +241,6 @@ void zgeqr2_kernel_batched( int m, int n, magmaDoubleComplex** dA_array, magma_i
     ZGEQR2 computes a QR factorization of a complex m by n matrix A:
     A = Q * R.
 
-    This expert routine requires two more arguments than the standard
-    zgeqr2, namely, dT and ddA, explained below. The storage for A is
-    also not as in the LAPACK's zgeqr2 routine (see below).
-
-    The first is used to output the triangular
-    n x n factor T of the block reflector used in the factorization.
-    The second holds the diagonal nxn blocks of A, i.e., the diagonal
-    submatrices of R.
-
     This version implements the right-looking QR with non-blocking.
 
     Arguments
