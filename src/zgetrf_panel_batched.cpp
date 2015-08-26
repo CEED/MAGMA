@@ -84,7 +84,7 @@
                 The number of matrices to operate on.
 
     @param[in]
-    myhandle   Cublas_Handle_t
+    myhandle   cublasHandle_t
             Cublas handle might be used internally.
 
     @param[in]
