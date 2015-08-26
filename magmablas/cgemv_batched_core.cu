@@ -56,15 +56,18 @@
     alpha   COMPLEX
             On entry, ALPHA specifies the scalar alpha.
 
+
     @param[in]
-    dA      COMPLEX array of dimension ( LDDA, n ) on the GPU.
+    dA_array 	Array of pointers, dimension (batchCount).
+             Each is a COMPLEX array A of DIMENSION ( ldda, n ) on the GPU
    
     @param[in]
     ldda    INTEGER
             LDDA specifies the leading dimension of A.
 
     @param[in]
-    dx      COMPLEX array of dimension
+    dx_array 	Array of pointers, dimension (batchCount).
+            Each is a COMPLEX array of dimension
             n if trans == MagmaNoTrans
             m if trans == MagmaTrans or MagmaConjTrans
      
@@ -73,12 +76,13 @@
             INCX must not be zero.
   
     @param[in]
-    beta    DOUBLE REAL
-            On entry, BETA specifies the scalar beta. When BETA is
+    beta    COMPLEX
+            On entry, ALPHA specifies the scalar beta. When BETA is
             supplied as zero then Y need not be set on input.
 
     @param[out]
-    dy      REAL array of dimension
+    dy_array 	Array of pointers, dimension (batchCount).
+            Each is a COMPLEX array of dimension
             m if trans == MagmaNoTrans
             n if trans == MagmaTrans or MagmaConjTrans
 
@@ -86,8 +90,17 @@
     incy    Specifies the increment for the elements of Y.
             INCY must not be zero.
 
-    @ingroup magma_dblas2
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @ingroup magma_sblas2
     ********************************************************************/
+
 
 extern "C" void
 magmablas_cgemv_batched(
