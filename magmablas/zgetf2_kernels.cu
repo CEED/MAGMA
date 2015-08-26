@@ -273,7 +273,7 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
 
 
     @param[in]
-    dx_array     Array of pointers, dimension (batchCount).
+    x_array     Array of pointers, dimension (batchCount).
             Each is a COMPLEX_16 array of dimension
 
 
@@ -286,7 +286,7 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
             the offset of ipiv
 
     @param[in]
-    ldda    INTEGER
+    lda    INTEGER
             The leading dimension of each array A, internal use to find the starting position of x.
 
     @param[out]
@@ -306,7 +306,7 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
                   to solve a system of equations.
 
     @param[in]
-    gstep    INTEGER
+    gbstep    INTEGER
             the offset of info, internal use
 
     @param[in]
@@ -403,7 +403,7 @@ void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int
 
 
     @param[in]
-    dx_array     Array of pointers, dimension (batchCount).
+    x_array     Array of pointers, dimension (batchCount).
             Each is a COMPLEX_16 array of dimension
 
 
@@ -630,7 +630,7 @@ void zgetf2trsm_kernel_batched(int ib, int n, magmaDoubleComplex **dA_array, int
 
 extern "C" void
 magma_zgetf2trsm_batched(magma_int_t ib, magma_int_t n, magmaDoubleComplex **dA_array, 
-                         magma_int_t step, magma_int_t lda,
+                         magma_int_t step, magma_int_t ldda,
                          magma_int_t batchCount, magma_queue_t queue)
 {
     /*
@@ -649,7 +649,7 @@ magma_zgetf2trsm_batched(magma_int_t ib, magma_int_t n, magmaDoubleComplex **dA_
     dim3 grid(1, 1, batchCount);
     dim3 threads(max(n,ib), 1, 1);
 
-    zgetf2trsm_kernel_batched<<< grid, threads, shared_size, queue>>>(ib, n, dA_array, step, lda);
+    zgetf2trsm_kernel_batched<<< grid, threads, shared_size, queue>>>(ib, n, dA_array, step, ldda);
 }
 
 
@@ -1010,7 +1010,7 @@ kernel_zgetf2_sm_batched(
 extern "C"
 magma_int_t  magma_zgetf2_sm_batched(
     magma_int_t m, magma_int_t ib,
-    magmaDoubleComplex **dA_array, magma_int_t lda,
+    magmaDoubleComplex **dA_array, magma_int_t ldda,
     magma_int_t **ipiv_array,
     magma_int_t *info_array, 
     magma_int_t batchCount, magma_queue_t queue)
@@ -1030,7 +1030,7 @@ magma_int_t  magma_zgetf2_sm_batched(
     dim3 threads(max(max(zamax, m), ib), 1, 1);
 
     kernel_zgetf2_sm_batched<<<grid, threads, shared_size, queue>>>
-                                                        ( m, ib, dA_array, lda, ipiv_array, info_array);
+                                                        ( m, ib, dA_array, ldda, ipiv_array, info_array);
 
 
     return 0;
