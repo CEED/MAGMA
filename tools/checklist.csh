@@ -172,6 +172,12 @@ echo
 echo
 echo "============================================================ should be fixed"
 
+# fixed
+echo "========== use @date instead of a specific hard-coded date"
+egrep '(January|February|March|April|May|June|July|August|September|October|November|December) +[0-9]{4} *$' $FILES \
+    | egrep -v 'testing/(checkdiag|lin|matgen)|blas_fix'
+echo
+
 echo "========== cuda, cublas functions                                          *** should be fixed ***"
 egrep '(cuda|cublas)[a-zA-Z]\w+ *\('   $FILES \
     | egrep -v '\.f:|interface_cuda|testing_blas_z.cpp|cudaFuncSetCacheConfig|cudaCreateChannelDesc|cudaCreateTextureObject|cudaDeviceSetSharedMemConfig|cudaDestroyTextureObject|cublasSetAtomicsMode|cudaGetErrorString|cudaMemcpyToSymbol|cudaMemcpyFromSymbol|cudaDeviceSetCacheConfig|cudaBindTexture|cudaUnbindTexture|cudaEventElapsedTime|cudaEventCreateWithFlags|cudaMemGetInfo|cublas\w+Batched|cublasHandle|cublasCreate|cublasDestroy|fortran2.cpp' \
