@@ -9,17 +9,18 @@
        
        @author Tingxing Dong
        @author Azzam Haidar
+
 */
 #include "common_magma.h"
-#include "commonblas_c.h"
 #include "magma_templates.h"
 
 #define PRECISION_c
+
 #include "gemv_template_kernel_batched.cuh"
 #include "gemv_config/gemvn_param.h"
 #include "gemv_config/gemvt_param.h"
-#define version(s,v) s ## _V_ ## v
 
+#define version(s,v) s ## _V_ ## v
 
 
 /**

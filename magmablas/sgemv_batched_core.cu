@@ -12,15 +12,15 @@
 
 */
 #include "common_magma.h"
-#include "commonblas_s.h"
 #include "magma_templates.h"
 
 #define PRECISION_s
+
 #include "gemv_template_kernel_batched.cuh"
 #include "gemv_config/gemvn_param.h"
 #include "gemv_config/gemvt_param.h"
-#define version(s,v) s ## _V_ ## v
 
+#define version(s,v) s ## _V_ ## v
 
 
 /**
