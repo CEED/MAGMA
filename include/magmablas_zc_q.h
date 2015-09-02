@@ -44,29 +44,29 @@ void magmablas_zlag2c_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr A,  magma_int_t lda,
     magmaFloatComplex_ptr       SA, magma_int_t ldsa,
-    magma_int_t *info,
-    magma_queue_t queue );
+    magma_queue_t queue,
+    magma_int_t *info );
 
 void magmablas_clag2z_q(
     magma_int_t m, magma_int_t n,
     magmaFloatComplex_const_ptr SA, magma_int_t ldsa,
     magmaDoubleComplex_ptr       A,  magma_int_t lda,
-    magma_int_t *info,
-    magma_queue_t queue );
+    magma_queue_t queue,
+    magma_int_t *info );
 
 void magmablas_zlat2c_q(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex_const_ptr A,  magma_int_t lda,
     magmaFloatComplex_ptr       SA, magma_int_t ldsa,
-    magma_int_t *info,
-    magma_queue_t queue );
+    magma_queue_t queue,
+    magma_int_t *info );
 
 void magmablas_clat2z_q(
     magma_uplo_t uplo, magma_int_t n,
     magmaFloatComplex_const_ptr SA, magma_int_t ldsa,
     magmaDoubleComplex_ptr       A,  magma_int_t lda,
-    magma_int_t *info,
-    magma_queue_t queue );
+    magma_queue_t queue,
+    magma_int_t *info );
 
 #ifdef __cplusplus
 }

@@ -101,7 +101,8 @@ magmablas_zlascl_diag_q(
     magma_type_t type, magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dD, magma_int_t lddd, 
     magmaDoubleComplex_ptr       dA, magma_int_t ldda, 
-    magma_int_t *info, magma_queue_t queue )
+    magma_queue_t queue,
+    magma_int_t *info )
 {
     *info = 0;
     if ( type != MagmaLower && type != MagmaUpper && type != MagmaFull )
@@ -141,5 +142,5 @@ magmablas_zlascl_diag(
     magmaDoubleComplex_ptr       dA, magma_int_t ldda, 
     magma_int_t *info )
 {
-    magmablas_zlascl_diag_q( type, m, n, dD, lddd, dA, ldda, info, magma_stream );
+    magmablas_zlascl_diag_q( type, m, n, dD, lddd, dA, ldda, magma_stream, info );
 }
