@@ -38,13 +38,33 @@
     Arguments
     ---------
     @param[in]
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
+
+    @param[in]
     uplo    magma_uplo_t
       -     = MagmaUpper:  Upper triangle of dA is stored;
       -     = MagmaLower:  Lower triangle of dA is stored.
 
     @param[in]
+    m       INTEGER
+            The number of rows of the submatrix to be factorized.
+
+    @param[in]
     n       INTEGER
-            The order of the matrix dA.  N >= 0.
+            The number of columns of the submatrix to be factorized.
+
+    @param[in]
+    off_i   INTEGER
+            The first row index of the submatrix to be factorized.
+
+    @param[in]
+    off_j   INTEGER
+            The first column index of the submatrix to be factorized.
+
+    @param[in]
+    nb      INTEGER
+            The block size used for the factorization and distribution.
 
     @param[in,out]
     dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
@@ -60,10 +80,26 @@
             factorization dA = U**H * U or dA = L * L**H.
 
     @param[in]
-    ldda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
             To benefit from coalescent memory accesses LDDA must be
             divisible by 16.
+
+    @param[in,out]
+    A       COMPLEX_16 array on the CPU, dimension (LDA,H*NB)
+            On exit, the panel is copied back to the CPU
+
+    @param[in]
+    lda     INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
+
+    @param[in]
+    h       INTEGER
+            It specifies the size of the CPU workspace, A.
+
+    @param[in]
+    queues  magma_queue_t
+            queues contains the streams used for the partial factorization.
 
     @param[out]
     info    INTEGER

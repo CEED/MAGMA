@@ -97,6 +97,10 @@ zlascl_2x2_upper(int m, const magmaDoubleComplex *W, int ldw, magmaDoubleComplex
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void

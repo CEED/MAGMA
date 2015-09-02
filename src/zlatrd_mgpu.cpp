@@ -37,6 +37,10 @@
     Arguments
     ---------
     @param[in]
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
+
+    @param[in]
     uplo    magma_uplo_t
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is stored:

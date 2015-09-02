@@ -44,7 +44,7 @@
     ldda    INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    param[in,out]
+    @param[in,out]
     dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.

@@ -90,6 +90,10 @@ zlascl_diag_upper(int m, int n, magmaDoubleComplex const* D, int ldd,
       -     = 0:  successful exit
       -     < 0:  if INFO = -i, the i-th argument had an illegal value.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" void
@@ -106,8 +110,8 @@ magmablas_zlascl_diag_q(
         *info = -2;
     else if ( n < 0 )
         *info = -3;
-    else if ( ldda < max(1,m) )
-        *info = -5;
+    //else if ( ldda < max(1,m) )
+    //    *info = -5;
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
