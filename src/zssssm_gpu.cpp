@@ -26,6 +26,11 @@
     Arguments
     ---------
     @param[in]
+    order   magma_order_t
+      -     = MagmaRowMajor:  dA is in row-major order (more efficient).
+      -     = MagmaColMajor:  dA is in column-major order.
+
+    @param[in]
     m1      INTEGER
             The number of rows of the matrix A1.  M1 >= 0.
 
@@ -87,6 +92,12 @@
     @param[in]
     ipiv    INTEGER array on the cpu.
             The pivot indices array of size K as returned by ZTSTRF
+
+    @param[out]
+    info    INTEGER
+      -     = 0:  successful exit
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
+                  or another error occured, such as memory allocation failed.
 
     @ingroup magma_zgesv_tile
     ********************************************************************/
