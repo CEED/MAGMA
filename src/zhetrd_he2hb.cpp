@@ -33,7 +33,11 @@
 
     @param[in]
     n       INTEGER
-            The order of the matrix A.  N >= 0.
+            The order of the matrix A.  n >= 0.
+
+    @param[in]
+    nb      INTEGER
+            The inner blocking.  nb >= 0.
 
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)

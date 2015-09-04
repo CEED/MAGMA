@@ -35,6 +35,10 @@
     n       INTEGER
             The order of the matrix A.  N >= 0.
 
+    @param[in]
+    nb      INTEGER
+            The inner blocking.  nb >= 0.
+
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
@@ -79,13 +83,45 @@
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    @param[out]
-    dT      COMPLEX_16 array on the GPU, dimension N*NB,
-            where NB is the optimal blocksize.
+    @param[in,out]
+    dAmgpu  COMPLEX_16 array of pointer, dimension (ngpu)
+            Each point to a COMPLEX_16 array, dimension (LDDA, nlocal)
+            which hold the local matrix on each GPU.
+
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array dAmgpu.  ldda >= max(1,n).
+
+    @param[in,out]
+    dTmgpu  COMPLEX_16 array of pointer, dimension (ngpu)
+            Each point to a COMPLEX_16 array on the GPU, dimension n*nb,
+            where nb is the optimal blocksize.
             On exit dT holds the upper triangular matrices T from the
             accumulated Householder transformations (I - V T V') used
             in the factorization. The nb x nb matrices T are ordered
             consecutively in memory one after another.
+
+    @param[in]
+    lddt    INTEGER
+            The leading dimension of each array dT.  lddt >= max(1,nb).
+
+    @param[in]
+    ngpu    INTEGER
+            The number of GPUs.
+
+    @param[in]
+    distblk INTEGER
+            Internal parameter for performance tuning.
+            The size of the distribution/computation.
+
+    @param[in]
+    queues  Array of magma_queue_t that point to the queues to be used 
+            in execution/communications. Dimension >= max(3, ngpu+1)
+            Queue to execute in.
+
+    @param[in]
+    nqueue  INTEGER
+            The number of queues should be >= max(3, ngpu+1).
 
     @param[out]
     info    INTEGER
@@ -180,6 +216,8 @@ magma_zhetrd_he2hb_mgpu(
         *info = -4;
     } else if (lwork < 1 && ! lquery) {
         *info = -9;
+    } else if (nqueues < max(3,ngpu+1)) {
+        *info = -16;
     }
 
     /* Determine the block size. */
