@@ -101,7 +101,7 @@
     this is an internal routine that might have many assumption.
 
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
     ********************************************************************/
 
 extern "C" magma_int_t

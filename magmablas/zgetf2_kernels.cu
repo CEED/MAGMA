@@ -24,7 +24,7 @@
     They are used in zgetf2_batched.cpp   
     No documentation is available today.
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
 
 */
 
@@ -317,7 +317,7 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
     ********************************************************************/
 
 extern "C"
@@ -430,9 +430,8 @@ void zswap_kernel_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
     ********************************************************************/
-
 
 extern "C"
 magma_int_t magma_zswap_batched(magma_int_t n, magmaDoubleComplex **x_array, magma_int_t incx, 
@@ -624,9 +623,8 @@ void zgetf2trsm_kernel_batched(int ib, int n, magmaDoubleComplex **dA_array, int
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
     ********************************************************************/
-
 
 extern "C" void
 magma_zgetf2trsm_batched(magma_int_t ib, magma_int_t n, magmaDoubleComplex **dA_array, 
@@ -1001,11 +999,8 @@ kernel_zgetf2_sm_batched(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgesv_comp
+    @ingroup magma_zgesv_aux
     ********************************************************************/
-
-
-
 
 extern "C"
 magma_int_t  magma_zgetf2_sm_batched(

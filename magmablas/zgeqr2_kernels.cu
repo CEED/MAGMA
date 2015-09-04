@@ -37,8 +37,9 @@ zgeqrf_copy_upper_kernel_batched(
         }
     }
 }
-/*
 
+
+/**
     Purpose
     -------
     These are internal routines that might have many assumption.
@@ -81,9 +82,8 @@ zgeqrf_copy_upper_kernel_batched(
     queue   magma_queue_t
             Queue to execute in.
 
-    @ingroup magma_zgeqrf_comp
-
-*/
+    @ingroup magma_zgeqrf_aux
+    ********************************************************************/
 
 void zgeqrf_copy_upper_batched(                
                   magma_int_t n, magma_int_t nb,
