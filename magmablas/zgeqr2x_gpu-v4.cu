@@ -81,6 +81,10 @@
       -     = 0: successful exit
       -     < 0: if INFO = -i, the i-th argument had an illegal value
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     Further Details
     ---------------
     The matrix Q is represented as a product of elementary reflectors

@@ -49,7 +49,7 @@
             previous steps.
 
     @param[in]
-    NB      INTEGER
+    nb      INTEGER
             The number of columns to factorize.
 
     @param[out]
