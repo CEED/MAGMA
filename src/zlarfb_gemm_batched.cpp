@@ -111,6 +111,18 @@
             The leading dimension of the array WORKVT.
             LDWORKVT >= max(1,min(M,N));
 
+    @param[in]
+    batchCount  INTEGER
+                The number of matrices to operate on.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
+    @param[in]
+    myhandle   cublasHandle_t
+            Cublas handle might be used internally.
+
     Further Details
     ---------------
     The shape of the matrix V and the storage of the vectors which define
