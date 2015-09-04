@@ -31,6 +31,10 @@
     Arguments
     ---------
     @param[in]
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
+
+    @param[in]
     uplo    magma_uplo_t
       -     = MagmaUpper:  Upper triangle of dA is stored;
       -     = MagmaLower:  Lower triangle of dA is stored.

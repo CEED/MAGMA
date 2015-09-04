@@ -76,6 +76,21 @@
     lda     INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
+    @param[in,out]
+    dA      COMPLEX*16 array on GPU, dimension (LDDA,N)
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            n-by-n upper triangular part of A contains the upper
+            triangular part of the matrix A, and the strictly lower
+            triangular part of A is not referenced.  If UPLO = 'L', the
+            leading n-by-n lower triangular part of A contains the lower
+            triangular part of the matrix A, and the strictly upper
+            triangular part of A is not referenced.
+            On exit, A contains details of the partial factorization.
+
+    @param[in]
+    ldda    INTEGER
+            The leading dimension of the array A.  LDDA >= max(1,N).
+
     @param[out]
     ipiv    INTEGER array, dimension (N)
             Details of the interchanges and the block structure of D.
@@ -96,6 +111,10 @@
     @param[in]
     lddw    INTEGER
             The leading dimension of the array W.  LDW >= max(1,N).
+
+    @param[in]
+    queues  magma_queue_t
+            queues contains the streams used for the partial factorization.
 
     @param[out]
     info    INTEGER

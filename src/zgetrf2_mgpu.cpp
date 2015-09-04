@@ -69,13 +69,13 @@
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
-    @param[in] (workspace) on device
+    @param[in] 
     d_lAP   COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
             d_lAP[d] is the workspace on d-th GPU. Each local workspace
             must be of size (3+ngpu)*nb*maxm, where maxm is m rounded
             up to a multiple of 32 and nb is the block size.
 
-    @param[in] (workspace)
+    @param[in] 
     W       COMPLEX_16 array, dimension (ngpu*nb*maxm).
             It is used to store panel on CPU.
 

@@ -27,8 +27,11 @@
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the M-by-N matrix dA.
+    dlA     COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
+            On entry, the M-by-N matrix A distributed over GPUs
+            (d_lA[d] points to the local matrix on d-th GPU).
+            It uses 1D block column cyclic format with the block size of nb,
+            and each local matrix is stored by column.
             On exit, the elements on and above the diagonal of the array
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is
             upper triangular if m >= n); the elements below the diagonal,

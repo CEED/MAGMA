@@ -67,17 +67,29 @@
             The block size used for the factorization and distribution.
 
     @param[in,out]
-    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the Hermitian matrix dA.  If UPLO = MagmaUpper, the leading
-            N-by-N upper triangular part of dA contains the upper
-            triangular part of the matrix dA, and the strictly lower
-            triangular part of dA is not referenced.  If UPLO = MagmaLower, the
-            leading N-by-N lower triangular part of dA contains the lower
-            triangular part of the matrix dA, and the strictly upper
-            triangular part of dA is not referenced.
+    d_lA    COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
+            On entry, the Hermitian matrix dA distributed over GPU.
+            (d_lAT[d] points to the local matrix on d-th GPU).
+            If UPLO = MagmaLower or MagmaUpper, it respectively uses 
+            a 1D block column or row cyclic format (with the block size 
+            nb), and each local matrix is stored by column.
+            If UPLO = MagmaUpper, the leading N-by-N upper triangular 
+            part of dA contains the upper triangular part of the matrix dA, 
+            and the strictly lower triangular part of dA is not referenced.  
+            If UPLO = MagmaLower, the leading N-by-N lower triangular part 
+            of dA contains the lower triangular part of the matrix dA, and 
+            the strictly upper triangular part of dA is not referenced.
     \n
             On exit, if INFO = 0, the factor U or L from the Cholesky
             factorization dA = U**H * U or dA = L * L**H.
+
+    @param[in,out]
+    d_lP    COMPLEX_16 array of pointers on the GPU, dimension (ngpu).
+            d_LAT[d] points to workspace of size h*lddp*nb on d-th GPU.
+
+    @param[in]
+    lddp    INTEGER
+            The leading dimension of the array dP.  LDDA >= max(1,N).
 
     @param[in]
     ldda    INTEGER

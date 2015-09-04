@@ -36,6 +36,10 @@
       -     = 'L':  Lower triangle of A is stored.
  
     @param[in]
+    cpu_panel INTEGER
+              If cpu_panel =0, panel factorization is done on GPU.
+  
+    @param[in]
     n       INTEGER
             The order of the matrix A.  N >= 0.
   

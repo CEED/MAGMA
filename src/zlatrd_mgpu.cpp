@@ -55,6 +55,11 @@
     nb      INTEGER
             The number of rows and columns to be reduced.
 
+    @param[in]
+    nb0     INTEGER
+            The block size used for the matrix distribution.
+            nb and nb0 can be different for the final step of zhetrd.
+
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
