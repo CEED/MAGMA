@@ -43,8 +43,8 @@
             The number of columns of each matrix A.  N >= 0.
 
     @param[in]
-    min_recnb    INTEGER.
-                 Internal use recursive nb
+    min_recpnb   INTEGER.
+                 Internal use. The recursive nb
 
     @param[in,out]
     dA_array    Array of pointers, dimension (batchCount).

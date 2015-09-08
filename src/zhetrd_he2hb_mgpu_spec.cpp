@@ -35,6 +35,10 @@
     n       INTEGER
             The order of the matrix A.  N >= 0.
 
+    @param[in]
+    nb      INTEGER
+            The inner blocking.  nb >= 0.
+
     @param[in,out]
     A       COMPLEX_16 array, dimension (LDA,N)
             On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
