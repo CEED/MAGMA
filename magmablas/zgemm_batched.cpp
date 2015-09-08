@@ -142,6 +142,10 @@
     @param[in]
     queue   magma_queue_t
             Queue to execute in.
+    
+    @param[in]
+    myhandle    cublasHandle_t
+              Handlde to use cuBLAS routines
 
     @ingroup magma_zblas3
     ********************************************************************/
