@@ -423,27 +423,27 @@ magma_zitericupdate(
 
     magma_z_matrix hALt={Magma_CSR};
     magma_z_matrix d_h={Magma_CSR};
+        
+    if( updates > 0 ){
+        // copy original matrix as CSRCOO to device
+        for(int i=0; i<updates; i++){
+            CHECK( magma_ziteric_csr( A, precond->M , queue ));
+        }
+        //magma_zmtransfer( precond->M, &hALt, Magma_DEV, Magma_CPU , queue );
+        magma_zmfree(&precond->L, queue );
+        magma_zmfree(&precond->U, queue );
+        magma_zmfree( &precond->d , queue );
+        magma_zmfree( &precond->d2 , queue );
+        
+        // copy the matrix to precond->L and (transposed) to precond->U
+        CHECK( magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue ));
+        CHECK( magma_zmtranspose( precond->L, &(precond->U), queue ));
 
-
-    // copy original matrix as CSRCOO to device
-
-    for(int i=0; i<updates; i++){
-        CHECK( magma_ziteric_csr( A, precond->M , queue ));
+        CHECK( magma_zjacobisetup_diagscal( precond->L, &precond->d, queue ));
+        CHECK( magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue ));
+    
     }
-    //magma_zmtransfer( precond->M, &precond->M, Magma_DEV, Magma_DEV , queue );
-    magma_zmfree(&precond->L, queue );
-    magma_zmfree(&precond->U, queue );
-    magma_zmfree( &precond->d , queue );
-
-
-    // Jacobi setup
-    CHECK( magma_zjacobisetup_matrix( precond->M, &precond->L, &precond->d , queue ));
-
-    // for Jacobi, we also need U
-    CHECK( magma_z_cucsrtranspose(   precond->M, &hALt , queue ));
-    CHECK( magma_zjacobisetup_matrix( hALt, &precond->U, &d_h , queue ));
-
-
+    
 cleanup:
     magma_zmfree(&d_h, queue );
     magma_zmfree(&hALt, queue );
