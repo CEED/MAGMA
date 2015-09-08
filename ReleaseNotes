@@ -29,12 +29,18 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Added results archive to compare historical performance.
     * Added Fortran code to example directory.
     * Added magmaf_wtime for consistency with other Fortran interfaces; deprecated magma_wtime_f.
+    * Added and template Batched MAGMA BLAS routine gemm, gemv, herk, trsv, and trsm
+    * Tuned Batched MAGMA BLAS routine in particular gemm, gemv, herk, and trsm
+    * Tuned Batched MAGMA LAPACK routine in particular Cholesky factorizations
+    * Tuned two stage symmetric eigenvalue code, {sy|he}heevdx_2stage, to improve performance.
     * Tuned symmetric eigenvalue code, {sy|he}evd, to improve performance for N < 2000.
     * Fixed Fortran constants (MagmaTrans, MagmaUpper, etc.).
+    * Fixed workspace requirements for the two stage symmetric eigenvalue problem {sy|he}heevdx_2stage and multi-GPU {sy|he}heevdx_2stage_m.
     * Fixed workspace requirements for Hessenberg (gehrd and gehrd_m) and multi-GPU geev_m.
     * Fixed trtri for unit diagonal, and added tester.
     * Fixed testing check for inverse (getri).
     * Rename lapack_const to lapack_const_str, to avoid name conflict with PLASMA.
+    * Fixed BUG for BATCHED routines
 
     MAGMA sparse
     * Added Induced Dimension Reduction Iterative solver (IDR).

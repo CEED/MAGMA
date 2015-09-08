@@ -52,7 +52,8 @@ MAGMA README FILE
     For csh/tcsh, put in ~/.cshrc:
         setenv OPENBLASDIR /opt/openblas
     
-    Several compiler defines, below, affect how MAGMA is compiled. These are set
+    Several compiler defines, below, affect how MAGMA is compiled and 
+    might have large impact in term of performance. These are set
     using, e.g., -DMAGMA_WITH_MKL in make.inc files.
     
     MAGMA_WITH_MKL
@@ -65,6 +66,21 @@ MAGMA README FILE
     
     MAGMA_NOAFFINITY
         Disables thread affinity, available in glibc 2.6 and later.
+    
+    BATCH_DISABLE_CHECKING
+        For BATCHED routines it disables the info_array that contains errors.
+        In other term, for example, for Cholesky factorization if you are sure 
+        your matrix is SPD and want better performance you can compile with this flag.
+
+    BATCH_DISABLE_CLEANUP
+        For BATCHED routines it disables the cleanup code.
+        For example the {sy|he}rk called with "lower" will write data on 
+        the upper diagonal portion of the matrix.
+
+    BATCHED_DISABLE_PARCPU
+        In the testing directory, it disable the parallel implementation of the
+        batched computation on CPU. Can be used to compare a naive versus a parallelized 
+        CPU batched computation.
 
 ----------------------------------------------------------------------------
 * Building without Fortran
