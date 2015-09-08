@@ -104,10 +104,10 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     int upper = (uplo == MagmaUpper);
 
     *info = 0;
-    /*if (! upper && uplo != MagmaLower) {
-        *info = -1;*/
+    // if (! upper && uplo != MagmaLower) {
+    //     *info = -1;
     if (uplo != MagmaLower) {
-        *info = MAGMA_ERR_NOT_IMPLEMENTED;;
+        *info = MAGMA_ERR_NOT_IMPLEMENTED;
     } else if (n < 0) {
         *info = -2;
     } else if (lda < max(1,n)) {

@@ -429,14 +429,14 @@ magma_zheevdx_2stage_m(
     magmaDoubleComplex *Wstg1 = T2   + sizT2;
     magmaDoubleComplex *A2    = Wstg1; /* PAY ATTENTION THAT work[indA2] should be able to be of size lda2*n which it should be checked in any future modification of lwork.*/
     magmaDoubleComplex *Z     = Wstg1;
-    magmaDoubleComplex *Wmqr1 = TAU2;// reuse TAU2 as work of unmqr for stage 1 since no need anymor efor TAU2 and V2 and T2 but pay attentionthat does not overlap with Z=Wstg1 so lwmqr1
+    magmaDoubleComplex *Wmqr1 = TAU2; // reuse TAU2 as work of unmqr for stage 1 since no need anymor efor TAU2 and V2 and T2 but pay attentionthat does not overlap with Z=Wstg1 so lwmqr1
     magma_int_t lwmqr1        = sizTAU2+sizV2+sizT2;
     #ifdef COMPLEX
     double *Wedc              = E + n; 
-    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n;//used only for wantz>0
+    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n; //used only for wantz>0
     #else
     double *Wedc              = Wstg1 + n*n;
-    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC;//used only for wantz>0
+    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC; //used only for wantz>0
     #endif
 
     magma_timer_t time=0, time_total=0, time_alloc=0, time_dist=0, time_band=0;

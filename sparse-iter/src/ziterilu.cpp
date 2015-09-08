@@ -321,7 +321,6 @@ magma_ziteriluupdate(
         
         CHECK( magma_zjacobisetup_diagscal( precond->L, &precond->d, queue ));
         CHECK( magma_zjacobisetup_diagscal( precond->U, &precond->d2, queue ));
-        
     }
 
 cleanup:

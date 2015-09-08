@@ -423,10 +423,10 @@ magma_zheevdx_2stage(
     magmaDoubleComplex *Z     = Wstg1;
     #ifdef COMPLEX
     double *Wedc              = E + n; 
-    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n;//used only for wantz>0
+    magma_int_t lwedc         = 1 + 4*n + 2*n*n; // lrwork - n; //used only for wantz>0
     #else
     double *Wedc              = Wstg1 + n*n;
-    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC;//used only for wantz>0
+    magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC; //used only for wantz>0
     #endif
 
 
