@@ -204,7 +204,7 @@ magma_zhetrd_he2hb_mgpu(
 
     assert (nqueue >= 3);
     assert (nqueue >= (ngpu+1));
-
+    
     *info = 0;
     int upper = (uplo == MagmaUpper);
     lquery = (lwork == -1);
@@ -216,7 +216,7 @@ magma_zhetrd_he2hb_mgpu(
         *info = -4;
     } else if (lwork < 1 && ! lquery) {
         *info = -9;
-    } else if (nqueues < max(3,ngpu+1)) {
+    } else if (nqueue < max(3,ngpu+1)) {
         *info = -16;
     }
 
