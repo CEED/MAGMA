@@ -65,7 +65,6 @@ zgeqrf_copy_upper_kernel_batched(
     lddv    INTEGER
             The leading dimension of each array V.  LDDV >= max(1,N).
 
-
     @param[in,out]
     dR_array    Array of pointers, dimension (batchCount).
             Each is a COMPLEX_16 array on the GPU, dimension (LDDR,N).
@@ -86,15 +85,16 @@ zgeqrf_copy_upper_kernel_batched(
     ********************************************************************/
 
 void zgeqrf_copy_upper_batched(                
-                  magma_int_t n, magma_int_t nb,
-                  magmaDoubleComplex **dV_array,    magma_int_t ldv,
-                  magmaDoubleComplex **dR_array,    magma_int_t ldr,
-          magma_int_t batchCount, magma_queue_t queue)
+    magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex **dV_array, magma_int_t lddv,
+    magmaDoubleComplex **dR_array, magma_int_t lddr,
+    magma_int_t batchCount,
+    magma_queue_t queue)
 {
     /* 
         copy some data in dV to dR
     */
     if ( nb >= n) return;
     
-    zgeqrf_copy_upper_kernel_batched<<<batchCount, n, 0, queue>>>(n, nb, dV_array, ldv, dR_array, ldr);
+    zgeqrf_copy_upper_kernel_batched<<< batchCount, n, 0, queue >>>( n, nb, dV_array, lddv, dR_array, lddr );
 }

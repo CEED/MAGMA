@@ -19,6 +19,10 @@
     Arguments
     ---------
     @param[in]
+    ngpu    INTEGER
+            Number of GPUs to use. ngpu > 0.
+
+    @param[in]
     m       INTEGER
             The number of rows of the matrix A.  M >= 0.
 
