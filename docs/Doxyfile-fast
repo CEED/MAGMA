@@ -786,7 +786,6 @@ INPUT                  = \
 	../src/dsyevd_gpu.cpp             \
 	../src/dsyevd_m.cpp               \
 	../src/dsyevdx.cpp                \
-	../src/dsyevdx_2stage_m.cpp       \
 	../src/dsyevdx_gpu.cpp            \
 	../src/dsyevdx_m.cpp              \
 	../src/dsygvd.cpp                 \
