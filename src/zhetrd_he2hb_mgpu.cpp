@@ -202,8 +202,6 @@ magma_zhetrd_he2hb_mgpu(
     int lwkopt;
     int lquery;
 
-    assert (nqueue >= 3);
-    assert (nqueue >= (ngpu+1));
     
     *info = 0;
     int upper = (uplo == MagmaUpper);
