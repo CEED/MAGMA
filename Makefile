@@ -103,10 +103,11 @@ cleanall2:
 
 # filter out MAGMA-specific options for pkg-config
 INSTALL_FLAGS := $(filter-out \
-	-DMAGMA_SETAFFINITY -DMAGMA_WITH_ACML -DMAGMA_WITH_MKL -DUSE_FLOCK \
+	-DMAGMA_NOAFFINITY -DMAGMA_SETAFFINITY -DMAGMA_WITH_ACML -DMAGMA_WITH_MKL -DUSE_FLOCK \
 	-DMIN_CUDA_ARCH=100 -DMIN_CUDA_ARCH=200 -DMIN_CUDA_ARCH=300 \
+	-DHAVE_CUBLAS \
 	-fno-strict-aliasing -fPIC -O0 -O1 -O2 -O3 -pedantic -stdc++98 \
-	-Wall -Wno-long-long, $(CFLAGS))
+	-Wall -Wshadow -Wno-long-long, $(CFLAGS))
 
 INSTALL_LDFLAGS := $(filter-out \
 	-fPIC -Wall -Xlinker -zmuldefs, $(LDFLAGS))
