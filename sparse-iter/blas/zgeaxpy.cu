@@ -20,9 +20,9 @@ zgeaxpy_kernel(
     int num_rows, 
     int num_cols, 
     magmaDoubleComplex alpha, 
-    magmaDoubleComplex * dy, 
+    magmaDoubleComplex * dx, 
     magmaDoubleComplex beta, 
-    magmaDoubleComplex * dx)
+    magmaDoubleComplex * dy)
 {
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
@@ -30,7 +30,7 @@ zgeaxpy_kernel(
     if( row<num_rows ){
         for( j=0; j<num_cols; j++ ){
             int idx = row + j*num_rows;
-            dx[ idx ] = alpha * dy[ idx ] + beta * dx[ idx ];
+            dy[ idx ] = alpha * dx[ idx ] + beta * dy[ idx ];
         }
     }
 }
@@ -77,8 +77,8 @@ magma_zgeaxpy(
     magma_z_matrix *Y,
     magma_queue_t queue )
 {
-    int m = Y.num_rows;
-    int n = Y.num_cols;
+    int m = X.num_rows;
+    int n = X.num_cols;
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
     zgeaxpy_kernel<<< grid, threads, 0, queue >>>
