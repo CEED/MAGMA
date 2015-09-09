@@ -57,3 +57,83 @@ v1.6.0
 		cgetrf.txt
 		zgetrf.txt
 		etc.
+
+To parse the output into a Python data file, use the parse.py Python script.
+
+	./parse.py v1.6.0/cuda7.0-k40c/*.txt > v160_cuda70_k40c.py
+
+and add the data file to parse.py:
+
+	import v150_cuda70_k40c
+	import v160_cuda70_k40c  # <== add
+	
+	versions = [
+		v150_cuda70_k40c,
+		v160_cuda70_k40c,    # <== add
+	]
+
+
+
+Plotting results
+================
+The plots.py Python script plots the performance of various routines from
+different versions of MAGMA. It requires matplotlib (pyplot).
+
+plots.versions is an array of available MAGMA versions; use array slices, as
+shown below, to select which versions to plot.
+
+plots.help() prints the global settings and available plots.
+
+It is easiest to use plots.py from an interactive Python shell. IPython is
+recommended. Examples:
+
+	mint magma-trunk/results> ipython
+	>>> run -i plots
+		# -i is necesary so g_save, etc. are in the right namespace to be modified
+		# prints help
+	>>> g_save = True
+	>>> g_subplots = False
+	>>> plot_potrf( versions[2:] )
+	saving spotrf.pdf
+	saving dpotrf.pdf
+	saving cpotrf.pdf
+	saving zpotrf.pdf
+
+
+	magma-trunk/results> python
+	>>> import plots
+		# prints help
+	>>> plots.g_save = True
+	>>> plots.plot_getrf( plots.versions[2:] )
+	saving getrf.pdf
+	>>> plots.g_subplots = False
+	>>> plots.plot_getrf( plots.versions[2:] )
+	saving sgetrf.pdf
+	saving dgetrf.pdf
+	saving cgetrf.pdf
+	saving zgetrf.pdf
+	>>> plots.help()
+	Global settings:
+	g_save      # True to save plots as PDF files
+	g_subplots  # True for all 4 precisions as subplots in one figure, False for 4 separate figures
+	g_log       # True for semilogx, False for linear plot
+	g_figsize   # size of figure with 4-up subplots, default (9,7)
+	g_figsize2  # size of individual figures, default (6,4)
+	
+	Available plots:
+	plot_getrf( versions, lapack=True, cpu=True, gpu=True )
+	plot_potrf( versions, lapack=True, cpu=True, gpu=True )
+	plot_geqrf( versions, lapack=True, cpu=True, gpu=True )
+	plot_geev(  versions, lapack=True )
+	plot_syev(  versions, lapack=True, cpu=True, gpu=True, bulge=True )
+	plot_gesvd( versions, lapack=True, svd=True, sdd=True, ratio=1 )
+	        where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
+	plot_symv(  versions, lapack=True )
+	
+	plot_all(   versions, lapack=True, cpu=True, gpu=True, bulge=True, sdd=True, svd=True, ratio=1 )
+	
+	Available versions:
+	versions[0] = 1.5.0
+	versions[1] = 1.6.0
+	versions[2] = 1.6.1
+	versions[3] = 1.6.3

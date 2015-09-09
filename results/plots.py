@@ -16,16 +16,20 @@ pp.rcParams['figure.facecolor'] = 'white'
 import v150_cuda70_k40c
 import v160_cuda70_k40c
 import v161_cuda70_k40c
-import trunk
 
 versions = [
 	v150_cuda70_k40c,
 	v160_cuda70_k40c,
 	v161_cuda70_k40c,
-	trunk,
 ]
 
-trunk.version = 'magma'
+# add trunk if it exists
+try:
+	import trunk
+	versions.append( trunk )
+	trunk.version = 'trunk'
+except ImportError:
+	pass
 
 # get nice distribution of colors from purple (old versions) to red (new versions)
 x = linspace( 0, 1, len(versions) )
@@ -51,6 +55,8 @@ if ( not locals().has_key('g_figure')):
 	g_figure   = None
 if ( not locals().has_key('g_log')):
 	g_log      = True
+if ( not locals().has_key('g_save')):
+	g_save     = False
 
 
 # --------------------
@@ -91,6 +97,22 @@ def resize( size, rows=0, cols=0 ):
 		for index in range( 1, rows*cols+1 ):
 			subplot( rows, cols, index )
 			util.resize( g_figsize2 )
+# end
+
+
+# --------------------
+def savefig( name, rows=0, cols=0 ):
+	if ( g_save ):
+		if ( g_subplots or rows == 0 or cols == 0 ):
+			print( 'saving', name )
+			pp.savefig( name )
+		else:
+			prec = ['s', 'd', 'c', 'z']
+			for index in range( 1, rows*cols+1 ):
+				pname = prec[index-1] + name
+				print( 'saving', pname )
+				subplot( rows, cols, index )
+				pp.savefig( pname )
 # end
 
 
@@ -231,6 +253,7 @@ def plot_getrf( versions, cpu=True, gpu=True, lapack=True ):
 		plot_getrf_labels()
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'getrf.pdf', 2, 2 )
 # end
 
 
@@ -313,6 +336,7 @@ def plot_potrf( versions, cpu=True, gpu=True, lapack=True ):
 		plot_potrf_labels()
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'potrf.pdf', 2, 2 )
 # end
 
 
@@ -395,6 +419,7 @@ def plot_geqrf( versions, cpu=True, gpu=True, lapack=True ):
 		plot_geqrf_labels()
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'geqrf.pdf', 2, 2 )
 # end
 
 
@@ -475,6 +500,7 @@ def plot_geev( versions, lapack=True ):
 		plot_geev_labels( 'no vectors', False )
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'geev-rn.pdf', 2, 2 )
 	
 	# --------------------
 	figure( 5 )
@@ -519,6 +545,7 @@ def plot_geev( versions, lapack=True ):
 		plot_geev_labels( 'with right vectors', True )
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'geev-rv.pdf', 2, 2 )
 # end
 
 
@@ -626,6 +653,7 @@ def plot_syev( versions, cpu=True, gpu=True, bulge=True, lapack=True ):
 		plot_syev_labels( 'no vectors', False )
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'syev-rn.pdf', 2, 2 )
 	
 	# --------------------
 	figure( 7 )
@@ -695,6 +723,7 @@ def plot_syev( versions, cpu=True, gpu=True, bulge=True, lapack=True ):
 		plot_syev_labels( 'with vectors', True )
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'syev-rv.pdf', 2, 2 )
 # end
 
 
@@ -898,6 +927,7 @@ def plot_gesvd( versions, ratio=1, lapack=True, svd=True, sdd=True ):
 		plot_gesvd_labels( 'some vectors, M:N ratio %.3g:%.3g' % (m,n), vec=True, square=(ratio == 1) )
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'gesvd.pdf', 2, 2 )
 # end
 
 
@@ -935,7 +965,7 @@ def plot_symv_labels( title=None ):
 # end
 
 def plot_symv( versions ):
-	figure( 12 )
+	figure( 10 )
 	clf( 2, 2 )
 	
 	first = True
@@ -961,6 +991,7 @@ def plot_symv( versions ):
 		plot_symv_labels()
 	# end
 	resize( g_figsize, 2, 2 )
+	savefig( 'symv.pdf', 2, 2 )
 # end
 
 
@@ -977,8 +1008,10 @@ def plot_all( versions, lapack=True, cpu=True, gpu=True, bulge=True, sdd=True, s
 
 
 # ----------------------------------------------------------------------
-print('''Global settings:
-g_subplots  # True for subplots, False for 4 separate figures
+def help():
+	print('''Global settings:
+g_save      # True to save plots as PDF files
+g_subplots  # True for all 4 precisions as subplots in one figure, False for 4 separate figures
 g_log       # True for semilogx, False for linear plot
 g_figsize   # size of figure with 4-up subplots, default (9,7)
 g_figsize2  # size of individual figures, default (6,4)
@@ -990,13 +1023,18 @@ plot_geqrf( versions, lapack=True, cpu=True, gpu=True )
 plot_geev(  versions, lapack=True )
 plot_syev(  versions, lapack=True, cpu=True, gpu=True, bulge=True )
 plot_gesvd( versions, lapack=True, svd=True, sdd=True, ratio=1 )
-            where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
+		where ratio m:n in { 1, 3, 100, 1/3., 1/100. }
 plot_symv(  versions, lapack=True )
 
 plot_all(   versions, lapack=True, cpu=True, gpu=True, bulge=True, sdd=True, svd=True, ratio=1 )
 
 Available versions:''')
-
-for i in xrange( len(versions) ):
-	print( "versions[%d] = %s" % (i, versions[i].version) )
+	
+	for i in xrange( len(versions) ):
+		print( "versions[%d] = %s" % (i, versions[i].version) )
+	# end
 # end
+
+
+if ( __name__ == '__main__' ):
+	help()
