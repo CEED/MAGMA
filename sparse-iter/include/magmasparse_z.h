@@ -1073,6 +1073,22 @@ magma_zqr(
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE BLAS function definitions
 */
+
+magma_int_t
+magma_zgeaxpy(
+    magmaDoubleComplex alpha,
+    magma_z_matrix Y,
+    magmaDoubleComplex beta,
+    magma_z_matrix *X,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zgecsrreimsplit(
+    magma_z_matrix A,
+    magma_z_matrix *ReA,
+    magma_z_matrix *ImA,
+    magma_queue_t queue );
+
 magma_int_t 
 magma_zgecsrmv(
     magma_trans_t transA,
