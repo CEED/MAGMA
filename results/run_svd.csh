@@ -25,6 +25,8 @@ setenv SIZES "$SIZES -N 100000,1000 -N 200000,2000"
 setenv SIZES "$SIZES -N 100,10000 -N 200,20000 -N 300,30000 -N 400,40000 -N 500,50000 -N 600,60000 -N 700,70000 -N 800,80000 -N 900,90000"
 setenv SIZES "$SIZES -N 1000,100000 -N 2000,200000"
 
+#setenv SIZES "$SIZES --lapack"
+
 $NUMA ./testing_sgesvd -UN -VN $SIZES >>&! sgesvd.txt
 $NUMA ./testing_sgesvd -US -VS $SIZES >>&! sgesvd.txt
 $NUMA ./testing_sgesdd -UN -VN $SIZES >>&! sgesvd.txt

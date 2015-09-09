@@ -6,6 +6,7 @@
 
 setenv NUMA  "./run numactl --interleave=all"
 setenv SIZES "-N 123 -N 1234 --range 10:90:10 --range 100:900:100 --range 1000:9000:1000 --range 10000:20000:2000"
+#setenv SIZES "$SIZES --lapack"
 
 $NUMA ./testing_ssyevd     -JN $SIZES >>&! ssyevd.txt
 $NUMA ./testing_ssyevd     -JV $SIZES >>&! ssyevd.txt

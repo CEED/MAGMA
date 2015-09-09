@@ -8,6 +8,7 @@ setenv NUMA  "./run numactl --interleave=all"
 
 # denser than other tests
 setenv SIZES "-N 123 -N 1234 --range 10:90:1 --range 100:900:10 --range 1000:9000:100 --range 10000:20000:2000"
+#setenv SIZES "$SIZES --lapack"
 
 $NUMA ./testing_ssymv -L $SIZES >>&! ssymv.txt
 $NUMA ./testing_ssymv -U $SIZES >>&! ssymv.txt
