@@ -473,6 +473,13 @@ magma_ziterilu_csr(
     magma_queue_t queue );
 
 magma_int_t
+magma_ziteriluupdate(
+    magma_z_matrix A,
+    magma_z_preconditioner *precond,
+    magma_int_t updates,
+    magma_queue_t queue );
+
+magma_int_t
 magma_ziteric_csr( 
     magma_z_matrix A,
     magma_z_matrix A_CSR,
