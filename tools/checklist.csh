@@ -162,6 +162,11 @@ echo "========== sync_wtime of NULL stream (excluding _mgpu codes)              
 egrep sync_wtime testing/*.cpp | egrep -v 'sync_wtime\( opts.queue \)' | egrep -v '_mgpu.cpp'
 echo
 
+# fixed
+echo "========== passing ints by pointer                                         *** required fix ***"
+egrep "int_t *\* *(m|n|k|ld\w|ldd\w|inc\w|l\w*work)\b" include/{magma_z,magma_zc,magmablas_z,magmablas_zc}.h
+echo
+
 # needs lots of work; also lots of exceptions
 echo "========== int instead of magma_int_t                                      *** required fix ***"
 egrep '\bint\b' $HEADERS \
