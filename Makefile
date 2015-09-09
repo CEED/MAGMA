@@ -110,7 +110,7 @@ INSTALL_FLAGS := $(filter-out \
 	-Wall -Wshadow -Wno-long-long, $(CFLAGS))
 
 INSTALL_LDFLAGS := $(filter-out \
-	-fPIC -Wall -Xlinker -zmuldefs, $(LDFLAGS))
+	-fPIC -Wall, $(LDFLAGS))
 
 install_dirs:
 	mkdir -p $(prefix)
@@ -137,6 +137,7 @@ install: lib install_dirs
 	    sed -e s:@LIBS@:"$(INSTALL_LDFLAGS) $(LIBEXT)": | \
 	    sed -e s:@MAGMA_REQUIRED@::                      \
 	    > $(prefix)/lib/pkgconfig/magma.pc
+	( cd sparse-iter && $(MAKE) install )
 
 # ========================================
 # This is a crude manner of creating shared libraries.
@@ -161,13 +162,14 @@ shared: libmagma
 	$(MAKE) $(LIBMAGMA_SO)
 
 # MacOS likes the library's path to be set; see make.inc.macos
+LIBMAGMA_SO_LDFLAGS := $(LDFLAGS)
 ifneq ($(INSTALL_NAME),)
-    LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SO))
+    LIBMAGMA_SO_LDFLAGS += $(INSTALL_NAME)$(notdir $(LIBMAGMA_SO))
 endif
 
 $(LIBMAGMA_SO): src/*.$(o_ext) control/*.$(o_ext) interface_cuda/*.$(o_ext) magmablas/*.$(o_ext)
 	@echo ======================================== $(LIBMAGMA_SO)
-	$(CXX) $(LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
+	$(CXX) $(LIBMAGMA_SO_LDFLAGS) -shared -o $(LIBMAGMA_SO) $^ \
 	$(LIBDIR) \
 	$(LIB)
 	@echo
