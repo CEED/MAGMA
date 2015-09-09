@@ -16,6 +16,7 @@ ZHDR :=
 ZSRC := \
 	magma_z_blaswrapper.cpp	\
 	zbajac_csr.cu			\
+	zgeaxpy.cu              \
 	zgecsrmv.cu				\
 	zgeellmv.cu				\
 	zgeelltmv.cu			\
@@ -49,6 +50,7 @@ ZSRC += \
 	zcompact.cu				\
 	magma_zmcsrcompressor_gpu.cu	\
 	magma_zdiagcheck.cu		\
+	zgecsrreimsplit.cu        \
 	
 # Tester routines
 ZSRC += \
