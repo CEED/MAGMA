@@ -67,7 +67,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.$(o_ext) *~ *.linkinfo *.mod ../include/*.mod sizeptr
+	rm -f *.$(o_ext) *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA_SPARSE)

@@ -30,7 +30,7 @@ ZSRC += \
 	zbicgstab_merge2.cpp	\
 	zidr.cpp	\
 	zidr_acc.cpp	\
-    zidr_strms.cpp	\
+	zidr_strms.cpp	\
 	ziterref.cpp		\
 	zjacobi.cpp			\
 	zbaiter.cpp			\
@@ -114,7 +114,7 @@ stamp: $(ALLHDR) $(ALLOBJ)
 	touch $@
 
 clean:
-	rm -f *.$(o_ext) *~ *.linkinfo
+	rm -f *.$(o_ext) *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f *.a
