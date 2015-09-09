@@ -1089,6 +1089,13 @@ magma_zgecsrreimsplit(
     magma_z_matrix *ImA,
     magma_queue_t queue );
 
+magma_int_t
+magma_zgedensereimsplit(
+    magma_z_matrix A,
+    magma_z_matrix *ReA,
+    magma_z_matrix *ImA,
+    magma_queue_t queue );
+
 magma_int_t 
 magma_zgecsrmv(
     magma_trans_t transA,
