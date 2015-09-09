@@ -1077,9 +1077,9 @@ magma_zqr(
 magma_int_t
 magma_zgeaxpy(
     magmaDoubleComplex alpha,
-    magma_z_matrix Y,
+    magma_z_matrix X,
     magmaDoubleComplex beta,
-    magma_z_matrix *X,
+    magma_z_matrix *Y,
     magma_queue_t queue );
 
 magma_int_t
