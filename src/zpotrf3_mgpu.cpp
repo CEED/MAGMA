@@ -111,7 +111,13 @@
 
     @param[in]
     queues  magma_queue_t
-            queues contains the streams used for the partial factorization.
+            queues is of dimension (ngpu,3) and contains the streams 
+            used for the partial factorization.
+
+    @param[in]
+    events  magma_event_t
+            events is of dimension(ngpu,5) and contains the events used 
+            for the partial factorization.
 
     @param[out]
     info    INTEGER

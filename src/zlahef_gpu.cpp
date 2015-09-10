@@ -114,7 +114,13 @@
 
     @param[in]
     queues  magma_queue_t
-            queues contains the streams used for the partial factorization.
+            queues contain the streams used for the partial factorization.
+            Currently, only one stream is used.
+
+    @param[in]
+    events  magma_event_t
+            events contain the events used for the partial factorization.
+            Currently, only one event is used.
 
     @param[out]
     info    INTEGER
