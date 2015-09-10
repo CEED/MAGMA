@@ -137,7 +137,7 @@ magma_zlahef_gpu(
     magmaDoubleComplex    *hA, magma_int_t lda,
     magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *ipiv,
     magmaDoubleComplex_ptr dW, magma_int_t lddw,
-    magma_queue_t queues[], magma_event_t event[],
+    magma_queue_t queues[], magma_event_t events[],
     magma_int_t *info)
 {
     /* .. Parameters .. */
@@ -427,8 +427,8 @@ magma_zlahef_gpu(
         }
 
         // copying the panel back to CPU
-        magma_event_record( event[0], queues[0] );
-        magma_queue_wait_event( queues[1], event[0] );
+        magma_event_record( events[0], queues[0] );
+        magma_queue_wait_event( queues[1], events[0] );
         trace_gpu_start( 0, 1, "get", "get" );
         magma_zgetmatrix_async( n,n-(k+1), &dA(0,k+1),ldda, &A(0,k+1),lda, queues[1] );
 
@@ -731,8 +731,8 @@ magma_zlahef_gpu(
             }
         }
         // copying the panel back to CPU
-        magma_event_record( event[0], queues[0] );
-        magma_queue_wait_event( queues[1], event[0] );
+        magma_event_record( events[0], queues[0] );
+        magma_queue_wait_event( queues[1], events[0] );
         trace_gpu_start( 0, 1, "get", "get" );
         magma_zgetmatrix_async( n,k, &dA(0,0),ldda, &A(0,0),lda, queues[1] );
         trace_gpu_end( 0, 1 );
