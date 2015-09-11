@@ -214,21 +214,12 @@ int main( int argc, char** argv)
                                 iwork, &liwork, 
                                 &info);
                 info_solution = check_solution(N, w2, w1, eps);
-              
-                if ( (info_solution == 0) && (info_ortho == 0) && (info_reduction == 0) ) {
-                    printf("  ok\n");
-                    //printf("***************************************************\n");
-                    //printf(" ---- TESTING ZHEEVD ...................... PASSED !\n");
-                    //printf("***************************************************\n");
-                }
-                else {
-                    printf("  failed\n");
-                    status += 1;
-                    //printf("************************************************\n");
-                    //printf(" - TESTING ZHEEVD ... FAILED !\n");
-                    //printf("************************************************\n");
-                }
+                
+                bool okay = (info_solution == 0) && (info_ortho == 0) && (info_reduction == 0);
+                status += ! okay;
+                printf("  %s", (okay ? "ok" : "failed"));
             }
+            printf("\n");
 
             TESTING_FREE_CPU( h_A   );
             TESTING_FREE_CPU( w1    );
