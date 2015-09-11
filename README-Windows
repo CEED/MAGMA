@@ -1,6 +1,4 @@
-November 2013
-
-For compiling on Windows, there are a couple options.
+For compiling MAGMA on Windows, there are a couple options.
 
 1) Setup a unix-like environment such as cygwin or mingw,
    and use the existing Makefiles.
