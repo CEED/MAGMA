@@ -134,7 +134,7 @@ EOT
             print "Commit these changes now (yes/no)?\n";
             $_ = <STDIN>;
             if ( m/\b(y|yes)\b/ ) {
-                myCmd("svn commit -m 'version $major.$minor.$micro' include/magma_types.h");
+                myCmd("svn commit -m 'version $major.$minor.$micro' include/magma_types.h docs/Doxyfile");
             }
             
             print "Tag release in SVN (yes/no)?\n";
