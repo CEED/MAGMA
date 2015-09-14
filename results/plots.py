@@ -760,7 +760,7 @@ def plot_syev( versions, cpu=True, gpu=True, bulge=True, lapack=True ):
 		plot_syev_labels( versions, 'no vectors', False )
 	# end
 	resize( g_figsize, 2, 2 )
-	savefig( 'syev_rn.pdf', 2, 2 )
+	savefig( 'syev_jn.pdf', 2, 2 )
 	
 	# --------------------
 	figure( 7 )
@@ -846,7 +846,7 @@ def plot_syev( versions, cpu=True, gpu=True, bulge=True, lapack=True ):
 		plot_syev_labels( versions, 'with vectors', True )
 	# end
 	resize( g_figsize, 2, 2 )
-	savefig( 'syev_rv.pdf', 2, 2 )
+	savefig( 'syev_jv.pdf', 2, 2 )
 # end
 
 
@@ -1033,7 +1033,7 @@ def plot_gesvd( versions, ratio=1, lapack=True, svd=True, sdd=True ):
 		plot_gesvd_labels( versions, 'some vectors, M:N ratio %.3g:%.3g' % (m,n), vec=True, square=(ratio == 1) )
 	# end
 	resize( g_figsize, 2, 2 )
-	savefig( 'gesvd_jv.pdf', 2, 2 )
+	savefig( 'gesvd_js.pdf', 2, 2 )
 # end
 
 
