@@ -17,14 +17,14 @@ import v150_cuda70_k40c
 import v160_cuda70_k40c
 import v161_cuda70_k40c
 import v162_cuda70_k40c  # same as v161 except sy/heevd
-#import v170_cuda70_k40c
+import v170_cuda70_k40c
 
 versions = [
 	v150_cuda70_k40c,
 	v160_cuda70_k40c,
 	v161_cuda70_k40c,
 	v162_cuda70_k40c,
-	#v170_cuda70_k40c,
+	v170_cuda70_k40c,
 ]
 
 # add local if it exists
@@ -34,6 +34,8 @@ try:
 	local.version = 'local'
 except ImportError:
 	pass
+
+versions = numpy.array( versions )
 
 # get nice distribution of colors from purple (old versions) to red (new versions)
 #x = linspace( 0, 1, len(versions) )
@@ -219,7 +221,7 @@ def plot_getrf_data( data, style='.-', color='y', label=None, idx=getrf_gpu_flop
 def plot_getrf_labels( versions, title=None ):
 	set_title( versions, title )
 	pp.legend( loc='upper left' )
-	pp.ylabel( r'Gflop/s' )
+	pp.ylabel( r'Gflop/s  $\frac{2n^3}{3t}$' )
 	if ( g_log ):
 		pp.xlabel( r'matrix size (log scale)' )
 		xticks = [ 10, 100, 1000, 10000 ]
@@ -313,7 +315,7 @@ def plot_potrf_data( data, style='.-', color='y', label=None, idx=potrf_gpu_flop
 def plot_potrf_labels( versions, title=None ):
 	set_title( versions, title )
 	pp.legend( loc='upper left' )
-	pp.ylabel( r'Gflop/s' )
+	pp.ylabel( r'Gflop/s  $\frac{n^3}{3t}' )
 	if ( g_log ):
 		pp.xlabel( r'matrix size (log scale)' )
 		xticks = [ 10, 100, 1000, 10000 ]
@@ -407,7 +409,7 @@ def plot_geqrf_data( data, style='.-', color='y', label=None, idx=geqrf_gpu_flop
 def plot_geqrf_labels( versions, title=None ):
 	set_title( versions, title )
 	pp.legend( loc='upper left' )
-	pp.ylabel( r'Gflop/s' )
+	pp.ylabel( r'Gflop/s  $\frac{4n^3}{3t}' )
 	if ( g_log ):
 		pp.xlabel( r'matrix size (log scale)' )
 		xticks = [ 10, 100, 1000, 10000 ]
@@ -1056,7 +1058,7 @@ def plot_symv_data( data, uplo, style='.-', color='y', label=None, first=False )
 def plot_symv_labels( versions, title=None ):
 	set_title( versions, title )
 	pp.legend( loc='upper left' )
-	pp.ylabel( r'Gflop/s' )
+	pp.ylabel( r'Gflop/s  $\frac{2n^2}{t}' )
 	if ( g_log ):
 		pp.xlabel( r'matrix size (log scale)' )
 		xticks = [ 10, 100, 1000, 10000 ]
