@@ -482,14 +482,14 @@ magma_zlahef_gpu(
 
 #ifdef COMPLEX
 magma_int_t
-zsytrf_nopiv_cpu(
+magma_zsytrf_nopiv_cpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
     magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *info);
 #endif
 
 magma_int_t
-zhetrf_nopiv_cpu(
+magma_zhetrf_nopiv_cpu(
     magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
     magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *info);

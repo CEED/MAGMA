@@ -151,7 +151,7 @@ magma_zsytrf_nopiv_gpu(
             // factorize the diagonal block
             magma_queue_sync(stream[1]);
             trace_cpu_start( 0, "potrf", "potrf" );
-            zsytrf_nopiv_cpu(MagmaUpper, jb, ib, A(j, j), nb, info);
+            magma_zsytrf_nopiv_cpu( MagmaUpper, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
             if (*info != 0) {
                 *info = *info + j;
@@ -184,9 +184,9 @@ magma_zsytrf_nopiv_gpu(
                 trace_gpu_start( 0, 0, "gemm", "gemm" );
                 for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
-                    magma_zgemm(MagmaTrans, MagmaNoTrans, kb, n-k, jb,
+                    magma_zgemm( MagmaTrans, MagmaNoTrans, kb, n-k, jb,
                                 mzone, dWt(0, k), nb, 
-                                       dA(j, k), ldda,
+                                            dA(j, k), ldda,
                                 zone,  dA(k, k), ldda);
                     if (k == j+jb)
                         magma_event_record( event, stream[0] );
@@ -211,7 +211,7 @@ magma_zsytrf_nopiv_gpu(
             // factorize the diagonal block
             magma_queue_sync(stream[1]);
             trace_cpu_start( 0, "potrf", "potrf" );
-            zsytrf_nopiv_cpu(MagmaLower, jb, ib, A(j, j), nb, info);
+            magma_zsytrf_nopiv_cpu( MagmaLower, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
             if (*info != 0) {
                 *info = *info + j;
@@ -244,9 +244,9 @@ magma_zsytrf_nopiv_gpu(
                 trace_gpu_start( 0, 0, "gemm", "gemm" );
                 for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
-                    magma_zgemm(MagmaNoTrans, MagmaTrans, n-k, kb, jb,
+                    magma_zgemm( MagmaNoTrans, MagmaTrans, n-k, kb, jb,
                                 mzone, dA(k, j), ldda, 
-                                       dW(k, 0), ldda,
+                                            dW(k, 0), ldda,
                                 zone,  dA(k, k), ldda);
                     if (k == j+jb)
                         magma_event_record( event, stream[0] );

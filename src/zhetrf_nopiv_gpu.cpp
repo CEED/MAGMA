@@ -150,7 +150,7 @@ magma_zhetrf_nopiv_gpu(
             // factorize the diagonal block
             magma_queue_sync(stream[1]);
             trace_cpu_start( 0, "potrf", "potrf" );
-            zhetrf_nopiv_cpu(MagmaUpper, jb, ib, A(j, j), nb, info);
+            magma_zhetrf_nopiv_cpu( MagmaUpper, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
             if (*info != 0) {
                 *info = *info + j;
@@ -210,7 +210,7 @@ magma_zhetrf_nopiv_gpu(
             // factorize the diagonal block
             magma_queue_sync(stream[1]);
             trace_cpu_start( 0, "potrf", "potrf" );
-            zhetrf_nopiv_cpu(MagmaLower, jb, ib, A(j, j), nb, info);
+            magma_zhetrf_nopiv_cpu( MagmaLower, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
             if (*info != 0) {
                 *info = *info + j;

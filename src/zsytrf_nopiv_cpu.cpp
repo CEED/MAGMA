@@ -215,9 +215,10 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
 
 // main routine
 extern "C" magma_int_t
-zsytrf_nopiv_cpu(magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
-                 magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *info)
+magma_zsytrf_nopiv_cpu(
+    magma_uplo_t uplo, magma_int_t n, magma_int_t ib,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magma_int_t *info)
 {
     magma_int_t ione = 1;
     magmaDoubleComplex alpha;
