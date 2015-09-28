@@ -11,10 +11,12 @@
 #include "common_magma.h"
 #define PRECISION_z
 
+// TODO convert to usual (A + (i) + (j)*lda), i.e., returns pointer?
 #define  A(i, j) ( A[(j)*lda  + (i)])
 #define  C(i, j) ( C[(j)*ldc  + (i)])
 #define  D(i)    ( D[(i)*incD] )
 
+// TODO: change alpha and beta to be double, per BLAS, instead of double-complex
 // trailing submatrix update with inner-blocking
 int zherk_d(magma_uplo_t uplo, magma_int_t m, magma_int_t n,
             magmaDoubleComplex alpha, magmaDoubleComplex *A, magma_int_t lda,
@@ -82,6 +84,8 @@ int zherk_d(magma_uplo_t uplo, magma_int_t m, magma_int_t n,
     return MAGMA_SUCCESS;
 }
 
+
+// TODO: change alpha and beta to be double, per BLAS, instead of double-complex
 // trailing submatrix update with inner-blocking, using workshpace that
 // stores D*L'
 int zherk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
@@ -90,7 +94,7 @@ int zherk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
                       magmaDoubleComplex *work, magma_int_t ldw)
 {
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Check input arguments */
     if ((uplo != MagmaLower) && (uplo != MagmaUpper)) {
@@ -118,19 +122,20 @@ int zherk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
     if ( uplo == MagmaLower ) {
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr,
                        &n, &n, &k,
-                       &c_mone, A,    &lda,
+                       &c_neg_one, A,    &lda,
                                    work, &ldw,
                        &c_one,     C,    &ldc );
     }
     else {
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr,
                        &n, &n, &k,
-                       &c_mone, work, &ldw,
+                       &c_neg_one, work, &ldw,
                                    A,    &lda,
                        &c_one,     C,    &ldc );
     }
     return MAGMA_SUCCESS;
 }
+
 
 // diagonal factorization with inner-block
 int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
@@ -146,7 +151,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
     magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
     magmaDoubleComplex *Akk = NULL;
-    double done = 1.0;
+    double d_one = 1.0;
     double alpha;
 
     if ( uplo == MagmaLower ) {
@@ -165,7 +170,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             *Akk = MAGMA_Z_MAKE(alpha, 0.0);
 
             // scale off-diagonals
-            alpha = done / alpha;
+            alpha = d_one / alpha;
             blasf77_zdscal(&k, &alpha, Ak1k, &ione);
 
             // update remaining
@@ -196,7 +201,7 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             *Akk = MAGMA_Z_MAKE(alpha, 0.0);
 
             // scale off-diagonals
-            alpha = done / alpha;
+            alpha = d_one / alpha;
             blasf77_zdscal(&k, &alpha, Ak1k, &lda);
 
             // update remaining
@@ -232,9 +237,9 @@ magma_zhetrf_nopiv_cpu(
 {
     magma_int_t ione = 1;
     double alpha;
-    double done = 1.0;
-    magmaDoubleComplex zone  =  MAGMA_Z_ONE;
-    magmaDoubleComplex mzone = -MAGMA_Z_ONE;
+    double d_one = 1.0;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Check input arguments */
     if (lda < n) {
@@ -264,7 +269,7 @@ magma_zhetrf_nopiv_cpu(
                     MagmaRightStr, MagmaLowerStr,
                     MagmaConjTransStr, MagmaUnitStr,
                     &height, &sb,
-                    &zone, &A(i, i),    &lda,
+                    &c_one, &A(i, i),    &lda,
                             &A(i+sb, i), &lda);
 
                 /* Scale the block to divide by D */
@@ -275,7 +280,7 @@ magma_zhetrf_nopiv_cpu(
                         A(i+k, ii) = MAGMA_Z_CNJG( A(ii, i+k) );
                     }
                     #endif
-                    alpha = done / MAGMA_Z_REAL(A(i+k, i+k));
+                    alpha = d_one / MAGMA_Z_REAL(A(i+k, i+k));
                     blasf77_zdscal(&height, &alpha, &A(i+sb, i+k), &ione);
                     A(i+k, i+k) = MAGMA_Z_MAKE(MAGMA_Z_REAL(A(i+k, i+k)), 0.0);
                 }
@@ -283,13 +288,13 @@ magma_zhetrf_nopiv_cpu(
                 /* Update the trailing submatrix A22 = A22 - A21 * D11 * A21' */
                 #ifdef ZHERK_D_WORKSPACE
                 zherk_d_workspace( MagmaLower, height, sb,
-                                  mzone, &A(i+sb, i), lda,    // A21
-                                  zone,  &A(i+sb, i+sb), lda, // A22
+                                   c_neg_one, &A(i+sb, i),    lda,    // A21
+                                   c_one,     &A(i+sb, i+sb), lda,    // A22
                                               &A(i, i+sb),    lda );  // workspace, I am writing on upper part :)
                 #else
                 zherk_d( MagmaLower, height, sb,
-                        mzone, &A(i+sb, i), lda,    // A21
-                        zone,  &A(i+sb, i+sb), lda, // A22
+                         c_neg_one, &A(i+sb, i),    lda,      // A21
+                         c_one,     &A(i+sb, i+sb), lda,      // A22
                                     &A(i, i),       lda+1 );  // D11
                 #endif
             }
@@ -310,7 +315,7 @@ magma_zhetrf_nopiv_cpu(
                     MagmaLeftStr, MagmaUpperStr,
                     MagmaConjTransStr, MagmaUnitStr,
                     &sb, &height,
-                    &zone, &A(i, i),    &lda,
+                    &c_one, &A(i, i),    &lda,
                             &A(i, i+sb), &lda);
 
                 /* Scale the block to divide by D */
@@ -321,7 +326,7 @@ magma_zhetrf_nopiv_cpu(
                         A(ii, i+k) = MAGMA_Z_CNJG( A(i+k, ii) );
                     }
                     #endif
-                    alpha = done / MAGMA_Z_REAL(A(i+k, i+k));
+                    alpha = d_one / MAGMA_Z_REAL(A(i+k, i+k));
                     blasf77_zdscal(&height, &alpha, &A(i+k, i+sb), &lda);
                     A(i+k, i+k) = MAGMA_Z_MAKE(MAGMA_Z_REAL(A(i+k, i+k)), 0.0);
                 }
@@ -329,13 +334,13 @@ magma_zhetrf_nopiv_cpu(
                 /* Update the trailing submatrix A22 = A22 - A21 * D11 * A21' */
                 #ifdef ZHERK_D_WORKSPACE
                 zherk_d_workspace( MagmaUpper, height, sb,
-                                  mzone, &A(i, i+sb), lda,    // A21
-                                  zone,  &A(i+sb, i+sb), lda, // A22
+                                   c_neg_one, &A(i, i+sb),    lda,    // A21
+                                   c_one,     &A(i+sb, i+sb), lda,    // A22
                                               &A(i+sb, i),    lda );  // workspace, I am writing on upper part :)
                 #else
                 zherk_d( MagmaUpper, height, sb,
-                        mzone, &A(i, i+sb), lda,    // A21
-                        zone,  &A(i+sb, i+sb), lda, // A22
+                         c_neg_one, &A(i, i+sb),    lda,      // A21
+                         c_one,     &A(i+sb, i+sb), lda,      // A22
                                     &A(i, i),       lda+1 );  // D11
                 #endif
             }

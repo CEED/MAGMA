@@ -13,8 +13,6 @@
 
 #define RFT_MAG_GEM
 
-static    magmaDoubleComplex one   = MAGMA_Z_ONE;
-static    magmaDoubleComplex zero  = MAGMA_Z_ZERO;
 
 //===================================================================================================================
 //===================================================================================================================
@@ -88,6 +86,9 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
                 magmaDoubleComplex **work_array, magma_int_t lwork, magma_int_t batchCount, cublasHandle_t myhandle, 
                 magma_queue_t queue)
 {
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+
     if ( k <= 0) return 0;
     if ( stair_T > 0 && k <= stair_T) return 0;
 
@@ -141,9 +142,9 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
 
     magma_zgemm_batched( MagmaConjTrans, MagmaNoTrans, 
                          k, k, n, 
-                         one,  v_array, ldv, 
-                               v_array, ldv, 
-                         zero, dTstep_array, ldtstep, 
+                         c_one,  v_array, ldv, 
+                                 v_array, ldv, 
+                         c_zero, dTstep_array, ldtstep, 
                          batchCount, queue, myhandle);
 
     magmablas_zlaset_batched(MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dTstep_array, ldtstep, batchCount, queue);
@@ -180,9 +181,9 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
             magma_zdisplace_pointers(dW2_displ, T_array,     ldt, 0, j, batchCount, queue);
             magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, 
                                  prev_n, mycol, prev_n, 
-                                 one,  T_array, ldt, 
-                                       dW1_displ, ldtstep, 
-                                 zero, dW2_displ, ldt, 
+                                 c_one,  T_array, ldt, 
+                                         dW1_displ, ldtstep, 
+                                 c_zero, dW2_displ, ldt, 
                                  batchCount, queue, myhandle);
 
             // update my rectangular portion (prev_n,mycol) using sequence of gemv 

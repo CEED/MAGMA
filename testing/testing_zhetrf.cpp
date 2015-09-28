@@ -130,8 +130,8 @@ double get_residual_aasen(
     magma_int_t *ipiv )
 {
     magma_int_t ione = 1;
-    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *L, *T;
     #define  A(i,j) ( A[(i) + (j)*lda])
     #define  L(i,j) ( L[(i) + (j)*n])
@@ -207,7 +207,7 @@ double get_residual_aasen(
     init_matrix( nopiv, n, n, A, lda );
 
     // compute r = Ax - b, saved in b
-    blasf77_zgemv( "Notrans", &n, &n, &c_one, A, &lda, x, &ione, &c_mone, b, &ione );
+    blasf77_zgemv( "Notrans", &n, &n, &c_one, A, &lda, x, &ione, &c_neg_one, b, &ione );
     
     // compute residual |Ax - b| / (n*|A|*|x|)
     double norm_x, norm_A, norm_r, work[1];

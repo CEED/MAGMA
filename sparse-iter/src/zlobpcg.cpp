@@ -140,8 +140,9 @@ magma_zlobpcg(
     double r0=0;  // set in 1st iteration
 
     // === Set some constants & defaults ===
-    magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
-    magmaDoubleComplex c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     double *residualNorms={0}, *condestGhistory={0}, condestG={0};
     double *gevalues={0};
@@ -289,7 +290,7 @@ magma_zlobpcg(
                 magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, cBlockSize, m,
                             c_one, blockX, m, blockR, m, c_zero, gramB(0,0), ldgram);
                 magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, cBlockSize, n,
-                            c_mone, blockX, m, gramB(0,0), ldgram, c_one, blockR, m);
+                            c_neg_one, blockX, m, gramB(0,0), ldgram, c_one, blockR, m);
             }
 
             // === make the active preconditioned residuals orthonormal
@@ -315,13 +316,13 @@ magma_zlobpcg(
                 magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, cBlockSize, m,
                             c_one, blockX, m, blockP, m, c_zero, gramB(0,0), ldgram);
                 magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, cBlockSize, n,
-                            c_mone, blockX, m, gramB(0,0), ldgram, c_one, blockP, m);
+                            c_neg_one, blockX, m, gramB(0,0), ldgram, c_one, blockP, m);
 
                 // === make P orthogonal to R ?
                 magma_zgemm(MagmaConjTrans, MagmaNoTrans, cBlockSize, cBlockSize, m,
                             c_one, blockR, m, blockP, m, c_zero, gramB(0,0), ldgram);
                 magma_zgemm(MagmaNoTrans, MagmaNoTrans, m, cBlockSize, cBlockSize,
-                            c_mone, blockR, m, gramB(0,0), ldgram, c_one, blockP, m);
+                            c_neg_one, blockR, m, gramB(0,0), ldgram, c_one, blockP, m);
                 */
 
                 // === Make P orthonormal & properly change AP (without multiplication by A)

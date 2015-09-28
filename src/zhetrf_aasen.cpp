@@ -97,7 +97,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     double d_one  = 1.0;
     magmaDoubleComplex    c_one  = MAGMA_Z_ONE;
     magmaDoubleComplex    c_zero = MAGMA_Z_ZERO;
-    magmaDoubleComplex    c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex    c_half = MAGMA_Z_MAKE(0.5, 0.0);
     magmaDoubleComplex   *work, *dH, *dW, *dX, *dY, *dL;
     magma_int_t nb = magma_get_zhetrf_aasen_nb(n);
@@ -209,23 +209,23 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 trace_gpu_start( 0, 1, "gemm", "compH" );
                 for (magma_int_t i=1; i < j; i++)
                 {
-                    //printf( " > compute H(%d,%d)\n",i,j);
+                    //printf( " > compute H(%d,%d)\n", i, j);
                     // > H(i,j) = T(i,i) * L(j,i)', Y
                     magmablasSetKernelStream(stream[0]);
-                    magma_zgemm(MagmaNoTrans, MagmaConjTrans,
-                                nb, jb, nb,
-                                c_one,  dT(i,i), ldda,
-                                        dL(j,i), ldda,
-                                c_zero, dX(i),   nb);
-                                //c_zero, dW(i+1), lddw);
+                    magma_zgemm( MagmaNoTrans, MagmaConjTrans,
+                                 nb, jb, nb,
+                                 c_one,  dT(i,i), ldda,
+                                         dL(j,i), ldda,
+                                 c_zero, dX(i),   nb );
+                                 //c_zero, dW(i+1), lddw);
                     // > W(i) = T(i,i+1) * L(j,i+1)', Z
                     // W(i) = L(j,i+1)'
                     magmablasSetKernelStream(stream[1]);
-                    magma_zgemm(MagmaConjTrans, MagmaConjTrans,
-                                nb, jb, (i < j-1 ? nb : jb),
-                                c_one,  dT(i+1,i), ldda,
-                                        dL(j,i+1), ldda,
-                                c_zero, dH(i,j),   ldda);
+                    magma_zgemm( MagmaConjTrans, MagmaConjTrans,
+                                 nb, jb, (i < j-1 ? nb : jb),
+                                 c_one,  dT(i+1,i), ldda,
+                                         dL(j,i+1), ldda,
+                                 c_zero, dH(i,j),   ldda );
                 }
                 // * insert event to keep track 
                 magma_event_record( event[0], stream[0] );
@@ -237,11 +237,11 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 {
                     // H(i,j) = W(i)+.5*H(i,j)
                     magmablasSetKernelStream(stream[(i-1)%2]);
-                    magmablas_zgeadd(nb, jb, 
-                                     c_one, dX(i),   nb,
-                                            dH(i,j), ldda);
+                    magmablas_zgeadd( nb, jb, 
+                                      c_one, dX(i),   nb,
+                                             dH(i,j), ldda );
                     // copy to dY to compute dW
-                    magma_zcopymatrix( nb,jb, dH(i,j), ldda, dY(i), nb );
+                    magma_zcopymatrix( nb, jb, dH(i,j), ldda, dY(i), nb );
                 }
                 // * insert event back to keep track
                 magma_event_record( event[0], stream[0] );
@@ -258,20 +258,20 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                              dY(i), nb);
                     // transpose W for calling zher2k
                     #if defined(PRECISION_z) || defined(PRECISION_c)
-                    magmablas_ztranspose_conj( nb,jb, dY(i), nb, dW(i), lddw );
+                    magmablas_ztranspose_conj( nb, jb, dY(i), nb, dW(i), lddw );
                     #else
-                    magmablas_ztranspose( nb,jb, dY(i), nb, dW(i), lddw );
+                    magmablas_ztranspose( nb, jb, dY(i), nb, dW(i), lddw );
                     #endif
 
                     // > H(i,j) += T(i,i-1) * L(j,i-1)', X
                     if (i > 1) // if i == 1, then L(j,i-1) = 0
                     {
                         // W(i+1) = T(i,i-1)*L(j,i-1)'
-                        magma_zgemm(MagmaNoTrans, MagmaConjTrans,
-                                    nb, jb, nb,
-                                    c_one, dT(i,i-1), ldda,
-                                           dL(j,i-1), ldda,
-                                    c_one, dH(i,j),   ldda);
+                        magma_zgemm( MagmaNoTrans, MagmaConjTrans,
+                                     nb, jb, nb,
+                                     c_one, dT(i,i-1), ldda,
+                                            dL(j,i-1), ldda,
+                                     c_one, dH(i,j),   ldda );
                     }
                 }
                 trace_gpu_end( 0,0 );
@@ -286,11 +286,11 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 // compute T(j, j) = A(j,j) - L(j,1:j)*H(1:j,j) (where T is A in memory)
                 trace_gpu_start( 0, 0, "her2k", "compTjj" );
                 if (j > 1)
-                magma_zher2k(MagmaLower, MagmaNoTrans,
-                             jb, (j-1)*nb,
-                             c_mone, dL(j,1), ldda,
-                                     dW(1),   lddw,
-                             d_one,  dT(j,j), ldda);
+                magma_zher2k( MagmaLower, MagmaNoTrans,
+                              jb, (j-1)*nb,
+                              c_neg_one, dL(j,1), ldda,
+                                         dW(1),   lddw,
+                              d_one,     dT(j,j), ldda );
                 magmablas_zsymmetrize(MagmaLower, jb, dT(j,j), ldda);
                 trace_gpu_end( 0,0 );
                 // > Compute T(j,j) - L(j,j)^-1 T(j,j) L^(j,j)^-T
@@ -300,11 +300,11 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                     magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                                  jb, jb,
                                  c_one, dL(j,j), ldda,
-                                        dT(j,j), ldda);
+                                        dT(j,j), ldda );
                     magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
                                  jb, jb,
                                  c_one, dL(j,j), ldda,
-                                        dT(j,j), ldda);
+                                        dT(j,j), ldda );
                 }
                 trace_gpu_end( 0,0 );
                 if (j < magma_ceildiv(n, nb)-1)
@@ -317,29 +317,29 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                     trace_gpu_start( 0, 0, "trmm", "compHjj" );
                     if (j >= 1)
                     {
-                        magma_zgemm(MagmaNoTrans, MagmaConjTrans,
-                                    jb, jb, nb,
-                                    c_one,  dT(j,j), ldda,
-                                            dL(j,j), ldda,
-                                    c_zero, dH(j,j), ldda);
+                        magma_zgemm( MagmaNoTrans, MagmaConjTrans,
+                                     jb, jb, nb,
+                                     c_one,  dT(j,j), ldda,
+                                             dL(j,j), ldda,
+                                     c_zero, dH(j,j), ldda );
                         if (j >= 2)
                         {
                             // > H(j,j) += T(j,j-1)*L(j,j-1)
-                            magma_zgemm(MagmaNoTrans, MagmaConjTrans,
-                                        jb, jb, nb,
-                                        c_one, dT(j,j-1), ldda,
-                                               dL(j,j-1), ldda,
-                                        c_one, dH(j,j),   ldda);
+                            magma_zgemm( MagmaNoTrans, MagmaConjTrans,
+                                         jb, jb, nb,
+                                         c_one, dT(j,j-1), ldda,
+                                                dL(j,j-1), ldda,
+                                         c_one, dH(j,j),   ldda );
                         }
                     }
                     trace_gpu_end( 0,0 );
                     // extract L(:, j+1)
                     trace_gpu_start( 0, 0, "gemm", "compLj" );
-                    magma_zgemm(MagmaNoTrans, MagmaNoTrans,
-                                ib, jb, j*nb,
-                                c_mone, dL(j+1,1), ldda,
-                                        dH(  1,j), ldda,
-                                c_one,  dA(j+1,j), ldda);
+                    magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                                 ib, jb, j*nb,
+                                 c_neg_one, dL(j+1,1), ldda,
+                                            dH(  1,j), ldda,
+                                 c_one,     dA(j+1,j), ldda );
                     trace_gpu_end( 0,0 );
 
                     // panel factorization
@@ -376,10 +376,10 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         #endif
                     }
                     // save L(j+1,j+1), and make it to unit-lower triangular
-                    magma_zcopymatrix( min(ib,jb),min(ib,jb), dA(j+1,j), ldda, dL(j+1,j+1), ldda );
-                    magmablas_zlaset(MagmaUpper, min(ib,jb),min(ib,jb), c_zero,c_one, dL(j+1,j+1),ldda);
+                    magma_zcopymatrix( min(ib,jb), min(ib,jb), dA(j+1,j), ldda, dL(j+1,j+1), ldda );
+                    magmablas_zlaset( MagmaUpper, min(ib,jb), min(ib,jb), c_zero, c_one, dL(j+1,j+1), ldda );
                     // extract T(j+1,j)
-                    magmablas_zlaset(MagmaLower, min(ib,jb)-1,jb-1, c_zero,c_zero, dT(j+1,j)+1,ldda);
+                    magmablas_zlaset( MagmaLower, min(ib,jb)-1, jb-1, c_zero, c_zero, dT(j+1,j)+1, ldda );
                     if (j > 0)
                     magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
                                  min(ib,jb), jb,
@@ -406,15 +406,15 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                             }
                         }
                         magma_isetvector_async( 2*count, rows, 1, drows, 1, stream[0]);
-                        magmablas_zlacpy_sym_in(MagmaLower, n-(j+1)*nb, count, drows, dperm, dA(j+1,j+1),ldda, dH(0,0),ldda);
-                        magmablas_zlacpy_sym_out(MagmaLower, n-(j+1)*nb, count, drows, dperm, dH(0,0),ldda, dA(j+1,j+1),ldda);
+                        magmablas_zlacpy_sym_in(  MagmaLower, n-(j+1)*nb, count, drows, dperm, dA(j+1,j+1), ldda, dH(0,0),     ldda );
+                        magmablas_zlacpy_sym_out( MagmaLower, n-(j+1)*nb, count, drows, dperm, dH(0,0),     ldda, dA(j+1,j+1), ldda );
 
                         // reset perm
                         for (magma_int_t ii=0; ii < count; ii++) {
                             perm[rows[2*ii+1]] = rows[2*ii+1];
                         }
                         //for (magma_int_t k=0; k < n; k++) {
-                        //    printf( "%d ",perm[k] );
+                        //    printf( "%d ", perm[k] );
                         //}
                         //printf( "\n" );
                     }
@@ -438,7 +438,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 {
                     // copy L
                     magma_int_t jb2 = min(nb, n-(j+1)*nb);
-                    magmablas_zlacpy( MagmaLower, jb2-1,jb2-1, dL(j+1,j+1)+1, ldda, dA(j+1,j)+1, ldda );
+                    magmablas_zlacpy( MagmaLower, jb2-1, jb2-1, dL(j+1,j+1)+1, ldda, dA(j+1,j)+1, ldda );
                     magma_zgetmatrix_async( n-j*nb-jb, jb, dA(j+1,j), ldda, A(j+1,j), lda, stream[0] );
                 }
                 #endif
@@ -452,7 +452,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         magma_event_destroy( event[i] );
     }
     magmablasSetKernelStream( orig_stream );
-    trace_finalize( "zhetrf.svg","trace.css" );
+    trace_finalize( "zhetrf.svg", "trace.css" );
 
     magma_free(dA_array);
     magma_free(dipiv_array);

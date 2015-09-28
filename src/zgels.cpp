@@ -86,7 +86,8 @@ magma_zgels(
     magmaDoubleComplex *hwork, magma_int_t lwork,
     magma_int_t *info)
 {
-    magmaDoubleComplex *tau, zone = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *tau;
     magma_int_t k;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
@@ -140,7 +141,7 @@ magma_zgels(
  
         // Solve R*X = B(1:n,:)
         blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                         &n, &nrhs, &zone, A, &lda, B, &ldb );
+                         &n, &nrhs, &c_one, A, &lda, B, &ldb );
     }
     
     magma_free_cpu(tau);

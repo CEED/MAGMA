@@ -74,8 +74,9 @@ magma_zpbicgstab(
     solver_par->info = MAGMA_SUCCESS;
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
-                                            c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows*b.num_cols;
 
@@ -134,7 +135,7 @@ magma_zpbicgstab(
         rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1 );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
         magma_zscal( dofs, beta, p.dval, 1 );                 // p = beta*p
-        magma_zaxpy( dofs, c_mone * omega * beta, v.dval, 1 , p.dval, 1 );
+        magma_zaxpy( dofs, c_neg_one * omega * beta, v.dval, 1 , p.dval, 1 );
                                                         // p = p-omega*beta*v
         magma_zaxpy( dofs, c_one, r.dval, 1, p.dval, 1 );      // p = p+r
 
@@ -146,7 +147,7 @@ magma_zpbicgstab(
 
         alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1 );
         magma_zcopy( dofs, r.dval, 1 , s.dval, 1 );            // s=r
-        magma_zaxpy( dofs, c_mone * alpha, v.dval, 1 , s.dval, 1 ); // s=s-alpha*v
+        magma_zaxpy( dofs, c_neg_one * alpha, v.dval, 1 , s.dval, 1 ); // s=s-alpha*v
 
         // preconditioner
         CHECK( magma_z_applyprecond_left( A, s, &ms, precond_par, queue ));
@@ -166,7 +167,7 @@ magma_zpbicgstab(
         magma_zaxpy( dofs, omega, z.dval, 1 , x->dval, 1 );     // x=x+omega*s
 
         magma_zcopy( dofs, s.dval, 1 , r.dval, 1 );             // r=s
-        magma_zaxpy( dofs, c_mone * omega, t.dval, 1 , r.dval, 1 ); // r=r-omega*t
+        magma_zaxpy( dofs, c_neg_one * omega, t.dval, 1 , r.dval, 1 ); // r=r-omega*t
         res = betanom = magma_dznrm2( dofs, r.dval, 1 );
 
         nom = betanom*betanom;

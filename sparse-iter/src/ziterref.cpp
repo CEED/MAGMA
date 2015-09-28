@@ -68,8 +68,9 @@ magma_ziterref(
     magmablasGetKernelStream( &orig_queue );
     
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
-                                                c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     // prepare solver feedback
     solver_par->solver = Magma_ITERREF;
@@ -121,7 +122,7 @@ magma_ziterref(
         CHECK( magma_z_precond( A, r, &z, precond_par, queue )); // inner solver:  A * z = r
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1);  // scale it
         magma_zaxpy(dofs,  c_one, z.dval, 1, x->dval, 1);        // x = x + z
-        CHECK( magma_z_spmv( c_mone, A, *x, c_zero, r, queue ));      // r = - A x
+        CHECK( magma_z_spmv( c_neg_one, A, *x, c_zero, r, queue ));      // r = - A x
         magma_zaxpy(dofs,  c_one, b.dval, 1, r.dval, 1);         // r = r + b
         nom = magma_dznrm2(dofs, r.dval, 1);                    // nom = || r ||
 

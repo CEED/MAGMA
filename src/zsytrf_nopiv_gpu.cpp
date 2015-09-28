@@ -83,8 +83,8 @@ magma_zsytrf_nopiv_gpu(
     #define dWt(i, j) (dW +(j)*nb   + (i))
 
     /* Local variables */
-    magmaDoubleComplex zone  = MAGMA_Z_ONE;
-    magmaDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     int                upper = (uplo == MagmaUpper);
     magma_int_t j, k, jb, nb, ib, iinfo;
 
@@ -169,7 +169,7 @@ magma_zsytrf_nopiv_gpu(
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm(MagmaLeft, MagmaUpper, MagmaTrans, MagmaUnit, 
                             jb, (n-j-jb), 
-                            zone, dA(j, j),    ldda, 
+                            c_one, dA(j, j), ldda, 
                             dA(j, j+jb), ldda);
                 magma_zcopymatrix( jb, n-j-jb, dA( j, j+jb ), ldda, dWt( 0, j+jb ), nb );
                 
@@ -185,9 +185,9 @@ magma_zsytrf_nopiv_gpu(
                 for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
                     magma_zgemm( MagmaTrans, MagmaNoTrans, kb, n-k, jb,
-                                mzone, dWt(0, k), nb, 
+                                 c_neg_one, dWt(0, k), nb, 
                                             dA(j, k), ldda,
-                                zone,  dA(k, k), ldda);
+                                 c_one,     dA(k, k), ldda );
                     if (k == j+jb)
                         magma_event_record( event, stream[0] );
                 }
@@ -229,7 +229,7 @@ magma_zsytrf_nopiv_gpu(
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm(MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                             (n-j-jb), jb, 
-                            zone, dA(j,    j), ldda, 
+                            c_one, dA(j, j), ldda, 
                             dA(j+jb, j), ldda);
                 magma_zcopymatrix( n-j-jb,jb, dA( j+jb, j ), ldda, dW( j+jb, 0 ), ldda );
                 
@@ -245,9 +245,9 @@ magma_zsytrf_nopiv_gpu(
                 for (k=j+jb; k < n; k += nb) {
                     magma_int_t kb = min(nb,n-k);
                     magma_zgemm( MagmaNoTrans, MagmaTrans, n-k, kb, jb,
-                                mzone, dA(k, j), ldda, 
+                                 c_neg_one, dA(k, j), ldda, 
                                             dW(k, 0), ldda,
-                                zone,  dA(k, k), ldda);
+                                 c_one,     dA(k, k), ldda );
                     if (k == j+jb)
                         magma_event_record( event, stream[0] );
                 }

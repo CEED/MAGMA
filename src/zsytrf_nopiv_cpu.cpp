@@ -93,8 +93,8 @@ int zsyrk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
                       magmaDoubleComplex beta,  magmaDoubleComplex *C, magma_int_t ldc,
                       magmaDoubleComplex *work, magma_int_t ldw)
 {
-    magmaDoubleComplex c_one  =  MAGMA_Z_ONE;
-    magmaDoubleComplex c_mone = -MAGMA_Z_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Check input arguments */
     if ((uplo != MagmaLower) && (uplo != MagmaUpper)) {
@@ -122,16 +122,16 @@ int zsyrk_d_workspace(magma_uplo_t uplo, magma_int_t n, magma_int_t k,
     if ( uplo == MagmaLower ) {
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
                        &n, &n, &k,
-                       &c_mone, A,    &lda,
-                                work, &ldw,
-                       &c_one,  C,    &ldc );
+                       &c_neg_one, A,    &lda,
+                                   work, &ldw,
+                       &c_one,     C,    &ldc );
     }
     else {
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
                        &n, &n, &k,
-                       &c_mone, work, &ldw,
-                                A,    &lda,
-                       &c_one,  C,    &ldc );
+                       &c_neg_one, work, &ldw,
+                                   A,    &lda,
+                       &c_one,     C,    &ldc );
     }
     return MAGMA_SUCCESS;
 }
@@ -150,7 +150,7 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
     magma_int_t info = 0, ione = 1;
     magmaDoubleComplex *Ak1k = NULL;
     magmaDoubleComplex Akk;
-    magmaDoubleComplex zone = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magmaDoubleComplex alpha;
 
     if ( uplo == MagmaLower ) {
@@ -167,7 +167,7 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             }
 
             // scale off-diagonals
-            alpha = MAGMA_Z_DIV( zone, Akk );
+            alpha = MAGMA_Z_DIV( c_one, Akk );
             blasf77_zscal(&k, &alpha, Ak1k, &ione);
 
             // update remaining
@@ -194,7 +194,7 @@ int zsytrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             }
 
             // scale off-diagonals
-            alpha = MAGMA_Z_DIV(zone, Akk );
+            alpha = MAGMA_Z_DIV( c_one, Akk );
             blasf77_zscal(&k, &alpha, Ak1k, &lda);
 
             // update remaining
@@ -222,8 +222,8 @@ magma_zsytrf_nopiv_cpu(
 {
     magma_int_t ione = 1;
     magmaDoubleComplex alpha;
-    magmaDoubleComplex zone  =  MAGMA_Z_ONE;
-    magmaDoubleComplex mzone = -MAGMA_Z_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Check input arguments */
     if (lda < n) {
@@ -253,8 +253,8 @@ magma_zsytrf_nopiv_cpu(
                     MagmaRightStr, MagmaLowerStr, 
                     MagmaTransStr, MagmaUnitStr,
                     &height, &sb, 
-                    &zone, &A(i, i),    &lda,
-                           &A(i+sb, i), &lda);
+                    &c_one, &A(i, i),    &lda,
+                            &A(i+sb, i), &lda);
 
                 /* Scale the block to divide by D */
                 for (magma_int_t k=0; k < sb; k++) {
@@ -264,21 +264,21 @@ magma_zsytrf_nopiv_cpu(
                         A(i+k, ii) = A(ii, i+k);
                     }
                     #endif
-                    alpha = MAGMA_Z_DIV( zone,A(i+k, i+k));
+                    alpha = MAGMA_Z_DIV( c_one, A(i+k, i+k));
                     blasf77_zscal(&height, &alpha, &A(i+sb, i+k), &ione);
                 }
 
                 /* Update the trailing submatrix A22 = A22 - A21 * D11 * A21' */
                 #ifdef ZSYRK_D_WORKSPACE
-                zsyrk_d_workspace(MagmaLower, height, sb,
-                                  mzone, &A(i+sb, i), lda,    // A21
-                                  zone,  &A(i+sb, i+sb), lda, // A22
-                                         &A(i, i+sb), lda);   // workspace, I am writing on upper part :)
+                zsyrk_d_workspace( MagmaLower, height, sb,
+                                   c_neg_one, &A(i+sb, i),    lda,    // A21
+                                   c_one,     &A(i+sb, i+sb), lda,    // A22
+                                              &A(i, i+sb),    lda );  // workspace, I am writing on upper part :)
                 #else
-                zsyrk_d(MagmaLower, height, sb,
-                        mzone, &A(i+sb, i), lda,    // A21
-                        zone,  &A(i+sb, i+sb), lda, // A22
-                               &A(i, i), lda+1);    // D11
+                zsyrk_d( MagmaLower, height, sb,
+                         c_neg_one, &A(i+sb, i),    lda,      // A21
+                         c_one,     &A(i+sb, i+sb), lda,      // A22
+                                    &A(i, i),       lda+1 );  // D11
                 #endif
             }
         }
@@ -298,8 +298,8 @@ magma_zsytrf_nopiv_cpu(
                     MagmaLeftStr, MagmaUpperStr, 
                     MagmaTransStr, MagmaUnitStr,
                     &sb, &height, 
-                    &zone, &A(i, i),    &lda,
-                           &A(i, i+sb), &lda);
+                    &c_one, &A(i, i),    &lda,
+                            &A(i, i+sb), &lda);
 
                 /* Scale the block to divide by D */
                 for (magma_int_t k=0; k < sb; k++) {
@@ -309,21 +309,21 @@ magma_zsytrf_nopiv_cpu(
                         A(ii, i+k) = A(i+k, ii);
                     }
                     #endif
-                    alpha = MAGMA_Z_DIV( zone, A(i+k, i+k) );
+                    alpha = MAGMA_Z_DIV( c_one, A(i+k, i+k) );
                     blasf77_zscal(&height, &alpha, &A(i+k, i+sb), &lda);
                 }
 
                 /* Update the trailing submatrix A22 = A22 - A21 * D11 * A21' */
                 #ifdef ZSYRK_D_WORKSPACE
-                zsyrk_d_workspace(MagmaUpper, height, sb,
-                                  mzone, &A(i, i+sb), lda,    // A21
-                                  zone,  &A(i+sb, i+sb), lda, // A22
-                                         &A(i+sb, i), lda);   // workspace, I am writing on upper part :)
+                zsyrk_d_workspace( MagmaUpper, height, sb,
+                                   c_neg_one, &A(i, i+sb),    lda,    // A21
+                                   c_one,     &A(i+sb, i+sb), lda,    // A22
+                                              &A(i+sb, i),    lda );  // workspace, I am writing on upper part :)
                 #else
-                zsyrk_d(MagmaUpper, height, sb,
-                        mzone, &A(i, i+sb), lda,    // A21
-                        zone,  &A(i+sb, i+sb), lda, // A22
-                               &A(i, i), lda+1);    // D11
+                zsyrk_d( MagmaUpper, height, sb,
+                         c_neg_one, &A(i, i+sb),    lda,      // A21
+                         c_one,     &A(i+sb, i+sb), lda,      // A22
+                                    &A(i, i),       lda+1 );  // D11
                 #endif
             }
         }

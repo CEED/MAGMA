@@ -250,8 +250,8 @@ printf("\n");
  */
 static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDoubleComplex *Q, magma_int_t LDQ, double eps)
 {
-    double  done  =  1.0;
-    double  mdone = -1.0;
+    double d_one     =  1.0;
+    double d_neg_one = -1.0;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     double  normQ, result;
@@ -267,9 +267,9 @@ static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDouble
 
     /* Perform Id - Q'Q */
     if (M >= N)
-        blasf77_zherk("U", "C", &N, &M, &done, Q, &LDQ, &mdone, Id, &N);
+        blasf77_zherk("U", "C", &N, &M, &d_one, Q, &LDQ, &d_neg_one, Id, &N);
     else
-        blasf77_zherk("U", "N", &M, &N, &done, Q, &LDQ, &mdone, Id, &M);
+        blasf77_zherk("U", "N", &M, &N, &d_one, Q, &LDQ, &d_neg_one, Id, &M);
 
     normQ = lapackf77_zlanhe("I", "U", &minMN, Id, &minMN, work);
 

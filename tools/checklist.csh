@@ -167,6 +167,12 @@ echo "========== passing ints by pointer                                        
 egrep "int_t *\* *(m|n|k|ld\w|ldd\w|inc\w|l\w*work)\b" include/{magma_z,magma_zc,magmablas_z,magmablas_zc}.h
 echo
 
+# fixed
+echo "========== use standard c_one and c_neg_one names                          *** required fix ***"
+egrep "\b(mz_one|z_one|zone|mzone|c_mone)\b" $FILES | egrep -v 'tools/checklist.csh'
+egrep "done *= *-?[0-9]" $FILES
+echo
+
 # needs lots of work; also lots of exceptions
 echo "========== int instead of magma_int_t                                      *** required fix ***"
 egrep '\bint\b' $HEADERS \

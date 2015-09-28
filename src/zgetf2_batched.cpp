@@ -136,8 +136,8 @@ magma_zgetf2_batched(
         return arginfo;
     }
 
-    magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t nb = BATF2_NB;
 
     
@@ -189,9 +189,9 @@ magma_zgetf2_batched(
             magma_zdisplace_pointers(dW2_displ, dA_array, ldda, ib+panelj, ib+panelj, batchCount, queue);
 
             magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m-(panelj+ib), n-(panelj+ib), ib,
-                                 neg_one, dW0_displ, ldda,
-                                 dW1_displ, ldda,
-                                 one,  dW2_displ, ldda,
+                                 c_neg_one, dW0_displ, ldda,
+                                            dW1_displ, ldda,
+                                 c_one,     dW2_displ, ldda,
                                  batchCount, queue, myhandle);
         }
     }

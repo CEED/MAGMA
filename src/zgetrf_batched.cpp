@@ -128,8 +128,8 @@ magma_zgetrf_batched(
     talloc = magma_sync_wtime(queue);
 #endif
 
-    magmaDoubleComplex neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t nb, recnb, ib, i, k, pm, use_stream;
     magma_get_zgetrf_batched_nbparam(n, &nb, &recnb);
 
@@ -328,9 +328,9 @@ magma_zgetrf_batched(
                         magmablasSetKernelStream(stream[streamid]);
                         magma_zgemm(MagmaNoTrans, MagmaNoTrans, 
                                 m-i-ib, n-i-ib, ib,
-                                neg_one, cpuAarray[k] + (i+ib)+i*ldda, ldda, 
-                                         cpuAarray[k] + i+(i+ib)*ldda, ldda,
-                                one,     cpuAarray[k] + (i+ib)+(i+ib)*ldda, ldda);
+                                c_neg_one, cpuAarray[k] + (i+ib)+i*ldda, ldda, 
+                                           cpuAarray[k] + i+(i+ib)*ldda, ldda,
+                                c_one,     cpuAarray[k] + (i+ib)+(i+ib)*ldda, ldda);
                     }
                     // need to synchronise to be sure that zgetf2 do not start before
                     // finishing the update at least of the next panel
@@ -353,9 +353,9 @@ magma_zgetrf_batched(
                     magma_zdisplace_pointers(dW2_displ, dA_array, ldda, i+ib, i+ib, batchCount, queue);
                     //printf("caling batched dgemm %d %d %d \n", m-i-ib, n-i-ib, ib);
                     magma_zgemm_batched( MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib, 
-                                         neg_one, dA_displ, ldda, 
-                                         dW1_displ, ldda, 
-                                         one,  dW2_displ, ldda, 
+                                         c_neg_one, dA_displ,  ldda, 
+                                                    dW1_displ, ldda, 
+                                         c_one,     dW2_displ, ldda, 
                                          batchCount, queue, myhandle);
                 } // end of batched/stream gemm
             } // end of  if ( (i + ib) < m) 

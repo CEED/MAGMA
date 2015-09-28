@@ -563,15 +563,17 @@ magma_zjacobiiter(
     magmablasGetKernelStream( &orig_queue );
 
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
-                                            c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    
     magma_int_t dofs = M.num_rows*x->num_cols;
     magma_z_matrix t={Magma_CSR}, swap={Magma_CSR};
     CHECK( magma_zvinit( &t, Magma_DEV, M.num_rows, x->num_cols, c_zero, queue ));
 
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {
-        CHECK( magma_z_spmv( c_mone, M, *x, c_zero, t, queue ));        // t = - M * x
+        CHECK( magma_z_spmv( c_neg_one, M, *x, c_zero, t, queue ));        // t = - M * x
         magma_zaxpy( dofs, c_one , c.dval, 1 , t.dval, 1 );        // t = t + c
 
         // swap so that x again contains solution, and y is ready to be used
@@ -639,14 +641,16 @@ magma_zjacobiiter_precond(
     magmablasGetKernelStream( &orig_queue );
 
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
-                                            c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    
     magma_int_t dofs = M.num_rows;
     magma_int_t num_vecs = x->num_rows / dofs;
     magma_z_matrix swap={Magma_CSR};
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {
-        CHECK( magma_z_spmv( c_mone, M, *x, c_zero, precond->work2, queue )); // t = - M * x
+        CHECK( magma_z_spmv( c_neg_one, M, *x, c_zero, precond->work2, queue )); // t = - M * x
 
         magma_zaxpy( num_vecs*dofs, c_one ,
                 precond->work1.dval, 1 , precond->work2.dval, 1 ); // t = t + c

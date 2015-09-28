@@ -344,11 +344,10 @@ int main( int argc, char** argv)
                    Check the result compared to LAPACK
                    =================================================================== */
                 double work[1], c_neg_one = -1;
-                magma_int_t one = 1;
                 
-                blasf77_daxpy(&min_mn, &c_neg_one, S1, &one, S2, &one);
-                result[4]  = lapackf77_dlange("f", &min_mn, &one, S2, &min_mn, work);
-                result[4] /= lapackf77_dlange("f", &min_mn, &one, S1, &min_mn, work);
+                blasf77_daxpy(&min_mn, &c_neg_one, S1, &ione, S2, &ione);
+                result[4]  = lapackf77_dlange("f", &min_mn, &ione, S2, &min_mn, work);
+                result[4] /= lapackf77_dlange("f", &min_mn, &ione, S1, &min_mn, work);
                 
                 printf("   %c %5d %5d  %7.2f         %7.2f         %8.2e",
                        lapack_vec_const(jobz)[0],
