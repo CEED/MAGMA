@@ -265,6 +265,8 @@ magma_zpidr(
 
     // |r|
     solver_par->init_res = nrmr;
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t)nrmr;
     }
@@ -272,8 +274,6 @@ magma_zpidr(
     // check if initial is guess good enough
     if ( nrmr <= solver_par->atol ||
         nrmr/nrmb <= solver_par->rtol ) {
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
         goto cleanup;
     }
 

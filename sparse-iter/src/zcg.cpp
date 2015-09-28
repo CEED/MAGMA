@@ -91,16 +91,21 @@ magma_zcg(
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) ); // den = p dot q
     solver_par->init_res = nom0;
     
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
+    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE ){
         r0 = ATOLERANCE;
+    }
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t)nom0;
+        solver_par->timing[0] = 0.0;
+    }
     if ( nom < r0 ) {
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
+        magmablasSetKernelStream( orig_queue );
         goto cleanup;
     }
     // check positive definite
     if (den <= 0.0) {
-        printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         magmablasSetKernelStream( orig_queue );
         info = MAGMA_NONSPD; 
         goto cleanup;
@@ -109,10 +114,7 @@ magma_zcg(
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = (real_Double_t)nom0;
-        solver_par->timing[0] = 0.0;
-    }
+
     
     solver_par->numiter = 0;
     // start iteration

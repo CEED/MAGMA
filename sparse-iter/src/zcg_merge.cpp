@@ -121,16 +121,19 @@ magma_zcg_merge(
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
 
     magma_zsetvector( 6, skp_h, 1, skp, 1 );
-    
+
     if( nom0 < solver_par->atol ||
         nom0/solver_par->init_res < solver_par->rtol ){
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
         goto cleanup;
+    }
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t) nom0;
+        solver_par->timing[0] = 0.0;
     }
     // check positive definite
     if (den <= 0.0) {
-        printf("Operator A is not postive definite. (Ar,r) = %f\n", den);
         info = MAGMA_NONSPD; 
         goto cleanup;
     }
@@ -138,10 +141,7 @@ magma_zcg_merge(
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = (real_Double_t) nom0;
-        solver_par->timing[0] = 0.0;
-    }
+
     
     solver_par->numiter = 0;
     // start iteration

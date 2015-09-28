@@ -132,9 +132,14 @@ magma_zidr(
 
     // set max iterations
     solver_par->maxiter = min( 2 * A.num_cols, solver_par->maxiter );
+    
 
     // check if matrix A is square
     if ( A.num_rows != A.num_cols ) {
+        solver_par->init_res = 0.0;
+        solver_par->final_res = 0.0;
+        solver_par->iter_res = 0.0;
+        solver_par->runtime = 0.0;
         printf("Operator A is not square.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
@@ -143,13 +148,10 @@ magma_zidr(
     // |b|
     nrmb = magma_dznrm2( b.num_rows, b.dval, 1 );
 
+    
     // check for |b| == 0
     if ( nrmb == 0.0 ) {
         magma_zscal( x->num_rows * x->num_cols, MAGMA_Z_ZERO, x->dval, 1 );
-        solver_par->init_res = 0.0;
-        solver_par->final_res = 0.0;
-        solver_par->iter_res = 0.0;
-        solver_par->runtime = 0.0;
         goto cleanup;
     }
 
@@ -159,6 +161,8 @@ magma_zidr(
     
     // |r|
     solver_par->init_res = nrmr;
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t)nrmr;
     }
@@ -166,8 +170,6 @@ magma_zidr(
     // check if initial is guess good enough
     if ( nrmr <= solver_par->atol ||
         nrmr/nrmb <= solver_par->rtol ) {
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
         goto cleanup;
     }
 

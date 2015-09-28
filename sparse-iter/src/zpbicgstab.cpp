@@ -107,24 +107,23 @@ magma_zpbicgstab(
     rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;
 
-    CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));              // z = A r
-    //den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z' * r
-
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE )
+    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE ){
         r0 = ATOLERANCE;
+    }
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = nom0;
+        solver_par->timing[0] = 0.0;
+    }
     if ( nom < r0 ) {
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
         goto cleanup;
     }
 
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = nom0;
-        solver_par->timing[0] = 0.0;
-    }
+
 
     solver_par->numiter = 0;
     // start iteration
@@ -154,14 +153,10 @@ magma_zpbicgstab(
         CHECK( magma_z_applyprecond_right( A, ms, &z, precond_par, queue ));
 
         CHECK( magma_z_spmv( c_one, A, z, c_zero, t, queue ));       // t=As
-
-        // preconditioner
-        CHECK( magma_z_applyprecond_left( A, s, &ms, precond_par, queue ));
-        CHECK( magma_z_applyprecond_left( A, t, &mt, precond_par, queue ));
-
-        // omega = <ms,mt>/<mt,mt>
-        omega = magma_zdotc( dofs, mt.dval, 1, ms.dval, 1 )
-                   / magma_zdotc( dofs, mt.dval, 1, mt.dval, 1 );
+                   
+       // omega = <s,t>/<t,t>
+        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )
+                   / magma_zdotc( dofs, t.dval, 1, t.dval, 1 );
 
         magma_zaxpy( dofs, alpha, y.dval, 1 , x->dval, 1 );     // x=x+alpha*p
         magma_zaxpy( dofs, omega, z.dval, 1 , x->dval, 1 );     // x=x+omega*s
