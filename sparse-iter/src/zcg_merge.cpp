@@ -105,7 +105,7 @@ magma_zcg_merge(
     nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );
     nom = nom0 * nom0;                                           // nom = r' * r
     CHECK( magma_z_spmv( c_one, A, d, c_zero, z, queue ));              // z = A d
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
+    den = MAGMA_Z_ABS( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
     solver_par->init_res = nom0;
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
@@ -165,7 +165,7 @@ magma_zcg_merge(
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1,
                                                     skp_h+1, 1, stream[1] );
-        betanom = sqrt(MAGMA_Z_REAL(skp_h[1]));
+        betanom = sqrt(MAGMA_Z_ABS(skp_h[1]));
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );

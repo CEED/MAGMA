@@ -99,7 +99,7 @@ magma_zpcg(
     CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
 
     magma_zcopy( dofs, h.dval, 1, p.dval, 1 );                    // p = h
-    nom = MAGMA_Z_REAL( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
+    nom = MAGMA_Z_ABS( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
     den =  magma_zdotc(dofs, p.dval, 1, q.dval, 1); // den = p dot q
     solver_par->init_res = nom0;
@@ -121,7 +121,7 @@ magma_zpcg(
         goto cleanup;
     }
     // check positive definite
-    if ( MAGMA_Z_REAL(den) + MAGMA_Z_IMAG(den) <= 0.0 ) {
+    if ( MAGMA_Z_ABS(den) <= 0.0 ) {
         info = MAGMA_NONSPD;
         goto cleanup;
     }
