@@ -75,8 +75,8 @@ magma_zpcg(
     
     // solver variables
     magmaDoubleComplex alpha, beta;
-    double nom, nom0, r0, gammaold=1, gammanew, den, res;
-
+    double nom, nom0, r0,  res, nomb;
+    magmaDoubleComplex den, gammanew, gammaold = MAGMA_Z_MAKE(1.0,0.0);
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     
@@ -101,10 +101,14 @@ magma_zpcg(
     magma_zcopy( dofs, h.dval, 1, p.dval, 1 );                    // p = h
     nom = MAGMA_Z_REAL( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) ); // den = p dot q
+    den =  magma_zdotc(dofs, p.dval, 1, q.dval, 1); // den = p dot q
     solver_par->init_res = nom0;
-    
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE ){
+            
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    if ( nomb == 0.0 ){
+        nomb=1.0;
+    }       
+    if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
         r0 = ATOLERANCE;
     }
     solver_par->final_res = solver_par->init_res;
@@ -117,7 +121,7 @@ magma_zpcg(
         goto cleanup;
     }
     // check positive definite
-    if (den <= 0.0) {
+    if ( MAGMA_Z_REAL(den) + MAGMA_Z_IMAG(den) <= 0.0 ) {
         info = MAGMA_NONSPD;
         goto cleanup;
     }
@@ -136,22 +140,22 @@ magma_zpcg(
         CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
 
-        gammanew = MAGMA_Z_REAL( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
+        gammanew = magma_zdotc(dofs, r.dval, 1, h.dval, 1);
                                                             // gn = < r,h>
 
         if ( solver_par->numiter == 1 ) {
             magma_zcopy( dofs, h.dval, 1, p.dval, 1 );                    // p = h
         } else {
-            beta = MAGMA_Z_MAKE(gammanew/gammaold, 0.);       // beta = gn/go
+            beta = (gammanew/gammaold);       // beta = gn/go
             magma_zscal(dofs, beta, p.dval, 1);            // p = beta*p
             magma_zaxpy(dofs, c_one, h.dval, 1, p.dval, 1); // p = p + h
         }
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));   // q = A p
-        den = MAGMA_Z_REAL(magma_zdotc(dofs, p.dval, 1, q.dval, 1));
+        den = magma_zdotc( dofs, p.dval, 1, q.dval, 1 );
                 // den = p dot q
 
-        alpha = MAGMA_Z_MAKE(gammanew/den, 0.);
+        alpha = gammanew / den;
         magma_zaxpy(dofs,  alpha, p.dval, 1, x->dval, 1);     // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.dval, 1, r.dval, 1);      // r = r - alpha q
         gammaold = gammanew;
@@ -167,7 +171,7 @@ magma_zpcg(
             }
         }
 
-        if ( res/nom0 <= solver_par->rtol || res <= solver_par->atol ){
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
     }

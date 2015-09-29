@@ -70,7 +70,7 @@ magma_zcg_merge(
     
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h={0};
-    double nom, nom0, betanom, den;
+    double nom, nom0, betanom, den, nomb;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -108,6 +108,11 @@ magma_zcg_merge(
     den = MAGMA_Z_REAL( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
     solver_par->init_res = nom0;
     
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    if ( nomb == 0.0 ){
+        nomb=1.0;
+    }       
+    
     // array on host for the parameters
     CHECK( magma_zmalloc_cpu( &skp_h, 6 ));
     
@@ -123,7 +128,7 @@ magma_zcg_merge(
     magma_zsetvector( 6, skp_h, 1, skp, 1 );
 
     if( nom0 < solver_par->atol ||
-        nom0/solver_par->init_res < solver_par->rtol ){
+        nom0/nomb < solver_par->rtol ){
         goto cleanup;
     }
     solver_par->final_res = solver_par->init_res;
@@ -173,7 +178,7 @@ magma_zcg_merge(
         }
 
         if (  betanom  < solver_par->atol || 
-              betanom/solver_par->init_res < solver_par->rtol ) {
+              betanom/nomb < solver_par->rtol ) {
             break;
         }
     }

@@ -96,7 +96,7 @@ magma_zpbicgstab(
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
-    double nom, betanom, nom0, r0, res;
+    double nom, betanom, nom0, r0, res, nomb;
     //double den;
 
     // solver setup
@@ -107,9 +107,14 @@ magma_zpbicgstab(
     rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;
 
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE ){
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    if ( nomb == 0.0 ){
+        nomb=1.0;
+    }       
+    if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
         r0 = ATOLERANCE;
     }
+    
     solver_par->final_res = solver_par->init_res;
     solver_par->iter_res = solver_par->init_res;
     if ( solver_par->verbose > 0 ) {
@@ -178,7 +183,7 @@ magma_zpbicgstab(
             }
         }
 
-        if ( res/nom0 <= solver_par->rtol || res <= solver_par->atol ){
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
     }

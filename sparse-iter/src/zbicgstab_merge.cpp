@@ -71,7 +71,7 @@ magma_zbicgstab_merge(
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, *skp_h={0};
-    double nom, nom0, betanom;
+    double nom, nom0, betanom, nomb;
     //double den;
 
     // some useful variables
@@ -127,6 +127,17 @@ magma_zbicgstab_merge(
     // array on host for the parameters
     CHECK( magma_zmalloc_cpu( &skp_h, 8 ));
     
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    if ( nomb == 0.0 ){
+        nomb=1.0;
+    }       
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = nom0;
+        solver_par->timing[0] = 0.0;
+    }
+    
     skp_h[0]=alpha;
     skp_h[1]=beta;
     skp_h[2]=omega;
@@ -135,22 +146,15 @@ magma_zbicgstab_merge(
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
     magma_zsetvector( 8, skp_h, 1, skp, 1 );
     CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));             // z = A r
-    //den = MAGMA_Z_REAL( magma_zdotc(dofs, v.dval, 1, r.dval, 1) ); // den = z dot r
-    
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
     if( nom0 < solver_par->atol ||
-        nom0/solver_par->init_res < solver_par->rtol ){
-        solver_par->final_res = solver_par->init_res;
-        solver_par->iter_res = solver_par->init_res;
+        nom0/nomb < solver_par->rtol ){
         goto cleanup;
     }
 
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = nom0;
-        solver_par->timing[0] = 0.0;
-    }
 
     solver_par->numiter = 0;
     // start iteration
@@ -193,7 +197,7 @@ magma_zbicgstab_merge(
         }
         
         if (  betanom  < solver_par->atol || 
-              betanom/solver_par->init_res < solver_par->rtol ) {
+              betanom/nomb < solver_par->rtol ) {
             break;
         }
     }

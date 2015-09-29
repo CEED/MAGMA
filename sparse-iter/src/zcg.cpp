@@ -80,7 +80,7 @@ magma_zcg(
     
     // solver variables
     magmaDoubleComplex alpha, beta;
-    double nom, nom0, r0, betanom, betanomsq, den;
+    double nom, nom0, r0, betanom, betanomsq, den, nomb;
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
@@ -91,7 +91,11 @@ magma_zcg(
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.dval, 1, q.dval, 1) ); // den = p dot q
     solver_par->init_res = nom0;
     
-    if ( (r0 = nom * solver_par->rtol) < ATOLERANCE ){
+    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    if ( nomb == 0.0 ){
+        nomb=1.0;
+    }       
+    if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
         r0 = ATOLERANCE;
     }
     solver_par->final_res = solver_par->init_res;
