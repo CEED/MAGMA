@@ -153,7 +153,7 @@ magma_zhtodpo(
 magma_int_t
 magma_zdtohpo(
     magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t bigNB,
     magmaDoubleComplex     *A,   magma_int_t lda,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
     magma_queue_t queues[][3],

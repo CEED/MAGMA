@@ -15,11 +15,45 @@ use Getopt::Long;
 use Text::Wrap;
 
 # --------------------
+# parse options
+my $verbose = 0;
+my $opencl = 0;
+my( $file_wrapper, $file_interface );
+GetOptions(
+	"verbose"     => \$verbose,
+	"opencl"      => \$opencl,
+	"wrapper=s"   => \$file_wrapper,
+	"interface=s" => \$file_interface,
+) or die( "$!$usage" );
+
+if ( $verbose ) {
+	print "ARGV: @ARGV\n";
+}
+
+if ( $#ARGV != 0 ) {
+	die("Specify one header file as input.\n$usage");
+}
+
+my( $blas, $precision ) = $ARGV[0] =~ m/magma(blas)?_(s|d|c|z|zc|ds)\.i/;
+if ( not $precision ) {
+	die("Specify one of magma_[sdcz].i pre-processed header files.\n$usage");
+}
+
+# default output files
+if ( not $file_wrapper   ) { $file_wrapper   = "magma${blas}_${precision}f77.cpp"; }
+if ( not $file_interface ) { $file_interface = "magma${blas}_${precision}fortran.F90"; }
+
+print "file_wrapper   $file_wrapper\n";
+print "file_interface $file_interface\n";
+
+
+# --------------------
 # declare constants and variables
-my( $pre, $return, $func, $is_gpu, $text, $rest, $comment,
+my( $pre, $return, $prefix, $func, $is_gpu, $text, $rest, $comment,
 	$funcf,
 	$wrapper, $call, $interface, $vars,
-	$args, @args, $arg, $type, $type2, $base_type, $var, $first_arg, $is_ptr );
+	$args, @args, $arg, $type, $type2, $base_type, $var, $first_arg, $is_ptr,
+	%seen );
 
 # ignore auxiliary functions which the user doesn't need
 # ignore PLASMA functions (tstrf, incpiv)
@@ -51,9 +85,20 @@ my @ignore = qw(
 	[sdcz]latrd2
 	[sdcz]tsqrt
 	[sdcz]tstrf
+	
+	[sdcz]getmatrix_1D_row_bcyclic
+	[sdcz]setmatrix_1D_row_bcyclic
+	[sdcz]getmatrix_1D_col_bcyclic
+	[sdcz]setmatrix_1D_col_bcyclic
+	[sdcz]htodhe
+	[sdcz]htodpo
+	[sdcz]dtohhe
+	[sdcz]dtohpo
 );
 my $ignore = join( "|", @ignore );
-print STDERR "ignore: $ignore\n";
+if ( $verbose ) {
+	print STDERR "ignore: $ignore\n";
+}
 
 # map C types to name for magma_<name>_const(...) call
 my %constants = (
@@ -62,7 +107,7 @@ my %constants = (
 	'magma_uplo_t'       => 'uplo'   ,
 	'magma_diag_t'       => 'diag'   ,
 	'magma_side_t'       => 'side'   ,
-	'magma_type_t'       => 'type'   ,
+	'magma_type_t'       => 'uplo'   ,  # type == uplo
 	'magma_norm_t'       => 'norm'   ,
 	'magma_dist_t'       => 'dist'   ,
 	'magma_pack_t'       => 'pack'   ,
@@ -71,14 +116,6 @@ my %constants = (
 	'magma_vect_t'       => 'vect'   ,
 	'magma_direct_t'     => 'direct' ,
 	'magma_storev_t'     => 'storev' ,
-	'magma_order_t'      => 'order'  ,
-	'magma_trans_t'      => 'trans'  ,
-	'magma_uplo_t'       => 'uplo'   ,
-	'magma_diag_t'       => 'diag'   ,
-	'magma_side_t'       => 'side'   ,
-	'magma_type_t'       => 'type'   ,
-	'magma_norm_t'       => 'norm'   ,
-	'magma_dist_t'       => 'dist'   ,
 	'magma_bool_t'       => 'bool'   ,
 );
 
@@ -97,6 +134,7 @@ my %f90types = (
 	'magma_queue_t'      => 'integer         ',  # not sure what type to use for streams -- they are pointers, right?
 	'magma_event_t'      => 'integer         ',  # not sure what type to use for events  -- they are pointers, right?
 	
+	'magmaInt_ptr'           => 'magma_devptr_t',
 	'magmaFloat_ptr'         => 'magma_devptr_t',
 	'magmaDouble_ptr'        => 'magma_devptr_t',
 	'magmaFloatComplex_ptr'  => 'magma_devptr_t',
@@ -118,11 +156,13 @@ my %devptrs = (
 	'magmaFloatComplex'      => 'magma_cdevptr',
 	'magmaDoubleComplex'     => 'magma_zdevptr',
 	
+	'magmaInt_ptr'           => 'magma_idevptr',
 	'magmaFloat_ptr'         => 'magma_sdevptr',
 	'magmaDouble_ptr'        => 'magma_ddevptr',
 	'magmaFloatComplex_ptr'  => 'magma_cdevptr',
 	'magmaDoubleComplex_ptr' => 'magma_zdevptr',
 	
+	'magmaInt_const_ptr'           => 'magma_idevptr',
 	'magmaFloat_const_ptr'         => 'magma_sdevptr',
 	'magmaDouble_const_ptr'        => 'magma_ddevptr',
 	'magmaFloatComplex_const_ptr'  => 'magma_cdevptr',
@@ -136,38 +176,20 @@ $Text::Wrap::unexpand  = 0;  # no tabs
 
 
 # --------------------
-# parse options
-my $verbose = 0;
-my $opencl = 0;
-my( $file_wrapper, $file_interface );
-GetOptions(
-	"verbose"     => \$verbose,
-	"opencl"      => \$opencl,
-	"wrapper=s"   => \$file_wrapper,
-	"interface=s" => \$file_interface,
-) or die( "$!$usage" );
-
-print "ARGV: @ARGV\n";
-
-if ( $#ARGV != 0 ) {
-	die("Specify one header file as input.\n$usage");
-}
-
-my( $precision ) = $ARGV[0] =~ m/magma_([sdcz])\.i/;
-if ( not $precision ) {
-	die("Specify one of magma_[sdcz].i pre-processed header files.\n$usage");
-}
-
-# default output files
-if ( not $file_wrapper   ) { $file_wrapper   = "magma_${precision}f77.cpp"; }
-if ( not $file_interface ) { $file_interface = "magma_${precision}fortran.F90"; }
-
-print "file_wrapper   $file_wrapper\n";
-print "file_interface $file_interface\n";
-
-
-# --------------------
 # header for magma_zf77.cpp wrappers
+#
+# I think previously, zf77.cpp generated cf77, etc., so needed these #ifndef statements.
+# Not needed now, but put here for future reference.
+#    #ifndef magma_cdevptr
+#    #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (ptr_))
+#    #endif
+#    #ifndef magma_ddevptr
+#    #define magma_ddevptr(ptr_) ((double*)            (ptr_))
+#    #endif
+#    #ifndef magma_sdevptr
+#    #define magma_sdevptr(ptr_) ((float*)             (ptr_))
+#    #endif
+
 my $output_wrapper = <<EOT;
 /*******************************************************************************
  *  This file is AUTOMATICALLY GENERATED by:
@@ -189,27 +211,15 @@ typedef size_t devptr_t;
 #ifdef PGI_FORTRAN
     #define magma_idevptr(ptr_) ((int*)               (ptr_))
     #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(ptr_))
-    #ifndef magma_cdevptr
     #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (ptr_))
-    #endif
-    #ifndef magma_ddevptr
     #define magma_ddevptr(ptr_) ((double*)            (ptr_))
-    #endif
-    #ifndef magma_sdevptr
     #define magma_sdevptr(ptr_) ((float*)             (ptr_))
-    #endif
 #else
     #define magma_idevptr(ptr_) ((int*)               (uintptr_t)(*(ptr_)))
     #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(uintptr_t)(*(ptr_)))
-    #ifndef magma_cdevptr
     #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (uintptr_t)(*(ptr_)))
-    #endif
-    #ifndef magma_ddevptr
     #define magma_ddevptr(ptr_) ((double*)            (uintptr_t)(*(ptr_)))
-    #endif
-    #ifndef magma_sdevptr
     #define magma_sdevptr(ptr_) ((float*)             (uintptr_t)(*(ptr_)))
-    #endif
 #endif
 
 #ifdef __cplusplus
@@ -228,7 +238,7 @@ my $output_interface = <<EOT;
 !!  Do not edit.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-module magma_${precision}fortran
+module magma${blas}_${precision}fortran
 
 use magma_param
 
@@ -259,33 +269,37 @@ s/void \wq_to_panel.*\n//;
 # strip out extern consts
 s/extern const .*;\n//g;
 
-
+my $i = 1;
 while( $_ ) {
+	#print STDERR $i, ': ', substr( $_, 0, 10 ), "\n";
+	#$i += 1;
+	
 	# look for function, e.g.: "magma_int_t magma_foo_gpu("
-	if ( m/(.*?)^(magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
+	if ( m/(.*?)^(magma_int_t|int|void)\s+(magma|magmablas)_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
 		# parse magma function
 		$pre    = $1;
 		$return = $2;
-		$func   = $3;
-		$is_gpu = $4;
-		$text   = $5;
+		$prefix = $3;
+		$func   = $4;
+		$is_gpu = $5;
+		$text   = $6;
 		
 		# get arguments: "( ... )"
 		($args, $rest) = extract_bracketed( $text, '()' );
 		$args =~ s/\n/ /g;
 		$args =~ s/^\( *//;
 		$args =~ s/ *\)$//;
+		
+		if ( $func =~ s/_internal// ) {
+			$args =~ s/,\s+const char\*\s+func,\s+const char\*\s+file,\s+int\s+line//;
+			print STDERR "dropping internal args ($args)\n\n";
+		}
+		
 		@args = split( /, */, $args );
 		
-		$funcf = "magmaf_$func$is_gpu";
-		if ( $is_gpu ) {
-			$wrapper = sprintf( "#define %s FORTRAN_NAME( %s, %s )\n",
-				${funcf}, $funcf, uc($funcf) );
-		}
-		else {
-			$wrapper = sprintf( "#define %s FORTRAN_NAME( %s, %s )\n",
-				${funcf}, $funcf, uc($funcf) );
-		}
+		$funcf = "${prefix}f_$func$is_gpu";
+		$wrapper = sprintf( "#define %s FORTRAN_NAME( %s, %s )\n",
+			${funcf}, $funcf, uc($funcf) );
 		
 		my $match = $func =~ m/^($ignore)$/;
 		if ( $verbose ) {
@@ -297,22 +311,29 @@ while( $_ ) {
 			$wrapper   = "";
 			$interface = "";
 		}
-		elsif ( $func =~ m/^($ignore)$/ or $func =~ m/_mgpu/ ) {
+		elsif ( $func =~ m/^($ignore)$/ or $func =~ m/(_mgpu|_batch|_vbatch)/ ) {
 			# ignore auxiliary functions and multi-GPU functions, since
 			# we haven't dealt with passing arrays of pointers in Fortran yet
+			$wrapper   = "";
+			$interface = "";
+		}
+		elsif ( $seen{ $funcf } ) {
+			print STDERR "ignoring duplicate $func\n";
 			$wrapper   = "";
 			$interface = "";
 		}
 		elsif ( $func =~ m/get_\w+_nb/ and $#args == 0 ) {  # i.e., len(@args) is 1
 			# special case for get_nb functions, to return a value
 			# is returning an int safe? otherwise, we could make these take an output argument.
-			$wrapper  .= "magma_int_t ${funcf}( magma_int_t *m )\n{\n    return magma_$func( *m );\n}\n\n";
+			$wrapper  .= "magma_int_t ${funcf}( magma_int_t *m )\n{\n    return ${prefix}_$func( *m );\n}\n\n";
 			$interface = "integer function $funcf( m )\n    integer :: m\nend function $funcf\n\n";
 		}
 		else {
+			$seen{ $funcf } = 1;
+			
 			# build up wrapper and the call inside the wrapper, argument by argument
 			$wrapper .= "void ${funcf}(\n    ";
-			$call     = "magma_$func$is_gpu(\n        ";
+			$call     = "${prefix}_$func$is_gpu(\n        ";
 			
 			# build up Fortran interface and variable definitions, argument by argument
 			$interface = "subroutine $funcf( ";
@@ -320,6 +341,7 @@ while( $_ ) {
 			
 			$first_arg = 1;
 			foreach $arg ( @args ) {
+				$arg =~ s/\bconst +//g;
 				($type, $var, $type2) = $arg =~ m/^((?:const +)?\w+(?: *\*+)?) *(\w+)([\[0-9\]]*)$/;
 				if ( not $type ) {
 					print STDERR "\nFAILED: func $func, arg $arg\n";
@@ -438,26 +460,7 @@ my %datatype = (
 $output_interface .= <<EOT;
 end interface
 
-!---- Fortran-only subroutines (see $0 to edit) ----
-contains
-
-subroutine magmaf_${precision}off1d( ptrNew, ptrOld, inc, i)
-    magma_devptr_t   :: ptrNew
-    magma_devptr_t   :: ptrOld
-    integer          :: inc, i
-
-    ptrNew = ptrOld + (i-1) * inc * sizeof_$datatype{$precision}
-end subroutine magmaf_${precision}off1d
-
-subroutine magmaf_${precision}off2d( ptrNew, ptrOld, lda, i, j)
-    magma_devptr_t   :: ptrNew
-    magma_devptr_t   :: ptrOld
-    integer          :: lda, i, j
-
-    ptrNew = ptrOld + ((j-1) * lda + (i-1)) * sizeof_$datatype{$precision}
-end subroutine magmaf_${precision}off2d
-
-end module magma_${precision}fortran
+end module magma${blas}_${precision}fortran
 EOT
 
 

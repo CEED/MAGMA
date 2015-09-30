@@ -94,7 +94,7 @@ end subroutine magmaf_dbulge_get_Vblksiz
 subroutine magmaf_get_dbulge_gcperf(  )
 end subroutine magmaf_get_dbulge_gcperf
 
-subroutine magmaf_dmove_eig( range, n, w, il, iu, vl, vu, m )
+subroutine magmaf_dmove_eig( range, n, w, il, iu, vl, vu, mout )
     character        :: range
     integer          :: n
     double precision :: w(*)
@@ -102,7 +102,7 @@ subroutine magmaf_dmove_eig( range, n, w, il, iu, vl, vu, m )
     integer          :: iu(*)
     double precision :: vl
     double precision :: vu
-    integer          :: m
+    integer          :: mout(*)
 end subroutine magmaf_dmove_eig
 
 subroutine magmaf_dvrange( k, d, il, iu, vl, vu )
@@ -369,7 +369,7 @@ subroutine magmaf_dsyevd( jobz, uplo, n, A, lda, w, work, lwork, iwork, liwork, 
     integer          :: info
 end subroutine magmaf_dsyevd
 
-subroutine magmaf_dsyevdx( jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, work,  &
+subroutine magmaf_dsyevdx( jobz, range, uplo, n, A, lda, vl, vu, il, iu, mout, w, work,  &
         lwork, iwork, liwork, info )
     character        :: jobz
     character        :: range
@@ -381,7 +381,7 @@ subroutine magmaf_dsyevdx( jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, w
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -390,7 +390,7 @@ subroutine magmaf_dsyevdx( jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w, w
     integer          :: info
 end subroutine magmaf_dsyevdx
 
-subroutine magmaf_dsyevdx_2stage( jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w,  &
+subroutine magmaf_dsyevdx_2stage( jobz, range, uplo, n, A, lda, vl, vu, il, iu, mout, w,  &
         work, lwork, iwork, liwork, info )
     character        :: jobz
     character        :: range
@@ -402,7 +402,7 @@ subroutine magmaf_dsyevdx_2stage( jobz, range, uplo, n, A, lda, vl, vu, il, iu, 
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -441,7 +441,7 @@ subroutine magmaf_dsygvd( itype, jobz, uplo, n, A, lda, B, ldb, w, work, lwork, 
 end subroutine magmaf_dsygvd
 
 subroutine magmaf_dsygvdx( itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu, il, iu,  &
-        m, w, work, lwork, iwork, liwork, info )
+        mout, w, work, lwork, iwork, liwork, info )
     integer          :: itype
     character        :: jobz
     character        :: range
@@ -455,7 +455,7 @@ subroutine magmaf_dsygvdx( itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu, 
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -465,7 +465,7 @@ subroutine magmaf_dsygvdx( itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu, 
 end subroutine magmaf_dsygvdx
 
 subroutine magmaf_dsygvdx_2stage( itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu,  &
-        il, iu, m, w, work, lwork, iwork, liwork, info )
+        il, iu, mout, w, work, lwork, iwork, liwork, info )
     integer          :: itype
     character        :: jobz
     character        :: range
@@ -479,7 +479,7 @@ subroutine magmaf_dsygvdx_2stage( itype, jobz, range, uplo, n, A, lda, B, ldb, v
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -570,6 +570,15 @@ subroutine magmaf_dsytrd_sy2sb( uplo, n, nb, A, lda, tau, work, lwork, dT, info 
     magma_devptr_t   :: dT
     integer          :: info
 end subroutine magmaf_dsytrd_sy2sb
+
+subroutine magmaf_dsytrf_nopiv_cpu( uplo, n, ib, A, lda, info )
+    character        :: uplo
+    integer          :: n
+    integer          :: ib
+    double precision :: A(*)
+    integer          :: lda
+    integer          :: info
+end subroutine magmaf_dsytrf_nopiv_cpu
 
 subroutine magmaf_dsytrs_nopiv_gpu( uplo, n, nrhs, dA, ldda, dB, lddb, info )
     character        :: uplo
@@ -903,7 +912,7 @@ subroutine magmaf_dsyevd_m( ngpu, jobz, uplo, n, A, lda, w, work, lwork, iwork, 
 end subroutine magmaf_dsyevd_m
 
 subroutine magmaf_dsyevdx_2stage_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu,  &
-        m, w, work, lwork, iwork, liwork, info )
+        mout, w, work, lwork, iwork, liwork, info )
     integer          :: ngpu
     character        :: jobz
     character        :: range
@@ -915,7 +924,7 @@ subroutine magmaf_dsyevdx_2stage_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, 
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -924,7 +933,7 @@ subroutine magmaf_dsyevdx_2stage_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, 
     integer          :: info
 end subroutine magmaf_dsyevdx_2stage_m
 
-subroutine magmaf_dsyevdx_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu, m, w,  &
+subroutine magmaf_dsyevdx_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu, mout, w,  &
         work, lwork, iwork, liwork, info )
     integer          :: ngpu
     character        :: jobz
@@ -937,7 +946,7 @@ subroutine magmaf_dsyevdx_m( ngpu, jobz, range, uplo, n, A, lda, vl, vu, il, iu,
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -978,7 +987,7 @@ subroutine magmaf_dsygvd_m( ngpu, itype, jobz, uplo, n, A, lda, B, ldb, w, work,
 end subroutine magmaf_dsygvd_m
 
 subroutine magmaf_dsygvdx_2stage_m( ngpu, itype, jobz, range, uplo, n, A, lda, B, ldb,  &
-        vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info )
+        vl, vu, il, iu, mout, w, work, lwork, iwork, liwork, info )
     integer          :: ngpu
     integer          :: itype
     character        :: jobz
@@ -993,7 +1002,7 @@ subroutine magmaf_dsygvdx_2stage_m( ngpu, itype, jobz, range, uplo, n, A, lda, B
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -1003,7 +1012,7 @@ subroutine magmaf_dsygvdx_2stage_m( ngpu, itype, jobz, range, uplo, n, A, lda, B
 end subroutine magmaf_dsygvdx_2stage_m
 
 subroutine magmaf_dsygvdx_m( ngpu, itype, jobz, range, uplo, n, A, lda, B, ldb, vl, vu,  &
-        il, iu, m, w, work, lwork, iwork, liwork, info )
+        il, iu, mout, w, work, lwork, iwork, liwork, info )
     integer          :: ngpu
     integer          :: itype
     character        :: jobz
@@ -1018,7 +1027,7 @@ subroutine magmaf_dsygvdx_m( ngpu, itype, jobz, range, uplo, n, A, lda, B, ldb, 
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: work(*)
     integer          :: lwork
@@ -1447,8 +1456,8 @@ subroutine magmaf_dsyevd_gpu( jobz, uplo, n, dA, ldda, w, wA, ldwa, work, lwork,
     integer          :: info
 end subroutine magmaf_dsyevd_gpu
 
-subroutine magmaf_dsyevdx_gpu( jobz, range, uplo, n, dA, ldda, vl, vu, il, iu, m, w, wA,  &
-        ldwa, work, lwork, iwork, liwork, info )
+subroutine magmaf_dsyevdx_gpu( jobz, range, uplo, n, dA, ldda, vl, vu, il, iu, mout, w,  &
+        wA, ldwa, work, lwork, iwork, liwork, info )
     character        :: jobz
     character        :: range
     character        :: uplo
@@ -1459,7 +1468,7 @@ subroutine magmaf_dsyevdx_gpu( jobz, range, uplo, n, dA, ldda, vl, vu, il, iu, m
     double precision :: vu
     integer          :: il
     integer          :: iu
-    integer          :: m
+    integer          :: mout(*)
     double precision :: w(*)
     double precision :: wA(*)
     integer          :: ldwa
@@ -1802,24 +1811,5 @@ subroutine magmaf_dq_to_panel( uplo, ib, A, lda, work )
 end subroutine magmaf_dq_to_panel
 
 end interface
-
-!---- Fortran-only subroutines (see ../tools/fortran_wrappers.pl to edit) ----
-contains
-
-subroutine magmaf_doff1d( ptrNew, ptrOld, inc, i)
-    magma_devptr_t   :: ptrNew
-    magma_devptr_t   :: ptrOld
-    integer          :: inc, i
-
-    ptrNew = ptrOld + (i-1) * inc * sizeof_double
-end subroutine magmaf_doff1d
-
-subroutine magmaf_doff2d( ptrNew, ptrOld, lda, i, j)
-    magma_devptr_t   :: ptrNew
-    magma_devptr_t   :: ptrOld
-    integer          :: lda, i, j
-
-    ptrNew = ptrOld + ((j-1) * lda + (i-1)) * sizeof_double
-end subroutine magmaf_doff2d
 
 end module magma_dfortran
