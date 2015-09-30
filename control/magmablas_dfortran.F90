@@ -126,15 +126,6 @@ subroutine magmablasf_dlacpy_sym_out( uplo, m, n, rows, perm, dA, ldda, dB, lddb
     integer          :: lddb
 end subroutine magmablasf_dlacpy_sym_out
 
-subroutine magmablasf_dlarfg_work( n, dalpha, dx, incx, dtau, dwork )
-    integer          :: n
-    magma_devptr_t   :: dalpha
-    magma_devptr_t   :: dx
-    integer          :: incx
-    magma_devptr_t   :: dtau
-    magma_devptr_t   :: dwork
-end subroutine magmablasf_dlarfg_work
-
 subroutine magmablasf_dlascl( type, kl, ku, cfrom, cto, m, n, dA, ldda, info )
     character        :: type
     integer          :: kl
@@ -522,51 +513,6 @@ subroutine magmablasf_dgemm_reduce( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC
     magma_devptr_t   :: dC
     integer          :: lddc
 end subroutine magmablasf_dgemm_reduce
-
-subroutine magmablasf_dsymm( side, uplo, m, n, alpha, dA, ldda, dB, lddb, beta, dC, lddc  &
-        )
-    character        :: side
-    character        :: uplo
-    integer          :: m
-    integer          :: n
-    double precision :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    double precision :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_dsymm
-
-subroutine magmablasf_dsyr2k( uplo, trans, n, k, alpha, dA, ldda, dB, lddb, beta, dC,  &
-        lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    double precision :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    double precision :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_dsyr2k
-
-subroutine magmablasf_dsyrk( uplo, trans, n, k, alpha, dA, ldda, beta, dC, lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    double precision :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    double precision :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_dsyrk
 
 subroutine magmablasf_dtrsm( side, uplo, transA, diag, m, n, alpha, dA, ldda, dB, lddb )
     character        :: side

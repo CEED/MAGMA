@@ -211,22 +211,6 @@ void magmablasf_zlacpy_sym_out(
         magma_zdevptr(dB), *lddb );
 }
 
-#define magmablasf_zlarfg_work FORTRAN_NAME( magmablasf_zlarfg_work, MAGMABLASF_ZLARFG_WORK )
-void magmablasf_zlarfg_work(
-    magma_int_t *n,
-    devptr_t *dalpha,
-    devptr_t *dx, magma_int_t *incx,
-    devptr_t *dtau,
-    devptr_t *dwork )
-{
-    magmablas_zlarfg_work(
-        *n,
-        magma_zdevptr(dalpha),
-        magma_zdevptr(dx), *incx,
-        magma_zdevptr(dtau),
-        magma_zdevptr(dwork) );
-}
-
 #define magmablasf_zlascl FORTRAN_NAME( magmablasf_zlascl, MAGMABLASF_ZLASCL )
 void magmablasf_zlascl(
     const char* type, magma_int_t *kl, magma_int_t *ku, double *cfrom, double *cto, magma_int_t *m, magma_int_t *n,
@@ -718,86 +702,6 @@ void magmablasf_zgemm_reduce(
         *m, *n, *k, *alpha,
         magma_zdevptr(dA), *ldda,
         magma_zdevptr(dB), *lddb, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zhemm FORTRAN_NAME( magmablasf_zhemm, MAGMABLASF_ZHEMM )
-void magmablasf_zhemm(
-    const char* side, const char* uplo, magma_int_t *m, magma_int_t *n, magmaDoubleComplex *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, magmaDoubleComplex *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zhemm(
-        magma_side_const(*side), magma_uplo_const(*uplo), *m, *n, *alpha,
-        magma_zdevptr(dA), *ldda,
-        magma_zdevptr(dB), *lddb, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zsymm FORTRAN_NAME( magmablasf_zsymm, MAGMABLASF_ZSYMM )
-void magmablasf_zsymm(
-    const char* side, const char* uplo, magma_int_t *m, magma_int_t *n, magmaDoubleComplex *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, magmaDoubleComplex *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zsymm(
-        magma_side_const(*side), magma_uplo_const(*uplo), *m, *n, *alpha,
-        magma_zdevptr(dA), *ldda,
-        magma_zdevptr(dB), *lddb, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zsyr2k FORTRAN_NAME( magmablasf_zsyr2k, MAGMABLASF_ZSYR2K )
-void magmablasf_zsyr2k(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, magmaDoubleComplex *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, magmaDoubleComplex *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zsyr2k(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_zdevptr(dA), *ldda,
-        magma_zdevptr(dB), *lddb, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zher2k FORTRAN_NAME( magmablasf_zher2k, MAGMABLASF_ZHER2K )
-void magmablasf_zher2k(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, magmaDoubleComplex *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, double *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zher2k(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_zdevptr(dA), *ldda,
-        magma_zdevptr(dB), *lddb, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zsyrk FORTRAN_NAME( magmablasf_zsyrk, MAGMABLASF_ZSYRK )
-void magmablasf_zsyrk(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, magmaDoubleComplex *alpha,
-    devptr_t *dA, magma_int_t *ldda, magmaDoubleComplex *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zsyrk(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_zdevptr(dA), *ldda, *beta,
-        magma_zdevptr(dC), *lddc );
-}
-
-#define magmablasf_zherk FORTRAN_NAME( magmablasf_zherk, MAGMABLASF_ZHERK )
-void magmablasf_zherk(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, double *alpha,
-    devptr_t *dA, magma_int_t *ldda, double *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_zherk(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_zdevptr(dA), *ldda, *beta,
         magma_zdevptr(dC), *lddc );
 }
 

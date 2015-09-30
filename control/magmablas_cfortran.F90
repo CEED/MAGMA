@@ -141,15 +141,6 @@ subroutine magmablasf_clacpy_sym_out( uplo, m, n, rows, perm, dA, ldda, dB, lddb
     integer          :: lddb
 end subroutine magmablasf_clacpy_sym_out
 
-subroutine magmablasf_clarfg_work( n, dalpha, dx, incx, dtau, dwork )
-    integer          :: n
-    magma_devptr_t   :: dalpha
-    magma_devptr_t   :: dx
-    integer          :: incx
-    magma_devptr_t   :: dtau
-    magma_devptr_t   :: dwork
-end subroutine magmablasf_clarfg_work
-
 subroutine magmablasf_clascl( type, kl, ku, cfrom, cto, m, n, dA, ldda, info )
     character        :: type
     integer          :: kl
@@ -567,96 +558,6 @@ subroutine magmablasf_cgemm_reduce( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC
     magma_devptr_t   :: dC
     integer          :: lddc
 end subroutine magmablasf_cgemm_reduce
-
-subroutine magmablasf_chemm( side, uplo, m, n, alpha, dA, ldda, dB, lddb, beta, dC, lddc  &
-        )
-    character        :: side
-    character        :: uplo
-    integer          :: m
-    integer          :: n
-    complex          :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    complex          :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_chemm
-
-subroutine magmablasf_csymm( side, uplo, m, n, alpha, dA, ldda, dB, lddb, beta, dC, lddc  &
-        )
-    character        :: side
-    character        :: uplo
-    integer          :: m
-    integer          :: n
-    complex          :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    complex          :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_csymm
-
-subroutine magmablasf_csyr2k( uplo, trans, n, k, alpha, dA, ldda, dB, lddb, beta, dC,  &
-        lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    complex          :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    complex          :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_csyr2k
-
-subroutine magmablasf_cher2k( uplo, trans, n, k, alpha, dA, ldda, dB, lddb, beta, dC,  &
-        lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    complex          :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    magma_devptr_t   :: dB
-    integer          :: lddb
-    real             :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_cher2k
-
-subroutine magmablasf_csyrk( uplo, trans, n, k, alpha, dA, ldda, beta, dC, lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    complex          :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    complex          :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_csyrk
-
-subroutine magmablasf_cherk( uplo, trans, n, k, alpha, dA, ldda, beta, dC, lddc )
-    character        :: uplo
-    character        :: trans
-    integer          :: n
-    integer          :: k
-    real             :: alpha
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    real             :: beta
-    magma_devptr_t   :: dC
-    integer          :: lddc
-end subroutine magmablasf_cherk
 
 subroutine magmablasf_ctrsm( side, uplo, transA, diag, m, n, alpha, dA, ldda, dB, lddb )
     character        :: side

@@ -189,22 +189,6 @@ void magmablasf_slacpy_sym_out(
         magma_sdevptr(dB), *lddb );
 }
 
-#define magmablasf_slarfg_work FORTRAN_NAME( magmablasf_slarfg_work, MAGMABLASF_SLARFG_WORK )
-void magmablasf_slarfg_work(
-    magma_int_t *n,
-    devptr_t *dalpha,
-    devptr_t *dx, magma_int_t *incx,
-    devptr_t *dtau,
-    devptr_t *dwork )
-{
-    magmablas_slarfg_work(
-        *n,
-        magma_sdevptr(dalpha),
-        magma_sdevptr(dx), *incx,
-        magma_sdevptr(dtau),
-        magma_sdevptr(dwork) );
-}
-
 #define magmablasf_slascl FORTRAN_NAME( magmablasf_slascl, MAGMABLASF_SLASCL )
 void magmablasf_slascl(
     const char* type, magma_int_t *kl, magma_int_t *ku, float *cfrom, float *cto, magma_int_t *m, magma_int_t *n,
@@ -666,46 +650,6 @@ void magmablasf_sgemm_reduce(
         *m, *n, *k, *alpha,
         magma_sdevptr(dA), *ldda,
         magma_sdevptr(dB), *lddb, *beta,
-        magma_sdevptr(dC), *lddc );
-}
-
-#define magmablasf_ssymm FORTRAN_NAME( magmablasf_ssymm, MAGMABLASF_SSYMM )
-void magmablasf_ssymm(
-    const char* side, const char* uplo, magma_int_t *m, magma_int_t *n, float *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, float *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_ssymm(
-        magma_side_const(*side), magma_uplo_const(*uplo), *m, *n, *alpha,
-        magma_sdevptr(dA), *ldda,
-        magma_sdevptr(dB), *lddb, *beta,
-        magma_sdevptr(dC), *lddc );
-}
-
-#define magmablasf_ssyr2k FORTRAN_NAME( magmablasf_ssyr2k, MAGMABLASF_SSYR2K )
-void magmablasf_ssyr2k(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, float *alpha,
-    devptr_t *dA, magma_int_t *ldda,
-    devptr_t *dB, magma_int_t *lddb, float *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_ssyr2k(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_sdevptr(dA), *ldda,
-        magma_sdevptr(dB), *lddb, *beta,
-        magma_sdevptr(dC), *lddc );
-}
-
-#define magmablasf_ssyrk FORTRAN_NAME( magmablasf_ssyrk, MAGMABLASF_SSYRK )
-void magmablasf_ssyrk(
-    const char* uplo, const char* trans, magma_int_t *n, magma_int_t *k, float *alpha,
-    devptr_t *dA, magma_int_t *ldda, float *beta,
-    devptr_t *dC, magma_int_t *lddc )
-{
-    magmablas_ssyrk(
-        magma_uplo_const(*uplo), magma_trans_const(*trans), *n, *k, *alpha,
-        magma_sdevptr(dA), *ldda, *beta,
         magma_sdevptr(dC), *lddc );
 }
 
