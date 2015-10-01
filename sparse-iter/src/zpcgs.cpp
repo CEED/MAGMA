@@ -133,6 +133,7 @@ magma_zpcgs(
         
         rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
                                                             // rho = < r,r_tld>    
+        printf("rho(%d)=%f\n", solver_par->numiter, rho);
         if ( MAGMA_Z_ABS(rho) == 0.0 ) {
             goto cleanup;
         }
@@ -160,7 +161,10 @@ magma_zpcgs(
         CHECK( magma_z_spmv( c_one, A, p_hat, c_zero, v_hat, queue ));   // v = A p
 
         alpha = rho / magma_zdotc(dofs, r_tld.dval, 1, v_hat.dval, 1);
-        
+        printf("r_tld'*r_tld(%d)=%f\n", solver_par->numiter, magma_zdotc(dofs, r_tld.dval, 1, r_tld.dval, 1) );
+        printf("q'*q(%d)=%f\n", solver_par->numiter, magma_zdotc(dofs,v_hat.dval, 1, v_hat.dval, 1) );
+        printf("r_tld'*q(%d)=%f\n", solver_par->numiter, magma_zdotc(dofs, r_tld.dval, 1, v_hat.dval, 1) );
+        printf("alpha(%d)=%f\n", solver_par->numiter, alpha);
         magma_zcopy( dofs, u.dval, 1, q.dval, 1 );              // q = u
         magma_zaxpy(dofs,  -alpha, v_hat.dval, 1, q.dval, 1);   // q = u - alpha v_hat
         
@@ -175,6 +179,7 @@ magma_zpcgs(
         CHECK(  magma_zresidualvec( A, b, *x, &r, &res, queue));
 
         res = magma_dznrm2( dofs, r.dval, 1 );
+printf("res(%d)=%f\n", solver_par->numiter, res);
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
