@@ -193,7 +193,8 @@ magma_zparse_opts(
                          opts->solver_par.restart = 4; break;
                 case 12: opts->solver_par.solver = Magma_PIDR;
                          opts->solver_par.restart = 4; break;
-                case 13: opts->solver_par.solver = Magma_PCGS;
+                case 13: opts->solver_par.solver = Magma_CGS; break;
+                case 14: opts->solver_par.solver = Magma_PCGS; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
@@ -210,7 +211,7 @@ magma_zparse_opts(
                 case 5: opts->precond_par.solver = Magma_GMRES; break;
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
                 case 7: opts->precond_par.solver = Magma_IDR; break;
-                case 8: opts->precond_par.solver = Magma_PCGS; break;
+                case 8: opts->precond_par.solver = Magma_CGS; break;
             }
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
