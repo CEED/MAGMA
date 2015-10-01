@@ -80,6 +80,8 @@ magma_z_precond(
                 CHECK( magma_zbaiter( A, b, x, &psolver_par, queue )); break;
         case  Magma_IDR:
                 CHECK( magma_zidr( A, b, x, &psolver_par, queue )); break;
+        case  Magma_CGS:
+                CHECK( magma_zcgs( A, b, x, &psolver_par, queue )); break;
         default:
                 CHECK( magma_zcg_res( A, b, x, &psolver_par, queue )); break;
     }
