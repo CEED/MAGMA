@@ -44,6 +44,7 @@ static const char *usage_sparse =
 "               10  Block-asynchronous Iteration\n"
 "               11  IDR (smoothed)\n"
 "               12  PIDR (smoothed)\n"
+"               13  PCGS\n"
 "               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
@@ -63,6 +64,7 @@ static const char *usage_sparse =
 "                   --piter k     Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
 "                   7   IDR\n"
+"                   8   PCGS\n"
 " --piter x     Number of relaxation steps for approximate triangular solve (ILU case).\n"
 " --psweeps x   Number of iterative ILU sweeps for to generate preconditioner (iterative ILU case).\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
@@ -191,6 +193,7 @@ magma_zparse_opts(
                          opts->solver_par.restart = 4; break;
                 case 12: opts->solver_par.solver = Magma_PIDR;
                          opts->solver_par.restart = 4; break;
+                case 13: opts->solver_par.solver = Magma_PCGS;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
@@ -207,6 +210,7 @@ magma_zparse_opts(
                 case 5: opts->precond_par.solver = Magma_GMRES; break;
                 case 6: opts->precond_par.solver = Magma_BAITER; break;
                 case 7: opts->precond_par.solver = Magma_IDR; break;
+                case 8: opts->precond_par.solver = Magma_PCGS; break;
             }
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
