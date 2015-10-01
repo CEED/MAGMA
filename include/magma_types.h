@@ -478,13 +478,14 @@ typedef enum {
     Magma_FUNCTION     = 452,
     Magma_IDR          = 453,
     Magma_PIDR         = 454,
-    Magma_PCGS         = 455
+    Magma_CGS          = 455,
+    Magma_PCGS         = 456
 } magma_solver_type;
 
 typedef enum {
-    Magma_CGS          = 461,
-    Magma_FUSED_CGS    = 462,
-    Magma_MGS          = 463
+    Magma_CGSO         = 461,
+    Magma_FUSED_CGSO   = 462,
+    Magma_MGSO         = 463
 } magma_ortho_t;
 
 typedef enum {
