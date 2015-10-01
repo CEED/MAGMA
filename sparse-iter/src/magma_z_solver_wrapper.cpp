@@ -98,6 +98,8 @@ magma_z_solver(
             case  Magma_BAITER:
                     //CHECK( magma_zjacobidomainoverlap( A, b, x, &zopts->solver_par, queue )); break;
                     CHECK( magma_zbaiter( A, b, x, &zopts->solver_par, queue ) ); break;
+            case  Magma_PCGS:
+                    CHECK( magma_zpcgs( A, b, x, &zopts->solver_par, queue ) ); break;
             default:
                     printf("error: solver class not supported.\n"); break;
         }

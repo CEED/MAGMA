@@ -35,6 +35,7 @@ ZSRC += \
 	zjacobi.cpp			\
 	zbaiter.cpp			\
 	zpcg.cpp			\
+    zpcgs.cpp			\
 	zbpcg.cpp			\
 	zfgmres.cpp 		\
 	zpbicgstab.cpp		\
