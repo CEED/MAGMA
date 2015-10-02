@@ -36,6 +36,7 @@ ZSRC += \
 	zbaiter.cpp			\
 	zpcg.cpp			\
     zcgs.cpp			\
+    zcgs_merge.cpp		\
     zpcgs.cpp			\
 	zbpcg.cpp			\
 	zfgmres.cpp 		\
