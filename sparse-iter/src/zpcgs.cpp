@@ -166,9 +166,10 @@ magma_zpcgs(
         // preconditioner
         CHECK( magma_z_applyprecond_left( A, t, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &u_hat, precond_par, queue ));
-        magma_zaxpy(dofs,  alpha, u_hat.dval, 1, x->dval, 1);     // x = x + alpha u_hat
+
 
         CHECK( magma_z_spmv( c_one, A, u_hat, c_zero, t, queue ));   // t = A u_hat
+        magma_zaxpy(dofs,  alpha, u_hat.dval, 1, x->dval, 1);     // x = x + alpha u_hat
         magma_zaxpy(dofs,  c_mone*alpha, t.dval, 1, r.dval, 1);       // r = r -alpha*A u_hat
         
         //CHECK(  magma_zresidualvec( A, b, *x, &r, &res, queue));
