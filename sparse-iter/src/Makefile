@@ -38,6 +38,7 @@ ZSRC += \
     zcgs.cpp			\
     zcgs_merge.cpp		\
     zpcgs.cpp			\
+    zpcgs_merge.cpp		\
 	zbpcg.cpp			\
 	zfgmres.cpp 		\
 	zpbicgstab.cpp		\

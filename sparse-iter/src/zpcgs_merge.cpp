@@ -56,7 +56,7 @@
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zpcgs(
+magma_zpcgs_merge(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
@@ -139,18 +139,28 @@ magma_zpcgs(
         
         if ( solver_par->numiter > 1 ) {                        // direction vectors
             beta = rho / rho_l;            
-            magma_zcopy( dofs, r.dval, 1, u.dval, 1 );          // u = r
-            magma_zaxpy(dofs,  beta, q.dval, 1, u.dval, 1);     // u = r + beta q
-            magma_zscal(dofs, beta, p.dval, 1);                 // p = beta*p
-            magma_zaxpy(dofs, c_one, q.dval, 1, p.dval, 1);      // p = q + beta*p
-            magma_zscal(dofs, beta, p.dval, 1);                 // p = beta*(q + beta*p)
-            magma_zaxpy(dofs, c_one, u.dval, 1, p.dval, 1);     // p = u + beta*(q + beta*p)
-        //u = r + beta*q;
-        //p = u + beta*( q + beta*p );
+            magma_zcgs_1(  
+            r.num_rows, 
+            r.num_cols, 
+            beta,
+            r.dval,
+            q.dval, 
+            u.dval,
+            p.dval,
+            queue );
+          //u = r + beta*q;
+          //p = u + beta*( q + beta*p );
         }
         else{
-            magma_zcopy( dofs, r.dval, 1, u.dval, 1 );          // u = r
-            magma_zcopy( dofs, r.dval, 1, p.dval, 1 );          // p = r
+            magma_zcgs_2(  
+            r.num_rows, 
+            r.num_cols, 
+            r.dval,
+            u.dval,
+            p.dval,
+            queue );
+            // u = r
+            // p = r
         }
         // preconditioner
         CHECK( magma_z_applyprecond_left( A, p, &rt, precond_par, queue ));
@@ -158,19 +168,36 @@ magma_zpcgs(
         
         CHECK( magma_z_spmv( c_one, A, p_hat, c_zero, v_hat, queue ));   // v = A p
         alpha = rho / magma_zdotc(dofs, r_tld.dval, 1, v_hat.dval, 1);
-        magma_zcopy( dofs, u.dval, 1, q.dval, 1 );              // q = u
-        magma_zaxpy(dofs,  -alpha, v_hat.dval, 1, q.dval, 1);   // q = u - alpha v_hat
         
-        magma_zcopy( dofs, u.dval, 1, t.dval, 1 );             // t = q
-        magma_zaxpy(dofs,  c_one, q.dval, 1, t.dval, 1);       // t = u + q
+        magma_zcgs_3(  
+        r.num_rows, 
+        r.num_cols, 
+        alpha,
+        v_hat.dval,
+        u.dval, 
+        q.dval,
+        t.dval, 
+        queue );
+        // q = u - alpha v_hat
+        // t = u + q
+        
         // preconditioner
         CHECK( magma_z_applyprecond_left( A, t, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &u_hat, precond_par, queue ));
 
-
         CHECK( magma_z_spmv( c_one, A, u_hat, c_zero, t, queue ));   // t = A u_hat
-        magma_zaxpy(dofs,  alpha, u_hat.dval, 1, x->dval, 1);     // x = x + alpha u_hat
-        magma_zaxpy(dofs,  c_mone*alpha, t.dval, 1, r.dval, 1);       // r = r -alpha*A u_hat
+        
+        magma_zcgs_4(  
+        r.num_rows, 
+        r.num_cols, 
+        alpha,
+        u_hat.dval,
+        t.dval,
+        x->dval, 
+        r.dval,
+        queue );
+        // r = r -alpha*A u_hat
+        // x = x + alpha u_hat
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         if ( solver_par->verbose > 0 ) {
@@ -243,4 +270,4 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
-}   /* magma_zpcgs */
+}   /* magma_zpcgs_merge */
