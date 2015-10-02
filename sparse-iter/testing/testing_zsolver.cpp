@@ -53,6 +53,7 @@ int main(  int argc, char** argv )
          zopts.solver_par.solver != Magma_PBICGSTAB &&
          zopts.solver_par.solver != Magma_ITERREF  &&
          zopts.solver_par.solver != Magma_PIDR  &&
+         zopts.solver_par.solver != Magma_PCGS  &&
          zopts.solver_par.solver != Magma_LOBPCG )
         zopts.precond_par.solver = Magma_NONE;
 

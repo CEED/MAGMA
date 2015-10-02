@@ -363,7 +363,7 @@ magma_zcgs_4(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zcgs_3_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, u_hat, t, x, r );
+    magma_zcgs_4_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, u_hat, t, x, r );
 
    return MAGMA_SUCCESS;
 }
