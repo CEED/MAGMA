@@ -94,7 +94,7 @@ magma_int_t
 magma_zcgs_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleCOmplex beta,
+    magmaDoubleComplex beta,
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr q, 
     magmaDoubleComplex_ptr u,
@@ -103,7 +103,7 @@ magma_zcgs_1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zcgs_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, r, q, u, p );
+    magma_zcgs_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, r, q, u, p );
 
    return MAGMA_SUCCESS;
 }
@@ -206,7 +206,7 @@ magma_zcgs_3_kernel(
         for( int j=0; j<num_cols; j++ ){
             magmaDoubleComplex uloc,  tmp;
             uloc = u[ i+j*num_rows ];
-            tmp = tmp - alpha * v_hat[ i+j*num_rows ];
+            tmp = uloc - alpha * v_hat[ i+j*num_rows ];
             t[ i+j*num_rows ] = tmp + uloc;
             q[ i+j*num_rows ] = tmp;
         }
@@ -285,10 +285,10 @@ magma_zcgs_4_kernel(
     int num_rows,
     int num_cols,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex *v_hat,
-    magmaDoubleComplex *u,
-    magmaDoubleComplex *q,
-    magmaDoubleComplex *t )
+    magmaDoubleComplex *u_hat,
+    magmaDoubleComplex *t,
+    magmaDoubleComplex *x,
+    magmaDoubleComplex *r )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
