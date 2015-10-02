@@ -157,7 +157,6 @@ magma_zcgs_merge(
             magma_zcgs_2(  
             r.num_rows, 
             r.num_cols, 
-            beta,
             r.dval,
             u.dval,
             p.dval,
@@ -190,12 +189,12 @@ magma_zcgs_merge(
         CHECK( magma_z_spmv( c_one, A, t, c_zero, rt, queue ));   // t = A u_hat
         
         magma_zcgs_4(  
-        num_rows, 
-        num_cols, 
+        r.num_rows, 
+        r.num_cols, 
         alpha,
         u_hat.dval,
         t.dval,
-        x.dval, 
+        x->dval, 
         r.dval,
         queue );
         
