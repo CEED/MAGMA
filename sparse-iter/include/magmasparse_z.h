@@ -1491,7 +1491,7 @@ magma_int_t
 magma_zcgs_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleCOmplex beta,
+    magmaDoubleComplex beta,
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr q, 
     magmaDoubleComplex_ptr u,
