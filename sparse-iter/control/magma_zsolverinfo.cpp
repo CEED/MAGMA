@@ -86,11 +86,17 @@ magma_zsolverinfo(
             case  Magma_JACOBI:
                     printf("%%  Jacobi performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_CGS:
+                    printf("%%  CGS performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             case  Magma_PCGS:
                     printf("%%  CGS performance analysis every %d iteration\n",
                                                                         (int) k); break;
-            case  Magma_CGS:
-                    printf("%%  CGS performance analysis every %d iteration\n",
+            case  Magma_CGSMERGE:
+                    printf("%%  CGS (merged) performance analysis every %d iteration\n",
+                                                                        (int) k); break;
+            case  Magma_PCGSMERGE:
+                    printf("%%  CGS (merged) performance analysis every %d iteration\n",
                                                                         (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
@@ -255,6 +261,26 @@ magma_zsolverinfo(
                 }
                 printf("%%======================================================="
                         "======%%\n"); break;
+            case  Magma_CGSMERGE:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d          %e          %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
+            case  Magma_PCGSMERGE:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d          %e          %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
             case  Magma_ITERREF:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
@@ -309,6 +335,10 @@ magma_zsolverinfo(
         case  Magma_CGS:
             printf("%% CGS solver summary:\n"); break;
         case  Magma_PCGS:
+            printf("%% PCGS solver summary:\n"); break;
+        case  Magma_CGSMERGE:
+            printf("%% CGS solver summary:\n"); break;
+        case  Magma_PCGSMERGE:
             printf("%% PCGS solver summary:\n"); break;
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;

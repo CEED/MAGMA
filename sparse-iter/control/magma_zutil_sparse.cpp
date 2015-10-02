@@ -44,7 +44,10 @@ static const char *usage_sparse =
 "               10  Block-asynchronous Iteration\n"
 "               11  IDR (smoothed)\n"
 "               12  PIDR (smoothed)\n"
-"               13  PCGS\n"
+"               13  CGS\n"
+"               14  merged CGS\n"
+"               15  PCGS\n"
+"               16  merged PCGS\n"
 "               21  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
@@ -64,7 +67,7 @@ static const char *usage_sparse =
 "                   --piter k     Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
 "                   7   IDR\n"
-"                   8   PCGS\n"
+"                   8   CGS\n"
 " --piter x     Number of relaxation steps for approximate triangular solve (ILU case).\n"
 " --psweeps x   Number of iterative ILU sweeps for to generate preconditioner (iterative ILU case).\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
@@ -194,7 +197,9 @@ magma_zparse_opts(
                 case 12: opts->solver_par.solver = Magma_PIDR;
                          opts->solver_par.restart = 4; break;
                 case 13: opts->solver_par.solver = Magma_CGS; break;
-                case 14: opts->solver_par.solver = Magma_PCGS; break;
+                case 14: opts->solver_par.solver = Magma_CGSMERGE; break;
+                case 15: opts->solver_par.solver = Magma_PCGS; break;
+                case 16: opts->solver_par.solver = Magma_PCGSMERGE; break;
                 case 21: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
