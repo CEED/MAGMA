@@ -480,7 +480,7 @@ typedef enum {
     Magma_PIDR         = 454,
     Magma_CGS          = 455,
     Magma_PCGS         = 456,
-    Magma_CGSMEGRE     = 457,
+    Magma_CGSMERGE     = 457,
     Magma_PCGSMERGE    = 458
     
 } magma_solver_type;
