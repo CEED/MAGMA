@@ -80,19 +80,19 @@ magma_ztfqmr(
 
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR},
-                    p={Magma_CSR}, q={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR},  t={Magma_CSR},
-                    p_hat={Magma_CSR}, q_hat={Magma_CSR}, u_hat={Magma_CSR}, v_hat={Magma_CSR};
+                    //p={Magma_CSR}, q={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR},  t={Magma_CSR},
+                    d={Magma_CSR}, w={Magma_CSR}, u_hat={Magma_CSR}, v_hat={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &p_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &q_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    //CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    //CHECK( magma_zvinit( &p_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    //CHECK( magma_zvinit( &q_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &u_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    //CHECK( magma_zvinit( &u_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &v_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     // solver setup
@@ -218,15 +218,15 @@ cleanup:
     magma_zmfree(&r, queue );
     magma_zmfree(&rt, queue );
     magma_zmfree(&r_tld, queue );
-    magma_zmfree(&p, queue );
-    magma_zmfree(&q, queue );
+    magma_zmfree(&d, queue );
+    magma_zmfree(&w, queue );
     magma_zmfree(&u, queue );
     magma_zmfree(&v, queue );
     magma_zmfree(&t, queue );
-    magma_zmfree(&p_hat, queue );
-    magma_zmfree(&q_hat, queue );
-    magma_zmfree(&u_hat, queue );
-    magma_zmfree(&v_hat, queue );
+    //magma_zmfree(&p_hat, queue );
+    //magma_zmfree(&q_hat, queue );
+    //magma_zmfree(&u_hat, queue );
+    //magma_zmfree(&v_hat, queue );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
