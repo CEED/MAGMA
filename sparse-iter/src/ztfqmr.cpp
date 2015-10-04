@@ -133,7 +133,7 @@ magma_ztfqmr(
         if( solver_par->numiter%2 == 1 ){
             alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
             printf("alpha = %.8e\n", alpha);
-            magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
+            //magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
         }
 magma_zprint_vector(w,0,30,queue);
         CHECK( magma_z_spmv( c_one, A, u, c_zero, t, queue ));   // t = A u
@@ -141,6 +141,11 @@ magma_zprint_vector(u,0,30,queue);
 magma_zprint_vector(t,0,30,queue);
         magma_zaxpy(dofs,  -alpha, t.dval, 1, w.dval, 1);     // w = w - alpha Au
 magma_zprint_vector(w,0,30,queue);
+        if( solver_par->numiter%2 == 1 ){
+            //alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
+            //printf("alpha = %.8e\n", alpha);
+            magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
+        }
         magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
         magma_zaxpy(dofs, c_one, u.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
