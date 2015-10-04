@@ -154,6 +154,8 @@ printf("nu = %.8e\n",nu);
 
         magma_zaxpy(dofs, nu, d.dval, 1, x->dval, 1);     // x = x + nu * d
         magma_zaxpy(dofs, -nu, rt.dval, 1, r.dval, 1);     // r = r - nu * Ad
+        res = magma_dznrm2( dofs, r.dval, 1 );
+printf("res = %.8e\n",res);
 
         if( solver_par->numiter%2 == 1 ){
             rho_l = rho;
@@ -169,8 +171,7 @@ printf("beta = %.8e\n",beta);
             magma_zaxpy(dofs, c_one, rt.dval, 1, v.dval, 1);            // u = beta*beta*v + beta * t + rt
         }
                
-        res = magma_dznrm2( dofs, r.dval, 1 );
-printf("res = %.8e\n",res);
+
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
