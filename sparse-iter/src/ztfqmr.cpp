@@ -138,7 +138,7 @@ printf("\n\n\n\niteration %d\n", solver_par->numiter);
         if( solver_par->numiter%2 == 1 ){
             alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
 printf("alpha = %.8e\n", alpha);
-            magma_zcopy( dofs, u.dval, 1, u_mp1.dval, 1 );   
+            magma_zcopy( dofs, u_m.dval, 1, u_mp1.dval, 1 );   
             magma_zaxpy(dofs,  -alpha, v.dval, 1, u_mp1.dval, 1);     // u = u - alpha v
         }
         magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha Au
@@ -147,7 +147,7 @@ printf("alpha = %.8e\n", alpha);
         magma_zscal(dofs, sigma, d.dval, 1);         
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
        magma_zscal(dofs, sigma, Ad.dval, 1);         
-        magma_zaxpy(dofs, c_one, Au.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
+        magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // d = u + theta * theta / alpha * nu * d
         
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
