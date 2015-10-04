@@ -70,10 +70,10 @@ magma_ztfqmr(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,  c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
     double nom0, r0,  res, nomb;
-    magmaDoubleComplex rho, rho_l = c_one, nu = c_zero , c = c_zero , 
+    magmaDoubleComplex rho = c_one, rho_l = c_one, nu = c_zero , c = c_zero , 
                         theta = c_zero , tau = c_zero, alpha = c_zero, beta = c_zero;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
@@ -122,9 +122,10 @@ magma_ztfqmr(
     do
     {
         solver_par->numiter++;
-        
+                    printf("\n\n\n\niteration %d\n", solver_par->numiter);
         if( solver_par->numiter%2 == 0 ){
             alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
+            printf("alpha = %.8e\n", alpha);
             magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
         }
         
@@ -138,6 +139,11 @@ magma_ztfqmr(
         c = c_one / magma_zsqrt( c_one + theta*theta );
         tau = tau * theta *c;
         nu = c * c * alpha;
+printf("theta = %.8e\n",theta);
+printf("c = %.8e\n",c);
+printf("tau = %.8e\n",tau);
+printf("nu = %.8e\n",nu);
+
         CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // t = A d
 
         magma_zaxpy(dofs, nu, d.dval, 1, x->dval, 1);     // x = x + nu * d
@@ -147,6 +153,8 @@ magma_ztfqmr(
             rho_l = rho;
             rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
             beta = rho / rho_l;
+printf("rho = %.8e\n",rho);
+printf("beta = %.8e\n",beta);
             magma_zscal(dofs, beta, u.dval, 1);                 // u = beta*u
             magma_zaxpy(dofs, c_one, w.dval, 1, u.dval, 1);     // u = w + beta * u
             CHECK( magma_z_spmv( c_one, A, u, c_zero, rt, queue ));   // rt = A u
@@ -156,6 +164,7 @@ magma_ztfqmr(
         }
                
         res = magma_dznrm2( dofs, r.dval, 1 );
+printf("res = %.8e\n",res);
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
