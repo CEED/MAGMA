@@ -242,7 +242,7 @@ printf("beta = %.8e\n",beta);
         }
         info = MAGMA_DIVERGENCE;
     }
-    magma_zprint_vector(x, 0, 30, queue);
+    magma_zprint_vector(&x, 0, 30, queue);
 cleanup:
     magma_zmfree(&r, queue );
     magma_zmfree(&rt, queue );
