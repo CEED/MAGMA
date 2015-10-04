@@ -85,7 +85,7 @@ magma_ztfqmr(
     CHECK( magma_zvinit( &rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &u, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &u, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -94,8 +94,8 @@ magma_ztfqmr(
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, u.dval, 1 );   
+    //magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
+    //magma_zcopy( dofs, r.dval, 1, u.dval, 1 );   
     CHECK( magma_z_spmv( c_one, A, u, c_zero, v, queue ));   // v = A u
             
     nomb = magma_dznrm2( dofs, b.dval, 1 );
