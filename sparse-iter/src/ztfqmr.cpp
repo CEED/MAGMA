@@ -172,7 +172,17 @@ printf("beta = %.8e\n",beta);
             magma_zaxpy(dofs, beta, t.dval, 1, v.dval, 1);              // v = beta*beta*v + beta * t
             magma_zaxpy(dofs, c_one, rt.dval, 1, v.dval, 1);            // u = beta*beta*v + beta * t + rt
         }
-               
+              
+        
+printf("\nall values:\n");
+printf("alpha = %.8e\n", alpha);
+printf("rho = %.8e\n",rho);
+printf("theta = %.8e\n",theta);
+printf("c = %.8e\n",c);
+printf("tau = %.8e\n",tau);
+printf("nu = %.8e\n",nu);
+printf("beta = %.8e\n",beta);
+printf("res = %.8e\n",res);
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
