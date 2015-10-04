@@ -101,8 +101,9 @@ magma_ztfqmr(
     //magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
     //magma_zcopy( dofs, r.dval, 1, u.dval, 1 );   
     CHECK( magma_z_spmv( c_one, A, u_m, c_zero, v, queue ));   // v = A u
+                    printf("check2:%f\n",magma_zdotc(dofs, v.dval, 1, v.dval, 1));
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
-    
+                    printf("check3:%f\n",magma_zdotc(dofs, Au.dval, 1, Au.dval, 1));
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
         nomb=1.0;
