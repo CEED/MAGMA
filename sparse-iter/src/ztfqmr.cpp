@@ -80,7 +80,7 @@ magma_ztfqmr(
     magma_int_t dofs = A.num_rows* b.num_cols;
 
     // GPU workspace
-    magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR}, t={Magma_CSR},
+    magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR}, pu_m={Magma_CSR},
                     d={Magma_CSR}, w={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR},
                     u_mp1={Magma_CSR}, u_m={Magma_CSR}, Au={Magma_CSR}, Ad={Magma_CSR},
                     Au_new={Magma_CSR};
@@ -88,6 +88,7 @@ magma_ztfqmr(
     CHECK( magma_zvinit( &u_mp1,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u_m, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
+    CHECK( magma_zvinit( &pu_m, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &Au, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Ad, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -148,7 +149,7 @@ printf("alpha = %.8e\n", alpha);
         sigma = theta * theta / alpha * eta;    
         magma_zscal(dofs, sigma, d.dval, 1);    
         printf("check1\n");
-        magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
+        magma_zaxpy(dofs, c_one, pu_m.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
         magma_zscal(dofs, sigma, Ad.dval, 1);         
         magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // d = u + theta * theta / alpha * nu * d
 
@@ -191,8 +192,8 @@ printf("beta = %.8e\n",beta);
             magma_zaxpy(dofs, beta, u_m.dval, 1, u_mp1.dval, 1);     // u = w + beta * u
       }
               
-        
-      CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue ));   // rt = A u
+      magma_zcopy( dofs, u_mp1.dval, 1, pu_m.dval, 1 );  
+      CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue ));   // rt = A u
       
       if( solver_par->numiter%2 == 0 ){
             magma_zscal(dofs, beta*beta, v.dval, 1);                    // v = beta*beta*v
@@ -251,7 +252,7 @@ cleanup:
     magma_zmfree(&w, queue );
     magma_zmfree(&u, queue );
     magma_zmfree(&v, queue );
-    magma_zmfree(&t, queue );
+    magma_zmfree(&pu_m, queue );
     magma_zmfree(&Au, queue );
     magma_zmfree(&Au_new, queue );
     magma_zmfree(&Ad, queue );
