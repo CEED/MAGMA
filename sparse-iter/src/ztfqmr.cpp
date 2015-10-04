@@ -137,6 +137,7 @@ magma_ztfqmr(
         }
 magma_zprint_vector(w,0,30,queue);
         CHECK( magma_z_spmv( c_one, A, u, c_zero, t, queue ));   // t = A u
+magma_zprint_vector(u,0,30,queue);
 magma_zprint_vector(t,0,30,queue);
         magma_zaxpy(dofs,  -alpha, t.dval, 1, w.dval, 1);     // w = w - alpha Au
 magma_zprint_vector(w,0,30,queue);
