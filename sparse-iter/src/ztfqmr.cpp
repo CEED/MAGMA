@@ -162,7 +162,6 @@ printf("c = %.8e\n",c);
 printf("tau = %.8e\n",tau);
 printf("eta = %.8e\n",eta);
 
-        CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // rt = A d
         magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + nu * d
         magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - nu * Ad
         res = magma_dznrm2( dofs, r.dval, 1 );
