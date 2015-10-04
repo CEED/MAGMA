@@ -145,7 +145,7 @@ magma_ztfqmr(
         c = c_one / magma_zsqrt( c_one + theta*theta );
         tau = tau * theta *c;
         nu = c * c * alpha;
-printf("theta = %.8e\n",theta);
+printf("theta = %.8f / %.8f = %.8e\n",magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) ), tau, theta);
 printf("c = %.8e\n",c);
 printf("tau = %.8e\n",tau);
 printf("nu = %.8e\n",nu);
