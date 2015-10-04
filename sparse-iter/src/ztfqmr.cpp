@@ -195,7 +195,7 @@ printf("beta = %.8e\n",beta);
       CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue ));   // rt = A u
       
       if( solver_par->numiter%2 == 0 ){
-            magma_zscal(dofs, beta*beta, u.dval, 1);                    // v = beta*beta*v
+            magma_zscal(dofs, beta*beta, v.dval, 1);                    // v = beta*beta*v
             magma_zaxpy(dofs, beta, Au.dval, 1, v.dval, 1);              // v = beta*beta*v + beta * t
             magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);            // u = beta*beta*v + beta * t + rt
       }
