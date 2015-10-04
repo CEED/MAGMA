@@ -106,6 +106,8 @@ magma_z_solver(
                     CHECK( magma_zpcgs( A, b, x, &zopts->solver_par, &zopts->precond_par, queue ) ); break;
             case  Magma_PCGSMERGE:
                     CHECK( magma_zpcgs_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue ) ); break;
+            case  Magma_TFQMR:
+                    CHECK( magma_ztfqmr( A, b, x, &zopts->solver_par, queue ) ); break;
             default:
                     printf("error: solver class not supported.\n"); break;
         }

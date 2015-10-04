@@ -23,8 +23,8 @@
     Solves a system of linear equations
        A * X = B
     where A is a complex Hermitian N-by-N positive definite matrix A.
-    This is a GPU implementation of the preconditioned Conjugate
-    Gradient Squared (CGS) method.
+    This is a GPU implementation of the transpose-free Quas-Minimal Residual 
+    method (TFQMR).
 
     Arguments
     ---------
