@@ -99,8 +99,8 @@ magma_ztfqmr(
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-    //magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    //magma_zcopy( dofs, r.dval, 1, u.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1 );   
     CHECK( magma_z_spmv( c_one, A, u_m, c_zero, v, queue ));   // v = A u
                     printf("check2:%f\n",magma_zdotc(dofs, v.dval, 1, v.dval, 1));
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
