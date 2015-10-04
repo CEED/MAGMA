@@ -144,13 +144,16 @@ printf("alpha = %.8e\n", alpha);
         magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha Au
 
         sigma = theta * theta / alpha * eta;    
-        magma_zscal(dofs, sigma, d.dval, 1);         
+        magma_zscal(dofs, sigma, d.dval, 1);    
+        printf("check1\n");
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
-       magma_zscal(dofs, sigma, Ad.dval, 1);         
+        magma_zscal(dofs, sigma, Ad.dval, 1);         
         magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // d = u + theta * theta / alpha * nu * d
-        
+                printf("check2\n");
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
+        printf("theta = %.8f / %.8e = %.8e\n",magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ), tau, theta);
+
         c = c_one / magma_zsqrt( c_one + theta*theta );
         tau = tau * theta *c;
         eta = c * c * alpha;
