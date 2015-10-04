@@ -135,8 +135,9 @@ magma_ztfqmr(
             printf("alpha = %.8e\n", alpha);
             magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
         }
-        
+magma_zprint_vector(w,0,30,queue);
         CHECK( magma_z_spmv( c_one, A, u, c_zero, t, queue ));   // t = A u
+magma_zprint_vector(t,0,30,queue);
         magma_zaxpy(dofs,  -alpha, t.dval, 1, w.dval, 1);     // w = w - alpha Au
 magma_zprint_vector(w,0,30,queue);
         magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
