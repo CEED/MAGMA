@@ -93,7 +93,7 @@ magma_ztfqmr(
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-    theta = nom0;
+
     solver_par->init_res = nom0;
             
     nomb = magma_dznrm2( dofs, b.dval, 1 );
@@ -113,6 +113,8 @@ magma_ztfqmr(
         goto cleanup;
     }
 
+    tau = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
+    
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
