@@ -79,9 +79,9 @@ magma_ztfqmr(
     magma_int_t dofs = A.num_rows* b.num_cols;
 
     // GPU workspace
-    magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR},
+    magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR}, t={Magma_CSR},
                     //p={Magma_CSR}, q={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR},  t={Magma_CSR},
-                    d={Magma_CSR}, w={Magma_CSR}, u_hat={Magma_CSR}, v_hat={Magma_CSR};
+                    d={Magma_CSR}, w={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
