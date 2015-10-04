@@ -197,7 +197,6 @@ printf("res = %.8e\n",res);
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        rho_l = rho;
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
