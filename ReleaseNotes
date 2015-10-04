@@ -25,6 +25,14 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
+1.7.?
+    * added TFQMR, preconditioned TFQMR
+	* added CGS, preconditioned CGS
+	* added kernel-fused versions for CGS/PCGS
+	* changed relative stopping criterion to be relative to RHS
+	* fixed bug in complex version of CG
+
+
  1.7.0 - final:  Sep 11, 2015
        - beta 1: Aug 25, 2015
     * Added results archive to compare historical performance.
