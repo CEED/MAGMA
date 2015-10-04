@@ -74,7 +74,7 @@ magma_ztfqmr(
     // solver variables
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho = c_one, rho_l = c_one, nu = c_zero , c = c_zero , 
-                        theta = c_zero , tau = c_zero, alpha = c_zero, beta = c_zero;
+                        theta = c_zero , tau = c_zero, alpha = c_one, beta = c_zero;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
@@ -138,7 +138,7 @@ magma_ztfqmr(
         CHECK( magma_z_spmv( c_one, A, u, c_zero, t, queue ));   // t = A u
         magma_zaxpy(dofs,  -alpha, t.dval, 1, w.dval, 1);     // w = w - alpha Au
 
-        magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                 // p = beta*p
+        magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
         magma_zaxpy(dofs, c_one, u.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
         
         theta = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) ) / tau;
@@ -151,7 +151,7 @@ printf("tau = %.8e\n",tau);
 printf("nu = %.8e\n",nu);
 
 magma_zprint_vector(d, 0, 5, queue);
-        CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // t = A d
+        CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // rt = A d
 magma_zprint_vector(rt, 0, 5, queue);
         magma_zaxpy(dofs, nu, d.dval, 1, x->dval, 1);     // x = x + nu * d
         magma_zaxpy(dofs, -nu, rt.dval, 1, r.dval, 1);     // r = r - nu * Ad
