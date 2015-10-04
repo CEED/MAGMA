@@ -23,7 +23,7 @@
     Solves a system of linear equations
        A * X = B
     where A is a complex Hermitian N-by-N positive definite matrix A.
-    This is a GPU implementation of the transpose-free Quas-Minimal Residual 
+    This is a GPU implementation of the transpose-free Quasi-Minimal Residual 
     method (TFQMR).
 
     Arguments
@@ -103,9 +103,7 @@ magma_ztfqmr(
     magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, u_m.dval, 1 );   
     CHECK( magma_z_spmv( c_one, A, u_m, c_zero, v, queue ));   // v = A u
-                    printf("check2:%f\n",magma_zdotc(dofs, v.dval, 1, v.dval, 1));
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
-                    printf("check3:%f\n",magma_zsqrt(magma_zdotc(dofs, Au.dval, 1, Au.dval, 1)));
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
         nomb=1.0;
@@ -126,7 +124,6 @@ magma_ztfqmr(
     tau = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
     rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
     rho_l = rho;
-            printf("rho_0 = %.8e\n", rho);
     
     //Chronometry
     real_Double_t tempo1, tempo2;
