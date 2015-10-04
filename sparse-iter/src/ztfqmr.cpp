@@ -116,7 +116,7 @@ magma_ztfqmr(
     }
 
     tau = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
-    rho = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
+    rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
             printf("rho_0 = %.8e\n", rho);
     
     //Chronometry
