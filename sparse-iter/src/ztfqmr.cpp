@@ -87,7 +87,7 @@ magma_ztfqmr(
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     // solver setup
