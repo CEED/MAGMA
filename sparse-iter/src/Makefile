@@ -28,7 +28,9 @@ ZSRC += \
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
-	zidr.cpp	\
+    ztfqmr.cpp	\
+    zptfqmr.cpp \
+    zidr.cpp	\
 	zidr_acc.cpp	\
 	zidr_strms.cpp	\
 	ziterref.cpp		\
