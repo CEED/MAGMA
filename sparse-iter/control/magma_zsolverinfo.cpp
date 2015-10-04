@@ -356,7 +356,7 @@ magma_zsolverinfo(
         case  Magma_PCGSMERGE:
             printf("%% PCGS solver summary:\n"); break;
         case  Magma_TFQMR:
-            printf("%% PCGS solver summary:\n"); break;
+            printf("%% TFQMR solver summary:\n"); break;
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;
         case  Magma_JACOBI:
