@@ -553,7 +553,8 @@ subs = {
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
     ('sbicgstab',      'dbicgstab',      'cbicgstab',      'zbicgstab',      ),
-
+    ('stfqmr',         'dtfqmr',         'ctfqmr',         'ztfqmr'          ),
+    ('sptfqmr',        'dptfqmr',        'cptfqmr',        'zptfqmr'         ),
     ('spcg',           'dpcg',           'cpcg',           'zpcg'            ),
     ('sbpcg',          'dbpcg',          'cbpcg',          'zbpcg'           ),
     ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab'      ),
