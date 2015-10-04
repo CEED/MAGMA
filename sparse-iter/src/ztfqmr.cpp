@@ -92,9 +92,11 @@ magma_ztfqmr(
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
-    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-
     solver_par->init_res = nom0;
+    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, u.dval, 1 );   
+    CHECK( magma_z_spmv( c_one, A, u, c_zero, v, queue ));   // v = A u
             
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
