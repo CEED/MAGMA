@@ -129,7 +129,7 @@ magma_ztfqmr(
     {
         solver_par->numiter++;
                     printf("\n\n\n\niteration %d\n", solver_par->numiter);
-        if( solver_par->numiter%2 == 0 ){
+        if( solver_par->numiter%2 == 1 ){
             alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
             printf("alpha = %.8e\n", alpha);
             magma_zaxpy(dofs,  -alpha, v.dval, 1, u.dval, 1);     // u = u - alpha v
@@ -155,7 +155,7 @@ printf("nu = %.8e\n",nu);
         res = magma_dznrm2( dofs, r.dval, 1 );
 printf("res = %.8e\n",res);
 
-        if( solver_par->numiter%2 == 1 ){
+        if( solver_par->numiter%2 == 0 ){
             rho_l = rho;
             rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
             beta = rho / rho_l;
