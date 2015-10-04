@@ -140,26 +140,18 @@ magma_ztfqmr(
 
         magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
         magma_zaxpy(dofs, c_one, u.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
-        printf("tau = %.8e\n",tau);
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
-            printf("tt = %.8e\n",magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1));   
-            printf("theta = %.8e\n",theta);
         c = c_one / magma_zsqrt( c_one + theta*theta );
-        printf("c = %.8e\n",c);
         tau = tau * theta *c;
-        printf("tau = %.8e\n",tau);
         nu = c * c * alpha;
 printf("theta = %.8f / %.8f = %.8e\n",magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) ), tau, theta);
 printf("c = %.8e\n",c);
 printf("tau = %.8e\n",tau);
 printf("nu = %.8e\n",nu);
 
-magma_zprint_vector(d, 0, 5, queue);
         CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // rt = A d
-magma_zprint_vector(rt, 0, 5, queue);
         magma_zaxpy(dofs, nu, d.dval, 1, x->dval, 1);     // x = x + nu * d
         magma_zaxpy(dofs, -nu, rt.dval, 1, r.dval, 1);     // r = r - nu * Ad
-magma_zprint_vector(r, 0, 5, queue);
         res = magma_dznrm2( dofs, r.dval, 1 );
 printf("res = %.8e\n",res);
 
