@@ -81,7 +81,7 @@ magma_ztfqmr(
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, rt={Magma_CSR}, r_tld={Magma_CSR}, t={Magma_CSR},
                     d={Magma_CSR}, w={Magma_CSR}, u={Magma_CSR}, v={Magma_CSR},
-                    u_mp1={Magma_CSR}, u_m={Magma_CSR}, Au={Magma_CSR}, Ad={Magma_CSR};
+                    u_mp1={Magma_CSR}, u_m={Magma_CSR}, Au={Magma_CSR}, Ad={Magma_CSR},
                     Au_new={Magma_CSR}, d={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u_mp1,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -142,7 +142,7 @@ printf("alpha = %.8e\n", alpha);
         }
         magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha Au
 
-        magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
+        magma_zscal(dofs, theta * theta / alpha * eta, d.dval, 1);                
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
