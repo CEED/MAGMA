@@ -141,7 +141,7 @@ magma_ztfqmr(
         magma_zscal(dofs, theta * theta / alpha * nu, d.dval, 1);                
         magma_zaxpy(dofs, c_one, u.dval, 1, d.dval, 1);     // d = u + theta * theta / alpha * nu * d
         printf("tau = %.8e\n",tau);
-        theta = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) ) / tau;
+        theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
             printf("tt = %.8e\n",magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1));   
             printf("theta = %.8e\n",theta);
         c = c_one / magma_zsqrt( c_one + theta*theta );
