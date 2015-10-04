@@ -150,11 +150,12 @@ printf("c = %.8e\n",c);
 printf("tau = %.8e\n",tau);
 printf("nu = %.8e\n",nu);
 
+magma_zprint_vector(d, 0, 5, queue);
         CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // t = A d
-        magma_zprint_vector(rt, 0, 5, queue);
+magma_zprint_vector(rt, 0, 5, queue);
         magma_zaxpy(dofs, nu, d.dval, 1, x->dval, 1);     // x = x + nu * d
         magma_zaxpy(dofs, -nu, rt.dval, 1, r.dval, 1);     // r = r - nu * Ad
-        magma_zprint_vector(r, 0, 5, queue);
+magma_zprint_vector(r, 0, 5, queue);
         res = magma_dznrm2( dofs, r.dval, 1 );
 printf("res = %.8e\n",res);
 
