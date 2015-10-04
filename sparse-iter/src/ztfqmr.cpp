@@ -151,7 +151,7 @@ printf("alpha = %.8e\n", alpha);
 printf("theta = %.8f / %.8e = %.8e\n",magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) ), tau, theta);
 printf("c = %.8e\n",c);
 printf("tau = %.8e\n",tau);
-printf("nu = %.8e\n",nu);
+printf("eta = %.8e\n",eta);
 
         CHECK( magma_z_spmv( c_one, A, d, c_zero, rt, queue ));   // rt = A d
         magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + nu * d
@@ -188,14 +188,6 @@ printf("beta = %.8e\n",beta);
             magma_zscal(dofs, beta*beta, u.dval, 1);                    // v = beta*beta*v
             magma_zaxpy(dofs, beta, Au.dval, 1, v.dval, 1);              // v = beta*beta*v + beta * t
             magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);            // u = beta*beta*v + beta * t + rt
-  
-            rho_l = rho;
-            rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
-            beta = rho / rho_l;
-printf("rho = %.8e\n",rho);
-printf("beta = %.8e\n",beta);
-            magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1 );  
-            magma_zaxpy(dofs, beta, u_m.dval, 1, u_mp1.dval, 1);     // u = w + beta * u
       }
       magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
       magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
