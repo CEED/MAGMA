@@ -75,7 +75,7 @@ magma_ztfqmr(
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho = c_one, rho_l = c_one, eta = c_zero , c = c_zero , 
                         theta = c_zero , tau = c_zero, alpha = c_one, beta = c_zero,
-                        sima = c_zero;
+                        sigma = c_zero;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
