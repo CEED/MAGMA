@@ -120,8 +120,8 @@ magmablas_zgemm_reduce(
         // call CUDA ARCH 1.x -- maximum 512 threads
         const int NUM_THREADS = 512;
         const int BLK_K = (NUM_THREADS / (BLK_M * BLK_N)); // == 2
-        dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ) );
         dim3 threads( BLK_K, BLK_M, BLK_N );
+        dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ), 1 );
         zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, magma_stream >>>
             ( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC, lddc );
     }
@@ -130,8 +130,8 @@ magmablas_zgemm_reduce(
         // call CUDA ARCH 2.x -- maximum 1024 threads
         const int NUM_THREADS = 1024;
         const int BLK_K = (NUM_THREADS / (BLK_M * BLK_N)); // == 4
-        dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ) );
         dim3 threads( BLK_K, BLK_M, BLK_N );
+        dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ), 1 );
         zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, magma_stream >>>
             ( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC, lddc );
     }

@@ -285,8 +285,7 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
             The length of the vector X.  N >= 0.
 
     @param[in,out]
-    x       COMPLEX*16 array, dimension
-                           (1+(N-1)*abs(INCX))
+    x       COMPLEX*16 array, dimension (1+(N-1)*abs(INCX))
             On entry, the vector of length N to be conjugated.
             On exit, X is overwritten with conjg(X).
 

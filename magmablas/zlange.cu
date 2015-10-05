@@ -35,17 +35,17 @@ zlange_inf_kernel(
             A += 4*lda;
             
             while( A < Aend ) {
-                rsum[0] += cuCabs( rA[0] );  rA[0] = A[0];
-                rsum[1] += cuCabs( rA[1] );  rA[1] = A[lda];
-                rsum[2] += cuCabs( rA[2] );  rA[2] = A[2*lda];
-                rsum[3] += cuCabs( rA[3] );  rA[3] = A[3*lda];
+                rsum[0] += MAGMA_Z_ABS( rA[0] );  rA[0] = A[0];
+                rsum[1] += MAGMA_Z_ABS( rA[1] );  rA[1] = A[lda];
+                rsum[2] += MAGMA_Z_ABS( rA[2] );  rA[2] = A[2*lda];
+                rsum[3] += MAGMA_Z_ABS( rA[3] );  rA[3] = A[3*lda];
                 A += 4*lda;
             }
             
-            rsum[0] += cuCabs( rA[0] );
-            rsum[1] += cuCabs( rA[1] );
-            rsum[2] += cuCabs( rA[2] );
-            rsum[3] += cuCabs( rA[3] );
+            rsum[0] += MAGMA_Z_ABS( rA[0] );
+            rsum[1] += MAGMA_Z_ABS( rA[1] );
+            rsum[2] += MAGMA_Z_ABS( rA[2] );
+            rsum[3] += MAGMA_Z_ABS( rA[3] );
         }
     
         /* clean up code */
@@ -54,18 +54,18 @@ zlange_inf_kernel(
                 break;
     
             case 1:
-                rsum[0] += cuCabs( A[0] );
+                rsum[0] += MAGMA_Z_ABS( A[0] );
                 break;
     
             case 2:
-                rsum[0] += cuCabs( A[0]   );
-                rsum[1] += cuCabs( A[lda] );
+                rsum[0] += MAGMA_Z_ABS( A[0]   );
+                rsum[1] += MAGMA_Z_ABS( A[lda] );
                 break;
     
             case 3:
-                rsum[0] += cuCabs( A[0]     );
-                rsum[1] += cuCabs( A[lda]   );
-                rsum[2] += cuCabs( A[2*lda] );
+                rsum[0] += MAGMA_Z_ABS( A[0]     );
+                rsum[1] += MAGMA_Z_ABS( A[lda]   );
+                rsum[2] += MAGMA_Z_ABS( A[2*lda] );
                 break;
         }
     
@@ -98,17 +98,17 @@ zlange_max_kernel(
             A += 4*lda;
             
             while( A < Aend ) {
-                rmax[0] = max_nan( rmax[0], cuCabs( rA[0] ));  rA[0] = A[0];
-                rmax[1] = max_nan( rmax[1], cuCabs( rA[1] ));  rA[1] = A[lda];
-                rmax[2] = max_nan( rmax[2], cuCabs( rA[2] ));  rA[2] = A[2*lda];
-                rmax[3] = max_nan( rmax[3], cuCabs( rA[3] ));  rA[3] = A[3*lda];
+                rmax[0] = max_nan( rmax[0], MAGMA_Z_ABS( rA[0] ));  rA[0] = A[0];
+                rmax[1] = max_nan( rmax[1], MAGMA_Z_ABS( rA[1] ));  rA[1] = A[lda];
+                rmax[2] = max_nan( rmax[2], MAGMA_Z_ABS( rA[2] ));  rA[2] = A[2*lda];
+                rmax[3] = max_nan( rmax[3], MAGMA_Z_ABS( rA[3] ));  rA[3] = A[3*lda];
                 A += 4*lda;
             }
             
-            rmax[0] = max_nan( rmax[0], cuCabs( rA[0] ));
-            rmax[1] = max_nan( rmax[1], cuCabs( rA[1] ));
-            rmax[2] = max_nan( rmax[2], cuCabs( rA[2] ));
-            rmax[3] = max_nan( rmax[3], cuCabs( rA[3] ));
+            rmax[0] = max_nan( rmax[0], MAGMA_Z_ABS( rA[0] ));
+            rmax[1] = max_nan( rmax[1], MAGMA_Z_ABS( rA[1] ));
+            rmax[2] = max_nan( rmax[2], MAGMA_Z_ABS( rA[2] ));
+            rmax[3] = max_nan( rmax[3], MAGMA_Z_ABS( rA[3] ));
         }
     
         /* clean up code */
@@ -117,18 +117,18 @@ zlange_max_kernel(
                 break;
     
             case 1:
-                rmax[0] = max_nan( rmax[0], cuCabs( A[0] ));
+                rmax[0] = max_nan( rmax[0], MAGMA_Z_ABS( A[0] ));
                 break;                          
                                                 
             case 2:                             
-                rmax[0] = max_nan( rmax[0], cuCabs( A[  0] ));
-                rmax[1] = max_nan( rmax[1], cuCabs( A[lda] ));
+                rmax[0] = max_nan( rmax[0], MAGMA_Z_ABS( A[  0] ));
+                rmax[1] = max_nan( rmax[1], MAGMA_Z_ABS( A[lda] ));
                 break;                          
                                                 
             case 3:                             
-                rmax[0] = max_nan( rmax[0], cuCabs( A[    0] ));
-                rmax[1] = max_nan( rmax[1], cuCabs( A[  lda] ));
-                rmax[2] = max_nan( rmax[2], cuCabs( A[2*lda] ));
+                rmax[0] = max_nan( rmax[0], MAGMA_Z_ABS( A[    0] ));
+                rmax[1] = max_nan( rmax[1], MAGMA_Z_ABS( A[  lda] ));
+                rmax[2] = max_nan( rmax[2], MAGMA_Z_ABS( A[2*lda] ));
                 break;
         }
     
@@ -155,7 +155,7 @@ zlange_one_kernel(
     
     ssum[tx] = 0;
     for( int i = tx; i < m; i += 64 ) {
-        ssum[tx] += cuCabs( A[i] );
+        ssum[tx] += MAGMA_Z_ABS( A[i] );
     }
     magma_sum_reduce< 64 >( tx, ssum );
     if ( tx == 0 ) {

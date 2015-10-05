@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        @date
        
-       zsymv_upper.cu is nearly identical to zhemv_upper.cu, just change names and drop cuConj.
+       zsymv_upper.cu is nearly identical to zhemv_upper.cu, just change names and drop MAGMA_Z_CNJG.
        
        zsymv_kernel_U (upper) in zsymv_upper.cu is very similar to
        zsymv_kernel_L (lower) in zsymv.cu; diff the two files to compare.

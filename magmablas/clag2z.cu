@@ -55,8 +55,8 @@ void clag2z_kernel(
 /**
     Purpose
     -------
-    CLAG2Z_STREAM converts a single-complex matrix, SA,
-                        to a double-complex matrix, A.
+    CLAG2Z converts a single-complex matrix, SA,
+                 to a double-complex matrix, A.
 
     Note that while it is possible to overflow while converting
     from double to single, it is not possible to overflow when
@@ -73,7 +73,7 @@ void clag2z_kernel(
             The number of columns of the matrix A.  N >= 0.
 
     @param[in]
-    SA      REAL array, dimension (LDSA,N)
+    SA      COMPLEX array, dimension (LDSA,N)
             On entry, the M-by-N coefficient matrix SA.
 
     @param[in]
@@ -142,7 +142,7 @@ magmablas_clag2z(
     magma_int_t m, magma_int_t n,
     magmaFloatComplex_const_ptr SA, magma_int_t ldsa,
     magmaDoubleComplex_ptr       A, magma_int_t lda,
-    magma_int_t *info )
+    magma_int_t *info)
 {
     magmablas_clag2z_q( m, n, SA, ldsa, A, lda, magma_stream, info );
 }

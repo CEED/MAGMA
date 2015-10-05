@@ -120,7 +120,7 @@ magmablas_zgeadd_q(
     if ( m == 0 || n == 0 )
         return;
     
-    dim3 threads( BLK_X );
+    dim3 threads( BLK_X, 1 );
     dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
     zgeadd_full<<< grid, threads, 0, queue >>>

@@ -18,7 +18,9 @@
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from left edge and moving right.
 __global__ void
-zlascl_full(int m, int n, double mul, magmaDoubleComplex* A, int lda)
+zlascl_full(
+    int m, int n, double mul,
+    magmaDoubleComplex* A, int lda)
 {
     int ind = blockIdx.x * NB + threadIdx.x;
 
@@ -33,7 +35,9 @@ zlascl_full(int m, int n, double mul, magmaDoubleComplex* A, int lda)
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from left edge and moving right to diagonal.
 __global__ void
-zlascl_lower(int m, int n, double mul, magmaDoubleComplex* A, int lda)
+zlascl_lower(
+    int m, int n, double mul,
+    magmaDoubleComplex* A, int lda)
 {
     int ind = blockIdx.x * NB + threadIdx.x;
 
@@ -50,7 +54,9 @@ zlascl_lower(int m, int n, double mul, magmaDoubleComplex* A, int lda)
 // each thread block does one NB x n block row of A.
 // each thread does one row, starting from right edge and moving left to diagonal.
 __global__ void
-zlascl_upper(int m, int n, double mul, magmaDoubleComplex* A, int lda)
+zlascl_upper(
+    int m, int n, double mul,
+    magmaDoubleComplex* A, int lda)
 {
     int ind = blockIdx.x * NB + threadIdx.x;
 
@@ -155,8 +161,8 @@ magmablas_zlascl_q(
         return;  //info;
     }
     
-    dim3 grid( magma_ceildiv( m, NB ) );
     dim3 threads( NB );
+    dim3 grid( magma_ceildiv( m, NB ) );
     
     double smlnum, bignum, cfromc, ctoc, cto1, cfrom1, mul;
     magma_int_t done = false;

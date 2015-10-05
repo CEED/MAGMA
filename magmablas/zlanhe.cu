@@ -65,7 +65,7 @@ zlanhe_inf_kernel_lower(
             // for ty=3:  res = sum( la[tx,24:31] )
             #pragma unroll 8             
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -96,7 +96,7 @@ zlanhe_inf_kernel_lower(
         // partial row sums
         #pragma unroll 8
         for (int j=ty*8; j < ty*8 + 8; j++) {
-            res += cuCabs( la[tx][j] );
+            res += MAGMA_Z_ABS( la[tx][j] );
         }
         __syncthreads();
         
@@ -115,7 +115,7 @@ zlanhe_inf_kernel_lower(
             // partial row sums
             #pragma unroll 8
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -138,7 +138,7 @@ zlanhe_inf_kernel_lower(
             // partial row sums
             #pragma unroll 8
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -186,7 +186,7 @@ zlanhe_inf_kernel_lower(
             // partial row sums
             #pragma unroll 8
             for (int j=0; j < 8; j++) {
-                res += cuCabs( la[tx][j+ty*8] );
+                res += MAGMA_Z_ABS( la[tx][j+ty*8] );
             }
             __syncthreads();
         }
@@ -196,7 +196,7 @@ zlanhe_inf_kernel_lower(
         if ( ty == 0 && tx < n_mod_bs ) {
             // sum rows left of diagonal
             for (int j=0; j < tx; j++) {
-                res += cuCabs( *A );
+                res += MAGMA_Z_ABS( *A );
                 A += lda;
             }
             // sum diagonal (ignoring imaginary part)
@@ -204,7 +204,7 @@ zlanhe_inf_kernel_lower(
             A += 1;
             // sum column below diagonal
             for (int j=tx+1; j < n_mod_bs; j++) {
-                res += cuCabs( *A );
+                res += MAGMA_Z_ABS( *A );
                 A += 1;
             }
         }
@@ -279,7 +279,7 @@ zlanhe_inf_kernel_upper(
             // for ty=3:  res = sum( la[tx,24:31] )
             #pragma unroll 8             
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -310,7 +310,7 @@ zlanhe_inf_kernel_upper(
         // partial row sums
         #pragma unroll 8
         for (int j=ty*8; j < ty*8 + 8; j++) {
-            res += cuCabs( la[tx][j] );
+            res += MAGMA_Z_ABS( la[tx][j] );
         }
         __syncthreads();
         
@@ -329,7 +329,7 @@ zlanhe_inf_kernel_upper(
             // partial row sums
             #pragma unroll 8
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -352,7 +352,7 @@ zlanhe_inf_kernel_upper(
             // partial row sums
             #pragma unroll 8
             for (int j=ty*8; j < ty*8 + 8; j++) {
-                res += cuCabs( la[tx][j] );
+                res += MAGMA_Z_ABS( la[tx][j] );
             }
             __syncthreads();
         }
@@ -398,7 +398,7 @@ zlanhe_inf_kernel_upper(
             // partial row sums
             #pragma unroll 8
             for (int j=0; j < 8; j++) {
-                res += cuCabs( la[tx][j+ty*8] );
+                res += MAGMA_Z_ABS( la[tx][j+ty*8] );
             }
             __syncthreads();
         }
@@ -412,7 +412,7 @@ zlanhe_inf_kernel_upper(
             
             // sum #column above diagonal
             for (int j=0; j < tx; j++) {
-                res += cuCabs( *A );
+                res += MAGMA_Z_ABS( *A );
                 A += 1;                                //#
             }
             // sum diagonal (ignoring imaginary part)
@@ -420,7 +420,7 @@ zlanhe_inf_kernel_upper(
             A += lda;                                  //#
             // sum #row right of diagonal
             for (int j=tx+1; j < n_mod_bs; j++) {
-                res += cuCabs( *A );
+                res += MAGMA_Z_ABS( *A );
                 A += lda;                              //#
             }
         }
@@ -483,7 +483,7 @@ zlanhe_max_kernel_lower(
     if (ind < n) {
         A += ind;
         for (int j=0; j < ind; ++j) {
-            res = max_nan( res, cuCabs( *A ));
+            res = max_nan( res, MAGMA_Z_ABS( *A ));
             A += lda;
         }
         // diagonal element (ignoring imaginary part)
@@ -505,7 +505,7 @@ zlanhe_max_kernel_upper(
         A += ind;
         A += (n-1)*lda;
         for (int j=n-1; j > ind; j--) {
-            res = max_nan( res, cuCabs( *A ));
+            res = max_nan( res, MAGMA_Z_ABS( *A ));
             A -= lda;
         }
         // diagonal element (ignoring imaginary part)

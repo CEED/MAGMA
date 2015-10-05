@@ -210,10 +210,8 @@ void zlacpy_upper_kernel_batched(
 /**
     Purpose
     -------
-    ZLACPY_Q copies all or part of a two-dimensional matrix dA to another
+    ZLACPY copies all or part of a two-dimensional matrix dA to another
     matrix dB.
-    
-    This is the same as ZLACPY, but adds queue argument.
     
     Arguments
     ---------

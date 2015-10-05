@@ -70,9 +70,10 @@ extern "C" void
 magmablas_ztrsv_outofplace(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t n,
-    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
-    magmaDoubleComplex *b, magma_int_t incb,
-    magmaDoubleComplex *x, magma_queue_t queue,
+    magmaDoubleComplex_const_ptr A, magma_int_t lda,
+    magmaDoubleComplex_ptr       b, magma_int_t incb,
+    magmaDoubleComplex_ptr       x,
+    magma_queue_t queue,
     magma_int_t flag=0)
 {
     /* Check arguments */
@@ -298,9 +299,10 @@ extern "C" void
 magmablas_ztrsv_recursive_outofplace(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t n,
-    const magmaDoubleComplex * __restrict__ A, magma_int_t lda,
-    magmaDoubleComplex *b, magma_int_t incb,
-    magmaDoubleComplex *x, magma_queue_t queue)
+    magmaDoubleComplex_const_ptr A, magma_int_t lda,
+    magmaDoubleComplex_ptr       b, magma_int_t incb,
+    magmaDoubleComplex_ptr       x,
+    magma_queue_t queue)
 {
     /* Check arguments */
     magma_int_t info = 0;

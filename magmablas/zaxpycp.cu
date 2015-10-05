@@ -17,7 +17,9 @@
 // each thread does one index, x[i] and r[i]
 __global__ void
 zaxpycp_kernel(
-    int m, magmaDoubleComplex *r, magmaDoubleComplex *x,
+    int m,
+    magmaDoubleComplex *r,
+    magmaDoubleComplex *x,
     const magmaDoubleComplex *b)
 {
     const int i = threadIdx.x + blockIdx.x*NB;

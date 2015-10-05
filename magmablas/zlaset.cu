@@ -215,10 +215,8 @@ void zlaset_upper_kernel_batched(
 /**
     Purpose
     -------
-    ZLASET_Q initializes a 2-D array A to DIAG on the diagonal and
+    ZLASET initializes a 2-D array A to DIAG on the diagonal and
     OFFDIAG on the off-diagonals.
-    
-    This is the same as ZLASET, but adds queue argument.
     
     Arguments
     ---------

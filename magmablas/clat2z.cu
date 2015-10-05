@@ -41,13 +41,15 @@ void clat2z_lower(
             // full block-column, off-diagonal block
             #pragma unroll
             for( int j=0; j < BLK_Y; ++j ) {
-                A[j*lda] = cuComplexFloatToDouble( SA[j*ldsa] );
+                A[j*lda] = MAGMA_Z_MAKE( MAGMA_C_REAL( SA[j*ldsa] ),
+                                         MAGMA_C_IMAG( SA[j*ldsa] ) );
             }
         }
         else {
             // either partial block-column or diagonal block
             for( int j=0; j < BLK_Y && iby+j < n && ind >= iby+j; ++j ) {
-                A[j*lda] = cuComplexFloatToDouble( SA[j*ldsa] );
+                A[j*lda] = MAGMA_Z_MAKE( MAGMA_C_REAL( SA[j*ldsa] ),
+                                         MAGMA_C_IMAG( SA[j*ldsa] ) );
             }
         }
     }
@@ -78,14 +80,16 @@ void clat2z_upper(
             // full block-column, off-diagonal block
             #pragma unroll
             for( int j=0; j < BLK_Y; ++j ) {
-                A[j*lda] = cuComplexFloatToDouble( SA[j*ldsa] );
+                A[j*lda] = MAGMA_Z_MAKE( MAGMA_C_REAL( SA[j*ldsa] ),
+                                         MAGMA_C_IMAG( SA[j*ldsa] ) );
             }
         }
         else {
             // either partial block-column or diagonal block
             for( int j=0; j < BLK_Y && iby+j < n; ++j ) {
                 if ( ind <= iby+j ) {
-                    A[j*lda] = cuComplexFloatToDouble( SA[j*ldsa] );
+                    A[j*lda] = MAGMA_Z_MAKE( MAGMA_C_REAL( SA[j*ldsa] ),
+                                             MAGMA_C_IMAG( SA[j*ldsa] ) );
                 }
             }
         }
@@ -96,8 +100,8 @@ void clat2z_upper(
 /**
     Purpose
     -------
-    CLAT2Z_STREAM converts a single-complex matrix, SA,
-                        to a double-complex matrix, A.
+    CLAT2Z converts a single-complex matrix, SA,
+                 to a double-complex matrix, A.
 
     Note that while it is possible to overflow while converting
     from double to single, it is not possible to overflow when

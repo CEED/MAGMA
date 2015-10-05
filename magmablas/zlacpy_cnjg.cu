@@ -12,30 +12,20 @@
 
 #define BLOCK_SIZE 64
 
-/*********************************************************
- *
- * SWAP BLAS: permute to set of N elements
- *
- ********************************************************/
-/*
- *  First version: line per line
- */
-typedef struct {
-    magmaDoubleComplex *A1;
-    magmaDoubleComplex *A2;
-    int n, lda1, lda2;
-} magmagpu_zlacpy_cnjg_params_t;
+// copy & conjugate a single vector of length n.
+// TODO: this was modeled on the old zswap routine. Update to new zlacpy code for 2D matrix?
 
-__global__ void magmagpu_zlacpy_cnjg( magmagpu_zlacpy_cnjg_params_t params )
+__global__ void zlacpy_cnjg_kernel(
+    int n,
+    magmaDoubleComplex *A1, int lda1,
+    magmaDoubleComplex *A2, int lda2 )
 {
-    unsigned int x = threadIdx.x + blockDim.x*blockIdx.x;
-    unsigned int offset1 = x*params.lda1;
-    unsigned int offset2 = x*params.lda2;
-    if ( x < params.n )
+    int x = threadIdx.x + blockDim.x*blockIdx.x;
+    int offset1 = x*lda1;
+    int offset2 = x*lda2;
+    if ( x < n )
     {
-        magmaDoubleComplex *A1  = params.A1 + offset1;
-        magmaDoubleComplex *A2  = params.A2 + offset2;
-        *A2 = MAGMA_Z_CNJG(*A1);
+        A2[offset2] = MAGMA_Z_CNJG( A1[offset1] );
     }
 }
 
@@ -43,22 +33,21 @@ __global__ void magmagpu_zlacpy_cnjg( magmagpu_zlacpy_cnjg_params_t params )
 extern "C" void 
 magmablas_zlacpy_cnjg_q(
     magma_int_t n,
-    magmaDoubleComplex *dA1, magma_int_t lda1, 
-    magmaDoubleComplex *dA2, magma_int_t lda2,
+    magmaDoubleComplex_ptr dA1, magma_int_t lda1, 
+    magmaDoubleComplex_ptr dA2, magma_int_t lda2,
     magma_queue_t queue )
 {
-    int blocksize = 64;
-    dim3 blocks( magma_ceildiv( n, blocksize ) );
-    magmagpu_zlacpy_cnjg_params_t params = { dA1, dA2, int(n), int(lda1), int(lda2) };
-    magmagpu_zlacpy_cnjg<<< blocks, blocksize, 0, queue >>>( params );
+    dim3 threads( BLOCK_SIZE );
+    dim3 blocks( magma_ceildiv( n, BLOCK_SIZE ) );
+    zlacpy_cnjg_kernel<<< blocks, threads, 0, queue >>>( n, dA1, lda1, dA2, lda2 );
 }
 
 
 extern "C" void 
 magmablas_zlacpy_cnjg(
     magma_int_t n,
-    magmaDoubleComplex *dA1, magma_int_t lda1, 
-    magmaDoubleComplex *dA2, magma_int_t lda2)
+    magmaDoubleComplex_ptr dA1, magma_int_t lda1, 
+    magmaDoubleComplex_ptr dA2, magma_int_t lda2)
 {
     magmablas_zlacpy_cnjg_q( n, dA1, lda1, dA2, lda2, magma_stream );
 }

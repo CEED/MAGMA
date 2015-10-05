@@ -82,15 +82,13 @@ void zlag2c_kernel(
 /**
     Purpose
     -------
-    ZLAG2C_Q converts a double-complex matrix, A,
-                   to a single-complex matrix, SA.
+    ZLAG2C converts a double-complex matrix, A,
+                 to a single-complex matrix, SA.
     
     RMAX is the overflow for the single-complex arithmetic.
     ZLAG2C checks that all the entries of A are between -RMAX and
     RMAX. If not, the conversion is aborted and a flag is raised.
     
-    This is the same as ZLAG2C, but adds queue argument.
-        
     Arguments
     ---------
     @param[in]

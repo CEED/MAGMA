@@ -51,30 +51,32 @@ void zlat2c_lower(
             #pragma unroll
             for( int j=0; j < BLK_Y; ++j ) {
                 tmp = A[j*lda];
-                if (   (cuCreal(tmp) < neg_rmax) || (cuCreal(tmp) > rmax)
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(tmp) < neg_rmax) || (cuCimag(tmp) > rmax)
-#endif
+                if (   (MAGMA_Z_REAL(tmp) < neg_rmax) || (MAGMA_Z_REAL(tmp) > rmax)
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (MAGMA_Z_IMAG(tmp) < neg_rmax) || (MAGMA_Z_IMAG(tmp) > rmax)
+                    #endif
                     )
                 {
                     flag = 1;
                 }
-                SA[j*ldsa] = cuComplexDoubleToFloat( tmp );
+                SA[j*ldsa] = MAGMA_C_MAKE( MAGMA_Z_REAL(tmp),
+                                           MAGMA_Z_IMAG(tmp) );
             }
         }
         else {
             // either partial block-column or diagonal block
             for( int j=0; j < BLK_Y && iby+j < n && ind >= iby+j; ++j ) {
                 tmp = A[j*lda];
-                if (   (cuCreal(tmp) < neg_rmax) || (cuCreal(tmp) > rmax)
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(tmp) < neg_rmax) || (cuCimag(tmp) > rmax)
-#endif
+                if (   (MAGMA_Z_REAL(tmp) < neg_rmax) || (MAGMA_Z_REAL(tmp) > rmax)
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (MAGMA_Z_IMAG(tmp) < neg_rmax) || (MAGMA_Z_IMAG(tmp) > rmax)
+                    #endif
                     )
                 {
                     flag = 1;
                 }
-                SA[j*ldsa] = cuComplexDoubleToFloat( tmp );
+                SA[j*ldsa] = MAGMA_C_MAKE( MAGMA_Z_REAL(tmp),
+                                           MAGMA_Z_IMAG(tmp) );
             }
         }
     }
@@ -110,15 +112,16 @@ void zlat2c_upper(
             #pragma unroll
             for( int j=0; j < BLK_Y; ++j ) {
                 tmp = A[j*lda];
-                if (   (cuCreal(tmp) < neg_rmax) || (cuCreal(tmp) > rmax)
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(tmp) < neg_rmax) || (cuCimag(tmp) > rmax)
-#endif
+                if (   (MAGMA_Z_REAL(tmp) < neg_rmax) || (MAGMA_Z_REAL(tmp) > rmax)
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (MAGMA_Z_IMAG(tmp) < neg_rmax) || (MAGMA_Z_IMAG(tmp) > rmax)
+                    #endif
                     )
                 {
                     flag = 1;
                 }
-                SA[j*ldsa] = cuComplexDoubleToFloat( tmp );
+                SA[j*ldsa] = MAGMA_C_MAKE( MAGMA_Z_REAL(tmp),
+                                           MAGMA_Z_IMAG(tmp) );
             }
         }
         else {
@@ -126,15 +129,16 @@ void zlat2c_upper(
             for( int j=0; j < BLK_Y && iby+j < n; ++j ) {
                 if ( ind <= iby+j ) {
                     tmp = A[j*lda];
-                    if (   (cuCreal(tmp) < neg_rmax) || (cuCreal(tmp) > rmax)
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                         || (cuCimag(tmp) < neg_rmax) || (cuCimag(tmp) > rmax)
-#endif
+                    if (   (MAGMA_Z_REAL(tmp) < neg_rmax) || (MAGMA_Z_REAL(tmp) > rmax)
+                         #if defined(PRECISION_z) || defined(PRECISION_c)
+                         || (MAGMA_Z_IMAG(tmp) < neg_rmax) || (MAGMA_Z_IMAG(tmp) > rmax)
+                         #endif
                         )
                     {
                         flag = 1;
                     }
-                    SA[j*ldsa] = cuComplexDoubleToFloat( tmp );
+                    SA[j*ldsa] = MAGMA_C_MAKE( MAGMA_Z_REAL(tmp),
+                                               MAGMA_Z_IMAG(tmp) );
                 }
             }
         }

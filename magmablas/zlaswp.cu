@@ -34,7 +34,9 @@ typedef struct {
 // Each thread goes down a column of A,
 // swapping rows according to pivots stored in params.
 __global__ void zlaswp_kernel(
-    int n, magmaDoubleComplex *dAT, int ldda, zlaswp_params_t params )
+    int n,
+    magmaDoubleComplex *dAT, int ldda,
+    zlaswp_params_t params )
 {
     int tid = threadIdx.x + blockDim.x*blockIdx.x;
     if ( tid < n ) {
@@ -134,8 +136,8 @@ magmablas_zlaswp_q(
         return;  //info;
     }
     
-    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     zlaswp_params_t params;
     
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
@@ -180,7 +182,9 @@ magmablas_zlaswp(
 // Each thread goes down a column of A,
 // swapping rows according to pivots stored in params.
 __global__ void zlaswpx_kernel(
-    int n, magmaDoubleComplex *dA, int ldx, int ldy, zlaswp_params_t params )
+    int n,
+    magmaDoubleComplex *dA, int ldx, int ldy,
+    zlaswp_params_t params )
 {
     int tid = threadIdx.x + blockDim.x*blockIdx.x;
     if ( tid < n ) {
@@ -284,8 +288,8 @@ magmablas_zlaswpx_q(
         return;  //info;
     }
     
-    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     zlaswp_params_t params;
     
     for( int k = k1-1; k < k2; k += MAX_PIVOTS ) {
@@ -329,7 +333,9 @@ magmablas_zlaswpx(
 // (including copying pivots to the GPU).
 
 __global__ void zlaswp2_kernel(
-    int n, magmaDoubleComplex *dAT, int ldda, int npivots,
+    int n,
+    magmaDoubleComplex *dAT, int ldda,
+    int npivots,
     const magma_int_t *d_ipiv, int inci )
 {
     int tid = threadIdx.x + blockDim.x*blockIdx.x;
@@ -432,8 +438,8 @@ magmablas_zlaswp2_q(
     
     magma_int_t nb = k2-(k1-1);
     
-    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     dim3 threads( NTHREADS );
+    dim3 grid( magma_ceildiv( n, NTHREADS ) );
     zlaswp2_kernel<<< grid, threads, 0, queue >>>
         ( n, dAT(k1-1,0), ldda, nb, d_ipiv, inci );
 }

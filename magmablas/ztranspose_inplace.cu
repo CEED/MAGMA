@@ -11,7 +11,6 @@
        @author Mark Gates
 */
 #include "common_magma.h"
-#define PRECISION_z
 
 #define NB 16
 
@@ -30,7 +29,9 @@
 //
 // See ztranspose_inplace_even for description of threads.
 
-__global__ void ztranspose_inplace_odd( int n, magmaDoubleComplex *matrix, int lda )
+__global__ void ztranspose_inplace_odd(
+    int n,
+    magmaDoubleComplex *matrix, int lda )
 {
     __shared__ magmaDoubleComplex sA[ NB ][ NB+1 ];
     __shared__ magmaDoubleComplex sB[ NB ][ NB+1 ];
@@ -92,7 +93,9 @@ __global__ void ztranspose_inplace_odd( int n, magmaDoubleComplex *matrix, int l
 // syncs, then saves sA(i,j) to B(i,j) and sB(i,j) to A(i,j).
 // Threads outside the matrix do not touch memory.
 
-__global__ void ztranspose_inplace_even( int n, magmaDoubleComplex *matrix, int lda )
+__global__ void ztranspose_inplace_even(
+    int n,
+    magmaDoubleComplex *matrix, int lda )
 {
     __shared__ magmaDoubleComplex sA[ NB ][ NB+1 ];
     __shared__ magmaDoubleComplex sB[ NB ][ NB+1 ];

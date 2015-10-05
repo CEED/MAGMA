@@ -17,12 +17,16 @@
 // each thread does one index, x[i] and w[i]
 __global__ void
 zcaxpycp_kernel(
-    int m, magmaFloatComplex *r, magmaDoubleComplex *x,
-    const magmaDoubleComplex *b, magmaDoubleComplex *w )
+    int m,
+    magmaFloatComplex *r,
+    magmaDoubleComplex *x,
+    const magmaDoubleComplex *b,
+    magmaDoubleComplex *w )
 {
     const int i = threadIdx.x + blockIdx.x*NB;
     if ( i < m ) {
-        x[i] = MAGMA_Z_ADD( x[i], cuComplexFloatToDouble( r[i] ) );
+        x[i] = MAGMA_Z_ADD( x[i], MAGMA_Z_MAKE( MAGMA_Z_REAL( r[i] ),
+                                                MAGMA_Z_IMAG( r[i] ) ) );
         w[i] = b[i];
     }
 }

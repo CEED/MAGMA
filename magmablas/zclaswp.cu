@@ -28,8 +28,8 @@ zclaswp_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA, int
         newind = ipiv[0];
         
         for (int i=0; i < n; i++) {
-            res = MAGMA_C_MAKE( (float)cuCreal(A[newind+i*lda]),
-                                (float)cuCimag(A[newind+i*lda]) );
+            res = MAGMA_C_MAKE( (float)MAGMA_Z_REAL( A[newind+i*lda] ),
+                                (float)MAGMA_Z_IMAG( A[newind+i*lda] ));
             SA[i*lda] = res; 
         }
     }
@@ -49,8 +49,8 @@ zclaswp_inv_kernel(int n, magmaDoubleComplex *A, int lda, magmaFloatComplex *SA,
         newind = ipiv[0];
 
         for (int i=0; i < n; i++) {
-            res = MAGMA_Z_MAKE( (double)cuCrealf(SA[newind+i*lda]),
-                                (double)cuCimagf(SA[newind+i*lda]) );
+            res = MAGMA_Z_MAKE( (double)MAGMA_C_REAL( SA[newind+i*lda] ),
+                                (double)MAGMA_C_IMAG( SA[newind+i*lda] ));
             A[i*lda] = res;
         }
     }
