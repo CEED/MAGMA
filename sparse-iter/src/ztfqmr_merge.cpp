@@ -53,7 +53,7 @@
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_ztfqmr_unrolled(
+magma_ztfqmr_merge(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
@@ -65,7 +65,7 @@ magma_ztfqmr_unrolled(
     magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
-    solver_par->solver = Magma_TFQMR;
+    solver_par->solver = Magma_TFQMRMERGE;
     solver_par->numiter = 0;
     solver_par->info = MAGMA_SUCCESS;
     
@@ -144,6 +144,18 @@ magma_ztfqmr_unrolled(
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u_mp1 + sigma*d;
         magma_zscal(dofs, sigma, Ad.dval, 1);         
         magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // Ad = Au + sigma*Ad;
+    /*    magma_ztfqmr_1(  
+    r.num_rows, 
+    r.num_cols, 
+    alpha,
+    sigma,
+    v.dval, 
+    Au.dval,
+    u_mp1.dval,
+    w.dval, 
+    d.dval,
+    Ad.dval,
+    queue );*/
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
@@ -153,6 +165,19 @@ magma_ztfqmr_unrolled(
         
         magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + eta * d
         magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - eta * Ad
+        /*
+        
+        magma_ztfqmr_2(  
+    r.num_rows, 
+    r.num_cols, 
+    eta,
+    d.dval,
+    Ad.dval,
+    x.dval, 
+    r.dval, 
+    queue )
+    
+    */
 
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
@@ -166,7 +191,18 @@ magma_ztfqmr_unrolled(
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u_mp1 + sigma*d;
         magma_zscal(dofs, sigma, Ad.dval, 1);         
         magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // Ad = Au + sigma*Ad;
-
+    /*    magma_ztfqmr_5(  
+    r.num_rows, 
+    r.num_cols, 
+    alpha,
+    sigma,
+    v.dval, 
+    Au.dval,
+    u_mp1.dval,
+    w.dval, 
+    d.dval,
+    Ad.dval,
+    queue );*/
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
@@ -175,6 +211,20 @@ magma_ztfqmr_unrolled(
 
         magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + eta * d
         magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - eta * Ad
+        
+                /*
+        
+    magma_ztfqmr_2(  
+    r.num_rows, 
+    r.num_cols, 
+    eta,
+    d.dval,
+    Ad.dval,
+    x.dval, 
+    r.dval, 
+    queue )
+    
+    */
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
@@ -197,6 +247,17 @@ magma_ztfqmr_unrolled(
         beta = rho / rho_l;
         magma_zscal(dofs, beta, u_mp1.dval, 1); 
         magma_zaxpy(dofs, c_one, w.dval, 1, u_mp1.dval, 1);         // u_mp1 = w + beta*u_mp1;
+        
+        /*
+magma_ztfqmr_3(  
+    r.num_rows, 
+    r.num_cols, 
+    beta,
+    w.dval,
+    u_mp1.dval, 
+    queue )
+
+*/
               
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
@@ -206,6 +267,16 @@ magma_ztfqmr_unrolled(
         magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);      // v = Au_new + beta*(Au+beta*v);
         
         magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
+        
+   /*     magma_ztfqmr_4(  
+    r.num_rows, 
+    r.num_cols, 
+    beta,
+    Au_new.dval,
+    v.dval,
+    Au.dval, 
+    queue )*/
+    
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
@@ -261,4 +332,4 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
-}   /* magma_zfqmr */
+}   /* magma_zfqmr_merge */

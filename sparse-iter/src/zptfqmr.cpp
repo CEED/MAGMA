@@ -70,7 +70,7 @@ magma_zptfqmr(
     magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
-    solver_par->solver = Magma_TFQMR;
+    solver_par->solver = Magma_PTFQMR;
     solver_par->numiter = 0;
     solver_par->info = MAGMA_SUCCESS;
     
