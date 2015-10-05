@@ -376,7 +376,7 @@ magma_ztfqmr_4(
 
 
 __global__ void
-magma_ztfqmr_1_kernel(  
+magma_ztfqmr_5_kernel(  
     int num_rows, 
     int num_cols, 
     magmaDoubleComplex alpha,
