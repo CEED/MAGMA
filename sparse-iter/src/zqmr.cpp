@@ -142,7 +142,7 @@ magma_zqmr(
     {
         solver_par->numiter++;
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
-            printf("break 1"\n);
+            printf("break 1\n");
             goto cleanup;
         }
 
@@ -159,7 +159,7 @@ magma_zqmr(
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
         if( delta == c_zero || delta == 'NaN' ){
-            printf("break 2"\n);
+            printf("break 2\n");
             break;
         }
         
@@ -185,7 +185,7 @@ magma_zqmr(
             magma_zaxpy(dofs, c_one, zt.dval, 1, q.dval, 1);
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
-            printf("break 3"\n);
+            printf("break 3\n");
             break;
         }
         
@@ -194,7 +194,7 @@ magma_zqmr(
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
-                        printf("break 4"\n);
+                        printf("break 4\n");
             break;
         }
         
