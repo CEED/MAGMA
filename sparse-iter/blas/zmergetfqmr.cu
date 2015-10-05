@@ -26,7 +26,6 @@ magma_ztfqmr_1_kernel(
     int num_cols, 
     magmaDoubleComplex alpha,
     magmaDoubleComplex sigma,
-    magmaDoubleComplex *u_m,
     magmaDoubleComplex *v, 
     magmaDoubleComplex *Au,
     magmaDoubleComplex *pu_m,
@@ -39,7 +38,7 @@ magma_ztfqmr_1_kernel(
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
             
-            u_mp1[ i+j*num_rows ] = u_m[ i+j*num_rows ] - alpha * v[ i+j*num_rows ];
+            u_mp1[ i+j*num_rows ] = u_mp1[ i+j*num_rows ] - alpha * v[ i+j*num_rows ];
             w[ i+j*num_rows ] = w[ i+j*num_rows ] - alpha * Au[ i+j*num_rows ];
             d[ i+j*num_rows ] = pu_m[ i+j*num_rows ] + sigma * d[ i+j*num_rows ];
             Ad[ i+j*num_rows ] = Au[ i+j*num_rows ] + sigma * Ad[ i+j*num_rows ];
@@ -53,7 +52,7 @@ magma_ztfqmr_1_kernel(
 
     Mergels multiple operations into one kernel:
 
-    u_mp1 = u_m - alpha*v;
+    u_mp1 = u_mp1 - alpha*v;
     w = w - alpha*Au;
     d = pu_m + sigma*d;
     Ad = Au + sigma*Ad;
@@ -73,10 +72,6 @@ magma_ztfqmr_1_kernel(
     @param[in]
     sigma       magmaDoubleComplex
                 scalar
-
-    @param[in]
-    u_m         magmaDoubleComplex_ptr 
-                vector
                 
     @param[in]
     v           magmaDoubleComplex_ptr 
@@ -120,7 +115,6 @@ magma_ztfqmr_1(
     magma_int_t num_cols, 
     magmaDoubleComplex alpha,
     magmaDoubleComplex sigma,
-    magmaDoubleComplex_ptr u_m,
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr Au,
     magmaDoubleComplex_ptr pu_m,
@@ -133,7 +127,7 @@ magma_ztfqmr_1(
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
-                    u_m, v, Au, pu_m, u_mp1, w, d, Ad );
+                     v, Au, pu_m, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;
 }
