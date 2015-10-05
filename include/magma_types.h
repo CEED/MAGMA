@@ -483,30 +483,32 @@ typedef enum {
     Magma_CGSMERGE     = 457,
     Magma_PCGSMERGE    = 458,
     Magma_TFQMR        = 459,   
-    Magma_PFQMR        = 460
+    Magma_PFQMR        = 460,
+    Magma_TFQMR        = 461,   
+    Magma_PFQMR        = 462
 } magma_solver_type;
 
 typedef enum {
-    Magma_CGSO         = 461,
-    Magma_FUSED_CGSO   = 462,
-    Magma_MGSO         = 463
+    Magma_CGSO         = 561,
+    Magma_FUSED_CGSO   = 562,
+    Magma_MGSO         = 563
 } magma_ortho_t;
 
 typedef enum {
-    Magma_CPU          = 471,
-    Magma_DEV          = 472
+    Magma_CPU          = 571,
+    Magma_DEV          = 572
 } magma_location_t;
 
 typedef enum {
-    Magma_GENERAL      = 481,
-    Magma_SYMMETRIC    = 482
+    Magma_GENERAL      = 581,
+    Magma_SYMMETRIC    = 582
 } magma_symmetry_t;
 
 typedef enum {
-    Magma_ORDERED      = 491,
-    Magma_DIAGFIRST    = 492,
-    Magma_UNITY        = 493,
-    Magma_VALUE        = 494
+    Magma_ORDERED      = 591,
+    Magma_DIAGFIRST    = 592,
+    Magma_UNITY        = 593,
+    Magma_VALUE        = 594
 } magma_diagorder_t;
 
 typedef enum {
