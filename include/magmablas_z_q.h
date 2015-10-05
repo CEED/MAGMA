@@ -81,7 +81,7 @@ magmablas_zlange_q(
     magma_norm_t norm,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork,
+    magmaDouble_ptr dwork, magma_int_t lwork,
     magma_queue_t queue );
 
 double
@@ -89,7 +89,7 @@ magmablas_zlanhe_q(
     magma_norm_t norm, magma_uplo_t uplo,
     magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork,
+    magmaDouble_ptr dwork, magma_int_t lwork,
     magma_queue_t queue );
 
 double
@@ -97,7 +97,7 @@ magmablas_zlansy_q(
     magma_norm_t norm, magma_uplo_t uplo,
     magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork,
+    magmaDouble_ptr dwork, magma_int_t lwork,
     magma_queue_t queue );
 
 void

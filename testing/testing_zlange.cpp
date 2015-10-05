@@ -89,7 +89,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            norm_magma = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work );
+            norm_magma = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work, lwork );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma < 0)
@@ -132,7 +132,7 @@ int main( int argc, char** argv)
             magma_int_t j = rand() % N;
             *h_A(i,j) = MAGMA_Z_NAN;
             magma_zsetvector( 1, h_A(i,j), 1, d_A(i,j), 1 );
-            norm_magma  = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work );
+            norm_magma  = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work, lwork );
             norm_lapack = lapackf77_zlange( lapack_norm_const( norm[inorm] ),
                                             &M, &N, h_A, &lda, h_work );
             bool nan_okay    = isnan(norm_magma);
@@ -142,7 +142,7 @@ int main( int argc, char** argv)
             
             *h_A(i,j) = MAGMA_Z_INF;
             magma_zsetvector( 1, h_A(i,j), 1, d_A(i,j), 1 );
-            norm_magma  = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work );
+            norm_magma  = magmablas_zlange( norm[inorm], M, N, d_A, ldda, d_work, lwork );
             norm_lapack = lapackf77_zlange( lapack_norm_const( norm[inorm] ),
                                             &M, &N, h_A, &lda, h_work );
             bool inf_okay    = isinf(norm_magma);

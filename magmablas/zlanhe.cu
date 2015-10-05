@@ -27,7 +27,9 @@
  * z precision uses > 16 KB shared memory, so requires Fermi (arch >= 200). */
 __global__ void
 zlanhe_inf_kernel_lower(
-    int n, const magmaDoubleComplex* A, int lda, double *dwork,
+    int n,
+    const magmaDoubleComplex * __restrict__ A, int lda,
+    double * __restrict__ dwork,
     int n_full_block, int n_mod_bs )
 {
 #if (defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c) || __CUDA_ARCH__ >= 200)
@@ -241,7 +243,9 @@ zlanhe_inf_kernel_lower(
  * Differences are noted with # in comments. */
 __global__ void
 zlanhe_inf_kernel_upper(
-    int n, const magmaDoubleComplex* A, int lda, double *dwork,
+    int n,
+    const magmaDoubleComplex * __restrict__ A, int lda,
+    double * __restrict__ dwork,
     int n_full_block, int n_mod_bs )
 {
 #if (defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c) || __CUDA_ARCH__ >= 200)
@@ -448,22 +452,22 @@ zlanhe_inf_kernel_upper(
 /* Computes row sums dwork[i] = sum( abs( A(i,:) )), i=0:n-1, for || A ||_inf */
 extern "C" void
 zlanhe_inf(
-    magma_uplo_t uplo, int n,
-    magmaDoubleComplex_const_ptr A, int lda,
-    magmaDouble_ptr dwork )
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_const_ptr A, magma_int_t lda,
+    magmaDouble_ptr dwork,
+    magma_queue_t queue )
 {
-    int blocks = magma_ceildiv( n, inf_bs );
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(inf_bs, 4, 1);
+    dim3 threads( inf_bs, 4 );
+    dim3 grid( magma_ceildiv( n, inf_bs ), 1 );
 
-    int n_full_block = (n - n % inf_bs) /inf_bs;
-    int n_mod_bs = n % inf_bs;
+    magma_int_t n_full_block = (n - n % inf_bs) / inf_bs;
+    magma_int_t n_mod_bs = n % inf_bs;
     if ( uplo == MagmaLower) {
-        zlanhe_inf_kernel_lower<<< grid, threads, 0, magma_stream >>>
+        zlanhe_inf_kernel_lower<<< grid, threads, 0, queue >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
     else {
-        zlanhe_inf_kernel_upper<<< grid, threads, 0, magma_stream >>>
+        zlanhe_inf_kernel_upper<<< grid, threads, 0, queue >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
 }
@@ -475,7 +479,9 @@ zlanhe_inf(
 /* Computes dwork[i] = max( abs( A(i,0:i) )), i=0:n-1, for ||A||_max, where A is stored lower */
 __global__ void
 zlanhe_max_kernel_lower(
-    int n, const magmaDoubleComplex* A, int lda, double *dwork )
+    int n,
+    const magmaDoubleComplex * __restrict__ A, int lda,
+    double * __restrict__ dwork )
 {
     int ind = blockIdx.x*max_bs + threadIdx.x;
     double res = 0;
@@ -496,7 +502,9 @@ zlanhe_max_kernel_lower(
 /* Computes dwork[i] = max( abs( A(i,0:i) )), i=0:n-1, for ||A||_max, where A is stored upper. */
 __global__ void
 zlanhe_max_kernel_upper(
-    int n, const magmaDoubleComplex* A, int lda, double *dwork )
+    int n,
+    const magmaDoubleComplex * __restrict__ A, int lda,
+    double * __restrict__ dwork )
 {
     int ind = blockIdx.x*max_bs + threadIdx.x;
     double res = 0;
@@ -518,20 +526,20 @@ zlanhe_max_kernel_upper(
 /* Computes dwork[i] = max( abs( A(i,:) )), i=0:n-1, for ||A||_max */
 extern "C" void
 zlanhe_max(
-    magma_uplo_t uplo, int n,
-    magmaDoubleComplex_const_ptr A, int lda,
-    magmaDouble_ptr dwork )
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_const_ptr A, magma_int_t lda,
+    magmaDouble_ptr dwork,
+    magma_queue_t queue )
 {
-    int blocks = magma_ceildiv( n, max_bs );
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(max_bs, 1, 1);
+    dim3 threads( max_bs );
+    dim3 grid( magma_ceildiv( n, max_bs ) );
 
     if ( uplo == MagmaLower ) {
-        zlanhe_max_kernel_lower<<< grid, threads, 0, magma_stream >>>
+        zlanhe_max_kernel_lower<<< grid, threads, 0, queue >>>
             ( n, A, lda, dwork );
     }
     else {
-        zlanhe_max_kernel_upper<<< grid, threads, 0, magma_stream >>>
+        zlanhe_max_kernel_upper<<< grid, threads, 0, queue >>>
             ( n, A, lda, dwork );
     }
 }
@@ -597,16 +605,20 @@ zlanhe_max(
     dwork   (workspace) DOUBLE PRECISION array on the GPU, dimension (MAX(1,LWORK)),
             where LWORK >= N.
             NOTE: this is different than LAPACK, where WORK is required
-            only for norm1 and normI. Here max-norm also requires work.
+            only for norm1 and normI. Here max-norm also requires WORK.
+    
+    @param[in]
+    lwork   INTEGER
+            The dimension of the array DWORK. LWORK >= max( 1, N ).
     
     @ingroup magma_zaux2
     ********************************************************************/
-
 extern "C" double
-magmablas_zlanhe(
+magmablas_zlanhe_q(
     magma_norm_t norm, magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork )
+    magmaDouble_ptr dwork, magma_int_t lwork,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
 
@@ -629,6 +641,8 @@ magmablas_zlanhe(
         info = -3;
     else if ( ldda < n )
         info = -5;
+    else if ( lwork < n )
+        info = -7;
     
     if ( info != 0 ) {
         magma_xerbla( __func__, -(info) );
@@ -641,13 +655,27 @@ magmablas_zlanhe(
         
     double res = 0;
     if ( inf_norm ) {
-        zlanhe_inf( uplo, n, dA, ldda, dwork );
+        zlanhe_inf( uplo, n, dA, ldda, dwork, queue );
     }
     else {
-        zlanhe_max( uplo, n, dA, ldda, dwork );
+        zlanhe_max( uplo, n, dA, ldda, dwork, queue );
     }
-    magma_max_nan_kernel<<< 1, 512, 0, magma_stream >>>( n, dwork );
-    cudaMemcpy( &res, &dwork[0], sizeof(double), cudaMemcpyDeviceToHost );
+    magma_max_nan_kernel<<< 1, 512, 0, queue >>>( n, dwork );
+    magma_dgetvector( 1, &dwork[0], 1, &res, 1 );
     
     return res;
+}
+
+
+/**
+    @see magmablas_zlanhe_q
+    @ingroup magma_zaux2
+    ********************************************************************/
+extern "C" double
+magmablas_zlanhe(
+    magma_norm_t norm, magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDouble_ptr dwork, magma_int_t lwork )
+{
+    return magmablas_zlanhe_q( norm, uplo, n, dA, ldda, dwork, lwork, magma_stream );
 }

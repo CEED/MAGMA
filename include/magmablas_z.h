@@ -382,21 +382,21 @@ magmablas_zlange(
     magma_norm_t norm,
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork );
+    magmaDouble_ptr dwork, magma_int_t lwork );
 
 double
 magmablas_zlanhe(
     magma_norm_t norm, magma_uplo_t uplo,
     magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork );
+    magmaDouble_ptr dwork, magma_int_t lwork );
 
 double
 magmablas_zlansy(
     magma_norm_t norm, magma_uplo_t uplo,
     magma_int_t n,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork );
+    magmaDouble_ptr dwork, magma_int_t lwork );
 
 void
 magmablas_zlarfg(

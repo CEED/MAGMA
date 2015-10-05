@@ -321,7 +321,7 @@ magma_dsyevdx_gpu(
     rmax = magma_dsqrt( bignum );
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_dlansy( MagmaMaxNorm, uplo, n, dA, ldda, dwork );
+    anrm = magmablas_dlansy( MagmaMaxNorm, uplo, n, dA, ldda, dwork, ldwork );
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {

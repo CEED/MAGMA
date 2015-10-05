@@ -188,7 +188,7 @@ magma_zcposv_gpu(
     dR  = dworkd;
 
     eps  = lapackf77_dlamch("Epsilon");
-    Anrm = magmablas_zlanhe(MagmaInfNorm, uplo, n, dA, ldda, (double*)dworkd );
+    Anrm = magmablas_zlanhe( MagmaInfNorm, uplo, n, dA, ldda, (double*)dworkd, n*nrhs );
     cte  = Anrm * eps * pow((double)n, 0.5) * BWDMAX;
 
     /*

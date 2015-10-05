@@ -158,7 +158,7 @@ magma_zgerfs_nopiv_gpu(
     dR  = dworkd;
     
     eps  = lapackf77_dlamch("Epsilon");
-    Anrm = magmablas_zlange(MagmaInfNorm, n, n, dA, ldda, (double*)dworkd );
+    Anrm = magmablas_zlange( MagmaInfNorm, n, n, dA, ldda, (double*)dworkd, n*nrhs );
     cte  = Anrm * eps * pow( (double)n, (double)0.5 ) * BWDMAX;
     
     // residual dR = dB - dA*dX in double precision

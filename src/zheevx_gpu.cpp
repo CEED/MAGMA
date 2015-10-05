@@ -324,7 +324,7 @@ magma_zheevx_gpu(
     rmax = magma_dsqrt(bignum);
     
     /* Scale matrix to allowable range, if necessary. */
-    anrm = magmablas_zlanhe(MagmaMaxNorm, uplo, n, dA, ldda, dwork);
+    anrm = magmablas_zlanhe( MagmaMaxNorm, uplo, n, dA, ldda, dwork, n );
     iscale = 0;
     sigma  = 1;
     if (anrm > 0. && anrm < rmin) {

@@ -70,7 +70,7 @@ int main( int argc, char** argv)
             printf( "Testing that magmablas_zlanhe( %s, %s, ... ) returns -1 error...\n",
                     lapack_norm_const( norm[inorm] ),
                     lapack_uplo_const( uplo[iuplo] ));
-            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], 1, NULL, 1, NULL );
+            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], 1, NULL, 1, NULL, 1 );
             if ( norm_magma != -1 ) {
                 printf( "expected magmablas_zlanhe to return -1 error, but got %f\n", norm_magma );
                 status = 1;
@@ -120,7 +120,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work );
+            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work, N );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma == -1) {
@@ -202,7 +202,7 @@ int main( int argc, char** argv)
                 
             *h_A(i,j) = MAGMA_Z_NAN;
             magma_zsetvector( 1, h_A(i,j), 1, d_A(i,j), 1 );
-            norm_magma  = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work );
+            norm_magma  = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work, N );
             norm_lapack = lapackf77_zlanhe( lapack_norm_const( norm[inorm] ),
                                             lapack_uplo_const( uplo[iuplo] ),
                                             &N, h_A, &lda, h_work );
@@ -213,7 +213,7 @@ int main( int argc, char** argv)
             
             *h_A(i,j) = MAGMA_Z_INF;
             magma_zsetvector( 1, h_A(i,j), 1, d_A(i,j), 1 );
-            norm_magma  = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work );
+            norm_magma  = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work, N );
             norm_lapack = lapackf77_zlanhe( lapack_norm_const( norm[inorm] ),
                                             lapack_uplo_const( uplo[iuplo] ),
                                             &N, h_A, &lda, h_work );
