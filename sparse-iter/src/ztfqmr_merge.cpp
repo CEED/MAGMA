@@ -262,20 +262,20 @@ magma_ztfqmr_3(
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
         // do this every loop as unrolled
-        magma_zscal(dofs, beta*beta, v.dval, 1);                    
-        magma_zaxpy(dofs, beta, Au.dval, 1, v.dval, 1);              
-        magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);      // v = Au_new + beta*(Au+beta*v);
+        //magma_zscal(dofs, beta*beta, v.dval, 1);                    
+        //magma_zaxpy(dofs, beta, Au.dval, 1, v.dval, 1);              
+        //magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);      // v = Au_new + beta*(Au+beta*v);
         
-        magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
+        //magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
         
-   /*     magma_ztfqmr_4(  
+        magma_ztfqmr_4(  
     r.num_rows, 
     r.num_cols, 
     beta,
     Au_new.dval,
     v.dval,
     Au.dval, 
-    queue )*/
+    queue );
     
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
