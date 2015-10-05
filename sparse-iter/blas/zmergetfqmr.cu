@@ -33,7 +33,7 @@ magma_ztfqmr_1_kernel(
     magmaDoubleComplex *um_p1,
     magmaDoubleComplex *w, 
     magmaDoubleComplex *d,
-    magmaDoubleComplex *Ad,
+    magmaDoubleComplex *Ad )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
@@ -309,11 +309,10 @@ __global__ void
 magma_ztfqmr_4_kernel(  
     int num_rows,
     int num_cols,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex *u_hat,
-    magmaDoubleComplex *t,
-    magmaDoubleComplex *x,
-    magmaDoubleComplex *r )
+    magmaDoubleComplex beta,
+    magmaDoubleComplex *Au_new,
+    magmaDoubleComplex *v,
+    magmaDoubleComplex *Au )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
