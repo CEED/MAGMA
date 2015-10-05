@@ -608,6 +608,12 @@ magma_ztfqmr(
     magma_queue_t queue );
 
 magma_int_t
+magma_ztfqmr_unrolled(
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zptfqmr(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
