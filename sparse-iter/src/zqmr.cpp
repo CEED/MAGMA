@@ -164,7 +164,7 @@ magma_zqmr(
         }
         
         // no precond: yt = y, zt = z
-        magma_zcopy( dofs, y.dval, 1, y.dval, 1 );
+        magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
         magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
         
         if( solver_par->numiter == 1 ){
