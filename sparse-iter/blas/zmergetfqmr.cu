@@ -124,7 +124,7 @@ magma_ztfqmr_1(
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr Au,
     magmaDoubleComplex_ptr pu_m,
-    magmaDoubleComplex_ptr um_p1,
+    magmaDoubleComplex_ptr u_mp1,
     magmaDoubleComplex_ptr w, 
     magmaDoubleComplex_ptr d,
     magmaDoubleComplex_ptr Ad,
