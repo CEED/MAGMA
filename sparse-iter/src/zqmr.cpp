@@ -73,7 +73,7 @@ magma_zqmr(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
     double nom0, r0,  res, nomb;
-    magmaDoubleComplex rho = c_one, rho1 = c_one, eta = c_zero , pds = c_one, 
+    magmaDoubleComplex rho = c_one, rho1 = c_one, eta = -c_one , pds = c_one, 
                         thet = c_one, thet1 = c_one, epsilon = c_one, pda = c_one, 
                         beta = c_one, delta = c_one, pde = c_one, rde = c_one, tau = c_one,
                         gamm = c_one, gamm1 = c_one;
@@ -105,13 +105,15 @@ magma_zqmr(
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, v.dval, 1 );  
+    magma_zcopy( dofs, r.dval, 1, y.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, vt.dval, 1 );  
+    magma_zcopy( dofs, r.dval, 1, wt.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
     CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
     nomb = magma_dznrm2( dofs, b.dval, 1 );
-    if ( nomb == 0.0 ){
+    if ( nomb == c_zero.0 ){
         nomb=1.0;
     }       
     if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
@@ -140,7 +142,7 @@ magma_zqmr(
     do
     {
         solver_par->numiter++;
-        if( rho == 0 || rho == 'NaN' || psi == 0 || psi == 'NaN' ){
+        if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             goto cleanup;
         }
 
@@ -156,7 +158,7 @@ magma_zqmr(
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
-        if( delta == 0 || delta == 'NaN' ){
+        if( delta == c_zero || delta == 'NaN' ){
             break;
         }
         
@@ -181,7 +183,7 @@ magma_zqmr(
             magma_zscal(dofs, -rde, q.dval, 1);    
             magma_zaxpy(dofs, c_one, zt.dval, 1, q.dval, 1);
         }
-        if( rho == 0 || rho == 'NaN' || psi == 0 || psi == 'NaN' ){
+        if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
         }
         
@@ -189,7 +191,7 @@ magma_zqmr(
             // epsilon = q' * pt;
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
-        if( epsilon == 0 || epsilon == 'NaN' || beta == 0 || beta == 'NaN' ){
+        if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
             break;
         }
         
@@ -219,7 +221,7 @@ magma_zqmr(
         gamm1 = gamm;
         gamm = c_one / magma_zsqrt(c_one + thet*thet);
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamml);
-        if( thet == 0 || thet == 'NaN' || gamm == 0 || gamm == 'NaN' || eta == 0 || eta == 'NaN' ){
+        if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
             break;
         }
         
@@ -250,7 +252,7 @@ magma_zqmr(
         
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
-            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
@@ -276,7 +278,7 @@ magma_zqmr(
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
-            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
@@ -291,7 +293,7 @@ magma_zqmr(
     }
     else {
         if ( solver_par->verbose > 0 ) {
-            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
+            if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
