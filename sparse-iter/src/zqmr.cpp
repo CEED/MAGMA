@@ -194,7 +194,7 @@ magma_zqmr(
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
-                        printf("break 4\n");
+                        printf("break 4:%f %f\n", epsilon, beta);
             break;
         }
         
