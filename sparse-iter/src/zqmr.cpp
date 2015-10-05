@@ -75,7 +75,8 @@ magma_zqmr(
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho = c_one, rho1 = c_one, eta = c_zero , pds = c_one, 
                         thet = c_one, thet1 = c_one, epsilon = c_one, pda = c_one, 
-                        beta = c_one, delta = c_one, pde = c_one, rde = c_one;
+                        beta = c_one, delta = c_one, pde = c_one, rde = c_one, tau = c_one,
+                        gamm = c_one, gamm1 = c_one;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
@@ -105,11 +106,7 @@ magma_zqmr(
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1 );  
-    
-    // preconditioner
-    CHECK( magma_z_applyprecond_left( A, u_m, &t, precond_par, queue ));
-    CHECK( magma_z_applyprecond_right( A, t, &pu_m, precond_par, queue ));
+    magma_zcopy( dofs, r.dval, 1, v.dval, 1 );  
     
     CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
@@ -143,7 +140,7 @@ magma_zqmr(
     do
     {
         solver_par->numiter++;
-        if( rho == 0 || rho == NaN || psi == 0 || psi == NaN ){
+        if( rho == 0 || rho == 'NaN' || psi == 0 || psi == 'NaN' ){
             goto cleanup;
         }
 
@@ -159,7 +156,7 @@ magma_zqmr(
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
-        if( delta == 0 || delta == NaN ){
+        if( delta == 0 || delta == 'NaN' ){
             break;
         }
         
@@ -184,7 +181,7 @@ magma_zqmr(
             magma_zscal(dofs, -rde, q.dval, 1);    
             magma_zaxpy(dofs, c_one, zt.dval, 1, q.dval, 1);
         }
-        if( rho == 0 || rho == NaN || psi == 0 || psi == NaN ){
+        if( rho == 0 || rho == 'NaN' || psi == 0 || psi == 'NaN' ){
             break;
         }
         
@@ -192,7 +189,7 @@ magma_zqmr(
             // epsilon = q' * pt;
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
-        if( epsilon == 0 || epsilon == NaN || beta == 0 || beta == NaN ){
+        if( epsilon == 0 || epsilon == 'NaN' || beta == 0 || beta == 'NaN' ){
             break;
         }
         
@@ -222,7 +219,7 @@ magma_zqmr(
         gamm1 = gamm;
         gamm = c_one / magma_zsqrt(c_one + thet*thet);
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamml);
-        if( thet == 0 || thet == NaN || gamm == 0 || gamm == NaN || eta == 0 || eta == NaN ){
+        if( thet == 0 || thet == 'NaN' || gamm == 0 || gamm == 'NaN' || eta == 0 || eta == 'NaN' ){
             break;
         }
         
