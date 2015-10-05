@@ -175,7 +175,7 @@ magma_ztfqmr_merge(
     Ad.dval,
     x.dval, 
     r.dval, 
-    queue )
+    queue );
     
     
 
@@ -222,7 +222,7 @@ magma_ztfqmr_merge(
     Ad.dval,
     x.dval, 
     r.dval, 
-    queue )
+    queue );
     
     */
         
