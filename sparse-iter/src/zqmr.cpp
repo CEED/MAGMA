@@ -76,7 +76,7 @@ magma_zqmr(
     magmaDoubleComplex rho = c_one, rho1 = c_one, eta = -c_one , pds = c_one, 
                         thet = c_one, thet1 = c_one, epsilon = c_one, pda = c_one, 
                         beta = c_one, delta = c_one, pde = c_one, rde = c_one, tau = c_one,
-                        gamm = c_one, gamm1 = c_one;
+                        gamm = c_one, gamm1 = c_one, psi = c_one;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
@@ -110,10 +110,10 @@ magma_zqmr(
     magma_zcopy( dofs, r.dval, 1, wt.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
-    CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
-    magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
+
+    
     nomb = magma_dznrm2( dofs, b.dval, 1 );
-    if ( nomb == c_zero.0 ){
+    if ( nomb == 0.0 ){
         nomb=1.0;
     }       
     if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
@@ -129,9 +129,8 @@ magma_zqmr(
         goto cleanup;
     }
 
-    tau = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
-    rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
-    rho_l = rho;
+    psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
+    rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
     
     //Chronometry
     real_Double_t tempo1, tempo2;
@@ -220,7 +219,7 @@ magma_zqmr(
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
         gamm1 = gamm;
         gamm = c_one / magma_zsqrt(c_one + thet*thet);
-        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamml);
+        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);
         if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
             break;
         }
