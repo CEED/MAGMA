@@ -209,10 +209,10 @@ magma_ztfqmr_merge(
         tau = tau * theta *c;
         eta = c * c * alpha;
 
-        magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + eta * d
-        magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - eta * Ad
+        //magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + eta * d
+        //magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - eta * Ad
         
-                /*
+                
         
     magma_ztfqmr_2(  
     r.num_rows, 
@@ -224,7 +224,7 @@ magma_ztfqmr_merge(
     r.dval, 
     queue );
     
-    */
+    
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
@@ -245,19 +245,19 @@ magma_ztfqmr_merge(
         rho_l = rho;
         rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
         beta = rho / rho_l;
-        magma_zscal(dofs, beta, u_mp1.dval, 1); 
-        magma_zaxpy(dofs, c_one, w.dval, 1, u_mp1.dval, 1);         // u_mp1 = w + beta*u_mp1;
+        //magma_zscal(dofs, beta, u_mp1.dval, 1); 
+        //magma_zaxpy(dofs, c_one, w.dval, 1, u_mp1.dval, 1);         // u_mp1 = w + beta*u_mp1;
         
-        /*
+        
 magma_ztfqmr_3(  
     r.num_rows, 
     r.num_cols, 
     beta,
     w.dval,
     u_mp1.dval, 
-    queue )
+    queue );
 
-*/
+
               
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
