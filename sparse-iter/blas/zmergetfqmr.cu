@@ -377,7 +377,7 @@ magma_ztfqmr_4(
 
 __global__ void
 magma_ztfqmr_5_kernel(  
-    int num_rows, 
+    int num_rows,                   
     int num_cols, 
     magmaDoubleComplex alpha,
     magmaDoubleComplex sigma,
@@ -391,7 +391,6 @@ magma_ztfqmr_5_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            
             w[ i+j*num_rows ] = w[ i+j*num_rows ] - alpha * Au[ i+j*num_rows ];
             d[ i+j*num_rows ] = u_mp1[ i+j*num_rows ] + sigma * d[ i+j*num_rows ];
             Ad[ i+j*num_rows ] = Au[ i+j*num_rows ] + sigma * Ad[ i+j*num_rows ];
@@ -459,7 +458,7 @@ magma_ztfqmr_5_kernel(
 extern "C" 
 magma_int_t
 magma_ztfqmr_5(  
-    magma_int_t num_rows, 
+    magma_int_t num_rows,               
     magma_int_t num_cols, 
     magmaDoubleComplex alpha,
     magmaDoubleComplex sigma,
@@ -473,7 +472,7 @@ magma_ztfqmr_5(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
+    magma_ztfqmr_5_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
                      v, Au, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;
