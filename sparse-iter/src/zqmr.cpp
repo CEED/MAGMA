@@ -225,7 +225,7 @@ magma_zqmr(
         gamm = c_one / magma_zsqrt(c_one + thet*thet);
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);
         if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
-                        printf("break 5"\n);
+                        printf("break 1\n");
             break;
         }
         
