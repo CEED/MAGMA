@@ -104,6 +104,12 @@ magma_zsolverinfo(
             case  Magma_PTFQMR:
                     printf("%%  TFQMR performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_TFQMRMERGE:
+                    printf("%%  TFQMR (merged) performance analysis every %d iteration\n",
+                                                                        (int) k); break;
+            case  Magma_PTFQMRMERGE:
+                    printf("%%  TFQMR (merged) performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
         }
@@ -309,6 +315,26 @@ magma_zsolverinfo(
                 }
                 printf("%%======================================================="
                         "======%%\n"); break;
+            case  Magma_TFQMRMERGE:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d          %e          %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
+            case  Magma_PTFQMRMERGE:
+                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%======================================================="
+                        "======%%\n");
+                for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
+                    printf("   %4d          %e          %f\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                }
+                printf("%%======================================================="
+                        "======%%\n"); break;
             case  Magma_ITERREF:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
@@ -371,6 +397,10 @@ magma_zsolverinfo(
         case  Magma_TFQMR:
             printf("%% TFQMR solver summary:\n"); break;
         case  Magma_PTFQMR:
+            printf("%% PTFQMR solver summary:\n"); break;
+        case  Magma_TFQMRMERGE:
+            printf("%% TFQMR solver summary:\n"); break;
+        case  Magma_PTFQMRMERGE:
             printf("%% PTFQMR solver summary:\n"); break;
         case  Magma_ITERREF:
             printf("%% Iterative refinement solver summary:\n"); break;
