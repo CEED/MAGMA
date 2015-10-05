@@ -74,8 +74,8 @@ magma_zqmr(
     // solver variables
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho = c_one, rho1 = c_one, eta = -c_one , pds = c_one, 
-                        thet = c_one, thet1 = c_one, epsilon = c_one, pda = c_one, 
-                        beta = c_one, delta = c_one, pde = c_one, rde = c_one, tau = c_one,
+                        thet = c_one, thet1 = c_one, epsilon = c_one, 
+                        beta = c_one, delta = c_one, pde = c_one, rde = c_one,
                         gamm = c_one, gamm1 = c_one, psi = c_one;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
@@ -83,7 +83,7 @@ magma_zqmr(
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR},
                     v={Magma_CSR}, w={Magma_CSR}, wt={Magma_CSR}, vt={Magma_CSR},
-                    d={Magma_CSR}, s={Magma_CSR}, z={Magma_CSR}, q={Magma_CSR}, 
+                    d={Magma_CSR}, s={Magma_CSR}, z={Magma_CSR}, zt={Magma_CSR}, q={Magma_CSR}, 
                     p={Magma_CSR}, pt={Magma_CSR}, y={Magma_CSR}, yt={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -94,6 +94,7 @@ magma_zqmr(
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &s, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &zt, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &pt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -312,6 +313,7 @@ cleanup:
     magma_zmfree(&d,  queue );
     magma_zmfree(&s,  queue );
     magma_zmfree(&z,  queue );
+    magma_zmfree(&zt,  queue );
     magma_zmfree(&q,  queue );
     magma_zmfree(&p,  queue );
     magma_zmfree(&pt, queue );
