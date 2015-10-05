@@ -28,7 +28,8 @@ ZSRC += \
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
-    ztfqmr.cpp	\
+    ztfqmr.cpp	\    
+    ztfqmr_unrolled.cpp	\
     zptfqmr.cpp \
     zidr.cpp	\
 	zidr_acc.cpp	\
