@@ -52,7 +52,11 @@ static const char *usage_sparse =
 "               18  merged TFQMR\n"
 "               19  PTFQMR\n"
 "               20  merged PTFQMR\n"
-"               21  Iterative Refinement\n"
+"               21  QMR\n"
+"               22  merged TFQMR\n"
+"               23  PQMR\n"
+"               24  merged PQMR\n"
+"               50  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
 " --precond x   Possibility to choose a preconditioner:\n"
@@ -208,7 +212,11 @@ magma_zparse_opts(
                 case 17: opts->solver_par.solver = Magma_TFQMR; break;
                 case 18: opts->solver_par.solver = Magma_TFQMRMERGE; break;
                 case 19: opts->solver_par.solver = Magma_PTFQMR; break;
-                case 21: opts->solver_par.solver = Magma_ITERREF; break;
+                case 20: opts->solver_par.solver = Magma_QMR; break;
+                case 21: opts->solver_par.solver = Magma_QMRMERGE; break;
+                case 22: opts->solver_par.solver = Magma_PQMR; break;
+                case 23: opts->solver_par.solver = Magma_PQMRMERGE; break;
+                case 50: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
