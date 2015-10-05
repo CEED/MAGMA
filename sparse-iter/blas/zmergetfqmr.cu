@@ -30,7 +30,7 @@ magma_ztfqmr_1_kernel(
     magmaDoubleComplex *v, 
     magmaDoubleComplex *Au,
     magmaDoubleComplex *pu_m,
-    magmaDoubleComplex *um_p1,
+    magmaDoubleComplex *u_mp1,
     magmaDoubleComplex *w, 
     magmaDoubleComplex *d,
     magmaDoubleComplex *Ad )
