@@ -185,13 +185,13 @@ magma_ztfqmr_merge(
         
         // here starts the second part of the loop #################################
         
-
+/*
         magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha*Au;
         magma_zscal(dofs, sigma, d.dval, 1);    
         magma_zaxpy(dofs, c_one, u_mp1.dval, 1, d.dval, 1);     // d = u_mp1 + sigma*d;
         magma_zscal(dofs, sigma, Ad.dval, 1);         
-        magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // Ad = Au + sigma*Ad;
-    /*    magma_ztfqmr_5(  
+        magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // Ad = Au + sigma*Ad;*/
+        magma_ztfqmr_5(  
     r.num_rows, 
     r.num_cols, 
     alpha,
@@ -202,7 +202,7 @@ magma_ztfqmr_merge(
     w.dval, 
     d.dval,
     Ad.dval,
-    queue );*/
+    queue );
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
