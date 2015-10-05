@@ -133,7 +133,7 @@ magma_ztfqmr_1(
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
-                    u_m, v, Au, pu_m, um_p1, w, d, Ad );
+                    u_m, v, Au, pu_m, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;
 }
