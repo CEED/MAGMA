@@ -85,7 +85,7 @@ magma_ztfqmr_unrolled(
                     u_mp1={Magma_CSR}, u_m={Magma_CSR}, Au={Magma_CSR}, 
                     Ad={Magma_CSR}, Au_new={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &u_mp1,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &u_mp1,Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u_m, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -100,8 +100,8 @@ magma_ztfqmr_unrolled(
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1 );   
-    CHECK( magma_z_spmv( c_one, A, u_m, c_zero, v, queue ));   // v = A u
+    magma_zcopy( dofs, r.dval, 1, u_mp1.dval, 1 );   
+    CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, v, queue ));   // v = A u
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -138,7 +138,7 @@ magma_ztfqmr_unrolled(
         alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
         sigma = theta * theta / alpha * eta; 
         
-        magma_zcopy( dofs, u_m.dval, 1, u_mp1.dval, 1 );   
+        //magma_zcopy(dofs, u_m.dval, 1, u_mp1.dval, 1 );   
         magma_zaxpy(dofs,  -alpha, v.dval, 1, u_mp1.dval, 1);     // u_mp1 = u_m - alpha*v;
         magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha*Au;
         magma_zscal(dofs, sigma, d.dval, 1);    
@@ -157,7 +157,7 @@ magma_ztfqmr_unrolled(
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
         magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
-        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
+        //magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
         
         // here starts the second part of the loop #################################
         
@@ -196,8 +196,10 @@ magma_ztfqmr_unrolled(
         rho_l = rho;
         rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
         beta = rho / rho_l;
-        magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1 );  
-        magma_zaxpy(dofs, beta, u_m.dval, 1, u_mp1.dval, 1);     // u_mp1 = w + beta*u_m;
+        magma_zscal(dofs, beta, u_mp1.dval, 1); 
+        magma_zaxpy(dofs, c_one, w.dval, 1, u_mp1.dval, 1);
+        //magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1 );  
+        //magma_zaxpy(dofs, beta, u_m.dval, 1, u_mp1.dval, 1);     // u_mp1 = w + beta*u_m;
               
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
       
@@ -207,7 +209,7 @@ magma_ztfqmr_unrolled(
         magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);      // v = Au_new + beta*(Au+beta*v);
         
         magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
-        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
+        //magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
