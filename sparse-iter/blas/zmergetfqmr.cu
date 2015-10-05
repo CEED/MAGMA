@@ -28,7 +28,6 @@ magma_ztfqmr_1_kernel(
     magmaDoubleComplex sigma,
     magmaDoubleComplex *v, 
     magmaDoubleComplex *Au,
-    magmaDoubleComplex *pu_m,
     magmaDoubleComplex *u_mp1,
     magmaDoubleComplex *w, 
     magmaDoubleComplex *d,
@@ -40,7 +39,7 @@ magma_ztfqmr_1_kernel(
             
             u_mp1[ i+j*num_rows ] = u_mp1[ i+j*num_rows ] - alpha * v[ i+j*num_rows ];
             w[ i+j*num_rows ] = w[ i+j*num_rows ] - alpha * Au[ i+j*num_rows ];
-            d[ i+j*num_rows ] = pu_m[ i+j*num_rows ] + sigma * d[ i+j*num_rows ];
+            d[ i+j*num_rows ] = u_mp1[ i+j*num_rows ] + sigma * d[ i+j*num_rows ];
             Ad[ i+j*num_rows ] = Au[ i+j*num_rows ] + sigma * Ad[ i+j*num_rows ];
         }
     }
@@ -80,10 +79,6 @@ magma_ztfqmr_1_kernel(
     @param[in]
     Au          magmaDoubleComplex_ptr 
                 vector
-
-    @param[in]
-    pu_m        magmaDoubleComplex_ptr 
-                vector
                 
     @param[in,out]
     u_mp1       magmaDoubleComplex_ptr 
@@ -117,7 +112,6 @@ magma_ztfqmr_1(
     magmaDoubleComplex sigma,
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr Au,
-    magmaDoubleComplex_ptr pu_m,
     magmaDoubleComplex_ptr u_mp1,
     magmaDoubleComplex_ptr w, 
     magmaDoubleComplex_ptr d,
@@ -127,7 +121,7 @@ magma_ztfqmr_1(
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
     magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
-                     v, Au, pu_m, u_mp1, w, d, Ad );
+                     v, Au, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;
 }
@@ -381,4 +375,107 @@ magma_ztfqmr_4(
 }
 
 
+__global__ void
+magma_ztfqmr_1_kernel(  
+    int num_rows, 
+    int num_cols, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex sigma,
+    magmaDoubleComplex *v, 
+    magmaDoubleComplex *Au,
+    magmaDoubleComplex *u_mp1,
+    magmaDoubleComplex *w, 
+    magmaDoubleComplex *d,
+    magmaDoubleComplex *Ad )
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i<num_rows ) {
+        for( int j=0; j<num_cols; j++ ){
+            
+            w[ i+j*num_rows ] = w[ i+j*num_rows ] - alpha * Au[ i+j*num_rows ];
+            d[ i+j*num_rows ] = u_mp1[ i+j*num_rows ] + sigma * d[ i+j*num_rows ];
+            Ad[ i+j*num_rows ] = Au[ i+j*num_rows ] + sigma * Ad[ i+j*num_rows ];
+        }
+    }
+}
+
+/**
+    Purpose
+    -------
+
+    Mergels multiple operations into one kernel:
+
+    w = w - alpha*Au;
+    d = pu_m + sigma*d;
+    Ad = Au + sigma*Ad;
+    
+    @param[in]
+    num_rows    magma_int_t
+                dimension m
+                
+    @param[in]
+    num_cols    magma_int_t
+                dimension n
+                
+    @param[in]
+    alpha       magmaDoubleComplex
+                scalar
+                
+    @param[in]
+    sigma       magmaDoubleComplex
+                scalar
+                
+    @param[in]
+    v           magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in]
+    Au          magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in,out]
+    u_mp1       magmaDoubleComplex_ptr 
+                vector
+
+    @param[in,out]
+    w           magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in,out]
+    d           magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in,out]
+    Ad          magmaDoubleComplex_ptr 
+                vector
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zgegpuk
+    ********************************************************************/
+
+extern "C" 
+magma_int_t
+magma_ztfqmr_5(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex sigma,
+    magmaDoubleComplex_ptr v, 
+    magmaDoubleComplex_ptr Au,
+    magmaDoubleComplex_ptr u_mp1,
+    magmaDoubleComplex_ptr w, 
+    magmaDoubleComplex_ptr d,
+    magmaDoubleComplex_ptr Ad,
+    magma_queue_t queue )
+{
+    dim3 Bs( BLOCK_SIZE );
+    dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
+    magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
+                     v, Au, u_mp1, w, d, Ad );
+
+   return MAGMA_SUCCESS;
+}
 
