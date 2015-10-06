@@ -211,15 +211,24 @@ magma_zqmr_merge(
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
-            magma_zprint_vector(q, 0, 10, queue);
-            magma_zprint_vector(pt, 0, 10, queue);
             break;
         }
-            // v = pt - beta * v;
+      /*      // v = pt - beta * v;
         magma_zscal(dofs, -beta, v.dval, 1); 
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
             // no precond: y = v
         magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
+        */
+        magma_zqmr_3(  
+    r.num_rows, 
+    r.num_cols, 
+    beta,
+    pt.dval,
+    v.dval,
+    y.dval,
+    queue );
+        
+        
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
