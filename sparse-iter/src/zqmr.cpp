@@ -110,8 +110,7 @@ magma_zqmr(
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, y.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, vt.dval, 1 );  
-    magma_zcopy( dofs, r.dval, 1, wt.dval, 1 ); 
-    magma_zcopy( dofs, r.dval, 1, w.dval, 1 ); 
+    magma_zcopy( dofs, r.dval, 1, wt.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
     // transpose the matrix
@@ -173,7 +172,7 @@ magma_zqmr(
                 // p = yt;
                 // q = zt;
             magma_zcopy( dofs, y.dval, 1, p.dval, 1 );
-            magma_zcopy( dofs, w.dval, 1, q.dval, 1 );
+            magma_zcopy( dofs, z.dval, 1, q.dval, 1 );
         }
         else{
             pde = psi * delta / epsilon;
@@ -182,7 +181,7 @@ magma_zqmr(
             magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
                 // q = zt - rde * q;
             magma_zscal(dofs, -rde, q.dval, 1);    
-            magma_zaxpy(dofs, c_one, w.dval, 1, q.dval, 1);
+            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
@@ -213,10 +212,10 @@ magma_zqmr(
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
         
                     // no precond: z = wt
-        //magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
+        magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
         
                     // psi = norm(z);
-        psi = magma_zsqrt( magma_zdotc(dofs, wt.dval, 1, wt.dval, 1) );
+        psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
 
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
