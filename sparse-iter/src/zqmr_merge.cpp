@@ -227,8 +227,7 @@ magma_zqmr_merge(
                     // no precond: z = wt
         magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
         
-                    // psi = norm(z);
-        psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
+
 
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
@@ -279,6 +278,8 @@ magma_zqmr_merge(
             r.dval, 
             queue );
         }
+            // psi = norm(z);
+        psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
