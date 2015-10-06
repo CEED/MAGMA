@@ -256,20 +256,11 @@ magma_zqmr_merge(
         if( solver_par->numiter == 1 ){
                 // d = eta * p;
                 // s = eta * pt;
-            magma_zcopy( dofs, p.dval, 1, d.dval, 1 );
+           /* magma_zcopy( dofs, p.dval, 1, d.dval, 1 );
             magma_zscal( dofs, eta, d.dval, 1);
             magma_zcopy( dofs, pt.dval, 1, s.dval, 1 );
-            magma_zscal( dofs, eta, s.dval, 1);
-        }
-        else{
-                // d = eta * p + (thet1 * gamm)^2 * d;
-                // s = eta * pt + (thet1 * gamm)^2 * s;
-            pds = (thet1 * gamm) * (thet1 * gamm);
-           /* magma_zscal(dofs, pds, d.dval, 1);    
-            magma_zaxpy(dofs, eta, p.dval, 1, d.dval, 1);
-            magma_zscal(dofs, pds, s.dval, 1);    
-            magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);*/
-            magma_zqmr_4(  
+            magma_zscal( dofs, eta, s.dval, 1);*/
+                        magma_zqmr_4(  
     r.num_rows, 
     r.num_cols, 
     eta,
@@ -281,11 +272,32 @@ magma_zqmr_merge(
     r.dval, 
     queue );
         }
+        else{
+                // d = eta * p + (thet1 * gamm)^2 * d;
+                // s = eta * pt + (thet1 * gamm)^2 * s;
+            pds = (thet1 * gamm) * (thet1 * gamm);
+           /* magma_zscal(dofs, pds, d.dval, 1);    
+            magma_zaxpy(dofs, eta, p.dval, 1, d.dval, 1);
+            magma_zscal(dofs, pds, s.dval, 1);    
+            magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);*/
+            magma_zqmr_5(  
+    r.num_rows, 
+    r.num_cols, 
+    eta,
+    pds,
+    p.dval,
+    pt.dval,
+    d.dval, 
+    s.dval, 
+    x->dval, 
+    r.dval, 
+    queue );
+        }
         
             // x = x + d;                    
-        magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
+        //magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
             // r = r - s;
-        magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
+        //magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
