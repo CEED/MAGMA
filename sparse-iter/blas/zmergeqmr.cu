@@ -107,7 +107,7 @@ magma_zqmr_1(
     magmaDoubleComplex_ptr y, 
     magmaDoubleComplex_ptr z,
     magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr w
+    magmaDoubleComplex_ptr w,
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
@@ -198,11 +198,12 @@ magma_int_t
 magma_zqmr_2(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleComplex eta,
-    magmaDoubleComplex_ptr d,
-    magmaDoubleComplex_ptr Ad,
-    magmaDoubleComplex_ptr x, 
-    magmaDoubleComplex_ptr r, 
+    magmaDoubleComplex pde,
+    magmaDoubleComplex rde,
+    magmaDoubleComplex_ptr y,
+    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex_ptr p, 
+    magmaDoubleComplex_ptr q, 
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
@@ -284,8 +285,9 @@ magma_zqmr_3(
     magma_int_t num_rows, 
     magma_int_t num_cols, 
     magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr w,
-    magmaDoubleComplex_ptr u_mp1, 
+    magmaDoubleComplex_ptr pt,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr y,
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
