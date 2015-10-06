@@ -145,7 +145,7 @@ magma_zqmr_merge(
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             goto cleanup;
         }
-            // v = y / rho;
+        /*    // v = y / rho;
         magma_zcopy( dofs, y.dval, 1, v.dval, 1 );  
         magma_zscal(dofs, c_one / rho, v.dval, 1);  
             // y = y / rho;
@@ -155,6 +155,17 @@ magma_zqmr_merge(
         magma_zscal(dofs, c_one / psi, w.dval, 1); 
             // z = z / psi;
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
+        */
+        magma_zqmr_1(  
+    r.num_rows, 
+    r.num_cols, 
+    rho,
+    psi,
+    y.dval, 
+    z.dval,
+    v.dval,
+    w.dval,
+    queue );
         
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);

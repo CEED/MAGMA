@@ -173,6 +173,10 @@ magma_zsolverinfo(
             case  Magma_PCGS:
             case  Magma_CGSMERGE:
             case  Magma_PCGSMERGE:
+            case  Magma_QMR:
+            case  Magma_QMRMERGE:
+            case  Magma_PQMR:
+            case  Magma_PQMRMERGE:
             case  Magma_TFQMR:
             case  Magma_PTFQMR:
             case  Magma_TFQMRMERGE:
