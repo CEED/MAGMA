@@ -154,7 +154,7 @@ magma_zqmr(
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1);  
             // w = wt / psi;
-        magma_zcopy( dofs, wt.dval, 1, w.dval, 1 );  
+        //magma_zcopy( dofs, wt.dval, 1, w.dval, 1 );  
         magma_zscal(dofs, c_one / psi, w.dval, 1); 
             // z = z / psi;
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
@@ -192,8 +192,6 @@ magma_zqmr(
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
-            magma_zprint_vector(q, 0, 10, queue);
-            magma_zprint_vector(pt, 0, 10, queue);
             break;
         }
             // vt = pt - beta * v;
@@ -208,11 +206,11 @@ magma_zqmr(
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
         
             // wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, AT, q, c_zero, wt, queue ));
-        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
+        CHECK( magma_z_spmv( c_one, AT, q, c_zero, z, queue ));
+        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, z.dval, 1);  
         
                     // no precond: z = wt
-        magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
+        //magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
         
                     // psi = norm(z);
         psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
