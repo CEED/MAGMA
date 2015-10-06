@@ -261,6 +261,7 @@ magma_zbombard(
         Q_beta = Q_epsilon / Q_delta;
             //CGS: alpha = r_tld' * v_hat
         C_alpha = C_rho / magma_zdotc(dofs, r_tld.dval, 1, C_v_hat.dval, 1);
+        C_rho_l = C_rho;
         
             //QMR: v = pt - beta * v
             //QMR: y = v
@@ -371,7 +372,7 @@ magma_zbombard(
         magma_zqmr_1(  
         b.num_rows, 
         b.num_cols, 
-        c_one,
+        Q_rho,
         Q_psi,
         Q_y.dval, 
         Q_z.dval,
