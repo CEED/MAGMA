@@ -265,14 +265,14 @@ magma_zbombard(
         
             //QMR: v = pt - beta * v
             //QMR: y = v
-        magma_zqmr_3(  
+       /* magma_zqmr_3(  
         b.num_rows, 
         b.num_cols, 
         Q_beta,
         Q_pt.dval,
         Q_v.dval,
         Q_y.dval,
-        queue );
+        queue );*/
         
             //CGS: q = u - alpha v_hat
             //CGS: t = u + q
