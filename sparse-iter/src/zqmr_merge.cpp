@@ -133,6 +133,21 @@ magma_zqmr_merge(
     psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
     rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
     
+        // v = y / rho
+        // y = y / rho
+        // w = wt / psi
+        // z = z / psi
+    magma_zqmr_1(  
+    r.num_rows, 
+    r.num_cols, 
+    rho,
+    psi,
+    y.dval, 
+    z.dval,
+    v.dval,
+    w.dval,
+    queue );
+    
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
@@ -146,20 +161,7 @@ magma_zqmr_merge(
             goto cleanup;
         }
         
-            // v = y / rho
-            // y = y / rho
-            // w = wt / psi
-            // z = z / psi
-        magma_zqmr_1(  
-        r.num_rows, 
-        r.num_cols, 
-        rho,
-        psi,
-        y.dval, 
-        z.dval,
-        v.dval,
-        w.dval,
-        queue );
+
         
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
@@ -293,6 +295,22 @@ magma_zqmr_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
+        
+                
+            // v = y / rho
+            // y = y / rho
+            // w = wt / psi
+            // z = z / psi
+        magma_zqmr_1(  
+        r.num_rows, 
+        r.num_cols, 
+        rho,
+        psi,
+        y.dval, 
+        z.dval,
+        v.dval,
+        w.dval,
+        queue );
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
