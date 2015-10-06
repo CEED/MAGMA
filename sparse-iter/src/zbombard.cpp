@@ -357,7 +357,7 @@ magma_zbombard(
         magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
 
         magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
-        magma_zaxpy( dofs, c_mone * omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
+        magma_zaxpy( dofs, c_mone * B_omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
         
 
         Q_thet1 = Q_thet;        
