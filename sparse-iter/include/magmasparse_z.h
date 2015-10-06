@@ -608,6 +608,12 @@ magma_zqmr(
     magma_queue_t queue );
 
 magma_int_t
+magma_zqmr_merge(
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_ztfqmr(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
@@ -1471,6 +1477,9 @@ magma_zjacobisetup_diagscal(
     magma_queue_t queue );
 
 
+//   kernel fusion for Krylov methods
+
+
 magma_int_t
 magma_zbicgmerge1(    
     int n, 
@@ -1565,6 +1574,65 @@ magma_zcgs_4(
     magmaDoubleComplex_ptr t,
     magmaDoubleComplex_ptr x, 
     magmaDoubleComplex_ptr r,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zqmr_1(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex rho,
+    magmaDoubleComplex psi,
+    magmaDoubleComplex_ptr y, 
+    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr w
+    magma_queue_t queue );
+
+magma_int_t
+magma_zqmr_2(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex eta,
+    magmaDoubleComplex_ptr d,
+    magmaDoubleComplex_ptr Ad,
+    magmaDoubleComplex_ptr x, 
+    magmaDoubleComplex_ptr r, 
+    magma_queue_t queue );
+
+magma_int_t
+magma_zqmr_3(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr w,
+    magmaDoubleComplex_ptr u_mp1, 
+    magma_queue_t queue );
+
+magma_int_t
+magma_zqmr_4(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex eta,
+    magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr pt,
+    magmaDoubleComplex_ptr d, 
+    magmaDoubleComplex_ptr s, 
+    magmaDoubleComplex_ptr x, 
+    magmaDoubleComplex_ptr r, 
+    magma_queue_t queue );
+
+magma_int_t
+magma_zqmr_5(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex eta,
+    magmaDoubleComplex pds,
+    magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr pt,
+    magmaDoubleComplex_ptr d, 
+    magmaDoubleComplex_ptr s, 
+    magmaDoubleComplex_ptr x, 
+    magmaDoubleComplex_ptr r, 
     magma_queue_t queue );
 
 magma_int_t
