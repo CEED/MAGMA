@@ -76,7 +76,7 @@ magma_zbombard(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one;
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
     
@@ -354,7 +354,7 @@ magma_zbombard(
         
         // BiCGSTAB
         magma_zaxpy( dofs, B_alpha, B_p.dval, 1 , B_x.dval, 1 );     // x=x+alpha*p
-        magma_zaxpy( dofs, omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
+        magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
 
         magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
         magma_zaxpy( dofs, c_mone * omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
