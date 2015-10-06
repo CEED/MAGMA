@@ -265,10 +265,21 @@ magma_zqmr_merge(
                 // d = eta * p + (thet1 * gamm)^2 * d;
                 // s = eta * pt + (thet1 * gamm)^2 * s;
             pds = (thet1 * gamm) * (thet1 * gamm);
-            magma_zscal(dofs, pds, d.dval, 1);    
+           /* magma_zscal(dofs, pds, d.dval, 1);    
             magma_zaxpy(dofs, eta, p.dval, 1, d.dval, 1);
             magma_zscal(dofs, pds, s.dval, 1);    
-            magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);
+            magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);*/
+            magma_zqmr_4(  
+    r.num_rows, 
+    r.num_cols, 
+    eta,
+    p.dval,
+    pt.dval,
+    d.dval, 
+    s.dval, 
+    x.dval, 
+    r.dval, 
+    queue );
         }
         
             // x = x + d;                    
