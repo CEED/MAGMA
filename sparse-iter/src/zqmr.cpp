@@ -147,14 +147,12 @@ magma_zqmr(
         }
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1); 
-            // v = y / rho;
+            // v = y;
         magma_zcopy( dofs, y.dval, 1, v.dval, 1 );  
-        //magma_zscal(dofs, c_one / rho, v.dval, 1);  
-             // z = z / psi;
+            // z = z / psi;
         magma_zscal(dofs, c_one / psi, z.dval, 1);
-            // w = wt / psi;
+            // w = z;
         magma_zcopy( dofs, z.dval, 1, w.dval, 1 );  
-        //magma_zscal(dofs, c_one / psi, w.dval, 1); 
  
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
@@ -175,6 +173,7 @@ magma_zqmr(
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
+                // p = y - pde * p;
             magma_zscal(dofs, -pde, p.dval, 1);    
             magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
                 // q = z - rde * q;
@@ -190,8 +189,6 @@ magma_zqmr(
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
-            magma_zprint_vector(q, 0, 10, queue);
-            magma_zprint_vector(pt, 0, 10, queue);
             break;
         }
             // v = pt - beta * v;
@@ -199,6 +196,7 @@ magma_zqmr(
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
             // no precond: y = v
         magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
+        
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
@@ -230,6 +228,10 @@ magma_zqmr(
             magma_zscal( dofs, eta, d.dval, 1);
             magma_zcopy( dofs, pt.dval, 1, s.dval, 1 );
             magma_zscal( dofs, eta, s.dval, 1);
+                // x = x + d;                    
+            magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
+                // r = r - s;
+            magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         }
         else{
                 // d = eta * p + (thet1 * gamm)^2 * d;
@@ -239,12 +241,11 @@ magma_zqmr(
             magma_zaxpy(dofs, eta, p.dval, 1, d.dval, 1);
             magma_zscal(dofs, pds, s.dval, 1);    
             magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);
+                // x = x + d;                    
+            magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
+                // r = r - s;
+            magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         }
-        
-            // x = x + d;                    
-        magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
-            // r = r - s;
-        magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
