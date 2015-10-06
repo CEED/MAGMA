@@ -122,6 +122,12 @@ magma_zsolverinfo(
             case  Magma_PQMRMERGE:
                     printf("%%  PQMR (merged) performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_BOMBARD:
+                    printf("%%  BOMBARD performance analysis every %d iteration\n",
+                                                                        (int) k); break;
+            case  Magma_BOMBARDMERGE:
+                    printf("%%  BOMBARD (merged) performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
         }
@@ -135,6 +141,8 @@ magma_zsolverinfo(
                     printf("%%   Preconditioner used: GMRES.\n"); break;
             case  Magma_CGS:
                     printf("%%   Preconditioner used: CGS.\n"); break;
+            case  Magma_BOMBARD:
+                    printf("%%   Preconditioner used: BOMBARD.\n"); break;
             case  Magma_TFQMR:
                     printf("%%   Preconditioner used: TFQMR.\n"); break;
             case  Magma_QMR:
@@ -182,6 +190,8 @@ magma_zsolverinfo(
             case  Magma_TFQMRMERGE:
             case  Magma_PTFQMRMERGE:
             case  Magma_ITERREF:
+            case  Magma_BOMBARD:
+            case  Magma_BOMBARDMERGE:
             case  Magma_JACOBI:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
@@ -224,27 +234,21 @@ magma_zsolverinfo(
         case  Magma_PIDR:
             printf("%% PIDR(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_CGS:
-            printf("%% CGS solver summary:\n"); break;
-        case  Magma_PCGS:
-            printf("%% PCGS solver summary:\n"); break;
         case  Magma_CGSMERGE:
             printf("%% CGS solver summary:\n"); break;
+        case  Magma_PCGS:
         case  Magma_PCGSMERGE:
             printf("%% PCGS solver summary:\n"); break;
         case  Magma_TFQMR:
-            printf("%% TFQMR solver summary:\n"); break;
-        case  Magma_PTFQMR:
-            printf("%% PTFQMR solver summary:\n"); break;
         case  Magma_TFQMRMERGE:
             printf("%% TFQMR solver summary:\n"); break;
+        case  Magma_PTFQMR:
         case  Magma_PTFQMRMERGE:
             printf("%% PTFQMR solver summary:\n"); break;
         case  Magma_QMR:
-            printf("%% QMR solver summary:\n"); break;
-        case  Magma_PQMR:
-            printf("%% PQMR solver summary:\n"); break;
         case  Magma_QMRMERGE:
             printf("%% QMR solver summary:\n"); break;
+        case  Magma_PQMR:
         case  Magma_PQMRMERGE:
             printf("%% PQMR solver summary:\n"); break;
         case  Magma_ITERREF:
@@ -255,6 +259,9 @@ magma_zsolverinfo(
             printf("%% Block-asynchronous iteration solver summary:\n"); break;
         case  Magma_LOBPCG:
             printf("%% LOBPCG iteration solver summary:\n"); break;
+        case  Magma_BOMBARD:
+        case  Magma_BOMBARDMERGE:
+            printf("%% multi-solver iteration summary:\n"); break;
         default:
             printf("%%   Solver info not supported.\n"); goto cleanup;
     }

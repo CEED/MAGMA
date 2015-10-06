@@ -118,6 +118,10 @@ magma_z_solver(
                     CHECK( magma_zqmr( A, b, x, &zopts->solver_par, queue ) ); break;
             case  Magma_QMRMERGE:
                     CHECK( magma_zqmr_merge( A, b, x, &zopts->solver_par, queue ) ); break;
+            case  Magma_BOMBARD:
+                    CHECK( magma_zqmr( A, b, x, &zopts->solver_par, queue ) ); break;
+            case  Magma_BOMBARDMERGE:
+                    CHECK( magma_zqmr_merge( A, b, x, &zopts->solver_par, queue ) ); break;
             default:
                     printf("error: solver class not supported.\n"); break;
         }

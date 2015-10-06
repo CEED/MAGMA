@@ -56,6 +56,8 @@ static const char *usage_sparse =
 "               22  merged TFQMR\n"
 "               23  PQMR\n"
 "               24  merged PQMR\n"
+"               30  BOMBARD\n"
+"               31  merged BOMBARD\n"
 "               50  Iterative Refinement\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
@@ -76,7 +78,8 @@ static const char *usage_sparse =
 "                   --plevels k   Number of ILU levels.\n"
 "                   7   IDR\n"
 "                   8   CGS\n"
-"                   8   TFQMR\n"
+"                   9   TFQMR\n"
+"                   10  BOMBARD\n"
 " --piter x     Number of relaxation steps for approximate triangular solve (ILU case).\n"
 " --psweeps x   Number of iterative ILU sweeps for to generate preconditioner (iterative ILU case).\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
@@ -216,6 +219,8 @@ magma_zparse_opts(
                 case 21: opts->solver_par.solver = Magma_QMRMERGE; break;
                 case 22: opts->solver_par.solver = Magma_PQMR; break;
                 case 23: opts->solver_par.solver = Magma_PQMRMERGE; break;
+                case 30: opts->solver_par.solver = Magma_BOMBARD; break;
+                case 31: opts->solver_par.solver = Magma_BOMBARDMERGE; break;
                 case 50: opts->solver_par.solver = Magma_ITERREF; break;
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
@@ -234,6 +239,7 @@ magma_zparse_opts(
                 case 7: opts->precond_par.solver = Magma_IDR; break;
                 case 8: opts->precond_par.solver = Magma_CGS; break;
                 case 9: opts->precond_par.solver = Magma_TFQMR; break;
+                case 10: opts->precond_par.solver = Magma_BOMBARD; break;
             }
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
