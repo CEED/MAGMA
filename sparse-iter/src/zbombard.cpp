@@ -63,6 +63,9 @@ magma_zbombard(
 {
     magma_int_t info = 0;
     
+    // 1=QMR, 2=CGS, 3+BiCGSTAB
+    magma_int_t flag = 0;
+    
     // set queue for old dense routines
     magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
@@ -75,7 +78,7 @@ magma_zbombard(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
-    double nom0, r0,  Q_res, C_res, B_res, nomb;
+    double nom0, r0, res, Q_res, C_res, B_res, nomb;
     magmaDoubleComplex Q_rho = c_one, Q_rho1 = c_one, Q_eta = -c_one , Q_pds = c_one, 
                         Q_thet = c_one, Q_thet1 = c_one, Q_epsilon = c_one, 
                         Q_beta = c_one, Q_delta = c_one, Q_pde = c_one, Q_rde = c_one,
@@ -112,6 +115,9 @@ magma_zbombard(
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r_tld, &nom0, queue));
     solver_par->init_res = nom0;
+    res = nom0;
+    
+    // QMR
     magma_zcopy( dofs, r_tld.dval, 1, Q_r.dval, 1 );   
     magma_zcopy( dofs, r_tld.dval, 1, Q_y.dval, 1 );   
     magma_zcopy( dofs, r_tld.dval, 1, Q_v.dval, 1 );  
@@ -275,6 +281,19 @@ magma_zbombard(
         
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
+            if( Q_res < res ){
+                res = Q_res;
+                flag = 1;
+            }
+            if( C_res < res ){
+                res = C_res;
+                flag = 2;
+            }
+            if( B_res < res ){
+                res = B_res;
+                flag = 3;
+            }
+            res = Q_res;
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) res;
