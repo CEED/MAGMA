@@ -75,7 +75,7 @@ magma_zbombard(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
-    double nom0, r0,  res, nomb;
+    double nom0, r0,  Q_res, C_res, B_res, nomb;
     magmaDoubleComplex Q_rho = c_one, Q_rho1 = c_one, Q_eta = -c_one , Q_pds = c_one, 
                         Q_thet = c_one, Q_thet1 = c_one, Q_epsilon = c_one, 
                         Q_beta = c_one, Q_delta = c_one, Q_pde = c_one, Q_rde = c_one,
@@ -87,7 +87,7 @@ magma_zbombard(
     
     // GPU workspace
     // QMR
-    magma_z_matrix Q_r={Magma_CSR}, r_tld={Magma_CSR},
+    magma_z_matrix Q_r={Magma_CSR}, r_tld={Magma_CSR}, Q_x={Magma_CSR},
                     Q_v={Magma_CSR}, Q_w={Magma_CSR}, Q_wt={Magma_CSR},
                     Q_d={Magma_CSR}, Q_s={Magma_CSR}, Q_z={Magma_CSR}, Q_q={Magma_CSR}, 
                     Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR};
@@ -106,6 +106,7 @@ magma_zbombard(
     CHECK( magma_zvinit( &Q_p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_pt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &Q_x, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     
     // solver setup
@@ -115,7 +116,8 @@ magma_zbombard(
     magma_zcopy( dofs, r_tld.dval, 1, Q_y.dval, 1 );   
     magma_zcopy( dofs, r_tld.dval, 1, Q_v.dval, 1 );  
     magma_zcopy( dofs, r_tld.dval, 1, Q_wt.dval, 1 );   
-    magma_zcopy( dofs, r_tld.dval, 1, Q_z.dval, 1 );  
+    magma_zcopy( dofs, r_tld.dval, 1, Q_z.dval, 1 ); 
+    magma_zcopy( dofs, x->dval, 1, Q_x.dval, 1 ); 
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -144,8 +146,8 @@ magma_zbombard(
     magma_zqmr_1(  
     b.num_rows, 
     b.num_cols, 
-    rho,
-    psi,
+    Q_rho,
+    Q_psi,
     Q_y.dval, 
     Q_z.dval,
     Q_v.dval,
@@ -241,7 +243,7 @@ magma_zbombard(
             Q_pt.dval,
             Q_d.dval, 
             Q_s.dval, 
-            Q_x->dval, 
+            Q_x.dval, 
             Q_r.dval, 
             queue );
         }
@@ -262,7 +264,7 @@ magma_zbombard(
             Q_pt.dval,
             Q_d.dval, 
             Q_s.dval, 
-            Q_x->dval, 
+            Q_x.dval, 
             Q_r.dval, 
             queue );
         }
@@ -303,6 +305,9 @@ magma_zbombard(
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
+    
+    // copy back the best solver
+    magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
     
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
@@ -354,6 +359,7 @@ cleanup:
     magma_zmfree(&Q_p,  queue );
     magma_zmfree(&Q_pt, queue );
     magma_zmfree(&Q_y,  queue );
+    magma_zmfree(&Q_x,  queue );
 
     
     magmablasSetKernelStream( orig_queue );
