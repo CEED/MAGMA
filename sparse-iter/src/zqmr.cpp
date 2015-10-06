@@ -221,7 +221,6 @@ magma_zprint_vector(v,0,5,queue);
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
         
-rho = MAGMA_Z_MAKE( MAGMA_Z_REAL(rho), 0.0 );
 printf("rho = %e  %ei\n", MAGMA_Z_REAL(rho), MAGMA_Z_IMAG(rho));
             // wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, q, c_zero, wt, queue ));
@@ -232,17 +231,14 @@ printf("rho = %e  %ei\n", MAGMA_Z_REAL(rho), MAGMA_Z_IMAG(rho));
         
                     // psi = norm(z);
         psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
-psi = MAGMA_Z_MAKE( MAGMA_Z_REAL(psi), 0.0 );
 printf("psi = %e  %ei\n", MAGMA_Z_REAL(psi), MAGMA_Z_IMAG(psi));
 
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
-thet = MAGMA_Z_MAKE( MAGMA_Z_REAL(thet), 0.0 );
         gamm1 = gamm;        
         
 printf("thet = %e  %ei\n", MAGMA_Z_REAL(thet), MAGMA_Z_IMAG(thet));
         gamm = c_one / magma_zsqrt(c_one + thet*thet);        
-gamm = MAGMA_Z_MAKE( MAGMA_Z_REAL(gamm), 0.0 );
 printf("gamm = %e  %ei\n", MAGMA_Z_REAL(gamm), MAGMA_Z_IMAG(gamm));
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
 printf("eta = %e  %ei\n\n", MAGMA_Z_REAL(eta), MAGMA_Z_IMAG(eta));
@@ -267,6 +263,8 @@ printf("eta = %e  %ei\n\n", MAGMA_Z_REAL(eta), MAGMA_Z_IMAG(eta));
             magma_zscal(dofs, pds, s.dval, 1);    
             magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);
         }
+magma_zprint_vector(d,0,5,queue);
+magma_zprint_vector(s,0,5,queue);
         
             // x = x + d;                    
         magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
