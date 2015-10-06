@@ -371,7 +371,7 @@ magma_zbombard(
         magma_zqmr_1(  
         b.num_rows, 
         b.num_cols, 
-        Q_rho,
+        c_one,
         Q_psi,
         Q_y.dval, 
         Q_z.dval,
