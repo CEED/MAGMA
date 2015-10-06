@@ -145,37 +145,27 @@ magma_zqmr_merge(
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             goto cleanup;
         }
-        /*    // v = y / rho;
-        magma_zcopy( dofs, y.dval, 1, v.dval, 1 );  
-        magma_zscal(dofs, c_one / rho, v.dval, 1);  
-            // y = y / rho;
-        magma_zscal(dofs, c_one / rho, y.dval, 1);  
-            // w = wt / psi;
-        magma_zcopy( dofs, wt.dval, 1, w.dval, 1 );  
-        magma_zscal(dofs, c_one / psi, w.dval, 1); 
-            // z = z / psi;
-        magma_zscal(dofs, c_one / psi, z.dval, 1); 
-        */
+        
+            // v = y / rho
+            // y = y / rho
+            // w = wt / psi
+            // z = z / psi
         magma_zqmr_1(  
-    r.num_rows, 
-    r.num_cols, 
-    rho,
-    psi,
-    y.dval, 
-    z.dval,
-    v.dval,
-    w.dval,
-    queue );
+        r.num_rows, 
+        r.num_cols, 
+        rho,
+        psi,
+        y.dval, 
+        z.dval,
+        v.dval,
+        w.dval,
+        queue );
         
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
         if( delta == c_zero || delta == 'NaN' ){
             break;
         }
-        
-        // no precond: yt = y, zt = z
-        //magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
-        //magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
         
         if( solver_par->numiter == 1 ){
                 // p = y;
@@ -186,47 +176,42 @@ magma_zqmr_merge(
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
-           /* magma_zscal(dofs, -pde, p.dval, 1);    
-            magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
-                // q = z - rde * q;
-            magma_zscal(dofs, -rde, q.dval, 1);    
-            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);*/
+            
+                // p = y - pde * p
+                // q = z - rde * q
             magma_zqmr_2(  
-    r.num_rows, 
-    r.num_cols, 
-    pde,
-    rde,
-    y.dval,
-    z.dval,
-    p.dval, 
-    q.dval, 
-    queue );
+            r.num_rows, 
+            r.num_cols, 
+            pde,
+            rde,
+            y.dval,
+            z.dval,
+            p.dval, 
+            q.dval, 
+            queue );
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
         }
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, pt, queue ));
+        
             // epsilon = q' * pt;
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
             break;
         }
-      /*      // v = pt - beta * v;
-        magma_zscal(dofs, -beta, v.dval, 1); 
-        magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
-            // no precond: y = v
-        magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
-        */
+            // v = pt - beta * v
+            // y = v
         magma_zqmr_3(  
-    r.num_rows, 
-    r.num_cols, 
-    beta,
-    pt.dval,
-    v.dval,
-    y.dval,
-    queue );
+        r.num_rows, 
+        r.num_cols, 
+        beta,
+        pt.dval,
+        v.dval,
+        y.dval,
+        queue );
         
         
         rho1 = rho;      
@@ -254,50 +239,44 @@ magma_zqmr_merge(
         }
         
         if( solver_par->numiter == 1 ){
-                // d = eta * p;
-                // s = eta * pt;
-           /* magma_zcopy( dofs, p.dval, 1, d.dval, 1 );
-            magma_zscal( dofs, eta, d.dval, 1);
-            magma_zcopy( dofs, pt.dval, 1, s.dval, 1 );
-            magma_zscal( dofs, eta, s.dval, 1);*/
-                        magma_zqmr_4(  
-    r.num_rows, 
-    r.num_cols, 
-    eta,
-    p.dval,
-    pt.dval,
-    d.dval, 
-    s.dval, 
-    x->dval, 
-    r.dval, 
-    queue );
+            
+                // d = eta * p + pds * d;
+                // s = eta * pt + pds * d;
+                // x = x + d;
+                // r = r - s;
+            magma_zqmr_4(  
+            r.num_rows, 
+            r.num_cols, 
+            eta,
+            p.dval,
+            pt.dval,
+            d.dval, 
+            s.dval, 
+            x->dval, 
+            r.dval, 
+            queue );
         }
         else{
-                // d = eta * p + (thet1 * gamm)^2 * d;
-                // s = eta * pt + (thet1 * gamm)^2 * s;
+
             pds = (thet1 * gamm) * (thet1 * gamm);
-           /* magma_zscal(dofs, pds, d.dval, 1);    
-            magma_zaxpy(dofs, eta, p.dval, 1, d.dval, 1);
-            magma_zscal(dofs, pds, s.dval, 1);    
-            magma_zaxpy(dofs, eta, pt.dval, 1, s.dval, 1);*/
+            
+                // d = eta * p + pds * d;
+                // s = eta * pt + pds * d;
+                // x = x + d;
+                // r = r - s;
             magma_zqmr_5(  
-    r.num_rows, 
-    r.num_cols, 
-    eta,
-    pds,
-    p.dval,
-    pt.dval,
-    d.dval, 
-    s.dval, 
-    x->dval, 
-    r.dval, 
-    queue );
+            r.num_rows, 
+            r.num_cols, 
+            eta,
+            pds,
+            p.dval,
+            pt.dval,
+            d.dval, 
+            s.dval, 
+            x->dval, 
+            r.dval, 
+            queue );
         }
-        
-            // x = x + d;                    
-        //magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
-            // r = r - s;
-        //magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         

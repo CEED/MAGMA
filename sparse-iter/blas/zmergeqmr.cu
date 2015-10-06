@@ -438,8 +438,8 @@ magma_zqmr_5_kernel(
 
     Mergels multiple operations into one kernel:
 
-    d = eta * p;
-    s = eta * pt;
+    d = eta * p + pds * d;
+    s = eta * pt + pds * s;
     x = x + d;
     r = r - s;
 
