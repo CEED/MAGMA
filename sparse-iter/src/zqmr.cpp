@@ -146,15 +146,14 @@ magma_zqmr(
             goto cleanup;
         }
             // v = y / rho;
-        magma_zcopy( dofs, y.dval, 1, v.dval, 1 );  
-        magma_zscal(dofs, c_one / rho, v.dval, 1);  
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1);  
+        magma_zcopy( dofs, y.dval, 1, v.dval, 1 ); 
             // w = wt / psi;
-        magma_zcopy( dofs, z.dval, 1, w.dval, 1 );  
-        magma_zscal(dofs, c_one / psi, w.dval, 1); 
             // z = z / psi;
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
+        magma_zscal(dofs, c_one / psi, w.dval, 1); 
+ 
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
         if( delta == c_zero || delta == 'NaN' ){
