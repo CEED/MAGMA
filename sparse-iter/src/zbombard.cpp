@@ -95,6 +95,12 @@ magma_zbombard(
                     Q_d={Magma_CSR}, Q_s={Magma_CSR}, Q_z={Magma_CSR}, Q_q={Magma_CSR}, 
                     Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR};
                     
+    // CGS
+    magma_z_matrix C_r={Magma_CSR}, C_rt={Magma_CSR},
+                    C_p={Magma_CSR}, C_q={Magma_CSR}, C_u={Magma_CSR}, C_v={Magma_CSR},  C_t={Magma_CSR},
+                    C_p_hat={Magma_CSR}, C_q_hat={Magma_CSR}, C_u_hat={Magma_CSR}, C_v_hat={Magma_CSR};
+
+                    
                     
     CHECK( magma_zvinit( &r_tld, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     // QMR
@@ -110,7 +116,20 @@ magma_zbombard(
     CHECK( magma_zvinit( &Q_pt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_x, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-
+    // QMR
+    CHECK( magma_zvinit( &C_r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_x,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_p_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_q_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_u, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_u_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_v_hat, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &C_t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    
     
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r_tld, &nom0, queue));
@@ -124,6 +143,10 @@ magma_zbombard(
     magma_zcopy( dofs, r_tld.dval, 1, Q_wt.dval, 1 );   
     magma_zcopy( dofs, r_tld.dval, 1, Q_z.dval, 1 ); 
     magma_zcopy( dofs, x->dval, 1, Q_x.dval, 1 ); 
+    
+    // CGS
+    magma_zcopy( dofs, r_tld.dval, 1, C_r.dval, 1 );   
+    magma_zcopy( dofs, x->dval, 1, C_x.dval, 1 ); 
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -173,15 +196,31 @@ magma_zbombard(
             //QMR: delta = z' * y;
         Q_delta = magma_zdotc(dofs, Q_z.dval, 1, Q_y.dval, 1);
         
+            //CGS: rho = r' * r_tld
+        C_rho = magma_zdotc(dofs, C_r.dval, 1, r_tld.dval, 1);
+
+        
         if( solver_par->numiter == 1 ){
                 //QMR: p = y;
                 //QMR: q = z;
             magma_zcopy( dofs, Q_y.dval, 1, Q_p.dval, 1 );
             magma_zcopy( dofs, Q_z.dval, 1, Q_q.dval, 1 );
+            
+                //QMR: u = r;
+                //QMR: p = r;
+            magma_zcgs_2(  
+            b.num_rows, 
+            b.num_cols, 
+            C_r.dval,
+            C_u.dval,
+            C_p.dval,
+            queue );
         }
         else{
             Q_pde = Q_psi * Q_delta / Q_epsilon;
             Q_rde = Q_rho * MAGMA_Z_CNJG(Q_delta/Q_epsilon);
+            
+            C_beta = C_rho / C_rho_l;  
             
                 //QMR p = y - pde * p
                 //QMR q = z - rde * q
@@ -195,13 +234,30 @@ magma_zbombard(
             Q_p.dval, 
             Q_q.dval, 
             queue );
+            
+                  //CGS: u = r + beta*q;
+                  //CGS: p = u + beta*( q + beta*p );
+            magma_zcgs_1(  
+            b.num_rows, 
+            b.num_cols, 
+            C_beta,
+            C_r.dval,
+            C_q.dval, 
+            C_u.dval,
+            C_p.dval,
+            queue );
         }
         //QMR
         CHECK( magma_z_spmv( c_one, A, Q_p, c_zero, Q_pt, queue ));
+        //CGS
+        CHECK( magma_z_spmv( c_one, A, C_p, c_zero, C_v_hat, queue ));
+
         
-            // epsilon = q' * pt;
+            //QMR: epsilon = q' * pt;
         Q_epsilon = magma_zdotc(dofs, Q_q.dval, 1, Q_pt.dval, 1);
         Q_beta = Q_epsilon / Q_delta;
+            //CGS: alpha = r_tld' * v_hat
+        C_alpha = rho / magma_zdotc(dofs, r_tld.dval, 1, C_v_hat.dval, 1);
         
             //QMR: v = pt - beta * v
             //QMR: y = v
@@ -214,6 +270,17 @@ magma_zbombard(
         Q_y.dval,
         queue );
         
+            //CGS: q = u - alpha v_hat
+            //CGS: t = u + q
+        magma_zcgs_3(  
+        b.num_rows, 
+        b.num_cols, 
+        C_alpha,
+        C_v_hat.dval,
+        C_u.dval, 
+        C_q.dval,
+        C_t.dval, 
+        queue );
         
         Q_rho1 = Q_rho;      
             //QMR rho = norm(y);
@@ -221,6 +288,9 @@ magma_zbombard(
         
             //QMR wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
+            //CGS t = A u_hat
+        CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue ));   
+        
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( Q_beta ), Q_w.dval, 1, Q_wt.dval, 1);  
         
                     // no precond: z = wt
@@ -274,39 +344,23 @@ magma_zbombard(
             Q_r.dval, 
             queue );
         }
-            // psi = norm(z);
+        
+        
+        // CGS: r = r -alpha*A u_hat
+        // CGS: x = x + alpha u_hat
+        magma_zcgs_4(  
+        b.num_rows, 
+        b.num_cols, 
+        C_alpha,
+        C_t.dval,
+        C_rt.dval,
+        C_x->dval, 
+        C_r.dval,
+        queue );
+        
+            //QMR: psi = norm(z);
         Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
         
-        Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
-        
-        if ( solver_par->verbose > 0 ) {
-            tempo2 = magma_sync_wtime( queue );
-            if( Q_res < res ){
-                res = Q_res;
-                flag = 1;
-            }
-            if( C_res < res ){
-                res = C_res;
-                flag = 2;
-            }
-            if( B_res < res ){
-                res = B_res;
-                flag = 3;
-            }
-            res = Q_res;
-            if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
-                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
-                        = (real_Double_t) res;
-                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
-                        = (real_Double_t) tempo2-tempo1;
-            }
-        }
-
-        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
-            break;
-        }
-        
-                
             //QMR: v = y / rho
             //QMR: y = y / rho
             //QMR: w = wt / psi
@@ -321,6 +375,39 @@ magma_zbombard(
         Q_v.dval,
         Q_w.dval,
         queue );
+        
+        Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
+        C_res = magma_dznrm2( dofs, C_r.dval, 1 );
+        
+        if( Q_res < res ){
+            res = Q_res;
+            flag = 1;
+        }
+        if( C_res < res ){
+            res = C_res;
+            flag = 2;
+        }
+       /* if( B_res < res ){
+            res = B_res;
+            flag = 3;
+        }
+    res = Q_res;*/
+        if ( solver_par->verbose > 0 ) {
+            tempo2 = magma_sync_wtime( queue );
+            if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
+                        = (real_Double_t) res;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
+
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            break;
+        }
+        
+                
+
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
@@ -366,7 +453,7 @@ magma_zbombard(
     
 cleanup:
     magma_zmfree(&r_tld, queue );
-    
+    // QMR
     magma_zmfree(&Q_r, queue );
     magma_zmfree(&Q_v,  queue );
     magma_zmfree(&Q_w,  queue );
@@ -379,6 +466,19 @@ cleanup:
     magma_zmfree(&Q_pt, queue );
     magma_zmfree(&Q_y,  queue );
     magma_zmfree(&Q_x,  queue );
+    // CGS
+    magma_zmfree(&C_r, queue );
+    magma_zmfree(&C_rt, queue );
+    magma_zmfree(&C_x, queue );
+    magma_zmfree(&C_p, queue );
+    magma_zmfree(&C_q, queue );
+    magma_zmfree(&C_u, queue );
+    magma_zmfree(&C_v, queue );
+    magma_zmfree(&C_t, queue );
+    magma_zmfree(&C_p_hat, queue );
+    magma_zmfree(&C_q_hat, queue );
+    magma_zmfree(&C_u_hat, queue );
+    magma_zmfree(&C_v_hat, queue );
 
     
     magmablasSetKernelStream( orig_queue );
