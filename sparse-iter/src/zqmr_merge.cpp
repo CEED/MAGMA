@@ -186,11 +186,21 @@ magma_zqmr_merge(
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
-            magma_zscal(dofs, -pde, p.dval, 1);    
+           /* magma_zscal(dofs, -pde, p.dval, 1);    
             magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
                 // q = z - rde * q;
             magma_zscal(dofs, -rde, q.dval, 1);    
-            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
+            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);*/
+            magma_zqmr_2(  
+    r.num_rows, 
+    r.num_cols, 
+    pde,
+    rde,
+    y.dval,
+    z.dval,
+    p.dval, 
+    q.dval, 
+    queue );
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
