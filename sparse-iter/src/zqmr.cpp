@@ -145,7 +145,10 @@ magma_zqmr(
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             goto cleanup;
         }
-
+magma_zprint_vector(vt,0,5,queue);
+magma_zprint_vector(y,0,5,queue);
+magma_zprint_vector(wt,0,5,queue);
+magma_zprint_vector(z,0,5,queue);
             // v = vt / rho;
         magma_zcopy( dofs, vt.dval, 1, v.dval, 1 );  
         magma_zscal(dofs, c_one / rho, v.dval, 1);  
