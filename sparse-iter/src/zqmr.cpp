@@ -207,10 +207,11 @@ magma_zqmr(
             // vt = pt - beta * v;
         magma_zcopy( dofs, pt.dval, 1, vt.dval, 1 ); 
         magma_zaxpy(dofs, -beta, v.dval, 1, vt.dval, 1);   
-        
+        magma_zprint_vector(pt,0,5,queue);
+        magma_zprint_vector(v,0,5,queue);
             // no precond: y = vt
         magma_zcopy( dofs, vt.dval, 1, y.dval, 1 );
-        
+        magma_zprint_vector(y,0,5,queue);
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
