@@ -173,7 +173,7 @@ magma_zqmr(
                 // p = yt;
                 // q = zt;
             magma_zcopy( dofs, y.dval, 1, p.dval, 1 );
-            magma_zcopy( dofs, z.dval, 1, q.dval, 1 );
+            magma_zcopy( dofs, w.dval, 1, q.dval, 1 );
         }
         else{
             pde = psi * delta / epsilon;
@@ -182,7 +182,7 @@ magma_zqmr(
             magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
                 // q = zt - rde * q;
             magma_zscal(dofs, -rde, q.dval, 1);    
-            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
+            magma_zaxpy(dofs, c_one, w.dval, 1, q.dval, 1);
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
