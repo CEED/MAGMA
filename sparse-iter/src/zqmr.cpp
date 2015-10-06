@@ -194,6 +194,8 @@ magma_zqmr(
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, pt, queue ));
             // epsilon = q' * pt;
+                    magma_zprint_vector(pt,0,5,queue);
+        magma_zprint_vector(q,0,5,queue);
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
