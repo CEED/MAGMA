@@ -84,24 +84,21 @@ magma_zqmr(
     
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR},
-                    v={Magma_CSR}, w={Magma_CSR}, wt={Magma_CSR}, vt={Magma_CSR},
-                    d={Magma_CSR}, s={Magma_CSR}, z={Magma_CSR}, zt={Magma_CSR}, q={Magma_CSR}, 
-                    p={Magma_CSR}, pt={Magma_CSR}, y={Magma_CSR}, yt={Magma_CSR};
+                    v={Magma_CSR}, w={Magma_CSR}, wt={Magma_CSR},
+                    d={Magma_CSR}, s={Magma_CSR}, z={Magma_CSR}, q={Magma_CSR}, 
+                    p={Magma_CSR}, pt={Magma_CSR}, y={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &r_tld, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &wt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &vt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &s, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &zt, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &q, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &pt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    CHECK( magma_zvinit( &yt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     
     // solver setup
@@ -109,7 +106,7 @@ magma_zqmr(
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, y.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, vt.dval, 1 );  
+    magma_zcopy( dofs, r.dval, 1, v.dval, 1 );  
     magma_zcopy( dofs, r.dval, 1, wt.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
@@ -165,12 +162,12 @@ magma_zqmr(
         }
         
         // no precond: yt = y, zt = z
-        magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
-        magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
+        //magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
+        //magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
         
         if( solver_par->numiter == 1 ){
-                // p = yt;
-                // q = zt;
+                // p = y;
+                // q = z;
             magma_zcopy( dofs, y.dval, 1, p.dval, 1 );
             magma_zcopy( dofs, z.dval, 1, q.dval, 1 );
         }
@@ -179,7 +176,7 @@ magma_zqmr(
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
             magma_zscal(dofs, -pde, p.dval, 1);    
             magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
-                // q = zt - rde * q;
+                // q = z - rde * q;
             magma_zscal(dofs, -rde, q.dval, 1);    
             magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
         }
@@ -196,12 +193,10 @@ magma_zqmr(
             magma_zprint_vector(pt, 0, 10, queue);
             break;
         }
-            // vt = pt - beta * v;
-        //magma_zcopy( dofs, pt.dval, 1, vt.dval, 1 ); 
-        //magma_zaxpy(dofs, -beta, v.dval, 1, vt.dval, 1);
+            // v = pt - beta * v;
         magma_zscal(dofs, -beta, v.dval, 1); 
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
-            // no precond: y = vt
+            // no precond: y = v
         magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
         rho1 = rho;      
             // rho = norm(y);
@@ -311,16 +306,13 @@ cleanup:
     magma_zmfree(&v,  queue );
     magma_zmfree(&w,  queue );
     magma_zmfree(&wt, queue );
-    magma_zmfree(&vt, queue );
     magma_zmfree(&d,  queue );
     magma_zmfree(&s,  queue );
     magma_zmfree(&z,  queue );
-    magma_zmfree(&zt,  queue );
     magma_zmfree(&q,  queue );
     magma_zmfree(&p,  queue );
     magma_zmfree(&pt, queue );
     magma_zmfree(&y,  queue );
-    magma_zmfree(&yt, queue );
     magma_zmfree(&AT, queue );
 
     
