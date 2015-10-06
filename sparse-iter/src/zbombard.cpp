@@ -79,10 +79,13 @@ magma_zbombard(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
+    //QMR
     magmaDoubleComplex Q_rho = c_one, Q_rho1 = c_one, Q_eta = -c_one , Q_pds = c_one, 
                         Q_thet = c_one, Q_thet1 = c_one, Q_epsilon = c_one, 
                         Q_beta = c_one, Q_delta = c_one, Q_pde = c_one, Q_rde = c_one,
                         Q_gamm = c_one, Q_gamm1 = c_one, Q_psi = c_one;
+    //CGS
+    magmaDoubleComplex C_rho, C_rho_l = c_one, C_alpha, C_beta;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
@@ -96,7 +99,7 @@ magma_zbombard(
                     Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR};
                     
     // CGS
-    magma_z_matrix C_r={Magma_CSR}, C_rt={Magma_CSR},
+    magma_z_matrix C_r={Magma_CSR}, C_rt={Magma_CSR}, C_x={Magma_CSR},
                     C_p={Magma_CSR}, C_q={Magma_CSR}, C_u={Magma_CSR}, C_v={Magma_CSR},  C_t={Magma_CSR},
                     C_p_hat={Magma_CSR}, C_q_hat={Magma_CSR}, C_u_hat={Magma_CSR}, C_v_hat={Magma_CSR};
 
@@ -354,7 +357,7 @@ magma_zbombard(
         C_alpha,
         C_t.dval,
         C_rt.dval,
-        C_x->dval, 
+        C_x.dval, 
         C_r.dval,
         queue );
         
