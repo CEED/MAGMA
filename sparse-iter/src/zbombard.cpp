@@ -345,22 +345,14 @@ magma_zbombard(
         
         B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1 )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, B_t.dval, 1, B_t.dval, 1 );
-
-
-        
+        // QMR
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( Q_beta ), Q_w.dval, 1, Q_wt.dval, 1);  
-        
                     // no precond: z = wt
         magma_zcopy( dofs, Q_wt.dval, 1, Q_z.dval, 1 );
         
-        // BiCGSTAB
-        magma_zaxpy( dofs, B_alpha, B_p.dval, 1 , B_x.dval, 1 );     // x=x+alpha*p
-        magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
 
-        magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
-        magma_zaxpy( dofs, c_mone * B_omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
         
-
+        // QMR
         Q_thet1 = Q_thet;        
         Q_thet = Q_rho / (Q_gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(Q_beta), 0.0 ));
         Q_gamm1 = Q_gamm;        
@@ -421,6 +413,13 @@ magma_zbombard(
         C_r.dval,
         queue );
         
+            // BiCGSTAB
+        magma_zaxpy( dofs, B_alpha, B_p.dval, 1 , B_x.dval, 1 );     // x=x+alpha*p
+        magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
+
+        magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
+        magma_zaxpy( dofs, c_mone * B_omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
+        
             //QMR: psi = norm(z);
         Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
         
@@ -442,7 +441,7 @@ magma_zbombard(
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
         B_res = magma_dznrm2( dofs, B_r.dval, 1 );
-        printf("res: %e   %e   %e\n", Q_res, C_res, B_res);
+        printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
             flag = 1;
