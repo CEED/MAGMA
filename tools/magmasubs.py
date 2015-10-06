@@ -577,6 +577,7 @@ subs = {
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
     ('sbajac',         'dbajac',         'cbajac',         'zbajac'          ),
     ('sbaiter',        'dbaiter',        'cbaiter',        'zbaiter'         ),
+    ('sbombard',       'dbombard',       'cbombard',       'zbombard'        ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
