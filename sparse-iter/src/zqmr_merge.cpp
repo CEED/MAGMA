@@ -277,7 +277,7 @@ magma_zqmr_merge(
     pt.dval,
     d.dval, 
     s.dval, 
-    x.dval, 
+    x->dval, 
     r.dval, 
     queue );
         }
