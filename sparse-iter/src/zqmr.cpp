@@ -141,6 +141,7 @@ magma_zqmr(
     do
     {
         solver_par->numiter++;
+        printf("\n\n\n#########\n iteration:%d\n", solver_par->numiter);
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             printf("break 1\n");
             goto cleanup;
@@ -162,6 +163,7 @@ magma_zqmr(
             printf("break 2\n");
             break;
         }
+        printf("delta = %e\n", delta);
         
         // no precond: yt = y, zt = z
         magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
@@ -176,7 +178,8 @@ magma_zqmr(
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
-
+        printf("pde = %e\n", pde);
+        printf("rde = %e\n", rde);
                 // p = yt - pde * p;
             magma_zscal(dofs, -pde, p.dval, 1);    
             magma_zaxpy(dofs, c_one, yt.dval, 1, p.dval, 1);
@@ -199,7 +202,8 @@ magma_zqmr(
                         printf("break 4:%f %f\n", epsilon, beta);
             break;
         }
-        
+        printf("epsilon = %e\n", epsilon);
+        printf("beta = %e\n", beta);
             // vt = pt - beta * v;
         magma_zcopy( dofs, pt.dval, 1, vt.dval, 1 ); 
         magma_zaxpy(dofs, -beta, v.dval, 1, vt.dval, 1);   
@@ -210,7 +214,7 @@ magma_zqmr(
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
-        
+        printf("rho = %e\n", rho);
             // wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, q, c_zero, wt, queue ));
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
@@ -220,12 +224,12 @@ magma_zqmr(
         
                     // psi = norm(z);
         psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
-        
+        printf("psi = %e\n", psi);
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
-        gamm1 = gamm;
-        gamm = c_one / magma_zsqrt(c_one + thet*thet);
-        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);
+        gamm1 = gamm;        printf("thet = %e\n", thet);
+        gamm = c_one / magma_zsqrt(c_one + thet*thet);        printf("gamm = %e\n", gamm);
+        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        printf("eta = %e\n", eta);
         if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
                         printf("break 1\n");
             break;
