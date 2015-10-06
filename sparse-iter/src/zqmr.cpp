@@ -79,6 +79,9 @@ magma_zqmr(
     
     magma_int_t dofs = A.num_rows* b.num_cols;
 
+    // need to transpose the matrix
+    magma_z_matrix AT={Magma_CSR};
+    
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR},
                     v={Magma_CSR}, w={Magma_CSR}, wt={Magma_CSR}, vt={Magma_CSR},
@@ -110,7 +113,8 @@ magma_zqmr(
     magma_zcopy( dofs, r.dval, 1, wt.dval, 1 );   
     magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
-
+    // transpose the matrix
+    magma_zmtranspose( A, &AT, queue );
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -223,7 +227,7 @@ magma_zprint_vector(v,0,5,queue);
         
 printf("rho = %e  %ei\n", MAGMA_Z_REAL(rho), MAGMA_Z_IMAG(rho));
             // wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, A, q, c_zero, wt, queue ));
+        CHECK( magma_z_spmv( c_one, AT, q, c_zero, wt, queue ));
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
         
                     // no precond: z = wt
@@ -342,6 +346,7 @@ cleanup:
     magma_zmfree(&pt, queue );
     magma_zmfree(&y,  queue );
     magma_zmfree(&yt, queue );
+    magma_zmfree(&AT, queue );
 
     
     magmablasSetKernelStream( orig_queue );
