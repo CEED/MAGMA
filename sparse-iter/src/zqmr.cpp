@@ -155,7 +155,7 @@ magma_zqmr(
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1);  
             // w = wt / psi;
-        //magma_zcopy( dofs, wt.dval, 1, w.dval, 1 );  
+        magma_zcopy( dofs, wt.dval, 1, w.dval, 1 );  
         magma_zscal(dofs, c_one / psi, w.dval, 1); 
             // z = z / psi;
         magma_zscal(dofs, c_one / psi, z.dval, 1); 
@@ -166,8 +166,8 @@ magma_zqmr(
         }
         
         // no precond: yt = y, zt = z
-        magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
-        magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
+        //magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
+        //magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
         
         if( solver_par->numiter == 1 ){
                 // p = yt;
@@ -203,17 +203,17 @@ magma_zqmr(
         magma_zscal(dofs, -beta, v.dval, 1); 
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
             // no precond: y = vt
-        magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
+        //magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
         
             // wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, AT, q, c_zero, z, queue ));
-        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, z.dval, 1);  
+        CHECK( magma_z_spmv( c_one, AT, q, c_zero, wt, queue ));
+        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
         
                     // no precond: z = wt
-        //magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
+        magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
         
                     // psi = norm(z);
         psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
