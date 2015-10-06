@@ -257,7 +257,7 @@ magma_zqmr(
             // x = x + d;                    
         magma_zaxpy(dofs, c_one, d.dval, 1, x->dval, 1);
             // r = r - s;
-        magma_zaxpy(dofs, -c_one, d.dval, 1, r.dval, 1);
+        magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
         
