@@ -199,7 +199,7 @@ magma_zqmr(
             // vt = pt - beta * v;
         //magma_zcopy( dofs, pt.dval, 1, vt.dval, 1 ); 
         //magma_zaxpy(dofs, -beta, v.dval, 1, vt.dval, 1);
-        agma_zscal(dofs, -beta, v.dval, 1); 
+        magma_zscal(dofs, -beta, v.dval, 1); 
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
             // no precond: y = vt
         magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
