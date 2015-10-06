@@ -161,6 +161,10 @@ magma_zqmr(
         if( delta == c_zero || delta == 'NaN' ){
             break;
         }
+magma_zprint_vector(v,0,5,queue);
+magma_zprint_vector(y,0,5,queue);
+magma_zprint_vector(w,0,5,queue);
+magma_zprint_vector(z,0,5,queue);
 printf("delta = %e  %ei\n", MAGMA_Z_REAL(delta)), MAGMA_Z_IMAG(delta);
         
         // no precond: yt = y, zt = z
