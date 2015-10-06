@@ -143,7 +143,6 @@ magma_zqmr(
         solver_par->numiter++;
         printf("\n\n\n#########\n iteration:%d\n", solver_par->numiter);
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
-            printf("break 1\n");
             goto cleanup;
         }
 
@@ -160,10 +159,9 @@ magma_zqmr(
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
         if( delta == c_zero || delta == 'NaN' ){
-            printf("break 2\n");
             break;
         }
-        printf("delta = %e\n", delta);
+printf("delta = %e  %ei\n", MAGMA_Z_REAL(delta)), MAGMA_Z_IMAG(delta);
         
         // no precond: yt = y, zt = z
         magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
@@ -178,8 +176,8 @@ magma_zqmr(
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
-        printf("pde = %e\n", pde);
-        printf("rde = %e\n", rde);
+printf("pde = %e  %ei\n", MAGMA_Z_REAL(pde), MAGMA_Z_IMAG(pde));
+printf("rde = %e  %ei\n\n", MAGMA_Z_REAL(rde), MAGMA_Z_IMAG(rde));
                 // p = yt - pde * p;
             magma_zscal(dofs, -pde, p.dval, 1);    
             magma_zaxpy(dofs, c_one, yt.dval, 1, p.dval, 1);
@@ -188,36 +186,34 @@ magma_zqmr(
             magma_zaxpy(dofs, c_one, zt.dval, 1, q.dval, 1);
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
-            printf("break 3\n");
             break;
         }
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, pt, queue ));
             // epsilon = q' * pt;
-                    magma_zprint_vector(pt,0,5,queue);
-        magma_zprint_vector(q,0,5,queue);
+magma_zprint_vector(pt,0,5,queue);
+magma_zprint_vector(q,0,5,queue);
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
         if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
             magma_zprint_vector(q, 0, 10, queue);
             magma_zprint_vector(pt, 0, 10, queue);
-                        printf("break 4:%f %f\n", epsilon, beta);
             break;
         }
-        printf("epsilon = %e\n", epsilon);
-        printf("beta = %e\n", beta);
+printf("epsilon = %e  %ei\n", MAGMA_Z_REAL(epsilon), MAGMA_Z_IMAG(epsilon));
+printf("beta = %e  %ei\n", MAGMA_Z_REAL(beta), MAGMA_Z_IMAG(beta));
             // vt = pt - beta * v;
         magma_zcopy( dofs, pt.dval, 1, vt.dval, 1 ); 
         magma_zaxpy(dofs, -beta, v.dval, 1, vt.dval, 1);   
-        magma_zprint_vector(pt,0,5,queue);
-        magma_zprint_vector(v,0,5,queue);
+magma_zprint_vector(pt,0,5,queue);
+magma_zprint_vector(v,0,5,queue);
             // no precond: y = vt
         magma_zcopy( dofs, vt.dval, 1, y.dval, 1 );
         magma_zprint_vector(y,0,5,queue);
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
-        printf("rho = %e\n", rho);
+printf("rho = %e  %ei\n", MAGMA_Z_REAL(rho), MAGMA_Z_IMAG(rho));
             // wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, q, c_zero, wt, queue ));
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
@@ -227,14 +223,16 @@ magma_zqmr(
         
                     // psi = norm(z);
         psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
-        printf("psi = %e\n", psi);
+printf("psi = %e  %ei\n", MAGMA_Z_REAL(psi), MAGMA_Z_IMAG(psi));
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
-        gamm1 = gamm;        printf("thet = %e\n", thet);
-        gamm = c_one / magma_zsqrt(c_one + thet*thet);        printf("gamm = %e\n", gamm);
-        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        printf("eta = %e\n", eta);
+        gamm1 = gamm;        
+printf("thet = %e  %ei\n", MAGMA_Z_REAL(thet), MAGMA_Z_IMAG(thet));
+        gamm = c_one / magma_zsqrt(c_one + thet*thet);        
+printf("gamm = %e  %ei\n", MAGMA_Z_REAL(gamm), MAGMA_Z_IMAG(gamm));
+        eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
+printf("eta = %e  %ei\n\n", MAGMA_Z_REAL(eta), MAGMA_Z_IMAG(eta));
         if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
-                        printf("break 1\n");
             break;
         }
         
@@ -262,7 +260,7 @@ magma_zqmr(
         magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
-        CHECK(  magma_zresidual( A, b, *x, &res, queue));
+        
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
