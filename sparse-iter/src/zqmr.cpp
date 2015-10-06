@@ -262,7 +262,7 @@ magma_zqmr(
         magma_zaxpy(dofs, -c_one, s.dval, 1, r.dval, 1);
         
         res = magma_dznrm2( dofs, r.dval, 1 );
-        
+        CHECK(  magma_zresidual( A, b, *x, &res, queue));
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
