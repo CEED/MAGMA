@@ -1585,7 +1585,7 @@ magma_zqmr_1(
     magmaDoubleComplex_ptr y, 
     magmaDoubleComplex_ptr z,
     magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr w
+    magmaDoubleComplex_ptr w,
     magma_queue_t queue );
 
 magma_int_t
