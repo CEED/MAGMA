@@ -22,7 +22,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a complex matrix A.
     This is a GPU implementation of the Conjugate Gradient method in variant,
     where multiple operations are merged into one compute kernel.
 
@@ -48,7 +48,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zposv
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 extern "C" magma_int_t

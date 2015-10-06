@@ -22,7 +22,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a complex matrix A.
     This is a GPU implementation of the preconditioned Conjugate
     Gradient Squared (CGS) method.
 
@@ -53,7 +53,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zposv
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 extern "C" magma_int_t

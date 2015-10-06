@@ -22,7 +22,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex Hermitian N-by-N positive definite matrix A.
+    where A is a complex matrix A.
     This is a GPU implementation of the transpose-free Quasi-Minimal Residual 
     method (TFQMR).
 
@@ -49,7 +49,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zposv
+    @ingroup magmasparse_zgesv
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -261,4 +261,4 @@ cleanup:
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
-}   /* magma_zfqmr */
+}   /* magma_zfqmr_unrolled */
