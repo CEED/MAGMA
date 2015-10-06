@@ -203,7 +203,7 @@ magma_zqmr(
         magma_zscal(dofs, -beta, v.dval, 1); 
         magma_zaxpy(dofs, c_one, pt.dval, 1, v.dval, 1); 
             // no precond: y = vt
-        //magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
+        magma_zcopy( dofs, v.dval, 1, y.dval, 1 );
         rho1 = rho;      
             // rho = norm(y);
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
@@ -213,10 +213,10 @@ magma_zqmr(
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, wt.dval, 1);  
         
                     // no precond: z = wt
-        magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
+        //magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
         
                     // psi = norm(z);
-        psi = magma_zsqrt( magma_zdotc(dofs, z.dval, 1, z.dval, 1) );
+        psi = magma_zsqrt( magma_zdotc(dofs, wt.dval, 1, wt.dval, 1) );
 
         thet1 = thet;        
         thet = rho / (gamm * MAGMA_Z_MAKE( MAGMA_Z_ABS(beta), 0.0 ));
