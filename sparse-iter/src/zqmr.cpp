@@ -209,8 +209,8 @@ magma_zqmr(
         rho = magma_zsqrt( magma_zdotc(dofs, y.dval, 1, y.dval, 1) );
         
             // wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, AT, q, c_zero, y, queue ));
-        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, y.dval, 1);  
+        CHECK( magma_z_spmv( c_one, AT, q, c_zero, z, queue ));
+        magma_zaxpy(dofs, - MAGMA_Z_CNJG( beta ), w.dval, 1, z.dval, 1);  
         
                     // no precond: z = wt
         //magma_zcopy( dofs, wt.dval, 1, z.dval, 1 );
