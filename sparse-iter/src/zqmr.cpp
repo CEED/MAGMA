@@ -149,7 +149,7 @@ magma_zqmr(
             goto cleanup;
         }
             // v = vt / rho;
-        magma_zcopy( dofs, vt.dval, 1, v.dval, 1 );  
+        magma_zcopy( dofs, y.dval, 1, v.dval, 1 );  
         magma_zscal(dofs, c_one / rho, v.dval, 1);  
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1);  
@@ -171,17 +171,17 @@ magma_zqmr(
         if( solver_par->numiter == 1 ){
                 // p = yt;
                 // q = zt;
-            magma_zcopy( dofs, yt.dval, 1, p.dval, 1 );
-            magma_zcopy( dofs, zt.dval, 1, q.dval, 1 );
+            magma_zcopy( dofs, y.dval, 1, p.dval, 1 );
+            magma_zcopy( dofs, z.dval, 1, q.dval, 1 );
         }
         else{
             pde = psi * delta / epsilon;
             rde = rho * MAGMA_Z_CNJG(delta/epsilon);
             magma_zscal(dofs, -pde, p.dval, 1);    
-            magma_zaxpy(dofs, c_one, yt.dval, 1, p.dval, 1);
+            magma_zaxpy(dofs, c_one, y.dval, 1, p.dval, 1);
                 // q = zt - rde * q;
             magma_zscal(dofs, -rde, q.dval, 1);    
-            magma_zaxpy(dofs, c_one, zt.dval, 1, q.dval, 1);
+            magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
         }
         if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
             break;
