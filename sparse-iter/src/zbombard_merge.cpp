@@ -320,8 +320,8 @@ magma_zbombard_merge(
         
         // scatter results
         magma_zcopy( dofs, SpMV_out_1.dval          , 1, Q_pt.dval, 1 );
-        magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat, 1 );
-        magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v, 1 );
+        magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat.dval, 1 );
+        magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v.dval, 1 );
 
         
             //QMR: epsilon = q' * pt;
