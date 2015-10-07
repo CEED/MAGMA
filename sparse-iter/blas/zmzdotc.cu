@@ -361,6 +361,8 @@ magma_zmzdotc(
         // copy vectors to host
     magma_zgetvector( 4 , aux1, 1, skp, 1 );
     
+    magma_zprint_gpu( 4, 1, aux1, 4 );
+    
     printf("the skp is: %d %d %d %d\n", skp[0], skp[1], skp[2], skp[3]);
 
    magmablasSetKernelStream( orig_queue );
