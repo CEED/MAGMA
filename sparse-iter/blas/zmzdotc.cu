@@ -285,6 +285,7 @@ magma_zmzdotc_kernel_2(
     @param[out]
     skp         magmaDoubleComplex_ptr 
                 vector[4] of scalar products [<v_i, w_i>]
+                This vector is located on the host
 
     @param[in]
     queue       magma_queue_t
@@ -357,9 +358,8 @@ magma_zmzdotc(
         else   { aux2 = d1; aux1 = d2; }
     }
 
-    for( int j=0; j<4; j++) {
-            magma_zcopyvector_async( 1, aux1+j*n, 1, skp+j, 1, queue );
-    }
+        // copy vectors to host
+    magma_zgetvector( 4 , aux1, 1, skp, 1 );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
