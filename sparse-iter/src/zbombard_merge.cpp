@@ -181,7 +181,7 @@ magma_zbombard_merge(
     magma_zcopy( dofs, r_tld.dval, 1, B_r.dval, 1 );   
     magma_zcopy( dofs, x->dval, 1, B_x.dval, 1 ); 
     CHECK( magma_z_spmv( c_one, A, B_r, c_zero, B_v, queue ));     
-    magma_zcopy( dofs, B_v, 1, SpMV_out_1.dval+2*dofs, 1 );
+    magma_zcopy( dofs, B_v.dval, 1, SpMV_out_1.dval+2*dofs, 1 );
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -352,7 +352,7 @@ magma_zbombard_merge(
         b.num_rows, 
         b.num_cols, 
         C_alpha,
-        SpMV_out_1.dval+dofs.dval,
+        SpMV_out_1.dval+dofs,
         C_u.dval, 
         C_q.dval,
         SpMV_in_2.dval+dofs, 
