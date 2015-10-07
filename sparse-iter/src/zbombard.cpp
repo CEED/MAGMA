@@ -226,18 +226,10 @@ magma_zbombard(
         C_rho = magma_zdotc(dofs, C_r.dval, 1, r_tld.dval, 1);
         
             // BiCGSTAB
-        //B_rho_old = B_rho_new;    
-        //B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
-        //B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
-        magma_zbicgstab_1(  
-            b.num_rows, 
-            b.num_cols, 
-            B_beta,
-            B_omega,
-            B_r.dval, 
-            B_v.dval,
-            B_p.dval,
-            queue );
+        B_rho_old = B_rho_new;    
+        B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
+        B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
+
 
         
         if( solver_par->numiter == 1 ){
@@ -292,14 +284,15 @@ magma_zbombard(
         //magma_zaxpy( dofs, c_mone * B_omega * B_beta, B_v.dval, 1 , B_p.dval, 1 );
                                                         // p = p-omega*beta*v
         //magma_zaxpy( dofs, c_one, B_r.dval, 1, B_p.dval, 1 );      // p = p+r
-        magma_zbicgstab_2(  
-    B_num_rows, 
-    B_num_cols, 
-    B_alpha,
-    B_r.dval,
-    B_v.dval,
-    B_s.dval, 
-    queue );
+                magma_zbicgstab_1(  
+            b.num_rows, 
+            b.num_cols, 
+            B_beta,
+            B_omega,
+            B_r.dval, 
+            B_v.dval,
+            B_p.dval,
+            queue );
         
         //QMR
         CHECK( magma_z_spmv( c_one, A, Q_p, c_zero, Q_pt, queue ));
@@ -342,9 +335,17 @@ magma_zbombard(
         C_t.dval, 
         queue );
             // BiCGSTAB
-        magma_zcopy( dofs, B_r.dval, 1 , B_s.dval, 1 );            // s=r
-        magma_zaxpy( dofs, c_mone * B_alpha, B_v.dval, 1 , B_s.dval, 1 ); // s=s-alpha*v
-
+            
+        //magma_zcopy( dofs, B_r.dval, 1 , B_s.dval, 1 );            // s=r
+        //magma_zaxpy( dofs, c_mone * B_alpha, B_v.dval, 1 , B_s.dval, 1 ); // s=s-alpha*v
+magma_zbicgstab_2(  
+    b.num_rows, 
+    b.num_cols, 
+    B_alpha,
+    B_r.dval,
+    B_v.dval,
+    B_s.dval, 
+    queue );
             
         
         Q_rho1 = Q_rho;      
