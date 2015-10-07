@@ -372,12 +372,26 @@ magma_zbombard_merge(
             //QMR rho = norm(y);
         Q_rho = magma_zsqrt( magma_zdotc(dofs, Q_y.dval, 1, Q_y.dval, 1) );
         
+            // gather everything for a block-SpMV
+        magma_zcopy( dofs, Q_q.dval, 1, SpMV_in_2.dval          , 1 );
+        magma_zcopy( dofs, C_t.dval, 1, SpMV_in_2.dval+dofs     , 1 );
+        magma_zcopy( dofs, B_s.dval, 1, SpMV_in_2.dval+2*dofs   , 1 );
+        
             //QMR wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
+        //CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
             //CGS t = A u_hat
-        CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
+        //CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
             //BiCGSTAB
-        CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
+        //CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));
+        
+            // block SpMV
+        CHECK( magma_z_spmv( c_one, A, SpMV_in_2, c_zero, SpMV_out_2, queue ));
+        
+        // scatter results
+        magma_zcopy( dofs, SpMV_out_2.dval          , 1, Q_wt.dval, 1 );
+        magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
+        magma_zcopy( dofs, SpMV_out_2.dval+2*dofs   , 1, B_t.dval, 1 );        
+        
         
         B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1 )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, B_t.dval, 1, B_t.dval, 1 );
