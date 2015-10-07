@@ -205,7 +205,7 @@ magma_zbicgstab_3_kernel(
             magmaDoubleComplex tmp = s[ i+j*num_rows ];
             x[ i+j*num_rows ] = x[ i+j*num_rows ] 
                         + alpha * p[ i+j*num_rows ] + omega * tmp;
-            y[ i+j*num_rows ] = tmp - omega * t[ i+j*num_rows ];
+            r[ i+j*num_rows ] = tmp - omega * t[ i+j*num_rows ];
         }
     }
 }
