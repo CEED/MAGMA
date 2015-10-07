@@ -357,13 +357,10 @@ magma_zmzdotc(
         if ( b ) { aux1 = d1; aux2 = d2; }
         else   { aux2 = d1; aux1 = d2; }
     }
-    magma_zprint_gpu( 4, 1, aux1, 4 );
+    
         // copy vectors to host
     magma_zgetvector( 4 , aux1, n, skp, 1 );
     
-
-    
-    printf("the skp is: %d %d %d %d\n", skp[0], skp[1], skp[2], skp[3]);
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;

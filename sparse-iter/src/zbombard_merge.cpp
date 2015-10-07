@@ -266,7 +266,7 @@ magma_zbombard_merge(
     do
     {
         solver_par->numiter++;
-        /*
+        
             //QMR: delta = z' * y;
         Q_delta = magma_zdotc(dofs, Q_z.dval, 1, Q_y.dval, 1);
         
@@ -278,7 +278,7 @@ magma_zbombard_merge(
         B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
         B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
 
-        */
+        /*
         B_rho_old = B_rho_new; 
         
         magma_zmzdotc(
@@ -301,7 +301,7 @@ magma_zbombard_merge(
         B_rho_new = skp.val[2];
         
         B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;
-
+*/
         
         if( solver_par->numiter == 1 ){
                 //QMR: p = y;
