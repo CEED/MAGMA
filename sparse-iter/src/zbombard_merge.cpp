@@ -508,7 +508,7 @@ magma_zqmr_6(
     Q_z.dval,
     Q_v.dval,
     Q_w.dval,
-    Q_wt.dval,
+    SpMV_out_2.dval,
     queue );
         
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
