@@ -396,10 +396,7 @@ magma_zbombard_merge(
         SpMV_in_2.dval+2*dofs, 
         queues[2] );
             
-        
-        Q_rho1 = Q_rho;      
-            //QMR rho = norm(y);
-        Q_rho = magma_zsqrt( magma_zdotc(dofs, Q_y.dval, 1, Q_y.dval, 1) );
+
         /*
             //QMR wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
@@ -421,6 +418,14 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, SpMV_out_2.dval          , 1, Q_wt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+2*dofs   , 1, B_t.dval, 1 );        
+        
+                
+        Q_rho1 = Q_rho;      
+            //QMR rho = norm(y);
+        Q_rho = magma_zsqrt( magma_zdotc(dofs, Q_y.dval, 1, Q_y.dval, 1) );
+        
+        //QMR: psi = norm(z);
+        Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
         
         // BiCGSTAB
         B_omega = magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_in_2.dval+2*dofs, 1 )   // omega = <s,t>/<t,t>
@@ -502,8 +507,6 @@ magma_zbombard_merge(
         B_r.dval,
         queues[2] );
         
-            //QMR: psi = norm(z);
-        Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
         
             //QMR: v = y / rho
             //QMR: y = y / rho
