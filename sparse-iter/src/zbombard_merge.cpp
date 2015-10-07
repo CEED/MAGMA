@@ -533,10 +533,31 @@ magma_zbombard_merge(
         Q_w.dval,
         SpMV_out_2.dval,
         queues[0] );
-        
+        /*
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
         B_res = magma_dznrm2( dofs, B_r.dval, 1 );
+        */
+    magma_zmzdotc(
+    b.num_rows,  
+    Q_r.dval, 
+    Q_r.dval,
+    C_r.dval, 
+    C_r.dval,
+    B_r.dval, 
+    B_r.dval,
+    B_r.dval, 
+    B_r.dval,
+    d1.dval,
+    d2.dval,
+    skp.val,
+    queue );
+        
+Q_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[0]));
+C_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[1]));
+B_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[2]));
+        
+        
         printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
