@@ -33,7 +33,7 @@ magma_zbicgstab_1_kernel(
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
-            p[ i+j*num_rows ] = r + 
+            p[ i+j*num_rows ] = r[ i+j*num_rows ] + 
                 beta * ( p[ i+j*num_rows ] - omega * v[ i+j*num_rows ] );
         }
     }
@@ -87,12 +87,11 @@ magma_int_t
 magma_zbicgstab_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleComplex rho,
-    magmaDoubleComplex psi,
-    magmaDoubleComplex_ptr y, 
-    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr r, 
     magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr w,
+    magmaDoubleComplex_ptr p,
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
@@ -271,10 +270,13 @@ magma_int_t
 magma_zbicgstab_3(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr pt,
-    magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr y,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr s,
+    magmaDoubleComplex_ptr t,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_ptr r,
     magma_queue_t queue )
 {
     dim3 Bs( BLOCK_SIZE );
