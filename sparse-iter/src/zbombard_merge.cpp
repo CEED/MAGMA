@@ -486,8 +486,8 @@ magma_zbombard_merge(
             b.num_rows,  
             Q_y.dval, 
             Q_y.dval,
-            Q_z.dval, 
-            Q_z.dval,
+            Q_y.dval, 
+            Q_y.dval,
             SpMV_out_2.dval+2*dofs, 
             SpMV_in_2.dval+2*dofs,
             SpMV_out_2.dval+2*dofs, 
@@ -497,8 +497,7 @@ magma_zbombard_merge(
             skp.val,
             queue );
             
-            Q_rho = skp.val[0];
-            Q_psi = skp.val[1];
+            Q_rho = magma_zsqrt(skp.val[0]);
             B_omega = skp.val[2]/skp.val[3];
         }               
                    
@@ -585,7 +584,7 @@ magma_zbombard_merge(
             Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
             C_res = magma_dznrm2( dofs, C_r.dval, 1 );
             B_res = magma_dznrm2( dofs, B_r.dval, 1 );
-                        //QMR: psi = norm(z);
+                //QMR: psi = norm(z);
             Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
             
         }else{
@@ -597,8 +596,8 @@ magma_zbombard_merge(
             C_r.dval,
             B_r.dval, 
             B_r.dval,
-            B_r.dval, 
-            B_r.dval,
+            Q_z.dval, 
+            Q_z.dval,
             d1.dval,
             d2.dval,
             skp.val,
@@ -607,8 +606,12 @@ magma_zbombard_merge(
             Q_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[0]));
             C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
             B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
+                //QMR: psi = norm(z);
+            Q_psi = magma_zsqrt(skp.val[3]);
         }
-                    //QMR: v = y / rho
+        
+        
+            //QMR: v = y / rho
             //QMR: y = y / rho
             //QMR: w = wt / psi
             //QMR: z = z / psi    
