@@ -579,24 +579,7 @@ magma_zbombard_merge(
         queues[2] );
         
         
-            //QMR: v = y / rho
-            //QMR: y = y / rho
-            //QMR: w = wt / psi
-            //QMR: z = z / psi    
-            //QMR: wt = A' * q - beta' * w
-            //QMR: no precond: z = wt
-        magma_zqmr_6(  
-        b.num_rows, 
-        b.num_cols, 
-        Q_beta,
-        Q_rho,
-        Q_psi,
-        Q_y.dval, 
-        Q_z.dval,
-        Q_v.dval,
-        Q_w.dval,
-        SpMV_out_2.dval,
-        queues[0] );
+
         
         if( mdot == 0 ){
             Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
@@ -625,6 +608,24 @@ magma_zbombard_merge(
             C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
             B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
         }
+                    //QMR: v = y / rho
+            //QMR: y = y / rho
+            //QMR: w = wt / psi
+            //QMR: z = z / psi    
+            //QMR: wt = A' * q - beta' * w
+            //QMR: no precond: z = wt
+        magma_zqmr_6(  
+        b.num_rows, 
+        b.num_cols, 
+        Q_beta,
+        Q_rho,
+        Q_psi,
+        Q_y.dval, 
+        Q_z.dval,
+        Q_v.dval,
+        Q_w.dval,
+        SpMV_out_2.dval,
+        queues[0] );
         
         printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
