@@ -63,6 +63,10 @@ magma_zbombard_merge(
 {
     magma_int_t info = 0;
     
+        // set queue for old dense routines
+    magma_queue_t orig_queue = NULL;
+    magmablasGetKernelStream( &orig_queue );
+    
         // queue variables
     const magma_queue_t squeue = 0;    // synchronous kernel queues
     const magma_int_t nqueues = 3;     // number of queues
@@ -81,7 +85,7 @@ magma_zbombard_merge(
         q1flag = 1;
     }
     magma_queue_create( &(queues[2]) );
-    for ( i = 0; i < nqueues; ++i ) {
+    for (int i = 0; i < nqueues; ++i ) {
         printf("%% Kernel queue #%d = %p\n", i, (void *)queues[i]);
     }
 
