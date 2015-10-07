@@ -622,7 +622,7 @@ magma_zbombard_merge(
             Q_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[0]));
             C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
             B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
-            Q_psi = skp.val[3];
+            Q_psi = magma_zsqrt(skp.val[3]);
         }
         
         printf(" %e   %e   %e\n", Q_res, C_res, B_res);
