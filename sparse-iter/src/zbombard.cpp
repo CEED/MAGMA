@@ -234,9 +234,9 @@ magma_zbombard(
             b.num_cols, 
             B_beta,
             B_omega,
-            B_r, 
-            B_v,
-            B_p,
+            B_r.dval, 
+            B_v.dval,
+            B_p.dval,
             queue );
 
         
@@ -288,11 +288,18 @@ magma_zbombard(
             queue );
         }
         // BiCGSTAB
-        magma_zscal( dofs, B_beta, B_p.dval, 1 );                 // p = beta*p
-        magma_zaxpy( dofs, c_mone * B_omega * B_beta, B_v.dval, 1 , B_p.dval, 1 );
+        //magma_zscal( dofs, B_beta, B_p.dval, 1 );                 // p = beta*p
+        //magma_zaxpy( dofs, c_mone * B_omega * B_beta, B_v.dval, 1 , B_p.dval, 1 );
                                                         // p = p-omega*beta*v
-        magma_zaxpy( dofs, c_one, B_r.dval, 1, B_p.dval, 1 );      // p = p+r
-        
+        //magma_zaxpy( dofs, c_one, B_r.dval, 1, B_p.dval, 1 );      // p = p+r
+        magma_zbicgstab_2(  
+    B_num_rows, 
+    B_num_cols, 
+    B_alpha,
+    B_r.dval,
+    B_v.dval,
+    B_s.dval, 
+    queue );
         
         //QMR
         CHECK( magma_z_spmv( c_one, A, Q_p, c_zero, Q_pt, queue ));
