@@ -349,7 +349,7 @@ magma_zmzdotc(
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zmzdotc_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
-                    ( Gs.x, n, k, aux1, aux2 );
+                    ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
         b = 1 - b;
