@@ -16,6 +16,7 @@
 
 #ifndef GEMM_TEMPLATE_DEVICE_CUH
 #define GEMM_TEMPLATE_DEVICE_CUH
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // op<trans>( x ) returns x or conj(x).
 template< const int conjugate, typename T >
@@ -28,8 +29,10 @@ T op( T& x )
         return x;
     }
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-template<class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
 static __device__ 
@@ -215,8 +218,10 @@ void gemm_template_device_nn(
     }
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-template<class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
 static __device__
@@ -406,8 +411,10 @@ void gemm_template_device_nt(
     }
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-template<class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
 static __device__
@@ -600,8 +607,10 @@ void gemm_template_device_tn(
     }
 #endif /* (__CUDA_ARCH__ >= 200) */
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-template<class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template<typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int THR_M, const int THR_N, const int CONJA, const int CONJB>
 static __device__

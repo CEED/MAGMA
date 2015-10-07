@@ -19,7 +19,7 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -54,7 +54,7 @@ void herk_template_batched_nt_kernel(
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 static __global__
@@ -93,7 +93,7 @@ void herk_template_batched_tn_kernel(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // NT, NC 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void herk_template_batched_nt(
@@ -114,7 +114,7 @@ void herk_template_batched_nt(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TN, CN 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template <class T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
+template <typename T, const int DIM_X, const int DIM_Y, const int BLK_M, const int BLK_N, const int BLK_K, const int dim_vec, 
          const int DIM_XA, const int DIM_YA, const int DIM_XB, const int DIM_YB, 
          const int CONJA, const int CONJB>
 void herk_template_batched_tn(

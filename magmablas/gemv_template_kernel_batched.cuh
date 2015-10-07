@@ -18,7 +18,7 @@
 #include "gemv_template_device.cuh"
 
 
-template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE> 
+template<typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE> 
 __global__ void
 gemvn_kernel_batched(
     int m, int n, T alpha,
@@ -32,7 +32,7 @@ gemvn_kernel_batched(
 }
 
 
-template <class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
+template <typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void gemvn_template_batched(
     magma_int_t m, magma_int_t n, T alpha,
     T const * const * dA_array, magma_int_t ldda,
@@ -48,7 +48,7 @@ void gemvn_template_batched(
 }
 
 
-template<class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE, magma_trans_t trans> 
+template<typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE, magma_trans_t trans> 
 __global__ void
 gemvc_kernel_batched(
     int m, int n, T alpha,
@@ -62,7 +62,7 @@ gemvc_kernel_batched(
 }
 
 
-template <class T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
+template <typename T, const int DIM_X, const int DIM_Y, const int TILE_SIZE>
 void gemvc_template_batched(
     magma_trans_t trans, magma_int_t m, magma_int_t n, T alpha,
     T const * const * dA_array, magma_int_t ldda,
