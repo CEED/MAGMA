@@ -526,8 +526,8 @@ magma_zqmr_6_kernel(
     magmaDoubleComplex *y, 
     magmaDoubleComplex *z,
     magmaDoubleComplex *v,
-    magmaDoubleComplex *wt,
-    magmaDoubleComplex *w)
+    magmaDoubleComplex *w,
+    magmaDoubleComplex *wt )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i<num_rows ) {
