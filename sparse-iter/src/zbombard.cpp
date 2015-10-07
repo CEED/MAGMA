@@ -458,7 +458,7 @@ magma_zbombard(
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
         B_res = magma_dznrm2( dofs, B_r.dval, 1 );
-        printf(" %e   %e   %e\n", Q_res, C_res, B_res);
+            // printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
             flag = 1;
