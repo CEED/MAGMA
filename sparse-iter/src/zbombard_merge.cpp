@@ -288,9 +288,9 @@ magma_zbombard_merge(
         r_tld.dval, 
         C_r,
         r_tld.dval, 
-        B_r,
+        B_r.dval,
         r_tld.dval, 
-        B_r,
+        B_r.dval,
         d1.dval,
         d2.dval,
         skp.val,
@@ -410,7 +410,7 @@ magma_zbombard_merge(
     
     
         Q_epsilon = skp.val[0];
-        alpha = skp.val[1];
+        C_alpha = skp.val[1];
         B_alpha = skp.val[2];
         
         Q_beta = Q_epsilon / Q_delta;
