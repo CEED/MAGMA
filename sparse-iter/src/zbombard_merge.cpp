@@ -142,6 +142,9 @@ magma_zbombard_merge(
     // multi-vector for block-SpMV 
     magma_z_matrix SpMV_in_1={Magma_CSR}, SpMV_out_1={Magma_CSR}, 
                     SpMV_in_2={Magma_CSR}, SpMV_out_2={Magma_CSR}; 
+                    
+    // workspace for zmzdotc
+    magma_z_matrix d1={Magma_CSR},  d2={Magma_CSR}, skp={Magma_CSR};
 
                     
     CHECK( magma_zvinit( &r_tld, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -150,6 +153,10 @@ magma_zbombard_merge(
     CHECK( magma_zvinit( &SpMV_out_1, Magma_DEV, A.num_rows, b.num_cols * 3, c_zero, queue ));
     CHECK( magma_zvinit( &SpMV_in_2,  Magma_DEV, A.num_rows, b.num_cols * 3, c_zero, queue ));
     CHECK( magma_zvinit( &SpMV_out_2, Magma_DEV, A.num_rows, b.num_cols * 3, c_zero, queue ));
+    
+    CHECK( magma_zvinit( &d1, Magma_DEV, A.num_rows, b.num_cols * 4, c_zero, queue ));
+    CHECK( magma_zvinit( &d2, Magma_DEV, A.num_rows, b.num_cols * 4, c_zero, queue ));
+    CHECK( magma_zvinit( &skp, Magma_CPU, 4, 1, c_zero, queue ));
     
     // QMR
     CHECK( magma_zvinit( &Q_r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -626,6 +633,10 @@ cleanup:
     magma_zmfree(&SpMV_out_1, queue );
     magma_zmfree(&SpMV_in_2,  queue );
     magma_zmfree(&SpMV_out_2, queue );
+    
+    magma_zmfree(&d1, queue );
+    magma_zmfree(&d2,  queue );
+    magma_zmfree(&skp, queue );
     
     // QMR
     magma_zmfree(&Q_r, queue );
