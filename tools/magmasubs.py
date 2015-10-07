@@ -536,6 +536,7 @@ subs = {
     ('sgesellcm',      'dgesellcm',      'cgesellcm',      'zgesellcm'       ),
     ('smgesellcm',     'dmgesellcm',     'cmgesellcm',     'zmgesellcm'      ),
     ('smdot',          'dmdot',          'cmdot',          'zmdot'           ),
+    ('smzdotc',        'dmzdotc',        'cmzdotc',        'zmzdotc'         ),
     ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
     ('mkl_scsrmm',     'mkl_dcsrmm',     'mkl_ccsrmm',     'mkl_zcsrmm'      ),
