@@ -382,7 +382,7 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v.dval, 1 );
 
-    /*    
+        
             //QMR: epsilon = q' * pt;
         Q_epsilon = magma_zdotc(dofs, SpMV_in_2.dval, 1, SpMV_out_1.dval, 1);
         Q_beta = Q_epsilon / Q_delta;
@@ -391,7 +391,7 @@ magma_zbombard_merge(
         C_rho_l = C_rho;
             //BiCGSTAB
          B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+2*dofs, 1 );
-*/
+/*
         magma_zmzdotc(
         b.num_rows,  
         SpMV_in_2.dval, 
@@ -414,7 +414,7 @@ magma_zbombard_merge(
         B_alpha = skp.val[2];
         
         Q_beta = Q_epsilon / Q_delta;
-        C_rho_l = C_rho;
+        C_rho_l = C_rho;*/
         
             //QMR: v = pt - beta * v
             //QMR: y = v
