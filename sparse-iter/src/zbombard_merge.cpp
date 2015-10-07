@@ -553,6 +553,12 @@ magma_zbombard_merge(
     skp.val,
     queue );
         
+    magma_zprint_vector(d1, 0, 3, queue);
+    magma_zprint_vector(d2, 0, 3, queue);
+    magma_zprint_vector(d1, dofs, 3, queue);
+    magma_zprint_vector(d2, dofs, 3, queue);
+    
+    
 Q_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[0]));
 C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
 B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
