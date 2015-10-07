@@ -474,9 +474,24 @@ magma_zbombard(
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
-    
+        
     // copy back the best solver
-    magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
+    switch ( flag ) {
+        case 1:
+            printf("%% MQR fastest solver.\n");
+            magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
+            break;
+       case 2:
+            printf("%% CGS fastest solver.\n");
+            magma_zcopy( dofs, C_x.dval, 1, x->dval, 1 ); 
+            break;
+       case 3:
+            printf("%% BiCGSTAB fastest solver.\n");
+            magma_zcopy( dofs, B_x.dval, 1, x->dval, 1 ); 
+            break;
+    }
+
+
     
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;

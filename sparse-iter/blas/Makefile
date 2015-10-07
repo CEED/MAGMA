@@ -28,12 +28,13 @@ ZSRC := \
 	zlobpcg_residuals.cu	\
 	zlobpcg_maxpy.cu		\
 	zmdot.cu				\
-	zmergebicgstab.cu		\
 	zmergebicgstab2.cu		\
+    zmergebicgstab3.cu		\
     zmergeidr.cu            \
 	zmergecg.cu				\
     zmergecgs.cu		    \
     zmergeqmr.cu		    \
+    zmergebicgstab.cu		\
     zmergetfqmr.cu		    \
 	zmgecsrmv.cu			\
 	zmgeellmv.cu			\

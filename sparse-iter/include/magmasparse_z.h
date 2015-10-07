@@ -1652,6 +1652,38 @@ magma_zqmr_5(
     magma_queue_t queue );
 
 magma_int_t
+magma_zbicgstab_1(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex rho,
+    magmaDoubleComplex psi,
+    magmaDoubleComplex_ptr y, 
+    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr w,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zbicgstab_2(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_ptr r,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr s, 
+    magma_queue_t queue );
+
+magma_int_t
+magma_zbicgstab_3(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr pt,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr y,
+    magma_queue_t queue );
+
+magma_int_t
 magma_ztfqmr_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
