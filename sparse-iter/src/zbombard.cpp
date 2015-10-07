@@ -226,10 +226,18 @@ magma_zbombard(
         C_rho = magma_zdotc(dofs, C_r.dval, 1, r_tld.dval, 1);
         
             // BiCGSTAB
-        B_rho_old = B_rho_new;    
-        B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
-        B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
-
+        //B_rho_old = B_rho_new;    
+        //B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
+        //B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
+        magma_zbicgstab_1(  
+            b.num_rows, 
+            b.num_cols, 
+            B_beta,
+            B_omega,
+            B_r, 
+            B_v,
+            B_p,
+            queue );
 
         
         if( solver_par->numiter == 1 ){
