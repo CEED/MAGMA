@@ -430,12 +430,22 @@ magma_zbicgstab_2(
         queue );
         
             // BiCGSTAB
-        magma_zaxpy( dofs, B_alpha, B_p.dval, 1 , B_x.dval, 1 );     // x=x+alpha*p
-        magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
-
-        magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
-        magma_zaxpy( dofs, c_mone * B_omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
-        
+       //magma_zaxpy( dofs, B_alpha, B_p.dval, 1 , B_x.dval, 1 );     // x=x+alpha*p
+       //magma_zaxpy( dofs, B_omega, B_s.dval, 1 , B_x.dval, 1 );     // x=x+omega*s
+       //
+       //magma_zcopy( dofs, B_s.dval, 1 , B_r.dval, 1 );             // r=s
+       //magma_zaxpy( dofs, c_mone * B_omega, B_t.dval, 1 , B_r.dval, 1 ); // r=r-omega*t
+        magma_zbicgstab_3(  
+    b.num_rows, 
+    b.num_cols, 
+    B_alpha,
+    B_omega,
+    B_p.dval,
+    B_s.dval,
+    B_t.dval,
+    B_x.dval,
+    B_r.dval,
+    queue );
             //QMR: psi = norm(z);
         Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
         

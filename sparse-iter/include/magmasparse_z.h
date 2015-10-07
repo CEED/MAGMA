@@ -1655,12 +1655,11 @@ magma_int_t
 magma_zbicgstab_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleComplex rho,
-    magmaDoubleComplex psi,
-    magmaDoubleComplex_ptr y, 
-    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr r, 
     magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr w,
+    magmaDoubleComplex_ptr p,
     magma_queue_t queue );
 
 magma_int_t
@@ -1677,10 +1676,13 @@ magma_int_t
 magma_zbicgstab_3(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr pt,
-    magmaDoubleComplex_ptr v,
-    magmaDoubleComplex_ptr y,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr s,
+    magmaDoubleComplex_ptr t,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_ptr r,
     magma_queue_t queue );
 
 magma_int_t
