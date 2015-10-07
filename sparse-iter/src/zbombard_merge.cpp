@@ -181,7 +181,7 @@ magma_zbombard_merge(
     magma_zcopy( dofs, r_tld.dval, 1, B_r.dval, 1 );   
     magma_zcopy( dofs, x->dval, 1, B_x.dval, 1 ); 
     CHECK( magma_z_spmv( c_one, A, B_r, c_zero, B_v, queue ));     
-
+    magma_zcopy( dofs, B_v, 1, SpMV_out_1.dval+2*dofs, 1 );
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
@@ -248,7 +248,7 @@ magma_zbombard_merge(
         if( solver_par->numiter == 1 ){
                 //QMR: p = y;
                 //QMR: q = z;
-            magma_zcopy( dofs, Q_y.dval, 1, Q_p.dval, 1 );
+            magma_zcopy( dofs, Q_y.dval, 1, SpMV_in_1.dval, 1 );
             magma_zcopy( dofs, Q_z.dval, 1, SpMV_in_2.dval, 1 );
             
                 //QMR: u = r;
@@ -258,7 +258,7 @@ magma_zbombard_merge(
             b.num_cols, 
             C_r.dval,
             C_u.dval,
-            C_p.dval,
+            SpMV_in_1.dval+dofs,
             queue );
         }
         else{
@@ -276,7 +276,7 @@ magma_zbombard_merge(
             Q_rde,
             Q_y.dval,
             Q_z.dval,
-            Q_p.dval, 
+            SpMV_in_1.dval, 
             SpMV_in_2.dval, 
             queue );
             
@@ -289,7 +289,7 @@ magma_zbombard_merge(
             C_r.dval,
             C_q.dval, 
             C_u.dval,
-            C_p.dval,
+            SpMV_in_1.dval+dofs,
             queue );
         }
             // BiCGSTAB: p = r + beta * ( p - omega * v )
@@ -299,8 +299,8 @@ magma_zbombard_merge(
         B_beta,
         B_omega,
         B_r.dval, 
-        B_v.dval,
-        B_p.dval,
+        SpMV_out_1.dval+2*dofs,
+        SpMV_in_1.dval+2*dofs,
         queue );
 /*
         //QMR
@@ -312,27 +312,27 @@ magma_zbombard_merge(
         */
         
         // gather everything for a block-SpMV
-        magma_zcopy( dofs, Q_p.dval, 1, SpMV_in_1.dval          , 1 );
-        magma_zcopy( dofs, C_p.dval, 1, SpMV_in_1.dval+dofs     , 1 );
-        magma_zcopy( dofs, B_p.dval, 1, SpMV_in_1.dval+2*dofs   , 1 );
+        //magma_zcopy( dofs, Q_p.dval, 1, SpMV_in_1.dval          , 1 );
+        //magma_zcopy( dofs, C_p.dval, 1, SpMV_in_1.dval+dofs     , 1 );
+        //magma_zcopy( dofs, B_p.dval, 1, SpMV_in_1.dval+2*dofs   , 1 );
         
         // block SpMV
         CHECK( magma_z_spmv( c_one, A, SpMV_in_1, c_zero, SpMV_out_1, queue ));
         
         // scatter results
-        magma_zcopy( dofs, SpMV_out_1.dval          , 1, Q_pt.dval, 1 );
-        magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat.dval, 1 );
-        magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v.dval, 1 );
+        //magma_zcopy( dofs, SpMV_out_1.dval          , 1, Q_pt.dval, 1 );
+        //magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat.dval, 1 );
+        //magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v.dval, 1 );
 
         
             //QMR: epsilon = q' * pt;
-        Q_epsilon = magma_zdotc(dofs, SpMV_in_2.dval, 1, Q_pt.dval, 1);
+        Q_epsilon = magma_zdotc(dofs, SpMV_in_2.dval, 1, SpMV_out_1.dval, 1);
         Q_beta = Q_epsilon / Q_delta;
             //CGS: alpha = r_tld' * v_hat
-        C_alpha = C_rho / magma_zdotc(dofs, r_tld.dval, 1, C_v_hat.dval, 1);
+        C_alpha = C_rho / magma_zdotc(dofs, r_tld.dval, 1, SpMV_out_1.dval+dofs, 1);
         C_rho_l = C_rho;
             //BiCGSTAB
-         B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, B_v.dval, 1 );
+         B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+2*dofs, 1 );
 
         
             //QMR: v = pt - beta * v
@@ -341,7 +341,7 @@ magma_zbombard_merge(
         b.num_rows, 
         b.num_cols, 
         Q_beta,
-        Q_pt.dval,
+        SpMV_out_1.dval,
         Q_v.dval,
         Q_y.dval,
         queue );
@@ -352,7 +352,7 @@ magma_zbombard_merge(
         b.num_rows, 
         b.num_cols, 
         C_alpha,
-        C_v_hat.dval,
+        SpMV_out_1.dval+dofs.dval,
         C_u.dval, 
         C_q.dval,
         SpMV_in_2.dval+dofs, 
@@ -364,7 +364,7 @@ magma_zbombard_merge(
         b.num_cols, 
         B_alpha,
         B_r.dval,
-        B_v.dval,
+        SpMV_out_1.dval+2*dofs,
         SpMV_in_2.dval+2*dofs, 
         queue );
             
@@ -423,8 +423,8 @@ magma_zbombard_merge(
             b.num_rows, 
             b.num_cols, 
             Q_eta,
-            Q_p.dval,
-            Q_pt.dval,
+            SpMV_in_1.dval,
+            SpMV_out_1.dval,
             Q_d.dval, 
             Q_s.dval, 
             Q_x.dval, 
@@ -444,8 +444,8 @@ magma_zbombard_merge(
             b.num_cols, 
             Q_eta,
             Q_pds,
-            Q_p.dval,
-            Q_pt.dval,
+            SpMV_in_1.dval,
+            SpMV_out_1.dval,
             Q_d.dval, 
             Q_s.dval, 
             Q_x.dval, 
@@ -473,7 +473,7 @@ magma_zbombard_merge(
         b.num_cols, 
         B_alpha,
         B_omega,
-        B_p.dval,
+        SpMV_in_1.dval+2*dofs,
         SpMV_in_2.dval+2*dofs,
         SpMV_out_2.dval+2*dofs,
         B_x.dval,
