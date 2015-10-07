@@ -480,36 +480,21 @@ magma_zbombard_merge(
             //QMR: v = y / rho
             //QMR: y = y / rho
             //QMR: w = wt / psi
-            //QMR: z = z / psi
-       /*     
-                    // QMR: wt = A' * q - beta' * w
-        magma_zaxpy(dofs, - MAGMA_Z_CNJG( Q_beta ), Q_w.dval, 1, SpMV_out_2.dval, 1);  
-                    // no precond: z = wt
-        magma_zcopy( dofs, SpMV_out_2.dval, 1, Q_z.dval, 1 );
-        
-        magma_zqmr_1(  
+            //QMR: z = z / psi    
+            //QMR: wt = A' * q - beta' * w
+            //QMR: no precond: z = wt
+        magma_zqmr_6(  
         b.num_rows, 
         b.num_cols, 
+        Q_beta,
         Q_rho,
         Q_psi,
         Q_y.dval, 
         Q_z.dval,
         Q_v.dval,
         Q_w.dval,
+        SpMV_out_2.dval,
         queue );
-        */
-magma_zqmr_6(  
-    b.num_rows, 
-    b.num_cols, 
-    Q_beta,
-    Q_rho,
-    Q_psi,
-    Q_y.dval, 
-    Q_z.dval,
-    Q_v.dval,
-    Q_w.dval,
-    SpMV_out_2.dval,
-    queue );
         
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
