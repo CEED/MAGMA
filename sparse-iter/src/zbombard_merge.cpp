@@ -286,7 +286,7 @@ magma_zbombard_merge(
         Q_z.dval, 
         Q_y.dval,
         r_tld.dval, 
-        C_r,
+        C_r.dval,
         r_tld.dval, 
         B_r.dval,
         r_tld.dval, 
