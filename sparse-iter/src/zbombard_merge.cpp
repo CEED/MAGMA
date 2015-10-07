@@ -438,6 +438,28 @@ magma_zbombard_merge(
         B_omega = magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_in_2.dval+2*dofs, 1 )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_out_2.dval+2*dofs, 1 );
 
+        magma_zmzdotc(
+        b.num_rows,  
+        Q_y.dval, 
+        Q_y.dval,
+        Q_z.dval, 
+        Q_z.dval,
+        SpMV_out_2.dval+2*dofs, 
+        SpMV_in_2.dval+2*dofs,
+        SpMV_out_2.dval+2*dofs, 
+        SpMV_out_2.dval+2*dofs,
+        d1.dval,
+        d2.dval,
+        skp.val,
+        queue );
+        
+    
+    
+        Q_rho = skp.val[0];
+        Q_psi = skp.val[1];
+        B_omega = skp.val[2]/skp.val[3];
+                   
+                   
         
         // QMR
         Q_thet1 = Q_thet;        
@@ -538,34 +560,26 @@ magma_zbombard_merge(
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
         B_res = magma_dznrm2( dofs, B_r.dval, 1 );
         */
-    magma_zmzdotc(
-    b.num_rows,  
-    Q_r.dval, 
-    Q_r.dval,
-    C_r.dval, 
-    C_r.dval,
-    B_r.dval, 
-    B_r.dval,
-    B_r.dval, 
-    B_r.dval,
-    d1.dval,
-    d2.dval,
-    skp.val,
-    queue );
+        magma_zmzdotc(
+        b.num_rows,  
+        Q_r.dval, 
+        Q_r.dval,
+        C_r.dval, 
+        C_r.dval,
+        B_r.dval, 
+        B_r.dval,
+        B_r.dval, 
+        B_r.dval,
+        d1.dval,
+        d2.dval,
+        skp.val,
+        queue );
         
-    magma_zprint_vector(d1, 0, 3, queue);
-    magma_zprint_vector(d2, 0, 3, queue);
-    magma_zprint_vector(d1, dofs, 3, queue);
-    magma_zprint_vector(d2, dofs, 3, queue);
-    magma_zprint_vector(d1, 2*dofs, 3, queue);
-    magma_zprint_vector(d2, 2*dofs, 3, queue);
-    magma_zprint_vector(d1, 3*dofs, 3, queue);
-    magma_zprint_vector(d2, 3*dofs, 3, queue);
     
     
-Q_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[0]));
-C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
-B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
+        Q_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[0]));
+        C_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[1]));
+        B_res = MAGMA_Z_ABS(magma_zsqrt(skp.val[2]));
         
         
         printf(" %e   %e   %e\n", Q_res, C_res, B_res);
