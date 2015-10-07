@@ -515,3 +515,119 @@ magma_zqmr_5(
    return MAGMA_SUCCESS;
 }
 
+
+__global__ void
+magma_zqmr_6_kernel(  
+    int num_rows, 
+    int num_cols, 
+    magmaDoubleComplex beta,
+    magmaDoubleComplex rho,
+    magmaDoubleComplex psi,
+    magmaDoubleComplex *y, 
+    magmaDoubleComplex *z,
+    magmaDoubleComplex *v,
+    magmaDoubleComplex *wt,
+    magmaDoubleComplex *w)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i<num_rows ) {
+        for( int j=0; j<num_cols; j++ ){
+            
+            magmaDoubleComplex wttmp = wt[ i+j*num_rows ] 
+                                - MAGMA_Z_CNJG( beta ) * w[ i+j*num_rows ];
+                                
+            wt[ i+j*num_rows ] = wttmp;
+            
+            magmaDoubleComplex ztmp = wttmp / psi;
+            z[ i+j*num_rows ] = ztmp;
+            w[ i+j*num_rows ] = ztmp;
+            
+            magmaDoubleComplex ytmp = y[ i+j*num_rows ] / rho;
+            y[ i+j*num_rows ] = ytmp;
+            v[ i+j*num_rows ] = ytmp;
+            
+        }
+    }
+}
+
+/**
+    Purpose
+    -------
+
+    Mergels multiple operations into one kernel:
+    
+    wt = wt - conj(beta) * w
+    v = y / rho
+    y = y / rho
+    w = wt / psi
+    z = wt / psi
+    
+    @param[in]
+    num_rows    magma_int_t
+                dimension m
+                
+    @param[in]
+    num_cols    magma_int_t
+                dimension n
+                
+    @param[in]
+    beta        magmaDoubleComplex
+                scalar
+                    
+    @param[in]
+    rho         magmaDoubleComplex
+                scalar
+                
+    @param[in]
+    psi         magmaDoubleComplex
+                scalar
+                
+    @param[in,out]
+    y           magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in,out]
+    z           magmaDoubleComplex_ptr 
+                vector
+                
+    @param[in,out]
+    v           magmaDoubleComplex_ptr 
+                vector
+
+    @param[in,out]
+    w           magmaDoubleComplex_ptr 
+                vector
+                    
+    @param[in,out]
+    wt          magmaDoubleComplex_ptr 
+                vector
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zgegpuk
+    ********************************************************************/
+
+extern "C" 
+magma_int_t
+magma_zqmr_6(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex beta,
+    magmaDoubleComplex rho,
+    magmaDoubleComplex psi,
+    magmaDoubleComplex_ptr y, 
+    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr w,
+    magmaDoubleComplex_ptr wt,
+    magma_queue_t queue )
+{
+    dim3 Bs( BLOCK_SIZE );
+    dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
+    magma_zqmr_6_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, rho, psi,
+                     y, z, v, w, wt );
+
+   return MAGMA_SUCCESS;
+}

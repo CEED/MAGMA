@@ -1652,6 +1652,20 @@ magma_zqmr_5(
     magma_queue_t queue );
 
 magma_int_t
+magma_zqmr_6(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex beta,
+    magmaDoubleComplex rho,
+    magmaDoubleComplex psi,
+    magmaDoubleComplex_ptr y, 
+    magmaDoubleComplex_ptr z,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr w,
+    magmaDoubleComplex_ptr wt,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zbicgstab_1(  
     magma_int_t num_rows, 
     magma_int_t num_cols, 

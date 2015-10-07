@@ -394,7 +394,7 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+2*dofs   , 1, B_t.dval, 1 );        
         
-        
+        // BiCGSTAB
         B_omega = magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_in_2.dval+2*dofs, 1 )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_out_2.dval+2*dofs, 1 );
 
@@ -481,8 +481,8 @@ magma_zbombard_merge(
             //QMR: y = y / rho
             //QMR: w = wt / psi
             //QMR: z = z / psi
-            
-                    // QMR
+       /*     
+                    // QMR: wt = A' * q - beta' * w
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( Q_beta ), Q_w.dval, 1, SpMV_out_2.dval, 1);  
                     // no precond: z = wt
         magma_zcopy( dofs, SpMV_out_2.dval, 1, Q_z.dval, 1 );
@@ -497,6 +497,19 @@ magma_zbombard_merge(
         Q_v.dval,
         Q_w.dval,
         queue );
+        */
+magma_zqmr_6(  
+    b.num_rows, 
+    b.num_cols, 
+    Q_beta,
+    Q_rho,
+    Q_psi,
+    Q_y.dval, 
+    Q_z.dval,
+    Q_v.dval,
+    Q_w.dval,
+    Q_wt.dval,
+    queue );
         
         Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
         C_res = magma_dznrm2( dofs, C_r.dval, 1 );
