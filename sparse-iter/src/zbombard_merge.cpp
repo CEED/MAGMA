@@ -553,9 +553,9 @@ magma_zbombard_merge(
     skp.val,
     queue );
         
-Q_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[0]));
-C_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[1]));
-B_res = MAGMA_Z_ABS(mamga_z_sqrt(skp.val[2]));
+Q_res = MAGMA_Z_ABS(mamga_zsqrt(skp.val[0]));
+C_res = MAGMA_Z_ABS(mamga_zsqrt(skp.val[1]));
+B_res = MAGMA_Z_ABS(mamga_zsqrt(skp.val[2]));
         
         
         printf(" %e   %e   %e\n", Q_res, C_res, B_res);
