@@ -74,13 +74,16 @@ magma_zbicgstab_merge(
     magma_int_t dofs = A.num_rows * b.num_cols;
 
     // workspace
-    magma_z_matrix r={Magma_CSR}, rr={Magma_CSR}, p={Magma_CSR}, v={Magma_CSR}, s={Magma_CSR}, t={Magma_CSR};
+    magma_z_matrix r={Magma_CSR}, rr={Magma_CSR}, p={Magma_CSR}, v={Magma_CSR}, 
+    s={Magma_CSR}, t={Magma_CSR}, d1={Magma_CSR}, d2={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &rr,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &s, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d1, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d2, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     
     // solver variables
@@ -129,7 +132,16 @@ magma_zbicgstab_merge(
     {
         solver_par->numiter++;
 
-        rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1 );  // rho=<rr,r>
+        
+        magma_zmzdotc_one(
+        r.num_rows,  
+        rr.dval, 
+        r.dval,
+        d1.dval,
+        d2.dval,
+        &rho_new,
+        queue );
+        //rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1 );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
         
         // p = r + beta * ( p - omega * v )
@@ -240,6 +252,8 @@ cleanup:
     magma_zmfree(&v, queue );
     magma_zmfree(&s, queue );
     magma_zmfree(&t, queue );
+    magma_zmfree(&d1, queue );
+    magma_zmfree(&d2, queue );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
