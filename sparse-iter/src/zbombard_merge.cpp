@@ -658,7 +658,7 @@ magma_zbombard_merge(
     // copy back the best solver
     switch ( flag ) {
         case 1:
-            printf("%% MQR fastest solver.\n");
+            printf("%% QMR fastest solver.\n");
             magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
             break;
        case 2:
