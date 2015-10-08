@@ -207,6 +207,15 @@ magma_zsolverinfo(
                         "======%%\n"); break;
         }
     }
+    else{
+        printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+            printf("%%======================================================="
+                        "======%%\n");
+        printf("   %4d          %e          %f\n",
+        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime );
+        printf("%%======================================================="
+        "======%%\n");
+    }
                 
     printf("\n%%======================================================="
         "======%%\n");
@@ -269,7 +278,6 @@ magma_zsolverinfo(
     printf("%%    iterations: %4d\n", (int) (solver_par->numiter) );
     printf("%%    exact final residual: %e\n%%    runtime: %.4f sec\n",
         solver_par->final_res, solver_par->runtime);
-
 cleanup:
     printf("%%======================================================="
         "======%%\n");

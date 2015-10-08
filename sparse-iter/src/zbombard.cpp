@@ -631,10 +631,10 @@ magma_zbombard(
     
     tempo2 = magma_sync_wtime( queue );
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
-    double Q_residual;
-    CHECK(  magma_zresidualvec( A, b, *x, &Q_r, &Q_residual, queue));
-    solver_par->iter_res = Q_res;
-    solver_par->final_res = Q_residual;
+    double residual;
+    CHECK(  magma_zresidualvec( A, b, *x, &r_tld, &residual, queue));
+    solver_par->iter_res = res;
+    solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
         info = MAGMA_SUCCESS;
