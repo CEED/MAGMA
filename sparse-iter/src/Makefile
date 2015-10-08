@@ -50,8 +50,8 @@ ZSRC += \
 	zfgmres.cpp 		\
 	zpbicgstab.cpp		\
 	zpidr.cpp	\
-	zbombard.cpp    \
-    zbombard_merge.cpp    \
+	zbombard.cpp	\
+	zbombard_merge.cpp	\
 
 # Krylov space eigen-solvers
 ZSRC += \
