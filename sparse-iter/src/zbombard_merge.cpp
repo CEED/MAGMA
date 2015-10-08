@@ -75,18 +75,18 @@ magma_zbombard_merge(
     
         // set asynchronous kernel queues
     printf("%% Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
-    cudaStreamCreateWithFlags( &(queue), cudaStreamNonBlocking );
+    cudaStreamCreateWithFlags( &(queues[0]), cudaStreamNonBlocking );
     if ( queue != squeue ) {
-        queue = queue;
+        queues[1] = queue;
         q1flag = 0;
     } else {
-        magma_queue_create( &(queue) );
-        queue = queue;
+        magma_queue_create( &(queues[1]) );
+        queue = queues[1];
         q1flag = 1;
     }
-    magma_queue_create( &(queue) );
-    for (int i = 0; i < nqueues; ++i ) {
-        printf("%% Kernel queue #%d = %p\n", i, (void *)queues[i]);
+    magma_queue_create( &(queues[2]) );
+    for ( i = 0; i < nqueues; ++i ) {
+        printD("Kernel queue #%d = %p\n", i, (void *)queues[i]);
     }
 
     // set to Q1
