@@ -26,7 +26,7 @@ magma_zmzdotc_one_kernel_1(
     int Gs,
     int n, 
     magmaDoubleComplex * v0,
-    magmaDoubleComplex * w0
+    magmaDoubleComplex * w0,
     magmaDoubleComplex * vtmp)
 {
     extern __shared__ magmaDoubleComplex temp[]; 
