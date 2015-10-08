@@ -1826,6 +1826,17 @@ magma_zmzdotc(
     magmaDoubleComplex_ptr skp,
     magma_queue_t queue );
 
+
+magma_int_t
+magma_zmzdotc_one(
+    int n,  
+    magmaDoubleComplex_ptr v0, 
+    magmaDoubleComplex_ptr w0,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
 magma_int_t
 magma_zbicgmerge_spmv1( 
     magma_z_matrix A,
