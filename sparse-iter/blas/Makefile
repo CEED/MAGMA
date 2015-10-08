@@ -41,7 +41,7 @@ ZSRC := \
 	zmgeelltmv.cu			\
 	zmgesellcmmv.cu			\
 	zmzdotc.cu		\
-	zmzdotc.cu	\
+	zmzdotc_one.cu		\
 	zpipelinedgmres.cu		\
 
 
