@@ -172,7 +172,7 @@ magma_zbicgstab_merge(
         p.dval,
         s.dval,
         t.dval,
-        x.dval,
+        x->dval,
         r.dval,
         queue );
         
