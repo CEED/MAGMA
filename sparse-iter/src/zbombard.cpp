@@ -76,7 +76,8 @@ magma_zbombard(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one,
+                        tmpval, tmpval2;
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
     
@@ -99,7 +100,7 @@ magma_zbombard(
     magma_z_matrix Q_r={Magma_CSR}, r_tld={Magma_CSR}, Q_x={Magma_CSR},
                     Q_v={Magma_CSR}, Q_w={Magma_CSR}, Q_wt={Magma_CSR},
                     Q_d={Magma_CSR}, Q_s={Magma_CSR}, Q_z={Magma_CSR}, Q_q={Magma_CSR}, 
-                    Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR};
+                    Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR}, d1={Magma_CSR}, d2={Magma_CSR};
     // CGS
     magma_z_matrix C_r={Magma_CSR}, C_rt={Magma_CSR}, C_x={Magma_CSR},
                     C_p={Magma_CSR}, C_q={Magma_CSR}, C_u={Magma_CSR}, C_v={Magma_CSR},  C_t={Magma_CSR},
@@ -110,6 +111,10 @@ magma_zbombard(
 
                     
     CHECK( magma_zvinit( &r_tld, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d1, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d2, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+
+    
     // QMR
     CHECK( magma_zvinit( &Q_r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -220,14 +225,38 @@ magma_zbombard(
         solver_par->numiter++;
         
             //QMR: delta = z' * y;
-        Q_delta = magma_zdotc(dofs, Q_z.dval, 1, Q_y.dval, 1);
+        //Q_delta = magma_zdotc(dofs, Q_z.dval, 1, Q_y.dval, 1);
+        magma_zmzdotc_one(
+        b.num_rows,  
+        Q_z.dval, 
+        Q_y.dval,
+        d1.dval,
+        d2.dval,
+        &Q_delta,
+        queue );
         
             //CGS: rho = r' * r_tld
-        C_rho = magma_zdotc(dofs, C_r.dval, 1, r_tld.dval, 1);
-        
+        //C_rho = magma_zdotc(dofs, C_r.dval, 1, r_tld.dval, 1);
+        magma_zmzdotc_one(
+        b.num_rows,  
+        C_r.dval, 
+        r_tld.dval,
+        d1.dval,
+        d2.dval,
+        &C_rho,
+        queue );
+                
             // BiCGSTAB
         B_rho_old = B_rho_new;    
-        B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
+        //B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1 );  // rho=<rr,r>
+        magma_zmzdotc_one(
+        b.num_rows,  
+        B_r.dval, 
+        r_tld.dval,
+        d1.dval,
+        d2.dval,
+        &C_rho,
+        queue );
         B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
 
 
@@ -299,14 +328,39 @@ magma_zbombard(
 
         
             //QMR: epsilon = q' * pt;
-        Q_epsilon = magma_zdotc(dofs, Q_q.dval, 1, Q_pt.dval, 1);
+        //Q_epsilon = magma_zdotc(dofs, Q_q.dval, 1, Q_pt.dval, 1);
+        magma_zmzdotc_one(
+        b.num_rows,  
+        Q_q.dval, 
+        Q_pt.dval,
+        d1.dval,
+        d2.dval,
+        &Q_epsilon,
+        queue );
         Q_beta = Q_epsilon / Q_delta;
             //CGS: alpha = r_tld' * v_hat
-        C_alpha = C_rho / magma_zdotc(dofs, r_tld.dval, 1, C_v_hat.dval, 1);
+        //C_alpha = C_rho / magma_zdotc(dofs, r_tld.dval, 1, C_v_hat.dval, 1);
+        magma_zmzdotc_one(
+        b.num_rows,  
+        C_v_hat.dval, 
+        r_tld.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        C_alpha = C_rho / tmpval;
         C_rho_l = C_rho;
             //BiCGSTAB
-         B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, B_v.dval, 1 );
-
+        //B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, B_v.dval, 1 );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        B_v.dval, 
+        r_tld.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        B_alpha = B_rho_new / tmpval;
         
             //QMR: v = pt - beta * v
             //QMR: y = v
@@ -344,7 +398,16 @@ magma_zbombard(
         
         Q_rho1 = Q_rho;      
             //QMR rho = norm(y);
-        Q_rho = magma_zsqrt( magma_zdotc(dofs, Q_y.dval, 1, Q_y.dval, 1) );
+        //Q_rho = magma_zsqrt( magma_zdotc(dofs, Q_y.dval, 1, Q_y.dval, 1) );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        Q_y.dval, 
+        Q_y.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        Q_rho = magma_zsqrt( tmpval );
         
             //QMR wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
@@ -353,9 +416,28 @@ magma_zbombard(
             //BiCGSTAB
         CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
         
-        B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1 )   // omega = <s,t>/<t,t>
-                   / magma_zdotc( dofs, B_t.dval, 1, B_t.dval, 1 );
-        // QMR
+        //BiCGSTAB
+        //B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1 )   // omega = <s,t>/<t,t>
+        //           / magma_zdotc( dofs, B_t.dval, 1, B_t.dval, 1 );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        B_s.dval, 
+        B_t.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        B_t.dval, 
+        B_t.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval2,
+        queue );
+        B_omega = tmpval / tmpval2;
+                   
+       // QMR
         magma_zaxpy(dofs, - MAGMA_Z_CNJG( Q_beta ), Q_w.dval, 1, Q_wt.dval, 1);  
                     // no precond: z = wt
         magma_zcopy( dofs, Q_wt.dval, 1, Q_z.dval, 1 );
@@ -439,6 +521,15 @@ magma_zbombard(
         
             //QMR: psi = norm(z);
         Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        Q_z.dval, 
+        Q_z.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        Q_psi = magma_zsqrt( tmpval );
         
             //QMR: v = y / rho
             //QMR: y = y / rho
@@ -455,9 +546,37 @@ magma_zbombard(
         Q_w.dval,
         queue );
         
-        Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
-        C_res = magma_dznrm2( dofs, C_r.dval, 1 );
-        B_res = magma_dznrm2( dofs, B_r.dval, 1 );
+        //Q_res = magma_dznrm2( dofs, Q_r.dval, 1 );
+        //C_res = magma_dznrm2( dofs, C_r.dval, 1 );
+        //B_res = magma_dznrm2( dofs, B_r.dval, 1 );
+        magma_zmzdotc_one(
+        b.num_rows,  
+        Q_r.dval, 
+        Q_r.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        Q_res = MAGMA_Z_ABS(magma_zsqrt( tmpval ));
+        magma_zmzdotc_one(
+        b.num_rows,  
+        C_r.dval, 
+        C_r.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        C_res = MAGMA_Z_ABS(magma_zsqrt( tmpval ));
+        magma_zmzdotc_one(
+        b.num_rows,  
+        B_r.dval, 
+        B_r.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        B_res = MAGMA_Z_ABS(magma_zsqrt( tmpval ));
+        
             // printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
@@ -548,8 +667,10 @@ magma_zbombard(
     
 cleanup:
     magma_zmfree(&r_tld, queue );
+    magma_zmfree(&d1, queue );
+    magma_zmfree(&d2, queue );
     // QMR
-    magma_zmfree(&Q_r, queue );
+    magma_zmfree(&Q_r,  queue );
     magma_zmfree(&Q_v,  queue );
     magma_zmfree(&Q_w,  queue );
     magma_zmfree(&Q_wt, queue );
@@ -562,14 +683,14 @@ cleanup:
     magma_zmfree(&Q_y,  queue );
     magma_zmfree(&Q_x,  queue );
     // CGS
-    magma_zmfree(&C_r, queue );
+    magma_zmfree(&C_r,  queue );
     magma_zmfree(&C_rt, queue );
-    magma_zmfree(&C_x, queue );
-    magma_zmfree(&C_p, queue );
-    magma_zmfree(&C_q, queue );
-    magma_zmfree(&C_u, queue );
-    magma_zmfree(&C_v, queue );
-    magma_zmfree(&C_t, queue );
+    magma_zmfree(&C_x,  queue );
+    magma_zmfree(&C_p,  queue );
+    magma_zmfree(&C_q,  queue );
+    magma_zmfree(&C_u,  queue );
+    magma_zmfree(&C_v,  queue );
+    magma_zmfree(&C_t,  queue );
     magma_zmfree(&C_p_hat, queue );
     magma_zmfree(&C_q_hat, queue );
     magma_zmfree(&C_u_hat, queue );
