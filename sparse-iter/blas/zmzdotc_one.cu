@@ -248,7 +248,7 @@ magma_zmzdotc_one(
     }
     
         // copy vectors to host
-    magma_zgetvector( 4 , aux1, n, skp, 1 );
+    magma_zgetvector( 1 , aux1, 1, skp, 1 );
     
 
    magmablasSetKernelStream( orig_queue );
