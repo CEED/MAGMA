@@ -657,6 +657,12 @@ magma_zbicgstab_merge2(
     magma_queue_t queue );
 
 magma_int_t
+magma_zbicgstab_merge3(
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zpcg(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par, 
