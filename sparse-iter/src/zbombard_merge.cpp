@@ -75,16 +75,16 @@ magma_zbombard_merge(
     
         // set asynchronous kernel queues
     printf("%% Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
-    cudaStreamCreateWithFlags( &(queues[0]), cudaStreamNonBlocking );
+    cudaStreamCreateWithFlags( &(queue), cudaStreamNonBlocking );
     if ( queue != squeue ) {
-        queues[1] = queue;
+        queue = queue;
         q1flag = 0;
     } else {
-        magma_queue_create( &(queues[1]) );
-        queue = queues[1];
+        magma_queue_create( &(queue) );
+        queue = queue;
         q1flag = 1;
     }
-    magma_queue_create( &(queues[2]) );
+    magma_queue_create( &(queue) );
     for (int i = 0; i < nqueues; ++i ) {
         printf("%% Kernel queue #%d = %p\n", i, (void *)queues[i]);
     }
@@ -318,7 +318,7 @@ magma_zbombard_merge(
             C_r.dval,
             C_u.dval,
             SpMV_in_1.dval+dofs,
-            queues[1] );
+            queue );
         }
         else{
             Q_pde = Q_psi * Q_delta / Q_epsilon;
@@ -337,7 +337,7 @@ magma_zbombard_merge(
             Q_z.dval,
             SpMV_in_1.dval, 
             SpMV_in_2.dval, 
-            queues[0] );
+            queue );
             
                   //CGS: u = r + beta*q;
                   //CGS: p = u + beta*( q + beta*p );
@@ -349,7 +349,7 @@ magma_zbombard_merge(
             C_q.dval, 
             C_u.dval,
             SpMV_in_1.dval+dofs,
-            queues[1] );
+            queue );
         }
             // BiCGSTAB: p = r + beta * ( p - omega * v )
         magma_zbicgstab_1(  
@@ -360,7 +360,7 @@ magma_zbombard_merge(
         B_r.dval, 
         SpMV_out_1.dval+2*dofs,
         SpMV_in_1.dval+2*dofs,
-        queues[2] );
+        queue );
         /*
         //QMR
         CHECK( magma_z_spmv( c_one, A, Q_p, c_zero, Q_pt, queue ));
@@ -424,7 +424,7 @@ magma_zbombard_merge(
         SpMV_out_1.dval,
         Q_v.dval,
         Q_y.dval,
-        queues[0] );
+        queue );
         
             //CGS: q = u - alpha v_hat
             //CGS: t = u + q
@@ -436,7 +436,7 @@ magma_zbombard_merge(
         C_u.dval, 
         C_q.dval,
         SpMV_in_2.dval+dofs, 
-        queues[1] );
+        queue );
         
             // BiCGSTAB: s = r - alpha v
         magma_zbicgstab_2(  
@@ -446,7 +446,7 @@ magma_zbombard_merge(
         B_r.dval,
         SpMV_out_1.dval+2*dofs,
         SpMV_in_2.dval+2*dofs, 
-        queues[2] );
+        queue );
             
 
 
@@ -517,7 +517,7 @@ magma_zbombard_merge(
             Q_s.dval, 
             Q_x.dval, 
             Q_r.dval, 
-            queues[0] );
+            queue );
         }
         else{
 
@@ -538,7 +538,7 @@ magma_zbombard_merge(
             Q_s.dval, 
             Q_x.dval, 
             Q_r.dval, 
-            queues[0] );
+            queue );
         }
         
         
@@ -552,7 +552,7 @@ magma_zbombard_merge(
         SpMV_out_2.dval+dofs,
         C_x.dval, 
         C_r.dval,
-        queues[1] );
+        queue );
         
             // BiCGSTAB: x = x + alpha * p + omega * s
             // BiCGSTAB: r = s - omega * t
@@ -566,7 +566,7 @@ magma_zbombard_merge(
         SpMV_out_2.dval+2*dofs,
         B_x.dval,
         B_r.dval,
-        queues[2] );
+        queue );
         
         
 
@@ -619,7 +619,7 @@ magma_zbombard_merge(
         Q_v.dval,
         Q_w.dval,
         SpMV_out_2.dval,
-        queues[0] );
+        queue );
         
           // printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
@@ -759,11 +759,11 @@ cleanup:
     
     
     // destroy asynchronous queues
-    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queue );
     if ( q1flag == 1 ) {
-        magma_queue_destroy( queues[1] );
+        magma_queue_destroy( queue );
     }
-    magma_queue_destroy( queues[2] );
+    magma_queue_destroy( queue );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
