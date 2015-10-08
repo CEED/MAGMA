@@ -759,11 +759,11 @@ cleanup:
     
     
     // destroy asynchronous queues
-    magma_queue_destroy( queue );
+    magma_queue_destroy( queues[0] );
     if ( q1flag == 1 ) {
-        magma_queue_destroy( queue );
+        magma_queue_destroy( queues[1] );
     }
-    magma_queue_destroy( queue );
+    magma_queue_destroy( queues[2] );
 
     magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
