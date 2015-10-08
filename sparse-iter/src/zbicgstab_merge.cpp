@@ -87,7 +87,7 @@ magma_zbicgstab_merge(
 
     
     // solver variables
-    magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
+    magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, tmpval, tmpval2;
     double nom, betanom, nom0, r0, res, nomb;
     //double den;
 
@@ -156,8 +156,18 @@ magma_zbicgstab_merge(
         queue );
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, v, queue ));      // v = Ap
-
-        alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1 );
+        magma_zmzdotc_one(
+        r.num_rows,  
+        rr.dval, 
+        v.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+        
+        
+        alpha = rho_new / tmpval;
+        //alpha = rho_new /magma_zdotc( dofs, rr.dval, 1, v.dval, 1 );
         
         // s = r - alpha v
         magma_zbicgstab_2(  
@@ -170,10 +180,29 @@ magma_zbicgstab_merge(
         queue );
 
 
-        CHECK( magma_z_spmv( c_one, A, s, c_zero, t, queue ));       // t=As
-        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )   // omega = <s,t>/<t,t>
-                   / magma_zdotc( dofs, t.dval, 1, t.dval, 1 );
 
+        CHECK( magma_z_spmv( c_one, A, s, c_zero, t, queue ));       // t=As
+      //  omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )   // omega = <s,t>/<t,t>
+        //           / magma_zdotc( dofs, t.dval, 1, t.dval, 1 );
+                   
+                            magma_zmzdotc_one(
+        r.num_rows,  
+        t.dval, 
+        s.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval,
+        queue );
+                        magma_zmzdotc_one(
+        r.num_rows,  
+        t.dval, 
+        t.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval2,
+        queue );       
+        omega = tmpval / tmpval2;
+                        
         // x = x + alpha * p + omega * s
         // r = s - omega * t
         magma_zbicgstab_3(  
@@ -188,7 +217,18 @@ magma_zbicgstab_merge(
         r.dval,
         queue );
         
-        res = betanom = magma_dznrm2( dofs, r.dval, 1 );
+        
+                        magma_zmzdotc_one(
+        r.num_rows,  
+        r.dval, 
+        r.dval,
+        d1.dval,
+        d2.dval,
+        &tmpval2,
+        queue );     
+        
+        res = betanom = MAGMA_Z_ABS(magma_zsqrt(tmpval2));
+        // magma_dznrm2( dofs, r.dval, 1 );
 
         nom = betanom*betanom;
         rho_old = rho_new;                                    // rho_old=rho
