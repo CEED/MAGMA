@@ -255,7 +255,7 @@ magma_zbombard(
         r_tld.dval,
         d1.dval,
         d2.dval,
-        &C_rho,
+        &B_rho_new,
         queue );
         B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
 
