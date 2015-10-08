@@ -131,6 +131,7 @@ magma_zbicgstab_merge(
     do
     {
         solver_par->numiter++;
+        rho_old = rho_new;                                    // rho_old=rho
 
         
         magma_zmzdotc_one(
@@ -231,7 +232,6 @@ magma_zbicgstab_merge(
         // magma_dznrm2( dofs, r.dval, 1 );
 
         nom = betanom*betanom;
-        rho_old = rho_new;                                    // rho_old=rho
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
