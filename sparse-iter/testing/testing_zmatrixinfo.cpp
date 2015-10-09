@@ -56,7 +56,7 @@ int main(  int argc, char** argv )
         printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n \n");
         printf("%%======================================================="
                         "======%%\n");
-        printf("   %4d          %4d          %4d\n",
+        printf("   %10d          %10d          %10d\n",
         (int) Z.num_rows,(int) Z.nnz, (int) Z.nnz/Z.num_rows );
         printf("%%======================================================="
         "======%%\n");
