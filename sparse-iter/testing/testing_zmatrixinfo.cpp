@@ -40,7 +40,10 @@ int main(  int argc, char** argv )
     
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
-
+    printf("matrixinfo = [ \n");
+    printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n \n");
+    printf("%%======================================================="
+                        "======%%\n");
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
@@ -49,21 +52,18 @@ int main(  int argc, char** argv )
         } else {                        // file-matrix test
             CHECK( magma_z_csr_mtx( &Z,  argv[i], queue ));
         }
-        printf("matrixinfo = [ \n");
-        printf("%%   size (n)   ||   nonzeros (nnz)   ||   nnz/n \n");
-        printf("%%======================================================="
-                        "======%%\n");
+
         printf("   %10d          %10d          %10d\n",
         (int) Z.num_rows,(int) Z.nnz, (int) Z.nnz/Z.num_rows );
-        printf("%%======================================================="
-        "======%%\n");
-        printf("];\n");
-        
+
         magma_zmfree(&Z, queue );
 
         i++;
     }
-
+    printf("%%======================================================="
+    "======%%\n");
+    printf("];\n");
+        
 cleanup:
     magma_zmfree(&Z, queue );
     magma_queue_destroy( queue );
