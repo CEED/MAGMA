@@ -36,7 +36,6 @@ int main(  int argc, char** argv )
     magma_queue_t queue=NULL;
     magma_queue_create( &queue );
     
-    real_Double_t res;
     magma_z_matrix Z={Magma_CSR};
     
     int i=1;
