@@ -37,8 +37,7 @@ int main(  int argc, char** argv )
     magma_queue_create( &queue );
     
     real_Double_t res;
-    magma_z_matrix Z={Magma_CSR}, A={Magma_CSR}, AT={Magma_CSR}, 
-    A2={Magma_CSR}, B={Magma_CSR}, B_d={Magma_CSR};
+    magma_z_matrix Z={Magma_CSR};
     
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
@@ -70,11 +69,6 @@ int main(  int argc, char** argv )
     }
 
 cleanup:
-    magma_zmfree(&AT, queue );
-    magma_zmfree(&A, queue );
-    magma_zmfree(&B, queue );
-    magma_zmfree(&B_d, queue );
-    magma_zmfree(&A2, queue );
     magma_zmfree(&Z, queue );
     magma_queue_destroy( queue );
     TESTING_FINALIZE();
