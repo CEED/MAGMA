@@ -72,7 +72,16 @@ int main(  int argc, char** argv )
 
         printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
                             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
-
+        
+        printf("matrixinfo = [ \n");
+        printf("%%   size   (m x n)     ||   nonzeros (nnz)   ||   nnz/m \n");
+        printf("%%======================================================="
+                            "======%%\n");
+        printf("   %8d  %8d          %10d          %10d\n",
+            (int) A.num_rows, (int) A.num_cols ,(int) A.nnz, (int) A.nnz/A.num_rows );
+        printf("%%======================================================="
+        "======%%\n");
+        printf("];\n");
         // for the eigensolver case
         zopts.solver_par.ev_length = A.num_rows;
         CHECK( magma_zeigensolverinfo_init( &zopts.solver_par, queue ));
