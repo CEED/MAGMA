@@ -41,9 +41,6 @@ int main(  int argc, char** argv )
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
 
-    B.blocksize = zopts.blocksize;
-    B.alignment = zopts.alignment;
-
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
             i++;
