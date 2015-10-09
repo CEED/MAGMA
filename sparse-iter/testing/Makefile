@@ -21,7 +21,7 @@ ZSRC += \
 	testing_zmcompressor.cpp	\
 	testing_zmconverter.cpp		\
 	testing_zsort.cpp	\
-
+	testing_zmatrixinfo.cpp		\
 
 
 # ----------
