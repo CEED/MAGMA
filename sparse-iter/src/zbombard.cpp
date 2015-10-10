@@ -86,6 +86,7 @@ magma_zbombard(
                         Q_thet = c_one, Q_thet1 = c_one, Q_epsilon = c_one, 
                         Q_beta = c_one, Q_delta = c_one, Q_pde = c_one, Q_rde = c_one,
                         Q_gamm = c_one, Q_gamm1 = c_one, Q_psi = c_one;
+                        
     //CGS
     magmaDoubleComplex C_rho, C_rho_l = c_one, C_alpha, C_beta;
     //BiCGSTAB
@@ -97,7 +98,7 @@ magma_zbombard(
     
     // GPU workspace
     // QMR
-    magma_z_matrix Q_r={Magma_CSR}, r_tld={Magma_CSR}, Q_x={Magma_CSR},
+    magma_z_matrix AT = {Magma_CSR}, Q_r={Magma_CSR}, r_tld={Magma_CSR}, Q_x={Magma_CSR},
                     Q_v={Magma_CSR}, Q_w={Magma_CSR}, Q_wt={Magma_CSR},
                     Q_d={Magma_CSR}, Q_s={Magma_CSR}, Q_z={Magma_CSR}, Q_q={Magma_CSR}, 
                     Q_p={Magma_CSR}, Q_pt={Magma_CSR}, Q_y={Magma_CSR}, d1={Magma_CSR}, d2={Magma_CSR};
@@ -164,6 +165,8 @@ magma_zbombard(
     magma_zcopy( dofs, r_tld.dval, 1, Q_wt.dval, 1 );   
     magma_zcopy( dofs, r_tld.dval, 1, Q_z.dval, 1 ); 
     magma_zcopy( dofs, x->dval, 1, Q_x.dval, 1 ); 
+    // transpose the matrix
+    magma_zmtransposeconjugate( A, &AT, queue );
     
     // CGS
     magma_zcopy( dofs, r_tld.dval, 1, C_r.dval, 1 );   
@@ -669,6 +672,8 @@ cleanup:
     magma_zmfree(&r_tld, queue );
     magma_zmfree(&d1, queue );
     magma_zmfree(&d2, queue );
+    magma_zmfree(&AT,  queue );
+    
     // QMR
     magma_zmfree(&Q_r,  queue );
     magma_zmfree(&Q_v,  queue );
