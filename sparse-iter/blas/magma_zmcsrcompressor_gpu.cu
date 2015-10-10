@@ -109,7 +109,7 @@ magma_zmcsrgpu_kernel3( int num_rows,
     Arguments
     ---------
 
-    @param
+    @param[in,out]
     A           magma_z_matrix*
                 input/output matrix
     @param[in]

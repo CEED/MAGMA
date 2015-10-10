@@ -55,10 +55,11 @@ ZSRC += \
 ZSRC += \
 	zcompact.cu				\
 	magma_zmcsrcompressor_gpu.cu	\
-	magma_zdiagcheck.cu		\
-	zgecsrreimsplit.cu        \
-    zgedensereimsplit.cu        \
-	
+	magma_zdiagcheck.cu	\
+	zgecsrreimsplit.cu	\
+	zgedensereimsplit.cu	\
+	magma_zmconjugate.cu	\
+
 # Tester routines
 ZSRC += \
 

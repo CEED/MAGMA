@@ -179,6 +179,17 @@ magma_z_cucsrtranspose(
     magma_z_matrix *B,
     magma_queue_t queue );
 
+magma_int_t
+    magma_zmtransposeconjugate(
+    magma_z_matrix A,
+    magma_z_matrix *B,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmconjugate(
+    magma_z_matrix *A,
+    magma_queue_t queue );
+
 magma_int_t 
 z_transpose_csr( 
     magma_int_t n_rows, 

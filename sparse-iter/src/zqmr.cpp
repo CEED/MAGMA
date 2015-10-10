@@ -111,7 +111,7 @@ magma_zqmr(
     magma_zcopy( dofs, r.dval, 1, z.dval, 1 );  
     
     // transpose the matrix
-    magma_zmtranspose( A, &AT, queue );
+    magma_zmtransposeconjugate( A, &AT, queue );
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
