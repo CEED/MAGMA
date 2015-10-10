@@ -15,7 +15,6 @@
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
- 
 
 /**
     Purpose
@@ -195,12 +194,8 @@ magma_zbombard_merge(
     CHECK( magma_zvinit( &B_s, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &B_t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
-    magma_free( Q_q.dval  ); Q_q.dval  = SpMV_in_2.dval;
-    magma_free( Q_wt.dval ); Q_wt.dval = SpMV_out_2.dval;
-    magma_free( C_t.dval ); C_t.dval = SpMV_in_2.dval+dofs;
-    magma_free( C_rt.dval  ); C_rt.dval  = SpMV_out_2.dval+dofs;
-    magma_free( B_s.dval  ); B_s.dval  = SpMV_in_2.dval+2*dofs;
-    magma_free( B_t.dval  ); B_t.dval  = SpMV_out_2.dval+2*dofs;
+    
+    
     
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r_tld, &nom0, queue));
@@ -463,15 +458,8 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, B_s.dval, 1, SpMV_in_2.dval+2*dofs   , 1 );
 
             // block SpMV
-        //CHECK( magma_z_spmv( c_one, A, SpMV_in_2, c_zero, SpMV_out_2, queue ));
-        
-        
-            // individual SpMV as QMR needs transpose
-        CHECK( magma_z_spmv( c_one, AT, Q_q, c_zero, Q_wt, queue ));
-            //CGS t = A u_hat
-        CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
-            //BiCGSTAB
-        CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
+        CHECK( magma_z_spmv( c_one, A, SpMV_in_2, c_zero, SpMV_out_2, queue ));
+
             // scatter results
         //magma_zcopy( dofs, SpMV_out_2.dval          , 1, Q_wt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
@@ -635,7 +623,7 @@ magma_zbombard_merge(
         SpMV_out_2.dval,
         queue );
         
-           printf(" %e   %e   %e\n", Q_res, C_res, B_res);
+          // printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
             flag = 1;
@@ -742,24 +730,24 @@ cleanup:
     magma_zmfree(&Q_r, queue );
     magma_zmfree(&Q_v,  queue );
     magma_zmfree(&Q_w,  queue );
-    //magma_zmfree(&Q_wt, queue );
+    magma_zmfree(&Q_wt, queue );
     magma_zmfree(&Q_d,  queue );
     magma_zmfree(&Q_s,  queue );
     magma_zmfree(&Q_z,  queue );
-    //magma_zmfree(&Q_q,  queue );
+    magma_zmfree(&Q_q,  queue );
     magma_zmfree(&Q_p,  queue );
     magma_zmfree(&Q_pt, queue );
     magma_zmfree(&Q_y,  queue );
     magma_zmfree(&Q_x,  queue );
     // CGS
     magma_zmfree(&C_r, queue );
-    //magma_zmfree(&C_rt, queue );
+    magma_zmfree(&C_rt, queue );
     magma_zmfree(&C_x, queue );
     magma_zmfree(&C_p, queue );
     magma_zmfree(&C_q, queue );
     magma_zmfree(&C_u, queue );
     magma_zmfree(&C_v, queue );
-    //magma_zmfree(&C_t, queue );
+    magma_zmfree(&C_t, queue );
     magma_zmfree(&C_p_hat, queue );
     magma_zmfree(&C_q_hat, queue );
     magma_zmfree(&C_u_hat, queue );
@@ -769,8 +757,8 @@ cleanup:
     magma_zmfree(&B_x, queue );
     magma_zmfree(&B_p, queue );
     magma_zmfree(&B_v, queue );
-    // magma_zmfree(&B_s, queue );
-    // magma_zmfree(&B_t, queue );
+    magma_zmfree(&B_s, queue );
+    magma_zmfree(&B_t, queue );
     
     
     
