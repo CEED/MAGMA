@@ -413,7 +413,7 @@ magma_zbombard(
         Q_rho = magma_zsqrt( tmpval );
         
             //QMR wt = A' * q - beta' * w;
-        CHECK( magma_z_spmv( c_one, A, Q_q, c_zero, Q_wt, queue ));
+        CHECK( magma_z_spmv( c_one, AT, Q_q, c_zero, Q_wt, queue ));
             //CGS t = A u_hat
         CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
             //BiCGSTAB

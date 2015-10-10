@@ -461,17 +461,17 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, Q_q.dval, 1, SpMV_in_2.dval          , 1 );
         //magma_zcopy( dofs, C_t.dval, 1, SpMV_in_2.dval+dofs     , 1 );
         //magma_zcopy( dofs, B_s.dval, 1, SpMV_in_2.dval+2*dofs   , 1 );
-
+        if( A.sym = Magma_SYMMETRIC ){
             // block SpMV
-        //CHECK( magma_z_spmv( c_one, A, SpMV_in_2, c_zero, SpMV_out_2, queue ));
-        
-        
-            // individual SpMV as QMR needs transpose
-        CHECK( magma_z_spmv( c_one, AT, Q_q, c_zero, Q_wt, queue ));
-            //CGS t = A u_hat
-        CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
-            //BiCGSTAB
-        CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
+            CHECK( magma_z_spmv( c_one, A, SpMV_in_2, c_zero, SpMV_out_2, queue ));
+        } else {
+                // individual SpMV as QMR needs transpose
+            CHECK( magma_z_spmv( c_one, AT, Q_q, c_zero, Q_wt, queue ));
+                //CGS t = A u_hat
+            CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
+                //BiCGSTAB
+            CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
+        }
             // scatter results
         //magma_zcopy( dofs, SpMV_out_2.dval          , 1, Q_wt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
@@ -635,7 +635,7 @@ magma_zbombard_merge(
         SpMV_out_2.dval,
         queue );
         
-           printf(" %e   %e   %e\n", Q_res, C_res, B_res);
+        //   printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
             flag = 1;
