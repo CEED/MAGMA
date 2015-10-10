@@ -635,7 +635,7 @@ magma_zbombard_merge(
         SpMV_out_2.dval,
         queue );
         
-        //   printf(" %e   %e   %e\n", Q_res, C_res, B_res);
+           printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
             res = Q_res;
             flag = 1;
