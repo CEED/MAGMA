@@ -328,6 +328,7 @@ magma_zm_5stencil(
     }
 
     CHECK( magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue ));
+    magma_zmcsrcompressor( A, queue );
     
 cleanup:
     magma_free_cpu( diag_vals );
