@@ -363,6 +363,24 @@ magma_zmconvert(
                     }
                 }
             }
+            
+            // CSR to CSRLIST
+            else if ( new_format == Magma_CSRLIST ) {
+                CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
+                B->storage_type = Magma_CSRLIST;
+    
+                CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
+                CHECK( magma_index_malloc_cpu( &B->list, A.nnz ));
+                
+                for(magma_int_t i=0; i < A.num_rows; i++) {
+                    for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
+                        B->rowidx[j] = i;
+                    }
+                    for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
+                        B->list[j] = j+1;
+                    }
+                }
+            }
    
             // CSR to ELLPACKT (using row-major storage)
             else if (  new_format == Magma_ELLPACKT ) {
@@ -717,6 +735,38 @@ magma_zmconvert(
             // CSRCOO to CSR
             else if ( old_format == Magma_CSRCOO ) {
                 CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
+            }
+            
+            // CSRLIST to CSR
+            else if ( old_format == Magma_CSRLIST ) {
+                CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
+                magma_int_t element, row, numnnz;
+                element = 0;
+                row = 0;
+                numnnz = 0;
+                // fill the rowpointer
+                B->row[0] = 0;
+                while( element != A.row[A.num_rows] ) {
+                    B->val[ numnnz ] = A.val[ element ];
+                    B->col[ numnnz ] = A.col[ element ];
+                    if( A.rowidx[ element ] > row ){
+                        B->row[ row+1 ] = numnnz;
+                        row = row+1;
+                    }
+                    numnnz++;
+                    element = A.list[ element ];
+                } 
+                B->row[row+1] = numnnz;
+                // sort elements in every row according to col
+                element = 0;
+                for( magma_int_t i=0; i < A.num_rows; i++) {
+                    magma_zindexsortval(
+                    B->col,
+                    B->val,
+                    B->row[i],
+                    B->row[i+1]-1,
+                    queue );
+                }
             }
             
             // CSRCSC to CSR

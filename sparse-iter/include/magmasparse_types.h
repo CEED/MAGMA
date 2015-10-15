@@ -53,16 +53,20 @@ typedef struct magma_z_matrix
         magmaDoubleComplex_ptr  ddiag;          // opt: diagonal entries in DEV case
     };
     union {
-        magma_index_t           *row;           // row pointer CPU case
-        magmaIndex_ptr          drow;           // row pointer DEV case
+        magma_index_t           *row;           // opt: row pointer CPU case
+        magmaIndex_ptr          drow;           // opt: row pointer DEV case
     };
     union {
         magma_index_t           *rowidx;        // opt: array containing row indices CPU case
         magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
     };
     union {
-        magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices DEV case
+        magma_index_t           *col;           // opt: array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // opt: array containing col indices DEV case
+    };
+    union {
+        magma_index_t           *list;          // opt: linked list pointing to next element
+        magmaIndex_ptr          dlist;          // opt: linked list pointing to next element
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
@@ -103,6 +107,10 @@ typedef struct magma_c_matrix
     union {
         magma_index_t           *col;           // array containing col indices CPU case
         magmaIndex_ptr          dcol;           // array containing col indices DEV case
+    };
+    union {
+        magma_index_t           *list;          // opt: linked list pointing to next element
+        magmaIndex_ptr          dlist;          // opt: linked list pointing to next element
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
@@ -145,6 +153,10 @@ typedef struct magma_d_matrix
         magma_index_t           *col;           // array containing col indices CPU case
         magmaIndex_ptr          dcol;           // array containing col indices DEV case
     };
+    union {
+        magma_index_t           *list;          // opt: linked list pointing to next element
+        magmaIndex_ptr          dlist;          // opt: linked list pointing to next element
+    };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR
     magma_int_t        numblocks;               // opt: info for SELL-P/BCSR
@@ -175,16 +187,20 @@ typedef struct magma_s_matrix
         magmaFloat_ptr          ddiag;          // opt: diagonal entries in DEV case
     };
     union {
-        magma_index_t           *row;           // row pointer CPU case
-        magmaIndex_ptr          drow;           // row pointer DEV case
+        magma_index_t           *row;           // opt: row pointer CPU case
+        magmaIndex_ptr          drow;           // opt: row pointer DEV case
     };
     union {
         magma_index_t           *rowidx;        // opt: array containing row indices CPU case
         magmaIndex_ptr          drowidx;        // opt: array containing row indices DEV case
     };
     union {
-        magma_index_t           *col;           // array containing col indices CPU case
-        magmaIndex_ptr          dcol;           // array containing col indices DEV case
+        magma_index_t           *col;           // opt: array containing col indices CPU case
+        magmaIndex_ptr          dcol;           // opt: array containing col indices DEV case
+    };
+    union {
+        magma_index_t           *list;          // opt: linked list pointing to next element
+        magmaIndex_ptr          dlist;          // opt: linked list pointing to next element
     };
     magma_index_t      *blockinfo;              // opt: for BCSR format CPU case
     magma_int_t        blocksize;               // opt: info for SELL-P/BCSR

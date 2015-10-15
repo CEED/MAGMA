@@ -246,6 +246,23 @@ magma_zindexsort(
     magma_queue_t queue );
 
 magma_int_t
+magma_zindexsortval(
+    magma_index_t *x,
+    magmaDoubleComplex *y,
+    magma_int_t first,
+    magma_int_t last,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmorderstatistics(
+    magmaDoubleComplex *val,
+    magma_int_t length,
+    magma_int_t k,
+    magma_int_t r,
+    magmaDoubleComplex *element,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zdomainoverlap(
     magma_index_t num_rows,
     magma_int_t *num_indices,

@@ -445,7 +445,7 @@ typedef enum {
     Magma_SPMVFUNCTION = 420,
     Magma_SELLP        = 421,
     Magma_ELLD         = 422,
-
+    Magma_CSRLIST      = 423,
     Magma_CSRD         = 424,
     Magma_CSRL         = 427,
     Magma_CSRU         = 428,
