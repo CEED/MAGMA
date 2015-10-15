@@ -193,7 +193,7 @@ int main(  int argc, char** argv )
                 (end-start)/10, 0.0 );
             printf("%% |x-y|_F/|y| = %8.2e.  Tester spmv ELL:  failed\n", res);
         }
-        magma_dmfree( &hcheck, queue );
+        magma_zmfree( &hcheck, queue );
 
         // convert to SELLP and copy to GPU
         CHECK( magma_zmconvert(  hA, &hA_SELLP, Magma_CSR, Magma_SELLP, queue ));
@@ -271,7 +271,7 @@ int main(  int argc, char** argv )
         }
         magma_zmfree( &hcheck, queue );
         magma_zmfree( &dy, queue );
-        CHECK( magma_dvinit( &dy, Magma_DEV, hA.num_rows, 1, c_zero, queue ));
+        CHECK( magma_zvinit( &dy, Magma_DEV, hA.num_rows, 1, c_zero, queue ));
         cusparseZcsr2hyb(cusparseHandle,  hA.num_rows, hA.num_cols,
                         descrA, dA.dval, dA.drow, dA.dcol,
                         hybA, 0, CUSPARSE_HYB_PARTITION_AUTO);
