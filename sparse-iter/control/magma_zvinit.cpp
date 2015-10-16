@@ -69,12 +69,14 @@ magma_zvinit(
     x->row = NULL;
     x->rowidx = NULL;
     x->col = NULL;
+    x->list = NULL;
     x->blockinfo = NULL;
     x->dval = NULL;
     x->ddiag = NULL;
     x->drow = NULL;
     x->drowidx = NULL;
     x->dcol = NULL;
+    x->dlist = NULL;
     x->storage_type = Magma_DENSE;
     x->memory_location = mem_loc;
     x->sym = Magma_GENERAL;

@@ -69,6 +69,11 @@ magma_zmtransfer(
     B->drow = NULL;
     B->drowidx = NULL;
     B->dcol = NULL;
+    B.diag = NULL;
+    B.ddiag = NULL;
+    B.list = NULL;
+    B.dlist = NULL;
+    
 
     // first case: copy matrix from host to device
     if ( src == Magma_CPU && dst == Magma_DEV ) {

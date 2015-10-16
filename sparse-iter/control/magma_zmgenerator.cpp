@@ -73,6 +73,8 @@ magma_zmgenerator(
     B.drow = NULL;
     B.drowidx = NULL;
     B.ddiag = NULL;
+    B.list = NULL;
+    B.dlist = NULL;
     
     B.num_rows = n;
     B.num_cols = n;

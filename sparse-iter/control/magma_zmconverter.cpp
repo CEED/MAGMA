@@ -180,6 +180,7 @@ magma_zmconvert(
     B->col = NULL;
     B->row = NULL;
     B->rowidx = NULL;
+    B->list = NULL;
     B->blockinfo = NULL;
     B->diag = NULL;
     B->dval = NULL;
@@ -187,7 +188,8 @@ magma_zmconvert(
     B->drow = NULL;
     B->drowidx = NULL;
     B->ddiag = NULL;
-
+    B->dlist = NULL;
+    
     magmaDoubleComplex zero = MAGMA_Z_MAKE( 0.0, 0.0 );
 
     // check whether matrix on CPU
