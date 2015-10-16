@@ -114,10 +114,21 @@ zgesellptmv2d_kernel_1(
     magmaDoubleComplex * dy)
 {
     // threads assigned to rows
-    int Idx = blockDim.x * blockIdx.x + threadIdx.x;
-    int offset = drowptr[ blockIdx.x ];
-    int border = (drowptr[ blockIdx.x+1 ]-offset)/blocksize;
-    if(Idx < num_rows ) {
+    //int Idx = blockDim.x * blockIdx.x + threadIdx.x;
+    //int offset = drowptr[ blockIdx.x ];
+    //int border = (drowptr[ blockIdx.x+1 ]-offset)/blocksize;
+    
+    
+    // T threads assigned to each row
+    int idx = threadIdx.y;      // thread in row
+    int idy = threadIdx.x;      // local row
+    int ldx = idx * blocksize + idy;
+    int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
+    int row = bdx * blocksize + idy;  // global row index
+    int offset = drowptr[ bdx ];
+    int border = (drowptr[ bdx+1 ]-offset)/blocksize;
+    
+    if( row < num_rows ) {
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < border; n++) { 
             int col = dcolind [offset+ blocksize * n + threadIdx.x ];
@@ -127,7 +138,7 @@ zgesellptmv2d_kernel_1(
             }
         }
 
-        dy[ Idx ] = dot * alpha + beta * dy [ Idx ];
+        dy[ row ] = dot * alpha + beta * dy [ row ];
     }
 }
 
@@ -801,10 +812,14 @@ magma_zgesellpmv(
         printf("error: too much shared memory requested.\n");
 
     dim3 block( blocksize, alignment, 1);
-
-    int dimgrid1 = int( sqrt( double( slices )));
-    int dimgrid2 = magma_ceildiv( slices, dimgrid1 );
-
+    
+    int dimgrid1 = min( int( sqrt( double( slices ))), 65535 );
+    int dimgrid2 = min(magma_ceildiv( slices, dimgrid1 ), 65535);
+    int dimgrid3 = magma_ceildiv( slices, dimgrid1*dimgrid2 );
+    if( dimgrid3 > 65535 ){
+        printf("error: too many GPU thread blocks requested.\n");
+    }
+        
     dim3 grid( dimgrid1, dimgrid2, 1);
     int Ms = num_threads * sizeof( magmaDoubleComplex );
 

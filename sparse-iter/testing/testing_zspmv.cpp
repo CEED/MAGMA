@@ -143,6 +143,7 @@ int main(  int argc, char** argv )
             row = NULL;
             col = NULL;
         #endif // MAGMA_WITH_MKL
+        
 
         // copy matrix to GPU
         CHECK( magma_zmtransfer( hA, &dA, Magma_CPU, Magma_DEV, queue ));
@@ -181,7 +182,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue ));
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ ){
-            res = res + MAGMA_Z_ABS(hcheck.val[k]) - MAGMA_Z_ABS(hrefvec.val[k]);
+            res = res + MAGMA_Z_ABS(hcheck.val[k] - hrefvec.val[k]);
         }
         res /= ref;
         if ( res < .000001 ) {
@@ -206,11 +207,10 @@ int main(  int argc, char** argv )
         for (j=0; j<10; j++)
             CHECK( magma_z_spmv( c_one, dA_SELLP, dx, c_zero, dy, queue ));
         end = magma_sync_wtime( queue );
-
         CHECK( magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue ));
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ ){
-            res = res + MAGMA_Z_ABS(hcheck.val[k]) - MAGMA_Z_ABS(hrefvec.val[k]);
+            res = res + MAGMA_Z_ABS(hcheck.val[k] - hrefvec.val[k]);
         }
         res /= ref;
         if ( res < .000001 ) {
@@ -257,7 +257,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue ));
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ ){
-            res = res + MAGMA_Z_ABS(hcheck.val[k]) - MAGMA_Z_ABS(hrefvec.val[k]);
+            res = res + MAGMA_Z_ABS(hcheck.val[k] - hrefvec.val[k]);
         }
         res /= ref;
         if ( res < .000001 ) {
@@ -287,7 +287,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtransfer( dy, &hcheck , Magma_DEV, Magma_CPU, queue ));
         res = 0.0;
         for(magma_int_t k=0; k<hA.num_rows; k++ ){
-            res = res + MAGMA_Z_ABS(hcheck.val[k]) - MAGMA_Z_ABS(hrefvec.val[k]);
+            res = res + MAGMA_Z_ABS(hcheck.val[k] - hrefvec.val[k]);
         }
         res /= ref;
         if ( res < .000001 ) {
