@@ -751,6 +751,7 @@ magma_zmconvert(
                 while( element != A.row[A.num_rows] ) {
                     B->val[ numnnz ] = A.val[ element ];
                     B->col[ numnnz ] = A.col[ element ];
+
                     if( A.rowidx[ element ] > row ){
                         B->row[ row+1 ] = numnnz;
                         row = row+1;

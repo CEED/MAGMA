@@ -67,6 +67,15 @@ magma_zmfree(
             A->num_cols = 0;
             A->nnz = 0;
         }
+        if ( A->storage_type == Magma_CSRLIST ) {
+            magma_free_cpu( A->val );
+            magma_free_cpu( A->row );
+            magma_free_cpu( A->col );
+            magma_free_cpu( A->list );
+            A->num_rows = 0;
+            A->num_cols = 0;
+            A->nnz = 0;
+        }
         if ( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC
                                         || A->storage_type == Magma_CSRD
                                         || A->storage_type == Magma_CSRL
@@ -114,6 +123,8 @@ magma_zmfree(
         A->drow = NULL;
         A->drowidx = NULL;
         A->ddiag = NULL;
+        A->dlist = NULL;
+        A->list = NULL;
     }
 
     if ( A->memory_location == Magma_DEV ) {
@@ -173,6 +184,27 @@ magma_zmfree(
                 return MAGMA_ERR_INVALID_PTR; 
             }
             if ( magma_free( A->dcol ) != MAGMA_SUCCESS ) {
+                printf("Memory Free Error.\n");
+                return MAGMA_ERR_INVALID_PTR; 
+            }
+            A->num_rows = 0;
+            A->num_cols = 0;
+            A->nnz = 0;
+        }
+        if ( A->storage_type == Magma_CSRLIST ) {
+            if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
+                printf("Memory Free Error.\n");
+                return MAGMA_ERR_INVALID_PTR; 
+            }
+            if ( magma_free( A->drow ) != MAGMA_SUCCESS ) {
+                printf("Memory Free Error.\n");
+                return MAGMA_ERR_INVALID_PTR; 
+            }
+            if ( magma_free( A->dcol ) != MAGMA_SUCCESS ) {
+                printf("Memory Free Error.\n");
+                return MAGMA_ERR_INVALID_PTR; 
+            }
+            if ( magma_free( A->dlist ) != MAGMA_SUCCESS ) {
                 printf("Memory Free Error.\n");
                 return MAGMA_ERR_INVALID_PTR; 
             }
@@ -263,6 +295,8 @@ magma_zmfree(
         A->drow = NULL;
         A->drowidx = NULL;
         A->ddiag = NULL;
+        A->dlist = NULL;
+        A->list = NULL;
     }
 
     else {
