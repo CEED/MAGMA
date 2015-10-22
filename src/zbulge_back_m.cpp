@@ -160,7 +160,7 @@ magma_zbulge_back_m(
     /*============================
      *  use GPU+CPU's
      *==========================*/
-//n_gpu = ne;
+n_gpu = ne;
     if (n_gpu < ne) {
         // define the size of Q to be done on CPU's and the size on GPU's
         // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
