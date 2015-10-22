@@ -843,6 +843,17 @@ magma_zmconvert(
             
             // ELLD (ELLPACK with diagonal element first) to CSR
             else if ( old_format == Magma_ELLD ) {
+                CHECK( magma_zmconvert( A, B, Magma_ELL, Magma_CSR, queue ));
+                for( magma_int_t i=0; i < A.num_rows; i++) {
+                    magma_zindexsortval(
+                    B->col,
+                    B->val,
+                    B->row[i],
+                    B->row[i+1]-1,
+                    queue );
+                }
+            /*    
+                
                 //printf( "Conversion to CSR: " );
                 //fflush(stdout);
                 // fill in information for B
@@ -888,7 +899,7 @@ magma_zmconvert(
                 //The CSR compressor removes these
                 CHECK( magma_z_csr_compressor(&val_tmp2, &row_tmp, &col_tmp2,
                            &B->val, &B->row, &B->col, &B->num_rows, queue ));
-                B->nnz = B->row[B->num_rows];
+                B->nnz = B->row[B->num_rows];*/
             }
             
             // ELLRT to CSR
