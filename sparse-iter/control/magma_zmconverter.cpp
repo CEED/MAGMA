@@ -743,15 +743,15 @@ magma_zmconvert(
             else if ( old_format == Magma_CSRLIST ) {
                 CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
                 magma_int_t element, row, numnnz;
-                element = 0;
+                element = A.row[0];
                 row = 0;
                 numnnz = 0;
                 // fill the rowpointer
                 B->row[0] = 0;
                 while( element != A.row[A.num_rows] ) {
+                    
                     B->val[ numnnz ] = A.val[ element ];
                     B->col[ numnnz ] = A.col[ element ];
-
                     if( A.rowidx[ element ] > row ){
                         B->row[ row+1 ] = numnnz;
                         row = row+1;
