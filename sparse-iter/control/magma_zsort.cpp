@@ -240,9 +240,6 @@ magma_zmorderstatistics(
         }
     } else {
         for ( st = i = 0; i < length - 1; i++ ) {
-            //if( MAGMA_Z_ABS(val[i]) = 0.0 ){ // no zero division
-            //    val[i] = MAGMA_Z_MAKE( 1e-16, 0.0 );
-            //}
             if ( MAGMA_Z_ABS(val[i]) < MAGMA_Z_ABS(val[length-1]) ){
                 continue;
             }
