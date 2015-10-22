@@ -695,43 +695,16 @@ magma_zmconvert(
                     
             // CSRD to CSR (diagonal elements first)
             else if ( old_format == Magma_CSRD ) {
-                // fill in information for B
-                B->storage_type = Magma_CSR;
-                B->memory_location = A.memory_location;
-                B->fill_mode = A.fill_mode;
-                B->num_rows = A.num_rows;
-                B->num_cols = A.num_cols;
-                B->nnz = A.nnz;
-                B->max_nnz_row = A.max_nnz_row;
-                B->diameter = A.diameter;
-
-    
-                CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
-                CHECK( magma_index_malloc_cpu( &B->row, A.num_rows+1 ));
-                CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
-                
-                for(magma_int_t i=0; i < A.num_rows; i++) {
-                    magmaDoubleComplex diagval = A.val[A.row[i]];
-                    magma_index_t diagcol = A.col[A.row[i]];
-                    magma_int_t smaller = 0;
-                    for( magma_int_t k=A.row[i]; k < A.row[i+1]; k++ ) {
-                        if ( (A.col[k] < diagcol) )
-                            smaller++;
-                    }
-                    for( magma_int_t k=A.row[i]; k < A.row[i]+smaller; k++ ) {
-                        B->col[k] = A.col[k+1];
-                        B->val[k] = A.val[k+1];
-                    }
-                    B->col[A.row[i]+smaller] = diagcol;
-                    B->val[A.row[i]+smaller] = diagval;
-                    for( magma_int_t k=A.row[i]+smaller+1; k < A.row[i+1]; k++ ) {
-                        B->col[k] = A.col[k];
-                        B->val[k] = A.val[k];
-                    }
+                CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
+                for( magma_int_t i=0; i < A.num_rows; i++) {
+                    magma_zindexsortval(
+                    B->col,
+                    B->val,
+                    B->row[i],
+                    B->row[i+1]-1,
+                    queue );
                 }
-                for( magma_int_t i=0; i < A.num_rows+1; i++) {
-                    B->row[i] = A.row[i];
-                }
+            
             }
             
             // CSRCOO to CSR
@@ -843,7 +816,7 @@ magma_zmconvert(
             
             // ELLD (ELLPACK with diagonal element first) to CSR
             else if ( old_format == Magma_ELLD ) {
-                CHECK( magma_zmconvert( A, B, Magma_ELL, Magma_CSR, queue ));
+          /*      CHECK( magma_zmconvert( A, B, Magma_ELL, Magma_CSR, queue ));
                 for( magma_int_t i=0; i < A.num_rows; i++) {
                     magma_zindexsortval(
                     B->col,
@@ -852,7 +825,7 @@ magma_zmconvert(
                     B->row[i+1]-1,
                     queue );
                 }
-            /*    
+            */    
                 
                 //printf( "Conversion to CSR: " );
                 //fflush(stdout);
@@ -899,7 +872,7 @@ magma_zmconvert(
                 //The CSR compressor removes these
                 CHECK( magma_z_csr_compressor(&val_tmp2, &row_tmp, &col_tmp2,
                            &B->val, &B->row, &B->col, &B->num_rows, queue ));
-                B->nnz = B->row[B->num_rows];*/
+                B->nnz = B->row[B->num_rows];
             }
             
             // ELLRT to CSR
