@@ -16,13 +16,13 @@
 typedef size_t devptr_t;
 
 #ifdef PGI_FORTRAN
-    #define magma_idevptr(ptr_) ((int*)               (ptr_))
+    #define magma_idevptr(ptr_) ((magma_int_t*)       (ptr_))
     #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(ptr_))
     #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (ptr_))
     #define magma_ddevptr(ptr_) ((double*)            (ptr_))
     #define magma_sdevptr(ptr_) ((float*)             (ptr_))
 #else
-    #define magma_idevptr(ptr_) ((int*)               (uintptr_t)(*(ptr_)))
+    #define magma_idevptr(ptr_) ((magma_int_t*)       (uintptr_t)(*(ptr_)))
     #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(uintptr_t)(*(ptr_)))
     #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (uintptr_t)(*(ptr_)))
     #define magma_ddevptr(ptr_) ((double*)            (uintptr_t)(*(ptr_)))
