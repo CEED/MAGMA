@@ -41,6 +41,7 @@ ZSRC := \
 	zmgeelltmv.cu			\
 	zmgesellcmmv.cu			\
 	zmzdotc.cu		\
+	zmzdotc3.cu		\
 	zmzdotc_one.cu		\
 	zpipelinedgmres.cu		\
 
@@ -62,6 +63,7 @@ ZSRC += \
 
 # Tester routines
 ZSRC += \
+    zmergeblockkrylov.cu    \
 
 # ------------------------------------------------------------
 -include Makefile.local
