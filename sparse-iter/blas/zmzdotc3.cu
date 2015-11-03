@@ -59,9 +59,6 @@ magma_zmzdotc3_kernel_1(
                 
     temp[ Idx + 2*blockDim.x ]  = ( i < n ) ?
                 v2[ i ] * w2[ i ] : MAGMA_Z_ZERO;
-                
-    temp[ Idx + 3*blockDim.x ]  = ( i < n ) ?
-                v3[ i ] * w3[ i ] : MAGMA_Z_ZERO;
                
     
     __syncthreads();
@@ -312,7 +309,7 @@ magma_zmzdotc3(
 
 
     magma_zmzdotc3_kernel_1<<<Gs, Bs, Ms, queue>>>
-            ( Gs.x, n, v0, w0, v1, w1, v2, w2, v3, w3, d1 );
+            ( Gs.x, n, v0, w0, v1, w1, v2, w2, d1 );
 
 /*
     // not necessary to zero GPU mem
