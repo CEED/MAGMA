@@ -667,7 +667,7 @@ magma_zmdynamicic_candidates(
     magma_index_t *numadd;
     CHECK( magma_index_malloc_cpu( &numadd, LU.num_rows+1 ));
     
-    #pargma omp parallel for
+    #pragma omp parallel for
     for( magma_int_t i = 0; i<LU.num_rows+1; i++ ){
         numadd[i] = 0;  
     }
@@ -694,8 +694,9 @@ magma_zmdynamicic_candidates(
                 magma_index_t checkrow = col1;
                 magma_index_t checkelement = col2;
                 magma_index_t check = LU.row[ checkrow ];
+                magma_index_t checkcol = LU.col[check];
                 while( checkcol <= checkelement && check!=0 ) {
-                    if( LU.col[check] == checkelement ){
+                    if( checkcol == checkelement ){
                         // element included in LU and nonzero
                         exist = 1;
                         break;
@@ -722,8 +723,8 @@ magma_zmdynamicic_candidates(
     #pragma omp parallel for
     for( magma_int_t i = 0; i<LU.num_rows; i++ ){
         omp_set_lock(&(counter));
-        LU_new->nnz=LU_new->nnz + numadd[ row+1 ];
-        numadd[ row+1 ] = LU_new->nnz;
+        LU_new->nnz=LU_new->nnz + numadd[ i+1 ];
+        numadd[ i+1 ] = LU_new->nnz;
         omp_unset_lock(&(counter));
     }
     // allocate space
@@ -758,7 +759,7 @@ magma_zmdynamicic_candidates(
                 magma_index_t check = LU.row[ checkrow ];
                 magma_index_t checkcol = LU.col[check];
                 while( checkcol <= checkelement && check!=0 ) {
-                    if( LU.col[check] == checkelement ){
+                    if( checkcol == checkelement ){
                         // element included in LU and nonzero
                         exist = 1;
                         break;
