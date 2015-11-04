@@ -378,9 +378,10 @@ magma_zmconvert(
                     for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
                         B->rowidx[j] = i;
                     }
-                    for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++) {
+                    for(magma_int_t j=A.row[i]; j < A.row[i+1]-1; j++) {
                         B->list[j] = j+1;
                     }
+                    B->list[A.row[i+1]-1] = 0;
                 }
             }
    
@@ -716,25 +717,21 @@ magma_zmconvert(
             else if ( old_format == Magma_CSRLIST ) {
                 CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
                 magma_int_t element, row, numnnz;
-                element = A.row[0];
-                row = 0;
+                
                 numnnz = 0;
                 // fill the rowpointer
                 B->row[0] = 0;
-                while( element != A.row[A.num_rows] ) {
-                    
-                    B->val[ numnnz ] = A.val[ element ];
-                    B->col[ numnnz ] = A.col[ element ];
-                    if( A.rowidx[ element ] > row ){
-                        B->row[ row+1 ] = numnnz;
-                        row = row+1;
-                    }
-                    numnnz++;
-                    element = A.list[ element ];
-                } 
-                B->row[row+1] = numnnz;
+                for( magma_int_t row=0; row<A.num_rows; row++ ){
+                    element = A.row[row];
+                    do{
+                        B->val[ numnnz ] = A.val[ element ];
+                        B->col[ numnnz ] = A.col[ element ];
+                        numnnz++;
+                        element = A.list[ element ];
+                    }while( element != 0 );
+                    B->row[ row+1 ] = numnnz;
+                }
                 // sort elements in every row according to col
-                element = 0;
                 for( magma_int_t i=0; i < A.num_rows; i++) {
                     magma_zindexsortval(
                     B->col,
