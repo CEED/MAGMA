@@ -45,7 +45,7 @@ static const char *usage_sparse =
 "                   --psweeps k   Iteration count for iterative incomplete factorizations.\n"
 "                   --piter k     Iteration count for iterative preconditioner.\n"
 "                   --plevels k   Number of ILU levels.\n"
-" --psweeps x   Number of iterative ILU sweeps used to generate preconditioner (iterative ILU case).\n"
+"                   --psweeps x   Number of iterative ILU sweeps.\n"
 " --ev x        For eigensolvers, set number of eigenvalues/eigenvectors to compute.\n"
 " --verbose x   Possibility to print intermediate residuals every x iteration.\n"
 " --maxiter x   Set an upper limit for the iteration count.\n"
