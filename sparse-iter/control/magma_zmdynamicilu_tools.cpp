@@ -664,7 +664,7 @@ magma_zmdynamicic_candidates(
     omp_lock_t counter;
     omp_init_lock(&(counter));
     
-    magma_int_t *numadd;
+    magma_index_t *numadd;
     CHECK( magma_index_malloc_cpu( &numadd, LU.num_rows+1 ));
     
     #pargma omp parallel for
@@ -803,7 +803,7 @@ magma_zmdynamicic_candidates_n(
     
     magma_set_omp_numthreads(32);
     
-    magma_int_t *numadd;
+    magma_index_t *numadd;
     CHECK( magma_index_malloc_cpu( &numadd, LU.num_rows+1 ));
     for( magma_int_t i = 0; i<LU.num_rows+1; i++ ){
         numadd[i] = 0;  
