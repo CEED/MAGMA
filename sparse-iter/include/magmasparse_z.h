@@ -14,6 +14,7 @@
 
 #include "magma_types.h"
 #include "magmasparse_types.h"
+#include <omp.h>
 
 #define PRECISION_z
 
@@ -568,6 +569,76 @@ magma_zmLdiagadd(
     magma_queue_t queue );
 
 
+/* ////////////////////////////////////////////////////////////////////////////
+ -- MAGMA_SPARSE iterative dynamic ILU
+*/
+magma_int_t
+magma_zmdynamicic_insert(
+    magma_int_t tri,
+    magma_int_t num_rm,
+    magma_index_t *rm_loc,
+    magma_z_matrix *LU_new,
+    magma_z_matrix *LU,
+    omp_lock_t *rowlock,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicilu_rm(
+    magma_int_t num_rm,
+    magma_z_matrix *LU,
+    magma_index_t *rm_loc,
+    omp_lock_t *rowlock,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicilu_set_thrs(
+    magma_int_t num_rm,
+    magma_z_matrix *LU,
+    magmaDoubleComplex *thrs,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicilu_rm_thrs(
+    magmaDoubleComplex *thrs,
+    magma_int_t *num_rm,
+    magma_z_matrix *LU,
+    magma_index_t *rm_loc,
+    omp_lock_t *rowlock,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicic_sweep(
+    magma_z_matrix A,
+    magma_z_matrix *LU,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicic_sweep_parallel(
+    magma_z_matrix A,
+    magma_z_matrix *v,
+    magma_z_matrix *LU,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicic_residuals(
+    magma_z_matrix A,
+    magma_z_matrix LU,
+    magma_z_matrix *LU_new,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicic_residuals_parallel(
+    magma_z_matrix A,
+    magma_z_matrix LU,
+    magma_z_matrix *v,
+    magma_z_matrix *LU_new,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdynamicic_candidates(
+    magma_z_matrix LU,
+    magma_z_matrix *LU_new,
+    magma_queue_t queue );
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -1527,6 +1598,14 @@ magma_zjacobisetup_diagscal(
 
 //##################   kernel fusion for Krylov methods
 
+magma_int_t
+magma_zmergeblockkrylov(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex_ptr alpha, 
+    magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr x,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zbicgmerge1(    
@@ -1849,6 +1928,20 @@ magma_zmzdotc(
     magmaDoubleComplex_ptr w2,
     magmaDoubleComplex_ptr v3, 
     magmaDoubleComplex_ptr w3,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmzdotc3(
+    int n,  
+    magmaDoubleComplex_ptr v0, 
+    magmaDoubleComplex_ptr w0,
+    magmaDoubleComplex_ptr v1, 
+    magmaDoubleComplex_ptr w1,
+    magmaDoubleComplex_ptr v2, 
+    magmaDoubleComplex_ptr w2,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr skp,

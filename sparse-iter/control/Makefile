@@ -24,7 +24,8 @@ ZSRC := \
 	magma_zsolverinfo.cpp	\
 	magma_zcsrsplit.cpp		\
 	magma_ziteriluutils.cpp	\
-	magma_zmcsrpass.cpp		\
+	magma_zmdynamicilu_tools.cpp		\
+    magma_zmcsrpass.cpp		\
 	magma_zmcsrpass_gpu.cpp	\
 	magma_zmcsrcompressor.cpp	\
 	magma_zmscale.cpp		\

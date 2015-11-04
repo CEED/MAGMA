@@ -18,6 +18,7 @@
 #include <read_matrix.h>
 #include <get_options.h>
 #include <assert.h>
+#include <omp.h>
 #endif
 
 // includes CUDA

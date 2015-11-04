@@ -290,14 +290,12 @@ magma_zbombard_merge(
 
         }else{
             B_rho_old = B_rho_new; 
-            magma_zmzdotc(
+            magma_zmzdotc3(
             b.num_rows,  
             Q_z.dval, 
             Q_y.dval,
             r_tld.dval, 
             C_r.dval,
-            r_tld.dval, 
-            B_r.dval,
             r_tld.dval, 
             B_r.dval,
             d1.dval,
@@ -400,14 +398,12 @@ magma_zbombard_merge(
                 //BiCGSTAB
             B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+2*dofs, 1 );
         }else{
-            magma_zmzdotc(
+            magma_zmzdotc3(
             b.num_rows,  
             SpMV_in_2.dval, 
             SpMV_out_1.dval,
             r_tld.dval, 
             SpMV_out_1.dval+dofs,
-            r_tld.dval, 
-            SpMV_out_1.dval+2*dofs,
             r_tld.dval, 
             SpMV_out_1.dval+2*dofs,
             d1.dval,
@@ -487,10 +483,8 @@ magma_zbombard_merge(
             B_omega = magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_in_2.dval+2*dofs, 1 )   // omega = <s,t>/<t,t>
                        / magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_out_2.dval+2*dofs, 1 );
         }else{
-            magma_zmzdotc(
+            magma_zmzdotc3(
             b.num_rows,  
-            Q_y.dval, 
-            Q_y.dval,
             Q_y.dval, 
             Q_y.dval,
             SpMV_out_2.dval+2*dofs, 
@@ -503,7 +497,7 @@ magma_zbombard_merge(
             queue );
             
             Q_rho = magma_zsqrt(skp.val[0]);
-            B_omega = skp.val[2]/skp.val[3];
+            B_omega = skp.val[1]/skp.val[2];
         }               
                    
         
@@ -668,21 +662,26 @@ magma_zbombard_merge(
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
-        
-    // copy back the best solver
-    switch ( flag ) {
-        case 1:
-            printf("%% QMR fastest solver.\n");
-            magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
-            break;
-       case 2:
-            printf("%% CGS fastest solver.\n");
-            magma_zcopy( dofs, C_x.dval, 1, x->dval, 1 ); 
-            break;
-       case 3:
-            printf("%% BiCGSTAB fastest solver.\n");
-            magma_zcopy( dofs, B_x.dval, 1, x->dval, 1 ); 
-            break;
+    
+    if( solver_par->numiter <= solver_par->maxiter ){   
+        // copy back the best solver
+        switch ( flag ) {
+            case 1:
+                printf("%% QMR fastest solver.\n");
+                info = 1;
+                magma_zcopy( dofs, Q_x.dval, 1, x->dval, 1 ); 
+                break;
+           case 2:
+                printf("%% CGS fastest solver.\n");
+                info = 2;
+                magma_zcopy( dofs, C_x.dval, 1, x->dval, 1 ); 
+                break;
+           case 3:
+                printf("%% BiCGSTAB fastest solver.\n");
+                info = 3;
+                magma_zcopy( dofs, B_x.dval, 1, x->dval, 1 ); 
+                break;
+        }
     }
 
 
@@ -721,6 +720,20 @@ magma_zbombard_merge(
             }
         }
         info = MAGMA_DIVERGENCE;
+    }
+    if( info == MAGMA_SUCCESS ){   
+        // copy back the best solver
+        switch ( flag ) {
+            case 1:
+                info = 1;
+                break;
+           case 2:
+                info = 2;
+                break;
+           case 3:
+                info = 3;
+                break;
+        }
     }
     
 cleanup:
