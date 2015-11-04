@@ -131,6 +131,8 @@ magma_zparse_opts(
     int *matrices,
     magma_queue_t queue )
 {
+    magma_int_t info = MAGMA_SUCCESS;
+    
     // fill in default values
     opts->input_format = Magma_CSR;
     opts->blocksize = 8;
@@ -163,14 +165,12 @@ magma_zparse_opts(
     opts->precond_par.restart = 10;
     opts->precond_par.levels = 0;
     opts->precond_par.sweeps = 5;
-    opts->solver_par.solver = Magma_CG;
+    opts->solver_par.solver = Magma_CGMERGE;
     
     printf( usage_sparse_short, argv[0] );
     
     int ndevices;
     cudaGetDeviceCount( &ndevices );
-    
-    int info;
     
 
     for( int i = 1; i < argc; ++i ) {
@@ -190,56 +190,136 @@ magma_zparse_opts(
                 case 2: opts->scaling = Magma_UNITROW; break;
             }
         } else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
-            info = atoi( argv[++i] );
-            switch( info ) {
-                case 0: opts->solver_par.solver = Magma_CG; break;
-                case 1: opts->solver_par.solver = Magma_CGMERGE; break;
-                case 2: opts->solver_par.solver = Magma_PCG; break;
-                case 3: opts->solver_par.solver = Magma_BICGSTAB; break;
-                case 4: opts->solver_par.solver = Magma_BICGSTABMERGE; break;
-                case 5: opts->solver_par.solver = Magma_PBICGSTAB; break;
-                case 6: opts->solver_par.solver = Magma_GMRES; break;
-                case 7: opts->solver_par.solver = Magma_PGMRES; break;
-                case 8: opts->solver_par.solver = Magma_LOBPCG;
-                        opts->solver_par.num_eigenvalues = 16; break;
-                case 9: opts->solver_par.solver = Magma_JACOBI; break;
-                case 10: opts->solver_par.solver = Magma_BAITER; break;
-                case 11: opts->solver_par.solver = Magma_IDR; 
-                         opts->solver_par.restart = 4; break;
-                case 12: opts->solver_par.solver = Magma_PIDR;
-                         opts->solver_par.restart = 4; break;
-                case 13: opts->solver_par.solver = Magma_CGS; break;
-                case 14: opts->solver_par.solver = Magma_CGSMERGE; break;
-                case 15: opts->solver_par.solver = Magma_PCGS; break;
-                case 16: opts->solver_par.solver = Magma_PCGSMERGE; break;
-                case 17: opts->solver_par.solver = Magma_TFQMR; break;
-                case 18: opts->solver_par.solver = Magma_TFQMRMERGE; break;
-                case 19: opts->solver_par.solver = Magma_PTFQMR; break;
-                case 20: opts->solver_par.solver = Magma_QMR; break;
-                case 21: opts->solver_par.solver = Magma_QMRMERGE; break;
-                case 22: opts->solver_par.solver = Magma_PQMR; break;
-                case 23: opts->solver_par.solver = Magma_PQMRMERGE; break;
-                case 30: opts->solver_par.solver = Magma_BOMBARD; break;
-                case 31: opts->solver_par.solver = Magma_BOMBARDMERGE; break;
-                case 50: opts->solver_par.solver = Magma_ITERREF; break;
+            i++;
+            if ( strcmp("CG", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_CGMERGE;
+            }
+            else if ( strcmp("PCG", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PCG;
+            }
+            else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_BICGSTABMERGE;
+            }
+            else if ( strcmp("PBICGSTAB", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PBICGSTAB;
+            }
+            else if ( strcmp("QMR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_QMRMERGE;
+            }
+            else if ( strcmp("PQMR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PQMRMERGE;
+            }
+            else if ( strcmp("TFQMR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_TFQMRMERGE;
+            }
+            else if ( strcmp("PTFQMR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PTFQMR;
+            }
+            else if ( strcmp("GMRES", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_GMRES;
+            }
+            else if ( strcmp("PGMRES", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PGMRES;
+            }
+            else if ( strcmp("LOBPCG", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_LOBPCG;
+            }
+            else if ( strcmp("JACOBI", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_JACOBI;
+            }
+            else if ( strcmp("BA", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_BAITER;
+            }
+            else if ( strcmp("IDR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_IDR;
+            }
+            else if ( strcmp("PIDR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PIDR;
+            }
+            else if ( strcmp("CGS", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_CGSMERGE;
+            }
+            else if ( strcmp("PCGS", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PCGSMERGE;
+            }
+            else if ( strcmp("BOMBARDMENT", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_BOMBARDMERGE;
+            }
+            else if ( strcmp("ITERREF", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_ITERREF;
+            }
+            else {
+                printf( "error: invalid solver.\n" );
             }
         } else if ( strcmp("--restart", argv[i]) == 0 && i+1 < argc ) {
             opts->solver_par.restart = atoi( argv[++i] );
         } else if ( strcmp("--precond", argv[i]) == 0 && i+1 < argc ) {
-            info = atoi( argv[++i] );
-            switch( info ) {
-                case 0: opts->precond_par.solver = Magma_NONE; break;
-                case 1: opts->precond_par.solver = Magma_JACOBI; break;
-                case 2: opts->precond_par.solver = Magma_ILU; break;
-                case -2: opts->precond_par.solver = Magma_AILU; break;
-                case 3: opts->precond_par.solver = Magma_CG; break;
-                case 4: opts->precond_par.solver = Magma_BICGSTAB; break;
-                case 5: opts->precond_par.solver = Magma_GMRES; break;
-                case 6: opts->precond_par.solver = Magma_BAITER; break;
-                case 7: opts->precond_par.solver = Magma_IDR; break;
-                case 8: opts->precond_par.solver = Magma_CGS; break;
-                case 9: opts->precond_par.solver = Magma_TFQMR; break;
-                case 10: opts->precond_par.solver = Magma_BOMBARD; break;
+            i++;
+            if ( strcmp("CG", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_CGMERGE;
+            }
+            else if ( strcmp("PCG", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PCG;
+            }
+            else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_BICGSTABMERGE;
+            }
+            else if ( strcmp("PBICGSTAB", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PBICGSTAB;
+            }
+            else if ( strcmp("QMR", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_QMRMERGE;
+            }
+            else if ( strcmp("TFQMR", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_TFQMRMERGE;
+            }
+            else if ( strcmp("PTFQMR", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PTFQMR;
+            }
+            else if ( strcmp("GMRES", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_GMRES;
+            }
+            else if ( strcmp("PGMRES", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PGMRES;
+            }
+            else if ( strcmp("LOBPCG", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_LOBPCG;
+            }
+            else if ( strcmp("JACOBI", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_JACOBI;
+            }
+            else if ( strcmp("BA", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_BAITER;
+            }
+            else if ( strcmp("IDR", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_IDR;
+            }
+            else if ( strcmp("PIDR", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PIDR;
+            }
+            else if ( strcmp("CGS", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_CGSMERGE;
+            }
+            else if ( strcmp("PCGS", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_PCGSMERGE;
+            }
+            else if ( strcmp("BOMBARDMENT", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_BOMBARDMERGE;
+            }
+            else if ( strcmp("ITERREF", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_ITERREF;
+            }
+            else if ( strcmp("ILU", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_ILU;
+            }
+            else if ( strcmp("AILU", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_AILU;
+            }
+            else if ( strcmp("NONE", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_NONE;
+            }
+            else {
+                printf( "error: invalid preconditioner.\n" );
             }
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
@@ -286,5 +366,5 @@ magma_zparse_opts(
         && opts->precond_par.solver == Magma_AILU )
             opts->precond_par.solver = Magma_AICC;
             
-    return MAGMA_SUCCESS;
+    return info;
 }

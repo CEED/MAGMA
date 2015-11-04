@@ -91,7 +91,7 @@ magma_zmdynamicic_insert(
     start = magma_wtime();
     // identify num_rm-th largest elements and bring them to the front
     CHECK( magma_zmorderstatistics(
-    LU_new->val, num_rm, LU_new->nnz-1, 1, &element, queue ) );
+    LU_new->val, LU_new->nnz, num_rm,  1, &element, queue ) );
         end = magma_wtime();tsort= end-start;start = magma_wtime();
         //    printf("done with order statistics\n");fflush(stdout);
     // insert the new elements
@@ -652,7 +652,7 @@ magma_zmdynamicic_residuals(
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmdynamicic_candidates(
+magma_zmdynamicic_candidates_nn(
     magma_z_matrix LU,
     magma_z_matrix *LU_new,
     magma_queue_t queue )
@@ -793,7 +793,7 @@ cleanup:
 
 
 extern "C" magma_int_t
-magma_zmdynamicic_candidates_n(
+magma_zmdynamicic_candidates(
     magma_z_matrix LU,
     magma_z_matrix *LU_new,
     magma_queue_t queue )
