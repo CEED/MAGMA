@@ -675,6 +675,13 @@ magma_zcg_merge(
     magma_queue_t queue );
 
 magma_int_t
+magma_zpcg_merge(
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
+    magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zcgs(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
@@ -1893,7 +1900,26 @@ magma_zcgmerge_xrbeta(
     magma_queue_t queue );
 
 
+magma_int_t
+magma_zpcgmerge_xrbeta1(
+    int n,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dr,
+    magmaDoubleComplex_ptr dd,
+    magmaDoubleComplex_ptr dz, 
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
 
+magma_int_t
+magma_zpcgmerge_xrbeta2(
+    int n,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr dh,
+    magmaDoubleComplex_ptr dr, 
+    magmaDoubleComplex_ptr dd, 
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zmdotc(
