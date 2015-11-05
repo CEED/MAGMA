@@ -34,11 +34,12 @@ static const char *usage_sparse =
 "               CG, PCG, BICGSTAB, PBICGSTAB, GMRES, PGMRES, LOBPCG, JACOBI,\n"
 "               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR\n"
 "               BOMBARDMENT, ITERREF.\n"
+" --basic       Use non-optimized version\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
 " --precond x   Possibility to choose a preconditioner:\n"
-"               CG, PCG, BICGSTAB, PBICGSTAB, GMRES, PGMRES, LOBPCG, JACOBI,\n"
-"               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR\n"
+"               CG, BICGSTAB, GMRES, LOBPCG, JACOBI,\n"
+"               BAITER, IDR, CGS, TFQMR, QMR\n"
 "               BOMBARDMENT, ITERREF, ILU, AILU, NONE.\n"
 "                   --patol atol  Absolute residual stopping criterion for preconditioner.\n"
 "                   --prtol rtol  Relative residual stopping criterion for preconditioner.\n"
@@ -136,6 +137,7 @@ magma_zparse_opts(
     int ndevices;
     cudaGetDeviceCount( &ndevices );
     
+    int basic = 0;
 
     for( int i = 1; i < argc; ++i ) {
         if ( strcmp("--format", argv[i]) == 0 && i+1 < argc ) {
@@ -285,9 +287,11 @@ magma_zparse_opts(
             else {
                 printf( "error: invalid preconditioner.\n" );
             }
+        } else if ( strcmp("--basic", argv[i]) == 0 && i+1 < argc ) {
+            basic = 1;
         } else if ( strcmp("--patol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.atol );
-        } else if ( strcmp("--prtol", argv[i]) == 0 && i+1 < argc ) {
+        }else if ( strcmp("--prtol", argv[i]) == 0 && i+1 < argc ) {
             sscanf( argv[++i], "%lf", &opts->precond_par.rtol );
         } else if ( strcmp("--piter", argv[i]) == 0 && i+1 < argc ) {
             opts->precond_par.maxiter = atoi( argv[++i] );
@@ -319,6 +323,44 @@ magma_zparse_opts(
         } else {
             *matrices = i;
             break;
+        }
+    }
+    if( basic == 1 ){
+        if ( opts->solver_par.solver == Magma_CGMERGE )
+            opts->solver_par.solver = Magma_CG;
+        }
+        else if ( opts->solver_par.solver = Magma_PCGMERGE) {
+            opts->solver_par.solver = Magma_PCG;
+        }
+        else if ( opts->solver_par.solver == Magma_BICGSTABMERGE )
+            opts->solver_par.solver = Magma_BICGSTAB;
+        }
+        else if ( opts->solver_par.solver = Magma_PBICGSTABMERGE) {
+            opts->solver_par.solver = Magma_PBICGSTAB;
+        }
+        else if ( opts->solver_par.solver == Magma_TFQMRMERGE )
+            opts->solver_par.solver = Magma_TFQMR;
+        }
+        else if ( opts->solver_par.solver = Magma_PTFQMRMERGE) {
+            opts->solver_par.solver = Magma_PTFQMR;
+        }
+        else if ( opts->solver_par.solver == Magma_CGSMERGE )
+            opts->solver_par.solver = Magma_CGS;
+        }
+        else if ( opts->solver_par.solver = Magma_PCGSMERGE) {
+            opts->solver_par.solver = Magma_PCGS;
+        }
+        else if ( opts->solver_par.solver == Magma_QMRMERGE )
+            opts->solver_par.solver = Magma_QMR;
+        }
+        else if ( opts->solver_par.solver = Magma_PQMRMERGE) {
+            opts->solver_par.solver = Magma_PQMR;
+        }
+                if ( opts->solver_par.solver == Magma_QMRMERGE )
+            opts->solver_par.solver = Magma_QMR;
+        }
+        else if ( opts->solver_par.solver = Magma_PCGMERGE) {
+            opts->solver_par.solver = Magma_PCG;
         }
     }
     

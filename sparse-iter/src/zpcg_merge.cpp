@@ -76,7 +76,8 @@ magma_zpcg_merge(
     
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h={0};
-    double nom, nom0, betanom, den, nomb;
+    double nom, nom0, r0,  res, nomb;
+    magmaDoubleComplex den;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -107,20 +108,38 @@ magma_zpcg_merge(
     // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1);                      // x = 0
-    //CHECK(  magma_zresidualvec( A, b, *x, &r, nom0, queue));
-    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
-    magma_zcopy( dofs, r.dval, 1, d.dval, 1 );                    // d = r
-    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );
-    nom = nom0 * nom0;                                           // nom = r' * r
+    CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
+    
+    // preconditioner
+    CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
+    CHECK( magma_z_applyprecond_right( A, rt, &d, precond_par, queue ));
+    
+    nom = MAGMA_Z_ABS( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
     CHECK( magma_z_spmv( c_one, A, d, c_zero, z, queue ));              // z = A d
-    den = MAGMA_Z_ABS( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
+    den = magma_zdotc(dofs, d.dval, 1, z.dval, 1); // den = d'* z
     solver_par->init_res = nom0;
     
     nomb = magma_dznrm2( dofs, b.dval, 1 );
     if ( nomb == 0.0 ){
         nomb=1.0;
     }       
+    if ( (r0 = nomb * solver_par->rtol) < ATOLERANCE ){
+        r0 = ATOLERANCE;
+    }
+    solver_par->final_res = solver_par->init_res;
+    solver_par->iter_res = solver_par->init_res;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t)nom0;
+        solver_par->timing[0] = 0.0;
+    }
+    if ( nom < r0 ) {
+        goto cleanup;
+    }
+    // check positive definite
+    if ( MAGMA_Z_ABS(den) <= 0.0 ) {
+        info = MAGMA_NONSPD;
+        goto cleanup;
+    }    
     
     // array on host for the parameters
     CHECK( magma_zmalloc_cpu( &skp_h, 6 ));
@@ -136,22 +155,6 @@ magma_zpcg_merge(
 
     magma_zsetvector( 6, skp_h, 1, skp, 1 );
 
-    if( nom0 < solver_par->atol ||
-        nom0/nomb < solver_par->rtol ){
-        goto cleanup;
-    }
-    solver_par->final_res = solver_par->init_res;
-    solver_par->iter_res = solver_par->init_res;
-    if ( solver_par->verbose > 0 ) {
-        solver_par->res_vec[0] = (real_Double_t) nom0;
-        solver_par->timing[0] = 0.0;
-    }
-    // check positive definite
-    if (den <= 0.0) {
-        info = MAGMA_NONSPD; 
-        goto cleanup;
-    }
-    
     //Chronometry
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
@@ -181,20 +184,20 @@ magma_zpcg_merge(
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1,
                                                     skp_h+1, 1, stream[1] );
-        betanom = sqrt(MAGMA_Z_ABS(skp_h[1]));
+        res = sqrt(MAGMA_Z_ABS(skp_h[1]));
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
-                        = (real_Double_t) betanom;
+                        = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
         }
 
-        if (  betanom  < solver_par->atol || 
-              betanom/nomb < solver_par->rtol ) {
+        if (  res < solver_par->atol || 
+              res/nomb < solver_par->rtol ) {
             break;
         }
     }
@@ -204,7 +207,7 @@ magma_zpcg_merge(
     solver_par->runtime = (real_Double_t) tempo2-tempo1;
     double residual;
     CHECK(  magma_zresidualvec( A, b, *x, &r, &residual, NULL));
-    solver_par->iter_res = betanom;
+    solver_par->iter_res = res;
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
@@ -213,7 +216,7 @@ magma_zpcg_merge(
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
-                        = (real_Double_t) betanom;
+                        = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
@@ -228,7 +231,7 @@ magma_zpcg_merge(
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
                 solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
-                        = (real_Double_t) betanom;
+                        = (real_Double_t) res;
                 solver_par->timing[(solver_par->numiter)/solver_par->verbose]
                         = (real_Double_t) tempo2-tempo1;
             }
