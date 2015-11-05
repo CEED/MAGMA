@@ -326,37 +326,37 @@ magma_zparse_opts(
         }
     }
     if( basic == 1 ){
-        if ( opts->solver_par.solver == Magma_CGMERGE )
+        if ( opts->solver_par.solver == Magma_CGMERGE ) {
             opts->solver_par.solver = Magma_CG;
         }
         else if ( opts->solver_par.solver = Magma_PCGMERGE) {
             opts->solver_par.solver = Magma_PCG;
         }
-        else if ( opts->solver_par.solver == Magma_BICGSTABMERGE )
+        else if ( opts->solver_par.solver == Magma_BICGSTABMERGE ) {
             opts->solver_par.solver = Magma_BICGSTAB;
         }
         else if ( opts->solver_par.solver = Magma_PBICGSTABMERGE) {
             opts->solver_par.solver = Magma_PBICGSTAB;
         }
-        else if ( opts->solver_par.solver == Magma_TFQMRMERGE )
+        else if ( opts->solver_par.solver == Magma_TFQMRMERGE ) {
             opts->solver_par.solver = Magma_TFQMR;
         }
         else if ( opts->solver_par.solver = Magma_PTFQMRMERGE) {
             opts->solver_par.solver = Magma_PTFQMR;
         }
-        else if ( opts->solver_par.solver == Magma_CGSMERGE )
+        else if ( opts->solver_par.solver == Magma_CGSMERGE ) {
             opts->solver_par.solver = Magma_CGS;
         }
         else if ( opts->solver_par.solver = Magma_PCGSMERGE) {
             opts->solver_par.solver = Magma_PCGS;
         }
-        else if ( opts->solver_par.solver == Magma_QMRMERGE )
+        else if ( opts->solver_par.solver == Magma_QMRMERGE ) {
             opts->solver_par.solver = Magma_QMR;
         }
         else if ( opts->solver_par.solver = Magma_PQMRMERGE) {
             opts->solver_par.solver = Magma_PQMR;
         }
-                if ( opts->solver_par.solver == Magma_QMRMERGE )
+                if ( opts->solver_par.solver == Magma_QMRMERGE ) {
             opts->solver_par.solver = Magma_QMR;
         }
         else if ( opts->solver_par.solver = Magma_PCGMERGE) {
