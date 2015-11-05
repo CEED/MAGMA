@@ -131,6 +131,9 @@ magma_zsolverinfo(
             case  Magma_BOMBARDMERGE:
                     printf("%%  BOMBARD (merged) performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_BAITER:
+                    printf("%%  BAITER performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
         }
@@ -197,6 +200,7 @@ magma_zsolverinfo(
             case  Magma_BOMBARD:
             case  Magma_BOMBARDMERGE:
             case  Magma_JACOBI:
+            case  Magma_BAITER:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
                         "======%%\n");

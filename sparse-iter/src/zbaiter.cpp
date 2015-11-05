@@ -63,42 +63,57 @@ magma_zbaiter(
     // prepare solver feedback
     solver_par->solver = Magma_BAITER;
     solver_par->info = MAGMA_SUCCESS;
+    
+    // some useful variables 
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     // initial residual
-    real_Double_t tempo1, tempo2;
+    real_Double_t tempo1, tempo2, runtime;
     double residual;
     magma_int_t localiter = 1;
     
     magma_z_matrix Ah={Magma_CSR}, ACSR={Magma_CSR}, A_d={Magma_CSR}, D={Magma_CSR}, 
-                    R={Magma_CSR}, D_d={Magma_CSR}, R_d={Magma_CSR};
-    
-    CHECK( magma_zresidual( A, b, *x, &residual, queue ));
-    solver_par->init_res = residual;
-    solver_par->res_vec = NULL;
-    solver_par->timing = NULL;
-
-
+                    R={Magma_CSR}, D_d={Magma_CSR}, R_d={Magma_CSR}, r={Magma_CSR};
 
     CHECK( magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue ));
     CHECK( magma_zmconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue ));
 
     CHECK( magma_zmtransfer( ACSR, &A_d, Magma_CPU, Magma_DEV, queue ));
-
+    
+    CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK(  magma_zresidualvec( A_d, b, *x, &r, &residual, queue));
+    solver_par->init_res = residual;
+    if ( solver_par->verbose > 0 ) {
+        solver_par->res_vec[0] = (real_Double_t) residual;
+    }
     // setup
     CHECK( magma_zcsrsplit( 256, ACSR, &D, &R, queue ));
     CHECK( magma_zmtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue ));
     CHECK( magma_zmtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue ));
-
-
-    tempo1 = magma_sync_wtime( queue );
-
+    
+    solver_par->numiter = 0;
     // block-asynchronous iteration iterator
-    for( int iter=0; iter<solver_par->maxiter; iter++)
-        CHECK( magma_zbajac_csr( localiter, D_d, R_d, b, x, queue ));
+    do
+    {
+        tempo1 = magma_sync_wtime( queue );
+        solver_par->numiter+= localiter*solver_par->verbose;
+        for( int z=0; z<solver_par->verbose; z++){
+            CHECK( magma_zbajac_csr( localiter, D_d, R_d, b, x, queue ));
+        }
+        tempo2 = magma_sync_wtime( queue );
+        runtime += tempo2-tempo1;
+        if ( solver_par->verbose > 0 ) {
+        CHECK(  magma_zresidualvec( A_d, b, *x, &r, &residual, queue));
+            solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
+                = (real_Double_t) residual;
+            solver_par->timing[(solver_par->numiter)/solver_par->verbose]
+                = (real_Double_t) runtime;
+        }
+    }
+    while ( solver_par->numiter+1 <= solver_par->maxiter );
 
-    tempo2 = magma_sync_wtime( queue );
-    solver_par->runtime = (real_Double_t) tempo2-tempo1;
-    CHECK(  magma_zresidual( A, b, *x, &residual, queue));
+    solver_par->runtime = runtime;
+    CHECK(  magma_zresidual( A_d, b, *x, &residual, queue));
     solver_par->final_res = residual;
     solver_par->numiter = solver_par->maxiter;
 
@@ -110,6 +125,7 @@ magma_zbaiter(
     }
     
 cleanup:
+    magma_zmfree(&r, queue );
     magma_zmfree(&D, queue );
     magma_zmfree(&R, queue );
     magma_zmfree(&D_d, queue );
