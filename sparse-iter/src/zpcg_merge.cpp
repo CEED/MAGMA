@@ -172,14 +172,14 @@ magma_zpcg_merge(
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
             
-        // updates x, r, computes scalars and updates d
+        // updates x, r
         CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
         
         // preconditioner in between
         CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
         
-        // updates x, r, computes scalars and updates d
+        // computes scalars and updates d
         CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));
 
         // check stopping criterion (asynchronous copy)
