@@ -181,9 +181,9 @@ magma_zpcg_merge(
         
         // computes scalars and updates d
         CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));
-if( solver_par->numiter==1){
-       magma_zcopy( dofs, h.dval, 1, d.dval, 1 );   
-    }
+        if( solver_par->numiter==1){
+            magma_zcopy( dofs, h.dval, 1, d.dval, 1 );   
+        }
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1,
                                                     skp_h+1, 1, stream[1] );
