@@ -335,7 +335,7 @@ magma_zparse_opts(
         else if ( opts->solver_par.solver == Magma_BICGSTABMERGE ) {
             opts->solver_par.solver = Magma_BICGSTAB;
         }
-        else if ( opts->solver_par.solver = Magma_PBICGSTABMERGE) {
+        else if ( opts->solver_par.solver = Magma_PBICGSTAB ) {
             opts->solver_par.solver = Magma_PBICGSTAB;
         }
         else if ( opts->solver_par.solver == Magma_TFQMRMERGE ) {
