@@ -159,7 +159,7 @@ magma_zparse_opts(
                 opts->solver_par.solver = Magma_CGMERGE;
             }
             else if ( strcmp("PCG", argv[i]) == 0 ) {
-                opts->solver_par.solver = Magma_PCG;
+                opts->solver_par.solver = Magma_PCGMERGE;
             }
             else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_BICGSTABMERGE;
