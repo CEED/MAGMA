@@ -101,6 +101,9 @@ magma_zsolverinfo(
             case  Magma_TFQMR:
                     printf("%%  TFQMR performance analysis every %d iteration\n",
                                                                         (int) k); break;
+            case  Magma_PCGMERGE:
+                    printf("%%  PCG performance analysis every %d iteration\n",
+                                                                        (int) k); break;
             case  Magma_PTFQMR:
                     printf("%%  TFQMR performance analysis every %d iteration\n",
                                                                         (int) k); break;
@@ -179,8 +182,10 @@ magma_zsolverinfo(
             case  Magma_PIDR:
             case  Magma_CGS:
             case  Magma_PCGS:
+            case  Magma_PCGMERGE:
             case  Magma_CGSMERGE:
             case  Magma_PCGSMERGE:
+            case  Magma_PCGMERGE:
             case  Magma_QMR:
             case  Magma_QMRMERGE:
             case  Magma_PQMR:
@@ -223,6 +228,7 @@ magma_zsolverinfo(
         case  Magma_CG:
             printf("%% CG solver summary:\n"); break;
         case  Magma_PCG:
+        case  Magma_PCGMERGE:
             printf("%% PCG solver summary:\n"); break;
         case  Magma_CGMERGE:
             printf("%% CG solver summary:\n"); break;
