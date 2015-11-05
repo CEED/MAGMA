@@ -25,6 +25,7 @@ ZSRC += \
 	zcg.cpp				\
 	zcg_res.cpp			\
 	zcg_merge.cpp		\
+	zpcg_merge.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
 	zbicgstab_merge2.cpp	\
