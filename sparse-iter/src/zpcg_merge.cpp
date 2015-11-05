@@ -112,8 +112,9 @@ magma_zpcg_merge(
     
     // preconditioner
     CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-    CHECK( magma_z_applyprecond_right( A, rt, &d, precond_par, queue ));
+    CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
     
+    magma_zcopy( dofs, h.dval, 1, d.dval, 1 );  
     nom = MAGMA_Z_ABS( magma_zdotc(dofs, r.dval, 1, h.dval, 1) );
     CHECK( magma_z_spmv( c_one, A, d, c_zero, z, queue ));              // z = A d
     den = magma_zdotc(dofs, d.dval, 1, z.dval, 1); // den = d'* z
