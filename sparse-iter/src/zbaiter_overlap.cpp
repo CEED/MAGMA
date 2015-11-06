@@ -74,13 +74,26 @@ magma_zbaiter_overlap(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     // initial residual
-    real_Double_t tempo1, tempo2, runtime;
+    real_Double_t tempo1, tempo2, runtime=0;
     double residual;
     magma_int_t localiter = precond_par->maxiter;
     
     magma_z_matrix Ah={Magma_CSR}, ACSR={Magma_CSR}, A_d={Magma_CSR}, r={Magma_CSR},
-        D1={Magma_CSR}, R1={Magma_CSR}, D1_d={Magma_CSR}, R1_d={Magma_CSR},
-        D2={Magma_CSR}, R2={Magma_CSR}, D2_d={Magma_CSR}, R2_d={Magma_CSR};
+        D={Magma_CSR}, R={Magma_CSR};
+        
+    // setup
+    magma_int_t matrices;
+    magma_int_t overlap = precond_par->levels;
+    magma_int_t blocksize = 256;
+    if( overlap ){
+        matrices = 100/overlap;
+    }else{
+        printf("error: overlap ratio not supported.\n");
+        goto cleanup;
+    }
+    magma_z_matrix D_d[ matrices ];
+    magma_z_matrix R_d[ matrices ];
+    
 
     CHECK( magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue ));
     CHECK( magma_zmconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue ));
@@ -93,8 +106,14 @@ magma_zbaiter_overlap(
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t) residual;
     }
-    // setup
-    CHECK( magma_zcsrsplit( 0, 256, ACSR, &D1, &R1, queue ));
+    
+
+    
+   // setup  
+   for( int i=0; i<matrices; i++ ){
+       CHECK( magma_zcsrsplit( overlap, 256, ACSR, &D1, &R1, queue ));
+       
+   }
     CHECK( magma_zmtransfer( D1, &D1_d, Magma_CPU, Magma_DEV, queue ));
     CHECK( magma_zmtransfer( R1, &R1_d, Magma_CPU, Magma_DEV, queue ));
     CHECK( magma_zcsrsplit( 128, 256, ACSR, &D2, &R2, queue ));

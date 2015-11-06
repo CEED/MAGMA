@@ -73,7 +73,7 @@ magma_zbaiter(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     // initial residual
-    real_Double_t tempo1, tempo2, runtime;
+    real_Double_t tempo1, tempo2, runtime=0;
     double residual;
     magma_int_t localiter = precond_par->maxiter;
     
