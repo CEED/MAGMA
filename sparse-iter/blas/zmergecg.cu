@@ -234,6 +234,7 @@ magma_zcgmerge_spmvell_kernel(
     }
 }
 
+
 // computes the SpMV using ELLPACK and the first step of the reduction
 __global__ void
 magma_zcgmerge_spmvellpack_kernel(  
@@ -309,6 +310,98 @@ magma_zcgmerge_spmvellpack_kernel(
             vtmp[ blockIdx.x ] = temp[ 0 ];
     }
 }
+
+
+// computes the SpMV using SELL alignment 1 and the first step of the reduction
+__global__ void
+magma_zcgmerge_spmvell_kernelb1(  
+    int n,
+    int blocksize,
+    magmaDoubleComplex * dval, 
+    magma_index_t * dcolind,
+    magma_index_t * drowptr,
+    magmaDoubleComplex * d,
+    magmaDoubleComplex * z,
+    magmaDoubleComplex * vtmp )
+{
+    extern __shared__ magmaDoubleComplex temp[]; 
+    int Idx = threadIdx.x;   
+    int i   = blockIdx.x * blockDim.x + Idx;
+
+    temp[ Idx ] = MAGMA_Z_MAKE( 0.0, 0.0);
+    
+
+    if(i < n ) {
+        int offset = drowptr[ blockIdx.x ];
+        int border = (drowptr[ blockIdx.x+1 ]-offset)/blocksize;
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        for ( int k = 0; k < border; k++){ 
+            int col = dcolind [ offset+ blocksize * k + threadIdx.x ];
+            magmaDoubleComplex val = dval[offset+ blocksize * k + threadIdx.x];
+            if( val != 0){
+                  dot += val*d[col];
+            }
+        }
+        
+        
+        //magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        //for ( int k = 0; k < num_cols_per_row; k++ ) {
+        //    int col = dcolind [ n * k + i ];
+        //    magmaDoubleComplex val = dval [ n * k + i ];
+        //    if( val != 0)
+        //        dot += val * d[ col ];
+        //}
+        z[ i ] =  dot;
+        temp[ Idx ] = d[ i ] * dot;
+    }
+
+    __syncthreads();
+    if ( Idx < 128 ) {
+        temp[ Idx ] += temp[ Idx + 128 ];
+    }
+    __syncthreads();
+    if ( Idx < 64 ) {
+        temp[ Idx ] += temp[ Idx + 64 ];
+    }
+    __syncthreads();
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+        if( Idx < 32 ) {
+            temp[ Idx ] += temp[ Idx + 32 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 16 ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 8  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 4  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 2  ]; __syncthreads();
+            temp[ Idx ] += temp[ Idx + 1  ]; __syncthreads();
+        }
+    #endif
+    #if defined(PRECISION_d)
+        if( Idx < 32 ) {
+            volatile double *temp2 = temp;
+            temp2[ Idx ] += temp2[ Idx + 32 ];
+            temp2[ Idx ] += temp2[ Idx + 16 ];
+            temp2[ Idx ] += temp2[ Idx + 8 ];
+            temp2[ Idx ] += temp2[ Idx + 4 ];
+            temp2[ Idx ] += temp2[ Idx + 2 ];
+            temp2[ Idx ] += temp2[ Idx + 1 ];
+        }
+    #endif
+    #if defined(PRECISION_s)
+        if( Idx < 32 ) {
+            volatile float *temp2 = temp;
+            temp2[ Idx ] += temp2[ Idx + 32 ];
+            temp2[ Idx ] += temp2[ Idx + 16 ];
+            temp2[ Idx ] += temp2[ Idx + 8 ];
+            temp2[ Idx ] += temp2[ Idx + 4 ];
+            temp2[ Idx ] += temp2[ Idx + 2 ];
+            temp2[ Idx ] += temp2[ Idx + 1 ];
+        }
+    #endif
+
+    if ( Idx == 0 ) {
+            vtmp[ blockIdx.x ] = temp[ 0 ];
+    }
+}
+
 
 // computes the SpMV using ELLRT 8 threads per row
 __global__ void
@@ -862,7 +955,37 @@ magma_zcgmerge_spmv1(
     else if ( A.storage_type == Magma_ELL )
         magma_zcgmerge_spmvell_kernel<<<Gs, Bs, Ms, queue >>>
         ( A.num_rows, A.max_nnz_row, A.dval, A.dcol, dd, dz, d1 );
-    else if ( A.storage_type == Magma_SELLP ) {
+    else if ( A.storage_type == Magma_CUCSR ) {
+        cusparseHandle_t cusparseHandle = 0;
+        cusparseMatDescr_t descr = 0;
+        magmaDoubleComplex c_one = MAGMA_Z_ONE;
+        magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+        cusparseCreate( &cusparseHandle );
+        cusparseSetStream( cusparseHandle, queue );
+        cusparseCreateMatDescr( &descr );
+        cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL );
+        cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO );
+        cusparseZcsrmv( cusparseHandle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+        A.num_rows, A.num_cols, A.nnz, &c_one, descr,
+        A.dval, A.drow, A.dcol, dd, &c_zero, dz );
+        cusparseDestroyMatDescr( descr );
+        cusparseDestroy( cusparseHandle );
+        cusparseHandle = 0;
+        descr = 0;
+        magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, queue >>>
+                      ( A.num_rows, dz, dd, d1 );
+
+    }
+    else if ( A.storage_type == Magma_SELLP && A.alignment == 1 ) {
+        if( A.blocksize == 256 ){
+            magma_zcgmerge_spmvell_kernelb1<<<Gs, Bs, Ms, queue >>>
+            ( A.num_rows, A.blocksize, 
+                A.dval, A.dcol, A.drow, dd, dz, d1 );
+        }else{
+                printf("error: for alignment 1, only blocksize 256 supported.\n");
+        }
+    }
+    else if ( A.storage_type == Magma_SELLP && A.alignment > 1) {
             int num_threadssellp = A.blocksize*A.alignment;
             magma_int_t arch = magma_getdevice_arch();
             if ( arch < 200 && num_threadssellp > 256 )

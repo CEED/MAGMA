@@ -16,6 +16,7 @@ ZHDR :=
 ZSRC := \
 	magma_z_blaswrapper.cpp	\
 	zbajac_csr.cu			\
+	zbajac_csr_overlap.cu	\
 	zgeaxpy.cu              \
 	zgecsrmv.cu				\
 	zgeellmv.cu				\

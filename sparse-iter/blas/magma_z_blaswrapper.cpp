@@ -91,7 +91,7 @@ magma_z_spmv(
     // DEV case
     if ( A.memory_location == Magma_DEV ) {
         if ( A.num_cols == x.num_rows && x.num_cols == 1 ) {
-             if ( A.storage_type == Magma_CSR
+             if ( A.storage_type == Magma_CSR || A.storage_type == Magma_CUCSR
                             || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
               CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
