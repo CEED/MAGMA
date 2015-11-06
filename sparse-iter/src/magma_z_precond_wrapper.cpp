@@ -66,6 +66,7 @@ magma_z_precond(
     psolver_par.verbose = 0;
     magma_z_preconditioner pprecond;
     pprecond.solver = Magma_NONE;
+    pprecond.maxiter = 3;
 
     switch( precond->solver ) {
         case  Magma_CG:
@@ -77,11 +78,17 @@ magma_z_precond(
         case  Magma_JACOBI:
                 CHECK( magma_zjacobi( A, b, x, &psolver_par, queue )); break;
         case  Magma_BAITER:
-                CHECK( magma_zbaiter( A, b, x, &psolver_par, queue )); break;
+                CHECK( magma_zbaiter( A, b, x, &psolver_par, &pprecond, queue )); break;
         case  Magma_IDR:
                 CHECK( magma_zidr( A, b, x, &psolver_par, queue )); break;
         case  Magma_CGS:
                 CHECK( magma_zcgs( A, b, x, &psolver_par, queue )); break;
+        case  Magma_QMR:
+                CHECK( magma_zqmr( A, b, x, &psolver_par, queue )); break;
+        case  Magma_TFQMR:
+                CHECK( magma_ztfqmr( A, b, x, &psolver_par, queue )); break;
+        case  Magma_BAITERO:
+                CHECK( magma_zbaiter_overlap( A, b, x, &psolver_par, &pprecond, queue )); break;
         default:
                 CHECK( magma_zcg_res( A, b, x, &psolver_par, queue )); break;
     }

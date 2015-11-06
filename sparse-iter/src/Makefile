@@ -42,6 +42,7 @@ ZSRC += \
 	ziterref.cpp		\
 	zjacobi.cpp			\
 	zbaiter.cpp			\
+	zbaiter_overlap.cpp	\
 	zpcg.cpp			\
     zcgs.cpp			\
     zcgs_merge.cpp		\

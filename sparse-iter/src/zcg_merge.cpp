@@ -76,7 +76,7 @@ magma_zcg_merge(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     magma_int_t dofs = A.num_rows*b.num_cols;
 
-    magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, z={Magma_CSR};
+    magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, z={Magma_CSR}, B={Magma_CSR}, C={Magma_CSR};
     magmaDoubleComplex *d1=NULL, *d2=NULL, *skp=NULL;
 
     // GPU stream
@@ -96,7 +96,7 @@ magma_zcg_merge(
     // array for the parameters
     CHECK( magma_zmalloc( &skp, 6 ));
     // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
-
+    
     // solver setup
     magma_zscal( dofs, c_zero, x->dval, 1);                      // x = 0
     //CHECK(  magma_zresidualvec( A, b, *x, &r, nom0, queue));
@@ -147,7 +147,6 @@ magma_zcg_merge(
     real_Double_t tempo1, tempo2;
     tempo1 = magma_sync_wtime( queue );
 
-    
     solver_par->numiter = 0;
     // start iteration
     do
@@ -224,6 +223,8 @@ cleanup:
     magma_zmfree(&r, queue );
     magma_zmfree(&z, queue );
     magma_zmfree(&d, queue );
+    magma_zmfree(&B, queue );
+    magma_zmfree(&C, queue );
 
     magma_free( d1 );
     magma_free( d2 );

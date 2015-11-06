@@ -98,8 +98,9 @@ magma_z_solver(
             case  Magma_JACOBI:
                     CHECK( magma_zjacobi( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_BAITER:
-                    //CHECK( magma_zjacobidomainoverlap( A, b, x, &zopts->solver_par, queue )); break;
-                    CHECK( magma_zbaiter( A, b, x, &zopts->solver_par, queue ) ); break;
+                    CHECK( magma_zbaiter( A, b, x, &zopts->solver_par, &zopts->precond_par, queue ) ); break;
+            case  Magma_BAITERO:
+                    CHECK( magma_zbaiter_overlap( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_CGS:
                     CHECK( magma_zcgs( A, b, x, &zopts->solver_par, queue ) ); break;
             case  Magma_CGSMERGE:

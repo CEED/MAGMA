@@ -42,6 +42,10 @@
     @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
+                
+    @param[in]
+    precond_par magma_z_preconditioner*
+                preconditioner parameters
 
     @param[in]
     queue       magma_queue_t
@@ -56,6 +60,7 @@ magma_zbaiter(
     magma_z_matrix b,
     magma_z_matrix *x,
     magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -70,7 +75,7 @@ magma_zbaiter(
     // initial residual
     real_Double_t tempo1, tempo2, runtime;
     double residual;
-    magma_int_t localiter = 1;
+    magma_int_t localiter = precond_par->maxiter;
     
     magma_z_matrix Ah={Magma_CSR}, ACSR={Magma_CSR}, A_d={Magma_CSR}, D={Magma_CSR}, 
                     R={Magma_CSR}, D_d={Magma_CSR}, R_d={Magma_CSR}, r={Magma_CSR};
@@ -87,7 +92,7 @@ magma_zbaiter(
         solver_par->res_vec[0] = (real_Double_t) residual;
     }
     // setup
-    CHECK( magma_zcsrsplit( 256, ACSR, &D, &R, queue ));
+    CHECK( magma_zcsrsplit( 0, 256, ACSR, &D, &R, queue ));
     CHECK( magma_zmtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue ));
     CHECK( magma_zmtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue ));
     
@@ -96,7 +101,7 @@ magma_zbaiter(
     do
     {
         tempo1 = magma_sync_wtime( queue );
-        solver_par->numiter+= localiter*solver_par->verbose;
+        solver_par->numiter+= solver_par->verbose;
         for( int z=0; z<solver_par->verbose; z++){
             CHECK( magma_zbajac_csr( localiter, D_d, R_d, b, x, queue ));
         }

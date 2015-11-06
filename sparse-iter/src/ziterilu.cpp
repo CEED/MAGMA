@@ -113,8 +113,8 @@ magma_ziterilusetup(
 
     magma_zmfree(&hAtmp, queue );
 
-    CHECK( magma_zcsrsplit( 256, hAL, &DL, &RL , queue ));
-    CHECK( magma_zcsrsplit( 256, hAU, &DU, &RU , queue ));
+    CHECK( magma_zcsrsplit( 0, 256, hAL, &DL, &RL , queue ));
+    CHECK( magma_zcsrsplit( 0, 256, hAU, &DU, &RU , queue ));
 
     CHECK( magma_zmtransfer( DL, &precond->LD, Magma_CPU, Magma_DEV , queue ));
     CHECK( magma_zmtransfer( DU, &precond->UD, Magma_CPU, Magma_DEV , queue ));
