@@ -152,11 +152,18 @@ magma_zparse_opts(
                 printf( "error: invalid format, use default (CSR).\n" );
             }
         } else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
-            info = atoi( argv[++i] );
-            switch( info ) {
-                case 0: opts->scaling = Magma_NOSCALE; break;
-                case 1: opts->scaling = Magma_UNITDIAG; break;
-                case 2: opts->scaling = Magma_UNITROW; break;
+            i++;
+            if ( strcmp("NOSCALE", argv[i]) == 0 ) {
+                opts->scaling = Magma_NOSCALE;
+            }
+            else if ( strcmp("UNITDIAG", argv[i]) == 0 ) {
+                opts->scaling = Magma_UNITDIAG;
+            }
+            else if ( strcmp("UNITROW", argv[i]) == 0 ) {
+                opts->scaling = Magma_UNITROW;
+            }
+            else {
+                printf( "error: invalid scaling, use default.\n" );
             }
         } else if ( strcmp("--solver", argv[i]) == 0 && i+1 < argc ) {
             i++;
@@ -338,37 +345,37 @@ magma_zparse_opts(
         if ( opts->solver_par.solver == Magma_CGMERGE ) {
             opts->solver_par.solver = Magma_CG;
         }
-        else if ( opts->solver_par.solver = Magma_PCGMERGE) {
+        else if ( opts->solver_par.solver == Magma_PCGMERGE) {
             opts->solver_par.solver = Magma_PCG;
         }
         else if ( opts->solver_par.solver == Magma_BICGSTABMERGE ) {
             opts->solver_par.solver = Magma_BICGSTAB;
         }
-        else if ( opts->solver_par.solver = Magma_PBICGSTAB ) {
+        else if ( opts->solver_par.solver == Magma_PBICGSTAB ) {
             opts->solver_par.solver = Magma_PBICGSTAB;
         }
         else if ( opts->solver_par.solver == Magma_TFQMRMERGE ) {
             opts->solver_par.solver = Magma_TFQMR;
         }
-        else if ( opts->solver_par.solver = Magma_PTFQMRMERGE) {
+        else if ( opts->solver_par.solver == Magma_PTFQMRMERGE) {
             opts->solver_par.solver = Magma_PTFQMR;
         }
         else if ( opts->solver_par.solver == Magma_CGSMERGE ) {
             opts->solver_par.solver = Magma_CGS;
         }
-        else if ( opts->solver_par.solver = Magma_PCGSMERGE) {
+        else if ( opts->solver_par.solver == Magma_PCGSMERGE) {
             opts->solver_par.solver = Magma_PCGS;
         }
         else if ( opts->solver_par.solver == Magma_QMRMERGE ) {
             opts->solver_par.solver = Magma_QMR;
         }
-        else if ( opts->solver_par.solver = Magma_PQMRMERGE) {
+        else if ( opts->solver_par.solver == Magma_PQMRMERGE) {
             opts->solver_par.solver = Magma_PQMR;
         }
                 if ( opts->solver_par.solver == Magma_QMRMERGE ) {
             opts->solver_par.solver = Magma_QMR;
         }
-        else if ( opts->solver_par.solver = Magma_PCGMERGE) {
+        else if ( opts->solver_par.solver == Magma_PCGMERGE) {
             opts->solver_par.solver = Magma_PCG;
         }
     }
