@@ -142,8 +142,16 @@ magma_zqmr(
     do
     {
         solver_par->numiter++;
-        if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
-            goto cleanup;
+        if( rho == c_zero || psi == c_zero 
+            || isnan(MAGMA_Z_REAL(rho))
+            || isnan(MAGMA_Z_IMAG(rho))
+            || isinf(MAGMA_Z_REAL(rho))
+            || isinf(MAGMA_Z_IMAG(rho))
+            || isnan(MAGMA_Z_REAL(psi))
+            || isnan(MAGMA_Z_IMAG(psi))
+            || isinf(MAGMA_Z_REAL(psi))
+            || isinf(MAGMA_Z_IMAG(psi))  ){
+            break;
         }
             // y = y / rho;
         magma_zscal(dofs, c_one / rho, y.dval, 1); 
@@ -156,7 +164,11 @@ magma_zqmr(
  
             // delta = z' * y;
         delta = magma_zdotc(dofs, z.dval, 1, y.dval, 1);
-        if( delta == c_zero || delta == 'NaN' ){
+        if( delta == c_zero
+            || isnan(MAGMA_Z_REAL(delta))
+            || isnan(MAGMA_Z_IMAG(delta))
+            || isinf(MAGMA_Z_REAL(delta))
+            || isinf(MAGMA_Z_IMAG(delta))  ){
             break;
         }
         
@@ -180,7 +192,15 @@ magma_zqmr(
             magma_zscal(dofs, -rde, q.dval, 1);    
             magma_zaxpy(dofs, c_one, z.dval, 1, q.dval, 1);
         }
-        if( rho == c_zero || rho == 'NaN' || psi == c_zero || psi == 'NaN' ){
+        if( rho == c_zero || psi == c_zero 
+            || isnan(MAGMA_Z_REAL(rho))
+            || isnan(MAGMA_Z_IMAG(rho))
+            || isinf(MAGMA_Z_REAL(rho))
+            || isinf(MAGMA_Z_IMAG(rho))
+            || isnan(MAGMA_Z_REAL(psi))
+            || isnan(MAGMA_Z_IMAG(psi))
+            || isinf(MAGMA_Z_REAL(psi))
+            || isinf(MAGMA_Z_IMAG(psi))  ){
             break;
         }
         
@@ -188,7 +208,16 @@ magma_zqmr(
             // epsilon = q' * pt;
         epsilon = magma_zdotc(dofs, q.dval, 1, pt.dval, 1);
         beta = epsilon / delta;
-        if( epsilon == c_zero || epsilon == 'NaN' || beta == c_zero || beta == 'NaN' ){
+
+        if( epsilon == c_zero || beta == c_zero 
+            || isnan(MAGMA_Z_REAL(epsilon))
+            || isnan(MAGMA_Z_IMAG(epsilon))
+            || isinf(MAGMA_Z_REAL(epsilon))
+            || isinf(MAGMA_Z_IMAG(epsilon))
+            || isnan(MAGMA_Z_REAL(beta))
+            || isnan(MAGMA_Z_IMAG(beta))
+            || isinf(MAGMA_Z_REAL(beta))
+            || isinf(MAGMA_Z_IMAG(beta))  ){
             break;
         }
             // v = pt - beta * v;
@@ -217,7 +246,20 @@ magma_zqmr(
         
         gamm = c_one / magma_zsqrt(c_one + thet*thet);        
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
-        if( thet == c_zero || thet == 'NaN' || gamm == c_zero || gamm == 'NaN' || eta == c_zero || eta == 'NaN' ){
+
+        if( thet == c_zero || gamm == c_zero || eta == c_zero 
+            || isnan(MAGMA_Z_REAL(thet))
+            || isnan(MAGMA_Z_IMAG(thet))
+            || isinf(MAGMA_Z_REAL(thet))
+            || isinf(MAGMA_Z_IMAG(thet))
+            || isnan(MAGMA_Z_REAL(gamm))
+            || isnan(MAGMA_Z_IMAG(gamm))
+            || isinf(MAGMA_Z_REAL(gamm))
+            || isinf(MAGMA_Z_IMAG(gamm))
+            || isnan(MAGMA_Z_REAL(eta))
+            || isnan(MAGMA_Z_IMAG(eta))
+            || isinf(MAGMA_Z_REAL(eta))
+            || isinf(MAGMA_Z_IMAG(eta))  ){
             break;
         }
         
