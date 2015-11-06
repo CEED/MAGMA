@@ -222,6 +222,11 @@ magma_zmconvert(
                     B->row[i] = A.row[i];
                 }
             }
+            // CSR to CUCSR
+            else if ( new_format == Magma_CUCSR ){
+                CHECK(magma_zmconvert(A, B, Magma_CSR, Magma_CSR, queue));
+                B->storage_type = Magma_CUCSR;
+            }
             
             // CSR to CSRL
             else if ( new_format == Magma_CSRL ) {
@@ -692,6 +697,11 @@ magma_zmconvert(
             // CSRU/CSRCSCU to CSR
             if ( old_format == Magma_CSRU ) {
                 CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ));
+            }
+            
+            // CUCSR to CSR
+            else if ( old_format == Magma_CUCSR ){
+                CHECK(magma_zmconvert(A, B, Magma_CSR, Magma_CSR, queue));
             }
                     
             // CSRD to CSR (diagonal elements first)

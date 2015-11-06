@@ -132,6 +132,7 @@ magma_zsolverinfo(
                     printf("%%  BOMBARD (merged) performance analysis every %d iteration\n",
                                                                         (int) k); break;
             case  Magma_BAITER:
+            case  Magma_BAITERO:
                     printf("%%  BAITER performance analysis every %d iteration\n",
                                                                         (int) k); break;
             default:
@@ -156,6 +157,7 @@ magma_zsolverinfo(
             case  Magma_JACOBI:
                     printf("%%   Preconditioner used: Jacobi.\n"); break;
             case  Magma_BAITER:
+            case  Magma_BAITERO:
                     printf("%%   Preconditioner used: Block-asynchronous iteration.\n"); break;
             case  Magma_ILU:
                     printf("%%   Preconditioner used: ILU(%d).\n", int(precond_par->levels)); break;
@@ -201,6 +203,7 @@ magma_zsolverinfo(
             case  Magma_BOMBARDMERGE:
             case  Magma_JACOBI:
             case  Magma_BAITER:
+            case  Magma_BAITERO:
                 printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
                 printf("%%======================================================="
                         "======%%\n");
@@ -274,6 +277,7 @@ magma_zsolverinfo(
         case  Magma_JACOBI:
             printf("%% Jacobi solver summary:\n"); break;
         case  Magma_BAITER:
+        case  Magma_BAITERO:
             printf("%% Block-asynchronous iteration solver summary:\n"); break;
         case  Magma_LOBPCG:
             printf("%% LOBPCG iteration solver summary:\n"); break;

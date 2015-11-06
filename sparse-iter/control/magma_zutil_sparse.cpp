@@ -141,12 +141,17 @@ magma_zparse_opts(
 
     for( int i = 1; i < argc; ++i ) {
         if ( strcmp("--format", argv[i]) == 0 && i+1 < argc ) {
-            info = atoi( argv[++i] );
-            switch( info ) {
-                case 0: opts->output_format = Magma_CSR; break;
-                case 1: opts->output_format = Magma_ELL; break;
-                case 2: opts->output_format = Magma_SELLP; break;
-                //case 2: opts->output_format = Magma_ELLRT; break;
+            i++;
+            if ( strcmp("CSR", argv[i]) == 0 ) {
+                opts->output_format = Magma_CSR;
+            } else if ( strcmp("ELL", argv[i]) == 0 ) {
+                opts->output_format = Magma_ELL;
+            } else if ( strcmp("SELLP", argv[i]) == 0 ) {
+                opts->output_format = Magma_SELLP;
+            } else if ( strcmp("CUSPARSECSR", argv[i]) == 0 ) {
+                opts->output_format = Magma_CUCSR;
+            } else {
+                printf( "error: invalid format, use default (CSR).\n" );
             }
         } else if ( strcmp("--mscale", argv[i]) == 0 && i+1 < argc ) {
             info = atoi( argv[++i] );
@@ -195,6 +200,9 @@ magma_zparse_opts(
             }
             else if ( strcmp("BA", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_BAITER;
+            }
+            else if ( strcmp("BAO", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_BAITERO;
             }
             else if ( strcmp("IDR", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_IDR;
@@ -256,6 +264,9 @@ magma_zparse_opts(
             }
             else if ( strcmp("BA", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_BAITER;
+            }
+            else if ( strcmp("BAO", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_BAITERO;
             }
             else if ( strcmp("IDR", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_IDR;

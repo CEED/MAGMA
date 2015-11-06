@@ -652,7 +652,7 @@ magma_zmdynamicic_residuals(
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmdynamicic_candidates_nn(
+magma_zmdynamicic_candidates(
     magma_z_matrix LU,
     magma_z_matrix *LU_new,
     magma_queue_t queue )
@@ -720,13 +720,14 @@ magma_zmdynamicic_candidates_nn(
     // get the total candidate count
     LU_new->nnz = 0;
     // should become fan-in
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for( magma_int_t i = 0; i<LU.num_rows; i++ ){
         omp_set_lock(&(counter));
         LU_new->nnz=LU_new->nnz + numadd[ i+1 ];
         numadd[ i+1 ] = LU_new->nnz;
         omp_unset_lock(&(counter));
     }
+    
     // allocate space
     CHECK( magma_zmalloc_cpu( &LU_new->val, LU_new->nnz ));
     CHECK( magma_index_malloc_cpu( &LU_new->rowidx, LU_new->nnz ));
@@ -793,7 +794,7 @@ cleanup:
 
 
 extern "C" magma_int_t
-magma_zmdynamicic_candidates(
+magma_zmdynamicic_candidates_nn(
     magma_z_matrix LU,
     magma_z_matrix *LU_new,
     magma_queue_t queue )
