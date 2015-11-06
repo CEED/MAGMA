@@ -576,6 +576,8 @@ magma_zmLdiagadd(
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE iterative dynamic ILU
 */
+#ifdef _OPENMP
+
 magma_int_t
 magma_zmdynamicic_insert(
     magma_int_t tri,
@@ -585,6 +587,7 @@ magma_zmdynamicic_insert(
     magma_z_matrix *LU,
     omp_lock_t *rowlock,
     magma_queue_t queue );
+
 
 magma_int_t
 magma_zmdynamicilu_rm(
@@ -644,7 +647,7 @@ magma_zmdynamicic_candidates(
     magma_z_matrix *LU_new,
     magma_queue_t queue );
 
-
+#endif
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE function definitions / Data on CPU
 */
