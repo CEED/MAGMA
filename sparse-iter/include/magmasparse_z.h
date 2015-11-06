@@ -209,6 +209,7 @@ z_transpose_csr(
 
 magma_int_t
 magma_zcsrsplit( 
+    magma_int_t offset,
     magma_int_t bsize,
     magma_z_matrix A,
     magma_z_matrix *D,
@@ -858,6 +859,14 @@ magma_int_t
 magma_zbaiter(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zbaiter_overlap(
+    magma_z_matrix A, magma_z_matrix b,
+    magma_z_matrix *x, magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
     magma_queue_t queue );
 
 magma_int_t
@@ -1111,6 +1120,17 @@ magma_zbajac_csr(
     magma_int_t localiters,
     magma_z_matrix D,
     magma_z_matrix R,
+    magma_z_matrix b,
+    magma_z_matrix *x,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zbajac_csr_overlap(
+    magma_int_t localiters,
+    magma_z_matrix D1,
+    magma_z_matrix R1,
+    magma_z_matrix D2,
+    magma_z_matrix R2,
     magma_z_matrix b,
     magma_z_matrix *x,
     magma_queue_t queue );
