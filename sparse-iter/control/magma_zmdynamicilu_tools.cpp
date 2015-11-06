@@ -10,6 +10,7 @@
 
 */
 #include "common_magmasparse.h"
+#ifdef _OPENMP
 #include <omp.h>
 
 
@@ -941,11 +942,5 @@ cleanup:
 }
 
 
-
-
-// TODO: chek whether pattern is correct
-// entries are ordered!
-// check how far to sort
-// use locking for counting new elements
-
+#endif
 
