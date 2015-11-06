@@ -731,7 +731,7 @@ magma_zmconvert(
                 numnnz = 0;
                 // fill the rowpointer
                 B->row[0] = 0;
-                for( magma_int_t row=0; row<A.num_rows; row++ ){
+                for( row=0; row<A.num_rows; row++ ){
                     element = A.row[row];
                     do{
                         B->val[ numnnz ] = A.val[ element ];
