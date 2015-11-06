@@ -61,7 +61,7 @@ magma_zbajac_csr_ls_kernel(int localiters, int n,
         __syncthreads();
 
         #pragma unroll
-        for( j=0; j<localiters; j++ )
+        for( j=0; j<localiters-1; j++ )
         {
             tmp = zero;
             #pragma unroll
