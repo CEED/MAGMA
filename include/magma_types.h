@@ -433,23 +433,24 @@ typedef enum {
 // --------------------
 // sparse
 typedef enum {
-    Magma_CSR          = 411,
-    Magma_ELLPACKT     = 412,
-    Magma_ELL          = 413,
-    Magma_DENSE        = 414,
-    Magma_BCSR         = 415,
-    Magma_CSC          = 416,
-    Magma_HYB          = 417,
-    Magma_COO          = 418,
-    Magma_ELLRT        = 419,
-    Magma_SPMVFUNCTION = 420,
-    Magma_SELLP        = 421,
-    Magma_ELLD         = 422,
-    Magma_CSRLIST      = 423,
-    Magma_CSRD         = 424,
-    Magma_CSRL         = 427,
-    Magma_CSRU         = 428,
-    Magma_CSRCOO       = 429
+    Magma_CSR          = 611,
+    Magma_ELLPACKT     = 612,
+    Magma_ELL          = 613,
+    Magma_DENSE        = 614,
+    Magma_BCSR         = 615,
+    Magma_CSC          = 616,
+    Magma_HYB          = 617,
+    Magma_COO          = 618,
+    Magma_ELLRT        = 619,
+    Magma_SPMVFUNCTION = 620,
+    Magma_SELLP        = 621,
+    Magma_ELLD         = 622,
+    Magma_CSRLIST      = 623,
+    Magma_CSRD         = 624,
+    Magma_CSRL         = 627,
+    Magma_CSRU         = 628,
+    Magma_CSRCOO       = 629,
+    Magma_CUCSR        = 630
 } magma_storage_t;
 
 
@@ -492,7 +493,8 @@ typedef enum {
     Magma_PQMRMERGE    = 466,
     Magma_BOMBARD      = 490,
     Magma_BOMBARDMERGE = 491,
-    Magma_PCGMERGE     = 492
+    Magma_PCGMERGE     = 492,
+    Magma_BAITERO      = 493
 } magma_solver_type;
 
 typedef enum {
