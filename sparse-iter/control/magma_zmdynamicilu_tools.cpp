@@ -316,7 +316,7 @@ start = magma_wtime();
 
     #pragma omp parallel for
     for( magma_int_t r=0;r<LU->num_rows;r++ ) {
-        magma_int_t i=LU->row[r];
+        i=LU->row[r];
         magma_int_t lasti=i;
         magma_int_t nexti=LU->list[i];
         while( nexti!=0 ){
