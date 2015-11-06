@@ -21,10 +21,8 @@ static const char *usage_sparse_short =
 
 static const char *usage_sparse =
 "Options are:\n"
-" --format x     Possibility to choose a format for the sparse matrix:\n"
-"               0   CSR\n"
-"               1   ELL\n"
-"               2   SELL-P\n"
+" --format      Possibility to choose a format for the sparse matrix:\n"
+"               CSR, ELL, SELLP, CUSPARSECSR\n"
 " --blocksize x Set a specific blocksize for SELL-P format.\n"
 " --alignment x Set a specific alignment for SELL-P format.\n"
 " --mscale      Possibility to scale the original matrix:\n"
