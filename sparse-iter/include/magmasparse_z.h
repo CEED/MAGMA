@@ -14,7 +14,10 @@
 
 #include "magma_types.h"
 #include "magmasparse_types.h"
+
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #define PRECISION_z
 
