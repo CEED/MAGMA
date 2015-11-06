@@ -80,7 +80,7 @@ magma_zjacobi(
     solver_par->solver = Magma_JACOBI;
     solver_par->info = MAGMA_SUCCESS;
 
-    real_Double_t tempo1, tempo2;
+    real_Double_t tempo1, tempo2, runtime;
     double residual;
     // solver setup
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
