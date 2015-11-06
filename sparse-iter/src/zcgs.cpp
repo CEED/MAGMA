@@ -136,7 +136,7 @@ magma_zcgs(
         if ( solver_par->numiter > 1 ) {                        // direction vectors
             beta = rho / rho_l;            
             magma_zcopy( dofs, r.dval, 1, u.dval, 1 );          // u = r
-            magma_zaxpy(dofs,  beta, q.dval, 1, u.dval, 1);     // u = r + beta q
+            magma_zaxpy(dofs,  beta, q.dval, 1, u.dval, 1);     // u = u + beta q
             magma_zscal(dofs, beta, p.dval, 1);                 // p = beta*p
             magma_zaxpy(dofs, c_one, q.dval, 1, p.dval, 1);      // p = q + beta*p
             magma_zscal(dofs, beta, p.dval, 1);                 // p = beta*(q + beta*p)
