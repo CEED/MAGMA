@@ -48,6 +48,7 @@
     @param[in]
     precond_par magma_z_preconditioner*
                 preconditioner parameters
+                
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
