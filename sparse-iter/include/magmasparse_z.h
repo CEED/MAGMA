@@ -1133,10 +1133,10 @@ magma_zbajac_csr(
 magma_int_t
 magma_zbajac_csr_overlap(
     magma_int_t localiters,
-    magma_z_matrix D1,
-    magma_z_matrix R1,
-    magma_z_matrix D2,
-    magma_z_matrix R2,
+    magma_int_t matrices,
+    magma_int_t overlap,
+    magma_z_matrix *D,
+    magma_z_matrix *R,
     magma_z_matrix b,
     magma_z_matrix *x,
     magma_queue_t queue );
