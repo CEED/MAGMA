@@ -85,11 +85,7 @@ magma_zbaiter_overlap(
         
     // setup
     magma_int_t matrices;
-    if( precond_par->levels == 0 ){
-        matrices = 1;
-    }else{
-        matrices = 200/precond_par->levels;
-    }
+        matrices = precond_par->levels;
     struct magma_z_matrix D_d[ matrices ];
     struct magma_z_matrix R_d[ matrices ];
     magma_int_t overlap;
@@ -125,7 +121,7 @@ magma_zbaiter_overlap(
     
     // setup  
     for( int i=0; i<matrices; i++ ){
-        CHECK( magma_zcsrsplit( 0, 256, ACSR, &D, &R, queue ));
+        CHECK( magma_zcsrsplit( i*overlap, 256, ACSR, &D, &R, queue ));
         CHECK( magma_zmtransfer( D, &D_d[i], Magma_CPU, Magma_DEV, queue ));
         CHECK( magma_zmtransfer( R, &R_d[i], Magma_CPU, Magma_DEV, queue ));
         magma_zmfree(&D, queue );

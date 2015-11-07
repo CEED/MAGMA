@@ -108,8 +108,8 @@ magma_zbaiter(
     do
     {
         tempo1 = magma_sync_wtime( queue );
-        solver_par->numiter+= solver_par->verbose;
-        for( int z=0; z<solver_par->verbose; z++){
+        solver_par->numiter+= iterinc;
+        for( int z=0; z<iterinc; z++){
             CHECK( magma_zbajac_csr( localiter, D_d, R_d, b, x, queue ));
         }
         tempo2 = magma_sync_wtime( queue );
