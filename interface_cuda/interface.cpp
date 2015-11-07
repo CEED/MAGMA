@@ -48,7 +48,7 @@
 #if ! (__cplusplus >= 201103)  // not C++11 standard
 bool atomic_flag_test_and_set( bool* flag )
 {
-    bool x = flag;
+    bool x = *flag;
     // note race condition here, if someone else modifies flag!
     *flag = true;
     return x;
