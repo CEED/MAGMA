@@ -96,6 +96,13 @@ magma_zbaiter(
     CHECK( magma_zmtransfer( D, &D_d, Magma_CPU, Magma_DEV, queue ));
     CHECK( magma_zmtransfer( R, &R_d, Magma_CPU, Magma_DEV, queue ));
     
+    magma_int_t iterinc;
+    if( solver_par->verbose == 0 ){
+        iterinc = solver_par->maxiter;
+    }
+    else{
+        iterinc = solver_par->verbose;
+    }
     solver_par->numiter = 0;
     // block-asynchronous iteration iterator
     do

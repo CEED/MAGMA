@@ -81,8 +81,17 @@ magma_zbaiter_overlap(
     magma_z_matrix Ah={Magma_CSR}, ACSR={Magma_CSR}, A_d={Magma_CSR}, r={Magma_CSR},
         D={Magma_CSR}, R={Magma_CSR};
         
+
+        
     // setup
-    magma_int_t matrices = 200/precond_par->levels;
+    magma_int_t matrices;
+    if( precond_par->levels == 0 ){
+        matrices = 1;
+    }else{
+        matrices = 200/precond_par->levels;
+    }
+    struct magma_z_matrix D_d[ matrices ];
+    struct magma_z_matrix R_d[ matrices ];
     magma_int_t overlap;
     magma_int_t blocksize = 256;
     if(  matrices==2 ||
@@ -91,14 +100,15 @@ magma_zbaiter_overlap(
          matrices==16 ||
          matrices==32 ||
          matrices==64 ||
-         matrices==128 || ){
+         matrices==128 ){
         overlap = blocksize/matrices;
+    }else if( matrices == 1){
+        overlap = 0;
     }else{
         printf("error: overlap ratio not supported.\n");
         goto cleanup;
     }
-    magma_z_matrix D_d[ matrices ];
-    magma_z_matrix R_d[ matrices ];
+
     
 
     CHECK( magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue ));
@@ -115,22 +125,30 @@ magma_zbaiter_overlap(
     
     // setup  
     for( int i=0; i<matrices; i++ ){
-        CHECK( magma_zcsrsplit( overlap*i, 256, ACSR, &D1, &R1, queue ));
+        CHECK( magma_zcsrsplit( 0, 256, ACSR, &D, &R, queue ));
         CHECK( magma_zmtransfer( D, &D_d[i], Magma_CPU, Magma_DEV, queue ));
         CHECK( magma_zmtransfer( R, &R_d[i], Magma_CPU, Magma_DEV, queue ));
         magma_zmfree(&D, queue );
         magma_zmfree(&R, queue );
     }
     
+
+    
+    magma_int_t iterinc;
+    if( solver_par->verbose == 0 ){
+        iterinc = solver_par->maxiter;
+    }
+    else{
+        iterinc = solver_par->verbose;
+    }
     solver_par->numiter = 0;
-    printf("check before solver launch\n");
     // block-asynchronous iteration iterator
     do
     {
         tempo1 = magma_sync_wtime( queue );
-        solver_par->numiter+= solver_par->verbose;
-        for( int z=0; z<solver_par->verbose; z++){
-            CHECK( magma_zbajac_csr_overlap( localiter, D_d, R_d, b, x, queue ));
+        solver_par->numiter+= iterinc;
+        for( int z=0; z<iterinc; z++){
+            CHECK( magma_zbajac_csr_overlap( localiter, matrices, overlap, D_d, R_d, b, x, queue ));
         }
         tempo2 = magma_sync_wtime( queue );
         runtime += tempo2-tempo1;
