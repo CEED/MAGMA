@@ -72,7 +72,7 @@ magmablas_zswap_q(
 {
     dim3 threads( NB );
     dim3 grid( magma_ceildiv( n, NB ) );
-    zswap_kernel<<< grid, threads, 0, queue >>>( n, dx, incx, dy, incy );
+    zswap_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( n, dx, incx, dy, incy );
 }
 
 
@@ -86,5 +86,5 @@ magmablas_zswap(
     magmaDoubleComplex_ptr dx, magma_int_t incx, 
     magmaDoubleComplex_ptr dy, magma_int_t incy)
 {
-    magmablas_zswap_q( n, dx, incx, dy, incy, magma_stream );
+    magmablas_zswap_q( n, dx, incx, dy, incy, magmablasGetQueue() );
 }

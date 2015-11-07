@@ -112,7 +112,7 @@ magma_zqmr_1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, rho, psi,
+    magma_zqmr_1_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, rho, psi,
                      y, z, v, w );
 
    return MAGMA_SUCCESS;
@@ -208,7 +208,7 @@ magma_zqmr_2(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_2_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, pde, rde, y, z, p, q );
+    magma_zqmr_2_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, pde, rde, y, z, p, q );
 
    return MAGMA_SUCCESS;
 }
@@ -292,7 +292,7 @@ magma_zqmr_3(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_3_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, pt, v, y );
+    magma_zqmr_3_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, pt, v, y );
 
    return MAGMA_SUCCESS;
 }
@@ -399,7 +399,7 @@ magma_zqmr_4(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_4_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, eta, p, pt, d, s, x, r );
+    magma_zqmr_4_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, eta, p, pt, d, s, x, r );
 
    return MAGMA_SUCCESS;
 }
@@ -510,7 +510,7 @@ magma_zqmr_5(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_5_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, eta, pds, p, pt, d, s, x, r );
+    magma_zqmr_5_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, eta, pds, p, pt, d, s, x, r );
 
    return MAGMA_SUCCESS;
 }
@@ -626,7 +626,7 @@ magma_zqmr_6(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zqmr_6_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, rho, psi,
+    magma_zqmr_6_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, rho, psi,
                      y, z, v, w, wt );
 
    return MAGMA_SUCCESS;

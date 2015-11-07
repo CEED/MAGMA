@@ -122,9 +122,9 @@ magma_zgetrs_nopiv_batched(
         return info;
     }
 
-    cublasHandle_t myhandle;
-    cublasCreate_v2(&myhandle);
-    cublasSetStream(myhandle, queue);
+    cublasHandle_t myhandle = queue->cublas_handle();
+    ////cublasCreate_v2(&myhandle);
+    ////cublasSetStream(myhandle, queue);
 
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dB_displ  = NULL;
@@ -276,7 +276,7 @@ magma_zgetrs_nopiv_batched(
 
     magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    cublasDestroy_v2(myhandle);
+    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dB_displ);

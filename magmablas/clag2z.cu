@@ -129,7 +129,7 @@ magmablas_clag2z_q(
 
     dim3 threads( BLK_X, 1 );
     dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
-    clag2z_kernel<<< grid, threads, 0, queue >>> ( m, n, SA, ldsa, A, lda );
+    clag2z_kernel<<< grid, threads, 0, queue->cuda_stream() >>> ( m, n, SA, ldsa, A, lda );
 }
 
 
@@ -144,5 +144,5 @@ magmablas_clag2z(
     magmaDoubleComplex_ptr       A, magma_int_t lda,
     magma_int_t *info)
 {
-    magmablas_clag2z_q( m, n, SA, ldsa, A, lda, magma_stream, info );
+    magmablas_clag2z_q( m, n, SA, ldsa, A, lda, magmablasGetQueue(), info );
 }

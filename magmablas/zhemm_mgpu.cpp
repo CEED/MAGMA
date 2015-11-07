@@ -9,6 +9,8 @@
        @author Mark Gates
        @author Azzam Haidar
 */
+#include <cuda_runtime.h>
+
 #include "common_magma.h"
 #include "magma_bulge.h"
 //#include "trace.h"

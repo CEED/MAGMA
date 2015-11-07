@@ -147,7 +147,7 @@ magma_zgecsrmv(
 {
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgecsrmv_kernel<<< grid, threads, 0, queue >>>
+    zgecsrmv_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                     (m, n, alpha, dval, drowptr, dcolind, dx, beta, dy);
 
     return MAGMA_SUCCESS;
@@ -246,7 +246,7 @@ magma_zgecsrmv_shift(
 {
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgecsrmv_kernel_shift<<< grid, threads, 0, queue >>>
+    zgecsrmv_kernel_shift<<< grid, threads, 0, queue->cuda_stream() >>>
                          (m, n, alpha, lambda, dval, drowptr, dcolind, dx, 
                                     beta, offset, blocksize, addrows, dy);
 

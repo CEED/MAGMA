@@ -172,7 +172,7 @@ void magmablas_zlarfg_q(
 {
     dim3 threads( NB );
     dim3 blocks( 1 );
-    zlarfg_kernel<<< blocks, threads, 0, queue >>>( n, dalpha, dx, incx, dtau );
+    zlarfg_kernel<<< blocks, threads, 0, queue->cuda_stream() >>>( n, dalpha, dx, incx, dtau );
 }
 
 
@@ -187,5 +187,5 @@ void magmablas_zlarfg(
     magmaDoubleComplex_ptr dx, magma_int_t incx,
     magmaDoubleComplex_ptr dtau )
 {
-    magmablas_zlarfg_q( n, dalpha, dx, incx, dtau, magma_stream );
+    magmablas_zlarfg_q( n, dalpha, dx, incx, dtau, magmablasGetQueue() );
 }

@@ -1048,7 +1048,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1072,7 +1072,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1111,7 +1111,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1159,7 +1159,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1194,7 +1194,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1223,7 +1223,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1252,7 +1252,7 @@ magma_zmconvert(
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 
@@ -1283,7 +1283,7 @@ magma_zmconvert(
             // CUSPARSE context //
 
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+            CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
             CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             // end CUSPARSE context //
 

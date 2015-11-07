@@ -377,7 +377,7 @@ magma_zbcsrluegemm(
         dim3 threads( 64, 4 );
     
         dim3 grid(1, 1, num_brows);
-        zbcsr_gemm_kernel64<<< grid, threads, 0, queue >>>( 
+        zbcsr_gemm_kernel64<<< grid, threads, 0, queue->cuda_stream() >>>( 
                       size_b, size_b, kblocks, dA, dB, dC );
     }
 

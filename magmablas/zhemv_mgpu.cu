@@ -762,20 +762,20 @@ magmablas_zhemv_mgpu(
         dim3 threads_sum( NB_X, 1 );
         
         if ( upper ) {
-            zhemv_kernel_U_mgpu<<< grid, threads, 0, queues[dev] >>>(
+            zhemv_kernel_U_mgpu<<< grid, threads, 0, queues[dev]->cuda_stream() >>>(
                 n, dA_dev, ldda, dx_dev, 1, dwork_dev,
                 new_gpu_id, ngpu, block_offset );
             
-            zhemv_kernel_U_mgpu_sum<<< grid, threads_sum, 0, queues[dev] >>>(
+            zhemv_kernel_U_mgpu_sum<<< grid, threads_sum, 0, queues[dev]->cuda_stream() >>>(
                 n, alpha, ldda, dx_dev, 1, dwork_dev,
                 new_gpu_id, ngpu, block_offset );
         }
         else {
-            zhemv_kernel_L_mgpu<<< grid, threads, 0, queues[dev] >>>(
+            zhemv_kernel_L_mgpu<<< grid, threads, 0, queues[dev]->cuda_stream() >>>(
                 n, dA_dev, ldda, dx_dev, 1, dwork_dev,
                 new_gpu_id, ngpu, block_offset );
             
-            zhemv_kernel_L_mgpu_sum<<< grid, threads_sum, 0, queues[dev] >>>(
+            zhemv_kernel_L_mgpu_sum<<< grid, threads_sum, 0, queues[dev]->cuda_stream() >>>(
                 n, alpha, ldda, dx_dev, 1, dwork_dev,
                 new_gpu_id, ngpu, block_offset );
         }

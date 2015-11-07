@@ -226,7 +226,10 @@ void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
         threadSize = 64;
     }
 
-    kernel_zdotc<<< 1, threadSize, threadSize * sizeof(double), magma_stream>>> (n, x, incx, threadSize);
+    size_t shmem = threadSize * sizeof(double);
+    kernel_zdotc
+        <<< 1, threadSize, shmem, magmablasGetQueue()->cuda_stream() >>>
+        (n, x, incx, threadSize);
 }
 
 __global__ void kernel_zdscal(int n, magmaDoubleComplex *x, int incx)
@@ -255,7 +258,9 @@ void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
     dim3 threads(zdscal_bs, 1, 1);
     int num_blocks = magma_ceildiv( n, zdscal_bs );
     dim3 grid(num_blocks,1);
-    kernel_zdscal<<< grid, threads, 0, magma_stream >>> (n, x, incx);
+    kernel_zdscal
+        <<< grid, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        (n, x, incx);
 }
 
 
@@ -300,7 +305,9 @@ void magmablas_zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
     dim3 threads(zlacgv_bs, 1, 1);
     int num_blocks = magma_ceildiv( n, zlacgv_bs );
     dim3 grid(num_blocks,1);
-    kernel_zlacgv<<< grid, threads, 0, magma_stream >>> (n, x, incx);
+    kernel_zlacgv
+        <<< grid, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        (n, x, incx);
 }
 
 #endif // defined(PRECISION_z) || defined(PRECISION_c)

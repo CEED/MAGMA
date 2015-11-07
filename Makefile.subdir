@@ -1,0 +1,54 @@
+#
+# included by each sub-dir/Makefile
+# contains rules to forward 'make' to top-level Makefile
+# note that paths in here are relative to the original sub-dir.
+#
+
+.SUFFIXES:
+
+.PHONY: default
+
+targets := \
+	all             \
+	lib             \
+	static          \
+	shared          \
+	test            \
+	headers         \
+	cleanall        \
+	cleangen        \
+	echo            \
+
+subdirs := \
+	blas_fix             \
+	control              \
+	include              \
+	interface_cuda       \
+	src                  \
+	magmablas            \
+	testing              \
+	testing/lin          \
+	sparse-iter          \
+	sparse-iter/blas     \
+	sparse-iter/control  \
+	sparse-iter/src      \
+	sparse-iter/testing  \
+
+# global targets to forward as-is
+$(targets) $(subdirs):
+	cd $(top) && $(MAKE) $@
+
+# forward all other, directory-specific, targets (e.g., files) with directory prefix
+%: force
+	cd $(top) && $(MAKE) $(cdir)/$@
+
+force: ;
+
+# don't regenerate Makefiles
+Makefile: ;
+
+$(top)/Makefile.subdir: ;
+
+Makefile.local: ;
+
+-include Makefile.local

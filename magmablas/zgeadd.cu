@@ -123,7 +123,7 @@ magmablas_zgeadd_q(
     dim3 threads( BLK_X, 1 );
     dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     
-    zgeadd_full<<< grid, threads, 0, queue >>>
+    zgeadd_full<<< grid, threads, 0, queue->cuda_stream() >>>
         ( m, n, alpha, dA, ldda, dB, lddb );
 }
 
@@ -139,5 +139,5 @@ magmablas_zgeadd(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb )
 {
-    magmablas_zgeadd_q( m, n, alpha, dA, ldda, dB, lddb, magma_stream );
+    magmablas_zgeadd_q( m, n, alpha, dA, ldda, dB, lddb, magmablasGetQueue() );
 }

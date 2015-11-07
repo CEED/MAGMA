@@ -1273,55 +1273,55 @@ magma_zmgesellpmv(
         if ( alignment == 1) {
             dim3 block( blocksize, num_vecs/2, 1 );
             if ( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellptmv_kernel_1_3D_texb<<< grid, block, 0, queue >>>
+            zmgesellptmv_kernel_1_3D_texb<<< grid, block, 0, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, dy );
             else
-            zmgesellptmv_kernel_1_3D_tex<<< grid, block, 0, queue >>>
+            zmgesellptmv_kernel_1_3D_tex<<< grid, block, 0, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
         else if ( alignment == 4) {
             dim3 block( blocksize, alignment, num_vecs/2 );
             if ( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellptmv_kernel_4_3D_texb<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_4_3D_texb<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, dy );
             else
-            zmgesellptmv_kernel_4_3D_tex<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_4_3D_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
         else if ( alignment == 8) {
             dim3 block( blocksize, alignment, num_vecs/2 );
             if ( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellptmv_kernel_8_3D_texb<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_8_3D_texb<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, dy );
             else
-            zmgesellptmv_kernel_8_3D_tex<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_8_3D_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
         else if ( alignment == 16) {
             dim3 block( blocksize, alignment, num_vecs/2 );
             if ( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellptmv_kernel_16_3D_texb<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_16_3D_texb<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, dy );
             else
-            zmgesellptmv_kernel_16_3D_tex<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_16_3D_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
         else if ( alignment == 32) {
             dim3 block( blocksize, alignment, num_vecs/2 );
             if ( beta == MAGMA_Z_MAKE( 0.0, 0.0 ) )
-            zmgesellptmv_kernel_32_3D_texb<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_32_3D_texb<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, dy );
             else
-            zmgesellptmv_kernel_32_3D_tex<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_32_3D_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
         }
@@ -1352,31 +1352,31 @@ magma_zmgesellpmv(
 
         if ( alignment == 1) {
             dim3 block( blocksize, num_vecs, 1 ); 
-            zmgesellptmv_kernel_1_3D<<< grid, block, 0, queue >>>
+            zmgesellptmv_kernel_1_3D<<< grid, block, 0, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
         }
         else if ( alignment == 4) {
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellptmv_kernel_4_3D<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_4_3D<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
         }
         else if ( alignment == 8) {
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellptmv_kernel_8_3D<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_8_3D<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
         }
         else if ( alignment == 16) {
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellptmv_kernel_16_3D<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_16_3D<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
         }
         else if ( alignment == 32) {
             dim3 block( blocksize, alignment, num_vecs );
-            zmgesellptmv_kernel_32_3D<<< grid, block, Ms, queue >>>
+            zmgesellptmv_kernel_32_3D<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, num_vecs, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
         }

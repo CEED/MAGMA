@@ -9,6 +9,8 @@
        
        Work in progress.
 */
+#include <cuda_runtime.h>
+
 #include "common_magma.h"
 
 extern "C"

@@ -186,7 +186,7 @@ magmablas_ztranspose_q(
 
     dim3 threads( NX, NY );
     dim3 grid( magma_ceildiv( m, NB ), magma_ceildiv( n, NB ) );
-    ztranspose_kernel<<< grid, threads, 0, queue >>>
+    ztranspose_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
         ( m, n, dA, ldda, dAT, lddat );
 }
 
@@ -201,7 +201,7 @@ magmablas_ztranspose(
     magmaDoubleComplex_const_ptr dA,  magma_int_t ldda,
     magmaDoubleComplex_ptr       dAT, magma_int_t lddat )
 {
-    magmablas_ztranspose_q( m, n, dA, ldda, dAT, lddat, magma_stream );
+    magmablas_ztranspose_q( m, n, dA, ldda, dAT, lddat, magmablasGetQueue() );
 }
 
 
@@ -282,7 +282,7 @@ magmablas_ztranspose_batched_q(
 
     dim3 threads( NX, NY, 1 );
     dim3 grid( magma_ceildiv( m, NB ), magma_ceildiv( n, NB ), batchCount );
-    ztranspose_kernel_batched<<< grid, threads, 0, queue >>>
+    ztranspose_kernel_batched<<< grid, threads, 0, queue->cuda_stream() >>>
         ( m, n, dA_array, ldda, dAT_array, lddat );
 }
 
@@ -298,5 +298,5 @@ magmablas_ztranspose_batched(
     magmaDoubleComplex **dAT_array, magma_int_t lddat,
     magma_int_t batchCount )
 {
-    magmablas_ztranspose_batched_q( m, n, dA_array, ldda, dAT_array, lddat, batchCount, magma_stream );
+    magmablas_ztranspose_batched_q( m, n, dA_array, ldda, dAT_array, lddat, batchCount, magmablasGetQueue() );
 }

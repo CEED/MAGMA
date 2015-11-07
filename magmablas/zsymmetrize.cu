@@ -118,10 +118,10 @@ magmablas_zsymmetrize_q(
     dim3 grid( magma_ceildiv( m, NB ) );
     
     if ( uplo == MagmaUpper ) {
-        zsymmetrize_upper<<< grid, threads, 0, queue >>>( m, dA, ldda );
+        zsymmetrize_upper<<< grid, threads, 0, queue->cuda_stream() >>>( m, dA, ldda );
     }
     else {
-        zsymmetrize_lower<<< grid, threads, 0, queue >>>( m, dA, ldda );
+        zsymmetrize_lower<<< grid, threads, 0, queue->cuda_stream() >>>( m, dA, ldda );
     }
 }
 
@@ -135,5 +135,5 @@ magmablas_zsymmetrize(
     magma_uplo_t uplo, magma_int_t m,
     magmaDoubleComplex_ptr dA, magma_int_t ldda )
 {
-    magmablas_zsymmetrize_q( uplo, m, dA, ldda, magma_stream );
+    magmablas_zsymmetrize_q( uplo, m, dA, ldda, magmablasGetQueue() );
 }

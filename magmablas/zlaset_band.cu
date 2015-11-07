@@ -200,12 +200,12 @@ magmablas_zlaset_band_q(
     if (uplo == MagmaUpper) {
         dim3 threads( min(k,n) );
         dim3 grid( magma_ceildiv( min(m+k-1,n), NB ) );
-        zlaset_band_upper<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_band_upper<<< grid, threads, 0, queue->cuda_stream() >>> (m, n, offdiag, diag, dA, ldda);
     }
     else if (uplo == MagmaLower) {
         dim3 threads( min(k,m) );
         dim3 grid( magma_ceildiv( min(m,n), NB ) );
-        zlaset_band_lower<<< grid, threads, 0, queue >>> (m, n, offdiag, diag, dA, ldda);
+        zlaset_band_lower<<< grid, threads, 0, queue->cuda_stream() >>> (m, n, offdiag, diag, dA, ldda);
     }
 }
 
@@ -220,5 +220,5 @@ magmablas_zlaset_band(
     magmaDoubleComplex offdiag, magmaDoubleComplex diag,
     magmaDoubleComplex_ptr dA, magma_int_t ldda)
 {
-    magmablas_zlaset_band_q(uplo, m, n, k, offdiag, diag, dA, ldda, magma_stream);
+    magmablas_zlaset_band_q(uplo, m, n, k, offdiag, diag, dA, ldda, magmablasGetQueue() );
 }

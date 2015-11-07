@@ -852,22 +852,22 @@ magma_zgesellpmv(
         cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeEightByte);
 
         if ( alignment == 4)
-            zgesellptmv2d_kernel_4_tex<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_4_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
 
         else if ( alignment == 8)
-            zgesellptmv2d_kernel_8_tex<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_8_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
 
         else if ( alignment == 16)
-            zgesellptmv2d_kernel_16_tex<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_16_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
 
         else if ( alignment == 32)
-            zgesellptmv2d_kernel_32_tex<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_32_tex<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, texdx, beta, dy );
 
@@ -880,27 +880,27 @@ magma_zgesellpmv(
 
     #else 
         if ( alignment == 1)
-            zgesellptmv2d_kernel_1<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_1<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
 
         else if ( alignment == 4)
-            zgesellptmv2d_kernel_4<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_4<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
 
         else if ( alignment == 8)
-            zgesellptmv2d_kernel_8<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_8<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
 
         else if ( alignment == 16)
-            zgesellptmv2d_kernel_16<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_16<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
 
         else if ( alignment == 32)
-            zgesellptmv2d_kernel_32<<< grid, block, Ms, queue >>>
+            zgesellptmv2d_kernel_32<<< grid, block, Ms, queue->cuda_stream() >>>
             ( m, n, blocksize, alignment, alpha,
                 dval, dcolind, drowptr, dx, beta, dy );
 

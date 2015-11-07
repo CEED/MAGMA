@@ -46,9 +46,9 @@ RANLIB    = ranlib
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
-FPIC      = -fPIC
+#FPIC      = -fPIC
 
-CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wshadow -DMAGMA_NOAFFINITY
+CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wshadow -DMAGMA_NOAFFINITY -std=c99
 FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
@@ -63,7 +63,7 @@ INSTALL_NAME = -install_name @rpath/
 
 LIB       = -framework Accelerate -lstdc++ -lm
 
-LIB      += -lcublas -lcudart
+LIB      += -lcublas -lcusparse -lcudart
 
 
 # --------------------
@@ -78,21 +78,21 @@ LIBDIR    = -L$(CUDADIR)/lib
 INC       = -I$(CUDADIR)/include
 
 
-# ========================================
-# replace single & single-complex BLAS functions with reference versions.
-# (i.e., functions that return float; subroutines do not need a fix.)
-LIB      := -L$(MAGMA_DIR)/lib -lblas_fix $(LIB)
-
-BLAS_FIX  = $(MAGMA_DIR)/lib/libblas_fix.a
-
-.PHONY: blas_fix
-
-blas_fix:
-	@echo "======================================== BLAS fix for MacOS"
-	( cd $(MAGMA_DIR)/blas_fix && $(MAKE) )
-	@echo
-
-lib: blas_fix
-
-# reset default goal
-.DEFAULT_GOAL :=
+# # ========================================
+# # replace single & single-complex BLAS functions with reference versions.
+# # (i.e., functions that return float; subroutines do not need a fix.)
+# LIB      := -L$(MAGMA_DIR)/lib -lblas_fix $(LIB)
+# 
+# BLAS_FIX  = $(MAGMA_DIR)/lib/libblas_fix.a
+# 
+# .PHONY: blas_fix
+# 
+# blas_fix:
+# 	@echo "======================================== BLAS fix for MacOS"
+# 	( cd $(MAGMA_DIR)/blas_fix && $(MAKE) )
+# 	@echo
+# 
+# lib: blas_fix
+# 
+# # reset default goal
+# .DEFAULT_GOAL :=

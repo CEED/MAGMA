@@ -463,11 +463,11 @@ zlanhe_inf(
     magma_int_t n_full_block = (n - n % inf_bs) / inf_bs;
     magma_int_t n_mod_bs = n % inf_bs;
     if ( uplo == MagmaLower) {
-        zlanhe_inf_kernel_lower<<< grid, threads, 0, queue >>>
+        zlanhe_inf_kernel_lower<<< grid, threads, 0, queue->cuda_stream() >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
     else {
-        zlanhe_inf_kernel_upper<<< grid, threads, 0, queue >>>
+        zlanhe_inf_kernel_upper<<< grid, threads, 0, queue->cuda_stream() >>>
             ( n, A, lda, dwork, n_full_block, n_mod_bs );
     }
 }
@@ -535,11 +535,11 @@ zlanhe_max(
     dim3 grid( magma_ceildiv( n, max_bs ) );
 
     if ( uplo == MagmaLower ) {
-        zlanhe_max_kernel_lower<<< grid, threads, 0, queue >>>
+        zlanhe_max_kernel_lower<<< grid, threads, 0, queue->cuda_stream() >>>
             ( n, A, lda, dwork );
     }
     else {
-        zlanhe_max_kernel_upper<<< grid, threads, 0, queue >>>
+        zlanhe_max_kernel_upper<<< grid, threads, 0, queue->cuda_stream() >>>
             ( n, A, lda, dwork );
     }
 }
@@ -660,7 +660,7 @@ magmablas_zlanhe_q(
     else {
         zlanhe_max( uplo, n, dA, ldda, dwork, queue );
     }
-    magma_max_nan_kernel<<< 1, 512, 0, queue >>>( n, dwork );
+    magma_max_nan_kernel<<< 1, 512, 0, queue->cuda_stream() >>>( n, dwork );
     magma_dgetvector( 1, &dwork[0], 1, &res, 1 );
     
     return res;
@@ -677,5 +677,5 @@ magmablas_zlanhe(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDouble_ptr dwork, magma_int_t lwork )
 {
-    return magmablas_zlanhe_q( norm, uplo, n, dA, ldda, dwork, lwork, magma_stream );
+    return magmablas_zlanhe_q( norm, uplo, n, dA, ldda, dwork, lwork, magmablasGetQueue() );
 }

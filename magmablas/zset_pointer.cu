@@ -79,7 +79,9 @@ void zset_pointer(magmaDoubleComplex **output_array,
 
 {
 
-    kernel_set_pointer<<<batchCount, 1, 0, queue>>>(output_array, input, lda,  row, column, batch_offset);
+    kernel_set_pointer
+        <<< batchCount, 1, 0, queue->cuda_stream() >>>
+        (output_array, input, lda,  row, column, batch_offset);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -144,8 +146,8 @@ void magma_zdisplace_pointers(magmaDoubleComplex **output_array,
                magmaDoubleComplex **input_array, magma_int_t lda,
                magma_int_t row, magma_int_t column, 
                magma_int_t batchCount, magma_queue_t queue)
-
 {
-
-    zdisplace_pointers_kernel<<<batchCount, 1, 0, queue>>>(output_array, input_array, lda, row, column);
+    zdisplace_pointers_kernel
+        <<< batchCount, 1, 0, queue->cuda_stream() >>>
+        (output_array, input_array, lda, row, column);
 }

@@ -12,13 +12,6 @@
 #include "common_magmasparse.h"
 
 
-#include "common_magmasparse.h"
-#include "magmablas.h"
-#include "magmasparse_types.h"
-
-
-
-
 /**
     Purpose
     -------
@@ -95,7 +88,7 @@ magma_z_spmv(
                             || A.storage_type == Magma_CSRL
                             || A.storage_type == Magma_CSRU ) {
               CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-              CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+              CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
               CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
             
               CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
@@ -153,7 +146,7 @@ magma_z_spmv(
                 int mb = (A.num_rows + A.blocksize-1)/A.blocksize;
                 int nb = (A.num_cols + A.blocksize-1)/A.blocksize;
                 CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
                 CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
                 cusparseZbsrmv( cusparseHandle, dirA,
                     CUSPARSE_OPERATION_NON_TRANSPOSE, mb, nb, A.numblocks,
@@ -169,7 +162,7 @@ magma_z_spmv(
             magma_int_t num_vecs = x.num_rows / A.num_cols * x.num_cols;
             if ( A.storage_type == Magma_CSR ) {
                 CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+                CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
                 CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
                 CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
                 CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));

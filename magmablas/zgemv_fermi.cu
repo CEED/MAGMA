@@ -74,7 +74,7 @@ zgemvn_template_fermi(
     dim3 threads( DIM_X, DIM_Y, 1 );
 
     zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE>
-        <<< grid, threads, 0, queue >>>
+        <<< grid, threads, 0, queue->cuda_stream() >>>
         (m, n, alpha, A, lda, x, incx, beta, y, incy);
 }
 
@@ -95,12 +95,12 @@ zgemvc_template_fermi(
 
     if (trans == MagmaConjTrans) {
         zgemvc_template_kernel_fermi< DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans >
-            <<< grid, threads, 0, queue >>>
+            <<< grid, threads, 0, queue->cuda_stream() >>>
             (m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
     else {
         zgemvc_template_kernel_fermi< DIM_X, DIM_Y, TILE_SIZE, MagmaTrans >
-            <<< grid, threads, 0, queue >>>
+            <<< grid, threads, 0, queue->cuda_stream() >>>
             (m, n, alpha, A, lda, x, incx, beta, y, incy);
     }
 }
@@ -208,19 +208,6 @@ magmablas_zgemv_q(
         return;  //info;
     }
 
-    magma_int_t arch = magma_getdevice_arch();
-    if ( arch < 200  ) {
-        // --------------------
-        // call CUDA ARCH 1.x version
-        // magmablas for [sd] precisions, cublas for [zc] precisions.
-        #if defined(PRECISION_z) || defined(PRECISION_c)
-        magma_zgemv( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
-        #else
-        magmablas_zgemv_tesla( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy );
-        #endif
-        return;
-    }
-    
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
     if ( trans == MagmaNoTrans ) {
@@ -252,5 +239,5 @@ magmablas_zgemv(
     magmaDoubleComplex beta,
     magmaDoubleComplex_ptr dy, magma_int_t incy)
 {
-    magmablas_zgemv_q( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, magma_stream);
+    magmablas_zgemv_q( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, magmablasGetQueue() );
 }

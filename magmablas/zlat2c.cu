@@ -234,10 +234,10 @@ magmablas_zlat2c_q(
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
     if (uplo == MagmaLower) {
-        zlat2c_lower<<< grid, threads, 0, queue >>> (n, A, lda, SA, ldsa, rmax);
+        zlat2c_lower<<< grid, threads, 0, queue->cuda_stream() >>> (n, A, lda, SA, ldsa, rmax);
     }
     else if (uplo == MagmaUpper) {
-        zlat2c_upper<<< grid, threads, 0, queue >>> (n, A, lda, SA, ldsa, rmax);
+        zlat2c_upper<<< grid, threads, 0, queue->cuda_stream() >>> (n, A, lda, SA, ldsa, rmax);
     }
     
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
@@ -255,5 +255,5 @@ magmablas_zlat2c(
     magmaFloatComplex_ptr        SA, magma_int_t ldsa,
     magma_int_t *info )
 {
-    magmablas_zlat2c_q( uplo, n, A, lda, SA, ldsa, magma_stream, info );
+    magmablas_zlat2c_q( uplo, n, A, lda, SA, ldsa, magmablasGetQueue(), info );
 }

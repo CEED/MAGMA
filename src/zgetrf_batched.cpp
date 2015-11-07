@@ -10,10 +10,11 @@
 
    @precisions normal z -> s d c
 */
+#include <cuda_runtime.h>
+
 #include "common_magma.h"
 #include "batched_kernel_param.h"
 
-#include "cublas_v2.h"
 ///////////////////////////////////////////////////////////////////////////////////////
 /**
     Purpose
@@ -134,9 +135,9 @@ magma_zgetrf_batched(
     magma_get_zgetrf_batched_nbparam(n, &nb, &recnb);
 
 
-    cublasHandle_t myhandle;
-    cublasCreate_v2(&myhandle);
-    cublasSetStream(myhandle, queue);
+    cublasHandle_t myhandle = queue->cublas_handle();
+    ////cublasCreate_v2(&myhandle);
+    ////cublasSetStream(myhandle, queue);
 
 
     magma_int_t     **dipiv_displ   = NULL;
@@ -373,7 +374,7 @@ fin:
     for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( stream[k] );
     }
-    cublasDestroy_v2(myhandle);
+    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dW0_displ);

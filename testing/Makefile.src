@@ -1,0 +1,245 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      @date
+#//////////////////////////////////////////////////////////////////////////////
+
+# push previous directory
+dir_stack := $(dir_stack) $(cdir)
+cdir      := testing
+# ----------------------------------------------------------------------
+
+
+# ----------
+# BLAS and auxiliary
+testing_zsrc += \
+	$(cdir)/testing_zgemm.cpp	\
+	$(cdir)/testing_zgemv.cpp	\
+	$(cdir)/testing_zhemv.cpp	\
+	$(cdir)/testing_zherk.cpp	\
+	$(cdir)/testing_zher2k.cpp	\
+	$(cdir)/testing_zsymv.cpp	\
+	$(cdir)/testing_ztrmm.cpp	\
+	$(cdir)/testing_ztrmv.cpp	\
+	$(cdir)/testing_ztrsm.cpp	\
+	$(cdir)/testing_ztrsv.cpp	\
+	\
+	$(cdir)/testing_zhemm_mgpu.cpp	\
+	$(cdir)/testing_zhemv_mgpu.cpp	\
+	$(cdir)/testing_zher2k_mgpu.cpp	\
+	\
+	$(cdir)/testing_blas_z.cpp	\
+	$(cdir)/testing_cblas_z.cpp	\
+	$(cdir)/testing_zgeadd.cpp	\
+	$(cdir)/testing_zlacpy.cpp	\
+	$(cdir)/testing_zlag2c.cpp	\
+	$(cdir)/testing_zlange.cpp	\
+	$(cdir)/testing_zlanhe.cpp	\
+	$(cdir)/testing_zlarfg.cpp	\
+	$(cdir)/testing_zlascl.cpp	\
+	$(cdir)/testing_zlaset.cpp	\
+	$(cdir)/testing_zlaset_band.cpp	\
+	$(cdir)/testing_zlat2c.cpp	\
+	$(cdir)/testing_znan_inf.cpp	\
+	$(cdir)/testing_zprint.cpp	\
+	$(cdir)/testing_zsymmetrize.cpp	\
+	$(cdir)/testing_zsymmetrize_tiles.cpp	\
+	$(cdir)/testing_zswap.cpp	\
+	$(cdir)/testing_ztranspose.cpp	\
+	$(cdir)/testing_ztrtri_diag.cpp	\
+	\
+	$(cdir)/testing_auxiliary.cpp	\
+	$(cdir)/testing_constants.cpp	\
+	$(cdir)/testing_operators.cpp	\
+	$(cdir)/testing_parse_opts.cpp	\
+
+	#$(cdir)/testing_veclib.cpp	\
+
+# ----------
+# Cholesky, GPU interface
+testing_zsrc += \
+	$(cdir)/testing_zcposv_gpu.cpp	\
+	\
+	$(cdir)/testing_zposv_gpu.cpp	\
+	$(cdir)/testing_zpotrf_gpu.cpp	\
+	$(cdir)/testing_zpotf2_gpu.cpp	\
+	$(cdir)/testing_zpotri_gpu.cpp	\
+	$(cdir)/testing_ztrtri_gpu.cpp	\
+	\
+	$(cdir)/testing_zpotrf_mgpu.cpp	\
+
+# Cholesky, CPU interface
+testing_zsrc += \
+	$(cdir)/testing_zposv.cpp	\
+	$(cdir)/testing_zpotrf.cpp	\
+	$(cdir)/testing_zpotri.cpp	\
+	$(cdir)/testing_ztrtri.cpp	\
+
+# ----------
+# Symmetric indefinite, CPU interface
+testing_zsrc += \
+	$(cdir)/testing_zhesv.cpp	\
+	$(cdir)/testing_zhesv_nopiv_gpu.cpp	\
+	$(cdir)/testing_zsysv_nopiv_gpu.cpp	\
+	$(cdir)/testing_zhetrf.cpp	\
+
+# ----------
+# LU, GPU interface
+testing_zsrc += \
+	$(cdir)/testing_zcgesv_gpu.cpp	\
+	\
+	$(cdir)/testing_zgesv_gpu.cpp	\
+	$(cdir)/testing_zgetrf_gpu.cpp	\
+	$(cdir)/testing_zgetf2_gpu.cpp	\
+	$(cdir)/testing_zgetri_gpu.cpp	\
+	\
+	$(cdir)/testing_zgetrf_mgpu.cpp	\
+
+# LU, CPU interface
+testing_zsrc += \
+	$(cdir)/testing_zgesv.cpp	\
+	$(cdir)/testing_zgesv_rbt.cpp	\
+	$(cdir)/testing_zgetrf.cpp	\
+
+# ----------
+# QR and least squares, GPU interface
+testing_zsrc += \
+	$(cdir)/testing_zcgeqrsv_gpu.cpp	\
+	\
+	$(cdir)/testing_zgegqr_gpu.cpp	\
+	$(cdir)/testing_zgelqf_gpu.cpp	\
+	$(cdir)/testing_zgels_gpu.cpp	\
+	$(cdir)/testing_zgels3_gpu.cpp	\
+	$(cdir)/testing_zgeqp3_gpu.cpp	\
+	$(cdir)/testing_zgeqr2_gpu.cpp	\
+	$(cdir)/testing_zgeqr2x_gpu.cpp	\
+	$(cdir)/testing_zgeqrf_gpu.cpp	\
+	$(cdir)/testing_zlarfb_gpu.cpp	\
+	$(cdir)/testing_zungqr_gpu.cpp	\
+	$(cdir)/testing_zunmqr_gpu.cpp	\
+	\
+	$(cdir)/testing_zgeqrf_mgpu.cpp	\
+
+# QR, CPU interface
+testing_zsrc += \
+	$(cdir)/testing_zgelqf.cpp	\
+	$(cdir)/testing_zgels.cpp       \
+	$(cdir)/testing_zgeqlf.cpp	\
+	$(cdir)/testing_zgeqp3.cpp	\
+	$(cdir)/testing_zgeqrf.cpp	\
+	$(cdir)/testing_zungqr.cpp	\
+	$(cdir)/testing_zunmlq.cpp	\
+	$(cdir)/testing_zunmql.cpp	\
+	$(cdir)/testing_zunmqr.cpp	\
+	\
+	$(cdir)/testing_zungqr_m.cpp	\
+
+# ----------
+# symmetric eigenvalues, GPU interface
+testing_zsrc += \
+	$(cdir)/testing_zheevd_gpu.cpp	\
+	$(cdir)/testing_zhetrd_gpu.cpp	\
+	\
+	$(cdir)/testing_zhetrd_mgpu.cpp	\
+
+# symmetric eigenvalues, CPU interface
+testing_zsrc += \
+	$(cdir)/testing_zheevd.cpp	\
+	$(cdir)/testing_zhetrd.cpp	\
+
+# symmetric eigenvalues, 2-stage
+testing_zsrc += \
+	$(cdir)/testing_zhetrd_he2hb.cpp	\
+	$(cdir)/testing_zheevdx_2stage.cpp	\
+#	$(cdir)/testing_zhetrd_he2hb_mgpu.cpp	\
+
+# generalized symmetric eigenvalues
+testing_zsrc += \
+	$(cdir)/testing_zhegvd.cpp	\
+	$(cdir)/testing_zhegvd_m.cpp	\
+	$(cdir)/testing_zhegvdx.cpp	\
+	$(cdir)/testing_zhegvdx_2stage.cpp	\
+	$(cdir)/testing_zhegvdx_2stage_m.cpp	\
+
+# ----------
+# non-symmetric eigenvalues
+testing_zsrc += \
+	$(cdir)/testing_dgeev.cpp	\
+	$(cdir)/testing_zgeev.cpp	\
+	$(cdir)/testing_dgeev_m.cpp	\
+	$(cdir)/testing_zgeev_m.cpp	\
+	$(cdir)/testing_zgehrd.cpp	\
+	$(cdir)/testing_zgehrd_m.cpp	\
+
+# ----------
+# SVD
+testing_zsrc += \
+	$(cdir)/testing_zgesdd.cpp	\
+	$(cdir)/testing_zgesvd.cpp	\
+	$(cdir)/testing_zgebrd.cpp	\
+	$(cdir)/testing_zunmbr.cpp	\
+
+# ----------
+# batched BLAS, QR, LU, Cholesky
+testing_zsrc += \
+	$(cdir)/testing_zgeadd_batched.cpp	\
+	$(cdir)/testing_zgemm_batched.cpp	\
+	$(cdir)/testing_zgemv_batched.cpp	\
+	$(cdir)/testing_zherk_batched.cpp	\
+	$(cdir)/testing_zlacpy_batched.cpp	\
+	$(cdir)/testing_ztrsm_batched.cpp	\
+	$(cdir)/testing_ztrsv_batched.cpp	\
+	\
+	$(cdir)/testing_zgeqrf_batched.cpp	\
+	\
+	$(cdir)/testing_zgesv_batched.cpp	\
+	$(cdir)/testing_zgesv_nopiv_batched.cpp	\
+	$(cdir)/testing_zgetrf_batched.cpp	\
+	$(cdir)/testing_zgetrf_nopiv_batched.cpp	\
+	$(cdir)/testing_zgetri_batched.cpp	\
+	\
+	$(cdir)/testing_zposv_batched.cpp	\
+	$(cdir)/testing_zpotrf_batched.cpp	\
+
+# ----------
+# fortran.c and fortran_thunking.c are provided by NVIDIA in $(CUDADIR)/src
+ifeq ($(FORT), pgfortran)
+	testing_src += \
+		$(cdir)/fortran_thunking.$(o_ext)
+	
+	testing_zsrc += \
+		$(cdir)/testing_zgetrf_gpu_f.cuf
+else
+	testing_src += \
+		$(cdir)/fortran.$(o_ext)
+	
+	testing_zsrc += \
+		$(cdir)/testing_zgetrf_gpu_f.F90	\
+		$(cdir)/testing_zgetrf_f.f90
+endif
+
+#
+# These two files are provided by cuda
+# CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
+#
+$(cdir)/fortran.$(o_ext) : CFLAGS += -DCUBLAS_GFORTRAN
+$(cdir)/fortran.$(o_ext) : $(CUDADIR)/src/fortran.c
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+
+$(cdir)/fortran_thunking.$(o_ext) : $(CUDADIR)/src/fortran_thunking.c
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+
+
+# ----------------------------------------
+# utilities library
+libtest_zsrc := \
+	$(cdir)/magma_util.cpp		\
+	$(cdir)/magma_zutil.cpp		\
+
+
+# ----------------------------------------------------------------------
+# pop first directory
+cdir      := $(firstword $(dir_stack))
+dir_stack := $(wordlist 2, $(words $(dir_stack)), $(dir_stack))

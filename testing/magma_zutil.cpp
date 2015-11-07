@@ -29,7 +29,7 @@ void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t ld
     for( i=0; i < N; ++i ) {
         A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ), 0. );
         for( j=0; j < i; ++j ) {
-            A(j,i) = MAGMA_Z_CNJG( A(i,j) );
+            A(j,i) = MAGMA_Z_CONJ( A(i,j) );
         }
     }
 }
@@ -46,7 +46,7 @@ void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
     for( i=0; i < N; ++i ) {
         A(i,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( A(i,i) ) + N, 0. );
         for( j=0; j < i; ++j ) {
-            A(j,i) = MAGMA_Z_CNJG( A(i,j) );
+            A(j,i) = MAGMA_Z_CONJ( A(i,j) );
         }
     }
 }

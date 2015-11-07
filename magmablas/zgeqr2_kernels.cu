@@ -96,5 +96,7 @@ void zgeqrf_copy_upper_batched(
     */
     if ( nb >= n) return;
     
-    zgeqrf_copy_upper_kernel_batched<<< batchCount, n, 0, queue >>>( n, nb, dV_array, lddv, dR_array, lddr );
+    zgeqrf_copy_upper_kernel_batched
+        <<< batchCount, n, 0, queue->cuda_stream() >>>
+        ( n, nb, dV_array, lddv, dR_array, lddr );
 }

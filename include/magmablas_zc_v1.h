@@ -8,8 +8,8 @@
        @precisions mixed zc -> ds
 */
 
-#ifndef MAGMABLAS_ZC_H
-#define MAGMABLAS_ZC_H
+#ifndef MAGMABLAS_ZC_V1_H
+#define MAGMABLAS_ZC_V1_H
 
 #include "magma_types.h"
 
@@ -26,13 +26,13 @@ magmablas_zcaxpycp(
     magmaDoubleComplex_const_ptr b,
     magmaDoubleComplex_ptr w );
 
-// TODO add ldsa
 void
 magmablas_zclaswp(
     magma_int_t n,
     magmaDoubleComplex_ptr  A, magma_int_t lda,
     magmaFloatComplex_ptr  SA,
-    magma_int_t m, const magma_int_t *ipiv, magma_int_t incx );
+    magma_int_t m,
+    const magma_int_t *ipiv, magma_int_t incx );
 
 void
 magmablas_zlag2c(
@@ -66,4 +66,4 @@ magmablas_clat2z(
 }
 #endif
 
-#endif /* MAGMABLAS_ZC_H */
+#endif /* MAGMABLAS_ZC_V1_H */

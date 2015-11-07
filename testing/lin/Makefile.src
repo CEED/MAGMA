@@ -32,73 +32,57 @@
 #
 #######################################################################
 
-DIR = testing/lin
-MAGMA_DIR = ../..
-include $(MAGMA_DIR)/Makefile.internal
+# push previous directory
+dir_stack := $(dir_stack) $(cdir)
+cdir      := testing/lin
+# ----------------------------------------------------------------------
 
-
-# ----------
-# sources for liblapacktest.a, if Fortran is NOT available -- dummy stub functions.
-ZSRC := magma_z_no_fortran.cpp
-
--include Makefile.src
-
-NO_FORT_SRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-
-NO_FORT_OBJ := $(NO_FORT_SRC:.cpp=.$(o_ext))
-
-# ----------
-# sources for liblapacktest.a, if Fortran IS available.
-SRC =   zbdt01.f  \
-        zget22.f  \
-        zhet21.f  \
-        zhst01.f  \
-        zunt01.f  \
-        zqpt01.f  \
-        zqrt02.f  \
-        zlarfy.f  \
-        zstt21.f  \
-        \
-        cbdt01.f  \
-        cget22.f  \
-        chet21.f  \
-        chst01.f  \
-        cunt01.f  \
-        cqpt01.f  \
-        cqrt02.f  \
-        clarfy.f  \
-        cstt21.f  \
-        \
-        dbdt01.f  \
-        dget22.f  \
-        dsyt21.f  \
-        dhst01.f  \
-        dort01.f  \
-        dqpt01.f  \
-        dqrt02.f  \
-        dlarfy.f  \
-        dstt21.f  \
-        \
-        sbdt01.f  \
-        sget22.f  \
-        ssyt21.f  \
-        shst01.f  \
-        sort01.f  \
-        sqpt01.f  \
-        sqrt02.f  \
-        slarfy.f  \
-        sstt21.f
-
-OBJ = $(SRC:.f=.$(o_ext))
 
 ifeq ($(FORT),no_fortran)
-liblapacktest.a: $(NO_FORT_OBJ)
-	$(ARCH) $(ARCHFLAGS) $@ $^
-	$(RANLIB) $@
+	# sources for liblapacktest.a, if Fortran is NOT available -- dummy stub functions.
+	liblapacktest_zsrc := \
+		$(cdir)/magma_z_no_fortran.cpp
 else
-liblapacktest.a: $(OBJ)
-	$(ARCH) $(ARCHFLAGS) $@ $^
-	$(RANLIB) $@
+	liblapacktest_src := \
+		$(cdir)/zbdt01.f  \
+		$(cdir)/zget22.f  \
+		$(cdir)/zhet21.f  \
+		$(cdir)/zhst01.f  \
+		$(cdir)/zunt01.f  \
+		$(cdir)/zqpt01.f  \
+		$(cdir)/zqrt02.f  \
+		$(cdir)/zlarfy.f  \
+		$(cdir)/zstt21.f  \
+		\
+		$(cdir)/cbdt01.f  \
+		$(cdir)/cget22.f  \
+		$(cdir)/chet21.f  \
+		$(cdir)/chst01.f  \
+		$(cdir)/cunt01.f  \
+		$(cdir)/cqpt01.f  \
+		$(cdir)/cqrt02.f  \
+		$(cdir)/clarfy.f  \
+		$(cdir)/cstt21.f  \
+		\
+		$(cdir)/dbdt01.f  \
+		$(cdir)/dget22.f  \
+		$(cdir)/dsyt21.f  \
+		$(cdir)/dhst01.f  \
+		$(cdir)/dort01.f  \
+		$(cdir)/dqpt01.f  \
+		$(cdir)/dqrt02.f  \
+		$(cdir)/dlarfy.f  \
+		$(cdir)/dstt21.f  \
+		\
+		$(cdir)/sbdt01.f  \
+		$(cdir)/sget22.f  \
+		$(cdir)/ssyt21.f  \
+		$(cdir)/shst01.f  \
+		$(cdir)/sort01.f  \
+		$(cdir)/sqpt01.f  \
+		$(cdir)/sqrt02.f  \
+		$(cdir)/slarfy.f  \
+		$(cdir)/sstt21.f
 endif
 
 
@@ -108,9 +92,9 @@ ALINTST = \
    aladhd.$(o_ext) alaerh.$(o_ext) alaesm.$(o_ext) alahd.$(o_ext) alareq.$(o_ext) \
    alasum.$(o_ext) alasvm.$(o_ext) chkxer.$(o_ext) icopy.$(o_ext) ilaenv.$(o_ext) xlaenv.$(o_ext) xerbla.$(o_ext)
 
-SCLNTST= slaord.$(o_ext)
+SCLNTST = slaord.$(o_ext)
 
-DZLNTST= dlaord.$(o_ext) 
+DZLNTST = dlaord.$(o_ext)
 
 SLINTST = schkaa.$(o_ext) \
    schkeq.$(o_ext) schkgb.$(o_ext) schkge.$(o_ext) schkgt.$(o_ext) \
@@ -177,7 +161,7 @@ CLINTST = cchkaa.$(o_ext) \
    ctzt01.$(o_ext) ctzt02.$(o_ext) sget06.$(o_ext) cgennd.$(o_ext)
 
 CLINTST += cerrvx.$(o_ext) cdrvge.$(o_ext) cdrvgb.$(o_ext) cerrge.$(o_ext) cdrvpo.$(o_ext) \
-	cerrpo.$(o_ext) 
+	cerrpo.$(o_ext)
 
 DLINTST = dchkaa.$(o_ext) \
    dchkeq.$(o_ext) dchkgb.$(o_ext) dchkge.$(o_ext) dchkgt.$(o_ext) \
@@ -243,7 +227,7 @@ ZLINTST = zchkaa.$(o_ext) \
    ztzt01.$(o_ext) ztzt02.$(o_ext) dget06.$(o_ext) zgennd.$(o_ext)
 
 ZLINTST += zerrvx.$(o_ext) zdrvge.$(o_ext) zdrvgb.$(o_ext) zerrge.$(o_ext) zdrvpo.$(o_ext) \
-	zerrpo.$(o_ext) 
+	zerrpo.$(o_ext)
 
 DSLINTST = dchkab.$(o_ext) \
 	ddrvab.$(o_ext) ddrvac.$(o_ext) derrab.$(o_ext) derrac.$(o_ext) dget08.$(o_ext)          \
@@ -259,59 +243,59 @@ ZCLINTST = zchkab.$(o_ext) \
 
 SLINTSTRFP = schkrfp.$(o_ext) sdrvrfp.$(o_ext) sdrvrf1.$(o_ext) sdrvrf2.$(o_ext) sdrvrf3.$(o_ext) sdrvrf4.$(o_ext) serrrfp.$(o_ext) \
 	slatb4.$(o_ext) slarhs.$(o_ext) sget04.$(o_ext) spot01.$(o_ext) spot03.$(o_ext) spot02.$(o_ext) \
-	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext) 
+	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext)
 
 DLINTSTRFP = dchkrfp.$(o_ext) ddrvrfp.$(o_ext) ddrvrf1.$(o_ext) ddrvrf2.$(o_ext) ddrvrf3.$(o_ext) ddrvrf4.$(o_ext) derrrfp.$(o_ext) \
 	dlatb4.$(o_ext) dlarhs.$(o_ext) dget04.$(o_ext) dpot01.$(o_ext) dpot03.$(o_ext) dpot02.$(o_ext) \
-	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext) 
+	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext)
 
 CLINTSTRFP = cchkrfp.$(o_ext) cdrvrfp.$(o_ext) cdrvrf1.$(o_ext) cdrvrf2.$(o_ext) cdrvrf3.$(o_ext) cdrvrf4.$(o_ext) cerrrfp.$(o_ext) \
 	claipd.$(o_ext) clatb4.$(o_ext) clarhs.$(o_ext) csbmv.$(o_ext) cget04.$(o_ext) cpot01.$(o_ext) cpot03.$(o_ext) cpot02.$(o_ext) \
-	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext) 
+	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext)
 
 ZLINTSTRFP = zchkrfp.$(o_ext) zdrvrfp.$(o_ext) zdrvrf1.$(o_ext) zdrvrf2.$(o_ext) zdrvrf3.$(o_ext) zdrvrf4.$(o_ext) zerrrfp.$(o_ext) \
 	zlatb4.$(o_ext) zlaipd.$(o_ext) zlarhs.$(o_ext) zsbmv.$(o_ext) zget04.$(o_ext) zpot01.$(o_ext) zpot03.$(o_ext) zpot02.$(o_ext) \
-	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext) 
+	chkxer.$(o_ext) xerbla.$(o_ext) alaerh.$(o_ext) aladhd.$(o_ext) alahd.$(o_ext) alasvm.$(o_ext)
 
-TMGLIB = ../matgen/tmglib.a
+TMGLIB = testing/matgen/tmglib.a
 
-all:  single double complex complex16 liblapacktest.a
+$(cdir)/all: $(cdir)/single $(cdir)/double $(cdir)/complex $(cdir)/complex16 $(cdir)/liblapacktest.a
 
-single: xlintsts
-double: xlintstd
-complex: xlintstc
-complex16: xlintstz 
+$(cdir)/single:    xlintsts
+$(cdir)/double:    xlintstd
+$(cdir)/complex:   xlintstc
+$(cdir)/complex16: xlintstz
 
 $(TMGLIB):
-	cd ../matgen && $(MAKE)
+	cd testing/matgen && $(MAKE)
 
-xlintsts : $(ALINTST) $(SLINTST) $(SCLNTST) ../fortran.$(o_ext) $(TMGLIB)
+xlintsts : $(ALINTST) $(SLINTST) $(SCLNTST) testing/fortran.$(o_ext) $(TMGLIB)
 	$(FORT) $(ALINTST) $(SCLNTST) $(SLINTST) \
 	$(TMGLIB) -o xlintsts \
-	../fortran.$(o_ext) \
+	testing/fortran.$(o_ext) \
 	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
-	$(LIBDIR) $(LIB) 
+	$(LIBDIR) $(LIB)
 
-xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) ../fortran.$(o_ext) $(TMGLIB)
+xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) testing/fortran.$(o_ext) $(TMGLIB)
 	$(FORT) $(ALINTST) $(SCLNTST) $(CLINTST) \
 	$(TMGLIB) -o xlintstc \
-	../fortran.$(o_ext) \
+	testing/fortran.$(o_ext) \
 	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
-	$(LIBDIR) $(LIB) 
+	$(LIBDIR) $(LIB)
  
-xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) ../fortran.$(o_ext) $(TMGLIB)
+xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) testing/fortran.$(o_ext) $(TMGLIB)
 	$(FORT) $(ALINTST) $(DLINTST) $(DZLNTST) \
 	$(TMGLIB) -o xlintstd \
-	../fortran.$(o_ext) \
+	testing/fortran.$(o_ext) \
 	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
-	$(LIBDIR) $(LIB) 
+	$(LIBDIR) $(LIB)
  
-xlintstz : $(ALINTST) $(ZLINTST) $(DZLNTST) ../fortran.$(o_ext) $(TMGLIB)
+xlintstz : $(ALINTST) $(ZLINTST) $(DZLNTST) testing/fortran.$(o_ext) $(TMGLIB)
 	$(FORT) $(ALINTST) $(DZLNTST) $(ZLINTST) \
 	$(TMGLIB) -o xlintstz \
-	../fortran.$(o_ext) \
+	testing/fortran.$(o_ext) \
 	$(LDFLAGS) -L$(MAGMA_DIR)/lib -lmagma \
-	$(LIBDIR) $(LIB) 
+	$(LIBDIR) $(LIB)
  
 $(ALINTST): $(FRC)
 $(SCLNTST): $(FRC)
@@ -324,25 +308,14 @@ $(ZLINTST): $(FRC)
 FRC:
 	@FRC=$(FRC)
  
-clean:
-	rm -f *.$(o_ext) *.mod liblapacktest.a *~
+# $(cdir)/clean:
+# 	rm -f *.$(o_ext) *.mod liblapacktest.a *~
+# 
+# $(cdir)/cleanall: $(cdir)/clean
+# 	rm -f liblapacktest.a xlintsts xlintstd xlintstc xlintstz testing_results.txt
 
-cleanall: clean
-	rm -f liblapacktest.a xlintsts xlintstd xlintstc xlintstz testing_results.txt
 
-# These are handled by generic %.$(o_ext): %.f rule in Makefile.internal
-#schkaa.$(o_ext): schkaa.f
-#	cp $(MAGMA_DIR)/control/magma.mod . 
-#	$(FORT) $(FFLAGS) -c $< -o $@
-#
-#dchkaa.$(o_ext): dchkaa.f
-#	$(FORT) $(FFLAGS) -c $< -o $@
-#
-#cchkaa.$(o_ext): cchkaa.f
-#	$(FORT) $(FFLAGS) -c $< -o $@
-#
-#zchkaa.$(o_ext): zchkaa.f
-#	$(FORT) $(FFLAGS) -c $< -o $@
-
-../fortran.$(o_ext):
-	cd .. && $(MAKE) fortran.$(o_ext)
+# ----------------------------------------------------------------------
+# pop first directory
+cdir      := $(firstword $(dir_stack))
+dir_stack := $(wordlist 2, $(words $(dir_stack)), $(dir_stack))

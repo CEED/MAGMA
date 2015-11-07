@@ -233,7 +233,7 @@ int main(  int argc, char** argv )
         //#ifdef PRECISION_d
         start = magma_sync_wtime( queue );
         CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-        CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+        CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
         CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
         CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));
         CHECK_CUSPARSE( cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO ));

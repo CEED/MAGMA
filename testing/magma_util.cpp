@@ -638,8 +638,7 @@ void magma_opts::parse_opts( int argc, char** argv )
     
     #ifdef HAVE_CUBLAS
     // handle for directly calling cublas
-    cublasCreate( &this->handle );
-    cublasSetStream( this->handle, this->queue );
+    this->handle = magma_queue_get_cublas_handle( this->queue );
     #endif
 }
 // end parse_opts

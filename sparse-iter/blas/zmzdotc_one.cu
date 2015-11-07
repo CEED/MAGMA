@@ -232,13 +232,13 @@ magma_zmzdotc_one(
     int b = 1;        
 
 
-    magma_zmzdotc_one_kernel_1<<<Gs, Bs, Ms, queue>>>
+    magma_zmzdotc_one_kernel_1<<< Gs, Bs, Ms, queue->cuda_stream() >>>
             ( Gs.x, n, v0, w0, d1 );
    
     while( Gs.x > 1 ) {
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zmzdotc_one_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
+        magma_zmzdotc_one_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                     ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;

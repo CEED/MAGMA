@@ -84,7 +84,7 @@ magma_zdiagcheck(
     CHECK( magma_imalloc_cpu( &hinfo, 1 ) );
     hinfo[0] = 0;
     magma_isetvector( 1, hinfo, 1, dinfo, 1 );
-    zdiagcheck_kernel<<< grid, threads, 0, queue >>>
+    zdiagcheck_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
     ( dA.num_rows, dA.num_cols, dA.dval, dA.drow, dA.dcol, dinfo );
     info = hinfo[0];
     magma_igetvector( 1, dinfo, 1, hinfo, 1 ); 

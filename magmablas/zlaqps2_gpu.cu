@@ -157,10 +157,10 @@ magma_zlaqps2_gpu(
            A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'.
            Optimization: multiply with beta=0; wait for vector and subtract */
         if (k > 0) {
-            magmablas_zgemv_conjv( m-rk, k,
-                                   c_neg_one, dA(rk, 0), ldda,
-                                              dF(k,  0), lddf,
-                                   c_one,     dA(rk, k), ione );
+            magmablas_zgemv_conj( m-rk, k,
+                                  c_neg_one, dA(rk, 0), ldda,
+                                             dF(k,  0), lddf,
+                                  c_one,     dA(rk, k), ione );
         }
 
         /*  Generate elementary reflector H(k). */
@@ -189,8 +189,9 @@ magma_zlaqps2_gpu(
                                  dA(rk, k), ione,
                          c_zero, dauxv, ione ); */
 
-            magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, dA(rk, 0), ldda,
-                                                                      dA(rk, k), dauxv, dtau+k);
+            magma_zgemv_kernel3
+                <<< k, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+                (m-rk, dA(rk, 0), ldda, dA(rk, k), dauxv, dtau+k);
 
             /* I think we only need stricly lower-triangular part */
             magma_zgemv( MagmaNoTrans, n-k-1, k,

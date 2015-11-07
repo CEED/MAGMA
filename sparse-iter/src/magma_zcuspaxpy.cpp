@@ -98,7 +98,7 @@ magma_zcuspaxpy(
         // CUSPARSE context //
 
         CHECK_CUSPARSE( cusparseCreate( &handle ));
-        CHECK_CUSPARSE( cusparseSetStream( handle, queue ));
+        CHECK_CUSPARSE( cusparseSetStream( handle, queue->cuda_stream() ));
         CHECK_CUSPARSE( cusparseCreateMatDescr( &descrA ));
         CHECK_CUSPARSE( cusparseCreateMatDescr( &descrB ));
         CHECK_CUSPARSE( cusparseCreateMatDescr( &descrC ));

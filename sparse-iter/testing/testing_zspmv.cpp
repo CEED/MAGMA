@@ -231,7 +231,7 @@ int main(  int argc, char** argv )
         // CUSPARSE context //
 
         CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-        CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+        CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
         CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));
 
         CHECK_CUSPARSE( cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL ));

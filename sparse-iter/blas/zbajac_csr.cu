@@ -181,11 +181,11 @@ magma_zbajac_csr(
     dim3 block( blocksize1, blocksize2, 1 );
     if ( R.nnz > 0 ) { 
         if ( localiters == 1 )
-        magma_zbajac_csr_kernel<<< grid, block, 0, queue >>>
+        magma_zbajac_csr_kernel<<< grid, block, 0, queue->cuda_stream() >>>
             ( D.num_rows, D.dval, D.drow, D.dcol, 
                             R.dval, R.drow, R.dcol, b.dval, x->dval );
         else
-            magma_zbajac_csr_ls_kernel<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
             ( localiters, D.num_rows, D.dval, D.drow, D.dcol, 
                             R.dval, R.drow, R.dcol, b.dval, x->dval );
     }

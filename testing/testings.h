@@ -9,7 +9,9 @@
 #include <cublas_v2.h>  // before magma.h
 #endif
 
+#if ! defined(MAGMA_H) && ! defined(MAGMA_V2_H)
 #include "magma.h"
+#endif
 
 
 /***************************************************************************//**

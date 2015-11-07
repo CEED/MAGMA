@@ -196,7 +196,7 @@ magma_zlahr2_m(
     // zero out current top block of V on all GPUs
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( data->streams[d] );
+        magmablasSetKernelStream( data->queues[d] );
         magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV(d,k,0), ldv );
     }
     
@@ -272,12 +272,12 @@ magma_zlahr2_m(
         nblocks = (n-1) / nb / ngpu + 1;
         for( d = 0; d < ngpu; ++d ) {
             magma_setdevice( d );
-            magmablasSetKernelStream( data->streams[d] );
+            magmablasSetKernelStream( data->queues[d] );
             
             // dV(k+i+1:n-1, i) = VA(k+i:n, i)
             magma_zsetvector_async( n_k_i_1,
                                     A(k+i+1,i), 1,
-                                    dV(d, k+i+1, i), 1, data->streams[d] );
+                                    dV(d, k+i+1, i), 1, data->queues[d] );
             
             // copy column of dV -> dVd, using block cyclic distribution.
             // This assumes V and Vd have been padded so that
@@ -310,7 +310,7 @@ magma_zlahr2_m(
                 // as temporary space (Y has >= nb+ngpu columns)
                 magma_zgetvector_async( n-k,
                                         dY(d, k, i), 1,
-                                        Y(k, nb+d),  1, data->streams[d] );
+                                        Y(k, nb+d),  1, data->queues[d] );
             }
         }
         
@@ -364,7 +364,7 @@ magma_zlahr2_m(
         // yi = sum_g yi{d}
         for( d = 0; d < ngpu; ++d ) {
             magma_setdevice( d );
-            magma_queue_sync( data->streams[d] );
+            magma_queue_sync( data->queues[d] );
             magma_indices_1D_bcyclic( nb, ngpu, d, k+i+1, n, &dki1, &dn );
             if ( dn-dki1 > 0 ) {
                 // yi = yi + yi{d}
@@ -378,7 +378,7 @@ magma_zlahr2_m(
     // compute Y = Am V = sum_g Am{d} V{d} --- top part, Y(0:k-1,:)
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( data->streams[d] );
+        magmablasSetKernelStream( data->queues[d] );
         
         // convert global indices (k) to local indices (dk)
         magma_indices_1D_bcyclic( nb, ngpu, d, k+1, n, &dki1, &dn );
@@ -397,7 +397,7 @@ magma_zlahr2_m(
             // as temporary space (Y has nb + nb*ngpu columns)
             magma_zgetmatrix_async( k, nb,
                                     dY(d, 0, 0),  ldda,
-                                    Y(0,nb+nb*d), ldy, data->streams[d] );
+                                    Y(0,nb+nb*d), ldy, data->queues[d] );
         }
     }
     
@@ -417,8 +417,8 @@ magma_zlahr2_m(
     // copy Y and T matrices to GPUs
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magma_zsetmatrix_async( n, nb, Y, ldy, dY(d, 0, 0), ldda, data->streams[d] );
-        magma_zsetmatrix_async( nb, nb, T, nb, dTi(d),      nb,   data->streams[d] );
+        magma_zsetmatrix_async( n, nb, Y, ldy, dY(d, 0, 0), ldda, data->queues[d] );
+        magma_zsetmatrix_async( nb, nb, T, nb, dTi(d),      nb,   data->queues[d] );
     }
 
     magma_setdevice( orig_dev );

@@ -46,7 +46,7 @@ magmablas_zcaxpycp_q(
 {
     dim3 threads( NB );
     dim3 grid( magma_ceildiv( m, NB ) );
-    zcaxpycp_kernel <<< grid, threads, 0, queue >>> ( m, r, x, b, w );
+    zcaxpycp_kernel <<< grid, threads, 0, queue->cuda_stream() >>> ( m, r, x, b, w );
 }
 
 
@@ -58,5 +58,5 @@ magmablas_zcaxpycp(
     magmaDoubleComplex_const_ptr b,
     magmaDoubleComplex_ptr w)
 {
-    magmablas_zcaxpycp_q( m, r, x, b, w, magma_stream );
+    magmablas_zcaxpycp_q( m, r, x, b, w, magmablasGetQueue() );
 }

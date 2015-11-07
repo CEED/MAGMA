@@ -141,7 +141,7 @@ magma_ziteric_csr(
 
     dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
     dim3 block( blocksize1, blocksize2, 1 );
-    magma_ziteric_csr_kernel<<< grid, block, 0, magma_stream >>>
+    magma_ziteric_csr_kernel<<< grid, block, 0, queue->cuda_stream() >>>
             ( A.num_rows, A.nnz, 
               A.rowidx, A.col, A.val, 
               A_CSR.row, A_CSR.col,  A_CSR.val );

@@ -134,10 +134,10 @@ magmablas_zlascl_2x2_q(
     dim3 grid( magma_ceildiv( m, NB ) );
     
     if (type == MagmaLower) {
-        zlascl_2x2_lower <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
+        zlascl_2x2_lower <<< grid, threads, 0, queue->cuda_stream() >>> (m, dW, lddw, dA, ldda);
     }
     else {
-        zlascl_2x2_upper <<< grid, threads, 0, queue >>> (m, dW, lddw, dA, ldda);
+        zlascl_2x2_upper <<< grid, threads, 0, queue->cuda_stream() >>> (m, dW, lddw, dA, ldda);
     }
 }
 
@@ -153,5 +153,5 @@ magmablas_zlascl_2x2(
     magmaDoubleComplex_ptr       dA, magma_int_t ldda,
     magma_int_t *info )
 {
-    magmablas_zlascl_2x2_q( type, m, dW, lddw, dA, ldda, magma_stream, info );
+    magmablas_zlascl_2x2_q( type, m, dW, lddw, dA, ldda, magmablasGetQueue(), info );
 }

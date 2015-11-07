@@ -152,7 +152,7 @@ magma_zgeelltmv(
 {
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgeelltmv_kernel<<< grid, threads, 0, queue >>>
+    zgeelltmv_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                   ( m, n, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
 
 
@@ -255,7 +255,7 @@ magma_zgeelltmv_shift(
     magmaDoubleComplex tmp_shift;
     //magma_zsetvector(1,&lambda,1,&tmp_shift,1); 
     tmp_shift = lambda;
-    zgeelltmv_kernel_shift<<< grid, threads, 0, queue >>>
+    zgeelltmv_kernel_shift<<< grid, threads, 0, queue->cuda_stream() >>>
                   ( m, n, nnz_per_row, alpha, tmp_shift, dval, dcolind, dx, 
                             beta, offset, blocksize, addrows, dy );
 

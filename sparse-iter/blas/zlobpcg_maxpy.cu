@@ -94,7 +94,7 @@ magma_zlobpcg_maxpy(
     dim3 block( block_size );
     dim3 grid( magma_ceildiv( num_rows, block_size ) );
 
-    magma_zlobpcg_maxpy_kernel<<< grid, threads, 0, queue >>>
+    magma_zlobpcg_maxpy_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                                 ( num_rows, num_vecs, X, Y );
 
 

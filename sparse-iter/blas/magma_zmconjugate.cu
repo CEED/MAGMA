@@ -58,7 +58,7 @@ magma_zmconjugate(
     magma_int_t info = 0;
 
     dim3 grid( magma_ceildiv( A->num_rows, BLOCK_SIZE ));
-    magma_zmconjugate_kernel<<< grid, BLOCK_SIZE, 0, queue >>> 
+    magma_zmconjugate_kernel<<< grid, BLOCK_SIZE, 0, queue->cuda_stream() >>> 
                                     ( A->num_rows, A->drow, A->dval );
         
     return info;

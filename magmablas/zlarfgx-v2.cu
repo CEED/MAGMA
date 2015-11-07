@@ -118,7 +118,9 @@ magma_zlarfgx_gpu(
     dim3 blocks( magma_ceildiv( n, BLOCK_SIZE ) );
     dim3 threads( BLOCK_SIZE );
  
-    magma_zlarfgx_gpu_kernel<<< blocks, threads, 0, magma_stream >>>( n, dx0, dx, dtau, dxnorm, dA, iter);
+    magma_zlarfgx_gpu_kernel
+        <<< blocks, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        ( n, dx0, dx, dtau, dxnorm, dA, iter);
 }
 
 //==============================================================================
@@ -157,8 +159,13 @@ magma_zlarfgtx_gpu(
     }
     else {
         /* Compute the iter-th column of T */
-        magma_zgemv_kernel3<<< iter, BLOCK_SIZE, 0, magma_stream >>>( n, V, ldv, dx0, dwork, dtau );
-        magma_ztrmv_kernel2<<< iter, iter,       0, magma_stream >>>( T, ldt, dwork, T+iter*ldt, dtau );
+        magma_zgemv_kernel3
+            <<< iter, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+            ( n, V, ldv, dx0, dwork, dtau );
+        
+        magma_ztrmv_kernel2
+            <<< iter, iter,       0, magmablasGetQueue()->cuda_stream() >>>
+            ( T, ldt, dwork, T+iter*ldt, dtau );
     }
 }
 

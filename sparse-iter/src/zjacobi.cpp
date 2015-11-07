@@ -111,7 +111,7 @@ magma_zjacobi(
         //CHECK( magma_zjacobiiter_sys( A, b, d, r, x, &jacobiiter_par, queue ) );
         CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));
         tempo2 = magma_sync_wtime( queue );
-        runtime+=tempo2-tempo1;
+        runtime += tempo2 - tempo1;
         //CHECK( magma_zjacobispmvupdate_bw(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
         if ( solver_par->verbose > 0 ) {
             CHECK(  magma_zresidualvec( ACSR, b, *x, &r, &residual, queue));

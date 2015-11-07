@@ -210,13 +210,13 @@ magmablas_zlascl_q(
         }
         
         if (type == MagmaLower) {
-            zlascl_lower <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
+            zlascl_lower <<< grid, threads, 0, queue->cuda_stream() >>> (m, n, mul, dA, ldda);
         }
         else if (type == MagmaUpper) {
-            zlascl_upper <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
+            zlascl_upper <<< grid, threads, 0, queue->cuda_stream() >>> (m, n, mul, dA, ldda);
         }
         else if (type == MagmaFull) {
-            zlascl_full  <<< grid, threads, 0, queue >>> (m, n, mul, dA, ldda);
+            zlascl_full  <<< grid, threads, 0, queue->cuda_stream() >>> (m, n, mul, dA, ldda);
         }
      
         cnt += 1;
@@ -236,5 +236,5 @@ magmablas_zlascl(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t *info )
 {
-    magmablas_zlascl_q( type, kl, ku, cfrom, cto, m, n, dA, ldda, magma_stream, info );
+    magmablas_zlascl_q( type, kl, ku, cfrom, cto, m, n, dA, ldda, magmablasGetQueue(), info );
 }

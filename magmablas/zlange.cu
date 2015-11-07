@@ -267,18 +267,18 @@ magmablas_zlange_q(
     double result = -1;
     if ( norm == MagmaInfNorm ) {
         dim3 grid( magma_ceildiv( m, NB_X ) );
-        zlange_inf_kernel<<< grid, threads, 0, queue >>>( m, n, dA, ldda, dwork );
-        magma_max_nan_kernel<<< 1, 512, 0, queue >>>( m, dwork );
+        zlange_inf_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( m, n, dA, ldda, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, queue->cuda_stream() >>>( m, dwork );
     }
     else if ( norm == MagmaMaxNorm ) {
         dim3 grid( magma_ceildiv( m, NB_X ) );
-        zlange_max_kernel<<< grid, threads, 0, queue >>>( m, n, dA, ldda, dwork );
-        magma_max_nan_kernel<<< 1, 512, 0, queue >>>( m, dwork );
+        zlange_max_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( m, n, dA, ldda, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, queue->cuda_stream() >>>( m, dwork );
     }
     else if ( norm == MagmaOneNorm ) {
         dim3 grid( n );
-        zlange_one_kernel<<< grid, threads, 0, queue >>>( m, n, dA, ldda, dwork );
-        magma_max_nan_kernel<<< 1, 512, 0, queue >>>( n, dwork );  // note n instead of m
+        zlange_one_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( m, n, dA, ldda, dwork );
+        magma_max_nan_kernel<<< 1, 512, 0, queue->cuda_stream() >>>( n, dwork );  // note n instead of m
     }
     magma_dgetvector( 1, &dwork[0], 1, &result, 1 );
     
@@ -296,5 +296,5 @@ magmablas_zlange(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDouble_ptr dwork, magma_int_t lwork )
 {
-    return magmablas_zlange_q( norm, m, n, dA, ldda, dwork, lwork, magma_stream );
+    return magmablas_zlange_q( norm, m, n, dA, ldda, dwork, lwork, magmablasGetQueue() );
 }

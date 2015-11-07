@@ -10,11 +10,12 @@
 
        @precisions normal z -> s d c
 */
-#define PRECISION_z
+#include <cuda_runtime.h>
 
 #include "common_magma.h"
 #include "batched_kernel_param.h"
-#include "cublas_v2.h"
+
+#define PRECISION_z
 
 /**
     Purpose
@@ -176,9 +177,9 @@ magma_zgeqrf_expert_batched(
     magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0, use_stream;
     magma_int_t ldw, offset; 
 
-    cublasHandle_t myhandle;
-    cublasCreate_v2(&myhandle);
-    cublasSetStream(myhandle, queue);
+    cublasHandle_t myhandle = queue->cublas_handle();
+    ////cublasCreate_v2(&myhandle);
+    ////cublasSetStream(myhandle, queue);
 
 
     magmaDoubleComplex **dW0_displ = NULL;
@@ -385,7 +386,7 @@ magma_zgeqrf_expert_batched(
     for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( stream[k] );
     }
-    cublasDestroy_v2(myhandle);
+    ////cublasDestroy_v2(myhandle);
 
     magma_free(dW0_displ);
     magma_free(dW1_displ);

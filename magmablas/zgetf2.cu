@@ -154,7 +154,9 @@ void magma_zgetf2_swap(
     */
     dim3 threads( zswap_bs );
     dim3 grid( magma_ceildiv( n, zswap_bs ) );
-    kernel_zswap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, incx);
+    kernel_zswap
+        <<< grid, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        (n, x, i, j, incx);
 }
 
 
@@ -205,5 +207,7 @@ void magma_zscal_zgeru(
     dim3 threads( zgeru_bs );
     dim3 grid( magma_ceildiv( m, zgeru_bs ) );
     size_t shared_size = sizeof(magmaDoubleComplex)*(n);
-    kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, dA, ldda);
+    kernel_zscal_zgeru
+        <<< grid, threads, shared_size, magmablasGetQueue()->cuda_stream() >>>
+        (m, n, dA, ldda);
 }

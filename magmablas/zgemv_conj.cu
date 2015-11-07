@@ -18,7 +18,7 @@
 
 
 __global__ void
-zgemv_conjv_kernel(
+zgemv_conj_kernel(
     int m, int n, magmaDoubleComplex alpha,
     const magmaDoubleComplex * __restrict__ A, int lda,
     const magmaDoubleComplex * __restrict__ x, int incx, magmaDoubleComplex beta,
@@ -46,7 +46,7 @@ zgemv_conjv_kernel(
 /**
     Purpose
     -------
-    ZGEMV_CONJV performs the matrix-vector operation
+    ZGEMV_CONJ performs the matrix-vector operation
     
         y := alpha*A*conj(x)    + beta*y, 
     
@@ -96,12 +96,13 @@ zgemv_conjv_kernel(
     @ingroup magma_zblas2
     ********************************************************************/
 extern "C" void
-magmablas_zgemv_conjv(
+magmablas_zgemv_conj_q(
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr dy, magma_int_t incy)
+    magmaDoubleComplex_ptr dy, magma_int_t incy,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -124,8 +125,23 @@ magmablas_zgemv_conjv(
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
 
-    zgemv_conjv_kernel<<< grid, threads, 0, magma_stream >>>
+    zgemv_conj_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
             (m, n, alpha, dA, ldda, dx, incx, beta, dy, incy);
 }
 
-#undef num_threads
+
+/**
+    @see magmablas_zgemv_conj_q
+    @ingroup magma_zblas2
+    ********************************************************************/
+extern "C" void
+magmablas_zgemv_conj(
+    magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr dy, magma_int_t incy)
+{
+    magmablas_zgemv_conj_q(
+        m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, magmablasGetQueue() );
+}

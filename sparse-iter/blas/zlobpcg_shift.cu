@@ -100,7 +100,7 @@ magma_zlobpcg_shift(
 
     dim3 grid( dimgrid1, dimgrid2, 1);
 
-    magma_zlobpcg_shift_kernel<<< grid, block, Ms, queue >>>
+    magma_zlobpcg_shift_kernel<<< grid, block, Ms, queue->cuda_stream() >>>
             ( num_rows, num_vecs, shift, x );
 
 

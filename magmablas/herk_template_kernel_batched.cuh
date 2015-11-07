@@ -48,8 +48,9 @@ void herk_template_batched_nt_kernel(
     #endif
     */
     
-    gemm_template_device_nt<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-    ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+    gemm_template_device_nt
+        <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
+        ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
 
 
@@ -83,8 +84,9 @@ void herk_template_batched_tn_kernel(
     #endif
     */
     
-    gemm_template_device_tn<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
-    ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
+    gemm_template_device_tn
+        <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, (BLK_M/DIM_X), (BLK_N/DIM_Y), CONJA, CONJB>
+        ( N, N, K, Aarray[batchid], LDA, Aarray[batchid], LDA, Carray[batchid], LDC, alpha, beta, offsetA, offsetB );
 }
 
 
@@ -106,8 +108,10 @@ void herk_template_batched_nt(
 {
     dim3 dimBlock(DIM_X, DIM_Y);
     dim3 dimGrid( magma_ceildiv( n, BLK_M ), magma_ceildiv( n, BLK_N ), batchCount );
-    herk_template_batched_nt_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
-    <<<dimGrid, dimBlock, 0, queue>>>(uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
+    herk_template_batched_nt_kernel
+        <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
+        <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
+        (uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
 }
 
 
@@ -127,8 +131,10 @@ void herk_template_batched_tn(
 {
     dim3 dimBlock(DIM_X, DIM_Y);
     dim3 dimGrid( magma_ceildiv( n, BLK_M ), magma_ceildiv( n, BLK_N ), batchCount );
-    herk_template_batched_tn_kernel<T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
-    <<<dimGrid, dimBlock, 0, queue>>>(uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
+    herk_template_batched_tn_kernel
+        <T, DIM_X, DIM_Y, BLK_M, BLK_N, BLK_K, DIM_XA, DIM_YA, DIM_XB, DIM_YB, CONJA, CONJB>
+        <<< dimGrid, dimBlock, 0, queue->cuda_stream() >>>
+        (uplo, n, k, alpha, dA_array, ldda, beta, dC_array, lddc, offsetA, offsetB);
 }
 
 #endif //HERK_TEMPLATE_KERNEL_BATCHED_CUH

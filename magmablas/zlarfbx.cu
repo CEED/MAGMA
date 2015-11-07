@@ -47,7 +47,7 @@ magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
 //==============================================================================
 /*  ----------------------------------------------------------------------------- 
     Call 
-        magma_zgemv_kernel3<<< n, BLOCK_SIZE>>>(m, V, ldv, c, dwork, tau)
+        magma_zgemv_kernel3<<< n, BLOCK_SIZE >>>(m, V, ldv, c, dwork, tau)
     to compute
         ZGEMV( "Conjugate transpose", m, n, -tau[0], V, ldv, c, 1, zero, dwork, 1)
         and to set c[0] to 1.
@@ -121,15 +121,21 @@ magma_zlarfbx_gpu(
     magmaDoubleComplex_ptr dwork)
 {
     /* dwork = V**H c     */
-    magma_zgemv_kernel1<<< k, BLOCK_SIZE, 0, magma_stream >>>(m, V, ldv, c, dwork); 
+    magma_zgemv_kernel1
+        <<< k, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+        (m, V, ldv, c, dwork); 
 
     /* dwork = T**H dwork */
-    magma_ztrmv_tkernel<<< k, k, 0, magma_stream >>>( dT, ldt, dwork, dwork+k);
+    magma_ztrmv_tkernel
+        <<< k, k, 0, magmablasGetQueue()->cuda_stream() >>>
+        ( dT, ldt, dwork, dwork+k);
  
     /* c = c - V dwork    */
     dim3  blocks3( magma_ceildiv( m, BLOCK_SIZE ) );
     dim3 threads3( BLOCK_SIZE );     
-    magma_zgemv_kernel2<<< blocks3, threads3, 0, magma_stream >>>( m, k, V, ldv, dwork+k, c);
+    magma_zgemv_kernel2
+        <<< blocks3, threads3, 0, magmablasGetQueue()->cuda_stream() >>>
+        ( m, k, V, ldv, dwork+k, c);
 }
 
 //==============================================================================

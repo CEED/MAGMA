@@ -339,7 +339,7 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n,
         //load panel in shared memory and factorize it and copy back to gloabl memory
         //intend for small panel to avoid overfill of shared memory.
         //this kernel is composed of device routine and thus clean
-        zgeqr2_sm_kernel_batched<<< blocks, threads, sizeof(magmaDoubleComplex)*(m*k), queue >>>
+        zgeqr2_sm_kernel_batched<<< blocks, threads, sizeof(magmaDoubleComplex)*(m*k), queue->cuda_stream() >>>
                                       (m, k, dA_array, ldda, dtau_array);
     }
     else
@@ -347,11 +347,11 @@ magma_zgeqr2_batched(magma_int_t m, magma_int_t n,
         //load one column vector in shared memory and householder it and used it to update trailing matrix which is global memory
         // one vector is normally smaller than  48K shared memory
         if (sizeof(magmaDoubleComplex)*(m) < 42000)
-            zgeqr2_column_sm_kernel_batched<<< blocks, threads, sizeof(magmaDoubleComplex)*(m), queue >>>
+            zgeqr2_column_sm_kernel_batched<<< blocks, threads, sizeof(magmaDoubleComplex)*(m), queue->cuda_stream() >>>
                                       (m, k, dA_array, ldda, dtau_array);
         else
             //not use dynamic shared memory at all
-            zgeqr2_kernel_batched<<< blocks, threads, 0, queue >>>
+            zgeqr2_kernel_batched<<< blocks, threads, 0, queue->cuda_stream() >>>
                                       (m, k, dA_array, ldda, dtau_array);
     }
 

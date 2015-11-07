@@ -83,7 +83,7 @@ magma_zgedensereimsplit(
     int n = A.num_cols;
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgedensereimsplit_kernel<<< grid, threads, 0, queue >>>
+    zgedensereimsplit_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                     ( m, n, A.row, A.dval, ReA->dval, ImA->dval );
                     
     return MAGMA_SUCCESS;

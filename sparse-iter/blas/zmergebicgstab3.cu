@@ -91,7 +91,7 @@ magma_zbicgmerge1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
-    magma_zbicgmerge1_kernel<<<Gs, Bs, 0, queue>>>( n, skp, v, r, p );
+    magma_zbicgmerge1_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( n, skp, v, r, p );
 
    return MAGMA_SUCCESS;
 }
@@ -166,7 +166,7 @@ magma_zbicgmerge2(
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
 
-    magma_zbicgmerge2_kernel<<<Gs, Bs, 0, queue>>>( n, skp, r, v, s );
+    magma_zbicgmerge2_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( n, skp, r, v, s );
 
    return MAGMA_SUCCESS;
 }
@@ -260,7 +260,7 @@ magma_zbicgmerge3(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( n, BLOCK_SIZE ) );
-    magma_zbicgmerge3_kernel<<<Gs, Bs, 0, queue>>>( n, skp, p, s, t, x, r );
+    magma_zbicgmerge3_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( n, skp, p, s, t, x, r );
 
    return MAGMA_SUCCESS;
 }

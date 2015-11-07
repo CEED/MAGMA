@@ -112,6 +112,7 @@ magma_zlarfg_gpu(
     //magmablas_dznrm2_cols(n, 1, dx0, n, dxnorm);
     magmablas_dznrm2_cols(n-1, 1, dx0+1, n, dxnorm);
 
-    magma_zlarfg_gpu_kernel<<< blocks, threads,
-                               0, magma_stream >>>(n, dx0, dx, dtau, dxnorm, dAkk);
+    magma_zlarfg_gpu_kernel
+        <<< blocks, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        (n, dx0, dx, dtau, dxnorm, dAkk);
 }

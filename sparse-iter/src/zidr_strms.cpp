@@ -76,7 +76,13 @@
 
 
 // Comments:
-// 1. queues - when receiving queue in magma_zidr function, one does not knows if queue is stream 0 (synchronous) or stream # (asynchronous). For this reason, I create the necessary queues needed and ignore the queue parameter. In the serial version of magma_zidr I set the queue parameter to the same queue as cuBLAS library. Also, queues will be used in OpenCL so we should use 0 instead of NULL for portability.
+// TODO: (1) is out-dated; queues are always non-null (async).
+// 1. queues - when receiving queue in magma_zidr function,
+//    one does not knows if queue is stream 0 (synchronous) or stream # (asynchronous).
+//    For this reason, I create the necessary queues needed and ignore the queue
+//    parameter. In the serial version of magma_zidr I set the queue parameter
+//    to the same queue as cuBLAS library. Also, queues will be used in OpenCL
+//    so we should use 0 instead of NULL for portability.
 // 2. For pointer to array element, use &A[i] or A+i?
 // 3. Synchronous functions:
 //      magma_zvinit (does not uses queues, calls zmalloc)
@@ -192,7 +198,7 @@ magma_zidr_strm(
 
     // set asynchronous kernel queues
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
-    cudaStreamCreateWithFlags( &(queues[0]), cudaStreamNonBlocking );
+    magma_queue_create( &queues[0] );
     if ( queue != squeue ) {
         queues[1] = queue;
         q1flag = 0;

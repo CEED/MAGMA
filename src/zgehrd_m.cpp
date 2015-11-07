@@ -199,7 +199,7 @@ magma_zgehrd_m(
     // set to null, to simplify cleanup code
     for( d = 0; d < ngpu; ++d ) {
         data.A[d]       = NULL;
-        data.streams[d] = NULL;
+        data.queues[d] = NULL;
     }
     
     // Now requires lwork >= iws; else dT won't be computed in unblocked code.
@@ -252,7 +252,7 @@ magma_zgehrd_m(
             data.W [d] = data.Y [d] + nb*ldda;
             data.Ti[d] = data.W [d] + nb*ldda;
             
-            magma_queue_create( &data.streams[d] );
+            magma_queue_create( &data.queues[d] );
         }
         
         // Copy the matrix to GPUs
@@ -285,7 +285,7 @@ magma_zgehrd_m(
             magma_setdevice( dpanel );
             magma_zgetmatrix_async( i, nb,
                                     dA(dpanel, 0, di), ldda,
-                                    A(0,i),            lda, data.streams[dpanel] );
+                                    A(0,i),            lda, data.queues[dpanel] );
         }
         
         // Copy remainder to host, block-by-block
@@ -310,7 +310,7 @@ CLEANUP:
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
         magma_free( data.A[d] );
-        magma_queue_destroy( data.streams[d] );
+        magma_queue_destroy( data.queues[d] );
     }
     magma_setdevice( orig_dev );
     

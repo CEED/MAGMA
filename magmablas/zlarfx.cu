@@ -170,14 +170,24 @@ magma_zlarfx_gpu(
 {
     magma_int_t N = n + iter + 1;
 
-    if (iter == 0)
-        magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, C, ldc, xnorm, dT+iter*N, iter);
-    else
-        magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, C, ldc, xnorm, work, iter);
+    if (iter == 0) {
+        magma_zlarfx_kernel
+            <<< N, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+            ( m, v, tau, C, ldc, xnorm, dT+iter*N, iter );
+    }
+    else {
+        magma_zlarfx_kernel
+            <<< N, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+            ( m, v, tau, C, ldc, xnorm, work, iter );
+    }
 
     if (iter > 0) {
-        //magma_ztrmv_kernel<<< 1, iter, 0, magma_stream >>>( dT, N, dT+iter*N);
-        magma_ztrmv_kernel2<<< iter, iter, 0, magma_stream  >>>( dT, N, work, dT+iter*N, tau);
+        //magma_ztrmv_kernel
+        //    <<< 1, iter, 0, magmablasGetQueue()->cuda_stream() >>>
+        //    ( dT, N, dT+iter*N);
+        magma_ztrmv_kernel2
+            <<< iter, iter, 0, magmablasGetQueue()->cuda_stream() >>>
+            ( dT, N, work, dT+iter*N, tau );
     }
 }
 

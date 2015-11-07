@@ -81,7 +81,7 @@ magma_zgeaxpy(
     int n = X.num_cols;
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgeaxpy_kernel<<< grid, threads, 0, queue >>>
+    zgeaxpy_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                     ( m, n, alpha, X.dval, beta, Y->dval );
                     
     return MAGMA_SUCCESS;

@@ -120,7 +120,7 @@ magma_ztfqmr_1(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_1_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
+    magma_ztfqmr_1_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, alpha, sigma,
                      v, Au, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;
@@ -210,7 +210,7 @@ magma_ztfqmr_2(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_2_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, eta, d, Ad, x, r );
+    magma_ztfqmr_2_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, eta, d, Ad, x, r );
 
    return MAGMA_SUCCESS;
 }
@@ -285,7 +285,7 @@ magma_ztfqmr_3(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_3_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, w, u_mp1 );
+    magma_ztfqmr_3_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, w, u_mp1 );
 
    return MAGMA_SUCCESS;
 }
@@ -369,7 +369,7 @@ magma_ztfqmr_4(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_4_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, beta, Au_new, v, Au );
+    magma_ztfqmr_4_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, beta, Au_new, v, Au );
 
    return MAGMA_SUCCESS;
 }
@@ -472,7 +472,7 @@ magma_ztfqmr_5(
 {
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_ztfqmr_5_kernel<<<Gs, Bs, 0, queue>>>( num_rows, num_cols, alpha, sigma,
+    magma_ztfqmr_5_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>( num_rows, num_cols, alpha, sigma,
                      v, Au, u_mp1, w, d, Ad );
 
    return MAGMA_SUCCESS;

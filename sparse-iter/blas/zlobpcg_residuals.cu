@@ -173,7 +173,7 @@ magma_zlobpcg_res(
     dim3 threads( block_size );
     dim3 grid( magma_ceildiv( num_rows, block_size ) );
 
-    magma_zlobpcg_res_kernel<<< grid, threads, 0, queue >>>
+    magma_zlobpcg_res_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
                                 ( num_rows, num_vecs, evalues, X, R, res );
 
 

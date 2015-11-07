@@ -11,6 +11,8 @@
 
        Utilities for testing MAGMA-sparse.
 */
+#include <cuda_runtime_api.h>
+
 #include "common_magmasparse.h"
 
 #define PRECISION_z

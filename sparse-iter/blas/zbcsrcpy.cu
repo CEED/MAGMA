@@ -117,12 +117,12 @@ magma_zbcsrvalcpy(
         int dimgrid3 = magma_ceildiv( num_zblocks, 65535 );
         dim3 dimGrid( dimgrid2, dimgrid1, 1 );
 
-        zbcsrvalcpy_kernel<<<dimGrid,dimBlock, 0, queue >>>
+        zbcsrvalcpy_kernel<<< dimGrid,dimBlock, 0, queue->cuda_stream() >>>
                             ( size_b, num_blocks, Aval, Bval );
 
         dim3 dimGrid2( dimgrid3, dimgrid1, 1 );
 
-        zbcsrvalzro_kernel<<<dimGrid2,dimBlock, 0, queue >>>
+        zbcsrvalzro_kernel<<< dimGrid2,dimBlock, 0, queue->cuda_stream() >>>
                             ( size_b, num_zblocks, Bval2 );
 
         return MAGMA_SUCCESS;

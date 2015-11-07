@@ -76,7 +76,7 @@ magma_zbombard_merge(
     
         // set asynchronous kernel queues
     //printf("%% Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
-    cudaStreamCreateWithFlags( &(queues[0]), cudaStreamNonBlocking );
+    magma_queue_create( &queues[0] );
     if ( queue != squeue ) {
         queues[1] = queue;
         q1flag = 0;
@@ -107,7 +107,7 @@ magma_zbombard_merge(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
     

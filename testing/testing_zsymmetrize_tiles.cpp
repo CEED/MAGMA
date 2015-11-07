@@ -97,10 +97,10 @@ int main( int argc, char** argv)
                 for( int j = 0; j < nb; ++j ) {
                     for( int i = 0; i < j; ++i ) {
                         if ( opts.uplo == MagmaLower ) {
-                            h_A[offset + i + j*lda] = MAGMA_Z_CNJG( h_A[offset + j + i*lda] );
+                            h_A[offset + i + j*lda] = MAGMA_Z_CONJ( h_A[offset + j + i*lda] );
                         }
                         else {
-                            h_A[offset + j + i*lda] = MAGMA_Z_CNJG( h_A[offset + i + j*lda] );
+                            h_A[offset + j + i*lda] = MAGMA_Z_CONJ( h_A[offset + i + j*lda] );
                         }
                     }
                 }

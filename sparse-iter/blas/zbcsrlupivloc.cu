@@ -98,7 +98,7 @@ magma_zbcsrlupivloc(
     dim3 threads( 64, 1 );
 
     dim3 grid(kblocks, 1, 1);
-    zbcsrlupivloc_kernel<<< grid, threads, 0, queue >>>( 
+    zbcsrlupivloc_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( 
                   size_b, kblocks, dA, ipiv );
     #endif
 

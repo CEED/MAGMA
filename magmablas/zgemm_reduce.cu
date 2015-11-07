@@ -87,13 +87,14 @@ void zgemm_reduce_kernel(
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C" void
-magmablas_zgemm_reduce(
+magmablas_zgemm_reduce_q(
     magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
     magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr       dC, magma_int_t lddc )
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -122,7 +123,7 @@ magmablas_zgemm_reduce(
         const int BLK_K = (NUM_THREADS / (BLK_M * BLK_N)); // == 2
         dim3 threads( BLK_K, BLK_M, BLK_N );
         dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ), 1 );
-        zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, magma_stream >>>
+        zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, queue->cuda_stream() >>>
             ( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC, lddc );
     }
     else {
@@ -132,9 +133,25 @@ magmablas_zgemm_reduce(
         const int BLK_K = (NUM_THREADS / (BLK_M * BLK_N)); // == 4
         dim3 threads( BLK_K, BLK_M, BLK_N );
         dim3 blocks( magma_ceildiv( m, BLK_M ), magma_ceildiv( n, BLK_N ), 1 );
-        zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, magma_stream >>>
+        zgemm_reduce_kernel<BLK_K> <<< blocks, threads, 0, queue->cuda_stream() >>>
             ( m, n, k, alpha, dA, ldda, dB, lddb, beta, dC, lddc );
     }
 }
 
-//==============================================================================
+
+/**
+    @see magmablas_zgemm_reduce_q
+    @ingroup magma_zblas3
+    ********************************************************************/
+extern "C" void
+magmablas_zgemm_reduce(
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc )
+{
+    magmablas_zgemm_reduce_q(
+        m, n, k, alpha, dA, ldda, dB, lddb, beta, dC, lddc, magmablasGetQueue() );
+}

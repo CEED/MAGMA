@@ -99,7 +99,7 @@ magma_zmergeblockkrylov(
     dim3 Bs( BLOCK_SIZE, num_cols );
     
     dim3 Gs( magma_ceildiv( num_rows, BLOCK_SIZE ) );
-    magma_zmergeblockkrylov_kernel<<<Gs, Bs, 0, queue>>>
+    magma_zmergeblockkrylov_kernel<<< Gs, Bs, 0, queue->cuda_stream() >>>
                 ( num_rows, num_cols, alpha, p, x );
 
    return MAGMA_SUCCESS;

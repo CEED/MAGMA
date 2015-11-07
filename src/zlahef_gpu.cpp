@@ -243,7 +243,7 @@ magma_zlahef_gpu(
                     #endif
 
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( k-imax, &dA( imax, imax+1 ), ldda, &dW( imax+1, kw-1 ), 1 );
+                    magmablas_zlacpy_conj( k-imax, &dA( imax, imax+1 ), ldda, &dW( imax+1, kw-1 ), 1 );
                     #else
                     magma_zcopy( k-imax, &dA( imax, imax+1 ), ldda, &dW( imax+1, kw-1 ), 1 );
                     #endif
@@ -305,7 +305,7 @@ magma_zlahef_gpu(
                     /* Copy non-updated column kk to column kp */
                     magmablasSetKernelStream( queues[0] );
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp, kp+1 ), ldda );
+                    magmablas_zlacpy_conj( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp, kp+1 ), ldda );
                     #else
                     magma_zcopy( kk-kp-1, &dA( kp+1, kk ), 1, &dA( kp, kp+1 ), ldda );
                     #endif
@@ -333,7 +333,7 @@ magma_zlahef_gpu(
                         /* Conjugate W(k) */
 
                         #if defined(COMPLEX)
-                        magmablas_zlacpy_cnjg( k, &dW( 0, kw ),1, &dW( 0, kw ),1 );
+                        magmablas_zlacpy_conj( k, &dW( 0, kw ),1, &dW( 0, kw ),1 );
                         #endif
                     }
                 } else {
@@ -354,8 +354,8 @@ magma_zlahef_gpu(
                     /* Conjugate W(k) and W(k-1) */
 
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( k,   &dW( 0, kw ),1, &dW( 0, kw ),1 );
-                    magmablas_zlacpy_cnjg( k-1, &dW( 0, kw-1 ), 1, &dW( 0, kw-1 ), 1 );
+                    magmablas_zlacpy_conj( k,   &dW( 0, kw ),1, &dW( 0, kw ),1 );
+                    magmablas_zlacpy_conj( k-1, &dW( 0, kw-1 ), 1, &dW( 0, kw-1 ), 1 );
                     #endif
                 }
             }
@@ -519,7 +519,7 @@ magma_zlahef_gpu(
                     magmablasSetKernelStream( queues[0] );
                     trace_gpu_start( 0, 0, "copy", "copy" );
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( imax-k, &dA( imax, k ), ldda, &dW( k, k+1 ), 1 );
+                    magmablas_zlacpy_conj( imax-k, &dA( imax, k ), ldda, &dW( k, k+1 ), 1 );
                     #else
                     magma_zcopy( imax-k, &dA( imax, k ), ldda, &dW( k, k+1 ), 1 );
                     #endif
@@ -595,7 +595,7 @@ magma_zlahef_gpu(
                     magmablasSetKernelStream( queues[0] );
                     trace_gpu_start( 0, 0, "copy", "copy" );
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( kp-kk, &dA( kk, kk ), 1, &dA( kp, kk ), ldda );
+                    magmablas_zlacpy_conj( kp-kk, &dA( kk, kk ), 1, &dA( kp, kk ), ldda );
                     #else
                     magma_zcopy( kp-kk, &dA( kk, kk ), 1, &dA( kp, kk ), ldda );
                     #endif
@@ -634,7 +634,7 @@ magma_zlahef_gpu(
 
                         /* Conjugate W(k) */
                         #if defined(COMPLEX)
-                        magmablas_zlacpy_cnjg( (n-1)-k, &dW( k+1, k ),1, &dW( k+1, k ),1 );
+                        magmablas_zlacpy_conj( (n-1)-k, &dW( k+1, k ),1, &dW( k+1, k ),1 );
                         #endif
                     }
                 } else {
@@ -652,8 +652,8 @@ magma_zlahef_gpu(
 
                     /* Conjugate W(k) and W(k+1) */
                     #if defined(COMPLEX)
-                    magmablas_zlacpy_cnjg( (n-1)-k,   &dW( k+1, k ),1, &dW( k+1, k ),1 );
-                    magmablas_zlacpy_cnjg( (n-1)-k-1, &dW( k+2, k+1 ), 1, &dW( k+2, k+1 ), 1 );
+                    magmablas_zlacpy_conj( (n-1)-k,   &dW( k+1, k ),1, &dW( k+1, k ),1 );
+                    magmablas_zlacpy_conj( (n-1)-k-1, &dW( k+2, k+1 ), 1, &dW( k+2, k+1 ), 1 );
                     #endif
                     trace_gpu_end( 0, 0 );
                 }

@@ -8,10 +8,11 @@
        @precisions normal z -> s d c
 
 */
+#include <cuda_runtime.h>
 
 #include "common_magma.h"
 #include "magma_timer.h"
-#include "../testing/flops.h"
+//#include "../testing/flops.h"
 
 /**
     Purpose
@@ -331,16 +332,16 @@ magma_zgetrf_m(
             time_get += timer_stop( time );
         } /* end of for */
     
-        timer_stop( time_total );
-        flops = FLOPS_ZGETRF( m, n ) / 1e9;
-        timer_printf(" memory-allocation time: %e\n", time_alloc );
-        timer_printf(" NB=%d nb=%d\n", (int) NB, (int) nb );
-        timer_printf(" memcopy and transpose %e seconds\n", time_set );
-        timer_printf(" total time %e seconds\n", time_total );
-        timer_printf(" Performance %f GFlop/s, %f seconds without htod and dtoh\n",     flops / (time_comp),               time_comp               );
-        timer_printf(" Performance %f GFlop/s, %f seconds with    htod\n",              flops / (time_comp + time_set),    time_comp + time_set    );
-        timer_printf(" Performance %f GFlop/s, %f seconds with    dtoh\n",              flops / (time_comp + time_get),    time_comp + time_get    );
-        timer_printf(" Performance %f GFlop/s, %f seconds without memory-allocation\n", flops / (time_total - time_alloc), time_total - time_alloc );
+        //timer_stop( time_total );
+        //flops = FLOPS_ZGETRF( m, n ) / 1e9;
+        //timer_printf(" memory-allocation time: %e\n", time_alloc );
+        //timer_printf(" NB=%d nb=%d\n", (int) NB, (int) nb );
+        //timer_printf(" memcopy and transpose %e seconds\n", time_set );
+        //timer_printf(" total time %e seconds\n", time_total );
+        //timer_printf(" Performance %f GFlop/s, %f seconds without htod and dtoh\n",     flops / (time_comp),               time_comp               );
+        //timer_printf(" Performance %f GFlop/s, %f seconds with    htod\n",              flops / (time_comp + time_set),    time_comp + time_set    );
+        //timer_printf(" Performance %f GFlop/s, %f seconds with    dtoh\n",              flops / (time_comp + time_get),    time_comp + time_get    );
+        //timer_printf(" Performance %f GFlop/s, %f seconds without memory-allocation\n", flops / (time_total - time_alloc), time_total - time_alloc );
     
         for( d=0; d < ngpu0; d++ ) {
             magma_setdevice(d);

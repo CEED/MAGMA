@@ -12,8 +12,15 @@
 #ifndef MAGMA_OPERATORS_H
 #define MAGMA_OPERATORS_H
 
+#ifdef __cplusplus
+
+#include <cmath>
+using std::isinf;
+using std::isnan;
+using std::fabs;
+
 // __host__ and __device__ are defined in CUDA headers.
-#include "magma.h"
+#include "magma_types.h"
 
 /* names to match C++ std complex functions */
 __host__ __device__ static inline double real(const magmaDoubleComplex &x) { return MAGMA_Z_REAL(x); }
@@ -26,8 +33,8 @@ __host__ __device__ static inline float  imag(const magmaFloatComplex  &x) { ret
 __host__ __device__ static inline double imag(const double        & /*x*/) { return 0.; }
 __host__ __device__ static inline float  imag(const float         & /*x*/) { return 0.; }
 
-__host__ __device__ static inline magmaDoubleComplex conj(const magmaDoubleComplex &x) { return MAGMA_Z_CNJG(x); }
-__host__ __device__ static inline magmaFloatComplex  conj(const magmaFloatComplex  &x) { return MAGMA_C_CNJG(x); }
+__host__ __device__ static inline magmaDoubleComplex conj(const magmaDoubleComplex &x) { return MAGMA_Z_CONJ(x); }
+__host__ __device__ static inline magmaFloatComplex  conj(const magmaFloatComplex  &x) { return MAGMA_C_CONJ(x); }
 __host__ __device__ static inline double             conj(const double             &x) { return x; }
 __host__ __device__ static inline float              conj(const float              &x) { return x; }
 
@@ -535,5 +542,7 @@ operator != (const float s, const magmaFloatComplex a)
 {
     return ! (a == s);
 }
+
+#endif /* __cplusplus */
 
 #endif /* MAGMA_OPERATORS_H */

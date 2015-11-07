@@ -131,7 +131,7 @@ magma_zmgeelltmv(
     magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                 * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgeelltmv_kernel<<< grid, threads, MEM_SIZE, queue >>>
+    zmgeelltmv_kernel<<< grid, threads, MEM_SIZE, queue->cuda_stream() >>>
         ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
 
 

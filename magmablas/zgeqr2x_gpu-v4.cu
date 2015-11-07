@@ -148,32 +148,39 @@ magma_zgeqr2x4_gpu(
             if (i-b > 0) {
                 /* Compute the (i-1)th column of T */
                 if ( i-1 > 0 ) {
-                    magma_zgemv_kernel3<<< i-1, BLOCK_SIZE, 0, magma_stream >>>
+                    magma_zgemv_kernel3
+                        <<< i-1, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
                         ( m-i+1, dA(i-1,0), ldda, dA(i-1, i-1), work, dtau+i-1);
-                    magma_ztrmv_kernel2<<< i-1, i-1, 0, magma_stream >>>
+                    magma_ztrmv_kernel2
+                        <<< i-1, i-1, 0, magmablasGetQueue()->cuda_stream() >>>
                         ( dT(0,0), k, work, dT(0,i-1), dtau+i-1);
                 }
 
                 /* dwork = V**H c */
-                magma_zgemv_kernel1<<< i-b, BLOCK_SIZE, 0, magma_stream >>>
+                magma_zgemv_kernel1
+                    <<< i-b, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
                     (m-b, dA(b, b),  ldda, dA(b,i), work);
 
                 /* dwork = T**H work */
-                magma_ztrmv_tkernel<<< i-b, i-b, 0, magma_stream >>>
+                magma_ztrmv_tkernel
+                    <<< i-b, i-b, 0, magmablasGetQueue()->cuda_stream() >>>
                     (dT(b,b), k, work, work+i-b);
 
                 /* c = c - V work */
                 if ( m-b > 0 ) {
                     dim3  blocks3( magma_ceildiv( m-b, BLOCK_SIZE ) );
                     dim3 threads3( BLOCK_SIZE );
-                    magma_zgemv_kernel2<<< blocks3, threads3, 0, magma_stream >>>
+                    magma_zgemv_kernel2
+                        <<< blocks3, threads3, 0, magmablasGetQueue()->cuda_stream() >>>
                         (m-b, i-b, dA(b,b), ldda,  work+i-b, dA(b, i));
                 }
             }
 
             /*   Adjust the dnorm[i] to hold the norm of A(i:m,i) */
             if ( i > 0 ) {
-                magma_dznrm2_adjust_kernel<<< 1, i, 0, magma_stream >>>(dnorm+i, dA(0, i));
+                magma_dznrm2_adjust_kernel
+                    <<< 1, i, 0, magmablasGetQueue()->cuda_stream() >>>
+                    (dnorm+i, dA(0, i));
             }
 
             /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i)
@@ -187,13 +194,15 @@ magma_zgeqr2x4_gpu(
             if (i == 0) {
                 magmaDoubleComplex tt = MAGMA_Z_ONE;
                 magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, dT(0,0), 1);
-                magma_zsetmatrix_async(1, 1, &tt, 1, dA(i, i), 1, magma_stream);
+                magma_zsetmatrix_async(1, 1, &tt, 1, dA(i, i), 1, magmablasGetQueue() );
             }
         }
         if ( i-1 > 0 ) {
-            magma_zgemv_kernel3<<< i-1, BLOCK_SIZE, 0, magma_stream >>>
+            magma_zgemv_kernel3
+                <<< i-1, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
                 ( m-i+1, dA(i-1,0), ldda, dA(i-1, i-1), work, dtau+i-1);
-            magma_ztrmv_kernel2<<< i-1, i-1, 0, magma_stream >>>
+            magma_ztrmv_kernel2
+                <<< i-1, i-1, 0, magmablasGetQueue()->cuda_stream() >>>
                 ( dT(0,0), k, work, dT(0,i-1), dtau+i-1);
         }
 

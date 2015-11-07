@@ -273,17 +273,17 @@ magma_zgeellrtmv(
     // printf("launch kernel: %dx%d %d %d\n", grid.x, grid.y, num_threads, Ms);
 
     if ( alignment == 32 ) {
-        zgeellrtmv_kernel_32<<< grid, threads, Ms, queue >>>
+        zgeellrtmv_kernel_32<<< grid, threads, Ms, queue->cuda_stream() >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 16 ) {
-        zgeellrtmv_kernel_16<<< grid, threads, Ms, queue >>>
+        zgeellrtmv_kernel_16<<< grid, threads, Ms, queue->cuda_stream() >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }
     else if ( alignment == 8 ) {
-        zgeellrtmv_kernel_8<<< grid, threads, Ms, queue >>>
+        zgeellrtmv_kernel_8<<< grid, threads, Ms, queue->cuda_stream() >>>
                  ( m, n, alpha, dval, dcolind, drowlength, dx, beta, dy, 
                                                  alignment, real_row_length );
     }

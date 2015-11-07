@@ -141,7 +141,7 @@ magma_zgesellcmv(
    // (~2M rows for blocksize 32)
    dim3 grid( slices, 1, 1);
    magma_int_t threads = blocksize;
-   zgesellcmv_kernel<<< grid, threads, 0, queue >>>
+   zgesellcmv_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
    ( m, n, blocksize, alpha,
         dval, dcolind, drowptr, dx, beta, dy );
 

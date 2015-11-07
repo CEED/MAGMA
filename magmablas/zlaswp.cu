@@ -146,7 +146,9 @@ magmablas_zlaswp_q(
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswp_kernel<<< grid, threads, 0, queue >>>( n, dAT(k,0), ldda, params );
+        zlaswp_kernel
+            <<< grid, threads, 0, queue->cuda_stream() >>>
+            ( n, dAT(k,0), ldda, params );
     }
     
     #undef dAT
@@ -164,7 +166,7 @@ magmablas_zlaswp(
     magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci )
 {
-    magmablas_zlaswp_q( n, dAT, ldda, k1, k2, ipiv, inci, magma_stream );
+    magmablas_zlaswp_q( n, dAT, ldda, k1, k2, ipiv, inci, magmablasGetQueue() );
 }
 
 
@@ -298,7 +300,9 @@ magmablas_zlaswpx_q(
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswpx_kernel<<< grid, threads, 0, queue >>>( n, dA(k,0), ldx, ldy, params );
+        zlaswpx_kernel
+            <<< grid, threads, 0, queue->cuda_stream() >>>
+            ( n, dA(k,0), ldx, ldy, params );
     }
     
     #undef dA
@@ -316,7 +320,7 @@ magmablas_zlaswpx(
     magma_int_t k1, magma_int_t k2,
     const magma_int_t *ipiv, magma_int_t inci )
 {
-    return magmablas_zlaswpx_q( n, dA, ldx, ldy, k1, k2, ipiv, inci, magma_stream );
+    return magmablas_zlaswpx_q( n, dA, ldx, ldy, k1, k2, ipiv, inci, magmablasGetQueue() );
 }
 
 
@@ -440,7 +444,7 @@ magmablas_zlaswp2_q(
     
     dim3 threads( NTHREADS );
     dim3 grid( magma_ceildiv( n, NTHREADS ) );
-    zlaswp2_kernel<<< grid, threads, 0, queue >>>
+    zlaswp2_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
         ( n, dAT(k1-1,0), ldda, nb, d_ipiv, inci );
 }
 
@@ -456,5 +460,5 @@ magmablas_zlaswp2(
     magma_int_t k1, magma_int_t k2,
     magmaInt_const_ptr d_ipiv, magma_int_t inci )
 {
-    magmablas_zlaswp2_q( n, dAT, ldda, k1, k2, d_ipiv, inci, magma_stream );
+    magmablas_zlaswp2_q( n, dAT, ldda, k1, k2, d_ipiv, inci, magmablasGetQueue() );
 }

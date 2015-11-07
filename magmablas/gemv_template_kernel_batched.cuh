@@ -28,7 +28,8 @@ gemvn_kernel_batched(
 {
     int batchid = blockIdx.z;
 
-    gemvn_template_device<T, DIM_X, DIM_Y, TILE_SIZE>(m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
+    gemvn_template_device<T, DIM_X, DIM_Y, TILE_SIZE>
+        (m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
 }
 
 
@@ -43,8 +44,9 @@ void gemvn_template_batched(
     dim3 grid    ( magma_ceildiv(m, TILE_SIZE), 1, batchCount );                                                
     dim3 threads ( DIM_X, DIM_Y);
     
-    gemvn_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE><<< grid, threads, 0, queue >>>                    
-            ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );
+    gemvn_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE>
+        <<< grid, threads, 0, queue->cuda_stream() >>>                    
+        ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );
 }
 
 
@@ -58,7 +60,8 @@ gemvc_kernel_batched(
 {
     int batchid = blockIdx.z;
 
-    gemvc_template_device<T, DIM_X, DIM_Y, TILE_SIZE, trans>(m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
+    gemvc_template_device<T, DIM_X, DIM_Y, TILE_SIZE, trans>
+        (m, n, alpha, A_array[batchid], lda, x_array[batchid], incx, beta, y_array[batchid], incy);
 }
 
 
@@ -75,13 +78,15 @@ void gemvc_template_batched(
     
     if (trans == MagmaConjTrans)
     {                         
-        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans><<< grid, threads, 0, queue >>>                    
-                ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );        
+        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans>
+            <<< grid, threads, 0, queue->cuda_stream() >>>                    
+            ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );        
     }
     else if (trans == MagmaTrans)
     {
-        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaTrans><<< grid, threads, 0, queue >>>                    
-                ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );       
+        gemvc_kernel_batched<T, DIM_X, DIM_Y, TILE_SIZE, MagmaTrans>
+            <<< grid, threads, 0, queue->cuda_stream() >>>                    
+            ( m, n, alpha, dA_array, ldda, dx_array, incx, beta, dy_array, incy );       
     }
 }
 

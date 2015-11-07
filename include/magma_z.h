@@ -1447,25 +1447,7 @@ magma_zlarf_gpu(
     magmaDoubleComplex_const_ptr dv, magmaDoubleComplex_const_ptr dtau,
     magmaDoubleComplex_ptr dC,  magma_int_t lddc);
 
-magma_int_t
-magma_zlarfb_gpu(
-    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_const_ptr dV, magma_int_t lddv,
-    magmaDoubleComplex_const_ptr dT, magma_int_t lddt,
-    magmaDoubleComplex_ptr dC,       magma_int_t lddc,
-    magmaDoubleComplex_ptr dwork,    magma_int_t ldwork );
-
-magma_int_t
-magma_zlarfb_gpu_gemm(
-    magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_const_ptr dV, magma_int_t lddv,
-    magmaDoubleComplex_const_ptr dT, magma_int_t lddt,
-    magmaDoubleComplex_ptr dC,       magma_int_t lddc,
-    magmaDoubleComplex_ptr dwork,    magma_int_t ldwork,
-    magmaDoubleComplex_ptr dworkvt,  magma_int_t ldworkvt);
-
+// in zgeqr2x_gpu-v3.cpp
 magma_int_t
 magma_zlarfb2_gpu(
     magma_int_t m, magma_int_t n, magma_int_t k,

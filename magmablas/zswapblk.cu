@@ -102,7 +102,7 @@ magmablas_zswapblk_q(
                 else
                     params.ipiv[j] = im - offset;
             }
-            magmagpu_zswapblkcm<<< blocks, blocksize, 0, queue >>>( params );
+            magmagpu_zswapblkcm<<< blocks, blocksize, 0, queue->cuda_stream() >>>( params );
         }
     }
     else {
@@ -118,7 +118,7 @@ magmablas_zswapblk_q(
                 else
                     params.ipiv[j] = im - offset;
             }
-            magmagpu_zswapblkrm<<< blocks, blocksize, 0, queue >>>( params );
+            magmagpu_zswapblkrm<<< blocks, blocksize, 0, queue->cuda_stream() >>>( params );
         }
     }
 }
@@ -137,5 +137,5 @@ magmablas_zswapblk(
     const magma_int_t *ipiv, magma_int_t inci, magma_int_t offset )
 {
     magmablas_zswapblk_q(
-        order, n, dA, ldda, dB, lddb, i1, i2, ipiv, inci, offset, magma_stream );
+        order, n, dA, ldda, dB, lddb, i1, i2, ipiv, inci, offset, magmablasGetQueue() );
 }

@@ -1,96 +1,10 @@
-#//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 1.1) --
-#      Univ. of Tennessee, Knoxville
-#      Univ. of California, Berkeley
-#      Univ. of Colorado, Denver
-#      @date
-#//////////////////////////////////////////////////////////////////////////////
+# See Makefile.src for list of files in this directory.
+# This makefile simply forwards commands to the top-level makefile.
 
-DIR = sparse-iter/blas
-MAGMA_DIR = ../..
-include $(MAGMA_DIR)/Makefile.internal
+top  := ../..
+pwd  := $(shell pwd)
+cdir := sparse-iter/blas
 
-ZHDR := 
+default: $(cdir)
 
-# alphabetic order by base name (ignoring precision)
-ZSRC := \
-	magma_z_blaswrapper.cpp	\
-	zbajac_csr.cu			\
-	zbajac_csr_overlap.cu	\
-	zgeaxpy.cu              \
-	zgecsrmv.cu				\
-	zgeellmv.cu				\
-	zgeelltmv.cu			\
-	zgeellrtmv.cu			\
-	zgesellcmv.cu			\
-	zgesellcmmv.cu			\
-	zjacobisetup.cu			\
-	zlobpcg_shift.cu		\
-	zlobpcg_residuals.cu	\
-	zlobpcg_maxpy.cu		\
-	zmdot.cu				\
-	zmergebicgstab2.cu		\
-    zmergebicgstab3.cu		\
-    zmergeidr.cu            \
-	zmergecg.cu				\
-    zmergecgs.cu		    \
-    zmergeqmr.cu		    \
-    zmergebicgstab.cu		\
-    zmergetfqmr.cu		    \
-	zmgecsrmv.cu			\
-	zmgeellmv.cu			\
-	zmgeelltmv.cu			\
-	zmgesellcmmv.cu			\
-	zmzdotc.cu		\
-	zmzdotc3.cu		\
-	zmzdotc_one.cu		\
-	zpipelinedgmres.cu		\
-
-
-# Iterative factorizations
-ZSRC += \
-	ziterilu_kernels.cu	\
-	ziteric.cu	\
-
-
-# Auxiliary routines
-ZSRC += \
-	zcompact.cu				\
-	magma_zmcsrcompressor_gpu.cu	\
-	magma_zdiagcheck.cu	\
-	zgecsrreimsplit.cu	\
-	zgedensereimsplit.cu	\
-	magma_zmconjugate.cu	\
-
-# Tester routines
-ZSRC += \
-    zmergeblockkrylov.cu    \
-
-# ------------------------------------------------------------
--include Makefile.local
--include Makefile.src
-
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
-
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-
-ALLOBJ := $(ALLSRC:.cu=.$(o_ext)) 
-ALLOBJ := $(ALLOBJ:.cpp=.$(o_ext))
-
-.PHONY: all clean cleanall
-
-all: $(LIBMAGMA_SPARSE) 
-
-$(LIBMAGMA_SPARSE): $(ALLHDR) $(ALLOBJ) stamp
-	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
-	$(RANLIB) $@
-
-# this forces LIBMAGMA to be archived
-stamp: $(ALLHDR) $(ALLOBJ)
-	touch $@
-
-clean:
-	rm -f *.$(o_ext) *~ *.linkinfo stamp
-
-cleanall: clean
-	rm -f $(LIBMAGMA_SPARSE)
+include $(top)/Makefile.subdir

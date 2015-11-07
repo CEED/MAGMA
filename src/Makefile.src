@@ -1,0 +1,342 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      @date
+#//////////////////////////////////////////////////////////////////////////////
+
+# push previous directory
+dir_stack := $(dir_stack) $(cdir)
+cdir      := src
+# ----------------------------------------------------------------------
+
+
+# Loosely, the order is alphabetic in each section, but mixed precision,
+# driver, and multi-GPU routines are separated where it made sense.
+# Double precision "d" files that generate "s" files must also be listed
+# in ZSRC, despite the name.
+
+# ----------
+# BLAS wrappers
+libmagma_zsrc += \
+	$(cdir)/cblas_z.cpp		\
+
+# ----------
+# Cholesky, GPU interface
+libmagma_zsrc += \
+	$(cdir)/zcposv_gpu.cpp		\
+	\
+	$(cdir)/zposv_gpu.cpp		\
+	$(cdir)/zpotrf_gpu.cpp		\
+	$(cdir)/zpotri_gpu.cpp		\
+	$(cdir)/zpotrs_gpu.cpp		\
+	$(cdir)/zlauum_gpu.cpp		\
+	$(cdir)/ztrtri_gpu.cpp		\
+	\
+	$(cdir)/zpotrf_mgpu.cpp		\
+	$(cdir)/zpotrf_mgpu_right.cpp	\
+	$(cdir)/zpotrf3_mgpu.cpp	\
+
+# Cholesky, CPU interface
+libmagma_zsrc += \
+	$(cdir)/zposv.cpp		\
+	$(cdir)/zpotrf.cpp		\
+	$(cdir)/zpotri.cpp		\
+	$(cdir)/zlauum.cpp		\
+	$(cdir)/ztrtri.cpp		\
+	\
+	$(cdir)/zpotrf_m.cpp		\
+
+# ----------
+# LU, GPU interface
+libmagma_zsrc += \
+	$(cdir)/zcgesv_gpu.cpp		\
+	$(cdir)/zcgetrs_gpu.cpp		\
+	\
+	$(cdir)/zgerfs_nopiv_gpu.cpp	\
+	$(cdir)/zgesv_gpu.cpp		\
+	$(cdir)/zgesv_nopiv_gpu.cpp	\
+	$(cdir)/zgetrf_gpu.cpp		\
+	$(cdir)/zgetrf_nopiv_gpu.cpp	\
+	$(cdir)/zgetri_gpu.cpp		\
+	$(cdir)/zgetrs_gpu.cpp		\
+	$(cdir)/zgetrs_nopiv_gpu.cpp	\
+	\
+	$(cdir)/zgetrf_mgpu.cpp		\
+	$(cdir)/zgetrf2_mgpu.cpp	\
+	$(cdir)/zgerbt_gpu.cpp		\
+
+# LU, CPU interface
+libmagma_zsrc += \
+	$(cdir)/zgesv.cpp		\
+	$(cdir)/zgesv_rbt.cpp		\
+	$(cdir)/zgetrf.cpp		\
+	$(cdir)/zgetf2_nopiv.cpp	\
+	$(cdir)/zgetrf_nopiv.cpp	\
+	\
+	$(cdir)/zgetrf_m.cpp		\
+
+# LU, auxiliary for multi-gpu-dynamic
+libmagma_zsrc += \
+	$(cdir)/zgetrf_incpiv_gpu.cpp	\
+	$(cdir)/zgessm_gpu.cpp		\
+	$(cdir)/zssssm_gpu.cpp		\
+	$(cdir)/ztstrf_gpu.cpp		\
+
+# ----------
+# QR and least squares, GPU interface
+libmagma_zsrc += \
+	$(cdir)/zcgeqrsv_gpu.cpp	\
+	\
+	$(cdir)/zgelqf_gpu.cpp		\
+	$(cdir)/zgels3_gpu.cpp		\
+	$(cdir)/zgels_gpu.cpp		\
+	$(cdir)/zgegqr_gpu.cpp		\
+	$(cdir)/zgeqrf2_gpu.cpp		\
+	$(cdir)/zgeqrf3_gpu.cpp		\
+	$(cdir)/zgeqrf_gpu.cpp		\
+	$(cdir)/zgeqr2x_gpu.cpp		\
+	$(cdir)/zgeqr2x_gpu-v2.cpp	\
+	$(cdir)/zgeqr2x_gpu-v3.cpp	\
+	$(cdir)/zgeqrs3_gpu.cpp		\
+	$(cdir)/zgeqrs_gpu.cpp		\
+	$(cdir)/zlarfb_gpu.cpp		\
+	$(cdir)/zlarfb_gpu_gemm.cpp	\
+	$(cdir)/zungqr_gpu.cpp		\
+	$(cdir)/zunmql2_gpu.cpp		\
+	$(cdir)/zunmqr2_gpu.cpp		\
+	$(cdir)/zunmqr_gpu.cpp		\
+	\
+	$(cdir)/zgeqrf_mgpu.cpp		\
+	\
+	$(cdir)/zgeqp3_gpu.cpp		\
+	$(cdir)/zlaqps_gpu.cpp		\
+
+# QR, CPU interface
+libmagma_zsrc += \
+	$(cdir)/zgelqf.cpp		\
+	$(cdir)/zgels.cpp		\
+	$(cdir)/zgeqlf.cpp		\
+	$(cdir)/zgeqrf.cpp		\
+	$(cdir)/zgeqrf_ooc.cpp		\
+	$(cdir)/zungqr.cpp		\
+	$(cdir)/zungqr2.cpp		\
+	$(cdir)/zunmlq.cpp		\
+	$(cdir)/zunmql.cpp		\
+	$(cdir)/zunmqr.cpp		\
+	\
+	$(cdir)/zgeqp3.cpp		\
+	$(cdir)/zlaqps.cpp		\
+	\
+	$(cdir)/zgeqrf_m.cpp		\
+	$(cdir)/zungqr_m.cpp		\
+	$(cdir)/zunmqr_m.cpp		\
+
+# ----------
+# symmetric indefinite factorization, CPU interface
+libmagma_zsrc += \
+	$(cdir)/zhesv.cpp		\
+	$(cdir)/zhetrf.cpp		\
+	$(cdir)/zhetrf_aasen.cpp	\
+	$(cdir)/zhetrf_nopiv.cpp	\
+	$(cdir)/zhetrf_nopiv_cpu.cpp	\
+	$(cdir)/zsytrf_nopiv_cpu.cpp	\
+	$(cdir)/zhetrf_nopiv_gpu.cpp	\
+	$(cdir)/zsytrf_nopiv_gpu.cpp	\
+	$(cdir)/zhetrs_nopiv_gpu.cpp	\
+	$(cdir)/zsytrs_nopiv_gpu.cpp	\
+	$(cdir)/zhesv_nopiv_gpu.cpp	\
+	$(cdir)/zsysv_nopiv_gpu.cpp	\
+	$(cdir)/zlahef_gpu.cpp		\
+
+# ----------
+# symmetric eigenvalues, GPU interface
+libmagma_zsrc += \
+	$(cdir)/dsyevd_gpu.cpp		\
+	$(cdir)/dsyevdx_gpu.cpp		\
+	$(cdir)/zheevd_gpu.cpp		\
+	$(cdir)/zheevdx_gpu.cpp		\
+	$(cdir)/zheevr_gpu.cpp		\
+	$(cdir)/zheevx_gpu.cpp		\
+	$(cdir)/zhetrd2_gpu.cpp		\
+	$(cdir)/zhetrd_gpu.cpp		\
+	$(cdir)/zunmtr_gpu.cpp		\
+
+# symmetric eigenvalues, CPU interface
+libmagma_zsrc += \
+	$(cdir)/dsyevd.cpp		\
+	$(cdir)/dsyevdx.cpp		\
+	$(cdir)/zheevd.cpp		\
+	$(cdir)/zheevdx.cpp		\
+	$(cdir)/zheevr.cpp		\
+	$(cdir)/zheevx.cpp		\
+	\
+	$(cdir)/dlaex0.cpp		\
+	$(cdir)/dlaex1.cpp		\
+	$(cdir)/dlaex3.cpp		\
+	$(cdir)/dmove_eig.cpp		\
+	$(cdir)/dstedx.cpp		\
+	$(cdir)/zhetrd.cpp		\
+	$(cdir)/zlatrd.cpp		\
+	$(cdir)/zlatrd2.cpp		\
+	$(cdir)/zstedx.cpp		\
+	$(cdir)/zungtr.cpp		\
+	$(cdir)/zunmtr.cpp		\
+
+# symmetric eigenvalues, multi-GPU 
+libmagma_zsrc += \
+	$(cdir)/zhetrd_mgpu.cpp		\
+	$(cdir)/zlatrd_mgpu.cpp		\
+	$(cdir)/dsyevd_m.cpp		\
+	$(cdir)/zheevd_m.cpp		\
+	$(cdir)/dsyevdx_m.cpp		\
+	$(cdir)/zheevdx_m.cpp		\
+	$(cdir)/dlaex0_m.cpp		\
+	$(cdir)/dlaex1_m.cpp		\
+	$(cdir)/dlaex3_m.cpp		\
+	$(cdir)/dstedx_m.cpp		\
+	$(cdir)/zstedx_m.cpp		\
+	$(cdir)/zunmtr_m.cpp		\
+
+# symmetric eigenvalues 2-stage
+libmagma_zsrc += \
+	$(cdir)/dbulge_aux.cpp		\
+	$(cdir)/zbulge_applyQ.cpp	\
+	$(cdir)/zbulge_applyQ_v2.cpp	\
+	$(cdir)/zbulge_aux.cpp		\
+	$(cdir)/zbulge_kernel.cpp	\
+	$(cdir)/zbulge_kernel_v2.cpp	\
+	$(cdir)/zhetrd_he2hb.cpp	\
+	$(cdir)/zhetrd_hb2st.cpp	\
+	$(cdir)/zbulge_back.cpp		\
+	$(cdir)/zungqr_2stage_gpu.cpp	\
+	$(cdir)/zunmqr_gpu_2stage.cpp	\
+	$(cdir)/dsygvdx_2stage.cpp	\
+	$(cdir)/zhegvdx_2stage.cpp	\
+	$(cdir)/zheevdx_2stage.cpp	\
+	\
+	$(cdir)/zbulge_back_m.cpp	\
+	$(cdir)/zbulge_applyQ_v2_m.cpp	\
+	$(cdir)/dsygvdx_2stage_m.cpp	\
+	$(cdir)/zheevdx_2stage_m.cpp	\
+	$(cdir)/zhegvdx_2stage_m.cpp	\
+	$(cdir)/zhetrd_he2hb_mgpu.cpp	\
+	$(cdir)/zhetrd_he2hb_mgpu_spec.cpp	\
+	$(cdir)/core_zlarfy.cpp		\
+	$(cdir)/core_zhbtype1cb.cpp	\
+	$(cdir)/core_zhbtype2cb.cpp	\
+	$(cdir)/core_zhbtype3cb.cpp	\
+
+# generalized symmetric eigenvalues
+libmagma_zsrc += \
+	$(cdir)/dsygvd.cpp		\
+	$(cdir)/dsygvdx.cpp		\
+	$(cdir)/zhegst.cpp		\
+	$(cdir)/zhegvd.cpp		\
+	$(cdir)/zhegvdx.cpp		\
+	$(cdir)/zhegvr.cpp		\
+	$(cdir)/zhegvx.cpp		\
+	$(cdir)/zhegst_gpu.cpp		\
+	\
+	$(cdir)/zhegst_m.cpp		\
+	$(cdir)/dsygvd_m.cpp		\
+	$(cdir)/zhegvd_m.cpp		\
+	$(cdir)/dsygvdx_m.cpp		\
+	$(cdir)/zhegvdx_m.cpp		\
+	$(cdir)/ztrsm_m.cpp		\
+
+# ----------
+# non-symmetric eigenvalues
+libmagma_zsrc += \
+	$(cdir)/dgeev.cpp		\
+	$(cdir)/zgeev.cpp		\
+	$(cdir)/zgehrd.cpp		\
+	$(cdir)/zgehrd2.cpp		\
+	$(cdir)/zlahr2.cpp		\
+	$(cdir)/zlahru.cpp		\
+	$(cdir)/dlaln2.cpp		\
+	$(cdir)/dlaqtrsd.cpp		\
+	$(cdir)/zlatrsd.cpp		\
+	$(cdir)/dtrevc3.cpp		\
+	$(cdir)/dtrevc3_mt.cpp		\
+	$(cdir)/ztrevc3.cpp		\
+	$(cdir)/ztrevc3_mt.cpp		\
+	$(cdir)/zunghr.cpp		\
+
+# use ztrevc3 and ztrevc3_mt instead
+	#$(cdir)/lapack_dtrevc3.f	\
+	#$(cdir)/lapack_ztrevc3.f	\
+
+# non-symmetric eigenvalues, multi-GPU
+libmagma_zsrc += \
+	$(cdir)/dgeev_m.cpp		\
+	$(cdir)/zgeev_m.cpp		\
+	$(cdir)/zgehrd_m.cpp		\
+	$(cdir)/zlahr2_m.cpp		\
+	$(cdir)/zlahru_m.cpp		\
+	$(cdir)/zunghr_m.cpp		\
+
+# ----------
+# SVD
+libmagma_zsrc += \
+	$(cdir)/dgesdd.cpp		\
+	$(cdir)/zgesdd.cpp		\
+	$(cdir)/dgesvd.cpp		\
+	$(cdir)/zgesvd.cpp		\
+	$(cdir)/zgebrd.cpp		\
+	$(cdir)/zlabrd_gpu.cpp		\
+	$(cdir)/zunmbr.cpp		\
+
+# ----------
+# Batched, GPU interface
+libmagma_zsrc += \
+	$(cdir)/zgetf2_batched.cpp		\
+	$(cdir)/zgetf2_nopiv_batched.cpp	\
+	$(cdir)/zgetrf_panel_batched.cpp	\
+	$(cdir)/zgetrf_panel_nopiv_batched.cpp	\
+	$(cdir)/zgetrf_batched.cpp		\
+	$(cdir)/zgetrf_nopiv_batched.cpp	\
+	$(cdir)/zgetrs_batched.cpp		\
+	$(cdir)/zgetrs_nopiv_batched.cpp	\
+	$(cdir)/zgesv_batched.cpp		\
+	$(cdir)/zgesv_nopiv_batched.cpp		\
+	$(cdir)/zgerbt_batched.cpp		\
+	$(cdir)/zgesv_rbt_batched.cpp		\
+	\
+	$(cdir)/zgetri_outofplace_batched.cpp	\
+	\
+	$(cdir)/zpotf2_batched.cpp		\
+	$(cdir)/zpotrf_batched.cpp		\
+	$(cdir)/zpotrf_panel_batched.cpp	\
+	$(cdir)/zpotrs_batched.cpp		\
+	$(cdir)/zposv_batched.cpp		\
+	\
+	$(cdir)/zlarft_batched.cpp		\
+	$(cdir)/zlarfb_gemm_batched.cpp		\
+	$(cdir)/zgeqrf_panel_batched.cpp	\
+	$(cdir)/zgeqrf_batched.cpp		\
+	$(cdir)/zgeqrf_expert_batched.cpp	\
+
+
+# additional dependencies
+$(cdir)/spotrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/dpotrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/cpotrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/zpotrf_batched.$(o_ext): control/batched_kernel_param.h
+                                 
+$(cdir)/sgetrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/dgetrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/cgetrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/zgetrf_batched.$(o_ext): control/batched_kernel_param.h
+                                 
+$(cdir)/sgeqrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/dgeqrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/cgeqrf_batched.$(o_ext): control/batched_kernel_param.h
+$(cdir)/zgeqrf_batched.$(o_ext): control/batched_kernel_param.h
+
+
+# ----------------------------------------------------------------------
+# pop first directory
+cdir      := $(firstword $(dir_stack))
+dir_stack := $(wordlist 2, $(words $(dir_stack)), $(dir_stack))

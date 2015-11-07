@@ -9,6 +9,7 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <cuda_runtime.h>
 
 // tests internal routines: magma_{set,get}_lapack_numthreads, magma_get_parallel_numthreads
 // so include common_magma.h instead of magma.h

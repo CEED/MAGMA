@@ -103,7 +103,7 @@ def main():
     if options.make:
         # print footer for .Makefile.gen
         print
-        print 'gen = ' + ' '.join(c.files_out) + '\n'
+        print 'gen = \\\n\t' + ' \\\n\t'.join(c.files_out) + '\n'
         print 'cleangen:'
         print '\trm -f $(gen)\n'
         print 'generate: $(gen)\n'

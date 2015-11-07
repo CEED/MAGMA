@@ -125,26 +125,25 @@ class Conversion:
     # A running list of files that are output.
     dependencies = []
 
-    def __init__(self, file=None, match=None, content=None):
-        """Constructor that takes a file, match, and content.
-        @param file The file name of the input.
-        @param match The regular expression matches
-        @param content The ASCII content of the file.
+    def __init__(self, filename=None, match=None, content=None):
+        """Constructor that takes a filename, match, and content.
+        @param filename The file name of the input.
+        @param match    The regular expression matches
+        @param content  The ASCII content of the file.
         """
-        if file is None: return
+        if filename is None: return
         self.content = content
-        #file = path.realpath(file)
-        rel = relpath(file)
-        self.file = path.split(file)
-        self.date = path.getmtime(file)
-        if sys.platform!="win32" and path.samefile( path.join( self.file[0], self.file[1] ), sys.argv[0]):
+        rel = relpath(filename)
+        self.filename = filename
+        self.date = path.getmtime(filename)
+        if sys.platform!="win32" and path.samefile( filename, sys.argv[0] ):
             raise ValueError('Let\'s just forget codegen.py')
         try:
             # ['normal', 'all', 'mixed'] for example. These are the replacement types to be used.
             self.types = match[0].split(',')
-            # 'z' for example. This is the current file's `type`.
+            # 'z' for example. This is the current file's type.
             self.precision = match[2].lower()
-            # ['c', 'd', 's'] for example. This is the current file's destination `types`.
+            # ['c', 'd', 's'] for example. This is the current file's destination types.
             self.precisions = match[3].lower().split()
             if len(self.required_precisions):
                 self.precstmp = []
@@ -153,7 +152,7 @@ class Conversion:
                         self.precstmp.append(prec)
                 self.precisions = self.precstmp
         except:
-            raise ValueError(path.join(self.file[0], self.file[1])+' : Invalid conversion string')
+            raise ValueError( filename+' : Invalid conversion string')
         self.files_in.append(rel)
 
     def run(self):
@@ -170,13 +169,13 @@ class Conversion:
         self.copy = []
         self.converted = []
         load = False
-        if self.debug: print '|'.join(self.types), self.precision, relpath(path.join(self.file[0], self.file[1]))
+        if self.debug: print '|'.join(self.types), self.precision, relpath( self.filename )
         for precision in self.precisions:
             # For each destination precision, make the appropriate changes to the file name/data.
-            new_file = self.convert(self.file[1], precision)
+            new_file = self.convert( self.filename, precision )
             if self.debug: print precision, ':',
             copy = False
-            if new_file != self.file[1] or self.prefix is not None:
+            if new_file != self.filename or self.prefix is not None:
                 if self.prefix is None:
                     # If no prefix is specified, use the file's current folder.
                     prefix = ''
@@ -185,19 +184,19 @@ class Conversion:
                     # If a prefix is specified, set it up.
                     prefix = self.prefix
                     makeprefix = '--prefix '+prefix
-                    if new_file == self.file[1]:
+                    if new_file == self.filename:
                         copy = True
                 # Where the destination file will reside.
                 conversion = path.join(prefix, new_file)
                 file_out = relpath(conversion)
                 if self.make:
                     # If in GNU Make mode, write the rule to create the file.
-                    file_in = relpath(path.join(self.file[0], self.file[1]))
+                    file_in = self.filename
                     print file_out+':', file_in
                     print "\t$(PYTHON)", sys.argv[0], makeprefix, '-p', precision, file_in
                 self.names.append(new_file)
                 self.files_out.append(file_out)
-                self.dependencies.append( (path.join(self.file[0], self.file[1]), precision, file_out) )
+                self.dependencies.append( (self.filename, precision, file_out) )
                 if self.debug: print relpath(conversion), ':',
                 try:
                     # Try to emulate Make like time based dependencies.
@@ -287,6 +286,6 @@ class Conversion:
         # Replace the replacement keywork with one that signifies this is an output file,
         # to prevent multiple replacement issues if run again.
         data = re.sub( KEYWORD+' '+','.join(self.types)+'.*',
-                       DONE_KEYWORD+' from '+self.file[1]+' '+','.join(self.types)+' '+self.precision+' -> '+precision+', '+datetime.now().ctime(), data );
+                       DONE_KEYWORD+' from '+self.filename+' '+','.join(self.types)+' '+self.precision+' -> '+precision+', '+datetime.now().ctime(), data );
         return data
 # end class Conversion

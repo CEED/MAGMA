@@ -11,7 +11,7 @@
 #include "common_magma.h"
 #include "trace.h"
 #include "magma_timer.h"
-#include "../testing/flops.h"
+//#include "../testing/flops.h"
 
 /**
     Purpose
@@ -275,7 +275,7 @@ magma_zgetrf2_mgpu(
                 trace_gpu_start( d, 1, "gemm", "gemm" );
                 /* transpose panel on GPU */
                 magmablas_ztranspose( rows, nb, &d_lAP[d][(j%h)*nb*maxm], cols, panel_local[d], ldpan[d] );
-                /* synch for remaining update */
+                /* sync for remaining update */
                 magma_queue_sync(queues[d][1]);
             } else {
                 /* update the entire trailing matrix */
@@ -450,7 +450,7 @@ magma_zgetrf2_mgpu(
     magmablasSetKernelStream( orig_stream );
     
     timer_start( time );
-    timer_printf("\n Performance %f GFlop/s\n", FLOPS_ZGETRF(m,n) / 1e9 / time );
+    //timer_printf("\n Performance %f GFlop/s\n", FLOPS_ZGETRF(m,n) / 1e9 / time );
 
     return *info;
 } /* magma_zgetrf2_mgpu */

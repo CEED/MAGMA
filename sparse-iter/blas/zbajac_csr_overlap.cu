@@ -450,7 +450,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel1<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel1<<< grid, block, 0, queue->cuda_stream() >>>
             ( localiters, size, matrices, overlap,
             D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
             b.dval, x->dval );  
@@ -460,7 +460,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel8<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel8<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
@@ -471,7 +471,7 @@ magma_zbajac_csr_overlap(
                     D[6].dval, D[6].drow, D[6].dcol, R[6].dval, R[6].drow, R[6].dcol,
                     D[7].dval, D[7].drow, D[7].dcol, R[7].dval, R[7].drow, R[7].dcol,
                     b.dval, x->dval );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
                 } else if (matrices == 2){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
@@ -479,12 +479,12 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
                     b.dval, x->dval );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
         } else{
            printf("error: invalid matrix count.\n");

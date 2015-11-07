@@ -5,9 +5,9 @@
        Univ. of Colorado, Denver
        @date
 */
+#include <cuda_runtime.h>
 
 #include "common_magma.h"
-#include <assert.h>
 
 
 // -------------------------

@@ -109,9 +109,9 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_int_t ib, j;
     magma_int_t nb = 256; //256; // BATRF_NB;
 
-    cublasHandle_t myhandle;
-    cublasCreate_v2(&myhandle);
-    cublasSetStream(myhandle, queue);
+    cublasHandle_t myhandle = queue->cublas_handle();
+    ////cublasCreate_v2(&myhandle);
+    ////cublasSetStream(myhandle, queue);
 
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
@@ -217,7 +217,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
     magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    cublasDestroy_v2(myhandle);
+    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dW1_displ);

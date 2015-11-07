@@ -489,10 +489,10 @@ magma_zmdotc(
     int b = 1;        
 
     if (k>1) {
-        magma_zblockdot_kernel<<<Gs, Bs, Ms, queue>>>( Gs.x, n, k, v, r, d1 );
+        magma_zblockdot_kernel<<< Gs, Bs, Ms, queue->cuda_stream() >>>( Gs.x, n, k, v, r, d1 );
     }
     else {
-        magma_zdot_kernel<<<Gs, Bs, Ms, queue>>>( Gs.x, n, v, r, d1 );
+        magma_zdot_kernel<<< Gs, Bs, Ms, queue->cuda_stream() >>>( Gs.x, n, v, r, d1 );
     }
 /*
     // not necessary to zero GPU mem
@@ -518,7 +518,7 @@ magma_zmdotc(
         while( Gs.x > 1 ) {
             Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
-            magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
+            magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                         ( Gs.x, n, k, aux1, aux2 );
             Gs_next.x = Gs_next.x /2;
             Gs.x = Gs_next.x;
@@ -531,7 +531,7 @@ magma_zmdotc(
         while( Gs.x > 1 ) {
             Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
-            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue >>> 
+            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                         ( Gs.x, n, aux1, aux2 );
             Gs_next.x = Gs_next.x /2;
             Gs.x = Gs_next.x;

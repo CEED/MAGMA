@@ -8,6 +8,8 @@
        @precisions normal z -> s d c
 
 */
+#include <cuda_runtime.h>
+
 #include "common_magma.h"
 
 /**

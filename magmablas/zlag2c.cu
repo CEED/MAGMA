@@ -164,7 +164,7 @@ magmablas_zlag2c_q(
     dim3 grid( magma_ceildiv( m, BLK_X ), magma_ceildiv( n, BLK_Y ) );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     
-    zlag2c_kernel<<< grid, threads, 0, queue >>>( m, n, A, lda, SA, ldsa, rmax );
+    zlag2c_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( m, n, A, lda, SA, ldsa, rmax );
     
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
@@ -181,5 +181,5 @@ magmablas_zlag2c(
     magmaFloatComplex_ptr SA,       magma_int_t ldsa,
     magma_int_t *info )
 {
-    magmablas_zlag2c_q( m, n, A, lda, SA, ldsa, magma_stream, info );
+    magmablas_zlag2c_q( m, n, A, lda, SA, ldsa, magmablasGetQueue(), info );
 }

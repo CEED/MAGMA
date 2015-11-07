@@ -77,7 +77,7 @@ magma_zcumilusetup(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrA ));
     CHECK_CUSPARSE( cusparseSetMatType( descrA, CUSPARSE_MATRIX_TYPE_GENERAL ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrA, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -249,7 +249,7 @@ magma_zcumilugeneratesolverinfo(
     
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
 
 
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrL ));
@@ -346,7 +346,7 @@ magma_zapplycumilu_l(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrL ));
     CHECK_CUSPARSE( cusparseSetMatType( descrL, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrL, CUSPARSE_DIAG_TYPE_UNIT ));
@@ -419,7 +419,7 @@ magma_zapplycumilu_r(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrU ));
     CHECK_CUSPARSE( cusparseSetMatType( descrU, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrU, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -510,7 +510,7 @@ magma_zcumiccsetup(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrA ));
     CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &(precond->cuinfo) ));
     // use kernel to manually check for zeros n the diagonal
@@ -684,7 +684,7 @@ magma_zcumicgeneratesolverinfo(
     
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrL ));
     CHECK_CUSPARSE( cusparseSetMatType( descrL, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrL, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -785,7 +785,7 @@ magma_zapplycumicc_l(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrL ));
     CHECK_CUSPARSE( cusparseSetMatType( descrL, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrL, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -860,7 +860,7 @@ magma_zapplycumicc_r(
 
     // CUSPARSE context //
     CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
-    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrU ));
     CHECK_CUSPARSE( cusparseSetMatType( descrU, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrU, CUSPARSE_DIAG_TYPE_NON_UNIT ));

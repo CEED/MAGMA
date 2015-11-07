@@ -110,7 +110,7 @@ magma_zbcsrblockinfo5(
                                                             hAII, 1, AII, 1 );
 /*
     magma_setvector( 1, sizeof(magmaDoubleComplex*), address, 1, daddress, 1 );
-    zbcsrblockinfo5_kernel<<<dimGrid,dimBlock, 0, queue >>>
+    zbcsrblockinfo5_kernel<<< dimGrid,dimBlock, 0, queue->cuda_stream() >>>
                         ( num_blocks, daddress, AII );
 
 */

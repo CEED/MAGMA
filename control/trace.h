@@ -11,7 +11,10 @@
 #define TRACE_H
 
 // has MagmaMaxGPUs, strlcpy, max
-#include "common_magma.h"
+// TODO: what's the best way to protect inclusion?
+#ifndef MAGMA_H
+#include "magma_v2.h"
+#endif
 
 // ----------------------------------------
 const int MAX_CORES       = 1;                 // CPU cores

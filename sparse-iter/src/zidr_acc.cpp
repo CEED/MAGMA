@@ -175,6 +175,7 @@ magma_zidr_acc(
     real_Double_t tempo1, tempo2;
 
     // set synchrounous kernel queues
+    // TODO: this will not work: queues are always async.
     queue = squeue;
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
 

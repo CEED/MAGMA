@@ -97,7 +97,9 @@ magmablas_dznrm2_check_q(
 {
     dim3 threads( BLOCK_SIZE );
     dim3 blocks( n );    
-    magmablas_dznrm2_check_kernel<<< blocks, threads, 0, queue >>>( m, dA, ldda, dxnorm, dlsticc );
+    magmablas_dznrm2_check_kernel
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
+        ( m, dA, ldda, dxnorm, dlsticc );
 }
 
 extern "C" void
@@ -107,7 +109,7 @@ magmablas_dznrm2_check(
     magmaDouble_ptr dxnorm,
     magmaDouble_ptr dlsticc ) 
 {
-    magmablas_dznrm2_check_q( m, n, dA, ldda, dxnorm, dlsticc, magma_stream );
+    magmablas_dznrm2_check_q( m, n, dA, ldda, dxnorm, dlsticc, magmablasGetQueue() );
 }
 
 
@@ -161,7 +163,9 @@ magmablas_dznrm2_sm_q(
 {
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
     dim3 blocks( 1, 1 );
-    magmablas_dznrm2_smkernel<<< blocks, threads, 0, queue >>>( m, n, dA, ldda, dxnorm );
+    magmablas_dznrm2_smkernel
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
+        ( m, n, dA, ldda, dxnorm );
 }
 
 extern "C" void
@@ -170,7 +174,7 @@ magmablas_dznrm2_sm(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDouble_ptr dxnorm )
 {
-    magmablas_dznrm2_sm_q( m, n, dA, ldda, dxnorm, magma_stream );
+    magmablas_dznrm2_sm_q( m, n, dA, ldda, dxnorm, magmablasGetQueue() );
 }
 
 
@@ -206,7 +210,9 @@ magmablas_dznrm2_adjust_q(
 {
     dim3 threads( k );
     dim3 blocks( 1 );
-    magma_dznrm2_adjust_kernel<<< blocks, threads, 0, queue >>> (dxnorm, dc);
+    magma_dznrm2_adjust_kernel
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
+        (dxnorm, dc);
 }
 
 extern "C" void
@@ -215,7 +221,7 @@ magmablas_dznrm2_adjust(
     magmaDouble_ptr dxnorm,
     magmaDoubleComplex_ptr dc )
 {
-    magmablas_dznrm2_adjust_q( k, dxnorm, dc, magma_stream );
+    magmablas_dznrm2_adjust_q( k, dxnorm, dc, magmablasGetQueue() );
 }
 
 
@@ -265,7 +271,9 @@ magmablas_dznrm2_row_check_adjust_q(
 {
     dim3 threads( BS );
     dim3 blocks( magma_ceildiv( k, BS ) );
-    magma_dznrm2_row_check_adjust_kernel<<< blocks, threads, 0, queue >>> (k, tol, dxnorm, dxnorm2, dC, lddc, dlsticc);
+    magma_dznrm2_row_check_adjust_kernel
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
+        (k, tol, dxnorm, dxnorm2, dC, lddc, dlsticc);
 }
 
 extern "C" void
@@ -276,7 +284,7 @@ magmablas_dznrm2_row_check_adjust(
     magmaDoubleComplex_ptr dC, magma_int_t lddc,
     magmaDouble_ptr dlsticc )
 {
-    magmablas_dznrm2_row_check_adjust_q( k, tol, dxnorm, dxnorm2, dC, lddc, dlsticc, magma_stream );
+    magmablas_dznrm2_row_check_adjust_q( k, tol, dxnorm, dxnorm2, dC, lddc, dlsticc, magmablasGetQueue() );
 }
 
 
@@ -296,7 +304,9 @@ magmablas_dznrm2_cols_q(
 {
     dim3 threads( BLOCK_SIZE );
     dim3 blocks( n );    
-    magmablas_dznrm2_kernel<<< blocks, threads, 0, queue >>>( m, dA, ldda, dxnorm );
+    magmablas_dznrm2_kernel
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
+        ( m, dA, ldda, dxnorm );
 
     // The following would do the computation on one SM
     // magmablas_dznrm2_sm(m, n, dA, ldda, dxnorm);
@@ -308,5 +318,5 @@ magmablas_dznrm2_cols(
     magmaDoubleComplex_ptr dA, magma_int_t ldda, 
     magmaDouble_ptr dxnorm ) 
 {
-    magmablas_dznrm2_cols_q( m, n, dA, ldda, dxnorm, magma_stream );
+    magmablas_dznrm2_cols_q( m, n, dA, ldda, dxnorm, magmablasGetQueue() );
 }

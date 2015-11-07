@@ -116,7 +116,7 @@ magma_zlahru_m(
     
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( data->streams[d] );
+        magmablasSetKernelStream( data->queues[d] );
         
         // convert global indices (k) to local indices (dk)
         magma_indices_1D_bcyclic( nb, ngpu, d, k,    ihi, &dk,   &dkhi );

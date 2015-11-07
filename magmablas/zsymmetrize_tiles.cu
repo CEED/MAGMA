@@ -152,10 +152,14 @@ magmablas_zsymmetrize_tiles_q(
     
     //printf( "m %d, grid %d x %d, threads %d\n", m, grid.x, grid.y, threads.x );
     if ( uplo == MagmaUpper ) {
-        zsymmetrize_tiles_upper<<< grid, threads, 0, queue >>>( m, dA, ldda, mstride, nstride );
+        zsymmetrize_tiles_upper
+            <<< grid, threads, 0, queue->cuda_stream() >>>
+            ( m, dA, ldda, mstride, nstride );
     }
     else {
-        zsymmetrize_tiles_lower<<< grid, threads, 0, queue >>>( m, dA, ldda, mstride, nstride );
+        zsymmetrize_tiles_lower
+            <<< grid, threads, 0, queue->cuda_stream() >>>
+            ( m, dA, ldda, mstride, nstride );
     }
 }
 
@@ -170,5 +174,5 @@ magmablas_zsymmetrize_tiles(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride )
 {
-    magmablas_zsymmetrize_tiles_q( uplo, m, dA, ldda, ntile, mstride, nstride, magma_stream );
+    magmablas_zsymmetrize_tiles_q( uplo, m, dA, ldda, ntile, mstride, nstride, magmablasGetQueue() );
 }

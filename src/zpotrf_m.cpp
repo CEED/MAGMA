@@ -8,8 +8,10 @@
        @precisions normal z -> s d c
 
 */
+#include <cuda_runtime.h>
+
 #include "common_magma.h"
-#include "../testing/flops.h"
+//#include "../testing/flops.h"
 #include "magma_timer.h"
 
 /**
@@ -171,7 +173,7 @@ magma_zpotrf_m(
             magma_queue_create( &stream[d][j] );
         for( j=0; j < 5; j++ )
             magma_event_create( &event[d][j]  );
-        magma_device_sync(); // synch the device
+        magma_device_sync(); // sync the device
     }
     magma_setdevice(0);
 
@@ -452,13 +454,13 @@ magma_zpotrf_m(
     magma_setdevice( orig_dev );
     magmablasSetKernelStream( orig_stream );
     
-    timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
-    timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
-                  FLOPS_ZPOTRF(n) / 1e9,  time_total,
-                  FLOPS_ZPOTRF(n) / 1e9 / time_total );
-    timer_printf( " Performance %f / %f = %f GFlop/s\n",
-                  FLOPS_ZPOTRF(n) / 1e9,  time_sum,
-                  FLOPS_ZPOTRF(n) / 1e9 / time_sum );
+    // timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
+    // timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
+    //               FLOPS_ZPOTRF(n) / 1e9,  time_total,
+    //               FLOPS_ZPOTRF(n) / 1e9 / time_total );
+    // timer_printf( " Performance %f / %f = %f GFlop/s\n",
+    //               FLOPS_ZPOTRF(n) / 1e9,  time_sum,
+    //               FLOPS_ZPOTRF(n) / 1e9 / time_sum );
     
     return *info;
 } /* magma_zpotrf_ooc */

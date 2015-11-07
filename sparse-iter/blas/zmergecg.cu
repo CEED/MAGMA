@@ -947,13 +947,13 @@ magma_zcgmerge_spmv1(
     int b = 1;        
 
     if ( A.storage_type == Magma_CSR )
-        magma_zcgmerge_spmvcsr_kernel<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvcsr_kernel<<< Gs, Bs, Ms, queue->cuda_stream() >>>
         ( A.num_rows, A.dval, A.drow, A.dcol, dd, dz, d1 );
     else if ( A.storage_type == Magma_ELLPACKT )
-        magma_zcgmerge_spmvellpack_kernel<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvellpack_kernel<<< Gs, Bs, Ms, queue->cuda_stream() >>>
         ( A.num_rows, A.max_nnz_row, A.dval, A.dcol, dd, dz, d1 );
     else if ( A.storage_type == Magma_ELL )
-        magma_zcgmerge_spmvell_kernel<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvell_kernel<<< Gs, Bs, Ms, queue->cuda_stream() >>>
         ( A.num_rows, A.max_nnz_row, A.dval, A.dcol, dd, dz, d1 );
     else if ( A.storage_type == Magma_CUCSR ) {
         cusparseHandle_t cusparseHandle = 0;
@@ -961,7 +961,7 @@ magma_zcgmerge_spmv1(
         magmaDoubleComplex c_one = MAGMA_Z_ONE;
         magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
         cusparseCreate( &cusparseHandle );
-        cusparseSetStream( cusparseHandle, queue );
+        cusparseSetStream( cusparseHandle, queue->cuda_stream() );
         cusparseCreateMatDescr( &descr );
         cusparseSetMatType( descr, CUSPARSE_MATRIX_TYPE_GENERAL );
         cusparseSetMatIndexBase( descr, CUSPARSE_INDEX_BASE_ZERO );
@@ -972,13 +972,13 @@ magma_zcgmerge_spmv1(
         cusparseDestroy( cusparseHandle );
         cusparseHandle = 0;
         descr = 0;
-        magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvellpackrt_kernel2<<< Gs, Bs, Ms, queue->cuda_stream() >>>
                       ( A.num_rows, dz, dd, d1 );
 
     }
     else if ( A.storage_type == Magma_SELLP && A.alignment == 1 ) {
         if( A.blocksize == 256 ){
-            magma_zcgmerge_spmvell_kernelb1<<<Gs, Bs, Ms, queue >>>
+            magma_zcgmerge_spmvell_kernelb1<<< Gs, Bs, Ms, queue->cuda_stream() >>>
             ( A.num_rows, A.blocksize, 
                 A.dval, A.dcol, A.drow, dd, dz, d1 );
         }else{
@@ -1000,19 +1000,19 @@ magma_zcgmerge_spmv1(
 
             if ( A.alignment == 8)
                 magma_zcgmerge_spmvsellpt_kernel_8
-                <<< gridsellp, block, Mssellp, queue >>>
+                <<< gridsellp, block, Mssellp, queue->cuda_stream() >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.dval, A.dcol, A.drow, dd, dz);
 
             else if ( A.alignment == 16)
                 magma_zcgmerge_spmvsellpt_kernel_16
-                <<< gridsellp, block, Mssellp, queue >>>
+                <<< gridsellp, block, Mssellp, queue->cuda_stream() >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.dval, A.dcol, A.drow, dd, dz);
 
             else if ( A.alignment == 32)
                 magma_zcgmerge_spmvsellpt_kernel_32
-                <<< gridsellp, block, Mssellp, queue >>>
+                <<< gridsellp, block, Mssellp, queue->cuda_stream() >>>
                 ( A.num_rows, A.blocksize, A.alignment, 
                     A.dval, A.dcol, A.drow, dd, dz);
 
@@ -1022,7 +1022,7 @@ magma_zcgmerge_spmv1(
         // in case of using SELLP, we can't efficiently merge the 
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
-        magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvellpackrt_kernel2<<< Gs, Bs, Ms, queue->cuda_stream() >>>
                               ( A.num_rows, dz, dd, d1 );
     }
     else if ( A.storage_type == Magma_ELLRT ) {
@@ -1052,19 +1052,19 @@ magma_zcgmerge_spmv1(
 
     if ( A.alignment == 32 ) {
         magma_zcgmerge_spmvellpackrt_kernel_32
-                <<< gridellrt, num_threads , Mellrt, queue >>>
+                <<< gridellrt, num_threads , Mellrt, queue->cuda_stream() >>>
                  ( A.num_rows, A.dval, A.dcol, A.drow, dd, dz, d1, 
                                                  A.alignment, real_row_length );
     }
     else if ( A.alignment == 16 ) {
         magma_zcgmerge_spmvellpackrt_kernel_16
-                <<< gridellrt, num_threads , Mellrt, queue >>>
+                <<< gridellrt, num_threads , Mellrt, queue->cuda_stream() >>>
                  ( A.num_rows, A.dval, A.dcol, A.drow, dd, dz, d1, 
                                                  A.alignment, real_row_length );
     }
     else if ( A.alignment == 8 ) {
         magma_zcgmerge_spmvellpackrt_kernel_8
-                <<< gridellrt, num_threads , Mellrt, queue >>>
+                <<< gridellrt, num_threads , Mellrt, queue->cuda_stream() >>>
                  ( A.num_rows, A.dval, A.dcol, A.drow, dd, dz, d1, 
                                                  A.alignment, real_row_length );
     }
@@ -1076,7 +1076,7 @@ magma_zcgmerge_spmv1(
         // dot product and the first reduction loop into the SpMV kernel
         // as the SpMV grid would result in low occupancy.
 
-        magma_zcgmerge_spmvellpackrt_kernel2<<<Gs, Bs, Ms, queue >>>
+        magma_zcgmerge_spmvellpackrt_kernel2<<< Gs, Bs, Ms, queue->cuda_stream() >>>
                               ( A.num_rows, dz, dd, d1 );
     }
 

@@ -198,9 +198,9 @@ magma_zcopyscale(
     dim3 Gs2( magma_ceildiv( n, BLOCK_SIZE ) );
 
 
-    magma_zpipelined_correction<<<Gs, Bs, Ms, queue >>>
+    magma_zpipelined_correction<<< Gs, Bs, Ms, queue->cuda_stream() >>>
                                             ( n, k, skp, r, v );
-    magma_zpipelined_copyscale<<<Gs2, Bs, 0, queue >>>
+    magma_zpipelined_copyscale<<< Gs2, Bs, 0, queue->cuda_stream() >>>
                                             ( n, k, skp, r, v );
 
     return MAGMA_SUCCESS;
@@ -217,12 +217,12 @@ magma_dznrm2scale(
 {
     dim3  blocks( 1 );
     dim3 threads( 512 );
-    magma_zpipelineddznrm2_kernel<<< blocks, threads, 0, queue >>>
+    magma_zpipelineddznrm2_kernel<<< blocks, threads, 0, queue->cuda_stream() >>>
                                 ( m, r, lddr, drnorm );
 
     dim3 Bs( BLOCK_SIZE );
     dim3 Gs2( magma_ceildiv( m, BLOCK_SIZE ) );
-    magma_zpipelinedscale<<<Gs2, Bs, 0, queue >>>( m, r, drnorm );
+    magma_zpipelinedscale<<< Gs2, Bs, 0, queue->cuda_stream() >>>( m, r, drnorm );
 
     return MAGMA_SUCCESS;
 }

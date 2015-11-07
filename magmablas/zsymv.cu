@@ -643,17 +643,17 @@ magmablas_zsymv_work(
     dim3 threads_sum( NB_X, 1, 1 );
 
     if ( upper ) {
-        zsymv_kernel_U<<< grid, threads, 0, queue >>>
+        zsymv_kernel_U<<< grid, threads, 0, queue->cuda_stream() >>>
             (n, dA, ldda, dx, incx, dwork);
         
-        zsymv_kernel_U_sum<<< grid, threads_sum, 0, queue >>>
+        zsymv_kernel_U_sum<<< grid, threads_sum, 0, queue->cuda_stream() >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     else {
-        zsymv_kernel_L<<< grid, threads, 0, queue >>>
+        zsymv_kernel_L<<< grid, threads, 0, queue->cuda_stream() >>>
             (n, dA, ldda, dx, incx, dwork);
         
-        zsymv_kernel_L_sum<<< grid, threads_sum, 0, queue >>>
+        zsymv_kernel_L_sum<<< grid, threads_sum, 0, queue->cuda_stream() >>>
             (n, alpha, ldda, beta, dy, incy, dwork);
     }
     return info;
@@ -806,7 +806,7 @@ magmablas_zsymv(
     }
     
     magmablas_zsymv_work( uplo, n, alpha, dA, ldda, dx, incx, beta, dy, incy,
-                          dwork, lwork, magma_stream );
+                          dwork, lwork, magmablasGetQueue() );
     
     magma_free( dwork );
     
