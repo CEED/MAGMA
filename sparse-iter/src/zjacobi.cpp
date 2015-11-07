@@ -61,14 +61,15 @@ magma_zjacobi(
 {
     magma_int_t info = 0;
     
-
-    
     // set queue for old dense routines
     magma_queue_t orig_queue=NULL;
     magmablasGetKernelStream( &orig_queue );
     
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    
+    real_Double_t tempo1, tempo2, runtime=0;
+    double residual;
     
     //double nom0 = 0.0;
 
@@ -80,8 +81,6 @@ magma_zjacobi(
     solver_par->solver = Magma_JACOBI;
     solver_par->info = MAGMA_SUCCESS;
 
-    real_Double_t tempo1, tempo2, runtime=0;
-    double residual;
     // solver setup
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK(  magma_zresidualvec( ACSR, b, *x, &r, &residual, queue));

@@ -76,7 +76,7 @@ magma_zbombard(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one,
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
                         tmpval, tmpval2;
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
