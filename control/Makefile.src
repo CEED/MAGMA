@@ -24,8 +24,8 @@ libmagma_zsrc += \
 else
 libmagma_zsrc += \
 	$(cdir)/magma_f77.cpp		\
-	$(cdir)/magma_param.f90		\
-	$(cdir)/magma.f90
+	$(cdir)/magma_param.F90		\
+	$(cdir)/magma.F90
 endif
 
 # alphabetic order

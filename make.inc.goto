@@ -52,7 +52,7 @@ LDFLAGS   =     $(FPIC)
 
 LIB       = -lgoto  -lpthread -llapack -lm
 
-LIB      += -lcublas -lcudart
+LIB      += -lcublas -lcusparse -lcudart
 
 
 # --------------------

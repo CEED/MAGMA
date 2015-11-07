@@ -57,7 +57,7 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # requires gcc & gfortran >= 4.6
 LIB       = -lacml_mp           -lstdc++ -lm -lgfortran
 
-LIB      += -lcublas -lcudart
+LIB      += -lcublas -lcusparse -lcudart
 
 
 # --------------------

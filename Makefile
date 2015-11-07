@@ -416,7 +416,6 @@ $(sparse_testers): $(libtest_a) $(libblas_fix_a)  # doesn't use liblapacktest
 
 # ----------------------------------------
 # MacOS likes shared library's path to be set; see make.inc.macos
-INSTALL_NAME = -install_name @rpath/
 
 ifneq ($(INSTALL_NAME),)
     $(libmagma_so):  LDFLAGS += $(INSTALL_NAME)$(notdir $(libmagma_so))

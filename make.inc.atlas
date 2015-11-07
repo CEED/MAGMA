@@ -54,7 +54,7 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # -lifcore -ldl -lf2c -lgfortran
 LIB       = -llapack -lf77blas -latlas -lstdc++ -lm -lgfortran -lifcore
 
-LIB      += -lcublas -lcudart
+LIB      += -lcublas -lcusparse -lcudart
 
 
 # --------------------

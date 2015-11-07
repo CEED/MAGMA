@@ -49,7 +49,7 @@ LDFLAGS   =     $(FPIC)              -fopenmp
 # gcc with OpenBLAS (includes LAPACK)
 LIB       = -lopenblas
 
-LIB      += -lcublas -lcudart
+LIB      += -lcublas -lcusparse -lcudart
 
 
 # --------------------
