@@ -43,7 +43,6 @@ int main(  int argc, char** argv )
     
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
-
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
 
@@ -92,6 +91,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zmscale( &A, zopts.scaling, queue ));
 
         CHECK( magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue ));
+
         CHECK( magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue ));
 
         // vectors and initial guess

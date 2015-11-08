@@ -67,7 +67,7 @@ magma_zbaiter_overlap(
     magma_int_t info = 0;
         
     // prepare solver feedback
-    solver_par->solver = Magma_BAITER;
+    solver_par->solver = Magma_BAITERO;
     solver_par->info = MAGMA_SUCCESS;
     
     // some useful variables 
@@ -86,8 +86,8 @@ magma_zbaiter_overlap(
     // setup
     magma_int_t matrices;
         matrices = precond_par->levels;
-    struct magma_z_matrix D_d[ matrices ];
-    struct magma_z_matrix R_d[ matrices ];
+    struct magma_z_matrix D_d[ 256 ];
+    struct magma_z_matrix R_d[ 256 ];
     magma_int_t overlap;
     magma_int_t blocksize = 256;
     if(  matrices==2 ||
@@ -104,8 +104,6 @@ magma_zbaiter_overlap(
         printf("error: overlap ratio not supported.\n");
         goto cleanup;
     }
-
-    
 
     CHECK( magma_zmtransfer( A, &Ah, A.memory_location, Magma_CPU, queue ));
     CHECK( magma_zmconvert( Ah, &ACSR, Ah.storage_type, Magma_CSR, queue ));
@@ -184,4 +182,4 @@ cleanup:
 
     solver_par->info = info;
     return info;
-}   /* magma_zbaiter */
+}   /* magma_zbaiter_overlap */
