@@ -949,7 +949,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel1<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel1<<< grid, block, 0, queue->cuda_stream() >>>
             ( localiters, size, matrices, overlap,
             D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
             b.dval, x->dval, y );  
@@ -960,12 +960,12 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel2<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel2<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
                     b.dval, x->dval, y );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
                
         } else if (matrices == 4){
@@ -974,14 +974,14 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel4<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel4<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
                     D[2].dval, D[2].drow, D[2].dcol, R[2].dval, R[2].drow, R[2].dcol,
                     D[3].dval, D[3].drow, D[3].dcol, R[3].dval, R[3].drow, R[3].dcol,
                     b.dval, x->dval, y );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
            } else if (matrices == 8){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
@@ -989,7 +989,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel8<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel8<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
@@ -1000,7 +1000,7 @@ magma_zbajac_csr_overlap(
                     D[6].dval, D[6].drow, D[6].dcol, R[6].dval, R[6].drow, R[6].dcol,
                     D[7].dval, D[7].drow, D[7].dcol, R[7].dval, R[7].drow, R[7].dcol,
                     b.dval, x->dval, y );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
             } else if (matrices == 16){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
@@ -1008,7 +1008,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel16<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel16<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[ 0].dval, D[ 0].drow, D[ 0].dcol, R[ 0].dval, R[ 0].drow, R[ 0].dcol, 
                     D[ 1].dval, D[ 1].drow, D[ 1].dcol, R[ 1].dval, R[ 1].drow, R[ 1].dcol,
@@ -1033,7 +1033,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel32<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel32<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[ 0].dval, D[ 0].drow, D[ 0].dcol, R[ 0].dval, R[ 0].drow, R[ 0].dcol, 
                     D[ 1].dval, D[ 1].drow, D[ 1].dcol, R[ 1].dval, R[ 1].drow, R[ 1].dcol,
@@ -1074,7 +1074,7 @@ magma_zbajac_csr_overlap(
             int dimgrid3 = 1;
             dim3 grid( dimgrid1, dimgrid2, dimgrid3 );
             dim3 block( blocksize1, blocksize2, 1 );
-            magma_zbajac_csr_o_ls_kernel64<<< grid, block, 0, queue >>>
+            magma_zbajac_csr_o_ls_kernel64<<< grid, block, 0, queue->cuda_stream() >>>
                 ( localiters, size, matrices, overlap,
                     D[ 0].dval, D[ 0].drow, D[ 0].dcol, R[ 0].dval, R[ 0].drow, R[ 0].dcol, 
                     D[ 1].dval, D[ 1].drow, D[ 1].dcol, R[ 1].dval, R[ 1].drow, R[ 1].dcol,
@@ -1141,7 +1141,7 @@ magma_zbajac_csr_overlap(
                     D[62].dval, D[62].drow, D[62].dcol, R[62].dval, R[62].drow, R[62].dcol,
                     D[63].dval, D[63].drow, D[63].dcol, R[63].dval, R[63].drow, R[63].dcol,
                     b.dval, x->dval, y );  
-               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue >>>
+               //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
         } else{
            printf("error: invalid matrix count.\n");
