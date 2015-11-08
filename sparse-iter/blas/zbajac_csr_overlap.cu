@@ -127,7 +127,7 @@ magma_zbajac_csr_o_ls_kernel1(int localiters, int n,
                             magma_index_t * rowR,
                             magma_index_t * colR, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*blockDim.x;
     int index   =  blockIdx.x*blockDim.x+threadIdx.x;
@@ -201,7 +201,7 @@ magma_zbajac_csr_o_ls_kernel2(int localiters, int n,
                             magma_index_t * rowR1,
                             magma_index_t * colR1, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*blockDim.x/2-blockDim.x/2;
     int index   = blockIdx.x*blockDim.x/2+threadIdx.x-blockDim.x/2;
@@ -276,7 +276,7 @@ magma_zbajac_csr_o_ls_kernel4(int localiters, int n,
                             magmaDoubleComplex * valD2, magma_index_t * rowD2, magma_index_t * colD2, magmaDoubleComplex * valR2, magma_index_t * rowR2, magma_index_t * colR2, 
                             magmaDoubleComplex * valD3, magma_index_t * rowD3, magma_index_t * colD3, magmaDoubleComplex * valR3, magma_index_t * rowR3, magma_index_t * colR3, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*(blockDim.x - overlap) - overlap;
     int index   =  blockIdx.x*(blockDim.x - overlap) - overlap + threadIdx.x;
@@ -361,7 +361,7 @@ magma_zbajac_csr_o_ls_kernel8(int localiters, int n,
                             magmaDoubleComplex * valD6, magma_index_t * rowD6, magma_index_t * colD6, magmaDoubleComplex * valR6, magma_index_t * rowR6, magma_index_t * colR6, 
                             magmaDoubleComplex * valD7, magma_index_t * rowD7, magma_index_t * colD7, magmaDoubleComplex * valR7, magma_index_t * rowR7, magma_index_t * colR7, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*(blockDim.x - overlap) - overlap;
     int index   =  blockIdx.x*(blockDim.x - overlap) - overlap + threadIdx.x;
@@ -459,7 +459,7 @@ magma_zbajac_csr_o_ls_kernel16(int localiters, int n,
                             magmaDoubleComplex *valD14, magma_index_t *rowD14, magma_index_t *colD14, magmaDoubleComplex *valR14, magma_index_t *rowR14, magma_index_t *colR14, 
                             magmaDoubleComplex *valD15, magma_index_t *rowD15, magma_index_t *colD15, magmaDoubleComplex *valR15, magma_index_t *rowR15, magma_index_t *colR15,  
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*(blockDim.x - overlap) - overlap;
     int index   =  blockIdx.x*(blockDim.x - overlap) - overlap + threadIdx.x;
@@ -572,7 +572,7 @@ magma_zbajac_csr_o_ls_kernel32(int localiters, int n,
                             magmaDoubleComplex *valD30, magma_index_t *rowD30, magma_index_t *colD30, magmaDoubleComplex *valR30, magma_index_t *rowR30, magma_index_t *colR30, 
                             magmaDoubleComplex *valD31, magma_index_t *rowD31, magma_index_t *colD31, magmaDoubleComplex *valR31, magma_index_t *rowR31, magma_index_t *colR31, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*(blockDim.x - overlap) - overlap;
     int index   =  blockIdx.x*(blockDim.x - overlap) - overlap + threadIdx.x;
@@ -733,7 +733,7 @@ magma_zbajac_csr_o_ls_kernel64(int localiters, int n,
                             magmaDoubleComplex *valD62, magma_index_t *rowD62, magma_index_t *colD62, magmaDoubleComplex *valR62, magma_index_t *rowR62, magma_index_t *colR62, 
                             magmaDoubleComplex *valD63, magma_index_t *rowD63, magma_index_t *colD63, magmaDoubleComplex *valR63, magma_index_t *rowR63, magma_index_t *colR63, 
                             const magmaDoubleComplex *  __restrict__ b,                            
-                            magmaDoubleComplex * x, magmaDoubleComplex * y )
+                            magmaDoubleComplex * x )
 {
     int inddiag =  blockIdx.x*(blockDim.x - overlap) - overlap;
     int index   =  blockIdx.x*(blockDim.x - overlap) - overlap + threadIdx.x;
@@ -934,8 +934,6 @@ magma_zbajac_csr_overlap(
     int size = D[0].num_rows;
     int min_nnz=100;
     
-    magmaDoubleComplex *tmp, *y;
-    //magma_zmalloc( &y, size );
     
     for(int i=0; i<matrices; i++){
        min_nnz = min(min_nnz, R[i].nnz);   
@@ -951,7 +949,7 @@ magma_zbajac_csr_overlap(
             magma_zbajac_csr_o_ls_kernel1<<< grid, block, 0, queue->cuda_stream() >>>
             ( localiters, size, matrices, overlap,
             D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
-            b.dval, x->dval, y );  
+            b.dval, x->dval );  
             
         } else if (matrices == 2){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
@@ -963,7 +961,7 @@ magma_zbajac_csr_overlap(
                 ( localiters, size, matrices, overlap,
                     D[0].dval, D[0].drow, D[0].dcol, R[0].dval, R[0].drow, R[0].dcol, 
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
                //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
                
@@ -979,7 +977,7 @@ magma_zbajac_csr_overlap(
                     D[1].dval, D[1].drow, D[1].dcol, R[1].dval, R[1].drow, R[1].dcol,
                     D[2].dval, D[2].drow, D[2].dcol, R[2].dval, R[2].drow, R[2].dcol,
                     D[3].dval, D[3].drow, D[3].dcol, R[3].dval, R[3].drow, R[3].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
                //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
            } else if (matrices == 8){
@@ -998,7 +996,7 @@ magma_zbajac_csr_overlap(
                     D[5].dval, D[5].drow, D[5].dcol, R[5].dval, R[5].drow, R[5].dcol,
                     D[6].dval, D[6].drow, D[6].dcol, R[6].dval, R[6].drow, R[6].dcol,
                     D[7].dval, D[7].drow, D[7].dcol, R[7].dval, R[7].drow, R[7].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
                //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
             } else if (matrices == 16){
@@ -1025,7 +1023,7 @@ magma_zbajac_csr_overlap(
                     D[13].dval, D[13].drow, D[13].dcol, R[13].dval, R[13].drow, R[13].dcol,
                     D[14].dval, D[14].drow, D[14].dcol, R[14].dval, R[14].drow, R[14].dcol,
                     D[15].dval, D[15].drow, D[15].dcol, R[15].dval, R[15].drow, R[15].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
             } else if (matrices == 32){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
             int dimgrid2 = 1;
@@ -1066,7 +1064,7 @@ magma_zbajac_csr_overlap(
                     D[29].dval, D[29].drow, D[29].dcol, R[29].dval, R[29].drow, R[29].dcol,
                     D[30].dval, D[30].drow, D[30].dcol, R[30].dval, R[30].drow, R[30].dcol,
                     D[31].dval, D[31].drow, D[31].dcol, R[31].dval, R[31].drow, R[31].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
             } else if (matrices == 64){
             int dimgrid1 = magma_ceildiv( size * blocksize1/(blocksize1-overlap) , blocksize1 );
             int dimgrid2 = 1;
@@ -1139,21 +1137,17 @@ magma_zbajac_csr_overlap(
                     D[61].dval, D[61].drow, D[61].dcol, R[61].dval, R[61].drow, R[61].dcol,
                     D[62].dval, D[62].drow, D[62].dcol, R[62].dval, R[62].drow, R[62].dcol,
                     D[63].dval, D[63].drow, D[63].dcol, R[63].dval, R[63].drow, R[63].dcol,
-                    b.dval, x->dval, y );  
+                    b.dval, x->dval );  
                //magma_zbajac_csr_o_ls_kernel<<< grid, block, 0, queue->cuda_stream() >>>
                // ( localiters, size, matrices, overlap, D, R, b.dval, x->dval );
         } else{
            printf("error: invalid matrix count.\n");
         }
-        //tmp = x->dval;
-        //x->dval = y;
-        //y = tmp;
 
 
     }
     else {
             printf("error: all elements in diagonal block.\n");
     }
-    //magma_free(y);
     return MAGMA_SUCCESS;
 }
