@@ -46,13 +46,20 @@ RANLIB    = ranlib
 
 # Use -fPIC to make shared (.so) and static (.a) library;
 # can be commented out if making only static library.
-#FPIC      = -fPIC
+FPIC      = -fPIC
 
-CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wshadow -DMAGMA_NOAFFINITY -std=c99
+CFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wshadow -DMAGMA_NOAFFINITY
 FFLAGS    = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS  = -m64 -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument -x f95-cpp-input
 NVCCFLAGS = -m64 -O3         -DADD_       -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
 LDFLAGS   = -m64     $(FPIC)
+
+# Options to do extra checks for non-standard things like variable length arrays;
+# it is safe to disable all these
+CFLAGS   += -pedantic -Wno-long-long
+#CFLAGS   += -Werror  # uncomment to ensure all warnings are dealt with
+CXXFLAGS := $(CFLAGS) -std=c++11
+CFLAGS   += -std=c99
 
 # MacOS likes the library's path to be set
 INSTALL_NAME = -install_name @rpath/
