@@ -392,8 +392,8 @@ $(libblas_fix_a):   $(libblas_fix_obj)
 $(libtest_a):       $(libtest_obj)
 $(liblapacktest_a): $(liblapacktest_obj)
 
-
-$(libsparse_so):    LIBEXT += -Llib -lmagma
+# sparse requires libmagma
+$(libsparse_so): | $(libmagma_so)
 
 
 # ----- testers
@@ -634,11 +634,21 @@ $(libs_a):
 	@echo
 
 ifneq ($(have_fpic),)
-$(libs_so):
+$(libmagma_so):
 	@echo "===== shared library $@"
 	$(CXX) $(LDFLAGS) -shared -o $@ \
 		$^ \
 		$(LIBEXT)
+	@echo
+
+# Can't add -Llib -lmagma to LIBEXT, because that would apply to libsparse_so's
+# prerequisites, namely libmagma_so. So libmagma and libsparse need different rules.
+# See Make section 6.11 Target-specific Variable Values.
+$(libsparse_so):
+	@echo "===== shared library $@"
+	$(CXX) $(LDFLAGS) -shared -o $@ \
+		$^ \
+		$(LIBEXT) -Llib -lmagma
 	@echo
 else
 # missing -fPIC: "make shared" prints warning
