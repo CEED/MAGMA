@@ -132,13 +132,13 @@ magma_int_t magma_getdevice_arch();
 /* magma_int_t magma_getdevice_arch( magma_int_t dev );   todo: new */
 
 void magma_getdevices(
-    magma_int_t* devices,
+    magma_device_t* devices,
     magma_int_t  size,
     magma_int_t* num_ptr );
 
-void magma_getdevice( magma_int_t* dev );
+void magma_getdevice( magma_device_t* dev );
 
-void magma_setdevice( magma_int_t dev );
+void magma_setdevice( magma_device_t dev );
 
 
 // ========================================

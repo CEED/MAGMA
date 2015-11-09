@@ -88,12 +88,12 @@ public:
 protected:
     friend
     void magma_queue_create_v2_internal(
-        magma_int_t device, magma_queue_t* queuePtr,
+        magma_device_t device, magma_queue_t* queuePtr,
         const char* func, const char* file, int line );
     
     friend
     void magma_queue_create_from_cuda_internal(
-        magma_int_t      device,
+        magma_device_t   device,
         cudaStream_t     stream,
         cublasHandle_t   cublas_handle,
         cusparseHandle_t cusparse_handle,

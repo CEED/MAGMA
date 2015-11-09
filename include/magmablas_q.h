@@ -40,12 +40,12 @@ size_t
 magma_queue_mem_size( magma_queue_t queue );
 
 void magma_queue_create_v2_internal(
-    magma_int_t    device,
+    magma_device_t device,
     magma_queue_t* queue_ptr,
     const char* func, const char* file, int line );
 
 void magma_queue_create_from_cuda_internal(
-    magma_int_t      device,
+    magma_device_t   device,
     cudaStream_t     stream,
     cublasHandle_t   cublas,
     cusparseHandle_t cusparse,

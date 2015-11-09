@@ -93,14 +93,14 @@ magma_queue_t g_null_queues[ MagmaMaxAccelerators ] = { NULL };
 
 // --------------------
 // subset of the CUDA device properties, set by magma_init()
-struct magma_device
+struct magma_device_info
 {
     size_t memory;
     magma_int_t cuda_arch;
 };
 
 int g_magma_devices_cnt = 0;
-struct magma_device* g_magma_devices = NULL;
+struct magma_device_info* g_magma_devices = NULL;
 
 
 // ========================================
@@ -129,7 +129,7 @@ magma_int_t magma_init()
         cudaError_t err;
         err = cudaGetDeviceCount( &g_magma_devices_cnt );
         check_error( err );
-        magma_malloc_cpu( (void**) &g_magma_devices, g_magma_devices_cnt * sizeof(struct magma_device) );
+        magma_malloc_cpu( (void**) &g_magma_devices, g_magma_devices_cnt * sizeof(struct magma_device_info) );
         if ( g_magma_devices == NULL ) {
             info = MAGMA_ERR_HOST_ALLOC;
             goto cleanup;
@@ -143,7 +143,7 @@ magma_int_t magma_init()
         }
         
         // build NULL queues (for backwards compatability with MAGMA 1.x) on each device
-        magma_int_t cdev;
+        magma_device_t cdev;
         magma_getdevice( &cdev );
         
         for( int dev=0; dev < g_magma_devices_cnt; ++dev ) {
@@ -293,7 +293,7 @@ void magma_print_environment()
 extern "C"
 magma_int_t magma_getdevice_arch()
 {
-    int dev;
+    magma_device_t dev;
     cudaError_t err;
     err = cudaGetDevice( &dev );
     check_error( err );
@@ -308,7 +308,7 @@ magma_int_t magma_getdevice_arch()
 // --------------------
 extern "C"
 void magma_getdevices(
-    magma_int_t* devices,
+    magma_device_t* devices,
     magma_int_t  size,
     magma_int_t* numPtr )
 {
@@ -326,7 +326,7 @@ void magma_getdevices(
 
 // --------------------
 extern "C"
-void magma_getdevice( magma_int_t* device )
+void magma_getdevice( magma_device_t* device )
 {
     cudaError_t err;
     err = cudaGetDevice( device );
@@ -335,7 +335,7 @@ void magma_getdevice( magma_int_t* device )
 
 // --------------------
 extern "C"
-void magma_setdevice( magma_int_t device )
+void magma_setdevice( magma_device_t device )
 {
     cudaError_t err;
     err = cudaSetDevice( device );
@@ -392,7 +392,7 @@ magma_int_t magmablasSetKernelStream( magma_queue_t queue )
 {
     magma_int_t info = 0;
     if ( queue == NULL ) {
-        magma_int_t dev;
+        magma_device_t dev;
         magma_getdevice( &dev );
         assert( 0 <= dev && dev < g_magma_devices_cnt );
         assert( g_null_queues != NULL );
@@ -442,7 +442,7 @@ void magma_queue_create_internal(
     magma_queue_t* queue_ptr,
     const char* func, const char* file, int line )
 {
-    int device;
+    magma_device_t device;
     cudaError_t err;
     err = cudaGetDevice( &device );
     check_xerror( err, func, file, line );
@@ -453,7 +453,7 @@ void magma_queue_create_internal(
 // --------------------
 extern "C"
 void magma_queue_create_v2_internal(
-    magma_int_t device, magma_queue_t* queue_ptr,
+    magma_device_t device, magma_queue_t* queue_ptr,
     const char* func, const char* file, int line )
 {
     magma_queue_t queue;
@@ -494,7 +494,7 @@ void magma_queue_create_v2_internal(
 // --------------------
 extern "C"
 void magma_queue_create_from_cuda_internal(
-    magma_int_t      device,
+    magma_device_t   device,
     cudaStream_t     stream,
     cublasHandle_t   cublas_handle,
     cusparseHandle_t cusparse_handle,

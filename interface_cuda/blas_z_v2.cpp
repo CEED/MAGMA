@@ -40,7 +40,7 @@ magma_izamax_q(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magma_queue_t queue )
 {
-    magma_int_t result;
+    int result; /* not magma_int_t */
     cublasIzamax( queue->cublas_handle(), n, dx, incx, &result );
     return result;
 }
@@ -66,7 +66,7 @@ magma_izamin_q(
     magmaDoubleComplex_const_ptr dx, magma_int_t incx,
     magma_queue_t queue )
 {
-    magma_int_t result;
+    int result; /* not magma_int_t */
     cublasIzamin( queue->cublas_handle(), n, dx, incx, &result );
     return result;
 }

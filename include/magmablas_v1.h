@@ -34,7 +34,6 @@ void magma_queue_create_internal(
 
 // ========================================
 // @deprecated
-typedef int magma_device_t;
 
 #define MagmaUpperLower     MagmaFull
 #define MagmaUpperLowerStr  MagmaFullStr

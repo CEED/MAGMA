@@ -79,6 +79,7 @@ typedef struct magma_queue* magma_queue_t;
     #endif
     
     typedef cudaEvent_t    magma_event_t;
+    typedef int            magma_device_t;
     
     typedef cuDoubleComplex magmaDoubleComplex;
     typedef cuFloatComplex  magmaFloatComplex;
