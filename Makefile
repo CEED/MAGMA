@@ -19,8 +19,9 @@ RANLIB     ?= ranlib
 # shared libraries require -fPIC
 #FPIC       = -fPIC
 
-CFLAGS     ?= -O3 $(FPIC) -DADD_ -Wall -MMD -std=c99
-#CXXFLAGS   ?= -O3 $(FPIC) -DADD_ -Wall -MMD -std=c++11
+# may want -std=c99 for CFLAGS, -std=c++11 for CXXFLAGS
+CFLAGS     ?= -O3 $(FPIC) -DADD_ -Wall -MMD
+CXXFLAGS   ?= $(CFLAGS)
 NVFLAGS    ?= -O3         -DADD_ -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
 FFLAGS     ?= -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS   ?= -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
@@ -42,10 +43,6 @@ o_ext      ?= o
 # MAGMA-specific programs & flags
 
 LIBEXT     = $(LIBDIR) $(LIB)
-
-ifeq ($(CXXFLAGS),)
-    CXXFLAGS = $(filter-out -std=%,$(CFLAGS)) -std=c++11
-endif
 
 # preprocessor flags. See below for MAGMA_INC
 CPPFLAGS   = $(INC) $(MAGMA_INC)
@@ -579,10 +576,11 @@ testing/clean: testing/lin/clean
 testing/lin/clean:
 	-rm -f $(liblapacktest_a) $(liblapacktest_obj)
 
+# hmm... what should lib/clean do? just the libraries, not objects?
 lib/clean: blas_fix/clean sparse-iter/clean
 	-rm -f $(libmagma_a) $(libmagma_so) $(libmagma_obj)
 
-sparse-iter/clean:
+sparse-iter/clean: sparse-iter/testing/clean
 	-rm -f $(libsparse_a) $(libsparse_so) $(libsparse_obj)
 
 sparse-iter/blas/clean:
