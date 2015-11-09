@@ -60,9 +60,11 @@ typedef struct magma_queue* magma_queue_t;
 // define types specific to implementation (CUDA, OpenCL, MIC)
 // define macros to deal with complex numbers
 #if defined(HAVE_CUBLAS)
-    #ifndef CUBLAS_V2_H_
-    #include <cublas.h>
+    // include cublas_v2.h, unless cublas.h has already been included, e.g., via magma.h
+    #ifndef CUBLAS_H_
+    #include <cublas_v2.h>
     #endif
+    
     #include <cusparse_v2.h>
     
     #ifdef __cplusplus

@@ -9,6 +9,11 @@
 #ifndef MAGMA_H
 #define MAGMA_H
 
+// magma v1 includes cublas.h by default, unless cublas_v2.h has already been included
+#ifndef CUBLAS_V2_H_
+#include <cublas.h>
+#endif
+
 /* ------------------------------------------------------------
  * MAGMA BLAS Functions
  * --------------------------------------------------------- */

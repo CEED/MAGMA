@@ -23,9 +23,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <cublas_v2.h>
-#include <cusparse_v2.h>
-
 #if defined( _WIN32 ) || defined( _WIN64 )
 
     #include "magma_winthread.h"
