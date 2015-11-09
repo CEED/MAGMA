@@ -29,6 +29,7 @@
 #endif
 
 #include <cuda_runtime.h>
+#include <cublas_v2.h>
 
 // defining MAGMA_LAPACK_H is a hack to NOT include magma_lapack.h
 // via common_magma.h here, since it conflicts with acml.h and we don't
@@ -501,7 +502,8 @@ void magma_queue_create_from_cuda_internal(
     magma_queue_t*   queue_ptr,
     const char* func, const char* file, int line )
 {
-    magma_queue_t queue = (magma_queue_t) malloc( sizeof(*queue) );
+    magma_queue_t queue;
+    magma_malloc_cpu( (void**)&queue, sizeof(*queue) );
     assert( queue != NULL );
     *queue_ptr = queue;
     
@@ -576,13 +578,19 @@ void magma_queue_sync_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
-    cudaError_t    err;
-    err  = cudaStreamSynchronize( queue->cuda_stream() );
+    cudaError_t err;
+    if ( queue != NULL ) {
+        err = cudaStreamSynchronize( queue->cuda_stream() );
+    }
+    else {
+        err = cudaStreamSynchronize( NULL );
+    }
     check_xerror( err, func, file, line );
 }
 
 
 // --------------------
+// TODO: do set device based on queue? and restore device?
 extern "C" size_t
 magma_queue_mem_size( magma_queue_t queue )
 {
