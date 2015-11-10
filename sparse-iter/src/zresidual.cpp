@@ -9,10 +9,10 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
-#define  r(i)  r.dval+i*dofs
-#define  b(i)  b.dval+i*dofs
+#define  r(i_)  (r.dval + (i_)*dofs)
+#define  b(i_)  (b.dval + (i_)*dofs)
 
 /**
     Purpose
@@ -54,36 +54,35 @@ magma_zresidual(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
+    // constants
+    const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    
     // some useful variables
-    magmaDoubleComplex zero = MAGMA_Z_ZERO, one = MAGMA_Z_ONE,
-                                            mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
     magma_int_t num_vecs = b.num_rows*b.num_cols/A.num_rows;
     
-    magma_z_matrix r={Magma_CSR};
+    magma_z_matrix r = {Magma_CSR};
     
     if ( A.num_rows == b.num_rows ) {
-        CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, zero, queue ));
+        CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
-        CHECK( magma_z_spmv( one, A, x, zero, r, queue ));           // r = A x
-        magma_zaxpy(dofs, mone, b.dval, 1, r.dval, 1);          // r = r - b
-        *res =  magma_dznrm2(dofs, r.dval, 1);            // res = ||r||
-        //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
+        CHECK( magma_z_spmv( c_one, A, x, c_zero, r, queue ));        // r = A x
+        magma_zaxpy( dofs, c_neg_one, b.dval, 1, r.dval, 1, queue );  // r = r - b
+        *res = magma_dznrm2( dofs, r.dval, 1, queue );                // res = ||r||
+        //   / magma_dznrm2( dofs, b.dval, 1, queue );                //     / ||b||
         //printf( "relative residual: %e\n", *res );
-    } else if ((b.num_rows*b.num_cols)%A.num_rows== 0 ) {
-        CHECK( magma_zvinit( &r, Magma_DEV, b.num_rows,b.num_cols, zero, queue ));
+    } else if ((b.num_rows*b.num_cols)%A.num_rows == 0 ) {
+        CHECK( magma_zvinit( &r, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
 
-        CHECK( magma_z_spmv( one, A, x, zero, r, queue ));           // r = A x
+        CHECK( magma_z_spmv( c_one, A, x, c_zero, r, queue ));        // r = A x
 
-        for( magma_int_t i=0; i<num_vecs; i++) {
-            magma_zaxpy(dofs, mone, b(i), 1, r(i), 1);   // r = r - b
-            res[i] =  magma_dznrm2(dofs, r(i), 1);        // res = ||r||
+        for( magma_int_t i=0; i < num_vecs; i++) {
+            magma_zaxpy( dofs, c_neg_one, b(i), 1, r(i), 1, queue );  // r = r - b
+            res[i] = magma_dznrm2( dofs, r(i), 1, queue );            // res = ||r||
         }
-        //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
+        //         / magma_dznrm2( dofs, b.dval, 1, queue );          //     / ||b||
         //printf( "relative residual: %e\n", *res );
     } else {
         printf("error: dimensions do not match.\n");
@@ -91,7 +90,6 @@ magma_zresidual(
     }
     
 cleanup:
-    magma_zmfree(&r, queue );
-    magmablasSetKernelStream( orig_queue );
+    magma_zmfree( &r, queue );
     return info;
 }
