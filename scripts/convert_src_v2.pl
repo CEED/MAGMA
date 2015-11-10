@@ -67,6 +67,9 @@ my $queue = "UNKNOWN";
 while( <> ) {
 	##print "<<<< $_ >>>>\n\n";
 	
+	# update version
+	s/MAGMA \(version \d\.\d\)/MAGMA (version 2.0)/;
+	
 	# rename stream array to queues
 	s/\bstream\[/queues[/g;
 	
@@ -77,15 +80,15 @@ while( <> ) {
 	
 	# fix queue_create
 	#  ($1)                      ($2 )
-	s/^( +)magma_queue_create\( *(.*?) *\);/${1}magma_int_t cdev;\n${1}magma_getdevice( \&cdev );\n${1}magma_queue_create( cdev, $2 );/mg;
+	s/^( +)magma_queue_create\( *(.*?) *\);/${1}magma_device_t cdev;\n${1}magma_getdevice( \&cdev );\n${1}magma_queue_create( cdev, $2 );/mg;
 	
 	# comment out Set/GetKernelStream & record queue
-	if ( s|(magmablasSetKernelStream\( *(.*?) *\);)|//$1|g ) {
+	if ( s@(magmablasSetKernelStream\( *(.*?) *\);)@//$1@g ) {
 		##print "[[[[ queue $queue ]]]]\n";
 		$queue = $2;
 	}
-	s|(magmablasGetKernelStream\( *(.*?) *\);)|//$1|g;
-	s|(magma_queue_t +orig_queue)|//$1|g;
+	s@(magmablasGetKernelStream\( *(.*?) *\);)@//$1@g;
+	s@(magma_queue_t +orig_(stream|queue))@//$1@g;
 	
 	# add queue to BLAS/GPU kernels
 	#   ($1 ..............................................)      ($2 ...)

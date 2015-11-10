@@ -1,4 +1,4 @@
-#!/usr/bin/perl -p
+#!/usr/bin/perl -pi
 #
 # Does basic conversion of MAGMA kernels from v1 to v2.
 # 1) Kernel launches get stream from queue.
