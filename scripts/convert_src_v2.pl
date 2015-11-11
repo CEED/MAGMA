@@ -76,7 +76,7 @@ while( <> ) {
 	# fix headers
 	s/#include "magma.h"/#include "magma_v2.h"/;
 	s/#include "common_magma.h"/#include "magma_internal.h"/;
-	s/#include "common_sparsemagma.h"/#include "magmasparse_internal.h"/;
+	s/#include "common_magmasparse.h"/#include "magmasparse_internal.h"/;
 	
 	# fix queue_create
 	#  ($1)                      ($2 )
