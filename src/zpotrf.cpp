@@ -141,7 +141,7 @@ magma_zpotrf(
             return magma_zpotrf_m( ngpu, uplo, n, A, lda, info );
         }
         
-        magma_queue_t queues[2] = { NULL, NULL, NULL };
+        magma_queue_t queues[2] = { NULL, NULL };
         magma_device_t cdev;
         magma_getdevice( &cdev );
         magma_queue_create( cdev, &queues[0] );

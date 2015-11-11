@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -80,6 +80,14 @@ magma_zposv(
     magmaDoubleComplex *B, magma_int_t ldb,
     magma_int_t *info )
 {
+    #ifdef HAVE_clBLAS
+    #define  dA(i_, j_)  dA, ((i_) + (j_)*ldda)
+    #define  dB(i_, j_)  dB, ((i_) + (j_)*lddb)
+    #else
+    #define  dA(i_, j_) (dA + (i_) + (j_)*ldda)
+    #define  dB(i_, j_) (dB + (i_) + (j_)*lddb)
+    #endif
+    
     magma_int_t ngpu, ldda, lddb;
 
     *info = 0;
@@ -99,13 +107,13 @@ magma_zposv(
     }
 
     /* Quick return if possible */
-    if ( (n == 0) || (nrhs == 0) ) {
+    if (n == 0 || nrhs == 0) {
         return *info;
     }
 
     /* If single-GPU and allocation suceeds, use GPU interface. */
     ngpu = magma_num_gpus();
-    magmaDoubleComplex *dA, *dB;
+    magmaDoubleComplex_ptr dA, dB;
     if ( ngpu > 1 ) {
         goto CPU_INTERFACE;
     }
@@ -118,19 +126,24 @@ magma_zposv(
         magma_free( dA );
         goto CPU_INTERFACE;
     }
-    magma_zsetmatrix( n, n, A, lda, dA, ldda );
-    magma_zpotrf_gpu( uplo, n, dA, ldda, info );
+    magma_queue_t queues[1];
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queues[0] );
+    magma_zsetmatrix( n, n, A, lda, dA(0,0), ldda, queues[0] );
+    magma_zpotrf_gpu( uplo, n, dA(0,0), ldda, info );
     if ( *info == MAGMA_ERR_DEVICE_ALLOC ) {
         magma_free( dA );
         magma_free( dB );
         goto CPU_INTERFACE;
     }
-    magma_zgetmatrix( n, n, dA, ldda, A, lda );
+    magma_zgetmatrix( n, n, dA(0,0), ldda, A, lda, queues[0] );
     if ( *info == 0 ) {
-        magma_zsetmatrix( n, nrhs, B, ldb, dB, lddb );
-        magma_zpotrs_gpu( uplo, n, nrhs, dA, ldda, dB, lddb, info );
-        magma_zgetmatrix( n, nrhs, dB, lddb, B, ldb );
+        magma_zsetmatrix( n, nrhs, B, ldb, dB(0,0), lddb, queues[0] );
+        magma_zpotrs_gpu( uplo, n, nrhs, dA(0,0), ldda, dB(0,0), lddb, info );
+        magma_zgetmatrix( n, nrhs, dB(0,0), lddb, B, ldb, queues[0] );
     }
+    magma_queue_destroy( queues[0] );
     magma_free( dA );
     magma_free( dB );
     return *info;
@@ -142,6 +155,5 @@ CPU_INTERFACE:
     if ( *info == 0 ) {
         lapackf77_zpotrs( lapack_uplo_const(uplo), &n, &nrhs, A, &lda, B, &ldb, info );
     }
-
     return *info;
 }
