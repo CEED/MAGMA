@@ -48,7 +48,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zgesv
+    @ingroup magmasparse_zposv
     ********************************************************************/
 
 extern "C" magma_int_t

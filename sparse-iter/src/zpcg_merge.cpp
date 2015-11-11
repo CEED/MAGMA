@@ -53,7 +53,7 @@
     queue       magma_queue_t
                 Queue to execute in.
 
-    @ingroup magmasparse_zgesv
+    @ingroup magmasparse_zposv
     ********************************************************************/
 
 extern "C" magma_int_t
@@ -172,18 +172,28 @@ magma_zpcg_merge(
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
             
+        
+        
         // updates x, r
         CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
         
         // preconditioner in between
-        CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+        //CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
+        //CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
         
         // computes scalars and updates d
         CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));
-        if( solver_par->numiter==1){
-            magma_zcopy( dofs, h.dval, 1, d.dval, 1 );   
-        }
+        
+        
+        //if( solver_par->numiter==1){
+        //    magma_zcopy( dofs, h.dval, 1, d.dval, 1 );   
+        //}
+        
+                // updates x, r, computes scalars and updates d
+        //CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, d.dval, z.dval, skp, queue ));
+
+        
         // check stopping criterion (asynchronous copy)
         magma_zgetvector_async( 1 , skp+1, 1,
                                                     skp_h+1, 1, stream[1] );
