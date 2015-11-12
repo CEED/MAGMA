@@ -1409,7 +1409,9 @@ magma_zlabrd_gpu(
     magmaDoubleComplex     *X, magma_int_t ldx,
     magmaDoubleComplex_ptr dX, magma_int_t lddx,
     magmaDoubleComplex     *Y, magma_int_t ldy,
-    magmaDoubleComplex_ptr dY, magma_int_t lddy );
+    magmaDoubleComplex_ptr dY, magma_int_t lddy,
+    magmaDoubleComplex  *work, magma_int_t lwork,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zlaqps_gpu(
