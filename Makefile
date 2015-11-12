@@ -441,6 +441,8 @@ testers_f: $(testers_f)
 
 sparse-test: sparse-iter/testing
 
+generation: generate
+
 # cleangen is defined in Makefile.gen
 cleanall: clean cleangen
 
