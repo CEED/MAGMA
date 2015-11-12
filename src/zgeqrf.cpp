@@ -99,15 +99,15 @@ magma_zgeqrf(
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info )
 {
-    #define  A(i_,j_) ( A + (i_) + (j_)*lda )
+    #define  A(i_,j_)  (A + (i_) + (j_)*lda)
     
     #ifdef HAVE_clBLAS
     #define dA(i_,j_)  dA,    ((i_) + (j_)*ldda + dA_offset)
     #define dT(i_,j_)  dT,    ((i_) + (j_)*nb   + dT_offset)
     #define dwork(i_)  dwork, ((i_)             + dwork_offset)
     #else
-    #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
-    #define dT(i_,j_) (dT + (i_) + (j_)*nb)
+    #define dA(i_,j_) (dA    + (i_) + (j_)*ldda)
+    #define dT(i_,j_) (dT    + (i_) + (j_)*nb)
     #define dwork(i_) (dwork + (i_))
     #endif
     
@@ -177,7 +177,7 @@ magma_zgeqrf(
         /* Use blocked code initially.
            Asynchronously send the matrix to the GPU except the first panel. */
         magma_zsetmatrix_async( m, n-nb,
-                                A(0,nb),  lda,
+                                 A(0,nb), lda,
                                 dA(0,nb), ldda, queues[0] );
         
         old_i = 0;
@@ -185,11 +185,11 @@ magma_zgeqrf(
         for (i = 0; i < k-nb; i += nb) {
             ib = min( k-i, nb );
             if (i > 0) {
-                /* download i-th panel */
+                /* get i-th panel from device */
                 magma_queue_sync( queues[1] );
                 magma_zgetmatrix_async( m-i, ib,
                                         dA(i,i), ldda,
-                                        A(i,i),  lda, queues[0] );
+                                         A(i,i), lda, queues[0] );
                 
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
@@ -199,7 +199,7 @@ magma_zgeqrf(
                 
                 magma_zgetmatrix_async( i, ib,
                                         dA(0,i), ldda,
-                                        A(0,i),  lda, queues[1] );
+                                         A(0,i), lda, queues[1] );
                 magma_queue_sync( queues[0] );
             }
             
@@ -213,10 +213,10 @@ magma_zgeqrf(
             
             magma_zpanel_to_q( MagmaUpper, ib, A(i,i), lda, work+ib*ib );
             
-            /* download the i-th V matrix */
+            /* put i-th V matrix onto device */
             magma_zsetmatrix_async( rows, ib, A(i,i), lda, dA(i,i), ldda, queues[0] );
             
-            /* download the T matrix */
+            /* put T matrix onto device */
             magma_queue_sync( queues[1] );
             magma_zsetmatrix_async( ib, ib, work, ib, dT(0,0), nb, queues[0] );
             magma_queue_sync( queues[0] );
