@@ -34,13 +34,36 @@ subdirs := \
 	sparse-iter/src      \
 	sparse-iter/testing  \
 
-# global targets to forward as-is
-$(targets) $(subdirs):
+ifneq ($(MAKECMDGOALS),)
+
+# goals given on command line
+# forward them in one batch to top level
+
+# global targets in $(targets) and $(subdirs) are forwarded as-is
+# all other, directory-specific goals (e.g., files) are forwarded with directory prefix
+forward := $(filter $(targets) $(subdirs), $(MAKECMDGOALS)) \
+           $(addprefix $(cdir)/, $(filter-out $(targets) $(subdirs), $(MAKECMDGOALS)))
+
+# we want to run one top-level make command, not N different ones.
+# we'll make the first goal forward all the goals,
+# and disable the rest.
+first := $(firstword $(MAKECMDGOALS))
+
+rest  := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+
+$(first): force
+	cd $(top) && $(MAKE) $(forward)
+
+$(rest): ;
+
+else
+
+# no goals given on command line
+# forward default rule to top level as-is
+%:
 	cd $(top) && $(MAKE) $@
 
-# forward all other, directory-specific, targets (e.g., files) with directory prefix
-%: force
-	cd $(top) && $(MAKE) $(cdir)/$@
+endif
 
 force: ;
 
@@ -52,3 +75,8 @@ $(top)/Makefile.subdir: ;
 Makefile.local: ;
 
 -include Makefile.local
+
+# Disable parallel make for sub-directories, which causes problems,
+# e.g., if two top-level makes try to update a library simultaneously.
+# The first/rest mechanism above should also prevent parallel jobs.
+.NOTPARALLEL:

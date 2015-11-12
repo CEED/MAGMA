@@ -85,21 +85,7 @@ LIBDIR    = -L$(CUDADIR)/lib
 INC       = -I$(CUDADIR)/include
 
 
-# # ========================================
-# # replace single & single-complex BLAS functions with reference versions.
-# # (i.e., functions that return float; subroutines do not need a fix.)
-# LIB      := -L$(MAGMA_DIR)/lib -lblas_fix $(LIB)
-# 
-# BLAS_FIX  = $(MAGMA_DIR)/lib/libblas_fix.a
-# 
-# .PHONY: blas_fix
-# 
-# blas_fix:
-# 	@echo "======================================== BLAS fix for MacOS"
-# 	( cd $(MAGMA_DIR)/blas_fix && $(MAKE) )
-# 	@echo
-# 
-# lib: blas_fix
-# 
-# # reset default goal
-# .DEFAULT_GOAL :=
+# ========================================
+# replace single & single-complex BLAS functions with reference versions.
+# (i.e., functions that return float; subroutines do not need a fix.)
+LIB      := -L./lib -lblas_fix $(LIB)
