@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Stan Tomov
        @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -147,7 +147,8 @@ magma_zlahr2(
     magmaDoubleComplex *A,     magma_int_t lda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex *T,     magma_int_t ldt,
-    magmaDoubleComplex *Y,     magma_int_t ldy )
+    magmaDoubleComplex *Y,     magma_int_t ldy,
+    magma_queue_t queue )
 {
     #define  A(i_,j_) ( A + (i_) + (j_)*lda)
     #define  Y(i_,j_) ( Y + (i_) + (j_)*ldy)
@@ -284,14 +285,14 @@ magma_zlahr2(
         // dV(i+1:n-k-1, i) = VA(k+i+1:n-1, i)
         magma_zsetvector( n_k_i_1,
                           A(k+i+1,i), 1,
-                          dV(i+1,i),  1 );
+                          dV(i+1,i),  1, queue );
         
         // Compute Y(k+1:n,i) = A vi
         // dA(k:n-1, i) = dA(k:n-1, i+1:n-k-1) * dV(i+1:n-k-1, i)
         magma_zgemv( MagmaNoTrans, n_k, n_k_i_1,
                      c_one,  dA(k,i+1), ldda,
                              dV(i+1,i), ione,
-                     c_zero, dA(k,i),   ione );
+                     c_zero, dA(k,i),   ione, queue );
         
         // Compute T(0:i,i) = [ -tau T V' vi ]
         //                    [  tau         ]
@@ -310,7 +311,7 @@ magma_zlahr2(
         // Y(k:n-1, i) = dA(k:n-1, i)
         magma_zgetvector( n-k,
                           dA(k,i), 1,
-                          Y(k,i),  1 );
+                          Y(k,i),  1, queue );
     }
     // Restore diagonal element
     *A(k+nb,nb-1) = ei;

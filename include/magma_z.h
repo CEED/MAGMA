@@ -534,7 +534,8 @@ magma_zlahr2(
     magmaDoubleComplex *A,  magma_int_t lda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex *T,  magma_int_t ldt,
-    magmaDoubleComplex *Y,  magma_int_t ldy);
+    magmaDoubleComplex *Y,  magma_int_t ldy,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zlahru(
@@ -544,7 +545,8 @@ magma_zlahru(
     magmaDoubleComplex_ptr dY, magma_int_t lddy,
     magmaDoubleComplex_ptr dV, magma_int_t lddv,
     magmaDoubleComplex_ptr dT,
-    magmaDoubleComplex_ptr dwork);
+    magmaDoubleComplex_ptr dwork,
+    magma_queue_t queue );
 
 #ifdef REAL
 magma_int_t

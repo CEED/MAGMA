@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,7 +10,7 @@
        @author Stan Tomov
        @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -192,6 +192,10 @@ magma_zgehrd(
     }
     else {
         // Use blocked code
+        magma_queue_t queue;
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+        magma_queue_create( cdev, &queue );
         
         // GPU workspace is:
         //   nb*ldda for dwork for zlahru
@@ -215,7 +219,7 @@ magma_zgehrd(
         }
     
         // zero first block of V, which is lower triangular
-        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda );
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda, queue );
     
         // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
         for (i = 0; i < ilo; ++i)
@@ -228,10 +232,10 @@ magma_zgehrd(
         for (i=0; i < nb*nb; i += 4)
             T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
         
-        magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb );
+        magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb, queue );
         
         // Copy the matrix to the GPU
-        magma_zsetmatrix( n, n-ilo, A(0,ilo), lda, dA, ldda );
+        magma_zsetmatrix( n, n-ilo, A(0,ilo), lda, dA, ldda, queue );
         
         for (i = ilo; i < ihi-1 - nb; i += nb) {
             //   Reduce columns i:i+nb-1 to Hessenberg form, returning the
@@ -241,34 +245,36 @@ magma_zgehrd(
             //   Get the current panel (no need for the 1st iteration)
             magma_zgetmatrix( ihi-i, nb,
                               dA(i,i-ilo), ldda,
-                              A(i,i), lda );
+                              A(i,i), lda, queue );
             
             // add 1 to i for 1-based index
             magma_zlahr2( ihi, i+1, nb,
                           dA(0,i-ilo), ldda,
                           dV,          ldda,
                           A(0,i),      lda,
-                          &tau[i], T, nb, work, n);
+                          &tau[i], T, nb, work, n, queue );
             
             // Copy T from the CPU to dT on the GPU
             dTi = dT + (i - ilo)*nb;
-            magma_zsetmatrix( nb, nb, T, nb, dTi, nb );
+            magma_zsetmatrix( nb, nb, T, nb, dTi, nb, queue );
             
             magma_zlahru( n, ihi, i, nb,
                           A(0,i),      lda,
                           dA(0,i-ilo), ldda, // dA
                           dA(i,i-ilo), ldda, // dY, stored over current panel
                           dV,          ldda,
-                          dTi, dwork );
+                          dTi, dwork, queue );
         }
         
         // Copy remainder to host
         magma_zgetmatrix( n, n-i,
                           dA(0,i-ilo), ldda,
-                          A(0,i), lda );
+                          A(0,i), lda, queue );
         
         magma_free( dwork );
         magma_free_cpu( T );
+        
+        magma_queue_destroy( queue );
     }
 
     // Use unblocked code to reduce the rest of the matrix
