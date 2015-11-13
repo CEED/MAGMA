@@ -4,7 +4,7 @@
 -----------------------------------------------------
 
 MAGMA is intended for CUDA enabled NVIDIA GPUs.
-It supports Tesla, Fermi, and Kepler GPUs.
+It supports Fermi and Kepler GPUs.
 
 Included are routines for the following algorithms:
 
@@ -25,12 +25,13 @@ Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
 
-1.7.?
+ 2.0.0
+    * Removed support for CUDA arch 1.x, which NVIDIA no longer supports since CUDA 6.
     * added TFQMR, preconditioned TFQMR
-	* added CGS, preconditioned CGS
-	* added kernel-fused versions for CGS/PCGS
-	* changed relative stopping criterion to be relative to RHS
-	* fixed bug in complex version of CG
+    * added CGS, preconditioned CGS
+    * added kernel-fused versions for CGS/PCGS
+    * changed relative stopping criterion to be relative to RHS
+    * fixed bug in complex version of CG
 
 
  1.7.0 - final:  Sep 11, 2015

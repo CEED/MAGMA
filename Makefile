@@ -58,10 +58,6 @@ codegen    = python tools/codegen.py
 # ----------------------------------------
 # NVCC options for the different cards
 # First, add smXX for architecture names
-ifneq ($(findstring Tesla, $(GPU_TARGET)),)
-    # sm10 is no longer supported by CUDA 6.x nvcc
-    GPU_TARGET += sm13
-endif
 ifneq ($(findstring Fermi, $(GPU_TARGET)),)
     GPU_TARGET += sm20
 endif
@@ -87,13 +83,13 @@ ifneq ($(findstring sm10, $(GPU_TARGET)),)
     #MIN_ARCH ?= 100
     #NV_SM    += -gencode arch=compute_10,code=sm_10
     #NV_COMP  := -gencode arch=compute_10,code=compute_10
-    $(warning CUDA arch 1.x (aka "Tesla") is no longer supported by CUDA >= 6.x and MAGMA >= 2.0)
+    $(warning CUDA arch 1.x is no longer supported by CUDA >= 6.x and MAGMA >= 2.0)
 endif
 ifneq ($(findstring sm13, $(GPU_TARGET)),)
     #MIN_ARCH ?= 130
     #NV_SM    += -gencode arch=compute_13,code=sm_13
     #NV_COMP  := -gencode arch=compute_13,code=compute_13
-    $(warning CUDA arch 1.x (aka "Tesla") is no longer supported by CUDA >= 6.x and MAGMA >= 2.0)
+    $(warning CUDA arch 1.x is no longer supported by CUDA >= 6.x and MAGMA >= 2.0)
 endif
 ifneq ($(findstring sm20, $(GPU_TARGET)),)
     MIN_ARCH ?= 200
