@@ -109,7 +109,7 @@
     (     a   a   a   a   a   a )    (      v2  v3  v4  h   h   h )
     (                         a )    (                          a )
     @endverbatim
-    
+
     where a denotes an element of the original matrix A, h denotes a
     modified element of the upper Hessenberg matrix H, and vi denotes an
     element of the vector defining H(i).
@@ -135,12 +135,25 @@ magma_zgehrd(
     magma_int_t *info)
 {
     #define  A(i_,j_) ( A + (i_) + (j_)*lda)
-    #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
 
-    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    #ifdef HAVE_clBLAS
+    #define dA(i_,j_)  dwork, ((i_) + (j_)*ldda + nb*ldda*2)
+    #define dT(i_,j_)  dT,    ((i_) + (j_)*nb   + dT_offset)
+    #define dV(i_,j_)  dwork, ((i_) + (j_)*ldda + nb*ldda)
+    #define dwork(i_)  dwork, ((i_))
+    #else
+    #define dA(i_,j_) (dA    + (i_) + (j_)*ldda)
+    #define dT(i_,j_) (dT    + (i_) + (j_)*nb)
+    #define dV(i_,j_) (dV    + (i_) + (j_)*ldda)
+    #define dwork(i_) (dwork + (i_))
+    #endif
 
-    magma_int_t nb = magma_get_zgehrd_nb(n);
+    // Constants
+    const magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+
+    // Local variables
+    magma_int_t nb = magma_get_zgehrd_nb( n );
     magma_int_t ldda = magma_roundup( n, 32 );
 
     magma_int_t i, nh, iws;
@@ -201,14 +214,13 @@ magma_zgehrd(
         //   nb*ldda for dwork for zlahru
         //   nb*ldda for dV
         //   n*ldda  for dA
-        magmaDoubleComplex *dwork;
+        magmaDoubleComplex_ptr dwork;
         if (MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*nb*ldda + n*ldda )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
         magmaDoubleComplex *dV = dwork + nb*ldda;
         magmaDoubleComplex *dA = dwork + nb*ldda*2;
-        magmaDoubleComplex *dTi;
         
         magmaDoubleComplex *T;
         magma_zmalloc_cpu( &T, nb*nb );
@@ -217,10 +229,10 @@ magma_zgehrd(
             *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
         }
-    
+        
         // zero first block of V, which is lower triangular
-        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV, ldda, queue );
-    
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV(0,0), ldda, queue );
+        
         // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
         for (i = 0; i < ilo; ++i)
             tau[i] = c_zero;
@@ -232,17 +244,17 @@ magma_zgehrd(
         for (i=0; i < nb*nb; i += 4)
             T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
         
-        magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT, nb, queue );
+        magmablas_zlaset( MagmaFull, nb, n, c_zero, c_zero, dT(0,0), nb, queue );
         
         // Copy the matrix to the GPU
-        magma_zsetmatrix( n, n-ilo, A(0,ilo), lda, dA, ldda, queue );
+        magma_zsetmatrix( n, n-ilo, A(0,ilo), lda, dA(0,0), ldda, queue );
         
         for (i = ilo; i < ihi-1 - nb; i += nb) {
-            //   Reduce columns i:i+nb-1 to Hessenberg form, returning the
-            //   matrices V and T of the block reflector H = I - V*T*V'
-            //   which performs the reduction, and also the matrix Y = A*V*T
+            // Reduce columns i:i+nb-1 to Hessenberg form, returning the
+            // matrices V and T of the block reflector H = I - V*T*V'
+            // which performs the reduction, and also the matrix Y = A*V*T
             
-            //   Get the current panel (no need for the 1st iteration)
+            // Get the current panel (no need for the 1st iteration)
             magma_zgetmatrix( ihi-i, nb,
                               dA(i,i-ilo), ldda,
                               A(i,i), lda, queue );
@@ -250,20 +262,19 @@ magma_zgehrd(
             // add 1 to i for 1-based index
             magma_zlahr2( ihi, i+1, nb,
                           dA(0,i-ilo), ldda,
-                          dV,          ldda,
+                          dV(0,0),     ldda,
                           A(0,i),      lda,
                           &tau[i], T, nb, work, n, queue );
             
             // Copy T from the CPU to dT on the GPU
-            dTi = dT + (i - ilo)*nb;
-            magma_zsetmatrix( nb, nb, T, nb, dTi, nb, queue );
+            magma_zsetmatrix( nb, nb, T, nb, dT(0,i-ilo), nb, queue );
             
             magma_zlahru( n, ihi, i, nb,
                           A(0,i),      lda,
                           dA(0,i-ilo), ldda, // dA
                           dA(i,i-ilo), ldda, // dY, stored over current panel
-                          dV,          ldda,
-                          dTi, dwork, queue );
+                          dV(0,0),     ldda,
+                          dT(0,i-ilo), dwork(0), queue );
         }
         
         // Copy remainder to host
