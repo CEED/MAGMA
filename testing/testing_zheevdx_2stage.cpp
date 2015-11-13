@@ -25,7 +25,7 @@
 #include "testings.h"
 #include "magma_threadsetting.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDoubleComplex *Q, magma_int_t LDQ, double eps);
 static magma_int_t check_reduction(magma_uplo_t uplo, magma_int_t N, magma_int_t bw, magmaDoubleComplex *A, double *D, magma_int_t LDA, magmaDoubleComplex *Q, double eps );
@@ -42,7 +42,7 @@ int main( int argc, char** argv)
 
     magmaDoubleComplex *h_A, *h_R, *h_work;
 
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
     double *rwork;
     magma_int_t lrwork;
     #endif
@@ -84,7 +84,7 @@ int main( int argc, char** argv)
 
             magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
                                      &lwork, 
-                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     #ifdef COMPLEX
                                      &lrwork, 
                                      #endif
                                      &liwork);
@@ -97,7 +97,7 @@ int main( int argc, char** argv)
             
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2    );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_MALLOC_PIN( rwork, double, lrwork );
             #endif
 
@@ -127,7 +127,7 @@ int main( int argc, char** argv)
                                     vl, vu, il, iu, 
                                     &m1, w1, 
                                     h_work, lwork, 
-                                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                                    #ifdef COMPLEX
                                     rwork, lrwork, 
                                     #endif
                                     iwork, liwork, 
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
                                     vl, vu, il, iu, 
                                     &m1, w1, 
                                     h_work, lwork, 
-                                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                                    #ifdef COMPLEX
                                     rwork, lrwork, 
                                     #endif
                                     iwork, liwork, 
@@ -159,7 +159,7 @@ int main( int argc, char** argv)
                                 vl, vu, il, iu, 
                                 &m1, w1, 
                                 h_work, lwork, 
-                                #if defined(PRECISION_z) || defined(PRECISION_c)
+                                #ifdef COMPLEX
                                 rwork, lrwork, 
                                 #endif
                                 iwork, liwork, 
@@ -171,7 +171,7 @@ int main( int argc, char** argv)
                                 vl, vu, il, iu, 
                                 &m1, w1, 
                                 h_work, lwork, 
-                                #if defined(PRECISION_z) || defined(PRECISION_c)
+                                #ifdef COMPLEX
                                 rwork, lrwork, 
                                 #endif
                                 iwork, liwork, 
@@ -208,7 +208,7 @@ int main( int argc, char** argv)
                 lapackf77_zheevd("N", "L", &N, 
                                 h_A, &N, w2, 
                                 h_work, &lwork, 
-                                #if defined(PRECISION_z) || defined(PRECISION_c)
+                                #ifdef COMPLEX
                                 rwork, &lrwork, 
                                 #endif
                                 iwork, &liwork, 
@@ -228,7 +228,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE_PIN( h_R    );
             TESTING_FREE_PIN( h_work );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_FREE_PIN( rwork  );
             #endif
             fflush( stdout );

@@ -26,7 +26,7 @@
 #include "magma_zbulge.h"
 #include "magma_threadsetting.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
@@ -38,10 +38,10 @@ int main( int argc, char** argv)
     real_Double_t   mgpu_time;
     magmaDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
     double *rwork;
     magma_int_t lrwork;
-#endif
+    #endif
 
     double *w1, result=0;
     magma_int_t *iwork;
@@ -81,7 +81,7 @@ int main( int argc, char** argv)
             n2     = N*N;
             magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
                                      &lwork, 
-                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     #ifdef COMPLEX
                                      &lrwork, 
                                      #endif
                                      &liwork);
@@ -92,7 +92,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_A,    magmaDoubleComplex, n2 );
             TESTING_MALLOC_PIN( h_B,    magmaDoubleComplex, n2 );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_MALLOC_PIN( rwork,  double, lrwork);
             #endif
 
@@ -130,7 +130,7 @@ int main( int argc, char** argv)
                 magma_zhegvdx_2stage_m(opts.ngpu, opts.itype, opts.jobz, range, opts.uplo,
                                        N, h_A, N, h_B, N, vl, vu, il, iu, &m1, w1,
                                        h_work, lwork,
-                                       #if defined(PRECISION_z) || defined(PRECISION_c)
+                                       #ifdef COMPLEX
                                        rwork, lrwork,
                                        #endif
                                        iwork, liwork,
@@ -147,7 +147,7 @@ int main( int argc, char** argv)
             magma_zhegvdx_2stage_m(opts.ngpu, opts.itype, opts.jobz, range, opts.uplo,
                                    N, h_A, N, h_B, N, vl, vu, il, iu, &m1, w1,
                                    h_work, lwork,
-                                       #if defined(PRECISION_z) || defined(PRECISION_c)
+                                       #ifdef COMPLEX
                                    rwork, lrwork,
                                        #endif
                                    iwork, liwork,
@@ -163,7 +163,7 @@ int main( int argc, char** argv)
                 //        | A B Z - Z D | / ( |A||Z| N )  (itype = 2)
                 //        | B A Z - Z D | / ( |A||Z| N )  (itype = 3)
                 // ===================================================================
-                #if defined(PRECISION_d) || defined(PRECISION_s)
+                #ifdef REAL
                 double *rwork = h_work + N*N;
                 #endif
                 result = 1.;
@@ -216,7 +216,7 @@ int main( int argc, char** argv)
             TESTING_FREE_PIN( h_A    );
             TESTING_FREE_PIN( h_B    );
             TESTING_FREE_PIN( h_work );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_FREE_PIN( rwork  );
             #endif
 

@@ -28,6 +28,7 @@
 // TODO include checkdiag.h if needed.
 
 #define PRECISION_z
+#define COMPLEX
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -146,21 +147,21 @@ int main( int argc, char** argv)
             magma_int_t /*nb,*/ /*lwork,*/ liwork;
             magma_int_t threads = magma_get_parallel_numthreads();
 
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             double *rwork;
             magma_int_t lrwork;
             #endif
 
             magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
                                      &lwork, 
-                                     #if defined(PRECISION_z) || defined(PRECISION_c)
+                                     #ifdef COMPLEX
                                      &lrwork, 
                                      #endif
                                      &liwork);
 
             TESTING_MALLOC_PIN( hh_work, magmaDoubleComplex, lwork  );
             TESTING_MALLOC_CPU( iwork,   magma_int_t,        liwork );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             TESTING_MALLOC_PIN( rwork, double, lrwork );
             #endif
     
@@ -171,7 +172,7 @@ int main( int argc, char** argv)
                                 vl, vu, il, iu,
                                 &m1, D,
                                 hh_work, lwork,
-                                #if defined(PRECISION_z) || defined(PRECISION_c)
+                                #ifdef COMPLEX
                                 rwork, lrwork,
                                 #endif
                                 iwork, liwork,
@@ -183,7 +184,7 @@ int main( int argc, char** argv)
                                 vl, vu, il, iu,
                                 &m1, D,
                                 hh_work, lwork,
-                                #if defined(PRECISION_z) || defined(PRECISION_c)
+                                #ifdef COMPLEX
                                 rwork, lrwork,
                                 #endif
                                 iwork, liwork,
@@ -210,7 +211,7 @@ int main( int argc, char** argv)
     
                 for (j=0; j < N; j++) {
                     for (k=0; k < N; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
+                        #ifdef COMPLEX
                         fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
                                 h_A[k+j*lda].x, h_A[k+j*lda].y);
                         #else
@@ -229,7 +230,7 @@ int main( int argc, char** argv)
     
                 for (j=0; j < N; j++) {
                     for (k=0; k < N; k++) {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
+                        #ifdef COMPLEX
                         fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
                                 h_R[k+j*lda].x, h_R[k+j*lda].y);
                         #else
@@ -270,7 +271,7 @@ int main( int argc, char** argv)
                 magma_set_lapack_numthreads( i );
     
                 lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2,
-                    #if defined(PRECISION_z) || defined (PRECISION_c)
+                    #ifdef COMPLEX
                     rwork2,
                     #endif
                     &info );

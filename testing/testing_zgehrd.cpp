@@ -21,7 +21,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgehrd
@@ -33,7 +33,7 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork;
     magmaDoubleComplex_ptr dT;
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
     double      *rwork;
     #endif
     double      eps, result[2];
@@ -97,7 +97,7 @@ int main( int argc, char** argv)
                 ltwork = 2*(N*N);
                 TESTING_MALLOC_PIN( h_Q,   magmaDoubleComplex, lda*N  );
                 TESTING_MALLOC_CPU( twork, magmaDoubleComplex, ltwork );
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 TESTING_MALLOC_CPU( rwork, double, N );
                 #endif
                 
@@ -118,19 +118,17 @@ int main( int argc, char** argv)
                            (int) info, magma_strerror( info ));
                     return -1;
                 }
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zhst01(&N, &ione, &N,
-                                 h_A, &lda, h_R, &lda,
-                                 h_Q, &lda, twork, &ltwork, rwork, result);
-                #else
-                lapackf77_zhst01(&N, &ione, &N,
-                                 h_A, &lda, h_R, &lda,
-                                 h_Q, &lda, twork, &ltwork, result);
-                #endif
+                lapackf77_zhst01( &N, &ione, &N,
+                                  h_A, &lda, h_R, &lda,
+                                  h_Q, &lda, twork, &ltwork,
+                                  #ifdef COMPLEX
+                                  rwork,
+                                  #endif
+                                  result );
                 
                 TESTING_FREE_PIN( h_Q   );
                 TESTING_FREE_CPU( twork );
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 TESTING_FREE_CPU( rwork );
                 #endif
             }
@@ -140,7 +138,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zgehrd(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, &info);
+                lapackf77_zgehrd( &N, &ione, &N, h_A, &lda, tau, h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
@@ -160,11 +158,11 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
+                bool okay = (result[0]*eps < tol) && (result[1]*eps < tol);
+                status += ! okay;
                 printf("   %8.2e        %8.2e   %s\n",
                        result[0]*eps, result[1]*eps,
-                       ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "ok" : "failed")  );
-                status += ! (result[0]*eps < tol);
-                status += ! (result[1]*eps < tol);
+                       (okay ? "ok" : "failed") );
             }
             else {
                 printf("     ---             ---\n");

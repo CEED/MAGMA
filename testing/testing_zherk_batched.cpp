@@ -25,7 +25,7 @@
 
 #include "magma_threadsetting.h"  // to work around MKL bug
 
-#define PRECISION_z
+#define COMPLEX
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zherk_batched
@@ -65,7 +65,7 @@ int main( int argc, char** argv)
            "%% relative to CPU BLAS result.\n\n");
     printf("%% uplo = %s, transA = %s\n",
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
-    #if defined(PRECISION_c) || defined (PRECISION_z)
+    #ifdef COMPLEX
     if(opts.transA == MagmaTrans)
     {
         opts.transA = MagmaConjTrans; 
