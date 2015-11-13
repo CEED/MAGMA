@@ -676,7 +676,7 @@ $(sparse_testers): %: %.$(o_ext)
 	$(CXX) $(LDFLAGS) $(RPATH) \
 	-o $@ $< \
 	-L./testing -ltest \
-	-L./lib -lmagma -lmagma_sparse \
+	-L./lib -lmagma_sparse -lmagma \
 	$(LIBEXT)
 
 
