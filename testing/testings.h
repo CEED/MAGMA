@@ -225,6 +225,7 @@ public:
     // queue for default device
     magma_queue_t   queue;
     magma_queue_t   queues2[3];  // 2 queues + 1 extra NULL entry to catch errors
+    magma_queue_t   default_queue;
     
     #ifdef HAVE_CUBLAS
     // handle for directly calling cublas

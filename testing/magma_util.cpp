@@ -157,6 +157,8 @@ const char *usage =
 "  --dev x          GPU device to use, default 0.\n"
 "  --align n        Round up LDDA on GPU to multiple of align, default 32.\n"
 "  --verbose        Verbose output.\n"
+"  --null-queue     Use NULL queue; mainly to test old codes that relied on\n"
+"                   extra synchronization provided by the NULL queue.\n"
 "  -x  --exclusive  Lock file for exclusive use (internal ICL functionality).\n"
 "\n"
 "The following options apply to only some routines.\n"
@@ -261,6 +263,8 @@ void magma_opts::parse_opts( int argc, char** argv )
     
     int ndevices;
     cudaGetDeviceCount( &ndevices );
+    
+    bool null_queue = false;
     
     int info;
     this->ntest = 0;
@@ -504,6 +508,7 @@ void magma_opts::parse_opts( int argc, char** argv )
         else if ( strcmp("--all",      argv[i]) == 0 ) { this->all    = true;  }
         else if ( strcmp("--notall",   argv[i]) == 0 ) { this->all    = false; }
         else if ( strcmp("--verbose",  argv[i]) == 0 ) { this->verbose= true;  }
+        else if ( strcmp("--null-queue", argv[i]) == 0 ) { null_queue   = true;  }
         
         // ----- lapack flag arguments
         else if ( strcmp("-L",  argv[i]) == 0 ) { this->uplo = MagmaLower; }
@@ -635,6 +640,14 @@ void magma_opts::parse_opts( int argc, char** argv )
     this->queues2[ 2 ] = NULL;
     
     this->queue = this->queues2[ 0 ];
+    
+    if ( ! null_queue ) {
+        magma_queue_create( &this->default_queue );
+    }
+    else {
+        this->default_queue = NULL;
+    }
+    magmablasSetKernelStream( this->default_queue );
     
     #ifdef HAVE_CUBLAS
     // handle for directly calling cublas
