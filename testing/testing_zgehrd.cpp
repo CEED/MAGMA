@@ -77,7 +77,13 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
+            if ( opts.version == 1 ) {
+                magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
+            }
+            else {
+                // LAPACK-complaint arguments, no dT array
+                magma_zgehrd2( N, ione, N, h_R, lda, tau, h_work, lwork, &info);
+            }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -100,7 +106,13 @@ int main( int argc, char** argv)
                     for( int i = j+2; i < N; ++i )
                         h_R[i+j*lda] = MAGMA_Z_ZERO;
                 
-                magma_zunghr( N, ione, N, h_Q, lda, tau, dT, nb, &info );
+                if ( opts.version == 1 ) {
+                    magma_zunghr( N, ione, N, h_Q, lda, tau, dT, nb, &info );
+                }
+                else {
+                    // for magma_zgehrd2, no dT array
+                    lapackf77_zunghr( &N, &ione, &N, h_Q, &lda, tau, h_work, &lwork, &info );
+                }
                 if (info != 0) {
                     printf("magma_zunghr returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));

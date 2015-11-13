@@ -763,7 +763,8 @@ geev = (
 	('testing_zgeev_m', ngpu + '-RN -LN -c',  n,    ''),
 	('testing_zgeev_m', ngpu + '-RV -LV -c',  n,    ''),
 	
-	('testing_zgehrd',                 '-c',  n,    ''),
+	('testing_zgehrd',     '--version 1 -c',  n,    ''),
+	('testing_zgehrd',     '--version 2 -c',  n,    ''),
 	('testing_zgehrd_m',        ngpu + '-c',  n,    ''),
 )
 if ( opts.geev ):
