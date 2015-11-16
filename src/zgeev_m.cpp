@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Stan Tomov
        @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 #define COMPLEX
@@ -18,7 +18,6 @@
  * Version1 - LAPACK              (lapack_zgehrd and lapack_zunghr)
  * Version2 - MAGMA without dT    (magma_zgehrd2 and lapack_zunghr)
  * Version3 - MAGMA with dT       (magma_zgehrd  and magma_zunghr)
- * Version4 - Multi-GPU magma_zgehrd_m with T on CPU, copied to dT, single-GPU magma_zunghr
  * Version5 - Multi-GPU magma_zgehrd_m with T on CPU, multi-GPU magma_zunghr_m
  */
 #define Version5
@@ -210,17 +209,16 @@ magma_zgeev_m(
         return *info;
     }
     
-    #if defined(Version3) || defined(Version4) || defined(Version5)
+    #if defined(Version3)
     magmaDoubleComplex *dT;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, nb*n )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     #endif
-    #if defined(Version4) || defined(Version5)
+    #if defined(Version5)
     magmaDoubleComplex *T;
     if (MAGMA_SUCCESS != magma_zmalloc_cpu( &T, nb*n )) {
-        magma_free( dT );
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
@@ -276,11 +274,10 @@ magma_zgeev_m(
         // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored,
         magma_zgehrd( n, ilo, ihi, A, lda,
                       &work[itau], &work[iwrk], liwrk, dT, &ierr );
-    #elif defined(Version4) || defined(Version5)
+    #elif defined(Version5)
         // Version 4 - Multi-GPU, T on host
         magma_zgehrd_m( n, ilo, ihi, A, lda,
                         &work[itau], &work[iwrk], liwrk, T, &ierr );
-        magma_zsetmatrix( nb, n, T, nb, dT, nb );
     #endif
 
     if (wantvl) {
@@ -297,7 +294,7 @@ magma_zgeev_m(
             // Version 1 & 2 - LAPACK
             lapackf77_zunghr( &n, &ilo, &ihi, VL, &ldvl, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
-        #elif defined(Version3) || defined(Version4)
+        #elif defined(Version3)
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_zunghr( n, ilo, ihi, VL, ldvl, &work[itau], dT, nb, &ierr );
         #elif defined(Version5)
@@ -335,7 +332,7 @@ magma_zgeev_m(
             // Version 1 & 2 - LAPACK
             lapackf77_zunghr( &n, &ilo, &ihi, VR, &ldvr, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
-        #elif defined(Version3) || defined(Version4)
+        #elif defined(Version3)
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_zunghr( n, ilo, ihi, VR, ldvr, &work[itau], dT, nb, &ierr );
         #elif defined(Version5)
@@ -413,7 +410,7 @@ magma_zgeev_m(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
-            tmp = MAGMA_Z_CNJG( *VL(k,i) ) / magma_dsqrt( rwork[irwork + k] );
+            tmp = MAGMA_Z_CONJ( *VL(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             blasf77_zscal( &n, &tmp, VL(0,i), &ione );
             *VL(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VL(k,i) ), 0 );
         }
@@ -437,7 +434,7 @@ magma_zgeev_m(
                 rwork[irwork + k] = d__1*d__1 + d__2*d__2;
             }
             k = blasf77_idamax( &n, &rwork[irwork], &ione ) - 1;  // subtract 1; k is 0-based
-            tmp = MAGMA_Z_CNJG( *VR(k,i) ) / magma_dsqrt( rwork[irwork + k] );
+            tmp = MAGMA_Z_CONJ( *VR(k,i) ) / magma_dsqrt( rwork[irwork + k] );
             blasf77_zscal( &n, &tmp, VR(0,i), &ione );
             *VR(k,i) = MAGMA_Z_MAKE( MAGMA_Z_REAL( *VR(k,i) ), 0 );
         }
@@ -458,10 +455,10 @@ CLEANUP:
         }
     }
 
-    #if defined(Version3) || defined(Version4) || defined(Version5)
+    #if defined(Version3)
     magma_free( dT );
     #endif
-    #if defined(Version4) || defined(Version5)
+    #if defined(Version5)
     magma_free_cpu( T );
     #endif
     
