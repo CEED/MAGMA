@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -198,7 +198,7 @@ magma_zgehrd_m(
 
     // set to null, to simplify cleanup code
     for( d = 0; d < ngpu; ++d ) {
-        data.A[d]       = NULL;
+        data.A[d]      = NULL;
         data.queues[d] = NULL;
     }
     
@@ -252,11 +252,11 @@ magma_zgehrd_m(
             data.W [d] = data.Y [d] + nb*ldda;
             data.Ti[d] = data.W [d] + nb*ldda;
             
-            magma_queue_create( &data.queues[d] );
+            magma_queue_create( d, &data.queues[d] );
         }
         
         // Copy the matrix to GPUs
-        magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, data.A, ldda, ngpu, nb );
+        magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, data.A, ldda, ngpu, nb, data.queues );
         
         // round ilo down to block boundary
         ilo = (ilo/nb)*nb;
@@ -272,7 +272,7 @@ magma_zgehrd_m(
                 magma_setdevice( dpanel );
                 magma_zgetmatrix( ihi-i, nb,
                                   dA(dpanel, i, di), ldda,
-                                  A(i,i),            lda );
+                                  A(i,i),            lda, data.queues[dpanel] );
             }
             
             // add 1 to i for 1-based index
@@ -296,7 +296,7 @@ magma_zgehrd_m(
             magma_setdevice( d );
             magma_zgetmatrix( n, ib,
                               dA(d, 0, di), ldda,
-                              A(0,i2),      lda );
+                              A(0,i2),      lda, data.queues[d] );
         }
     }
 

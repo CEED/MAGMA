@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -190,14 +190,11 @@ magma_zlahr2_m(
     
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    magma_queue_t orig_stream;
-    magmablasGetKernelStream( &orig_stream );
     
     // zero out current top block of V on all GPUs
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( data->queues[d] );
-        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV(d,k,0), ldv );
+        magmablas_zlaset( MagmaFull, nb, nb, c_zero, c_zero, dV(d,k,0), ldv, data->queues[d] );
     }
     
     // set all Y=0
@@ -272,7 +269,6 @@ magma_zlahr2_m(
         nblocks = (n-1) / nb / ngpu + 1;
         for( d = 0; d < ngpu; ++d ) {
             magma_setdevice( d );
-            magmablasSetKernelStream( data->queues[d] );
             
             // dV(k+i+1:n-1, i) = VA(k+i:n, i)
             magma_zsetvector_async( n_k_i_1,
@@ -291,7 +287,7 @@ magma_zlahr2_m(
             // treat V as (nb*ngpu) x nblock matrix, and Vd as nb x nblock matrix
             magmablas_zlacpy( MagmaFull, nb, nblocks-lblock,
                               dV (d, d*nb + lblock*nb*ngpu, i), nb*ngpu,
-                              dVd(d, 0    + lblock*nb,      i), nb );
+                              dVd(d, 0    + lblock*nb,      i), nb, data->queues[d] );
             
             // convert global indices (k) to local indices (dk)
             magma_indices_1D_bcyclic( nb, ngpu, d, k+i+1, n, &dki1, &dn );
@@ -304,7 +300,7 @@ magma_zlahr2_m(
                 magma_zgemv( MagmaNoTrans, n-k, dn-dki1,
                              c_one,  dA (d, k,    dki1), ldda,
                                      dVd(d, dki1,    i), 1,
-                             c_zero, dY (d, k,       i), 1 );
+                             c_zero, dY (d, k,       i), 1, data->queues[d] );
                 
                 // copy vector to host, storing in column nb+d of Y
                 // as temporary space (Y has >= nb+ngpu columns)
@@ -378,7 +374,6 @@ magma_zlahr2_m(
     // compute Y = Am V = sum_g Am{d} V{d} --- top part, Y(0:k-1,:)
     for( d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
-        magmablasSetKernelStream( data->queues[d] );
         
         // convert global indices (k) to local indices (dk)
         magma_indices_1D_bcyclic( nb, ngpu, d, k+1, n, &dki1, &dn );
@@ -391,7 +386,7 @@ magma_zlahr2_m(
             magma_zgemm( MagmaNoTrans, MagmaNoTrans, k, nb, dn-dki1,
                          c_one,  dA (d, 0,    dki1), ldda,
                                  dVd(d, dki1,    0), ldvd,
-                         c_zero, dY (d, 0,       0), ldda );
+                         c_zero, dY (d, 0,       0), ldda, data->queues[d] );
             
             // copy result to host, storing in columns [nb + nb*d : nb + nb*(d+1)] of Y
             // as temporary space (Y has nb + nb*ngpu columns)
@@ -422,7 +417,6 @@ magma_zlahr2_m(
     }
 
     magma_setdevice( orig_dev );
-    magmablasSetKernelStream( orig_stream );
     
     return *info;
 } /* magma_zlahr2 */
