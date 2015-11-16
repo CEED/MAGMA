@@ -113,8 +113,16 @@ protected:
     #endif
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // needed for BLAS functions that no longer include magma.h (v1)
 magma_queue_t magmablasGetQueue();
+
+#ifdef __cplusplus
+}
+#endif
 
 
 /** ****************************************************************************

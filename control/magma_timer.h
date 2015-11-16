@@ -13,7 +13,9 @@
 
 #include <stdio.h>
 
+#ifndef MAGMA_V2_H
 #include "magma.h"
+#endif
 
 typedef double    magma_timer_t;
 typedef long long magma_flops_t;
