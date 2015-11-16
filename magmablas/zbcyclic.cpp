@@ -10,7 +10,12 @@
        
        @precisions normal z -> s d c
 */
-#include "common_magma.h"
+
+// include v1 header first; the v2 header will redefine non-q names,
+// but we can undef them to get back to the v1 versions.
+#include "magmablas_v1.h"
+
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -28,11 +33,12 @@
 // The dA arrays are pointers to the matrix data on the corresponding GPUs.
 //===========================================================================
 extern "C" void
-magma_zsetmatrix_1D_col_bcyclic(
+magma_zsetmatrix_1D_col_bcyclic_q(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *hA, magma_int_t lda,
     magmaDoubleComplex_ptr   *dA, magma_int_t ldda,
-    magma_int_t ngpu, magma_int_t nb )
+    magma_int_t ngpu, magma_int_t nb,
+    magma_queue_t queues[ MagmaMaxGPUs ] )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -72,16 +78,32 @@ magma_zsetmatrix_1D_col_bcyclic(
 }
 
 
+#undef magma_zsetmatrix_1D_col_bcyclic
+
+extern "C" void
+magma_zsetmatrix_1D_col_bcyclic(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *hA, magma_int_t lda,
+    magmaDoubleComplex_ptr   *dA, magma_int_t ldda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    // uses NULL queue -> NULL stream in setmatrix_async
+    magma_queue_t queues[ MagmaMaxGPUs ] = { NULL };
+    magma_zsetmatrix_1D_col_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+}
+
+
 //===========================================================================
 // Get a matrix with 1D column block cyclic distribution from multi-GPUs to the CPU.
 // The dA arrays are pointers to the matrix data on the corresponding GPUs.
 //===========================================================================
 extern "C" void
-magma_zgetmatrix_1D_col_bcyclic(
+magma_zgetmatrix_1D_col_bcyclic_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
     magmaDoubleComplex                 *hA, magma_int_t lda,
-    magma_int_t ngpu, magma_int_t nb )
+    magma_int_t ngpu, magma_int_t nb,
+    magma_queue_t queues[ MagmaMaxGPUs ] )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -121,16 +143,32 @@ magma_zgetmatrix_1D_col_bcyclic(
 }
 
 
+#undef magma_zgetmatrix_1D_col_bcyclic
+
+extern "C" void
+magma_zgetmatrix_1D_col_bcyclic(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
+    magmaDoubleComplex                 *hA, magma_int_t lda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    // uses NULL queue -> NULL stream in setmatrix_async
+    magma_queue_t queues[ MagmaMaxGPUs ] = { NULL };
+    magma_zgetmatrix_1D_col_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
+}
+
+
 //===========================================================================
 // Set a matrix from CPU to multi-GPUs in 1D row block cyclic distribution.
 // The dA arrays are pointers to the matrix data on the corresponding GPUs.
 //===========================================================================
 extern "C" void
-magma_zsetmatrix_1D_row_bcyclic(
+magma_zsetmatrix_1D_row_bcyclic_q(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex    *hA, magma_int_t lda,
     magmaDoubleComplex_ptr      *dA, magma_int_t ldda,
-    magma_int_t ngpu, magma_int_t nb )
+    magma_int_t ngpu, magma_int_t nb,
+    magma_queue_t queues[ MagmaMaxGPUs ] )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -170,16 +208,32 @@ magma_zsetmatrix_1D_row_bcyclic(
 }
 
 
+#undef magma_zsetmatrix_1D_row_bcyclic
+
+extern "C" void
+magma_zsetmatrix_1D_row_bcyclic(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex    *hA, magma_int_t lda,
+    magmaDoubleComplex_ptr      *dA, magma_int_t ldda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    // uses NULL queue -> NULL stream in setmatrix_async
+    magma_queue_t queues[ MagmaMaxGPUs ] = { NULL };
+    magma_zsetmatrix_1D_row_bcyclic_q( m, n, hA, lda, dA, ldda, ngpu, nb, queues );
+}
+
+
 //===========================================================================
 // Get a matrix with 1D row block cyclic distribution from multi-GPUs to the CPU.
 // The dA arrays are pointers to the matrix data for the corresponding GPUs.
 //===========================================================================
 extern "C" void
-magma_zgetmatrix_1D_row_bcyclic(
+magma_zgetmatrix_1D_row_bcyclic_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
     magmaDoubleComplex                 *hA, magma_int_t lda,
-    magma_int_t ngpu, magma_int_t nb )
+    magma_int_t ngpu, magma_int_t nb,
+    magma_queue_t queues[ MagmaMaxGPUs ] )
 {
     magma_int_t info = 0;
     if ( m < 0 )
@@ -216,4 +270,19 @@ magma_zgetmatrix_1D_row_bcyclic(
     }
     
     magma_setdevice( cdevice );
+}
+
+
+#undef magma_zgetmatrix_1D_row_bcyclic
+
+extern "C" void
+magma_zgetmatrix_1D_row_bcyclic(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_const_ptr const *dA, magma_int_t ldda,
+    magmaDoubleComplex                 *hA, magma_int_t lda,
+    magma_int_t ngpu, magma_int_t nb )
+{
+    // uses NULL queue -> NULL stream in setmatrix_async
+    magma_queue_t queues[ MagmaMaxGPUs ] = { NULL };
+    magma_zgetmatrix_1D_row_bcyclic_q( m, n, dA, ldda, hA, lda, ngpu, nb, queues );
 }
