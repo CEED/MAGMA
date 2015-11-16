@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -221,6 +221,11 @@ magma_zunmqr_gpu(
         ic = 0;
     }
     
+    magma_queue_t queue;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queue );
+    
     /* Use unblocked code to multiply last or only block (cases Q*C or C*Q^T). */
     // workspace left:  A(mi*nb) + C(mi*ni) + work(ni*nb_la) = (m-k-nb)*nb + (m-k-nb)*n + n*nb
     // workspace right: A(ni*nb) + C(mi*ni) + work(mi*nb_la) = (n-k-nb)*nb + m*(n-k-nb) + m*nb
@@ -249,8 +254,8 @@ magma_zunmqr_gpu(
         magmaDoubleComplex* hW = hwork + ma*ib + mi*ni;
         magma_int_t lhwork = lwork - (ma*ib + mi*ni);
         
-        magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma );
-        magma_zgetmatrix( mi, ni, dC(ic, jc), lddc, hC, mi );
+        magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma, queue );
+        magma_zgetmatrix( mi, ni, dC(ic, jc), lddc, hC, mi, queue );
 
         lapackf77_zunmqr( side_, trans_,
                           &mi, &ni, &ib,
@@ -259,7 +264,7 @@ magma_zunmqr_gpu(
                           hW, &lhwork, info );
 
         // send the updated part of C back to the GPU
-        magma_zsetmatrix( mi, ni, hC, mi, dC(ic, jc), lddc );
+        magma_zsetmatrix( mi, ni, hC, mi, dC(ic, jc), lddc, queue );
     }
 
     /* Use blocked code to multiply blocks */
@@ -280,7 +285,7 @@ magma_zunmqr_gpu(
             magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                               mi, ni, ib,
                               dA(i,  i ), ldda, dT(i), nb,
-                              dC(ic, jc), lddc, dwork, nw );
+                              dC(ic, jc), lddc, dwork, nw, queue );
         }
     }
     else {
@@ -308,8 +313,8 @@ magma_zunmqr_gpu(
         magmaDoubleComplex* hW = hwork + ma*ib + mi*ni;
         magma_int_t lhwork = lwork - (ma*ib + mi*ni);
         
-        magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma );
-        magma_zgetmatrix( mi, ni, dC(ic, jc), lddc, hC, mi );
+        magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma, queue );
+        magma_zgetmatrix( mi, ni, dC(ic, jc), lddc, hC, mi, queue );
 
         lapackf77_zunmqr( side_, trans_,
                           &mi, &ni, &ib,
@@ -318,7 +323,7 @@ magma_zunmqr_gpu(
                           hW, &lhwork, info );
         
         // send the updated part of C back to the GPU
-        magma_zsetmatrix( mi, ni, hC, mi, dC(ic, jc), lddc );
+        magma_zsetmatrix( mi, ni, hC, mi, dC(ic, jc), lddc, queue );
     }
     
     // TODO sync. For cases Q*C and C*Q^T, last call is magma_zlarfb_gpu,
@@ -328,5 +333,8 @@ magma_zunmqr_gpu(
     // That needs to be fixed, but until then, don't modify hwork[0] here.
     // In LAPACK: On exit, if INFO = 0, HWORK[0] returns the optimal LWORK.
     //hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    
+    magma_queue_destroy( queue );
+    
     return *info;
 } /* magma_zunmqr_gpu */
