@@ -156,7 +156,7 @@ magma_zhbtype2cb(magma_int_t n, magma_int_t nb,
          * col st is the col that has been revomved;
          */
         len = len-1;
-        ctmp = MAGMA_Z_CNJG(*TAU(taupos));
+        ctmp = MAGMA_Z_CONJ(*TAU(taupos));
         lapackf77_zlarfx("L", &lem, &len, V(vpos),  &ctmp, A(J1, st+1), &ldx, work);
     }
     return;

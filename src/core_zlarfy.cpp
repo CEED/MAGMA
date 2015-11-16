@@ -77,7 +77,7 @@ magma_zlarfy(
     /*
     dtmp = c_zero;
     for (magma_int_t j = 0; j < n; j++)
-        dtmp = dtmp + MAGMA_Z_CNJG(work[j]) * V[j];
+        dtmp = dtmp + MAGMA_Z_CONJ(work[j]) * V[j];
     */
 
     /* compute 1/2 X'*V*t = 1/2*dtmp*tau  */

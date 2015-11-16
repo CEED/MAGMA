@@ -556,7 +556,7 @@ magma_int_t magma_ztrevc3_mt(
         
             // Form right-hand side.
             for( k = ki + 1; k < n; ++k ) {
-                *work(k,iv) = -MAGMA_Z_CNJG( *T(ki,k) );
+                *work(k,iv) = -MAGMA_Z_CONJ( *T(ki,k) );
             }
             
             // Solve conjugate-transposed triangular system:

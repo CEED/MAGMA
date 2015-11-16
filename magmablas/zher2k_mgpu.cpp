@@ -248,7 +248,7 @@ void magmablas_zher2k_mgpu2(
     }
     
     // second loop does C = conj(alpha)*B*A**H + C_hat
-    alpha = MAGMA_Z_CNJG( alpha );
+    alpha = MAGMA_Z_CONJ( alpha );
     blockoffset = c_offset % nb;
     for( magma_int_t i = 0; i < n; i += ib ) {
         ib     = min( nb-blockoffset, n-i );  // block size

@@ -157,7 +157,7 @@ magma_ztrdtype2cbHLsym_withQ_v2(
 
         /* apply left on A(J1:J2,st+1:ed) */
         len = len-1; /* because we start at col st+1 instead of st. col st is the col that has been removed; */
-        conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
+        conjtmp = MAGMA_Z_CONJ(*TAU(taupos));
         lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
     }
 }

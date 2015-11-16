@@ -189,7 +189,7 @@ magma_zlaqps_gpu(
         if (k > 0) {
             /*#if (defined(PRECISION_c) || defined(PRECISION_z))
             for (j = 0; j < k; ++j) {
-                *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
+                *F(k,j) = MAGMA_Z_CONJ( *F(k,j) );
             }
             #endif*/
 
@@ -216,7 +216,7 @@ magma_zlaqps_gpu(
 
             /*#if (defined(PRECISION_c) || defined(PRECISION_z))
             for (j = 0; j < k; ++j) {
-                *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
+                *F(k,j) = MAGMA_Z_CONJ( *F(k,j) );
             }
             #endif*/
         }

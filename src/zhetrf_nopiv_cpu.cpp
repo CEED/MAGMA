@@ -277,7 +277,7 @@ magma_zhetrf_nopiv_cpu(
                     #define ZHERK_D_WORKSPACE
                     #ifdef ZHERK_D_WORKSPACE
                     for (magma_int_t ii=i+sb; ii < n; ii++) {
-                        A(i+k, ii) = MAGMA_Z_CNJG( A(ii, i+k) );
+                        A(i+k, ii) = MAGMA_Z_CONJ( A(ii, i+k) );
                     }
                     #endif
                     alpha = d_one / MAGMA_Z_REAL(A(i+k, i+k));
@@ -323,7 +323,7 @@ magma_zhetrf_nopiv_cpu(
                     #define ZHERK_D_WORKSPACE
                     #ifdef ZHERK_D_WORKSPACE
                     for (magma_int_t ii=i+sb; ii < n; ii++) {
-                        A(ii, i+k) = MAGMA_Z_CNJG( A(i+k, ii) );
+                        A(ii, i+k) = MAGMA_Z_CONJ( A(i+k, ii) );
                     }
                     #endif
                     alpha = d_one / MAGMA_Z_REAL(A(i+k, i+k));
