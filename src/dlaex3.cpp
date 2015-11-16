@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -14,7 +14,7 @@
 #include <omp.h>
 #endif
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_timer.h"
 
 #ifdef __cplusplus
@@ -309,8 +309,13 @@ magma_dlaex3(
 
     iq2 = n1 * n12;
     lq2 = iq2 + n2 * n23;
+    
+    magma_queue_t queue;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queue );
 
-    magma_dsetvector_async( lq2, Q2, 1, dQ2(0,0), 1, NULL );
+    magma_dsetvector_async( lq2, Q2, 1, dQ2(0,0), 1, queue );
 
 #ifdef _OPENMP
     /////////////////////////////////////////////////////////////////////////////////
@@ -517,7 +522,7 @@ magma_dlaex3(
     // Compute the updated eigenvectors.
 
     //timer_start( time );
-    magma_queue_sync( NULL );
+    //magma_queue_sync( queue );  // previously, needed to setvector finished. Now all on same queue, so not needed?
 
     if (rk != 0) {
         if ( n23 != 0 ) {
@@ -526,12 +531,12 @@ magma_dlaex3(
                 blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &Q2[iq2], &n2,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             } else {
-                magma_dsetmatrix( n23, rk, Q(ctot[0],iil-1), ldq, dS(0,0), n23 );
+                magma_dsetmatrix( n23, rk, Q(ctot[0],iil-1), ldq, dS(0,0), n23, queue );
                 magma_dgemm( MagmaNoTrans, MagmaNoTrans, n2, rk, n23,
                              d_one,  dQ2(iq2,0), n2,
                                      dS(0,0), n23,
-                             d_zero, dQ(0,0), lddq);
-                magma_dgetmatrix( n2, rk, dQ(0,0), lddq, Q(n1,iil-1), ldq );
+                             d_zero, dQ(0,0), lddq, queue );
+                magma_dgetmatrix( n2, rk, dQ(0,0), lddq, Q(n1,iil-1), ldq, queue );
             }
         } else
             lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
@@ -542,18 +547,20 @@ magma_dlaex3(
                 blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, Q2, &n1,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);
             } else {
-                magma_dsetmatrix( n12, rk, Q(0,iil-1), ldq, dS(0,0), n12 );
+                magma_dsetmatrix( n12, rk, Q(0,iil-1), ldq, dS(0,0), n12, queue );
                 magma_dgemm( MagmaNoTrans, MagmaNoTrans, n1, rk, n12,
                              d_one,  dQ2(0,0), n1,
                                      dS(0,0), n12,
-                             d_zero, dQ(0,0), lddq);
-                magma_dgetmatrix( n1, rk, dQ(0,0), lddq, Q(0,iil-1), ldq );
+                             d_zero, dQ(0,0), lddq, queue );
+                magma_dgetmatrix( n1, rk, dQ(0,0), lddq, Q(0,iil-1), ldq, queue );
             }
         } else
             lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
     }
     //timer_stop( time );
     //timer_printf( "gemms = %6.2f\n", time );
+
+    magma_queue_destroy( queue );
 
     return *info;
 } /* magma_dlaex3 */
