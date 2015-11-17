@@ -71,7 +71,9 @@ while( <> ) {
 	s/MAGMA \(version \d\.\d\)/MAGMA (version 2.0)/;
 	
 	# rename stream array to queues
-	s/\bstream\[/queues[/g;
+	# make arrays plural
+	s/\bstream *\[/queues[/g;
+	s/\bevent *\[/events[/g;
 	
 	# fix headers
 	s/#include "magma.h"/#include "magma_v2.h"/;
