@@ -53,7 +53,7 @@ def dump( name ):
 			format = '\t' + ',  '.join( formats )
 		
 		# differentiate data from multiple files
-		if ( len(args) > 2 ):
+		if ( len(args) > 1 ):
 			(base,ext) = os.path.splitext( filename )
 			base = re.sub( '[^\w]', '_', base )
 			name = base + '_' + name
@@ -87,7 +87,7 @@ def dump( name ):
 # process files
 
 # if no arguments, or special argmument '-', read from stdin
-if ( len(args) == 1 ):
+if ( len(args) == 0 ):
 	args.append( '-' )
 
 cmd     = None
