@@ -578,7 +578,7 @@ magma_zpidr(
 
     // last stats
     solver_par->iter_res = nrmr;
-    CHECK( magma_zresidualvec( A, b, *x, &dr, &residual, NULL ));
+    CHECK( magma_zresidualvec( A, b, *x, &dr, &residual, queue ));
     solver_par->final_res = residual;
 
     // set solver conclusion
