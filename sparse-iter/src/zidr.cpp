@@ -76,7 +76,7 @@ magma_zidr(
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
     // internal user parameters
-    const magma_int_t smoothing = 0;   // 1 = enable, 0 = disable
+    const magma_int_t smoothing = 1;   // 1 = enable, 0 = disable
     const double angle = 0.7;          // [0-1]
 
     // local variables
@@ -493,7 +493,7 @@ magma_zidr(
 
     // get final stats
     solver_par->iter_res = nrmr;
-    CHECK( magma_zresidualvec( A, b, *x, &dr, &residual, NULL ));
+    CHECK( magma_zresidualvec( A, b, *x, &dr, &residual, queue ));
     solver_par->final_res = residual;
 
     // set solver conclusion
