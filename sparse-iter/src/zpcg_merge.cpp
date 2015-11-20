@@ -101,11 +101,11 @@ magma_zpcg_merge(
     CHECK( magma_zvinit( &rt, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &h, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     
-    CHECK( magma_zmalloc( &d1, dofs*(1) ));
-    CHECK( magma_zmalloc( &d2, dofs*(1) ));
+    CHECK( magma_zmalloc( &d1, dofs*(2) ));
+    CHECK( magma_zmalloc( &d2, dofs*(2) ));
     // array for the parameters
-    CHECK( magma_zmalloc( &skp, 6 ));
-    // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
+    CHECK( magma_zmalloc( &skp, 7 ));
+    // skp = [alpha|beta|gamma|rho|tmp1|tmp2|res]
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
@@ -143,18 +143,19 @@ magma_zpcg_merge(
     }    
     
     // array on host for the parameters
-    CHECK( magma_zmalloc_cpu( &skp_h, 6 ));
+    CHECK( magma_zmalloc_cpu( &skp_h, 7 ));
     
     alpha = rho = gamma = tmp1 = c_one;
-    beta =  magma_zdotc(dofs, r.dval, 1, r.dval, 1);
+    beta =  magma_zdotc(dofs, h.dval, 1, r.dval, 1);
     skp_h[0]=alpha;
     skp_h[1]=beta;
     skp_h[2]=gamma;
     skp_h[3]=rho;
     skp_h[4]=tmp1;
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
+    skp_h[6]=MAGMA_Z_MAKE(nom, 0.0);
 
-    magma_zsetvector( 6, skp_h, 1, skp, 1 );
+    magma_zsetvector( 7, skp_h, 1, skp, 1 );
 
     //Chronometry
     real_Double_t tempo1, tempo2, tempop1, tempop2;
@@ -165,13 +166,10 @@ magma_zpcg_merge(
     do
     {
         solver_par->numiter++;
-
-        magmablasSetKernelStream(stream[0]);
         
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
             
-        
         
         // updates x, r
         CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
@@ -180,6 +178,7 @@ magma_zpcg_merge(
         tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+        //            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
         
@@ -196,9 +195,8 @@ magma_zpcg_merge(
 
         
         // check stopping criterion (asynchronous copy)
-        magma_zgetvector_async( 1 , skp+1, 1,
-                                                    skp_h+1, 1, stream[1] );
-        res = sqrt(MAGMA_Z_ABS(skp_h[1]));
+        magma_zgetvector( 1 , skp+6, 1, skp_h+6, 1);
+        res = sqrt(MAGMA_Z_ABS(skp_h[6]));
 
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
@@ -210,8 +208,7 @@ magma_zpcg_merge(
             }
         }
 
-        if (  res < solver_par->atol || 
-              res/nomb < solver_par->rtol ) {
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
     }

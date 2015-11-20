@@ -83,6 +83,96 @@ magma_zcgreduce_kernel_spmv1(
     }
 }
 
+
+// accelerated reduction for two vectors
+__global__ void
+magma_zcgreduce_kernel_spmv2( 
+    int Gs,
+    int n, 
+    magmaDoubleComplex * vtmp,
+    magmaDoubleComplex * vtmp2 )
+{
+    extern __shared__ magmaDoubleComplex temp[];     
+    int Idx = threadIdx.x;
+    int blockSize = 128;
+    int gridSize = blockSize  * 2 * gridDim.x; 
+    int j;
+
+    for( j=0; j<2; j++){
+        int i = blockIdx.x * ( blockSize * 2 ) + Idx;   
+        temp[Idx+j*(blockSize)] = MAGMA_Z_ZERO;
+        while (i < Gs ) {
+            temp[ Idx+j*(blockSize)  ] += vtmp[ i+j*n ]; 
+            temp[ Idx+j*(blockSize)  ] += 
+                ( i + (blockSize) < Gs ) ? vtmp[ i+j*n + (blockSize) ] 
+                                                : MAGMA_Z_ZERO;
+            i += gridSize;
+        }
+    }
+    __syncthreads();
+    if ( Idx < 64 ){
+        for( j=0; j<2; j++){
+            temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 64 ];
+        }
+    }
+    __syncthreads();
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+        if( Idx < 32 ){
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 32 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 16 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 8 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 4 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 2 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 1 ];
+                __syncthreads();
+        }
+    #endif
+    #if defined(PRECISION_d)
+        if( Idx < 32 ){
+            volatile double *temp2 = temp;
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 32 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 16 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 8 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 4 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 2 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 1 ];
+            }
+        }
+    #endif
+    #if defined(PRECISION_s)
+        if( Idx < 32 ){
+            volatile float *temp2 = temp;
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 32 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 16 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 8 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 4 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 2 ];
+                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 1 ];
+            }
+        }
+    #endif
+    if ( Idx == 0 ){
+        for( j=0; j<2; j++){
+            vtmp2[ blockIdx.x+j*n ] = temp[ j*(blockSize) ];
+        }
+    }
+}
+
+
+
 // computes the SpMV using CSR and the first step of the reduction
 __global__ void
 magma_zcgmerge_spmvcsr_kernel(  
@@ -1349,61 +1439,80 @@ magma_zmzdotc_one_kernel_1(
     extern __shared__ magmaDoubleComplex temp[]; 
     int Idx = threadIdx.x;   
     int i   = blockIdx.x * blockDim.x + Idx;
+    int j;
 
     // 1 vectors v(i)/w(i)
     
     temp[ Idx ]                 = ( i < n ) ?
                 v0[ i ] * w0[ i ] : MAGMA_Z_ZERO;
+    temp[ Idx + blockDim.x ]    = ( i < n ) ?
+                v0[ i ] * v0[ i ] : MAGMA_Z_ZERO;
     
     __syncthreads();
     if ( Idx < 128 ){
-            temp[ Idx ] += temp[ Idx + 128 ];
+        for( j=0; j<2; j++){
+            temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 128 ];
+        }
     }
     __syncthreads();
     if ( Idx < 64 ){
-            temp[ Idx ] += temp[ Idx + 64 ];
+        for( j=0; j<2; j++){
+            temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 64 ];
+        }
     }
     __syncthreads();
     #if defined(PRECISION_z) || defined(PRECISION_c)
         if( Idx < 32 ){
-                temp[ Idx ] += temp[ Idx + 32 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 32 ];
                 __syncthreads();
-                temp[ Idx ] += temp[ Idx + 16 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 16 ];
                 __syncthreads();
-                temp[ Idx ] += temp[ Idx + 8 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 8 ];
                 __syncthreads();
-                temp[ Idx ] += temp[ Idx + 4 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 4 ];
                 __syncthreads();
-                temp[ Idx ] += temp[ Idx + 2 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 2 ];
                 __syncthreads();
-                temp[ Idx ] += temp[ Idx + 1 ];
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 1 ];
                 __syncthreads();
         }
     #endif
     #if defined(PRECISION_d)
         if( Idx < 32 ){
             volatile double *temp2 = temp;
-                temp2[ Idx ] += temp2[ Idx + 32 ];
-                temp2[ Idx ] += temp2[ Idx + 16 ];
-                temp2[ Idx ] += temp2[ Idx + 8 ];
-                temp2[ Idx ] += temp2[ Idx + 4 ];
-                temp2[ Idx ] += temp2[ Idx + 2 ];
-                temp2[ Idx ] += temp2[ Idx + 1 ];
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
+            }
         }
     #endif
     #if defined(PRECISION_s)
         if( Idx < 32 ){
             volatile float *temp2 = temp;
-                temp2[ Idx ] += temp2[ Idx + 32 ];
-                temp2[ Idx ] += temp2[ Idx + 16 ];
-                temp2[ Idx ] += temp2[ Idx + 8 ];
-                temp2[ Idx ] += temp2[ Idx + 4 ];
-                temp2[ Idx ] += temp2[ Idx + 2 ];
-                temp2[ Idx ] += temp2[ Idx + 1 ];
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
+            }
         }
-    #endif
+    #endif  
+    
     if ( Idx == 0 ){
             vtmp[ blockIdx.x ] = temp[ 0 ];
+            vtmp[ blockIdx.x+n ] = temp[ blockDim.x ];
     }
 }
 
@@ -1534,7 +1643,7 @@ magma_zpcgmerge_xrbeta2(
     dim3 Bs( local_block_size );
     dim3 Gs( magma_ceildiv( n, local_block_size ) );
     dim3 Gs_next;
-    int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
+    int Ms =  4*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;        
                                     
@@ -1544,7 +1653,7 @@ magma_zpcgmerge_xrbeta2(
     while( Gs.x > 1 ) {
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+        magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                                     ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
@@ -1555,6 +1664,7 @@ magma_zpcgmerge_xrbeta2(
 
 
     magma_zcopyvector( 1, aux1, 1, skp+1, 1 );
+    magma_zcopyvector( 1, aux1+n, 1, skp+6, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
     magma_zcg_alphabetakernel<<<Gs2, Bs2, 0>>>( skp );

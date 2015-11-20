@@ -153,7 +153,7 @@ magma_zcg_merge(
     {
         solver_par->numiter++;
 
-        magmablasSetKernelStream(stream[0]);
+        //magmablasSetKernelStream(stream[0]);
         
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
@@ -162,8 +162,7 @@ magma_zcg_merge(
         CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, d.dval, z.dval, skp, queue ));
 
         // check stopping criterion (asynchronous copy)
-        magma_zgetvector_async( 1 , skp+1, 1,
-                                                    skp_h+1, 1, stream[1] );
+        magma_zgetvector( 1 , skp+1, 1, skp_h+1, 1 );
         betanom = sqrt(MAGMA_Z_ABS(skp_h[1]));
 
         if ( solver_par->verbose > 0 ) {
