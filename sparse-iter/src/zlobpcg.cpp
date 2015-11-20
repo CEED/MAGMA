@@ -123,7 +123,7 @@ magma_zlobpcg(
     magma_int_t iterationNumber, cBlockSize, restart = 1, iter;
 
     //Chronometry
-    real_Double_t tempo1, tempo2;
+    real_Double_t tempo1, tempo2, tempop1, tempop2;
     
     magma_int_t lwork = max( 2*n+n*magma_get_dsytrd_nb(n),
                                             1 + 6*3*n + 2* 3*n* 3*n);
@@ -282,9 +282,12 @@ magma_zlobpcg(
             magma_z_matrix bWv={Magma_CSR}, bRv={Magma_CSR};
             bWv.memory_location = Magma_DEV;  bWv.num_rows = m; bWv.num_cols = cBlockSize; bWv.major = MagmaColMajor;  bWv.nnz = m*cBlockSize;  bWv.dval = blockW;
             bRv.memory_location = Magma_DEV;  bRv.num_rows = m; bRv.num_cols = cBlockSize; bRv.major = MagmaColMajor;  bRv.nnz = m*cBlockSize;  bRv.dval = blockR;
+            tempop1 = magma_sync_wtime( queue );
             CHECK( magma_z_applyprecond_left( A, bRv, &bWv, precond_par, queue ));
             CHECK( magma_z_applyprecond_right( A, bWv, &bRv, precond_par, queue ));
-            
+            tempop2 = magma_sync_wtime( queue );
+            precond_par->runtime += tempop2-tempop1;
+        
             // === make the preconditioned residuals orthogonal to X
             if( precond_par->solver != Magma_NONE){
                 magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, cBlockSize, m,

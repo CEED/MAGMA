@@ -74,7 +74,7 @@ magma_zpcgs_merge(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,  c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho, rho_l = c_one, alpha, beta;
@@ -122,7 +122,7 @@ magma_zpcgs_merge(
     }
 
     //Chronometry
-    real_Double_t tempo1, tempo2;
+    real_Double_t tempo1, tempo2, tempop1, tempop2;
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
@@ -163,8 +163,11 @@ magma_zpcgs_merge(
             // p = r
         }
         // preconditioner
+        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, p, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &p_hat, precond_par, queue ));
+        tempop2 = magma_sync_wtime( queue );
+        precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, p_hat, c_zero, v_hat, queue ));   // v = A p
         alpha = rho / magma_zdotc(dofs, r_tld.dval, 1, v_hat.dval, 1);
@@ -182,9 +185,12 @@ magma_zpcgs_merge(
         // t = u + q
         
         // preconditioner
+        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, t, &rt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, rt, &u_hat, precond_par, queue ));
-
+        tempop2 = magma_sync_wtime( queue );
+        precond_par->runtime += tempop2-tempop1;
+        
         CHECK( magma_z_spmv( c_one, A, u_hat, c_zero, t, queue ));   // t = A u_hat
         
         magma_zcgs_4(  

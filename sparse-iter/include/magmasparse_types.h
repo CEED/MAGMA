@@ -451,6 +451,8 @@ typedef struct magma_z_preconditioner
     magma_int_t             numiter;
     double                  init_res;
     double                  final_res;
+    real_Double_t      runtime;                // feedback: preconditioner runtime needed
+    real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_z_matrix   M;
     magma_z_matrix   L;
     magma_z_matrix   U;
@@ -485,6 +487,8 @@ typedef struct magma_c_preconditioner
     magma_int_t             numiter;
     float                   init_res;
     float                   final_res;
+    real_Double_t      runtime;                // feedback: preconditioner runtime needed
+    real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_c_matrix   M;
     magma_c_matrix   L;
     magma_c_matrix   U;
@@ -520,6 +524,8 @@ typedef struct magma_d_preconditioner
     magma_int_t             numiter;
     double                  init_res;
     double                  final_res;
+    real_Double_t      runtime;                // feedback: preconditioner runtime needed
+    real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_d_matrix   M;
     magma_d_matrix   L;
     magma_d_matrix   U;
@@ -555,6 +561,8 @@ typedef struct magma_s_preconditioner
     magma_int_t             numiter;
     float                   init_res;
     float                   final_res;
+    real_Double_t      runtime;                // feedback: preconditioner runtime needed
+    real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_s_matrix   M;
     magma_s_matrix   L;
     magma_s_matrix   U;

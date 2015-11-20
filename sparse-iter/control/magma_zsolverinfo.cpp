@@ -288,9 +288,11 @@ magma_zsolverinfo(
             printf("%%   Solver info not supported.\n"); goto cleanup;
     }
     printf("%%    initial residual: %e\n", solver_par->init_res );
+    printf("%%    preconditioner setup: %.4f sec\n", precond_par->setuptime );
     printf("%%    iterations: %4d\n", (int) (solver_par->numiter) );
     printf("%%    exact final residual: %e\n%%    runtime: %.4f sec\n",
         solver_par->final_res, solver_par->runtime);
+    printf("%%    preconditioner runtime: %.4f sec\n", precond_par->runtime );
 cleanup:
     printf("%%======================================================="
         "======%%\n");
@@ -533,6 +535,9 @@ magma_zsolverinfo_init(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
+    solver_par->runtime         = 0.;
+    precond_par->runtime       = 0.;
+    precond_par->setuptime  = 0.;
     solver_par->res_vec = NULL;
     solver_par->timing = NULL;
     solver_par->eigenvectors = NULL;

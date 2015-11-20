@@ -58,7 +58,7 @@
 //  1 = print scalars
 //  2 = print all (few iters)
 // >2 = prints all (all iters)
-#define MYDEBUG 0
+#define MYDEBUG 2
 
 #if MYDEBUG <= 0
 #define printD(...)
@@ -230,7 +230,7 @@ magma_zidr_acc(
         solver_par->runtime = 0.0;
         goto cleanup;
     }
-
+printf("check1\n");
     // t = 0
     // make t twice as large to contain both, dt and dr
     ldd = magma_roundup( b.num_rows, 32 );
@@ -240,16 +240,16 @@ magma_zidr_acc(
     dt.num_cols = b.num_cols;
     dt.nnz = dt.num_rows * dt.num_cols;
     doft = dt.ld * dt.num_cols;
-
+printf("check2\n");
     // redirect the dr.dval to the second part of dt
     CHECK( magma_zvinit( &dr, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
     magma_free( dr.dval );
     dr.dval = dt.dval + ldd * b.num_cols;
-
+printf("check3\n");
     // r = b - A x
     CHECK( magma_zresidualvec( A, b, *x, &dr, &nrmr, queue ));
     printMatrix("R", dr);
-    
+    printf("check4\n");
     // |r|
     solver_par->init_res = nrmr;
     solver_par->final_res = solver_par->init_res;
@@ -257,7 +257,7 @@ magma_zidr_acc(
     if ( solver_par->verbose > 0 ) {
         solver_par->res_vec[0] = (real_Double_t)nrmr;
     }
-
+printf("check5\n");
     // check if initial is guess good enough
     if ( nrmr <= solver_par->atol ||
         nrmr/nrmb <= solver_par->rtol ) {
@@ -397,8 +397,6 @@ magma_zidr_acc(
     if ( solver_par->verbose > 0 ) {
         solver_par->timing[0] = 0.0;
     }
-    
-cudaProfilerStart();
 
     om = MAGMA_Z_ONE;
     innerflag = 0;
@@ -408,6 +406,7 @@ cudaProfilerStart();
     do
     {
         solver_par->numiter++;
+        printf("in iteration %d\n", solver_par->numiter);
     
         // new RHS for small systems
         // f = (r' P)' = P' r
@@ -759,8 +758,6 @@ cudaProfilerStart();
         magma_zcopy( dofr, drs.dval, 1, dr.dval, 1 );
         magma_zcopy( dofx, dxs.dval, 1, x->dval, 1 );
     }
-
-cudaProfilerStop();
 
     // get last iteration timing
     tempo2 = magma_sync_wtime( queue );

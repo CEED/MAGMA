@@ -69,7 +69,6 @@ magma_zbicgstab_merge(
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows * b.num_cols;
 

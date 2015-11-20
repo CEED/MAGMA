@@ -127,9 +127,8 @@ magma_zpbicgstab(
     }
 
     //Chronometry
-    real_Double_t tempo1, tempo2;
+    real_Double_t tempo1, tempo2, tempop1, tempop2;
     tempo1 = magma_sync_wtime( queue );
-
 
     solver_par->numiter = 0;
     // start iteration
@@ -145,9 +144,12 @@ magma_zpbicgstab(
         magma_zaxpy( dofs, c_one, r.dval, 1, p.dval, 1 );      // p = p+r
 
         // preconditioner
+        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, p, &mt, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, mt, &y, precond_par, queue ));
-
+        tempop2 = magma_sync_wtime( queue );
+        precond_par->runtime += tempop2-tempop1;
+        
         CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
 
         alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1 );
@@ -155,9 +157,12 @@ magma_zpbicgstab(
         magma_zaxpy( dofs, c_neg_one * alpha, v.dval, 1 , s.dval, 1 ); // s=s-alpha*v
 
         // preconditioner
+        tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, s, &ms, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, ms, &z, precond_par, queue ));
-
+        tempop2 = magma_sync_wtime( queue );
+        precond_par->runtime += tempop2-tempop1;
+        
         CHECK( magma_z_spmv( c_one, A, z, c_zero, t, queue ));       // t=As
                    
        // omega = <s,t>/<t,t>

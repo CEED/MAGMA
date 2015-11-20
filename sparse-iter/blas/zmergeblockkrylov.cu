@@ -39,7 +39,7 @@ magma_zmergeblockkrylov_kernel(
         for( int j=0; j<num_vecs; j++ ){
             
             magmaDoubleComplex lalpha = alpha[ j * num_vecs + vec ];
-            magmaDoubleComplex xval = x[ row + j * num_rows ];
+            magmaDoubleComplex xval = p[ row + j * num_rows ];
             
             val += lalpha * xval;
             
