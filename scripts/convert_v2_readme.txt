@@ -8,6 +8,34 @@ examples. To see changes, diffs of these 3 files are in:
     convert_v2_zgeqrf.html
 
 
+----------------------------------------
+In kernel files (*.cu):
+Many kernels have already been converted, but this is how to fix one that it
+isn't yet converted.
+
+1)  Add an _q version that takes a queue, e.g., magmablas_zswap_q( ..., queue ).
+    The kernel launch changes from
+        <<< ..., magma_stream >>>
+    to
+        <<< ..., queue->cuda_stream() >>>
+
+    The prototype for the _q version goes in magmablas_z_q.h; most already exist.
+
+2)  Have the non-q version call the _q version, using magmablasGetQueue().
+    See magmablas/zswap.cu for a simple example.
+
+3)  Automated partial conversion using scripts/convert_v2_kernel.pl
+    This replaces queue with queue->cuda_stream(),
+    and magma_stream with magmablasGetQueue().
+    Steps (1) and (2) are manual, though.
+
+    In most cases, you do not currently need to change the header, unless the
+    driver calls other magma functions that now take a queue, such as ztrsm.
+    This gets more complicated, so ask Mark.
+
+
+
+----------------------------------------
 In src files:
 
 0)  Run testers to verify that the code is working before changes.
