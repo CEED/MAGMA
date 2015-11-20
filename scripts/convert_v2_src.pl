@@ -80,6 +80,9 @@ while( <> ) {
 	s/#include "common_magma.h"/#include "magma_internal.h"/;
 	s/#include "common_magmasparse.h"/#include "magmasparse_internal.h"/;
 	
+	# change UpperLower to Full, for consistency with LAPACK
+	s/UpperLower/Full/g;
+	
 	# fix queue_create
 	#  ($1)                      ($2 )
 	s/^( +)magma_queue_create\( *(.*?) *\);/${1}magma_device_t cdev;\n${1}magma_getdevice( \&cdev );\n${1}magma_queue_create( cdev, $2 );/mg;
