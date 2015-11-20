@@ -28,6 +28,7 @@ magma_setvector_q_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    assert( queue != NULL );
     cublasStatus_t status;
     status = cublasSetVectorAsync(
         n, elemSize,
@@ -38,6 +39,7 @@ magma_setvector_q_internal(
 }
 
 // --------------------
+// for backwards compatability, accepts NULL queue to mean NULL stream.
 extern "C" void
 magma_setvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -46,11 +48,18 @@ magma_setvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     cublasStatus_t status;
     status = cublasSetVectorAsync(
         n, elemSize,
         hx_src, incx,
-        dy_dst, incy, queue->cuda_stream() );
+        dy_dst, incy, stream );
     check_xerror( status, func, file, line );
 }
 
@@ -73,6 +82,7 @@ magma_getvector_q_internal(
 }
 
 // --------------------
+// for backwards compatability, accepts NULL queue to mean NULL stream.
 extern "C" void
 magma_getvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -81,11 +91,18 @@ magma_getvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     cublasStatus_t status;
     status = cublasGetVectorAsync(
         n, elemSize,
         dx_src, incx,
-        hy_dst, incy, queue->cuda_stream() );
+        hy_dst, incy, stream );
     check_xerror( status, func, file, line );
 }
 
@@ -100,6 +117,7 @@ magma_copyvector_q_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    assert( queue != NULL );
     if ( incx == 1 && incy == 1 ) {
         cudaError_t status;
         status = cudaMemcpyAsync(
@@ -116,6 +134,7 @@ magma_copyvector_q_internal(
 }
 
 // --------------------
+// for backwards compatability, accepts NULL queue to mean NULL stream.
 extern "C" void
 magma_copyvector_async_internal(
     magma_int_t n, magma_int_t elemSize,
@@ -124,12 +143,19 @@ magma_copyvector_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     if ( incx == 1 && incy == 1 ) {
         cudaError_t status;
         status = cudaMemcpyAsync(
             dy_dst,
             dx_src,
-            n*elemSize, cudaMemcpyDeviceToDevice, queue->cuda_stream() );
+            n*elemSize, cudaMemcpyDeviceToDevice, stream );
         check_xerror( status, func, file, line );
     }
     else {
@@ -149,6 +175,7 @@ magma_setmatrix_q_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    assert( queue != NULL );
     cublasStatus_t status;
     status = cublasSetMatrixAsync(
         m, n, elemSize,
@@ -159,6 +186,7 @@ magma_setmatrix_q_internal(
 }
 
 // --------------------
+// for backwards compatability, accepts NULL queue to mean NULL stream.
 extern "C" void
 magma_setmatrix_async_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
@@ -167,11 +195,18 @@ magma_setmatrix_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     cublasStatus_t status;
     status = cublasSetMatrixAsync(
         m, n, elemSize,
         hA_src, ldha,
-        dB_dst, lddb, queue->cuda_stream() );
+        dB_dst, lddb, stream );
     check_xerror( status, func, file, line );
 }
 
@@ -184,6 +219,7 @@ magma_getmatrix_q_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    assert( queue != NULL );
     cublasStatus_t status;
     status = cublasGetMatrixAsync(
         m, n, elemSize,
@@ -202,11 +238,18 @@ magma_getmatrix_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     cublasStatus_t status;
     status = cublasGetMatrixAsync(
         m, n, elemSize,
         dA_src, ldda,
-        hB_dst, ldhb, queue->cuda_stream() );
+        hB_dst, ldhb, stream );
     check_xerror( status, func, file, line );
 }
 
@@ -219,6 +262,7 @@ magma_copymatrix_q_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    assert( queue != NULL );
     cudaError_t status;
     status = cudaMemcpy2DAsync(
         dB_dst, lddb*elemSize,
@@ -229,6 +273,7 @@ magma_copymatrix_q_internal(
 }
 
 // --------------------
+// for backwards compatability, accepts NULL queue to mean NULL stream.
 extern "C" void
 magma_copymatrix_async_internal(
     magma_int_t m, magma_int_t n, magma_int_t elemSize,
@@ -237,11 +282,18 @@ magma_copymatrix_async_internal(
     magma_queue_t queue,
     const char* func, const char* file, int line )
 {
+    cudaStream_t stream = NULL;
+    if ( queue != NULL ) {
+        stream = queue->cuda_stream();
+    }
+    else {
+        fprintf( stderr, "Warning: %s got NULL queue\n", __func__ );
+    }
     cudaError_t status;
     status = cudaMemcpy2DAsync(
         dB_dst, lddb*elemSize,
         dA_src, ldda*elemSize,
-        m*elemSize, n, cudaMemcpyDeviceToDevice, queue->cuda_stream() );
+        m*elemSize, n, cudaMemcpyDeviceToDevice, stream );
     check_xerror( status, func, file, line );
 }
 
