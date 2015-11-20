@@ -25,6 +25,7 @@ use strict;
 my @kernels = qw(
 	axpy
 	dot
+	scal
 	gemm
 	gemv
 	hemm
@@ -55,6 +56,8 @@ my @setget = qw(
 	getmatrix
 	setvector
 	setmatrix
+	copyvector
+	copymatrix
 );
 
 my $kernels = join( "|", @kernels );
