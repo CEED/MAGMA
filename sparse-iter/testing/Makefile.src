@@ -28,6 +28,7 @@ sparse_testing_zsrc += \
 # low level LA operations
 sparse_testing_zsrc += \
 	$(cdir)/testing_zdot.cpp              \
+	$(cdir)/testing_zmdotc.cpp            \
 	$(cdir)/testing_zspmv.cpp             \
 	$(cdir)/testing_zspmv_check.cpp       \
 	$(cdir)/testing_zspmm.cpp             \

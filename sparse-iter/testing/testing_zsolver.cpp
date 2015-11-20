@@ -109,7 +109,12 @@ int main(  int argc, char** argv )
         printf("data = [\n");
         magma_zsolverinfo( &zopts.solver_par, &zopts.precond_par, queue );
         printf("];\n\n");
-
+        
+        printf("precond_info = [\n");
+        printf("%%   setup  runtime\n");        
+        printf("  %.6f  %.6f\n",
+           zopts.precond_par.setuptime, zopts.precond_par.runtime );
+        printf("];\n\n");
         magma_zmfree(&B_d, queue );
         magma_zmfree(&B, queue );
         magma_zmfree(&A, queue );
