@@ -53,26 +53,12 @@ magma_z_solver(
 {
     magma_int_t info = 0;
     
-    //Chronometry
-    real_Double_t tempo1, tempo2;
-    
     // make sure RHS is a dense matrix
     if ( b.storage_type != Magma_DENSE ) {
         printf( "error: sparse RHS not yet supported.\n" );
         return MAGMA_ERR_NOT_SUPPORTED;
     }
     if( b.num_cols == 1 ){
-    // preconditioner
-        if ( zopts->solver_par.solver != Magma_ITERREF ) {
-            tempo1 = magma_sync_wtime( queue );
-            int stat = magma_z_precondsetup( A, b, &zopts->precond_par, queue );
-            if (  stat != MAGMA_SUCCESS ){
-                printf("error: bad preconditioner.\n");
-                return MAGMA_ERR_BADPRECOND; 
-            }
-            tempo2 = magma_sync_wtime( queue );
-            zopts->precond_par.setuptime += tempo2-tempo1;
-        }
         switch( zopts->solver_par.solver ) {
             case  Magma_CG:
                     CHECK( magma_zcg_res( A, b, x, &zopts->solver_par, queue )); break;
@@ -93,7 +79,7 @@ magma_z_solver(
             case  Magma_PGMRES:
                     CHECK( magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_IDR:
-                    CHECK( magma_zidr_acc( A, b, x, &zopts->solver_par, queue )); break;
+                    CHECK( magma_zidr_strm( A, b, x, &zopts->solver_par, queue )); break;
                     //CHECK( magma_zidr( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PIDR:
                     CHECK( magma_zpidr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
@@ -136,14 +122,6 @@ magma_z_solver(
         }
     }
     else {
-  // preconditioner
-        if ( zopts->solver_par.solver != Magma_ITERREF ) {
-            int stat = magma_z_precondsetup( A, b, &zopts->precond_par, queue );
-            if (  stat != MAGMA_SUCCESS ){
-                printf("error: bad preconditioner.\n");
-                return MAGMA_ERR_BADPRECOND; 
-            }
-        }
         switch( zopts->solver_par.solver ) {
             case  Magma_CG:
                     CHECK( magma_zbpcg( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;

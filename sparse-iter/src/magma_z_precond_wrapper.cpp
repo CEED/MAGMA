@@ -134,38 +134,45 @@ magma_z_precondsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
-    // make sure RHS is a dense matrix
-    if ( b.storage_type != Magma_DENSE ) {
-        printf( "error: sparse RHS not yet supported.\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
-    }
+    magma_int_t info = 0;
+    
+    //Chronometry
+    real_Double_t tempo1, tempo2;
+    
+    tempo1 = magma_sync_wtime( queue );
+    
 
     if ( precond->solver == Magma_JACOBI ) {
-        return magma_zjacobisetup_diagscal( A, &(precond->d), queue );
+        info = magma_zjacobisetup_diagscal( A, &(precond->d), queue );
     }
     else if ( precond->solver == Magma_PASTIX ) {
-        //return magma_zpastixsetup( A, b, precond, queue );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        //info = magma_zpastixsetup( A, b, precond, queue );
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
     else if ( precond->solver == Magma_ILU ) {
-        return magma_zcumilusetup( A, precond, queue );
+        info = magma_zcumilusetup( A, precond, queue );
     }
     else if ( precond->solver == Magma_ICC ) {
-        return magma_zcumiccsetup( A, precond, queue );
+        info = magma_zcumiccsetup( A, precond, queue );
     }
     else if ( precond->solver == Magma_AICC ) {
-        return magma_zitericsetup( A, b, precond, queue );
+        info = magma_zitericsetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_AILU ) {
-        return magma_ziterilusetup( A, b, precond, queue );
+        info = magma_ziterilusetup( A, b, precond, queue );
     }
     else if ( precond->solver == Magma_NONE ) {
-        return MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
+    
+    tempo2 = magma_sync_wtime( queue );
+    precond->setuptime += tempo2-tempo1;
+    
+   return info;
 }
 
 
@@ -226,7 +233,7 @@ magma_z_applyprecond(
     }
     else if ( precond->solver == Magma_PASTIX ) {
         //CHECK( magma_zapplypastix( b, x, precond, queue ));
-        return MAGMA_ERR_NOT_SUPPORTED;
+        info = MAGMA_ERR_NOT_SUPPORTED;
     }
     else if ( precond->solver == Magma_ILU ) {
         CHECK( magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));

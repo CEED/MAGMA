@@ -288,42 +288,61 @@ magma_zjacobisetup_diagscal(
     magma_z_matrix diag={Magma_CSR};
     CHECK( magma_zvinit( &diag, Magma_CPU, A.num_rows, 1, MAGMA_Z_ZERO, queue ));
 
-    if ( A.storage_type != Magma_CSR) {
+    if ( A.storage_type != Magma_CSR || A.memory_location != Magma_CPU ) {
         CHECK( magma_zmtransfer( A, &A_h1, A.memory_location, Magma_CPU, queue ));
         CHECK( magma_zmconvert( A_h1, &B, A_h1.storage_type, Magma_CSR, queue ));
-    }
-    else {
-        CHECK( magma_zmtransfer( A, &B, A.memory_location, Magma_CPU, queue ));
-    }
-    for( magma_int_t rowindex=0; rowindex<B.num_rows; rowindex++ ) {
-        magma_int_t start = (B.drow[rowindex]);
-        magma_int_t end = (B.drow[rowindex+1]);
-        for( i=start; i<end; i++ ) {
-            if ( B.dcol[i]==rowindex ) {
-                diag.val[rowindex] = 1.0/B.val[i];
-                break;
+        
+        for( magma_int_t rowindex=0; rowindex<B.num_rows; rowindex++ ) {
+            magma_int_t start = (B.drow[rowindex]);
+            magma_int_t end = (B.drow[rowindex+1]);
+            for( i=start; i<end; i++ ) {
+                if ( B.dcol[i]==rowindex ) {
+                    diag.val[rowindex] = 1.0/B.val[i];
+                    break;
+                }
+            }
+            if ( diag.val[rowindex] == MAGMA_Z_ZERO ){
+                printf(" error: zero diagonal element in row %d!\n",
+                                                            (int) rowindex);
+                
+                if ( A.storage_type != Magma_CSR) {
+                    magma_zmfree( &A_h1, queue );
+                }
+                magma_zmfree( &B, queue );
+                magma_zmfree( &diag, queue );
+                info = MAGMA_ERR_BADPRECOND;
+                goto cleanup;
             }
         }
-        if ( diag.val[rowindex] == MAGMA_Z_ZERO ){
-            printf(" error: zero diagonal element in row %d!\n",
-                                                        (int) rowindex);
-            
-            if ( A.storage_type != Magma_CSR) {
-                magma_zmfree( &A_h1, queue );
+    }
+    else{
+        for( magma_int_t rowindex=0; rowindex<A.num_rows; rowindex++ ) {
+            magma_int_t start = (A.drow[rowindex]);
+            magma_int_t end = (A.drow[rowindex+1]);
+            for( i=start; i<end; i++ ) {
+                if ( A.dcol[i]==rowindex ) {
+                    diag.val[rowindex] = 1.0/A.val[i];
+                    break;
+                }
             }
-            magma_zmfree( &B, queue );
-            magma_zmfree( &diag, queue );
-            info = MAGMA_ERR_BADPRECOND;
-            goto cleanup;
+            if ( diag.val[rowindex] == MAGMA_Z_ZERO ){
+                printf(" error: zero diagonal element in row %d!\n",
+                                                            (int) rowindex);
+                
+                if ( A.storage_type != Magma_CSR) {
+                    magma_zmfree( &A_h1, queue );
+                }
+                magma_zmfree( &B, queue );
+                magma_zmfree( &diag, queue );
+                info = MAGMA_ERR_BADPRECOND;
+                goto cleanup;
+            }
         }
     }
-    CHECK( magma_zmtransfer( diag, d, Magma_CPU, A.memory_location, queue ));
-
-    if ( A.storage_type != Magma_CSR) {
-        magma_zmfree( &A_h1, queue );
-    }
+    CHECK( magma_zmtransfer( diag, d, Magma_CPU, Magma_DEV, queue ));
     
 cleanup:
+    magma_zmfree( &A_h1, queue );
     magma_zmfree( &B, queue );
     magma_zmfree( &diag, queue );
  
