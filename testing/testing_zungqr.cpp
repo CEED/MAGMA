@@ -72,14 +72,14 @@ int main( int argc, char** argv )
             n2 = lda*n;
             min_mn = min(m, n);
             nb = magma_get_zgeqrf_nb( m );
-            lwork  = (m + 2*n+nb)*nb;
+            lwork  = n*nb;
             gflops = FLOPS_ZUNGQR( m, n, k ) / 1e9;
             
-            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             TESTING_MALLOC_PIN( hR,     magmaDoubleComplex, lda*n  );
             
             TESTING_MALLOC_CPU( hA,     magmaDoubleComplex, lda*n  );
             TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_CPU( h_work, magmaDoubleComplex, lwork  );
             
             TESTING_MALLOC_DEV( dA,     magmaDoubleComplex, ldda*n );
             TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, ( 2*min_mn + magma_roundup( n, 32 ) )*nb );
@@ -110,7 +110,7 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zungqr_gpu returned error %d: %s.\n",
+                printf("magma_zungqr returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
             /* =====================================================================
@@ -142,11 +142,11 @@ int main( int argc, char** argv )
                        gpu_perf, gpu_time );
             }
             
-            TESTING_FREE_PIN( h_work );
             TESTING_FREE_PIN( hR     );
             
             TESTING_FREE_CPU( hA  );
             TESTING_FREE_CPU( tau );
+            TESTING_FREE_CPU( h_work );
             
             TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dT );
