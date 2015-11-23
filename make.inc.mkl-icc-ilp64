@@ -53,7 +53,9 @@ NVCCFLAGS += -DMKL_ILP64
 # it is safe to disable all these
 CFLAGS   += -pedantic -Wno-long-long
 #CFLAGS   += -Werror  # uncomment to ensure all warnings are dealt with
-CXXFLAGS := $(CFLAGS) -std=c++98
+
+# C++11 (icc >= 13) is not required, but has benefits like atomic operations
+CXXFLAGS := $(CFLAGS) -std=c++11
 CFLAGS   += -std=c99
 
 

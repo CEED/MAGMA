@@ -43,6 +43,10 @@ F90FLAGS  = -O3 $(FPIC) -DADD_ -warn all -warn nounused
 NVCCFLAGS = -O3         -DADD_           -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
 LDFLAGS   =     $(FPIC)                  -openmp
 
+# C++11 (icc >= 13) is not required, but has benefits like atomic operations
+CXXFLAGS := $(CFLAGS) -std=c++11
+CFLAGS   += -std=c99
+
 
 # --------------------
 # libraries
