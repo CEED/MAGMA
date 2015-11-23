@@ -15,8 +15,6 @@
 #ifdef __cplusplus
 
 #include <cmath>
-using std::isinf;
-using std::isnan;
 using std::fabs;
 
 // __host__ and __device__ are defined in CUDA headers.
