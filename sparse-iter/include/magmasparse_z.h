@@ -1948,6 +1948,20 @@ magma_zpcgmerge_xrbeta2(
     magma_queue_t queue );
 
 magma_int_t
+magma_zjcgmerge_xrbeta(
+    int n,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr diag,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dr,
+    magmaDoubleComplex_ptr dd,
+    magmaDoubleComplex_ptr dz,
+    magmaDoubleComplex_ptr dh, 
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zmdotc(
     magma_int_t n, 
     magma_int_t k, 

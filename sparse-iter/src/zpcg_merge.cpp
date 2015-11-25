@@ -171,20 +171,29 @@ magma_zpcg_merge(
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
             
         
-        // updates x, r
-        CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
+        if( precond_par->solver == Magma_JACOBI ){
+                CHECK( magma_zjcgmerge_xrbeta( dofs, d1, d2, precond_par->d.dval, x->dval, r.dval, d.dval, z.dval, h.dval, skp, queue ));
+        }
+        else if( precond_par->solver == Magma_NONE ){
+                // updates x, r, computes scalars and updates d
+                CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, h.dval, z.dval, skp, queue ));
+                magma_zcopy( dofs, h.dval, 1, d.dval, 1 );
+        } else {
         
-        // preconditioner in between
-        tempop1 = magma_sync_wtime( queue );
-        CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
-        //            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
-        tempop2 = magma_sync_wtime( queue );
-        precond_par->runtime += tempop2-tempop1;
-        
-        // computes scalars and updates d
-        CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));
-        
+            // updates x, r
+            CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
+            
+            // preconditioner in between
+            tempop1 = magma_sync_wtime( queue );
+            CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
+            CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+            //            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
+            tempop2 = magma_sync_wtime( queue );
+            precond_par->runtime += tempop2-tempop1;
+            
+            // computes scalars and updates d
+            CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, h.dval, r.dval, d.dval, skp, queue ));
+        }
         
         //if( solver_par->numiter==1){
         //    magma_zcopy( dofs, h.dval, 1, d.dval, 1 );   

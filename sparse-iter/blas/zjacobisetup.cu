@@ -11,7 +11,7 @@
 */
 #include "common_magmasparse.h"
 
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 512
 
 
 #define PRECISION_z
@@ -162,9 +162,10 @@ magma_zjacobi_diagscal(
     magma_z_matrix *c,
     magma_queue_t queue )
 {
-    dim3 grid( magma_ceildiv( num_rows, BLOCK_SIZE ));
+    
+    dim3 grid( magma_ceildiv( num_rows, 512 ));
     int num_vecs = b.num_rows*b.num_cols/num_rows;
-    magma_int_t threads = BLOCK_SIZE;
+    magma_int_t threads = 512;
     zjacobidiagscal_kernel<<< grid, threads, 0 >>>( num_rows, num_vecs, b.dval, d.dval, c->val );
 
     return MAGMA_SUCCESS;
