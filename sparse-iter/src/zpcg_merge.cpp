@@ -175,9 +175,10 @@ magma_zpcg_merge(
                 CHECK( magma_zjcgmerge_xrbeta( dofs, d1, d2, precond_par->d.dval, x->dval, r.dval, d.dval, z.dval, h.dval, skp, queue ));
         }
         else if( precond_par->solver == Magma_NONE ){
-                // updates x, r, computes scalars and updates d
-                CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, h.dval, z.dval, skp, queue ));
-                magma_zcopy( dofs, h.dval, 1, d.dval, 1 );
+            // updates x, r
+            CHECK( magma_zpcgmerge_xrbeta1( dofs, x->dval, r.dval, d.dval, z.dval, skp, queue ));
+            // computes scalars and updates d
+            CHECK( magma_zpcgmerge_xrbeta2( dofs, d1, d2, r.dval, r.dval, d.dval, skp, queue ));
         } else {
         
             // updates x, r
