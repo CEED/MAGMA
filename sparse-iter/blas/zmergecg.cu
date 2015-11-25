@@ -1678,3 +1678,213 @@ magma_zpcgmerge_xrbeta2(
 }
 
 /* -------------------------------------------------------------------------- */
+
+
+
+// updates x and r
+__global__ void
+magma_zjcgmerge_xrbeta_kernel(  
+    int n, 
+    magmaDoubleComplex * diag, 
+    magmaDoubleComplex * x,     
+    magmaDoubleComplex * r,
+    magmaDoubleComplex * d,
+    magmaDoubleComplex * z,
+    magmaDoubleComplex * h,
+    magmaDoubleComplex * vtmp,
+    magmaDoubleComplex * skp )
+{
+    extern __shared__ magmaDoubleComplex temp[]; 
+    int Idx = threadIdx.x;   
+    int i   = blockIdx.x * blockDim.x + Idx;
+    int j;
+
+    magmaDoubleComplex rho = skp[3];
+    magmaDoubleComplex mrho = MAGMA_Z_MAKE( -1.0, 0.0)*rho;
+
+    if( i<n ) {
+        //x[i] += rho * d[i];
+        //r[i] += mrho * z[i];
+        h[i] = r[i] * diag[i];
+    }/*
+    __syncthreads();
+    temp[ Idx ]                 = ( i < n ) ?
+                h[ i ] * r[ i ] : MAGMA_Z_ZERO;
+    temp[ Idx + blockDim.x ]    = ( i < n ) ?
+                r[ i ] * r[ i ] : MAGMA_Z_ZERO;
+    
+    __syncthreads();
+    if ( Idx < 128 ){
+        for( j=0; j<2; j++){
+            temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 128 ];
+        }
+    }
+    __syncthreads();
+    if ( Idx < 64 ){
+        for( j=0; j<2; j++){
+            temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 64 ];
+        }
+    }
+    __syncthreads();
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+        if( Idx < 32 ){
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 32 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 16 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 8 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 4 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 2 ];
+                __syncthreads();
+            for( j=0; j<2; j++)
+                temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 1 ];
+                __syncthreads();
+        }
+    #endif
+    #if defined(PRECISION_d)
+        if( Idx < 32 ){
+            volatile double *temp2 = temp;
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
+            }
+        }
+    #endif
+    #if defined(PRECISION_s)
+        if( Idx < 32 ){
+            volatile float *temp2 = temp;
+            for( j=0; j<2; j++){
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
+                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
+            }
+        }
+    #endif  
+    
+    if ( Idx == 0 ){
+            vtmp[ blockIdx.x ] = temp[ 0 ];
+            vtmp[ blockIdx.x+n ] = temp[ blockDim.x ];
+    */
+}
+
+
+
+
+
+/**
+    Purpose
+    -------
+
+    Merges the update of r and x with the dot product and performs then 
+    the update for the Krylov vector d
+
+    Arguments
+    ---------
+
+    @param[in]
+    n           int
+                dimension n
+
+    @param[in]
+    d1          magmaDoubleComplex_ptr 
+                temporary vector
+
+    @param[in]
+    d2          magmaDoubleComplex_ptr 
+                temporary vector
+
+    @param[in]
+    dh          magmaDoubleComplex_ptr
+                input vector x
+
+    @param[in]
+    dr          magmaDoubleComplex_ptr 
+                input/output vector r
+
+    @param[in]
+    skp         magmaDoubleComplex_ptr 
+                array for parameters
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zsygpuk
+    ********************************************************************/
+
+extern "C" magma_int_t
+magma_zjcgmerge_xrbeta(
+    int n,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr diag,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dr,
+    magmaDoubleComplex_ptr dd,
+    magmaDoubleComplex_ptr dz,
+    magmaDoubleComplex_ptr dh, 
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue )
+{
+    // set queue for old dense routines
+    magma_queue_t orig_queue;
+    magmablasGetKernelStream( &orig_queue );
+
+    int local_block_size=256;
+    dim3 Bs( local_block_size );
+    dim3 Gs( magma_ceildiv( n, local_block_size ) );
+    dim3 Gs_next;
+    int Ms =  4*local_block_size * sizeof( magmaDoubleComplex ); 
+    magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
+    int b = 1;    
+        magma_zpcgmerge_xrbeta_kernel<<<Gs, Bs, 0, queue->cuda_stream() >>>
+                                    ( n, dx, dr, dd, dz, skp );  
+                                    
+    magma_zjcgmerge_xrbeta_kernel<<<Gs, Bs, Ms, queue->cuda_stream() >>>
+                                    ( n, diag, dx, dr, dd, dz, dh, d1, skp );  
+                                                  //  magma_zcopy( n, dr, 1, dh, 1 );
+    magma_zmzdotc_one_kernel_1<<<Gs, Bs, Ms, queue->cuda_stream() >>>
+                                    ( n, dr, dh, d1);                  
+                                    
+    while( Gs.x > 1 ) {
+        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        if ( Gs_next.x == 1 ) Gs_next.x = 2;
+        magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
+                                    ( Gs.x, n, aux1, aux2 );
+        Gs_next.x = Gs_next.x /2;
+        Gs.x = Gs_next.x;
+        b = 1 - b;
+        if ( b ) { aux1 = d1; aux2 = d2; }
+        else   { aux2 = d1; aux1 = d2; }
+    }
+
+
+    magma_zcopyvector( 1, aux1, 1, skp+1, 1 );
+    magma_zcopyvector( 1, aux1+n, 1, skp+6, 1 );
+    dim3 Bs2( 2 );
+    dim3 Gs2( 1 );
+    magma_zcg_alphabetakernel<<<Gs2, Bs2, 0>>>( skp );
+
+    dim3 Bs3( local_block_size );
+    dim3 Gs3( magma_ceildiv( n, local_block_size ) );
+    magma_zcg_d_kernel<<<Gs3, Bs3, 0>>>( n, skp, dh, dd );  
+
+   magmablasSetKernelStream( orig_queue );
+   return MAGMA_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
