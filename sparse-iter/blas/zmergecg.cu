@@ -1703,10 +1703,10 @@ magma_zjcgmerge_xrbeta_kernel(
     magmaDoubleComplex mrho = MAGMA_Z_MAKE( -1.0, 0.0)*rho;
 
     if( i<n ) {
-        //x[i] += rho * d[i];
-        //r[i] += mrho * z[i];
+        x[i] += rho * d[i];
+        r[i] += mrho * z[i];
         h[i] = r[i] * diag[i];
-    }/*
+    }
     __syncthreads();
     temp[ Idx ]                 = ( i < n ) ?
                 h[ i ] * r[ i ] : MAGMA_Z_ZERO;
@@ -1778,7 +1778,8 @@ magma_zjcgmerge_xrbeta_kernel(
     if ( Idx == 0 ){
             vtmp[ blockIdx.x ] = temp[ 0 ];
             vtmp[ blockIdx.x+n ] = temp[ blockDim.x ];
-    */
+    }
+    
 }
 
 
@@ -1851,14 +1852,9 @@ magma_zjcgmerge_xrbeta(
     int Ms =  4*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;    
-        magma_zpcgmerge_xrbeta_kernel<<<Gs, Bs, 0, queue->cuda_stream() >>>
-                                    ( n, dx, dr, dd, dz, skp );  
                                     
     magma_zjcgmerge_xrbeta_kernel<<<Gs, Bs, Ms, queue->cuda_stream() >>>
                                     ( n, diag, dx, dr, dd, dz, dh, d1, skp );  
-                                                  //  magma_zcopy( n, dr, 1, dh, 1 );
-    magma_zmzdotc_one_kernel_1<<<Gs, Bs, Ms, queue->cuda_stream() >>>
-                                    ( n, dr, dh, d1);                  
                                     
     while( Gs.x > 1 ) {
         Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;

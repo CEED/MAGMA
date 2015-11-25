@@ -122,8 +122,8 @@ magma_zidr_strm(
     magma_queue_t queue )
 {
     // set queue for old dense routines
-    magma_queue_t orig_queue = NULL;
-    magmablasGetKernelStream( &orig_queue );
+    //magma_queue_t orig_queue = NULL;
+    //magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
@@ -185,7 +185,7 @@ magma_zidr_strm(
     magmaDoubleComplex *d1 = NULL, *d2 = NULL;
     
     // queue variables
-    const magma_queue_t squeue = 0;    // synchronous kernel queues
+    //const magma_queue_t squeue = 0;    // synchronous kernel queues
     const magma_int_t nqueues = 3;     // number of queues
     magma_queue_t queues[nqueues];    
     magma_int_t q1flag = 0;
@@ -198,8 +198,10 @@ magma_zidr_strm(
 
     // set asynchronous kernel queues
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
+    queues[1] = queue;
     magma_queue_create( &queues[0] );
-    if ( queue != squeue ) {
+    magma_queue_create( &queues[2] );
+    /*if ( queue != squeue ) {
         queues[1] = queue;
         q1flag = 0;
     } else {
@@ -210,10 +212,10 @@ magma_zidr_strm(
     magma_queue_create( &(queues[2]) );
     for ( i = 0; i < nqueues; ++i ) {
         printD("Kernel queue #%d = %p\n", i, (void *)queues[i]);
-    }
+    }*/
 
     // set to Q1
-    magmablasSetKernelStream( queue );
+    magmablasSetKernelStream( queues[1] );
 
     // initial s space
     // hack --> use "--restart" option as the shadow space number.
@@ -877,15 +879,20 @@ cudaProfilerStart();
                 CHECK( magma_zmdotc( doft, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queues[2] ));
             }
 
-if ( smoothing > 0 && (k + 1) < s ) {
-// sync Q0
-// c(k:s) = M1(k:s,k:s) c(k:s)
-magma_queue_sync( queues[0] );
-}
+            if ( smoothing > 0 && (k + 1) < s ) {
+            // sync Q0
+            // c(k:s) = M1(k:s,k:s) c(k:s)
+            magma_queue_sync( queues[0] );
+            }
 
             // iter = iter + 1
             solver_par->numiter++;
         }
+
+        //magma_queue_sync( queues[0] );
+        //magma_queue_sync( queues[1] );
+        magma_queue_sync( queues[2] );
+
 
         // update solution approximation x
         if ( smoothing < 0 && innerflag != 1 ) {
@@ -1134,7 +1141,7 @@ cleanup:
     }
 
     // set to Q
-    magmablasSetKernelStream( queue );
+    magmablasSetKernelStream( queues[1] );
 
     // free resources
     dr.dval = NULL;   // needed because its pointer is redirected to dt
@@ -1171,12 +1178,12 @@ cleanup:
 
     // destroy asynchronous queues
     magma_queue_destroy( queues[0] );
-    if ( q1flag == 1 ) {
-        magma_queue_destroy( queues[1] );
-    }
+    //if ( q1flag == 1 ) {
+    //    magma_queue_destroy( queues[1] );
+    //}
     magma_queue_destroy( queues[2] );
 
-    magmablasSetKernelStream( orig_queue );
+    magmablasSetKernelStream( queue );
     solver_par->info = info;
     return info;
     /* magma_zidr_strms */
