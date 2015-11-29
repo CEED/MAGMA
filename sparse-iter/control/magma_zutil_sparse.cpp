@@ -380,6 +380,9 @@ magma_zparse_opts(
         else if ( opts->solver_par.solver == Magma_PCGMERGE) {
             opts->solver_par.solver = Magma_PCG;
         }
+        else if ( opts->solver_par.solver == Magma_BOMBARDMERGE) {
+            opts->solver_par.solver = Magma_BOMBARD;
+        }
     }
     
     // ensure to take a symmetric preconditioner for the PCG
