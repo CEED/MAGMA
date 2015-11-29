@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -71,8 +71,6 @@ magma_zresidual(
         CHECK( magma_z_spmv( c_one, A, x, c_zero, r, queue ));        // r = A x
         magma_zaxpy( dofs, c_neg_one, b.dval, 1, r.dval, 1, queue );  // r = r - b
         *res = magma_dznrm2( dofs, r.dval, 1, queue );                // res = ||r||
-        //   / magma_dznrm2( dofs, b.dval, 1, queue );                //     / ||b||
-        //printf( "relative residual: %e\n", *res );
     } else if ((b.num_rows*b.num_cols)%A.num_rows == 0 ) {
         CHECK( magma_zvinit( &r, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
 
@@ -82,8 +80,6 @@ magma_zresidual(
             magma_zaxpy( dofs, c_neg_one, b(i), 1, r(i), 1, queue );  // r = r - b
             res[i] = magma_dznrm2( dofs, r(i), 1, queue );            // res = ||r||
         }
-        //         / magma_dznrm2( dofs, b.dval, 1, queue );          //     / ||b||
-        //printf( "relative residual: %e\n", *res );
     } else {
         printf("error: dimensions do not match.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
