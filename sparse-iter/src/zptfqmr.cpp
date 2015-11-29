@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,14 +10,14 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
 
 /**
-    Purpose
+    Purpose                                                                                                           
     -------
 
     Solves a system of linear equations
@@ -65,10 +65,6 @@ magma_zptfqmr(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_PTFQMR;
     solver_par->numiter = 0;
@@ -105,17 +101,17 @@ magma_zptfqmr(
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     solver_par->init_res = nom0;
-    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, w.dval, 1 );   
-    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1 );  
+    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1, queue );   
+    magma_zcopy( dofs, r.dval, 1, w.dval, 1, queue );   
+    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1, queue );  
     
     // preconditioner
     CHECK( magma_z_applyprecond_left( A, u_m, &t, precond_par, queue ));
     CHECK( magma_z_applyprecond_right( A, t, &pu_m, precond_par, queue ));
     
     CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
-    magma_zcopy( dofs, v.dval, 1, Au.dval, 1 );  
-    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    magma_zcopy( dofs, v.dval, 1, Au.dval, 1, queue );  
+    nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
         nomb=1.0;
     }       
@@ -132,8 +128,8 @@ magma_zptfqmr(
         goto cleanup;
     }
 
-    tau = magma_zsqrt( magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1) );
-    rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
+    tau = magma_zsqrt( magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue ) );
+    rho = magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue );
     rho_l = rho;
     
     //Chronometry
@@ -146,26 +142,26 @@ magma_zptfqmr(
     {
         solver_par->numiter++;
         if( solver_par->numiter%2 == 1 ){
-            alpha = rho / magma_zdotc(dofs, v.dval, 1, r_tld.dval, 1);
-            magma_zcopy( dofs, u_m.dval, 1, u_mp1.dval, 1 );   
-            magma_zaxpy(dofs,  -alpha, v.dval, 1, u_mp1.dval, 1);     // u_mp1 = u_m - alpha*v;
+            alpha = rho / magma_zdotc( dofs, v.dval, 1, r_tld.dval, 1, queue );
+            magma_zcopy( dofs, u_m.dval, 1, u_mp1.dval, 1, queue );   
+            magma_zaxpy( dofs,  -alpha, v.dval, 1, u_mp1.dval, 1, queue );     // u_mp1 = u_m - alpha*v;
         }
-        magma_zaxpy(dofs,  -alpha, Au.dval, 1, w.dval, 1);     // w = w - alpha*Au;
+        magma_zaxpy( dofs,  -alpha, Au.dval, 1, w.dval, 1, queue );     // w = w - alpha*Au;
         sigma = theta * theta / alpha * eta;    
-        magma_zscal(dofs, sigma, d.dval, 1);    
-        magma_zaxpy(dofs, c_one, pu_m.dval, 1, d.dval, 1);     // d = pu_m + sigma*d;
-        magma_zscal(dofs, sigma, Ad.dval, 1);         
-        magma_zaxpy(dofs, c_one, Au.dval, 1, Ad.dval, 1);     // Ad = Au + sigma*Ad;
+        magma_zscal( dofs, sigma, d.dval, 1, queue );    
+        magma_zaxpy( dofs, c_one, pu_m.dval, 1, d.dval, 1, queue );     // d = pu_m + sigma*d;
+        magma_zscal( dofs, sigma, Ad.dval, 1, queue );         
+        magma_zaxpy( dofs, c_one, Au.dval, 1, Ad.dval, 1, queue );     // Ad = Au + sigma*Ad;
 
         
-        theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1) ) / tau;
+        theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1, queue ) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
         tau = tau * theta *c;
         eta = c * c * alpha;
 
-        magma_zaxpy(dofs, eta, d.dval, 1, x->dval, 1);     // x = x + eta * d
-        magma_zaxpy(dofs, -eta, Ad.dval, 1, r.dval, 1);     // r = r - eta * Ad
-        res = magma_dznrm2( dofs, r.dval, 1 );
+        magma_zaxpy( dofs, eta, d.dval, 1, x->dval, 1, queue );     // x = x + eta * d
+        magma_zaxpy( dofs, -eta, Ad.dval, 1, r.dval, 1, queue );     // r = r - eta * Ad
+        res = magma_dznrm2( dofs, r.dval, 1, queue );
         
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
@@ -182,10 +178,10 @@ magma_zptfqmr(
         }
         if( solver_par->numiter%2 == 0 ){
             rho_l = rho;
-            rho = magma_zdotc(dofs, w.dval, 1, r_tld.dval, 1);
+            rho = magma_zdotc( dofs, w.dval, 1, r_tld.dval, 1, queue );
             beta = rho / rho_l;
-            magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1 );  
-            magma_zaxpy(dofs, beta, u_m.dval, 1, u_mp1.dval, 1);     // u_mp1 = w + beta*u_m;
+            magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1, queue );  
+            magma_zaxpy( dofs, beta, u_m.dval, 1, u_mp1.dval, 1, queue );     // u_mp1 = w + beta*u_m;
         }
               
         // preconditioner
@@ -198,12 +194,12 @@ magma_zptfqmr(
         CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue )); // Au_new = A pu_m
       
         if( solver_par->numiter%2 == 0 ){
-            magma_zscal(dofs, beta*beta, v.dval, 1);                    
-            magma_zaxpy(dofs, beta, Au.dval, 1, v.dval, 1);              
-            magma_zaxpy(dofs, c_one, Au_new.dval, 1, v.dval, 1);      // v = Au_new + beta*(Au+beta*v);
+            magma_zscal( dofs, beta*beta, v.dval, 1, queue );                    
+            magma_zaxpy( dofs, beta, Au.dval, 1, v.dval, 1, queue );              
+            magma_zaxpy( dofs, c_one, Au_new.dval, 1, v.dval, 1, queue );      // v = Au_new + beta*(Au+beta*v);
         }
-        magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1 );  
-        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1 );  
+        magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1, queue );  
+        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1, queue );  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
@@ -258,7 +254,6 @@ cleanup:
     magma_zmfree(&Au_new, queue );
     magma_zmfree(&Ad, queue );
     
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zpfqmr */
