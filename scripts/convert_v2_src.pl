@@ -24,8 +24,9 @@ use strict;
 # MAGMA kernels, in alphabetical order
 my @kernels = qw(
 	axpy
+	cnrm2
+	copy
 	dot
-	scal
 	gemm
 	gemv
 	hemm
@@ -40,24 +41,24 @@ my @kernels = qw(
 	larfb
 	laset
 	laswp
+	nrm2
+	scal
 	symm
 	symv
+	transpose
 	trmm
 	trsm
 	trsv
-	transpose
-	nrm2
 	znrm2
-	cnrm2
 );
 
 my @setget = qw(
+	copyvector
+	copymatrix
 	getvector
 	getmatrix
 	setvector
 	setmatrix
-	copyvector
-	copymatrix
 );
 
 my $kernels = join( "|", @kernels );
