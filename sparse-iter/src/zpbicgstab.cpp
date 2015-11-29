@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
@@ -65,10 +65,6 @@ magma_zpbicgstab(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_PBICGSTAB;
     solver_par->numiter = 0;
@@ -102,13 +98,13 @@ magma_zpbicgstab(
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
-    magma_zcopy( dofs, r.dval, 1, rr.dval, 1 );                  // rr = r
+    magma_zcopy( dofs, r.dval, 1, rr.dval, 1, queue );                  // rr = r
     betanom = nom0;
     nom = nom0*nom0;
     rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;
 
-    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
         nomb=1.0;
     }       
@@ -136,12 +132,12 @@ magma_zpbicgstab(
     {
         solver_par->numiter++;
         rho_old = rho_new;                                   // rho_old=rho
-        rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1 );  // rho=<rr,r>
+        rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1, queue );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
-        magma_zscal( dofs, beta, p.dval, 1 );                 // p = beta*p
-        magma_zaxpy( dofs, c_neg_one * omega * beta, v.dval, 1 , p.dval, 1 );
+        magma_zscal( dofs, beta, p.dval, 1, queue );                 // p = beta*p
+        magma_zaxpy( dofs, c_neg_one * omega * beta, v.dval, 1 , p.dval, 1, queue );
                                                         // p = p-omega*beta*v
-        magma_zaxpy( dofs, c_one, r.dval, 1, p.dval, 1 );      // p = p+r
+        magma_zaxpy( dofs, c_one, r.dval, 1, p.dval, 1, queue );      // p = p+r
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
@@ -152,9 +148,9 @@ magma_zpbicgstab(
         
         CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
 
-        alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1 );
-        magma_zcopy( dofs, r.dval, 1 , s.dval, 1 );            // s=r
-        magma_zaxpy( dofs, c_neg_one * alpha, v.dval, 1 , s.dval, 1 ); // s=s-alpha*v
+        alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
+        magma_zcopy( dofs, r.dval, 1 , s.dval, 1, queue );            // s=r
+        magma_zaxpy( dofs, c_neg_one * alpha, v.dval, 1 , s.dval, 1, queue ); // s=s-alpha*v
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
@@ -166,15 +162,15 @@ magma_zpbicgstab(
         CHECK( magma_z_spmv( c_one, A, z, c_zero, t, queue ));       // t=As
                    
        // omega = <s,t>/<t,t>
-        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )
-                   / magma_zdotc( dofs, t.dval, 1, t.dval, 1 );
+        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1, queue )
+                   / magma_zdotc( dofs, t.dval, 1, t.dval, 1, queue );
 
-        magma_zaxpy( dofs, alpha, y.dval, 1 , x->dval, 1 );     // x=x+alpha*p
-        magma_zaxpy( dofs, omega, z.dval, 1 , x->dval, 1 );     // x=x+omega*s
+        magma_zaxpy( dofs, alpha, y.dval, 1 , x->dval, 1, queue );     // x=x+alpha*p
+        magma_zaxpy( dofs, omega, z.dval, 1 , x->dval, 1, queue );     // x=x+omega*s
 
-        magma_zcopy( dofs, s.dval, 1 , r.dval, 1 );             // r=s
-        magma_zaxpy( dofs, c_neg_one * omega, t.dval, 1 , r.dval, 1 ); // r=r-omega*t
-        res = betanom = magma_dznrm2( dofs, r.dval, 1 );
+        magma_zcopy( dofs, s.dval, 1 , r.dval, 1, queue );             // r=s
+        magma_zaxpy( dofs, c_neg_one * omega, t.dval, 1 , r.dval, 1, queue ); // r=r-omega*t
+        res = betanom = magma_dznrm2( dofs, r.dval, 1, queue );
 
         nom = betanom*betanom;
 
@@ -243,7 +239,6 @@ cleanup:
     magma_zmfree(&y, queue );
     magma_zmfree(&z, queue );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zbicgstab */

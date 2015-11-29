@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -60,10 +60,6 @@ magma_zbicgstab_merge2(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_BICGSTABMERGE2;
     solver_par->numiter = 0;
@@ -79,12 +75,6 @@ magma_zbicgstab_merge2(
     
     magma_int_t dofs = A.num_rows;
 
-    // GPU stream
-    magma_queue_t stream[2]={0};
-    magma_event_t event[1]={0};
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
-    magma_event_create( &event[0] );
 
     // workspace
     magma_z_matrix q={Magma_CSR}, r={Magma_CSR}, rr={Magma_CSR}, p={Magma_CSR}, v={Magma_CSR}, s={Magma_CSR}, t={Magma_CSR};
@@ -117,13 +107,13 @@ magma_zbicgstab_merge2(
     t.dval = q(5);
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1);                             // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1, queue );                             // x = 0
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
-    magma_zcopy( dofs, r.dval, 1, q(0), 1 );                            // rr = r
-    magma_zcopy( dofs, r.dval, 1, q(1), 1 );                            // q = r
+    magma_zcopy( dofs, r.dval, 1, q(0), 1, queue );                            // rr = r
+    magma_zcopy( dofs, r.dval, 1, q(1), 1, queue );                            // q = r
     betanom = nom0;
     nom = nom0*nom0;
-    rho_new = magma_zdotc( dofs, r.dval, 1, r.dval, 1 );             // rho=<rr,r>
+    rho_new = magma_zdotc( dofs, r.dval, 1, r.dval, 1, queue );             // rho=<rr,r>
     rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     beta = rho_new;
     solver_par->init_res = nom0;
@@ -136,7 +126,7 @@ magma_zbicgstab_merge2(
     skp_h[3]=rho_old;
     skp_h[4]=rho_new;
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
-    magma_zsetvector( 8, skp_h, 1, skp, 1 );
+    magma_zsetvector( 8, skp_h, 1, skp, 1, queue );
 
     solver_par->final_res = solver_par->init_res;
     solver_par->iter_res = solver_par->init_res;
@@ -144,7 +134,7 @@ magma_zbicgstab_merge2(
         solver_par->res_vec[0] = nom0;
         solver_par->timing[0] = 0.0;
     }
-    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if( nom0 < solver_par->atol ||
         nom0/nomb < solver_par->rtol ){
 
@@ -164,7 +154,7 @@ magma_zbicgstab_merge2(
     {
         solver_par->numiter++;
 
-        magmablasSetKernelStream(stream[0]);
+        //magmablasSetKernelStream(queues[0]);
 
         // computes p=r+beta*(p-omega*v)
         CHECK( magma_zbicgmerge1( dofs, skp, v.dval, r.dval, p.dval, queue ));
@@ -175,8 +165,7 @@ magma_zbicgstab_merge2(
                                                     q(4), q(5), x->dval, skp, queue ));
 
         // check stopping criterion (asynchronous copy)
-        magma_zgetvector_async( 1 , skp+5, 1,
-                                                        skp_h+5, 1, stream[1] );
+        magma_zgetvector( 1 , skp+5, 1, skp_h+5, 1, queue );
 
         betanom = sqrt(MAGMA_Z_REAL(skp_h[5]));
 
@@ -240,7 +229,6 @@ cleanup:
     magma_free( skp );
     magma_free_cpu( skp_h );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* zbicgstab_merge2 */

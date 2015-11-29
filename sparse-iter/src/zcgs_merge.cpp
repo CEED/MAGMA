@@ -251,7 +251,6 @@ cleanup:
     magma_zmfree(&u_hat, queue );
     magma_zmfree(&v_hat, queue );
 
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zcgs_merge */
