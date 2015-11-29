@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,7 +10,7 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -60,8 +60,8 @@ magma_zcg_merge(
     magma_int_t info = 0;
     
     // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
+    //magma_queue_t orig_queue=NULL;
+    //magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_CGMERGE;
@@ -79,13 +79,6 @@ magma_zcg_merge(
     magma_z_matrix r={Magma_CSR}, d={Magma_CSR}, z={Magma_CSR}, B={Magma_CSR}, C={Magma_CSR};
     magmaDoubleComplex *d1=NULL, *d2=NULL, *skp=NULL;
 
-    // GPU stream
-    magma_queue_t stream[2]={0};
-    magma_event_t event[1]={0};
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
-    magma_event_create( &event[0] );
-
     // GPU workspace
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -98,17 +91,17 @@ magma_zcg_merge(
     // skp = [alpha|beta|gamma|rho|tmp1|tmp2]
     
     // solver setup
-    magma_zscal( dofs, c_zero, x->dval, 1);                      // x = 0
+    magma_zscal( dofs, c_zero, x->dval, 1, queue );                      // x = 0
     //CHECK(  magma_zresidualvec( A, b, *x, &r, nom0, queue));
-    magma_zcopy( dofs, b.dval, 1, r.dval, 1 );                    // r = b
-    magma_zcopy( dofs, r.dval, 1, d.dval, 1 );                    // d = r
-    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1 );
+    magma_zcopy( dofs, b.dval, 1, r.dval, 1, queue );                    // r = b
+    magma_zcopy( dofs, r.dval, 1, d.dval, 1, queue );                    // d = r
+    nom0 = betanom = magma_dznrm2( dofs, r.dval, 1, queue );
     nom = nom0 * nom0;                                           // nom = r' * r
     CHECK( magma_z_spmv( c_one, A, d, c_zero, z, queue ));              // z = A d
-    den = MAGMA_Z_ABS( magma_zdotc(dofs, d.dval, 1, z.dval, 1) ); // den = d'* z
+    den = MAGMA_Z_ABS( magma_zdotc( dofs, d.dval, 1, z.dval, 1, queue ) ); // den = d'* z
     solver_par->init_res = nom0;
     
-    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
         nomb=1.0;
     }       
@@ -117,7 +110,7 @@ magma_zcg_merge(
     CHECK( magma_zmalloc_cpu( &skp_h, 6 ));
     
     alpha = rho = gamma = tmp1 = c_one;
-    beta =  magma_zdotc(dofs, r.dval, 1, r.dval, 1);
+    beta =  magma_zdotc( dofs, r.dval, 1, r.dval, 1, queue );
     skp_h[0]=alpha;
     skp_h[1]=beta;
     skp_h[2]=gamma;
@@ -125,7 +118,7 @@ magma_zcg_merge(
     skp_h[4]=tmp1;
     skp_h[5]=MAGMA_Z_MAKE(nom, 0.0);
 
-    magma_zsetvector( 6, skp_h, 1, skp, 1 );
+    magma_zsetvector( 6, skp_h, 1, skp, 1, queue );
 
     if( nom0 < solver_par->atol ||
         nom0/nomb < solver_par->rtol ){
@@ -153,7 +146,7 @@ magma_zcg_merge(
     {
         solver_par->numiter++;
 
-        //magmablasSetKernelStream(stream[0]);
+        ////magmablasSetKernelStream(queues[0]);
         
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
@@ -162,7 +155,7 @@ magma_zcg_merge(
         CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, d.dval, z.dval, skp, queue ));
 
         // check stopping criterion (asynchronous copy)
-        magma_zgetvector( 1 , skp+1, 1, skp_h+1, 1 );
+        magma_zgetvector( 1 , skp+1, 1, skp_h+1, 1, queue );
         betanom = sqrt(MAGMA_Z_ABS(skp_h[1]));
 
         if ( solver_par->verbose > 0 ) {
@@ -230,7 +223,7 @@ cleanup:
     magma_free( skp );
     magma_free_cpu( skp_h );
 
-    magmablasSetKernelStream( orig_queue );
+    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zcg_merge */
