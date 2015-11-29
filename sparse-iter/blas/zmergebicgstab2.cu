@@ -241,7 +241,7 @@ magma_zbicgmerge_spmv1(
     int b = 1;        
 
     if ( A.storage_type == Magma_CSR)
-        magma_zbicgmerge_spmv1_kernel<<<Gs, Bs, Ms>>>
+        magma_zbicgmerge_spmv1_kernel<<< Gs, Bs, Ms>>>
                     ( n, A.dval, A.drow, A.dcol, dp, dr, dv, d1 );
     else
         printf("error: only CSR format supported.\n");
@@ -262,7 +262,7 @@ magma_zbicgmerge_spmv1(
     magma_zcopyvector( 1, aux1, 1, skp, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zbicgstab_alphakernel<<<Gs2, Bs2, 0>>>( skp );
+    magma_zbicgstab_alphakernel<<< Gs2, Bs2, 0>>>( skp );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
@@ -536,7 +536,7 @@ magma_zbicgmerge_spmv2(
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;        
     if ( A.storage_type == Magma_CSR)
-        magma_zbicgmerge_spmv2_kernel<<<Gs, Bs, Ms>>>
+        magma_zbicgmerge_spmv2_kernel<<< Gs, Bs, Ms>>>
                     ( n, A.dval, A.drow, A.dcol, ds, dt, d1 );
     else
         printf("error: only CSR format supported.\n");
@@ -558,7 +558,7 @@ magma_zbicgmerge_spmv2(
     magma_zcopyvector( 1, aux1+n, 1, skp+7, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zbicgstab_omegakernel<<<Gs2, Bs2, 0>>>( skp );
+    magma_zbicgstab_omegakernel<<< Gs2, Bs2, 0>>>( skp );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
@@ -768,7 +768,7 @@ magma_zbicgmerge_xrbeta(
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;        
-    magma_zbicgmerge_xrbeta_kernel<<<Gs, Bs, Ms>>>
+    magma_zbicgmerge_xrbeta_kernel<<< Gs, Bs, Ms>>>
                     ( n, rr, r, p, s, t, x, skp, d1);  
 
     while( Gs.x > 1 ) {
@@ -788,7 +788,7 @@ magma_zbicgmerge_xrbeta(
     magma_zcopyvector( 1, aux1+n, 1, skp+5, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zbicgstab_betakernel<<<Gs2, Bs2, 0>>>( skp );
+    magma_zbicgstab_betakernel<<< Gs2, Bs2, 0>>>( skp );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
