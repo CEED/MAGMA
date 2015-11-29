@@ -59,10 +59,6 @@ magma_zcg_merge(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_CGMERGE;
     solver_par->numiter = 0;
@@ -223,7 +219,6 @@ cleanup:
     magma_free( skp );
     magma_free_cpu( skp_h );
 
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zcg_merge */

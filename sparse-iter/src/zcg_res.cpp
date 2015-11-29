@@ -60,10 +60,6 @@ magma_zcg_res(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_CG;
     solver_par->numiter = 0;
@@ -204,7 +200,6 @@ cleanup:
     magma_zmfree(&p, queue );
     magma_zmfree(&q, queue );
 
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zcg */

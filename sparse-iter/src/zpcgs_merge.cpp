@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,7 +10,7 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -48,6 +48,7 @@
     @param[in]
     precond_par magma_z_preconditioner*
                 preconditioner
+                
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
@@ -64,10 +65,6 @@ magma_zpcgs_merge(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_PCGS;
     solver_par->numiter = 0;
@@ -100,11 +97,11 @@ magma_zpcgs_merge(
 
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
-    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1 );   
+    magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1, queue );   
 
     solver_par->init_res = nom0;
             
-    nomb = magma_dznrm2( dofs, b.dval, 1 );
+    nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
         nomb=1.0;
     }       
@@ -131,7 +128,7 @@ magma_zpcgs_merge(
     {
         solver_par->numiter++;
         
-        rho = magma_zdotc(dofs, r.dval, 1, r_tld.dval, 1);
+        rho = magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue );
                                                             // rho = < r,r_tld>    
         if ( MAGMA_Z_ABS(rho) == 0.0 ) {
             goto cleanup;
@@ -170,7 +167,7 @@ magma_zpcgs_merge(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, p_hat, c_zero, v_hat, queue ));   // v = A p
-        alpha = rho / magma_zdotc(dofs, r_tld.dval, 1, v_hat.dval, 1);
+        alpha = rho / magma_zdotc( dofs, r_tld.dval, 1, v_hat.dval, 1, queue );
         
         magma_zcgs_3(  
         r.num_rows, 
@@ -205,7 +202,7 @@ magma_zpcgs_merge(
         // r = r -alpha*A u_hat
         // x = x + alpha u_hat
         
-        res = magma_dznrm2( dofs, r.dval, 1 );
+        res = magma_dznrm2( dofs, r.dval, 1, queue );
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
@@ -273,7 +270,6 @@ cleanup:
     magma_zmfree(&u_hat, queue );
     magma_zmfree(&v_hat, queue );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zpcgs_merge */
