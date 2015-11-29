@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 #include <cuda_profiler_api.h>
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
@@ -103,9 +103,6 @@ magma_zidr_acc(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    // set queue for old dense routines
-    magma_queue_t orig_queue = NULL;
-    magmablasGetKernelStream( &orig_queue );
 
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
@@ -180,7 +177,7 @@ magma_zidr_acc(
     printD("Kernel queues: (orig, queue) = (%p, %p)\n", (void *)orig_queue, (void *)queue);
 
     // Set to Q
-    magmablasSetKernelStream( queue );
+    //magmablasSetKernelStream( queue );
 
     // initial s space
     // hack --> use "--restart" option as the shadow space number.
@@ -206,24 +203,24 @@ magma_zidr_acc(
 
     // initial solution vector
     // x = 0
-    //magmablas_zlaset( MagmaFull, x->num_rows, x->num_cols, c_zero, c_zero, x->dval, x->num_rows );
+    //magmablas_zlaset( MagmaFull, x->num_rows, x->num_cols, c_zero, c_zero, x->dval, x->num_rows, queue );
     printMatrix("X", *x);
     gpumem += x->nnz * sizeof(magmaDoubleComplex);
 
     // initial RHS
     // b = 1
-    //magmablas_zlaset( MagmaFull, b.num_rows, b.num_cols, c_one, c_one, b.dval, b.num_rows );
+    //magmablas_zlaset( MagmaFull, b.num_rows, b.num_cols, c_one, c_one, b.dval, b.num_rows, queue );
     printMatrix("B", b);
     gpumem += b.nnz * sizeof(magmaDoubleComplex);
 
     // |b|
-    nrmb = magma_dznrm2( b.num_rows, b.dval, inc );
+    nrmb = magma_dznrm2( b.num_rows, b.dval, inc, queue );
     printD("init norm(b) ..........%lg\n", nrmb);
 
     // check for |b| == 0
     if ( nrmb == 0.0 ) {
         printD("RHS is zero, exiting...\n");
-        magma_zscal( dofx, MAGMA_Z_ZERO, x->dval, 1 );
+        magma_zscal( dofx, MAGMA_Z_ZERO, x->dval, 1, queue );
         solver_par->init_res = 0.0;
         solver_par->final_res = 0.0;
         solver_par->iter_res = 0.0;
@@ -282,9 +279,9 @@ magma_zidr_acc(
         CHECK( magma_zqr( dP1.num_rows, dP1.num_cols, dP1, dP1.ld, &dP, NULL, queue ));
     } else {
         // P = P1 / |P1|
-        nrm = magma_dznrm2( dofP, dP1.dval, inc );
+        nrm = magma_dznrm2( dofP, dP1.dval, inc, queue );
         nrm = 1.0 / nrm;
-        magma_zdscal( dofP, nrm, dP1.dval, 1 );
+        magma_zdscal( dofP, nrm, dP1.dval, 1, queue );
         CHECK( magma_zmtransfer( dP1, &dP, Magma_DEV, Magma_DEV, queue ));
         dP.major = dP1.major;
     }
@@ -338,7 +335,7 @@ magma_zidr_acc(
         drs.dval = dtt.dval + ldd * b.num_cols;
 
         // set smoothing residual vector
-        magma_zcopy( dofr, dr.dval, 1, drs.dval, 1 );
+        magma_zcopy( dofr, dr.dval, 1, drs.dval, 1, queue );
     }
 
     // G(n,s) = 0
@@ -366,7 +363,7 @@ magma_zidr_acc(
     CHECK( magma_zvinit( &dM1, Magma_DEV, s, s, c_zero, queue ));
     CHECK( magma_zvinit( &dM, Magma_DEV, s, s, c_zero, queue ));
     dofM = dM.num_rows * dM.num_cols;
-    magmablas_zlaset( MagmaFull, dM.num_rows, dM.num_cols, c_zero, c_one, dM.dval, dM.ld );
+    magmablas_zlaset( MagmaFull, dM.num_rows, dM.num_cols, c_zero, c_one, dM.dval, dM.ld, queue );
     gpumem += (dM1.nnz + dM.nnz) * sizeof(magmaDoubleComplex);
 
     // f = 0
@@ -404,7 +401,7 @@ magma_zidr_acc(
     
         // new RHS for small systems
         // f = (r' P)' = P' r
-        magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.ld, dr.dval, 1, c_zero, df.dval, 1 );
+        magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.ld, dr.dval, 1, c_zero, df.dval, 1, queue );
         printMatrix("F", df);
 
         // shadow space loop
@@ -415,10 +412,10 @@ magma_zidr_acc(
             // f(k:s) = M(k:s,k:s) c(k:s)
 //---------------------------------------
             // c(k:s) = f(k:s)
-            magma_zcopy( sk, &df.dval[k], 1, &dc.dval[k], 1 );
+            magma_zcopy( sk, &df.dval[k], 1, &dc.dval[k], 1, queue );
 
             // M1 = M
-            magma_zcopy( dofM, dM.dval, 1, dM1.dval, 1 );
+            magma_zcopy( dofM, dM.dval, 1, dM1.dval, 1, queue );
 
             // c(k:s) = M1(k:s,k:s) \ c(k:s)
             CHECK( magma_zgesv_gpu( sk, dc.num_cols, &dM1.dval[k*dM1.ld+k], dM1.ld, piv, &dc.dval[k], dc.num_rows, &info ));
@@ -428,10 +425,10 @@ magma_zidr_acc(
             // v1 = r - G(:,k:s) c(k:s)
 //---------------------------------------
             // v1 = r
-            magma_zcopy( dofr, dr.dval, 1, dv1.dval, 1 );
+            magma_zcopy( dofr, dr.dval, 1, dv1.dval, 1, queue );
 
             // v1 = v1 - G(:,k:s) c(k:s)
-            magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, &dG.dval[k*dG.ld], dG.ld, &dc.dval[k], 1, c_one, dv1.dval, 1 );
+            magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, &dG.dval[k*dG.ld], dG.ld, &dc.dval[k], 1, c_one, dv1.dval, 1, queue );
 //---------------------------------------
             printMatrix("V", dv1);
 
@@ -439,10 +436,10 @@ magma_zidr_acc(
             // U(:,k) = om * v1 + U(:,k:s) c(k:s)
 //---------------------------------------
             // v1 = om * v1 + U(:,k:s) c(k:s)
-            magmablas_zgemv( MagmaNoTrans, dU.num_rows, sk, c_one, &dU.dval[k*dU.ld], dU.ld, &dc.dval[k], 1, om, dv1.dval, 1 );
+            magmablas_zgemv( MagmaNoTrans, dU.num_rows, sk, c_one, &dU.dval[k*dU.ld], dU.ld, &dc.dval[k], 1, om, dv1.dval, 1, queue );
 
             // U(:,k) = v1
-            magma_zcopy( dU.num_rows, dv1.dval, 1, &dU.dval[k*dU.ld], 1 );
+            magma_zcopy( dU.num_rows, dv1.dval, 1, &dU.dval[k*dU.ld], 1, queue );
 //---------------------------------------
             printMatrix("U", dU);
 
@@ -453,7 +450,7 @@ magma_zidr_acc(
             CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dv, queue ));
 
             // G(:,k) = v
-            magma_zcopy( dG.num_rows, dv.dval, 1, &dG.dval[k*dG.ld], 1 );
+            magma_zcopy( dG.num_rows, dv.dval, 1, &dG.dval[k*dG.ld], 1, queue );
 //---------------------------------------
             printMatrix("G", dG);
 
@@ -463,17 +460,17 @@ magma_zidr_acc(
 //---------------------------------------
                 // alpha = P(:,i)' G(:,k)
                 CHECK( magma_zmdotc( dP.num_rows, 1, &dP.dval[i*dP.ld], &dG.dval[k*dG.ld], d1, d2, (dalpha.dval)+i, queue ));
-                magma_zgetvector( 1, (dalpha.dval)+i, 1, (alpha.val)+i, 1 );
+                magma_zgetvector( 1, (dalpha.dval)+i, 1, (alpha.val)+i, 1, queue );
                 
                 // alpha = alpha / M(i,i)
-                magma_zgetvector( 1, &dM.dval[i*dM.ld+i], 1, &mkk, 1 );
+                magma_zgetvector( 1, &dM.dval[i*dM.ld+i], 1, &mkk, 1, queue );
                 alpha.val[i] = alpha.val[i] / mkk;
                 
 //---------------------------------------
                 printD("bi-ortho: i, k, alpha ...................%d, %d, (%lg, %lg)\n", i, k, MAGMA_Z_REAL(alpha.val[i]), MAGMA_Z_IMAG(alpha.val[i]));
 
                 // G(:,k) = G(:,k) - alpha * G(:,i)
-                magma_zaxpy( dG.num_rows, -alpha.val[i], &dG.dval[i*dG.ld], 1, &dG.dval[k*dG.ld], 1 );
+                magma_zaxpy( dG.num_rows, -alpha.val[i], &dG.dval[i*dG.ld], 1, &dG.dval[k*dG.ld], 1, queue );
                 printMatrix("G", dG);
 
                 // U(:,k) = U(:,k) - alpha * U(:,i)
@@ -483,18 +480,18 @@ magma_zidr_acc(
             if ( k > 0 ) {
                 // U(:,k) = U(:,k) - alpha * U(:,i) outside the loop using GEMV
                 // copy scalars alpha needed for gemv to device
-                magma_zsetvector( k, alpha.val, 1, dalpha.dval, 1 );
-                magmablas_zgemv( MagmaNoTrans, dU.num_rows, k, c_n_one, &dU.dval[0], dU.ld, &dalpha.dval[0], 1, c_one, &dU.dval[k*dU.ld], 1 );
+                magma_zsetvector( k, alpha.val, 1, dalpha.dval, 1, queue );
+                magmablas_zgemv( MagmaNoTrans, dU.num_rows, k, c_n_one, &dU.dval[0], dU.ld, &dalpha.dval[0], 1, c_one, &dU.dval[k*dU.ld], 1, queue );
                 printMatrix("U", dU);
             }
             
             // new column of M = P'G, first k-1 entries are zero
             // M(k:s,k) = (G(:,k)' P(:,k:s))' = P(:,k:s)' G(:,k)
-            magmablas_zgemv( MagmaConjTrans, dP.num_rows, sk, c_one, &dP.dval[k*dP.ld], dP.ld, &dG.dval[k*dG.ld], 1, c_zero, &dM.dval[k*dM.ld+k], 1 );
+            magmablas_zgemv( MagmaConjTrans, dP.num_rows, sk, c_one, &dP.dval[k*dP.ld], dP.ld, &dG.dval[k*dG.ld], 1, c_zero, &dM.dval[k*dM.ld+k], 1, queue );
             printMatrix("M", dM);
 
             // check M(k,k) == 0
-            magma_zgetvector( 1, &dM.dval[k*dM.ld+k], 1, &mkk, 1 );
+            magma_zgetvector( 1, &dM.dval[k*dM.ld+k], 1, &mkk, 1, queue );
             if ( MAGMA_Z_EQUAL(mkk, MAGMA_Z_ZERO) ) {
                 s = k; // for the x-update outside the loop
                 info = MAGMA_DIVERGENCE;
@@ -503,31 +500,31 @@ magma_zidr_acc(
             }
 
             // beta = f(k) / M(k,k)
-            magma_zgetvector( 1, &df.dval[k], 1, &fk, 1 );
+            magma_zgetvector( 1, &df.dval[k], 1, &fk, 1, queue );
             beta.val[k] = fk / mkk;
             printD("beta: k ...................%d, (%lg, %lg)\n", k, MAGMA_Z_REAL(beta.val[k]), MAGMA_Z_IMAG(beta.val[k]));
 
             // make r orthogonal to q_i, i = 1..k
             // r = r - beta * G(:,k)
-            magma_zaxpy( dr.num_rows, -beta.val[k], &dG.dval[k*dG.ld], 1, dr.dval, 1 );
+            magma_zaxpy( dr.num_rows, -beta.val[k], &dG.dval[k*dG.ld], 1, dr.dval, 1, queue );
             printMatrix("R", dr);
 
             if ( smoothing < 0 ) {
                 // |r|
-                nrmr = magma_dznrm2( dofb, dr.dval, inc );
+                nrmr = magma_dznrm2( dofb, dr.dval, inc, queue );
                 printD("norm(r): k ...................%d, %lg\n", k, nrmr);
             }
             else if ( smoothing == 0 ) {
                 // x = x + beta * U(:,k)
-                magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1 );
+                magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1, queue );
                 printMatrix("X", *x);
 
                 // |r|
-                nrmr = magma_dznrm2( dofb, dr.dval, inc );
+                nrmr = magma_dznrm2( dofb, dr.dval, inc, queue );
                 printD("norm(r): k ...................%d, %lg\n", k, nrmr);
             } else {
                 // x = x + beta * U(:,k)
-                magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1 );
+                magma_zaxpy( x->num_rows, beta.val[k], &dU.dval[k*dU.ld], 1, x->dval, 1, queue );
                 printMatrix("X", *x);
 
                 // smoothing operation
@@ -535,16 +532,16 @@ magma_zidr_acc(
                 //----MERGED---///
                 // t = rs - r
                 //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-                //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+                //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc, queue );
                 //----MERGED---///
                 magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
                 /*
                 // |t|
                 dof = dtt.num_rows * dtt.num_cols;
-                nrmt = magma_dznrm2( dof, dtt.dval, inc );
+                nrmt = magma_dznrm2( dof, dtt.dval, inc, queue );
 
                 // gamma = t' rs
-                gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc );
+                gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc, queue );
 
                 // gamma = gamma / (|t| * |t|)
                 gamma = gamma / (nrmt * nrmt);
@@ -552,29 +549,29 @@ magma_zidr_acc(
                 // merge into mdot
                 //CHECK( magma_zmdotc( dofr, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
                 CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
-                magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
+                magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1, queue );
                 // |t|
                 //nrmt = sqrt( MAGMA_Z_REAL ( skp.val[2] ) );
                 // gamma = gamma / (|t| * |t|)
                 gamma = skp.val[3] / skp.val[2];
                 
                 // rs = rs - gamma * t
-                magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
+                magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc, queue );
                 printMatrix("RS", drs);
 
                 //----MERGED---///
                 // t = xs - x
                 //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
-                //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+                //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc, queue );
 
                 // xs = xs - gamma * t
-                //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+                //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc, queue );
                 //----MERGED---///
                 magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
                 printMatrix("XS", dxs);
 
                 // |rs|
-                nrmr = magma_dznrm2( dofb, drs.dval, inc );           
+                nrmr = magma_dznrm2( dofb, drs.dval, inc, queue );           
                 printD("norm(rs): k ...................%d, %lg\n", k, nrmr);
 //---------------------------------------
             }
@@ -602,7 +599,7 @@ magma_zidr_acc(
             // new f = P' r (first k components are zero)
             if ( (k + 1) < s ) {
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)
-                magma_zaxpy( sk - 1, -beta.val[k], &dM.dval[k*dM.ld+(k+1)], 1, &df.dval[k+1], 1 );
+                magma_zaxpy( sk - 1, -beta.val[k], &dM.dval[k*dM.ld+(k+1)], 1, &df.dval[k+1], 1, queue );
                 printMatrix("F", df);
             }
 
@@ -612,8 +609,8 @@ magma_zidr_acc(
 
         // update solution approximation x
         if ( smoothing < 0 ) {
-            magma_zsetvector( s, beta.val, 1, dbeta.dval, 1 );
-            magmablas_zgemv( MagmaNoTrans, dU.num_rows, s, c_one, &dU.dval[0], dU.ld, &dbeta.dval[0], 1, c_one, &x->dval[0], 1 );
+            magma_zsetvector( s, beta.val, 1, dbeta.dval, 1, queue );
+            magmablas_zgemv( MagmaNoTrans, dU.num_rows, s, c_one, &dU.dval[0], dU.ld, &dbeta.dval[0], 1, c_one, &x->dval[0], 1, queue );
             printMatrix("X", *x);
         }
  
@@ -623,7 +620,7 @@ magma_zidr_acc(
         }
 
         // v = r
-        magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, 1, dv.dval, 1 );
+        magma_zcopy( dr.num_rows * dr.num_cols, dr.dval, 1, dv.dval, 1, queue );
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
@@ -635,7 +632,7 @@ magma_zidr_acc(
         // |t|
         //CHECK( magma_zmdotc( dofr, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
         CHECK( magma_zmdotc( doft, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
-        magma_zgetvector( 2 , dskp.dval, 1, skp.val, 1 );
+        magma_zgetvector( 2 , dskp.dval, 1, skp.val, 1, queue );
         nrmt = sqrt(MAGMA_Z_REAL(skp.val[0]));
 
         // tr = t' r
@@ -658,17 +655,17 @@ magma_zidr_acc(
 
         // update approximation vector
         // x = x + om * v
-        magma_zaxpy(x->num_rows, om, dv.dval, 1, x->dval, 1);
+        magma_zaxpy( x->num_rows, om, dv.dval, 1, x->dval, 1, queue );
         printMatrix("X", *x);
 
         // update residual vector
         // r = r - om * t
-        magma_zaxpy(dr.num_rows, -om, dt.dval, 1, dr.dval, 1);
+        magma_zaxpy( dr.num_rows, -om, dt.dval, 1, dr.dval, 1, queue );
         printMatrix("R", dr);
 
         if ( smoothing < 1 ) {
             // residual norm
-            nrmr = magma_dznrm2( dofb, dr.dval, inc );
+            nrmr = magma_dznrm2( dofb, dr.dval, inc, queue );
             printD("norm(r): k ...................%d, %lg\n", k, nrmr);
         }
         else {
@@ -677,16 +674,16 @@ magma_zidr_acc(
             //----MERGED---///
             // t = rs - r
             //magma_zcopy( drs.num_rows * drs.num_cols, drs.dval, inc, dt.dval, inc );
-            //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc );
+            //magma_zaxpy( dt.num_rows, c_n_one, dr.dval, inc, dt.dval, inc, queue );
             //----MERGED---///
             magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
             /*
             // |t|
             dof = dt.num_rows * dt.num_cols;
-            nrmt = magma_dznrm2( dof, dtt.dval, inc );
+            nrmt = magma_dznrm2( dof, dtt.dval, inc, queue );
 
             // gamma = t' rs
-            gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc );
+            gamma = magma_zdotc( dtt.num_rows, dtt.dval, inc, drs.dval, inc, queue );
 
             // gamma = gamma / (|t| * |t|)
             gamma = gamma / (nrmt * nrmt);
@@ -694,29 +691,29 @@ magma_zidr_acc(
             // merge into mdot
             //CHECK( magma_zmdotc( dofr, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
             CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
-            magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1 );
+            magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1, queue );
             // |t|
             //nrmt = sqrt( MAGMA_Z_REAL( skp.val[2] ) );
             // gamma = gamma / (|t| * |t|)
             gamma = skp.val[3] / skp.val[2];
 
             // rs = rs - gamma * t
-            magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc );
+            magma_zaxpy( drs.num_rows, -gamma, dtt.dval, inc, drs.dval, inc, queue );
             printMatrix("RS", drs);
 
             //----MERGED---///
             // t = xs - x
             //magma_zcopy( dxs.num_rows * dxs.num_cols, dxs.dval, inc, dt.dval, inc );
-            //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc );
+            //magma_zaxpy( dt.num_rows, c_n_one, x->dval, inc, dt.dval, inc, queue );
 
             // xs = xs - gamma * t
-            //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc );
+            //magma_zaxpy( dxs.num_rows, -gamma, dt.dval, inc, dxs.dval, inc, queue );
             //----MERGED---///
             magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queue );
             printMatrix("XS", dxs);
 
             // |rs|
-            nrmr = magma_dznrm2( dofb, drs.dval, inc );           
+            nrmr = magma_dznrm2( dofb, drs.dval, inc, queue );           
             printD("norm(rs): k ...................%d, %lg\n", k, nrmr);
         }
 //---------------------------------------
@@ -749,8 +746,8 @@ magma_zidr_acc(
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
             
     if ( smoothing > 0 ) {
-        magma_zcopy( dofr, drs.dval, 1, dr.dval, 1 );
-        magma_zcopy( dofx, dxs.dval, 1, x->dval, 1 );
+        magma_zcopy( dofr, drs.dval, 1, dr.dval, 1, queue );
+        magma_zcopy( dofx, dxs.dval, 1, x->dval, 1, queue );
     }
 
     // get last iteration timing
@@ -811,7 +808,6 @@ cleanup:
     magma_free( d1 );
     magma_free( d2 );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
     /* magma_zidr_acc */

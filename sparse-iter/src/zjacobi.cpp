@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,7 +10,7 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -60,10 +60,6 @@ magma_zjacobi(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
     
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -137,7 +133,6 @@ cleanup:
     magma_zmfree( &d, queue );
     magma_zmfree( &ACSR, queue );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zjacobi */
@@ -577,10 +572,6 @@ magma_zjacobiiter(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -593,19 +584,17 @@ magma_zjacobiiter(
 
     for( magma_int_t i=0; i<solver_par->maxiter; i++ ) {
         CHECK( magma_z_spmv( c_neg_one, M, *x, c_zero, t, queue ));        // t = - M * x
-        magma_zaxpy( dofs, c_one , c.dval, 1 , t.dval, 1 );        // t = t + c
+        magma_zaxpy( dofs, c_one , c.dval, 1 , t.dval, 1, queue );        // t = t + c
 
         // swap so that x again contains solution, and y is ready to be used
         swap = *x;
         *x = t;
         t = swap;
-        //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
     }
 
 cleanup:
     magma_zmfree( &t, queue );
 
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zjacobiiter */
@@ -655,10 +644,6 @@ magma_zjacobiiter_precond(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -672,17 +657,15 @@ magma_zjacobiiter_precond(
         CHECK( magma_z_spmv( c_neg_one, M, *x, c_zero, precond->work2, queue )); // t = - M * x
 
         magma_zaxpy( num_vecs*dofs, c_one ,
-                precond->work1.dval, 1 , precond->work2.dval, 1 ); // t = t + c
+                precond->work1.dval, 1 , precond->work2.dval, 1, queue ); // t = t + c
 
         // swap so that x again contains solution, and y is ready to be used
         swap = *x;
         *x = precond->work2;
         precond->work2 = swap;
-        //magma_zcopy( dofs, t.dval, 1 , x->dval, 1 );               // x = t
     }
     
 cleanup:
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zjacobiiter */
@@ -745,10 +728,6 @@ magma_zjacobiiter_sys(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
 
@@ -763,7 +742,6 @@ magma_zjacobiiter_sys(
     }
     
 cleanup:
-    magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zjacobiiter_sys */

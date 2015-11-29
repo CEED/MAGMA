@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
 
        @precisions normal z -> s d c
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 #include <cuda.h>  // for CUDA_VERSION
 
 #define PRECISION_z
@@ -367,7 +367,7 @@ magma_zapplycumilu_l(
                             x->dval,
                             precond->L.num_rows ));
     
-    magma_device_sync();
+    
 
 cleanup:
     cusparseDestroyMatDescr( descrL );
@@ -440,7 +440,7 @@ magma_zapplycumilu_r(
                             x->dval,
                             precond->U.num_rows ));
     
-    magma_device_sync();
+    
 
 cleanup:
     cusparseDestroyMatDescr( descrU );
@@ -806,7 +806,7 @@ magma_zapplycumicc_l(
                             x->dval,
                             precond->M.num_rows ));
     
-    magma_device_sync();
+    
 
 cleanup:
     cusparseDestroyMatDescr( descrL );
@@ -881,7 +881,7 @@ magma_zapplycumicc_r(
                             x->dval,
                             precond->M.num_rows ));
     
-    magma_device_sync();
+    
 
 cleanup:
     cusparseDestroyMatDescr( descrU );
