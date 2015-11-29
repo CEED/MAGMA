@@ -610,7 +610,7 @@ magma_zbombard_merge(
             res = B_res;
             flag = 3;
         }
-
+        res = Q_res;
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
