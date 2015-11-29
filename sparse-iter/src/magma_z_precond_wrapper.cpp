@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 
@@ -225,8 +225,8 @@ magma_z_applyprecond(
     magma_z_matrix tmp={Magma_CSR};
     
     // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
+    //magma_queue_t orig_queue=NULL;
+    //magmablasGetKernelStream( &orig_queue );
 
     if ( precond->solver == Magma_JACOBI ) {
         CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
@@ -242,16 +242,16 @@ magma_z_applyprecond(
         CHECK( magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
     }
     else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );
-        magmablasSetKernelStream( orig_queue );
+        //magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 cleanup:
     magma_zmfree( &tmp, queue );
-    magmablasSetKernelStream( orig_queue );
+    //magmablasSetKernelStream( orig_queue );
     return info;
 }
 
@@ -302,8 +302,8 @@ magma_z_applyprecond_left(
     magma_int_t info = 0;
     
     // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
+    //magma_queue_t orig_queue=NULL;
+    //magmablasGetKernelStream( &orig_queue );
 
     if ( precond->solver == Magma_JACOBI ) {
         CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
@@ -314,7 +314,7 @@ magma_z_applyprecond_left(
     }
     else if ( ( precond->solver == Magma_ILU ||
                 precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
         magma_z_solver_par solver_par;
         solver_par.maxiter = precond->maxiter;
         magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
@@ -326,25 +326,25 @@ magma_z_applyprecond_left(
     }
     else if ( ( precond->solver == Magma_ICC ||
                 precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
         magma_z_solver_par solver_par;
         solver_par.maxiter = precond->maxiter;
         magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
         //CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
     }
     else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
     }
     else if ( precond->solver == Magma_FUNCTION ) {
         CHECK( magma_zapplycustomprecond_l( b, x, precond, queue ));
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );
-        magmablasSetKernelStream( orig_queue );
+        //magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED; 
     }
 cleanup:
-    magmablasSetKernelStream( orig_queue );
+    //magmablasSetKernelStream( orig_queue );
     return info;
 }
 
@@ -395,11 +395,11 @@ magma_z_applyprecond_right(
     magma_int_t info = 0;
     
     // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
+    //magma_queue_t orig_queue=NULL;
+    //magmablasGetKernelStream( &orig_queue );
 
     if ( precond->solver == Magma_JACOBI ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );    // x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
     }
     else if ( ( precond->solver == Magma_ILU ||
                 precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
@@ -407,7 +407,7 @@ magma_z_applyprecond_right(
     }
     else if ( ( precond->solver == Magma_ILU ||
                 precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
         magma_z_solver_par solver_par;
         solver_par.maxiter = precond->maxiter;
         magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
@@ -420,24 +420,24 @@ magma_z_applyprecond_right(
     }
     else if ( ( precond->solver == Magma_ICC ||
                precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols );
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
         magma_z_solver_par solver_par;
         solver_par.maxiter = precond->maxiter;
         magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
         //CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
     }
     else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1 );      //  x = b
+        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
     }
     else if ( precond->solver == Magma_FUNCTION ) {
         CHECK( magma_zapplycustomprecond_r( b, x, precond, queue ));
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );
-        magmablasSetKernelStream( orig_queue );
+        //magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 cleanup:
-    magmablasSetKernelStream( orig_queue );
+    //magmablasSetKernelStream( orig_queue );
     return info;
 }
