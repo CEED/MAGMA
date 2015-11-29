@@ -366,6 +366,13 @@ magmablas_zswapdblk_q(
     magmaDoubleComplex_ptr dB, magma_int_t lddb, magma_int_t incb,
     magma_queue_t queue );
 
+void
+magmablas_dznrm2_cols_q(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDouble_ptr dxnorm,
+    magma_queue_t queue );
+
   /*
    * Level 2 BLAS (alphabetical order)
    */
