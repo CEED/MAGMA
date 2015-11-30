@@ -285,7 +285,7 @@ magma_zbombard_merge(
 
         }else{
             B_rho_old = B_rho_new; 
-            magma_zmzdotc(
+            magma_zmdotc4(
             b.num_rows,  
             Q_z.dval, 
             Q_y.dval,
@@ -395,7 +395,7 @@ magma_zbombard_merge(
                 //BiCGSTAB
             B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+2*dofs, 1 );
         }else{
-            magma_zmzdotc(
+            magma_zmdotc4(
             b.num_rows,  
             SpMV_in_2.dval, 
             SpMV_out_1.dval,
@@ -475,7 +475,7 @@ magma_zbombard_merge(
             B_omega = magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_in_2.dval+2*dofs, 1 )   // omega = <s,t>/<t,t>
                        / magma_zdotc( dofs, SpMV_out_2.dval+2*dofs, 1, SpMV_out_2.dval+2*dofs, 1 );
         }else{
-            magma_zmzdotc(
+            magma_zmdotc4(
             b.num_rows,  
             Q_y.dval, 
             Q_y.dval,
@@ -581,7 +581,7 @@ magma_zbombard_merge(
             Q_psi = magma_zsqrt( magma_zdotc(dofs, Q_z.dval, 1, Q_z.dval, 1) );
             
         }else{
-            magma_zmzdotc(
+            magma_zmdotc4(
             b.num_rows,  
             Q_r.dval, 
             Q_r.dval,

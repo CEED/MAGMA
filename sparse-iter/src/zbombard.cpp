@@ -147,8 +147,6 @@ magma_zbombard(
     CHECK( magma_zvinit( &B_t, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     
-    
-    
     // solver setup
     CHECK(  magma_zresidualvec( A, b, *x, &r_tld, &nom0, queue));
     solver_par->init_res = nom0;
@@ -225,7 +223,7 @@ magma_zbombard(
         
             //QMR: delta = z' * y;
         //Q_delta = magma_zdotc( dofs, Q_z.dval, 1, Q_y.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         Q_z.dval, 
         Q_y.dval,
@@ -236,7 +234,7 @@ magma_zbombard(
         
             //CGS: rho = r' * r_tld
         //C_rho = magma_zdotc( dofs, C_r.dval, 1, r_tld.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         C_r.dval, 
         r_tld.dval,
@@ -248,7 +246,7 @@ magma_zbombard(
             // BiCGSTAB
         B_rho_old = B_rho_new;    
         //B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1, queue );  // rho=<rr,r>
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         B_r.dval, 
         r_tld.dval,
@@ -328,7 +326,7 @@ magma_zbombard(
         
             //QMR: epsilon = q' * pt;
         //Q_epsilon = magma_zdotc( dofs, Q_q.dval, 1, Q_pt.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         Q_q.dval, 
         Q_pt.dval,
@@ -339,7 +337,7 @@ magma_zbombard(
         Q_beta = Q_epsilon / Q_delta;
             //CGS: alpha = r_tld' * v_hat
         //C_alpha = C_rho / magma_zdotc( dofs, r_tld.dval, 1, C_v_hat.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         C_v_hat.dval, 
         r_tld.dval,
@@ -351,7 +349,7 @@ magma_zbombard(
         C_rho_l = C_rho;
             //BiCGSTAB
         //B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, B_v.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         B_v.dval, 
         r_tld.dval,
@@ -398,7 +396,7 @@ magma_zbombard(
         Q_rho1 = Q_rho;      
             //QMR rho = norm(y);
         //Q_rho = magma_zsqrt( magma_zdotc( dofs, Q_y.dval, 1, Q_y.dval, 1), queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         Q_y.dval, 
         Q_y.dval,
@@ -418,7 +416,7 @@ magma_zbombard(
         //BiCGSTAB
         //B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1 )   // omega = <s,t>/<t,t>
         //           / magma_zdotc( dofs, B_t.dval, 1, B_t.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         B_s.dval, 
         B_t.dval,
@@ -426,7 +424,7 @@ magma_zbombard(
         d2.dval,
         &tmpval,
         queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         B_t.dval, 
         B_t.dval,
@@ -520,7 +518,7 @@ magma_zbombard(
         
             //QMR: psi = norm(z);
         Q_psi = magma_zsqrt( magma_zdotc( dofs, Q_z.dval, 1, Q_z.dval, 1, queue ) );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         Q_z.dval, 
         Q_z.dval,
@@ -548,7 +546,7 @@ magma_zbombard(
         //Q_res = magma_dznrm2( dofs, Q_r.dval, 1, queue );
         //C_res = magma_dznrm2( dofs, C_r.dval, 1, queue );
         //B_res = magma_dznrm2( dofs, B_r.dval, 1, queue );
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         Q_r.dval, 
         Q_r.dval,
@@ -557,7 +555,7 @@ magma_zbombard(
         &tmpval,
         queue );
         Q_res = MAGMA_Z_ABS(magma_zsqrt( tmpval ));
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         C_r.dval, 
         C_r.dval,
@@ -566,7 +564,7 @@ magma_zbombard(
         &tmpval,
         queue );
         C_res = MAGMA_Z_ABS(magma_zsqrt( tmpval ));
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         b.num_rows,  
         B_r.dval, 
         B_r.dval,
