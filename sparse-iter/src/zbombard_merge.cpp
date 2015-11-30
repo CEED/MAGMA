@@ -375,7 +375,7 @@ magma_zbombard_merge(
             Q_beta = Q_epsilon / Q_delta;
                 //CGS: alpha = r_tld' * v_hat
             C_alpha = C_rho / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+dofs, 1, queue );
-            C_rho_l = C_rho;
+
                 //BiCGSTAB
             B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, SpMV_out_1.dval+2*dofs, 1, queue );
         }else{
@@ -546,6 +546,7 @@ magma_zbombard_merge(
         C_x.dval, 
         C_r.dval,
         queue );
+        C_rho_l = C_rho;  
         
             // BiCGSTAB: x = x + alpha * p + omega * s
             // BiCGSTAB: r = s - omega * t
@@ -593,7 +594,7 @@ magma_zbombard_merge(
                 //QMR: psi = norm(z);
             Q_psi = magma_zsqrt(skp.val[3]);
         }
-        
+  
         
             //QMR: v = y / rho
             //QMR: y = y / rho
@@ -627,7 +628,6 @@ magma_zbombard_merge(
          Q_w.dval,
          SpMV_out_2.dval,
          queue );*/
-
         
          //  printf(" %e   %e   %e\n", Q_res, C_res, B_res);
         if( Q_res < res ){
@@ -642,7 +642,6 @@ magma_zbombard_merge(
             res = B_res;
             flag = 3;
         }
-        res = Q_res;
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {

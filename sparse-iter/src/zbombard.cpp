@@ -305,7 +305,6 @@ magma_zbombard(
         Q_beta = Q_epsilon / Q_delta;
             //CGS: alpha = r_tld' * v_hat
         C_alpha = C_rho / magma_zdotc( dofs, r_tld.dval, 1, C_v_hat.dval, 1, queue );
-        C_rho_l = C_rho;
             //BiCGSTAB
         B_alpha = B_rho_new / magma_zdotc( dofs, r_tld.dval, 1, B_v.dval, 1, queue );
 
@@ -427,6 +426,7 @@ magma_zbombard(
         C_x.dval, 
         C_r.dval,
         queue );
+        C_rho_l = C_rho;  
         
             // BiCGSTAB: x = x + alpha * p + omega * s
             // BiCGSTAB: r = s - omega * t
@@ -478,7 +478,6 @@ magma_zbombard(
             res = B_res;
             flag = 3;
         }
-        res = Q_res;
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {

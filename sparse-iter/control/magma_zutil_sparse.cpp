@@ -288,7 +288,7 @@ magma_zparse_opts(
                 opts->precond_par.solver = Magma_PCGSMERGE;
             }
             else if ( strcmp("BOMBARDMENT", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_BOMBARDMERGE;
+                opts->precond_par.solver = Magma_BOMBARD;
             }
             else if ( strcmp("ITERREF", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_ITERREF;
