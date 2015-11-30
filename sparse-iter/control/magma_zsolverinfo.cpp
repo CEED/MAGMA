@@ -204,12 +204,12 @@ magma_zsolverinfo(
             case  Magma_JACOBI:
             case  Magma_BAITER:
             case  Magma_BAITERO:
-                printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+                printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   info\n");
                 printf("%%======================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %4d          %e          %f\n",
-                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j]);
+                    printf("   %8d          %e          %f          %d\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j], solver_par->info );
                 }
                 printf("%%======================================================="
                         "======%%\n"); break;
@@ -222,7 +222,7 @@ magma_zsolverinfo(
         printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   info\n");
             printf("%%======================================================="
                         "======%%\n");
-        printf("   %4d          %e          %f          %d\n",
+        printf("   %8d          %e          %f          %d\n",
         (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, solver_par->info );
         printf("%%======================================================="
         "======%%\n");
