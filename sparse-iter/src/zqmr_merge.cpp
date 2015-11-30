@@ -157,14 +157,18 @@ magma_zqmr_merge(
             info = MAGMA_DIVERGENCE;
             break;
         }
-        
+ 
             // delta = z' * y;
         delta = magma_zdotc( dofs, z.dval, 1, y.dval, 1, queue );
-
+        
         if( magma_z_isinf( delta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
+        
+        // no precond: yt = y, zt = z
+        //magma_zcopy( dofs, y.dval, 1, yt.dval, 1 );
+        //magma_zcopy( dofs, z.dval, 1, zt.dval, 1 );
         
         if( solver_par->numiter == 1 ){
                 // p = y;
@@ -199,6 +203,7 @@ magma_zqmr_merge(
             // epsilon = q' * pt;
         epsilon = magma_zdotc( dofs, q.dval, 1, pt.dval, 1, queue );
         beta = epsilon / delta;
+
         if( magma_z_isinf( epsilon ) || magma_z_isinf( beta ) ){
             info = MAGMA_DIVERGENCE;
             break;
@@ -234,6 +239,7 @@ magma_zqmr_merge(
         
         gamm = c_one / magma_zsqrt(c_one + thet*thet);        
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
+
         if( magma_z_isinf( thet ) || magma_z_isinf( gamm ) || magma_z_isinf( eta ) ){
             info = MAGMA_DIVERGENCE;
             break;
@@ -311,8 +317,6 @@ magma_zqmr_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        
-                
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
@@ -324,7 +328,7 @@ magma_zqmr_merge(
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter && info == MAGMA_SUCCESS ) {
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
