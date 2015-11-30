@@ -129,7 +129,7 @@ magma_zbicgstab_merge(
         rho_old = rho_new;                                    // rho_old=rho
 
         
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         r.num_rows,  
         rr.dval, 
         r.dval,
@@ -152,7 +152,7 @@ magma_zbicgstab_merge(
         queue );
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, v, queue ));      // v = Ap
-        magma_zmzdotc_one(
+        magma_zmdotc1(
         r.num_rows,  
         rr.dval, 
         v.dval,
@@ -181,7 +181,7 @@ magma_zbicgstab_merge(
       //  omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1 )   // omega = <s,t>/<t,t>
         //           / magma_zdotc( dofs, t.dval, 1, t.dval, 1, queue );
                    
-                            magma_zmzdotc_one(
+                            magma_zmdotc1(
         r.num_rows,  
         t.dval, 
         s.dval,
@@ -189,7 +189,7 @@ magma_zbicgstab_merge(
         d2.dval,
         &tmpval,
         queue );
-                        magma_zmzdotc_one(
+                        magma_zmdotc1(
         r.num_rows,  
         t.dval, 
         t.dval,
@@ -214,7 +214,7 @@ magma_zbicgstab_merge(
         queue );
         
         
-                        magma_zmzdotc_one(
+                        magma_zmdotc1(
         r.num_rows,  
         r.dval, 
         r.dval,
