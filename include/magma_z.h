@@ -1634,6 +1634,10 @@ magma_zunmtr_gpu(
 extern const magmaDoubleComplex MAGMA_Z_NAN;
 extern const magmaDoubleComplex MAGMA_Z_INF;
 
+bool magma_z_isnan( magmaDoubleComplex x );
+bool magma_z_isinf( magmaDoubleComplex x );
+bool magma_z_isnan_inf( magmaDoubleComplex x );
+
 magma_int_t
 magma_znan_inf(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,

@@ -14,8 +14,10 @@
 
 #ifdef __cplusplus
 
-#include <cmath>
-using std::fabs;
+// including cmath undefs isinf, isnan, etc. macros.
+// doing "using std::isinf" or "using std::isnan" generates conflicts when using icc.
+//#include <cmath>
+//using std::fabs;
 
 // __host__ and __device__ are defined in CUDA headers.
 #include "magma_types.h"
@@ -38,7 +40,8 @@ __host__ __device__ static inline float              conj(const float           
 
 __host__ __device__ static inline double fabs(const magmaDoubleComplex &x) { return MAGMA_Z_ABS(x); }
 __host__ __device__ static inline float  fabs(const magmaFloatComplex  &x) { return MAGMA_C_ABS(x); }
-//__host__ __device__ static inline float  fabs(const float              &x) { return MAGMA_S_ABS(x); }  // conflicts with std::fabs
+//__host__ __device__ static inline float  fabs(const float              &x) { return MAGMA_S_ABS(x); }  // conflicts with std::fabs in .cu files
+// already have fabs( double ) in math.h
 
 __host__ __device__ static inline double abs1(const magmaDoubleComplex &x) { return MAGMA_Z_ABS1(x); }
 __host__ __device__ static inline float  abs1(const magmaFloatComplex  &x) { return MAGMA_C_ABS1(x); }
