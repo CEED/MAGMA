@@ -533,7 +533,7 @@ magma_zqmr_6_kernel(
     if ( i<num_rows ) {
         for( int j=0; j<num_cols; j++ ){
             
-            magmaDoubleComplex wttmp = wt[ i+j*num_rows ] 
+            magmaDoubleComplex wttmp = wt[ i+j*num_rows ]
                                 - MAGMA_Z_CNJG( beta ) * w[ i+j*num_rows ];
                                 
             wt[ i+j*num_rows ] = wttmp;

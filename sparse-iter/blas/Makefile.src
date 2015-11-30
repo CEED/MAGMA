@@ -41,9 +41,7 @@ libsparse_zsrc += \
 	$(cdir)/zmgeellmv.cu                  \
 	$(cdir)/zmgeelltmv.cu                 \
 	$(cdir)/zmgesellcmmv.cu               \
-	$(cdir)/zmzdotc.cu                    \
-	$(cdir)/zmzdotc3.cu                   \
-	$(cdir)/zmzdotc_one.cu                \
+	$(cdir)/zmdotc.cu                     \
 	$(cdir)/zpipelinedgmres.cu            \
 
 # Iterative factorizations
