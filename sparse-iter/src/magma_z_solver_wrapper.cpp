@@ -79,8 +79,9 @@ magma_z_solver(
             case  Magma_PGMRES:
                     CHECK( magma_zfgmres( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_IDR:
-                    //CHECK( magma_zidr_strm( A, b, x, &zopts->solver_par, queue )); break;
                     CHECK( magma_zidr( A, b, x, &zopts->solver_par, queue )); break;
+            case  Magma_IDRMERGE:
+                    CHECK( magma_zidr_acc( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PIDR:
                     CHECK( magma_zpidr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_LOBPCG:
@@ -129,8 +130,6 @@ magma_z_solver(
                     CHECK( magma_zbpcg( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_LOBPCG:
                     CHECK( magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue )); break;
-            case  Magma_IDR:
-                    CHECK( magma_zidr( A, &zopts->solver_par, &zopts->precond_par, queue )); break;
             default:
                     printf("error: only 1 RHS supported for this solver class.\n"); break;
         }
