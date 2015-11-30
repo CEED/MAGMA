@@ -38,6 +38,7 @@ sparse_testing_zsrc += \
 # iterative solvers and preconditioners
 sparse_testing_zsrc += \
 	$(cdir)/testing_zsolver.cpp           \
+    $(cdir)/testing_zsolver_rhs.cpp           \
 	$(cdir)/testing_zpreconditioner.cpp   \
 
 # ----------

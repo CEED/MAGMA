@@ -173,7 +173,19 @@ parser.add_option(      '--iterref'          , action='store_true', dest='iterre
 parser.add_option(      '--jacobi'           , action='store_true', dest='jacobi'        , help='run jacobi'        )
 parser.add_option(      '--ba'               , action='store_true', dest='ba'            , help='run ba-iter'       )
 parser.add_option(      '--idr'              , action='store_true', dest='idr'           , help='run idr'           )
+parser.add_option(      '--idr_merge'        , action='store_true', dest='idr_merge'     , help='run idr_merge'     )
 parser.add_option(      '--pidr'             , action='store_true', dest='pidr'          , help='run pidr'          )
+parser.add_option(      '--cgs'              , action='store_true', dest='cgs'           , help='run cgs'           )
+parser.add_option(      '--cgs_merge'        , action='store_true', dest='cgs_merge'     , help='run cgs_merge'     )
+parser.add_option(      '--qmr'              , action='store_true', dest='qmr'           , help='run qmr'           )
+parser.add_option(      '--qmr_merge'        , action='store_true', dest='qmr_merge'     , help='run qmr_merge'     )
+parser.add_option(      '--pcgs'             , action='store_true', dest='pcgs'          , help='run pcgs'          )
+parser.add_option(      '--pcgs_merge'       , action='store_true', dest='pcgs_merge'    , help='run pcgs_merge'    )
+parser.add_option(      '--pqmr'             , action='store_true', dest='pqmr'          , help='run pqmr'          )
+parser.add_option(      '--pqmr_merge'       , action='store_true', dest='pqmr_merge'    , help='run pqmr_merge'    )   
+parser.add_option(      '--bombard'          , action='store_true', dest='bombard'       , help='run bombard'       )
+parser.add_option(      '--bombard_merge'    , action='store_true', dest='bombard_merge' , help='run bombard_merge' )
+
                                                                                            
 parser.add_option(      '--jacobi-prec'      , action='store_true', dest='jacobi_prec'   , help='run Jacobi preconditioner')
 parser.add_option(      '--ilu-prec'         , action='store_true', dest='ilu_prec'      , help='run ILU preconditioner')
@@ -224,6 +236,18 @@ if (     not opts.cg
      and not opts.jacobi
      and not opts.ba
      and not opts.idr
+     and not opts.ba
+     and not opts.idr_merge
+     and not opts.qmr
+     and not opts.qmr_merge
+     and not opts.cgs
+     and not opts.cgs_merge
+     and not opts.pqmr
+     and not opts.pqmr_merge
+     and not opts.pcgs
+     and not opts.pcgs_merge
+     and not opts.bombard
+     and not opts.bombard_merge
      and not opts.pidr ):
     opts.cg             = True
     opts.cg_merge       = True
@@ -238,7 +262,18 @@ if (     not opts.cg
     opts.jacobi         = True
     opts.ba             = True
     opts.idr            = True
+    opts.idr_merge      = True
     opts.pidr           = True
+    opts.cgs            = True
+    opts.cgs_merge      = True
+    opts.qmr            = True
+    opts.qmr_merge      = True
+    opts.pcgs           = True
+    opts.pcgs_merge     = True
+    opts.pqmr           = True
+    opts.pqmr_merge     = True
+    opts.bombard        = True
+    opts.bombard_merge  = True
 # end
 
 # default if no preconditioners given all
@@ -265,91 +300,119 @@ print 'args', args
 # looping over formats
 formats = []
 if ( opts.csr ):
-    formats += ['--format 0']
+    formats += ['--format CSR']
 # end
 if ( opts.ell ):
-    formats += ['--format 1']
+    formats += ['--format ELL']
 # end
 if ( opts.sellp ):
-    formats += ['--format 2']
+    formats += ['--format SELLP']
 # end
 
 # looping over solvers
 solvers = []
 if ( opts.cg ):
-    solvers += ['--solver 0']
+    solvers += ['--solver CG --basic']
 # end
 if ( opts.cg_merge ):
-    solvers += ['--solver 1']
+    solvers += ['--solver CG']
 # end
 if ( opts.bicgstab ):
-    solvers += ['--solver 3']
+    solvers += ['--solver BICGSTAB --basic']
 # end
 if ( opts.bicgstab_merge ):
-    solvers += ['--solver 4']
+    solvers += ['--solver BICGSTAB']
 # end
 if ( opts.gmres ):
-    solvers += ['--solver 6']
+    solvers += ['--solver GMRES']
 # end
 if ( opts.lobpcg ):
-    solvers += ['--solver 8']
+    solvers += ['--solver LOBPCG']
 # end
 if ( opts.jacobi ):
-    solvers += ['--solver 9']
+    solvers += ['--solver JACOBI']
 # end
 if ( opts.ba ):
-    solvers += ['--solver 10']
+    solvers += ['--solver BA']
 # end
 if ( opts.idr ):
-    solvers += ['--solver 11']
+    solvers += ['--solver IDR --basic']
+# end
+if ( opts.idr_merge ):
+    solvers += ['--solver IDR']
+# end
+if ( opts.cgs ):
+    solvers += ['--solver CGS']
+# end
+if ( opts.cgs_merge ):
+    solvers += ['--solver CGS --basic']
+# end
+if ( opts.qmr ):
+    solvers += ['--solver QMR --basic']
+# end
+if ( opts.qmr_merge ):
+    solvers += ['--solver QMR']
+# end
+if ( opts.bombard ):
+    solvers += ['--solver BOMBARDMENT']
+# end
+if ( opts.bombard_merge ):
+    solvers += ['--solver BOMBARDMENT --basic']
 # end
 
 
 # looping over precsolvers
 precsolvers = []
 if ( opts.pcg ):
-    precsolvers += ['--solver 2']
+    precsolvers += ['--solver PCG']
 # end
 if ( opts.pbicgstab ):
-    precsolvers += ['--solver 5']
+    precsolvers += ['--solver PBICGSTAB']
 # end
 if ( opts.pgmres ):
-    precsolvers += ['--solver 7']
+    precsolvers += ['--solver PGMRES']
 # end
 if ( opts.pidr ):
-    precsolvers += ['--solver 12']
+    precsolvers += ['--solver PIDR']
 # end
+if ( opts.pidr ):
+    precsolvers += ['--solver PQMR']
+# end
+if ( opts.pidr ):
+    precsolvers += ['--solver PCGS']
+# end
+
 
 # looping over IR
 IR = []
 if ( opts.iterref ):
-    IR += ['--solver 21']
+    IR += ['--solver LOBPCG']
 # end
 
 
 
 # looping over preconditioners
-precs = ['--precond 0']
+precs = ['--precond NONE']
 if ( opts.jacobi_prec ):
-    precs += ['--precond 1']
+    precs += ['--precond ILU']
 # end
 if ( opts.ilu_prec ):
-    precs += ['--precond 2']
+    precs += ['--precond JACOBI']
 # end
 if ( opts.iter_ilu_prec ):
-    precs += ['--precond -2']
+    precs += ['--precond AILU']
 # end
 
 
 # looping over preconditioners
 IRprecs = []
 if ( opts.iterref ):
-    IRprecs += ['--precond 1']
-    IRprecs += ['--precond 3']
-    IRprecs += ['--precond 4']
-    IRprecs += ['--precond 5']
-    IRprecs += ['--precond 6']
-    IRprecs += ['--precond 7']
+    IRprecs += ['--precond CG']
+    IRprecs += ['--precond CGS']
+    IRprecs += ['--precond BICGSTAB']
+    IRprecs += ['--precond GMRES']
+    IRprecs += ['--precond QMR']
+    IRprecs += ['--precond BOMBARDMENT']
 # end
 
 

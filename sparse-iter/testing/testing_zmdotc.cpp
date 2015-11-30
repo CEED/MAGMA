@@ -89,17 +89,17 @@ int main(  int argc, char** argv )
             #endif
             for( int h=0; h<iters; h++) {
                 if( num_vecs == 2 ){
-                    magma_zmzdotc_one( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
+                    magma_zmdotc1( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
                 }
                 else if( num_vecs == 4 ){
-                    magma_zmzdotc_one( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
-                    magma_zmzdotc_one( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
+                    magma_zmdotc1( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
+                    magma_zmdotc1( n, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
                 }
                 else if( num_vecs == 6 ){
-                    magma_zmzdotc3( n, a.dval, b.dval, a.dval+n, b.dval+n, a.dval+2*n, b.dval+2*n, x.dval, y.dval, skp.dval, queue );
+                    magma_zmdotc3( n, a.dval, b.dval, a.dval+n, b.dval+n, a.dval+2*n, b.dval+2*n, x.dval, y.dval, skp.dval, queue );
                 }
                 else if( num_vecs == 8 ){
-                    magma_zmzdotc3( n, a.dval, b.dval, a.dval+n, b.dval+n, a.dval+2*n, b.dval+2*n, x.dval, y.dval, skp.dval, queue );
+                    magma_zmdotc3( n, a.dval, b.dval, a.dval+n, b.dval+n, a.dval+2*n, b.dval+2*n, x.dval, y.dval, skp.dval, queue );
                 }
                 else{
                     printf("error: not supported.\n");
