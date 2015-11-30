@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
 //  in this file, many routines are taken from
 //  the IO functions provided by MatrixMarket
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -68,7 +68,7 @@ magma_zcsrset_gpu(
     A->num_rows = m;
     A->num_cols = n;
     magma_index_t nnz;
-    magma_index_getvector( 1, row+m, 1, &nnz, 1 );
+    magma_index_getvector( 1, row+m, 1, &nnz, 1, queue );
     A->nnz = (magma_int_t) nnz;
     A->storage_type = Magma_CSR;
     A->memory_location = Magma_DEV;

@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -47,10 +47,6 @@ magma_zvtranspose(
     magma_int_t    m = x.num_rows;
     magma_int_t    n = x.num_cols;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     magma_z_matrix x_d={Magma_CSR}, y_d={Magma_CSR};
             
     if ( x.memory_location == Magma_DEV ) {
@@ -60,11 +56,11 @@ magma_zvtranspose(
         y->storage_type = x.storage_type;
         if ( x.major == MagmaColMajor) {
             y->major = MagmaRowMajor;
-            magmablas_ztranspose( m, n, x.val, m, y->val, n );
+            magmablas_ztranspose( m, n, x.val, m, y->val, n, queue );
         }
         else {
             y->major = MagmaColMajor;
-            magmablas_ztranspose( n, m, x.val, n, y->val, m );
+            magmablas_ztranspose( n, m, x.val, n, y->val, m, queue );
         }
     } else {
         CHECK( magma_zmtransfer( x, &x_d, Magma_CPU, Magma_DEV, queue ));
@@ -78,6 +74,5 @@ cleanup:
     }
     magma_zmfree( &x_d, queue );
     magma_zmfree( &y_d, queue );
-    magmablasSetKernelStream( orig_queue );
     return info;
 }

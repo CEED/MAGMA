@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -55,8 +55,8 @@ magma_zmtransfer(
     magma_int_t info = 0;
     
     // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
+    ////magma_queue_t orig_queue=NULL;
+    ////magmablasGetKernelStream( &orig_queue );
 
     B->val = NULL;
     B->diag = NULL;
@@ -99,9 +99,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             // data transfer
-            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1 );
-            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1 );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -122,10 +122,10 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1 );
-            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1 );
-            magma_index_setvector( A.nnz, A.rowidx, 1, B->drowidx, 1 );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.nnz, A.rowidx, 1, B->drowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -144,8 +144,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zsetvector( A.num_rows * A.max_nnz_row, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.num_rows * A.max_nnz_row, A.col, 1, B->dcol, 1 );
+            magma_zsetvector( A.num_rows * A.max_nnz_row, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.num_rows * A.max_nnz_row, A.col, 1, B->dcol, 1, queue );
         }
         //ELLD-type
         else if ( A.storage_type == Magma_ELLD ) {
@@ -164,8 +164,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zsetvector( A.num_rows * A.max_nnz_row, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.num_rows * A.max_nnz_row, A.col, 1, B->dcol, 1 );
+            magma_zsetvector( A.num_rows * A.max_nnz_row, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.num_rows * A.max_nnz_row, A.col, 1, B->dcol, 1, queue );
         }
         //ELLRT-type
         else if ( A.storage_type == Magma_ELLRT ) {
@@ -188,9 +188,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * rowlength ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows ));
             // data transfer
-            magma_zsetvector( A.num_rows * rowlength, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.num_rows * rowlength, A.col, 1, B->dcol, 1 );
-            magma_index_setvector( A.num_rows, A.row, 1, B->drow, 1 );
+            magma_zsetvector( A.num_rows * rowlength, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.num_rows * rowlength, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.num_rows, A.row, 1, B->drow, 1, queue );
         }
         //SELLP-type
         else if ( A.storage_type == Magma_SELLP ) {
@@ -213,9 +213,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.numblocks + 1 ));
             // data transfer
-            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1 );
-            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1 );
-            magma_index_setvector( A.numblocks + 1, A.row, 1, B->drow, 1 );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.numblocks + 1, A.row, 1, B->drow, 1, queue );
         }
         //BCSR-type
         else if ( A.storage_type == Magma_BCSR ) {
@@ -244,9 +244,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->drow, r_blocks + 1 ));
             CHECK( magma_index_malloc( &B->dcol, A.numblocks ));
             // data transfer
-            magma_zsetvector( size_b * size_b * A.numblocks, A.val, 1, B->dval, 1 );
-            magma_index_setvector( r_blocks + 1, A.row, 1, B->drow, 1 );
-            magma_index_setvector( A.numblocks, A.col, 1, B->dcol, 1 );
+            magma_zsetvector( size_b * size_b * A.numblocks, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( r_blocks + 1, A.row, 1, B->drow, 1, queue );
+            magma_index_setvector( A.numblocks, A.col, 1, B->dcol, 1, queue );
         }
         //DENSE-type
         else if ( A.storage_type == Magma_DENSE ) {
@@ -266,7 +266,7 @@ magma_zmtransfer(
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.num_cols ));
             // data transfer
-            magma_zsetvector( A.num_rows * A.num_cols, A.val, 1, B->dval, 1 );
+            magma_zsetvector( A.num_rows * A.num_cols, A.val, 1, B->dval, 1, queue );
         }
     }
 
@@ -462,15 +462,15 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->row, r_blocks + 1 ));
             CHECK( magma_index_malloc_cpu( &B->col, A.numblocks ));
             // data transfer
-            //magma_zsetvector( size_b * size_b * A.numblocks, A.val, 1, B->dval, 1 );
+            //magma_zsetvector( size_b * size_b * A.numblocks, A.val, 1, B->dval, 1, queue );
             for( magma_int_t i=0; i<size_b*size_b*A.numblocks; i++ ) {
                 B->dval[i] = A.val[i];
             }
-            //magma_index_setvector( r_blocks + 1, A.row, 1, B->drow, 1 );
+            //magma_index_setvector( r_blocks + 1, A.row, 1, B->drow, 1, queue );
             for( magma_int_t i=0; i<r_blocks+1; i++ ) {
                 B->drow[i] = A.row[i];
             }
-            //magma_index_setvector( A.numblocks, A.col, 1, B->dcol, 1 );
+            //magma_index_setvector( A.numblocks, A.col, 1, B->dcol, 1, queue );
             for( magma_int_t i=0; i<A.numblocks; i++ ) {
                 B->dcol[i] = A.col[i];
             }
@@ -523,9 +523,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows + 1 ));
             CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             // data transfer
-            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1 );
-            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1 );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -546,10 +546,10 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
             // data transfer
-            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1 );
-            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1 );
-            magma_index_getvector( A.nnz, A.drowidx, 1, B->rowidx, 1 );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.nnz, A.drowidx, 1, B->rowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -568,8 +568,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zgetvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->col, 1 );
+            magma_zgetvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->col, 1, queue );
         }
         //ELLD-type
         else if (  A.storage_type == Magma_ELLD ) {
@@ -588,8 +588,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zgetvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->col, 1 );
+            magma_zgetvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->col, 1, queue );
         }
         //ELLRT-type
         else if ( A.storage_type == Magma_ELLRT ) {
@@ -615,9 +615,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows ));
             CHECK( magma_index_malloc_cpu( &B->col, rowlength * A.num_rows ));
             // data transfer
-            magma_zgetvector( A.num_rows * rowlength, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.num_rows * rowlength, A.dcol, 1, B->col, 1 );
-            magma_index_getvector( A.num_rows, A.drow, 1, B->row, 1 );
+            magma_zgetvector( A.num_rows * rowlength, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.num_rows * rowlength, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.num_rows, A.drow, 1, B->row, 1, queue );
         }
         //SELLP-type
         else if ( A.storage_type == Magma_SELLP ) {
@@ -640,9 +640,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.numblocks + 1 ));
             // data transfer
-            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1 );
-            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1 );
-            magma_index_getvector( A.numblocks + 1, A.drow, 1, B->row, 1 );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.numblocks + 1, A.drow, 1, B->row, 1, queue );
         }
         //BCSR-type
         else if ( A.storage_type == Magma_BCSR ) {
@@ -671,9 +671,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc_cpu( &B->row, r_blocks + 1 ));
             CHECK( magma_index_malloc_cpu( &B->col, A.numblocks ));
             // data transfer
-            magma_zgetvector( size_b * size_b * A.numblocks, A.dval, 1, B->val, 1 );
-            magma_index_getvector( r_blocks + 1, A.drow, 1, B->row, 1 );
-            magma_index_getvector( A.numblocks, A.dcol, 1, B->col, 1 );
+            magma_zgetvector( size_b * size_b * A.numblocks, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( r_blocks + 1, A.drow, 1, B->row, 1, queue );
+            magma_index_getvector( A.numblocks, A.dcol, 1, B->col, 1, queue );
         }
         //DENSE-type
         else if ( A.storage_type == Magma_DENSE ) {
@@ -693,7 +693,7 @@ magma_zmtransfer(
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.num_cols ));
             // data transfer
-            magma_zgetvector( A.num_rows * A.num_cols, A.dval, 1, B->val, 1 );
+            magma_zgetvector( A.num_rows * A.num_cols, A.dval, 1, B->val, 1, queue );
         }
     }
 
@@ -721,9 +721,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             // data transfer
-            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1 );
-            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1 );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -744,10 +744,10 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1 );
-            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1 );
-            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1 );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -766,8 +766,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zcopyvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->dcol, 1 );
+            magma_zcopyvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->dcol, 1, queue );
         }
         //ELLD-type
         else if ( A.storage_type == Magma_ELLD ) {
@@ -786,8 +786,8 @@ magma_zmtransfer(
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
             // data transfer
-            magma_zcopyvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->dcol, 1 );
+            magma_zcopyvector( A.num_rows * A.max_nnz_row, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.num_rows * A.max_nnz_row, A.dcol, 1, B->dcol, 1, queue );
         }
         //ELLRT-type
         else if ( A.storage_type == Magma_ELLRT ) {
@@ -813,9 +813,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * rowlength ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows ));
             // data transfer
-            magma_zcopyvector( A.num_rows * rowlength, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.num_rows * rowlength, A.dcol, 1, B->dcol, 1 );
-            magma_index_copyvector( A.num_rows, A.drow, 1, B->drow, 1 );
+            magma_zcopyvector( A.num_rows * rowlength, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.num_rows * rowlength, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.num_rows, A.drow, 1, B->drow, 1, queue );
         }
         //SELLP-type
         else if ( A.storage_type == Magma_SELLP ) {
@@ -838,9 +838,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.numblocks + 1 ));
             // data transfer
-            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1 );
-            magma_index_copyvector( A.numblocks + 1, A.drow, 1, B->drow, 1 );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.numblocks + 1, A.drow, 1, B->drow, 1, queue );
         }
         //BCSR-type
         else if ( A.storage_type == Magma_BCSR ) {
@@ -869,9 +869,9 @@ magma_zmtransfer(
             CHECK( magma_index_malloc( &B->drow, r_blocks + 1 ));
             CHECK( magma_index_malloc( &B->dcol, A.numblocks ));
             // data transfer
-            magma_zcopyvector( size_b * size_b * A.numblocks, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( r_blocks + 1, A.drow, 1, B->drow, 1 );
-            magma_index_copyvector( A.numblocks, A.dcol, 1, B->dcol, 1 );
+            magma_zcopyvector( size_b * size_b * A.numblocks, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( r_blocks + 1, A.drow, 1, B->drow, 1, queue );
+            magma_index_copyvector( A.numblocks, A.dcol, 1, B->dcol, 1, queue );
         }
         //DENSE-type
         else if ( A.storage_type == Magma_DENSE ) {
@@ -891,7 +891,7 @@ magma_zmtransfer(
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.num_cols ));
             // data transfer
-            magma_zcopyvector( A.num_rows * A.num_cols, A.dval, 1, B->dval, 1 );
+            magma_zcopyvector( A.num_rows * A.num_cols, A.dval, 1, B->dval, 1, queue );
         }
     }
     
@@ -900,6 +900,6 @@ cleanup:
     if( info != 0 ){
         magma_zmfree( B, queue );
     }
-    magmablasSetKernelStream( orig_queue );
+    ////magmablasSetKernelStream( orig_queue );
     return info;
 }

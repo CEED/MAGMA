@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -60,10 +60,6 @@ magma_zvinit(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue = NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     x->val = NULL;
     x->diag = NULL;
     x->row = NULL;
@@ -100,10 +96,9 @@ magma_zvinit(
     }
     else if ( mem_loc == Magma_DEV ) {
         CHECK( magma_zmalloc( &x->val, x->nnz ));
-        magmablas_zlaset(MagmaFull, x->num_rows, x->num_cols, values, values, x->val, x->num_rows);
+        magmablas_zlaset( MagmaFull, x->num_rows, x->num_cols, values, values, x->val, x->num_rows, queue );
     }
     
 cleanup:
-    magmablasSetKernelStream( orig_queue );
     return info; 
 }

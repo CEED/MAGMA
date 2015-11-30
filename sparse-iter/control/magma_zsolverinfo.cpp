@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -647,7 +647,7 @@ magma_zeigensolverinfo_init(
 
         magma_zsetmatrix( solver_par->ev_length, solver_par->num_eigenvalues,
             initial_guess, solver_par->ev_length, solver_par->eigenvectors,
-                                                    solver_par->ev_length );
+                                                    solver_par->ev_length, queue );
     } else {
         solver_par->eigenvectors = NULL;
         solver_par->eigenvalues = NULL;

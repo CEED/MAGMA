@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Hartwig Anzt
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -172,10 +172,6 @@ magma_zmconvert(
     cusparseHandle_t cusparseHandle = 0;
     cusparseMatDescr_t descr = 0;
     
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
-
     B->val = NULL;
     B->col = NULL;
     B->row = NULL;
@@ -1020,13 +1016,13 @@ magma_zmconvert(
             
             else {
                 printf("error: format not supported.\n");
-                magmablasSetKernelStream( orig_queue );
+                //magmablasSetKernelStream( queue );
                 info = MAGMA_ERR_NOT_SUPPORTED;
             }
         }
         else {
             printf("error: conversion not supported.\n");
-            magmablasSetKernelStream( orig_queue );
+            //magmablasSetKernelStream( queue );
             info = MAGMA_ERR_NOT_SUPPORTED;
         }
     } // end CPU case
@@ -1130,8 +1126,8 @@ magma_zmconvert(
             if (NULL != nnzTotalDevHostPtr) {
                 nnzb = *nnzTotalDevHostPtr;
             } else {
-                magma_index_getvector( 1, B->row+mb, 1, &nnzb, 1 );
-                magma_index_getvector( 1, B->row, 1, &base, 1 );
+                magma_index_getvector( 1, B->row+mb, 1, &nnzb, 1, queue );
+                magma_index_getvector( 1, B->row, 1, &base, 1, queue );
                 nnzb -= base;
             }
             B->numblocks = nnzb; // number of blocks
@@ -1261,8 +1257,8 @@ magma_zmconvert(
             CHECK( magma_index_malloc( &B->dcol, B->nnz ));
             
             
-            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1 );
-            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1 );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
 
             // conversion using CUSPARSE
             cusparseXcsr2coo( cusparseHandle, A.drow,
@@ -1292,8 +1288,8 @@ magma_zmconvert(
             CHECK( magma_index_malloc( &B->dcol, B->nnz ));
             
             
-            magma_zcopyvector( A.nnz, A.val, 1, B->val, 1 );
-            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1 );
+            magma_zcopyvector( A.nnz, A.val, 1, B->val, 1, queue );
+            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1, queue );
 
             // conversion using CUSPARSE
             cusparseXcoo2csr( cusparseHandle, A.drow,
@@ -1337,6 +1333,5 @@ cleanup:
     if ( info != 0 ) {
         magma_zmfree( B, queue );
     }
-    magmablasSetKernelStream( orig_queue );
     return info;
 }

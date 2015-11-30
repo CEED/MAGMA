@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -10,7 +10,7 @@
        @author Mark Gates
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 /**
     Purpose
