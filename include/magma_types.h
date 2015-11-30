@@ -513,7 +513,8 @@ typedef enum {
     Magma_BOMBARD      = 490,
     Magma_BOMBARDMERGE = 491,
     Magma_PCGMERGE     = 492,
-    Magma_BAITERO      = 493
+    Magma_BAITERO      = 493,
+    Magma_IDRMERGE     = 494
 } magma_solver_type;
 
 typedef enum {
