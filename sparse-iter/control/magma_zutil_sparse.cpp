@@ -212,7 +212,7 @@ magma_zparse_opts(
                 opts->solver_par.solver = Magma_BAITERO;
             }
             else if ( strcmp("IDR", argv[i]) == 0 ) {
-                opts->solver_par.solver = Magma_IDR;
+                opts->solver_par.solver = Magma_IDRMERGE;
             }
             else if ( strcmp("PIDR", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_PIDR;
@@ -276,7 +276,7 @@ magma_zparse_opts(
                 opts->precond_par.solver = Magma_BAITERO;
             }
             else if ( strcmp("IDR", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_IDR;
+                opts->precond_par.solver = Magma_IDRMERGE;
             }
             else if ( strcmp("PIDR", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_PIDR;
@@ -374,11 +374,14 @@ magma_zparse_opts(
         else if ( opts->solver_par.solver == Magma_PQMRMERGE) {
             opts->solver_par.solver = Magma_PQMR;
         }
-                if ( opts->solver_par.solver == Magma_QMRMERGE ) {
+        else if ( opts->solver_par.solver == Magma_QMRMERGE ) {
             opts->solver_par.solver = Magma_QMR;
         }
         else if ( opts->solver_par.solver == Magma_PCGMERGE) {
             opts->solver_par.solver = Magma_PCG;
+        }
+        else if ( opts->solver_par.solver == Magma_IDRMERGE) {
+            opts->solver_par.solver = Magma_IDR;
         }
         else if ( opts->solver_par.solver == Magma_BOMBARDMERGE) {
             opts->solver_par.solver = Magma_BOMBARD;

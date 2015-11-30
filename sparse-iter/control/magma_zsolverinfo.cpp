@@ -219,11 +219,11 @@ magma_zsolverinfo(
         }
     }
     else{
-        printf("%%   iter   ||   residual-nrm2    ||   runtime \n");
+        printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   info\n");
             printf("%%======================================================="
                         "======%%\n");
-        printf("   %4d          %e          %f\n",
-        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime );
+        printf("   %4d          %e          %f          %d\n",
+        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, solver_par->info );
         printf("%%======================================================="
         "======%%\n");
     }
