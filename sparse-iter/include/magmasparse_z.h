@@ -1983,8 +1983,45 @@ magma_zgemvmdot(
     magmaDoubleComplex_ptr dskp,
     magma_queue_t queue );
 
+
 magma_int_t
-magma_zmzdotc(
+magma_zmdotc1(
+    int n,  
+    magmaDoubleComplex_ptr v0, 
+    magmaDoubleComplex_ptr w0,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdotc2(
+    int n,  
+    magmaDoubleComplex_ptr v0, 
+    magmaDoubleComplex_ptr w0,
+    magmaDoubleComplex_ptr v1, 
+    magmaDoubleComplex_ptr w1,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdotc3(
+    int n,  
+    magmaDoubleComplex_ptr v0, 
+    magmaDoubleComplex_ptr w0,
+    magmaDoubleComplex_ptr v1, 
+    magmaDoubleComplex_ptr w1,
+    magmaDoubleComplex_ptr v2, 
+    magmaDoubleComplex_ptr w2,
+    magmaDoubleComplex_ptr d1,
+    magmaDoubleComplex_ptr d2,
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zmdotc4(
     int n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
@@ -1994,31 +2031,6 @@ magma_zmzdotc(
     magmaDoubleComplex_ptr w2,
     magmaDoubleComplex_ptr v3, 
     magmaDoubleComplex_ptr w3,
-    magmaDoubleComplex_ptr d1,
-    magmaDoubleComplex_ptr d2,
-    magmaDoubleComplex_ptr skp,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zmzdotc3(
-    int n,  
-    magmaDoubleComplex_ptr v0, 
-    magmaDoubleComplex_ptr w0,
-    magmaDoubleComplex_ptr v1, 
-    magmaDoubleComplex_ptr w1,
-    magmaDoubleComplex_ptr v2, 
-    magmaDoubleComplex_ptr w2,
-    magmaDoubleComplex_ptr d1,
-    magmaDoubleComplex_ptr d2,
-    magmaDoubleComplex_ptr skp,
-    magma_queue_t queue );
-
-
-magma_int_t
-magma_zmzdotc_one(
-    int n,  
-    magmaDoubleComplex_ptr v0, 
-    magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr skp,
