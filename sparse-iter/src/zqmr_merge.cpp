@@ -27,7 +27,7 @@
 
     Arguments
     ---------
-
+ 
     @param[in]
     A           magma_z_matrix
                 input matrix A
@@ -153,25 +153,16 @@ magma_zqmr_merge(
     do
     {
         solver_par->numiter++;
-        if( rho == c_zero || psi == c_zero 
-            || isnan(MAGMA_Z_REAL(rho))
-            || isnan(MAGMA_Z_IMAG(rho))
-            || isinf(MAGMA_Z_REAL(rho))
-            || isinf(MAGMA_Z_IMAG(rho))
-            || isnan(MAGMA_Z_REAL(psi))
-            || isnan(MAGMA_Z_IMAG(psi))
-            || isinf(MAGMA_Z_REAL(psi))
-            || isinf(MAGMA_Z_IMAG(psi))  ){
+        if( magma_z_isinf( rho ) || magma_z_isinf( psi ) ){
+            info = MAGMA_DIVERGENCE;
             break;
         }
         
             // delta = z' * y;
         delta = magma_zdotc( dofs, z.dval, 1, y.dval, 1, queue );
-        if( delta == c_zero
-            || isnan(MAGMA_Z_REAL(delta))
-            || isnan(MAGMA_Z_IMAG(delta))
-            || isinf(MAGMA_Z_REAL(delta))
-            || isinf(MAGMA_Z_IMAG(delta))  ){
+
+        if( magma_z_isinf( delta ) ){
+            info = MAGMA_DIVERGENCE;
             break;
         }
         
@@ -198,15 +189,8 @@ magma_zqmr_merge(
             q.dval, 
             queue );
         }
-        if( rho == c_zero || psi == c_zero 
-            || isnan(MAGMA_Z_REAL(rho))
-            || isnan(MAGMA_Z_IMAG(rho))
-            || isinf(MAGMA_Z_REAL(rho))
-            || isinf(MAGMA_Z_IMAG(rho))
-            || isnan(MAGMA_Z_REAL(psi))
-            || isnan(MAGMA_Z_IMAG(psi))
-            || isinf(MAGMA_Z_REAL(psi))
-            || isinf(MAGMA_Z_IMAG(psi))  ){
+        if( magma_z_isinf( rho ) || magma_z_isinf( psi ) ){
+            info = MAGMA_DIVERGENCE;
             break;
         }
         
@@ -215,15 +199,8 @@ magma_zqmr_merge(
             // epsilon = q' * pt;
         epsilon = magma_zdotc( dofs, q.dval, 1, pt.dval, 1, queue );
         beta = epsilon / delta;
-        if( epsilon == c_zero || beta == c_zero 
-            || isnan(MAGMA_Z_REAL(epsilon))
-            || isnan(MAGMA_Z_IMAG(epsilon))
-            || isinf(MAGMA_Z_REAL(epsilon))
-            || isinf(MAGMA_Z_IMAG(epsilon))
-            || isnan(MAGMA_Z_REAL(beta))
-            || isnan(MAGMA_Z_IMAG(beta))
-            || isinf(MAGMA_Z_REAL(beta))
-            || isinf(MAGMA_Z_IMAG(beta))  ){
+        if( magma_z_isinf( epsilon ) || magma_z_isinf( beta ) ){
+            info = MAGMA_DIVERGENCE;
             break;
         }
             // v = pt - beta * v
@@ -257,19 +234,8 @@ magma_zqmr_merge(
         
         gamm = c_one / magma_zsqrt(c_one + thet*thet);        
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
-        if( thet == c_zero || gamm == c_zero || eta == c_zero 
-            || isnan(MAGMA_Z_REAL(thet))
-            || isnan(MAGMA_Z_IMAG(thet))
-            || isinf(MAGMA_Z_REAL(thet))
-            || isinf(MAGMA_Z_IMAG(thet))
-            || isnan(MAGMA_Z_REAL(gamm))
-            || isnan(MAGMA_Z_IMAG(gamm))
-            || isinf(MAGMA_Z_REAL(gamm))
-            || isinf(MAGMA_Z_IMAG(gamm))
-            || isnan(MAGMA_Z_REAL(eta))
-            || isnan(MAGMA_Z_IMAG(eta))
-            || isinf(MAGMA_Z_REAL(eta))
-            || isinf(MAGMA_Z_IMAG(eta))  ){
+        if( magma_z_isinf( thet ) || magma_z_isinf( gamm ) || magma_z_isinf( eta ) ){
+            info = MAGMA_DIVERGENCE;
             break;
         }
         
@@ -326,16 +292,11 @@ magma_zqmr_merge(
                         = (real_Double_t) tempo2-tempo1;
             }
         }
-
-        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
-            break;
-        }
         
-                
-            // v = y / rho
-            // y = y / rho
-            // w = wt / psi
-            // z = z / psi
+        // v = y / rho
+        // y = y / rho
+        // w = wt / psi
+        // z = z / psi
         magma_zqmr_1(  
         r.num_rows, 
         r.num_cols, 
@@ -346,6 +307,12 @@ magma_zqmr_merge(
         v.dval,
         w.dval,
         queue );
+
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            break;
+        }
+        
+                
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );

@@ -251,7 +251,7 @@ magma_zbombard_merge(
     {
 
         solver_par->numiter++;
-        if(mdot == -1){   
+        if(mdot == 0){   
                 //QMR: delta = z' * y;
             Q_delta = magma_zdotc( dofs, Q_z.dval, 1, Q_y.dval, 1, queue );
             
