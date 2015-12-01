@@ -655,14 +655,17 @@ magma_zbombard_merge(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        
+        if( magma_z_isinf( Q_beta ) && magma_z_isinf( C_beta ) && magma_z_isinf( B_beta ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        }
                 
 
  
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
     
-    if( solver_par->numiter <= solver_par->maxiter ){   
+    if( solver_par->numiter <= solver_par->maxiter ) {  
         // copy back the best solver
         switch ( flag ) {
             case 1:
@@ -692,7 +695,7 @@ magma_zbombard_merge(
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter  && info == MAGMA_SUCCESS ) {
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {

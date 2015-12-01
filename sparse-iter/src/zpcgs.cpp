@@ -130,8 +130,9 @@ magma_zpcgs(
         
         rho = magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue );
                                                             // rho = < r,r_tld>    
-        if ( MAGMA_Z_ABS(rho) == 0.0 ) {
-            goto cleanup;
+        if( magma_z_isinf( rho ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
         }
         
         if ( solver_par->numiter > 1 ) {                        // direction vectors
@@ -199,7 +200,7 @@ magma_zpcgs(
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter && info == MAGMA_SUCCESS ) {
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {

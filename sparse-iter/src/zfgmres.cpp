@@ -193,6 +193,11 @@ magma_zfgmres(
         temp = MAGMA_Z_MAKE(-1.0, 0.0);
         magma_zaxpy( dofs,temp, b.dval, 1, V(0), 1, queue );           // V(0) = V(0) - b
         beta = MAGMA_Z_MAKE( magma_dznrm2( dofs, V(0), 1, queue ), 0.0 ); // beta = norm(V(0))
+        if( magma_z_isinf( beta ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        }
+        
         if (solver_par->numiter == 0){
             solver_par->init_res = MAGMA_Z_REAL( beta );
             resid0 = MAGMA_Z_REAL( beta );
@@ -259,6 +264,10 @@ magma_zfgmres(
             ApplyPlaneRotation(&s[i], &s[i+1], cs[i], sn[i]);
             
             betanom = MAGMA_Z_ABS( s[i+1] );
+            if( magma_z_isinf( betanom ) ){
+                info = MAGMA_DIVERGENCE;
+                break;
+            }
             rel_resid = betanom / resid0;
             if ( solver_par->verbose > 0 ) {
                 tempo2 = magma_sync_wtime( queue );
@@ -300,7 +309,7 @@ magma_zfgmres(
     solver_par->iter_res = betanom;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter && info == MAGMA_SUCCESS ) {
         solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {

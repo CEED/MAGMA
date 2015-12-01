@@ -130,6 +130,10 @@ magma_zbicgstab_merge(
 
         rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1, queue );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
+        if( magma_z_isinf( beta ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        }
         
         // p = r + beta * ( p - omega * v )
         magma_zbicgstab_1(  
@@ -146,7 +150,10 @@ magma_zbicgstab_merge(
         
         //alpha = rho_new / tmpval;
         alpha = rho_new /magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
-        
+        if( magma_z_isinf( alpha ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        }
         // s = r - alpha v
         magma_zbicgstab_2(  
         r.num_rows, 
@@ -202,7 +209,7 @@ magma_zbicgstab_merge(
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter && info == MAGMA_SUCCESS ) {
         solver_par->info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {

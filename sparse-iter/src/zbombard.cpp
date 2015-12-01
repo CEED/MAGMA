@@ -72,8 +72,8 @@ magma_zbombard(
     solver_par->info = MAGMA_SUCCESS;
     
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,
-                        tmpval;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
+                        
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
     
@@ -491,7 +491,10 @@ magma_zbombard(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        
+        if( magma_z_isinf( Q_beta ) && magma_z_isinf( C_beta ) && magma_z_isinf( B_beta ) ){
+            info = MAGMA_DIVERGENCE;
+            break;
+        } 
                 
 
  
@@ -523,7 +526,7 @@ magma_zbombard(
     solver_par->iter_res = res;
     solver_par->final_res = residual;
 
-    if ( solver_par->numiter < solver_par->maxiter ) {
+    if ( solver_par->numiter < solver_par->maxiter  && info == MAGMA_SUCCESS ) {
         info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
