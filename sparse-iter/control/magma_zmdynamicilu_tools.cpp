@@ -235,9 +235,7 @@ magma_zmdynamicilu_rm_thrs(
             }
             
         }
-        omp_unset_lock(&(counter));
     }
-    
     
     *num_rm = count_rm;
 
@@ -659,8 +657,6 @@ magma_zmdynamicic_candidates_nn(
     magma_int_t info = 0;
     
     LU_new->nnz = 0;
-    
-    //magma_set_omp_numthreads(32);
     
     magma_index_t *numadd;
     CHECK( magma_index_malloc_cpu( &numadd, LU.num_rows+1 ));
