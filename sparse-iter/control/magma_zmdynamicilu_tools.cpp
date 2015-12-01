@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 2.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,6 +9,8 @@
        @author Hartwig Anzt
 
 */
+#define _OPENMP
+
 #include "magmasparse_internal.h"
 #ifdef _OPENMP
 #include <omp.h>
@@ -82,37 +84,27 @@ magma_zmdynamicic_insert(
     
     magma_int_t i=0;
     magma_int_t num_insert = 0;
-    real_Double_t start, end, talloc,tcopy,tsort,tchange;
-    //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
     if(num_rm>=LU_new->nnz){
-      //  printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
+        //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
         goto cleanup;
     }
-    //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
-    start = magma_wtime();
     // identify num_rm-th largest elements and bring them to the front
     CHECK( magma_zmorderstatistics(
     LU_new->val, LU_new->nnz, num_rm,  1, &element, queue ) );
-        end = magma_wtime();tsort= end-start;start = magma_wtime();
-        //    printf("done with order statistics\n");fflush(stdout);
     // insert the new elements
-    //#pragma omp parallel for
+    // has to be sequential
     while( num_insert < num_rm ) {
         if(i>=LU_new->nnz){
-            printf("problem: exceeding candidate list: %d >%d\n", i, LU_new->nnz);
+            //printf("problem: exceeding candidate list: %d >%d\n", i, LU_new->nnz);
             break;
         }
-        //printf("next: %d %d\t", i, rm_loc[ i ]);fflush(stdout);
         magma_int_t loc = rm_loc[ num_insert ];
         magma_index_t new_row = LU_new->rowidx[ i ]; 
         magma_index_t new_col = LU_new->col[ i ];
         
         magma_index_t old_rowstart = LU->row[ new_row ];
-        // lock this row
-        omp_set_lock(&(rowlock[new_row]));
-        //printf("candidate: (%d,%d), old rowstart:%d\t", new_row, new_col, old_rowstart);
         if( new_col < LU->col[ old_rowstart ] ){
-          //  printf("insert at rowstart: (%d,%d)\n", new_row, new_col);
+            //printf("insert at rowstart: (%d,%d)\n", new_row, new_col);
             LU->row[ new_row ] = loc;
             LU->list[ loc ] = old_rowstart;
             LU->rowidx[ loc ] = new_row;
@@ -127,109 +119,14 @@ magma_zmdynamicic_insert(
 
             j = old_rowstart;
             jn = LU->list[j];
-             //printf("not at rowstart(%d,%d) j=%d jn=%d:\t", LU->rowidx[ old_rowstart ],LU->col[ old_rowstart ], j,jn);
             // this will finish, as we consider the lower triangular
             // and we always have the diagonal!
             while( j!=0 ){
-                // insert some code here to avoid inserting a new element twice!
                 if( LU->col[jn]==new_col ){
-               //     printf("tried to insert duplicate!\n");
-                    break;
-                }else 
-                if( LU->col[jn]>new_col ){
-                 //   printf("insert in list: (%d,%d)->(%d,%d)->(%d,%d)\n", LU->rowidx[j],LU->col[j],new_row, new_col,LU->rowidx[jn],LU->col[jn]);
-                    LU->list[j]=loc;
-                    LU->list[loc]=jn;
-                    LU->rowidx[ loc ] = new_row;
-                    LU->col[ loc ] = new_col;
-                    LU->val[ loc ] = MAGMA_Z_ZERO;
-                    num_insert++;
-                    break;
-                }
-                j=jn;
-                jn=LU->list[jn];
-            }
-        }
-        
-        // unlock this row
-        omp_unset_lock(&(rowlock[new_row]));
-        i++;
-    }
-        end = magma_wtime();tchange= end-start;
-        //printf("%% inserted %d elements. timing: insert:  sort: %.4e change: %.4e\n", 
-          //      num_insert,tsort,tchange);
-cleanup:
-    return info;
-}
-
-magma_int_t
-magma_zmdynamicic_insert_om(
-    magma_int_t tri,
-    magma_int_t num_rm,
-    magma_index_t *rm_loc,
-    magma_z_matrix *LU_new,
-    magma_z_matrix *LU,
-    omp_lock_t *rowlock,
-    magma_queue_t queue )
-{
-    magma_int_t info = 0;
-        
-    magmaDoubleComplex element;
-    magma_int_t j,jn;
-    
-    magma_int_t i=0;
-    magma_int_t num_insert = 0;
-    real_Double_t start, end, talloc,tcopy,tsort,tchange;
-    printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
-    if(num_rm>=LU_new->nnz){
-        printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
-        goto cleanup;
-    }
-    //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
-    start = magma_wtime();
-    // identify num_rm-th largest elements and bring them to the front
-    CHECK( magma_zmorderstatistics(
-    LU_new->val, LU_new->nnz, LU_new->nnz-1, 1, &element, queue ) );
-        end = magma_wtime();tsort= end-start;start = magma_wtime();
-            //printf("done with order statistics\n");fflush(stdout);
-    // insert the new elements
-    //#pragma omp parallel for
-    while( num_insert < num_rm ) {
-        if(i>=LU_new->nnz){
-            printf("problem! %d >%d\n", i, LU_new->nnz);;
-        }
-        //printf("next: %d %d\t", i, rm_loc[ i ]);fflush(stdout);
-        magma_int_t loc = rm_loc[ i ];
-        magma_index_t new_row = LU_new->rowidx[ i ]; 
-        magma_index_t new_col = LU_new->col[ i ];
-        
-        magma_index_t old_rowstart = LU->row[ new_row ];
-        // lock this row
-        omp_set_lock(&(rowlock[new_row]));
-        //printf("candidate: (%d,%d), old rowstart:%d\t", new_row, new_col, old_rowstart);
-        if( new_col < LU->col[ old_rowstart ] ){
-            //printf("insert at rowstart: (%d,%d)\n", new_row, new_col);
-            LU->row[ new_row ] = loc;
-            LU->list[ loc ] = old_rowstart;
-            LU->rowidx[ loc ] = new_row;
-            LU->col[ loc ] = new_col;
-            LU->val[ loc ] = MAGMA_Z_ZERO;
-            num_insert++;
-        }
-        else{
-             //printf("not at rowstart(%d,%d):\t", LU->rowidx[ old_rowstart ],LU->col[ old_rowstart ]);
-            j = old_rowstart;
-            jn = LU->list[j];
-            // this will finish, as we consider the lower triangular
-            // and we always have the diagonal!
-            while( j!=0 ){
-                // insert some code here to avoid inserting a new element twice!
-                if( LU->col[jn]==new_col || LU->col[j]==new_col ){
                     //printf("tried to insert duplicate!\n");
                     break;
                 }else 
                 if( LU->col[jn]>new_col ){
-                    //printf("insert in list: (%d,%d)\n", new_row, new_col);
                     LU->list[j]=loc;
                     LU->list[loc]=jn;
                     LU->rowidx[ loc ] = new_row;
@@ -242,18 +139,11 @@ magma_zmdynamicic_insert_om(
                 jn=LU->list[jn];
             }
         }
-        
-        // unlock this row
-        omp_unset_lock(&(rowlock[new_row]));
         i++;
     }
-        end = magma_wtime();tchange= end-start;
-        //printf("%% inserted %d elements. timing: insert:  sort: %.4e change: %.4e\n", 
-          //      num_insert,tsort,tchange);
 cleanup:
     return info;
 }
-
 
 
 /**
@@ -304,29 +194,18 @@ magma_zmdynamicilu_rm_thrs(
 {
     magma_int_t info = 0;
     magma_int_t count_rm = 0;
-    magma_int_t i = 0;
     
     omp_lock_t counter;
     omp_init_lock(&(counter));
     
-    real_Double_t start, end, talloc,tcopy,tsort,tchange;
-    const magma_int_t ione = 1;
-    
-start = magma_wtime();
-
     #pragma omp parallel for
     for( magma_int_t r=0;r<LU->num_rows;r++ ) {
-        i=LU->row[r];
+        magma_int_t i = LU->row[r];
         magma_int_t lasti=i;
         magma_int_t nexti=LU->list[i];
         while( nexti!=0 ){
             if( MAGMA_Z_ABS( LU->val[ i ] ) <  MAGMA_Z_ABS(*thrs) ){
-                
-                // never on the diagonal!
-                //if( LU->col[ i ] != r ){
-                    //printf("remove element %d (%d,%d)\t", i, r, LU->col[ i ]);
-                    // lock this row
-                    //omp_set_lock(&(rowlock[r]));
+                // the condition nexti!=0 esures we never remove the diagonal
                     LU->val[ i ] = MAGMA_Z_ZERO;
                     LU->list[ i ] = -1;
                     
@@ -339,40 +218,28 @@ start = magma_wtime();
                     // linked list to skip this element otherwise
                     if( LU->row[r] == i ){
                             LU->row[r] = nexti;
-                            //printf("new headpointer to %d\n", LU->row[r]);
                             lasti=i;
                             i = nexti;
                             nexti = LU->list[nexti];
                     }
                     else{
                         LU->list[lasti] = nexti;
-                        //printf("new list from %d to %d\n", lasti, nexti);
                         i = nexti;
                         nexti = LU->list[nexti];
                     }
-                    // unlock this row
-    
-
-                    //omp_unset_lock(&(rowlock[row]));
-                //}
-
             }
             else{
                 lasti = i;
                 i = nexti;
                 nexti = LU->list[nexti];
             }
+            
         }
+        omp_unset_lock(&(counter));
     }
     
     
     *num_rm = count_rm;
-    
-    end = magma_wtime();tchange= end-start;
-    //printf("%%num_rm:%d  timing remove: change: %.4e\n", 
-      //          *num_rm,tchange);
-    
-cleanup:
 
     omp_destroy_lock(&(counter));
     return info;
@@ -415,13 +282,8 @@ magma_zmdynamicilu_set_thrs(
 {
     magma_int_t info = 0;
     
-    magma_int_t count_rm = 0;
-    magma_int_t i = 0;
     magmaDoubleComplex element;
     magmaDoubleComplex *val;
-    
-    
-    real_Double_t start, end, talloc,tcopy,tsort,tchange;
     const magma_int_t ione = 1;
     
     CHECK( magma_zmalloc_cpu( &val, LU->nnz ));
@@ -477,11 +339,11 @@ magma_zmdynamicic_sweep(
 {
     magma_int_t info = 0;
     
-        // parallel for using openmp
+    // parallel for using openmp
     #pragma omp parallel for
     for( magma_int_t e=0; e<LU->nnz; e++){
         if( LU->list[e]!=-1){
-            magma_int_t i,j,icol,jcol,iold,jold;
+            magma_int_t i,j,icol,jcol,jold;
             
             magma_index_t row = LU->rowidx[ e ];
             magma_index_t col = LU->col[ e ];
@@ -502,7 +364,6 @@ magma_zmdynamicic_sweep(
             magmaDoubleComplex lsum = MAGMA_Z_ZERO;
             do{
                 lsum = MAGMA_Z_ZERO;
-                iold = i;
                 jold = j;
                 icol = LU->col[i];
                 jcol = LU->col[j];
@@ -534,7 +395,7 @@ magma_zmdynamicic_sweep(
     return info;
 }
 
-
+ 
 
 
 
@@ -575,10 +436,10 @@ magma_zmdynamicic_residuals(
 {
     magma_int_t info = 0;
     
-        // parallel for using openmp
+    // parallel for using openmp
     #pragma omp parallel for
     for( magma_int_t e=0; e<LU_new->nnz; e++){
-        magma_int_t i,j,icol,jcol,iold,jold;
+        magma_int_t i,j,icol,jcol;
         
         magma_index_t row = LU_new->rowidx[ e ];
         magma_index_t col = LU_new->col[ e ];
@@ -599,8 +460,6 @@ magma_zmdynamicic_residuals(
         magmaDoubleComplex lsum = MAGMA_Z_ZERO;
         do{
             lsum = MAGMA_Z_ZERO;
-            iold = i;
-            jold = j;
             icol = LU.col[i];
             jcol = LU.col[j];
             if( icol == jcol ){
@@ -672,8 +531,8 @@ magma_zmdynamicic_candidates(
     for( magma_int_t i = 0; i<LU.num_rows+1; i++ ){
         numadd[i] = 0;  
     }
-   
-
+     
+ 
     // parallel loop
     #pragma omp parallel for
     for( magma_index_t row=0; row<LU.num_rows; row++){
@@ -721,12 +580,9 @@ magma_zmdynamicic_candidates(
     // get the total candidate count
     LU_new->nnz = 0;
     // should become fan-in
-    //#pragma omp parallel for
     for( magma_int_t i = 0; i<LU.num_rows; i++ ){
-        omp_set_lock(&(counter));
         LU_new->nnz=LU_new->nnz + numadd[ i+1 ];
         numadd[ i+1 ] = LU_new->nnz;
-        omp_unset_lock(&(counter));
     }
     
     // allocate space
@@ -754,7 +610,7 @@ magma_zmdynamicic_candidates(
                 magma_index_t col1 = LU.col[lcol1];
                 magma_index_t col2 = LU.col[lcol2]; 
                 // col1 is always larger as col2
-
+ 
                 // we only look at the lower triangular part
                 magma_index_t checkrow = col1;
                 magma_index_t checkelement = col2;
@@ -804,7 +660,7 @@ magma_zmdynamicic_candidates_nn(
     
     LU_new->nnz = 0;
     
-    magma_set_omp_numthreads(32);
+    //magma_set_omp_numthreads(32);
     
     magma_index_t *numadd;
     CHECK( magma_index_malloc_cpu( &numadd, LU.num_rows+1 ));
@@ -817,8 +673,6 @@ magma_zmdynamicic_candidates_nn(
     #pragma omp parallel for
     for( magma_index_t row=0; row<LU.num_rows; row++){
         magma_index_t start = LU.row[ row ];
-        magma_index_t end = LU.row[ row+1 ]; 
-        
         magma_index_t lcol1 = start;
         // loop first element over row
         while( lcol1 != 0 ) {
@@ -843,7 +697,6 @@ magma_zmdynamicic_candidates_nn(
                 magma_index_t checkrow = max(col1,col2);
                 magma_index_t checkelement = min(col1,col2);
                 magma_index_t check = LU.row[ checkrow ];
-                magma_index_t checkend = LU.row[ checkrow+1 ];
                 while( check != 0 ) {
                     if( LU.col[check] == checkelement ){
                         // element included in LU and nonzero
@@ -882,7 +735,6 @@ magma_zmdynamicic_candidates_nn(
     #pragma omp parallel for
     for( magma_index_t row=0; row<LU.num_rows; row++){
         magma_index_t start = LU.row[ row ];
-        magma_index_t end = LU.row[ row+1 ]; 
         magma_int_t ladd = 0;
         
         magma_index_t lcol1 = start;

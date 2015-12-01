@@ -11,6 +11,7 @@
 
 #ifndef MAGMASPARSE_Z_H
 #define MAGMASPARSE_Z_H
+#define _OPENMP
 
 #include "magma_types.h"
 #include "magmasparse_types.h"
