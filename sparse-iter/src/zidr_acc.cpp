@@ -310,9 +310,9 @@ magma_zidr_acc(
     gpumem += dbeta.nnz * sizeof(magmaDoubleComplex);
     
     // workspace for merged dot product
-    CHECK( magma_zmalloc( &d1, 2 * dofb ));
-    CHECK( magma_zmalloc( &d2, 2 * dofb ));
-    gpumem += 4 * dofb * sizeof(magmaDoubleComplex);
+    CHECK( magma_zmalloc( &d1, s * dofb ));
+    CHECK( magma_zmalloc( &d2, s * dofb ));
+    gpumem += 2 * s * dofb * sizeof(magmaDoubleComplex);
 
     if ( smoothing > 0 ) {
         // set smoothing solution vector
@@ -401,7 +401,8 @@ magma_zidr_acc(
     
         // new RHS for small systems
         // f = (r' P)' = P' r
-        magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.ld, dr.dval, 1, c_zero, df.dval, 1, queue );
+        magma_zgemvmdot(dP.num_rows,dP.num_cols,dP.dval,dr.dval,d1,d2,df.dval,queue);
+//        magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.ld, dr.dval, 1, c_zero, df.dval, 1, queue );
         printMatrix("F", df);
 
         // shadow space loop
@@ -487,7 +488,8 @@ magma_zidr_acc(
             
             // new column of M = P'G, first k-1 entries are zero
             // M(k:s,k) = (G(:,k)' P(:,k:s))' = P(:,k:s)' G(:,k)
-            magmablas_zgemv( MagmaConjTrans, dP.num_rows, sk, c_one, &dP.dval[k*dP.ld], dP.ld, &dG.dval[k*dG.ld], 1, c_zero, &dM.dval[k*dM.ld+k], 1, queue );
+            magma_zgemvmdot(dP.num_rows,sk,&dP.dval[k*dP.ld],&dG.dval[k*dG.ld],d1,d2,&dM.dval[k*dM.ld+k],queue);
+//            magmablas_zgemv( MagmaConjTrans, dP.num_rows, sk, c_one, &dP.dval[k*dP.ld], dP.ld, &dG.dval[k*dG.ld], 1, c_zero, &dM.dval[k*dM.ld+k], 1, queue );
             printMatrix("M", dM);
 
             // check M(k,k) == 0
