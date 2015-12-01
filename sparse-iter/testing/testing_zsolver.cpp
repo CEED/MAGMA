@@ -51,6 +51,7 @@ int main(  int argc, char** argv )
          zopts.solver_par.solver != Magma_PCGMERGE &&
          zopts.solver_par.solver != Magma_PGMRES &&
          zopts.solver_par.solver != Magma_PBICGSTAB &&
+         zopts.solver_par.solver != Magma_PBICGSTABMERGE &&
          zopts.solver_par.solver != Magma_ITERREF  &&
          zopts.solver_par.solver != Magma_PIDR  &&
          zopts.solver_par.solver != Magma_PCGS  &&

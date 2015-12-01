@@ -72,6 +72,8 @@ magma_z_solver(
                     CHECK( magma_zbicgstab( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_BICGSTABMERGE: 
                     CHECK( magma_zbicgstab_merge( A, b, x, &zopts->solver_par, queue )); break;
+            case  Magma_PBICGSTABMERGE:
+                    CHECK( magma_zpbicgstab_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_PBICGSTAB:
                     CHECK( magma_zpbicgstab( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_GMRES:

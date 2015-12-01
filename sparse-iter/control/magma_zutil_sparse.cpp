@@ -179,7 +179,7 @@ magma_zparse_opts(
                 opts->solver_par.solver = Magma_BICGSTABMERGE;
             }
             else if ( strcmp("PBICGSTAB", argv[i]) == 0 ) {
-                opts->solver_par.solver = Magma_PBICGSTAB;
+                opts->solver_par.solver = Magma_PBICGSTABMERGE;
             }
             else if ( strcmp("QMR", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_QMRMERGE;
@@ -244,9 +244,6 @@ magma_zparse_opts(
             }
             else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_BICGSTABMERGE;
-            }
-            else if ( strcmp("PBICGSTAB", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_PBICGSTAB;
             }
             else if ( strcmp("QMR", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_QMRMERGE;

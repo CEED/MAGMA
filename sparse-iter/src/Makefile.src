@@ -52,6 +52,7 @@ libsparse_zsrc += \
 	$(cdir)/zpidr.cpp                     \
 	$(cdir)/zbombard.cpp                  \
 	$(cdir)/zbombard_merge.cpp            \
+    $(cdir)/zpbicgstab_merge.cpp          \
 
 # Krylov space eigen-solvers
 libsparse_zsrc += \

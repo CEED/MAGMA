@@ -11,7 +11,6 @@
 */
 #include "magmasparse_internal.h"
 
-
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
 
@@ -22,7 +21,7 @@
 
     Solves a system of linear equations
        A * X = B
-    where A is a complex N-by-N general matrix.
+    where A is a general matrix.
     This is a GPU implementation of the preconditioned
     Biconjugate Gradient Stabelized method.
 
@@ -44,7 +43,7 @@
     @param[in,out]
     solver_par  magma_z_solver_par*
                 solver parameters
-
+                
     @param[in]
     precond_par magma_z_preconditioner*
                 preconditioner parameters
@@ -57,7 +56,7 @@
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zpbicgstab(
+magma_zpbicgstab_merge(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
     magma_z_preconditioner *precond_par,
@@ -66,19 +65,20 @@ magma_zpbicgstab(
     magma_int_t info = 0;
     
     // prepare solver feedback
-    solver_par->solver = Magma_PBICGSTAB;
+    solver_par->solver = Magma_BICGSTAB;
     solver_par->numiter = 0;
     solver_par->info = MAGMA_SUCCESS;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
-    magma_int_t dofs = A.num_rows*b.num_cols;
+    magma_int_t dofs = A.num_rows * b.num_cols;
 
     // workspace
-    magma_z_matrix r={Magma_CSR}, rr={Magma_CSR}, p={Magma_CSR}, v={Magma_CSR}, s={Magma_CSR}, t={Magma_CSR}, ms={Magma_CSR}, mt={Magma_CSR}, y={Magma_CSR}, z={Magma_CSR};
+    magma_z_matrix r={Magma_CSR}, rr={Magma_CSR}, p={Magma_CSR}, v={Magma_CSR}, 
+    z={Magma_CSR}, y={Magma_CSR}, ms={Magma_CSR}, mt={Magma_CSR}, 
+    s={Magma_CSR}, t={Magma_CSR}, d1={Magma_CSR}, d2={Magma_CSR};
     CHECK( magma_zvinit( &r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &rr,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &p, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -89,6 +89,8 @@ magma_zpbicgstab(
     CHECK( magma_zvinit( &mt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &z, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d1, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
+    CHECK( magma_zvinit( &d2, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
 
     
     // solver variables
@@ -101,8 +103,11 @@ magma_zpbicgstab(
     magma_zcopy( dofs, r.dval, 1, rr.dval, 1, queue );                  // rr = r
     betanom = nom0;
     nom = nom0*nom0;
-    rho_new = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
+    rho_new = magma_zdotc( dofs, r.dval, 1, r.dval, 1, queue );             // rho=<rr,r>
+    rho_old = omega = alpha = MAGMA_Z_MAKE( 1.0, 0. );
     solver_par->init_res = nom0;
+
+    CHECK( magma_z_spmv( c_one, A, r, c_zero, v, queue ));              // z = A r
 
     nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
@@ -121,7 +126,7 @@ magma_zpbicgstab(
     if ( nom < r0 ) {
         goto cleanup;
     }
-
+    
     //Chronometry
     real_Double_t tempo1, tempo2, tempop1, tempop2;
     tempo1 = magma_sync_wtime( queue );
@@ -139,10 +144,17 @@ magma_zpbicgstab(
             info = MAGMA_DIVERGENCE;
             break;
         }
-        magma_zscal( dofs, beta, p.dval, 1, queue );                 // p = beta*p
-        magma_zaxpy( dofs, c_neg_one * omega * beta, v.dval, 1 , p.dval, 1, queue );
-                                                        // p = p-omega*beta*v
-        magma_zaxpy( dofs, c_one, r.dval, 1, p.dval, 1, queue );      // p = p+r
+        
+        // p = r + beta * ( p - omega * v )
+        magma_zbicgstab_1(  
+        r.num_rows, 
+        r.num_cols, 
+        beta,
+        omega,
+        r.dval, 
+        v.dval,
+        p.dval,
+        queue );
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
@@ -150,35 +162,51 @@ magma_zpbicgstab(
         CHECK( magma_z_applyprecond_right( A, mt, &y, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
-        
-        CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
 
-        alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
+        CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
+        
+        //alpha = rho_new / tmpval;
+        alpha = rho_new /magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
         if( magma_z_isinf( alpha ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
-        magma_zcopy( dofs, r.dval, 1 , s.dval, 1, queue );            // s=r
-        magma_zaxpy( dofs, c_neg_one * alpha, v.dval, 1 , s.dval, 1, queue ); // s=s-alpha*v
-
+        // s = r - alpha v
+        magma_zbicgstab_2(  
+        r.num_rows, 
+        r.num_cols, 
+        alpha,
+        r.dval,
+        v.dval,
+        s.dval, 
+        queue );
+        
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
         CHECK( magma_z_applyprecond_left( A, s, &ms, precond_par, queue ));
         CHECK( magma_z_applyprecond_right( A, ms, &z, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
-        
+
         CHECK( magma_z_spmv( c_one, A, z, c_zero, t, queue ));       // t=As
-                   
-       // omega = <s,t>/<t,t>
-        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1, queue )
+        omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1, queue )   // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, t.dval, 1, t.dval, 1, queue );
+                        
+        // x = x + alpha * y + omega * z
+        // r = s - omega * t
+        magma_zbicgstab_4(  
+        r.num_rows, 
+        r.num_cols, 
+        alpha,
+        omega,
+        y.dval,
+        z.dval,
+        s.dval,
+        t.dval,
+        x->dval,
+        r.dval,
+        queue );
 
-        magma_zaxpy( dofs, alpha, y.dval, 1 , x->dval, 1, queue );     // x=x+alpha*p
-        magma_zaxpy( dofs, omega, z.dval, 1 , x->dval, 1, queue );     // x=x+omega*s
-
-        magma_zcopy( dofs, s.dval, 1 , r.dval, 1, queue );             // r=s
-        magma_zaxpy( dofs, c_neg_one * omega, t.dval, 1 , r.dval, 1, queue ); // r=r-omega*t
         res = betanom = magma_dznrm2( dofs, r.dval, 1, queue );
 
         nom = betanom*betanom;
@@ -241,12 +269,14 @@ cleanup:
     magma_zmfree(&p, queue );
     magma_zmfree(&v, queue );
     magma_zmfree(&s, queue );
+    magma_zmfree(&y, queue );
+    magma_zmfree(&z, queue );
     magma_zmfree(&t, queue );
     magma_zmfree(&ms, queue );
     magma_zmfree(&mt, queue );
-    magma_zmfree(&y, queue );
-    magma_zmfree(&z, queue );
+    magma_zmfree(&d1, queue );
+    magma_zmfree(&d2, queue );
 
     solver_par->info = info;
     return info;
-}   /* magma_zbicgstab */
+}   /* magma_zbicgstab_merge */

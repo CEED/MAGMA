@@ -797,6 +797,13 @@ magma_zpbicgstab(
     magma_queue_t queue );
 
 magma_int_t
+magma_zpbicgstab_merge(
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zfgmres(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par, 
@@ -1839,6 +1846,20 @@ magma_zbicgstab_3(
     magmaDoubleComplex alpha,
     magmaDoubleComplex omega,
     magmaDoubleComplex_ptr p,
+    magmaDoubleComplex_ptr s,
+    magmaDoubleComplex_ptr t,
+    magmaDoubleComplex_ptr x,
+    magmaDoubleComplex_ptr r,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zbicgstab_4(  
+    magma_int_t num_rows, 
+    magma_int_t num_cols, 
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex omega,
+    magmaDoubleComplex_ptr y,
+    magmaDoubleComplex_ptr z,
     magmaDoubleComplex_ptr s,
     magmaDoubleComplex_ptr t,
     magmaDoubleComplex_ptr x,
