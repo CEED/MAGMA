@@ -22,7 +22,7 @@ RANLIB     ?= ranlib
 # may want -std=c99 for CFLAGS, -std=c++11 for CXXFLAGS
 CFLAGS     ?= -O3 $(FPIC) -DADD_ -Wall -MMD
 CXXFLAGS   ?= $(CFLAGS)
-NVFLAGS    ?= -O3         -DADD_ -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
+NVCCFLAGS  ?= -O3         -DADD_ -Xcompiler "$(FPIC) -Wall -Wno-unused-function"
 FFLAGS     ?= -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 F90FLAGS   ?= -O3 $(FPIC) -DADD_ -Wall -Wno-unused-dummy-argument
 LDFLAGS    ?= -O3 $(FPIC)
@@ -617,7 +617,7 @@ sparse-iter/testing/clean:
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 %.$(o_ext): %.cu
-	$(NVCC) $(NVFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 %.i: %.c
 	$(CC) -E $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
