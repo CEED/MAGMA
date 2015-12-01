@@ -264,10 +264,6 @@ magma_zfgmres(
             ApplyPlaneRotation(&s[i], &s[i+1], cs[i], sn[i]);
             
             betanom = MAGMA_Z_ABS( s[i+1] );
-            if( magma_z_isinf( betanom ) ){
-                info = MAGMA_DIVERGENCE;
-                break;
-            }
             rel_resid = betanom / resid0;
             if ( solver_par->verbose > 0 ) {
                 tempo2 = magma_sync_wtime( queue );
