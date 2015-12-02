@@ -9,7 +9,6 @@
        @author Hartwig Anzt
 
 */
-#define _OPENMP
 
 #include "magmasparse_internal.h"
 #ifdef _OPENMP
@@ -84,13 +83,15 @@ magma_zmdynamicic_insert(
     
     magma_int_t i=0;
     magma_int_t num_insert = 0;
+    
     if(num_rm>=LU_new->nnz){
         //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
         goto cleanup;
     }
     // identify num_rm-th largest elements and bring them to the front
     CHECK( magma_zmorderstatistics(
-    LU_new->val, LU_new->nnz, num_rm,  1, &element, queue ) );
+    LU_new->val, LU_new->col, LU_new->rowidx, LU_new->nnz, num_rm,  1, &element, queue ) );
+
     // insert the new elements
     // has to be sequential
     while( num_insert < num_rm ) {
@@ -288,9 +289,10 @@ magma_zmdynamicilu_set_thrs(
     blasf77_zcopy(&LU->nnz, LU->val, &ione, val, &ione );
     
     // identify num_rm-th smallest element
-    CHECK( magma_zmorderstatistics(
+    CHECK( magma_zorderstatistics(
     val, LU->nnz, num_rm, 0, &element, queue ) );
-    
+    CHECK( magma_zsort( val, 0, LU->nnz, queue ) );
+    element = val[num_rm];
     *thrs = element;
     
 

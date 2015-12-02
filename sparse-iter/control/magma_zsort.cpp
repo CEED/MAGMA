@@ -16,12 +16,84 @@
 
 
 #define SWAP(a, b) { tmp = val[a]; val[a] = val[b]; val[b] = tmp; }
+#define SWAPM(a, b) { tmpv = val[a]; val[a] = val[b]; val[b] = tmpv;    \
+                        tmpc = col[a]; col[a] = col[b]; col[b] = tmpc;  \
+                        tmpr = row[a]; row[a] = row[b]; row[b] = tmpr;}
 
 /**
     Purpose
     -------
 
-    Sorts an array of integers.
+    Sorts an array of values in increasing order.
+
+    Arguments
+    ---------
+
+    @param[in,out]
+    x           magmaDoubleComplex*
+                array to sort
+
+    @param[in]
+    first       magma_int_t
+                pointer to first element
+
+    @param[in]
+    last        magma_int_t
+                pointer to last element
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+extern "C"
+magma_int_t
+magma_zsort(
+    magmaDoubleComplex *x,
+    magma_int_t first,
+    magma_int_t last,
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+    
+    magmaDoubleComplex temp;
+    magma_index_t pivot,j,i;
+    
+    if(first<last){
+         pivot=first;
+         i=first;
+         j=last;
+
+        while(i<j){
+            while( MAGMA_Z_ABS(x[i]) <= MAGMA_Z_ABS(x[pivot]) && i<last )
+                i++;
+            while( MAGMA_Z_ABS(x[j]) > MAGMA_Z_ABS(x[pivot]) )
+                j--;
+            if( i<j ){
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
+            }
+        }
+
+        temp=x[pivot];
+        x[pivot]=x[j];
+        x[j]=temp;
+        CHECK( magma_zsort( x, first, j-1, queue ));
+        CHECK( magma_zsort( x, j+1, last, queue ));
+    }
+cleanup:
+    return info;
+}
+
+
+/**
+    Purpose
+    -------
+
+    Sorts an array of integers in increasing order.
 
     Arguments
     ---------
@@ -171,6 +243,116 @@ cleanup:
     Purpose
     -------
 
+    Identifies the kth smallest/largest element in an array and reorders 
+    such that these elements come to the front. The related arrays col and row
+    are also reordered.
+
+    Arguments
+    ---------
+    
+    @param[in,out]
+    val         magmaDoubleComplex*
+                Target array, will be modified during operation.
+                
+    @param[in,out]
+    col         magma_index_t*
+                Target array, will be modified during operation.
+                
+    @param[in,out]
+    row         magma_index_t*
+                Target array, will be modified during operation.
+
+    @param[in]
+    length      magma_int_t
+                Length of the target array.
+
+    @param[in]
+    k           magma_int_t
+                Element to be identified (largest/smallest).
+                
+    @param[in]
+    r           magma_int_t
+                rule how to sort: '1' -> largest, '0' -> smallest
+                
+    @param[out]
+    element     magmaDoubleComplex*
+                location of the respective element
+                
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+extern "C"
+magma_int_t
+magma_zmorderstatistics(
+    magmaDoubleComplex *val,
+    magma_index_t *col,
+    magma_index_t *row,
+    magma_int_t length,
+    magma_int_t k,
+    magma_int_t r,
+    magmaDoubleComplex *element,
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+    magma_int_t i, st;
+    magmaDoubleComplex tmpv;
+    magma_index_t tmpc, tmpr;
+    if( r == 0 ){
+        for ( st = i = 0; i < length - 1; i++ ) {
+            if ( MAGMA_Z_ABS(val[i]) > MAGMA_Z_ABS(val[length-1]) ){
+                continue;
+            }
+            SWAPM(i, st);
+            st++;
+        }
+     
+        SWAPM(length-1, st);
+     
+        if ( k == st ){
+            *element = val[st];    
+        }
+        else if ( st > k ) {
+            CHECK( magma_zmorderstatistics( val, col, row, st, k, r, element, queue ));
+        }
+        else {
+             CHECK( magma_zmorderstatistics( val+st, col+st, row+st, length-st, k-st, r, element, queue ));
+        }
+    } else {
+        for ( st = i = 0; i < length - 1; i++ ) {
+            if ( MAGMA_Z_ABS(val[i]) < MAGMA_Z_ABS(val[length-1]) ){
+                continue;
+            }
+            SWAPM(i, st);
+            st++;
+        }
+     
+        SWAPM(length-1, st);
+     
+        if ( k == st ){
+            *element = val[st];    
+        }
+        else if ( st > k ) {
+            CHECK( magma_zmorderstatistics( val, col, row, st, k, r, element, queue ));
+        }
+        else {
+             CHECK( magma_zmorderstatistics( val+st, col+st, row+st, length-st, k-st, r, element, queue ));
+        }
+    }
+    
+cleanup:
+    return info;
+}
+
+
+
+/**
+    Purpose
+    -------
+
     Identifies the kth smallest/largest element in an array.
 
     Arguments
@@ -190,7 +372,7 @@ cleanup:
                 
     @param[in]
     r           magma_int_t
-                rule how to ort: '1' -> largest, '0' -> smallest
+                rule how to sort: '1' -> largest, '0' -> smallest
                 
     @param[out]
     element     magmaDoubleComplex*
@@ -205,7 +387,7 @@ cleanup:
 
 extern "C"
 magma_int_t
-magma_zmorderstatistics(
+magma_zorderstatistics(
     magmaDoubleComplex *val,
     magma_int_t length,
     magma_int_t k,
@@ -217,7 +399,6 @@ magma_zmorderstatistics(
 
     magma_int_t i, st;
     magmaDoubleComplex tmp;
- 
     if( r == 0 ){
         for ( st = i = 0; i < length - 1; i++ ) {
             if ( MAGMA_Z_ABS(val[i]) > MAGMA_Z_ABS(val[length-1]) ){
@@ -233,10 +414,10 @@ magma_zmorderstatistics(
             *element = val[st];    
         }
         else if ( st > k ) {
-            CHECK( magma_zmorderstatistics( val, st, k, r, element, queue ));
+            CHECK( magma_zorderstatistics( val, st, k, r, element, queue ));
         }
         else {
-             CHECK( magma_zmorderstatistics( val+st, length-st, k-st, r, element, queue ));
+             CHECK( magma_zorderstatistics( val+st, length-st, k-st, r, element, queue ));
         }
     } else {
         for ( st = i = 0; i < length - 1; i++ ) {
@@ -253,10 +434,10 @@ magma_zmorderstatistics(
             *element = val[st];    
         }
         else if ( st > k ) {
-            CHECK( magma_zmorderstatistics( val, st, k, r, element, queue ));
+            CHECK( magma_zorderstatistics( val, st, k, r, element, queue ));
         }
         else {
-             CHECK( magma_zmorderstatistics( val+st, length-st, k-st, r, element, queue ));
+             CHECK( magma_zorderstatistics( val+st, length-st, k-st, r, element, queue ));
         }
     }
     
