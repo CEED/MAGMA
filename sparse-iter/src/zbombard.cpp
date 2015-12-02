@@ -61,7 +61,7 @@ magma_zbombard(
     magma_z_matrix *x, magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // 1=QMR, 2=CGS, 3+BiCGSTAB
     magma_int_t flag = 0;
@@ -69,7 +69,6 @@ magma_zbombard(
     // prepare solver feedback
     solver_par->solver = Magma_BOMBARD;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -84,7 +83,7 @@ magma_zbombard(
                         Q_gamm = c_one, Q_gamm1 = c_one, Q_psi = c_one;
                         
     //CGS
-    magmaDoubleComplex C_rho, C_rho_l = c_one, C_alpha, C_beta;
+    magmaDoubleComplex C_rho, C_rho_l = c_one, C_alpha, C_beta = c_zero;
     //BiCGSTAB
     magmaDoubleComplex B_alpha, B_beta, B_omega, B_rho_old, B_rho_new;
     
@@ -186,6 +185,7 @@ magma_zbombard(
         solver_par->timing[0] = 0.0;
     }
     if ( nom0 < r0 ) {
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
 

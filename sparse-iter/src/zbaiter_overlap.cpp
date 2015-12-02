@@ -64,11 +64,10 @@ magma_zbaiter_overlap(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
         
     // prepare solver feedback
     solver_par->solver = Magma_BAITERO;
-    solver_par->info = MAGMA_SUCCESS;
     
     // some useful variables 
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;

@@ -62,7 +62,7 @@ magma_zbombard_merge(
     magma_z_matrix *x, magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // 1=QMR, 2=CGS, 3+BiCGSTAB
     magma_int_t flag = 0;
@@ -72,7 +72,6 @@ magma_zbombard_merge(
     // prepare solver feedback
     solver_par->solver = Magma_BOMBARD;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -216,6 +215,7 @@ magma_zbombard_merge(
         solver_par->timing[0] = 0.0;
     }
     if ( nom0 < r0 ) {
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
 

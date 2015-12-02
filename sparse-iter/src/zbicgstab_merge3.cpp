@@ -58,12 +58,11 @@ magma_zbicgstab_merge3(
     magma_z_matrix *x, magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // prepare solver feedback
     solver_par->solver = Magma_BICGSTABMERGE;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, *skp_h={0};
@@ -137,6 +136,7 @@ magma_zbicgstab_merge3(
     nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if( nom0 < solver_par->atol ||
         nom0/nomb < solver_par->rtol ){
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
 
@@ -198,7 +198,7 @@ magma_zbicgstab_merge3(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
-        solver_par->info = MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {
