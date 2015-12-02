@@ -40,6 +40,7 @@ int main(  int argc, char** argv )
 
     magma_int_t i, n=100;
     magma_index_t *x=NULL;
+    magmaDoubleComplex *y=NULL;
     
     magma_z_matrix A={Magma_CSR};
 
@@ -64,6 +65,29 @@ int main(  int argc, char** argv )
     printf("\n\n");
 
     magma_free_cpu( x );
+    
+    
+    CHECK( magma_zmalloc_cpu( &y, n ));
+    printf("unsorted:\n");
+    srand(time(NULL));
+    for(i = 0; i < n; i++ ){
+        double r = (double) rand()/(double) 10.;
+        y[i] = MAGMA_Z_MAKE( r, 0.0);
+        printf("%2.2f  ", y[i]);
+    }
+    printf("\n\n");
+    
+    printf("sorting...");
+    CHECK( magma_zsort(y, 0, n-1, queue ));
+    printf("done.\n\n");
+    
+    printf("sorted:\n");
+    for(i = 0; i < n; i++ ){
+        printf("%2.2f  ", y[i]);
+    }
+    printf("\n\n");
+
+    magma_free_cpu( y );
     
     i=1;
     while( i < argc ) {
