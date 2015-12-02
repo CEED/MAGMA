@@ -221,6 +221,7 @@ magmablas_zgemv_q(
         }
     }
     else {
+        //printf("CALL with %dx%d\n",m,n);
         zgemvc_template_fermi<version(T, 189)>
             ( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, queue );
     }

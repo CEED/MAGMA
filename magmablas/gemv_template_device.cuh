@@ -166,13 +166,20 @@ gemvc_template_device(
         iters = (ed-st)/DIM_Y;
     #endif
 
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+//        printf("DIMX %d DIMY %d mfull %d TILE_SIZE %d iters %d block %dx%d grid %dx%d\n",DIM_X,DIM_Y,mfull,TILE_SIZE,iters,blockDim.x,blockDim.y,gridDim.x,gridDim.y);
+    }
 
-    if (tx < m) A += tx;
+    if (tx < m) {
+//        printf("threadIdx.x %d stride %d\n",threadIdx.x,tx);
+        A += tx;
+    }
     
     for (int i = 0; i < iters; i++)// at 2Gflops/ overhead
     //for (int col=start; col < (blockIdx.y+1)*TILE_SIZE; col += DIM_Y)// at least 3Gflop/s overhead
     {
         int col = start + i * DIM_Y;
+//        printf("block %d thread %d col %d\n",blockIdx.x,threadIdx.x,col);
 
         if ( col < n) A += col*lda;
 
@@ -182,9 +189,11 @@ gemvc_template_device(
         if (col < n)
         {    
             for (int i=0; i < mfull; i += DIM_X) {
+//                printf("threadIdx.x %d access %p %p\n",threadIdx.x,&A[i],&x[(tx+i)*incx]);
                 res += op<trans>(A[i]) * x[(tx + i)*incx];
             }
             if ( tx + mfull < m ) {
+//                printf("threadIdx.x %d access A[%d] x[%d]\n",threadIdx.x,mfull,(tx+mfull)*incx);
                 res += op<trans>(A[mfull]) * x[(tx + mfull)*incx];
             }
         }

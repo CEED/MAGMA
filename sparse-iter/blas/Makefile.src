@@ -29,6 +29,7 @@ libsparse_zsrc += \
 	$(cdir)/zlobpcg_residuals.cu          \
 	$(cdir)/zlobpcg_maxpy.cu              \
 	$(cdir)/zmdot.cu                      \
+	$(cdir)/zmdot_shfl.cu                 \
 	$(cdir)/zmergebicgstab2.cu            \
 	$(cdir)/zmergebicgstab3.cu            \
 	$(cdir)/zmergeidr.cu                  \
