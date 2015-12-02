@@ -11,7 +11,6 @@
 
 #ifndef MAGMASPARSE_Z_H
 #define MAGMASPARSE_Z_H
-#define _OPENMP
 
 #include "magma_types.h"
 #include "magmasparse_types.h"
@@ -252,6 +251,13 @@ magma_zindexsort(
     magma_queue_t queue );
 
 magma_int_t
+magma_zsort(
+    magmaDoubleComplex *x, 
+    magma_int_t first,
+    magma_int_t last,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zindexsortval(
     magma_index_t *x,
     magmaDoubleComplex *y,
@@ -260,8 +266,19 @@ magma_zindexsortval(
     magma_queue_t queue );
 
 magma_int_t
+magma_zorderstatistics(
+    magmaDoubleComplex *val,
+    magma_int_t length,
+    magma_int_t k,
+    magma_int_t r,
+    magmaDoubleComplex *element,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zmorderstatistics(
     magmaDoubleComplex *val,
+    magma_index_t *col,
+    magma_index_t *row,
     magma_int_t length,
     magma_int_t k,
     magma_int_t r,
