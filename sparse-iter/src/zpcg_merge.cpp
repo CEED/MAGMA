@@ -63,12 +63,11 @@ magma_zpcg_merge(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // prepare solver feedback
     solver_par->solver = Magma_PCGMERGE;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h={0};
@@ -123,6 +122,7 @@ magma_zpcg_merge(
         solver_par->timing[0] = 0.0;
     }
     if ( nom < r0 ) {
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
     // check positive definite
@@ -221,7 +221,7 @@ magma_zpcg_merge(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
-        solver_par->info = MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {

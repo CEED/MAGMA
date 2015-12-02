@@ -61,7 +61,7 @@ magma_ziterref(
     magma_z_solver_par *solver_par, magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -71,7 +71,6 @@ magma_ziterref(
     // prepare solver feedback
     solver_par->solver = Magma_ITERREF;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     magma_int_t dofs = A.num_rows*b.num_cols;
 
@@ -100,6 +99,7 @@ magma_ziterref(
         nom0/solver_par->init_res < solver_par->rtol ){
         solver_par->final_res = solver_par->init_res;
         solver_par->iter_res = solver_par->init_res;
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
     
@@ -144,7 +144,7 @@ magma_ziterref(
     solver_par->iter_res = nom;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
-        solver_par->info = MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {

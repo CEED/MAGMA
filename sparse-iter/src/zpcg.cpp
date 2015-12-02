@@ -62,12 +62,11 @@ magma_zpcg(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // solver variables
     magmaDoubleComplex alpha, beta;
@@ -114,6 +113,7 @@ magma_zpcg(
         solver_par->timing[0] = 0.0;
     }
     if ( nom < r0 ) {
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
     // check positive definite

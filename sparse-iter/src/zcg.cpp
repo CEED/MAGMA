@@ -56,7 +56,7 @@ magma_zcg(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // set queue for old dense routines
     magma_queue_t orig_queue=NULL;
@@ -65,7 +65,6 @@ magma_zcg(
     // prepare solver feedback
     solver_par->solver = Magma_CG;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -106,6 +105,7 @@ magma_zcg(
     }
     if ( nom < r0 ) {
         magmablasSetKernelStream( orig_queue );
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
     // check positive definite
@@ -162,7 +162,7 @@ magma_zcg(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter ) {
-        solver_par->info = MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {

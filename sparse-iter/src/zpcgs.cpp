@@ -63,12 +63,11 @@ magma_zpcgs(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // prepare solver feedback
     solver_par->solver = Magma_PCGS;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,  c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
@@ -115,6 +114,7 @@ magma_zpcgs(
         solver_par->timing[0] = 0.0;
     }
     if ( nom0 < r0 ) {
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
 

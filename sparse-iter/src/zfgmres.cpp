@@ -124,14 +124,13 @@ magma_zfgmres(
     magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     magma_int_t dofs = A.num_rows;
 
     // prepare solver feedback
     solver_par->solver = Magma_PGMRES;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
     
     //Chronometry
     real_Double_t tempo1, tempo2;
@@ -208,6 +207,7 @@ magma_zfgmres(
             if ( resid0 < r0 ) {
                 solver_par->final_res = solver_par->init_res;
                 solver_par->iter_res = solver_par->init_res;
+                info = MAGMA_SUCCESS;
                 goto cleanup;
             }
         }
@@ -306,7 +306,7 @@ magma_zfgmres(
     solver_par->final_res = residual;
 
     if ( solver_par->numiter < solver_par->maxiter && info == MAGMA_SUCCESS ) {
-        solver_par->info = MAGMA_SUCCESS;
+        info = MAGMA_SUCCESS;
     } else if ( solver_par->init_res > solver_par->final_res ) {
         if ( solver_par->verbose > 0 ) {
             if ( (solver_par->numiter)%solver_par->verbose==0 ) {

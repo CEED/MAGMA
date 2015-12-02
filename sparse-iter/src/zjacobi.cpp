@@ -59,7 +59,7 @@ magma_zjacobi(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
