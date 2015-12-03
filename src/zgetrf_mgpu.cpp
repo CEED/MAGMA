@@ -8,8 +8,8 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
-
+//#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -81,7 +81,7 @@ magma_zgetrf_mgpu(
     magma_int_t i, j, d, lddat, lddwork;
     magmaDoubleComplex *d_lAT[MagmaMaxGPUs];
     magmaDoubleComplex *d_panel[MagmaMaxGPUs], *work;
-    magma_queue_t streaml[MagmaMaxGPUs][2];
+    magma_queue_t queues[MagmaMaxGPUs][2];
 
     /* Check arguments */
     *info = 0;
@@ -101,6 +101,12 @@ magma_zgetrf_mgpu(
     if (m == 0 || n == 0)
         return *info;
 
+    /* create the streams */
+    for( d=0; d < ngpu; d++ ) {
+        magma_queue_create( d, &queues[d][0] );
+        magma_queue_create( d, &queues[d][1] );
+    }
+
     /* Function Body */
     nb = magma_get_zgetrf_nb(m);
 
@@ -111,16 +117,20 @@ magma_zgetrf_mgpu(
             *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
         }
-        magma_zgetmatrix( m, n, d_lA[0], ldda, work, m );
+        magma_zgetmatrix( m, n, d_lA[0], ldda, work, m, queues[0][0] );
+        magma_queue_sync( queues[0][0] );
+
         lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
-        magma_zsetmatrix( m, n, work, m, d_lA[0], ldda );
+        magma_zsetmatrix( m, n, work, m, d_lA[0], ldda, queues[0][0] );
+        magma_queue_sync( queues[0][0] );
+
         magma_free_cpu(work);
     } else {
         /* Use hybrid blocked code. */
         magma_device_t orig_dev;
         magma_getdevice( &orig_dev );
-        magma_queue_t orig_stream;
-        magmablasGetKernelStream( &orig_stream );
+        //magma_queue_t orig_queue;
+        //magmablasGetKernelStream( &orig_queue );
         
         maxm = magma_roundup( m, 32 );
         if ( ngpu > ceil((double)n/nb) ) {
@@ -173,17 +183,13 @@ magma_zgetrf_mgpu(
                 return *info;
             }
             
-            /* create the streams */
-            magma_queue_create( &streaml[i][0] );
-            magma_queue_create( &streaml[i][1] );
-            
-            magmablasSetKernelStream(streaml[i][1]);
-            magmablas_ztranspose( m, n_local[i], d_lA[i], ldda, d_lAT[i], lddat );
+            //magmablasSetKernelStream(queues[i][1]);
+            magmablas_ztranspose( m, n_local[i], d_lA[i], ldda, d_lAT[i], lddat, queues[i][1] );
         }
         for (i=0; i < ngpu; i++) {
             magma_setdevice(i);
-            magma_queue_sync(streaml[i][0]);
-            magmablasSetKernelStream(NULL);
+            magma_queue_sync(queues[i][0]);
+            //magmablasSetKernelStream(NULL);
         }
         magma_setdevice(0);
 
@@ -201,24 +207,31 @@ magma_zgetrf_mgpu(
 
         /* calling multi-gpu interface with allocated workspaces and streams */
         magma_zgetrf2_mgpu(ngpu, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
-                           streaml, info);
+                           queues, info);
 
         /* clean up */
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
             
             /* save on output */
-            magmablas_ztranspose( n_local[d], m, d_lAT[d], lddat, d_lA[d], ldda );
-            magma_device_sync();
+            magmablas_ztranspose( n_local[d], m, d_lAT[d], lddat, d_lA[d], ldda, queues[d][0] );
+            magma_queue_sync(queues[d][0]);
+            magma_queue_sync(queues[d][1]);
+
             magma_free( d_lAT[d]   );
             magma_free( d_panel[d] );
-            magma_queue_destroy( streaml[d][0] );
-            magma_queue_destroy( streaml[d][1] );
         } /* end of for d=1,..,ngpu */
         magma_setdevice( orig_dev );
-        magmablasSetKernelStream( orig_stream );
+        //magmablasSetKernelStream( orig_queue );
         magma_free_pinned( work );
     }
-        
+
+    /* clean up */
+    for( d=0; d < ngpu; d++ ) {
+        magma_setdevice(d);
+        magma_queue_destroy( queues[d][0] );
+        magma_queue_destroy( queues[d][1] );
+    }
+
     return *info;
 }
