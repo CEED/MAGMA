@@ -15,11 +15,7 @@
 
 // includes, project
 #include "flops.h"
-#if MAGMA_SOURCE == 1
-    #include "magma.h"
-#else
-    #include "magma_v2.h"
-#endif
+#include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -49,12 +45,6 @@ int main( int argc, char** argv )
     magma_int_t status = 0;
     double tol, eps = lapackf77_dlamch("E");
     tol = opts.tolerance * eps;
-
-    magma_queue_t queues[MagmaMaxGPUs];
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_create( dev, &queues[dev] );
-    }
 
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
@@ -130,11 +120,7 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            magma_zsetmatrix_1D_col_bcyclic( M, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
-            }
+            magma_zsetmatrix_1D_col_bcyclic( M, N, h_R, lda, d_lA, ldda, ngpu, nb );
 
             gpu_time = magma_wtime();
             magma_zgeqrf2_mgpu( ngpu, M, N, d_lA, ldda, tau, &info );
@@ -144,11 +130,7 @@ int main( int argc, char** argv )
                 printf("magma_zgeqrf2 returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
-            }
+            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb );
             
             if ( opts.check == 1 && M >= N ) {
                 /* =====================================================================
@@ -225,11 +207,6 @@ int main( int argc, char** argv )
         }
     }
  
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_sync( queues[dev] );
-        magma_queue_destroy( queues[dev] );
-    }
     TESTING_FINALIZE();
     return status;
 }

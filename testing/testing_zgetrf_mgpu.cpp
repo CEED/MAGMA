@@ -16,11 +16,7 @@
 
 // includes, project
 #include "flops.h"
-#if MAGMA_SOURCE == 1
-    #include "magma.h"
-#else
-    #include "magma_v2.h"
-#endif
+#include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -170,11 +166,6 @@ int main( int argc, char** argv )
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    magma_queue_t queues[MagmaMaxGPUs];
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_create( dev, &queues[dev] );
-    }
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 2 ) {
         printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
@@ -235,11 +226,7 @@ int main( int argc, char** argv )
                Performs operation using MAGMA
                =================================================================== */
             init_matrix( M, N, h_A, lda );
-            magma_zsetmatrix_1D_col_bcyclic( M, N, h_A, lda, d_lA, ldda, ngpu, nb, queues );
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
-            }
+            magma_zsetmatrix_1D_col_bcyclic( M, N, h_A, lda, d_lA, ldda, ngpu, nb );
 
             gpu_time = magma_wtime();
             magma_zgetrf_mgpu( ngpu, M, N, d_lA, ldda, ipiv, &info );
@@ -249,11 +236,7 @@ int main( int argc, char** argv )
                 printf("magma_zgetrf_mgpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
                        
-            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb, queues );
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
-            }
+            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_A, lda, ngpu, nb );
     
             /* =====================================================================
                Check the factorization
@@ -291,11 +274,6 @@ int main( int argc, char** argv )
         if ( opts.niter > 1 ) {
             printf( "\n" );
         }
-    }
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_sync( queues[dev] );
-        magma_queue_destroy( queues[dev] );
     }
 
     TESTING_FINALIZE();

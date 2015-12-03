@@ -15,11 +15,7 @@
 
 // includes, project
 #include "flops.h"
-#if MAGMA_SOURCE == 1
-    #include "magma.h"
-#else
-    #include "magma_v2.h"
-#endif
+#include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -47,11 +43,6 @@ int main( int argc, char** argv )
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    magma_queue_t queues[MagmaMaxGPUs];
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_create( dev, &queues[dev] );
-    }
     printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
     printf("%%   N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("%%================================================================\n");
@@ -106,23 +97,11 @@ int main( int argc, char** argv )
                =================================================================== */
             if ( opts.uplo == MagmaUpper ) {
                 ldda = magma_roundup( N, nb );
-                #if MAGMA_SOURCE == 1
-                    magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
-                #else
-                    magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
-                #endif
+                magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
             }
             else {
                 ldda = (1+N/(nb*ngpu))*nb;
-                #if MAGMA_SOURCE == 1
-                    magma_zsetmatrix_1D_row_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
-                #else
-                    magma_zsetmatrix_1D_row_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
-                #endif
-            }
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
+                magma_zsetmatrix_1D_row_bcyclic( N, N, h_R, lda, d_lA, ldda, ngpu, nb );
             }
 
             gpu_time = magma_wtime();
@@ -134,22 +113,10 @@ int main( int argc, char** argv )
                        (int) info, magma_strerror( info ));
             
             if ( opts.uplo == MagmaUpper ) {
-                #if MAGMA_SOURCE == 1
-                    magma_zgetmatrix_1D_col_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
-                #else
-                    magma_zgetmatrix_1D_col_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
-                #endif
+                magma_zgetmatrix_1D_col_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
             }
             else {
-                #if MAGMA_SOURCE == 1
-                    magma_zgetmatrix_1D_row_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
-                #else
-                    magma_zgetmatrix_1D_row_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
-                #endif
-            }
-            for( int dev=0; dev < opts.ngpu; dev++ ) {
-                magma_setdevice( dev );
-                magma_queue_sync( queues[dev] );
+                magma_zgetmatrix_1D_row_bcyclic( N, N, d_lA, ldda, h_R, lda, ngpu, nb );
             }
             
             /* =====================================================================
@@ -181,12 +148,6 @@ int main( int argc, char** argv )
         if ( opts.niter > 1 ) {
             printf( "\n" );
         }
-    }
-
-    for( int dev=0; dev < opts.ngpu; dev++ ) {
-        magma_setdevice( dev );
-        magma_queue_sync( queues[dev] );
-        magma_queue_destroy( queues[dev] );
     }
 
     TESTING_FINALIZE();
