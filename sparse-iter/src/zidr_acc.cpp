@@ -118,7 +118,7 @@ magma_zidr_acc(
     const double angle = 0.7;          // [0-1]
 
     // local variables
-    magma_int_t info = MAGMA_NOTVCONVERGED;
+    magma_int_t info = MAGMA_NOTCONVERGED;
     magma_int_t iseed[4] = { 0, 0, 0, 1 };
     magma_int_t dofx = x->num_rows * x->num_cols;
     magma_int_t dofb = b.num_rows * b.num_cols;
