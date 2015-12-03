@@ -15,7 +15,11 @@
 
 // includes, project
 #include "flops.h"
-#include "magma.h"
+#if MAGMA_SOURCE == 1
+    #include "magma.h"
+#else
+    #include "magma_v2.h"
+#endif
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -45,6 +49,12 @@ int main( int argc, char** argv )
     magma_int_t status = 0;
     double tol, eps = lapackf77_dlamch("E");
     tol = opts.tolerance * eps;
+
+    magma_queue_t queues[MagmaMaxGPUs];
+    for( int dev=0; dev < opts.ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( dev, &queues[dev] );
+    }
 
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
@@ -99,7 +109,7 @@ int main( int argc, char** argv )
             for( int j=0; j < 4; j++ )
                 ISEED2[j] = ISEED[j]; // save seeds
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &N, h_A, &lda, h_R, &lda );
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -120,8 +130,12 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            magma_zsetmatrix_1D_col_bcyclic( M, N, h_R, lda, d_lA, ldda, ngpu, nb );
-            
+            magma_zsetmatrix_1D_col_bcyclic( M, N, h_R, lda, d_lA, ldda, ngpu, nb, queues );
+            for( int dev=0; dev < opts.ngpu; dev++ ) {
+                magma_setdevice( dev );
+                magma_queue_sync( queues[dev] );
+            }
+
             gpu_time = magma_wtime();
             magma_zgeqrf2_mgpu( ngpu, M, N, d_lA, ldda, tau, &info );
             gpu_time = magma_wtime() - gpu_time;
@@ -130,8 +144,11 @@ int main( int argc, char** argv )
                 printf("magma_zgeqrf2 returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb );
-            magma_queue_sync( NULL );
+            magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb, queues );
+            for( int dev=0; dev < opts.ngpu; dev++ ) {
+                magma_setdevice( dev );
+                magma_queue_sync( queues[dev] );
+            }
             
             if ( opts.check == 1 && M >= N ) {
                 /* =====================================================================
@@ -207,7 +224,12 @@ int main( int argc, char** argv )
             printf( "\n" );
         }
     }
-    
+ 
+    for( int dev=0; dev < opts.ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( queues[dev] );
+        magma_queue_destroy( queues[dev] );
+    }
     TESTING_FINALIZE();
     return status;
 }
