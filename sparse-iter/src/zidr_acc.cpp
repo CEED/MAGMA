@@ -107,7 +107,6 @@ magma_zidr_acc(
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
 
     // constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -119,7 +118,7 @@ magma_zidr_acc(
     const double angle = 0.7;          // [0-1]
 
     // local variables
-    magma_int_t info = 0;
+    magma_int_t info = MAGMA_NOTVCONVERGED;
     magma_int_t iseed[4] = { 0, 0, 0, 1 };
     magma_int_t dofx = x->num_rows * x->num_cols;
     magma_int_t dofb = b.num_rows * b.num_cols;
@@ -225,6 +224,7 @@ magma_zidr_acc(
         solver_par->final_res = 0.0;
         solver_par->iter_res = 0.0;
         solver_par->runtime = 0.0;
+        info = MAGMA_SUCCESS;
         goto cleanup;
     }
     // t = 0
@@ -591,10 +591,16 @@ magma_zidr_acc(
 
             // check convergence or iteration limit
             if ( nrmr <= solver_par->atol ||
-                nrmr/nrmb <= solver_par->rtol || 
-                solver_par->numiter >= solver_par->maxiter ) {
+                nrmr/nrmb <= solver_par->rtol ) {
                 s = k; // for the x-update outside the loop
                 innerflag = 1;
+                info = MAGMA_SUCCESS;
+                break;
+            }
+            if ( solver_par->numiter >= solver_par->maxiter ) {
+                s = k; // for the x-update outside the loop
+                innerflag = 1;
+                info = MAGMA_NOTCONVERGED;
                 break;
             }
 
@@ -733,8 +739,12 @@ magma_zidr_acc(
 
         // check convergence or iteration limit
         if ( nrmr <= solver_par->atol ||
-            nrmr/nrmb <= solver_par->rtol || 
-            solver_par->numiter >= solver_par->maxiter ) {
+            nrmr/nrmb <= solver_par->rtol ) {
+            info = MAGMA_SUCCESS;
+            break;
+        }
+        if ( solver_par->numiter >= solver_par->maxiter ) {
+            info = MAGMA_NOTCONVERGED;
             break;
         }
 
