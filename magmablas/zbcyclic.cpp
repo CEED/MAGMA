@@ -71,7 +71,7 @@ magma_zsetmatrix_1D_col_bcyclic_q(
         magma_zsetmatrix_async( m, jb,
                                 hA(0,j), lda,
                                 dA( dev, 0, j/(nb*ngpu)*nb ), ldda,
-                                NULL );
+                                queues[dev] );
     }
     
     magma_setdevice( cdevice );
@@ -136,7 +136,7 @@ magma_zgetmatrix_1D_col_bcyclic_q(
         magma_zgetmatrix_async( m, jb,
                                 dA( dev, 0, j/(nb*ngpu)*nb ), ldda,
                                 hA(0,j), lda,
-                                NULL );
+                                queues[dev] );
     }
     
     magma_setdevice( cdevice );
@@ -201,7 +201,7 @@ magma_zsetmatrix_1D_row_bcyclic_q(
         magma_zsetmatrix_async( jb, n,
                                 hA(i,0), lda,
                                 dA( dev, i/(nb*ngpu)*nb, 0 ), ldda,
-                                NULL );
+                                queues[dev] );
     }
     
     magma_setdevice( cdevice );
@@ -266,7 +266,7 @@ magma_zgetmatrix_1D_row_bcyclic_q(
         magma_zgetmatrix_async( jb, n,
                                 dA( dev, i/(nb*ngpu)*nb, 0 ), ldda,
                                 hA(i,0), lda,
-                                NULL );
+                                queues[dev] );
     }
     
     magma_setdevice( cdevice );
