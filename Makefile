@@ -51,6 +51,7 @@ CFLAGS    += -DHAVE_CUBLAS
 CXXFLAGS  += -DHAVE_CUBLAS
 
 RPATH      = -Wl,-rpath,../lib
+RPATH2     = -Wl,-rpath,../../lib
 
 codegen    = python tools/codegen.py
 
@@ -673,7 +674,7 @@ $(testers_f): %: %.$(o_ext) testing/fortran.o
 
 # link sparse testing_foo from testing_foo.o
 $(sparse_testers): %: %.$(o_ext)
-	$(CXX) $(LDFLAGS) $(RPATH) \
+	$(CXX) $(LDFLAGS) $(RPATH2) \
 	-o $@ $< \
 	-L./testing -ltest \
 	-L./lib -lmagma_sparse -lmagma \
