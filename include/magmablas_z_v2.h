@@ -48,18 +48,6 @@ extern "C" {
 #define magma_zgetmatrix_1D_row_bcyclic      magma_zgetmatrix_1D_row_bcyclic_q
 #define magma_zsetmatrix_1D_row_bcyclic      magma_zsetmatrix_1D_row_bcyclic_q
 
-// in src/zhetrd_mgpu.cpp
-// TODO rename zsetmatrix_sy or similar
-#define magma_zhtodhe                        magma_zhtodhe_q
-
-// in src/zpotrf3_mgpu.cpp
-// TODO same as magma_zhtodhe?
-#define magma_zhtodpo                        magma_zhtodpo_q
-
-// in src/zpotrf3_mgpu.cpp
-// TODO rename zgetmatrix_sy or similar
-#define magma_zdtohpo                        magma_zdtohpo_q
-
 
   /*
    * Multi-GPU BLAS functions (alphabetical order)

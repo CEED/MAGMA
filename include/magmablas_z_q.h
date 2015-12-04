@@ -125,6 +125,38 @@ magma_zsetmatrix_1D_row_bcyclic_q(
     magma_int_t ngpu, magma_int_t nb,
     magma_queue_t queue[ MagmaMaxGPUs ] );
 
+// in src/zhetrd_mgpu.cpp
+// TODO rename zsetmatrix_sy or similar
+magma_int_t
+magma_zhtodhe(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
+    magmaDoubleComplex     *A,   magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t queues[][10],
+    magma_int_t *info );
+
+// in src/zpotrf3_mgpu.cpp
+// TODO same as magma_zhtodhe?
+magma_int_t
+magma_zhtodpo(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+    magmaDoubleComplex     *A,   magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t queues[][3],
+    magma_int_t *info );
+
+// in src/zpotrf3_mgpu.cpp
+// TODO rename zgetmatrix_sy or similar
+magma_int_t
+magma_zdtohpo(
+    magma_int_t ngpu, magma_uplo_t uplo, magma_int_t m, magma_int_t n,
+    magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
+    magmaDoubleComplex     *A,   magma_int_t lda,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magma_queue_t queues[][3],
+    magma_int_t *info );
+
 
   /*
    * Multi-GPU BLAS functions (alphabetical order)
