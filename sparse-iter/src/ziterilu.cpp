@@ -271,7 +271,6 @@ magma_ziteriluupdate(
     if( updates > 0 ){
         
         CHECK( magma_zmtransfer( precond->M, &hAcopy, Magma_DEV, Magma_CPU , queue ));
-        
         // in case using fill-in
         CHECK( magma_zsymbilu( &hAcopy, precond->levels, &hAL, &hAUt,  queue ));
         // add a unit diagonal to L for the algorithm
@@ -286,21 +285,20 @@ magma_ziteriluupdate(
         magma_zmfree(&hAUt, queue );
         magma_zmfree(&precond->M, queue );
         magma_zmfree(&hAcopy, queue );
-
         
         // copy original matrix as CSRCOO to device
         for(int i=0; i<updates; i++){
             CHECK( magma_ziterilu_csr( A, dL, dU, queue ));
         }
-        
         CHECK( magma_zmtransfer( dL, &hL, Magma_DEV, Magma_CPU , queue ));
         CHECK( magma_zmtransfer( dU, &hU, Magma_DEV, Magma_CPU , queue ));
         CHECK( magma_z_cucsrtranspose(  hU, &hUT , queue ));
-        
         magma_zmfree(&dL, queue );
         magma_zmfree(&dU, queue );
         magma_zmfree(&hU, queue );
         CHECK( magma_zmlumerge( hL, hUT, &hAtmp, queue ));
+        // for CUSPARSE
+        CHECK( magma_zmtransfer( hAtmp, &precond->M, Magma_CPU, Magma_DEV , queue ));
         
         magma_zmfree(&hL, queue );
         magma_zmfree(&hUT, queue );
