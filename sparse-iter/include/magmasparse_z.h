@@ -2002,8 +2002,8 @@ magma_zjcgmerge_xrbeta(
 
 magma_int_t
 magma_zmdotc_shfl(
-    magma_int_t n, 
-    magma_int_t k, 
+    int n, 
+    int k, 
     magmaDoubleComplex_ptr dv, 
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd1,
