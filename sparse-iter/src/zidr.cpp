@@ -112,11 +112,16 @@ magma_zidr(
 
     // chronometry
     real_Double_t tempo1, tempo2;
-   
+
     // initial s space
-    // hack --> use "--restart" option as the shadow space number
+    // TODO: add option for 's' (shadow space number)
+    // Hack: uses '--restart' option as the shadow space number.
+    //       This is not a good idea because the default value of restart option is used to detect
+    //       if the user provided a custom restart. This means that if the default restart value
+    //       is changed then the code will think it was the user (unless the default value is
+    //       also updated in the 'if' statement below.
     s = 1;
-    if ( solver_par->restart != 30 ) {
+    if ( solver_par->restart != 50 ) {
         if ( solver_par->restart > A.num_cols ) {
             s = A.num_cols;
         }
@@ -128,7 +133,6 @@ magma_zidr(
 
     // set max iterations
     solver_par->maxiter = min( 2 * A.num_cols, solver_par->maxiter );
-    
 
     // check if matrix A is square
     if ( A.num_rows != A.num_cols ) {
@@ -143,9 +147,6 @@ magma_zidr(
 
     // |b|
     nrmb = magma_dznrm2( b.num_rows, b.dval, 1, queue );
-
-    
-    // check for |b| == 0
     if ( nrmb == 0.0 ) {
         magma_zscal( x->num_rows * x->num_cols, MAGMA_Z_ZERO, x->dval, 1, queue );
         goto cleanup;
