@@ -102,7 +102,6 @@ cleanup:
 
 
 
-
 /**
     Purpose
     -------
@@ -141,6 +140,9 @@ magma_zvread(
     
     magma_int_t nnz=0, i=0;
     FILE *fid;
+    char buff[BUFSIZ]={0};
+    int count=0;
+    char *p;
     
     x->memory_location = Magma_CPU;
     x->storage_type = Magma_DENSE;
@@ -149,7 +151,15 @@ magma_zvread(
     x->major = MagmaColMajor;
     CHECK( magma_zmalloc_cpu( &x->val, length ));
     
+
+    
     fid = fopen(filename, "r");
+
+    if(NULL==fgets(buff, BUFSIZ, fid))
+        return -1;
+    rewind(fid);
+    for(p=buff;NULL!=strtok(p, " \t\n");p=NULL)
+    count++;
     
     while( i<length )  // eof() is 'true' at the end of data
     {
@@ -160,11 +170,22 @@ magma_zvread(
         
         #ifdef COMPLEX
             double VAL2;
-            fscanf(fid, " %lf %lf \n", &VAL1, &VAL2);
-            VAL = MAGMA_Z_MAKE(VAL1, VAL2);
+            if( count == 2 ){
+                fscanf(fid, "%lg %lg\n", &VAL1, &VAL2);
+                VAL = MAGMA_Z_MAKE(VAL1, VAL2);
+            }else{
+                fscanf(fid, "%lg\n", &VAL1);
+                VAL = MAGMA_Z_MAKE(VAL1, 0.0);  
+            }
         #else
-            fscanf(fid, " %lf \n", &VAL1);
-            VAL = MAGMA_Z_MAKE(VAL1, 0.0);
+            double VAL2;
+            if( count == 2 ){
+                fscanf(fid, "%lg %lg\n", &VAL1, &VAL2);
+                VAL = MAGMA_Z_MAKE(VAL1, VAL2);
+            }else{
+                fscanf(fid, "%lg\n", &VAL1);
+                VAL = MAGMA_Z_MAKE(VAL1, 0.0);  
+            }
         #endif
         
         if ( VAL != MAGMA_Z_ZERO )
