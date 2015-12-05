@@ -747,12 +747,6 @@ magma_zmconvert(
                     queue );
                 }
             }
-            
-            // CSRCSC to CSR
-            else if ( old_format == Magma_COO ) {
-               // A.storage_type = Magma_CSR;
-              //  magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue );
-            }
                 
             // ELL/ELLPACK to CSR
             else if ( old_format == Magma_ELLPACKT ) {
@@ -1011,7 +1005,18 @@ magma_zmconvert(
             else if ( old_format == Magma_BCSR ) {
                 CHECK( magma_zmtransfer(A, &A_d, Magma_CPU, Magma_DEV, queue ) );
                 CHECK( magma_zmconvert(A_d, &B_d, Magma_BCSR, Magma_CSR, queue ) );
+                magma_zmfree( &A_d, queue );
                 CHECK( magma_zmtransfer(B_d, B, Magma_DEV, Magma_CPU, queue ) );
+                magma_zmfree( &B_d, queue );
+            }
+            
+            // COO to CSR
+            else if ( old_format == Magma_COO ) {
+                CHECK( magma_zmtransfer(A, &A_d, Magma_CPU, Magma_DEV, queue ) );
+                CHECK( magma_zmconvert(A_d, &B_d, Magma_COO, Magma_CSR, queue ) );
+                magma_zmfree( &A_d, queue );
+                CHECK( magma_zmtransfer(B_d, B, Magma_DEV, Magma_CPU, queue ) );
+                magma_zmfree( &B_d, queue );
             }
             
             else {
@@ -1275,8 +1280,15 @@ magma_zmconvert(
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            int m = A.num_rows;
+            int n = A.num_cols;
+            int nnz = A.nnz;
 
             // CUSPARSE context //
+            
+            size_t pBufferSizeInBytes = 0;
+            void *pBuffer = NULL;
+            int *P = NULL;
 
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
             CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
@@ -1284,17 +1296,37 @@ magma_zmconvert(
             // end CUSPARSE context //
 
             CHECK( magma_zmalloc( &B->dval, B->nnz ));
-            CHECK( magma_index_malloc( &B->drow, B->nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, B->nnz ));
             CHECK( magma_index_malloc( &B->dcol, B->nnz ));
+            CHECK( magma_index_malloc( &B->drow, B->num_rows + 1 ));
             
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue ) ;
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue ) ;
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue ) ;
+
+            // step 1: allocate buffer
+            cusparseXcoosort_bufferSizeExt(cusparseHandle, m, n, nnz, B->drowidx, B->dcol, &pBufferSizeInBytes);
+            //cudaMalloc( &pBuffer, sizeof(char)* pBufferSizeInBytes);
+            CHECK( magma_malloc( &pBuffer, sizeof(char)* pBufferSizeInBytes ));
+            // step 2: setup permutation vector P to identity
+            CHECK( magma_index_malloc( &P, nnz ));
+            //magma_( &P, sizeof(int)*nnz);
+            cusparseCreateIdentityPermutation(cusparseHandle, nnz, P);
             
-            magma_zcopyvector( A.nnz, A.val, 1, B->val, 1, queue );
-            magma_index_copyvector( A.nnz, A.col, 1, B->col, 1, queue );
+            // step 3: sort COO format by Row
+            cusparseXcoosortByRow(cusparseHandle, m, n, nnz, B->drowidx, B->dcol, P, pBuffer);
+            
+            // step 4: gather sorted cooVals
+            cusparseZgthr(cusparseHandle, nnz, A.dval, B->dval, P, CUSPARSE_INDEX_BASE_ZERO);
+
 
             // conversion using CUSPARSE
-            cusparseXcoo2csr( cusparseHandle, A.drow,
+            cusparseXcoo2csr( cusparseHandle, B->drowidx,
                               A.nnz, A.num_rows, B->drow,
                               CUSPARSE_INDEX_BASE_ZERO );
+            magma_free( B->drowidx );
+            magma_free( pBuffer );
+            magma_free( P );
         }
         else {
             printf("warning: format not supported on GPU. "
