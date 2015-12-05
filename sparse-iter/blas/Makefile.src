@@ -28,7 +28,8 @@ libsparse_zsrc += \
 	$(cdir)/zlobpcg_shift.cu              \
 	$(cdir)/zlobpcg_residuals.cu          \
 	$(cdir)/zlobpcg_maxpy.cu              \
-	$(cdir)/zmdot.cu                      \
+    $(cdir)/zmdotc.cu                     \
+    $(cdir)/zgemvmdot.cu                  \
 	$(cdir)/zmdot_shfl.cu                 \
 	$(cdir)/zmergebicgstab2.cu            \
 	$(cdir)/zmergebicgstab3.cu            \
@@ -42,7 +43,6 @@ libsparse_zsrc += \
 	$(cdir)/zmgeellmv.cu                  \
 	$(cdir)/zmgeelltmv.cu                 \
 	$(cdir)/zmgesellcmmv.cu               \
-	$(cdir)/zmdotc.cu                     \
 	$(cdir)/zpipelinedgmres.cu            \
 
 # Iterative factorizations
