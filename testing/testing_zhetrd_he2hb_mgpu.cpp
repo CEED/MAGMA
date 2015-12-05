@@ -167,11 +167,6 @@ int main( int argc, char** argv)
 #if defined(PRECISION_z) || defined(PRECISION_d)
             if ( opts.check ) {
                 printf("  Total N %5d  flops %6.2f  timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
-                char JOBZ;
-                if (WANTZ == 0)
-                    JOBZ = 'N';
-                else
-                    JOBZ = 'V';
                 double nrmI=0.0, nrm1=0.0, nrm2=0.0;
                 int    lwork2 = 256*N;
                 magmaDoubleComplex *work2, *AINIT;

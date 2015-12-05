@@ -249,11 +249,11 @@ int main( int argc, char** argv)
 #if defined(PRECISION_z)  || defined(PRECISION_d)
             if ( opts.check ) {
                 printf("  Total N %5d  gflops %6.2f  timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
-                char JOBZ;
+                const char* JOBZ;
                 if (WANTZ == 0)
-                    JOBZ = 'N';
+                    JOBZ = MagmaNoVecStr;
                 else
-                    JOBZ = 'V';
+                    JOBZ = MagmaVecStr;
                 double nrmI=0.0, nrm1=0.0, nrm2=0.0;
                 int    lwork2 = 256*N;
                 magmaDoubleComplex *work2, *AINIT;
@@ -309,7 +309,7 @@ int main( int argc, char** argv)
                 double NOTHING=0.0;
                 cpu_time = magma_wtime();
                 // check results
-                zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2, D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
+                zcheck_eig_( JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2, D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
                 cpu_time = magma_wtime() - cpu_time;
                 printf("  Finish CHECK - results timing= %f\n", cpu_time);
                 magma_set_lapack_numthreads( 1 );
