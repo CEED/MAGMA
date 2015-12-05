@@ -103,6 +103,28 @@ magma_zmtransfer(
             magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1, queue );
             magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
         }
+        //COO-type
+        else if ( A.storage_type == Magma_COO ) {
+            // fill in information for B
+            B->storage_type = A.storage_type;
+            B->memory_location = Magma_DEV;
+            B->sym = A.sym;
+            B->diagorder_type = A.diagorder_type;
+            B->fill_mode = A.fill_mode;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+            // memory allocation
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
+            // data transfer
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.nnz, A.rowidx, 1, B->drowidx, 1, queue );
+        }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
             // fill in information for B
@@ -300,6 +322,30 @@ magma_zmtransfer(
             }
             for( magma_int_t i=0; i<A.num_rows+1; i++ ) {
                 B->row[i] = A.row[i];
+            }
+        }
+        //COO-type
+        else if ( A.storage_type == Magma_COO ) {
+            // fill in information for B
+            B->storage_type = A.storage_type;
+            B->memory_location = Magma_CPU;
+            B->sym = A.sym;
+            B->diagorder_type = A.diagorder_type;
+            B->fill_mode = A.fill_mode;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+            // memory allocation
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
+            // data transfer
+            for( magma_int_t i=0; i<A.nnz; i++ ) {
+                B->val[i] = A.val[i];
+                B->col[i] = A.col[i];
+                B->rowidx[i] = A.rowidx[i];
             }
         }
         //CSRCOO-type
@@ -527,6 +573,28 @@ magma_zmtransfer(
             magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1, queue );
             magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
         }
+        //COO-type
+        else if ( A.storage_type == Magma_COO ) {
+            // fill in information for B
+            B->storage_type = A.storage_type;
+            B->memory_location = Magma_CPU;
+            B->sym = A.sym;
+            B->diagorder_type = A.diagorder_type;
+            B->fill_mode = A.fill_mode;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+            // memory allocation
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
+            // data transfer
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.nnz, A.drowidx, 1, B->rowidx, 1, queue );
+        }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
             // fill in information for B
@@ -724,6 +792,28 @@ magma_zmtransfer(
             magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
             magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1, queue );
             magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+        }
+        //COO-type
+        else if ( A.storage_type == Magma_COO ) {
+            // fill in information for B
+            B->storage_type = A.storage_type;
+            B->memory_location = Magma_DEV;
+            B->sym = A.sym;
+            B->diagorder_type = A.diagorder_type;
+            B->fill_mode = A.fill_mode;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+            // memory allocation
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
+            // data transfer
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
