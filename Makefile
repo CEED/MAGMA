@@ -690,7 +690,7 @@ $(sparse_testers): %: %.$(o_ext)
 files.txt: force
 	svn st -vq \
 		| egrep -v '> moved' \
-		| perl -pi -e 's/^.{41}//' | sort \
+		| perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> files.txt
@@ -704,7 +704,7 @@ subdir_files = $(addsuffix /files.txt,$(subdirs) $(sparse_subdirs))
 $(subdir_files): force
 	svn st -N -vq $(dir $@) \
 		| egrep -v '> moved' \
-		| perl -pi -e 's|^.{41}.*/||;' | sort \
+		| perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> $@

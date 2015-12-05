@@ -8,7 +8,8 @@
 #
 # @author Mark Gates
 
-svn st -vq | perl -pi -e 's/^.{41}//' | sort \
+svn st -vq \
+    | perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
     | egrep -v '^\.$$|obsolete|Makefile\.|deprecated|^exp|contrib|\.png|results/v' \
     | egrep 'Makefile|\w\.\w' >! files.txt
 
@@ -164,7 +165,7 @@ echo
 
 # fixed
 echo "========== passing ints by pointer                                         *** required fix ***"
-egrep "int_t *\* *(m|n|k|ld\w|ldd\w|inc\w|l\w*work)\b" include/{magma_z,magma_zc,magmablas_z,magmablas_zc}.h
+egrep "int_t *\* *(m|n|k|ld\w|ldd\w|inc\w|l\w*work)\b" include/{magma_z,magma_zc,magmablas_z*}.h
 echo
 
 # fixed
