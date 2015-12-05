@@ -291,8 +291,8 @@ magma_zmdynamicilu_set_thrs(
     // identify num_rm-th smallest element
     CHECK( magma_zorderstatistics(
     val, LU->nnz, num_rm, 0, &element, queue ) );
-    CHECK( magma_zsort( val, 0, LU->nnz, queue ) );
-    element = val[num_rm];
+    //CHECK( magma_zsort( val, 0, LU->nnz, queue ) );
+    //element = val[num_rm];
     *thrs = element;
     
 
