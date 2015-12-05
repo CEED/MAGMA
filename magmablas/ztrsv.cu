@@ -388,12 +388,15 @@ magmablas_ztrsv_recursive_outofplace(
     -------
     ztrsv solves one of the matrix equations on gpu
 
-        op(A)*x = B,   or   x*op(A) = B,
+        op(A)*x = B,   or
+        x*op(A) = B,
 
     where alpha is a scalar, X and B are vectors, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
-        op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
+        op(A) = A,    or
+        op(A) = A^T,  or
+        op(A) = A^H.
 
     The vector x is overwritten on b.
 

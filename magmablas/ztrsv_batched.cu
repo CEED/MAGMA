@@ -462,12 +462,15 @@ magmablas_ztrsv_work_batched(
     -------
     ztrsv solves one of the matrix equations on gpu
 
-        op(A)*x = b,   or   x*op(A) = b,
+        op(A)*x = b,   or
+        x*op(A) = b,
 
     where alpha is a scalar, X and B are vectors, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
-        op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
+        op(A) = A,    or
+        op(A) = A^T,  or
+        op(A) = A^H.
 
     The vector x is overwritten on b.
 

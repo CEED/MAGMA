@@ -179,10 +179,10 @@ void magmablas_zher2k_mgpu2(
     
     /* Check arguments */
     magma_int_t info = 0;
-    if ( uplo != MagmaLower) {
-        info = -1;  // 'u' not yet handled
-    } else if ( trans != MagmaNoTrans) {
-        info = -2;  // 'c' not yet handled
+    if ( uplo != MagmaLower ) {
+        info = -1;  // upper not yet handled
+    } else if ( trans != MagmaNoTrans ) {
+        info = -2;  // conj not yet handled
     } else if ( n < 0 ) {
         info = -3;
     } else if ( k < 0 ) {

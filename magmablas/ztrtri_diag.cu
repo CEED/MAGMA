@@ -57,15 +57,15 @@
     dA      COMPLEX_16 array of dimension ( ldda, n )
             The triangular matrix A.
     \n
-            If UPLO = 'U', the leading N-by-N upper triangular part of A
+            If UPLO = MagmaUpper, the leading N-by-N upper triangular part of A
             contains the upper triangular matrix, and the strictly lower
             triangular part of A is not referenced.
     \n
-            If UPLO = 'L', the leading N-by-N lower triangular part of A
+            If UPLO = MagmaLower, the leading N-by-N lower triangular part of A
             contains the lower triangular matrix, and the strictly upper
             triangular part of A is not referenced.
     \n
-            If DIAG = 'U', the diagonal elements of A are also not referenced
+            If DIAG = MagmaUnit, the diagonal elements of A are also not referenced
             and are assumed to be 1.
 
     @param[in]

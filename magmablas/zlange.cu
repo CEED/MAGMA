@@ -182,13 +182,13 @@ zlange_one_kernel(
     -----------
     ZLANGE returns the value
     
-       ZLANGE = ( max(abs(A(i,j))), NORM = 'M' or 'm'
+       ZLANGE = ( max(abs(A(i,j))), NORM = MagmaMaxNorm
                 (
-                ( norm1(A),         NORM = '1', 'O' or 'o'
+                ( norm1(A),         NORM = MagmaOneNorm
                 (
-                ( normI(A),         NORM = 'I' or 'i'
+                ( normI(A),         NORM = MagmaInfNorm
                 (
-                ( normF(A),         NORM = 'F', 'f', 'E' or 'e'  ** not yet supported
+                ( normF(A),         NORM = MagmaFrobeniusNorm  ** not yet supported
     
     where norm1 denotes the one norm of a matrix (maximum column sum),
     normI denotes the infinity norm of a matrix (maximum row sum) and
@@ -198,7 +198,7 @@ zlange_one_kernel(
     Arguments
     ---------
     @param[in]
-    norm    CHARACTER*1
+    norm    magma_norm_t
             Specifies the value to be returned in ZLANGE as described
             above.
     
@@ -226,10 +226,10 @@ zlange_one_kernel(
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.
-            If NORM = 'I' or 'M', LWORK >= max( 1, M ).
-            If NORM = '1',        LWORK >= max( 1, N ).
+            If NORM = MagmaInfNorm or MagmaMaxNorm, LWORK >= max( 1, M ).
+            If NORM = MagmaOneNorm,                 LWORK >= max( 1, N ).
             Note this is different than LAPACK, which requires WORK only for
-            NORM = 'I', and does not pass LWORK.
+            NORM = MagmaInfNorm, and does not pass LWORK.
 
     @ingroup magma_zaux2
     ********************************************************************/

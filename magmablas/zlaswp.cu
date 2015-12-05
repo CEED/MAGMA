@@ -71,7 +71,9 @@ __global__ void zlaswp_kernel(
             The number of columns of the matrix A.
     
     @param[in,out]
-    dAT     COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,N)
+    dAT     COMPLEX*16 array on GPU, stored row-wise, dimension (LDDA,M)
+            The M-by-N matrix, stored transposed as N-by-M matrix embedded in
+            LDDA-by-M array. M is not given; it is implicit.
             On entry, the matrix of column dimension N to which the row
             interchanges will be applied.
             On exit, the permuted matrix.
@@ -83,12 +85,12 @@ __global__ void zlaswp_kernel(
     @param[in]
     k1      INTEGER
             The first element of IPIV for which a row interchange will
-            be done. (Fortran one-based index: 1 <= k1 .)
+            be done. (Fortran one-based index: 1 <= k1.)
     
     @param[in]
     k2      INTEGER
             The last element of IPIV for which a row interchange will
-            be done. (Fortran one-based index: 1 <= k2 .)
+            be done. (Fortran one-based index: 1 <= k2.)
     
     @param[in]
     ipiv    INTEGER array, on CPU, dimension (K2*abs(INCI))

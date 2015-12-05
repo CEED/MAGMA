@@ -553,13 +553,13 @@ zlanhe_max(
     the infinity norm, or the element of largest absolute value of a
     complex Hermitian matrix A.
     
-       ZLANHE = ( max(abs(A(i,j))), NORM = 'M' or 'm'
+       ZLANHE = ( max(abs(A(i,j))), NORM = MagmaMaxNorm
                 (
-                ( norm1(A),         NORM = '1', 'O' or 'o'      ** supported only for (PRECISION_s || PRECISION_d || PRECISION_c || __CUDA_ARCH__ >= 200)
+                ( norm1(A),         NORM = MagmaOneNorm
                 (
-                ( normI(A),         NORM = 'I' or 'i'           ** supported only for (PRECISION_s || PRECISION_d || PRECISION_c || __CUDA_ARCH__ >= 200)
+                ( normI(A),         NORM = MagmaInfNorm
                 (
-                ( normF(A),         NORM = 'F', 'f', 'E' or 'e' ** not yet supported
+                ( normF(A),         NORM = MagmaFrobeniusNorm ** not yet supported
     
     where norm1 denotes the one norm of a matrix (maximum column sum),
     normI denotes the infinity norm of a matrix (maximum row sum) and
@@ -571,7 +571,7 @@ zlanhe_max(
     Arguments:
     ----------
     @param[in]
-    norm    CHARACTER*1
+    norm    magma_norm_t
             Specifies the value to be returned in ZLANHE as described above.
     
     @param[in]

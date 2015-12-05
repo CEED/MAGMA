@@ -18,14 +18,13 @@
        
        These files are included multiple times, once for each transpose version.
        gemm_stencil.cuh             defines the GPU kernel (device function).
-       gemm_kernel_batched.cuh              defines the GPU kernel (global function).
+       gemm_kernel_batched.cuh      defines the GPU kernel (global function).
        
        The batched version uses gemm_kernel_batched.cuh instead of gemm_kernel.cuh.
 */
 #include "cublas_v2.h"
 #include "common_magma.h"
 #include "commonblas_z.h"
-
 
 #define PRECISION_z
 
@@ -39,7 +38,9 @@
     
     where op( X ) is one of
     
-        op( X ) = X   or   op( X ) = X**T   or   op( X ) = X**H,
+        op( X ) = X      or
+        op( X ) = X**T   or
+        op( X ) = X**H,
     
     alpha and beta are scalars, and A, B and C are matrices, with
     op( A ) an m by k matrix, op( B ) a k by n matrix and C an m by n matrix.
@@ -47,20 +48,20 @@
     Parameters
     ----------
     @param[in]
-    transA  CHARACTER*1.
+    transA  magma_trans_t.
             On entry, transA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
-      -     = 'N':  op( A ) = A.
-      -     = 'T':  op( A ) = A**T.
-      -     = 'C':  op( A ) = A**H.
+      -     = MagmaNoTrans:    op( A ) = A.
+      -     = MagmaTrans:      op( A ) = A**T.
+      -     = MagmaConjTrans:  op( A ) = A**H.
     
     @param[in]
-    transB  CHARACTER*1.
+    transB  magma_trans_t.
             On entry, transB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
-      -     = 'N':  op( B ) = B.
-      -     = 'T':  op( B ) = B**T.
-      -     = 'C':  op( B ) = B**H.
+      -     = MagmaNoTrans:    op( B ) = B.
+      -     = MagmaTrans:      op( B ) = B**T.
+      -     = MagmaConjTrans:  op( B ) = B**H.
     
     @param[in]
     m       INTEGER.

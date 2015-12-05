@@ -19,12 +19,15 @@
     -------
     ztrsm_outofplace solves one of the matrix equations on gpu
 
-        op(A)*X = alpha*B,   or   X*op(A) = alpha*B,
+        op(A)*X = alpha*B,   or
+        X*op(A) = alpha*B,
 
     where alpha is a scalar, X and B are m by n matrices, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
-        op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
+        op(A) = A,    or
+        op(A) = A^T,  or
+        op(A) = A^H.
 
     The matrix X is overwritten on B.
 
@@ -486,12 +489,15 @@ void magmablas_ztrsm_outofplace_batched(
     -------
     ztrsm_work solves one of the matrix equations on gpu
 
-        op(A)*X = alpha*B,   or   X*op(A) = alpha*B,
+        op(A)*X = alpha*B,   or
+        X*op(A) = alpha*B,
 
     where alpha is a scalar, X and B are m by n matrices, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
-        op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
+        op(A) = A,    or
+        op(A) = A^T,  or
+        op(A) = A^H.
 
     The matrix X is overwritten on B.
 
@@ -697,12 +703,15 @@ void magmablas_ztrsm_work_batched(
     -------
     ztrsm solves one of the matrix equations on gpu
 
-        op(A)*X = alpha*B,   or   X*op(A) = alpha*B,
+        op(A)*X = alpha*B,   or
+        X*op(A) = alpha*B,
 
     where alpha is a scalar, X and B are m by n matrices, A is a unit, or
     non-unit, upper or lower triangular matrix and op(A) is one of
 
-        op(A) = A,   or   op(A) = A^T,  or  op(A) = A^H.
+        op(A) = A,    or
+        op(A) = A^T,  or
+        op(A) = A^H.
 
     The matrix X is overwritten on B.
 
