@@ -57,7 +57,10 @@ sparse_testing_zsrc += \
 #	$(cdir)/testing_z_mpk_5.cpp           \
 
 # debugging
-#sparse_testing_zsrc += \
+sparse_testing_zsrc += \
+	$(cdir)/testing_zailumatrix.cpp       \
+	$(cdir)/testing_zdynamicilu.cpp       \
+	$(cdir)/testing_zbgmres_saak_mscale2M.cpp	\
 #	$(cdir)/testing_zluwrite.cpp          \
 #	$(cdir)/testing_zbug.cpp              \
 #	$(cdir)/testing_zsolver_debug.cpp     \

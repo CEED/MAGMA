@@ -73,6 +73,8 @@ int main(  int argc, char** argv )
     for(i = 0; i < n; i++ ){
         double r = (double) rand()/(double) 10.;
         y[i] = MAGMA_Z_MAKE( r, 0.0);
+        if(i%5==0)
+            y[i] = - y[i];
         printf("%2.2f  ", y[i]);
     }
     printf("\n\n");
