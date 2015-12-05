@@ -120,6 +120,7 @@ libmagma_zsrc += \
 	$(cdir)/zgeqlf.cpp		\
 	$(cdir)/zgeqrf.cpp		\
 	$(cdir)/zgeqrf_ooc.cpp		\
+	$(cdir)/zunglq.cpp		\
 	$(cdir)/zungqr.cpp		\
 	$(cdir)/zungqr2.cpp		\
 	$(cdir)/zunmlq.cpp		\
@@ -286,6 +287,7 @@ libmagma_zsrc += \
 	$(cdir)/zgesvd.cpp		\
 	$(cdir)/zgebrd.cpp		\
 	$(cdir)/zlabrd_gpu.cpp		\
+	$(cdir)/zungbr.cpp		\
 	$(cdir)/zunmbr.cpp		\
 
 # ----------

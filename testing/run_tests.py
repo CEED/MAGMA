@@ -598,7 +598,9 @@ qr = (
 	('testing_zgeqlf',                 '-c',  mn,   ''),
 	('testing_zgeqp3',                 '-c',  mn,   ''),
 	('testing_zgeqrf',                '-c2',  mn,   ''),
-	('testing_zungqr',                 '-c',  mnk,  ''),
+	('testing_zunglq',                 '-c',  mnk,  ''),
+	('testing_zungqr',     '--version 1 -c',  mnk,  ''),
+	('testing_zungqr',     '--version 2 -c',  mnk,  ''),
 	('testing_zunmlq',                 '-c',  mnk,  ''),
 	('testing_zunmql',                 '-c',  mnk,  ''),
 	('testing_zunmqr',                 '-c',  mnk,  ''),
@@ -787,6 +789,7 @@ svd = (
 	('testing_zgesvd',         '-UA -VA -c',  mn,   ''),
 	
 	('testing_zgebrd',                 '-c',  mn,   ''),
+	('testing_zungbr',                 '-c',  mnk,  ''),
 	('testing_zunmbr',                 '-c',  mnk,  ''),
 )
 if ( opts.svd ):

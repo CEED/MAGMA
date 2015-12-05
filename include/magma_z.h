@@ -681,8 +681,24 @@ magma_ztrtri(
     magma_int_t *info);
 
 magma_int_t
+magma_zungbr(
+    magma_vect_t vect, magma_int_t m, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info);
+
+magma_int_t
 magma_zunghr(
     magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex_ptr dT, magma_int_t nb,
+    magma_int_t *info);
+
+magma_int_t
+magma_zunglq(
+    magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex_ptr dT, magma_int_t nb,

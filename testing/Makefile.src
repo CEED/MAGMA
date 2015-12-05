@@ -129,6 +129,7 @@ testing_zsrc += \
 	$(cdir)/testing_zgeqlf.cpp	\
 	$(cdir)/testing_zgeqp3.cpp	\
 	$(cdir)/testing_zgeqrf.cpp	\
+	$(cdir)/testing_zunglq.cpp	\
 	$(cdir)/testing_zungqr.cpp	\
 	$(cdir)/testing_zunmlq.cpp	\
 	$(cdir)/testing_zunmql.cpp	\
@@ -179,6 +180,7 @@ testing_zsrc += \
 	$(cdir)/testing_zgesdd.cpp	\
 	$(cdir)/testing_zgesvd.cpp	\
 	$(cdir)/testing_zgebrd.cpp	\
+	$(cdir)/testing_zungbr.cpp	\
 	$(cdir)/testing_zunmbr.cpp	\
 
 # ----------
