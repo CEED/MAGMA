@@ -13,15 +13,15 @@
 #include "magma_internal.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function: 'a' is pointer to the current panel holding the
+   -- Auxiliary function: "A" is pointer to the current panel holding the
       Householder vectors for the QR factorization of the panel. This routine
-      puts ones on the diagonal and zeros in the upper triangular part of 'a'.
+      puts ones on the diagonal and zeros in the upper triangular part of "A".
       The upper triangular values are stored in work.
       
       Then, the inverse is calculated in place in work, so as a final result,
       work holds the inverse of the upper triangular diagonal block.
 */
-void zsplit_diag_block(magma_int_t ib, magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *work)
+void zsplit_diag_block(magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work)
 {
     magma_int_t i, j, info;
     magmaDoubleComplex *cola, *colw;
@@ -29,7 +29,7 @@ void zsplit_diag_block(magma_int_t ib, magmaDoubleComplex *a, magma_int_t lda, m
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     for (i=0; i < ib; i++) {
-        cola = a    + i*lda;
+        cola = A    + i*lda;
         colw = work + i*ib;
         for (j=0; j < i; j++) {
             colw[j] = cola[j];

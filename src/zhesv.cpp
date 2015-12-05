@@ -20,8 +20,8 @@
     matrices.
 
     The diagonal pivoting method is used to factor A as
-       A = U * D * U**H,  if uplo = 'U', or
-       A = L * D * L**H,  if uplo = 'L',
+       A = U * D * U**H,  if uplo = MagmaUpper, or
+       A = L * D * L**H,  if uplo = MagmaLower,
     where U (or L) is a product of permutation and unit upper (lower)
     triangular matrices, and D is Hermitian and block diagonal with
     1-by-1 and 2-by-2 diagonal blocks.  The factored form of A is then
@@ -30,9 +30,9 @@
     Arguments
     =========
     @param[in]
-    uplo    CHARACTER*1
-            = 'U':  Upper triangle of A is stored;
-            = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+            = MagmaUpper:  Upper triangle of A is stored;
+            = MagmaLower:  Lower triangle of A is stored.
 
     @param[in]
     n       INTEGER
@@ -46,10 +46,10 @@
 
     @param[in,out]
     A       COMPLEX*16 array, dimension (lda,n)
-            On entry, the Hermitian matrix A.  If uplo = 'U', the leading
+            On entry, the Hermitian matrix A.  If uplo = MagmaUpper, the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If uplo = 'L', the
+            triangular part of A is not referenced.  If uplo = MagmaLower, the
             leading n-by-n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
@@ -68,9 +68,9 @@
             Details of the interchanges and the block structure of D, as
             determined by ZHETRF.  If ipiv(k) > 0, then rows and columns
             k and ipiv(k) were interchanged, and D(k,k) is a 1-by-1
-            diagonal block.  If uplo = 'U' and ipiv(k) = ipiv(k-1) < 0,
+            diagonal block.  If uplo = MagmaUpper and ipiv(k) = ipiv(k-1) < 0,
             then rows and columns k-1 and -ipiv(k) were interchanged and
-            D(k-1:k,k-1:k) is a 2-by-2 diagonal block.  If uplo = 'L' and
+            D(k-1:k,k-1:k) is a 2-by-2 diagonal block.  If uplo = MagmaLower and
             ipiv(k) = ipiv(k+1) < 0, then rows and columns k+1 and
             -ipiv(k) were interchanged and D(k:k+1,k:k+1) is a 2-by-2
             diagonal block.

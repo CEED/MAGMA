@@ -20,8 +20,8 @@
     The LU decomposition with no pivoting is
     used to factor A as
     The factorization has the form
-       A = U^H * D * U,  if UPLO = 'U', or
-       A = L  * D * L^H, if UPLO = 'L',
+       A = U^H * D * U,  if UPLO = MagmaUpper, or
+       A = L  * D * L^H, if UPLO = MagmaLower,
     where U is an upper triangular matrix, L is lower triangular, and
     D is a diagonal matrix.
     The factored form of A is then
@@ -44,22 +44,22 @@
             of the matrix B.  nrhs >= 0.
 
     @param[in,out]
-    dA       COMPLEX_16 array, dimension (ldda,n).
+    dA      COMPLEX_16 array, dimension (ldda,n).
             On entry, the n-by-n matrix to be factored.
             On exit, the factors L and U from the factorization
             A = L*U; the unit diagonal elements of L are not stored.
 
     @param[in]
-    ldda     INTEGER
+    ldda    INTEGER
             The leading dimension of the array A.  ldda >= max(1,n).
 
     @param[in,out]
-    dB       COMPLEX_16 array, dimension (lddb,nrhs)
+    dB      COMPLEX_16 array, dimension (lddb,nrhs)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
-    lddb     INTEGER
+    lddb    INTEGER
             The leading dimension of the array B.  ldb >= max(1,n).
 
     @param[out]

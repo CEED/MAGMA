@@ -20,8 +20,8 @@
     The LU decomposition with no pivoting is
     used to factor A as
     The factorization has the form   
-       A = U^T * D * U,  if UPLO = 'U', or   
-       A = L  * D * L^T, if UPLO = 'L',   
+       A = U^T * D * U,  if UPLO = MagmaUpper, or   
+       A = L  * D * L^T, if UPLO = MagmaLower,   
     where U is an upper triangular matrix, L is lower triangular, and
     D is a diagonal matrix.
     The factored form of A is then

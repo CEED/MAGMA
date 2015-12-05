@@ -11,19 +11,19 @@
 #include "common_magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function: 'a' is pointer to the current panel holding the
+   -- Auxiliary function: "A" is pointer to the current panel holding the
       Householder vectors for the QR factorization of the panel. This routine
-      puts ones on the diagonal and zeros in the upper triangular part of 'a'.
+      puts ones on the diagonal and zeros in the upper triangular part of "A".
       The upper triangular values are stored in work.
  */
-void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleComplex *work) {
+void zsplit_diag_block3(int ib, magmaDoubleComplex *A, int lda, magmaDoubleComplex *work) {
     int i, j;
     magmaDoubleComplex *cola, *colw;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     for (i=0; i < ib; i++) {
-        cola = a    + i*lda;
+        cola = A    + i*lda;
         colw = work + i*ib;
         for (j=0; j < i; j++) {
             colw[j] = cola[j];

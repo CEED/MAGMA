@@ -133,7 +133,7 @@ magma_zungtr(
     }
 
     if (upper) {
-        /*  Q was determined by a call to ZHETRD with UPLO = 'U'
+        /*  Q was determined by a call to ZHETRD with UPLO = MagmaUpper
             Shift the vectors which define the elementary reflectors one
             column to the left, and set the last row and column of Q to
             those of the unit matrix                                    */
@@ -153,7 +153,7 @@ magma_zungtr(
         lapackf77_zungql(&i__1, &i__1, &i__1, A(0,0), &lda, tau, work,
                          &lwork, &iinfo);
     } else {
-        /*  Q was determined by a call to ZHETRD with UPLO = 'L'.
+        /*  Q was determined by a call to ZHETRD with UPLO = MagmaLower.
             Shift the vectors which define the elementary reflectors one
             column to the right, and set the first row and column of Q to
             those of the unit matrix                                      */

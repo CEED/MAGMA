@@ -177,7 +177,7 @@ magma_zunmtr_gpu(
                           dC, lddc, wA(0,1), ldwa, &iinfo);
     }
     else {
-        /* Q was determined by a call to ZHETRD with UPLO = 'L' */
+        /* Q was determined by a call to ZHETRD with UPLO = MagmaLower */
         if (left) {
             i1 = 1;
             i2 = 0;

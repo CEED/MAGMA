@@ -70,7 +70,7 @@
     @param[out]
     info    INTEGER
       -     = 0:  successful exit
-      -     < 0:  if INFO = -i, the i-th argument has an illegal value
+      -     < 0:  if INFO = -i, the i-th argument had an illegal value
 
     @ingroup magma_zgeqrf_comp
     ********************************************************************/

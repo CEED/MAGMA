@@ -22,8 +22,8 @@
     matrix A.
 
     The factorization has the form   
-       A = U^T * D * U,  if UPLO = 'U', or   
-       A = L  * D * L^T, if UPLO = 'L',   
+       A = U^T * D * U,  if UPLO = MagmaUpper, or   
+       A = L  * D * L^T, if UPLO = MagmaLower,   
     where U is an upper triangular matrix, L is lower triangular, and
     D is a diagonal matrix.
 
@@ -32,9 +32,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1   
-      -     = 'U':  Upper triangle of A is stored;   
-      -     = 'L':  Lower triangle of A is stored.   
+    uplo    magma_uplo_t   
+      -     = MagmaUpper:  Upper triangle of A is stored;   
+      -     = MagmaLower:  Lower triangle of A is stored.   
 
     @param[in]
     n       INTEGER   
@@ -42,10 +42,10 @@
 
     @param[in,out]
     dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
+            On entry, the symmetric matrix A.  If UPLO = MagmaUpper, the leading   
             N-by-N upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
-            triangular part of A is not referenced.  If UPLO = 'L', the   
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the   
             leading N-by-N lower triangular part of A contains the lower   
             triangular part of the matrix A, and the strictly upper   
             triangular part of A is not referenced.   

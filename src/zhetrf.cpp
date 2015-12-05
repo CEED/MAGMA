@@ -31,9 +31,9 @@
     Arguments
     ---------
     @param[in]
-    uplo    CHARACTER*1
-      -     = 'U':  Upper triangle of A is stored;
-      -     = 'L':  Lower triangle of A is stored.
+    uplo    magma_uplo_t
+      -     = MagmaUpper:  Upper triangle of A is stored;
+      -     = MagmaLower:  Lower triangle of A is stored.
  
     @param[in]
     n       INTEGER
@@ -41,10 +41,10 @@
   
     @param[in,out]
     A       COMPLEX*16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading N-by-N lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
@@ -61,9 +61,9 @@
             Details of the interchanges and the block structure of D.
             If IPIV(k) > 0, then rows and columns k and IPIV(k) were
             interchanged and D(k,k) is a 1-by-1 diagonal block.
-            If UPLO = 'U' and IPIV(k) = IPIV(k-1) < 0, then rows and
+            If UPLO = MagmaUpper and IPIV(k) = IPIV(k-1) < 0, then rows and
             columns k-1 and -IPIV(k) were interchanged and D(k-1:k,k-1:k)
-            is a 2-by-2 diagonal block.  If UPLO = 'L' and IPIV(k) =
+            is a 2-by-2 diagonal block.  If UPLO = MagmaLower and IPIV(k) =
             IPIV(k+1) < 0, then rows and columns k+1 and -IPIV(k) were
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
 
@@ -78,7 +78,7 @@
 
     Further Details
     ===============
-    If UPLO = 'U', then A = U*D*U', where
+    If UPLO = MagmaUpper, then A = U*D*U', where
     U = P(n)*U(n)* ... *P(k)U(k)* ...,
     i.e., U is a product of terms P(k)*U(k), where k decreases from n to
     1 in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1
@@ -95,7 +95,7 @@
     If s = 2, the upper triangle of D(k) overwrites A(k-1,k-1), A(k-1,k),
     and A(k,k), and v overwrites A(1:k-2,k-1:k).
   
-    If UPLO = 'L', then A = L*D*L', where
+    If UPLO = MagmaLower, then A = L*D*L', where
        L = P(1)*L(1)* ... *P(k)*L(k)* ...,
     i.e., L is a product of terms P(k)*L(k), where k increases from 1 to
     n in steps of 1 or 2, and D is a block diagonal matrix with 1-by-1

@@ -23,10 +23,10 @@
     matrix A using the Bunch-Kaufman diagonal pivoting method. The
     partial factorization has the form:
 
-    A  =  ( I  U12 ) ( A11  0  ) (  I    0   )  if UPLO = 'U', or:
+    A  =  ( I  U12 ) ( A11  0  ) (  I    0   )  if UPLO = MagmaUpper, or:
           ( 0  U22 ) (  0   D  ) ( U12' U22' )
 
-    A  =  ( L11  0 ) (  D   0  ) ( L11' L21' )  if UPLO = 'L'
+    A  =  ( L11  0 ) (  D   0  ) ( L11' L21' )  if UPLO = MagmaLower
           ( L21  I ) (  0  A22 ) (  0    I   )
 
     where the order of D is at most NB. The actual order is returned in
@@ -34,8 +34,8 @@
     Note that U' denotes the conjugate transpose of U.
 
     ZLAHEF is an auxiliary routine called by ZHETRF. It uses blocked code
-    (calling Level 3 BLAS) to update the submatrix A11 (if UPLO = 'U') or
-    A22 (if UPLO = 'L').
+    (calling Level 3 BLAS) to update the submatrix A11 (if UPLO = MagmaUpper) or
+    A22 (if UPLO = MagmaLower).
 
     Arguments
     ---------
@@ -43,8 +43,8 @@
     uplo    CHARACTER
             Specifies whether the upper or lower triangular part of the
             Hermitian matrix A is stored:
-      -     = 'U':  Upper triangular
-      -     = 'L':  Lower triangular
+      -     = MagmaUpper:  Upper triangular
+      -     = MagmaLower:  Lower triangular
 
     @param[in]
     n       INTEGER
@@ -63,10 +63,10 @@
 
     @param[in,out]
     hA      COMPLEX*16 array, dimension (LDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading n-by-n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
@@ -78,10 +78,10 @@
 
     @param[in,out]
     dA      COMPLEX*16 array on GPU, dimension (LDDA,N)
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = MagmaUpper, the leading
             n-by-n upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
-            triangular part of A is not referenced.  If UPLO = 'L', the
+            triangular part of A is not referenced.  If UPLO = MagmaLower, the
             leading n-by-n lower triangular part of A contains the lower
             triangular part of the matrix A, and the strictly upper
             triangular part of A is not referenced.
@@ -94,14 +94,14 @@
     @param[out]
     ipiv    INTEGER array, dimension (N)
             Details of the interchanges and the block structure of D.
-            If UPLO = 'U', only the last KB elements of ipiv are set;
-            if UPLO = 'L', only the first KB elements are set.
+            If UPLO = MagmaUpper, only the last KB elements of ipiv are set;
+            if UPLO = MagmaLower, only the first KB elements are set.
     \n
             If ipiv(k) > 0, then rows and columns k and ipiv(k) were
             interchanged and D(k,k) is a 1-by-1 diagonal block.
-            If UPLO = 'U' and ipiv(k) = ipiv(k-1) < 0, then rows and
+            If UPLO = MagmaUpper and ipiv(k) = ipiv(k-1) < 0, then rows and
             columns k-1 and -ipiv(k) were interchanged and D(k-1:k,k-1:k)
-            is a 2-by-2 diagonal block.  If UPLO = 'L' and ipiv(k) =
+            is a 2-by-2 diagonal block.  If UPLO = MagmaLower and ipiv(k) =
             ipiv(k+1) < 0, then rows and columns k+1 and -ipiv(k) were
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
  
