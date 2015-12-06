@@ -78,6 +78,7 @@ libsparse_zsrc += \
 # iterative ILU
 libsparse_zsrc += \
 	$(cdir)/ziterilu.cpp                  \
+    $(cdir)/ziterict.cpp                  \
 
 # orthogonalization schemes and wrappers to dense MAGMA
 libsparse_zsrc += \

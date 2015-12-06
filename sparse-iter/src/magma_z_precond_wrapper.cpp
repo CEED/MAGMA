@@ -158,6 +158,10 @@ magma_z_precondsetup(
     else if ( precond->solver == Magma_AICC ) {
         info = magma_zitericsetup( A, b, precond, queue );
     }
+    else if ( precond->solver == Magma_AICT ) {
+        info = magma_zitericsetup( A, b, precond, queue );
+        precond->solver = Magma_AICC; // handle as AICC
+    }
     else if ( precond->solver == Magma_AILU ) {
         info = magma_ziterilusetup( A, b, precond, queue );
     }

@@ -606,15 +606,6 @@ magma_zmdynamicic_insert(
     omp_lock_t *rowlock,
     magma_queue_t queue );
 
-
-magma_int_t
-magma_zmdynamicilu_rm(
-    magma_int_t num_rm,
-    magma_z_matrix *LU,
-    magma_index_t *rm_loc,
-    omp_lock_t *rowlock,
-    magma_queue_t queue );
-
 magma_int_t
 magma_zmdynamicilu_set_thrs(
     magma_int_t num_rm,
@@ -638,13 +629,6 @@ magma_zmdynamicic_sweep(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmdynamicic_sweep_parallel(
-    magma_z_matrix A,
-    magma_z_matrix *v,
-    magma_z_matrix *LU,
-    magma_queue_t queue );
-
-magma_int_t
 magma_zmdynamicic_residuals(
     magma_z_matrix A,
     magma_z_matrix LU,
@@ -652,17 +636,16 @@ magma_zmdynamicic_residuals(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmdynamicic_residuals_parallel(
-    magma_z_matrix A,
+magma_zmdynamicic_candidates(
     magma_z_matrix LU,
-    magma_z_matrix *v,
     magma_z_matrix *LU_new,
     magma_queue_t queue );
 
 magma_int_t
-magma_zmdynamicic_candidates(
-    magma_z_matrix LU,
-    magma_z_matrix *LU_new,
+magma_ziterictsetup(
+    magma_z_matrix A,
+    magma_z_matrix b,
+    magma_z_preconditioner *precond,
     magma_queue_t queue );
 
 #endif

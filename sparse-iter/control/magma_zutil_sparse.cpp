@@ -290,11 +290,14 @@ magma_zparse_opts(
             else if ( strcmp("ITERREF", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_ITERREF;
             }
-            else if ( strcmp("ILU", argv[i]) == 0 ) {
+            else if ( strcmp("ILU", argv[i]) == 0 || strcmp("IC", argv[i]) == 0 )  {
                 opts->precond_par.solver = Magma_ILU;
             }
-            else if ( strcmp("AILU", argv[i]) == 0 ) {
+            else if ( strcmp("AILU", argv[i]) == 0 || strcmp("AIC", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_AILU;
+            }
+            else if ( strcmp("AICT", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_AICT;
             }
             else if ( strcmp("NONE", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_NONE;
