@@ -153,6 +153,7 @@ parser.add_option(      '--tol',        action='store',      dest='tol',        
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
 parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests', default='2')
+parser.add_option(      '--null-stream',action='store_true', dest='null_stream',help='use null stream (for verifying old behavior)')
 
 parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     help='run very few, extra small tests, N=25:100:25, 32:128:32')
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
@@ -969,6 +970,9 @@ if ( opts.tol ):
 
 if ( opts.dev is not None ):
 	global_options += ' --dev ' + opts.dev + ' '
+
+if ( opts.null_stream ):
+	global_options += ' --null-stream '
 
 last_cmd = None
 
