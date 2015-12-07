@@ -13,7 +13,7 @@
 
 #define BLOCK_SIZE 256
 
-#define PRECISION_z
+#define COMPLEX
 
 
 
@@ -44,7 +44,7 @@ magma_zmdotc1_kernel_1(
             temp[ Idx ] += temp[ Idx + 64 ];
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
                 temp[ Idx ] += temp[ Idx + 32 ];
                 __syncthreads();
@@ -60,7 +60,7 @@ magma_zmdotc1_kernel_1(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
                 temp2[ Idx ] += temp2[ Idx + 32 ];
@@ -71,17 +71,7 @@ magma_zmdotc1_kernel_1(
                 temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-                temp2[ Idx ] += temp2[ Idx + 32 ];
-                temp2[ Idx ] += temp2[ Idx + 16 ];
-                temp2[ Idx ] += temp2[ Idx + 8 ];
-                temp2[ Idx ] += temp2[ Idx + 4 ];
-                temp2[ Idx ] += temp2[ Idx + 2 ];
-                temp2[ Idx ] += temp2[ Idx + 1 ];
-        }
-    #endif
+    
     if ( Idx == 0 ){
             vtmp[ blockIdx.x ] = temp[ 0 ];
     }
@@ -116,7 +106,7 @@ magma_zmdotc1_kernel_2(
             temp[ Idx ] += temp[ Idx + 64 ];
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
                 temp[ Idx ] += temp[ Idx + 32 ];
                 __syncthreads();
@@ -132,7 +122,7 @@ magma_zmdotc1_kernel_2(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
                 temp2[ Idx ] += temp2[ Idx + 32 ];
@@ -143,17 +133,7 @@ magma_zmdotc1_kernel_2(
                 temp2[ Idx ] += temp2[ Idx + 1 ];
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-                temp2[ Idx ] += temp2[ Idx + 32 ];
-                temp2[ Idx ] += temp2[ Idx + 16 ];
-                temp2[ Idx ] += temp2[ Idx + 8 ];
-                temp2[ Idx ] += temp2[ Idx + 4 ];
-                temp2[ Idx ] += temp2[ Idx + 2 ];
-                temp2[ Idx ] += temp2[ Idx + 1 ];
-        }
-    #endif
+    
     if ( Idx == 0 ){
             vtmp2[ blockIdx.x ] = temp[ 0 ];
     }
@@ -308,7 +288,7 @@ magma_zmdotc2_kernel_1(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<2; j++)
                 temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 32 ];
@@ -330,7 +310,7 @@ magma_zmdotc2_kernel_1(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<2; j++){
@@ -343,19 +323,7 @@ magma_zmdotc2_kernel_1(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<2; j++){
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
-            }
-        }
-    #endif
+    
     if ( Idx == 0 ){
         for( j=0; j<2; j++){
             vtmp[ blockIdx.x+j*n ] = temp[ j*blockDim.x ];
@@ -397,7 +365,7 @@ magma_zmdotc2_kernel_2(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<2; j++)
                 temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 32 ];
@@ -419,7 +387,7 @@ magma_zmdotc2_kernel_2(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<2; j++){
@@ -432,19 +400,7 @@ magma_zmdotc2_kernel_2(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<2; j++){
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 32 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 16 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 8 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 4 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 2 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 1 ];
-            }
-        }
-    #endif
+
     if ( Idx == 0 ){
         for( j=0; j<2; j++){
             vtmp2[ blockIdx.x+j*n ] = temp[ j*(blockSize) ];
@@ -619,7 +575,7 @@ magma_zmdotc3_kernel_1(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<3; j++)
                 temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 32 ];
@@ -641,7 +597,7 @@ magma_zmdotc3_kernel_1(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<3; j++){
@@ -654,19 +610,7 @@ magma_zmdotc3_kernel_1(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<3; j++){
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
-            }
-        }
-    #endif
+    
     if ( Idx == 0 ){
         for( j=0; j<3; j++){
             vtmp[ blockIdx.x+j*n ] = temp[ j*blockDim.x ];
@@ -708,7 +652,7 @@ magma_zmdotc3_kernel_2(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<3; j++)
                 temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 32 ];
@@ -730,7 +674,7 @@ magma_zmdotc3_kernel_2(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<3; j++){
@@ -743,19 +687,7 @@ magma_zmdotc3_kernel_2(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<3; j++){
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 32 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 16 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 8 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 4 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 2 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 1 ];
-            }
-        }
-    #endif
+
     if ( Idx == 0 ){
         for( j=0; j<3; j++){
             vtmp2[ blockIdx.x+j*n ] = temp[ j*(blockSize) ];
@@ -944,7 +876,7 @@ magma_zmdotc4_kernel_1(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<4; j++)
                 temp[ Idx+j*blockDim.x ] += temp[ Idx+j*blockDim.x + 32 ];
@@ -966,7 +898,7 @@ magma_zmdotc4_kernel_1(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<4; j++){
@@ -979,19 +911,7 @@ magma_zmdotc4_kernel_1(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<4; j++){
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 32 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 16 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 8 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 4 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 2 ];
-                temp2[ Idx+j*blockDim.x ] += temp2[ Idx+j*blockDim.x + 1 ];
-            }
-        }
-    #endif
+
     if ( Idx == 0 ){
         for( j=0; j<4; j++){
             vtmp[ blockIdx.x+j*n ] = temp[ j*blockDim.x ];
@@ -1033,7 +953,7 @@ magma_zmdotc4_kernel_2(
         }
     }
     __syncthreads();
-    #if defined(PRECISION_z) || defined(PRECISION_c)
+    #ifdef COMPLEX
         if( Idx < 32 ){
             for( j=0; j<4; j++)
                 temp[ Idx+j*(blockSize) ] += temp[ Idx+j*(blockSize) + 32 ];
@@ -1055,7 +975,7 @@ magma_zmdotc4_kernel_2(
                 __syncthreads();
         }
     #endif
-    #if defined(PRECISION_d)
+    #ifdef REAL
         if( Idx < 32 ){
             volatile double *temp2 = temp;
             for( j=0; j<4; j++){
@@ -1068,19 +988,7 @@ magma_zmdotc4_kernel_2(
             }
         }
     #endif
-    #if defined(PRECISION_s)
-        if( Idx < 32 ){
-            volatile double *temp2 = temp;
-            for( j=0; j<4; j++){
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 32 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 16 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 8 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 4 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 2 ];
-                temp2[ Idx+j*(blockSize) ] += temp2[ Idx+j*(blockSize) + 1 ];
-            }
-        }
-    #endif
+
     if ( Idx == 0 ){
         for( j=0; j<4; j++){
             vtmp2[ blockIdx.x+j*n ] = temp[ j*(blockSize) ];
@@ -1160,7 +1068,7 @@ magma_zmdotc4_kernel_2(
     ********************************************************************/
 
 extern "C" magma_int_t
-magma_zmzdotc(
+magma_zmdotc4(
     int n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
