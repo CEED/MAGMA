@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.5) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,11 +7,12 @@
        
        @author Azzam Haidar
        @author Tingxing Dong
-
+       @author Ahmad Abdelfattah
+       
        @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 #include "cublas_v2.h"
 
@@ -109,7 +110,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_int_t ib, j;
     magma_int_t nb = 256; //256; // BATRF_NB;
 
-    cublasHandle_t myhandle = queue->cublas_handle();
+    //cublasHandle_t myhandle = queue->cublas_handle();
     ////cublasCreate_v2(&myhandle);
     ////cublasSetStream(myhandle, queue);
 
@@ -156,8 +157,8 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         return info;
     }
 
-    magmablas_zlaset_q(MagmaFull, invdiagA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvdiagA, invdiagA_msize, queue);
-    magmablas_zlaset_q(MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue);
+    magmablas_zlaset_q( MagmaFull, invdiagA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvdiagA, invdiagA_msize, queue );
+    magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvdiagA_array, dinvdiagA, TRI_NB, 0, 0, invdiagA_msize, batchCount, queue);
 
@@ -166,7 +167,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
 
     magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
     // set dinvdiagA to identity
-    magmablas_zlaset_batched(MagmaUpperLower, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount, queue);
+    magmablas_zlaset_batched( MagmaFull, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount, queue );
 
     for (j = 0; j < n; j += nb) {
         ib = min(nb, n-j);
@@ -178,7 +179,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 1 \n",j);
         // solve dwork = L^-1 * I
-        magmablas_zlaset_batched(MagmaUpperLower, j, ib, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount, queue);
+        magmablas_zlaset_batched( MagmaFull, j, ib, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork_array, n, batchCount, queue );
         magma_zdisplace_pointers(dW5_displ, dwork_array, n, j, 0, batchCount, queue);
         magma_zdisplace_pointers(dW0_displ, dinvA_array, lddia, j, j, batchCount, queue);
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount, queue);
@@ -192,7 +193,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount, queue, myhandle);
+                1, batchCount, queue );
         
         //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 2 \n",j);
@@ -209,13 +210,13 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dinvdiagA_array,  invdiagA_msize, 
                 dW1_displ,   dW2_displ, 
                 dW3_displ,   dW4_displ,
-                1, batchCount, queue, myhandle);
+                1, batchCount, queue );
     }
 
     // Apply column interchanges
-    magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount, queue);
+    magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount, queue );
 
-    magmablasSetKernelStream(queue);
+    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     ////cublasDestroy_v2(myhandle);
 
