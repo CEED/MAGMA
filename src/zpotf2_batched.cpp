@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.4) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,10 +7,11 @@
        
        @author Azzam Haidar
        @author Tingxing Dong
+       @author Ahmad Abdelfattah
 
        @precisions normal z -> s d c
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 
 #define PRECISION_z
@@ -62,11 +63,11 @@ magma_zpotf2_ztrsm_batched(
                 magma_zdisplace_pointers(dC_displ, dA_array, lda, j+1, j, batchCount, queue);
 
                 // Compute elements J+1:N of column J = A(j+1:n,1:j-1) * A(j,1:j-1) (row).
-                magmablas_zgemv_batched(MagmaNoTrans, m-j-1, j,
+                magmablas_zgemv_batched( MagmaNoTrans, m-j-1, j,
                                  alpha, dA_displ, lda,
                                         dB_displ,    lda,
                                  beta,  dC_displ, 1,
-                                 batchCount, queue);
+                                 batchCount, queue );
 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 magma_zlacgv_batched(j, dA_array, lda, j, batchCount, queue);
@@ -97,7 +98,8 @@ magma_zpotf2_batched(
     magmaDoubleComplex **dB_displ, 
     magmaDoubleComplex **dC_displ, 
     magma_int_t *info_array, magma_int_t gbstep, 
-    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
+    magma_int_t batchCount, magma_queue_t queue)
+    //magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue)
 {
     magma_int_t arginfo=0;
 
@@ -150,7 +152,7 @@ magma_zpotf2_batched(
                                  m-j-ib, n-j-ib, ib,
                                  alpha, dA_displ, lda,
                                         dA_displ, lda,
-                                 beta,  dC_displ, lda, batchCount, queue, myhandle);
+                                 beta,  dC_displ, lda, batchCount, queue );
                 #else
                     // update next subpanel
                     magma_zdisplace_pointers(dA_displ, dA_array, lda, j+ib, 0, batchCount, queue);
@@ -159,7 +161,7 @@ magma_zpotf2_batched(
                                  m-j-ib, min((n-j-ib),ib), j+ib,
                                  alpha, dA_displ, lda,
                                         dA_displ, lda,
-                                 beta,  dC_displ, lda, batchCount, queue, myhandle);
+                                 beta,  dC_displ, lda, batchCount, queue );
                 #endif
                 } // end of if ( (n-j-ib) > 0)
                 #endif

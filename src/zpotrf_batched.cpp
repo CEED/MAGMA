@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.5) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,12 +7,13 @@
        
        @author Azzam Haidar
        @author Tingxing Dong
+       @author Ahmad Abdelfattah
 
        @precisions normal z -> s d c
 */
 #include <cuda_runtime.h>
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +108,7 @@ magma_zpotrf_lg_batched(
     magma_int_t nb, recnb;
     magma_get_zpotrf_batched_nbparam(n, &nb, &recnb);
 
-    cublasHandle_t myhandle = queue->cublas_handle();
+    //cublasHandle_t myhandle = queue->cublas_handle();
     ////cublasCreate_v2(&myhandle);
     ////cublasSetStream(myhandle, queue);
 
@@ -156,19 +157,21 @@ magma_zpotrf_lg_batched(
         magma_xerbla( __func__, -(info) );
         return info;
     }
-    magmablas_zlaset_q(MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue);
-    magmablas_zlaset_q(MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue);
+    magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
+    magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
     zset_pointer(dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
 
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
-    magma_queue_t stream[nbstreams];
+    magma_queue_t queues[nbstreams];
     for (k=0; k < nbstreams; k++) {
-        magma_queue_create( &stream[k] );
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+        magma_queue_create( cdev, &queues[k] );
     }
-    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
+    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1, queue);
 
     if (uplo == MagmaUpper) {
         printf("Upper side is unavailable \n");
@@ -195,7 +198,7 @@ magma_zpotrf_lg_batched(
                                    dinvA_array, invA_msize,
                                    dW0_displ, dW1_displ, dW2_displ,
                                    dW3_displ, dW4_displ,
-                                   info_array, j, batchCount, myhandle, queue);
+                                   info_array, j, batchCount, queue);
             }
             else {
                 //arginfo = magma_zpotrf_rectile_batched(
@@ -206,7 +209,7 @@ magma_zpotrf_lg_batched(
                                    dinvA_array, invA_msize,
                                    dW0_displ, dW1_displ, dW2_displ,
                                    dW3_displ, dW4_displ, 
-                                   info_array, j, batchCount, myhandle, queue);
+                                   info_array, j, batchCount, queue);
             }
             if (arginfo != 0 ) goto fin;
             //===============================================
@@ -232,13 +235,13 @@ magma_zpotrf_lg_batched(
                     for (k=0; k < batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
-                        magmablasSetKernelStream(stream[streamid]);
+                        //magmablasSetKernelStream(queues[streamid]);
                         // call herk, class zherk must call cpu pointer 
-                        magma_zherk(MagmaLower, MagmaNoTrans, n-j-ib, ib, 
+                        magma_zherk( MagmaLower, MagmaNoTrans, n-j-ib, ib, 
                             d_alpha, 
                             (const magmaDoubleComplex*) cpuAarray[k] + j+ib+j*ldda, ldda, 
                             d_beta,
-                            cpuAarray[k] + j+ib+(j+ib)*ldda, ldda);
+                            cpuAarray[k] + j+ib+(j+ib)*ldda, ldda, queues[streamid] );
                      }
                      // need to synchronise to be sure that panel do not start before
                      // finishing the update at least of the next panel
@@ -247,9 +250,9 @@ magma_zpotrf_lg_batched(
                      //magma_device_sync(); 
                      if ( queue != NULL ) {
                          for (magma_int_t s=0; s < nbstreams; s++)
-                             magma_queue_sync(stream[s]);
+                             magma_queue_sync(queues[s]);
                      }
-                     magmablasSetKernelStream(queue);
+                     //magmablasSetKernelStream(queue);
                 }
                 else
                 {
@@ -258,10 +261,10 @@ magma_zpotrf_lg_batched(
                     //-------------------------------------------
                     magma_zdisplace_pointers(dA_displ, dA_array, ldda, j+ib, j, batchCount, queue);
                     magma_zdisplace_pointers(dW1_displ, dA_array, ldda, j+ib, j+ib, batchCount, queue);
-                    magmablas_zherk_batched(uplo, MagmaNoTrans, n-j-ib, ib,
+                    magmablas_zherk_batched( uplo, MagmaNoTrans, n-j-ib, ib,
                                           d_alpha, dA_displ, ldda, 
                                           d_beta,  dW1_displ, ldda, 
-                                          batchCount, queue);
+                                          batchCount, queue );
                 }
             } 
             //gpu_time = magma_sync_wtime(NULL) - gpu_time;
@@ -273,10 +276,10 @@ magma_zpotrf_lg_batched(
     }
 
 fin:
-    magmablasSetKernelStream(queue);
+    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     for (k=0; k < nbstreams; k++) {
-        magma_queue_destroy( stream[k] );
+        magma_queue_destroy( queues[k] );
     }
     ////cublasDestroy_v2(myhandle);
 
