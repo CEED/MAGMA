@@ -82,6 +82,8 @@ magma_zgesv(
     #endif
     
     magma_int_t ngpu, ldda, lddb;
+    magma_queue_t queue = NULL;
+    magma_device_t cdev;
     
     *info = 0;
     if (n < 0) {
@@ -118,24 +120,25 @@ magma_zgesv(
         magma_free( dA );
         goto CPU_INTERFACE;
     }
-    magma_queue_t queues[1];
-    magma_device_t cdev;
+    
     magma_getdevice( &cdev );
-    magma_queue_create( cdev, &queues[0] );
-    magma_zsetmatrix( n, n, A, lda, dA(0,0), ldda, queues[0] );
+    magma_queue_create( cdev, &queue );
+    
+    magma_zsetmatrix( n, n, A, lda, dA(0,0), ldda, queue );
     magma_zgetrf_gpu( n, n, dA(0,0), ldda, ipiv, info );
     if ( *info == MAGMA_ERR_DEVICE_ALLOC ) {
+        magma_queue_destroy( queue );
         magma_free( dA );
         magma_free( dB );
         goto CPU_INTERFACE;
     }
-    magma_zgetmatrix( n, n, dA(0,0), ldda, A, lda, queues[0] );
+    magma_zgetmatrix( n, n, dA(0,0), ldda, A, lda, queue );
     if ( *info == 0 ) {
-        magma_zsetmatrix( n, nrhs, B, ldb, dB(0,0), lddb, queues[0] );
+        magma_zsetmatrix( n, nrhs, B, ldb, dB(0,0), lddb, queue );
         magma_zgetrs_gpu( MagmaNoTrans, n, nrhs, dA(0,0), ldda, ipiv, dB(0,0), lddb, info );
-        magma_zgetmatrix( n, nrhs, dB(0,0), lddb, B, ldb, queues[0] );
+        magma_zgetmatrix( n, nrhs, dB(0,0), lddb, B, ldb, queue );
     }
-    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queue );
     magma_free( dA );
     magma_free( dB );
     return *info;
