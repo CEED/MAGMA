@@ -54,7 +54,7 @@ magma_ziterictsetup(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-
+    
     cusparseHandle_t cusparseHandle=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
@@ -75,7 +75,7 @@ magma_ziterictsetup(
     magma_set_omp_numthreads( 4 );
     
     CHECK( magma_index_malloc_cpu( &rm_loc, A.nnz ) );  
-    num_rm_gl = 0.05*A.nnz;
+    num_rm_gl = 0.025*A.nnz;
     tri = 0;
     
     CHECK( magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue ));
@@ -101,9 +101,7 @@ magma_ziterictsetup(
     magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
     
-    magma_zmdynamicilu_set_thrs( num_rm, &LU, &thrs, queue );
-    
-    for( magma_int_t iters =1; iters<precond->sweeps; iters++ ) {
+    for( magma_int_t iters =0; iters<precond->sweeps; iters++ ) {
         num_rm = num_rm_gl;
         magma_zmdynamicilu_set_thrs( num_rm, &LU, &thrs, queue );   
         magma_zmdynamicilu_rm_thrs( &thrs, &num_rm, &LU, &LU_new, rm_loc, rowlock, queue );
@@ -115,14 +113,13 @@ magma_ziterictsetup(
     }
     magma_zmconvert( LU, &LUCSR, Magma_CSRLIST, Magma_CSR, queue );  
 
-
     // for CUSPARSE
-    CHECK( magma_zmtransfer( LU, &precond->M, Magma_CPU, Magma_DEV , queue ));
-
+    CHECK( magma_zmtransfer( LUCSR, &precond->M, Magma_CPU, Magma_DEV , queue ));
+    
         // copy the matrix to precond->L and (transposed) to precond->U
     CHECK( magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue ));
     CHECK( magma_zmtranspose( precond->L, &(precond->U), queue ));
-
+    
     // extract the diagonal of L into precond->d
     CHECK( magma_zjacobisetup_diagscal( precond->L, &precond->d, queue ));
     CHECK( magma_zvinit( &precond->work1, Magma_DEV, hA.num_rows, 1, MAGMA_Z_ZERO, queue ));
