@@ -83,7 +83,7 @@ magma_zgemm_batched( magma_trans_t transA, magma_trans_t transB,
                      magmaDoubleComplex const * const * dB_array, magma_int_t lddb,
                      magmaDoubleComplex beta,
                      magmaDoubleComplex **dC_array, magma_int_t lddc, 
-                     magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle );
+                     magma_int_t batchCount, magma_queue_t queue );
 
 void
 magmablas_zgemm_vbatched( magma_trans_t transA, magma_trans_t transB, 
@@ -165,7 +165,7 @@ magmablas_ztrsm_batched(
     magmaDoubleComplex alpha,
     magmaDoubleComplex** dA_array,    magma_int_t ldda,
     magmaDoubleComplex** dB_array,    magma_int_t lddb,
-    magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle);
+    magma_int_t batchCount, magma_queue_t queue);
 
 void magmablas_ztrsm_work_batched(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
@@ -178,7 +178,7 @@ void magmablas_ztrsm_work_batched(
     magmaDoubleComplex** dA_displ, magmaDoubleComplex** dB_displ, 
     magmaDoubleComplex** dX_displ, magmaDoubleComplex** dinvA_displ,
     magma_int_t resetozero, 
-    magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle);
+    magma_int_t batchCount, magma_queue_t queue);
 
 void 
 magmablas_ztrsm_outofplace_batched(
@@ -191,7 +191,7 @@ magmablas_ztrsm_outofplace_batched(
     magmaDoubleComplex** dinvA_array, magma_int_t dinvA_length,
     magmaDoubleComplex** dA_displ, magmaDoubleComplex** dB_displ, 
     magmaDoubleComplex** dX_displ, magmaDoubleComplex** dinvA_displ,
-    magma_int_t resetozero, magma_int_t batchCount, magma_queue_t queue, cublasHandle_t myhandle);
+    magma_int_t resetozero, magma_int_t batchCount, magma_queue_t queue);
 
 void magmablas_ztrsv_batched(
     magma_uplo_t uplo, magma_trans_t transA, magma_diag_t diag,
@@ -351,8 +351,7 @@ magma_zgetf2_batched(
     magma_int_t **ipiv_array,
     magma_int_t *info_array, 
     magma_int_t gbstep,            
-    magma_int_t batchCount,
-    cublasHandle_t myhandle, magma_queue_t queue);
+    magma_int_t batchCount, magma_queue_t queue);
 
 magma_int_t 
 magma_zgetrf_recpanel_batched(
@@ -365,7 +364,7 @@ magma_zgetrf_recpanel_batched(
     magmaDoubleComplex** dW3_displ, magmaDoubleComplex** dW4_displ,
     magmaDoubleComplex** dW5_displ,
     magma_int_t *info_array, magma_int_t gbstep,
-    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue);
+    magma_int_t batchCount, magma_queue_t queue);
 
 magma_int_t 
 magma_zgetrf_batched(
@@ -445,8 +444,7 @@ magma_zgetf2_nopiv_batched(
     magmaDoubleComplex **dW2_displ,
     magma_int_t *info_array,            
     magma_int_t gbstep, 
-    magma_int_t batchCount,
-    cublasHandle_t myhandle, magma_queue_t queue);
+    magma_int_t batchCount, magma_queue_t queue);
 
 magma_int_t 
 magma_zgetrf_panel_nopiv_batched(
@@ -458,7 +456,7 @@ magma_zgetrf_panel_nopiv_batched(
     magmaDoubleComplex** dW2_displ, magmaDoubleComplex** dW3_displ,
     magmaDoubleComplex** dW4_displ,     
     magma_int_t *info_array, magma_int_t gbstep, 
-    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue);
+    magma_int_t batchCount, magma_queue_t queue);
 
 magma_int_t 
 magma_zgetrf_recpanel_nopiv_batched(
@@ -470,7 +468,7 @@ magma_zgetrf_recpanel_nopiv_batched(
     magmaDoubleComplex** dW3_displ, magmaDoubleComplex** dW4_displ,
     magmaDoubleComplex** dW5_displ, 
     magma_int_t *info_array, magma_int_t gbstep,
-    magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue);
+    magma_int_t batchCount, magma_queue_t queue);
 
 
 magma_int_t 

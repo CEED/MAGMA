@@ -1,5 +1,5 @@
 /*
-   -- MAGMA (version 1.5) --
+   -- MAGMA (version 2.0) --
    Univ. of Tennessee, Knoxville
    Univ. of California, Berkeley
    Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
    @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 #define A(i, j)  (A + (i) + (j)*ldda)   // A(i, j) means at i row, j column
 
@@ -100,8 +100,8 @@ magma_zgetf2_nopiv_batched(
     magmaDoubleComplex **dW2_displ,
     magma_int_t *info_array,            
     magma_int_t gbstep, 
-    magma_int_t batchCount,
-    cublasHandle_t myhandle, magma_queue_t queue)
+    magma_int_t batchCount, magma_queue_t queue)
+    //cublasHandle_t myhandle, magma_queue_t queue)
 
 {
     magma_int_t arginfo = 0;
@@ -146,7 +146,7 @@ magma_zgetf2_nopiv_batched(
             {
                 // Compute elements J+1:M of J-th column.
                 if (gbj < m) {
-                    arginfo = magma_zscal_zgeru_batched(m-gbj, ib-step, gbj, dA_array, ldda, info_array, gbstep, batchCount, queue);
+                    arginfo = magma_zscal_zgeru_batched( m-gbj, ib-step, gbj, dA_array, ldda, info_array, gbstep, batchCount, queue );
                     if (arginfo != 0 ) return arginfo;
                 }
             }
@@ -168,7 +168,7 @@ magma_zgetf2_nopiv_batched(
                                  c_neg_one, dW0_displ, ldda, 
                                             dW1_displ, ldda, 
                                  c_one,     dW2_displ, ldda, 
-                                 batchCount, queue, myhandle);
+                                 batchCount, queue );
         }
     }
 
