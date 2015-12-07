@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.5) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
 */
 #include <cuda_runtime.h>
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 
 #define PRECISION_z
@@ -177,7 +177,7 @@ magma_zgeqrf_expert_batched(
     magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0, use_stream;
     magma_int_t ldw, offset; 
 
-    cublasHandle_t myhandle = queue->cublas_handle();
+    //cublasHandle_t myhandle = queue->cublas_handle();
     ////cublasCreate_v2(&myhandle);
     ////cublasSetStream(myhandle, queue);
 
@@ -232,28 +232,30 @@ magma_zgeqrf_expert_batched(
     magma_zdisplace_pointers(dR_displ, dR_array, lddr, 0, 0, batchCount, queue); 
     magma_zdisplace_pointers(dT_displ, dT_array, lddt, 0, 0, batchCount, queue); 
     // set dR and dT to zero. if provide_RT == 0 only a tile of size nbxnb is used and overwritten at each step
-    magmablas_zlaset_batched(MagmaFull, lddr, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR_displ, lddr, batchCount, queue); 
-    magmablas_zlaset_batched(MagmaFull, lddt, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT_displ, lddt, batchCount, queue);
+    magmablas_zlaset_batched( MagmaFull, lddr, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR_displ, lddr, batchCount, queue ); 
+    magmablas_zlaset_batched( MagmaFull, lddt, (provide_RT > 0 ? n:min(min_mn,nb)), MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT_displ, lddt, batchCount, queue );
     /*
     if ( provide_RT > 0 )
     {
-        magmablas_zlaset_q(MagmaFull, lddr, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue);
-        magmablas_zlaset_q(MagmaFull, lddt, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue);
+        magmablas_zlaset_q( MagmaFull, lddr, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue, UNKNOWN );
+        magmablas_zlaset_q( MagmaFull, lddt, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue, UNKNOWN );
     }
     else
     {
-        magmablas_zlaset_q(MagmaFull, lddr, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue);
-        magmablas_zlaset_q(MagmaFull, lddt, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue);
+        magmablas_zlaset_q( MagmaFull, lddr, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue, UNKNOWN );
+        magmablas_zlaset_q( MagmaFull, lddt, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue, UNKNOWN );
     }
     */
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
-    magma_queue_t stream[nbstreams];
+    magma_queue_t queues[nbstreams];
     for (i=0; i < nbstreams; i++) {
-        magma_queue_create( &stream[i] );
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+        magma_queue_create( cdev, &queues[i] );
     }
-    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1);
-    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1);
+    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dA_array, 1, cpuAarray, 1, queue);
+    magma_getvector( batchCount, sizeof(magmaDoubleComplex*), dT_array, 1, cpuTarray, 1, queue);
 
 
     for (i=0; i < min_mn; i += nb)
@@ -284,7 +286,7 @@ magma_zgeqrf_expert_batched(
                                    dwork, 
                                    dW4_displ, dW5_displ,
                                    info_array,
-                                   batchCount, myhandle, queue);
+                                   batchCount, queue);
            
         //===============================================
         // end of panel
@@ -303,7 +305,7 @@ magma_zgeqrf_expert_batched(
             zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
 
             // set the diagonal of v as one and the upper triangular part as zero already set inside geqrf_panel
-            //magmablas_zlaset_batched(MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue); 
+            //magmablas_zlaset_batched( MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue ); 
             //magma_zdisplace_pointers(dW2_displ, dtau_array, 1, i, 0, batchCount, queue); 
 
             // it is faster since it is using BLAS-3 GEMM routines, different from lapack implementation 
@@ -312,7 +314,7 @@ magma_zgeqrf_expert_batched(
                              dW2_displ,
                              dT_displ, lddt, 
                              dW4_displ, nb*lddt,
-                             batchCount, myhandle, queue);
+                             batchCount, queue);
 
             
             // perform C = (I-V T^H V^H) * C, C is the trailing matrix
@@ -329,15 +331,15 @@ magma_zgeqrf_expert_batched(
                 for (k=0; k < batchCount; k++)
                 {
                     streamid = k%nbstreams;                                       
-                    magmablasSetKernelStream(stream[streamid]);
+                    //magmablasSetKernelStream(queues[streamid]);
                     // the stream gemm must take cpu pointer 
-                    magma_zlarfb_gpu_gemm(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+                    magma_zlarfb_gpu_gemm( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                 m-i, n-i-ib, ib,
                                 cpuAarray[k] + i + i * ldda, ldda, 
                                 cpuTarray[k] + offset_RT*lddt, lddt,
                                 cpuAarray[k] + i + (i+ib) * ldda, ldda,
                                 dwork + nb * n * k, -1,
-                                dwork + nb * n * batchCount + nb * n * k, -1);
+                                dwork + nb * n * batchCount + nb * n * k, -1, queues[streamid] );
                 }
 
                 // need to synchronise to be sure that panel does not start before
@@ -347,9 +349,9 @@ magma_zgeqrf_expert_batched(
                 //magma_device_sync();
                 if ( queue != NULL ) {
                     for (magma_int_t s=0; s < nbstreams; s++)
-                        magma_queue_sync(stream[s]);
+                        magma_queue_sync(queues[s]);
                 }
-                magmablasSetKernelStream(queue);
+                //magmablasSetKernelStream(queue);
             }
             //-------------------------------------------
             //          USE BATCHED GEMM
@@ -367,7 +369,7 @@ magma_zgeqrf_expert_batched(
                             dW1_displ,  ldda,
                             dW4_displ,  ldw,
                             dW5_displ, ldw,
-                            batchCount, queue, myhandle);
+                            batchCount, queue );
             }
         }// update the trailing matrix 
         //===============================================
@@ -377,14 +379,14 @@ magma_zgeqrf_expert_batched(
         // The upper portion of V could be set totaly to 0 here
         if ( provide_RT == 0 )
         {
-            magmablas_zlacpy_batched(MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue);
+            magmablas_zlacpy_batched( MagmaUpper, ib, ib, dR_displ, lddr, dW0_displ, ldda, batchCount, queue );
         }
     }
 
-    magmablasSetKernelStream(queue);
+    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     for (k=0; k < nbstreams; k++) {
-        magma_queue_destroy( stream[k] );
+        magma_queue_destroy( queues[k] );
     }
     ////cublasDestroy_v2(myhandle);
 

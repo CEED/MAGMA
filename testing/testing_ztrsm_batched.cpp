@@ -180,7 +180,7 @@ int main( int argc, char** argv)
                     dinvA_array,  dinvA_batchSize,
                     dW1_displ,   dW2_displ,
                     dW3_displ,   dW4_displ,
-                    1, batchCount, opts.queue, opts.handle);
+                    1, batchCount, opts.queue);
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, dwork, lddb, h_Bmagma, ldb );
@@ -190,7 +190,7 @@ int main( int argc, char** argv)
                     M, N, alpha,
                     d_A_array, ldda,
                     d_B_array, lddb,
-                    batchCount, opts.queue, opts.handle );
+                    batchCount, opts.queue );
                 magma_time = magma_sync_wtime( opts.queue ) - magma_time;
                 magma_perf = gflops / magma_time;
                 magma_zgetmatrix( M, N*batchCount, d_B, lddb, h_Bmagma, ldb );
