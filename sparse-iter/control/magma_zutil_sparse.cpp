@@ -299,6 +299,9 @@ magma_zparse_opts(
             else if ( strcmp("AICT", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_AICT;
             }
+            else if ( strcmp("CUSTOMIC", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_CUSTOMIC;
+            }
             else if ( strcmp("NONE", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_NONE;
             }
