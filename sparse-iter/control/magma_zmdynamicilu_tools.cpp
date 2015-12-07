@@ -169,6 +169,10 @@ cleanup:
                 Current ILU approximation where the identified smallest components
                 are deleted.
                 
+    @param[in,out]
+    LU_new      magma_z_matrix*
+                List of candidates in COO format.
+                
     @param[out]
     rm_loc      magma_index_t*
                 List containing the locations of the elements deleted.
@@ -189,6 +193,7 @@ magma_zmdynamicilu_rm_thrs(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
     magma_z_matrix *LU,
+    magma_z_matrix *LU_new,
     magma_index_t *rm_loc,
     omp_lock_t *rowlock,
     magma_queue_t queue )
@@ -198,6 +203,8 @@ magma_zmdynamicilu_rm_thrs(
     
     omp_lock_t counter;
     omp_init_lock(&(counter));
+    
+    LU_new->nnz = 0;
     
     #pragma omp parallel for
     for( magma_int_t r=0;r<LU->num_rows;r++ ) {
@@ -209,9 +216,13 @@ magma_zmdynamicilu_rm_thrs(
                 // the condition nexti!=0 esures we never remove the diagonal
                     LU->val[ i ] = MAGMA_Z_ZERO;
                     LU->list[ i ] = -1;
+
                     
                     omp_set_lock(&(counter));
                     rm_loc[ count_rm ] = i; 
+                    // keep it as potential fill-in candidate
+                    LU_new->col[ count_rm ] = LU->col[ i ];
+                    LU_new->rowidx[ count_rm ] = r;
                     count_rm++;
                     omp_unset_lock(&(counter));
                     // either the headpointer or the linked list has to be changed
@@ -237,7 +248,7 @@ magma_zmdynamicilu_rm_thrs(
             
         }
     }
-    
+    LU_new->nnz = count_rm;
     *num_rm = count_rm;
 
     omp_destroy_lock(&(counter));
@@ -519,7 +530,7 @@ magma_zmdynamicic_candidates(
 {
     magma_int_t info = 0;
     
-    LU_new->nnz = 0;
+    //LU_new->nnz = 0;
     
     omp_lock_t counter;
     omp_init_lock(&(counter));
@@ -578,19 +589,16 @@ magma_zmdynamicic_candidates(
     }
     
     // get the total candidate count
-    LU_new->nnz = 0;
+    //LU_new->nnz = 0;
     // should become fan-in
     for( magma_int_t i = 0; i<LU.num_rows; i++ ){
         LU_new->nnz=LU_new->nnz + numadd[ i+1 ];
         numadd[ i+1 ] = LU_new->nnz;
     }
-    
-    // allocate space
-    CHECK( magma_zmalloc_cpu( &LU_new->val, LU_new->nnz ));
-    CHECK( magma_index_malloc_cpu( &LU_new->rowidx, LU_new->nnz ));
-    CHECK( magma_index_malloc_cpu( &LU_new->col, LU_new->nnz ));
-    LU_new->num_rows = LU.num_rows;
-    LU_new->num_cols = LU.num_cols;
+    if( LU_new->nnz > LU.nnz*5 ){
+        printf("error: more candidates than space allocated. Increase candidate allocation.\n");
+        goto cleanup;
+    }
     
     // now insert - in parallel!
     #pragma omp parallel for

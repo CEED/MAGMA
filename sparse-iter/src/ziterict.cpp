@@ -81,6 +81,20 @@ magma_ziterictsetup(
     CHECK( magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue ));
     magma_zmconvert( hA, &L, Magma_CSR, Magma_CSRL, queue );
     magma_zmconvert( L, &LU, Magma_CSR, Magma_CSRLIST, queue );
+    
+    magma_zmalloc_cpu( &LU_new.val, LU.nnz*5 );
+    magma_index_malloc_cpu( &LU_new.rowidx, LU.nnz*5 );
+    magma_index_malloc_cpu( &LU_new.col, LU.nnz*5 );
+    LU_new.num_rows = LU.num_rows;
+    LU_new.num_cols = LU.num_cols;
+    LU_new.storage_type = Magma_COO;
+    LU_new.memory_location = Magma_CPU;
+
+    magma_zmdynamicic_sweep( hA, &LU, queue );
+    magma_zmdynamicic_sweep( hA, &LU, queue );
+    magma_zmdynamicic_sweep( hA, &LU, queue );
+    magma_zmdynamicic_sweep( hA, &LU, queue );
+    magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
@@ -92,7 +106,7 @@ magma_ziterictsetup(
     for( magma_int_t iters =1; iters<precond->sweeps; iters++ ) {
         num_rm = num_rm_gl;
         magma_zmdynamicilu_set_thrs( num_rm, &LU, &thrs, queue );   
-        magma_zmdynamicilu_rm_thrs( &thrs, &num_rm, &LU, rm_loc, rowlock, queue );
+        magma_zmdynamicilu_rm_thrs( &thrs, &num_rm, &LU, &LU_new, rm_loc, rowlock, queue );
         magma_zmdynamicic_sweep( hA, &LU, queue );
         magma_zmdynamicic_candidates( LU, &LU_new, queue );
         magma_zmdynamicic_residuals( hA, LU, &LU_new, queue );
@@ -104,17 +118,6 @@ magma_ziterictsetup(
 
     // for CUSPARSE
     CHECK( magma_zmtransfer( LU, &precond->M, Magma_CPU, Magma_DEV , queue ));
-/*
-    // Jacobi setup
-    CHECK( magma_zjacobisetup_matrix( precond->M, &precond->L, &precond->d , queue ));
-
-    // for Jacobi, we also need U
-    magma_z_cucsrtranspose(  precond->M, &dM, queue );
-    CHECK( magma_zjacobisetup_matrix( dM, &precond->U, &d , queue ));
-
-    magma_zmfree(&dM, queue );
-    magma_zmfree(&d, queue );
-*/
 
         // copy the matrix to precond->L and (transposed) to precond->U
     CHECK( magma_zmtransfer(precond->M, &(precond->L), Magma_DEV, Magma_DEV, queue ));

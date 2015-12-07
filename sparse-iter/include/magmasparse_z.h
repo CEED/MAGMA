@@ -617,7 +617,8 @@ magma_int_t
 magma_zmdynamicilu_rm_thrs(
     magmaDoubleComplex *thrs,
     magma_int_t *num_rm,
-    magma_z_matrix *LU,
+    magma_z_matrix *LU,    
+    magma_z_matrix *LU_new,
     magma_index_t *rm_loc,
     omp_lock_t *rowlock,
     magma_queue_t queue );
