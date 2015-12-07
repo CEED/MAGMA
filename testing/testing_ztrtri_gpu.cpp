@@ -114,10 +114,11 @@ int main( int argc, char** argv)
                 if ( opts.verbose ) {
                     printf( "diff=" );  magma_zprint( N, N, h_R, lda );
                 }
+                bool okay = (error < tol);
+                status += ! okay;
                 printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       error, (error < tol ? "ok" : "failed") );
-                status += ! (error < tol);
+                       error, (okay ? "ok" : "failed") );
             }
             else {
                 printf("%5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
