@@ -77,6 +77,11 @@ magma_zmdynamicic_insert(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
+    
+    magmaDoubleComplex *val;
+    magma_index_t *col;
+    magma_index_t *rowidx;
+    const magma_int_t ione = 1;
         
     magmaDoubleComplex element;
     magma_int_t j,jn;
@@ -85,27 +90,37 @@ magma_zmdynamicic_insert(
     magma_int_t num_insert = 0;
     
     if(num_rm>=LU_new->nnz){
-        //printf("num_rm = %d nnz:%d\n", num_rm, LU_new->nnz);
+        printf("error: try to remove too many elements\n.");
         goto cleanup;
     }
     // identify num_rm-th largest elements and bring them to the front
+    CHECK( magma_zmalloc_cpu( &val, LU_new->nnz ));
+    CHECK( magma_index_malloc_cpu( &rowidx, LU_new->nnz ));
+    CHECK( magma_index_malloc_cpu( &col, LU_new->nnz ));
+    
+    #pragma omp parallel for
+    for( magma_int_t r=0; r<LU_new->nnz; r++ ) {
+        col[r] = LU_new->col[r];
+        rowidx[r] = LU_new->rowidx[r];
+        val[r] = LU_new->val[r];
+    }
     CHECK( magma_zmorderstatistics(
-    LU_new->val, LU_new->col, LU_new->rowidx, LU_new->nnz, num_rm,  1, &element, queue ) );
+    val, col, rowidx, LU_new->nnz, num_rm*2,  1, &element, queue ) );
+    CHECK( magma_zmorderstatistics(
+    val, col, rowidx, LU_new->nnz, num_rm,  1, &element, queue ) );
 
     // insert the new elements
     // has to be sequential
     while( num_insert < num_rm ) {
         if(i>=LU_new->nnz){
-            //printf("problem: exceeding candidate list: %d >%d\n", i, LU_new->nnz);
             break;
         }
         magma_int_t loc = rm_loc[ num_insert ];
-        magma_index_t new_row = LU_new->rowidx[ i ]; 
-        magma_index_t new_col = LU_new->col[ i ];
-        
+        magma_index_t new_row = rowidx[ i ]; 
+        magma_index_t new_col = col[ i ];
         magma_index_t old_rowstart = LU->row[ new_row ];
         if( new_col < LU->col[ old_rowstart ] ){
-            //printf("insert at rowstart: (%d,%d)\n", new_row, new_col);
+            //printf("insert: (%d,%d)\n", new_row, new_col);
             LU->row[ new_row ] = loc;
             LU->list[ loc ] = old_rowstart;
             LU->rowidx[ loc ] = new_row;
@@ -114,7 +129,7 @@ magma_zmdynamicic_insert(
             num_insert++;
         }
         else if( new_col == LU->col[ old_rowstart ] ){
-            //printf("tried to insert duplicate!\n");
+            ;//printf("tried to insert duplicate!\n");
         }
         else{
 
@@ -128,6 +143,7 @@ magma_zmdynamicic_insert(
                     break;
                 }else 
                 if( LU->col[jn]>new_col ){
+                    //printf("insert: (%d,%d)\n", new_row, new_col);
                     LU->list[j]=loc;
                     LU->list[loc]=jn;
                     LU->rowidx[ loc ] = new_row;
@@ -143,6 +159,9 @@ magma_zmdynamicic_insert(
         i++;
     }
 cleanup:
+    magma_free_cpu( val );
+    magma_free_cpu( col );
+    magma_free_cpu( rowidx );
     return info;
 }
 
@@ -203,8 +222,10 @@ magma_zmdynamicilu_rm_thrs(
     
     omp_lock_t counter;
     omp_init_lock(&(counter));
-    
-    LU_new->nnz = 0;
+    // never forget elements
+    // magma_int_t offset = LU_new->diameter;
+    // never forget last rm
+    magma_int_t offset = 0;
     
     #pragma omp parallel for
     for( magma_int_t r=0;r<LU->num_rows;r++ ) {
@@ -221,8 +242,9 @@ magma_zmdynamicilu_rm_thrs(
                     omp_set_lock(&(counter));
                     rm_loc[ count_rm ] = i; 
                     // keep it as potential fill-in candidate
-                    LU_new->col[ count_rm ] = LU->col[ i ];
-                    LU_new->rowidx[ count_rm ] = r;
+                    LU_new->col[ count_rm+offset ] = LU->col[ i ];
+                    LU_new->rowidx[ count_rm+offset ] = r;
+                    LU_new->val[ count_rm+offset ] = MAGMA_Z_MAKE(1e-14,0.0);
                     count_rm++;
                     omp_unset_lock(&(counter));
                     // either the headpointer or the linked list has to be changed
@@ -248,7 +270,11 @@ magma_zmdynamicilu_rm_thrs(
             
         }
     }
-    LU_new->nnz = count_rm;
+    // never forget elements
+    // LU_new->diameter = count_rm+LU_new->diameter;
+    // not forget the last rm
+    LU_new->diameter = count_rm;
+    LU_new->nnz = LU_new->diameter;
     *num_rm = count_rm;
 
     omp_destroy_lock(&(counter));
@@ -291,7 +317,7 @@ magma_zmdynamicilu_set_thrs(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    
+
     magmaDoubleComplex element;
     magmaDoubleComplex *val;
     const magma_int_t ione = 1;
@@ -305,7 +331,6 @@ magma_zmdynamicilu_set_thrs(
     //CHECK( magma_zsort( val, 0, LU->nnz, queue ) );
     //element = val[num_rm];
     *thrs = element;
-    
 
 cleanup:
     magma_free_cpu( val );
@@ -591,10 +616,12 @@ magma_zmdynamicic_candidates(
     // get the total candidate count
     //LU_new->nnz = 0;
     // should become fan-in
+    numadd[ 0 ] = LU_new->nnz;
     for( magma_int_t i = 0; i<LU.num_rows; i++ ){
         LU_new->nnz=LU_new->nnz + numadd[ i+1 ];
         numadd[ i+1 ] = LU_new->nnz;
     }
+
     if( LU_new->nnz > LU.nnz*5 ){
         printf("error: more candidates than space allocated. Increase candidate allocation.\n");
         goto cleanup;
@@ -638,7 +665,7 @@ magma_zmdynamicic_candidates(
                 if( exist == 0 ){
                      //  printf("---------------->>>  candidate at (%d, %d)\n", col2, col1);
                     //add in the next location for this row
-                    LU_new->val[ numadd[row] + ladd ] = MAGMA_Z_ZERO; //or anything
+                    LU_new->val[ numadd[row] + ladd ] = MAGMA_Z_MAKE(1e-14,0.0);
                     LU_new->rowidx[ numadd[row] + ladd ] = col1;
                     LU_new->col[ numadd[row] + ladd ] = col2;
                     ladd++;
