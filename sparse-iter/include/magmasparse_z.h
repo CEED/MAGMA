@@ -239,8 +239,12 @@ magma_zmdiagadd(
     magma_queue_t queue );
 
 magma_int_t 
-magma_zmsort( 
-    magma_z_matrix *A,
+magma_zmsort(
+    magmaDoubleComplex *x,
+    magma_index_t *col,
+    magma_index_t *row,
+    magma_int_t first,
+    magma_int_t last,
     magma_queue_t queue );
 
 magma_int_t
@@ -1079,6 +1083,13 @@ magma_zapplycuicc_r(
 magma_int_t
 magma_zcumilusetup(
     magma_z_matrix A, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zcustomicsetup(
+    magma_z_matrix A,
+    magma_z_matrix b,
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 

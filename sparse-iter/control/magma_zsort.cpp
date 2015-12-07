@@ -93,6 +93,91 @@ cleanup:
     Purpose
     -------
 
+    Sorts an array of values in increasing order.
+
+    Arguments
+    ---------
+
+    @param[in,out]
+    x           magmaDoubleComplex*
+                array to sort
+                
+    @param[in,out]
+    col         magma_index_t*
+                Target array, will be modified during operation.
+                
+    @param[in,out]
+    row         magma_index_t*
+                Target array, will be modified during operation.
+
+    @param[in]
+    first       magma_int_t
+                pointer to first element
+
+    @param[in]
+    last        magma_int_t
+                pointer to last element
+
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
+    @ingroup magmasparse_zaux
+    ********************************************************************/
+
+extern "C"
+magma_int_t
+magma_zmsort(
+    magmaDoubleComplex *x,
+    magma_index_t *col,
+    magma_index_t *row,
+    magma_int_t first,
+    magma_int_t last,
+    magma_queue_t queue )
+{
+    magma_int_t info = 0;
+    
+    magmaDoubleComplex temp;
+    magma_index_t pivot,j,i, tmpcol, tmprow;
+    
+    if(first<last){
+         pivot=first;
+         i=first;
+         j=last;
+
+        while(i<j){
+            while( MAGMA_Z_ABS(x[i]) <= MAGMA_Z_ABS(x[pivot]) && i<last )
+                i++;
+            while( MAGMA_Z_ABS(x[j]) > MAGMA_Z_ABS(x[pivot]) )
+                j--;
+            if( i<j ){
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
+                tmpcol = col[i];
+                col[i] = col[j];
+                col[j] = tmpcol;
+                tmprow = row[i];
+                row[i] = row[j];
+                row[j] = tmprow;
+            }
+        }
+
+        temp=x[pivot];
+        x[pivot]=x[j];
+        x[j]=temp;
+        CHECK( magma_zmsort( x, col, row, first, j-1, queue ));
+        CHECK( magma_zmsort( x, col, row, j+1, last, queue ));
+    }
+cleanup:
+    return info;
+}
+
+
+/**
+    Purpose
+    -------
+
     Sorts an array of integers in increasing order.
 
     Arguments
