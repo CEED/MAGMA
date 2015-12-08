@@ -104,6 +104,8 @@ magma_zmdynamicic_insert(
         rowidx[r] = LU_new->rowidx[r];
         val[r] = LU_new->val[r];
     }
+    
+    // this is usually sufficient to have the large elements in front
     CHECK( magma_zmorderstatistics(
     val, col, rowidx, LU_new->nnz, num_rm*2,  1, &element, queue ) );
     CHECK( magma_zmorderstatistics(
@@ -113,6 +115,7 @@ magma_zmdynamicic_insert(
     // has to be sequential
     while( num_insert < num_rm ) {
         if(i>=LU_new->nnz){
+            printf("error: tried to insert too many elements!\n");
             break;
         }
         magma_int_t loc = rm_loc[ num_insert ];
@@ -158,6 +161,7 @@ magma_zmdynamicic_insert(
         }
         i++;
     }
+    printf("elements sorted:%d last index inserted:%d\n.", 2*num_rm, i);
 cleanup:
     magma_free_cpu( val );
     magma_free_cpu( col );
@@ -244,7 +248,7 @@ magma_zmdynamicilu_rm_thrs(
                     // keep it as potential fill-in candidate
                     LU_new->col[ count_rm+offset ] = LU->col[ i ];
                     LU_new->rowidx[ count_rm+offset ] = r;
-                    LU_new->val[ count_rm+offset ] = MAGMA_Z_MAKE(1e-14,0.0);
+                    LU_new->val[ count_rm+offset ] = MAGMA_Z_ZERO; // MAGMA_Z_MAKE(1e-14,0.0);
                     count_rm++;
                     omp_unset_lock(&(counter));
                     // either the headpointer or the linked list has to be changed
@@ -665,7 +669,7 @@ magma_zmdynamicic_candidates(
                 if( exist == 0 ){
                      //  printf("---------------->>>  candidate at (%d, %d)\n", col2, col1);
                     //add in the next location for this row
-                    LU_new->val[ numadd[row] + ladd ] = MAGMA_Z_MAKE(1e-14,0.0);
+                    LU_new->val[ numadd[row] + ladd ] = MAGMA_Z_ZERO; // MAGMA_Z_MAKE(1e-14,0.0);
                     LU_new->rowidx[ numadd[row] + ladd ] = col1;
                     LU_new->col[ numadd[row] + ladd ] = col2;
                     ladd++;
