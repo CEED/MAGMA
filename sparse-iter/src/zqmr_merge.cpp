@@ -153,7 +153,7 @@ magma_zqmr_merge(
     do
     {
         solver_par->numiter++;
-        if( magma_z_isinf( rho ) || magma_z_isinf( psi ) ){
+        if( magma_z_isnan_inf( rho ) || magma_z_isnan_inf( psi ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
@@ -161,7 +161,7 @@ magma_zqmr_merge(
             // delta = z' * y;
         delta = magma_zdotc( dofs, z.dval, 1, y.dval, 1, queue );
         
-        if( magma_z_isinf( delta ) ){
+        if( magma_z_isnan_inf( delta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
@@ -193,7 +193,7 @@ magma_zqmr_merge(
             q.dval, 
             queue );
         }
-        if( magma_z_isinf( rho ) || magma_z_isinf( psi ) ){
+        if( magma_z_isnan_inf( rho ) || magma_z_isnan_inf( psi ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
@@ -204,7 +204,7 @@ magma_zqmr_merge(
         epsilon = magma_zdotc( dofs, q.dval, 1, pt.dval, 1, queue );
         beta = epsilon / delta;
 
-        if( magma_z_isinf( epsilon ) || magma_z_isinf( beta ) ){
+        if( magma_z_isnan_inf( epsilon ) || magma_z_isnan_inf( beta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
@@ -240,7 +240,7 @@ magma_zqmr_merge(
         gamm = c_one / magma_zsqrt(c_one + thet*thet);        
         eta = - eta * rho1 * gamm * gamm / (beta * gamm1 * gamm1);        
 
-        if( magma_z_isinf( thet ) || magma_z_isinf( gamm ) || magma_z_isinf( eta ) ){
+        if( magma_z_isnan_inf( thet ) || magma_z_isnan_inf( gamm ) || magma_z_isnan_inf( eta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }

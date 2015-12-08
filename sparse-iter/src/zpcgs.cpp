@@ -130,7 +130,7 @@ magma_zpcgs(
         
         rho = magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue );
                                                             // rho = < r,r_tld>    
-        if( magma_z_isinf( rho ) ){
+        if( magma_z_isnan_inf( rho ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
