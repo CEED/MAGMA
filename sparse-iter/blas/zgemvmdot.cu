@@ -541,12 +541,7 @@ magma_zmdotc(
         }
     }
 
-/*
-    for( int j=0; j<k; j++) {
-            magma_zcopyvector_async( 1, aux1+j*n, 1, skp+j, 1, queue );
-    }*/
-    
-    magma_zcopyvector_async( k, aux1, n, skp, n, queue );
+    magma_zcopyvector_async( k, aux1, n, skp, 1, queue );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
