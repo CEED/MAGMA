@@ -547,6 +547,7 @@ lu = (
 	('testing_zcgesv_gpu',             '-c',  n,    ''),
 	('testing_zgesv_gpu',              '-c',  n,    ''),
 	('testing_zgetrf_gpu',            '-c2',  n,    ''),
+	('testing_zgetrf_gpu','--version 2 -c2',  n,    ''), # zgetrf_nopiv_gpu
 	('testing_zgetf2_gpu',             '-c',  n + tall,  ''),
 	('testing_zgetri_gpu',             '-c',  n,    ''),
 	('testing_zgetrf_mgpu',    ngpu + '-c2',  n,    ''),
@@ -556,6 +557,8 @@ lu = (
 	('testing_zgesv',                  '-c',  n,    ''),
 	('testing_zgesv_rbt',              '-c',  n,    ''),
 	('testing_zgetrf',                '-c2',  n,    ''),
+	('testing_zgetrf',    '--version 2 -c2',  n,    ''),  # zgetrf_nopiv
+	('testing_zgetrf',    '--version 3 -c2',  n,    ''),  # zgetf2_nopiv
 )
 if ( opts.lu ):
 	tests += lu
