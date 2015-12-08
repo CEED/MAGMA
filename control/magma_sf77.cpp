@@ -1701,24 +1701,6 @@ void magmaf_sgerfs_nopiv_gpu(
         info );
 }
 
-#define magmaf_sgessm_gpu FORTRAN_NAME( magmaf_sgessm_gpu, MAGMAF_SGESSM_GPU )
-void magmaf_sgessm_gpu(
-    const char* order, magma_int_t *m, magma_int_t *n, magma_int_t *k, magma_int_t *ib,
-    magma_int_t *ipiv,
-    devptr_t *dL1, magma_int_t *lddl1,
-    devptr_t *dL, magma_int_t *lddl,
-    devptr_t *dA, magma_int_t *ldda,
-    magma_int_t *info )
-{
-    magma_sgessm_gpu(
-        magma_order_const(*order), *m, *n, *k, *ib,
-        ipiv,
-        magma_sdevptr(dL1), *lddl1,
-        magma_sdevptr(dL), *lddl,
-        magma_sdevptr(dA), *ldda,
-        info );
-}
-
 #define magmaf_sgesv_gpu FORTRAN_NAME( magmaf_sgesv_gpu, MAGMAF_SGESV_GPU )
 void magmaf_sgesv_gpu(
     magma_int_t *n, magma_int_t *nrhs,
@@ -2086,26 +2068,6 @@ void magmaf_spotrs_gpu(
         magma_uplo_const(*uplo), *n, *nrhs,
         magma_sdevptr(dA), *ldda,
         magma_sdevptr(dB), *lddb,
-        info );
-}
-
-#define magmaf_sssssm_gpu FORTRAN_NAME( magmaf_sssssm_gpu, MAGMAF_SSSSSM_GPU )
-void magmaf_sssssm_gpu(
-    const char* order, magma_int_t *m1, magma_int_t *n1, magma_int_t *m2, magma_int_t *n2, magma_int_t *k, magma_int_t *ib,
-    devptr_t *dA1, magma_int_t *ldda1,
-    devptr_t *dA2, magma_int_t *ldda2,
-    devptr_t *dL1, magma_int_t *lddl1,
-    devptr_t *dL2, magma_int_t *lddl2,
-    magma_int_t *ipiv,
-    magma_int_t *info )
-{
-    magma_sssssm_gpu(
-        magma_order_const(*order), *m1, *n1, *m2, *n2, *k, *ib,
-        magma_sdevptr(dA1), *ldda1,
-        magma_sdevptr(dA2), *ldda2,
-        magma_sdevptr(dL1), *lddl1,
-        magma_sdevptr(dL2), *lddl2,
-        ipiv,
         info );
 }
 

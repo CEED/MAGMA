@@ -1466,23 +1466,6 @@ subroutine magmaf_cgerfs_nopiv_gpu( trans, n, nrhs, dA, ldda, dB, lddb, dX, lddx
     integer          :: info
 end subroutine magmaf_cgerfs_nopiv_gpu
 
-subroutine magmaf_cgessm_gpu( order, m, n, k, ib, ipiv, dL1, lddl1, dL, lddl, dA, ldda,  &
-        info )
-    character        :: order
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    integer          :: ib
-    integer          :: ipiv(*)
-    magma_devptr_t   :: dL1
-    integer          :: lddl1
-    magma_devptr_t   :: dL
-    integer          :: lddl
-    magma_devptr_t   :: dA
-    integer          :: ldda
-    integer          :: info
-end subroutine magmaf_cgessm_gpu
-
 subroutine magmaf_cgesv_gpu( n, nrhs, dA, ldda, ipiv, dB, lddb, info )
     integer          :: n
     integer          :: nrhs
@@ -1844,27 +1827,6 @@ subroutine magmaf_cpotrs_gpu( uplo, n, nrhs, dA, ldda, dB, lddb, info )
     integer          :: lddb
     integer          :: info
 end subroutine magmaf_cpotrs_gpu
-
-subroutine magmaf_cssssm_gpu( order, m1, n1, m2, n2, k, ib, dA1, ldda1, dA2, ldda2, dL1,  &
-        lddl1, dL2, lddl2, ipiv, info )
-    character        :: order
-    integer          :: m1
-    integer          :: n1
-    integer          :: m2
-    integer          :: n2
-    integer          :: k
-    integer          :: ib
-    magma_devptr_t   :: dA1
-    integer          :: ldda1
-    magma_devptr_t   :: dA2
-    integer          :: ldda2
-    magma_devptr_t   :: dL1
-    integer          :: lddl1
-    magma_devptr_t   :: dL2
-    integer          :: lddl2
-    integer          :: ipiv(*)
-    integer          :: info
-end subroutine magmaf_cssssm_gpu
 
 subroutine magmaf_ctrtri_gpu( uplo, diag, n, dA, ldda, info )
     character        :: uplo
