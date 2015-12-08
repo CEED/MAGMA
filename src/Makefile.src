@@ -78,11 +78,12 @@ libmagma_zsrc += \
 	$(cdir)/zgetrf_m.cpp		\
 
 # LU, auxiliary for multi-gpu-dynamic
-libmagma_zsrc += \
-	$(cdir)/zgetrf_incpiv_gpu.cpp	\
-	$(cdir)/zgessm_gpu.cpp		\
-	$(cdir)/zssssm_gpu.cpp		\
-	$(cdir)/ztstrf_gpu.cpp		\
+# moved to tiled directory
+#libmagma_zsrc += \
+#	$(cdir)/zgetrf_incpiv_gpu.cpp	\
+#	$(cdir)/zgessm_gpu.cpp		\
+#	$(cdir)/zssssm_gpu.cpp		\
+#	$(cdir)/ztstrf_gpu.cpp		\
 
 # ----------
 # QR and least squares, GPU interface
