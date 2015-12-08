@@ -22,6 +22,8 @@
         B = A( i:i+n, : ) 
         
     The last slice might be smaller. For the non-local parts, it is the identity.
+    comm contains 1es in the locations that are non-local but needed to 
+    solve local system.
 
 
     Arguments
@@ -43,6 +45,13 @@
     B           magma_z_matrix*
                 sparse matrix in CSR
                 
+   @param[out]          
+    comm_i      magma_int_t*
+                communication plan
+ 
+    @param[out]          
+    comm_v      magmaDoubleComplex*
+                communication plan
 
     @param[in]
     queue       magma_queue_t
@@ -57,6 +66,8 @@ magma_zmslice(
     magma_int_t slice,
     magma_z_matrix A, 
     magma_z_matrix *B,
+    magma_index_t *comm_i,
+    magmaDoubleComplex *comm_v,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -68,6 +79,7 @@ magma_zmslice(
         magma_free_cpu( B->val );
         
         magma_int_t i,j,k, nnz;
+        magma_index_t col;
         magma_int_t size = magma_ceildiv( A.num_rows, num_slices ); 
         magma_int_t start = slice*size;
         magma_int_t end = min( (slice+1)*size, A.num_rows );
@@ -78,6 +90,14 @@ magma_zmslice(
         nnz = A.row[ end ] - A.row[ start ] + ( A.num_rows - size );
         CHECK( magma_index_malloc_cpu( &B->col, nnz ) );
         CHECK( magma_zmalloc_cpu( &B->val, nnz ) );
+        
+        // for the communication plan
+        CHECK( magma_index_malloc_cpu( &comm_i, A.num_rows ) );
+        CHECK( magma_zmalloc_cpu( &comm_v, A.num_rows ) );
+        for( i=0; i<A.num_rows; i++ ) {
+            comm_i[i] = 0;
+            comm_v[i] = MAGMA_Z_ZERO;
+        }
         
         k=0;
         // identity above slice
@@ -93,7 +113,12 @@ magma_zmslice(
             B->row[i+1]   = B->row[i] + (A.row[i+1]-A.row[i]);
             for( j=A.row[i]; j<A.row[i+1]; j++ ){
                 B->val[k] = A.val[j];
-                B->col[k] = A.col[j];
+                col = A.col[j];
+                B->col[k] = col;
+                // communication plan
+                comm_i[ col ] = 1;
+                comm_v[ col ] = comm_v[ col ] 
+                                + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
                 k++;
             }
         }
@@ -117,3 +142,7 @@ magma_zmslice(
 cleanup:
     return info;
 }
+
+
+
+

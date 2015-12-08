@@ -226,11 +226,13 @@ magma_zmscale(
     magma_queue_t queue );
 
 magma_int_t
-magma_zmslice( 
+magma_zmslice(
     magma_int_t num_slices,
     magma_int_t slice,
     magma_z_matrix A, 
-    magma_z_matrix *B, 
+    magma_z_matrix *B,
+    magma_index_t *comm_i,
+    magmaDoubleComplex *comm_v,
     magma_queue_t queue );
 
 magma_int_t 
