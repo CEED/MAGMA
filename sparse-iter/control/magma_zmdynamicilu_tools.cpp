@@ -161,7 +161,6 @@ magma_zmdynamicic_insert(
         }
         i++;
     }
-    printf("elements sorted:%d last index inserted:%d\n.", 2*num_rm, i);
 cleanup:
     magma_free_cpu( val );
     magma_free_cpu( col );
