@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @author Mark Gates
        @precisions normal d -> s
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 // Version 1 is LAPACK dlaln2. This is not thread safe.
 // Version 2 is MAGMA  dlaln2, which is exactly the same, but thread safe.
