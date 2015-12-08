@@ -44,7 +44,7 @@ magma_zsolverinfo(
 {
     if( solver_par->verbose > 0 ){
         magma_int_t k = solver_par->verbose;
-        printf("%%======================================================="
+        printf("%%==========================================================================="
             "======%%\n");
         switch( solver_par->solver ) {
             case  Magma_CG:
@@ -171,7 +171,7 @@ magma_zsolverinfo(
                   break;
         }
         
-            printf("%%======================================================="
+            printf("%%==========================================================================="
             "======%%\n");
         switch( solver_par->solver ) {
             case  Magma_CG:
@@ -204,31 +204,31 @@ magma_zsolverinfo(
             case  Magma_JACOBI:
             case  Magma_BAITER:
             case  Magma_BAITERO:
-                printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   info\n");
-                printf("%%======================================================="
+                printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   SpMV-count   ||   info\n");
+                printf("%%==========================================================================="
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
-                    printf("   %8d          %e          %f          %d\n",
-                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j], solver_par->info );
+                    printf("   %8d          %e          %f          %d          %d\n",
+                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j], (int) solver_par->spmv_count, (int) solver_par->info );
                 }
-                printf("%%======================================================="
+                printf("%%==========================================================================="
                         "======%%\n"); break;
             default:
-                printf("%%======================================================="
+                printf("%%==========================================================================="
                         "======%%\n"); break;
         }
     }
     else{
-        printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   info\n");
-            printf("%%======================================================="
+        printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   SpMV-count   ||   info\n");
+            printf("%%==========================================================================="
                         "======%%\n");
-        printf("   %8d          %e          %f          %d\n",
-        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, solver_par->info );
-        printf("%%======================================================="
+        printf("   %8d          %e          %f          %d          %d          %d\n",
+        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, (int) solver_par->spmv_count, (int) solver_par->info );
+        printf("%%==========================================================================="
         "======%%\n");
     }
                 
-    printf("\n%%======================================================="
+    printf("\n%%==========================================================================="
         "======%%\n");
     switch( solver_par->solver ) {
         case  Magma_CG:
@@ -290,6 +290,7 @@ magma_zsolverinfo(
     printf("%%    initial residual: %e\n", solver_par->init_res );
     printf("%%    preconditioner setup: %.4f sec\n", precond_par->setuptime );
     printf("%%    iterations: %4d\n", (int) (solver_par->numiter) );
+    printf("%%    SpMV: %4d\n", (int) (solver_par->spmv_count) );
     printf("%%    exact final residual: %e\n%%    runtime: %.4f sec\n",
         solver_par->final_res, solver_par->runtime);
     printf("%%    preconditioner runtime: %.4f sec\n", precond_par->runtime );
@@ -536,6 +537,10 @@ magma_zsolverinfo_init(
 {
     magma_int_t info = 0;
     solver_par->runtime         = 0.;
+    solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
+    precond_par->numiter = 0;
+    precond_par->spmv_count = 0;
     precond_par->runtime       = 0.;
     precond_par->setuptime  = 0.;
     solver_par->res_vec = NULL;

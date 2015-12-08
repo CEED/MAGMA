@@ -292,6 +292,7 @@ typedef struct magma_z_solver_par
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
     magma_int_t        numiter;                 // feedback: number of needed iterations
+    magma_int_t        spmv_count;              // feedback: number of needed SpMV - can be different to iteration count
     double             init_res;                // feedback: initial residual
     double             final_res;               // feedback: final residual
     double             iter_res;                // feedback: iteratively computed residual
@@ -330,6 +331,7 @@ typedef struct magma_c_solver_par
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
     magma_int_t        numiter;                 // feedback: number of needed iterations
+    magma_int_t        spmv_count;              // feedback: number of needed SpMV - can be different to iteration count
     float              init_res;                // feedback: initial residual
     float              final_res;               // feedback: final residual
     float              iter_res;                // feedback: iteratively computed residual
@@ -368,6 +370,7 @@ typedef struct magma_d_solver_par
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
     magma_int_t        numiter;                 // feedback: number of needed iterations
+    magma_int_t        spmv_count;              // feedback: number of needed SpMV - can be different to iteration count
     double             init_res;                // feedback: initial residual
     double             final_res;               // feedback: final residual
     double             iter_res;                // feedback: iteratively computed residual
@@ -406,6 +409,7 @@ typedef struct magma_s_solver_par
     magma_int_t        restart;                 // for GMRES
     magma_ortho_t      ortho;                   // for GMRES
     magma_int_t        numiter;                 // feedback: number of needed iterations
+    magma_int_t        spmv_count;              // feedback: number of needed SpMV - can be different to iteration count
     float              init_res;                // feedback: initial residual
     float              final_res;               // feedback: final residual
     float              iter_res;                // feedback: iteratively computed residual
@@ -449,6 +453,7 @@ typedef struct magma_z_preconditioner
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
+    magma_int_t             spmv_count;  
     double                  init_res;
     double                  final_res;
     real_Double_t      runtime;                // feedback: preconditioner runtime needed
@@ -485,6 +490,7 @@ typedef struct magma_c_preconditioner
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
+    magma_int_t             spmv_count;
     float                   init_res;
     float                   final_res;
     real_Double_t      runtime;                // feedback: preconditioner runtime needed
@@ -522,6 +528,7 @@ typedef struct magma_d_preconditioner
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
+    magma_int_t             spmv_count;
     double                  init_res;
     double                  final_res;
     real_Double_t      runtime;                // feedback: preconditioner runtime needed
@@ -559,6 +566,7 @@ typedef struct magma_s_preconditioner
     magma_int_t             maxiter;
     magma_int_t             restart; 
     magma_int_t             numiter;
+    magma_int_t             spmv_count;
     float                   init_res;
     float                   final_res;
     real_Double_t      runtime;                // feedback: preconditioner runtime needed
