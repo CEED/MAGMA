@@ -491,7 +491,7 @@ magma_zbombard(
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
             break;
         }
-        if( magma_z_isinf( Q_beta ) && magma_z_isinf( C_beta ) && magma_z_isinf( B_beta ) ){
+        if( magma_z_isnan_inf( Q_beta ) && magma_z_isnan_inf( C_beta ) && magma_z_isnan_inf( B_beta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         } 

@@ -135,7 +135,7 @@ magma_zpbicgstab(
 
         rho_new = magma_zdotc( dofs, rr.dval, 1, r.dval, 1, queue );  // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;   // beta=rho/rho_old *alpha/omega
-        if( magma_z_isinf( beta ) ){
+        if( magma_z_isnan_inf( beta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
@@ -154,7 +154,7 @@ magma_zpbicgstab(
         CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
 
         alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
-        if( magma_z_isinf( alpha ) ){
+        if( magma_z_isnan_inf( alpha ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }

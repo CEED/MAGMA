@@ -102,14 +102,16 @@ magma_ziterictsetup(
     magma_zmdynamicic_sweep( hA, &LU, queue );
     
     for( magma_int_t iters =0; iters<precond->sweeps; iters++ ) {
+        printf("\n\n iteration %d:\n", iters+1);
         num_rm = num_rm_gl;
-        magma_zmdynamicilu_set_thrs( num_rm, &LU, &thrs, queue );   
-        magma_zmdynamicilu_rm_thrs( &thrs, &num_rm, &LU, &LU_new, rm_loc, rowlock, queue );
-        magma_zmdynamicic_sweep( hA, &LU, queue );
-        magma_zmdynamicic_candidates( LU, &LU_new, queue );
-        magma_zmdynamicic_residuals( hA, LU, &LU_new, queue );
-        magma_zmdynamicic_insert( tri, num_rm, rm_loc, &LU_new, &LU, rowlock, queue );
-        magma_zmdynamicic_sweep( hA, &LU, queue );
+        magma_zmdynamicilu_set_thrs( num_rm, &LU, &thrs, queue );   printf("threshold set \t ");
+        magma_zmdynamicilu_rm_thrs( &thrs, &num_rm, &LU, &LU_new, rm_loc, rowlock, queue );printf("elements removed \t ");
+        magma_zmdynamicic_sweep( hA, &LU, queue );printf("sweep done \t ");
+        magma_zmdynamicic_candidates( LU, &LU_new, queue );printf("candidates done \t ");
+        magma_zmdynamicic_residuals( hA, LU, &LU_new, queue );printf("residuals done \t ");
+        magma_zmdynamicic_insert( tri, num_rm, rm_loc, &LU_new, &LU, rowlock, queue );printf("insertion done \t ");
+        magma_zmdynamicic_sweep( hA, &LU, queue );printf("sweep done \t ");
+        printf("\n\n iteration %d:\n", iters+1); magma_z_mvisu( LU, queue );
     }
     magma_zmconvert( LU, &LUCSR, Magma_CSRLIST, Magma_CSR, queue );  
 

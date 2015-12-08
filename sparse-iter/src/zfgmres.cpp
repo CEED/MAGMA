@@ -192,7 +192,7 @@ magma_zfgmres(
         temp = MAGMA_Z_MAKE(-1.0, 0.0);
         magma_zaxpy( dofs,temp, b.dval, 1, V(0), 1, queue );           // V(0) = V(0) - b
         beta = MAGMA_Z_MAKE( magma_dznrm2( dofs, V(0), 1, queue ), 0.0 ); // beta = norm(V(0))
-        if( magma_z_isinf( beta ) ){
+        if( magma_z_isnan_inf( beta ) ){
             info = MAGMA_DIVERGENCE;
             break;
         }
