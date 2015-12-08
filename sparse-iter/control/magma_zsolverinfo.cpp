@@ -222,7 +222,7 @@ magma_zsolverinfo(
         printf("%%   iter   ||   residual-nrm2    ||   runtime    ||   SpMV-count   ||   info\n");
             printf("%%==========================================================================="
                         "======%%\n");
-        printf("   %8d          %e          %f          %d          %d          %d\n",
+        printf("   %8d          %e          %f          %d          %d\n",
         (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, (int) solver_par->spmv_count, (int) solver_par->info );
         printf("%%==========================================================================="
         "======%%\n");
@@ -290,13 +290,13 @@ magma_zsolverinfo(
     printf("%%    initial residual: %e\n", solver_par->init_res );
     printf("%%    preconditioner setup: %.4f sec\n", precond_par->setuptime );
     printf("%%    iterations: %4d\n", (int) (solver_par->numiter) );
-    printf("%%    SpMV: %4d\n", (int) (solver_par->spmv_count) );
+    printf("%%    SpMV-count: %4d\n", (int) (solver_par->spmv_count) );
     printf("%%    exact final residual: %e\n%%    runtime: %.4f sec\n",
         solver_par->final_res, solver_par->runtime);
     printf("%%    preconditioner runtime: %.4f sec\n", precond_par->runtime );
 cleanup:
-    printf("%%======================================================="
-        "======%%\n");
+    printf("%%================================================================="
+        "================%%\n");
     return MAGMA_SUCCESS;
 }
 
