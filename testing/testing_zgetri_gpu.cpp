@@ -141,10 +141,10 @@ int main( int argc, char** argv )
                     // R -= A*A^{-1}
                     // err = ||I - A*A^{-1}|| / ( N ||A||*||A^{-1}|| ) = ||R|| * rcond / N, using 1-norm
                     lapackf77_zlaset( "full", &N, &N, &c_zero, &c_one, h_R, &lda );
-                    blasf77_zgemm( "no", "no", &N, &N, &N, &c_neg_one,
-                                   h_A,    &lda,
-                                   h_Ainv, &lda, &c_one,
-                                   h_R,    &lda );
+                    blasf77_zgemm( "no", "no", &N, &N, &N,
+                                   &c_neg_one, h_A,    &lda,
+                                               h_Ainv, &lda,
+                                   &c_one,     h_R,    &lda );
                     error = lapackf77_zlange( "1", &N, &N, h_R, &lda, rwork );
                     error = error * rcond / N;
                 }
