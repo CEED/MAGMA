@@ -388,6 +388,11 @@ magma_zmorderstatistics(
     magma_index_t tmpc, tmpr;
     if( r == 0 ){
         for ( st = i = 0; i < length - 1; i++ ) {
+            if ( magma_z_isnan_inf( val[i]) ) {
+                printf("error: array contains  %f.\n", val[i] );
+                info = MAGMA_ERR_NAN;
+                goto cleanup;
+            }
             if ( MAGMA_Z_ABS(val[i]) > MAGMA_Z_ABS(val[length-1]) ){
                 continue;
             }
@@ -408,6 +413,11 @@ magma_zmorderstatistics(
         }
     } else {
         for ( st = i = 0; i < length - 1; i++ ) {
+            if ( magma_z_isnan_inf( val[i]) ) {
+                printf("error: array contains  %f.\n", val[i] );
+                info = MAGMA_ERR_NAN;
+                goto cleanup;
+            }
             if ( MAGMA_Z_ABS(val[i]) < MAGMA_Z_ABS(val[length-1]) ){
                 continue;
             }
@@ -486,6 +496,11 @@ magma_zorderstatistics(
     magmaDoubleComplex tmp;
     if( r == 0 ){
         for ( st = i = 0; i < length - 1; i++ ) {
+            if ( magma_z_isnan_inf( val[i]) ) {
+                printf("error: array contains  %f.\n", val[i] );
+                info = MAGMA_ERR_NAN;
+                goto cleanup;
+            }
             if ( MAGMA_Z_ABS(val[i]) > MAGMA_Z_ABS(val[length-1]) ){
                 continue;
             }
@@ -506,6 +521,11 @@ magma_zorderstatistics(
         }
     } else {
         for ( st = i = 0; i < length - 1; i++ ) {
+            if ( magma_z_isnan_inf( val[i]) ) {
+                printf("error: array contains  %f.\n", val[i] );
+                info = MAGMA_ERR_NAN;
+                goto cleanup;
+            }
             if ( MAGMA_Z_ABS(val[i]) < MAGMA_Z_ABS(val[length-1]) ){
                 continue;
             }

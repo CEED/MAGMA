@@ -317,6 +317,7 @@ typedef struct magma_queue* magma_queue_t;
 #define MAGMA_ERR_INVALID_PTR      -115
 #define MAGMA_ERR_UNKNOWN          -116
 #define MAGMA_ERR_NOT_IMPLEMENTED  -117
+#define MAGMA_ERR_NAN              -118
 
 // some sparse-iter errors
 #define MAGMA_SLOW_CONVERGENCE     -201
