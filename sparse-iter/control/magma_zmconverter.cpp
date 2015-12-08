@@ -10,6 +10,7 @@
 */
 #include "magmasparse_internal.h"
 
+#include <cuda.h>  // for CUDA_VERSION
 
 /**
     Purpose
@@ -1272,6 +1273,8 @@ magma_zmconvert(
         }
         // COO to CSR
         else if ( old_format == Magma_COO && new_format == Magma_CSR ) {
+            
+#if CUDA_VERSION >= 7000
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -1327,6 +1330,10 @@ magma_zmconvert(
             magma_free( B->drowidx );
             magma_free( pBuffer );
             magma_free( P );
+#else
+                printf("error: conversion only supported for CUDA version > 7.0.\n");
+            
+#endif
         }
         else {
             printf("warning: format not supported on GPU. "

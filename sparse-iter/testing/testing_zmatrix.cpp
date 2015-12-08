@@ -40,6 +40,9 @@ int main(  int argc, char** argv )
     magma_z_matrix Z={Magma_CSR}, A={Magma_CSR}, AT={Magma_CSR}, 
     A2={Magma_CSR}, B={Magma_CSR}, B_d={Magma_CSR};
     
+    magma_index_t *comm_i=NULL;
+    magmaDoubleComplex *comm_v=NULL;
+    
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
 
@@ -57,7 +60,25 @@ int main(  int argc, char** argv )
 
         printf("%% matrix info: %d-by-%d with %d nonzeros\n",
                             (int) Z.num_rows,(int) Z.num_cols,(int) Z.nnz );
-
+        
+        // slice matrix
+        CHECK( magma_zmslice( 9, 0, Z, &A2, comm_i, comm_v, queue ) );    
+        magma_zprint_matrix( A2, queue );
+        magma_zmfree(&A2, queue );
+        CHECK( magma_zmslice( 9, 1, Z, &A2, comm_i, comm_v, queue ) );    
+        magma_zprint_matrix( A2, queue );
+        magma_zmfree(&A2, queue );
+        CHECK( magma_zmslice( 9, 5, Z, &A2, comm_i, comm_v, queue ) );    
+        magma_zprint_matrix( A2, queue );
+        magma_zmfree(&A2, queue );
+        CHECK( magma_zmslice( 1, 0, Z, &A2, comm_i, comm_v, queue ) );    
+        magma_zprint_matrix( A2, queue );
+        magma_zmfree(&A2, queue );
+        CHECK( magma_zmslice( 9, 8, Z, &A2, comm_i, comm_v, queue ) );    
+        magma_zprint_matrix( A2, queue );
+        magma_zmfree(&A2, queue );
+        
+        
         // scale matrix
         CHECK( magma_zmscale( &Z, zopts.scaling, queue ));
 
@@ -100,6 +121,8 @@ int main(  int argc, char** argv )
     }
 
 cleanup:
+    magma_free_cpu( comm_i );
+    magma_free_cpu( comm_v );
     magma_zmfree(&AT, queue );
     magma_zmfree(&A, queue );
     magma_zmfree(&B, queue );
