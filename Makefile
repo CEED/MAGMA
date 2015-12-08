@@ -689,7 +689,7 @@ $(sparse_testers): %: %.$(o_ext)
 # excludes directories by matching *.* files (\w\.\w) and some exceptions like Makefile.
 files.txt: force
 	svn st -vq \
-		| egrep -v '> moved' \
+		| egrep -v '^D|> moved' \
 		| perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
@@ -703,8 +703,8 @@ subdir_files = $(addsuffix /files.txt,$(subdirs) $(sparse_subdirs))
 
 $(subdir_files): force
 	svn st -N -vq $(dir $@) \
-		| egrep -v '> moved' \
-		| perl -pi -e 's/^.{13} +\S+ +\S+ +\S+ +//' | sort \
+		| egrep -v '^D|> moved' \
+		| perl -pi -e 's%^.{13} +\S+ +\S+ +\S+ +$(dir $@)%%' | sort \
 		| egrep -v '^\.$$|obsolete|deprecated|contrib\b|^exp' \
 		| egrep '\w\.\w|Makefile|docs|run' \
 		> $@
