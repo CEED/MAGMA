@@ -225,6 +225,14 @@ magma_zmscale(
     magma_scale_t scaling,
     magma_queue_t queue );
 
+magma_int_t
+magma_zmslice( 
+    magma_int_t num_slices,
+    magma_int_t slice,
+    magma_z_matrix A, 
+    magma_z_matrix *B, 
+    magma_queue_t queue );
+
 magma_int_t 
 magma_zmdiff( 
     magma_z_matrix A, 
