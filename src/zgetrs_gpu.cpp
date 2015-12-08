@@ -14,7 +14,9 @@
     Purpose
     -------
     ZGETRS solves a system of linear equations
-      A * X = B,  A**T * X = B,  or  A**H * X = B
+        A * X = B,
+        A**T * X = B,  or
+        A**H * X = B
     with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
 
     Arguments
@@ -36,13 +38,13 @@
             of the matrix B.  NRHS >= 0.
 
     @param[in]
-    dA      COMPLEX_16 array on the GPU, dimension (LDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The factors L and U from the factorization A = P*L*U as computed
             by ZGETRF_GPU.
 
     @param[in]
     ldda    INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+            The leading dimension of the array A.  LDDA >= max(1,N).
 
     @param[in]
     ipiv    INTEGER array, dimension (N)
@@ -50,13 +52,13 @@
             matrix was interchanged with row IPIV(i).
 
     @param[in,out]
-    dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
     lddb    INTEGER
-            The leading dimension of the array B.  LDB >= max(1,N).
+            The leading dimension of the array B.  LDDB >= max(1,N).
 
     @param[out]
     info    INTEGER
