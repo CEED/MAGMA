@@ -81,7 +81,6 @@ magma_zmdynamicic_insert(
     magmaDoubleComplex *val;
     magma_index_t *col;
     magma_index_t *rowidx;
-    const magma_int_t ione = 1;
         
     magmaDoubleComplex element;
     magma_int_t j,jn;
