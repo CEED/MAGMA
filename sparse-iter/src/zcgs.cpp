@@ -63,6 +63,7 @@ magma_zcgs(
     // prepare solver feedback
     solver_par->solver = Magma_CGS;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,  c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
@@ -118,6 +119,7 @@ magma_zcgs(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -147,6 +149,7 @@ magma_zcgs(
         }
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, v_hat, queue ));   // v = A p
+        solver_par->spmv_count++;
         alpha = rho / magma_zdotc( dofs, r_tld.dval, 1, v_hat.dval, 1, queue );
         magma_zcopy( dofs, u.dval, 1, q.dval, 1, queue );              // q = u
         magma_zaxpy( dofs,  -alpha, v_hat.dval, 1, q.dval, 1, queue );   // q = u - alpha v_hat
@@ -156,6 +159,7 @@ magma_zcgs(
 
 
         CHECK( magma_z_spmv( c_one, A, t, c_zero, rt, queue ));   // t = A u_hat
+        solver_par->spmv_count++;
         magma_zaxpy( dofs,  c_mone*alpha, rt.dval, 1, r.dval, 1, queue );       // r = r -alpha*A u_hat
         magma_zaxpy( dofs,  alpha, t.dval, 1, x->dval, 1, queue );      // x = x + alpha u_hat
         rho_l = rho;

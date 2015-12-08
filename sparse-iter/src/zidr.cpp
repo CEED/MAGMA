@@ -64,7 +64,8 @@ magma_zidr(
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
+    solver_par->spmv_count = 0;
+    solver_par->info = MAGMA_NOTCONVERGED;
 
     // constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -282,6 +283,7 @@ magma_zidr(
             // compute new G
             // G(:,k) = A U(:,k)
             CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dv, queue ));
+            solver_par->spmv_count++;
             magma_zcopyvector( dG.num_rows, dv.dval, 1, &dG.dval[k*dG.ld], 1, queue );
 
             // bi-orthogonalize the new basis vectors
@@ -377,7 +379,7 @@ magma_zidr(
             }
 
             // iter = iter + 1
-            solver_par->numiter++;
+
         }
 
         // update solution approximation x
@@ -396,7 +398,7 @@ magma_zidr(
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
-
+        solver_par->spmv_count++;
         // computation of a new omega
 //---------------------------------------
         // |t|

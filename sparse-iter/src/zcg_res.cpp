@@ -63,6 +63,7 @@ magma_zcg_res(
     // prepare solver feedback
     solver_par->solver = Magma_CG;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // solver variables
     magmaDoubleComplex alpha, beta;
@@ -86,6 +87,7 @@ magma_zcg_res(
     magma_zcopy( dofs, r.dval, 1, p.dval, 1, queue );                    // p = h
     nom = MAGMA_Z_ABS( magma_zdotc( dofs, r.dval, 1, r.dval, 1, queue) );
     CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));             // q = A p
+    solver_par->spmv_count++;
     den =  magma_zdotc( dofs, p.dval, 1, q.dval, 1, queue ); // den = p dot q
     solver_par->init_res = nom0;
             
@@ -117,6 +119,7 @@ magma_zcg_res(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {

@@ -62,6 +62,7 @@ magma_zqmr_merge(
     // prepare solver feedback
     solver_par->solver = Magma_QMRMERGE;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -149,6 +150,7 @@ magma_zqmr_merge(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -199,7 +201,7 @@ magma_zqmr_merge(
         }
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, pt, queue ));
-        
+        solver_par->spmv_count++;
             // epsilon = q' * pt;
         epsilon = magma_zdotc( dofs, q.dval, 1, pt.dval, 1, queue );
         beta = epsilon / delta;
@@ -226,6 +228,7 @@ magma_zqmr_merge(
         
             // wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, AT, q, c_zero, wt, queue ));
+        solver_par->spmv_count++;
         magma_zaxpy( dofs, - MAGMA_Z_CONJ( beta ), w.dval, 1, wt.dval, 1, queue );  
         
                     // no precond: z = wt

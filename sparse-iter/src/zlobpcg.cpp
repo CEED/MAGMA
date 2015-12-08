@@ -96,6 +96,8 @@ magma_zlobpcg(
     magma_int_t n =(solver_par->num_eigenvalues);
     magmaDoubleComplex *blockX = solver_par->eigenvectors;
     double *evalues = solver_par->eigenvalues;
+    solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
 
 
     magmaDoubleComplex *dwork=NULL, *hwork=NULL;
@@ -222,7 +224,7 @@ magma_zlobpcg(
     //magma_zorthomgs( m, n, blockX, queue );
     
     magma_z_bspmv_tuned(m, n, c_one, A, blockX, c_zero, blockAX, queue );
-
+    solver_par->spmv_count++;
     // === Compute the Gram matrix = (X, AX) & its eigenstates ===
     magma_zgemm( MagmaConjTrans, MagmaNoTrans, n, n, m,
                 c_one,  blockX, m, blockAX, m, c_zero, gramM, n, queue );
@@ -308,7 +310,7 @@ magma_zlobpcg(
 
             // === compute AR
             magma_z_bspmv_tuned(m, cBlockSize, c_one, A, blockR, c_zero, blockAR, queue );
-
+            solver_par->spmv_count++;
             if (!restart) {
                 // === compact P & AP as well
                 CHECK( magma_zcompactActive(m, n, blockP,  m, activeMask, queue ));

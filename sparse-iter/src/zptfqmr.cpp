@@ -68,6 +68,7 @@ magma_zptfqmr(
     // prepare solver feedback
     solver_par->solver = Magma_PTFQMR;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -137,6 +138,7 @@ magma_zptfqmr(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -192,7 +194,7 @@ magma_zptfqmr(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue )); // Au_new = A pu_m
-      
+        solver_par->spmv_count++;
         if( solver_par->numiter%2 == 0 ){
             magma_zscal( dofs, beta*beta, v.dval, 1, queue );                    
             magma_zaxpy( dofs, beta, Au.dval, 1, v.dval, 1, queue );              

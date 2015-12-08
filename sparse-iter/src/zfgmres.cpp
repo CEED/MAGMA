@@ -131,6 +131,7 @@ magma_zfgmres(
     // prepare solver feedback
     solver_par->solver = Magma_PGMRES;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     //Chronometry
     real_Double_t tempo1, tempo2;
@@ -179,14 +180,17 @@ magma_zfgmres(
         r0 = ATOLERANCE;
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
 
     tempo1 = magma_sync_wtime( queue );
     do
     {
+        solver_par->numiter++;
         // compute initial residual and its norm
         // A.mult(n, 1, x, n, V(0), n);                        // V(0) = A*x
         CHECK( magma_z_spmv( MAGMA_Z_ONE, A, *x, MAGMA_Z_ZERO, t, queue ));
+        solver_par->spmv_count++;
         magma_zcopy( dofs, t.dval, 1, V(0), 1, queue );
         
         temp = MAGMA_Z_MAKE(-1.0, 0.0);
@@ -229,7 +233,7 @@ magma_zfgmres(
         i = -1;
         do
         {
-            solver_par->numiter++;
+
             i++;
             
             // M.apply(n, 1, V(i), n, W(i), n);
@@ -241,6 +245,7 @@ magma_zfgmres(
             // A.mult(n, 1, W(i), n, V(i+1), n);
             w_t.dval = W(i);
             CHECK( magma_z_spmv( MAGMA_Z_ONE, A, w_t, MAGMA_Z_ZERO, t, queue ));
+            solver_par->spmv_count++;
             magma_zcopy( dofs, t.dval, 1, V(i+1), 1, queue );
             
             for (k = 0; k <= i; k++)

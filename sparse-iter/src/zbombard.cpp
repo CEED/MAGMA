@@ -69,6 +69,7 @@ magma_zbombard(
     // prepare solver feedback
     solver_par->solver = Magma_BOMBARD;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -216,6 +217,7 @@ magma_zbombard(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -298,7 +300,8 @@ magma_zbombard(
         CHECK( magma_z_spmv( c_one, A, C_p, c_zero, C_v_hat, queue ));
         // BiCGSTAB
         CHECK( magma_z_spmv( c_one, A, B_p, c_zero, B_v, queue ));      // v = Ap
-
+        
+        solver_par->spmv_count++;
         
             //QMR: epsilon = q' * pt;
         Q_epsilon = magma_zdotc( dofs, Q_q.dval, 1, Q_pt.dval, 1, queue );
@@ -353,6 +356,8 @@ magma_zbombard(
         CHECK( magma_z_spmv( c_one, A, C_t, c_zero, C_rt, queue )); 
             //BiCGSTAB
         CHECK( magma_z_spmv( c_one, A, B_s, c_zero, B_t, queue ));       // t=As
+        
+        solver_par->spmv_count++;
         
         //BiCGSTAB
         B_omega = magma_zdotc( dofs, B_t.dval, 1, B_s.dval, 1, queue )   // omega = <s,t>/<t,t>

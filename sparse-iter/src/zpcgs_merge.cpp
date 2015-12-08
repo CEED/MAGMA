@@ -68,6 +68,7 @@ magma_zpcgs_merge(
     // prepare solver feedback
     solver_par->solver = Magma_PCGS;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -123,6 +124,7 @@ magma_zpcgs_merge(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -167,6 +169,7 @@ magma_zpcgs_merge(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, p_hat, c_zero, v_hat, queue ));   // v = A p
+        solver_par->spmv_count++;
         alpha = rho / magma_zdotc( dofs, r_tld.dval, 1, v_hat.dval, 1, queue );
         
         magma_zcgs_3(  
@@ -189,7 +192,7 @@ magma_zpcgs_merge(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, u_hat, c_zero, t, queue ));   // t = A u_hat
-        
+        solver_par->spmv_count++;
         magma_zcgs_4(  
         r.num_rows, 
         r.num_cols, 

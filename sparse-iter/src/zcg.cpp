@@ -65,6 +65,7 @@ magma_zcg(
     // prepare solver feedback
     solver_par->solver = Magma_CG;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -121,6 +122,7 @@ magma_zcg(
 
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -149,6 +151,7 @@ magma_zcg(
         magma_zscal(dofs, beta, p.dval, 1);                // p = beta*p
         magma_zaxpy(dofs, c_one, r.dval, 1, p.dval, 1);     // p = p + r
         CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));   // q = A p
+        solver_par->spmv_count++;
         den = MAGMA_Z_REAL(magma_zdotc(dofs, p.dval, 1, q.dval, 1));
                 // den = p dot q
         nom = betanomsq;

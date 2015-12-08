@@ -62,6 +62,9 @@ magma_zjacobidomainoverlap(
 {
     magma_int_t info = MAGMA_NOTCONVERGED;
     
+    solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
+    
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;

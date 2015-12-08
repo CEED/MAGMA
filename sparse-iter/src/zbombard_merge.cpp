@@ -72,6 +72,7 @@ magma_zbombard_merge(
     // prepare solver feedback
     solver_par->solver = Magma_BOMBARD;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -246,6 +247,7 @@ magma_zbombard_merge(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -368,7 +370,9 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, SpMV_out_1.dval          , 1, Q_pt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_1.dval+dofs     , 1, C_v_hat.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_1.dval+2*dofs   , 1, B_v.dval, 1 );
-
+        
+        solver_par->spmv_count++;
+        
         if( mdot == 0 ) {      
                 //QMR: epsilon = q' * pt;
             Q_epsilon = magma_zdotc( dofs, SpMV_in_2.dval, 1, SpMV_out_1.dval, 1, queue );
@@ -453,6 +457,8 @@ magma_zbombard_merge(
         //magma_zcopy( dofs, SpMV_out_2.dval          , 1, Q_wt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+dofs     , 1, C_rt.dval, 1 );
         //magma_zcopy( dofs, SpMV_out_2.dval+2*dofs   , 1, B_t.dval, 1 );        
+        
+        solver_par->spmv_count++;
         
         // QMR
         magma_zaxpy( dofs, - MAGMA_Z_CONJ( Q_beta ), Q_w.dval, 1, Q_wt.dval, 1, queue );  

@@ -64,6 +64,8 @@ magma_ztfqmr_unrolled(
     // prepare solver feedback
     solver_par->solver = Magma_TFQMR;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
+    solver_par->spmv_count = 0;
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -126,6 +128,7 @@ magma_ztfqmr_unrolled(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -149,6 +152,7 @@ magma_ztfqmr_unrolled(
         sigma = theta * theta / alpha * eta;  
         printf("sigma:%f\n", sigma);
         CHECK( magma_z_spmv( c_one, A, d, c_zero, Ad, queue )); // Au_new = A u_mp1
+        solver_par->spmv_count++;
       
         magma_zaxpy( dofs, eta, d.dval, 1, x->dval, 1, queue );     // x = x + eta * d
         magma_zaxpy( dofs, -eta, Ad.dval, 1, r.dval, 1, queue );     // r = r - eta * Ad
@@ -195,7 +199,7 @@ magma_ztfqmr_unrolled(
         magma_zaxpy( dofs, c_one, w.dval, 1, u_mp1.dval, 1, queue );         // u_mp1 = w + beta*u_mp1;
               
         CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
-      
+        solver_par->spmv_count++;
         // do this every loop as unrolled
         magma_zscal( dofs, beta*beta, v.dval, 1, queue );                    
         magma_zaxpy( dofs, beta, Au.dval, 1, v.dval, 1, queue );              

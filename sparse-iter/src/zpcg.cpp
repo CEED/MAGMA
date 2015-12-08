@@ -67,6 +67,7 @@ magma_zpcg(
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // solver variables
     magmaDoubleComplex alpha, beta;
@@ -127,6 +128,7 @@ magma_zpcg(
     tempo1 = magma_sync_wtime( queue );
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {

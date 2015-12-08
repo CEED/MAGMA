@@ -68,6 +68,7 @@ magma_zpbicgstab(
     // prepare solver feedback
     solver_par->solver = Magma_PBICGSTAB;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -127,6 +128,7 @@ magma_zpbicgstab(
     tempo1 = magma_sync_wtime( queue );
 
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -152,7 +154,7 @@ magma_zpbicgstab(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, y, c_zero, v, queue ));      // v = Ap
-
+        solver_par->spmv_count++;
         alpha = rho_new / magma_zdotc( dofs, rr.dval, 1, v.dval, 1, queue );
         if( magma_z_isnan_inf( alpha ) ){
             info = MAGMA_DIVERGENCE;
@@ -169,7 +171,7 @@ magma_zpbicgstab(
         precond_par->runtime += tempop2-tempop1;
         
         CHECK( magma_z_spmv( c_one, A, z, c_zero, t, queue ));       // t=As
-                   
+        solver_par->spmv_count++;                  
        // omega = <s,t>/<t,t>
         omega = magma_zdotc( dofs, t.dval, 1, s.dval, 1, queue )
                    / magma_zdotc( dofs, t.dval, 1, t.dval, 1, queue );

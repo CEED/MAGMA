@@ -71,6 +71,7 @@ magma_ziterref(
     // prepare solver feedback
     solver_par->solver = Magma_ITERREF;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     magma_int_t dofs = A.num_rows*b.num_cols;
 
@@ -119,6 +120,7 @@ magma_ziterref(
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.dval, 1, queue );  // scale it
         magma_zaxpy( dofs,  c_one, z.dval, 1, x->dval, 1, queue );        // x = x + z
         CHECK( magma_z_spmv( c_neg_one, A, *x, c_zero, r, queue ));      // r = - A x
+        solver_par->spmv_count++;
         magma_zaxpy( dofs,  c_one, b.dval, 1, r.dval, 1, queue );         // r = r + b
         nom = magma_dznrm2( dofs, r.dval, 1, queue );                    // nom = || r ||
 

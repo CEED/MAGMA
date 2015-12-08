@@ -63,6 +63,7 @@ magma_zbicgstab_merge3(
     // prepare solver feedback
     solver_par->solver = Magma_BICGSTABMERGE;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new, *skp_h={0};
@@ -145,6 +146,7 @@ magma_zbicgstab_merge3(
     tempo1 = magma_sync_wtime( queue );
 
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -156,13 +158,13 @@ magma_zbicgstab_merge3(
         CHECK( magma_zbicgmerge1( dofs, skp, v.dval, r.dval, p.dval, queue ));
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, v, queue ));         // v = Ap
-
+        solver_par->spmv_count++;
         CHECK( magma_zmdotc( dofs, 1, q.dval, v.dval, d1, d2, skp, queue ));
         CHECK( magma_zbicgmerge4(  1, skp, queue ));
         CHECK( magma_zbicgmerge2( dofs, skp, r.dval, v.dval, s.dval, queue )); // s=r-alpha*v
 
         CHECK( magma_z_spmv( c_one, A, s, c_zero, t, queue ));         // t=As
-
+        solver_par->spmv_count++;
         CHECK( magma_zmdotc( dofs, 2, q.dval+4*dofs, t.dval, d1, d2, skp+6, queue ));
         CHECK( magma_zbicgmerge4(  2, skp, queue ));
 

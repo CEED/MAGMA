@@ -62,6 +62,7 @@ magma_zcg_merge(
     // prepare solver feedback
     solver_par->solver = Magma_CGMERGE;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     
     // solver variables
     magmaDoubleComplex alpha, beta, gamma, rho, tmp1, *skp_h={0};
@@ -137,6 +138,7 @@ magma_zcg_merge(
     tempo1 = magma_sync_wtime( queue );
 
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -146,7 +148,7 @@ magma_zcg_merge(
         
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
-            
+        solver_par->spmv_count++;
         // updates x, r, computes scalars and updates d
         CHECK( magma_zcgmerge_xrbeta( dofs, d1, d2, x->dval, r.dval, d.dval, z.dval, skp, queue ));
 

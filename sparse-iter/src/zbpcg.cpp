@@ -81,6 +81,7 @@ magma_zbpcg(
     // prepare solver feedback
     solver_par->solver = Magma_PCG;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     solver_par->info = MAGMA_SUCCESS;
 
     // local variables
@@ -171,6 +172,7 @@ magma_zbpcg(
     }
     
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // start iteration
     do
     {
@@ -195,7 +197,7 @@ magma_zbpcg(
         }
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));   // q = A p
-
+        solver_par->spmv_count++;
      //   magma_z_bspmv_tuned( dofs, num_vecs, c_one, A, p.dval, c_zero, q.dval, queue );
 
 

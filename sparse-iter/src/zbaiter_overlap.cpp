@@ -135,6 +135,7 @@ magma_zbaiter_overlap(
         iterinc = solver_par->verbose;
     }
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // block-asynchronous iteration iterator
     do
     {

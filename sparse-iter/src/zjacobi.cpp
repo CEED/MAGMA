@@ -99,6 +99,7 @@ magma_zjacobi(
 
 
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
     // Jacobi iterator
     do
     {
@@ -106,6 +107,7 @@ magma_zjacobi(
         solver_par->numiter = solver_par->numiter+jacobiiter_par.maxiter;
         //CHECK( magma_zjacobiiter_sys( A, b, d, r, x, &jacobiiter_par, queue ) );
         CHECK( magma_zjacobispmvupdate(jacobiiter_par.maxiter, ACSR, r, b, d, x, queue ));
+        solver_par->spmv_count++;
         tempo2 = magma_sync_wtime( queue );
         runtime += tempo2 - tempo1;
         //CHECK( magma_zjacobispmvupdate_bw(jacobiiter_par.maxiter, A, r, b, d, x, queue ));
