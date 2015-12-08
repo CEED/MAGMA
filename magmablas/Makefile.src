@@ -114,9 +114,7 @@ libmagma_zsrc += \
 	$(cdir)/zhemv_mgpu.cu			\
 	$(cdir)/zhemv_mgpu_upper.cu		\
 	$(cdir)/zhemm_mgpu.cpp			\
-	$(cdir)/zhemm_mgpu_spec.cpp		\
 	$(cdir)/zher2k_mgpu.cpp			\
-	$(cdir)/zher2k_mgpu_spec.cpp		\
 	$(cdir)/zherk_mgpu.cpp			\
 
 # panels for one-sided factorizations in CUDA

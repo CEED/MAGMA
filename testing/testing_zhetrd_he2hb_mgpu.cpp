@@ -121,10 +121,12 @@ int main( int argc, char** argv)
                 magma_setdevice(0);
                 gpu_time = magma_wtime();
                 if (opts.version == 30) {
-                    magma_zhetrd_he2hb_mgpu_spec(
-                        opts.uplo, N, opts.nb, h_R, lda, tau, h_work, lwork,
-                        da, ldda, dT1, opts.nb, opts.ngpu, distblk,
-                        streams, nstream, opts.nthread, &info);
+                    // see src/obsolete and magmablas/obsolete
+                    printf( "magma_zhetrd_he2hb_mgpu_spec not compiled\n" );
+                    //magma_zhetrd_he2hb_mgpu_spec(
+                    //    opts.uplo, N, opts.nb, h_R, lda, tau, h_work, lwork,
+                    //    da, ldda, dT1, opts.nb, opts.ngpu, distblk,
+                    //    streams, nstream, opts.nthread, &info);
                 } else {
                     nstream = 3;
                     magma_zhetrd_he2hb_mgpu(

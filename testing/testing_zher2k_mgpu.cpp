@@ -59,7 +59,7 @@ int main( int argc, char** argv)
     nstream = (opts.nstream > 0 ? opts.nstream :  2);
     
     printf( "%% version 1: magmablas_zher2k_mgpu2     %s\n", (opts.version == 1 ? "(enabled)" : ""));
-    printf( "%% version 2: magmablas_zher2k_mgpu_spec %s\n", (opts.version == 2 ? "(enabled)" : ""));
+    //printf( "%% version 2: magmablas_zher2k_mgpu_spec %s\n", (opts.version == 2 ? "(enabled)" : ""));
 #ifdef ICHI
     printf( "%% version 3: magma_zher2k_mgpu (Ichi)   %s\n", (opts.version == 3 ? "(enabled)" : ""));
 #endif
@@ -123,12 +123,14 @@ int main( int argc, char** argv)
                         ngpu, nb, streams, nstream );
                 }
                 else if ( opts.version == 2 ) {
-                    magmablas_zher2k_mgpu_spec(
-                        MagmaLower, MagmaNoTrans, n-offset, k,
-                        alpha, dV, ldda, 0,
-                               dW, ldda, 0,
-                        beta,  dA, ldda, offset,
-                        ngpu, nb, streams, nstream );
+                    // see src/obsolete and magmablas/obsolete
+                    printf( "magmablas_zher2k_mgpu_spec not compiled\n" );
+                    //magmablas_zher2k_mgpu_spec(
+                    //    MagmaLower, MagmaNoTrans, n-offset, k,
+                    //    alpha, dV, ldda, 0,
+                    //           dW, ldda, 0,
+                    //    beta,  dA, ldda, offset,
+                    //    ngpu, nb, streams, nstream );
                 }
                 else {
 #ifdef ICHI

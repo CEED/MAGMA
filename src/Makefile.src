@@ -224,7 +224,6 @@ libmagma_zsrc += \
 	$(cdir)/zheevdx_2stage_m.cpp	\
 	$(cdir)/zhegvdx_2stage_m.cpp	\
 	$(cdir)/zhetrd_he2hb_mgpu.cpp	\
-	$(cdir)/zhetrd_he2hb_mgpu_spec.cpp	\
 	$(cdir)/core_zlarfy.cpp		\
 	$(cdir)/core_zhbtype1cb.cpp	\
 	$(cdir)/core_zhbtype2cb.cpp	\
