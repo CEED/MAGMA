@@ -233,6 +233,8 @@ magma_zmslice(
     magma_z_matrix *B,
     magma_index_t *comm_i,
     magmaDoubleComplex *comm_v,
+    magma_int_t *start,
+    magma_int_t *end,
     magma_queue_t queue );
 
 magma_int_t 
