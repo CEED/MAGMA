@@ -151,7 +151,7 @@ magma_zlarft_batched(magma_int_t n, magma_int_t k, magma_int_t stair_T,
 
     magmablas_zlaset_batched( MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dTstep_array, ldtstep, batchCount, queue );
     // no need for it as T is expected to be lower zero
-    //if (k > nb) magmablas_zlaset_batched( MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dTstep_array, ldtstep, batchCount, UNKNOWN );
+    //if (k > nb) magmablas_zlaset_batched( MagmaLower, k, k, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dTstep_array, ldtstep, batchCount, queue );
     
 
     //TRMV
