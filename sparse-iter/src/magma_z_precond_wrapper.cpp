@@ -170,8 +170,13 @@ magma_z_precondsetup(
         precond->solver = Magma_AICC; // handle as AICC
     }
     else if ( precond->solver == Magma_CUSTOMILU ) {
+        #ifdef _OPENMP
         info = magma_zcustomilusetup( A, b, precond, queue );
         precond->solver = Magma_AILU; // handle as AILU
+        #else
+            printf( "error: preconditioner requires OpenMP.\n" );
+            info = MAGMA_ERR_NOT_SUPPORTED;
+        #endif
     }
     else if ( precond->solver == Magma_NONE ) {
         info = MAGMA_SUCCESS;

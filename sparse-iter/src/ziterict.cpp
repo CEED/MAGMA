@@ -23,6 +23,8 @@
     -------
 
     Prepares the iterative threshold Incomplete Cholesky preconditioner.
+    
+    This function requires OpenMP, and is only available if OpenMP is activated. 
 
     Arguments
     ---------
