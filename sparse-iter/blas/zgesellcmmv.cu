@@ -99,6 +99,7 @@ zgesellptmv2d_kernel_4_ldg(
 // A UNIFIED SPARSE MATRIX DATA FORMAT 
 // FOR MODERN PROCESSORS WITH WIDE SIMD UNITS
 // SELLC SpMV kernel modified assigning one thread to each row - 1D kernel
+template<bool betazero>
 __global__ void 
 zgesellptmv2d_kernel_1( 
     int num_rows, 
@@ -120,9 +121,7 @@ zgesellptmv2d_kernel_1(
     
     
     // T threads assigned to each row
-    int idx = threadIdx.y;      // thread in row
     int idy = threadIdx.x;      // local row
-    int ldx = idx * blocksize + idy;
     int bdx = blockIdx.y * gridDim.x + blockIdx.x; // global block index
     int row = bdx * blocksize + idy;  // global row index
     int offset = drowptr[ bdx ];
@@ -133,12 +132,14 @@ zgesellptmv2d_kernel_1(
         for ( int n = 0; n < border; n++) { 
             int col = dcolind [offset+ blocksize * n + threadIdx.x ];
             magmaDoubleComplex val = dval[offset+ blocksize * n + threadIdx.x];
-            if( val != 0) {
-                  dot=dot+val*dx[col];
-            }
+            dot=dot+val*dx[col];
         }
 
-        dy[ row ] = dot * alpha + beta * dy [ row ];
+        if (betazero) {
+            dy[ row ] = dot * alpha;
+        } else {
+            dy[ row ] = dot * alpha + beta * dy [ row ];
+        }
     }
 }
 
@@ -879,10 +880,17 @@ magma_zgesellpmv(
         cudaDestroyTextureObject(texdx);
 
     #else 
-        if ( alignment == 1)
-            zgesellptmv2d_kernel_1<<< grid, block, Ms, queue->cuda_stream() >>>
-            ( m, n, blocksize, alignment, alpha,
-                dval, dcolind, drowptr, dx, beta, dy );
+        if ( alignment == 1) {
+            if (beta == MAGMA_Z_ZERO) {
+                zgesellptmv2d_kernel_1<true><<< grid, block, Ms, queue->cuda_stream() >>>
+                ( m, n, blocksize, alignment, alpha,
+                    dval, dcolind, drowptr, dx, beta, dy );
+            } else {
+                zgesellptmv2d_kernel_1<false><<< grid, block, Ms, queue->cuda_stream() >>>
+                ( m, n, blocksize, alignment, alpha,
+                    dval, dcolind, drowptr, dx, beta, dy );
+            }
+        }
 
         else if ( alignment == 4)
             zgesellptmv2d_kernel_4<<< grid, block, Ms, queue->cuda_stream() >>>
