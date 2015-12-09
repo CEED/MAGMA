@@ -143,7 +143,7 @@ from optparse import OptionParser
 batch = not sys.stdout.isatty()
 
 parser = OptionParser()
-parser.add_option('-p', '--precisions',  action='store',      dest='precisions', help='run given precisions', default='sd' )
+parser.add_option('-p', '--precisions',  action='store',      dest='precisions', help='run given precisions', default='sdcz' )
 parser.add_option(      '--start',       action='store',      dest='start',      help='start with given routine; useful to restart an interupted run')
 parser.add_option(      '--memcheck',    action='store_true', dest='memcheck',   help='run with cuda-memcheck (slow)')
 parser.add_option(      '--tol',         action='store',      dest='tol',        help='set tolerance')
