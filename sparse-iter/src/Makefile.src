@@ -80,6 +80,7 @@ libsparse_zsrc += \
 	$(cdir)/ziterilu.cpp                  \
 	$(cdir)/ziterict.cpp                  \
 	$(cdir)/zcustomic.cpp                 \
+	$(cdir)/zcustomilu.cpp                \
 
 # orthogonalization schemes and wrappers to dense MAGMA
 libsparse_zsrc += \
