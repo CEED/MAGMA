@@ -445,6 +445,14 @@ magma_zresidualvec(
     magma_queue_t queue );
 
 magma_int_t
+magma_zresidual_slice(
+    magma_z_matrix A, 
+    magma_z_matrix b, 
+    magma_z_matrix x,
+    double *res,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zmgenerator(
     magma_int_t n,
     magma_int_t offdiags,
