@@ -62,6 +62,8 @@ magma_zqmr(
     // prepare solver feedback
     solver_par->solver = Magma_QMR;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
+    
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
@@ -75,7 +77,7 @@ magma_zqmr(
     magma_int_t dofs = A.num_rows* b.num_cols;
 
     // need to transpose the matrix
-    magma_z_matrix AT={Magma_CSR};
+    magma_z_matrix AT={Magma_CSR}, Ah1={Magma_CSR}, Ah2={Magma_CSR};
     
     // GPU workspace
     magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR},
@@ -106,7 +108,17 @@ magma_zqmr(
     magma_zcopy( dofs, r.dval, 1, z.dval, 1, queue );  
     
     // transpose the matrix
-    magma_zmtransposeconjugate( A, &AT, queue );
+    magma_zmtransfer( A, &Ah1, Magma_DEV, Magma_CPU, queue );
+    magma_zmconvert( Ah1, &Ah2, A.storage_type, Magma_CSR, queue );
+    magma_zmfree(&Ah1, queue );
+    magma_zmtransposeconjugate( Ah2, &Ah1, queue );
+    magma_zmfree(&Ah2, queue );
+    Ah2.blocksize = A.blocksize;
+    Ah2.alignment = A.alignment;
+    magma_zmconvert( Ah1, &Ah2, Magma_CSR, A.storage_type, queue );
+    magma_zmfree(&Ah1, queue );
+    magma_zmtransfer( Ah2, &AT, Magma_CPU, Magma_DEV, queue );
+    magma_zmfree(&Ah2, queue );
     
     nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
@@ -186,7 +198,7 @@ magma_zqmr(
         }
         
         CHECK( magma_z_spmv( c_one, A, p, c_zero, pt, queue ));
-        
+        solver_par->spmv_count++;
             // epsilon = q' * pt;
         epsilon = magma_zdotc( dofs, q.dval, 1, pt.dval, 1, queue );
         beta = epsilon / delta;
@@ -207,6 +219,7 @@ magma_zqmr(
         
             // wt = A' * q - beta' * w;
         CHECK( magma_z_spmv( c_one, AT, q, c_zero, wt, queue ));
+        solver_par->spmv_count++;
         magma_zaxpy( dofs, - MAGMA_Z_CONJ( beta ), w.dval, 1, wt.dval, 1, queue );  
         
                     // no precond: z = wt
@@ -338,6 +351,8 @@ cleanup:
     magma_zmfree(&pt, queue );
     magma_zmfree(&y,  queue );
     magma_zmfree(&AT, queue );
+    magma_zmfree(&Ah1, queue );
+    magma_zmfree(&Ah2, queue );
 
     
     solver_par->info = info;
