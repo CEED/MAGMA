@@ -92,8 +92,6 @@ magma_zmslice(
         CHECK( magma_zmalloc_cpu( &B->val, nnz ) );
         
         // for the communication plan
-        CHECK( magma_index_malloc_cpu( &comm_i, A.num_rows ) );
-        CHECK( magma_zmalloc_cpu( &comm_v, A.num_rows ) );
         for( i=0; i<A.num_rows; i++ ) {
             comm_i[i] = 0;
             comm_v[i] = MAGMA_Z_ZERO;
@@ -116,9 +114,11 @@ magma_zmslice(
                 col = A.col[j];
                 B->col[k] = col;
                 // communication plan
-                comm_i[ col ] = 1;
-                comm_v[ col ] = comm_v[ col ] 
-                                + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
+                if( col<start || col>=end ){
+                    comm_i[ col ] = 1;
+                    comm_v[ col ] = comm_v[ col ] 
+                                    + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
+                }
                 k++;
             }
         }
