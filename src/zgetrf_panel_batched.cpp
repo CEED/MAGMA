@@ -120,10 +120,6 @@
                 The number of matrices to operate on.
 
     @param[in]
-    myhandle   cublasHandle_t
-            Cublas handle might be used internally.
-
-    @param[in]
     queue   magma_queue_t
             Queue to execute in.
 
@@ -141,7 +137,6 @@ magma_zgetrf_recpanel_batched(
     magmaDoubleComplex** dW5_displ,
     magma_int_t *info_array, magma_int_t gbstep,  
     magma_int_t batchCount,  magma_queue_t queue)
-    //magma_int_t batchCount,  cublasHandle_t myhandle, magma_queue_t queue)
 {
     //magma_int_t DEBUG = 3;
     // Quick return if possible

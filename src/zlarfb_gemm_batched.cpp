@@ -119,10 +119,6 @@
     queue   magma_queue_t
             Queue to execute in.
 
-    @param[in]
-    myhandle   cublasHandle_t
-            Cublas handle might be used internally.
-
     Further Details
     ---------------
     The shape of the matrix V and the storage of the vectors which define

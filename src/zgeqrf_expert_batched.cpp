@@ -177,11 +177,6 @@ magma_zgeqrf_expert_batched(
     magma_int_t i, k, ib=nb, jb=nnb, offset_RT=0, use_stream;
     magma_int_t ldw, offset; 
 
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
-
     magmaDoubleComplex **dW0_displ = NULL;
     magmaDoubleComplex **dW1_displ = NULL;
     magmaDoubleComplex **dW2_displ = NULL;
@@ -237,13 +232,13 @@ magma_zgeqrf_expert_batched(
     /*
     if ( provide_RT > 0 )
     {
-        magmablas_zlaset_q( MagmaFull, lddr, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue, UNKNOWN );
-        magmablas_zlaset_q( MagmaFull, lddt, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue, UNKNOWN );
+        magmablas_zlaset_q( MagmaFull, lddr, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue );
+        magmablas_zlaset_q( MagmaFull, lddt, n*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue );
     }
     else
     {
-        magmablas_zlaset_q( MagmaFull, lddr, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue, UNKNOWN );
-        magmablas_zlaset_q( MagmaFull, lddt, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue, UNKNOWN );
+        magmablas_zlaset_q( MagmaFull, lddr, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dR, lddr, queue );
+        magmablas_zlaset_q( MagmaFull, lddt, nb*batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dT, lddt, queue );
     }
     */
     magma_int_t streamid;
@@ -324,14 +319,10 @@ magma_zgeqrf_expert_batched(
             use_stream = magma_zrecommend_cublas_gemm_stream(MagmaNoTrans, MagmaNoTrans, m-i-ib, n-i-ib, ib);
             if ( use_stream )   
             { 
-                // But since the code use the NULL stream everywhere, 
-                // so I don't need it, because the NULL stream do the sync by itself
-                //magma_device_sync(); 
                 magma_queue_sync(queue); 
                 for (k=0; k < batchCount; k++)
                 {
                     streamid = k%nbstreams;                                       
-                    //magmablasSetKernelStream(queues[streamid]);
                     // the stream gemm must take cpu pointer 
                     magma_zlarfb_gpu_gemm( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                 m-i, n-i-ib, ib,
@@ -344,14 +335,11 @@ magma_zgeqrf_expert_batched(
 
                 // need to synchronise to be sure that panel does not start before
                 // finishing the update at least of the next panel
-                // BUT no need for it as soon as the other portion of the code 
-                // use the NULL stream which do the sync by itself 
-                //magma_device_sync();
+                // if queue is NULL, no need to sync
                 if ( queue != NULL ) {
                     for (magma_int_t s=0; s < nbstreams; s++)
                         magma_queue_sync(queues[s]);
                 }
-                //magmablasSetKernelStream(queue);
             }
             //-------------------------------------------
             //          USE BATCHED GEMM
@@ -383,13 +371,11 @@ magma_zgeqrf_expert_batched(
         }
     }
 
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( queues[k] );
     }
-    ////cublasDestroy_v2(myhandle);
-
+    
     magma_free(dW0_displ);
     magma_free(dW1_displ);
     magma_free(dW2_displ);

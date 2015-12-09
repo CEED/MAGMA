@@ -117,10 +117,6 @@ magma_zgetrs_batched(
         return info;
     }
 
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
     magmaDoubleComplex **dW1_displ  = NULL;
     magmaDoubleComplex **dW2_displ  = NULL;
     magmaDoubleComplex **dW3_displ  = NULL;
@@ -263,10 +259,7 @@ magma_zgetrs_batched(
         magma_zlaswp_rowserial_batched( nrhs, dB_array, lddb, 1, n, dipiv_array, batchCount, queue );
     }
 
-
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    ////cublasDestroy_v2(myhandle);
 
     magma_free(dW1_displ);
     magma_free(dW2_displ);

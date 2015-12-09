@@ -110,10 +110,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     magma_int_t ib, j;
     magma_int_t nb = 256; //256; // BATRF_NB;
 
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
     magmaDoubleComplex **dW1_displ  = NULL;
@@ -162,9 +158,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvdiagA_array, dinvdiagA, TRI_NB, 0, 0, invdiagA_msize, batchCount, queue);
 
-    //printf(" I am after malloc getri\n");
-
-
     magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
     // set dinvdiagA to identity
     magmablas_zlaset_batched( MagmaFull, n, n, MAGMA_Z_ZERO, MAGMA_Z_ONE, dinvA_array, lddia, batchCount, queue );
@@ -195,7 +188,6 @@ magma_zgetri_outofplace_batched( magma_int_t n,
                 dW3_displ,   dW4_displ,
                 1, batchCount, queue );
         
-        //magma_queue_sync(NULL);
         //printf(" @ step %d calling solve 2 \n",j);
         // solve dinvdiagA = U^-1 * dwork
         magma_zdisplace_pointers(dW5_displ, dwork_array, n, 0, 0, batchCount, queue);
@@ -216,9 +208,7 @@ magma_zgetri_outofplace_batched( magma_int_t n,
     // Apply column interchanges
     magma_zlaswp_columnserial_batched( n, dinvA_array, lddia, max(1,n-1), 1, dipiv_array, batchCount, queue );
 
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dW1_displ);

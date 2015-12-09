@@ -122,10 +122,6 @@ magma_zgetrs_nopiv_batched(
         return info;
     }
 
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dB_displ  = NULL;
     magmaDoubleComplex **dW1_displ  = NULL;
@@ -143,9 +139,6 @@ magma_zgetrs_nopiv_batched(
     magma_malloc((void**)&dW4_displ,  batchCount * sizeof(*dW4_displ));
     magma_malloc((void**)&dinvA_array, batchCount * sizeof(*dinvA_array));
     magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
-
-
-
 
     magma_int_t invA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = n*nrhs;
@@ -274,9 +267,7 @@ magma_zgetrs_nopiv_batched(
         }
     }
 
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dB_displ);

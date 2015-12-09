@@ -96,10 +96,6 @@ magma_zpotrs_batched(
         return info;
     }
     
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
     magmaDoubleComplex **dW1_displ  = NULL;
     magmaDoubleComplex **dW2_displ  = NULL;
     magmaDoubleComplex **dW3_displ  = NULL;
@@ -107,15 +103,12 @@ magma_zpotrs_batched(
     magmaDoubleComplex **dinvA_array = NULL;
     magmaDoubleComplex **dwork_array = NULL;
 
-
-
     magma_malloc((void**)&dW1_displ,  batchCount * sizeof(*dW1_displ));
     magma_malloc((void**)&dW2_displ,  batchCount * sizeof(*dW2_displ));
     magma_malloc((void**)&dW3_displ,  batchCount * sizeof(*dW3_displ));
     magma_malloc((void**)&dW4_displ,  batchCount * sizeof(*dW4_displ));
     magma_malloc((void**)&dinvA_array, batchCount * sizeof(*dinvA_array));
     magma_malloc((void**)&dwork_array, batchCount * sizeof(*dwork_array));
-
 
     magma_int_t invA_msize = magma_roundup( n, TRI_NB )*TRI_NB;
     magma_int_t dwork_msize = n*nrhs;
@@ -145,9 +138,6 @@ magma_zpotrs_batched(
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
     magma_queue_t cstream;
-    //magmablasGetKernelStream(&cstream);
-
-
     if ( uplo == MagmaUpper) {
         if (nrhs > 1)
         {
@@ -245,12 +235,7 @@ magma_zpotrs_batched(
         }
     }
 
-
-
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
-    ////cublasDestroy_v2(myhandle);
-
 
     magma_free(dW1_displ);
     magma_free(dW2_displ);

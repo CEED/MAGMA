@@ -108,10 +108,6 @@ magma_zpotrf_lg_batched(
     magma_int_t nb, recnb;
     magma_get_zpotrf_batched_nbparam(n, &nb, &recnb);
 
-    //cublasHandle_t myhandle = queue->cublas_handle();
-    ////cublasCreate_v2(&myhandle);
-    ////cublasSetStream(myhandle, queue);
-
     magmaDoubleComplex **dA_displ   = NULL;
     magmaDoubleComplex **dW0_displ  = NULL;
     magmaDoubleComplex **dW1_displ  = NULL;
@@ -227,15 +223,11 @@ magma_zpotrf_lg_batched(
                     //          USE STREAM  HERK
                     //-------------------------------------------
                     // since it use different stream I need to wait the panel.
-                    // But since the code use the NULL stream everywhere, 
-                    // so I don't need it, because the NULL stream do the sync by itself
-                    //magma_queue_sync(NULL); 
                     /* you must know the matrix layout inorder to do it */  
                     magma_queue_sync(queue); 
                     for (k=0; k < batchCount; k++)
                     {
                         streamid = k%nbstreams;                                       
-                        //magmablasSetKernelStream(queues[streamid]);
                         // call herk, class zherk must call cpu pointer 
                         magma_zherk( MagmaLower, MagmaNoTrans, n-j-ib, ib, 
                             d_alpha, 
@@ -245,14 +237,11 @@ magma_zpotrf_lg_batched(
                      }
                      // need to synchronise to be sure that panel do not start before
                      // finishing the update at least of the next panel
-                     // BUT no need for it as soon as the other portion of the code 
-                     // use the NULL stream which do the sync by itself 
-                     //magma_device_sync(); 
+                     // if queue is NULL, no need to sync
                      if ( queue != NULL ) {
                          for (magma_int_t s=0; s < nbstreams; s++)
                              magma_queue_sync(queues[s]);
                      }
-                     //magmablasSetKernelStream(queue);
                 }
                 else
                 {
@@ -276,12 +265,10 @@ magma_zpotrf_lg_batched(
     }
 
 fin:
-    //magmablasSetKernelStream(queue);
     magma_queue_sync(queue);
     for (k=0; k < nbstreams; k++) {
         magma_queue_destroy( queues[k] );
     }
-    ////cublasDestroy_v2(myhandle);
 
     magma_free(dA_displ);
     magma_free(dW0_displ);

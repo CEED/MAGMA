@@ -33,7 +33,6 @@ magma_zgetrf_panel_nopiv_batched(
     magmaDoubleComplex** dW4_displ,     
     magma_int_t *info_array, magma_int_t gbstep,  
     magma_int_t batchCount, magma_queue_t queue )
-    //magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue )
 {
     magma_int_t arginfo = 0;
     //===============================================
@@ -92,7 +91,6 @@ magma_zgetrf_recpanel_nopiv_batched(
     magmaDoubleComplex** dW5_displ, 
     magma_int_t *info_array, magma_int_t gbstep,
     magma_int_t batchCount, magma_queue_t queue )
-    //magma_int_t batchCount, cublasHandle_t myhandle, magma_queue_t queue )
 {
     // Quick return if possible
     if (m == 0 || n == 0) {
