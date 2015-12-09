@@ -56,10 +56,10 @@ magma_zcustomicsetup(
     cusparseMatDescr_t descrU=NULL;
     
     magma_z_matrix hA={Magma_CSR};
-    char preconditionermatix[255];
+    char preconditionermatrix[255];
     
-    sprintf(preconditionermatix, "IC_factor.mtx" );
-    CHECK( magma_z_csr_mtx( &hA, preconditionermatix , queue) );
+    sprintf(preconditionermatrix, "/Users/hanzt0114cl306/work/matrices/ani/ani5_crop_ilut.mtx" );
+    CHECK( magma_z_csr_mtx( &hA, preconditionermatrix , queue) );
     
     
     // for CUSPARSE

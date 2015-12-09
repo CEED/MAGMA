@@ -94,12 +94,6 @@ magma_ziterictsetup(
     magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
     magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
-    magma_zmdynamicic_sweep( hA, &LU, queue );
     
     for( magma_int_t iters =0; iters<precond->sweeps; iters++ ) {
         printf("\n\n iteration %d:\n", iters+1);
