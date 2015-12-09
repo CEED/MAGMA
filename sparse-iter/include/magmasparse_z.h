@@ -446,6 +446,8 @@ magma_zresidualvec(
 
 magma_int_t
 magma_zresidual_slice(
+    magma_int_t start,
+    magma_int_t end,
     magma_z_matrix A, 
     magma_z_matrix b, 
     magma_z_matrix x,
