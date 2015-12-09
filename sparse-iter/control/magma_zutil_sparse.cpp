@@ -302,6 +302,9 @@ magma_zparse_opts(
             else if ( strcmp("CUSTOMIC", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_CUSTOMIC;
             }
+            else if ( strcmp("CUSTOMILU", argv[i]) == 0 ) {
+                opts->precond_par.solver = Magma_CUSTOMILU;
+            }
             else if ( strcmp("NONE", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_NONE;
             }
