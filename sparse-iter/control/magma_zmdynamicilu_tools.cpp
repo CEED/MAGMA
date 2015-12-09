@@ -239,7 +239,9 @@ magma_zmdynamicilu_rm_thrs(
                 // the condition nexti!=0 esures we never remove the diagonal
                     LU->val[ i ] = MAGMA_Z_ZERO;
                     LU->list[ i ] = -1;
-
+                    if( LU->col[ i ] == r ){
+                        printf("error: try to rm diagonal.\n");   
+                    }
                     
                     omp_set_lock(&(counter));
                     rm_loc[ count_rm ] = i; 
