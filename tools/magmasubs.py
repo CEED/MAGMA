@@ -580,7 +580,7 @@ subs = {
     ('sbajac',         'dbajac',         'cbajac',         'zbajac'          ),
     ('sbaiter',        'dbaiter',        'cbaiter',        'zbaiter'         ),
     ('sbombard',       'dbombard',       'cbombard',       'zbombard'        ),
-    ('scustomic',      'dcustomic',      'ccustomic',      'zcustomic'       ),
+    ('scustom',        'dcustom',        'ccustom',        'zcustom'         ),
 
     # ----- SPARSE Iterative Eigensolvers
     ('slobpcg',        'dlobpcg',        'clobpcg',        'zlobpcg'         ),
