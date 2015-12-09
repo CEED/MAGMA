@@ -14,6 +14,7 @@
 #include "magmasparse_internal.h"
 #ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #define PRECISION_z
 
@@ -55,8 +56,11 @@ magma_ziterictsetup(
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
+
     magma_int_t info = 0;
-    
+
+#ifdef _OPENMP
+
     cusparseHandle_t cusparseHandle=NULL;
     cusparseMatDescr_t descrL=NULL;
     cusparseMatDescr_t descrU=NULL;
@@ -177,8 +181,8 @@ magma_ziterictsetup(
     magma_zmfree( &LU_new, queue );
     magma_zmfree( &L, queue );
     magma_zmfree( &LU, queue );
-    
+#endif
     return info;
 }
     
-#endif
+
