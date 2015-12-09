@@ -1097,6 +1097,13 @@ magma_zcumilusetup(
     magma_queue_t queue );
 
 magma_int_t
+magma_zcustomilusetup(
+    magma_z_matrix A,
+    magma_z_matrix b,
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zcustomicsetup(
     magma_z_matrix A,
     magma_z_matrix b,
