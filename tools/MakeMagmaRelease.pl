@@ -22,6 +22,7 @@ my $beta     = 0;
 my @files2delete = qw(
     ReleaseChecklist
     Makefile.gen
+    Makefile.internal
     contrib
     control/sizeptr
     
@@ -187,7 +188,7 @@ EOT
     # Precision Generation
     print "Generate the different precisions\n";
     myCmd("touch make.inc");
-    myCmd("make -j generation");
+    myCmd("make -j generate");
 
     # Compile the documentation
     print "Compile the documentation\n";
