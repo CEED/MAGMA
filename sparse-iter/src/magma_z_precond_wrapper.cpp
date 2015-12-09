@@ -169,6 +169,10 @@ magma_z_precondsetup(
         info = magma_zcustomicsetup( A, b, precond, queue );
         precond->solver = Magma_AICC; // handle as AICC
     }
+    else if ( precond->solver == Magma_CUSTOMILU ) {
+        info = magma_zcustomilusetup( A, b, precond, queue );
+        precond->solver = Magma_AILU; // handle as AILU
+    }
     else if ( precond->solver == Magma_NONE ) {
         info = MAGMA_SUCCESS;
     }
