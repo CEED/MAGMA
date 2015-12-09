@@ -42,7 +42,7 @@ int main(  int argc, char** argv )
     
     magma_index_t *comm_i=NULL;
     magmaDoubleComplex *comm_v=NULL;
-
+    magma_int_t start, end;
     
     int i=1;
     CHECK( magma_zparse_opts( argc, argv, &zopts, &i, queue ));
@@ -65,19 +65,19 @@ int main(  int argc, char** argv )
         // slice matrix
         CHECK( magma_index_malloc_cpu( &comm_i, Z.num_rows ) );
         CHECK( magma_zmalloc_cpu( &comm_v, Z.num_rows ) );
-        CHECK( magma_zmslice( 9, 0, Z, &A2, comm_i, comm_v, queue ) );    
+        CHECK( magma_zmslice( 9, 0, Z, &A2, comm_i, comm_v, &start, &end, queue ) );    
         magma_zprint_matrix( A2, queue );
         magma_zmfree(&A2, queue );
-        CHECK( magma_zmslice( 9, 1, Z, &A2, comm_i, comm_v, queue ) );    
+        CHECK( magma_zmslice( 9, 1, Z, &A2, comm_i, comm_v, &start, &end, queue ) );    
         magma_zprint_matrix( A2, queue );
         magma_zmfree(&A2, queue );
-        CHECK( magma_zmslice( 9, 5, Z, &A2, comm_i, comm_v, queue ) );    
+        CHECK( magma_zmslice( 9, 5, Z, &A2, comm_i, comm_v, &start, &end, queue ) );    
         magma_zprint_matrix( A2, queue );
         magma_zmfree(&A2, queue );
-        CHECK( magma_zmslice( 1, 0, Z, &A2, comm_i, comm_v, queue ) );    
+        CHECK( magma_zmslice( 1, 0, Z, &A2, comm_i, comm_v, &start, &end, queue ) );    
         magma_zprint_matrix( A2, queue );
         magma_zmfree(&A2, queue );
-        CHECK( magma_zmslice( 9, 8, Z, &A2, comm_i, comm_v, queue ) );    
+        CHECK( magma_zmslice( 9, 8, Z, &A2, comm_i, comm_v, &start, &end, queue ) );    
         magma_zprint_matrix( A2, queue );
         magma_zmfree(&A2, queue );
         

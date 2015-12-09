@@ -45,17 +45,25 @@
     B           magma_z_matrix*
                 sparse matrix in CSR
                 
-   @param[out]          
+   @param[in,out]          
     comm_i      magma_int_t*
                 communication plan
  
-    @param[out]          
+    @param[in,out]          
     comm_v      magmaDoubleComplex*
                 communication plan
 
     @param[in]
     queue       magma_queue_t
                 Queue to execute in.
+                
+    @param[out]          
+    start       magma_int_t*
+                start of slice (row-index)
+                
+    @param[out]          
+    end         magma_int_t*
+                end of slice (row-index)
 
     @ingroup magmasparse_zaux
     ********************************************************************/
@@ -68,6 +76,8 @@ magma_zmslice(
     magma_z_matrix *B,
     magma_index_t *comm_i,
     magmaDoubleComplex *comm_v,
+    magma_int_t *start,
+    magma_int_t *end,
     magma_queue_t queue )
 {
     magma_int_t info = 0;
@@ -81,13 +91,13 @@ magma_zmslice(
         magma_int_t i,j,k, nnz;
         magma_index_t col;
         magma_int_t size = magma_ceildiv( A.num_rows, num_slices ); 
-        magma_int_t start = slice*size;
-        magma_int_t end = min( (slice+1)*size, A.num_rows );
+        magma_int_t lstart = slice*size;
+        magma_int_t lend = min( (slice+1)*size, A.num_rows );
         // correct size for last slice
-        size = end-start;
+        size = lend-lstart;
         
         // count elements - identity for rest
-        nnz = A.row[ end ] - A.row[ start ] + ( A.num_rows - size );
+        nnz = A.row[ lend ] - A.row[ lstart ] + ( A.num_rows - size );
         CHECK( magma_index_malloc_cpu( &B->col, nnz ) );
         CHECK( magma_zmalloc_cpu( &B->val, nnz ) );
         
@@ -99,7 +109,7 @@ magma_zmslice(
         
         k=0;
         // identity above slice
-        for( i=0; i<start; i++ ) {
+        for( i=0; i<lstart; i++ ) {
             B->row[i+1]   = B->row[i]+1;
             B->val[k] = MAGMA_Z_ONE;
             B->col[k] = i;
@@ -107,14 +117,14 @@ magma_zmslice(
         }
         
         // slice        
-        for( i=start; i<end; i++ ) {
+        for( i=lstart; i<lend; i++ ) {
             B->row[i+1]   = B->row[i] + (A.row[i+1]-A.row[i]);
             for( j=A.row[i]; j<A.row[i+1]; j++ ){
                 B->val[k] = A.val[j];
                 col = A.col[j];
                 B->col[k] = col;
                 // communication plan
-                if( col<start || col>=end ){
+                if( col<lstart || col>=lend ){
                     comm_i[ col ] = 1;
                     comm_v[ col ] = comm_v[ col ] 
                                     + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
@@ -125,13 +135,15 @@ magma_zmslice(
         
         
         // identity below slice
-        for( i=end; i<A.num_rows; i++ ) {
+        for( i=lend; i<A.num_rows; i++ ) {
             B->row[i+1] = B->row[i]+1;
             B->val[k] = MAGMA_Z_ONE;
             B->col[k] = i;
             k++;
         }
         B->nnz = k;
+        *start = lstart;
+        *end = lend;
         
     }
     else {
