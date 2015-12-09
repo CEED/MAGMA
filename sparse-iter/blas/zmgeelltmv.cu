@@ -13,7 +13,7 @@
 
 #define BLOCK_SIZE 512
 
-
+template<bool betazero>
 __global__ void 
 zmgeelltmv_kernel( 
         int num_rows, 
@@ -35,15 +35,17 @@ zmgeelltmv_kernel(
         for ( int n = 0; n < num_cols_per_row; n++ ) {
             int col = dcolind [ num_rows * n + row ];
             magmaDoubleComplex val = dval [ num_rows * n + row ];
-            if( val != 0) {
                 for( int i=0; i<num_vecs; i++ )
                     dot[ threadIdx.x + i*blockDim.x ] += 
                                         val * dx[col + i * num_cols ];
-            }
         }
         for( int i=0; i<num_vecs; i++ ) {
-            dy[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] 
-                            * alpha + beta * dy [ row + i*num_cols ];
+            if (betazero) {
+                dy[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] *alpha;
+            } else {
+                dy[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] 
+                                        * alpha + beta * dy [ row + i*num_cols ];
+            }
         }
     }
 }
@@ -131,8 +133,13 @@ magma_zmgeelltmv(
     magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                 * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgeelltmv_kernel<<< grid, threads, MEM_SIZE, queue->cuda_stream() >>>
-        ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
+    if (beta == MAGMA_Z_ZERO) {
+        zmgeelltmv_kernel<true><<< grid, threads, MEM_SIZE, queue->cuda_stream() >>>
+            ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
+    } else {
+        zmgeelltmv_kernel<false><<< grid, threads, MEM_SIZE, queue->cuda_stream() >>>
+            ( m, n, num_vecs, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
+    }
 
 
     return MAGMA_SUCCESS;

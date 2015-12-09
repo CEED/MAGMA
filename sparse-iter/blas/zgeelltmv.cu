@@ -16,6 +16,7 @@
 
 // ELL SpMV kernel
 //Michael Garland
+template<bool betazero>
 __global__ void 
 zgeelltmv_kernel( 
     int num_rows, 
@@ -34,10 +35,13 @@ zgeelltmv_kernel(
         for ( int n = 0; n < num_cols_per_row; n++ ) {
             int col = dcolind [ num_rows * n + row ];
             magmaDoubleComplex val = dval [ num_rows * n + row ];
-            if ( val != 0)
                 dot += val * dx[col ];
         }
-        dy[ row ] = dot * alpha + beta * dy [ row ];
+        if (betazero) {
+            dy[ row ] = dot * alpha;
+        } else {
+            dy[ row ] = dot * alpha + beta * dy [ row ];
+        }
     }
 }
 
@@ -152,8 +156,13 @@ magma_zgeelltmv(
 {
     dim3 grid( magma_ceildiv( m, BLOCK_SIZE ) );
     magma_int_t threads = BLOCK_SIZE;
-    zgeelltmv_kernel<<< grid, threads, 0, queue->cuda_stream() >>>
+    if (beta == MAGMA_Z_ZERO) {
+        zgeelltmv_kernel<true><<< grid, threads, 0, queue->cuda_stream() >>>
                   ( m, n, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
+    } else {
+        zgeelltmv_kernel<false><<< grid, threads, 0, queue->cuda_stream() >>>
+                  ( m, n, nnz_per_row, alpha, dval, dcolind, dx, beta, dy );
+    }
 
 
    return MAGMA_SUCCESS;
