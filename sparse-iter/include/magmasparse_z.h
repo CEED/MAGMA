@@ -232,6 +232,7 @@ magma_zmslice(
     magma_z_matrix A, 
     magma_z_matrix *B,
     magma_z_matrix *ALOC,
+    magma_z_matrix *ANLOC,
     magma_index_t *comm_i,
     magmaDoubleComplex *comm_v,
     magma_int_t *start,

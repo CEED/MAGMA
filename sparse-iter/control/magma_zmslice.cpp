@@ -19,10 +19,13 @@
 
     Takes a matrix and extracts a slice for solving the system in parallel:
     
-        B = A( i:i+n, : ) and ALOC = A(i:i+n,i:i+n)
+        B = A( i:i+n, : ) and ALOC = A(i:i+n,i:i+n) and ANLOCA(0:start - end:n,:)
         
-    The last slice might be smaller. For the non-local parts, it is the identity.
-    comm contains 1es in the locations that are non-local but needed to 
+    B is of size n x n, ALOC of size end-start x end-start,
+    ANLOC of size end-start x n
+        
+    The last slice might be smaller. For the non-local parts, B is the identity.
+    comm contains 1ess in the locations that are non-local but needed to 
     solve local system.
 
 
@@ -49,6 +52,9 @@
     ALOC        magma_z_matrix*
                 sparse matrix in CSR
                 
+    @param[out]
+    ANLOC       magma_z_matrix*
+                sparse matrix in CSR
                 
    @param[in,out]          
     comm_i      magma_int_t*
@@ -80,6 +86,7 @@ magma_zmslice(
     magma_z_matrix A, 
     magma_z_matrix *B,
     magma_z_matrix *ALOC,
+    magma_z_matrix *ANLOC,
     magma_index_t *comm_i,
     magmaDoubleComplex *comm_v,
     magma_int_t *start,
@@ -97,15 +104,20 @@ magma_zmslice(
         magma_free_cpu( ALOC->col );
         magma_free_cpu( ALOC->row );
         magma_free_cpu( ALOC->val );
+        CHECK( magma_zmconvert( A, ANLOC, Magma_CSR, Magma_CSR, queue ) );
+        magma_free_cpu( ANLOC->col );
+        magma_free_cpu( ANLOC->row );
+        magma_free_cpu( ANLOC->val );
         
-        magma_int_t i,j,k, nnz, nnz_loc=0, loc_row = 0;
+        magma_int_t i,j,k, nnz, nnz_loc=0, loc_row = 0, nnz_nloc = 0;
         magma_index_t col;
         magma_int_t size = magma_ceildiv( A.num_rows, num_slices ); 
         magma_int_t lstart = slice*size;
         magma_int_t lend = min( (slice+1)*size, A.num_rows );
         // correct size for last slice
         size = lend-lstart;
-        CHECK( magma_index_malloc_cpu( &ALOC->row, size ) );
+        CHECK( magma_index_malloc_cpu( &ALOC->row, size+1 ) );
+        CHECK( magma_index_malloc_cpu( &ANLOC->row, size+1 ) );
         
         // count elements for slice - identity for rest
         nnz = A.row[ lend ] - A.row[ lstart ] + ( A.num_rows - size );
@@ -121,6 +133,7 @@ magma_zmslice(
         k=0;
         B->row[i] = 0;
         ALOC->row[0] = 0;
+        ANLOC->row[0] = 0;
         // identity above slice
         for( i=0; i<lstart; i++ ) {
             B->row[i+1]   = B->row[i]+1;
@@ -140,7 +153,8 @@ magma_zmslice(
                 if( col<lstart || col>=lend ){
                     comm_i[ col ] = 1;
                     comm_v[ col ] = comm_v[ col ] 
-                                    + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
+                            + MAGMA_Z_MAKE( MAGMA_Z_ABS( A.val[j] ), 0.0 );
+                    nnz_nloc++;
                 } else {
                     nnz_loc++;   
                 }
@@ -148,6 +162,7 @@ magma_zmslice(
             }
             loc_row++;
             ALOC->row[ loc_row ] = nnz_loc;
+            ANLOC->row[ loc_row ] = nnz_nloc;
         }
         CHECK( magma_index_malloc_cpu( &ALOC->col, nnz_loc ) );
         CHECK( magma_zmalloc_cpu( &ALOC->val, nnz_loc ) ); 
@@ -155,14 +170,23 @@ magma_zmslice(
         ALOC->num_cols = size;
         ALOC->nnz = nnz_loc;
         
+        CHECK( magma_index_malloc_cpu( &ANLOC->col, nnz_nloc ) );
+        CHECK( magma_zmalloc_cpu( &ANLOC->val, nnz_nloc ) ); 
+        ANLOC->num_rows = size;
+        ANLOC->num_cols = A.num_cols;
+        ANLOC->nnz = nnz_nloc;
+        
         nnz_loc = 0;
-        // local matrix        
+        nnz_nloc = 0;
+        // local/nonlocal matrix        
         for( i=lstart; i<lend; i++ ) {
             for( j=A.row[i]; j<A.row[i+1]; j++ ){
                 col = A.col[j];
-                // insert only in local part
+                // insert only in local part in ALOC, nonlocal in ANLOC
                 if( col<lstart || col>=lend ){
-                    ;
+                    ANLOC->val[ nnz_nloc ] = A.val[j];
+                    ANLOC->col[ nnz_nloc ] = col;  
+                    nnz_nloc++;
                 } else {
                     ALOC->val[ nnz_loc ] = A.val[j];
                     ALOC->col[ nnz_loc ] = col-lstart;  
