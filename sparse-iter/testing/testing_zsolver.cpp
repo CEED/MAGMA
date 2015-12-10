@@ -46,21 +46,6 @@ int main(  int argc, char** argv )
     B.blocksize = zopts.blocksize;
     B.alignment = zopts.alignment;
 
-    // make sure preconditioner is NONE for unpreconditioned systems
-    if ( zopts.solver_par.solver != Magma_PCG &&
-         zopts.solver_par.solver != Magma_PCGMERGE &&
-         zopts.solver_par.solver != Magma_PGMRES &&
-         zopts.solver_par.solver != Magma_PBICGSTAB &&
-         zopts.solver_par.solver != Magma_PBICGSTABMERGE &&
-         zopts.solver_par.solver != Magma_ITERREF  &&
-         zopts.solver_par.solver != Magma_PIDR  &&
-         zopts.solver_par.solver != Magma_PCGS  &&
-         zopts.solver_par.solver != Magma_PCGSMERGE &&
-         zopts.solver_par.solver != Magma_PTFQMR &&
-         zopts.solver_par.solver != Magma_PTFQMRMERGE &&
-         zopts.solver_par.solver != Magma_LOBPCG ){
-                    zopts.precond_par.solver = Magma_NONE;
-         }
     CHECK( magma_zsolverinfo_init( &zopts.solver_par, &zopts.precond_par, queue ));
 
     while( i < argc ) {

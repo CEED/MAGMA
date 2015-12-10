@@ -191,7 +191,7 @@ magma_zparse_opts(
                 opts->solver_par.solver = Magma_TFQMRMERGE;
             }
             else if ( strcmp("PTFQMR", argv[i]) == 0 ) {
-                opts->solver_par.solver = Magma_PTFQMR;
+                opts->solver_par.solver = Magma_PTFQMRMERGE;
             }
             else if ( strcmp("GMRES", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_GMRES;
@@ -252,7 +252,7 @@ magma_zparse_opts(
                 opts->precond_par.solver = Magma_TFQMRMERGE;
             }
             else if ( strcmp("PTFQMR", argv[i]) == 0 ) {
-                opts->precond_par.solver = Magma_PTFQMR;
+                opts->precond_par.solver = Magma_PTFQMRMERGE;
             }
             else if ( strcmp("GMRES", argv[i]) == 0 ) {
                 opts->precond_par.solver = Magma_GMRES;
@@ -393,6 +393,22 @@ magma_zparse_opts(
             opts->solver_par.solver = Magma_BOMBARD;
         }
     }
+    
+    // make sure preconditioner is NONE for unpreconditioned systems
+    if ( opts->solver_par.solver != Magma_PCG &&
+         opts->solver_par.solver != Magma_PCGMERGE &&
+         opts->solver_par.solver != Magma_PGMRES &&
+         opts->solver_par.solver != Magma_PBICGSTAB &&
+         opts->solver_par.solver != Magma_PBICGSTABMERGE &&
+         opts->solver_par.solver != Magma_ITERREF  &&
+         opts->solver_par.solver != Magma_PIDR  &&
+         opts->solver_par.solver != Magma_PCGS  &&
+         opts->solver_par.solver != Magma_PCGSMERGE &&
+         opts->solver_par.solver != Magma_PTFQMR &&
+         opts->solver_par.solver != Magma_PTFQMRMERGE &&
+         opts->solver_par.solver != Magma_LOBPCG ){
+                    opts->precond_par.solver = Magma_NONE;
+         }
     
     // ensure to take a symmetric preconditioner for the PCG
     if ( opts->solver_par.solver == Magma_PCG
