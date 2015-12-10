@@ -806,7 +806,6 @@ magma_zprint_matrix(
     if ( A.memory_location == Magma_CPU ) {
         printf("visualizing matrix of size %d x %d with %d nonzeros:\n",
             (int) A.num_rows, (int) A.num_cols, (int) A.nnz);
-        
         if ( A.storage_type == Magma_DENSE ) {
             for( i=0; i < (A.num_rows); i++ ) {
                 for( j=0; j < A.num_cols; j++ ) {
@@ -814,6 +813,10 @@ magma_zprint_matrix(
                 }
                 printf( "\n" );
             }
+        }
+        else if( A.num_cols < 8 || A.num_rows < 8 ) { 
+            CHECK( magma_zmconvert( A, &C, A.storage_type, Magma_DENSE, queue ));
+            CHECK( magma_zprint_matrix(  C, queue ));
         }
         else if ( A.storage_type == Magma_CSR ) {
             // visualize only small matrices like dense
