@@ -159,7 +159,7 @@ magma_zresidual_slice(
 
         CHECK( magma_z_spmv( c_one, A, x, c_zero, r, queue ));        // r = A x
         magma_zaxpy( dofs, c_neg_one, b.dval, 1, r.dval, 1, queue );  // r = r - b
-        *res = magma_dznrm2( end-start, r.dval+start, 1, queue );                // res = ||r||
+        *res = magma_dznrm2( end-start, r.dval+start, 1, queue );                // res = ||r(start:end)||
     } else if ((b.num_rows*b.num_cols)%A.num_rows == 0 ) {
         CHECK( magma_zvinit( &r, Magma_DEV, b.num_rows, b.num_cols, c_zero, queue ));
 
@@ -167,7 +167,7 @@ magma_zresidual_slice(
 
         for( magma_int_t i=0; i < num_vecs; i++) {
             magma_zaxpy( dofs, c_neg_one, b(i), 1, r(i), 1, queue );  // r = r - b
-            res[i] = magma_dznrm2( end-start, r(i)+start, 1, queue );            // res = ||r||
+            res[i] = magma_dznrm2( end-start, r(i)+start, 1, queue );            // res = ||r(start:end)||
         }
     } else {
         printf("error: dimensions do not match.\n");

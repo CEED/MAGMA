@@ -129,7 +129,7 @@ magma_zptfqmr(
         goto cleanup;
     }
 
-    tau = magma_zsqrt( magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue ) );
+    tau = magma_zsqrt( magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue ));
     rho = magma_zdotc( dofs, r.dval, 1, r_tld.dval, 1, queue );
     rho_l = rho;
     
@@ -179,9 +179,9 @@ magma_zptfqmr(
             break;
         }
         if( solver_par->numiter%2 == 0 ){
-            rho_l = rho;
             rho = magma_zdotc( dofs, w.dval, 1, r_tld.dval, 1, queue );
             beta = rho / rho_l;
+            rho_l = rho;
             magma_zcopy( dofs, w.dval, 1, u_mp1.dval, 1, queue );  
             magma_zaxpy( dofs, beta, u_m.dval, 1, u_mp1.dval, 1, queue );     // u_mp1 = w + beta*u_m;
         }
