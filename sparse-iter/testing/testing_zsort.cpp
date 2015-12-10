@@ -110,7 +110,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zdomainoverlap( A.num_rows, &num_ind, A.row, A.col, x, queue ));
                 printf("domain overlap indices:\n");
         for(magma_int_t j = 0; j<num_ind; j++ ){
-            printf("%d  ", x[j]);
+            printf("%d  ", (int) x[j]);
         }
         printf("\n\n");
         magma_free_cpu( x );
