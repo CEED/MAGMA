@@ -600,9 +600,10 @@ for solver in IR:
 
 
 # ----------------------------------------------------------------------
-print 'tests'
-for t in tests:
-    print t
+#print 'tests'
+#for t in tests:
+#    print t
+
 
 # ----------------------------------------------------------------------
 # runs command in a subprocess.
@@ -695,7 +696,7 @@ for test in tests:
     if (    (args and not cmd in args)
          or (not os.path.exists( cmd ))
          or (seen.has_key( cmd_args )) ):
-        print "skipping", cmd_args
+        #print "skipping", cmd_args
         continue
     # end
     seen[ cmd_args ] = True
