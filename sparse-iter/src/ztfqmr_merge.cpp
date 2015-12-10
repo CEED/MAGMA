@@ -60,10 +60,6 @@ magma_ztfqmr_merge(
 {
     magma_int_t info = MAGMA_NOTCONVERGED;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_TFQMRMERGE;
     solver_par->numiter = 0;
@@ -80,7 +76,7 @@ magma_ztfqmr_merge(
     magma_int_t dofs = A.num_rows* b.num_cols;
 
     // GPU workspace
-    magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR},
+    magma_z_matrix r={Magma_CSR}, r_tld={Magma_CSR}, pu_m={Magma_CSR},
                     d={Magma_CSR}, w={Magma_CSR}, v={Magma_CSR},
                     u_mp1={Magma_CSR}, u_m={Magma_CSR}, Au={Magma_CSR}, 
                     Ad={Magma_CSR}, Au_new={Magma_CSR};
@@ -88,6 +84,7 @@ magma_ztfqmr_merge(
     CHECK( magma_zvinit( &u_mp1,Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &r_tld,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &u_m, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
+    CHECK( magma_zvinit( &pu_m, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &v, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &d, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &w, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
@@ -100,8 +97,10 @@ magma_ztfqmr_merge(
     solver_par->init_res = nom0;
     magma_zcopy( dofs, r.dval, 1, r_tld.dval, 1, queue );   
     magma_zcopy( dofs, r.dval, 1, w.dval, 1, queue );   
-    magma_zcopy( dofs, r.dval, 1, u_mp1.dval, 1, queue );   
-    CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, v, queue ));   // v = A u
+    magma_zcopy( dofs, r.dval, 1, u_m.dval, 1, queue );  
+    magma_zcopy( dofs, r.dval, 1, u_mp1.dval, 1, queue ); 
+    magma_zcopy( dofs, u_m.dval, 1, pu_m.dval, 1, queue );  
+    CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1, queue );  
     nomb = magma_dznrm2( dofs, b.dval, 1, queue );
     if ( nomb == 0.0 ){
@@ -147,6 +146,8 @@ magma_ztfqmr_merge(
         sigma,
         v.dval, 
         Au.dval,
+        u_m.dval,
+        pu_m.dval,
         u_mp1.dval,
         w.dval, 
         d.dval,
@@ -168,11 +169,29 @@ magma_ztfqmr_merge(
         x->dval, 
         r.dval, 
         queue );
-    
-        CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
+        
+        res = magma_dznrm2( dofs, r.dval, 1, queue );
+        
+        if ( solver_par->verbose > 0 ) {
+            tempo2 = magma_sync_wtime( queue );
+            if ( (solver_par->numiter)%solver_par->verbose == 0 ) {
+                solver_par->res_vec[(solver_par->numiter)/solver_par->verbose]
+                        = (real_Double_t) res;
+                solver_par->timing[(solver_par->numiter)/solver_par->verbose]
+                        = (real_Double_t) tempo2-tempo1;
+            }
+        }
+
+        if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            break;
+        }
+
+        magma_zcopy( dofs, u_mp1.dval, 1, pu_m.dval, 1, queue );
+        CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue )); // Au_new = A u_mp1
         solver_par->spmv_count++;
         magma_zcopy( dofs, Au_new.dval, 1, Au.dval, 1, queue );  
-        
+        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1, queue );  
+
         // here starts the second part of the loop #################################
         magma_ztfqmr_5(  
         r.num_rows, 
@@ -181,11 +200,13 @@ magma_ztfqmr_merge(
         sigma,
         v.dval, 
         Au.dval,
-        u_mp1.dval,
+        pu_m.dval,
         w.dval, 
         d.dval,
         Ad.dval,
         queue ); 
+        
+        sigma = theta * theta / alpha * eta;  
         
         theta = magma_zsqrt( magma_zdotc(dofs, w.dval, 1, w.dval, 1, queue) ) / tau;
         c = c_one / magma_zsqrt( c_one + theta*theta );
@@ -201,8 +222,6 @@ magma_ztfqmr_merge(
         x->dval, 
         r.dval, 
         queue );
-    
-    
         
         res = magma_dznrm2( dofs, r.dval, 1, queue );
         
@@ -220,19 +239,22 @@ magma_ztfqmr_merge(
             break;
         }
         
-        rho_l = rho;
         rho = magma_zdotc( dofs, w.dval, 1, r_tld.dval, 1, queue );
         beta = rho / rho_l;
+        rho_l = rho;
         
         magma_ztfqmr_3(  
         r.num_rows, 
         r.num_cols, 
         beta,
         w.dval,
+        u_m.dval,
         u_mp1.dval, 
         queue );
               
-        CHECK( magma_z_spmv( c_one, A, u_mp1, c_zero, Au_new, queue )); // Au_new = A u_mp1
+        magma_zcopy( dofs, u_mp1.dval, 1, pu_m.dval, 1, queue );  
+        CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, Au_new, queue )); // Au_new = A pu_m
+
         solver_par->spmv_count++;
         magma_ztfqmr_4(  
         r.num_rows, 
@@ -242,6 +264,8 @@ magma_ztfqmr_merge(
         v.dval,
         Au.dval, 
         queue );
+        
+        magma_zcopy( dofs, u_mp1.dval, 1, u_m.dval, 1, queue ); 
     
     }
     while ( solver_par->numiter+1 <= solver_par->maxiter );
@@ -290,12 +314,12 @@ cleanup:
     magma_zmfree(&v, queue );
     magma_zmfree(&u_m, queue );
     magma_zmfree(&u_mp1, queue );
+    magma_zmfree(&pu_m, queue );
     magma_zmfree(&d, queue );
     magma_zmfree(&Au, queue );
     magma_zmfree(&Au_new, queue );
     magma_zmfree(&Ad, queue );
     
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
-}   /* magma_zfqmr_merge */
+}   /* magma_ztfqmr_merge */
