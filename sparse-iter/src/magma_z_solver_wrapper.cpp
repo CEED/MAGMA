@@ -111,7 +111,7 @@ magma_z_solver(
             case  Magma_TFQMRMERGE:
                     CHECK( magma_ztfqmr_merge( A, b, x, &zopts->solver_par, queue ) ); break;
             case  Magma_PTFQMRMERGE:
-                    CHECK( magma_zptfqmr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue ) ); break;
+                    CHECK( magma_zptfqmr_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue ) ); break;
             case  Magma_QMR:
                     CHECK( magma_zqmr( A, b, x, &zopts->solver_par, queue ) ); break;
             case  Magma_QMRMERGE:
