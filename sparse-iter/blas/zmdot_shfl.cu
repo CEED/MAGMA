@@ -6,7 +6,7 @@
        @date
 
        @precisions normal z -> c d s
-       @author Hartwig Anzt
+       @author Moritz Kreutzer
 
 */
 #include "common_magma.h"

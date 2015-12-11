@@ -7,6 +7,7 @@
 
        @author Hartwig Anzt
        @author Eduardo Ponce
+       @author Moritz Kreutzer
 
        @precisions normal z -> s d c
 */
