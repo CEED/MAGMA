@@ -103,14 +103,15 @@ magma_zidr_acc(
     magmaDoubleComplex gamma;
     magmaDoubleComplex mkk;
     magmaDoubleComplex fk;
+    magmaDoubleComplex_ptr tmp;
 
     // matrices and vectors
     magma_z_matrix dxs = {Magma_CSR};
     magma_z_matrix dP1 = {Magma_CSR}, dP = {Magma_CSR};
     magma_z_matrix dr = {Magma_CSR}, drs = {Magma_CSR};
-    magma_z_matrix dG = {Magma_CSR};
+    magma_z_matrix dG = {Magma_CSR}, dGcol = {Magma_CSR};
     magma_z_matrix dU = {Magma_CSR};
-    magma_z_matrix dM1 = {Magma_CSR}, dM = {Magma_CSR};
+    magma_z_matrix dM1 = {Magma_CSR}, dM = {Magma_CSR}, hMdiag = {Magma_CSR};
     magma_z_matrix df = {Magma_CSR};
     magma_z_matrix dt = {Magma_CSR}, dtt = {Magma_CSR};
     magma_z_matrix dc = {Magma_CSR};
@@ -234,8 +235,8 @@ magma_zidr_acc(
     CHECK( magma_zvinit( &dbeta, Magma_DEV, s, 1, c_zero, queue ));
     
     // workspace for merged dot product
-    CHECK( magma_zmalloc( &d1, s * dofb ));
-    CHECK( magma_zmalloc( &d2, s * dofb ));
+    CHECK( magma_zmalloc( &d1, max(2,s) * dofb ));
+    CHECK( magma_zmalloc( &d2, max(2,s) * dofb ));
 
     // smoothing enabled
     if ( smoothing == 1 ) {
@@ -267,6 +268,8 @@ magma_zidr_acc(
     } else {
         CHECK( magma_zvinit( &dG, Magma_DEV, A.num_rows, s, c_zero, queue ));
     }
+    CHECK( magma_zvinit( &dGcol, Magma_DEV, A.num_rows, 1, c_zero, queue ));
+    magma_free(dGcol.dval);
 
     // U(n,s) = 0
     if ( s > 1 ) {
@@ -281,6 +284,7 @@ magma_zidr_acc(
     // M(s,s) = I
     CHECK( magma_zvinit( &dM1, Magma_DEV, s, s, c_zero, queue ));
     CHECK( magma_zvinit( &dM, Magma_DEV, s, s, c_zero, queue ));
+    CHECK( magma_zvinit( &hMdiag, Magma_CPU, s, 1, c_zero, queue ));
     dofM = dM.num_rows * dM.num_cols;
     magmablas_zlaset( MagmaFull, dM.num_rows, dM.num_cols, c_zero, c_one, dM.dval, dM.ld, queue );
 
@@ -307,6 +311,7 @@ cudaProfilerStart();
     om = MAGMA_Z_ONE;
     innerflag = 0;
     solver_par->numiter = 0;
+    solver_par->spmv_count = 0;
 
     // start iteration
     do
@@ -315,18 +320,17 @@ cudaProfilerStart();
     
         // new RHS for small systems
         // f = (r' P)' = P' r
-        magma_zgemvmdot( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queue );
+        magma_zgemvmdot_shfl( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queue );
         //magmablas_zgemv( MagmaConjTrans, dP.num_rows, dP.num_cols, c_one, dP.dval, dP.ld, dr.dval, 1, c_zero, df.dval, 1, queue );
 
         // shadow space loop
-        for ( k = 0; k < s; ++k ) {
+        for ( k = 0; k < s; k++ ) {
             sk = s - k;
     
             // solve small system and make v orthogonal to P
             // f(k:s) = M(k:s,k:s) c(k:s)
             magma_zcopy( sk, &df.dval[k], 1, &dc.dval[k], 1, queue );
-            magma_zcopy( dofM, dM.dval, 1, dM1.dval, 1, queue );
-            magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, sk, &dM1.dval[k*dM1.ld+k], dM1.ld, &dc.dval[k], 1, queue );
+            magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, sk, &dM.dval[k*dM1.ld+k], dM.ld, &dc.dval[k], 1, queue );
 
             // v1 = r - G(:,k:s) c(k:s)
             magma_zcopy( dofr, dr.dval, 1, dv1.dval, 1, queue );
@@ -339,16 +343,15 @@ cudaProfilerStart();
 
             // compute new G
             // G(:,k) = A U(:,k)
-            CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dv, queue ));
-            magma_zcopy( dG.num_rows, dv.dval, 1, &dG.dval[k*dG.ld], 1, queue );
+            dGcol.dval = &dG.dval[k*dG.ld];
+            CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dGcol, queue ));
+            solver_par->spmv_count++;
 
             // bi-orthogonalize the new basis vectors
             for ( i = 0; i < k; ++i ) {
                 // alpha = P(:,i)' G(:,k) / M(i,i)
-                CHECK( magma_zmdotc( dP.num_rows, 1, &dP.dval[i*dP.ld], &dG.dval[k*dG.ld], d1, d2, (dalpha.dval)+i, queue ));
-                magma_zgetvector( 1, (dalpha.dval)+i, 1, (alpha.val)+i, 1, queue );
-                magma_zgetvector( 1, &dM.dval[i*dM.ld+i], 1, &mkk, 1, queue );
-                alpha.val[i] = alpha.val[i] / mkk;
+                alpha.val[i] = magma_zdotc( dP.num_rows, &dP.dval[i*dP.ld], 1, &dG.dval[k*dG.ld], 1, queue );
+                alpha.val[i] = alpha.val[i] / hMdiag.val[i];
                 
                 // G(:,k) = G(:,k) - alpha * G(:,i)
                 magma_zaxpy( dG.num_rows, -alpha.val[i], &dG.dval[i*dG.ld], 1, &dG.dval[k*dG.ld], 1, queue );
@@ -364,12 +367,11 @@ cudaProfilerStart();
             
             // new column of M = P'G, first k-1 entries are zero
             // M(k:s,k) = (G(:,k)' P(:,k:s))' = P(:,k:s)' G(:,k)
-            magma_zgemvmdot( dP.num_rows, sk, &dP.dval[k*dP.ld], &dG.dval[k*dG.ld], d1, d2, &dM.dval[k*dM.ld+k], queue );
-            //magmablas_zgemv( MagmaConjTrans, dP.num_rows, sk, c_one, &dP.dval[k*dP.ld], dP.ld, &dG.dval[k*dG.ld], 1, c_zero, &dM.dval[k*dM.ld+k], 1, queue );
+            magma_zgemvmdot_shfl( dP.num_rows, sk, &dP.dval[k*dP.ld], &dG.dval[k*dG.ld], d1, d2, &dM.dval[k*dM.ld+k], queue );
+            magma_zgetvector( k+1, dM.dval, dM.ld+1, hMdiag.val, 1, queue );
 
             // check M(k,k) == 0
-            magma_zgetvector( 1, &dM.dval[k*dM.ld+k], 1, &mkk, 1, queue );
-            if ( MAGMA_Z_EQUAL(mkk, MAGMA_Z_ZERO) ) {
+            if ( MAGMA_Z_EQUAL(hMdiag.val[k], MAGMA_Z_ZERO) ) {
                 s = k; // for the x-update outside the loop
                 info = MAGMA_DIVERGENCE;
                 innerflag = 1;
@@ -378,7 +380,7 @@ cudaProfilerStart();
 
             // beta = f(k) / M(k,k)
             magma_zgetvector( 1, &df.dval[k], 1, &fk, 1, queue );
-            beta.val[k] = fk / mkk;
+            beta.val[k] = fk / hMdiag.val[k];
 
             // make r orthogonal to q_i, i = 1..k
             // r = r - beta * G(:,k)
@@ -400,7 +402,7 @@ cudaProfilerStart();
                 magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
 
                 // gamma = (t' * rs) / (|t| * |t|)
-                CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+                CHECK( magma_zgemvmdot_shfl( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
                 magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1, queue );
                 gamma = skp.val[3] / skp.val[2];
                 
@@ -440,9 +442,6 @@ cudaProfilerStart();
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)
                 magma_zaxpy( sk - 1, -beta.val[k], &dM.dval[k*dM.ld+(k+1)], 1, &df.dval[k+1], 1, queue );
             }
-
-            // iter = iter + 1
-            solver_par->numiter++;
         }
 
         // update solution approximation x
@@ -461,11 +460,12 @@ cudaProfilerStart();
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
+        solver_par->spmv_count++;
 
         // computation of a new omega
 //---------------------------------------
         // |t|
-        CHECK( magma_zmdotc( doft, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
+        CHECK( magma_zgemvmdot_shfl( doft, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queue ));
         magma_zgetvector( 2 , dskp.dval, 1, skp.val, 1, queue );
 
         // tr = t' * r
@@ -506,7 +506,7 @@ cudaProfilerStart();
             magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queue );
 
             // gamma = (t' * rs) / (|t| * |t|)
-            CHECK( magma_zmdotc( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
+            CHECK( magma_zgemvmdot_shfl( doft, 2, dtt.dval, dtt.dval, d1, d2, dskp.dval+2, queue ));
             magma_zgetvector( 2 , dskp.dval+2, 1, skp.val+2, 1, queue );
             gamma = skp.val[3] / skp.val[2];
 
