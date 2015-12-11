@@ -100,8 +100,8 @@ magma_zparse_opts(
     
     // fill in default values
     opts->input_format = Magma_CSR;
-    opts->blocksize = 8;
-    opts->alignment = 8;
+    opts->blocksize = 32;
+    opts->alignment = 1;
     opts->output_format = Magma_CSR;
     opts->input_location = Magma_CPU;
     opts->output_location = Magma_CPU;
