@@ -28,12 +28,12 @@ zgesellptmv2d_kernel_1(
     int blocksize,
     int T,
     magmaDoubleComplex alpha, 
-    magmaDoubleComplex * dval, 
-    magma_index_t * dcolind,
-    magma_index_t * drowptr,
-    magmaDoubleComplex *  dx,
+    const magmaDoubleComplex * __restrict__ dval, 
+    const magma_index_t * __restrict__ dcolind,
+    const magma_index_t * __restrict__ drowptr,
+    const magmaDoubleComplex *__restrict__ dx,
     magmaDoubleComplex beta, 
-    magmaDoubleComplex * dy)
+    magmaDoubleComplex * __restrict__ dy)
 {
     // threads assigned to rows
     //int Idx = blockDim.x * blockIdx.x + threadIdx.x;
