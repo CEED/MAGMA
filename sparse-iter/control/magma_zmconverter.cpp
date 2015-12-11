@@ -580,6 +580,12 @@ magma_zmconvert(
             // alignment is posible such that multiple threads can be used for SpMV
             // so the rowlength is padded (SELLP) to a multiple of the alignment
             else if ( new_format == Magma_SELLP ) {
+                if( 256%(B->blocksize) !=0 ){
+                    printf("error: blocksize not supported!\n");
+                    info = MAGMA_ERR_NOT_SUPPORTED;
+                    goto cleanup;
+                }
+                
                 // fill in information for B
                 B->storage_type = new_format;
                 if (B->alignment > 1)
