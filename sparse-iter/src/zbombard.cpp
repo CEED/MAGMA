@@ -125,7 +125,7 @@ magma_zbombard(
     CHECK( magma_zvinit( &Q_pt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_y, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &Q_x, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    // QMR
+    // CSGS
     CHECK( magma_zvinit( &C_r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &C_rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &C_x,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));

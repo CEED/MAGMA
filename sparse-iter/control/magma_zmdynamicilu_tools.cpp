@@ -106,9 +106,9 @@ magma_zmdynamicic_insert(
     
     // this is usually sufficient to have the large elements in front
     CHECK( magma_zmorderstatistics(
-    val, col, rowidx, LU_new->nnz, num_rm*2,  1, &element, queue ) );
+    val, col, rowidx, LU_new->nnz, num_rm*1.4,  1, &element, queue ) );
     CHECK( magma_zmorderstatistics(
-    val, col, rowidx, LU_new->nnz, num_rm,  1, &element, queue ) );
+    val, col, rowidx, num_rm*2, num_rm,  1, &element, queue ) );
 
     // insert the new elements
     // has to be sequential
@@ -229,7 +229,7 @@ magma_zmdynamicilu_rm_thrs(
     // never forget last rm
     magma_int_t offset = 0;
     
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for( magma_int_t r=0;r<LU->num_rows;r++ ) {
         magma_int_t i = LU->row[r];
         magma_int_t lasti=i;

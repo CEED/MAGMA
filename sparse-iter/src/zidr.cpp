@@ -59,13 +59,13 @@ magma_zidr(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-    magma_int_t info = 0;
+    magma_int_t info;
 
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
     solver_par->numiter = 0;
     solver_par->spmv_count = 0;
-    solver_par->info = MAGMA_NOTCONVERGED;
+    info = MAGMA_NOTCONVERGED;
 
     // constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -365,8 +365,14 @@ magma_zidr(
 
             // check convergence or iteration limit
             if ( nrmr <= solver_par->atol ||
-                nrmr/nrmb <= solver_par->rtol || 
-                solver_par->numiter >= solver_par->maxiter ) {
+                nrmr/nrmb <= solver_par->rtol ) {
+                s = k; // for the x-update outside the loop
+                innerflag = 1;
+                info = MAGMA_SUCCESS;
+                break;
+            }
+            // check convergence or iteration limit
+            if ( solver_par->numiter >= solver_par->maxiter ) {
                 s = k; // for the x-update outside the loop
                 innerflag = 1;
                 break;
@@ -473,8 +479,12 @@ magma_zidr(
 
         // check convergence or iteration limit
         if ( nrmr <= solver_par->atol ||
-            nrmr/nrmb <= solver_par->rtol || 
-            solver_par->numiter >= solver_par->maxiter ) {
+            nrmr/nrmb <= solver_par->rtol ) {
+            info = MAGMA_SUCCESS;
+            break;
+        }
+        // check convergence or iteration limit
+        if ( solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
     }
@@ -523,7 +533,7 @@ cleanup:
     magma_zmfree( &dbeta, queue );
     magma_zmfree( &beta, queue );
     magma_free_pinned( piv );
-
+    
     solver_par->info = info;
     return info;
     /* magma_zidr */

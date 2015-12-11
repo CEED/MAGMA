@@ -183,6 +183,7 @@ magma_ztfqmr_merge(
         }
 
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            info = MAGMA_SUCCESS;
             break;
         }
 
@@ -236,6 +237,7 @@ magma_ztfqmr_merge(
         }
 
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            info = MAGMA_SUCCESS;
             break;
         }
         

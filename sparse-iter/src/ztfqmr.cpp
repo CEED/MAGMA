@@ -178,6 +178,7 @@ magma_ztfqmr(
         }
 
         if ( res/nomb <= solver_par->rtol || res <= solver_par->atol ){
+            info = MAGMA_SUCCESS;
             break;
         }
         

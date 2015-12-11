@@ -63,11 +63,13 @@ magma_zidr_acc(
     magma_z_solver_par *solver_par,
     magma_queue_t queue )
 {
-
+    magma_int_t info;
+    
     // prepare solver feedback
     solver_par->solver = Magma_IDR;
     solver_par->numiter = 0;
-    solver_par->info = MAGMA_SUCCESS;
+    solver_par->spmv_count = 0;
+    info = MAGMA_NOTCONVERGED;
 
     // constants
     const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -79,12 +81,10 @@ magma_zidr_acc(
     const double angle = 0.7;          // [0-1]
 
     // local variables
-    magma_int_t info = 0;
     magma_int_t iseed[4] = { 0, 0, 0, 1 };
     magma_int_t dofx = x->num_rows * x->num_cols;
     magma_int_t dofb = b.num_rows * b.num_cols;
     magma_int_t dofr = A.num_rows * b.num_cols;
-    magma_int_t dofM; 
     magma_int_t dofP;
     magma_int_t doft;
     magma_int_t inc = 1;
@@ -102,10 +102,8 @@ magma_zidr_acc(
     magmaDoubleComplex om;
     magmaDoubleComplex tr;
     magmaDoubleComplex gamma;
-    magmaDoubleComplex mkk;
     magmaDoubleComplex fk;
-    magmaDoubleComplex_ptr tmp;
-
+    
     // matrices and vectors
     magma_z_matrix dxs = {Magma_CSR};
     magma_z_matrix dP1 = {Magma_CSR}, dP = {Magma_CSR};
@@ -151,7 +149,7 @@ magma_zidr_acc(
         info = MAGMA_ERR_NOT_SUPPORTED;
         goto cleanup;
     }
-
+    
     // |b|
     nrmb = magma_dznrm2( b.num_rows, b.dval, inc, queue );
 
@@ -164,7 +162,7 @@ magma_zidr_acc(
         solver_par->runtime = 0.0;
         goto cleanup;
     }
-
+    
     // t = 0
     // make t twice as large to contain both, dt and dr
     ldd = magma_roundup( b.num_rows, 32 );
@@ -195,7 +193,7 @@ magma_zidr_acc(
         nrmr/nrmb <= solver_par->rtol ) {
         goto cleanup;
     }
-
+    
     // P = randn(n, s)
     // P = ortho(P)
 //---------------------------------------
@@ -243,7 +241,7 @@ magma_zidr_acc(
     if ( smoothing == 1 ) {
         // set smoothing solution vector
         CHECK( magma_zmtransfer( *x, &dxs, Magma_DEV, Magma_DEV, queue ));
-
+        
         // tt = 0
         // make tt twice as large to contain both, dtt and drs
         ldd = magma_roundup( b.num_rows, 32 );
@@ -286,9 +284,8 @@ magma_zidr_acc(
     CHECK( magma_zvinit( &dM1, Magma_DEV, s, s, c_zero, queue ));
     CHECK( magma_zvinit( &dM, Magma_DEV, s, s, c_zero, queue ));
     CHECK( magma_zvinit( &hMdiag, Magma_CPU, s, 1, c_zero, queue ));
-    dofM = dM.num_rows * dM.num_cols;
     magmablas_zlaset( MagmaFull, dM.num_rows, dM.num_cols, c_zero, c_one, dM.dval, dM.ld, queue );
-
+   
     // f = 0
     CHECK( magma_zvinit( &df, Magma_DEV, dP.num_cols, dr.num_cols, c_zero, queue ));
 
@@ -306,8 +303,6 @@ magma_zidr_acc(
     if ( solver_par->verbose > 0 ) {
         solver_par->timing[0] = 0.0;
     }
-    
-cudaProfilerStart();
 
     om = MAGMA_Z_ONE;
     innerflag = 0;
@@ -431,8 +426,14 @@ cudaProfilerStart();
 
             // check convergence or iteration limit
             if ( nrmr <= solver_par->atol ||
-                nrmr/nrmb <= solver_par->rtol || 
-                solver_par->numiter >= solver_par->maxiter ) {
+                nrmr/nrmb <= solver_par->rtol ) {
+                s = k; // for the x-update outside the loop
+                innerflag = 1;
+                info = MAGMA_SUCCESS;
+                break;
+            }
+            // check convergence or iteration limit
+            if ( solver_par->numiter >= solver_par->maxiter ) {
                 s = k; // for the x-update outside the loop
                 innerflag = 1;
                 break;
@@ -535,8 +536,12 @@ cudaProfilerStart();
 
         // check convergence or iteration limit
         if ( nrmr <= solver_par->atol ||
-            nrmr/nrmb <= solver_par->rtol || 
-            solver_par->numiter >= solver_par->maxiter ) {
+            nrmr/nrmb <= solver_par->rtol ) {
+            info = MAGMA_SUCCESS;
+            break;
+        }
+        // check convergence or iteration limit
+        if ( solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
     }
