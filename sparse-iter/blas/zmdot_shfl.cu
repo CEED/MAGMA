@@ -12,7 +12,7 @@
 #include "common_magma.h"
 
 #include "magmasparse_z.h"
-#define BLOCK_SIZE 256
+#define BLOCK_SIZE 128
 
 #define PRECISION_z
 
@@ -97,14 +97,14 @@ T blockReduceSum(T val) {
     __syncthreads();              // Wait for all partial reductions
 
     //read from shared memory only if that warp existed
-    val = (threadIdx.x < blockDim.x / warpSize) ? shared[threadIdx.y*32+lane] : MAGMA_Z_MAKE(0.0,0.0);
+    val = (threadIdx.x < blockDim.x / warpSize) ? shared[threadIdx.y*32+lane] : MAGMA_Z_ZERO;
     
     if (wid==0) val = warpReduceSum<T>(val); //Final reduce within first warp
     return val;
 }
 
 template<typename T> 
-__global__ void deviceReduceKernel(T *in, T* out, int N) {
+__global__ void deviceReduceKernel(const T * __restrict__ in, T * __restrict__ out, int N) {
     T sum = MAGMA_Z_MAKE(0.0,0.0);
     //reduce multiple elements per thread
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < N; i += blockDim.x * gridDim.x) {
@@ -120,16 +120,20 @@ __global__ void
 magma_zblockdot_kernel_shuffle( 
     int n, 
     int k,
-    magmaDoubleComplex * v,
-    magmaDoubleComplex * r,
-    magmaDoubleComplex * vtmp)
+    const magmaDoubleComplex * __restrict__ v,
+    const magmaDoubleComplex * __restrict__ r,
+    magmaDoubleComplex * __restrict__ vtmp)
 {
-    int Idx = threadIdx.x;   
-    int i   = blockIdx.x * blockDim.x + Idx;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = threadIdx.y;
-    magmaDoubleComplex tmp = (i<n)?(v[i+j*n] * r[i]):MAGMA_Z_MAKE(0.0,0.0);
+    magmaDoubleComplex tmp;
+    if (i<n) {
+        tmp = v[i+j*n] * r[i];
+    } else {
+        tmp = MAGMA_Z_ZERO;
+    }
     tmp = blockReduceSum(tmp);
-    if ( Idx == 0 ){
+    if (threadIdx.x == 0 ){
         vtmp[ blockIdx.x+j*gridDim.x ] = tmp;
     }
 }
@@ -201,7 +205,7 @@ magma_zmdotc_shfl(
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
 
-    int local_block_size = 1024;
+    int local_block_size = BLOCK_SIZE;
     dim3 block( PAD(magma_ceildiv(local_block_size,k),32),k );
     while (block.x*block.y > 1024) {
         block.x-=32;
