@@ -115,7 +115,7 @@ endif
 ifeq ($(NV_COMP),)
     $(error GPU_TARGET, currently $(GPU_TARGET), must contain one or more of Fermi, Kepler, Maxwell, or sm{20,30,35,50}. Please edit your make.inc file)
 endif
-NVCCFLAGS += $(NV_SM) $(NV_COMP)
+NVCCFLAGS += -DMIN_CUDA_ARCH=$(MIN_ARCH) $(NV_SM) $(NV_COMP)
 CFLAGS    += -DMIN_CUDA_ARCH=$(MIN_ARCH)
 CXXFLAGS  += -DMIN_CUDA_ARCH=$(MIN_ARCH)
 
