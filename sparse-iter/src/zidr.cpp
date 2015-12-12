@@ -377,7 +377,7 @@ magma_zidr(
                 innerflag = 1;
                 break;
             }
-            if( magma_d_isnan_inf( nrmr ) ){
+            if( magma_z_isnan_inf( beta ) ){
                 info = MAGMA_DIVERGENCE;
                 innerflag = 1;
                 break;

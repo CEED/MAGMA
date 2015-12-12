@@ -438,11 +438,6 @@ magma_zidr_acc(
                 innerflag = 1;
                 break;
             }
-            if( magma_d_isnan_inf( nrmr ) ){
-                info = MAGMA_DIVERGENCE;
-                innerflag = 1;
-                break;
-            }
 
             // new f = P' r (first k components are zero)
             if ( (k + 1) < s ) {
