@@ -464,8 +464,20 @@ magma_zpidr(
 
             // check convergence or iteration limit
             if ( nrmr <= solver_par->atol ||
-                nrmr/nrmb <= solver_par->rtol || 
-                solver_par->numiter >= solver_par->maxiter ) {
+                nrmr/nrmb <= solver_par->rtol ) {
+                s = k; // for the x-update outside the loop
+                innerflag = 1;
+                info = MAGMA_SUCCESS;
+                break;
+            }
+            // check convergence or iteration limit
+            if ( solver_par->numiter >= solver_par->maxiter ) {
+                s = k; // for the x-update outside the loop
+                innerflag = 1;
+                break;
+            }
+            if( magma_d_isnan_inf( nrmr ) ){
+                info = MAGMA_DIVERGENCE;
                 innerflag = 1;
                 break;
             }
@@ -553,8 +565,12 @@ magma_zpidr(
 
         // check convergence or iteration limit
         if ( nrmr <= solver_par->atol ||
-            nrmr/nrmb <= solver_par->rtol || 
-            solver_par->numiter >= solver_par->maxiter ) {
+            nrmr/nrmb <= solver_par->rtol ) {
+            info = MAGMA_SUCCESS;
+            break;
+        }
+        // check convergence or iteration limit
+        if ( solver_par->numiter >= solver_par->maxiter ) {
             break;
         }
 
