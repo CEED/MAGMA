@@ -438,6 +438,14 @@ magma_zidr_acc(
                 innerflag = 1;
                 break;
             }
+            // check for nan
+            magma_int_t c1=0,c2=0;
+            magma_znan_inf_gpu( MagmaFull, s, 1, dbeta.dval, s, &c1, &c2 );
+            if( c1+c2>0 ){
+                info = MAGMA_DIVERGENCE;
+                innerflag = 1;
+                break;
+            }
 
             // new f = P' r (first k components are zero)
             if ( (k + 1) < s ) {

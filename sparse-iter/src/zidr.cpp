@@ -377,7 +377,10 @@ magma_zidr(
                 innerflag = 1;
                 break;
             }
-            if( magma_z_isnan_inf( alpha ) ){
+            // check for nan
+            magma_int_t c1=0,c2=0;
+            magma_znan_inf( MagmaFull, s, 1, (beta.val), s, &c1, &c2 );
+            if( c1+c2>0 ){
                 info = MAGMA_DIVERGENCE;
                 innerflag = 1;
                 break;

@@ -172,7 +172,7 @@ magma_zpidr(
     // initial s space
     // hack --> use "--restart" option as the shadow space number
     s = 1;
-    if ( solver_par->restart != 30 ) {
+    if ( solver_par->restart != 50 ) {
         if ( solver_par->restart > A.num_cols )
             s = A.num_cols;
         else
@@ -389,7 +389,7 @@ magma_zpidr(
 //---------------------------------------
             // v = A v1
             CHECK( magma_z_spmv( c_one, A, dv1, c_zero, dv, queue ));
-
+            solver_par->spmv_count++;
             // G(:,k) = v
             magma_zcopy( dG.num_rows, dv.dval, inc, &dG.dval[k*dG.num_rows], inc, queue );
 //---------------------------------------
@@ -476,7 +476,10 @@ magma_zpidr(
                 innerflag = 1;
                 break;
             }
-            if( magma_z_isnan_inf( alpha ) ){
+            // check for nan
+            magma_int_t c1=0,c2=0;
+            magma_znan_inf( MagmaFull, 1, 1, &beta, 1, &c1, &c2 );
+            if( c1+c2>0 ){
                 info = MAGMA_DIVERGENCE;
                 innerflag = 1;
                 break;
@@ -489,8 +492,6 @@ magma_zpidr(
                 printMatrix("F", df);
             }
 
-            // iter = iter + 1
-            solver_par->numiter++;
         }
 
         // check convergence or iteration limit or invalid of inner loop
@@ -512,6 +513,7 @@ magma_zpidr(
 
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));
+        solver_par->spmv_count++;
         printMatrix("T", dt);
 
         // computation of a new omega
