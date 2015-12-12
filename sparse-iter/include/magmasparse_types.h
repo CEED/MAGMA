@@ -45,6 +45,7 @@ typedef struct magma_z_matrix
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
+    magma_int_t        stored_nnz;              // opt: actually stored nnz
     union {
         magmaDoubleComplex      *val;           // array containing values in CPU case
         magmaDoubleComplex_ptr  dval;           // array containing values in DEV case
@@ -89,6 +90,7 @@ typedef struct magma_c_matrix
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
+    magma_int_t        stored_nnz;              // opt: actually stored nnz
     union {
         magmaFloatComplex       *val;           // array containing values in CPU case
         magmaFloatComplex_ptr   dval;           // array containing values in DEV case
@@ -134,6 +136,7 @@ typedef struct magma_d_matrix
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
+    magma_int_t        stored_nnz;              // opt: actually stored nnz
     union {
         double                  *val;           // array containing values in CPU case
         magmaDouble_ptr         dval;           // array containing values in DEV case
@@ -179,6 +182,7 @@ typedef struct magma_s_matrix
     magma_int_t        nnz;                     // opt: number of nonzeros
     magma_int_t        max_nnz_row;             // opt: max number of nonzeros in one row
     magma_int_t        diameter;                // opt: max distance of entry from main diagonal
+    magma_int_t        stored_nnz;              // opt: actually stored nnz
     union {
         float                   *val;           // array containing values in CPU case
         magmaFloat_ptr          dval;           // array containing values in DEV case
