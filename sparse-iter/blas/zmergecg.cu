@@ -420,7 +420,27 @@ magma_zcgmerge_spmvell_kernelb1(
 
     temp[ Idx ] = MAGMA_Z_MAKE( 0.0, 0.0);
     
-
+    int idx = threadIdx.x;      // local row
+    int bdx = blockIdx.x; // global block index
+    int row = bdx * 256 + idx;  // global row index
+    // int lblocksize = ( row + blocksize < num_rows) ? blocksize : ( num_rows - blocksize * (row/blocksize) );
+    int lrow = threadIdx.x%blocksize; // local row;
+    
+    if( row < n ) {
+        int offset = drowptr[ row/blocksize ];
+        int border = (drowptr[ row/blocksize+1 ]-offset)/blocksize;
+    
+        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        for ( int n = 0; n < border; n++) { 
+            int col = dcolind [ offset+ blocksize * n + lrow ];
+            magmaDoubleComplex val = dval[ offset+ blocksize * n + lrow ];
+            dot = dot + val * d [ col ];
+        }
+        z[ i ] = dot;
+        temp[ Idx ] = d[ i ] * dot;
+    }
+    
+/*
     if(i < n ) {
         int offset = drowptr[ blockIdx.x ];
         int border = (drowptr[ blockIdx.x+1 ]-offset)/blocksize;
@@ -443,7 +463,7 @@ magma_zcgmerge_spmvell_kernelb1(
         //}
         z[ i ] =  dot;
         temp[ Idx ] = d[ i ] * dot;
-    }
+    }*/
 
     __syncthreads();
     if ( Idx < 128 ) {
@@ -1067,13 +1087,9 @@ magma_zcgmerge_spmv1(
 
     }
     else if ( A.storage_type == Magma_SELLP && A.alignment == 1 ) {
-        if( A.blocksize == 256 ){
             magma_zcgmerge_spmvell_kernelb1<<< Gs, Bs, Ms, queue->cuda_stream() >>>
             ( A.num_rows, A.blocksize, 
                 A.dval, A.dcol, A.drow, dd, dz, d1 );
-        }else{
-                printf("error: for alignment 1, only blocksize 256 supported.\n");
-        }
     }
     else if ( A.storage_type == Magma_SELLP && A.alignment > 1) {
             int num_threadssellp = A.blocksize*A.alignment;
