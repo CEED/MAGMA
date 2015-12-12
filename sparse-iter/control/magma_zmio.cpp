@@ -1008,6 +1008,7 @@ magma_z_csr_mtx(
     A->num_rows        = num_rows;
     A->num_cols        = num_cols;
     A->nnz             = num_nonzeros;
+    A->stored_nnz      = num_nonzeros;
     A->fill_mode       = MagmaFull;
     
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );
@@ -1108,6 +1109,7 @@ magma_z_csr_mtx(
         coo_col = new_col;
         coo_val = new_val;
         A->nnz = true_nonzeros;
+        A->stored_nnz = A->nnz;
         //printf("total number of nonzeros: %d\n", A->nnz);
     } // end symmetric case
     
@@ -1293,6 +1295,7 @@ magma_z_csr_mtxsymm(
     A->num_rows        = num_rows;
     A->num_cols        = num_cols;
     A->nnz             = num_nonzeros;
+    A->stored_nnz     = A->nnz;
     A->fill_mode       = MagmaFull;
   
     CHECK( magma_index_malloc_cpu( &coo_col, A->nnz ) );

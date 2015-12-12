@@ -206,6 +206,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.stored_nnz;
     
                 CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
                 CHECK( magma_index_malloc_cpu( &B->row, A.num_rows+1 ));
@@ -234,6 +235,7 @@ magma_zmconvert(
                 B->num_rows = A.num_rows;
                 B->num_cols = A.num_cols;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.stored_nnz;
     
                 magma_int_t numzeros=0;
                 for( magma_int_t i=0; i < A.num_rows; i++) {
@@ -303,6 +305,7 @@ magma_zmconvert(
                     }
                 }
                 B->row[B->num_rows] = numzeros;
+                B->stored_nnz = numzeros;
             }
             
             // CSR to CSRD (diagonal elements first)
@@ -316,6 +319,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.stored_nnz;
     
                 CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
                 CHECK( magma_index_malloc_cpu( &B->row, A.num_rows+1 ));
@@ -426,6 +430,7 @@ magma_zmconvert(
                     }
                 }
                 B->max_nnz_row = maxrowlength;
+                B->stored_nnz = maxrowlength*B->num_rows;
             }
             
             // CSR to ELL
@@ -469,6 +474,7 @@ magma_zmconvert(
                     }
                 }
                 B->max_nnz_row = maxrowlength;
+                B->stored_nnz = maxrowlength*B->num_rows;
                 //printf( "done\n" );
             }
             
@@ -519,6 +525,7 @@ magma_zmconvert(
                     }
                 }
                 B->max_nnz_row = maxrowlength;
+                B->stored_nnz = maxrowlength*B->num_rows;
             }
             
             // CSR to ELLRT (also ELLPACKRT)
@@ -568,6 +575,7 @@ magma_zmconvert(
                     B->row[i] = A.row[i+1] - A.row[i];
                 }
                 B->max_nnz_row = maxrowlength;
+                B->stored_nnz = maxrowlength*B->num_rows;
                 //printf( "done\n" );
             }
             
@@ -608,6 +616,7 @@ magma_zmconvert(
                 
                 
                 B->row[0] = 0;
+                B->stored_nnz = 0;
                 for( i=0; i < slices; i++ ) {
                     maxrowlength = 0;
                     for(j=0; j < C; j++) {
@@ -624,6 +633,7 @@ magma_zmconvert(
                     B->row[i+1] = B->row[i] + alignedlength * C;
                     if ( alignedlength > B->max_nnz_row )
                         B->max_nnz_row = alignedlength;
+                    B->stored_nnz += C*alignedlength;
                 }
                 B->nnz = B->row[slices];
                 //printf( "Conversion to SELLC with %d slices of size %d and"
@@ -667,7 +677,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
-    
+                B->stored_nnz = A.num_rows*A.num_cols;
                 // conversion
                 CHECK( magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols ));
                 
@@ -679,7 +689,7 @@ magma_zmconvert(
                     for(magma_int_t j=A.row[i]; j < A.row[i+1]; j++ )
                         B->val[i * (A.num_cols) + A.col[j] ] = A.val[ j ];
                 }
-    
+                B->stored_nnz = B->num_rows * B->num_cols;
                 //printf( "done\n" );
             }
             
@@ -767,6 +777,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.nnz;
         
                 // conversion
 
@@ -794,6 +805,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.nnz;
     
                 // conversion
                 CHECK( magma_zmalloc_cpu( &val_tmp, A.num_rows*A.max_nnz_row ));
@@ -842,6 +854,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.nnz;
     
                 // conversion
                 CHECK( magma_index_malloc_cpu( &row_tmp, A.num_rows+1 ));
@@ -892,6 +905,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
+                B->stored_nnz = A.nnz;
     
                 magma_int_t threads_per_row = A.alignment;
                 magma_int_t rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
@@ -924,6 +938,7 @@ magma_zmconvert(
                 magma_int_t slices = A.numblocks;
                 B->blocksize = A.blocksize;
                 B->numblocks = A.numblocks;
+                B->stored_nnz = A.nnz;
                 // conversion
                 CHECK( magma_zmalloc_cpu( &val_tmp, A.max_nnz_row*(A.num_rows+C) ));
                 CHECK( magma_index_malloc_cpu( &row_tmp, A.num_rows+C ));
@@ -973,7 +988,7 @@ magma_zmconvert(
                 B->nnz = A.nnz;
                 B->max_nnz_row = A.max_nnz_row;
                 B->diameter = A.diameter;
-    
+                B->stored_nnz = A.nnz;
                 // conversion
     
                 B->nnz=0;
@@ -1053,7 +1068,8 @@ magma_zmconvert(
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-
+            B->stored_nnz = A.nnz;
+            
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
             CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
@@ -1077,6 +1093,7 @@ magma_zmconvert(
             B->num_cols = A.num_cols;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->stored_nnz = A.nnz;
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
@@ -1103,6 +1120,7 @@ magma_zmconvert(
                                 descr,
                                 A.dval, A.num_rows, nnz_per_row,
                                 B->dval, B->drow, B->dcol );
+            
         }
         // CSR to BCSR
         else if ( old_format == Magma_CSR && new_format == Magma_BCSR ) {
@@ -1199,6 +1217,7 @@ magma_zmconvert(
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->stored_nnz = A.stored_nnz;
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
@@ -1228,6 +1247,7 @@ magma_zmconvert(
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->stored_nnz = A.stored_nnz;
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
@@ -1257,6 +1277,7 @@ magma_zmconvert(
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            B->stored_nnz = A.stored_nnz;
 
             // CUSPARSE context //
             CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
@@ -1292,6 +1313,7 @@ magma_zmconvert(
             int m = A.num_rows;
             int n = A.num_cols;
             int nnz = A.nnz;
+            B->stored_nnz = A.stored_nnz;
 
             // CUSPARSE context //
             

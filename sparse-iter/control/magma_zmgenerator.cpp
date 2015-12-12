@@ -121,7 +121,7 @@ magma_zmgenerator(
                 B.nnz++;
         }
     }
-
+    B.stored_nnz = B.nnz;
     // converting it to CSR will remove the invalit entries completely
     CHECK( magma_zmconvert( B, A, Magma_ELLPACKT, Magma_CSR, queue ));
 
@@ -241,6 +241,7 @@ magma_zm_27stencil(
             }
         }
     }
+    hA.stored_nnz = hA.nnz;
     CHECK( magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue ));
 
 cleanup:
@@ -331,6 +332,7 @@ magma_zm_5stencil(
 
     CHECK( magma_zmconvert( hA, A, Magma_CSR, Magma_CSR, queue ));
     magma_zmcsrcompressor( A, queue );
+    A->stored_nnz = A->nnz;
     
 cleanup:
     magma_free_cpu( diag_vals );

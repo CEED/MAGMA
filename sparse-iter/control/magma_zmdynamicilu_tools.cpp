@@ -87,6 +87,19 @@ magma_zmdynamicic_insert(
     
     magma_int_t i=0;
     magma_int_t num_insert = 0;
+    int loc_i=0;
+    int abort = 0;
+    magma_int_t *success;
+    magma_int_t *insert_loc;
+    CHECK( magma_imalloc_cpu( &success, omp_get_num_threads() ));
+    CHECK( magma_imalloc_cpu( &insert_loc, omp_get_num_threads() ));
+    //omp_lock_t rowlock[LU->num_rows];
+    #pragma omp parallel for
+    for (magma_int_t r=0; r<omp_get_num_threads(); r++){
+        success[r]= ( r<num_rm ) ? 1 : 0;
+        insert_loc[r] = 0;
+        printf("success[%d] = %d\n", r, success[r]);
+    }
     
     if(num_rm>=LU_new->nnz){
         printf("error: try to remove too many elements\n.");
@@ -112,55 +125,89 @@ magma_zmdynamicic_insert(
 
     // insert the new elements
     // has to be sequential
-    while( num_insert < num_rm ) {
-        if(i>=LU_new->nnz){
-            printf("error: tried to insert too many elements!\n");
-            break;
-        }
-        magma_int_t loc = rm_loc[ num_insert ];
-        magma_index_t new_row = rowidx[ i ]; 
-        magma_index_t new_col = col[ i ];
-        magma_index_t old_rowstart = LU->row[ new_row ];
-        if( new_col < LU->col[ old_rowstart ] ){
-            //printf("insert: (%d,%d)\n", new_row, new_col);
-            LU->row[ new_row ] = loc;
-            LU->list[ loc ] = old_rowstart;
-            LU->rowidx[ loc ] = new_row;
-            LU->col[ loc ] = new_col;
-            LU->val[ loc ] = MAGMA_Z_ZERO;
-            num_insert++;
-        }
-        else if( new_col == LU->col[ old_rowstart ] ){
-            ;//printf("tried to insert duplicate!\n");
-        }
-        else{
 
-            j = old_rowstart;
-            jn = LU->list[j];
-            // this will finish, as we consider the lower triangular
-            // and we always have the diagonal!
-            while( j!=0 ){
-                if( LU->col[jn]==new_col ){
-                    //printf("tried to insert duplicate!\n");
-                    break;
-                }else 
-                if( LU->col[jn]>new_col ){
+    //while( num_insert < num_rm ) {
+    
+
+    #pragma omp parallel for
+    for(int loc_i=0; loc_i<LU->nnz; loc_i++ ) {
+
+        {
+            if( success[ omp_get_thread_num() ] == 1 ){
+                omp_unset_lock( &(rowlock[LU->num_rows]) );
+                //#pragma omp critical(newel_count)
+                {
+                    insert_loc[ omp_get_thread_num() ] = num_insert;
+                    num_insert++;
+                }
+                omp_unset_lock( &(rowlock[LU->num_rows]) );
+                success[ omp_get_thread_num() ] = 0;
+            }
+            if( insert_loc[ omp_get_thread_num() ] >= num_rm ){
+                // enough elements added
+                success[ omp_get_thread_num() ] = -1;
+                //break;
+            }
+                    printf("tid:%d abort:%d num_insert:%d num_rm:%d loc:%d\n",omp_get_thread_num(), success[ omp_get_thread_num() ], insert_loc[ omp_get_thread_num() ], num_rm);fflush(stdout);
+            if( success[ omp_get_thread_num() ] > -1 ){
+                magma_int_t loc = rm_loc[ insert_loc[ omp_get_thread_num() ] ];
+                magma_index_t new_row = rowidx[ loc_i ]; 
+                omp_set_lock( &(rowlock[new_row]) );
+                magma_index_t new_col = col[ loc_i ];
+                magma_index_t old_rowstart = LU->row[ new_row ];
+
+                     printf("tid:%d abort:%d num_insert:%d num_rm:%d i:%d loc:%d\n",omp_get_thread_num(), success[ omp_get_thread_num() ], insert_loc[ omp_get_thread_num() ], num_rm, loc_i, loc);fflush(stdout);
+ printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+
+                if( new_col < LU->col[ old_rowstart ] ){
                     //printf("insert: (%d,%d)\n", new_row, new_col);
-                    LU->list[j]=loc;
-                    LU->list[loc]=jn;
+                    LU->row[ new_row ] = loc;
+                    LU->list[ loc ] = old_rowstart;
                     LU->rowidx[ loc ] = new_row;
                     LU->col[ loc ] = new_col;
                     LU->val[ loc ] = MAGMA_Z_ZERO;
-                    num_insert++;
-                    break;
+                    success[ omp_get_thread_num() ] = 1;
                 }
-                j=jn;
-                jn=LU->list[jn];
-            }
+                else if( new_col == LU->col[ old_rowstart ] ){
+                    ;//printf("tried to insert duplicate!\n");
+                }
+                else{
+        
+                    j = old_rowstart;
+                    jn = LU->list[j];
+                    // this will finish, as we consider the lower triangular
+                    // and we always have the diagonal!
+                    while( j!=0 ){
+                        if( LU->col[jn]==new_col ){
+                            //printf("tried to insert duplicate!\n");
+                            j=0;//break;
+                        }else if( LU->col[jn]>new_col ){
+                            //printf("insert: (%d,%d)\n", new_row, new_col);
+                            LU->list[j]=loc;
+                            LU->list[loc]=jn;
+                            LU->rowidx[ loc ] = new_row;
+                            LU->col[ loc ] = new_col;
+                            LU->val[ loc ] = MAGMA_Z_ZERO;
+                            success[ omp_get_thread_num() ] = 1;
+                            j=0;//break;
+                        } else{
+                            j=jn;
+                            jn=LU->list[jn];
+                        }
+                    }
+                }
+                omp_unset_lock( &(rowlock[new_row]) );
+            }// abort
         }
-        i++;
-    }
+        //loc_i++;
+    }// abort
+    //for (magma_int_t r=0; i<LU->num_rows; r++){
+    //    omp_destroy_lock(&(rowlock[r]));
+    //}
+    
 cleanup:
+    magma_free_cpu( success );
+    magma_free_cpu( insert_loc );
     magma_free_cpu( val );
     magma_free_cpu( col );
     magma_free_cpu( rowidx );
