@@ -57,18 +57,6 @@ int main(  int argc, char** argv )
             CHECK( magma_z_csr_mtx( &A,  argv[i], queue ));
         }
 
-        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
-                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
-        
-        printf("matrixinfo = [ \n");
-        printf("%%   size   (m x n)     ||   nonzeros (nnz)   ||   nnz/m \n");
-        printf("%%======================================================="
-                            "======%%\n");
-        printf("  %8d  %8d      %10d        %10d\n",
-            (int) A.num_rows, (int) A.num_cols ,(int) A.nnz, (int) A.nnz/A.num_rows );
-        printf("%%======================================================="
-        "======%%\n");
-        printf("];\n");
         // for the eigensolver case
         zopts.solver_par.ev_length = A.num_rows;
         CHECK( magma_zeigensolverinfo_init( &zopts.solver_par, queue ));
@@ -82,6 +70,19 @@ int main(  int argc, char** argv )
         }
 
         CHECK( magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue ));
+        
+        printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
+                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+        
+        printf("matrixinfo = [ \n");
+        printf("%%   size   (m x n)     ||   nonzeros (nnz)   ||   nnz/m   ||   stored nnz\n");
+        printf("%%======================================================================"
+                            "======%%\n");
+        printf("  %8d  %8d      %10d             %4d        %10d\n",
+            (int) B.num_rows, (int) B.num_cols ,(int) B.nnz, (int) B.nnz/B.num_rows, (int) B.stored_nnz );
+        printf("%%======================================================================"
+        "======%%\n");
+        printf("];\n");
 
         CHECK( magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue ));
 
