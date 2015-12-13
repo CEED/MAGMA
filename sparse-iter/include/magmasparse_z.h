@@ -880,6 +880,13 @@ magma_zpidr(
     magma_queue_t queue );
 
 magma_int_t
+magma_zpidr_merge(
+    magma_z_matrix A, magma_z_matrix b,
+    magma_z_matrix *x, magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zbombard(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par,
