@@ -75,9 +75,11 @@ magma_zsolverinfo(
                     printf("%%   GMRES(%d) performance analysis every %d iteration\n",
                                                 (int) solver_par->restart, (int) k); break;
             case  Magma_IDR:
+            case  Magma_IDRMERGE:
                     printf("%%   IDR(%d) performance analysis every %d iteration\n",
                                                 (int) solver_par->restart, (int) k); break;
             case  Magma_PIDR:
+            case  Magma_PIDRMERGE:
                     printf("%%   IDR(%d) performance analysis every %d iteration\n",
                                                 (int) solver_par->restart, (int) k); break;
             case  Magma_ITERREF:
@@ -156,6 +158,9 @@ magma_zsolverinfo(
                     printf("%%   Preconditioner used: QMR.\n"); break;
             case  Magma_JACOBI:
                     printf("%%   Preconditioner used: Jacobi.\n"); break;
+            case  Magma_IDR:
+            case  Magma_IDRMERGE:
+                    printf("%%   Preconditioner used: Jacobi.\n"); break;
             case  Magma_BAITER:
             case  Magma_BAITERO:
                     printf("%%   Preconditioner used: Block-asynchronous iteration.\n"); break;
@@ -184,7 +189,9 @@ magma_zsolverinfo(
             case  Magma_GMRES:
             case  Magma_PGMRES:
             case  Magma_IDR:
+            case  Magma_IDRMERGE:
             case  Magma_PIDR:
+            case  Magma_PIDRMERGE:
             case  Magma_CGS:
             case  Magma_PCGS:
             case  Magma_PCGMERGE:
@@ -251,8 +258,10 @@ magma_zsolverinfo(
         case  Magma_PGMRES:
             printf("%% PGMRES(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_IDR:
+        case  Magma_IDRMERGE:
             printf("%% IDR(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_PIDR:
+        case  Magma_PIDRMERGE:
             printf("%% PIDR(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_CGS:
         case  Magma_CGSMERGE:
