@@ -18,7 +18,7 @@
     Purpose
     -------
 
-    ALlows the user to choose a solver.
+    Allows the user to choose a solver.
 
     Arguments
     ---------
@@ -86,6 +86,8 @@ magma_z_solver(
                     CHECK( magma_zidr_acc( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PIDR:
                     CHECK( magma_zpidr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
+            case  Magma_PIDRMERGE:
+                    CHECK( magma_zpidr_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_LOBPCG:
                     CHECK( magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_ITERREF:

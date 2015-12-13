@@ -51,6 +51,7 @@ libsparse_zsrc += \
 	$(cdir)/zfgmres.cpp                   \
 	$(cdir)/zpbicgstab.cpp                \
 	$(cdir)/zpidr.cpp                     \
+	$(cdir)/zpidr_merge.cpp               \
 	$(cdir)/zbombard.cpp                  \
 	$(cdir)/zbombard_merge.cpp            \
     $(cdir)/zpbicgstab_merge.cpp          \
