@@ -1188,7 +1188,6 @@ magma_z_csr_mtx(
         CHECK( magma_zmtransfer( B, A, Magma_CPU, Magma_CPU, queue ));
         //printf("done.\n");
     }
-    A->stored_nnz = A->nnz;
     
     printf(" done.\n");
 cleanup:
@@ -1432,7 +1431,6 @@ magma_z_csr_mtxsymm(
 
         //printf("done.\n");
     }
-    A->stored_nnz = A->nnz;
     
     printf(" done.\n");
 cleanup:
