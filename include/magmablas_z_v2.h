@@ -41,8 +41,6 @@ extern "C" {
   /*
    * Multi-GPU copy functions
    */
-#define magmablas_zgetmatrix_transpose_mgpu  magmablas_zgetmatrix_transpose_mgpu_q
-#define magmablas_zsetmatrix_transpose_mgpu  magmablas_zsetmatrix_transpose_mgpu_q
 #define magma_zgetmatrix_1D_col_bcyclic      magma_zgetmatrix_1D_col_bcyclic_q
 #define magma_zsetmatrix_1D_col_bcyclic      magma_zsetmatrix_1D_col_bcyclic_q
 #define magma_zgetmatrix_1D_row_bcyclic      magma_zgetmatrix_1D_row_bcyclic_q

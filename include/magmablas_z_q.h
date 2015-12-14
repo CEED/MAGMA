@@ -125,6 +125,22 @@ magma_zsetmatrix_1D_row_bcyclic_q(
     magma_int_t ngpu, magma_int_t nb,
     magma_queue_t queue[ MagmaMaxGPUs ] );
 
+void
+magmablas_zgetmatrix_transpose_mgpu(
+    magma_int_t ngpu, magma_queue_t queues[][2],
+    magmaDoubleComplex_const_ptr const dAT[],    magma_int_t ldda,
+    magmaDoubleComplex                *hA,       magma_int_t lda,
+    magmaDoubleComplex_ptr             dwork[],  magma_int_t lddw,
+    magma_int_t m, magma_int_t n, magma_int_t nb );
+
+void
+magmablas_zsetmatrix_transpose_mgpu(
+    magma_int_t ngpu, magma_queue_t queues[][2],
+    const magmaDoubleComplex *hA,      magma_int_t lda,
+    magmaDoubleComplex_ptr    dAT[],   magma_int_t ldda,
+    magmaDoubleComplex_ptr    dwork[], magma_int_t lddw,
+    magma_int_t m, magma_int_t n, magma_int_t nb );
+
 // in src/zhetrd_mgpu.cpp
 // TODO rename zsetmatrix_sy or similar
 magma_int_t
