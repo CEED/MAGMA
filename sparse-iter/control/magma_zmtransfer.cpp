@@ -91,19 +91,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
-            
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             // data transfer
-            magma_zsetvector( A.stored_nnz, A.val, 1, B->dval, 1, queue );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
             magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
         }
         //COO-type
         else if ( A.storage_type == Magma_COO ) {
@@ -115,18 +113,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->drowidx, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zsetvector( A.stored_nnz, A.val, 1, B->dval, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.col, 1, B->dcol, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.rowidx, 1, B->drowidx, 1, queue );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.nnz, A.rowidx, 1, B->drowidx, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -138,20 +135,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->drowidx, A.stored_nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zsetvector( A.stored_nnz, A.val, 1, B->dval, 1, queue );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
             magma_index_setvector( A.num_rows + 1, A.row, 1, B->drow, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.col, 1, B->dcol, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.rowidx, 1, B->drowidx, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
+            magma_index_setvector( A.nnz, A.rowidx, 1, B->drowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -163,10 +159,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
@@ -184,10 +179,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
@@ -205,13 +199,11 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
-            B->stored_nnz = A.stored_nnz;
             magma_int_t rowlength = magma_roundup( A.max_nnz_row, A.alignment );
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * rowlength ));
@@ -232,21 +224,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.numblocks + 1 ));
             // data transfer
-            magma_zsetvector( A.stored_nnz, A.val, 1, B->dval, 1, queue );
-            magma_index_setvector( A.stored_nnz, A.col, 1, B->dcol, 1, queue );
+            magma_zsetvector( A.nnz, A.val, 1, B->dval, 1, queue );
+            magma_index_setvector( A.nnz, A.col, 1, B->dcol, 1, queue );
             magma_index_setvector( A.numblocks + 1, A.row, 1, B->drow, 1, queue );
         }
         //BCSR-type
@@ -259,15 +249,13 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
             magma_int_t size_b = A.blocksize;
-            B->stored_nnz = A.stored_nnz;
             //magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );
                     // max number of blocks per row
             //magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );
@@ -292,13 +280,11 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->major = A.major;
             B->ld = A.ld;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.num_cols ));
             // data transfer
@@ -322,16 +308,15 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows + 1 ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             // data transfer
-            for( magma_int_t i=0; i<A.stored_nnz; i++ ) {
+            for( magma_int_t i=0; i<A.nnz; i++ ) {
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
             }
@@ -349,16 +334,15 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->rowidx, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
             // data transfer
-            for( magma_int_t i=0; i<A.stored_nnz; i++ ) {
+            for( magma_int_t i=0; i<A.nnz; i++ ) {
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
                 B->rowidx[i] = A.rowidx[i];
@@ -374,17 +358,16 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows + 1 ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->rowidx, A.stored_nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
             // data transfer
-            for( magma_int_t i=0; i<A.stored_nnz; i++ ) {
+            for( magma_int_t i=0; i<A.nnz; i++ ) {
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
                 B->rowidx[i] = A.rowidx[i];
@@ -403,10 +386,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
@@ -426,10 +408,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
@@ -449,10 +430,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
@@ -482,19 +462,18 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             B->numblocks = A.numblocks;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.numblocks + 1 ));
             // data transfer
-            for( magma_int_t i=0; i<A.stored_nnz; i++ ) {
+            for( magma_int_t i=0; i<A.nnz; i++ ) {
                 B->val[i] = A.val[i];
                 B->col[i] = A.col[i];
             }
@@ -512,10 +491,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
@@ -553,10 +531,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->major = A.major;
             B->ld = A.ld;
             // memory allocation
@@ -576,7 +553,6 @@ magma_zmtransfer(
                                         || A.storage_type == Magma_CSRD
                                         || A.storage_type == Magma_CSRL
                                         || A.storage_type == Magma_CSRU ) {
-        
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -585,18 +561,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows + 1 ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             // data transfer
-            magma_zgetvector( A.stored_nnz, A.dval, 1, B->val, 1, queue );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
             magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
         }
         //COO-type
         else if ( A.storage_type == Magma_COO ) {
@@ -608,18 +583,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->rowidx, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
             // data transfer
-            magma_zgetvector( A.stored_nnz, A.dval, 1, B->val, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.dcol, 1, B->col, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.drowidx, 1, B->rowidx, 1, queue );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.nnz, A.drowidx, 1, B->rowidx, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -631,20 +605,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.num_rows + 1 ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->rowidx, A.stored_nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->rowidx, A.nnz ));
             // data transfer
-            magma_zgetvector( A.stored_nnz, A.dval, 1, B->val, 1, queue );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
             magma_index_getvector( A.num_rows + 1, A.drow, 1, B->row, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.dcol, 1, B->col, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.drowidx, 1, B->rowidx, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
+            magma_index_getvector( A.nnz, A.drowidx, 1, B->rowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -656,10 +629,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
@@ -677,10 +649,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc_cpu( &B->col, A.num_rows * A.max_nnz_row ));
@@ -698,10 +669,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
@@ -727,20 +697,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
             // memory allocation
-            CHECK( magma_zmalloc_cpu( &B->val, A.stored_nnz ));
-            CHECK( magma_index_malloc_cpu( &B->col, A.stored_nnz ));
+            CHECK( magma_zmalloc_cpu( &B->val, A.nnz ));
+            CHECK( magma_index_malloc_cpu( &B->col, A.nnz ));
             CHECK( magma_index_malloc_cpu( &B->row, A.numblocks + 1 ));
             // data transfer
-            magma_zgetvector( A.stored_nnz, A.dval, 1, B->val, 1, queue );
-            magma_index_getvector( A.stored_nnz, A.dcol, 1, B->col, 1, queue );
+            magma_zgetvector( A.nnz, A.dval, 1, B->val, 1, queue );
+            magma_index_getvector( A.nnz, A.dcol, 1, B->col, 1, queue );
             magma_index_getvector( A.numblocks + 1, A.drow, 1, B->row, 1, queue );
         }
         //BCSR-type
@@ -753,10 +722,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
@@ -785,10 +753,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->major = A.major;
             B->ld = A.ld;
             // memory allocation
@@ -806,7 +773,6 @@ magma_zmtransfer(
                                         || A.storage_type == Magma_CSRD
                                         || A.storage_type == Magma_CSRL
                                         || A.storage_type == Magma_CSRU ) {
-        
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
@@ -815,18 +781,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             // data transfer
-            magma_zcopyvector( A.stored_nnz, A.dval, 1, B->dval, 1, queue );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
             magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
         }
         //COO-type
         else if ( A.storage_type == Magma_COO ) {
@@ -838,18 +803,17 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->drowidx, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zcopyvector( A.stored_nnz, A.dval, 1, B->dval, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.dcol, 1, B->dcol, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.drowidx, 1, B->drowidx, 1, queue );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue );
         }
         //CSRCOO-type
         else if ( A.storage_type == Magma_CSRCOO ) {
@@ -861,20 +825,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->drowidx, A.stored_nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
+            CHECK( magma_index_malloc( &B->drowidx, A.nnz ));
             // data transfer
-            magma_zcopyvector( A.stored_nnz, A.dval, 1, B->dval, 1, queue );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
             magma_index_copyvector( A.num_rows + 1, A.drow, 1, B->drow, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.dcol, 1, B->dcol, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.drowidx, 1, B->drowidx, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue );
         }
         //ELL/ELLPACKT-type
         else if ( A.storage_type == Magma_ELLPACKT || A.storage_type == Magma_ELL ) {
@@ -886,10 +849,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
@@ -907,10 +869,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * A.max_nnz_row ));
             CHECK( magma_index_malloc( &B->dcol, A.num_rows * A.max_nnz_row ));
@@ -928,10 +889,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
@@ -957,20 +917,19 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
             // memory allocation
-            CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
-            CHECK( magma_index_malloc( &B->dcol, A.stored_nnz ));
+            CHECK( magma_zmalloc( &B->dval, A.nnz ));
+            CHECK( magma_index_malloc( &B->dcol, A.nnz ));
             CHECK( magma_index_malloc( &B->drow, A.numblocks + 1 ));
             // data transfer
-            magma_zcopyvector( A.stored_nnz, A.dval, 1, B->dval, 1, queue );
-            magma_index_copyvector( A.stored_nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
             magma_index_copyvector( A.numblocks + 1, A.drow, 1, B->drow, 1, queue );
         }
         //BCSR-type
@@ -983,10 +942,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             B->alignment = A.alignment;
@@ -1015,10 +973,9 @@ magma_zmtransfer(
             B->fill_mode = A.fill_mode;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
-            B->nnz = A.nnz;
+            B->nnz = A.nnz; B->true_nnz = A.true_nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            B->stored_nnz = A.stored_nnz;
             B->major = A.major;
             B->ld = A.ld;
             // memory allocation
