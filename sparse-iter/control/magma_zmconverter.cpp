@@ -431,6 +431,7 @@ magma_zmconvert(
                 }
                 B->max_nnz_row = maxrowlength;
                 B->stored_nnz = maxrowlength*B->num_rows;
+                B->nnz = A.nnz;
             }
             
             // CSR to ELL
@@ -475,6 +476,7 @@ magma_zmconvert(
                 }
                 B->max_nnz_row = maxrowlength;
                 B->stored_nnz = maxrowlength*B->num_rows;
+                B->nnz = A.nnz;
                 //printf( "done\n" );
             }
             
@@ -526,6 +528,7 @@ magma_zmconvert(
                 }
                 B->max_nnz_row = maxrowlength;
                 B->stored_nnz = maxrowlength*B->num_rows;
+                B->nnz = A.nnz;
             }
             
             // CSR to ELLRT (also ELLPACKRT)
@@ -576,7 +579,7 @@ magma_zmconvert(
                 }
                 B->max_nnz_row = maxrowlength;
                 B->stored_nnz = maxrowlength*B->num_rows;
-                //printf( "done\n" );
+                B->nnz = A.nnz;
             }
             
             // CSR to SELLP
@@ -662,7 +665,7 @@ magma_zmconvert(
                         }
                     }
                 }
-                //B->nnz = A.nnz;
+                B->nnz = A.nnz;
             }
             
             // CSR to DENSE
@@ -690,6 +693,7 @@ magma_zmconvert(
                         B->val[i * (A.num_cols) + A.col[j] ] = A.val[ j ];
                 }
                 B->stored_nnz = B->num_rows * B->num_cols;
+                B->nnz = A.nnz;
                 //printf( "done\n" );
             }
             

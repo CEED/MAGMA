@@ -124,7 +124,7 @@ magma_zmdynamicic_insert(
     
     // this is usually sufficient to have the large elements in front
     CHECK( magma_zmorderstatistics(
-    val, col, rowidx, LU_new->nnz, num_rm*1.4,  1, &element, queue ) );
+    val, col, rowidx, LU_new->nnz, min(num_rm*10, LU_new->nnz ),  1, &element, queue ) );
     CHECK( magma_zmorderstatistics(
     val, col, rowidx, num_rm*2, num_rm,  1, &element, queue ) );
 
@@ -134,20 +134,22 @@ magma_zmdynamicic_insert(
     //while( num_insert < num_rm ) {
     
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
+    #pragma omp parallel for private(loc_i) schedule(static,1) shared(num_insert)
     for(int loc_i=0; loc_i<LU_new->nnz; loc_i++ ) {
         magma_int_t tid = omp_get_thread_num();
         if( success[ tid ] > -1 ){
             if( success[ tid ] == 1 ){
                 //omp_set_lock( &(rowlock[LU->num_rows]) );
-                #pragma omp critical(numel_count__)
+                #pragma omp critical(num_insert)
                 {
-                    omp_set_lock( &(rowlock[LU->num_rows]) );
+                    //omp_set_lock( &(rowlock[LU->num_rows]) );
                 //}
                 //{
                     insert_loc[ tid ] = num_insert;
                     num_insert++;
-                    omp_unset_lock( &(rowlock[LU->num_rows]) );
+                    #pragma omp flush(num_insert)
+                    //omp_unset_lock( &(rowlock[LU->num_rows]) );
                     success[ tid ] = 0;
                 }
             }
@@ -167,8 +169,8 @@ magma_zmdynamicic_insert(
                 magma_index_t new_col = col[ loc_i ];
                 magma_index_t old_rowstart = LU->row[ new_row ];
 
-               //     printf("tid:%d abort:%d num_insert:%d num_rm:%d i:%d loc:%d\n",omp_get_thread_num(), success[ omp_get_thread_num() ], insert_loc[ omp_get_thread_num() ], num_rm, loc_i, loc);fflush(stdout);
- //printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+                    printf("tid:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",tid, loc_i, insert_loc[ tid ], num_rm, loc, new_row, new_col);fflush(stdout);
+ printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
 
                 if( new_col < LU->col[ old_rowstart ] ){
                     //printf("insert: (%d,%d)\n", new_row, new_col);
