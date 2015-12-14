@@ -8,7 +8,9 @@
        @precisions normal z -> s d c
  
 */
-#include "common_magma.h"
+
+//#include "common_magma.h"
+#include "magma_internal.h"
 #define PRECISION_z
 
 // TODO convert to usual (A + (i) + (j)*lda), i.e., returns pointer?

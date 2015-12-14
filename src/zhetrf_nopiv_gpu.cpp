@@ -10,7 +10,8 @@
 
        @precisions normal z -> s d c
 */
-#include "common_magma.h"
+//#include "common_magma.h"
+#include "magma_internal.h"
 #include "trace.h"
 
 /**
@@ -107,16 +108,17 @@ magma_zhetrf_nopiv_gpu(
     nb = magma_get_zhetrf_nopiv_nb(n);
     ib = min(32, nb); // inner-block for diagonal factorization
 
-    magma_queue_t orig_stream;
-    magmablasGetKernelStream( &orig_stream );
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    //magma_queue_t orig_queue;
+    //magmablasGetKernelStream( &orig_queue );
 
-
-    magma_queue_t stream[2];
+    magma_queue_t queue[2];
     magma_event_t event;
-    magma_queue_create(&stream[0]);
-    magma_queue_create(&stream[1]);
+    magma_queue_create( cdev, &queue[0] );
+    magma_queue_create( cdev, &queue[1] );
     magma_event_create( &event );
-    trace_init( 1, 1, 2, stream );
+    trace_init( 1, 1, 2, queue );
 
     // CPU workspace
     magmaDoubleComplex *A;
@@ -142,13 +144,13 @@ magma_zhetrf_nopiv_gpu(
             
             // copy A(j,j) back to CPU
             trace_gpu_start( 0, 0, "get", "get" );
-            //magma_queue_wait_event( stream[1], event );
+            //magma_queue_wait_event( queue[1], event );
             magma_event_sync(event);
-            magma_zgetmatrix_async(jb, jb, dA(j, j), ldda, A(j,j), nb, stream[1]);
+            magma_zgetmatrix_async( jb, jb, dA(j, j), ldda, A(j,j), nb, queue[1] );
             trace_gpu_end( 0, 0 );
 
             // factorize the diagonal block
-            magma_queue_sync(stream[1]);
+            magma_queue_sync( queue[1] );
             trace_cpu_start( 0, "potrf", "potrf" );
             magma_zhetrf_nopiv_cpu( MagmaUpper, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
@@ -159,24 +161,25 @@ magma_zhetrf_nopiv_gpu(
             
             // copy A(j,j) back to GPU
             trace_gpu_start( 0, 0, "set", "set" );
-            magma_zsetmatrix_async(jb, jb, A(j, j), nb, dA(j, j), ldda, stream[0]);
+            magma_zsetmatrix_async( jb, jb, A(j, j), nb, dA(j, j), ldda, queue[0] );
             trace_gpu_end( 0, 0 );
             
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                magmablasSetKernelStream( stream[0] );
+                //magmablasSetKernelStream( queue[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
-                magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaUnit,
-                            jb, (n-j-jb),
-                            c_one, dA(j, j), ldda,
-                            dA(j, j+jb), ldda);
-                magma_zcopymatrix( jb, n-j-jb, dA( j, j+jb ), ldda, dWt( 0, j+jb ), nb );
+                magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaUnit,
+                             jb, (n-j-jb),
+                             c_one, dA(j, j), ldda,
+                             dA(j, j+jb), ldda,
+                             queue[0] );
+                magma_zcopymatrix( jb, n-j-jb, dA( j, j+jb ), ldda, dWt( 0, j+jb ), nb, queue[0] );
                 
                 // update the trailing submatrix with D
                 magmablas_zlascl_diag(MagmaUpper, jb, n-j-jb,
                                       dA(j,    j), ldda,
                                       dA(j, j+jb), ldda,
-                                      &iinfo);
+                                      queue[0], &iinfo);
                 trace_gpu_end( 0, 0 );
                 
                 // update the trailing submatrix with U and W
@@ -186,9 +189,10 @@ magma_zhetrf_nopiv_gpu(
                     magma_zgemm( MagmaConjTrans, MagmaNoTrans, kb, n-k, jb,
                                  c_neg_one, dWt(0, k), nb,
                                             dA(j, k),  ldda,
-                                 c_one,     dA(k, k),  ldda );
+                                 c_one,     dA(k, k),  ldda,
+                                 queue[0] );
                     if (k == j+jb)
-                        magma_event_record( event, stream[0] );
+                        magma_event_record( event, queue[0] );
                 }
                 trace_gpu_end( 0, 0 );
             }
@@ -202,13 +206,13 @@ magma_zhetrf_nopiv_gpu(
             
             // copy A(j,j) back to CPU
             trace_gpu_start( 0, 0, "get", "get" );
-            //magma_queue_wait_event( stream[0], event );
+            //magma_queue_wait_event( queue[0], event );
             magma_event_sync(event);
-            magma_zgetmatrix_async(jb, jb, dA(j, j), ldda, A(j,j), nb, stream[1]);
+            magma_zgetmatrix_async( jb, jb, dA(j, j), ldda, A(j,j), nb, queue[1] );
             trace_gpu_end( 0, 0 );
             
             // factorize the diagonal block
-            magma_queue_sync(stream[1]);
+            magma_queue_sync( queue[1] );
             trace_cpu_start( 0, "potrf", "potrf" );
             magma_zhetrf_nopiv_cpu( MagmaLower, jb, ib, A(j, j), nb, info );
             trace_cpu_end( 0 );
@@ -219,24 +223,25 @@ magma_zhetrf_nopiv_gpu(
 
             // copy A(j,j) back to GPU
             trace_gpu_start( 0, 0, "set", "set" );
-            magma_zsetmatrix_async(jb, jb, A(j, j), nb, dA(j, j), ldda, stream[0]);
+            magma_zsetmatrix_async( jb, jb, A(j, j), nb, dA(j, j), ldda, queue[0] );
             trace_gpu_end( 0, 0 );
             
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                magmablasSetKernelStream( stream[0] );
+                //magmablasSetKernelStream( queue[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
-                magma_ztrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
-                            (n-j-jb), jb,
-                            c_one, dA(j, j), ldda,
-                            dA(j+jb, j), ldda);
-                magma_zcopymatrix( n-j-jb,jb, dA( j+jb, j ), ldda, dW( j+jb, 0 ), ldda );
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
+                             (n-j-jb), jb,
+                             c_one, dA(j, j), ldda,
+                             dA(j+jb, j), ldda,
+                             queue[0]);
+                magma_zcopymatrix( n-j-jb,jb, dA( j+jb, j ), ldda, dW( j+jb, 0 ), ldda, queue[0] );
                 
                 // update the trailing submatrix with D
-                magmablas_zlascl_diag(MagmaLower, n-j-jb, jb,
-                                      dA(j,    j), ldda,
-                                      dA(j+jb, j), ldda,
-                                      &iinfo);
+                magmablas_zlascl_diag( MagmaLower, n-j-jb, jb,
+                                       dA(j,    j), ldda,
+                                       dA(j+jb, j), ldda,
+                                       queue[0], &iinfo );
                 trace_gpu_end( 0, 0 );
                 
                 // update the trailing submatrix with L and W
@@ -246,9 +251,10 @@ magma_zhetrf_nopiv_gpu(
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans, n-k, kb, jb,
                                  c_neg_one, dA(k, j), ldda,
                                             dW(k, 0), ldda,
-                                 c_one,     dA(k, k), ldda );
+                                 c_one,     dA(k, k), ldda,
+                                 queue[0] );
                     if (k == j+jb)
-                        magma_event_record( event, stream[0] );
+                        magma_event_record( event, queue[0] );
                 }
                 trace_gpu_end( 0, 0 );
             }
@@ -256,12 +262,12 @@ magma_zhetrf_nopiv_gpu(
     }
     
     trace_finalize( "zhetrf.svg","trace.css" );
-    magma_queue_destroy(stream[0]);
-    magma_queue_destroy(stream[1]);
+    magma_queue_destroy( queue[0] );
+    magma_queue_destroy( queue[1] );
     magma_event_destroy( event );
     magma_free( dW );
     magma_free_pinned( A );
     
-    magmablasSetKernelStream( orig_stream );
+    //magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 } /* magma_zhetrf_nopiv */
