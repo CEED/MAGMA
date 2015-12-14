@@ -535,8 +535,6 @@ magma_zpidr_strms(
                 break;
             }
 
-            // iter = iter + 1
-            solver_par->numiter++;
         }
 
         // smoothing disabled

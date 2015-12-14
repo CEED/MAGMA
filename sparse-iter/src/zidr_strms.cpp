@@ -522,8 +522,6 @@ cudaProfilerStart();
                 break;
             }
 
-            // iter = iter + 1
-            solver_par->numiter++;
         }
 
         // smoothing disabled

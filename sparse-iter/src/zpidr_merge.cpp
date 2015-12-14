@@ -453,8 +453,6 @@ magma_zpidr_merge(
                 magma_zaxpy( sk-1, -hbeta.val[k], &dM.dval[k*dM.ld+(k+1)], 1, &df.dval[k+1], 1, queue );
             }
 
-            // iter = iter + 1
-            solver_par->numiter++;
         }
 
         // smoothing disabled
