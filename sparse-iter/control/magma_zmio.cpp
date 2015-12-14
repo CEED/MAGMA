@@ -318,7 +318,6 @@ magma_int_t read_z_csr_from_mtx(
             (*val)[kk+i] = rowval[i].second;
         }
     }
-    A->stored_nnz = A->nnz;
 
     printf(" done.\n");
 cleanup:
@@ -673,7 +672,6 @@ magma_zprint_csr_mtx(
         }
         #endif
     }
-    A->stored_nnz = A->nnz;
 
 cleanup:
     return info;
