@@ -135,7 +135,7 @@ magma_zmdynamicic_insert(
     
 
     //#pragma omp parallel for
-    #pragma omp parallel for private(loc_i) schedule(static,1) shared(num_insert)
+    //#pragma omp parallel for private(loc_i) schedule(static,1) shared(num_insert)
     for(int loc_i=0; loc_i<LU_new->nnz; loc_i++ ) {
         magma_int_t tid = omp_get_thread_num();
         if( success[ tid ] > -1 ){
@@ -148,7 +148,7 @@ magma_zmdynamicic_insert(
                 //{
                     insert_loc[ tid ] = num_insert;
                     num_insert++;
-                    #pragma omp flush(num_insert)
+                    //#pragma omp flush(num_insert)
                     //omp_unset_lock( &(rowlock[LU->num_rows]) );
                     success[ tid ] = 0;
                 }
@@ -169,8 +169,9 @@ magma_zmdynamicic_insert(
                 magma_index_t new_col = col[ loc_i ];
                 magma_index_t old_rowstart = LU->row[ new_row ];
 
-                    printf("tid:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",tid, loc_i, insert_loc[ tid ], num_rm, loc, new_row, new_col);fflush(stdout);
- printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+                    printf("tid:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
+                                tid, loc_i, insert_loc[ tid ], num_rm, loc, new_row, new_col);fflush(stdout);
+                                printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
 
                 if( new_col < LU->col[ old_rowstart ] ){
                     //printf("insert: (%d,%d)\n", new_row, new_col);

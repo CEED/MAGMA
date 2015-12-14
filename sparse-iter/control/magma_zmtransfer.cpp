@@ -95,6 +95,7 @@ magma_zmtransfer(
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
             B->stored_nnz = A.stored_nnz;
+            
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.stored_nnz ));
             CHECK( magma_index_malloc( &B->drow, A.num_rows + 1 ));
@@ -575,6 +576,7 @@ magma_zmtransfer(
                                         || A.storage_type == Magma_CSRD
                                         || A.storage_type == Magma_CSRL
                                         || A.storage_type == Magma_CSRU ) {
+        
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
@@ -804,6 +806,7 @@ magma_zmtransfer(
                                         || A.storage_type == Magma_CSRD
                                         || A.storage_type == Magma_CSRL
                                         || A.storage_type == Magma_CSRU ) {
+        
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;

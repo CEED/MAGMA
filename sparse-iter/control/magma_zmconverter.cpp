@@ -235,7 +235,7 @@ magma_zmconvert(
                 B->num_rows = A.num_rows;
                 B->num_cols = A.num_cols;
                 B->diameter = A.diameter;
-                B->stored_nnz = A.stored_nnz;
+                
     
                 magma_int_t numzeros=0;
                 for( magma_int_t i=0; i < A.num_rows; i++) {
@@ -246,6 +246,7 @@ magma_zmconvert(
                     }
                 }
                 B->nnz = numzeros;
+                B->stored_nnz = numzeros;
                 CHECK( magma_zmalloc_cpu( &B->val, numzeros ));
                 CHECK( magma_index_malloc_cpu( &B->row, A.num_rows+1 ));
                 CHECK( magma_index_malloc_cpu( &B->col, numzeros ));

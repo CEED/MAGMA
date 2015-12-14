@@ -42,14 +42,14 @@ magma_zmfree(
             magma_free_cpu( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if (A->storage_type == Magma_ELLD ) {
             magma_free_cpu( A->val );
             magma_free_cpu( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_ELLRT ) {
             magma_free_cpu( A->val );
@@ -57,7 +57,7 @@ magma_zmfree(
             magma_free_cpu( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_SELLP ) {
             magma_free_cpu( A->val );
@@ -65,7 +65,7 @@ magma_zmfree(
             magma_free_cpu( A->col );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_CSRLIST ) {
             magma_free_cpu( A->val );
@@ -74,7 +74,7 @@ magma_zmfree(
             magma_free_cpu( A->list );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC
                                         || A->storage_type == Magma_CSRD
@@ -85,7 +85,7 @@ magma_zmfree(
             magma_free_cpu( A->row );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if (  A->storage_type == Magma_CSRCOO ) {
             magma_free_cpu( A->val );
@@ -94,7 +94,7 @@ magma_zmfree(
             magma_free_cpu( A->rowidx );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_BCSR ) {
             magma_free_cpu( A->val );
@@ -103,14 +103,14 @@ magma_zmfree(
             magma_free_cpu( A->blockinfo );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
             A->blockinfo = 0;
         }
         if ( A->storage_type == Magma_DENSE ) {
             magma_free_cpu( A->val );
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         A->val = NULL;
         A->col = NULL;
@@ -140,7 +140,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_ELLD ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -154,7 +154,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_ELLRT ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -172,7 +172,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_SELLP ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -189,7 +189,7 @@ magma_zmfree(
             }
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_CSRLIST ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -210,7 +210,7 @@ magma_zmfree(
             }
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_CSR || A->storage_type == Magma_CSC
                                         || A->storage_type == Magma_CSRD
@@ -231,7 +231,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if (  A->storage_type == Magma_CSRCOO ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -253,7 +253,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_BCSR ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -272,7 +272,7 @@ magma_zmfree(
             A->blockinfo = NULL;
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         if ( A->storage_type == Magma_DENSE ) {
             if ( magma_free( A->dval ) != MAGMA_SUCCESS ) {
@@ -282,7 +282,7 @@ magma_zmfree(
 
             A->num_rows = 0;
             A->num_cols = 0;
-            A->nnz = 0;
+            A->nnz = 0; A->stored_nnz = 0;
         }
         A->val = NULL;
         A->col = NULL;
