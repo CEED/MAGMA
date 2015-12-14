@@ -83,8 +83,8 @@ magma_z_solver(
             case  Magma_IDR:
                     CHECK( magma_zidr( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_IDRMERGE:
-                    //CHECK( magma_zidr_merge( A, b, x, &zopts->solver_par, queue )); break;
-                    CHECK( magma_zidr_strms( A, b, x, &zopts->solver_par, queue )); break;
+                    CHECK( magma_zidr_merge( A, b, x, &zopts->solver_par, queue )); break;
+                    //CHECK( magma_zidr_strms( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PIDR:
                     CHECK( magma_zpidr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_PIDRMERGE:
@@ -123,7 +123,7 @@ magma_z_solver(
             case  Magma_BOMBARD:
                     CHECK( magma_zbombard( A, b, x, &zopts->solver_par, queue ) ); break;
             case  Magma_BOMBARDMERGE:
-                    CHECK( magma_zbombard_merge( A, b, x, &zopts->solver_par, queue ) ); break;
+                    CHECK( magma_zbombard( A, b, x, &zopts->solver_par, queue ) ); break;
             default:
                     printf("error: solver class not supported.\n"); break;
         }
