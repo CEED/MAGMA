@@ -23,6 +23,8 @@ use strict;
 
 # MAGMA kernels, in alphabetical order
 my @kernels = qw(
+	amax
+	asum
 	axpy
 	cnrm2
 	copy
@@ -45,10 +47,13 @@ my @kernels = qw(
 	scal
 	symm
 	symv
+	swap
 	transpose
 	trmm
 	trsm
 	trsv
+	zamax
+	zasum
 	znrm2
 );
 
@@ -102,6 +107,7 @@ while( <> ) {
 	# add queue to BLAS/GPU kernels
 	#   ($1 ..............................................)      ($2 ...)
 	s/\b(magma(?:blas)?_[isdcz](?:(?:$kernels)\w*|$setget)) *\( ?([^;]*?)\s*\);/$1( $2, $queue );/g;
+	s/\b(magma(?:blas)?_index_(?:(?:$kernels)\w*|$setget)) *\( ?([^;]*?)\s*\);/$1( $2, $queue );/g;
 	
 	print;
 }
