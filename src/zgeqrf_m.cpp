@@ -8,7 +8,8 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+//#include "common_magma.h"
+#include "magma_internal.h" 
 
 /**
     Purpose
@@ -158,14 +159,29 @@ magma_zgeqrf_m(
     }
 
     if (m > nb && n > nb) {
+        magma_queue_t queues[MagmaMaxGPUs];
+        for( int dev=0; dev < ngpu; dev++ ) {
+            magma_setdevice( dev );
+            magma_queue_create( dev, &queues[dev] );
+        }
+
         /* Copy the matrix to the GPUs in 1D block cyclic distribution */
-        magma_zsetmatrix_1D_col_bcyclic(m, n, A, lda, da, ldda, ngpu, nb);
+        magma_zsetmatrix_1D_col_bcyclic(m, n, A, lda, da, ldda, ngpu, nb, queues);
+        for( int dev=0; dev < ngpu; dev++ ) {
+            magma_setdevice( dev );
+            magma_queue_sync( queues[dev] );
+        }
 
         /* Factor using the GPU interface */
         magma_zgeqrf2_mgpu( ngpu, m, n, da, ldda, tau, info);
 
         /* Copy the matrix back from the GPUs to the CPU */
-        magma_zgetmatrix_1D_col_bcyclic(m, n, da, ldda, A, lda, ngpu, nb);
+        magma_zgetmatrix_1D_col_bcyclic(m, n, da, ldda, A, lda, ngpu, nb, queues);
+        for( int dev=0; dev < ngpu; dev++ ) {
+            magma_setdevice( dev );
+            magma_queue_sync( queues[dev] );
+            magma_queue_destroy( queues[dev] );
+        }
     }
     else {
         lapackf77_zgeqrf(&m, &n, A, &lda, tau, work, &lwork, info);
