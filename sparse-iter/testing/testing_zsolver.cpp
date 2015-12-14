@@ -79,7 +79,7 @@ int main(  int argc, char** argv )
         printf("%%======================================================================"
                             "======%%\n");
         printf("  %8d  %8d      %10d             %4d        %10d\n",
-            (int) B.num_rows, (int) B.num_cols ,(int) B.nnz, (int) B.nnz/B.num_rows, (int) B.stored_nnz );
+            (int) B.num_rows, (int) B.num_cols ,(int) B.true_nnz, (int) B.true_nnz/B.num_rows, (int) B.nnz );
         printf("%%======================================================================"
         "======%%\n");
         printf("];\n");
