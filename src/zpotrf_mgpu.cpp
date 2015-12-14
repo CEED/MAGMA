@@ -116,12 +116,8 @@ magma_zpotrf_mgpu(
             return *info;
         }
         magma_zgetmatrix( n, n, d_lA[0], ldda, work, n, queues[0][0] );
-        magma_queue_sync( queues[0][0] );
-
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
         magma_zsetmatrix( n, n, work, n, d_lA[0], ldda, queues[0][0] );
-        magma_queue_sync( queues[0][0] );
-
         magma_free_pinned( work );
         magma_queue_destroy( queues[0][0] );
     }

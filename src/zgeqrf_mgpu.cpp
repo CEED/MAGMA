@@ -303,10 +303,6 @@ magma_zgeqrf2_mgpu(
                               hwork + (j-i)*rows,         rows,
                               queues[panel_dev][0] );
         }
-        for( panel_dev=0; panel_dev < ngpu; panel_dev++ ) {
-            magma_setdevice( panel_dev );
-            magma_queue_sync( queues[panel_dev][0] );
-        }
 
         // needs lwork >= 2*n*nb:
         // needs (m-i)*(n-i) for last block row, bounded by nb*n.
@@ -327,10 +323,6 @@ magma_zgeqrf2_mgpu(
                               hwork + (j-i)*rows,         rows,
                               dlA(panel_dev, i, i_local), ldda,
                               queues[panel_dev][0] );
-        }
-        for( panel_dev=0; panel_dev < ngpu; panel_dev++ ) {
-            magma_setdevice( panel_dev );
-            magma_queue_sync( queues[panel_dev][0] );
         }
     }
 
