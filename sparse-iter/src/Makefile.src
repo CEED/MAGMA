@@ -36,7 +36,7 @@ libsparse_zsrc += \
 	$(cdir)/zptfqmr.cpp                   \
 	$(cdir)/zptfqmr_merge.cpp             \
 	$(cdir)/zidr.cpp                      \
-	$(cdir)/zidr_acc.cpp                  \
+	$(cdir)/zidr_merge.cpp                \
 	$(cdir)/zidr_strms.cpp                \
 	$(cdir)/ziterref.cpp                  \
 	$(cdir)/zjacobi.cpp                   \
@@ -52,9 +52,10 @@ libsparse_zsrc += \
 	$(cdir)/zpbicgstab.cpp                \
 	$(cdir)/zpidr.cpp                     \
 	$(cdir)/zpidr_merge.cpp               \
+	$(cdir)/zpidr_strms.cpp               \
 	$(cdir)/zbombard.cpp                  \
 	$(cdir)/zbombard_merge.cpp            \
-    $(cdir)/zpbicgstab_merge.cpp          \
+        $(cdir)/zpbicgstab_merge.cpp          \
 
 # Krylov space eigen-solvers
 libsparse_zsrc += \

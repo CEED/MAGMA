@@ -13,7 +13,6 @@
 */
 
 #include "magmasparse_internal.h"
-#include <cuda_profiler_api.h>
 
 #define RTOLERANCE     lapackf77_dlamch( "E" )
 #define ATOLERANCE     lapackf77_dlamch( "E" )
@@ -26,8 +25,8 @@
     Solves a system of linear equations
        A * X = B
     where A is a complex Hermitian N-by-N positive definite matrix A.
-    This is a GPU implementation of the Induced Dimension Reduction
-    method applying kernel fusion and kernel overlap.
+    This is a GPU implementation of the preconditioned Induced Dimension
+    Reduction method applying kernel fusion and kernel overlap.
 
     Arguments
     ---------
@@ -49,6 +48,10 @@
                 solver parameters
 
     @param[in]
+    precond_par magma_z_preconditioner*
+                preconditioner
+
+    @param[in]
     queue       magma_queue_t
                 Queue to execute in.
 
@@ -57,15 +60,16 @@
 
 
 extern "C" magma_int_t
-magma_zidr_strms(
+magma_zpidr_strms(
     magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
     magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
     magma_queue_t queue )
 {
     magma_int_t info = MAGMA_NOTCONVERGED;
 
     // prepare solver feedback
-    solver_par->solver = Magma_IDRMERGE;
+    solver_par->solver = Magma_PIDRMERGE;
     solver_par->numiter = 0;
     solver_par->spmv_count = 0;
     solver_par->init_res = 0.0;
@@ -111,6 +115,7 @@ magma_zidr_strms(
     magma_z_matrix dt = {Magma_CSR}, dtt = {Magma_CSR};
     magma_z_matrix dc = {Magma_CSR};
     magma_z_matrix dv = {Magma_CSR};
+    magma_z_matrix dlu = {Magma_CSR};
     magma_z_matrix dskp = {Magma_CSR};
     magma_z_matrix dalpha = {Magma_CSR};
     magma_z_matrix dbeta = {Magma_CSR};
@@ -300,14 +305,15 @@ magma_zidr_strms(
     // v = r
     CHECK( magma_zmtransfer( dr, &dv, Magma_DEV, Magma_DEV, queue ));
 
+    // lu = 0
+    CHECK( magma_zvinit( &dlu, Magma_DEV, dr.num_rows, 1, c_zero, queue ));
+
     //--------------START TIME---------------
     // chronometry
     tempo1 = magma_sync_wtime( queue );
     if ( solver_par->verbose > 0 ) {
         solver_par->timing[0] = 0.0;
     }
-
-cudaProfilerStart();
 
     om = MAGMA_Z_ONE;
     gamma = MAGMA_Z_ZERO;
@@ -343,6 +349,13 @@ cudaProfilerStart();
             // v = r - G(:,k:s) c(k:s)
             // Q1
             magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, dGcol.dval, dG.ld, &dc.dval[k], 1, c_one, dv.dval, 1, queues[1] );
+
+            // preconditioning operation 
+            // v = L \ v;
+            // v = U \ v;
+            // Q1
+            CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queues[1] )); 
+            CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queues[1] )); 
 
             // sync Q0 --> U(:,k) = U(:,k) - U(:,1:k) * alpha(1:k)
             magma_queue_sync( queues[0] );
@@ -542,9 +555,16 @@ cudaProfilerStart();
             break;
         }
 
-        // t = A r
+        // preconditioning operation 
+        // v = L \ v;
+        // v = U \ v;
         // Q2
-        CHECK( magma_z_spmv( c_one, A, dr, c_zero, dt, queues[2] ));
+        CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queues[2] )); 
+        CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queues[2] )); 
+
+        // t = A v
+        // Q2
+        CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queues[2] ));
         solver_par->spmv_count++;
 
         // computation of a new omega
@@ -561,7 +581,7 @@ cudaProfilerStart();
 
         // |t|
         nrmt = magma_dsqrt( MAGMA_Z_REAL(hskp[0]) );
-        
+
         // rho = abs((t' * r) / (|t| * |r|))
         rho = MAGMA_D_ABS( MAGMA_Z_REAL(hskp[1]) / (nrmt * nrmr) );
 
@@ -673,8 +693,6 @@ cudaProfilerStart();
         magma_zcopyvector_async( dr.num_rows, drs.dval, 1, dr.dval, 1, queue );
     }
 
-cudaProfilerStop();
-
     // get last iteration timing
     tempo2 = magma_sync_wtime( queue );
     magma_queue_sync( queue );
@@ -723,6 +741,7 @@ cleanup:
     magma_zmfree( &dt, queue );
     magma_zmfree( &dc, queue );
     magma_zmfree( &dv, queue );
+    magma_zmfree( &dlu, queue );
     magma_zmfree( &dskp, queue );
     magma_zmfree( &dalpha, queue );
     magma_zmfree( &dbeta, queue );
@@ -735,5 +754,5 @@ cleanup:
 
     solver_par->info = info;
     return info;
-    /* magma_zidr_strms */
+    /* magma_zpidr_strms */
 }

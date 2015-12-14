@@ -83,11 +83,13 @@ magma_z_solver(
             case  Magma_IDR:
                     CHECK( magma_zidr( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_IDRMERGE:
-                    CHECK( magma_zidr_acc( A, b, x, &zopts->solver_par, queue )); break;
+                    //CHECK( magma_zidr_merge( A, b, x, &zopts->solver_par, queue )); break;
+                    CHECK( magma_zidr_strms( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PIDR:
                     CHECK( magma_zpidr( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_PIDRMERGE:
-                    CHECK( magma_zpidr_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
+                    //CHECK( magma_zpidr_merge( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
+                    CHECK( magma_zpidr_strms( A, b, x, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_LOBPCG:
                     CHECK( magma_zlobpcg( A, &zopts->solver_par, &zopts->precond_par, queue )); break;
             case  Magma_ITERREF:
