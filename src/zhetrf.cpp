@@ -8,7 +8,8 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
+//#include "common_magma.h"
+#include "magma_internal.h"
 #include "trace.h"
 #define PRECISION_z
 
@@ -151,10 +152,13 @@ magma_zhetrf(
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+
     magma_queue_t stream[2];
     magma_event_t event[2];
-    magma_queue_create( &stream[0] );
-    magma_queue_create( &stream[1] );
+    magma_queue_create( cdev, &stream[0] );
+    magma_queue_create( cdev, &stream[1] );
     magma_event_create( &event[0] );
     magma_event_create( &event[1] );
     trace_init( 1, 1, 2, (CUstream_st**)stream );
@@ -197,7 +201,7 @@ magma_zhetrf(
                 /* Use unblocked code to factorize columns 1:k of A */
 
                 magma_queue_sync( stream[0] );
-                magma_zgetmatrix( nk, nk, dA( 0, 0 ),ldda, A( 0, 0 ),lda );
+                magma_zgetmatrix( nk, nk, dA( 0, 0 ),ldda, A( 0, 0 ),lda, stream[0] );
                 lapackf77_zhetf2( MagmaUpperStr, &nk, A( 0, 0 ), &lda, &ipiv[0], &iinfo );
                 kb = k+1;
             }
@@ -225,7 +229,7 @@ magma_zhetrf(
             else {
                 /* Use unblocked code to factorize columns k:n of A */
                 magma_queue_sync( stream[0] );
-                magma_zgetmatrix( nk,nk, dA(k,k),ldda, A(k,k),lda );
+                magma_zgetmatrix( nk,nk, dA(k,k),ldda, A(k,k),lda, stream[0] );
                 lapackf77_zhetf2( MagmaLowerStr, &nk, A( k, k ), &lda, &ipiv[k], &iinfo );
             }
             /* Set INFO on the first occurrence of a zero pivot */
@@ -244,7 +248,7 @@ magma_zhetrf(
     trace_finalize( "zhetrf.svg","trace.css" );
     magma_queue_sync( stream[0] );
     magma_queue_sync( stream[1] );
-    magmablasSetKernelStream( NULL );
+    //magmablasSetKernelStream( NULL );
     magma_event_destroy( event[0] );
     magma_event_destroy( event[1] );
     magma_queue_destroy( stream[0] );
