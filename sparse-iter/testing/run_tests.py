@@ -151,7 +151,7 @@ parser.add_option(      '--tol',         action='store',      dest='tol',       
 parser.add_option('-s', '--small',       action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',      action='store_true', dest='med',        help='run medium tests, N < 1000')
 parser.add_option('-l', '--large',       action='store_true', dest='large',      help='run large  tests, N > 1000')
-parser.add_option('-nonsym', '--nonsym', action='store_true', dest='nonsym',     help='run nonsym  tests')
+parser.add_option('-n', '--nonsym',      action='store_true', dest='nonsym',     help='run nonsym  tests')
 
 parser.add_option(      '--sparse-blas', action='store_true', dest='sparse_blas', help='run sparse BLAS tests')
 parser.add_option(      '--solver',      action='store_true', dest='solver',      help='run sparse solvers')
