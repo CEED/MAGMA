@@ -151,7 +151,7 @@ magma_zbombard(
     CHECK( magma_zvinit( &T_Au_new, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &T_Au, Magma_DEV, A.num_rows, b.num_cols, c_one, queue ));
     CHECK( magma_zvinit( &T_x, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
-    // CSGS
+    // CGS
     CHECK( magma_zvinit( &C_r, Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &C_rt,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
     CHECK( magma_zvinit( &C_x,Magma_DEV, A.num_rows, b.num_cols, c_zero, queue ));
@@ -290,7 +290,6 @@ magma_zbombard(
         B_rho_old = B_rho_new;    
         B_rho_new = magma_zdotc( dofs, r_tld.dval, 1, B_r.dval, 1, queue );  // rho=<rr,r>
         B_beta = B_rho_new/B_rho_old * B_alpha/B_omega;   // beta=rho/rho_old *alpha/omega
-
 
         
         if( solver_par->numiter == 1 ){
@@ -537,9 +536,6 @@ magma_zbombard(
         Q_gamm = c_one / magma_zsqrt(c_one + Q_thet*Q_thet);        
         Q_eta = - Q_eta * Q_rho1 * Q_gamm * Q_gamm / (Q_beta * Q_gamm1 * Q_gamm1);
 
-
-        
-        
         if( solver_par->numiter == 1 ){
             
                 //QMR: d = eta * p + pds * d;
@@ -580,7 +576,6 @@ magma_zbombard(
             queue );
         }
         
-
         
         // CGS: r = r -alpha*A u_hat
         // CGS: x = x + alpha u_hat
@@ -653,7 +648,7 @@ magma_zbombard(
             res = B_res;
             flag = 4;
         }
-        
+
         if ( solver_par->verbose > 0 ) {
             tempo2 = magma_sync_wtime( queue );
             if ( (solver_par->numiter)%solver_par->verbose == c_zero ) {
