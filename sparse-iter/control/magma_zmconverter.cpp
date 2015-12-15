@@ -457,7 +457,7 @@ magma_zmconvert(
                 
                 for( i=0; i < (maxrowlength*A.num_rows); i++) {
                     B->val[i] = MAGMA_Z_MAKE(0., 0.);
-                    B->col[i] = -1;
+                    B->col[i] = 0;
                 }
     
                 for( i=0; i < A.num_rows; i++ ) {
