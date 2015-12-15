@@ -195,10 +195,11 @@ parser.add_option(      '--iter-ilu-prec'    , action='store_true', dest='iter_i
 (opts, args) = parser.parse_args()
 
 # default if no sizes given is all sizes
-if ( not opts.small and not opts.med and not opts.large ):
+if ( not opts.small and not opts.med and not opts.large and not opts.nonsym ):
     opts.small = True
     opts.med   = True
     opts.large = True
+    opts.nonsym = True
 # end
 
 # default if no groups given is all groups
@@ -217,10 +218,11 @@ if (     not opts.sparse_blas
 # end
 
 # default if no sizes given is all sizes
-if ( not opts.small and not opts.med and not opts.large ):
+if ( not opts.small and not opts.med and not opts.large and not opts.nonsym ):
     opts.small = True
     opts.med   = True
     opts.large = True
+    opts.nonsym = True
 # end
 
 # default if no solvers given is all solvers
