@@ -424,6 +424,7 @@ aux = (
 	# ----------
 	# auxiliary
 	('testing_zgeadd',                 '-c',  mn,   ''),
+	('testing_zgeadd',     '--version 2 -c',  mn,   ''),
 	('testing_zlacpy',                 '-c',  mn,   ''),
 	('testing_zlag2c',                 '-c',  mn,   ''),
 	('testing_zlange',                 '-c',  mn,   ''),

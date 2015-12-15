@@ -259,6 +259,14 @@ magmablas_zgeadd(
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
 
 void
+magmablas_zgeadd2(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
+
+void
 magmablas_zlacpy(
     magma_uplo_t uplo,
     magma_int_t m, magma_int_t n,

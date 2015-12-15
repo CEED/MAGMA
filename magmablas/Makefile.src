@@ -47,6 +47,7 @@ libmagma_zsrc += \
 	$(cdir)/zaxpycp.cu		\
 	$(cdir)/zcaxpycp.cu		\
 	$(cdir)/zgeadd.cu		\
+	$(cdir)/zgeadd2.cu		\
 	$(cdir)/zgemm_reduce.cu		\
 	$(cdir)/zgemv_conj.cu		\
 	$(cdir)/zgerbt_kernels.cu	\

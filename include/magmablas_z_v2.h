@@ -73,6 +73,7 @@ extern "C" {
    * LAPACK auxiliary functions (alphabetical order)
    */
 #define magmablas_zgeadd                     magmablas_zgeadd_q
+#define magmablas_zgeadd2                    magmablas_zgeadd2_q
 #define magmablas_zlacpy                     magmablas_zlacpy_q
 #define magmablas_zlacpy_conj                magmablas_zlacpy_conj_q
 #define magmablas_zlacpy_sym_in              magmablas_zlacpy_sym_in_q

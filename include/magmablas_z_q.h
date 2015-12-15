@@ -192,6 +192,15 @@ magmablas_zgeadd_q(
     magma_queue_t queue );
 
 void
+magmablas_zgeadd2_q(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dB, magma_int_t lddb,
+    magma_queue_t queue );
+
+void
 magmablas_zlacpy_q(
     magma_uplo_t uplo,
     magma_int_t m, magma_int_t n,
