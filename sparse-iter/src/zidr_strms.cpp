@@ -79,7 +79,7 @@ magma_zidr_strms(
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
     // internal user options
-    const magma_int_t smoothing = 1;   // 0 = disable, 1 = enable
+    const magma_int_t smoothing = 0;   // 0 = disable, 1 = enable
     const double angle = 0.7;          // [0-1]
 
     // local variables
@@ -313,27 +313,27 @@ cudaProfilerStart();
     gamma = MAGMA_Z_ZERO;
     innerflag = 0;
 
+    // new RHS for small systems
+    // f = P' r
+    // Q1
+    magma_zgemvmdot_shfl( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queues[1] );
+
+    // skp[4] = f(k)
+    // Q1
+    magma_zgetvector_async( 1, df.dval, 1, &hskp[4], 1, queues[1] );
+
+    // c(k:s) = f(k:s)
+    // Q1
+    magma_zcopyvector_async( s, df.dval, 1, dc.dval, 1, queues[1] );
+
+    // c(k:s) = M(k:s,k:s) \ f(k:s)
+    // Q1
+    magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, s, dM.dval, dM.ld, dc.dval, 1, queues[1] );
+
     // start iteration
     do
     {
         solver_par->numiter++;
-
-        // new RHS for small systems
-        // f = P' r
-        // Q1
-        magma_zgemvmdot_shfl( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queues[1] );
-
-        // skp[4] = f(k)
-        // Q1
-        magma_zgetvector_async( 1, df.dval, 1, &hskp[4], 1, queues[1] );
-
-        // c(k:s) = f(k:s)
-        // Q1
-        magma_zcopyvector_async( s, df.dval, 1, dc.dval, 1, queues[1] );
-
-        // c(k:s) = M(k:s,k:s) \ f(k:s)
-        // Q1
-        magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, s, dM.dval, dM.ld, dc.dval, 1, queues[1] );
 
         // shadow space loop
         for ( k = 0; k < s; ++k ) {
@@ -343,9 +343,6 @@ cudaProfilerStart();
             // v = r - G(:,k:s) c(k:s)
             // Q1
             magmablas_zgemv( MagmaNoTrans, dG.num_rows, sk, c_n_one, dGcol.dval, dG.ld, &dc.dval[k], 1, c_one, dv.dval, 1, queues[1] );
-
-            // sync Q0 --> U(:,k) = U(:,k) - U(:,1:k) * alpha(1:k)
-            magma_queue_sync( queues[0] );
 
             // U(:,k) = om * v + U(:,k:s) c(k:s)
             // Q1
@@ -371,17 +368,13 @@ cudaProfilerStart();
                 magma_zaxpy( dG.num_rows, -halpha[i], &dG.dval[i*dG.ld], 1, dGcol.dval, 1, queues[1] );
             }
 
-            // sync Q1 --> compute new G, skp[4] = f(k
+            // sync Q1 --> G(:,k) = G(:,k) - alpha * G(:,i), skp[4] = f(k)
             magma_queue_sync( queues[1] );
 
             // new column of M = P'G, first k-1 entries are zero
             // M(k:s,k) = P(:,k:s)' G(:,k)
             // Q2
             magma_zgemvmdot_shfl( dP.num_rows, sk, &dP.dval[k*dP.ld], dGcol.dval, d1, d2, &dM.dval[k*dM.ld+k], queues[2] );
-
-            // U(:,k) = v
-            // Q0
-            magma_zcopyvector_async( dU.num_rows, dv.dval, 1, &dU.dval[k*dU.ld], 1, queues[0] );
 
             // non-first s iteration
             if ( k > 0 ) {
@@ -392,13 +385,17 @@ cudaProfilerStart();
                 // U update outside of loop using GEMV
                 // U(:,k) = U(:,k) - U(:,1:k) * alpha(1:k)
                 // Q0
-                magmablas_zgemv( MagmaNoTrans, dU.num_rows, k, c_n_one, dU.dval, dU.ld, dalpha.dval, 1, c_one, &dU.dval[k*dU.ld], 1, queues[0] );
+                magmablas_zgemv( MagmaNoTrans, dU.num_rows, k, c_n_one, dU.dval, dU.ld, dalpha.dval, 1, c_one, dv.dval, 1, queues[0] );
             }
 
             // Mdiag(k) = M(k,k)
             // Q2
             magma_zgetvector( 1, &dM.dval[k*dM.ld+k], 1, &hMdiag[k], 1, queues[2] );
             // implicit sync Q2 --> Mdiag(k) = M(k,k)
+
+            // U(:,k) = v
+            // Q0
+            magma_zcopyvector_async( dU.num_rows, dv.dval, 1, &dU.dval[k*dU.ld], 1, queues[0] );
 
             // check M(k,k) == 0
             if ( MAGMA_Z_EQUAL(hMdiag[k], MAGMA_Z_ZERO) ) {
@@ -417,6 +414,10 @@ cudaProfilerStart();
                 break;
             }
 
+            // r = r - beta * G(:,k)
+            // Q2
+            magma_zaxpy( dr.num_rows, -hbeta[k], dGcol.dval, 1, dr.dval, 1, queues[2] );
+
             // non-last s iteration 
             if ( (k + 1) < s ) {
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)
@@ -433,12 +434,8 @@ cudaProfilerStart();
 
                 // skp[4] = f(k+1)
                 // Q1
-                magma_zgetvector_async( 1, &df.dval[k+1], 1, &hskp[4], 1, queues[1] );
+                magma_zgetvector_async( 1, &df.dval[k+1], 1, &hskp[4], 1, queues[1] ); 
             }
-
-            // r = r - beta * G(:,k)
-            // Q2
-            magma_zaxpy( dr.num_rows, -hbeta[k], dGcol.dval, 1, dr.dval, 1, queues[2] );
 
             // smoothing disabled
             if ( smoothing <= 0 ) {
@@ -447,21 +444,17 @@ cudaProfilerStart();
                 nrmr = magma_dznrm2( dr.num_rows, dr.dval, 1, queues[2] );           
                 // implicit sync Q2 --> |r|
 
-                // v = r
-                // Q1
-                magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[1] );
-
             // smoothing enabled
             } else {
-                // x = x + beta * U(:,k)
-                // Q0
-                magma_zaxpy( x->num_rows, hbeta[k], &dU.dval[k*dU.ld], 1, x->dval, 1, queues[0] );
-
                 // smoothing operation
 //---------------------------------------
                 // t = rs - r
                 // Q2
                 magma_zidr_smoothing_1( drs.num_rows, drs.num_cols, drs.dval, dr.dval, dtt.dval, queues[2] );
+
+                // x = x + beta * U(:,k)
+                // Q0
+                magma_zaxpy( x->num_rows, hbeta[k], &dU.dval[k*dU.ld], 1, x->dval, 1, queues[0] );
 
                 // t't
                 // t'rs
@@ -476,23 +469,36 @@ cudaProfilerStart();
                 // gamma = (t' * rs) / (t' * t)
                 gamma = hskp[3] / hskp[2];
                 
+                // rs = rs - gamma * t 
+                // Q1
+                magma_zaxpy( drs.num_rows, -gamma, dtt.dval, 1, drs.dval, 1, queues[1] );
+
                 // xs = xs - gamma * (xs - x) 
                 // Q0
                 magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queues[0] );
 
-                // v = r
-                // Q1
-                magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[1] );
-
-                // rs = rs - gamma * t 
-                // Q2
-                magma_zaxpy( drs.num_rows, -gamma, dtt.dval, 1, drs.dval, 1, queues[2] );
-
                 // |rs|
-                // Q2
-                nrmr = magma_dznrm2( drs.num_rows, drs.dval, 1, queues[2] );       
-                // implicit sync Q2 --> |r|
+                // Q1
+                nrmr = magma_dznrm2( drs.num_rows, drs.dval, 1, queues[1] );       
+                // implicit sync Q0 --> |r|
 //---------------------------------------
+            }
+
+            // v = r
+            // Q1
+            magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[1] );
+
+            // last s iteration
+            if ( (k + 1) == s ) {
+               // t = A r
+               // Q2
+               CHECK( magma_z_spmv( c_one, A, dr, c_zero, dt, queues[2] ));
+               solver_par->spmv_count++;
+
+               // t't
+               // t'r
+               // Q2
+               CHECK( magma_zgemvmdot_shfl( dt.ld, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queues[2] ));
             }
 
             // store current timing and residual
@@ -521,7 +527,6 @@ cudaProfilerStart();
                 innerflag = 2;
                 break;
             }
-
         }
 
         // smoothing disabled
@@ -540,18 +545,8 @@ cudaProfilerStart();
             break;
         }
 
-        // t = A r
-        // Q2
-        CHECK( magma_z_spmv( c_one, A, dr, c_zero, dt, queues[2] ));
-        solver_par->spmv_count++;
-
         // computation of a new omega
 //---------------------------------------
-        // t't
-        // t'r
-        // Q2
-        CHECK( magma_zgemvmdot_shfl( dt.ld, 2, dt.dval, dt.dval, d1, d2, dskp.dval, queues[2] ));
-
         // skp[0-2] = dskp[0-2]
         // Q2
         magma_zgetvector( 2, dskp.dval, 1, hskp, 1, queues[2] );
@@ -593,8 +588,25 @@ cudaProfilerStart();
             // implicit sync Q2 --> |r|
 
             // v = r
+            // Q0
+            magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[0] );
+
+            // new RHS for small systems
+            // f = P' r
             // Q1
-            magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[1] );
+            magma_zgemvmdot_shfl( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queues[1] );
+
+            // skp[4] = f(k)
+            // Q1
+            magma_zgetvector_async( 1, df.dval, 1, &hskp[4], 1, queues[1] );
+
+            // c(k:s) = f(k:s)
+            // Q1
+            magma_zcopyvector_async( s, df.dval, 1, dc.dval, 1, queues[1] );
+
+            // c(k:s) = M(k:s,k:s) \ f(k:s)
+            // Q1
+            magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, s, dM.dval, dM.ld, dc.dval, 1, queues[1] );
 
         // smoothing enabled
         } else {
@@ -617,22 +629,39 @@ cudaProfilerStart();
             // gamma = (t' * rs) / (t' * t)
             gamma = hskp[3] / hskp[2];
 
+            // rs = rs - gamma * (rs - r) 
+            // Q2
+            magma_zaxpy( drs.num_rows, -gamma, dtt.dval, 1, drs.dval, 1, queues[2] );
+
             // xs = xs - gamma * (xs - x) 
             // Q0
             magma_zidr_smoothing_2( dxs.num_rows, dxs.num_cols, -gamma, x->dval, dxs.dval, queues[0] );
 
             // v = r
-            // Q1
-            magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[1] );
+            // Q0
+            magma_zcopyvector_async( dr.num_rows, dr.dval, 1, dv.dval, 1, queues[0] );
 
-            // rs = rs - gamma * (rs - r) 
-            // Q2
-            magma_zaxpy( drs.num_rows, -gamma, dtt.dval, 1, drs.dval, 1, queues[2] );
+            // new RHS for small systems
+            // f = P' r
+            // Q1
+            magma_zgemvmdot_shfl( dP.num_rows, dP.num_cols, dP.dval, dr.dval, d1, d2, df.dval, queues[1] );
+
+            // skp[4] = f(k)
+            // Q1
+            magma_zgetvector_async( 1, df.dval, 1, &hskp[4], 1, queues[1] );
+
+            // c(k:s) = f(k:s)
+            // Q1
+            magma_zcopyvector_async( s, df.dval, 1, dc.dval, 1, queues[1] );
 
             // |rs|
             // Q2
             nrmr = magma_dznrm2( drs.num_rows, drs.dval, 1, queues[2] );           
             // implicit sync Q2 --> |r|
+
+            // c(k:s) = M(k:s,k:s) \ f(k:s)
+            // Q1
+            magma_ztrsv( MagmaLower, MagmaNoTrans, MagmaNonUnit, s, dM.dval, dM.ld, dc.dval, 1, queues[1] );
 //---------------------------------------
         }
 
@@ -654,6 +683,9 @@ cudaProfilerStart();
             info = MAGMA_SUCCESS;
             break;
         }
+
+        // sync Q0 --> v = r
+        magma_queue_sync( queues[0] );
     }
     while ( solver_par->numiter + 1 <= solver_par->maxiter );
 
