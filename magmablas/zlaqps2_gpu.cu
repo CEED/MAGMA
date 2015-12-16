@@ -98,10 +98,14 @@
     lddf    INTEGER
             The leading dimension of the array F. LDDF >= max(1,N).
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zgeqp3_aux
     ********************************************************************/
 extern "C" magma_int_t
-magma_zlaqps2_gpu(
+magma_zlaqps2_gpu_q(
     magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t nb, magma_int_t *kb,
     magmaDoubleComplex_ptr dA,  magma_int_t ldda,
@@ -109,7 +113,8 @@ magma_zlaqps2_gpu(
     magmaDoubleComplex_ptr dtau, 
     magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
     magmaDoubleComplex_ptr dauxv,
-    magmaDoubleComplex_ptr dF,  magma_int_t lddf)
+    magmaDoubleComplex_ptr dF,  magma_int_t lddf,
+    magma_queue_t queue )
 {
 #define dA(i_, j_) (dA + (i_) + (j_)*(ldda))
 #define dF(i_, j_) (dF + (i_) + (j_)*(lddf))
@@ -190,7 +195,7 @@ magma_zlaqps2_gpu(
                          c_zero, dauxv, ione ); */
 
             magma_zgemv_kernel3
-                <<< k, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
+                <<< k, BLOCK_SIZE, 0, queue->cuda_stream() >>>
                 (m-rk, dA(rk, 0), ldda, dA(rk, k), dauxv, dtau+k);
 
             /* I think we only need stricly lower-triangular part */
@@ -258,4 +263,25 @@ magma_zlaqps2_gpu(
     magma_free(lsticcs);
     
     return MAGMA_SUCCESS;
-} /* magma_zlaqps */
+} /* magma_zlaqps2_q */
+
+
+/**
+    @see magma_zlaqps2_gpu_q
+    @ingroup magma_zgeqp3_aux
+    ********************************************************************/
+extern "C" magma_int_t
+magma_zlaqps2_gpu(
+    magma_int_t m, magma_int_t n, magma_int_t offset,
+    magma_int_t nb, magma_int_t *kb,
+    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
+    magma_int_t *jpvt,
+    magmaDoubleComplex_ptr dtau,
+    magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
+    magmaDoubleComplex_ptr dauxv,
+    magmaDoubleComplex_ptr dF,  magma_int_t lddf)
+{
+    return magma_zlaqps2_gpu_q(m, n, offset, nb, kb, dA, ldda, jpvt,
+                               dtau, dvn1, dvn2, dauxv, dF, lddf, 
+                               magmablasGetQueue());
+}

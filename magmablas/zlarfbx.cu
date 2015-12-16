@@ -113,6 +113,33 @@ magma_zgemv_kernel2(int m, int n, const magmaDoubleComplex * __restrict__ V, int
     k elementary reflectors. 
 */
 extern "C" void
+magma_zlarfbx_gpu_q(
+    magma_int_t m, magma_int_t k,
+    magmaDoubleComplex_ptr V,  magma_int_t ldv,
+    magmaDoubleComplex_ptr dT, magma_int_t ldt,
+    magmaDoubleComplex_ptr c,
+    magmaDoubleComplex_ptr dwork,
+    magma_queue_t queue )
+{
+    /* dwork = V**H c     */
+    magma_zgemv_kernel1
+        <<< k, BLOCK_SIZE, 0, queue->cuda_stream() >>>
+        (m, V, ldv, c, dwork); 
+
+    /* dwork = T**H dwork */
+    magma_ztrmv_tkernel
+        <<< k, k, 0, queue->cuda_stream() >>>
+        ( dT, ldt, dwork, dwork+k);
+ 
+    /* c = c - V dwork    */
+    dim3  blocks3( magma_ceildiv( m, BLOCK_SIZE ) );
+    dim3 threads3( BLOCK_SIZE );     
+    magma_zgemv_kernel2
+        <<< blocks3, threads3, 0, queue->cuda_stream() >>>
+        ( m, k, V, ldv, dwork+k, c);
+}
+
+extern "C" void
 magma_zlarfbx_gpu(
     magma_int_t m, magma_int_t k,
     magmaDoubleComplex_ptr V,  magma_int_t ldv,
@@ -120,22 +147,7 @@ magma_zlarfbx_gpu(
     magmaDoubleComplex_ptr c,
     magmaDoubleComplex_ptr dwork)
 {
-    /* dwork = V**H c     */
-    magma_zgemv_kernel1
-        <<< k, BLOCK_SIZE, 0, magmablasGetQueue()->cuda_stream() >>>
-        (m, V, ldv, c, dwork); 
-
-    /* dwork = T**H dwork */
-    magma_ztrmv_tkernel
-        <<< k, k, 0, magmablasGetQueue()->cuda_stream() >>>
-        ( dT, ldt, dwork, dwork+k);
- 
-    /* c = c - V dwork    */
-    dim3  blocks3( magma_ceildiv( m, BLOCK_SIZE ) );
-    dim3 threads3( BLOCK_SIZE );     
-    magma_zgemv_kernel2
-        <<< blocks3, threads3, 0, magmablasGetQueue()->cuda_stream() >>>
-        ( m, k, V, ldv, dwork+k, c);
+    magma_zlarfbx_gpu_q( m, k, V, ldv, dT, ldt, c, dwork, magmablasGetQueue() );
 }
 
 //==============================================================================
