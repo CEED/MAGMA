@@ -79,7 +79,7 @@ magma_zidr_strms(
     const magmaDoubleComplex c_n_one = MAGMA_Z_NEG_ONE;
 
     // internal user options
-    const magma_int_t smoothing = 0;   // 0 = disable, 1 = enable
+    const magma_int_t smoothing = 1;   // 0 = disable, 1 = enable
     const double angle = 0.7;          // [0-1]
 
     // local variables
