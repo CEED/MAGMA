@@ -367,6 +367,18 @@ magmablas_ztrtri_diag_q(
    * to cleanup (alphabetical order)
    */
 magma_int_t
+magma_zlaqps2_gpu_q(
+    magma_int_t m, magma_int_t n, magma_int_t offset,
+    magma_int_t nb, magma_int_t *kb,
+    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
+    magma_int_t *jpvt,
+    magmaDoubleComplex_ptr dtau,
+    magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
+    magmaDoubleComplex_ptr dauxv,
+    magmaDoubleComplex_ptr dF,  magma_int_t lddf,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zlarfb_gpu_q(
     magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
     magma_int_t m, magma_int_t n, magma_int_t k,
@@ -385,6 +397,49 @@ magma_zlarfb_gpu_gemm_q(
     magmaDoubleComplex_ptr dC,       magma_int_t lddc,
     magmaDoubleComplex_ptr dwork,    magma_int_t ldwork,
     magmaDoubleComplex_ptr dworkvt,  magma_int_t ldworkvt,
+    magma_queue_t queue );
+
+void
+magma_zlarfbx_gpu_q(
+    magma_int_t m, magma_int_t k,
+    magmaDoubleComplex_ptr V,  magma_int_t ldv,
+    magmaDoubleComplex_ptr dT, magma_int_t ldt,
+    magmaDoubleComplex_ptr c,
+    magmaDoubleComplex_ptr dwork,
+    magma_queue_t queue );
+
+void
+magma_zlarfgtx_gpu_q(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dx0,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dtau,
+    magmaDouble_ptr        dxnorm,
+    magmaDoubleComplex_ptr dA, magma_int_t iter,
+    magmaDoubleComplex_ptr V,  magma_int_t ldv,
+    magmaDoubleComplex_ptr T,  magma_int_t ldt,
+    magmaDoubleComplex_ptr dwork,
+    magma_queue_t queue );
+
+void
+magma_zlarfgx_gpu_q(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dx0,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dtau,
+    magmaDouble_ptr        dxnorm,
+    magmaDoubleComplex_ptr dA, magma_int_t iter,
+    magma_queue_t queue );
+
+void
+magma_zlarfx_gpu_q(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr v,
+    magmaDoubleComplex_ptr tau,
+    magmaDoubleComplex_ptr C, magma_int_t ldc,
+    magmaDouble_ptr        xnorm,
+    magmaDoubleComplex_ptr dT, magma_int_t iter,
+    magmaDoubleComplex_ptr work,
     magma_queue_t queue );
 
   /*
