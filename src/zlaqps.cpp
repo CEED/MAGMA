@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,10 +7,12 @@
 
        @precisions normal z -> s d c
 
+       @author Stan Tomov
+       @author Mark Gates 
        @author Mitch Horton
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -133,7 +135,9 @@ magma_zlaqps(
     tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
     magma_queue_t stream;
-    magma_queue_create( &stream );
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &stream );
 
     lsticc = 0;
     k = 0;
@@ -222,7 +226,7 @@ magma_zlaqps(
             i__2 = n - k - 1;
         
             /* Send the vector to the GPU */
-            magma_zsetmatrix( i__1, 1, A(rk, k), lda, dA(rk,k), ldda );
+            magma_zsetmatrix( i__1, 1, A(rk, k), lda, dA(rk,k), ldda, stream /**/ );
         
             /* Multiply on GPU */
             // was CALL ZGEMV( 'Conjugate transpose', M-RK+1, N-K,
@@ -235,7 +239,7 @@ magma_zlaqps(
             magma_zgemv( MagmaConjTrans, i__1 - i__5, i__2 - i__3,
                          tau[k], dA(rk +i__5, k+1+i__3), ldda,
                                  dA(rk +i__5, k       ), ione,
-                         c_zero, dF(k+1+i__3, k       ), ione );
+                         c_zero, dF(k+1+i__3, k       ), ione, stream /**/ );
             
             magma_zgetmatrix_async( i__2-i__3, 1,
                                     dF(k + 1 +i__3, k), i__2,
@@ -329,12 +333,12 @@ magma_zlaqps(
         /* Send F to the GPU */
         magma_zsetmatrix( i__2, *kb,
                           F (*kb, 0), ldf,
-                          dF(*kb, 0), i__2 );
+                          dF(*kb, 0), i__2, stream /**/ );
 
         magma_zgemm( MagmaNoTrans, MagmaConjTrans, i__1, i__2, *kb,
                      c_neg_one, dA(rk+1, 0  ), ldda,
                                 dF(*kb,  0  ), i__2,
-                     c_one,     dA(rk+1, *kb), ldda );
+                     c_one,     dA(rk+1, *kb), ldda, stream /**/ );
     }
     
     /* Recomputation of difficult columns. */
@@ -348,9 +352,9 @@ magma_zlaqps(
             double r1, r2;
             
             r1 = magma_cblas_dznrm2( nb-k, A(rk+1,lsticc), ione );
-            r2 = magma_dznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
+            r2 = magma_dznrm2( m-offset-nb, dA(offset + nb + 1, lsticc), ione, stream /**/ );
             
-            //vn1[lsticc] = magma_dznrm2(i__1, dA(rk + 1, lsticc), ione);
+            //vn1[lsticc] = magma_dznrm2( i__1, dA(rk + 1, lsticc), ione, stream );
             vn1[lsticc] = magma_dsqrt(r1*r1 + r2*r2);
         }
         

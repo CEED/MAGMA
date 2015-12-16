@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,8 +7,11 @@
   
        @precisions normal z -> c d s
 
+       @author Stan Tomov
+       @author Ichitaro Yamazaki
+       @author Mark Gates
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 #define COMPLEX
@@ -154,7 +157,13 @@ magma_zgeqp3_gpu(
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, n+1 );
+
+    magma_queue_t stream;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &stream );
+
+    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, n+1, stream );
 
     nfxd = 0;
     /* Move initial columns up front.
@@ -200,8 +209,8 @@ magma_zgeqp3_gpu(
         //sminmn = minmn - nfxd;
         
         /* Initialize partial column norms. */
-        magmablas_dznrm2_cols(sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd]);
-        magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
+        magmablas_dznrm2_cols( sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd], stream );
+        magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn, stream );
         
         j = nfxd;
         //if (nb < sminmn)
@@ -235,7 +244,7 @@ magma_zgeqp3_gpu(
             if (j > nfxd) {
                 magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
-                                   A(j,j), lda );
+                                   A(j,j), lda, stream );
             }
             lapackf77_zlaqp2(&m, &n_j, &j, dA(0, j), &ldda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], dwork );
@@ -243,6 +252,7 @@ magma_zgeqp3_gpu(
     }
 
     magma_free(df);
+    magma_queue_destroy( stream );
 
     return *info;
 } /* magma_zgeqp3_gpu */

@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -111,6 +111,11 @@ magma_zgeqr2x_gpu(
     magmaDouble_ptr dnorm = dwork;
     magmaDoubleComplex *work = (magmaDoubleComplex *)(dwork+2*n);
 
+    magma_queue_t stream;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &stream );
+
     *info = 0;
     if (m < 0) {
         *info = -1;
@@ -126,22 +131,24 @@ magma_zgeqr2x_gpu(
 
     /* Compute the norms of the trailing columns */
     k = min(m,n);
-    // magmablas_dznrm2_cols(m, k, dA(0,0), ldda, dnorm);
+    // magmablas_dznrm2_cols( m, k, dA(0,0), ldda, dnorm, stream );
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
-        magmablas_dznrm2_cols(m-i, 1, dA(i,i), ldda, dnorm+i);
+        magmablas_dznrm2_cols( m-i, 1, dA(i,i), ldda, dnorm+i, stream );
         magma_zlarfgx_gpu(m-i, dA(i, i), dA(min(i+1,m), i), dtau+i, dnorm+i,
-                          ddA + i + i*n, i);
+                          ddA + i + i*n, i, stream);
         
         if (i < n) {
             /* Apply H(i)' to A(i:m,i+1:n) from the left */
             magma_zlarfx_gpu(m-i, n-i-1, dA(i, i), dtau+i,
                              //dA(i, i+1), ldda, dnorm+i+1,
                              dA(i, 0), ldda, dnorm+i+1,
-                             dT, i, work );
+                             dT, i, work, stream );
         }
     }
+    
+    magma_queue_destroy( stream );
 
     return *info;
 } /* magma_zgeqr2 */

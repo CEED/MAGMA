@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -7,10 +7,13 @@
   
        @precisions normal z -> c d s
 
+       @author Stan Tomov
+       @author Ichitaro Yamazaki
+       @author Mark Gates
        @author Mitch Horton
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 #define COMPLEX
@@ -170,7 +173,9 @@ magma_zgeqp3(
     // dwork used for dA
 
     magma_queue_t stream;
-    magma_queue_create( &stream );
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &stream );
 
     /* Move initial columns up front.
      * Note jpvt uses 1-based indices for historical compatibility. */
@@ -245,12 +250,12 @@ magma_zgeqp3(
                     // Get panel to the CPU
                     magma_zgetmatrix( m-j, jb,
                                       dA(j,j), ldda,
-                                      A (j,j), lda );
+                                      A (j,j), lda, stream /**/ );
                     
                     // Get the rows
                     magma_zgetmatrix( jb, n_j - jb,
                                       dA(j,j + jb), ldda,
-                                      A (j,j + jb), lda );
+                                      A (j,j + jb), lda, stream /**/ );
                 }
 
                 magma_zlaqps( m, n_j, j, jb, &fjb,
@@ -271,7 +276,7 @@ magma_zgeqp3(
             if (j > nfxd) {
                 magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
-                                  A (j,j), lda );
+                                  A (j,j), lda, stream /**/ );
             }
             lapackf77_zlaqp2(&m, &n_j, &j, A(0, j), &lda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], work );
