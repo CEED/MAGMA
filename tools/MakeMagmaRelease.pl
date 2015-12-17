@@ -40,6 +40,9 @@ my @files2delete = qw(
 
     sparse-iter/python
     sparse-iter/testing/test_matrices
+    sparse-iter/src/ziterict.cpp
+    sparse-iter/control/magma_zmdynamicilu.cpp
+    sparse-iter/testing/testing_zspmv_check.cpp
 
     src/obsolete
     testing/*.txt
