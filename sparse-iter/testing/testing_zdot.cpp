@@ -75,7 +75,7 @@ int main(  int argc, char** argv )
             #endif
             for( int h=0; h<iters; h++) {
                 for( int l=0; l<num_vecs; l++)
-                    alpha = magma_zdotc(n, a.dval, 1, b.dval, 1);
+                    alpha = magma_zdotc(n, a.dval+l*a.num_rows, 1, b.dval, 1);
             }
             #ifdef ENABLE_TIMER
             cudot2 = magma_sync_wtime( queue );
