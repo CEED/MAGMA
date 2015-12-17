@@ -428,13 +428,6 @@ cudaProfilerStart();
                 break;
             }
 
-            // check iteration limit
-            if ( solver_par->numiter >= solver_par->maxiter ) {
-                s = k + 1; // for the x-update outside the loop
-                innerflag = 2;
-                break;
-            }
-
             // non-last s iteration
             if ( (k + 1) < s ) {
                 // f(k+1:s) = f(k+1:s) - beta * M(k+1:s,k)

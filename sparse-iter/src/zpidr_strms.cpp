@@ -528,13 +528,6 @@ magma_zpidr_strms(
                 break;
             }
 
-            // check iteration limit
-            if ( solver_par->numiter >= solver_par->maxiter ) {
-                s = k + 1; // for the x-update outside the loop
-                innerflag = 2;
-                break;
-            }
-
         }
 
         // smoothing disabled
