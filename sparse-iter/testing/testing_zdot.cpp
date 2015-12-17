@@ -49,7 +49,7 @@ int main(  int argc, char** argv )
     printf("%%------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("\n");
 
-    for( magma_int_t num_vecs=2; num_vecs < 33; num_vecs += 1 ) {
+    for( magma_int_t num_vecs=1; num_vecs <= 32; num_vecs += 1 ) {
         for( magma_int_t n=1000000; n < 1000001; n += 10000 ) {
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
@@ -61,11 +61,10 @@ int main(  int argc, char** argv )
             #endif
 
             CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
-            CHECK( magma_zvinit( &b, Magma_DEV, num_vecs, 1, one, queue ));
-            int min_ten = min(num_vecs, 15);
-            CHECK( magma_zvinit( &x, Magma_DEV, min_ten, n, one, queue ));
-            CHECK( magma_zvinit( &y, Magma_DEV, min_ten, n, one, queue ));
-            CHECK( magma_zvinit( &skp, Magma_DEV, num_vecs, 1, zero, queue ));
+            CHECK( magma_zvinit( &b, Magma_DEV, n, 1, one, queue ));
+            CHECK( magma_zvinit( &x, Magma_DEV, n, 8, one, queue ));
+            CHECK( magma_zvinit( &y, Magma_DEV, n, 8, one, queue ));
+            CHECK( magma_zvinit( &skp, Magma_DEV, 1, num_vecs, zero, queue ));
 
             // warm up
             CHECK( magma_zgemvmdot( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
@@ -187,11 +186,6 @@ int main(  int argc, char** argv )
     }
 
 cleanup:
-    magma_zmfree(&a, queue );
-    magma_zmfree(&b, queue );
-    magma_zmfree(&x, queue );
-    magma_zmfree(&y, queue );
-    magma_zmfree(&skp, queue );
     magma_queue_destroy( queue );
     TESTING_FINALIZE();
     return info;
