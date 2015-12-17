@@ -42,22 +42,22 @@ int main(  int argc, char** argv )
 
     magma_z_matrix a={Magma_CSR}, b={Magma_CSR}, x={Magma_CSR}, y={Magma_CSR}, skp={Magma_CSR};
 
-    printf("%%================================================================================================================================================\n");
+    printf("%%=======================================================================================================================================================================\n");
     printf("\n");
-    printf("            |                            runtime                             |                              GFLOPS\n");
-    printf("%% n num_vecs |  CUDOT       CUGEMV       MAGMAGEMV       MDOT       MDGM      |      CUDOT       CUGEMV      MAGMAGEMV       MDOT       MDGM      \n");
-    printf("%%------------------------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("            |                            runtime                                            |                              GFLOPS\n");
+    printf("%% n num_vecs |  CUDOT       CUGEMV       MAGMAGEMV       MDOT       MDGM    MDGM_SHFL      |      CUDOT       CUGEMV      MAGMAGEMV       MDOT       MDGM      MDGM_SHFL\n");
+    printf("%%------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("\n");
 
-    for( magma_int_t num_vecs=5; num_vecs < 6; num_vecs += 1 ) {
-        for( magma_int_t n=10000; n < 100000001; n += 10000 ) {
+    for( magma_int_t num_vecs=2; num_vecs < 33; num_vecs += 1 ) {
+        for( magma_int_t n=1000000; n < 1000001; n += 10000 ) {
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
 
             #define ENABLE_TIMER
             #ifdef ENABLE_TIMER
             real_Double_t mdot1, mdot2, mdgm1, mdgm2, magmagemv1, magmagemv2, cugemv1, cugemv2, cudot1, cudot2;
-            real_Double_t mdot_time, mdgm_time, magmagemv_time, cugemv_time, cudot_time;
+            real_Double_t mdot_time, mdgm_time, mdgmshf_time, magmagemv_time, cugemv_time, cudot_time;
             #endif
 
             CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
@@ -111,10 +111,12 @@ int main(  int argc, char** argv )
             mdot1 = magma_sync_wtime( queue );
             #endif
             for( int h=0; h<iters; h++) {
-                //magma_zmdotc( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue );
-                CHECK( magma_zmdotc( n, 2, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
-                CHECK( magma_zmdotc( n, 2, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
-                CHECK( magma_zmdotc( n, 1, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
+                for( int c = 0; c<num_vecs/2; c++ ){
+                    CHECK( magma_zmdotc( n, 2, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
+                }
+                for( int c = 0; c<num_vecs%2; c++ ){
+                    CHECK( magma_zmdotc( n, 1, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
+                }
                 //h++;
             }
             #ifdef ENABLE_TIMER
@@ -133,23 +135,38 @@ int main(  int argc, char** argv )
             mdgm2 = magma_sync_wtime( queue );
             mdgm_time=mdgm2-mdgm1;
             #endif
-
+            // MDGM_shfl
+            
+            #ifdef ENABLE_TIMER
+            mdgm1 = magma_sync_wtime( queue );
+            #endif
+            for( int h=0; h<iters; h++) {
+                CHECK( magma_zgemvmdot_shfl( n, num_vecs, a.dval, b.dval, x.dval, y.dval, skp.dval, queue ));
+            }
+            #ifdef ENABLE_TIMER
+            mdgm2 = magma_sync_wtime( queue );
+            mdgmshf_time=mdgm2-mdgm1;
+            #endif
+                
+                
             //magma_zprint_gpu(num_vecs,1,skp.dval,num_vecs);
 
             //Chronometry
             #ifdef ENABLE_TIMER
-            printf("%d  %d  %e  %e  %e  %e  %e  %e  %e  %e  %e  %e\n",
+            printf("%d  %d  %e  %e  %e  %e  %e  %e  || %e  %e  %e  %e  %e  %e\n",
                     int(n), int(num_vecs),
                     cudot_time/iters,
                     (cugemv_time)/iters,
                     (magmagemv_time)/iters,
                     (mdot_time)/iters,
                     (mdgm_time)/iters,
+                    (mdgmshf_time)/iters,
                     computations/(cudot_time*1e9),
                     computations/(cugemv_time*1e9),
                     computations/(magmagemv_time*1e9),
                     computations/(mdot_time*1e9),
-                    computations/(mdgm_time*1e9) );
+                    computations/(mdgm_time*1e9),
+                    computations/(mdgmshf_time*1e9) );
             #endif
 
             magma_zmfree(&a, queue );
@@ -159,9 +176,9 @@ int main(  int argc, char** argv )
             magma_zmfree(&skp, queue );
         }
 
-        printf("%%================================================================================================================================================\n");
-        printf("\n");
-        printf("\n");
+        //printf("%%================================================================================================================================================\n");
+        //printf("\n");
+        //printf("\n");
     }
     
     // use alpha to silence compiler warnings
