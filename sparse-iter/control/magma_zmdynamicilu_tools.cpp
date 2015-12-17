@@ -97,13 +97,13 @@ magma_zmdynamicic_insert(
         num_threads = omp_get_num_threads();
     }
     
-    CHECK( magma_imalloc_cpu( &success, num_threads ));
-    CHECK( magma_imalloc_cpu( &insert_loc, num_threads ));
+    CHECK( magma_imalloc_cpu( &success, num_threads*8 ));
+    CHECK( magma_imalloc_cpu( &insert_loc, num_threads*8 ));
     //omp_lock_t rowlock[LU->num_rows];
     #pragma omp parallel for
     for (magma_int_t r=0; r<omp_get_num_threads(); r++){
-        success[r]= ( r<num_rm ) ? 1 : 0;
-        insert_loc[r] = 0;
+        success[r*8]= ( r<num_rm ) ? 1 : -1;
+        insert_loc[r*8] = -1;
     }
     
     if(num_rm>=LU_new->nnz){
@@ -124,63 +124,57 @@ magma_zmdynamicic_insert(
     
     // this is usually sufficient to have the large elements in front
     CHECK( magma_zmorderstatistics(
-    val, col, rowidx, LU_new->nnz, min(num_rm*10, LU_new->nnz ),  1, &element, queue ) );
+    val, col, rowidx, LU_new->nnz, num_rm*4 ,  1, &element, queue ) );
+    CHECK( magma_zmorderstatistics(
+    val, col, rowidx, num_rm*4, num_rm*2,  1, &element, queue ) );
     CHECK( magma_zmorderstatistics(
     val, col, rowidx, num_rm*2, num_rm,  1, &element, queue ) );
 
     // insert the new elements
     // has to be sequential
 
-    //while( num_insert < num_rm ) {
-    
-
-    //#pragma omp parallel for
     //#pragma omp parallel for private(loc_i) schedule(static,1) shared(num_insert)
     for(int loc_i=0; loc_i<LU_new->nnz; loc_i++ ) {
         magma_int_t tid = omp_get_thread_num();
-        if( success[ tid ] > -1 ){
-            if( success[ tid ] == 1 ){
-                //omp_set_lock( &(rowlock[LU->num_rows]) );
+        if( success[ tid*8 ] > -1 ){
+            if( success[ tid*8 ] == 1 ){
                 #pragma omp critical(num_insert)
                 {
-                    //omp_set_lock( &(rowlock[LU->num_rows]) );
-                //}
-                //{
-                    insert_loc[ tid ] = num_insert;
+                    insert_loc[ tid*8 ] = num_insert;
                     num_insert++;
-                    //#pragma omp flush(num_insert)
-                    //omp_unset_lock( &(rowlock[LU->num_rows]) );
-                    success[ tid ] = 0;
                 }
+                success[ tid*8 ] = 0;
             }
-            if( insert_loc[ tid ] >= num_rm ){
+            if( insert_loc[ tid*8 ] >= num_rm ){
                 // enough elements added
-                success[ tid ] = -1;
-                //break;
+                success[ tid*8 ] = -1;
             }
-                    //printf("tid:%d abort:%d num_insert:%d num_rm:%d loc:%d\n",tid, success[ tid ], insert_loc[ tid ], num_rm);fflush(stdout);
-            if( success[ tid ] > -1 ){
-                magma_int_t loc = rm_loc[ insert_loc[ tid ] ];
+            if( success[ tid*8 ] > -1 ){
+                magma_int_t loc = rm_loc[ insert_loc[ tid*8 ] ];
                 magma_index_t new_row = rowidx[ loc_i ]; 
+                
+
+                
                 #pragma omp critical(rowlock__)
                 {
                     omp_set_lock( &(rowlock[new_row]) );
                 }
                 magma_index_t new_col = col[ loc_i ];
                 magma_index_t old_rowstart = LU->row[ new_row ];
+                
+                           //                         printf("tid*8:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
+                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col);fflush(stdout);
+                           //     printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
 
-                    printf("tid:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
-                                tid, loc_i, insert_loc[ tid ], num_rm, loc, new_row, new_col);fflush(stdout);
-                                printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+                
 
                 if( new_col < LU->col[ old_rowstart ] ){
-                    //printf("insert: (%d,%d)\n", new_row, new_col);
                     LU->row[ new_row ] = loc;
                     LU->list[ loc ] = old_rowstart;
                     LU->rowidx[ loc ] = new_row;
                     LU->col[ loc ] = new_col;
                     LU->val[ loc ] = MAGMA_Z_ZERO;
-                    success[ tid ] = 1;
+                    success[ tid*8 ] = 1;
                 }
                 else if( new_col == LU->col[ old_rowstart ] ){
                     ;//printf("tried to insert duplicate!\n");
@@ -202,7 +196,7 @@ magma_zmdynamicic_insert(
                             LU->rowidx[ loc ] = new_row;
                             LU->col[ loc ] = new_col;
                             LU->val[ loc ] = MAGMA_Z_ZERO;
-                            success[ tid ] = 1;
+                            success[ tid*8 ] = 1;
                             j=0;//break;
                         } else{
                             j=jn;
@@ -213,14 +207,9 @@ magma_zmdynamicic_insert(
                 //#pragma omp critical(rowlock__)
                 //{
                 omp_unset_lock( &(rowlock[new_row]) );
-                //}
-            }// abort
+            }
         }
-        //loc_i++;
     }// abort
-    //for (magma_int_t r=0; i<LU->num_rows; r++){
-    //    omp_destroy_lock(&(rowlock[r]));
-    //}
     
 cleanup:
     magma_free_cpu( success );
