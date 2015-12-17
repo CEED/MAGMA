@@ -24,7 +24,6 @@ libsparse_zsrc += \
 	$(cdir)/magma_zsolverinfo.cpp         \
 	$(cdir)/magma_zcsrsplit.cpp           \
 	$(cdir)/magma_ziteriluutils.cpp       \
-	$(cdir)/magma_zmdynamicilu_tools.cpp  \
 	$(cdir)/magma_zmcsrpass.cpp           \
 	$(cdir)/magma_zmcsrpass_gpu.cpp       \
 	$(cdir)/magma_zmcsrcompressor.cpp     \
