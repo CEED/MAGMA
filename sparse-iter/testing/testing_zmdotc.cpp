@@ -56,8 +56,8 @@ int main(  int argc, char** argv )
 
             #define ENABLE_TIMER
             #ifdef ENABLE_TIMER
-            real_Double_t mdot1, mdot2, mdgm1, mdgm2, magmagemv1, magmagemv2, cugemv1, cugemv2, cudot1, cudot2;
-            real_Double_t mdot_time, mdgm_time, magmagemv_time, cugemv_time, cudot_time;
+            real_Double_t mdot1, mdot2, cudot1, cudot2;
+            real_Double_t mdot_time, cudot_time;
             #endif
 
             CHECK( magma_zvinit( &a, Magma_DEV, n, num_vecs, one, queue ));
