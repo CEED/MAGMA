@@ -80,7 +80,7 @@ libsparse_zsrc += \
 
 # iterative ILU
 libsparse_zsrc += \
-	$(cdir)/ziterict.cpp                  \
+	$(cdir)/zdummy.cpp                  \
 	$(cdir)/ziterilu.cpp                  \
 	$(cdir)/zcustomic.cpp                 \
 	$(cdir)/zcustomilu.cpp                \
