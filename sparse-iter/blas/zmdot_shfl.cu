@@ -12,7 +12,7 @@
 #include "common_magma.h"
 
 #include "magmasparse_z.h"
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 512
 
 #define PRECISION_z
 
@@ -84,6 +84,27 @@ magmaFloatComplex warpReduceSum<magmaFloatComplex>(magmaFloatComplex val) {
 
 template<typename T>
 __inline__ __device__
+T blockReduceSum_1D(T val) {
+
+    extern __shared__ T shared[]; // Shared mem for 32 partial sums
+    int lane = threadIdx.x % warpSize;
+    int wid = threadIdx.x / warpSize;
+
+    val = warpReduceSum<T>(val);     // Each warp performs partial reduction
+
+    if (lane==0) shared[wid]=val; // Write reduced value to shared memory
+
+    __syncthreads();              // Wait for all partial reductions
+
+    //read from shared memory only if that warp existed
+    val = (threadIdx.x < blockDim.x / warpSize) ? shared[lane] : MAGMA_Z_ZERO;
+    
+    if (wid==0) val = warpReduceSum<T>(val); //Final reduce within first warp
+    return val;
+}
+
+template<typename T>
+__inline__ __device__
 T blockReduceSum(T val) {
 
     extern __shared__ T shared[]; // Shared mem for 32 partial sums
@@ -135,6 +156,31 @@ magma_zblockdot_kernel_shuffle(
     tmp = blockReduceSum(tmp);
     if (threadIdx.x == 0 ){
         vtmp[ blockIdx.x+j*gridDim.x ] = tmp;
+    }
+}
+
+// dot product for multiple vectors using shuffle intrinsics and less shared memory
+__global__ void
+magma_zblockdot_kernel_shuffle_1dblock( 
+    int n, 
+    int k,
+    const magmaDoubleComplex * __restrict__ v,
+    const magmaDoubleComplex * __restrict__ r,
+    magmaDoubleComplex * __restrict__ vtmp)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j;
+    for (j=0; j<k; j++) {
+        magmaDoubleComplex tmp;
+        if (i<n) {
+            tmp = v[i+j*n] * r[i];
+        } else {
+            tmp = MAGMA_Z_ZERO;
+        }
+        tmp = blockReduceSum_1D(tmp);
+        if (threadIdx.x == 0 ){
+            vtmp[ blockIdx.x+j*gridDim.x ] = tmp;
+        }
     }
 }
 
@@ -205,16 +251,25 @@ magma_zmdotc_shfl(
     magma_queue_t orig_queue;
     magmablasGetKernelStream( &orig_queue );
 
-    int local_block_size = BLOCK_SIZE;
-    dim3 block( PAD(magma_ceildiv(local_block_size,k),32),k );
-    while (block.x*block.y > 1024) {
-        block.x-=32;
-    }
-    dim3 grid( magma_ceildiv( n, block.x ) );
-    magma_zblockdot_kernel_shuffle<<< grid, block, 32*k*sizeof(magmaDoubleComplex), queue->cuda_stream() >>>( n, k, v, r, d1 );
-    int j;
-    for (j=0; j<k; j++) {
-        deviceReduceKernel<magmaDoubleComplex> <<<1,1024,32*sizeof(magmaDoubleComplex),queue->cuda_stream()>>>(d1+grid.x*j,skp+j,grid.x);
+    if (1) { // 1D block kernel seems to be always faster
+        dim3 block( BLOCK_SIZE );
+        dim3 grid( magma_ceildiv( n, block.x ) );
+        magma_zblockdot_kernel_shuffle_1dblock<<< grid, block, 32*sizeof(magmaDoubleComplex), queue->cuda_stream() >>>( n, k, v, r, d1 );
+        int j;
+        for (j=0; j<k; j++) {
+            deviceReduceKernel<magmaDoubleComplex> <<<1,1024,32*sizeof(magmaDoubleComplex),queue->cuda_stream()>>>(d1+grid.x*j,skp+j,grid.x);
+        }
+    } else {
+        dim3 block( PAD(magma_ceildiv(BLOCK_SIZE,k),32),k );
+        while (block.x*block.y > 1024) {
+            block.x-=32;
+        }
+        dim3 grid( magma_ceildiv( n, block.x ) );
+        magma_zblockdot_kernel_shuffle<<< grid, block, 32*k*sizeof(magmaDoubleComplex), queue->cuda_stream() >>>( n, k, v, r, d1 );
+        int j;
+        for (j=0; j<k; j++) {
+            deviceReduceKernel<magmaDoubleComplex> <<<1,1024,32*sizeof(magmaDoubleComplex),queue->cuda_stream()>>>(d1+grid.x*j,skp+j,grid.x);
+        }
     }
    
     magmablasSetKernelStream( orig_queue );
@@ -284,20 +339,15 @@ magma_zgemvmdot_shfl(
     magmaDoubleComplex_ptr skp,
     magma_queue_t queue )
 {
+    if (k==1) { // call CUBLAS dotc, we will never be faster
+        magmaDoubleComplex res =  magma_zdotc(n,v,1,r,1);
+        magma_zsetvector(1,&res,1,skp,1);
+    } else {
 #if MIN_CUDA_ARCH < 300
-    return magma_zgemvmdot(n,k,v,r,d1,d2,skp,queue);
+        return magma_zgemvmdot(n,k,v,r,d1,d2,skp,queue);
 #else
-    int rows_left = k;
-    int offset = 0;
-    int chunk_size = 16;
-    // process in chunks of 10 - has to be adapted to hardware and precision
-    while( rows_left > (chunk_size) ) {
-        magma_zmdotc_shfl( n, chunk_size, v+offset*n, r, d1, d2, skp+offset, queue );
-        offset = offset + chunk_size;
-        rows_left = rows_left-chunk_size;
+        magma_zmdotc_shfl( n, k, v, r, d1, d2, skp, queue );
     }
-    // process rest
-    magma_zmdotc_shfl( n, rows_left, v+offset*n, r, d1, d2, skp+offset, queue ); 
 
    return MAGMA_SUCCESS;
 #endif
