@@ -74,8 +74,11 @@ int main(  int argc, char** argv )
             cudot1 = magma_sync_wtime( queue );
             #endif
             for( int h=0; h<iters; h++) {
-                for( int l=0; l<num_vecs; l++)
+                for( int l=0; l<num_vecs; l++){
                     alpha = magma_zdotc(n, a.dval+l*a.num_rows, 1, b.dval, 1);
+                cudaDeviceSynchronize();    
+                }
+                cudaDeviceSynchronize();   
             }
             #ifdef ENABLE_TIMER
             cudot2 = magma_sync_wtime( queue );
