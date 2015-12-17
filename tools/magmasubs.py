@@ -550,6 +550,8 @@ subs = {
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
     ('siterilu',       'diterilu',       'citerilu',       'ziterilu'        ),
     ('siteric',        'diteric',        'citeric',        'ziteric'         ),
+    ('sdummy',         'ddummy',         'cdummy',         'zdummy'          ),
+
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
