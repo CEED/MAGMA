@@ -93,7 +93,7 @@ magma_zlobpcg(
     // Memory allocation for the eigenvectors, eigenvalues, and workspace
     solver_par->solver = Magma_LOBPCG;
     magma_int_t m = A.num_rows;
-    magma_int_t n =(solver_par->num_eigenvalues);
+    magma_int_t n = (solver_par->num_eigenvalues);
     magmaDoubleComplex *blockX = solver_par->eigenvectors;
     double *evalues = solver_par->eigenvalues;
     solver_par->numiter = 0;
@@ -213,7 +213,7 @@ magma_zlobpcg(
     for(magma_int_t k =0; k<n; k++){
         iwork[k]=1;
     }
-    magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n ,activeMask, n, queue);
+    magma_setmatrix(n, 1, sizeof(magma_int_t), iwork, n , activeMask, n, queue);
 
 #if defined(PRECISION_s)
     ikind = 3;
@@ -607,6 +607,7 @@ magma_zlobpcg(
     magma_dgetmatrix( n, iterationNumber,
                                         residualNorms, n,
                                         hresidualNorms, n, queue );
+    solver_par->iter_res = *hresidualNorms(0, iterationNumber-1);
 
     printf("Residuals are stored in file residualNorms\n");
     printf("Plot the residuals using: myplot \n");
