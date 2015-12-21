@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #define PRECISION_z
 
@@ -133,23 +133,28 @@ magma_zlaqps_gpu(
     k = 0;
     magma_zmalloc( &dAks, nb );
 
+    magma_queue_t stream;
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &stream );
+
     while( k < nb && lsticc == 0 ) {
         rk = offset + k;
         
         /* Determine ith pivot column and swap if necessary */
         // subtract 1 from Fortran/CUBLAS idamax; pvt, k are 0-based.
-        pvt = k + magma_idamax( n-k, &vn1[k], ione ) - 1;
+        pvt = k + magma_idamax( n-k, &vn1[k], ione, stream ) - 1;
         
         if (pvt != k) {
             /* F gets swapped so F must be sent at the end to GPU   */
             i__1 = k;
-            magmablas_zswap( m, dA(0, pvt), ione, dA(0, k), ione );
+            magmablas_zswap( m, dA(0, pvt), ione, dA(0, k), ione, stream );
 
-            magmablas_zswap( i__1, dF(pvt, 0), lddf, dF(k, 0), lddf);
+            magmablas_zswap( i__1, dF(pvt, 0), lddf, dF(k, 0), lddf, stream );
             itemp     = jpvt[pvt];
             jpvt[pvt] = jpvt[k];
             jpvt[k]   = itemp;
-            magma_dswap( 2, &vn1[pvt], n+offset, &vn1[k], n+offset );
+            magma_dswap( 2, &vn1[pvt], n+offset, &vn1[k], n+offset, stream );
         }
 
         /* Apply previous Householder reflectors to column K:
@@ -163,27 +168,27 @@ magma_zlaqps_gpu(
                 magma_zgemv( MagmaNoTrans, i__1, i__2,
                              c_neg_one, A(offset+nb, 0), lda,
                                         F(k,         0), ldf,
-                             c_one,     A(offset+nb, k), ione );
+                             c_one,     A(offset+nb, k), ione, stream );
             #else
                 i__1 = m - rk;
                 i__2 = k;
                 magma_zgemv( MagmaNoTrans, i__1, i__2,
                              c_neg_one, dA(rk, 0), ldda,
                                         dF(k,  0), lddf,
-                             c_one,     dA(rk, k), ione );
+                             c_one,     dA(rk, k), ione, stream );
             #endif
         }
         
         /*  Generate elementary reflector H(k). */
-        magma_zlarfg_gpu( m-rk, dA(rk, k), dA(rk + 1, k), &tau[k], &vn1[k], &dAks[k]);
+        magma_zlarfg_gpu( m-rk, dA(rk, k), dA(rk + 1, k), &tau[k], &vn1[k], &dAks[k], stream);
 
         /* needed to avoid the race condition */
-        if (k == 0) magma_zsetvector(  1,    &c_one,        1, dA(rk, k), 1 );
-        else        magma_zcopymatrix( 1, 1, dA(offset, 0), 1, dA(rk, k), 1 );
+        if (k == 0) magma_zsetvector(  1,    &c_one,        1, dA(rk, k), 1, stream );
+        else        magma_zcopymatrix( 1, 1, dA(offset, 0), 1, dA(rk, k), 1, stream );
 
         /* Compute Kth column of F:
            Compute  F(K+1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) on the GPU */
-        if (k < n-1 || k > 0) magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
+        if (k < n-1 || k > 0) magma_zgetvector( 1, &tau[k], 1, &tauk, 1, stream );
         if (k < n-1) {
             i__1 = m - rk;
             i__2 = n - k - 1;
@@ -192,7 +197,7 @@ magma_zlaqps_gpu(
             magma_zgemv( MagmaConjTrans, m-rk, n-k-1,
                          tauk,   dA( rk,  k+1 ), ldda,
                                  dA( rk,  k   ), 1,
-                         c_zero, dF( k+1, k   ), 1 );
+                         c_zero, dF( k+1, k   ), 1, stream );
         }
         
         /* Incremental updating of F:
@@ -208,26 +213,26 @@ magma_zlaqps_gpu(
                 magma_zgemv( MagmaConjTrans, i__1, i__2,
                              z__1,   dA(offset+nb, 0), lda,
                                      dA(offset+nb, k), ione,
-                             c_zero, dauxv, ione );
+                             c_zero, dauxv, ione, stream );
                 
                 i__1 = k;
                 magma_zgemv( MagmaNoTrans, n-k-1, i__1,
                              c_one, F(k+1,0), ldf,
                                     dauxv,     ione,
-                             c_one, F(k+1,k), ione );
+                             c_one, F(k+1,k), ione, stream );
             #else
                 i__1 = m - rk;
                 i__2 = k;
                 magma_zgemv( MagmaConjTrans, i__1, i__2,
                              z__1,   dA(rk, 0), ldda,
                                      dA(rk, k), ione,
-                             c_zero, dauxv, ione );
+                             c_zero, dauxv, ione, stream );
                 
                 /* I think we only need stricly lower-triangular part :) */
                 magma_zgemv( MagmaNoTrans, n-k-1, i__2,
                              c_one, dF(k+1,0), lddf,
                                     dauxv,     ione,
-                             c_one, dF(k+1,k), ione );
+                             c_one, dF(k+1,k), ione, stream );
             #endif
         }
         
@@ -243,28 +248,29 @@ magma_zlaqps_gpu(
                 magma_zgemm( MagmaNoTrans, MagmaConjTrans, nb-k, i__1, ione,
                              c_neg_one, dA(rk,  k  ), ldda,
                                         dF(k+1, k  ), lddf,
-                             c_one,     dA(rk,  k+1), ldda );
+                             c_one,     dA(rk,  k+1), ldda, stream );
             #else
                 /* left-looking update of rows,                     *
                  * since F=A'v with original A, so no right-looking */
                 magma_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
                              c_neg_one, dA(rk, 0  ), ldda,
                                         dF(k+1,0  ), lddf,
-                             c_one,     dA(rk, k+1), ldda );
+                             c_one,     dA(rk, k+1), ldda, stream );
             #endif
         }
         
         /* Update partial column norms. */
         if (rk < min(m, n+offset)-1 ) {
-            magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], dA(rk,k+1), ldda, dlsticcs);
+            magmablas_dznrm2_row_check_adjust( n-k-1, tol3z, &vn1[k+1], &vn2[k+1], 
+                                               dA(rk,k+1), ldda, dlsticcs, stream );
 
             magma_device_sync();
-            magma_dgetvector( 1, &dlsticcs[0], 1, &lsticc, 1 );
+            magma_dgetvector( 1, &dlsticcs[0], 1, &lsticc, 1, stream );
         }
         
         ++k;
     }
-    magma_zcopymatrix( 1, k, dAks, 1, dA(offset, 0), ldda+1 );
+    magma_zcopymatrix( 1, k, dAks, 1, dA(offset, 0), ldda+1, stream );
 
     // leave k as the last column done
     --k;
@@ -280,17 +286,19 @@ magma_zlaqps_gpu(
         magma_zgemm( MagmaNoTrans, MagmaConjTrans, i__1, i__2, *kb,
                      c_neg_one, dA(rk+1, 0  ), ldda,
                                 dF(*kb,  0  ), lddf,
-                     c_one,     dA(rk+1, *kb), ldda );
+                     c_one,     dA(rk+1, *kb), ldda, stream );
     }
     /* Recomputation of difficult columns. */
     if ( lsticc > 0 ) {
         // printf( " -- recompute dnorms --\n" );
         magmablas_dznrm2_check( m-rk-1, n-*kb, dA(rk+1,*kb), ldda,
-                                &vn1[*kb], dlsticcs );
-        magma_dcopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb );
+                                &vn1[*kb], dlsticcs, stream );
+        magma_dcopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb, stream );
     }
     magma_free(dAks);
     magma_free(dlsticcs);
+
+    magma_queue_destroy( stream );
 
     return MAGMA_SUCCESS;
 } /* magma_zlaqps */

@@ -409,6 +409,16 @@ magma_zlarfbx_gpu_q(
     magma_queue_t queue );
 
 void
+magma_zlarfg_gpu_q(
+    magma_int_t n,
+    magmaDoubleComplex_ptr dx0,
+    magmaDoubleComplex_ptr dx,
+    magmaDoubleComplex_ptr dtau,
+    magmaDouble_ptr        dxnorm,
+    magmaDoubleComplex_ptr dAkk,
+    magma_queue_t queue );
+
+void
 magma_zlarfgtx_gpu_q(
     magma_int_t n,
     magmaDoubleComplex_ptr dx0,
@@ -479,10 +489,35 @@ magmablas_zswapdblk_q(
     magma_queue_t queue );
 
 void
+magmablas_dnrm2_check_q(
+    magma_int_t m, magma_int_t n,
+    magmaDouble_ptr dA, magma_int_t ldda,
+    magmaDouble_ptr dxnorm,
+    magmaDouble_ptr dlsticc,
+    magma_queue_t queue );
+
+void
+magmablas_dznrm2_check_q(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magmaDouble_ptr dxnorm,
+    magmaDouble_ptr dlsticc,
+    magma_queue_t queue );
+
+void
 magmablas_dznrm2_cols_q(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDouble_ptr dxnorm,
+    magma_queue_t queue );
+
+void
+magmablas_dznrm2_row_check_adjust_q(
+    magma_int_t k, double tol,
+    magmaDouble_ptr dxnorm,
+    magmaDouble_ptr dxnorm2,
+    magmaDoubleComplex_ptr dC, magma_int_t lddc,
+    magmaDouble_ptr dlsticc,
     magma_queue_t queue );
 
   /*
