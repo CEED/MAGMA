@@ -153,6 +153,7 @@ parser.add_option(      '--tol',        action='store',      dest='tol',        
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
 parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests', default='2')
+parser.add_option(      '--niter',      action='store',      dest='niter',      help='number of iterations to repeat', default='1')
 parser.add_option(      '--null-stream',action='store_true', dest='null_stream',help='use null stream (for verifying old behavior)')
 
 parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     help='run very few, extra small tests, N=25:100:25, 32:128:32')
@@ -668,6 +669,19 @@ if ( opts.syev ):
 sygv = (
 	# ----------
 	# generalized symmetric eigenvalues
+	('testing_zhegst',               '-L --itype 1 -c',  n,  ''),
+	('testing_zhegst',               '-L --itype 2 -c',  n,  ''),
+	# itype 2 == itype 3 for hegst
+	
+	('testing_zhegst',               '-U --itype 1 -c',  n,  ''),
+	('testing_zhegst',               '-U --itype 2 -c',  n,  ''),
+	
+	('testing_zhegst_gpu',           '-L --itype 1 -c',  n,  ''),
+	('testing_zhegst_gpu',           '-L --itype 2 -c',  n,  ''),
+	
+	('testing_zhegst_gpu',           '-U --itype 1 -c',  n,  ''),
+	('testing_zhegst_gpu',           '-U --itype 2 -c',  n,  ''),
+	
 	# no-vector/vector, lower/upper, itypes
 	('testing_zhegvd',           '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvd',           '-L -JN --itype 2 -c',  n,  ''),
@@ -977,6 +991,9 @@ if ( opts.dev is not None ):
 
 if ( opts.null_stream ):
 	global_options += ' --null-stream '
+
+if ( opts.niter ):
+	global_options += ' --niter ' + opts.niter + ' '
 
 last_cmd = None
 
