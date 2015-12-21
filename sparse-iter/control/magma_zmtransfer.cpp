@@ -436,8 +436,7 @@ magma_zmtransfer(
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
-            //int rowlength = ( (int)((A.max_nnz_row+threads_per_row-1)
-            //                        /threads_per_row) ) * threads_per_row;
+            //int rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
             magma_int_t rowlength = magma_roundup( A.max_nnz_row, A.alignment );
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, rowlength * A.num_rows ));
@@ -675,8 +674,7 @@ magma_zmtransfer(
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
-            //int rowlength = ( (int)((A.max_nnz_row+threads_per_row-1)
-            //                    /threads_per_row) ) * threads_per_row;
+            //int rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
             magma_int_t rowlength = magma_roundup( A.max_nnz_row, A.alignment );
             // memory allocation
             CHECK( magma_zmalloc_cpu( &B->val, rowlength * A.num_rows ));
@@ -895,8 +893,7 @@ magma_zmtransfer(
             B->blocksize = A.blocksize;
             B->alignment = A.alignment;
             //int threads_per_row = A.alignment;
-            //int rowlength = ( (int)((A.max_nnz_row+threads_per_row-1)
-            //                        /threads_per_row) ) * threads_per_row;
+            //int rowlength = magma_roundup( A.max_nnz_row, threads_per_row );
             magma_int_t rowlength = magma_roundup( A.max_nnz_row, A.alignment );
             // memory allocation
             CHECK( magma_zmalloc( &B->dval, A.num_rows * rowlength ));

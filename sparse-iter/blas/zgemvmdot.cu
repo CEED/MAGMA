@@ -501,7 +501,7 @@ magma_zmdotc(
     //magmablas_zlaset( MagmaUpperLower, n, k, d1, n );
     //magmablas_zlaset( MagmaUpperLower, n, k, d2, n );
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         magma_zblockreduce_kernel<<< Gs_next.x, Bs.x, Ms >>> 
                                         ( Gs.x, n, k, aux1, aux2 );
         Gs.x = Gs_next.x;
@@ -516,7 +516,7 @@ magma_zmdotc(
    
     if ( k>1) {
         while( Gs.x > 1 ) {
-            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+            Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
             magma_zblockreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                         ( Gs.x, n, k, aux1, aux2 );
@@ -529,7 +529,7 @@ magma_zmdotc(
     }
     else {
         while( Gs.x > 1 ) {
-            Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+            Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
             if ( Gs_next.x == 1 ) Gs_next.x = 2;
             magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                         ( Gs.x, n, aux1, aux2 );

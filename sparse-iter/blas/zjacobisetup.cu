@@ -79,7 +79,7 @@ zvjacobisetup_gpu(  int num_rows,
 
 extern "C" magma_int_t
 magma_zjacobisetup_vector_gpu(
-    int num_rows, 
+    magma_int_t num_rows, 
     magma_z_matrix b, 
     magma_z_matrix d, 
     magma_z_matrix c,
@@ -156,13 +156,12 @@ zjacobidiagscal_kernel(  int num_rows,
 
 extern "C" magma_int_t
 magma_zjacobi_diagscal(
-    int num_rows, 
+    magma_int_t num_rows, 
     magma_z_matrix d, 
     magma_z_matrix b, 
     magma_z_matrix *c,
     magma_queue_t queue )
 {
-    
     dim3 grid( magma_ceildiv( num_rows, 512 ));
     int num_vecs = b.num_rows*b.num_cols/num_rows;
     magma_int_t threads = 512;

@@ -1138,12 +1138,11 @@ magma_zcgmerge_spmv1(
         // fixed values
 
 
-    int num_blocks = ( (A.num_rows+A.blocksize-1)/A.blocksize);
+    int num_blocks = magma_ceildiv( A.num_rows, A.blocksize );
 
     int num_threads = A.alignment*A.blocksize;
 
-    int real_row_length = ((int)(A.max_nnz_row+A.alignment-1)/A.alignment)
-                            *A.alignment;
+    int real_row_length = magma_roundup( A.max_nnz_row, A.alignment );
 
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200 && num_threads > 256 )
@@ -1187,7 +1186,7 @@ magma_zcgmerge_spmv1(
     }
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                                         ( Gs.x,  A.num_rows, aux1, aux2 );
@@ -1366,7 +1365,7 @@ magma_zcg_d_kernel(
 
 extern "C" magma_int_t
 magma_zcgmerge_xrbeta(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dx,
@@ -1393,7 +1392,7 @@ magma_zcgmerge_xrbeta(
 
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                                     ( Gs.x, n, aux1, aux2 );
@@ -1574,7 +1573,7 @@ magma_zmzdotc_one_kernel_1(
 
 extern "C" magma_int_t
 magma_zpcgmerge_xrbeta1(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd,
@@ -1642,7 +1641,7 @@ magma_zpcgmerge_xrbeta1(
 
 extern "C" magma_int_t
 magma_zpcgmerge_xrbeta2(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dh,
@@ -1667,7 +1666,7 @@ magma_zpcgmerge_xrbeta2(
                                     ( n, dr, dh, d1);  
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                                     ( Gs.x, n, aux1, aux2 );
@@ -1845,7 +1844,7 @@ magma_zjcgmerge_xrbeta_kernel(
 
 extern "C" magma_int_t
 magma_zjcgmerge_xrbeta(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr diag,
@@ -1873,7 +1872,7 @@ magma_zjcgmerge_xrbeta(
                                     ( n, diag, dx, dr, dd, dz, dh, d1, skp );  
                                     
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                                     ( Gs.x, n, aux1, aux2 );

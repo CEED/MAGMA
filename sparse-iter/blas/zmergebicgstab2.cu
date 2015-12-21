@@ -247,7 +247,7 @@ magma_zbicgmerge_spmv1(
         printf("error: only CSR format supported.\n");
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                             ( Gs.x, n, aux1, aux2 );
@@ -542,7 +542,7 @@ magma_zbicgmerge_spmv2(
         printf("error: only CSR format supported.\n");
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                     ( Gs.x, n, aux1, aux2 );
@@ -745,7 +745,7 @@ magma_zbicgstab_betakernel(
 
 extern "C" magma_int_t
 magma_zbicgmerge_xrbeta(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr rr,
@@ -772,7 +772,7 @@ magma_zbicgmerge_xrbeta(
                     ( n, rr, r, p, s, t, x, skp, d1);  
 
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
                             ( Gs.x, n, aux1, aux2 );

@@ -50,7 +50,7 @@ int main(  int argc, char** argv )
         }
 
         printf( "\n# matrix info: %d-by-%d with %d nonzeros\n\n",
-                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
 
         magma_int_t n = A.num_rows;
         CHECK( magma_zmtransfer( A, &B_d, Magma_CPU, Magma_DEV, queue ));

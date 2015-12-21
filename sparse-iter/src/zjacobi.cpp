@@ -205,7 +205,7 @@ magma_zjacobisetup_matrix(
                 diag.val[rowindex] = B.val[i];
                 if ( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
                     printf(" error: zero diagonal element in row %d!\n",
-                                                                (int) rowindex);
+                                                                int(rowindex));
             }
         }
         for( i=start; i<end; i++ ) {
@@ -300,7 +300,7 @@ magma_zjacobisetup_diagscal(
             }
             if ( diag.val[rowindex] == MAGMA_Z_ZERO ){
                 printf(" error: zero diagonal element in row %d!\n",
-                                                            (int) rowindex);
+                                                            int(rowindex));
                 
                 if ( A.storage_type != Magma_CSR) {
                     magma_zmfree( &A_h1, queue );
@@ -324,7 +324,7 @@ magma_zjacobisetup_diagscal(
             }
             if ( diag.val[rowindex] == MAGMA_Z_ZERO ){
                 printf(" error: zero diagonal element in row %d!\n",
-                                                            (int) rowindex);
+                                                            int(rowindex));
                 
                 if ( A.storage_type != Magma_CSR) {
                     magma_zmfree( &A_h1, queue );
@@ -482,7 +482,7 @@ magma_zjacobisetup(
                 diag.val[rowindex] = B.val[i];
                 if ( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
                     printf(" error: zero diagonal element in row %d!\n",
-                                                               (int) rowindex);
+                                                               int(rowindex));
             }
         }
         for( i=start; i<end; i++ ) {

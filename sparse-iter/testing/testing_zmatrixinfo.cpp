@@ -54,7 +54,7 @@ int main(  int argc, char** argv )
         }
 
         printf("   %10d          %10d          %10d\n",
-        (int) Z.num_rows,(int) Z.nnz, (int) Z.nnz/Z.num_rows );
+               int(Z.num_rows),  int(Z.nnz), int(Z.nnz/Z.num_rows) );
 
         magma_zmfree(&Z, queue );
 

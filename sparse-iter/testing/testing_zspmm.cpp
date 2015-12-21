@@ -79,7 +79,7 @@ int main(  int argc, char** argv )
     }
     printf("\n#    usage: ./run_zspmm"
            " [ --blocksize %d --alignment %d (for SELLP) ]"
-           " matrices \n\n", (int) hA_SELLP.blocksize, (int) hA_SELLP.alignment );
+           " matrices \n\n", int(hA_SELLP.blocksize), int(hA_SELLP.alignment) );
 
     while( i < argc ) {
         if ( strcmp("LAPLACE2D", argv[i]) == 0 && i+1 < argc ) {   // Laplace test
@@ -91,7 +91,7 @@ int main(  int argc, char** argv )
         }
 
         printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            (int) hA.num_rows,(int) hA.num_cols,(int) hA.nnz );
+                            int(hA.num_rows), int(hA.num_cols), int(hA.nnz) );
 
         real_Double_t FLOPS = 2.0*hA.nnz/1e9;
 

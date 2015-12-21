@@ -225,7 +225,7 @@ magma_int_t read_z_csr_from_mtx(
         }
         magma_index_t true_nonzeros = 2*off_diagonals + (*nnz - off_diagonals);
         
-        //printf("%% total number of nonzeros: %d\n%%", (int) *nnz);
+        //printf("%% total number of nonzeros: %d\n%%", int(*nnz));
 
         CHECK( magma_index_malloc_cpu( &new_row, true_nonzeros ));
         CHECK( magma_index_malloc_cpu( &new_col, true_nonzeros ));
@@ -805,7 +805,7 @@ magma_zprint_matrix(
 
     if ( A.memory_location == Magma_CPU ) {
         printf("visualizing matrix of size %d x %d with %d nonzeros:\n",
-            (int) A.num_rows, (int) A.num_cols, (int) A.nnz);
+            int(A.num_rows), int(A.num_cols), int(A.nnz));
         if ( A.storage_type == Magma_DENSE ) {
             for( i=0; i < (A.num_rows); i++ ) {
                 for( j=0; j < A.num_cols; j++ ) {
@@ -1075,7 +1075,7 @@ magma_z_csr_mtx(
         }
         magma_index_t true_nonzeros = 2*off_diagonals + (A->nnz - off_diagonals);
         
-        //printf("%% total number of nonzeros: %d\n%%", (int) A->nnz);
+        //printf("%% total number of nonzeros: %d\n%%", int(A->nnz));
 
         CHECK( magma_index_malloc_cpu( &new_row, true_nonzeros ));
         CHECK( magma_index_malloc_cpu( &new_col, true_nonzeros ));

@@ -235,8 +235,8 @@ magma_zblockdot_kernel_shuffle_1dblock(
 #define PAD(n,p) (((n)<1 || (p)<1)?(n):(((n) % (p)) ? ((n) + (p) - (n) % (p)) : (n)))
 extern "C" magma_int_t
 magma_zmdotc_shfl(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr d1,
@@ -330,8 +330,8 @@ magma_zmdotc_shfl(
 
 extern "C" magma_int_t
 magma_zgemvmdot_shfl(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr d1,

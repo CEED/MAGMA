@@ -213,7 +213,7 @@ magma_zmdotc1(
             ( Gs.x, n, v0, w0, d1 );
    
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zmdotc1_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                     ( Gs.x, n, aux1, aux2 );
@@ -492,7 +492,7 @@ magma_zmdotc2(
             ( Gs.x, n, v0, w0, v1, w1, d1 );
    
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zmdotc2_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                     ( Gs.x, n, aux1, aux2 );
@@ -789,7 +789,7 @@ magma_zmdotc3(
             ( Gs.x, n, v0, w0, v1, w1, v2, w2, d1 );
    
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zmdotc3_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                     ( Gs.x, n, aux1, aux2 );
@@ -1100,7 +1100,7 @@ magma_zmdotc4(
             ( Gs.x, n, v0, w0, v1, w1, v2, w2, v3, w3, d1 );
    
     while( Gs.x > 1 ) {
-        Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x;
+        Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
         magma_zmdotc4_kernel_2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream() >>> 
                     ( Gs.x, n, aux1, aux2 );

@@ -10,6 +10,8 @@
 */
 #include "magmasparse_internal.h"
 
+#define COMPLEX
+#define PRECISION_z
 
 /**
     Purpose
@@ -54,7 +56,6 @@ magma_zprint_vector(
     magma_z_matrix y={Magma_CSR};
     
     //**************************************************************
-    #define COMPLEX
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     
     #ifdef COMPLEX
@@ -80,7 +81,7 @@ magma_zprint_vector(
     //**************************************************************
     
     printf("visualize entries %d - %d of vector ",
-                    (int) offset, (int) (offset + visulen) );
+                    int(offset), int(offset + visulen) );
     fflush(stdout);
     if ( x.memory_location == Magma_CPU ) {
         printf("located on CPU:\n");
@@ -166,9 +167,8 @@ magma_zvread(
         double VAL1;
 
         magmaDoubleComplex VAL;
-        #define COMPLEX
         
-        #ifdef COMPLEX
+        #if defined(PRECISION_z) || defined(PRECISION_d)
             double VAL2;
             if( count == 2 ){
                 fscanf(fid, "%lg %lg\n", &VAL1, &VAL2);
@@ -177,13 +177,13 @@ magma_zvread(
                 fscanf(fid, "%lg\n", &VAL1);
                 VAL = MAGMA_Z_MAKE(VAL1, 0.0);  
             }
-        #else
+        #else // single-complex or single
             double VAL2;
             if( count == 2 ){
-                fscanf(fid, "%lg %lg\n", &VAL1, &VAL2);
+                fscanf(fid, "%g %g\n", &VAL1, &VAL2);
                 VAL = MAGMA_Z_MAKE(VAL1, VAL2);
             }else{
-                fscanf(fid, "%lg\n", &VAL1);
+                fscanf(fid, "%g\n", &VAL1);
                 VAL = MAGMA_Z_MAKE(VAL1, 0.0);  
             }
         #endif

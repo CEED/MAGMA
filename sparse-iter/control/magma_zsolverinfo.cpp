@@ -49,94 +49,94 @@ magma_zsolverinfo(
         switch( solver_par->solver ) {
             case  Magma_CG:
                     printf("%%   CG performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PCG:
                     printf("%%   CG performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_CGMERGE:
                     printf("%%   CG (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BICGSTAB:
                     printf("%%   BiCGSTAB performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PBICGSTAB:
                     printf("%%   BiCGSTAB performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BICGSTABMERGE:
                     printf("%%   BiCGSTAB (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BICGSTABMERGE2:
                     printf("%%   BiCGSTAB (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_GMRES:
                     printf("%%   GMRES(%d) performance analysis every %d iteration\n",
-                                                (int) solver_par->restart, (int) k); break;
+                                                int(solver_par->restart), int(k) ); break;
             case  Magma_PGMRES:
                     printf("%%   GMRES(%d) performance analysis every %d iteration\n",
-                                                (int) solver_par->restart, (int) k); break;
+                                                int(solver_par->restart), int(k) ); break;
             case  Magma_IDR:
             case  Magma_IDRMERGE:
                     printf("%%   IDR(%d) performance analysis every %d iteration\n",
-                                                (int) solver_par->restart, (int) k); break;
+                                                int(solver_par->restart), int(k) ); break;
             case  Magma_PIDR:
             case  Magma_PIDRMERGE:
                     printf("%%   IDR(%d) performance analysis every %d iteration\n",
-                                                (int) solver_par->restart, (int) k); break;
+                                                int(solver_par->restart), int(k) ); break;
             case  Magma_ITERREF:
                     printf("%%   Iterative refinement performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_JACOBI:
                     printf("%%  Jacobi performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_CGS:
                     printf("%%  CGS performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PCGS:
                     printf("%%  CGS performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_CGSMERGE:
                     printf("%%  CGS (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PCGSMERGE:
                     printf("%%  CGS (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_TFQMR:
                     printf("%%  TFQMR performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PCGMERGE:
                     printf("%%  PCG performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PTFQMR:
                     printf("%%  TFQMR performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_TFQMRMERGE:
                     printf("%%  TFQMR (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PTFQMRMERGE:
                     printf("%%  PTFQMR (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_QMR:
                     printf("%%  QMR performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PQMR:
                     printf("%%  PQMR performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_QMRMERGE:
                     printf("%%  QMR (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_PQMRMERGE:
                     printf("%%  PQMR (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BOMBARD:
                     printf("%%  BOMBARD performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BOMBARDMERGE:
                     printf("%%  BOMBARD (merged) performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             case  Magma_BAITER:
             case  Magma_BAITERO:
                     printf("%%  BAITER performance analysis every %d iteration\n",
-                                                                        (int) k); break;
+                                                                        int(k) ); break;
             default:
                     printf("%%   Detailed performance analysis not supported.\n"); break;
         }
@@ -216,7 +216,7 @@ magma_zsolverinfo(
                         "======%%\n");
                 for( int j=0; j<(solver_par->numiter)/k+1; j++ ) {
                     printf(" %8d       %e          %f         %8d          %3d\n",
-                       (int) (j*k), solver_par->res_vec[j], solver_par->timing[j], (int) solver_par->spmv_count/solver_par->numiter*(j*k), (int) solver_par->info );
+                           int(j*k), solver_par->res_vec[j], solver_par->timing[j], int(solver_par->spmv_count/solver_par->numiter*(j*k)), int(solver_par->info) );
                 }
                 printf("%%==========================================================================="
                         "======%%\n"); break;
@@ -230,7 +230,7 @@ magma_zsolverinfo(
             printf("%%==========================================================================="
                         "======%%\n");
         printf(" %8d       %e          %f         %8d          %3d\n",
-        (int) solver_par->numiter, solver_par->iter_res, solver_par->runtime, (int) solver_par->spmv_count, (int) solver_par->info );
+               int(solver_par->numiter), solver_par->iter_res, solver_par->runtime, int(solver_par->spmv_count), int(solver_par->info) );
         printf("%%==========================================================================="
         "======%%\n");
     }
@@ -298,8 +298,8 @@ magma_zsolverinfo(
     }
     printf("%%    initial residual: %e\n", solver_par->init_res );
     printf("%%    preconditioner setup: %.4f sec\n", precond_par->setuptime );
-    printf("%%    iterations: %4d\n", (int) (solver_par->numiter) );
-    printf("%%    SpMV-count: %4d\n", (int) (solver_par->spmv_count) );
+    printf("%%    iterations: %4d\n", int(solver_par->numiter) );
+    printf("%%    SpMV-count: %4d\n", int(solver_par->spmv_count) );
     printf("%%    exact final residual: %e\n%%    runtime: %.4f sec\n",
         solver_par->final_res, solver_par->runtime);
     printf("%%    preconditioner runtime: %.4f sec\n", precond_par->runtime );

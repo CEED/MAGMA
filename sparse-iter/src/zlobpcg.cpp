@@ -356,7 +356,7 @@ magma_zlobpcg(
 #endif
             }
 
-            iter = max(1,iterationNumber-10- (int)(log(1.*cBlockSize)));
+            iter = max( 1, iterationNumber - 10 - int(log(1.*cBlockSize)) );
             double condestGmean = 0.;
             for(magma_int_t i = 0; i<iterationNumber-iter+1; i++){
                 condestGmean += condestGhistory[i];
@@ -403,7 +403,7 @@ magma_zlobpcg(
             if ((condestG/condestGmean>2 && condestG>2) || condestG>8) {
                 // Steepest descent restart for stability
                 restart=1;
-                printf("restart at step #%d\n", (int) iterationNumber);
+                printf("restart at step #%d\n", int(iterationNumber));
             }
 
             // === assemble GramA; first, set it to I
@@ -532,7 +532,7 @@ magma_zlobpcg(
                     //
                     //  printf("Iteration %4d, CBS %4d, Residual: %10.7f\n",
                     //         iterationNumber, cBlockSize, res);
-                    printf("%4d-%2d ", (int) iterationNumber, (int) cBlockSize);
+                    printf("%4d-%2d ", int(iterationNumber), int(cBlockSize));
                     magma_dprint_gpu(1, n, residualNorms(0, iterationNumber), 1);
                 }
             }

@@ -209,7 +209,7 @@ magma_zmslice(
     }
     else {
         printf("error: mslice only supported for CSR matrices on the CPU: %d %d.\n", 
-                (int)A.memory_location, (int) A.storage_type );
+                int(A.memory_location), int(A.storage_type) );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 cleanup:

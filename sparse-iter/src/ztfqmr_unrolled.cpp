@@ -150,7 +150,7 @@ magma_ztfqmr_unrolled(
         tau = tau * theta *c;
         eta = c * c * alpha;
         sigma = theta * theta / alpha * eta;  
-        printf("sigma:%f\n", sigma);
+        printf("sigma: %f+%fi\n", MAGMA_Z_REAL(sigma), MAGMA_Z_IMAG(sigma) );
         CHECK( magma_z_spmv( c_one, A, d, c_zero, Ad, queue )); // Au_new = A u_mp1
         solver_par->spmv_count++;
       

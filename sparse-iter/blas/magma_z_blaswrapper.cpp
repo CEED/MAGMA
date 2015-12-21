@@ -143,8 +143,8 @@ magma_z_spmv(
                  //printf("using CUSPARSE BCSR kernel for SpMV: ");
                 // CUSPARSE context //
                 cusparseDirection_t dirA = CUSPARSE_DIRECTION_ROW;
-                int mb = (A.num_rows + A.blocksize-1)/A.blocksize;
-                int nb = (A.num_cols + A.blocksize-1)/A.blocksize;
+                int mb = magma_ceildiv( A.num_rows, A.blocksize );
+                int nb = magma_ceildiv( A.num_cols, A.blocksize );
                 CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
                 CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
                 CHECK_CUSPARSE( cusparseCreateMatDescr( &descr ));

@@ -55,7 +55,7 @@ int main(  int argc, char** argv )
         }
 
         printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            (int) Z.num_rows,(int) Z.num_cols,(int) Z.nnz );
+                            int(Z.num_rows), int(Z.num_cols), int(Z.nnz) );
         
         // convert to be non-symmetric
         CHECK( magma_zmconvert( Z, &A, Magma_CSR, Magma_CSRL, queue ));

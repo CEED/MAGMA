@@ -72,14 +72,14 @@ int main(  int argc, char** argv )
         CHECK( magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue ));
         
         printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
-                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
         
         printf("matrixinfo = [ \n");
         printf("%%   size   (m x n)     ||   nonzeros (nnz)   ||   nnz/m   ||   stored nnz\n");
         printf("%%======================================================================"
                             "======%%\n");
         printf("  %8d  %8d      %10d             %4d        %10d\n",
-            (int) B.num_rows, (int) B.num_cols ,(int) B.true_nnz, (int) B.true_nnz/B.num_rows, (int) B.nnz );
+            int(B.num_rows), int(B.num_cols), int(B.true_nnz), int(B.true_nnz/B.num_rows), int(B.nnz) );
         printf("%%======================================================================"
         "======%%\n");
         printf("];\n");

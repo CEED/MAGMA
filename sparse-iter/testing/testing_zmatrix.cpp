@@ -60,7 +60,7 @@ int main(  int argc, char** argv )
         }
 
         printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            (int) Z.num_rows,(int) Z.num_cols,(int) Z.nnz );
+                            int(Z.num_rows), int(Z.num_cols), int(Z.nnz) );
         
         // slice matrix
         CHECK( magma_index_malloc_cpu( &comm_i, Z.num_rows ) );

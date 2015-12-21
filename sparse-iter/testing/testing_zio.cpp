@@ -53,7 +53,7 @@ int main(  int argc, char** argv )
         }
 
         printf("%% matrix info: %d-by-%d with %d nonzeros\n",
-                            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+                            int(A.num_rows), int(A.num_cols), int(A.nnz) );
 
         // filename for temporary matrix storage
         const char *filename = "testmatrix.mtx";
