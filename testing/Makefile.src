@@ -158,6 +158,8 @@ testing_zsrc += \
 
 # generalized symmetric eigenvalues
 testing_zsrc += \
+	$(cdir)/testing_zhegst.cpp	\
+	$(cdir)/testing_zhegst_gpu.cpp	\
 	$(cdir)/testing_zhegvd.cpp	\
 	$(cdir)/testing_zhegvd_m.cpp	\
 	$(cdir)/testing_zhegvdx.cpp	\
