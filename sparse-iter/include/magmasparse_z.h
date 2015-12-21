@@ -1414,8 +1414,8 @@ magma_zgecsrmv_shift(
     magmaIndex_ptr dcolind,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex beta,
-    int offset,
-    int blocksize,
+    magma_int_t offset,
+    magma_int_t blocksize,
     magmaIndex_ptr dadd_rows,
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue );
@@ -1458,8 +1458,8 @@ magma_zgeellmv_shift(
     magmaIndex_ptr dcolind,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex beta,
-    int offset,
-    int blocksize,
+    magma_int_t offset,
+    magma_int_t blocksize,
     magmaIndex_ptr dadd_rows,
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue );
@@ -1504,8 +1504,8 @@ magma_zgeelltmv_shift(
     magmaIndex_ptr dcolind,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex beta,
-    int offset,
-    int blocksize,
+    magma_int_t offset,
+    magma_int_t blocksize,
     magmaIndex_ptr dadd_rows,
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue );
@@ -1620,8 +1620,8 @@ magma_zmergedgs(
 
 magma_int_t
 magma_zcopyscale(    
-    int n, 
-    int k,
+    magma_int_t n, 
+    magma_int_t k,
     magmaDoubleComplex_ptr dr, 
     magmaDoubleComplex_ptr dv,
     magmaDoubleComplex_ptr dskp,
@@ -1629,16 +1629,16 @@ magma_zcopyscale(
 
 magma_int_t
 magma_dznrm2scale(    
-    int m, 
+    magma_int_t m, 
     magmaDoubleComplex_ptr dr,    
-    int lddr, 
+    magma_int_t lddr, 
     magmaDoubleComplex *drnorm,
     magma_queue_t queue );
 
 
 magma_int_t
 magma_zjacobisetup_vector_gpu(
-    int num_rows, 
+    magma_int_t num_rows, 
     magma_z_matrix b, 
     magma_z_matrix d, 
     magma_z_matrix c,
@@ -1648,7 +1648,7 @@ magma_zjacobisetup_vector_gpu(
 
 magma_int_t
 magma_zjacobi_diagscal(    
-    int num_rows, 
+    magma_int_t num_rows, 
     magma_z_matrix d, 
     magma_z_matrix b, 
     magma_z_matrix *c,
@@ -1714,7 +1714,7 @@ magma_zmergeblockkrylov(
 
 magma_int_t
 magma_zbicgmerge1(    
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr dskp,
     magmaDoubleComplex_ptr dv, 
     magmaDoubleComplex_ptr dr, 
@@ -1724,7 +1724,7 @@ magma_zbicgmerge1(
 
 magma_int_t
 magma_zbicgmerge2(
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr dskp, 
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dv, 
@@ -1733,7 +1733,7 @@ magma_zbicgmerge2(
 
 magma_int_t
 magma_zbicgmerge3(
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr dskp, 
     magmaDoubleComplex_ptr dp,
     magmaDoubleComplex_ptr ds,
@@ -1744,7 +1744,7 @@ magma_zbicgmerge3(
 
 magma_int_t
 magma_zbicgmerge4(
-    int type, 
+    magma_int_t type, 
     magmaDoubleComplex_ptr dskp,
     magma_queue_t queue );
 
@@ -2004,7 +2004,7 @@ magma_zcgmerge_spmv1(
 
 magma_int_t
 magma_zcgmerge_xrbeta( 
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dx,
@@ -2017,7 +2017,7 @@ magma_zcgmerge_xrbeta(
 
 magma_int_t
 magma_zpcgmerge_xrbeta1(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd,
@@ -2027,7 +2027,7 @@ magma_zpcgmerge_xrbeta1(
 
 magma_int_t
 magma_zpcgmerge_xrbeta2(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr dh,
@@ -2038,7 +2038,7 @@ magma_zpcgmerge_xrbeta2(
 
 magma_int_t
 magma_zjcgmerge_xrbeta(
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr d1,
     magmaDoubleComplex_ptr d2,
     magmaDoubleComplex_ptr diag,
@@ -2052,8 +2052,8 @@ magma_zjcgmerge_xrbeta(
 
 magma_int_t
 magma_zmdotc_shfl(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr dv, 
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd1,
@@ -2074,8 +2074,8 @@ magma_zmdotc(
 
 magma_int_t
 magma_zgemvmdot_shfl(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr dv, 
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd1,
@@ -2086,8 +2086,8 @@ magma_zgemvmdot_shfl(
 
 magma_int_t
 magma_zgemvmdot(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr dv, 
     magmaDoubleComplex_ptr dr,
     magmaDoubleComplex_ptr dd1,
@@ -2098,7 +2098,7 @@ magma_zgemvmdot(
 
 magma_int_t
 magma_zmdotc1(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr d1,
@@ -2108,7 +2108,7 @@ magma_zmdotc1(
 
 magma_int_t
 magma_zmdotc2(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 
@@ -2120,7 +2120,7 @@ magma_zmdotc2(
 
 magma_int_t
 magma_zmdotc3(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 
@@ -2134,7 +2134,7 @@ magma_zmdotc3(
 
 magma_int_t
 magma_zmdotc4(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 
@@ -2171,7 +2171,7 @@ magma_zbicgmerge_spmv2(
 
 magma_int_t
 magma_zbicgmerge_xrbeta( 
-    int n,
+    magma_int_t n,
     magmaDoubleComplex_ptr dd1,
     magmaDoubleComplex_ptr dd2,
     magmaDoubleComplex_ptr drr,
