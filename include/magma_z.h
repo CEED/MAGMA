@@ -586,8 +586,10 @@ magma_zlatrd(
     magmaDoubleComplex *A, magma_int_t lda,
     double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *W, magma_int_t ldw,
+    magmaDoubleComplex *work, magma_int_t lwork,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr dW, magma_int_t lddw);
+    magmaDoubleComplex_ptr dW, magma_int_t lddw,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zlatrd2(
@@ -595,9 +597,11 @@ magma_zlatrd2(
     magmaDoubleComplex *A,  magma_int_t lda,
     double *e, magmaDoubleComplex *tau,
     magmaDoubleComplex *W,  magma_int_t ldw,
+    magmaDoubleComplex *work, magma_int_t lwork,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr dW, magma_int_t lddw,
-    magmaDoubleComplex_ptr dwork, magma_int_t ldwork);
+    magmaDoubleComplex_ptr dwork, magma_int_t ldwork,
+    magma_queue_t queue );
 
 #ifdef COMPLEX
 magma_int_t

@@ -50,23 +50,6 @@ extern "C" {
   /*
    * Multi-GPU BLAS functions (alphabetical order)
    */
-#define magmablas_zhemm_mgpu                 magmablas_zhemm_mgpu_q
-#define magmablas_zhemm_mgpu_com             magmablas_zhemm_mgpu_com_q
-#define magmablas_zhemm_mgpu_spec            magmablas_zhemm_mgpu_spec_q
-#define magmablas_zhemv_mgpu                 magmablas_zhemv_mgpu_q
-#define magmablas_zhemv_mgpu_sync            magmablas_zhemv_mgpu_sync_q
-
-// Ichi's version, in src/zhetrd_mgpu.cpp
-#define magma_zher2k_mgpu                    magma_zher2k_mgpu_q
-
-#define magmablas_zher2k_mgpu_spec           magmablas_zher2k_mgpu_spec_q
-#define magmablas_zher2k_mgpu2               magmablas_zher2k_mgpu2_q
-
-// in src/zpotrf_mgpu_right.cpp
-#define magma_zherk_mgpu                     magma_zherk_mgpu_q
-
-// in src/zpotrf_mgpu_right.cpp
-#define magma_zherk_mgpu2                    magma_zherk_mgpu2_q
 
 
   /*
