@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+void magma_device_sync();
 
 // ========================================
 // queue support
@@ -27,7 +28,6 @@ extern "C" {
 #undef magma_queue_create
 
 #define magma_queue_create  magma_queue_create_v2
-
 
 // ========================================
 // copying vectors
