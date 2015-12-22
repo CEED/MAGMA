@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,12 +8,11 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
-    =======
-
+    -------
     ZHESV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an n-by-n Hermitian matrix and X and B are n-by-nrhs
@@ -28,7 +27,7 @@
     used to solve the system of equations A * X = B.
 
     Arguments
-    =========
+    ---------
     @param[in]
     uplo    magma_uplo_t
             = MagmaUpper:  Upper triangle of A is stored;
@@ -101,8 +100,8 @@ magma_zhesv(
     magmaDoubleComplex *B, magma_int_t ldb,
     magma_int_t *info )
 {
-    /* .. Local Scalars .. */
-    magma_int_t upper = (uplo == MagmaUpper);
+    /* Local variables */
+    bool upper = (uplo == MagmaUpper);
 
     /* Test the input parameters. */
     *info = 0;
@@ -132,5 +131,4 @@ magma_zhesv(
     }
 
     return *info;
-    /* End of ZHESV */
 }
