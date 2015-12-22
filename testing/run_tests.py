@@ -624,6 +624,12 @@ syev = (
 	('testing_zheevd_gpu',      '-L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',      '-U -JV -c',  n,    ''),
 	
+	# version 2 is zheevdx_gpu
+	('testing_zheevd_gpu',      '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
+	
 	# lower/upper, version 1 (cublas_hemv)/2 (fast_hemv)
 	('testing_zhetrd_gpu',  '--version 1 -L -c',  n,    ''),
 	('testing_zhetrd_gpu',  '--version 1 -U -c',  n,    ''),
@@ -642,6 +648,13 @@ syev = (
 	('testing_zheevd',          '-L -JV -c',  n,    ''),
 	('testing_zheevd',          '-U -JV -c',  n,    ''),
 	
+	# version 2 is zheevdx
+	# currently 100% of eigenvalues/vectors; checks don't seem to work for < 100%
+	('testing_zheevd', '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd', '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd', '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd', '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
+	
 	# lower/upper
 	('testing_zhetrd',          '-L     -c',  n,    ''),
 	('testing_zhetrd',          '-U     -c',  n,    ''),
@@ -651,16 +664,18 @@ syev = (
 	#('testing_zhetrd_he2hb',       '-L -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage'),
 	#('testing_zhetrd_he2hb',       '-U -c',  n,    'NOT hetrd_he2hb -- calls heevdx_2stage. upper not implemented'),
 	
+	# TODO test with --fraction < 1; checks don't seem to work.
 	('testing_zheevdx_2stage',  '-L -JN -c',  n,    ''),
-	('#testing_zheevdx_2stage', '-U -JN -c',  n,    'upper not implemented'),
 	('testing_zheevdx_2stage',  '-L -JV -c',  n,    ''),
+	('#testing_zheevdx_2stage', '-U -JN -c',  n,    'upper not implemented'),
 	('#testing_zheevdx_2stage', '-U -JV -c',  n,    'upper not implemented'),
 	
 	# same tester for multi-GPU version
 	# TODO test multi-GPU version with ngpu=1
+	# TODO test with --fraction < 1; checks don't seem to work.
 	('testing_zheevdx_2stage',  ngpu + '-L -JN -c',  n,    ''),
-	('#testing_zheevdx_2stage', ngpu + '-U -JN -c',  n,    'upper not implemented'),
 	('testing_zheevdx_2stage',  ngpu + '-L -JV -c',  n,    ''),
+	('#testing_zheevdx_2stage', ngpu + '-U -JN -c',  n,    'upper not implemented'),
 	('#testing_zheevdx_2stage', ngpu + '-U -JV -c',  n,    'upper not implemented'),
 )
 if ( opts.syev ):
