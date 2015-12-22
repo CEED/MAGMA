@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,10 +12,9 @@
        @precisions normal z -> c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_timer.h"
 
-#define PRECISION_z
 #define COMPLEX
 
 /**
@@ -268,7 +267,7 @@ magma_zheevd_m(
         lapackf77_zheevd(jobz_, uplo_,
                          &n, A, &lda,
                          w, work, &lwork,
-                         #if defined(PRECISION_z) || defined(PRECISION_c)
+                         #ifdef COMPLEX
                          rwork, &lrwork,
                          #endif
                          iwork, &liwork, info);
