@@ -48,7 +48,7 @@ extern "C" {
 #define lapackf77_dlapy2 FORTRAN_NAME( dlapy2, DLAPY2 )
 #define lapackf77_slapy2 FORTRAN_NAME( slapy2, SLAPY2 )
 
-magma_int_t lapackf77_ieeeck( magma_int_t *ispec, float *zero, float *one );
+magma_int_t lapackf77_ieeeck( const magma_int_t *ispec, const float *zero, const float *one );
 
 long   lapackf77_lsame(  const char *ca, const char *cb );
 

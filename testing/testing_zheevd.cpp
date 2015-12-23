@@ -33,13 +33,13 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    magmaDoubleComplex *h_A, *h_R, *h_work, aux_work[1];
+    magmaDoubleComplex *h_A, *h_R, *h_Z, *h_work, aux_work[1];
     #ifdef COMPLEX
     double *rwork, aux_rwork[1];
     magma_int_t lrwork;
     #endif
-    double *w1, *w2, result[4]={0, 0, 0, 0}, eps;
-    magma_int_t *iwork, aux_iwork[1];
+    double *w1, *w2, result[4]={0, 0, 0, 0}, eps, abstol;
+    magma_int_t *iwork, *isuppz, aux_iwork[1];
     magma_int_t N, n2, info, lwork, liwork, lda;
     magma_int_t izero    = 0;
     magma_int_t ione     = 1;
@@ -57,6 +57,13 @@ int main( int argc, char** argv)
     if (opts.fraction != 1)
         range = MagmaRangeI;
     
+    #ifdef REAL
+    if (opts.version == 3) {
+        printf("%% zheevr not available for real precisions (single, double).\n");
+        return status;
+    }
+    #endif
+    
     double tol    = opts.tolerance * lapackf77_dlamch("E");
     double tolulp = opts.tolerance * lapackf77_dlamch("P");
     
@@ -71,16 +78,45 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             n2  = N*N;
             lda = N;
+            abstol = 0;  // auto, in zheevr
             
+            // TODO: test vl-vu range
+            magma_int_t m1 = 0;
+            double vl = 0;
+            double vu = 0;
+            magma_int_t il = 0;
+            magma_int_t iu = 0;
+            if (range == MagmaRangeI) {
+                il = 1;
+                iu = max( 1, int(opts.fraction*N) );
+            }
+
             // query for workspace sizes
-            magma_zheevd( opts.jobz, opts.uplo,
-                          N, NULL, lda, NULL,
-                          aux_work,  -1,
-                          #ifdef COMPLEX
-                          aux_rwork, -1,
-                          #endif
-                          aux_iwork, -1,
-                          &info );
+            if ( opts.version == 1 || opts.version == 2 ) {
+                magma_zheevd( opts.jobz, opts.uplo,
+                              N, NULL, lda, NULL,
+                              aux_work,  -1,
+                              #ifdef COMPLEX
+                              aux_rwork, -1,
+                              #endif
+                              aux_iwork, -1,
+                              &info );
+            }
+            else if ( opts.version == 3 ) {
+                #ifdef COMPLEX
+                magma_zheevr( opts.jobz, range, opts.uplo,
+                              N, NULL, lda,
+                              vl, vu, il, iu, abstol,
+                              &m1, NULL,
+                              NULL, lda, NULL,
+                              aux_work,  -1,
+                              #ifdef COMPLEX
+                              aux_rwork, -1,
+                              #endif
+                              aux_iwork, -1,
+                              &info );
+                #endif
+            }
             lwork  = (magma_int_t) MAGMA_Z_REAL( aux_work[0] );
             #ifdef COMPLEX
             lrwork = (magma_int_t) aux_rwork[0];
@@ -99,23 +135,17 @@ int main( int argc, char** argv)
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, N*lda  );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             
+            if (opts.version == 3) {
+                TESTING_MALLOC_CPU( h_Z,    magmaDoubleComplex, N*lda      );
+                TESTING_MALLOC_CPU( isuppz, magma_int_t,        2*max(1,N) );
+            }
+            
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             magma_zmake_hermitian( N, h_A, N );
             
             lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
             
-            // TODO: test vl-vu range
-            magma_int_t m1 = 0;
-            double vl = 0;
-            double vu = 0;
-            magma_int_t il = 0;
-            magma_int_t iu = 0;
-            if (range == MagmaRangeI) {
-                il = 1;
-                iu = max( 1, int(opts.fraction*N) );
-            }
-
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
@@ -142,8 +172,7 @@ int main( int argc, char** argv)
                                     &info );
                 }
             }
-            else {  // version 2: zheevdx computes selected eigenvalues/vectors
-                m1 = -1;
+            else if ( opts.version == 2 ) {  // version 2: zheevdx computes selected eigenvalues/vectors
                 if (opts.ngpu == 1) {
                     magma_zheevdx( opts.jobz, range, opts.uplo,
                                    N, h_R, lda,
@@ -169,6 +198,23 @@ int main( int argc, char** argv)
                                      &info );
                 }
                 //printf( "il %d, iu %d, m1 %d\n", il, iu, m1 );
+            }
+            else if ( opts.version == 3 ) {  // version 3: MRRR, computes selected eigenvalues/vectors
+                // only complex version available
+                #ifdef COMPLEX
+                magma_zheevr( opts.jobz, range, opts.uplo,
+                              N, h_R, lda,
+                              vl, vu, il, iu, abstol,
+                              &m1, w1,
+                              h_Z, lda, isuppz,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, lrwork,
+                              #endif
+                              iwork, liwork,
+                              &info );
+                lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_R, &lda );
+                #endif
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
@@ -202,7 +248,7 @@ int main( int argc, char** argv)
                 
                 TESTING_FREE_CPU( work );  work=NULL;
                 
-                // Disable eigenvalue check which calls routine again --
+                // Disable third eigenvalue check that calls routine again --
                 // it obscures whether error occurs in first call above or in this call.
                 // But see comparison to LAPACK below.
                 //
@@ -233,14 +279,32 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zheevd( lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
-                                  &N, h_A, &lda, w2,
-                                  h_work, &lwork,
-                                  #ifdef COMPLEX
-                                  rwork, &lrwork,
-                                  #endif
-                                  iwork, &liwork,
-                                  &info );
+                if ( opts.version == 1 || opts.version == 2 ) {
+                    lapackf77_zheevd( lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
+                                      &N, h_A, &lda, w2,
+                                      h_work, &lwork,
+                                      #ifdef COMPLEX
+                                      rwork, &lrwork,
+                                      #endif
+                                      iwork, &liwork,
+                                      &info );
+                }
+                else if ( opts.version == 3 ) {
+                    lapackf77_zheevr( lapack_vec_const(opts.jobz),
+                                      lapack_range_const(range),
+                                      lapack_uplo_const(opts.uplo),
+                                      &N, h_A, &lda,
+                                      &vl, &vu, &il, &iu, &abstol,
+                                      &m1, w2,
+                                      h_Z, &lda, isuppz,
+                                      h_work, &lwork,
+                                      #ifdef COMPLEX
+                                      rwork, &lrwork,
+                                      #endif
+                                      iwork, &liwork,
+                                      &info );
+                    lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_A, &lda );
+                }
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
                     printf("lapackf77_zheevd returned error %d: %s.\n",
@@ -293,6 +357,11 @@ int main( int argc, char** argv)
             
             TESTING_FREE_PIN( h_R    );
             TESTING_FREE_PIN( h_work );
+            
+            if ( opts.version == 3 ) {
+                TESTING_FREE_CPU( h_Z );
+                TESTING_FREE_CPU( isuppz );
+            }
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
