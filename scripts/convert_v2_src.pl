@@ -71,9 +71,13 @@ my $setget  = join( "|", @setget  );
 
 $/ = ";";  # slurp C statements
 
-my $queue = "UNKNOWN";
-
+my $queue;
+my $last;
 while( <> ) {
+	if ($ARGV ne $last) {
+		$queue = "UNKNOWN";
+		$last = $ARGV;
+	}
 	##print "<<<< $_ >>>>\n\n";
 	
 	# update version
