@@ -591,7 +591,9 @@ void   lapackf77_zheevx( const char *jobz, const char *range, const char *uplo,
                          magma_int_t *m, double *w,
                          magmaDoubleComplex *Z, const magma_int_t *ldz,
                          magmaDoubleComplex *work, const magma_int_t *lwork,
+                         #ifdef COMPLEX
                          double *rwork,
+                         #endif
                          magma_int_t *iwork, magma_int_t *ifail,
                          magma_int_t *info);
 

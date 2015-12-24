@@ -638,6 +638,13 @@ syev = (
 	('testing_zheevd_gpu',      '--version 3 --fraction 1.0 -L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',      '--version 3 --fraction 1.0 -U -JV -c',  n,    ''),
 	
+	# version 4 is zheevx_gpu
+	# TODO test with --fraction < 1; checks don't seem to work.
+	('testing_zheevd_gpu',      '--version 4 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 4 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 4 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd_gpu',      '--version 4 --fraction 1.0 -U -JV -c',  n,    ''),
+	
 	# lower/upper, version 1 (cublas_hemv)/2 (fast_hemv)
 	('testing_zhetrd_gpu',  '--version 1 -L -c',  n,    ''),
 	('testing_zhetrd_gpu',  '--version 1 -U -c',  n,    ''),
@@ -669,6 +676,13 @@ syev = (
 	('testing_zheevd', '--version 3 --fraction 1.0 -U -JN -c',  n,    ''),
 	('testing_zheevd', '--version 3 --fraction 1.0 -L -JV -c',  n,    ''),
 	('testing_zheevd', '--version 3 --fraction 1.0 -U -JV -c',  n,    ''),
+	
+	# version 4 is zheevx
+	# TODO test with --fraction < 1; checks don't seem to work.
+	('testing_zheevd', '--version 4 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd', '--version 4 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd', '--version 4 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd', '--version 4 --fraction 1.0 -U -JV -c',  n,    ''),
 	
 	# lower/upper
 	('testing_zhetrd',          '-L     -c',  n,    ''),

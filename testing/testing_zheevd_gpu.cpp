@@ -23,6 +23,7 @@
 // includes, project
 #include "magma.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 #define COMPLEX
@@ -34,6 +35,12 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
+    /* Constants */
+    const double d_zero = 0;
+    const magma_int_t izero = 0;
+    const magma_int_t ione  = 1;
+    
+    /* Local variables */
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_Z, *h_work, aux_work[1];
     magmaDoubleComplex_ptr d_R, d_Z;
@@ -42,10 +49,8 @@ int main( int argc, char** argv)
     magma_int_t lrwork;
     #endif
     double *w1, *w2, result[4]={0, 0, 0, 0}, eps, abstol;
-    magma_int_t *iwork, *isuppz, aux_iwork[1];
+    magma_int_t *iwork, *isuppz, *ifail, aux_iwork[1];
     magma_int_t N, n2, info, lwork, liwork, lda, ldda;
-    magma_int_t izero    = 0;
-    magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     eps = lapackf77_dlamch( "E" );
     magma_int_t status = 0;
@@ -61,8 +66,8 @@ int main( int argc, char** argv)
         range = MagmaRangeI;
     
     #ifdef REAL
-    if (opts.version == 3) {
-        printf("%% zheevr not available for real precisions (single, double).\n");
+    if (opts.version == 3 || opts.version == 4) {
+        printf("%% magma_zheevr and magma_zheevx not available for real precisions (single, double).\n");
         return status;
     }
     #endif
@@ -98,8 +103,8 @@ int main( int argc, char** argv)
             // query for workspace sizes
             if ( opts.version == 1 || opts.version == 2 ) {
                 magma_zheevd_gpu( opts.jobz, opts.uplo,
-                                  N, NULL, ldda, NULL,
-                                  NULL, lda,
+                                  N, NULL, ldda, NULL,  // A, w
+                                  NULL, lda,            // host A
                                   aux_work,  -1,
                                   #ifdef COMPLEX
                                   aux_rwork, -1,
@@ -110,18 +115,39 @@ int main( int argc, char** argv)
             else if ( opts.version == 3 ) {
                 #ifdef COMPLEX
                 magma_zheevr_gpu( opts.jobz, range, opts.uplo,
-                                  N, NULL, lda,     // A
+                                  N, NULL, ldda,     // A
                                   vl, vu, il, iu, abstol,
-                                  &m1, NULL,        // w
-                                  NULL, lda, NULL,  // Z, isuppz
-                                  NULL, lda,        // host A
-                                  NULL, lda,        // host Z
+                                  &m1, NULL,         // w
+                                  NULL, ldda, NULL,  // Z, isuppz
+                                  NULL, lda,         // host A
+                                  NULL, lda,         // host Z
                                   aux_work,  -1,
                                   #ifdef COMPLEX
                                   aux_rwork, -1,
                                   #endif
                                   aux_iwork, -1,
                                   &info );
+                #endif
+            }
+            else if ( opts.version == 4 ) {
+                #ifdef COMPLEX
+                magma_zheevx_gpu( opts.jobz, range, opts.uplo,
+                                  N, NULL, ldda,     // A
+                                  vl, vu, il, iu, abstol,
+                                  &m1, NULL,         // w
+                                  NULL, ldda,        // Z
+                                  NULL, lda,         // host A
+                                  NULL, lda,         // host Z
+                                  aux_work,  -1,
+                                  #ifdef COMPLEX
+                                  aux_rwork,
+                                  #endif
+                                  aux_iwork,
+                                  NULL,              // ifail
+                                  &info );
+                // zheevx doesn't query rwork, iwork; set them for consistency
+                aux_rwork[0] = double(7*N);
+                aux_iwork[0] = double(5*N);
                 #endif
             }
             lwork  = (magma_int_t) MAGMA_Z_REAL( aux_work[0] );
@@ -149,6 +175,15 @@ int main( int argc, char** argv)
                 TESTING_MALLOC_CPU( h_Z,    magmaDoubleComplex, N*lda      );
                 TESTING_MALLOC_CPU( isuppz, magma_int_t,        2*max(1,N) );
             }
+            if (opts.version == 4) {
+                TESTING_MALLOC_DEV( d_Z,    magmaDoubleComplex, N*ldda     );
+                TESTING_MALLOC_CPU( h_Z,    magmaDoubleComplex, N*lda      );
+                TESTING_MALLOC_CPU( ifail,  magma_int_t,        N          );
+            }
+            
+            /* Clear eigenvalues, for |S-S_magma| check when fraction < 1. */
+            lapackf77_dlaset( "Full", &N, &ione, &d_zero, &d_zero, w1, &N );
+            lapackf77_dlaset( "Full", &N, &ione, &d_zero, &d_zero, w2, &N );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -200,6 +235,26 @@ int main( int argc, char** argv)
                                   rwork, lrwork,
                                   #endif
                                   iwork, liwork,
+                                  &info );
+                magmablas_zlacpy( MagmaFull, N, N, d_Z, ldda, d_R, ldda );
+                #endif
+            }
+            else if ( opts.version == 4 ) {  // version 3: zheevx (QR iteration), computes selected eigenvalues/vectors
+                // only complex version available
+                #ifdef COMPLEX
+                magma_zheevx_gpu( opts.jobz, range, opts.uplo,
+                                  N, d_R, ldda,
+                                  vl, vu, il, iu, abstol,
+                                  &m1, w1,
+                                  d_Z, ldda,
+                                  h_R, lda,
+                                  h_Z, lda,
+                                  h_work, lwork,
+                                  #ifdef COMPLEX
+                                  rwork, /*lrwork,*/
+                                  #endif
+                                  iwork, /*liwork,*/
+                                  ifail,
                                   &info );
                 magmablas_zlacpy( MagmaFull, N, N, d_Z, ldda, d_R, ldda );
                 #endif
@@ -296,6 +351,23 @@ int main( int argc, char** argv)
                                       &info );
                     lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_A, &lda );
                 }
+                else if ( opts.version == 4 ) {
+                    lapackf77_zheevx( lapack_vec_const(opts.jobz),
+                                      lapack_range_const(range),
+                                      lapack_uplo_const(opts.uplo),
+                                      &N, h_A, &lda,
+                                      &vl, &vu, &il, &iu, &abstol,
+                                      &m1, w2,
+                                      h_Z, &lda,
+                                      h_work, &lwork,
+                                      #ifdef COMPLEX
+                                      rwork,
+                                      #endif
+                                      iwork,
+                                      ifail,
+                                      &info );
+                    lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_A, &lda );
+                }
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
                     printf("lapackf77_zheevd returned error %d: %s.\n",
@@ -352,9 +424,14 @@ int main( int argc, char** argv)
             TESTING_FREE_DEV( d_R );
             
             if ( opts.version == 3 ) {
-                TESTING_FREE_DEV( d_Z );
-                TESTING_FREE_CPU( h_Z );
+                TESTING_FREE_DEV( d_Z    );
+                TESTING_FREE_CPU( h_Z    );
                 TESTING_FREE_CPU( isuppz );
+            }
+            if ( opts.version == 4 ) {
+                TESTING_FREE_DEV( d_Z    );
+                TESTING_FREE_CPU( h_Z    );
+                TESTING_FREE_CPU( ifail  );
             }
             fflush( stdout );
         }
