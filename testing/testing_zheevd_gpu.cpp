@@ -79,7 +79,7 @@ int main( int argc, char** argv)
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
            opts.fraction );
 
-    printf("%%   N   CPU Time (sec)   GPU Time (sec)   |A-USU'|   |I-U'U|    |S-S_magma|\n");
+    printf("%%   N   CPU Time (sec)   GPU Time (sec)   |S-S_magma|   |A-USU'|   |I-U'U| \n");
     printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -264,6 +264,7 @@ int main( int argc, char** argv)
                 printf("magma_zheevd_gpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
+            bool okay = true;
             if ( opts.check && opts.jobz != MagmaNoVec ) {
                 /* =====================================================================
                    Check the results following the LAPACK's [zcds]drvst routine.
@@ -382,30 +383,22 @@ int main( int argc, char** argv)
                 }
                 result[3] = diff / (N*maxw);
                 
-                printf("%5d   %9.4f        %9.4f     ",
-                       (int) N, cpu_time, gpu_time);
+                okay = okay && (result[3] < tolulp);
+                printf("%5d   %9.4f        %9.4f        %8.2e   ",
+                       (int) N, cpu_time, gpu_time, result[3] );
             }
             else {
-                printf("%5d      ---           %9.4f     ",
+                printf("%5d      ---           %9.4f          ---      ",
                        (int) N, gpu_time);
             }
             
             // print error checks
-            bool okay = true;
             if ( opts.check && opts.jobz != MagmaNoVec ) {
                 okay = okay && (result[0] < tol) && (result[1] < tol);
                 printf("   %8.2e   %8.2e", result[0], result[1] );
             }
             else {
                 printf("     ---        ---   ");
-            }
-            
-            if ( opts.lapack ) {
-                okay = okay && (result[3] < tolulp);
-                printf("   %8.2e", result[3] );
-            }
-            else {
-                printf("     ---   ");
             }
             printf("   %s\n", (okay ? "ok" : "failed"));
             status += ! okay;
