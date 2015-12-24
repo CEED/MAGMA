@@ -416,8 +416,9 @@ void magma_opts::parse_opts( int argc, char** argv )
                           "error: --ngpu %s exceeds MagmaMaxGPUs, %d.\n", argv[i], MagmaMaxGPUs );
             magma_assert( this->ngpu <= ndevices,
                           "error: --ngpu %s exceeds number of CUDA devices, %d.\n", argv[i], ndevices );
-            magma_assert( this->ngpu > 0,
-                          "error: --ngpu %s is invalid; ensure ngpu > 0.\n", argv[i] );
+            // allow ngpu < 0, which forces multi-GPU code with abs(ngpu) GPUs. see testing_zhegvd, etc.
+            magma_assert( this->ngpu != 0,
+                          "error: --ngpu %s is invalid; ensure ngpu != 0.\n", argv[i] );
             // save in environment variable, so magma_num_gpus() picks it up
             #if defined( _WIN32 ) || defined( _WIN64 )
                 char env_num_gpus[20] = "MAGMA_NUM_GPUS=";  // space for 4 digits & nil

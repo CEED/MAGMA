@@ -176,6 +176,8 @@ parser.add_option(      '--svd',        action='store_true', dest='svd',        
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
 parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests')
 
+parser.add_option( '--itype', action='store', dest='itype', default=0 )
+
 (opts, args) = parser.parse_args()
 
 # default if no sizes given is all sizes (small, medium, large)
@@ -743,22 +745,22 @@ sygv = (
 	('testing_zhegvd',           '-U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvd',           '-U -JV --itype 3 -c',  n,  ''),
 	
-	# lower/upper, no-vector/vector, itypes
-	('testing_zhegvd_m',  ngpu + '-L -JN --itype 1 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-L -JN --itype 2 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-L -JN --itype 3 -c',  n,  ''),
+	# lower/upper, no-vector/vector, itypes, add ngpu to call zhegvd_m
+	('testing_zhegvd',    ngpu + '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-L -JN --itype 3 -c',  n,  ''),
 	
-	('testing_zhegvd_m',  ngpu + '-U -JN --itype 1 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-U -JN --itype 2 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-U -JN --itype 3 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-U -JN --itype 3 -c',  n,  ''),
 	
-	('testing_zhegvd_m',  ngpu + '-L -JV --itype 1 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-L -JV --itype 2 -c',  n,  ''),
-	('testing_zhegvd_m',  ngpu + '-L -JV --itype 3 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-L -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-L -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvd',    ngpu + '-L -JV --itype 3 -c',  n,  ''),
 	
-	('testing_zhegvd_m',  ngpu + '-U -JV --itype 1 -c',  n,  'upper not implemented ??'),
-	('testing_zhegvd_m',  ngpu + '-U -JV --itype 2 -c',  n,  'upper not implemented ??'),
-	('testing_zhegvd_m',  ngpu + '-U -JV --itype 3 -c',  n,  'upper not implemented ??'),
+	('testing_zhegvd',    ngpu + '-U -JV --itype 1 -c',  n,  'upper not implemented ??'),
+	('testing_zhegvd',    ngpu + '-U -JV --itype 2 -c',  n,  'upper not implemented ??'),
+	('testing_zhegvd',    ngpu + '-U -JV --itype 3 -c',  n,  'upper not implemented ??'),
 	
 	# lower/upper, no-vector/vector, itypes
 	('testing_zhegvdx',          '-L -JN --itype 1 -c',  n,  ''),
@@ -776,6 +778,23 @@ sygv = (
 	('testing_zhegvdx',          '-U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-U -JV --itype 3 -c',  n,  ''),
+	
+	# lower/upper, no-vector/vector, itypes, add ngpu to call zhegvdx_m
+	('testing_zhegvdx',   ngpu + '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-L -JN --itype 3 -c',  n,  ''),
+	
+	('testing_zhegvdx',   ngpu + '-U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-U -JN --itype 3 -c',  n,  ''),
+	
+	('testing_zhegvdx',   ngpu + '-L -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-L -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-L -JV --itype 3 -c',  n,  ''),
+	
+	('testing_zhegvdx',   ngpu + '-U -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-U -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx',   ngpu + '-U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes
 	# TODO: add -c
@@ -863,7 +882,9 @@ if ( opts.svd ):
 mgpu = []
 for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
 	for row in s:
-		if re.search( '(_m|_mgpu)$', row[0] ):
+		m1 = re.search( '(_m|_mgpu)$', row[0] )
+		m2 = re.search( '--ngpu',      row[1] )
+		if (m1 or m2):
 			mgpu.append( row )
 	# end
 # end
@@ -945,6 +966,20 @@ batched = (
 )
 if ( opts.batched ):
 	tests += batched
+
+
+# ----------------------------------------------------------------------
+# select subset of commands
+if (opts.itype):
+	opt = '--itype %s' % (opts.itype)
+	print 'opt', opt
+	tests2 = []
+	for test in tests:
+		if re.search( opt, test[1] ):
+			tests2.append( test )
+	# end
+	tests = tests2
+# end
 
 
 # ----------------------------------------------------------------------
