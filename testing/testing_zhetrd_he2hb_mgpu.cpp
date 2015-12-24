@@ -79,7 +79,7 @@ int main( int argc, char** argv)
             lda   = N;
             ldt   = N;
             ldda  = magma_roundup( N, opts.align );  // multiple of 32 by default
-            n2    = N*lda;
+            n2    = lda*N;
             /* We suppose the magma NB is bigger than lapack NB */
             lwork = N*opts.nb;
             //gflops = ....?

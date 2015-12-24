@@ -79,7 +79,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda = N;
             //ldt = N;
-            n2  = N*lda;
+            n2  = lda*N;
             gflops = FLOPS_ZHETRD( N ) / 1e9;
             
             /* We suppose the magma NB is bigger than lapack NB */

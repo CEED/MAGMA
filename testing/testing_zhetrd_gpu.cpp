@@ -73,7 +73,7 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda    = N;
             ldda   = magma_roundup( N, opts.align );  // multiple of 32 by default
-            n2     = N*lda;
+            n2     = lda*N;
             nb     = magma_get_zhetrd_nb(N);
             lwork  = N*nb;  /* We suppose the magma nb is bigger than lapack nb */
             gflops = FLOPS_ZHETRD( N ) / 1e9;

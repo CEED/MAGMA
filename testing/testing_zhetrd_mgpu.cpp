@@ -67,7 +67,7 @@ int main( int argc, char** argv)
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N      = opts.nsize[itest];
             lda    = N;
-            n2     = N*lda;
+            n2     = lda*N;
             nb     = magma_get_zhetrd_nb(N);
             /* We suppose the magma nb is bigger than lapack nb */
             lwork  = N*nb;
