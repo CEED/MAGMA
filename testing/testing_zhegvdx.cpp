@@ -41,13 +41,13 @@ int main( int argc, char** argv)
     
     /* Local variables */
     real_Double_t   gpu_time;
-    magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
-    double *w1, *w2, vl=0, vu=0;
+    magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_Z, *h_work, aux_work[1];
+    double *w1, *w2, vl=0, vu=0, abstol;
     double result[2] = {0};
-    magma_int_t *iwork;
-    magma_int_t N, n2, info, il, iu, m1, nb, lwork, liwork, lda;
+    magma_int_t *iwork, *isuppz, *ifail, aux_iwork[1];
+    magma_int_t N, n2, info, il, iu, m1, lwork, liwork, lda;
     #ifdef COMPLEX
-    double *rwork;
+    double *rwork, aux_rwork[1];
     magma_int_t lrwork;
     #endif
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -62,6 +62,17 @@ int main( int argc, char** argv)
     if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "WARNING: cannot currently check results when not computing vectors (option -JN).\n" );
     }
+    
+    magma_range_t range = MagmaRangeAll;
+    if (opts.fraction != 1)
+        range = MagmaRangeI;
+    
+    #ifdef REAL
+    if (opts.version == 2 || opts.version == 3) {
+        printf("%% magma_zhegvr and magma_zhegvx are not available for real precisions (single, double).\n");
+        return status;
+    }
+    #endif
     
     printf("%% itype = %d, jobz = %s, uplo = %s, fraction = %6.4f\n",
            (int) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
@@ -82,14 +93,6 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda    = N;
             n2     = lda*N;
-            nb     = magma_get_zhetrd_nb(N);
-            #ifdef COMPLEX
-                lwork  = max( N + N*nb, 2*N + N*N );
-                lrwork = 1 + 5*N +2*N*N;
-            #else
-                lwork  = max( 2*N + N*nb, 1 + 6*N + 2*N*N );
-            #endif
-            liwork = 3 + 5*N;
 
             if ( opts.fraction == 0 ) {
                 il = N / 10;
@@ -100,7 +103,61 @@ int main( int argc, char** argv)
                 iu = (int) (opts.fraction*N);
                 if (iu < 1) iu = 1;
             }
-
+            abstol = 0;  // auto in zhegvr
+            MAGMA_UNUSED( abstol );  // unused in [sd] precisions
+            
+            // query for workspace sizes
+            if ( opts.version == 1 ) {
+                magma_zhegvdx( opts.itype, opts.jobz, range, opts.uplo,
+                               N, NULL, lda, NULL, lda,    // A, B
+                               vl, vu, il, iu, &m1, NULL,  // w
+                               aux_work,  -1,
+                               #ifdef COMPLEX
+                               aux_rwork, -1,
+                               #endif
+                               aux_iwork, -1,
+                               &info );
+            }
+            else if ( opts.version == 2 ) {
+                #ifdef COMPLEX
+                magma_zhegvr( opts.itype, opts.jobz, range, opts.uplo,
+                              N, NULL, lda, NULL, lda,  // A, B
+                              vl, vu, il, iu, abstol,
+                              &m1, NULL,                // w
+                              NULL, lda, NULL,          // Z, isuppz
+                              aux_work,  -1,
+                              #ifdef COMPLEX
+                              aux_rwork, -1,
+                              #endif
+                              aux_iwork, -1,
+                              &info );
+                #endif
+            }
+            else if ( opts.version == 3 ) {
+                #ifdef COMPLEX
+                magma_zhegvx( opts.itype, opts.jobz, range, opts.uplo,
+                              N, NULL, lda, NULL, lda,  // A, B
+                              vl, vu, il, iu, abstol,
+                              &m1, NULL,         // w
+                              NULL, lda,         // Z
+                              aux_work,  -1,
+                              #ifdef COMPLEX
+                              aux_rwork,
+                              #endif
+                              aux_iwork,
+                              NULL,              // ifail
+                              &info );
+                // zheevx doesn't query rwork, iwork; set them for consistency
+                aux_rwork[0] = double(7*N);
+                aux_iwork[0] = double(5*N);
+                #endif
+            }
+            lwork  = (magma_int_t) MAGMA_Z_REAL( aux_work[0] );
+            #ifdef COMPLEX
+            lrwork = (magma_int_t) aux_rwork[0];
+            #endif
+            liwork = aux_iwork[0];
+            
             TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2     );
             TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, n2     );
             TESTING_MALLOC_CPU( w1,     double,             N      );
@@ -109,10 +166,19 @@ int main( int argc, char** argv)
             
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
             TESTING_MALLOC_PIN( h_S,    magmaDoubleComplex, n2     );
-            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, max( lwork, N*N ));  // check needs N*N
             #ifdef COMPLEX
             TESTING_MALLOC_PIN( rwork, double, lrwork);
             #endif
+            
+            if (opts.version == 2) {
+                TESTING_MALLOC_CPU( h_Z,    magmaDoubleComplex, N*lda      );
+                TESTING_MALLOC_CPU( isuppz, magma_int_t,        2*max(1,N) );
+            }
+            if (opts.version == 3) {
+                TESTING_MALLOC_CPU( h_Z,    magmaDoubleComplex, N*lda      );
+                TESTING_MALLOC_CPU( ifail,  magma_int_t,        N          );
+            }
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -129,25 +195,56 @@ int main( int argc, char** argv)
             // pass ngpu = -1 to test multi-GPU code using 1 gpu
             magma_int_t abs_ngpu = abs( opts.ngpu );
             gpu_time = magma_wtime();
-            if (opts.ngpu == 1) {
-                magma_zhegvdx( opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
-                               N, h_R, lda, h_S, lda, vl, vu, il, iu, &m1, w1,
-                               h_work, lwork,
-                               #ifdef COMPLEX
-                               rwork, lrwork,
-                               #endif
-                               iwork, liwork,
-                               &info );
+            if (opts.version == 1) {
+                if (opts.ngpu == 1) {
+                    magma_zhegvdx( opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
+                                   N, h_R, lda, h_S, lda, vl, vu, il, iu, &m1, w1,
+                                   h_work, lwork,
+                                   #ifdef COMPLEX
+                                   rwork, lrwork,
+                                   #endif
+                                   iwork, liwork,
+                                   &info );
+                }
+                else {
+                    magma_zhegvdx_m( abs_ngpu, opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
+                                     N, h_R, lda, h_S, lda, vl, vu, il, iu, &m1, w1,
+                                     h_work, lwork,
+                                     #ifdef COMPLEX
+                                     rwork, lrwork,
+                                     #endif
+                                     iwork, liwork,
+                                     &info );
+                }
             }
-            else {
-                magma_zhegvdx_m( abs_ngpu, opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
-                                 N, h_R, lda, h_S, lda, vl, vu, il, iu, &m1, w1,
-                                 h_work, lwork,
-                                 #ifdef COMPLEX
-                                 rwork, lrwork,
-                                 #endif
-                                 iwork, liwork,
-                                 &info );
+            else if (opts.version == 2) {
+                #ifdef COMPLEX
+                magma_zhegvr( opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
+                              N, h_R, lda, h_S, lda, vl, vu, il, iu, abstol, &m1, w1,
+                              h_Z, lda, isuppz,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, lrwork,
+                              #endif
+                              iwork, liwork,
+                              &info );
+                lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_R, &lda );
+                #endif
+            }
+            else if (opts.version == 3) {
+                #ifdef COMPLEX
+                magma_zhegvx( opts.itype, opts.jobz, MagmaRangeI, opts.uplo,
+                              N, h_R, lda, h_S, lda, vl, vu, il, iu, abstol, &m1, w1,
+                              h_Z, lda,
+                              h_work, lwork,
+                              #ifdef COMPLEX
+                              rwork, /*lrwork,*/
+                              #endif
+                              iwork, /*liwork,*/
+                              ifail,
+                              &info );
+                lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_R, &lda );
+                #endif
             }
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
@@ -253,6 +350,16 @@ int main( int argc, char** argv)
             #ifdef COMPLEX
             TESTING_FREE_PIN( rwork );
             #endif
+            
+            if ( opts.version == 2 ) {
+                TESTING_FREE_CPU( h_Z    );
+                TESTING_FREE_CPU( isuppz );
+            }
+            if ( opts.version == 3 ) {
+                TESTING_FREE_CPU( h_Z    );
+                TESTING_FREE_CPU( ifail  );
+            }
+            
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

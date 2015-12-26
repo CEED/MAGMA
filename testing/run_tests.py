@@ -152,8 +152,8 @@ parser.add_option(      '--memcheck',   action='store_true', dest='memcheck',   
 parser.add_option(      '--tol',        action='store',      dest='tol',        help='set tolerance')
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
-parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests', default='2')
 parser.add_option(      '--niter',      action='store',      dest='niter',      help='number of iterations to repeat', default='1')
+parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests', default='2')
 parser.add_option(      '--null-stream',action='store_true', dest='null_stream',help='use null stream (for verifying old behavior)')
 
 parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     help='run very few, extra small tests, N=25:100:25, 32:128:32')
@@ -176,7 +176,11 @@ parser.add_option(      '--svd',        action='store_true', dest='svd',        
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
 parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests')
 
-parser.add_option( '--itype', action='store', dest='itype', default=0 )
+parser.add_option(      '--itype',      action='store',      dest='itype',      help='select runs matching itype',   default=0 )
+parser.add_option(      '--version',    action='store',      dest='version',    help='select runs matching version', default=0 )
+parser.add_option('-U', '--upper',      action='store',      dest='upper',      help='select runs matching upper',   default=None )
+parser.add_option('-L', '--lower',      action='store',      dest='lower',      help='select runs matching lower',   default=None )
+parser.add_option('-J', '--jobz',       action='store',      dest='jobz',       help='select runs matching jobz',    default=None )
 
 (opts, args) = parser.parse_args()
 
@@ -763,6 +767,7 @@ sygv = (
 	('testing_zhegvd',    ngpu + '-U -JV --itype 3 -c',  n,  'upper not implemented ??'),
 	
 	# lower/upper, no-vector/vector, itypes
+	# TODO fraction
 	('testing_zhegvdx',          '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '-L -JN --itype 3 -c',  n,  ''),
@@ -780,6 +785,7 @@ sygv = (
 	('testing_zhegvdx',          '-U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes, add ngpu to call zhegvdx_m
+	# TODO fraction
 	('testing_zhegvdx',   ngpu + '-L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '-L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '-L -JN --itype 3 -c',  n,  ''),
@@ -795,6 +801,42 @@ sygv = (
 	('testing_zhegvdx',   ngpu + '-U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '-U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '-U -JV --itype 3 -c',  n,  ''),
+	
+	# version 2 is zhegvx
+	# TODO fraction
+	('testing_zhegvdx', '--version 2 -L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -L -JN --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 2 -U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -U -JN --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 2 -L -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -L -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -L -JV --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 2 -U -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -U -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 2 -U -JV --itype 3 -c',  n,  ''),
+	
+	# version 2 is zhegvr
+	# TODO fraction
+	('testing_zhegvdx', '--version 3 -L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -L -JN --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 3 -U -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -U -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -U -JN --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 3 -L -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -L -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -L -JV --itype 3 -c',  n,  ''),
+	                    
+	('testing_zhegvdx', '--version 3 -U -JV --itype 1 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -U -JV --itype 2 -c',  n,  ''),
+	('testing_zhegvdx', '--version 3 -U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes
 	# TODO: add -c
@@ -970,12 +1012,27 @@ if ( opts.batched ):
 
 # ----------------------------------------------------------------------
 # select subset of commands
+options = []
 if (opts.itype):
-	opt = '--itype %s' % (opts.itype)
-	print 'opt', opt
+	options.append('--itype %s' % (opts.itype))
+if (opts.version):
+	options.append('--version %s' % (opts.version))
+if (opts.lower):
+	options.append('-L')
+elif (opts.upper):
+	options.append('-U')
+if (opts.jobz):
+	options.append('-J%s' % (opts.jobz))
+
+if len(options) > 0:
 	tests2 = []
 	for test in tests:
-		if re.search( opt, test[1] ):
+		match = True
+		for o in options:
+			if not re.search( o, test[1] ):
+				match = False
+				break
+		if match:
 			tests2.append( test )
 	# end
 	tests = tests2
@@ -1071,7 +1128,7 @@ if ( opts.dev is not None ):
 if ( opts.null_stream ):
 	global_options += ' --null-stream '
 
-if ( opts.niter ):
+if ( opts.niter != 1 ):
 	global_options += ' --niter ' + opts.niter + ' '
 
 last_cmd = None
