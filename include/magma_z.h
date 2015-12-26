@@ -360,6 +360,8 @@ magma_zhegvdx_2stage(
     magma_int_t *iwork, magma_int_t liwork,
     magma_int_t *info);
 
+#ifdef COMPLEX
+// no real [sd] precisions available
 magma_int_t
 magma_zhegvr(
     magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo, magma_int_t n,
@@ -373,6 +375,7 @@ magma_zhegvr(
     magma_int_t *iwork, magma_int_t liwork,
     magma_int_t *info);
 
+// no real [sd] precisions available
 magma_int_t
 magma_zhegvx(
     magma_int_t itype, magma_vec_t jobz, magma_range_t range, magma_uplo_t uplo,
@@ -384,6 +387,7 @@ magma_zhegvx(
     magmaDoubleComplex *work, magma_int_t lwork, double *rwork,
     magma_int_t *iwork, magma_int_t *ifail,
     magma_int_t *info);
+#endif
 
 magma_int_t
 magma_zhesv(
