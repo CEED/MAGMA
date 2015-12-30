@@ -169,7 +169,9 @@ const char *usage =
 "  --ngpu x         Number of GPUs, default 1. Also set with $MAGMA_NUM_GPUS.\n"
 "  --nsub x         Number of submatrices, default 1.\n"
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
-"  --nthread x      Number of CPU threads, default 1.\n"
+"  --nthread x      Number of CPU threads for some experimental codes, default 1.\n"
+"                   (For most testers, set $OMP_NUM_THREADS or $MKL_NUM_THREADS\n"
+"                    to control the number of CPU threads.)\n"
 "  --offset x       Offset from beginning of matrix, default 0.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
 "  --svd_work [0123] SVD workspace size, from min (1) to optimal (3), or query (0), default 0.\n"
@@ -177,8 +179,6 @@ const char *usage =
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
 "  --tol x          same.\n"
-"  --panel_nthread x Number of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
-"  --fraction_dcpu x Percentage of the workload to schedule on the cpu. Used in magma_amc algorithms only, default 0.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
@@ -213,8 +213,6 @@ magma_opts::magma_opts( magma_opts_t flag )
     this->version  = 1;
     this->fraction = 1.;
     this->tolerance = 30.;
-    this->panel_nthread = 1;
-    this->fraction_dcpu = 0.0;
     this->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
     this->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
     this->warmup    = (getenv("MAGMA_WARMUP")         != NULL);
@@ -420,12 +418,13 @@ void magma_opts::parse_opts( int argc, char** argv )
             magma_assert( this->ngpu != 0,
                           "error: --ngpu %s is invalid; ensure ngpu != 0.\n", argv[i] );
             // save in environment variable, so magma_num_gpus() picks it up
+            char env_num_gpus[20];  // space for "MAGMA_NUM_GPUS=", 4 digits, and nil
             #if defined( _WIN32 ) || defined( _WIN64 )
-                char env_num_gpus[20] = "MAGMA_NUM_GPUS=";  // space for 4 digits & nil
-                strncat( env_num_gpus, argv[i], sizeof(env_num_gpus) - strlen(env_num_gpus) - 1 );
+                snprintf( env_num_gpus, sizeof(env_num_gpus), "MAGMA_NUM_GPUS=%d", abs(this->ngpu) );
                 putenv( env_num_gpus );
             #else
-                setenv( "MAGMA_NUM_GPUS", argv[i], true );
+                snprintf( env_num_gpus, sizeof(env_num_gpus), "%d", abs(this->ngpu) );
+                setenv( "MAGMA_NUM_GPUS", env_num_gpus, true );
             #endif
         }
         else if ( strcmp("--nsub", argv[i]) == 0 && i+1 < argc ) {
@@ -478,16 +477,6 @@ void magma_opts::parse_opts( int argc, char** argv )
             this->tolerance = atof( argv[++i] );
             magma_assert( this->tolerance >= 0 && this->tolerance <= 1000,
                           "error: --tolerance %s is invalid; ensure tolerance in [0,1000].\n", argv[i] );
-        }
-        else if ( strcmp("--panel_nthread", argv[i]) == 0 && i+1 < argc ) {
-            this->panel_nthread = atoi( argv[++i] );
-            magma_assert( this->panel_nthread > 0,
-                          "error: --panel_nthread %s is invalid; ensure panel_nthread > 0.\n", argv[i] );
-        }
-        else if ( strcmp("--fraction_dcpu", argv[i]) == 0 && i+1 < argc ) {
-            this->fraction_dcpu = atof( argv[++i] );
-            magma_assert( this->fraction_dcpu > 0 && this->fraction_dcpu <= 1,
-                          "error: --fraction_dcpu %s is invalid; ensure fraction_dcpu in [0, 1]\n", argv[i] );
         }
         else if ( strcmp("--batch", argv[i]) == 0 && i+1 < argc ) {
             this->batchcount = atoi( argv[++i] );
@@ -656,6 +645,24 @@ void magma_opts::parse_opts( int argc, char** argv )
     #endif
 }
 // end parse_opts
+
+
+// ------------------------------------------------------------
+void magma_opts::cleanup()
+{
+    this->queue = NULL;
+    magma_queue_destroy( this->queues2[0] );
+    magma_queue_destroy( this->queues2[1] );
+    this->queues2[0] = NULL;
+    this->queues2[1] = NULL;
+    
+    magma_queue_destroy( this->default_queue );
+    this->default_queue = NULL;
+    
+    #ifdef HAVE_CUBLAS
+    this->handle = NULL;
+    #endif
+}
 
 
 // ------------------------------------------------------------

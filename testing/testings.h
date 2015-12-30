@@ -68,6 +68,7 @@ void flops_init();
     magma_print_environment();
 
 #define TESTING_FINALIZE()                                                 \
+    opts.cleanup();                                                        \
     magma_finalize();
 
 
@@ -170,6 +171,9 @@ public:
     // parse command line
     void parse_opts( int argc, char** argv );
     
+    // deallocate queues, etc.
+    void cleanup();
+    
     // matrix size
     magma_int_t ntest;
     magma_int_t msize[ MAX_NTEST ];
@@ -200,8 +204,6 @@ public:
     magma_int_t version;   // hemm_mgpu, hetrd
     double      fraction;  // hegvdx
     double      tolerance;
-    magma_int_t panel_nthread; //in magma_amc: first dimension for a 2D big panel
-    double fraction_dcpu; //in magma_amc: fraction of the work for the cpu
     
     // boolean arguments
     int check;
