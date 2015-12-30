@@ -74,9 +74,12 @@ int main( int argc, char** argv)
     }
     #endif
     
-    printf("%% itype = %d, jobz = %s, uplo = %s, fraction = %6.4f\n",
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% itype = %d, jobz = %s, uplo = %s, fraction = %6.4f, ngpu = %d\n",
            (int) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
-           opts.fraction);
+           opts.fraction, (int) abs_ngpu );
 
     if (opts.version == 1) {
         printf("%%   N     M   GPU Time (sec)   |AZ-BZD|\n");
@@ -94,14 +97,13 @@ int main( int argc, char** argv)
             lda    = N;
             n2     = lda*N;
 
-            if ( opts.fraction == 0 ) {
-                il = N / 10;
-                iu = N / 5+il;
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
             }
             else {
                 il = 1;
-                iu = (int) (opts.fraction*N);
-                if (iu < 1) iu = 1;
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
             abstol = 0;  // auto in zhegvr
             MAGMA_UNUSED( abstol );  // unused in [sd] precisions
@@ -192,8 +194,6 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */                
-            // pass ngpu = -1 to test multi-GPU code using 1 gpu
-            magma_int_t abs_ngpu = abs( opts.ngpu );
             gpu_time = magma_wtime();
             if (opts.version == 1) {
                 if (opts.ngpu == 1) {

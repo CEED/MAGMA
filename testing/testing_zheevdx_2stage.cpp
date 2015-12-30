@@ -70,9 +70,12 @@ int main( int argc, char** argv)
                  "%% setting jobz=V is recommended otherwise only eigenvalues are checked\n" );
     }
 
-    printf("%% using: itype = %d, jobz = %s, range = %s, uplo = %s, check = %d, fraction = %6.4f, ngpu %d\n",
-           (int) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           (int) opts.check, opts.fraction, (int) opts.ngpu );
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %d\n",
+           lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
+           opts.fraction, int(abs_ngpu) );
 
     printf("%%   N     M  GPU Time (sec)  ||I-Q'Q||_oo/N  ||A-QDQ'||_oo/(||A||_oo.N).  |D-D_magma|/(|D| * N)\n");
     printf("%%=======================================================================\n");
@@ -110,9 +113,13 @@ int main( int argc, char** argv)
             double vu = 0;
             magma_int_t il = 0;
             magma_int_t iu = 0;
-            if (range == MagmaRangeI) {
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
+            }
+            else {
                 il = 1;
-                iu = (int) (opts.fraction*N);
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
 
             if (opts.warmup) {
@@ -122,28 +129,28 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
                 if (opts.ngpu == 1) {
                     //printf("calling zheevdx_2stage 1 GPU\n");
-                    magma_zheevdx_2stage(opts.jobz, range, opts.uplo, N, 
-                                    h_R, N, 
-                                    vl, vu, il, iu, 
-                                    &m1, w1, 
-                                    h_work, lwork, 
-                                    #ifdef COMPLEX
-                                    rwork, lrwork, 
-                                    #endif
-                                    iwork, liwork, 
-                                    &info);
+                    magma_zheevdx_2stage( opts.jobz, range, opts.uplo, N, 
+                                          h_R, N, 
+                                          vl, vu, il, iu, 
+                                          &m1, w1, 
+                                          h_work, lwork, 
+                                          #ifdef COMPLEX
+                                          rwork, lrwork, 
+                                          #endif
+                                          iwork, liwork, 
+                                          &info );
                 } else {
                     //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
-                    magma_zheevdx_2stage_m(opts.ngpu, opts.jobz, range, opts.uplo, N, 
-                                    h_R, N, 
-                                    vl, vu, il, iu, 
-                                    &m1, w1, 
-                                    h_work, lwork, 
-                                    #ifdef COMPLEX
-                                    rwork, lrwork, 
-                                    #endif
-                                    iwork, liwork, 
-                                    &info);
+                    magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
+                                            h_R, N, 
+                                            vl, vu, il, iu, 
+                                            &m1, w1, 
+                                            h_work, lwork, 
+                                            #ifdef COMPLEX
+                                            rwork, lrwork, 
+                                            #endif
+                                            iwork, liwork, 
+                                            &info );
                 }
             }
 
@@ -155,27 +162,27 @@ int main( int argc, char** argv)
             if (opts.ngpu == 1) {
                 //printf("calling zheevdx_2stage 1 GPU\n");
                 magma_zheevdx_2stage( opts.jobz, range, opts.uplo, N, 
-                                h_R, N, 
-                                vl, vu, il, iu, 
-                                &m1, w1, 
-                                h_work, lwork, 
-                                #ifdef COMPLEX
-                                rwork, lrwork, 
-                                #endif
-                                iwork, liwork, 
-                                &info);
+                                      h_R, N, 
+                                      vl, vu, il, iu, 
+                                      &m1, w1, 
+                                      h_work, lwork, 
+                                      #ifdef COMPLEX
+                                      rwork, lrwork, 
+                                      #endif
+                                      iwork, liwork, 
+                                      &info );
             } else {
                 //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
-                magma_zheevdx_2stage_m(opts.ngpu, opts.jobz, range, opts.uplo, N, 
-                                h_R, N, 
-                                vl, vu, il, iu, 
-                                &m1, w1, 
-                                h_work, lwork, 
-                                #ifdef COMPLEX
-                                rwork, lrwork, 
-                                #endif
-                                iwork, liwork, 
-                                &info);
+                magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
+                                        h_R, N, 
+                                        vl, vu, il, iu, 
+                                        &m1, w1, 
+                                        h_work, lwork, 
+                                        #ifdef COMPLEX
+                                        rwork, lrwork, 
+                                        #endif
+                                        iwork, liwork, 
+                                        &info );
             }
             gpu_time = magma_wtime() - gpu_time;
             

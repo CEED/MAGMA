@@ -64,7 +64,7 @@ int main( int argc, char** argv)
     
     #ifdef REAL
     if (opts.version == 3 || opts.version == 4) {
-        printf("%% magma_zheevr and magma_zheevx not available for real precisions (single, double).\n");
+        printf("%% magma_zheevr and magma_zheevx are not available for real precisions (single, double).\n");
         return status;
     }
     #endif
@@ -72,9 +72,12 @@ int main( int argc, char** argv)
     double tol    = opts.tolerance * lapackf77_dlamch("E");
     double tolulp = opts.tolerance * lapackf77_dlamch("P");
     
-    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu %d\n",
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %d\n",
            lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           opts.fraction, (int) opts.ngpu );
+           opts.fraction, int(abs_ngpu) );
 
     printf("%%   N   CPU Time (sec)   GPU Time (sec)   |S-S_magma|   |A-USU'|   |I-U'U| \n");
     printf("%%==========================================================================\n");
@@ -91,9 +94,13 @@ int main( int argc, char** argv)
             double vu = 0;
             magma_int_t il = 0;
             magma_int_t iu = 0;
-            if (range == MagmaRangeI) {
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
+            }
+            else {
                 il = 1;
-                iu = max( 1, int(opts.fraction*N) );
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
 
             // query for workspace sizes
@@ -181,8 +188,6 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            // pass ngpu = -1 to test multi-GPU code using 1 gpu
-            magma_int_t abs_ngpu = abs( opts.ngpu );
             gpu_time = magma_wtime();
             if (opts.version == 1) {
                 if (opts.ngpu == 1) {

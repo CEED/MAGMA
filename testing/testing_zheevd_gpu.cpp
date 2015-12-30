@@ -95,9 +95,13 @@ int main( int argc, char** argv)
             double vu = 0;
             magma_int_t il = 0;
             magma_int_t iu = 0;
-            if (range == MagmaRangeI) {
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
+            }
+            else {
                 il = 1;
-                iu = max( 1, int(opts.fraction*N) );
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
 
             // query for workspace sizes

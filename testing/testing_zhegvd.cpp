@@ -64,8 +64,12 @@ int main( int argc, char** argv)
     // checking NoVec requires LAPACK
     opts.lapack |= (opts.check && opts.jobz == MagmaNoVec);
     
-    printf("%% itype = %d, jobz = %s, uplo = %s\n",
-           (int) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo));
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% itype = %d, jobz = %s, uplo = %s, ngpu %d\n",
+           (int) opts.itype, lapack_vec_const(opts.jobz), lapack_uplo_const(opts.uplo),
+           (int) abs_ngpu );
 
     if (opts.version == 1) {
         printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |AZ-BZD|   |I-ZZ'B|\n");
@@ -117,8 +121,6 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            // pass ngpu = -1 to test multi-GPU code using 1 gpu
-            magma_int_t abs_ngpu = abs( opts.ngpu );
             gpu_time = magma_wtime();
             if (opts.ngpu == 1) {
                 magma_zhegvd( opts.itype, opts.jobz, opts.uplo,
@@ -131,7 +133,6 @@ int main( int argc, char** argv)
                               &info );
             }
             else {
-                //printf( "magma_zhegvd_m, ngpu %d (%d)\n", opts.ngpu, abs_ngpu );
                 magma_zhegvd_m( abs_ngpu, opts.itype, opts.jobz, opts.uplo,
                                 N, h_R, lda, h_S, lda, w1,
                                 h_work, lwork,
