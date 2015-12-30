@@ -17,6 +17,7 @@
 /* === Define what BLAS to use ============================================ */
 #if defined(PRECISION_s) || defined(PRECISION_d)
 #define ZTRSM_WORK
+//#undef  magma_ztrsm
 //#define magma_ztrsm magmablas_ztrsm
 #endif
 /* === End defining what BLAS to use ======================================= */

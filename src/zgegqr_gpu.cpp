@@ -14,6 +14,7 @@
 #define COMPLEX
 
 // === Define what BLAS to use ============================================
+#undef  magma_ztrsm
 #define magma_ztrsm magmablas_ztrsm
 // === End defining what BLAS to use ======================================
 
