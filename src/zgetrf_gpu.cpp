@@ -13,7 +13,6 @@
 */
 #include "magma_internal.h"
 
-
 /**
     Purpose
     -------
@@ -196,7 +195,7 @@ magma_zgetrf_gpu(
             if ( *info == 0 && iinfo > 0 )
                 *info = iinfo + j*nb;
 
-            // put j-th panel onto device
+            // send j-th panel to device
             magma_zsetmatrix_async( m-j*nb, nb, work, ldwork, dAP, maxm, queues[0] );
 
             for( i=j*nb; i < j*nb + nb; ++i ) {
@@ -208,7 +207,7 @@ magma_zgetrf_gpu(
             magmablas_ztranspose( m-j*nb, nb, dAP(0,0), maxm, dAT(j,j), lddat, queues[1] );
 
             // do the small non-parallel computations (next panel update)
-            if ( s > (j+1) ) {
+            if ( s > j+1 ) {
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                              nb, nb,
                              c_one, dAT(j, j  ), lddat,
@@ -235,10 +234,10 @@ magma_zgetrf_gpu(
         magma_int_t nb0 = min( m - s*nb, n - s*nb );
         if ( nb0 > 0 ) {
             rows = m - s*nb;
-    
+            
             magmablas_ztranspose( nb0, rows, dAT(s,s), lddat, dAP(0,0), maxm, queues[1] );
             magma_zgetmatrix( rows, nb0, dAP(0,0), maxm, work, ldwork, queues[1] );
-    
+            
             // do the cpu part
             lapackf77_zgetrf( &rows, &nb0, work, &ldwork, ipiv+s*nb, &iinfo );
             if ( *info == 0 && iinfo > 0 )
@@ -248,11 +247,11 @@ magma_zgetrf_gpu(
                 ipiv[i] += s*nb;
             }
             magmablas_zlaswp( n, dAT(0,0), lddat, s*nb + 1, s*nb + nb0, ipiv, 1, queues[1] );
-    
-            // upload j-th panel
+            
+            // send j-th panel to device
             magma_zsetmatrix( rows, nb0, work, ldwork, dAP(0,0), maxm, queues[1] );
             magmablas_ztranspose( rows, nb0, dAP(0,0), maxm, dAT(s,s), lddat, queues[1] );
-    
+            
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                          n-s*nb-nb0, nb0,
                          c_one, dAT(s,s),     lddat,
