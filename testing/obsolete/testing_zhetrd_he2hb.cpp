@@ -129,18 +129,18 @@ int main( int argc, char** argv)
             */
 
             magma_range_t range = MagmaRangeAll;
-            magma_int_t fraction_ev = 100;
-            magma_int_t il, iu, m1;
-            double vl=0., vu=0.;
-    
-            if (fraction_ev == 0) {
-                il = N / 10;
-                iu = N / 5+il;
+            magma_int_t m1 = 0;
+            double vl = 0;
+            double vu = 0;
+            magma_int_t il = 0;
+            magma_int_t iu = 0;
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
             }
             else {
                 il = 1;
-                iu = (int)(fraction_ev*N);
-                if (iu < 1) iu = 1;
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
             magmaDoubleComplex *hh_work;
             magma_int_t *iwork;
