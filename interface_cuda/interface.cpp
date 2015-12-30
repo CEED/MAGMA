@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <map>
+
 #if __cplusplus >= 201103  // C++11 standard
 #include <atomic>
 #endif
@@ -41,6 +43,15 @@
 #ifdef HAVE_CUBLAS
 
 #define HAVE_PTHREAD_KEY
+
+
+#ifdef DEBUG_MEMORY
+// defined in alloc.cpp
+extern pthread_mutex_t           g_pointers_mutex;
+extern std::map< void*, size_t > g_pointers_dev;
+extern std::map< void*, size_t > g_pointers_cpu;
+extern std::map< void*, size_t > g_pointers_pin;
+#endif
 
 
 // ------------------------------------------------------------
@@ -168,11 +179,32 @@ magma_int_t magma_init()
         
         magma_setdevice( cdev );
         magmablasSetKernelStream( g_null_queues[cdev] );
+        
+        #ifdef DEBUG_MEMORY
+        pthread_mutex_init( &g_pointers_mutex, NULL );
+        #endif
     }
     
 cleanup:
     return info;
 }
+
+// --------------------
+#ifdef DEBUG_MEMORY
+extern "C"
+void magma_warn_leaks( const std::map< void*, size_t >& pointers, const char* type )
+{
+    if ( pointers.size() > 0 ) {
+        fprintf( stderr, "Warning: MAGMA detected memory leak of %ld %s pointers:\n",
+                 pointers.size(), type );
+        std::map< void*, size_t >::const_iterator iter;
+        for( iter = pointers.begin(); iter != pointers.end(); ++iter ) {
+            fprintf( stderr, "    pointer %p, size %lu\n", iter->first, iter->second );
+        }
+    }
+}
+#endif
+
 
 // --------------------
 /**
@@ -198,6 +230,13 @@ magma_int_t magma_finalize()
         #endif
     }
     atomic_flag_clear( &g_init );
+    
+    #ifdef DEBUG_MEMORY
+    magma_warn_leaks( g_pointers_dev, "device" );
+    magma_warn_leaks( g_pointers_cpu, "CPU" );
+    magma_warn_leaks( g_pointers_pin, "CPU pinned" );
+    #endif
+    
     return info;
 }
 
