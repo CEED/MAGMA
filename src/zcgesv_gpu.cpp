@@ -214,20 +214,20 @@ magma_zcgesv_gpu(
     //magmablas_zlag2c( n, nrhs, dB, lddb, dSX, lddsx, info );  // done inside zcgetrs with pivots
     if (*info != 0) {
         *iter = -2;
-        goto FALLBACK;
+        goto fallback;
     }
     
     magmablas_zlag2c( n, n, dA, ldda, dSA, lddsa, queue, info );
     if (*info != 0) {
         *iter = -2;
-        goto FALLBACK;
+        goto fallback;
     }
     
     // factor dSA in single precision
     magma_cgetrf_gpu( n, n, dSA, lddsa, ipiv, info );
     if (*info != 0) {
         *iter = -3;
-        goto FALLBACK;
+        goto fallback;
     }
     
     // Generate parallel pivots
@@ -236,7 +236,7 @@ magma_zcgesv_gpu(
         magma_imalloc_cpu( &newipiv, n );
         if ( newipiv == NULL ) {
             *iter = -3;
-            goto FALLBACK;
+            goto fallback;
         }
         magma_swp2pswp( trans, n, ipiv, newipiv );
         magma_isetvector( n, newipiv, 1, dipiv, 1, queue );
@@ -273,7 +273,7 @@ magma_zcgesv_gpu(
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
         
         if ( Rnrm >  Xnrm*cte ) {
-            goto REFINEMENT;
+            goto refinement;
         }
     }
     
@@ -281,7 +281,7 @@ magma_zcgesv_gpu(
     goto cleanup;
     //return *info;
 
-REFINEMENT:
+refinement:
     for( iiter=1; iiter < ITERMAX; ) {
         *info = 0;
         // convert residual dR to single precision dSX
@@ -291,7 +291,7 @@ REFINEMENT:
         magma_zcgetrs_gpu( trans, n, nrhs, dSA, lddsa, dipiv, dR, lddr, dR, lddr, dSX, info );
         if (*info != 0) {
             *iter = -3;
-            goto FALLBACK;
+            goto fallback;
         }
         
         // Add correction and setup residual
@@ -350,7 +350,7 @@ REFINEMENT:
      * up on double precision routine. */
     *iter = -ITERMAX - 1;
     
-FALLBACK:
+fallback:
     /* Single-precision iterative refinement failed to converge to a
      * satisfactory solution, so we resort to double precision. */
     magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info );

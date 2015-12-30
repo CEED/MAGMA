@@ -204,20 +204,20 @@ magma_zcposv_gpu(
     magmablas_zlag2c( n, nrhs, dB, lddb, dSX, lddsx, queue, info );
     if (*info != 0) {
         *iter = -2;
-        goto FALLBACK;
+        goto fallback;
     }
 
     magmablas_zlat2c( uplo, n, dA, ldda, dSA, lddsa, queue, info );
     if (*info != 0) {
         *iter = -2;
-        goto FALLBACK;
+        goto fallback;
     }
     
     // factor dSA in single precision
     magma_cpotrf_gpu( uplo, n, dSA, lddsa, info );
     if (*info != 0) {
         *iter = -3;
-        goto FALLBACK;
+        goto fallback;
     }
     
     // solve dSA*dSX = dB in single precision
@@ -250,7 +250,7 @@ magma_zcposv_gpu(
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
 
         if ( Rnrm >  Xnrm*cte ) {
-            goto REFINEMENT;
+            goto refinement;
         }
     }
     
@@ -258,14 +258,14 @@ magma_zcposv_gpu(
     goto cleanup;
     //return *info;
 
-REFINEMENT:
+refinement:
     for( iiter=1; iiter < ITERMAX; ) {
         *info = 0;
         // convert residual dR to single precision dSX
         magmablas_zlag2c( n, nrhs, dR, lddr, dSX, lddsx, queue, info );
         if (*info != 0) {
             *iter = -2;
-            goto FALLBACK;
+            goto fallback;
         }
         // solve dSA*dSX = R in single precision
         magma_cpotrs_gpu( uplo, n, nrhs, dSA, lddsa, dSX, lddsx, info );
@@ -324,7 +324,7 @@ REFINEMENT:
      * up on double precision routine. */
     *iter = -ITERMAX - 1;
 
-FALLBACK:
+fallback:
     /* Single-precision iterative refinement failed to converge to a
      * satisfactory solution, so we resort to double precision. */
     magma_zpotrf_gpu( uplo, n, dA, ldda, info );
