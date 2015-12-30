@@ -177,10 +177,11 @@ int main( int argc, char** argv )
             TESTING_FREE_CPU( T );
             TESTING_FREE_CPU( W );
             
-            TESTING_FREE_DEV( dC );
-            TESTING_FREE_DEV( dV );
-            TESTING_FREE_DEV( dT );
-            TESTING_FREE_DEV( dW );
+            TESTING_FREE_DEV( dC  );
+            TESTING_FREE_DEV( dV  );
+            TESTING_FREE_DEV( dT  );
+            TESTING_FREE_DEV( dW  );
+            TESTING_FREE_DEV( dW2 );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {
