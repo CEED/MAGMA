@@ -214,13 +214,11 @@ libmagma_zsrc += \
 	$(cdir)/zbulge_back.cpp		\
 	$(cdir)/zungqr_2stage_gpu.cpp	\
 	$(cdir)/zunmqr_gpu_2stage.cpp	\
-	$(cdir)/dsygvdx_2stage.cpp	\
 	$(cdir)/zhegvdx_2stage.cpp	\
 	$(cdir)/zheevdx_2stage.cpp	\
 	\
 	$(cdir)/zbulge_back_m.cpp	\
 	$(cdir)/zbulge_applyQ_v2_m.cpp	\
-	$(cdir)/dsygvdx_2stage_m.cpp	\
 	$(cdir)/zheevdx_2stage_m.cpp	\
 	$(cdir)/zhegvdx_2stage_m.cpp	\
 	$(cdir)/zhetrd_he2hb_mgpu.cpp	\
