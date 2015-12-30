@@ -58,8 +58,9 @@ magma_zlarfb2_gpu(
     magmaDoubleComplex_ptr       dC,    magma_int_t lddc,
     magmaDoubleComplex_ptr       dwork, magma_int_t ldwork)
 {
-    magma_zlarfb2_gpu_q( m, n, k, dV, lddv, dT, lddt,
-                         dC, lddc, dwork, ldwork, magmablasGetQueue() );
+    return magma_zlarfb2_gpu_q( m, n, k, dV, lddv, dT, lddt,
+                                dC, lddc, dwork, ldwork, magmablasGetQueue() );
+    
 }
 
 
