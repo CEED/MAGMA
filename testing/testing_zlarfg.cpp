@@ -109,9 +109,10 @@ int main( int argc, char** argv)
                    (error < tol && error2 < tol ? "ok" : "failed") );
             status += ! (error < tol && error2 < tol);
             
-            TESTING_FREE_CPU( h_x   );
-            TESTING_FREE_CPU( h_x2  );
-            TESTING_FREE_CPU( h_tau );
+            TESTING_FREE_CPU( h_x    );
+            TESTING_FREE_CPU( h_x2   );
+            TESTING_FREE_CPU( h_tau  );
+            TESTING_FREE_CPU( h_tau2 );
         
             TESTING_FREE_DEV( d_x   );
             TESTING_FREE_DEV( d_tau );
