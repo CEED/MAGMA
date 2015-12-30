@@ -137,7 +137,6 @@ magma_zpotrs_batched(
     zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
     zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
 
-    magma_queue_t cstream;
     if ( uplo == MagmaUpper) {
         if (nrhs > 1)
         {
