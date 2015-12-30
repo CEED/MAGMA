@@ -613,10 +613,10 @@ qr = (
 	('testing_zunglq',                 '-c',  mnk,  ''),
 	('testing_zungqr',     '--version 1 -c',  mnk,  ''),
 	('testing_zungqr',     '--version 2 -c',  mnk,  ''),
+	('testing_zungqr',          ngpu + '-c',  mnk,  ''),
 	('testing_zunmlq',                 '-c',  mnk,  ''),
 	('testing_zunmql',                 '-c',  mnk,  ''),
 	('testing_zunmqr',                 '-c',  mnk,  ''),
-	('testing_zungqr_m',        ngpu + '-c',  mnk,  ''),
 )
 if ( opts.qr ):
 	tests += qr
