@@ -858,21 +858,21 @@ sygv = (
 	
 	# lower/upper, no-vector/vector, itypes
 	# TODO: add -c
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 1', n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 2', n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JN --itype 3', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 1', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 2', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 3', n,  '-c implies -JV'),
 	
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 1', n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 2', n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JN --itype 3', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 1', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 2', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 3', n,  '-c implies -JV, upper not implemented'),
 	
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JV --itype 1 -c', n,  ''),
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JV --itype 2 -c', n,  ''),
-	('testing_zhegvdx_2stage_m',  ngpu + '-L -JV --itype 3 -c', n,  ''),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JV --itype 1 -c', n,  ''),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JV --itype 2 -c', n,  ''),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JV --itype 3 -c', n,  ''),
 	
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JV --itype 1 -c', n,  'upper not implemented'),
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JV --itype 2 -c', n,  'upper not implemented'),
-	('#testing_zhegvdx_2stage_m', ngpu + '-U -JV --itype 3 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JV --itype 1 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JV --itype 2 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JV --itype 3 -c', n,  'upper not implemented'),
 )
 if ( opts.sygv ):
 	tests += sygv
@@ -884,14 +884,12 @@ geev = (
 	#('testing_dgeev',                   '',  n,    ''),  # covered by testing_zgeev
 	('testing_zgeev',          '-RN -LN -c',  n,    ''),
 	('testing_zgeev',          '-RV -LV -c',  n,    ''),
-	
-	#('testing_dgeev_m',                 '',  n,    ''),  # covered by testing_zgeev_m
-	('testing_zgeev_m', ngpu + '-RN -LN -c',  n,    ''),
-	('testing_zgeev_m', ngpu + '-RV -LV -c',  n,    ''),
+	('testing_zgeev',   ngpu + '-RN -LN -c',  n,    ''),
+	('testing_zgeev',   ngpu + '-RV -LV -c',  n,    ''),
 	
 	('testing_zgehrd',     '--version 1 -c',  n,    ''),
 	('testing_zgehrd',     '--version 2 -c',  n,    ''),
-	('testing_zgehrd_m',        ngpu + '-c',  n,    ''),
+	('testing_zgehrd',          ngpu + '-c',  n,    ''),
 )
 if ( opts.geev ):
 	tests += geev
@@ -1095,7 +1093,7 @@ def run( cmd ):
 			okay += 1
 		if re.search( 'failed', line ):
 			fail += 1
-		if re.search( 'exit|memory mapping error|CUDA runtime error|CL_INVALID|illegal value|ERROR SUMMARY: [1-9]', line ):
+		if re.search( 'exit|memory leak|memory mapping error|CUDA runtime error|CL_INVALID|illegal value|ERROR SUMMARY: [1-9]', line ):
 			error += 1
 	# end
 	

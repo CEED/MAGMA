@@ -71,9 +71,12 @@ int main( int argc, char** argv)
         opts.jobz = MagmaVec;
     }
 
-    printf("%% itype = %d, jobz = %s, range = %s, uplo = %s, opts.check = %d, fraction = %6.4f\n",
-           (int) opts.itype, lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
-           (int) opts.check, opts.fraction);
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% itype = %d, jobz = %s, range = %s, uplo = %s, fraction = %6.4f, ngpu = %d\n",
+           int(opts.itype), lapack_vec_const(opts.jobz), lapack_range_const(range), lapack_uplo_const(opts.uplo),
+           opts.fraction, int(abs_ngpu) );
 
     printf("%%   N     M   GPU Time (sec)\n");
     printf("%%===========================\n");
@@ -113,43 +116,42 @@ int main( int argc, char** argv)
             double vu = 0;
             magma_int_t il = 0;
             magma_int_t iu = 0;
-
-            if (range == MagmaRangeI) {
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
+            }
+            else {
                 il = 1;
-                iu = (int) (opts.fraction*N);
+                iu = max( 1, magma_int_t(opts.fraction*N) );
             }
 
-            // ==================================================================
-            // Warmup using MAGMA
-            // ==================================================================
-            if (opts.warmup) {
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-
-                magma_zhegvdx_2stage(opts.itype, opts.jobz, range, opts.uplo,
-                                     N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
-                                     h_work, lwork,
-                                     #ifdef COMPLEX
-                                     rwork, lrwork,
-                                     #endif
-                                     iwork, liwork,
-                                     &info);
-            }
             // ===================================================================
             // Performs operation using MAGMA
             // ===================================================================
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
+            lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &N, h_R, &N );
+            lapackf77_zlacpy( MagmaFullStr, &N, &N, h_B, &N, h_S, &N );
 
             gpu_time = magma_wtime();
-            magma_zhegvdx_2stage(opts.itype, opts.jobz, range, opts.uplo,
-                                 N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
-                                 h_work, lwork,
-                                 #ifdef COMPLEX
-                                 rwork, lrwork,
-                                 #endif
-                                 iwork, liwork,
-                                 &info);
+            if (opts.ngpu == 1) {
+                magma_zhegvdx_2stage( opts.itype, opts.jobz, range, opts.uplo,
+                                      N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
+                                      h_work, lwork,
+                                      #ifdef COMPLEX
+                                      rwork, lrwork,
+                                      #endif
+                                      iwork, liwork,
+                                      &info );
+            }
+            else {
+                magma_zhegvdx_2stage_m( abs_ngpu, opts.itype, opts.jobz, range, opts.uplo,
+                                        N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
+                                        h_work, lwork,
+                                        #ifdef COMPLEX
+                                        rwork, lrwork,
+                                        #endif
+                                        iwork, liwork,
+                                        &info );
+            }
             gpu_time = magma_wtime() - gpu_time;
 
             if ( opts.check && opts.jobz != MagmaNoVec ) {
@@ -192,8 +194,8 @@ int main( int argc, char** argv)
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
 
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
+                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &N, h_R, &N );
+                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_B, &N, h_S, &N );
 
                 magma_int_t m2 = m1;
                 lapackf77_zhegvd(&opts.itype, "N", lapack_uplo_const(opts.uplo), &N,
