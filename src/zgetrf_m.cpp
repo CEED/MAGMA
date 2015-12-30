@@ -92,7 +92,7 @@ magma_zgetrf_m(
 
     magma_timer_t time=0, time_total=0, time_alloc=0, time_set=0, time_get=0, time_comp=0;
     timer_start( time_total );
-    real_Double_t flops;
+    //real_Double_t flops;
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -328,7 +328,7 @@ magma_zgetrf_m(
             }
             time_comp += timer_stop( time );
     
-            /* download the current big panel to CPU */
+            /* get the current big panel to CPU from devices */
             timer_start( time );
             magmablas_zgetmatrix_transpose_mgpu(ngpu, queues, dAT, ldn_local, A(0,I), lda, dA, maxm, M, N, nb);
             for( d=0; d < ngpu; d++ ) {

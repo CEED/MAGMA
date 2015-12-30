@@ -70,7 +70,7 @@
 
     Each H(i) has the form
 
-        H(i) = I - tau * v * v'
+        H(i) = I - tau * v * v^H
 
     where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
@@ -115,8 +115,8 @@ magma_zgeqrf2_gpu(
 
     nb = magma_get_zgeqrf_nb(m);
 
-    lwork  = (m+n) * nb;
-    lhwork = lwork - (m)*nb;
+    lwork  = (m + n)*nb;
+    lhwork = lwork - m*nb;
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -156,13 +156,13 @@ magma_zgeqrf2_gpu(
             ib = min(k-i, nb);
             rows = m -i;
 
-            /* download i-th panel */
+            /* get i-th panel from device */
             magma_queue_sync( stream[1] );
             magma_zgetmatrix_async( rows, ib,
                                     dA(i,i),       ldda,
                                     work_ref(i), ldwork, stream[0] );
             if (i > 0) {
-                /* Apply H' to A(i:m,i+2*ib:n) from the left */
+                /* Apply H^H to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                   m-old_i, n-old_i-2*old_ib, old_ib,
                                   dA(old_i, old_i         ), ldda, dwork,        lddwork,
@@ -183,17 +183,17 @@ magma_zgeqrf2_gpu(
 
             magma_zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
 
-            /* download the i-th V matrix */
+            /* send i-th V matrix to device */
             magma_zsetmatrix_async( rows, ib, work_ref(i), ldwork, dA(i,i), ldda, stream[0] );
 
-            /* download the T matrix */
+            /* send T matrix to device */
             magma_queue_sync( stream[1] );
             magma_zsetmatrix_async( ib, ib, hwork, ib, dwork, lddwork, stream[0] );
             magma_queue_sync( stream[0] );
 
             if (i + ib < n) {
                 if (i+nb < k-nx) {
-                    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
+                    /* Apply H^H to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                       rows, ib, ib,
                                       dA(i, i   ), ldda, dwork,    lddwork,
