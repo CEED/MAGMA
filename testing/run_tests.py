@@ -91,7 +91,8 @@
 # What tests are run
 # ------------------
 # The --blas, --aux, --chol, --hesv, --lu, --qr, --syev, --sygv, --geev, --svd,
-# --batched options run particular sets of tests. By default, all tests are run.
+# --batched options run particular sets of tests. By default, all tests are run,
+# except batched because we don't want to run batched with, say, N=1000.
 # --mgpu runs only multi-GPU tests from the above sets.
 #
 # The --start option skips all testers before the given one, then continues
@@ -207,8 +208,8 @@ if ( not opts.blas and not opts.aux  and
 	opts.sygv = True
 	opts.geev = True
 	opts.svd  = True
-	opts.batched = True
-	opts.mgpu = False   # multi-GPU routines are part of above groups
+	opts.batched = False   # batched routines must be explicitly requested, as the typical size range is different
+	opts.mgpu    = False   # multi-GPU routines are part of above groups
 # end
 
 print 'opts', opts
