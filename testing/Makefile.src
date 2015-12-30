@@ -161,7 +161,6 @@ testing_zsrc += \
 	$(cdir)/testing_zhegst.cpp	\
 	$(cdir)/testing_zhegst_gpu.cpp	\
 	$(cdir)/testing_zhegvd.cpp	\
-	$(cdir)/testing_zhegvd_m.cpp	\
 	$(cdir)/testing_zhegvdx.cpp	\
 	$(cdir)/testing_zhegvdx_2stage.cpp	\
 	$(cdir)/testing_zhegvdx_2stage_m.cpp	\
@@ -171,10 +170,7 @@ testing_zsrc += \
 testing_zsrc += \
 	$(cdir)/testing_dgeev.cpp	\
 	$(cdir)/testing_zgeev.cpp	\
-	$(cdir)/testing_dgeev_m.cpp	\
-	$(cdir)/testing_zgeev_m.cpp	\
 	$(cdir)/testing_zgehrd.cpp	\
-	$(cdir)/testing_zgehrd_m.cpp	\
 
 # ----------
 # SVD

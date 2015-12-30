@@ -5,8 +5,9 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal z -> s d c
+       @author Mark Gates
 
+       @precisions normal z -> s d c
 */
 
 // includes, system
@@ -31,7 +32,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork;
+    magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork, *T;
     magmaDoubleComplex_ptr dT;
     #ifdef COMPLEX
     double      *rwork;
@@ -49,6 +50,11 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
+    printf("%% version %d, ngpu = %d\n", int(opts.version), int(abs_ngpu) );
+    
     printf("%%   N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
     printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -56,18 +62,22 @@ int main( int argc, char** argv)
             N = opts.nsize[itest];
             lda    = N;
             n2     = lda*N;
-            nb     = magma_get_zgehrd_nb(N);
-            /* We suppose the magma nb is bigger than lapack nb */
+            nb     = magma_get_zgehrd_nb( N );
+            // magma needs larger workspace than lapack, esp. multi-gpu verison
             lwork  = N*nb;
+            if (opts.ngpu != 1) {
+                lwork += N*nb*abs_ngpu;
+            }
             gflops = FLOPS_ZGEHRD( N ) / 1e9;
             
             TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2    );
             TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, N     );
+            TESTING_MALLOC_CPU( T,      magmaDoubleComplex, nb*N  );  // for multi GPU
             
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2    );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
             
-            TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, nb*N  );
+            TESTING_MALLOC_DEV( dT,     magmaDoubleComplex, nb*N  );  // for single GPU
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -78,11 +88,17 @@ int main( int argc, char** argv)
                =================================================================== */
             gpu_time = magma_wtime();
             if ( opts.version == 1 ) {
-                magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
+                if ( opts.ngpu == 1 ) {
+                    magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info );
+                }
+                else {
+                    magma_zgehrd_m( N, ione, N, h_R, lda, tau, h_work, lwork, T, &info );
+                }
             }
             else {
                 // LAPACK-complaint arguments, no dT array
-                magma_zgehrd2( N, ione, N, h_R, lda, tau, h_work, lwork, &info);
+                printf( "magma_zgehrd2\n" );
+                magma_zgehrd2( N, ione, N, h_R, lda, tau, h_work, lwork, &info );
             }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
@@ -94,7 +110,7 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.check ) {
-                ltwork = 2*(N*N);
+                ltwork = 2*N*N;
                 TESTING_MALLOC_PIN( h_Q,   magmaDoubleComplex, lda*N  );
                 TESTING_MALLOC_CPU( twork, magmaDoubleComplex, ltwork );
                 #ifdef COMPLEX
@@ -107,6 +123,9 @@ int main( int argc, char** argv)
                         h_R[i+j*lda] = MAGMA_Z_ZERO;
                 
                 if ( opts.version == 1 ) {
+                    if ( opts.ngpu != 1 ) {
+                        magma_zsetmatrix( nb, N, T, nb, dT, nb );
+                    }
                     magma_zunghr( N, ione, N, h_Q, lda, tau, dT, nb, &info );
                 }
                 else {
@@ -170,6 +189,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE_CPU( h_A    );
             TESTING_FREE_CPU( tau    );
+            TESTING_FREE_CPU( T      );
             
             TESTING_FREE_PIN( h_R    );
             TESTING_FREE_PIN( h_work );
