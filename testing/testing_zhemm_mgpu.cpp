@@ -53,6 +53,7 @@ int main( int argc, char** argv)
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     

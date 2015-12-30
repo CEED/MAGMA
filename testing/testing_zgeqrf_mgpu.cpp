@@ -40,6 +40,7 @@ int main( int argc, char** argv )
     
     magma_opts opts;
     opts.parse_opts( argc, argv );
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     opts.lapack |= (opts.check == 2);  // check (-c2) implies lapack (-l)
  
     magma_int_t status = 0;

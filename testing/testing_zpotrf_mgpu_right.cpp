@@ -43,6 +43,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     opts.parse_opts( argc, argv );
+    opts.ngpu = abs( opts.ngpu );  // always uses multi-GPU code
     ngpu0 = opts.ngpu;
 
     printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
