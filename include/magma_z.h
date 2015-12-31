@@ -1616,7 +1616,7 @@ magma_zunmql2_gpu(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex_ptr dC, magma_int_t lddc,
-    magmaDoubleComplex *wA, magma_int_t ldwa,
+    const magmaDoubleComplex *wA, magma_int_t ldwa,
     magma_int_t *info);
 
 magma_int_t
@@ -1637,7 +1637,7 @@ magma_zunmqr2_gpu(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex_ptr dC, magma_int_t lddc,
-    magmaDoubleComplex    *wA, magma_int_t ldwa,
+    const magmaDoubleComplex *wA, magma_int_t ldwa,
     magma_int_t *info);
 
 magma_int_t
@@ -1647,7 +1647,7 @@ magma_zunmtr_gpu(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex *tau,
     magmaDoubleComplex_ptr dC, magma_int_t lddc,
-    magmaDoubleComplex    *wA, magma_int_t ldwa,
+    const magmaDoubleComplex *wA, magma_int_t ldwa,
     magma_int_t *info);
 
 

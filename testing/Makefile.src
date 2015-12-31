@@ -118,6 +118,7 @@ testing_zsrc += \
 	$(cdir)/testing_zgeqrf_gpu.cpp	\
 	$(cdir)/testing_zlarfb_gpu.cpp	\
 	$(cdir)/testing_zungqr_gpu.cpp	\
+	$(cdir)/testing_zunmql_gpu.cpp	\
 	$(cdir)/testing_zunmqr_gpu.cpp	\
 	\
 	$(cdir)/testing_zgeqrf_mgpu.cpp	\

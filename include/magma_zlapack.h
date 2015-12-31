@@ -771,7 +771,7 @@ void   lapackf77_zlarfg( const magma_int_t *n,
 
 void   lapackf77_zlarft( const char *direct, const char *storev,
                          const magma_int_t *n, const magma_int_t *k,
-                         magmaDoubleComplex *V, const magma_int_t *ldv,
+                         const magmaDoubleComplex *V, const magma_int_t *ldv,
                          const magmaDoubleComplex *tau,
                          magmaDoubleComplex *T, const magma_int_t *ldt );
 

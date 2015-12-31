@@ -22,7 +22,7 @@
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zunmql
+   -- Testing zunmql_gpu
 */
 int main( int argc, char** argv )
 {
@@ -34,8 +34,9 @@ int main( int argc, char** argv )
     magma_int_t ione = 1;
     magma_int_t mm, m, n, k, size, info;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t nb, ldc, lda, lwork, lwork_max;
+    magma_int_t nb, ldc, lda, /*lwork,*/ lwork_max;
     magmaDoubleComplex *C, *R, *A, *hwork, *tau;
+    magmaDoubleComplex_ptr dC, dA;
     magma_int_t status = 0;
     
     magma_opts opts;
@@ -59,10 +60,10 @@ int main( int argc, char** argv )
             n = opts.nsize[itest];
             k = opts.ksize[itest];
             nb  = magma_get_zgeqlf_nb( m );
-            ldc = m;
+            ldc = magma_roundup( m, opts.align );  // multiple of 32 by default
             // A is m x k (left) or n x k (right)
             mm = (side[iside] == MagmaLeft ? m : n);
-            lda = mm;
+            lda = magma_roundup( mm, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZUNMQL( m, n, k, side[iside] ) / 1e9;
             
             if ( side[iside] == MagmaLeft && m < k ) {
@@ -89,16 +90,21 @@ int main( int argc, char** argv )
             TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork_max );
             TESTING_MALLOC_CPU( tau,   magmaDoubleComplex, k );
             
+            TESTING_MALLOC_DEV( dC, magmaDoubleComplex, ldc*n );
+            TESTING_MALLOC_DEV( dA, magmaDoubleComplex, lda*k );
+            
             // C is full, m x n
             size = ldc*n;
             lapackf77_zlarnv( &ione, ISEED, &size, C );
-            lapackf77_zlacpy( "Full", &m, &n, C, &ldc, R, &ldc );
+            magma_zsetmatrix( m, n, C, ldc, dC, ldc );
             
+            // A is m x k (left) or n x k (right)
             size = lda*k;
             lapackf77_zlarnv( &ione, ISEED, &size, A );
             
             // compute QL factorization to get Householder vectors in A, tau
             magma_zgeqlf( mm, k, A, lda, tau, hwork, lwork_max, &info );
+            magma_zsetmatrix( mm, k, A, lda, dA, lda );
             if (info != 0)
                 printf("magma_zgeqlf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
@@ -119,29 +125,44 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            // query for workspace size
-            lwork = -1;
-            magma_zunmql( side[iside], trans[itran],
-                          m, n, k,
-                          A, lda, tau, R, ldc, hwork, lwork, &info );
-            if (info != 0)
-                printf("magma_zunmql (lwork query) returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
-            lwork = (magma_int_t) MAGMA_Z_REAL( hwork[0] );
-            if ( lwork < 0 || lwork > lwork_max ) {
-                printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
-                lwork = lwork_max;
+            //// query for workspace size
+            //lwork = -1;
+            //magma_zunmql2_gpu( side[iside], trans[itran],
+            //                   m, n, k,
+            //                   A, lda, tau, R, ldc, hwork, lwork, &info );
+            //if (info != 0)
+            //    printf("magma_zunmql (lwork query) returned error %d: %s.\n",
+            //           (int) info, magma_strerror( info ));
+            //lwork = (magma_int_t) MAGMA_Z_REAL( hwork[0] );
+            //if ( lwork < 0 || lwork > lwork_max ) {
+            //    printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
+            //    lwork = lwork_max;
+            //}
+            
+            // zunmql2 takes a copy of dA in CPU memory
+            if ( opts.version == 2 ) {
+                magma_zgetmatrix( mm, k, dA, lda, A, lda );
             }
             
-            gpu_time = magma_wtime();
-            magma_zunmql( side[iside], trans[itran],
-                          m, n, k,
-                          A, lda, tau, R, ldc, hwork, lwork, &info );
-            gpu_time = magma_wtime() - gpu_time;
+            magmablasSetKernelStream( opts.queue );
+            gpu_time = magma_sync_wtime( opts.queue );
+            //if ( opts.version == 1 ) {
+            //    magma_zunmqr_gpu( side[iside], trans[itran],
+            //                      m, n, k,
+            //                      dA, lda, tau, dC, ldc, hwork, lwork, dT, nb, &info );
+            //}
+            //else if ( opts.version == 2 ) {
+                magma_zunmql2_gpu( side[iside], trans[itran],
+                                   m, n, k,
+                                   dA, lda, tau, dC, ldc, A, lda, &info );
+            //}
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
                 printf("magma_zunmql returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            
+            magma_zgetmatrix( m, n, dC, ldc, R, ldc );
             
             /* =====================================================================
                compute relative error |QC_magma - QC_lapack| / |QC_lapack|
@@ -164,6 +185,9 @@ int main( int argc, char** argv )
             TESTING_FREE_CPU( A );
             TESTING_FREE_CPU( hwork );
             TESTING_FREE_CPU( tau );
+            
+            TESTING_FREE_DEV( dC );
+            TESTING_FREE_DEV( dA );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

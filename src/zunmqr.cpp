@@ -259,8 +259,8 @@ magma_zunmqr(
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
             nq_i = nq - i;
-            lapackf77_zlarft("Forward", "Columnwise", &nq_i, &ib,
-                             A(i,i), &lda, &tau[i], T, &ib);
+            lapackf77_zlarft( "Forward", "Columnwise", &nq_i, &ib,
+                              A(i,i), &lda, &tau[i], T, &ib );
 
             /* 1) set upper triangle of panel in A to identity,
                2) copy the panel from A to the GPU, and

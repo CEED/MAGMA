@@ -599,9 +599,11 @@ qr = (
 	('testing_zgeqrf_gpu', '--version 3 -c2', mn,   ''),
 	
 	('testing_zlarfb_gpu',             '-c',  mnk,  ''),
-	('testing_zlarfb_gpu',             '-c --version 2',  mnk,  ''),
+	('testing_zlarfb_gpu', '--version 2 -c',  mnk,  ''),
 	('testing_zungqr_gpu',             '-c',  mnk,  ''),
+	('testing_zunmql_gpu',             '-c',  mnk,  ''),
 	('testing_zunmqr_gpu',             '-c',  mnk,  ''),
+	('testing_zunmqr_gpu', '--version 2 -c',  mnk,  ''),
 	('testing_zgeqrf_mgpu',    ngpu + '-c2',  mn,   ''),
 	
 	# ----------
