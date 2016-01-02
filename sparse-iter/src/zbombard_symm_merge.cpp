@@ -104,8 +104,10 @@ magma_zbombard_merge(
     solver_par->solver = Magma_BOMBARD;
     solver_par->numiter = 0;
     
-    // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = -c_one;
+    // constants
+    const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    
     // solver variables
     double nom0, r0, res, Q_res, C_res, B_res, nomb;
     

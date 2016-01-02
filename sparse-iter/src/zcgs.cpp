@@ -65,8 +65,11 @@ magma_zcgs(
     solver_par->numiter = 0;
     solver_par->spmv_count = 0;
     
-    // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE,  c_mone = MAGMA_Z_MAKE(-1.0, 0.0);
+    // constants
+    const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    
     // solver variables
     double nom0, r0,  res, nomb;
     magmaDoubleComplex rho, rho_l = c_one, alpha, beta;
@@ -160,7 +163,7 @@ magma_zcgs(
 
         CHECK( magma_z_spmv( c_one, A, t, c_zero, rt, queue ));   // t = A u_hat
         solver_par->spmv_count++;
-        magma_zaxpy( dofs,  c_mone*alpha, rt.dval, 1, r.dval, 1, queue );       // r = r -alpha*A u_hat
+        magma_zaxpy( dofs,  c_neg_one*alpha, rt.dval, 1, r.dval, 1, queue );       // r = r -alpha*A u_hat
         magma_zaxpy( dofs,  alpha, t.dval, 1, x->dval, 1, queue );      // x = x + alpha u_hat
         rho_l = rho;
         
