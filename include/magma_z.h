@@ -1162,8 +1162,8 @@ magma_zgeqrf3_gpu(
 magma_int_t
 magma_zgeqrs_gpu(
     magma_int_t m, magma_int_t n, magma_int_t nrhs,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex *tau,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex const *tau,
     magmaDoubleComplex_ptr dT,
     magmaDoubleComplex_ptr dB, magma_int_t lddb,
     magmaDoubleComplex *hwork, magma_int_t lwork,
@@ -1173,7 +1173,7 @@ magma_int_t
 magma_zgeqrs3_gpu(
     magma_int_t m, magma_int_t n, magma_int_t nrhs,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex *tau,
+    magmaDoubleComplex const *tau,
     magmaDoubleComplex_ptr dT,
     magmaDoubleComplex_ptr dB, magma_int_t lddb,
     magmaDoubleComplex *hwork, magma_int_t lwork,
@@ -1623,11 +1623,11 @@ magma_int_t
 magma_zunmqr_gpu(
     magma_side_t side, magma_trans_t trans,
     magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex *tau,
-    magmaDoubleComplex_ptr dC, magma_int_t lddc,
-    magmaDoubleComplex *hwork, magma_int_t lwork,
-    magmaDoubleComplex_ptr dT, magma_int_t nb,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex const   *tau,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magmaDoubleComplex       *hwork, magma_int_t lwork,
+    magmaDoubleComplex_ptr       dT, magma_int_t nb,
     magma_int_t *info);
 
 magma_int_t

@@ -46,8 +46,18 @@ int main( int argc, char** argv)
     magma_int_t status = 0;
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
+    // version 3 can do either check
+    if (opts.check == 1 && opts.version == 1) {
+        opts.check = 2;
+        printf( "%% version 1 requires check 2 (solve A*x=b)\n" );
+    }
+    if (opts.check == 2 && opts.version == 2) {
+        opts.check = 1;
+        printf( "%% version 2 requires check 1 (R - Q^H*A)\n" );
+    }
+    
     printf( "%% version %d\n", (int) opts.version );
-    if ( opts.version == 2 || opts.version == 3 ) {
+    if ( opts.check == 1 ) {
         printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
         printf("%%==============================================================================\n");
     }
@@ -120,7 +130,7 @@ int main( int argc, char** argv)
                 printf("magma_zgeqrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            if ( opts.check && (opts.version == 2 || opts.version == 3) ) {
+            if ( opts.check == 1 && (opts.version == 2 || opts.version == 3) ) {
                 if ( opts.version == 3 ) {
                     // copy diagonal blocks of R back to A
                     for( int i=0; i < min_mn-nb; i += nb ) {
@@ -174,7 +184,7 @@ int main( int argc, char** argv)
                 TESTING_FREE_CPU( R    );  R    = NULL;
                 TESTING_FREE_CPU( work );  work = NULL;
             }
-            else if ( opts.check && M >= N ) {
+            else if ( opts.check == 2 && M >= N && (opts.version == 1 || opts.version == 3) ) {
                 /* =====================================================================
                    Check the result by solving consistent linear system, A*x = b.
                    Only for versions 1 & 3 with M >= N.
@@ -274,13 +284,13 @@ int main( int argc, char** argv)
                 printf("  ---   (  ---  )" );
             }
             printf( "   %7.2f (%7.2f)   ", gpu_perf, gpu_time );
-            if ( opts.check ) {
-                if ( opts.version == 2 || opts.version == 3 ) {
-                    bool okay = (error < tol && error2 < tol);
-                    status += ! okay;
-                    printf( "%11.2e   %11.2e   %s\n", error, error2, (okay ? "ok" : "failed") );
-                }
-                else if ( M >= N ) {
+            if ( opts.check == 1 ) {
+                bool okay = (error < tol && error2 < tol);
+                status += ! okay;
+                printf( "%11.2e   %11.2e   %s\n", error, error2, (okay ? "ok" : "failed") );
+            }
+            else if ( opts.check == 2 ) {
+                if ( M >= N ) {
                     bool okay = (error < tol);
                     status += ! okay;
                     printf( "%10.2e   %s\n", error, (okay ? "ok" : "failed") );

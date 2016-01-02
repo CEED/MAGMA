@@ -104,9 +104,10 @@
             this value as the first entry of the HWORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    @param[in]
+    @param[in,out]
     dT      COMPLEX_16 array on the GPU that is the output
             (the 9th argument) of magma_zgeqrf_gpu.
+            Part used as workspace.
 
     @param[in]
     nb      INTEGER
@@ -124,11 +125,11 @@ extern "C" magma_int_t
 magma_zunmqr_gpu(
     magma_side_t side, magma_trans_t trans,
     magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_ptr dA,    magma_int_t ldda,
-    magmaDoubleComplex    *tau,
-    magmaDoubleComplex_ptr dC,    magma_int_t lddc,
-    magmaDoubleComplex    *hwork, magma_int_t lwork,
-    magmaDoubleComplex_ptr dT,    magma_int_t nb,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex const   *tau,
+    magmaDoubleComplex_ptr       dC, magma_int_t lddc,
+    magmaDoubleComplex       *hwork, magma_int_t lwork,
+    magmaDoubleComplex_ptr       dT, magma_int_t nb,
     magma_int_t *info)
 {
     #define dA(a_1,a_2) (dA + (a_1) + (a_2)*ldda)
