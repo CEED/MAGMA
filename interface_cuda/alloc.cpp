@@ -58,7 +58,7 @@ magma_free_internal( magma_ptr ptr,
 {
     #ifdef DEBUG_MEMORY
     pthread_mutex_lock( &g_pointers_mutex );
-    if ( g_pointers_dev.count( ptr ) == 0 ) {
+    if ( ptr != NULL && g_pointers_dev.count( ptr ) == 0 ) {
         fprintf( stderr, "magma_free( %p ) that wasn't allocated with magma_malloc.\n", ptr );
     }
     else {
@@ -127,7 +127,7 @@ magma_free_cpu( void* ptr )
 {
     #ifdef DEBUG_MEMORY
     pthread_mutex_lock( &g_pointers_mutex );
-    if ( g_pointers_cpu.count( ptr ) == 0 ) {
+    if ( ptr != NULL && g_pointers_cpu.count( ptr ) == 0 ) {
         fprintf( stderr, "magma_free_cpu( %p ) that wasn't allocated with magma_malloc_cpu.\n", ptr );
     }
     else {
@@ -175,7 +175,7 @@ magma_free_pinned_internal( void* ptr,
 {
     #ifdef DEBUG_MEMORY
     pthread_mutex_lock( &g_pointers_mutex );
-    if ( g_pointers_pin.count( ptr ) == 0 ) {
+    if ( ptr != NULL && g_pointers_pin.count( ptr ) == 0 ) {
         fprintf( stderr, "magma_free_pinned( %p ) that wasn't allocated with magma_malloc_pinned.\n", ptr );
     }
     else {
