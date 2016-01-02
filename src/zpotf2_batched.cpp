@@ -14,7 +14,8 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-#define PRECISION_z
+#define COMPLEX
+
 /////////////////////////////////////////////////////////////////
 /**
     \n
@@ -54,7 +55,7 @@ magma_zpotf2_ztrsm_batched(
         for (j = 0; j < n; j++) {
             magma_zpotf2_zdotc_batched(j, dA_array, lda, j, info_array, gbstep, batchCount, queue); // including zdotc product and update a(j,j)
             if (j < n) {
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 magma_zlacgv_batched(j, dA_array, lda, j, batchCount, queue);
                 #endif
 
@@ -69,7 +70,7 @@ magma_zpotf2_ztrsm_batched(
                                  beta,  dC_displ, 1,
                                  batchCount, queue );
 
-                #if defined(PRECISION_z) || defined(PRECISION_c)
+                #ifdef COMPLEX
                 magma_zlacgv_batched(j, dA_array, lda, j, batchCount, queue);
                 #endif
                 magma_zpotf2_zdscal_batched(m-j, dA_array, 1, j+j*lda, info_array, batchCount, queue);

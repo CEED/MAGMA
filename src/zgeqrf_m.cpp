@@ -8,7 +8,6 @@
        @precisions normal z -> s d c
 
 */
-//#include "common_magma.h"
 #include "magma_internal.h" 
 
 /**

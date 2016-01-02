@@ -15,8 +15,6 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-#define PRECISION_z
-
 /**
     Purpose
     -------

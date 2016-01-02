@@ -10,8 +10,6 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_z
-
 // === Define what BLAS to use ============================================
 #undef  magma_ztrsm
 #define magma_ztrsm magmablas_ztrsm

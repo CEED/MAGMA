@@ -10,8 +10,6 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_z
-
 /**
     Purpose
     -------

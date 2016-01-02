@@ -10,10 +10,6 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_z
-#define COMPLEX
-
-
 
 static void
 init_butterfly(

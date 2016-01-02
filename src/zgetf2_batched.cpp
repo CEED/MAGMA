@@ -13,8 +13,6 @@
 #include "magma_internal.h"
 #include "batched_kernel_param.h"
 
-#define PRECISION_z
-
 #define A(i, j)  (A + (i) + (j)*ldda)   // A(i, j) means at i row, j column
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -11,7 +11,6 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_d
 #define REAL
 
 // Version 1 - LAPACK

@@ -14,7 +14,7 @@
 
 #include "magma_internal.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /**
     Purpose
@@ -188,7 +188,7 @@ magma_zlaqps(
            A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'.
            Optimization: multiply with beta=0; wait for vector and subtract */
         if (k > 0) {
-            #if defined(PRECISION_c) || defined(PRECISION_z)
+            #ifdef COMPLEX
             for (j = 0; j < k; ++j) {
                 *F(k,j) = MAGMA_Z_CONJ( *F(k,j) );
             }
@@ -201,7 +201,7 @@ magma_zlaqps(
                                        F(k,  0), &ldf,
                            &c_one,     A(rk, k), &ione );
 
-            #if defined(PRECISION_c) || defined(PRECISION_z)
+            #ifdef COMPLEX
             for (j = 0; j < k; ++j) {
                 *F(k,j) = MAGMA_Z_CONJ( *F(k,j) );
             }
@@ -345,8 +345,9 @@ magma_zlaqps(
     while( lsticc > 0 ) {
         itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));
         i__1 = m - rk - 1;
-        if (lsticc <= nb)
+        if (lsticc <= nb) {
             vn1[lsticc] = magma_cblas_dznrm2( i__1, A(rk+1,lsticc), ione );
+        }
         else {
             /* Where is the data, CPU or GPU ? */
             double r1, r2;

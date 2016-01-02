@@ -13,8 +13,6 @@
 
 #include "common_magma.h"
 #include "magma_zbulgeinc.h"
-
-#define PRECISION_z
  
 #ifdef __cplusplus
 extern "C" {

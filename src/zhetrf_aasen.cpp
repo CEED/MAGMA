@@ -8,11 +8,10 @@
        @author Stan Tomov
        @precisions normal z -> s d c
 */
-//#include "common_magma.h"
 #include "magma_internal.h"
 #include "trace.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 
 /**
@@ -258,7 +257,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                              dY(i), nb,
                                     queues[(i-1)%2]);
                     // transpose W for calling zher2k
-                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    #ifdef COMPLEX
                     magmablas_ztranspose_conj( nb, jb, dY(i), nb, dW(i), lddw, queues[(i-1)%2] );
                     #else
                     magmablas_ztranspose( nb, jb, dY(i), nb, dW(i), lddw, queues[(i-1)%2] );

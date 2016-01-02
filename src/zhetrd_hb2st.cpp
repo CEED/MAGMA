@@ -20,7 +20,7 @@
 #include "affinity.h"
 #endif
 
-#define PRECISION_z
+#define COMPLEX
 
 static void *magma_zhetrd_hb2st_parallel_section(void *arg);
 
@@ -274,7 +274,7 @@ magma_zhetrd_hb2st(
      * one.
      *  */
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
+#ifdef COMPLEX
     if (uplo == MagmaLower) {
         for (magma_int_t i=0; i < n-1; i++) {
             d[i] = MAGMA_Z_REAL( A[i*lda  ] );

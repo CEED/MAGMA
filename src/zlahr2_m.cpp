@@ -10,7 +10,7 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /**
     Purpose
@@ -337,7 +337,7 @@ magma_zlahr2_m(
             magma_int_t i1 = i+1;
             
             // If complex, conjugate row of V, and undo afterwards
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             lapackf77_zlacgv( &i1,  A(k+i1,0), &lda );
             #endif
             // w = T(0:i, 0:i+1) * VA(k+i+1, 0:i+1)'
@@ -346,7 +346,7 @@ magma_zlahr2_m(
                            &c_one,  T(0,0), &ldt,
                                     A(k+i1,0), &lda,
                            &c_zero, T(0,nb-1), &ione );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             lapackf77_zlacgv( &i1,  A(k+i1,0), &lda );
             #endif
             

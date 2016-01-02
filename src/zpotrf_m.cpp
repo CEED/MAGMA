@@ -10,7 +10,6 @@
 */
 #include <cuda_runtime.h>
 
-//#include "common_magma.h"
 #include "magma_internal.h"
 
 //#include "../testing/flops.h"

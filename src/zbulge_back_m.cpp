@@ -21,7 +21,7 @@
 #endif
 
 
-#define PRECISION_z
+#define COMPLEX
 
 static void *magma_zapplyQ_m_parallel_section(void *arg);
 
@@ -130,7 +130,7 @@ magma_zbulge_back_m(
     double f= 1.;
     magma_int_t n_gpu = ne;
 
-//#if defined(PRECISION_s) || defined(PRECISION_d)
+//#ifdef REAL
 //    double gpu_cpu_perf = 32; //gpu over cpu performance
 //#else
 //    double gpu_cpu_perf = 32;  // gpu over cpu performance

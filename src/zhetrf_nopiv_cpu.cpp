@@ -8,10 +8,9 @@
        @precisions normal z -> s d c
  
 */
-
-//#include "common_magma.h"
 #include "magma_internal.h"
-#define PRECISION_z
+
+#define COMPLEX
 
 // TODO convert to usual (A + (i) + (j)*lda), i.e., returns pointer?
 #define  A(i, j) ( A[(j)*lda  + (i)])
@@ -209,12 +208,12 @@ int zhetrf_diag_nopiv(magma_uplo_t uplo, magma_int_t n,
             // update remaining
             alpha = - MAGMA_Z_REAL( *Akk );
 
-            #if defined(PRECISION_z) | defined(PRECISION_c)
+            #ifdef COMPLEX
             lapackf77_zlacgv(&k, Ak1k, &lda);
             #endif
             blasf77_zher(MagmaUpperStr, &k,
                          &alpha, Ak1k, &lda, Ak1k + 1, &lda);
-            #if defined(PRECISION_z) | defined(PRECISION_c)
+            #ifdef COMPLEX
             lapackf77_zlacgv(&k, Ak1k, &lda);
             #endif
 

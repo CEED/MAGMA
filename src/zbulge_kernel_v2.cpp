@@ -13,7 +13,6 @@
 
 #include "common_magma.h"
 
-#define PRECISION_z
 
 inline static void
 magma_zlarfxsym_v2(

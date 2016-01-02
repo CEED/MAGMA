@@ -62,7 +62,6 @@ magma_zlarfb2_gpu(
 {
     return magma_zlarfb2_gpu_q( m, n, k, dV, lddv, dT, lddt,
                                 dC, lddc, dwork, ldwork, magmablasGetQueue() );
-    
 }
 
 

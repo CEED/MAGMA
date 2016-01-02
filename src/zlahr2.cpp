@@ -11,7 +11,7 @@
 */
 #include "magma_internal.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 /**
     Purpose
@@ -210,7 +210,7 @@ magma_zlahr2(
             blasf77_zcopy( &i,
                            A(k+i,0),  &lda,
                            T(0,nb-1), &ione );
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             // If complex, conjugate row of V.
             lapackf77_zlacgv(&i, T(0,nb-1), &ione);
             #endif

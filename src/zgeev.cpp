@@ -12,7 +12,6 @@
 #include "magma_internal.h"
 #include "magma_timer.h"
 
-#define PRECISION_z
 #define COMPLEX
 
 /*

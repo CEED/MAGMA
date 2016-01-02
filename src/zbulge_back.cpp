@@ -16,7 +16,7 @@
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 static void *magma_zapplyQ_parallel_section(void *arg);
 
@@ -115,7 +115,7 @@ magma_zbulge_back(
     double f= 1.;
     magma_int_t n_gpu = ne;
 
-//#if defined(PRECISION_s) || defined(PRECISION_d)
+//#ifdef REAL
     //double gpu_cpu_perf = 50;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
     //double gpu_cpu_perf = 16;  // gpu over cpu performance  //100% ev // SandyB. - Fermi (M2090)
 //#else

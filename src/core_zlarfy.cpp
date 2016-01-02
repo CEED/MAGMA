@@ -12,8 +12,6 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 
-#define PRECISION_z
-
 /***************************************************************************//**
  *
  * @ingroup magma_zaux3
