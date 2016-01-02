@@ -163,8 +163,8 @@ magma_zmdynamicic_insert(
                 magma_index_t old_rowstart = LU->row[ new_row ];
                 
                            //                         printf("tid*8:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
-                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col);fflush(stdout);
-                           //     printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col); fflush(stdout);
+                           //     printf("-->(%d,%d)\n", new_row, new_col); fflush(stdout);
 
                 
 
@@ -177,7 +177,7 @@ magma_zmdynamicic_insert(
                     success[ tid*8 ] = 1;
                 }
                 else if( new_col == LU->col[ old_rowstart ] ){
-                    ;//printf("tried to insert duplicate!\n");
+                    ; //printf("tried to insert duplicate!\n");
                 }
                 else{
         
@@ -188,7 +188,7 @@ magma_zmdynamicic_insert(
                     while( j!=0 ){
                         if( LU->col[jn]==new_col ){
                             //printf("tried to insert duplicate!\n");
-                            j=0;//break;
+                            j=0; //break;
                         }else if( LU->col[jn]>new_col ){
                             //printf("insert: (%d,%d)\n", new_row, new_col);
                             LU->list[j]=loc;
@@ -197,7 +197,7 @@ magma_zmdynamicic_insert(
                             LU->col[ loc ] = new_col;
                             LU->val[ loc ] = MAGMA_Z_ZERO;
                             success[ tid*8 ] = 1;
-                            j=0;//break;
+                            j=0; //break;
                         } else{
                             j=jn;
                             jn=LU->list[jn];
@@ -285,7 +285,7 @@ magma_zmdynamicilu_rm_thrs(
     magma_int_t offset = 0;
     
     //#pragma omp parallel for
-    for( magma_int_t r=0;r<LU->num_rows;r++ ) {
+    for( magma_int_t r=0; r < LU->num_rows; r++ ) {
         magma_int_t i = LU->row[r];
         magma_int_t lasti=i;
         magma_int_t nexti=LU->list[i];

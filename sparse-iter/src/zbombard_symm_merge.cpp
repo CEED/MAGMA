@@ -86,7 +86,7 @@ magma_zbombard_merge(
     }
     magma_queue_create( &(queues[2]) );
     for (int i = 0; i < nqueues; ++i ) {
-        ;//printf("Kernel queue #%d = %p\n", i, (void *)queues[i]);
+        ; //printf("Kernel queue #%d = %p\n", i, (void *)queues[i]);
     }
 
     // set to Q1

@@ -1309,9 +1309,9 @@ magma_zmconvert(
             CHECK( magma_index_malloc( &B->dcol, B->nnz ));
             CHECK( magma_index_malloc( &B->drow, B->num_rows + 1 ));
             
-            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue ) ;
-            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue ) ;
-            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue ) ;
+            magma_zcopyvector( A.nnz, A.dval, 1, B->dval, 1, queue );
+            magma_index_copyvector( A.nnz, A.dcol, 1, B->dcol, 1, queue );
+            magma_index_copyvector( A.nnz, A.drowidx, 1, B->drowidx, 1, queue );
 
             // step 1: allocate buffer
             cusparseXcoosort_bufferSizeExt(cusparseHandle, m, n, nnz, B->drowidx, B->dcol, &pBufferSizeInBytes);

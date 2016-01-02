@@ -15,10 +15,10 @@
 #include "magmasparse_internal.h"
 
 
-#define SWAP(a, b) { tmp = val[a]; val[a] = val[b]; val[b] = tmp; }
-#define SWAPM(a, b) { tmpv = val[a]; val[a] = val[b]; val[b] = tmpv;    \
-                        tmpc = col[a]; col[a] = col[b]; col[b] = tmpc;  \
-                        tmpr = row[a]; row[a] = row[b]; row[b] = tmpr;}
+#define SWAP(a, b)  { tmp = val[a]; val[a] = val[b]; val[b] = tmp; }
+#define SWAPM(a, b) { tmpv = val[a]; val[a] = val[b]; val[b] = tmpv;  \
+                      tmpc = col[a]; col[a] = col[b]; col[b] = tmpc;  \
+                      tmpr = row[a]; row[a] = row[b]; row[b] = tmpr; }
 
 /**
     Purpose

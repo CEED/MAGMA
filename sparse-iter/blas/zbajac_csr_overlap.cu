@@ -96,8 +96,8 @@ printf("bdx:%d idx:%d  start:%d  end:%d\n", blockIdx.x, threadIdx.x, start, end)
 
      // add more local iterations            
 
-     local_x[threadIdx.x] = x[index] ;//+ ( v - tmp);// / (valD[start]);
-   __syncthreads();
+     local_x[threadIdx.x] = x[index] ; //+ ( v - tmp); // / (valD[start]);
+     __syncthreads();
 
      #pragma unroll
      for( j=0; j<localiters-1; j++ )

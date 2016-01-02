@@ -152,15 +152,13 @@ magma_zvread(
     x->major = MagmaColMajor;
     CHECK( magma_zmalloc_cpu( &x->val, length ));
     
-
-    
     fid = fopen(filename, "r");
 
     if(NULL==fgets(buff, BUFSIZ, fid))
         return -1;
     rewind(fid);
-    for(p=buff;NULL!=strtok(p, " \t\n");p=NULL)
-    count++;
+    for( p=buff; NULL != strtok(p, " \t\n"); p=NULL)
+        count++;
     
     while( i<length )  // eof() is 'true' at the end of data
     {
