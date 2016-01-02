@@ -44,8 +44,8 @@ int main( int argc, char** argv )
     opts.lapack |= (opts.check == 2);  // check (-c2) implies lapack (-l)
  
     magma_int_t status = 0;
-    double tol, eps = lapackf77_dlamch("E");
-    tol = opts.tolerance * eps;
+    double eps = lapackf77_dlamch("E");
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
@@ -208,6 +208,7 @@ int main( int argc, char** argv )
         }
     }
  
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

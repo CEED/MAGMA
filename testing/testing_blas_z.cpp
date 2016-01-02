@@ -459,6 +459,7 @@ int main( int argc, char** argv )
         printf( "all tests passed\n" );
     }
     
+    opts.cleanup();
     TESTING_FINALIZE();
     
     int status = (total_error != 0.);

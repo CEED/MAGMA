@@ -180,6 +180,7 @@ int main( int argc, char** argv)
         printf( "* Warning: LAPACK did not pass INF propagation test\n" );
     }
     
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

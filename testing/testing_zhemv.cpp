@@ -203,8 +203,9 @@ int main(int argc, char **argv)
         if ( opts.niter > 1 ) {
             printf( "\n" );
         }
-      }
+    }
 
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

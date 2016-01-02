@@ -259,6 +259,7 @@ int main( int argc, char** argv)
                "  Try again with MKL_NUM_THREADS=1.\n" );
     }
     
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

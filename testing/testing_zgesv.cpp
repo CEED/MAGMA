@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     nrhs = opts.nrhs;
     
     printf("%% ngpu %d\n", (int) opts.ngpu );
-    if(opts.lapack){
+    if (opts.lapack) {
         printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||  ||B - AX|| / N*||A||*||X||_CPU\n");
         printf("%%================================================================================================================\n");
     } else {
@@ -156,6 +156,7 @@ int main(int argc, char **argv)
         }
     }
 
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

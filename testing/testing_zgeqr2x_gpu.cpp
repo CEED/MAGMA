@@ -280,6 +280,7 @@ int main( int argc, char** argv)
     magma_queue_destroy( queues[0] );
     magma_queue_destroy( queues[1] );
 
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

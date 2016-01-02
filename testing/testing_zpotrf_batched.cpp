@@ -191,6 +191,7 @@ cleanup:
         }
     }
 
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

@@ -153,6 +153,7 @@ int main( int argc, char** argv)
         }
     }
 
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

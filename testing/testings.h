@@ -68,7 +68,6 @@ void flops_init();
     magma_print_environment();
 
 #define TESTING_FINALIZE()                                                 \
-    opts.cleanup();                                                        \
     magma_finalize();
 
 

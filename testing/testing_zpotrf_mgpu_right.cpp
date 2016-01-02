@@ -27,17 +27,19 @@
 */
 int main( int argc, char** argv)
 {
-    /* Initialize */
     TESTING_INIT();
 
+    /* Constants */
+    const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    const magma_int_t ione = 1;
+    
+    /* Local variables */
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double      work[1], error;
     magmaDoubleComplex *h_A, *h_R;
     magmaDoubleComplex_ptr d_lA[4] = {NULL, NULL, NULL, NULL};
     magma_int_t N, n2, lda, ldda, info;
     magma_int_t j, k, ngpu0 = 1, ngpu;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t nb, nk, n_local, ldn_local;
 
@@ -180,7 +182,7 @@ int main( int argc, char** argv)
         }
     }
 
-    /* Shutdown */
+    opts.cleanup();
     TESTING_FINALIZE();
 
     return 0;

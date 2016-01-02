@@ -388,6 +388,7 @@ int main( int argc, char** argv )
         fflush( stdout );
     }  // itest, incx, incy
     
+    opts.cleanup();
     TESTING_FINALIZE();
     return gStatus;
 }

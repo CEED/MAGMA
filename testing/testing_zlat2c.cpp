@@ -208,6 +208,7 @@ int main( int argc, char** argv )
       printf( "\n" );
     }
     
+    opts.cleanup();
     TESTING_FINALIZE();
     return status;
 }

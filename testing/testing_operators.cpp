@@ -287,6 +287,7 @@ int main( int argc, char** argv)
     // --------------------
     test_sqrt( dtol, stol );
     
+    opts.cleanup();
     TESTING_FINALIZE();
     return gStatus;
 }
