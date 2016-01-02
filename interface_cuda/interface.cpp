@@ -528,7 +528,6 @@ void magma_queue_create_v2_internal(
     queue->own__ |= own_cusparse;
     stat2 = cusparseSetStream( queue->cusparse__, queue->stream__ );
     check_xerror( stat2, func, file, line );
-    
 }
 
 // --------------------
@@ -580,7 +579,6 @@ void magma_queue_create_from_cuda_internal(
     queue->cusparse__ = cusparse_handle;
     stat2 = cusparseSetStream( queue->cusparse__, queue->stream__ );
     check_xerror( stat2, func, file, line );
-    
 }
 
 // --------------------
