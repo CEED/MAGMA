@@ -182,7 +182,7 @@ magma_zmdynamicic_insert_LU(
                     success[ tid*8 ] = 1;
                 }
                 else if( new_col == L->col[ old_rowstart ] ){
-                    ;//printf("tried to insert duplicate!\n");
+                    ; //printf("tried to insert duplicate!\n");
                 }
                 else{
         
@@ -193,7 +193,7 @@ magma_zmdynamicic_insert_LU(
                     while( j!=0 ){
                         if( L->col[jn]==new_col ){
                             //printf("tried to insert duplicate!\n");
-                            j=0;//break;
+                            j=0; //break;
                         }else if( L->col[jn]>new_col ){
                             L->list[j]=loc;
                             L->list[loc]=jn;
@@ -201,7 +201,7 @@ magma_zmdynamicic_insert_LU(
                             L->col[ loc ] = new_col;
                             L->val[ loc ] = MAGMA_Z_ZERO;
                             success[ tid*8 ] = 1;
-                            j=0;//break;
+                            j=0; //break;
                             
                         } else{
                             j=jn;
@@ -266,9 +266,9 @@ magma_zmdynamicic_insert_LU(
                         U->col[ loc ] = new_col;
                         U->val[ loc ] = MAGMA_Z_ONE;
                         success[ tid*8 ] = 1;
-                        jn=0;//break;
+                        jn=0; //break;
                     }else if( U->col[jn]==new_col ){
-                        jn=0;//break;
+                        jn=0; //break;
                     }else if( U->col[jn]>new_col ){
                         U->list[j]=loc;
                         U->list[loc]=jn;
@@ -276,7 +276,7 @@ magma_zmdynamicic_insert_LU(
                         U->col[ loc ] = new_col;
                         U->val[ loc ] = MAGMA_Z_ONE;
                         success[ tid*8 ] = 1;
-                        jn=0;//break;
+                        jn=0; //break;
                         
                     } 
                 }
@@ -441,8 +441,8 @@ magma_zmdynamicic_insert(
                 magma_index_t old_rowstart = LU->row[ new_row ];
                 
                            //                         printf("tid*8:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
-                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col);fflush(stdout);
-                           //     printf("-->(%d,%d)\n", new_row, new_col);fflush(stdout);
+                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col); fflush(stdout);
+                           //     printf("-->(%d,%d)\n", new_row, new_col); fflush(stdout);
 
                 
 
@@ -455,7 +455,7 @@ magma_zmdynamicic_insert(
                     success[ tid*8 ] = 1;
                 }
                 else if( new_col == LU->col[ old_rowstart ] ){
-                    ;//printf("tried to insert duplicate!\n");
+                    ; //printf("tried to insert duplicate!\n");
                 }
                 else{
         
@@ -466,7 +466,7 @@ magma_zmdynamicic_insert(
                     while( j!=0 ){
                         if( LU->col[jn]==new_col ){
                             //printf("tried to insert duplicate!\n");
-                            j=0;//break;
+                            j=0; //break;
                         }else if( LU->col[jn]>new_col ){
                             
                             
@@ -477,7 +477,7 @@ magma_zmdynamicic_insert(
                             LU->col[ loc ] = new_col;
                             LU->val[ loc ] = MAGMA_Z_ZERO;
                             success[ tid*8 ] = 1;
-                            j=0;//break;
+                            j=0; //break;
                             
                         } else{
                             j=jn;
@@ -647,8 +647,8 @@ magma_zmdynamicic_insert_U(
                 magma_index_t old_rowstart = LU->row[ new_row ];
                 
                            //                         printf("tid*8:%d loc_i:%d loc_num_insert:%d num_rm:%d target loc:%d  element (%d,%d)\n",
-                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col);fflush(stdout);
-                                printf("-->(%d,%d)\t", new_row, new_col);fflush(stdout);
+                           //     tid*8, loc_i, insert_loc[ tid*8 ], num_rm, loc, new_row, new_col); fflush(stdout);
+                                printf("-->(%d,%d)\t", new_row, new_col); fflush(stdout);
 
                 
 
@@ -661,7 +661,7 @@ magma_zmdynamicic_insert_U(
                     success[ tid*8 ] = 1;
                 }
                 else if( new_col == LU->col[ old_rowstart ] ){
-                    printf("tried to insert duplicate!\n");fflush(stdout);
+                    printf("tried to insert duplicate!\n"); fflush(stdout);
                 }
                 else{
         
@@ -676,24 +676,24 @@ magma_zmdynamicic_insert_U(
                     while( j!=breakpoint ){
                         if( LU->col[jn]==new_col ){
                             printf("tried to insert duplicate!\n");
-                            j=breakpoint;//break;
+                            j=breakpoint; //break;
                         }else if( LU->col[jn]>new_col ){
                             
                             
-                            printf("insert: (%d,%d)\t", new_row, new_col);fflush(stdout);
+                            printf("insert: (%d,%d)\t", new_row, new_col); fflush(stdout);
                             LU->list[j]=loc;
                             LU->list[loc]=jn;
                             LU->rowidx[ loc ] = new_row;
                             LU->col[ loc ] = new_col;
                             LU->val[ loc ] = MAGMA_Z_ONE;
                             success[ tid*8 ] = 1;
-                            j=breakpoint;//break;
+                            j=breakpoint; //break;
                             
                         } else{
                             j=jn;
                             jn=LU->list[jn];
                         }
-                    }printf("done\n");fflush(stdout);
+                    }printf("done\n"); fflush(stdout);
                 }
                 //#pragma omp critical(rowlock__)
                 //{
@@ -776,7 +776,7 @@ magma_zmdynamicilu_rm_thrs(
     magma_int_t offset = 0;
     
     #pragma omp parallel for
-    for( magma_int_t r=0;r<LU->num_rows;r++ ) {
+    for( magma_int_t r=0; r < LU->num_rows; r++ ) {
         magma_int_t i = LU->row[r];
         magma_int_t lasti=i;
         magma_int_t nexti=LU->list[i];
@@ -795,7 +795,7 @@ magma_zmdynamicilu_rm_thrs(
                     LU_new->col[ count_rm+offset ] = LU->col[ i ];
                     LU_new->rowidx[ count_rm+offset ] = r;
                     LU_new->val[ count_rm+offset ] = MAGMA_Z_ZERO; // MAGMA_Z_MAKE(1e-14,0.0);
-                   // printf("rm: (%d,%d)\n", r, LU->col[ i ]);fflush(stdout);
+                   // printf("rm: (%d,%d)\n", r, LU->col[ i ]); fflush(stdout);
                     count_rm++;
                     omp_unset_lock(&(counter));
                     // either the headpointer or the linked list has to be changed
@@ -892,27 +892,27 @@ magma_zmdynamicilu_rm_thrs_U(
     
     // set elements to zero
     #pragma omp parallel for
-    for( magma_int_t rm=0;rm<*num_rm;rm++ ) {
+    for( magma_int_t rm=0; rm < *num_rm; rm++ ) {
         magma_int_t rm_row = LU_new->col[rm];
         magma_int_t rm_col = LU_new->rowidx[rm];
         magma_int_t el = U->row[rm_row];
         magma_int_t success = 0;
-     //   printf("rm: (%d,%d)\t", rm_row, rm_col);fflush(stdout);
+     //   printf("rm: (%d,%d)\t", rm_row, rm_col); fflush(stdout);
       //  printf(" el:%d\t", el);                    fflush(stdout);
         while( success == 0 ){
             if( U->col[el] == rm_col ){
                 U->val[el] = MAGMA_Z_ZERO;
                 success = 1;
-            //    printf("done.\n");fflush(stdout);
+            //    printf("done.\n"); fflush(stdout);
             }
             el = U->list[el];
             //printf("Ucol:%d->%d  ", el, U->col[el]);
         }
     }
-  //  printf("first part done.\n");fflush(stdout);
+  //  printf("first part done.\n"); fflush(stdout);
         
     #pragma omp parallel for
-    for( magma_int_t r=0;r<U->num_rows;r++ ) {
+    for( magma_int_t r=0; r < U->num_rows; r++ ) {
         magma_int_t lasti = U->row[r];
         magma_int_t i=U->list[lasti];
         magma_int_t nexti=U->list[i];
@@ -927,7 +927,7 @@ magma_zmdynamicilu_rm_thrs_U(
                     omp_set_lock(&(counter));
                     rm_loc[ count_rm ] = i; 
                     // keep it as potential fill-in candidate
-                   // printf("rm: (%d,%d)\n", r, U->col[ i ]);fflush(stdout);
+                   // printf("rm: (%d,%d)\n", r, U->col[ i ]); fflush(stdout);
                     count_rm++;
                     omp_unset_lock(&(counter));
                     
@@ -947,7 +947,7 @@ magma_zmdynamicilu_rm_thrs_U(
             
         }
     }
-     //   printf("second part done.\n");fflush(stdout);
+     //   printf("second part done.\n"); fflush(stdout);
     omp_destroy_lock(&(counter));
     return info;
 }
@@ -1022,7 +1022,7 @@ magma_zmdynamicilu_rm_thrs_LU(
     magma_int_t offset = 0;
     
     //#pragma omp parallel for
-    for( magma_int_t r=0;r<L->num_rows;r++ ) {
+    for( magma_int_t r=0; r < L->num_rows; r++ ) {
         magma_int_t i = L->row[r];
         magma_int_t lasti=i;
         magma_int_t nexti=L->list[i];
@@ -1665,5 +1665,4 @@ cleanup:
 }
 
 
-#endif
-
+#endif  // _OPENMP
