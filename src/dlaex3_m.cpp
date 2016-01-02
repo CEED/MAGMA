@@ -376,10 +376,12 @@ magma_dlaex3_m(
                 lapackf77_dlamrg( &k, &nk, d, &ione, &ineg_one, indxq);
 
                 // compute the lower and upper bound of the non-deflated eigenvectors
-                if (valeig)
+                if (valeig) {
                     magma_dvrange( k, d, &iil, &iiu, vl, vu );
-                else if (indeig)
+                }
+                else if (indeig) {
                     magma_dirange( k, indxq, &iil, &iiu, il, iu );
+                }
                 else {
                     iil = 1;
                     iiu = k;
@@ -482,10 +484,12 @@ magma_dlaex3_m(
     lapackf77_dlamrg( &k, &nk, d, &ione, &ineg_one, indxq);
 
     // compute the lower and upper bound of the non-deflated eigenvectors
-    if (valeig)
+    if (valeig) {
         magma_dvrange( k, d, &iil, &iiu, vl, vu );
-    else if (indeig)
+    }
+    else if (indeig) {
         magma_dirange( k, indxq, &iil, &iiu, il, iu );
+    }
     else {
         iil = 1;
         iiu = k;
