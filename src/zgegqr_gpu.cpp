@@ -146,7 +146,7 @@ magma_zgegqr_gpu(
         S    = (double*)(U + n*n); // Size n
         tau  = U + n*n + n;        // Size n
         
-        #if defined(COMPLEX)
+        #ifdef COMPLEX
         double *rwork;
         magma_dmalloc_cpu( &rwork, 5*n );
         if ( rwork == NULL ) {
@@ -164,7 +164,7 @@ magma_zgegqr_gpu(
             
             lapackf77_zgesvd( "n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
                               hwork, &lwork,
-                              #if defined(COMPLEX)
+                              #ifdef COMPLEX
                               rwork,
                               #endif
                               info );
@@ -199,7 +199,7 @@ magma_zgegqr_gpu(
         } while (cn > 10.f);
         
         magma_free_cpu( hwork );
-        #if defined(COMPLEX)
+        #ifdef COMPLEX
         magma_free_cpu( rwork );
         #endif
         // ================== end of ikind == 1 ===================================================
