@@ -327,8 +327,9 @@ magma_zbicgmerge4_kernel_3(
 
 extern "C" int
 magma_zbicgmerge4(  
-    int type, 
-    magmaDoubleComplex_ptr skp )
+    magma_int_t type, 
+    magmaDoubleComplex_ptr skp,
+    magma_queue_t queue )
 {
     dim3 Bs( 1 );
     dim3 Gs( 1 );
