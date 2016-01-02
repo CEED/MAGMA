@@ -13,7 +13,7 @@
 #include "magma_internal.h"
 
 extern "C" magma_int_t
-magma_zlarfb2_gpu_q(
+magma_zlarfb2_gpu(
     magma_int_t m, magma_int_t n, magma_int_t k,
     magmaDoubleComplex_const_ptr dV,    magma_int_t lddv,
     magmaDoubleComplex_const_ptr dT,    magma_int_t lddt,
@@ -50,18 +50,6 @@ magma_zlarfb2_gpu_q(
                  c_one,     dC,    lddc, queue );
     
     return MAGMA_SUCCESS;
-}
-
-extern "C" magma_int_t
-magma_zlarfb2_gpu(
-    magma_int_t m, magma_int_t n, magma_int_t k,
-    magmaDoubleComplex_const_ptr dV,    magma_int_t lddv,
-    magmaDoubleComplex_const_ptr dT,    magma_int_t lddt,
-    magmaDoubleComplex_ptr       dC,    magma_int_t lddc,
-    magmaDoubleComplex_ptr       dwork, magma_int_t ldwork)
-{
-    return magma_zlarfb2_gpu_q( m, n, k, dV, lddv, dT, lddt,
-                                dC, lddc, dwork, ldwork, magmablasGetQueue() );
 }
 
 
@@ -212,8 +200,8 @@ magma_zgeqr2x3_gpu(
         }
         
         /* Apply the transformations to the trailing matrix. */
-        //magma_zlarfb2_gpu_q( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-        magma_zlarfb2_gpu_q(
+        //magma_zlarfb2_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+        magma_zlarfb2_gpu(
                            m-b, k-i, BLOCK_SIZE,
                            dA(b, b), ldda, dT+b+b*k, k,
                            dA(b, i), ldda, dwork2, k-i, queue );

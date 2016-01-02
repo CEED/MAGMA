@@ -1482,7 +1482,8 @@ magma_zlarfb2_gpu(
     magmaDoubleComplex_const_ptr dV, magma_int_t lddv,
     magmaDoubleComplex_const_ptr dT, magma_int_t lddt,
     magmaDoubleComplex_ptr dC,       magma_int_t lddc,
-    magmaDoubleComplex_ptr dwork,    magma_int_t ldwork );
+    magmaDoubleComplex_ptr dwork,    magma_int_t ldwork,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zlatrd_mgpu(
