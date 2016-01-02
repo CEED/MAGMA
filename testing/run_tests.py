@@ -245,6 +245,7 @@ if opts.large:
 
 
 # ----------
+# to avoid excessive runtime with large m or n in zunmql, etc., k is set to min(m,n)
 tall = ''
 if opts.small:
 	tall += (' -N 2,1        -N 3,1        -N 4,2'
@@ -252,13 +253,14 @@ if opts.small:
 	     +   ' -N 200,199    -N 200,100    -N 200,20    -N 200,10    -N 200,1'
 	)
 if opts.med:
-	tall += (' -N 600,599    -N 600,300    -N 10000,63   -N 10000,64   -N 10000,65'
-         +   ' -N 10000,31   -N 10000,32   -N 10000,33   -N 10000,10   -N 10000,1')
+	tall += (' -N 600,599       -N 600,300       -N 10000,63,63   -N 10000,64,64   -N 10000,65,65'
+         +   ' -N 10000,31,31   -N 10000,32,32   -N 10000,33,33   -N 10000,10,10   -N 10000,1,1')
 if opts.large:
-	tall +=  ' -N 2000,1999  -N 2000,1000  -N 20000,200  -N 20000,100  -N 200000,10  -N 200000,1  -N 2000000,10  -N 2000000,1'
+	tall +=  ' -N 2000,1999  -N 2000,1000  -N 20000,200,200  -N 20000,100,100  -N 200000,10,10  -N 200000,1,1  -N 2000000,10,10  -N 2000000,1,1'
 
 
 # ----------
+# to avoid excessive runtime with large m or n in zunmql, etc., k is set to min(m,n)
 wide = ''
 if opts.small:
 	wide += (' -N 1,2        -N 1,3        -N 2,4'
@@ -266,10 +268,10 @@ if opts.small:
 	     +   ' -N 199,200    -N 100,200    -N 20,200    -N 10,200    -N 1,200'
 	)
 if opts.med:
-	wide += (' -N 599,600    -N 300,600    -N 63,10000   -N 64,10000   -N 65,10000'
-         +   ' -N 31,10000   -N 32,10000   -N 33,10000   -N 10,10000   -N 1,10000')
+	wide += (' -N 599,600       -N 300,600       -N 63,10000,63   -N 64,10000,64   -N 65,10000,65'
+         +   ' -N 31,10000,31   -N 32,10000,32   -N 33,10000,33   -N 10,10000,10   -N 1,10000,1')
 if opts.large:
-	wide +=  ' -N 1999,2000  -N 1000,2000  -N 200,20000  -N 100,20000  -N 10,200000  -N 1,200000  -N 10,2000000  -N 1,2000000'
+	wide +=  ' -N 1999,2000  -N 1000,2000  -N 200,20000,200  -N 100,20000,100  -N 10,200000,10  -N 1,200000,1  -N 10,2000000,10  -N 1,2000000,1'
 
 
 # ----------
@@ -354,25 +356,25 @@ blas = (
 	('testing_zsymv',   '-U             -c',  n,    ''),
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
-	('testing_ztrmm',   '-SL -L    -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -L    -DU  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -L -C -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -L -C -DU  -c',  mn,   'cublas only'),
+	('testing_ztrmm',   '-SL -L    -DN  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -L    -DU  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -L -C -DN  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -L -C -DU  -c',  n + wide,   'cublas only'),
 	
-	('testing_ztrmm',   '-SL -U    -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -U    -DU  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -U -C -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SL -U -C -DU  -c',  mn,   'cublas only'),
+	('testing_ztrmm',   '-SL -U    -DN  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -U    -DU  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -U -C -DN  -c',  n + wide,   'cublas only'),
+	('testing_ztrmm',   '-SL -U -C -DU  -c',  n + wide,   'cublas only'),
 	
-	('testing_ztrmm',   '-SR -L    -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -L    -DU  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -L -C -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -L -C -DU  -c',  mn,   'cublas only'),
+	('testing_ztrmm',   '-SR -L    -DN  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -L    -DU  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -L -C -DN  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -L -C -DU  -c',  n + tall,   'cublas only'),
 	
-	('testing_ztrmm',   '-SR -U    -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -U    -DU  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -U -C -DN  -c',  mn,   'cublas only'),
-	('testing_ztrmm',   '-SR -U -C -DU  -c',  mn,   'cublas only'),
+	('testing_ztrmm',   '-SR -U    -DN  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -U    -DU  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -U -C -DN  -c',  n + tall,   'cublas only'),
+	('testing_ztrmm',   '-SR -U -C -DU  -c',  n + tall,   'cublas only'),
 	
 	# lower/upper, no-trans/conj-trans, non-unit/unit diag
 	('testing_ztrmv',       '-L    -DN  -c',  n,    'cublas only'),
@@ -982,25 +984,25 @@ batched = (
 	('testing_zlacpy_batched',    batch + '               -c',  mn,   ''),
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
-	('testing_ztrsm_batched',     batch + '-SL -L    -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -L    -DU  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -L -C -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -L -C -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',     batch + '-SL -L    -DN  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -L    -DU  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -L -C -DN  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -L -C -DU  -c',  n + wide, ''),
 	
-	('testing_ztrsm_batched',     batch + '-SL -U    -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -U    -DU  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -U -C -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SL -U -C -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',     batch + '-SL -U    -DN  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -U    -DU  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -U -C -DN  -c',  n + wide, ''),
+	('testing_ztrsm_batched',     batch + '-SL -U -C -DU  -c',  n + wide, ''),
 	
-	('testing_ztrsm_batched',     batch + '-SR -L    -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -L    -DU  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -L -C -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -L -C -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',     batch + '-SR -L    -DN  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -L    -DU  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -L -C -DN  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -L -C -DU  -c',  n + tall, ''),
 	
-	('testing_ztrsm_batched',     batch + '-SR -U    -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -U    -DU  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -U -C -DN  -c',  mn,   ''),
-	('testing_ztrsm_batched',     batch + '-SR -U -C -DU  -c',  mn,   ''),
+	('testing_ztrsm_batched',     batch + '-SR -U    -DN  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -U    -DU  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -U -C -DN  -c',  n + tall, ''),
+	('testing_ztrsm_batched',     batch + '-SR -U -C -DU  -c',  n + tall, ''),
 	
 	# lower/upper, no-trans/conj-trans, non-unit/unit diag
 	('testing_ztrsv_batched',     batch + '    -L    -DN  -c',  n,    ''),
