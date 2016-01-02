@@ -59,7 +59,9 @@ magma_zcustomilusetup(
     char preconditionermatrix[255];
     
     // first L
-    sprintf(preconditionermatrix, "precondL.mtx" );
+    snprintf( preconditionermatrix, sizeof(preconditionermatrix),
+                "precondL.mtx" );
+    
     CHECK( magma_z_csr_mtx( &hA, preconditionermatrix , queue) );
     CHECK( magma_zmtransfer( hA, &precond->L, Magma_CPU, Magma_DEV , queue ));
     // extract the diagonal of L into precond->d
@@ -69,7 +71,9 @@ magma_zcustomilusetup(
     magma_zmfree( &hA, queue );
     
     // now U
-    sprintf( preconditionermatrix, "precondU.mtx" );
+    snprintf( preconditionermatrix, sizeof(preconditionermatrix),
+                "precondU.mtx" );
+
     CHECK( magma_z_csr_mtx( &hA, preconditionermatrix , queue) );
     CHECK( magma_zmtransfer( hA, &precond->U, Magma_CPU, Magma_DEV , queue ));
     // extract the diagonal of U into precond->d2

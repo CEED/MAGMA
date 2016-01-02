@@ -58,7 +58,9 @@ magma_zcustomicsetup(
     magma_z_matrix hA={Magma_CSR};
     char preconditionermatrix[255];
     
-    sprintf(preconditionermatrix, "/Users/hanzt0114cl306/work/matrices/ani/ani5_crop_ilut.mtx" );
+    snprintf( preconditionermatrix, sizeof(preconditionermatrix),
+                "precondL.mtx" );
+    
     CHECK( magma_z_csr_mtx( &hA, preconditionermatrix , queue) );
     
     
