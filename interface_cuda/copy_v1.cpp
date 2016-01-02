@@ -75,12 +75,12 @@ magma_setmatrix_internal(
     magma_ptr   dB_dst, magma_int_t lddb,
     const char* func, const char* file, int line )
 {
-    magma_setmatrix_q_internal(
+    cublasStatus_t status;
+    status = cublasSetMatrix(
         m, n, elemSize,
         hA_src, ldha,
-        dB_dst, lddb,
-        magmablasGetQueue(),
-        func, file, line );
+        dB_dst, lddb );
+    check_xerror( status, func, file, line );
 }
 
 // --------------------
@@ -91,12 +91,12 @@ magma_getmatrix_internal(
     void*           hB_dst, magma_int_t ldhb,
     const char* func, const char* file, int line )
 {
-    magma_getmatrix_q_internal(
+    cublasStatus_t status;
+    status = cublasGetMatrix(
         m, n, elemSize,
         dA_src, ldda,
-        hB_dst, ldhb,
-        magmablasGetQueue(),
-        func, file, line );
+        hB_dst, ldhb );
+    check_xerror( status, func, file, line );
 }
 
 // --------------------
@@ -107,12 +107,12 @@ magma_copymatrix_internal(
     magma_ptr       dB_dst, magma_int_t lddb,
     const char* func, const char* file, int line )
 {
-    magma_copymatrix_q_internal(
-        m, n, elemSize,
-        dA_src, ldda,
-        dB_dst, lddb,
-        magmablasGetQueue(),
-        func, file, line );
+    cudaError_t status;
+    status = cudaMemcpy2D(
+        dB_dst, lddb*elemSize,
+        dA_src, ldda*elemSize,
+        m*elemSize, n, cudaMemcpyDeviceToDevice );
+    check_xerror( status, func, file, line );
 }
 
 #endif // HAVE_CUBLAS
