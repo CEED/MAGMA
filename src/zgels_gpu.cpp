@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -89,10 +89,9 @@ magma_zgels_gpu(
     magmaDoubleComplex_ptr dT;
     magmaDoubleComplex *tau;
     magma_int_t k;
-
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = (m - n + nb)*(nrhs + nb) + nrhs*nb;
-    int lquery = (lwork == -1);
+    bool lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
 
@@ -129,7 +128,7 @@ magma_zgels_gpu(
     /*
      * Allocate temporary buffers
      */
-    int ldtwork = ( 2*k + magma_roundup( n, 32 ) )*nb;
+    magma_int_t ldtwork = ( 2*k + magma_roundup( n, 32 ) )*nb;
     if (nb < nrhs)
         ldtwork = ( 2*k + magma_roundup( n, 32 ) )*nrhs;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, ldtwork )) {
@@ -153,6 +152,6 @@ magma_zgels_gpu(
     }
     
     magma_free( dT );
-    magma_free_cpu(tau);
+    magma_free_cpu( tau );
     return *info;
 }

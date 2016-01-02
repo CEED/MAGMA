@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -86,13 +86,15 @@ magma_zgels(
     magmaDoubleComplex *hwork, magma_int_t lwork,
     magma_int_t *info)
 {
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    /* Constants */
+    const magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    
+    /* Local variables */
     magmaDoubleComplex *tau;
     magma_int_t k;
-
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = max( n*nb, 2*nb*nb ); // (m - n + nb)*(nrhs + nb) + nrhs*nb;
-    int lquery = (lwork == -1);
+    bool lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
 
@@ -102,7 +104,7 @@ magma_zgels(
         *info = -1;
     else if (m < 0)
         *info = -2;
-    else if (n < 0 || m < n) /* LQ is not handle for now*/
+    else if (n < 0 || m < n) /* LQ is not handle for now */
         *info = -3;
     else if (nrhs < 0)
         *info = -4;
@@ -141,9 +143,9 @@ magma_zgels(
  
         // Solve R*X = B(1:n,:)
         blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                         &n, &nrhs, &c_one, A, &lda, B, &ldb );
+                       &n, &nrhs, &c_one, A, &lda, B, &ldb );
     }
     
-    magma_free_cpu(tau);
+    magma_free_cpu( tau );
     return *info;
 }
