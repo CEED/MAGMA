@@ -931,12 +931,12 @@ svd = (
 	('testing_zgesdd',         '-UN     -c',  mn,   ''),
 	('testing_zgesdd',         '-US     -c',  mn,   ''),
 	('testing_zgesdd',         '-UO     -c',  mn,   ''),
-	('testing_zgesdd',         '-UA     -c',  mn,   ''),
+	('testing_zgesdd',         '-UA     -c',  n,    ''),  # todo: do tall & wide, but avoid excessive sizes
 	
 	('testing_zgesvd',         '-UN -VN -c',  mn,   ''),
 	('testing_zgesvd',         '-US -VS -c',  mn,   ''),
 	('testing_zgesvd',         '-UO -VS -c',  mn,   ''),
-	('testing_zgesvd',         '-UA -VA -c',  mn,   ''),
+	('testing_zgesvd',         '-UA -VA -c',  n,    ''),  # todo: do tall & wide, but avoid excessive sizes
 	
 	('testing_zgebrd',                 '-c',  mn,   ''),
 	('testing_zungbr',                 '-c',  mnk,  ''),

@@ -192,6 +192,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_CPU( S1,    double, min_mn );
             TESTING_MALLOC_CPU( S2,    double, min_mn );
             TESTING_MALLOC_CPU( iwork, magma_int_t, 8*min_mn );
+            
             TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
             TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
             
@@ -375,11 +376,15 @@ int main( int argc, char** argv)
             TESTING_FREE_CPU( U   );
             TESTING_FREE_CPU( S1  );
             TESTING_FREE_CPU( S2  );
+            TESTING_FREE_CPU( iwork );
+            
             #ifdef COMPLEX
             TESTING_FREE_CPU( rwork );
             #endif
+            
             TESTING_FREE_PIN( h_R    );
             TESTING_FREE_PIN( h_work );
+            
             fflush( stdout );
         }}
         if ( opts.all || opts.niter > 1 ) {
