@@ -167,6 +167,7 @@ const char *usage =
 "  --nrhs x         Number of right hand sides, default 1.\n"
 "  --nstream x      Number of CUDA streams, default 1.\n"
 "  --ngpu x         Number of GPUs, default 1. Also set with $MAGMA_NUM_GPUS.\n"
+"                   (Some testers take --ngpu -1 to run the multi-GPU code with 1 GPU.\n"
 "  --nsub x         Number of submatrices, default 1.\n"
 "  --niter x        Number of iterations to repeat each test, default 1.\n"
 "  --nthread x      Number of CPU threads for some experimental codes, default 1.\n"
@@ -177,6 +178,7 @@ const char *usage =
 "  --svd_work [0123] SVD workspace size, from min (1) to optimal (3), or query (0), default 0.\n"
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
+"                   If fraction == 0, computes eigenvalues il=0.1*N to iu=0.3*N.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
 "  --tol x          same.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
@@ -414,8 +416,8 @@ void magma_opts::parse_opts( int argc, char** argv )
                           "error: --ngpu %s exceeds MagmaMaxGPUs, %d.\n", argv[i], MagmaMaxGPUs );
             magma_assert( this->ngpu <= ndevices,
                           "error: --ngpu %s exceeds number of CUDA devices, %d.\n", argv[i], ndevices );
-            // allow ngpu < 0, which forces multi-GPU code with abs(ngpu) GPUs. see testing_zhegvd, etc.
-            magma_assert( this->ngpu != 0,
+            // allow ngpu == -1, which forces multi-GPU code with 1 GPU. see testing_zhegvd, etc.
+            magma_assert( this->ngpu > 0 || this->ngpu == -1,
                           "error: --ngpu %s is invalid; ensure ngpu != 0.\n", argv[i] );
             // save in environment variable, so magma_num_gpus() picks it up
             char env_num_gpus[20];  // space for "MAGMA_NUM_GPUS=", 4 digits, and nil
