@@ -26,6 +26,7 @@ my @kernels = qw(
 	amax
 	asum
 	axpy
+	caxpycp
 	cnrm2
 	copy
 	dot
@@ -36,6 +37,8 @@ my @kernels = qw(
 	her2k
 	herk
 	lacpy
+	lag2c
+	lag2z
 	lange
 	lanhe
 	lansy
@@ -43,11 +46,13 @@ my @kernels = qw(
 	larfb
 	laset
 	laswp
+	lat2c
+	lat2z
 	nrm2
 	scal
+	swap
 	symm
 	symv
-	swap
 	transpose
 	trmm
 	trsm
