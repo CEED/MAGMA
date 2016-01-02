@@ -995,8 +995,8 @@ magma_ztrsm_m(
     magma_int_t ngpu,
     magma_side_t side, magma_uplo_t uplo, magma_trans_t transa, magma_diag_t diag,
     magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *B, magma_int_t ldb);
+    const magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex       *B, magma_int_t ldb);
 
 magma_int_t
 magma_zunghr_m(

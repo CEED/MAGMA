@@ -266,10 +266,10 @@ if opts.small:
 	     +   ' -N 199,200    -N 100,200    -N 20,200    -N 10,200    -N 1,200'
 	)
 if opts.med:
-	tall += (' -N 599,600    -N 300,600    -N 63,10000   -N 64,10000   -N 65,10000'
+	wide += (' -N 599,600    -N 300,600    -N 63,10000   -N 64,10000   -N 65,10000'
          +   ' -N 31,10000   -N 32,10000   -N 33,10000   -N 10,10000   -N 1,10000')
 if opts.large:
-	tall +=  ' -N 1999,2000  -N 1000,2000  -N 200,20000  -N 100,20000  -N 10,200000  -N 1,200000  -N 10,2000000  -N 1,2000000'
+	wide +=  ' -N 1999,2000  -N 1000,2000  -N 200,20000  -N 100,20000  -N 10,200000  -N 1,200000  -N 10,2000000  -N 1,2000000'
 
 
 # ----------
@@ -386,25 +386,46 @@ blas = (
 	('testing_ztrmv',       '-U -C -DU  -c',  n,    'cublas only'),
 	
 	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
-	('testing_ztrsm',   '-SL -L    -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -L    -DU  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -L -C -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -L -C -DU  -c',  mn,   ''),
+	('testing_ztrsm',   '-SL -L    -DN  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -L    -DU  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -L -C -DN  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -L -C -DU  -c',  n + wide,   ''),
 	
-	('testing_ztrsm',   '-SL -U    -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -U    -DU  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -U -C -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SL -U -C -DU  -c',  mn,   ''),
+	('testing_ztrsm',   '-SL -U    -DN  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -U    -DU  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -U -C -DN  -c',  n + wide,   ''),
+	('testing_ztrsm',   '-SL -U -C -DU  -c',  n + wide,   ''),
 	
-	('testing_ztrsm',   '-SR -L    -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -L    -DU  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -L -C -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -L -C -DU  -c',  mn,   ''),
+	('testing_ztrsm',   '-SR -L    -DN  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -L    -DU  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -L -C -DN  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -L -C -DU  -c',  n + tall,   ''),
 	
-	('testing_ztrsm',   '-SR -U    -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -U    -DU  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -U -C -DN  -c',  mn,   ''),
-	('testing_ztrsm',   '-SR -U -C -DU  -c',  mn,   ''),
+	('testing_ztrsm',   '-SR -U    -DN  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -U    -DU  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -U -C -DN  -c',  n + tall,   ''),
+	('testing_ztrsm',   '-SR -U -C -DU  -c',  n + tall,   ''),
+	
+	# left/right, lower/upper, no-trans/conj-trans, non-unit/unit diag
+	('testing_ztrsm', ngpu + '-SL -L    -DN  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -L    -DU  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -L -C -DN  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -L -C -DU  -c',  n + wide,  ''),
+	
+	('testing_ztrsm', ngpu + '-SL -U    -DN  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -U    -DU  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -U -C -DN  -c',  n + wide,  ''),
+	('testing_ztrsm', ngpu + '-SL -U -C -DU  -c',  n + wide,  ''),
+	
+	('testing_ztrsm', ngpu + '-SR -L    -DN  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -L    -DU  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -L -C -DN  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -L -C -DU  -c',  n + tall,  ''),
+	
+	('testing_ztrsm', ngpu + '-SR -U    -DN  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -U    -DU  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -U -C -DN  -c',  n + tall,  ''),
+	('testing_ztrsm', ngpu + '-SR -U -C -DU  -c',  n + tall,  ''),
 	
 	# lower/upper, no-trans/conj-trans, non-unit/unit diag
 	('testing_ztrsv',       '-L    -DN  -c',  n,    'cublas only'),
@@ -812,15 +833,15 @@ sygv = (
 	('testing_zhegvdx', '--version 2 -L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -L -JN --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 2 -U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -U -JN --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 2 -L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -L -JV --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 2 -U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 2 -U -JV --itype 3 -c',  n,  ''),
@@ -830,15 +851,15 @@ sygv = (
 	('testing_zhegvdx', '--version 3 -L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -L -JN --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 3 -U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -U -JN --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 3 -L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -L -JV --itype 3 -c',  n,  ''),
-	                    
+	
 	('testing_zhegvdx', '--version 3 -U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx', '--version 3 -U -JV --itype 3 -c',  n,  ''),
