@@ -20,7 +20,6 @@
 extern "C" {
 #endif
 
-void magma_device_sync();
 
 // ========================================
 // queue support

@@ -7,11 +7,8 @@
 
        @precisions normal z -> s d c
 */
-
-//#include "common_magma.h"
 #include "magma_internal.h"
 #include "trace.h"
-#define PRECISION_z
 
 /**
     Purpose
@@ -21,7 +18,7 @@
     using the Bunch-Kaufman diagonal pivoting method.  The form of the
     factorization is
  
-     A = U*D*U**H  or  A = L*D*L**H
+        A = U*D*U^H  or  A = L*D*L^H
  
     where U (or L) is a product of permutation and unit upper (lower)
     triangular matrices, and D is Hermitian and block diagonal with
@@ -121,19 +118,18 @@ magma_zhetrf(
     magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *ipiv, magma_int_t *info)
 {
-    #define  A(i, j) ( A + (j)*lda  + (i))
-    #define dA(i, j) (dA + (j)*ldda + (i))
+    #define  A(i_, j_) ( A + (i_) + (j_)*lda )
+    #define dA(i_, j_) (dA + (i_) + (j_)*ldda)
 
     /* .. Local Scalars .. */
-    magma_int_t upper;
     magma_int_t nb = magma_get_zhetrf_nb(n);
     magma_int_t iinfo = 0, nk, kb;
 
     /* .. Executable Statements .. */
     /* Test the input parameters. */
     *info = 0;
-    upper = (uplo == MagmaUpper);
-    if ( !upper && uplo != MagmaLower ) {
+    bool upper = (uplo == MagmaUpper);
+    if ( ! upper && uplo != MagmaLower ) {
         *info = -1;
     } else if ( n < 0 ) {
         *info = -2;
@@ -145,8 +141,9 @@ magma_zhetrf(
         return *info;
     }
 
+    // TODO fix memory leak of dA if dW fails
     magma_int_t ldda = magma_roundup( n, 32 );
-    magmaDoubleComplex *dA, *dW;
+    magmaDoubleComplex_ptr dA, dW;
     if ((MAGMA_SUCCESS != magma_zmalloc( &dA, n*ldda  )) ||
         (MAGMA_SUCCESS != magma_zmalloc( &dW, (1+nb)*ldda ))) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -155,26 +152,26 @@ magma_zhetrf(
     magma_device_t cdev;
     magma_getdevice( &cdev );
 
-    magma_queue_t stream[2];
+    magma_queue_t queues[2];
     magma_event_t event[2];
-    magma_queue_create( cdev, &stream[0] );
-    magma_queue_create( cdev, &stream[1] );
+    magma_queue_create( cdev, &queues[0] );
+    magma_queue_create( cdev, &queues[1] );
     magma_event_create( &event[0] );
     magma_event_create( &event[1] );
-    trace_init( 1, 1, 2, (CUstream_st**)stream );
+    trace_init( 1, 1, 2, queues );
 
     /* copy matrix to GPU */
     trace_gpu_start( 0, 0, "set", "setA" );
-    //magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, stream[0] );
+    //magma_zsetmatrix_async( n, n, A(0,0), lda, dA(0,0), ldda, queues[0] );
     if ( upper ) {
         for (int k = 0; k < n; k += nb ) {
             kb = min(nb, n-k);
-            magma_zsetmatrix_async( k+kb, kb, A(0,k), lda, dA(0,k), ldda, stream[0] );
+            magma_zsetmatrix_async( k+kb, kb, A(0,k), lda, dA(0,k), ldda, queues[0] );
         }
     } else {
         for (int k = 0; k < n; k += nb ) {
             kb = min(nb, n-k);
-            magma_zsetmatrix_async( n-k, kb, A(k,k), lda, dA(k,k), ldda, stream[0] );
+            magma_zsetmatrix_async( n-k, kb, A(k,k), lda, dA(k,k), ldda, queues[0] );
         }
     }
     trace_gpu_end( 0, 0 );
@@ -196,12 +193,12 @@ magma_zhetrf(
                    update columns 1:k-kb */
 
                 magma_zlahef_gpu( MagmaUpper, nk, kb, &kb, A( 0, 0 ), lda, dA( 0, 0 ), ldda,
-                                  &ipiv[0], dW, ldda, stream, event, &iinfo );
+                                  &ipiv[0], dW, ldda, queues, event, &iinfo );
             } else {
                 /* Use unblocked code to factorize columns 1:k of A */
 
-                magma_queue_sync( stream[0] );
-                magma_zgetmatrix( nk, nk, dA( 0, 0 ),ldda, A( 0, 0 ),lda, stream[0] );
+                magma_queue_sync( queues[0] );
+                magma_zgetmatrix( nk, nk, dA( 0, 0 ), ldda, A( 0, 0 ), lda, queues[0] );
                 lapackf77_zhetf2( MagmaUpperStr, &nk, A( 0, 0 ), &lda, &ipiv[0], &iinfo );
                 kb = k+1;
             }
@@ -224,12 +221,12 @@ magma_zhetrf(
                 /* Factorize columns k:k+kb-1 of A and use blocked code to
                    update columns k+kb:n */
                 magma_zlahef_gpu( MagmaLower, nk, nb, &kb, A( k, k ), lda, dA( k, k ), ldda,
-                                  &ipiv[k], dW, ldda, stream, event, &iinfo );
+                                  &ipiv[k], dW, ldda, queues, event, &iinfo );
             }
             else {
                 /* Use unblocked code to factorize columns k:n of A */
-                magma_queue_sync( stream[0] );
-                magma_zgetmatrix( nk,nk, dA(k,k),ldda, A(k,k),lda, stream[0] );
+                magma_queue_sync( queues[0] );
+                magma_zgetmatrix( nk, nk, dA(k,k), ldda, A(k,k), lda, queues[0] );
                 lapackf77_zhetf2( MagmaLowerStr, &nk, A( k, k ), &lda, &ipiv[k], &iinfo );
             }
             /* Set INFO on the first occurrence of a zero pivot */
@@ -245,16 +242,15 @@ magma_zhetrf(
         }
     }
 
-    trace_finalize( "zhetrf.svg","trace.css" );
-    magma_queue_sync( stream[0] );
-    magma_queue_sync( stream[1] );
-    //magmablasSetKernelStream( NULL );
+    trace_finalize( "zhetrf.svg", "trace.css" );
+    magma_queue_sync( queues[0] );
+    magma_queue_sync( queues[1] );
     magma_event_destroy( event[0] );
     magma_event_destroy( event[1] );
-    magma_queue_destroy( stream[0] );
-    magma_queue_destroy( stream[1] );
+    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queues[1] );
     magma_free( dA );
     magma_free( dW );
+    
     return *info;
-    /* End of ZHETRF */
-}
+}   /* End of ZHETRF */

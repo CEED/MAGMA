@@ -29,8 +29,6 @@
     where U is an upper triangular matrix and L is lower triangular.
 
     This is the block version of the algorithm, calling Level 3 BLAS.
-    If the current stream is NULL, this version replaces it with a new
-    stream to overlap computation with communication.
 
     Arguments
     ---------
@@ -222,7 +220,7 @@ magma_zpotrf_lg_batched(
                     //-------------------------------------------
                     //          USE STREAM  HERK
                     //-------------------------------------------
-                    // since it use different stream I need to wait the panel.
+                    // since it use different queue I need to wait the panel.
                     /* you must know the matrix layout inorder to do it */  
                     magma_queue_sync(queue); 
                     for (k=0; k < batchCount; k++)

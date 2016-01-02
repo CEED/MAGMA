@@ -147,11 +147,11 @@ magma_zpotrf_mgpu(
             return *info;
         }
         if (upper) {
-            /* with three streams */
+            /* with three queues */
             magma_zpotrf3_mgpu(ngpu, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,
                                h, queues, event, info);
         } else {
-            /* with three streams */
+            /* with three queues */
             magma_zpotrf3_mgpu(ngpu, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h,
                                h, queues, event, info);
         }

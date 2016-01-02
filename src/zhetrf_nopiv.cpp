@@ -173,7 +173,6 @@ magma_zhetrf_nopiv(
 
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                //magmablasSetKernelStream( queues[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaUnit,
                              jb, (n-j-jb),
@@ -251,7 +250,6 @@ magma_zhetrf_nopiv(
             
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                //magmablasSetKernelStream( queues[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
                              (n-j-jb), jb,

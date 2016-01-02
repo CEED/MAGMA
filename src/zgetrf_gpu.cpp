@@ -27,9 +27,6 @@
 
     This is the right-looking Level 3 BLAS version of the algorithm.
     
-    If the current stream is NULL, this version replaces it with a new
-    stream to overlap computation with communication.
-
     Arguments
     ---------
     @param[in]

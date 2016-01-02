@@ -118,8 +118,6 @@ magma_zgeqrf2_mgpu(
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    //magma_queue_t orig_queue;
-    //magmablasGetKernelStream( &orig_queue );
 
     nb = magma_get_zgeqrf_nb( m );
 
@@ -240,7 +238,6 @@ magma_zgeqrf2_mgpu(
                 la_dev = (panel_dev+1) % ngpu;
                 for( dev=0; dev < ngpu; dev++ ) {
                     magma_setdevice( dev );
-                    //magmablasSetKernelStream( queues[dev][0] );
                     if (dev == la_dev && i+nb < min_mn-nb) {
                         // If not last panel,
                         // for look-ahead panel, apply H' to A(i:m,i+ib:i+2*ib)
@@ -337,7 +334,6 @@ CLEANUP:
     }
     magma_free_pinned( hwork );
     magma_setdevice( orig_dev );
-    //magmablasSetKernelStream( orig_queue );
 
     return *info;
 } /* magma_zgeqrf2_mgpu */

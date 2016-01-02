@@ -165,7 +165,7 @@ magma_zungqr_m(
         magma_queue_create( d, &queues[d] );
     }
     
-    trace_init( 1, ngpu, 1, stream );
+    trace_init( 1, ngpu, 1, queues );
     
     // first kk columns are handled by blocked method.
     // ki is start of 2nd-to-last block

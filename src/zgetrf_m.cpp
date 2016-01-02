@@ -123,8 +123,6 @@ magma_zgetrf_m(
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    //magma_queue_t orig_queue;
-    //magmablasGetKernelStream( &orig_queue );
     
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -227,7 +225,6 @@ magma_zgetrf_m(
                 magma_setdevice(d);
                 magma_queue_sync( queues[d][0] );
                 magma_queue_sync( queues[d][1] );
-                //magmablasSetKernelStream(NULL);
             }
             time_set += timer_stop( time );
     
@@ -245,7 +242,6 @@ magma_zgetrf_m(
                                             dA[d],            (maxm-offset), queues[d][0] );
                     
                     /* make sure the previous update finished */
-                    //magmablasSetKernelStream(queues[d][0]);
                     //magma_queue_sync( queues[d][1] );
                     magma_queue_wait_event( queues[d][0], event[d][0] );
                     
@@ -280,7 +276,6 @@ magma_zgetrf_m(
                                                     queues[d][0] );
                             
                             /* make sure the previous update finished */
-                            //magmablasSetKernelStream(queues[d][0]);
                             //magma_queue_sync( queues[d][1] );
                             magma_queue_wait_event( queues[d][0], event[d][(1+jj/nb)%2] );
                             
@@ -290,7 +285,6 @@ magma_zgetrf_m(
                         }
                         
                         /* update with the block column */
-                        //magmablasSetKernelStream(queues[d][1]);
                         magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                                      n_local[d], nbi, c_one, dPT(d,0,(jj/nb)%2), nb, dAT(d,ib,0), ldn_local,
                                      queues[d][1]);
@@ -308,7 +302,6 @@ magma_zgetrf_m(
                 magma_setdevice(d);
                 magma_queue_sync( queues[d][0] );
                 magma_queue_sync( queues[d][1] );
-                //magmablasSetKernelStream(NULL);
             }
     
             /* calling magma-gpu interface to panel-factorize the big panel */
@@ -335,7 +328,6 @@ magma_zgetrf_m(
                 magma_setdevice(d);
                 magma_queue_sync( queues[d][0] );
                 magma_queue_sync( queues[d][1] );
-                //magmablasSetKernelStream(NULL);
             }
             time_get += timer_stop( time );
         } /* end of for */
@@ -360,7 +352,6 @@ magma_zgetrf_m(
             magma_queue_destroy( queues[d][1] );
         }
         magma_setdevice( orig_dev );
-        //magmablasSetKernelStream( orig_stream );
     }
     if ( *info >= 0 )
         magma_zgetrf_piv(m, n, NB, A, lda, ipiv, info);

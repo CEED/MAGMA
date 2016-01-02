@@ -120,10 +120,10 @@ magma_zgegqr_gpu(
         return *info;
     }
 
-    magma_queue_t stream;
+    magma_queue_t queue;
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_queue_create( cdev, &stream );
+    magma_queue_create( cdev, &queue );
 
     if (ikind == 1) {
         // === Iterative, based on SVD ============================================================
@@ -159,8 +159,8 @@ magma_zgegqr_gpu(
             i++;
             
             magma_zgemm( MagmaConjTrans, MagmaNoTrans, n, n, m, c_one,
-                         dA, ldda, dA, ldda, c_zero, dwork, n, stream );
-            magma_zgetmatrix( n, n, dwork, n, G, n, stream );
+                         dA, ldda, dA, ldda, c_zero, dwork, n, queue );
+            magma_zgetmatrix( n, n, dwork, n, G, n, queue );
             
             lapackf77_zgesvd( "n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
                               hwork, &lwork,
@@ -189,9 +189,9 @@ magma_zgegqr_gpu(
             else
                 blasf77_ztrmm( "l", "u", "n", "n", &n, &n, &c_one, VT, &n, R, &n );
             
-            magma_zsetmatrix( n, n, VT, n, dwork, n, stream );
+            magma_zsetmatrix( n, n, VT, n, dwork, n, queue );
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-                         m, n, c_one, dwork, n, dA, ldda, stream );
+                         m, n, c_one, dwork, n, dA, ldda, queue );
             if (mins > 0.00001f)
                 cn = maxs/mins;
             
@@ -214,11 +214,11 @@ magma_zgegqr_gpu(
         magmaDoubleComplex_ptr ddA  = dwork + n*n;
         magmaDoubleComplex *tau  = work+n*n;
 
-        magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, d_T, n, stream );
+        magmablas_zlaset( MagmaFull, n, n, c_zero, c_zero, d_T, n, queue );
         magma_zgeqr2x3_gpu( m, n, dA, ldda, dtau, d_T, ddA,
                             (double*)(dwork+min_mn+2*n*n), info );
-        magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn, stream );
-        magma_zgetmatrix( n, n, ddA, n, work, n, stream );
+        magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn, queue );
+        magma_zgetmatrix( n, n, ddA, n, work, n, queue );
         magma_zungqr_gpu( m, n, n, dA, ldda, tau, d_T, nb, info );
         // ================== end of ikind == 2 ===================================================
     }
@@ -226,32 +226,32 @@ magma_zgegqr_gpu(
         // ================== MGS               ===================================================
         for (j = 0; j < n; j++) {
             for (i = 0; i < j; i++) {
-                *work(i, j) = magma_zdotc( m, dA(0,i), 1, dA(0,j), 1, stream );
-                magma_zaxpy( m, -(*work(i,j)),  dA(0,i), 1, dA(0,j), 1, stream );
+                *work(i, j) = magma_zdotc( m, dA(0,i), 1, dA(0,j), 1, queue );
+                magma_zaxpy( m, -(*work(i,j)),  dA(0,i), 1, dA(0,j), 1, queue );
             }
             for (i = j; i < n; i++) {
                 *work(i, j) = MAGMA_Z_ZERO;
             }
-            //*work(j,j) = MAGMA_Z_MAKE( magma_dznrm2( m, dA(0,j), 1), 0., stream );
-            *work(j,j) = magma_zdotc( m, dA(0,j), 1, dA(0,j), 1, stream );
+            //*work(j,j) = MAGMA_Z_MAKE( magma_dznrm2( m, dA(0,j), 1), 0., queue );
+            *work(j,j) = magma_zdotc( m, dA(0,j), 1, dA(0,j), 1, queue );
             *work(j,j) = MAGMA_Z_MAKE( sqrt(MAGMA_Z_REAL( *work(j,j) )), 0. );
-            magma_zscal( m, 1./ *work(j,j), dA(0,j), 1, stream );
+            magma_zscal( m, 1./ *work(j,j), dA(0,j), 1, queue );
         }
         // ================== end of ikind == 3 ===================================================
     }
     else if (ikind == 4) {
         // ================== Cholesky QR       ===================================================
         magma_zgemm( MagmaConjTrans, MagmaNoTrans, n, n, m, c_one,
-                     dA, ldda, dA, ldda, c_zero, dwork, n, stream );
-        magma_zgetmatrix( n, n, dwork, n, work, n, stream );
+                     dA, ldda, dA, ldda, c_zero, dwork, n, queue );
+        magma_zgetmatrix( n, n, dwork, n, work, n, queue );
         lapackf77_zpotrf( "u", &n, work, &n, info );
-        magma_zsetmatrix( n, n, work, n, dwork, n, stream );
+        magma_zsetmatrix( n, n, work, n, dwork, n, queue );
         magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-                     m, n, c_one, dwork, n, dA, ldda, stream );
+                     m, n, c_one, dwork, n, dA, ldda, queue );
         // ================== end of ikind == 4 ===================================================
     }
              
-    magma_queue_destroy( stream );
+    magma_queue_destroy( queue );
 
     return *info;
 } /* magma_zgegqr_gpu */

@@ -344,7 +344,7 @@ magma_zgetrf_batched(
                                                     dW1_displ, ldda, 
                                          c_one,     dW2_displ, ldda, 
                                          batchCount, queue );
-                } // end of batched/stream gemm
+                } // end of batched/streamed gemm
             } // end of  if ( (i + ib) < m) 
         } // end of if ( (i + ib) < n)
 #endif

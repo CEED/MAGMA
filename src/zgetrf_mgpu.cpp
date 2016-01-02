@@ -101,7 +101,7 @@ magma_zgetrf_mgpu(
     if (m == 0 || n == 0)
         return *info;
 
-    /* create the streams */
+    /* create the queues */
     for( d=0; d < ngpu; d++ ) {
         magma_queue_create( d, &queues[d][0] );
         magma_queue_create( d, &queues[d][1] );
@@ -125,8 +125,6 @@ magma_zgetrf_mgpu(
         /* Use hybrid blocked code. */
         magma_device_t orig_dev;
         magma_getdevice( &orig_dev );
-        //magma_queue_t orig_queue;
-        //magmablasGetKernelStream( &orig_queue );
         
         maxm = magma_roundup( m, 32 );
         if ( ngpu > ceil((double)n/nb) ) {
@@ -179,13 +177,11 @@ magma_zgetrf_mgpu(
                 return *info;
             }
             
-            //magmablasSetKernelStream(queues[i][1]);
             magmablas_ztranspose( m, n_local[i], d_lA[i], ldda, d_lAT[i], lddat, queues[i][1] );
         }
         for (i=0; i < ngpu; i++) {
             magma_setdevice(i);
             magma_queue_sync(queues[i][0]);
-            //magmablasSetKernelStream(NULL);
         }
         magma_setdevice(0);
 
@@ -201,7 +197,7 @@ magma_zgetrf_mgpu(
             return *info;
         }
 
-        /* calling multi-gpu interface with allocated workspaces and streams */
+        /* calling multi-gpu interface with allocated workspaces and queues */
         magma_zgetrf2_mgpu(ngpu, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
                            queues, info);
 
@@ -218,7 +214,6 @@ magma_zgetrf_mgpu(
             magma_free( d_panel[d] );
         } /* end of for d=1,..,ngpu */
         magma_setdevice( orig_dev );
-        //magmablasSetKernelStream( orig_queue );
         magma_free_pinned( work );
     }
 

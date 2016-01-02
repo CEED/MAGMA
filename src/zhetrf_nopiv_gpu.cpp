@@ -110,8 +110,6 @@ magma_zhetrf_nopiv_gpu(
 
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    //magma_queue_t orig_queue;
-    //magmablasGetKernelStream( &orig_queue );
 
     magma_queue_t queue[2];
     magma_event_t event;
@@ -166,7 +164,6 @@ magma_zhetrf_nopiv_gpu(
             
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                //magmablasSetKernelStream( queue[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaUnit,
                              jb, (n-j-jb),
@@ -228,7 +225,6 @@ magma_zhetrf_nopiv_gpu(
             
             if ( (j+jb) < n) {
                 // compute the off-diagonal blocks of current block column
-                //magmablasSetKernelStream( queue[0] );
                 trace_gpu_start( 0, 0, "trsm", "trsm" );
                 magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaUnit,
                              (n-j-jb), jb,
@@ -268,6 +264,5 @@ magma_zhetrf_nopiv_gpu(
     magma_free( dW );
     magma_free_pinned( A );
     
-    //magmablasSetKernelStream( orig_queue );
     return MAGMA_SUCCESS;
 } /* magma_zhetrf_nopiv */

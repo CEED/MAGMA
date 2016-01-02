@@ -246,7 +246,7 @@ magma_zgetrf_nopiv_batched(
                 { 
                     //printf("caling streamed dgemm %d %d %d \n", m-i-ib, n-i-ib, ib);
 
-                    // since it use different stream I need to wait the TRSM and swap.
+                    // since it use different queue I need to wait the TRSM and swap.
                     magma_queue_sync(queue); 
                     for (k=0; k < batchCount; k++)
                     {
@@ -279,7 +279,7 @@ magma_zgetrf_nopiv_batched(
                                                     dW1_displ, ldda, 
                                          c_one,     dW2_displ, ldda, 
                                          batchCount, queue );
-                } // end of batched/stream gemm
+                } // end of batched/streamed gemm
             } // end of if ( (i + ib) < m) 
         } // end of if ( (i + ib) < n)
 #endif

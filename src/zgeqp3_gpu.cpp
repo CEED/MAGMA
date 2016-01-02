@@ -158,12 +158,12 @@ magma_zgeqp3_gpu(
         return *info;
     }
 
-    magma_queue_t stream;
+    magma_queue_t queue;
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_queue_create( cdev, &stream );
+    magma_queue_create( cdev, &queue );
 
-    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, n+1, stream );
+    magmablas_zlaset( MagmaFull, n+1, nb, c_zero, c_zero, df, n+1, queue );
 
     nfxd = 0;
     /* Move initial columns up front.
@@ -209,8 +209,8 @@ magma_zgeqp3_gpu(
         //sminmn = minmn - nfxd;
         
         /* Initialize partial column norms. */
-        magmablas_dznrm2_cols( sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd], stream );
-        magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn, stream );
+        magmablas_dznrm2_cols( sm, sn, dA(nfxd,nfxd), ldda, &rwork[nfxd], queue );
+        magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn, queue );
         
         j = nfxd;
         //if (nb < sminmn)
@@ -244,15 +244,15 @@ magma_zgeqp3_gpu(
             if (j > nfxd) {
                 magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
-                                   A(j,j), lda, stream );
+                                   A(j,j), lda, queue );
             }
             lapackf77_zlaqp2(&m, &n_j, &j, dA(0, j), &ldda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], dwork );
         }*/
     }
 
-    magma_free(df);
-    magma_queue_destroy( stream );
+    magma_free( df );
+    magma_queue_destroy( queue );
 
     return *info;
 } /* magma_zgeqp3_gpu */

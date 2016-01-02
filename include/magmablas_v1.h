@@ -43,6 +43,7 @@ void magma_queue_create_internal(
 #define MAGMA_D_CNJG(a)     MAGMA_D_CONJ(a)
 #define MAGMA_S_CNJG(a)     MAGMA_S_CONJ(a)
 
+// device_sync is not portable to OpenCL, and is generally not needed
 void magma_device_sync();
 
 

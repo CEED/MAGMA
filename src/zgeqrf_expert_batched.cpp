@@ -323,7 +323,7 @@ magma_zgeqrf_expert_batched(
                 for (k=0; k < batchCount; k++)
                 {
                     streamid = k%nbstreams;                                       
-                    // the stream gemm must take cpu pointer 
+                    // the queue gemm must take cpu pointer 
                     magma_zlarfb_gpu_gemm( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                 m-i, n-i-ib, ib,
                                 cpuAarray[k] + i + i * ldda, ldda, 

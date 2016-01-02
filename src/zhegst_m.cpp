@@ -269,7 +269,6 @@ magma_zhegst_m(
                 if (k > 0) {
                     // Update the next panel
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][2]);
 
                     magma_int_t nk = n - k*nb;
 
@@ -366,7 +365,6 @@ magma_zhegst_m(
                     }
 
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][1]);
 
                     magma_zhemm( MagmaLeft, uplo, kb, n-(k+1)*nb,
                                  c_neg_half, dA(igpu_p, k/ngpu, k),    ldda,
@@ -396,7 +394,6 @@ magma_zhegst_m(
 
                             magma_queue_wait_event( queues[igpu][j%2], events[igpu][0] );
 
-                            //magmablasSetKernelStream(queues[igpu][j%2]);
                             magma_ztrsm( MagmaRight, uplo, MagmaNoTrans, MagmaNonUnit, nloc[igpu], jb, c_one, dB_r(igpu, j%2, j), lddbr,
                                         dA(igpu, 0, j), ldda, queues[igpu][j%2] );
 
@@ -456,7 +453,6 @@ magma_zhegst_m(
                 if (k > 0) {
                     // Update the next panel
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][2]);
 
                     magma_int_t nk = n-k*nb;
 
@@ -501,7 +497,6 @@ magma_zhegst_m(
 
                 if (k+1 < nblock) {
                     magma_queue_sync( queues[igpu_p][0] ); // sync B panel copy
-                    //magmablasSetKernelStream(queues[igpu_p][2]);
 
                     magma_ztrsm( MagmaRight, uplo, MagmaConjTrans, MagmaNonUnit,
                                  n-(k+1)*nb, kb,
@@ -555,7 +550,6 @@ magma_zhegst_m(
                     }
 
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][1]);
 
                     magma_zhemm( MagmaRight, uplo, n-(k+1)*nb, kb,
                                  c_neg_half, dA(igpu_p, k, k/ngpu),    ldda,
@@ -585,7 +579,6 @@ magma_zhegst_m(
 
                             magma_queue_wait_event( queues[igpu][j%2], events[igpu][0] );
 
-                            //magmablasSetKernelStream(queues[igpu][j%2]);
                             magma_ztrsm( MagmaLeft, uplo, MagmaNoTrans, MagmaNonUnit, jb, nloc[igpu], c_one, dB_c(igpu, j, j%2), lddbc,
                                         dA(igpu, j, 0), ldda, queues[igpu][j%2] );
 
@@ -647,7 +640,6 @@ magma_zhegst_m(
 
                         magma_queue_wait_event( queues[igpu][k%2], events[igpu][0] );
 
-                        //magmablasSetKernelStream(queues[igpu][k%2]);
 
                         if (igpu == igpu_p) {
                             magma_zhemm( MagmaRight, uplo, k*nb, kb,
@@ -707,7 +699,6 @@ magma_zhegst_m(
                     }
 
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][2]);
 
                     magma_queue_wait_event( queues[igpu_p][2], events[igpu_p][ind_k1] ); // sync update of previous step
                     magma_queue_wait_event( queues[igpu_p][2], events[igpu_p][ind_k] ); // sync B copy
@@ -728,7 +719,6 @@ magma_zhegst_m(
                     for (magma_int_t j = 0; j < k; ++j) {
                         magma_int_t igpu = j%ngpu;
                         magma_setdevice( igpu );
-                        //magmablasSetKernelStream(queues[igpu][1]);
 
                         magma_zher2k( uplo, MagmaNoTrans, nb, kb,
                                       c_one, dwork(igpu, j, 0),    n,
@@ -813,7 +803,6 @@ magma_zhegst_m(
 
                         magma_queue_wait_event( queues[igpu][k%2], events[igpu][0] );
 
-                        //magmablasSetKernelStream(queues[igpu][k%2]);
 
                         if (igpu == igpu_p) {
                             magma_zhemm( MagmaLeft, uplo, kb, k*nb,
@@ -873,7 +862,6 @@ magma_zhegst_m(
                     }
 
                     magma_setdevice( igpu_p );
-                    //magmablasSetKernelStream(queues[igpu_p][2]);
 
                     magma_queue_wait_event( queues[igpu_p][2], events[igpu_p][ind_k1] ); // sync update of previous step
                     magma_queue_wait_event( queues[igpu_p][2], events[igpu_p][ind_k] ); // sync B copy
@@ -894,7 +882,6 @@ magma_zhegst_m(
                     for (magma_int_t j = 0; j < k; ++j) {
                         magma_int_t igpu = j%ngpu;
                         magma_setdevice( igpu );
-                        //magmablasSetKernelStream(queues[igpu][1]);
 
                         magma_zher2k( uplo, MagmaConjTrans, nb, kb,
                                       c_one, dwork(igpu, 0, j),    nb,

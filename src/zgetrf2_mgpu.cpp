@@ -87,8 +87,8 @@
 
     @param[in]
     queues  magma_queue_t
-            queues[d] points to the streams for the d-th GPU to execute
-            in. Each GPU require two streams.
+            queues[d] points to the queues for the d-th GPU to execute
+            in. Each GPU require two queues.
 
     @param[out]
     info    INTEGER
@@ -152,8 +152,6 @@ magma_zgetrf2_mgpu(
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    //magma_queue_t orig_queue;
-    //magmablasGetKernelStream( &orig_queue );
     
     /* Use hybrid blocked code. */
     maxm  = magma_roundup( m, block_size );
@@ -176,7 +174,6 @@ magma_zgetrf2_mgpu(
     /* start sending the panel to cpu */
     nb0 = min(mindim, nb);
     magma_setdevice(0);
-    //magmablasSetKernelStream(queues[0][1]);
     trace_gpu_start( 0, 1, "comm", "get" );
     magmablas_ztranspose( nb0, m, dAT(0,0,0), lddat, d_lAP[0], maxm, queues[0][1] );
     magma_zgetmatrix_async( m, nb0,
@@ -273,7 +270,6 @@ magma_zgetrf2_mgpu(
             if ( d == (j+1) % ngpu) {
                 /* owns the next column, look-ahead the column */
                 nb1 = nb0;
-                //magmablasSetKernelStream(queues[d][1]);
                 queue = queues[d][1];
                 
                 /* make sure all the pivoting has been applied */
@@ -287,7 +283,6 @@ magma_zgetrf2_mgpu(
             } else {
                 /* update the entire trailing matrix */
                 nb1 = n_local[d] - j_local2*nb;
-                //magmablasSetKernelStream(queues[d][0]);
                 queue = queues[d][0];
                 
                 /* synchronization to make sure panel arrived on gpu */
@@ -349,7 +344,6 @@ magma_zgetrf2_mgpu(
             
             d = (j+1) % ngpu;
             magma_setdevice(d);
-            //magmablasSetKernelStream(queues[d][0]);
             trace_gpu_start( d, 0, "gemm", "gemm" );
 
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
@@ -417,7 +411,6 @@ magma_zgetrf2_mgpu(
         
         for( d=0; d < ngpu; d++ ) {
             magma_setdevice(d);
-            //magmablasSetKernelStream(queues[d][1]);
             
             /* wait for the pivoting to be done */
             magma_queue_sync( queues[d][0] );
@@ -467,7 +460,6 @@ magma_zgetrf2_mgpu(
         magma_queue_sync( queues[d][1] );
     }
     magma_setdevice( orig_dev );
-    //magmablasSetKernelStream( orig_queue );
     
     timer_start( time );
     //timer_printf("\n Performance %f GFlop/s\n", FLOPS_ZGETRF(m,n) / 1e9 / time );

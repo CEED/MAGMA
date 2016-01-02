@@ -123,7 +123,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
     if ( n == 0 )
         return *info;
 
-    /* Define user stream if current stream is NULL */
     magma_int_t num_queues = 3;
     magma_queue_t queues[5];
     magma_event_t events[5];
@@ -134,7 +133,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         magma_queue_create( cdev, &queues[i] );
         magma_event_create( &events[i]  );
     }
-    //magmablasSetKernelStream(queues[0]);
 
     /* TODO fix memory leaks, e.g., if last malloc fails */
     magma_int_t lddw = nb*(1+magma_ceildiv(n, nb));
@@ -186,7 +184,7 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
         ipiv[j] = j+1;
     }
 
-    trace_init( 1, 1, num_queues, (CUstream_st**)queues );
+    trace_init( 1, 1, num_queues, queues );
     //if (nb <= 1 || nb >= n) {
     //    lapackf77_zpotrf(uplo_, &n, A, &lda, info);
     //} else 
@@ -213,7 +211,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 {
                     //printf( " > compute H(%d,%d)\n", i, j);
                     // > H(i,j) = T(i,i) * L(j,i)', Y
-                    //magmablasSetKernelStream(queues[0]);
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                  nb, jb, nb,
                                  c_one,  dT(i,i), ldda,
@@ -223,7 +220,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                                  //c_zero, dW(i+1), lddw);
                     // > W(i) = T(i,i+1) * L(j,i+1)', Z
                     // W(i) = L(j,i+1)'
-                    //magmablasSetKernelStream(queues[1]);
                     magma_zgemm( MagmaConjTrans, MagmaConjTrans,
                                  nb, jb, (i < j-1 ? nb : jb),
                                  c_one,  dT(i+1,i), ldda,
@@ -240,7 +236,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 for (magma_int_t i=1; i < j; i++)
                 {
                     // H(i,j) = W(i)+.5*H(i,j)
-                    //magmablasSetKernelStream(queues[(i-1)%2]);
                     magmablas_zgeadd( nb, jb, 
                                       c_one, dX(i),   nb,
                                              dH(i,j), ldda,
@@ -258,7 +253,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 for (magma_int_t i=1; i < j; i++)
                 {
                     // W(i) += .5*H(i,j)
-                    //magmablasSetKernelStream(queues[(i-1)%2]);
                     magmablas_zgeadd(nb, jb, 
                                     -c_half, dX(i), nb,
                                              dY(i), nb,
@@ -289,7 +283,6 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                 magma_event_record( events[1], queues[1] );
                 // * make sure they are done
                 magma_queue_wait_event( queues[0], events[1] );
-                //magmablasSetKernelStream(queues[0]);
 
                 // compute T(j, j) = A(j,j) - L(j,1:j)*H(1:j,j) (where T is A in memory)
                 trace_gpu_start( 0, 0, "her2k", "compTjj" );

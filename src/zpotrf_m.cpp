@@ -124,8 +124,6 @@ magma_zpotrf_m(
 
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
-    //magma_queue_t orig_queue;
-    //magmablasGetKernelStream( &orig_queue );
     
     nb = magma_get_dpotrf_nb(n);
     if ( ngpu0 > n/nb ) {
@@ -175,7 +173,6 @@ magma_zpotrf_m(
             magma_queue_create( d, &queues[d][j] );
         for( j=0; j < 5; j++ )
             magma_event_create( &event[d][j]  );
-        //magma_device_sync(); // sync the device
     }
     magma_setdevice(0);
 
@@ -244,7 +241,6 @@ magma_zpotrf_m(
                     J2 = jj/(nb*ngpu);
                     
                     magma_setdevice(d);
-                    //magmablasSetKernelStream(queues[d][J2%2]); // the last stream (2) used to process off-diagonal
                     J2 = nb*J2;
 
                     jb = min(nb,JB-jj); // number of columns in this current block-row
@@ -264,7 +260,6 @@ magma_zpotrf_m(
                 if ( n > J+JB ) {
                     for( d=0; d < ngpu; d++ ) {
                         magma_setdevice(d);
-                        //magmablasSetKernelStream(queues[d][2]);
                         
                         /* local number of columns in the big panel */
                         n_local[d] = ((n-J)/(nb*ngpu))*nb;
@@ -294,14 +289,13 @@ magma_zpotrf_m(
                     magma_setdevice(d);
                     for( jj=0; jj < 3; jj++ )
                         magma_queue_sync( queues[d][jj] );
-                    //magmablasSetKernelStream(NULL);
                 }
                 magma_setdevice(0);
             } /* end of updates with previous rows */
             
             /* factor the big panel */
             h  = magma_ceildiv( JB, nb ); // big diagonal of big panel will be on CPU
-            // using three streams
+            // using three queues
             magma_zpotrf3_mgpu(ngpu, uplo, JB, n-J, J, J, nb,
                                dwork, NB, dt, ldda, A, lda, h, queues, event, &iinfo);
             if ( iinfo != 0 ) {
@@ -369,7 +363,6 @@ magma_zpotrf_m(
                     J2 = jj/(nb*ngpu);
                     
                     magma_setdevice(d);
-                    //magmablasSetKernelStream(queues[d][J2%2]);
                     
                     J2 = nb*J2;
                     jb = min(nb,JB-jj);
@@ -389,7 +382,6 @@ magma_zpotrf_m(
                 if ( n > J+JB ) { /* off-diagonal */
                     for( d=0; d < ngpu; d++ ) {
                         magma_setdevice(d);
-                        //magmablasSetKernelStream(queues[d][2]);
                         
                         /* local number of columns in the big panel */
                         n_local[d] = (((n-J)/nb)/ngpu)*nb;
@@ -418,14 +410,13 @@ magma_zpotrf_m(
                     magma_setdevice(d);
                     for( jj=0; jj < 3; jj++ )
                         magma_queue_sync( queues[d][jj] );
-                    //magmablasSetKernelStream(NULL);
                 }
                 magma_setdevice(0);
             }
             
             /* factor the big panel */
             h = magma_ceildiv( JB, nb ); // big diagonal of big panel will be on CPU
-            // using three streams
+            // using three queues
             magma_zpotrf3_mgpu(ngpu, uplo, n-J, JB, J, J, nb,
                                dwork, lddla, dt, ldda, A, lda, h, queues, event, &iinfo);
             if ( iinfo != 0 ) {
@@ -460,7 +451,6 @@ magma_zpotrf_m(
         }
     }
     magma_setdevice( orig_dev );
-    //magmablasSetKernelStream( orig_queues );
     
     // timer_printf( "\n n=%d NB=%d nb=%d\n", (int) n, (int) NB, (int) nb );
     // timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
