@@ -161,7 +161,7 @@ int main( int argc, char** argv)
     zc = -za;                         zc3 = -za3;                                check( zc == MAGMA_Z_MAKE( real(zc3), imag(zc3) ) );
     zc = za + zb;                     zc3 = za3 + zb3;                           check( zc == MAGMA_Z_MAKE( real(zc3), imag(zc3) ) );
     zc = za - zb;                     zc3 = za3 - zb3;                           check( zc == MAGMA_Z_MAKE( real(zc3), imag(zc3) ) );
-    zc = za * zb;                     zc3 = za3 * zb3;                           check( zc == MAGMA_Z_MAKE( real(zc3), imag(zc3) ) );
+    zc = za * zb;                     zc3 = za3 * zb3;                           check( fabs( zc - MAGMA_Z_MAKE( real(zc3), imag(zc3) ) ) < dtol );
     zc = za / zb;                     zc3 = za3 / zb3;                           check( fabs( zc - MAGMA_Z_MAKE( real(zc3), imag(zc3) ) ) < dtol );
 
     da = fabs( za );                  da3 = std::abs( za3 );                     check( da == da3 );
@@ -183,7 +183,7 @@ int main( int argc, char** argv)
     cc = -ca;                         cc3 = -ca3;                                check( cc == MAGMA_C_MAKE( real(cc3), imag(cc3) ) );
     cc = ca + cb;                     cc3 = ca3 + cb3;                           check( cc == MAGMA_C_MAKE( real(cc3), imag(cc3) ) );
     cc = ca - cb;                     cc3 = ca3 - cb3;                           check( cc == MAGMA_C_MAKE( real(cc3), imag(cc3) ) );
-    cc = ca * cb;                     cc3 = ca3 * cb3;                           check( cc == MAGMA_C_MAKE( real(cc3), imag(cc3) ) );
+    cc = ca * cb;                     cc3 = ca3 * cb3;                           check( fabs( cc - MAGMA_C_MAKE( real(cc3), imag(cc3) ) ) < stol );
     cc = ca / cb;                     cc3 = ca3 / cb3;                           check( fabs( cc - MAGMA_C_MAKE( real(cc3), imag(cc3) ) ) < stol );
 
     sa = fabs( ca );                  sa3 = std::abs( ca3 );                     check( fabs( sa - sa3 ) < stol );
