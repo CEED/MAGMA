@@ -8,8 +8,7 @@
        @precisions normal z -> c d s
 
 */
-
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
 #define BLOCK_SIZE  512

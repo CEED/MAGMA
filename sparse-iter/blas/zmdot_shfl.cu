@@ -9,7 +9,7 @@
        @author Moritz Kreutzer
 
 */
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 #include "magmasparse_z.h"
 #define BLOCK_SIZE 512

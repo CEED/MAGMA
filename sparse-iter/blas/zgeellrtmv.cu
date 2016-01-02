@@ -8,8 +8,7 @@
        @precisions normal z -> c d s
 
 */
-
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 //F. Vázquez, G. Ortega, J.J. Fernández, E.M. Garzón, Almeria University
 __global__ void 

@@ -8,8 +8,7 @@
        @precisions normal z -> c d s
 
 */
-
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 
 #define  blockinfo(i,j)  blockinfo[(i)*c_blocks   + (j)]

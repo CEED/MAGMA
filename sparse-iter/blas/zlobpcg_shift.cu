@@ -8,8 +8,7 @@
        @precisions normal z -> c d s
 
 */
-
-#include "common_magma.h"
+#include "common_magmasparse.h"
 
 __global__ void
 magma_zlobpcg_shift_kernel( 
