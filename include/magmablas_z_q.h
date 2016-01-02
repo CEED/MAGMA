@@ -621,6 +621,13 @@ magmablas_zswapdblk_q(
     magma_queue_t queue );
 
 void
+magmablas_dznrm2_adjust_q(
+    magma_int_t k,
+    magmaDouble_ptr dxnorm,
+    magmaDoubleComplex_ptr dc,
+    magma_queue_t queue );
+
+void
 magmablas_dnrm2_check_q(
     magma_int_t m, magma_int_t n,
     magmaDouble_ptr dA, magma_int_t ldda,

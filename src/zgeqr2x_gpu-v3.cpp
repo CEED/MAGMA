@@ -4,6 +4,8 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
+       
+       @author Stan Tomov
 
        @precisions normal z -> s d c
 
@@ -17,7 +19,7 @@ magma_zlarfb2_gpu_q(
     magmaDoubleComplex_const_ptr dT,    magma_int_t lddt,
     magmaDoubleComplex_ptr       dC,    magma_int_t lddc,
     magmaDoubleComplex_ptr       dwork, magma_int_t ldwork,
-    magma_queue_t stream )
+    magma_queue_t queue )
 {
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -32,20 +34,20 @@ magma_zlarfb2_gpu_q(
                            n, k, m,
                            c_one,  dC,    lddc,
                                    dV,    lddv,
-                           c_zero, dwork, ldwork, stream );
+                           c_zero, dwork, ldwork, queue );
 
     // W = W T^H = C^H V T^H
     magma_ztrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                  n, k,
                  c_one, dT,    lddt,
-                        dwork, ldwork, stream );
+                        dwork, ldwork, queue );
 
     // C = C - V W^H = C - V T V^H C = (I - V T V^H) C = H C
     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                  m, n, k,
                  c_neg_one, dV,    lddv,
                             dwork, ldwork,
-                 c_one,     dC,    lddc, stream );
+                 c_one,     dC,    lddc, queue );
     
     return MAGMA_SUCCESS;
 }
@@ -158,13 +160,13 @@ magma_zgeqr2x3_gpu(
     magmaDouble_ptr        dwork,
     magma_int_t *info)
 {
-    #define dA(i_,j_) (dA + (j_)*(ldda) + (i_))
+    #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
     #define BLOCK_SIZE 32
 
-    magma_int_t i, k;
+    magma_int_t b, i, k;
 
     magmaDouble_ptr dnorm = dwork;
-    magmaDoubleComplex *work = (magmaDoubleComplex *)(dwork+2*(n));
+    magmaDoubleComplex_ptr dwork2 = (magmaDoubleComplex_ptr)(dwork + 2*n);
 
     *info = 0;
     if (m < 0) {
@@ -179,26 +181,26 @@ magma_zgeqr2x3_gpu(
         return *info;
     }
 
-    magma_queue_t stream;
+    magma_queue_t queue;
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_queue_create( cdev, &stream );
+    magma_queue_create( cdev, &queue );
 
     /* Compute the norms of the trailing columns */
     k = min(m,n);
-    // magmablas_dznrm2_cols( m, k, dA(0,0), ldda, dnorm, stream );
+    // magmablas_dznrm2_cols( m, k, dA(0,0), ldda, dnorm, queue );
 
-    for (int b=0; b < k; b += BLOCK_SIZE) {
+    for (b=0; b < k; b += BLOCK_SIZE) {
         for (i = b; i < min(k, b+BLOCK_SIZE); ++i) {
             /*   Apply H' to A(:,i) from the left */
             if ( i-b > 0)
                 magma_zlarfbx_gpu( m-b, i-b, dA(b, b), ldda,
-                                  dT+b+b*k, k, dA(b, i), work, stream );
+                                  dT+b+b*k, k, dA(b, i), dwork2, queue );
 
             /*   Adjust the dnorm[i] to hold the norm of A(i:m,i) */
             //if ( i > 0 )
-            //    magmablas_dznrm2_adjust( i, dnorm+i, dA(0, i), stream );
-            magmablas_dznrm2_cols( m-i, 1, dA(i,i), ldda, dnorm+i, stream );
+            //    magmablas_dznrm2_adjust( i, dnorm+i, dA(0, i), queue );
+            magmablas_dznrm2_cols( m-i, 1, dA(i,i), ldda, dnorm+i, queue );
             
             /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i)
                 1. 1 is not yet put on the diagonal of A
@@ -207,7 +209,7 @@ magma_zgeqr2x3_gpu(
                 3. update T */
             magma_zlarfgtx_gpu(m-i, dA(i, i), dA(min(i+1,m), i), dtau+i,
                                dnorm+i, ddA + i + i*(n), i,
-                               dA(i,0), ldda,  dT, k, work, stream);
+                               dA(i,0), ldda,  dT, k, dwork2, queue);
         }
         
         /* Apply the transformations to the trailing matrix. */
@@ -215,10 +217,10 @@ magma_zgeqr2x3_gpu(
         magma_zlarfb2_gpu_q(
                            m-b, k-i, BLOCK_SIZE,
                            dA(b, b), ldda, dT+b+b*k, k,
-                           dA(b, i), ldda, work, k-i, stream );
+                           dA(b, i), ldda, dwork2, k-i, queue );
     }
 
-    magma_queue_destroy( stream );
+    magma_queue_destroy( queue );
 
     return *info;
 } /* magma_zgeqr2 */

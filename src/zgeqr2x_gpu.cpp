@@ -4,6 +4,8 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
+       
+       @author Stan Tomov
 
        @precisions normal z -> s d c
 
@@ -104,17 +106,17 @@ magma_zgeqr2x_gpu(
     magmaDouble_ptr        dwork,
     magma_int_t *info)
 {
-    #define dA(i_,j_) (dA + (j_)*(ldda) + (i_))
+    #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
     
     magma_int_t i, k;
 
     magmaDouble_ptr dnorm = dwork;
-    magmaDoubleComplex *work = (magmaDoubleComplex *)(dwork+2*n);
+    magmaDoubleComplex_ptr dwork2 = (magmaDoubleComplex_ptr)(dwork + 2*n);
 
-    magma_queue_t stream;
+    magma_queue_t queue;
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_queue_create( cdev, &stream );
+    magma_queue_create( cdev, &queue );
 
     *info = 0;
     if (m < 0) {
@@ -131,24 +133,24 @@ magma_zgeqr2x_gpu(
 
     /* Compute the norms of the trailing columns */
     k = min(m,n);
-    // magmablas_dznrm2_cols( m, k, dA(0,0), ldda, dnorm, stream );
+    // magmablas_dznrm2_cols( m, k, dA(0,0), ldda, dnorm, queue );
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
-        magmablas_dznrm2_cols( m-i, 1, dA(i,i), ldda, dnorm+i, stream );
-        magma_zlarfgx_gpu(m-i, dA(i, i), dA(min(i+1,m), i), dtau+i, dnorm+i,
-                          ddA + i + i*n, i, stream);
+        magmablas_dznrm2_cols( m-i, 1, dA(i,i), ldda, dnorm+i, queue );
+        magma_zlarfgx_gpu( m-i, dA(i, i), dA(min(i+1,m), i), dtau+i, dnorm+i,
+                           ddA + i + i*n, i, queue );
         
         if (i < n) {
             /* Apply H(i)' to A(i:m,i+1:n) from the left */
-            magma_zlarfx_gpu(m-i, n-i-1, dA(i, i), dtau+i,
-                             //dA(i, i+1), ldda, dnorm+i+1,
-                             dA(i, 0), ldda, dnorm+i+1,
-                             dT, i, work, stream );
+            magma_zlarfx_gpu( m-i, n-i-1, dA(i, i), dtau+i,
+                              //dA(i, i+1), ldda, dnorm+i+1,
+                              dA(i, 0), ldda, dnorm+i+1,
+                              dT, i, dwork2, queue );
         }
     }
     
-    magma_queue_destroy( stream );
+    magma_queue_destroy( queue );
 
     return *info;
 } /* magma_zgeqr2 */
