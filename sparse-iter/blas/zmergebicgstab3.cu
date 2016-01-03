@@ -334,11 +334,11 @@ magma_zbicgmerge4(
     dim3 Bs( 1 );
     dim3 Gs( 1 );
     if ( type == 1 )
-        magma_zbicgmerge4_kernel_1<<< Gs, Bs, 0>>>( skp );
+        magma_zbicgmerge4_kernel_1<<< Gs, Bs, 0, queue->cuda_stream() >>>( skp );
     else if ( type == 2 )
-        magma_zbicgmerge4_kernel_2<<< Gs, Bs, 0>>>( skp );
+        magma_zbicgmerge4_kernel_2<<< Gs, Bs, 0, queue->cuda_stream() >>>( skp );
     else if ( type == 3 )
-        magma_zbicgmerge4_kernel_3<<< Gs, Bs, 0>>>( skp );
+        magma_zbicgmerge4_kernel_3<<< Gs, Bs, 0, queue->cuda_stream() >>>( skp );
     else
         printf("error: no kernel called\n");
 

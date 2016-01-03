@@ -134,7 +134,7 @@ magmablas_clag2z_sparse(
     dim3 threads( blksize );
     dim3 grid( magma_ceildiv( M, blksize ) );
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
-    magmaint_clag2z_sparse<<< dimGrid , dimBlock, 0, queue >>>
+    magmaint_clag2z_sparse<<< dimGrid , dimBlock, 0, queue->cuda_stream >>>
                                         ( M, N, SA, lda, A, ldsa, RMAX );
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }

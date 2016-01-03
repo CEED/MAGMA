@@ -1188,7 +1188,7 @@ magma_zcgmerge_spmv1(
     while( Gs.x > 1 ) {
         Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+        magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream()>>> 
                                         ( Gs.x,  A.num_rows, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
@@ -1201,7 +1201,7 @@ magma_zcgmerge_spmv1(
     magma_zcopyvector( 1, aux1, 1, skp+4, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zcg_rhokernel<<< Gs2, Bs2, 0>>>( skp );
+    magma_zcg_rhokernel<<< Gs2, Bs2, 0, queue->cuda_stream()>>>( skp );
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
@@ -1386,7 +1386,7 @@ magma_zcgmerge_xrbeta(
     int Ms =  2*local_block_size * sizeof( magmaDoubleComplex ); 
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;        
-    magma_zcgmerge_xrbeta_kernel<<< Gs, Bs, Ms>>>
+    magma_zcgmerge_xrbeta_kernel<<< Gs, Bs, Ms, queue->cuda_stream()>>>
                                     ( n, dx, dr, dd, dz, skp, d1);  
 
 
@@ -1394,7 +1394,7 @@ magma_zcgmerge_xrbeta(
     while( Gs.x > 1 ) {
         Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+        magma_zcgreduce_kernel_spmv1<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream()>>> 
                                     ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
@@ -1407,11 +1407,11 @@ magma_zcgmerge_xrbeta(
     magma_zcopyvector( 1, aux1, 1, skp+1, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0>>>( skp );
+    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0, queue->cuda_stream()>>>( skp );
 
     dim3 Bs3( local_block_size );
     dim3 Gs3( magma_ceildiv( n, local_block_size ) );
-    magma_zcg_d_kernel<<< Gs3, Bs3, 0>>>( n, skp, dr, dd );  
+    magma_zcg_d_kernel<<< Gs3, Bs3, 0, queue->cuda_stream()>>>( n, skp, dr, dd );  
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
@@ -1588,7 +1588,7 @@ magma_zpcgmerge_xrbeta1(
     int local_block_size=256;
     dim3 Bs( local_block_size );
     dim3 Gs( magma_ceildiv( n, local_block_size ) );
-    magma_zpcgmerge_xrbeta_kernel<<< Gs, Bs, 0>>>
+    magma_zpcgmerge_xrbeta_kernel<<< Gs, Bs, 0, queue->cuda_stream()>>>
                                     ( n, dx, dr, dd, dz, skp );  
                                     
    magmablasSetKernelStream( orig_queue );
@@ -1662,13 +1662,13 @@ magma_zpcgmerge_xrbeta2(
     magmaDoubleComplex_ptr aux1 = d1, aux2 = d2;
     int b = 1;        
                                     
-    magma_zmzdotc_one_kernel_1<<< Gs, Bs, Ms>>>
+    magma_zmzdotc_one_kernel_1<<< Gs, Bs, Ms, queue->cuda_stream()>>>
                                     ( n, dr, dh, d1);  
 
     while( Gs.x > 1 ) {
         Gs_next.x = magma_ceildiv( Gs.x, Bs.x );
         if ( Gs_next.x == 1 ) Gs_next.x = 2;
-        magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> 
+        magma_zcgreduce_kernel_spmv2<<< Gs_next.x/2, Bs.x/2, Ms/2, queue->cuda_stream()>>> 
                                     ( Gs.x, n, aux1, aux2 );
         Gs_next.x = Gs_next.x /2;
         Gs.x = Gs_next.x;
@@ -1682,11 +1682,11 @@ magma_zpcgmerge_xrbeta2(
     magma_zcopyvector( 1, aux1+n, 1, skp+6, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0>>>( skp );
+    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0, queue->cuda_stream()>>>( skp );
 
     dim3 Bs3( local_block_size );
     dim3 Gs3( magma_ceildiv( n, local_block_size ) );
-    magma_zcg_d_kernel<<< Gs3, Bs3, 0>>>( n, skp, dh, dd );  
+    magma_zcg_d_kernel<<< Gs3, Bs3, 0, queue->cuda_stream()>>>( n, skp, dh, dd );  
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;
@@ -1888,11 +1888,11 @@ magma_zjcgmerge_xrbeta(
     magma_zcopyvector( 1, aux1+n, 1, skp+6, 1 );
     dim3 Bs2( 2 );
     dim3 Gs2( 1 );
-    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0>>>( skp );
+    magma_zcg_alphabetakernel<<< Gs2, Bs2, 0, queue->cuda_stream()>>>( skp );
 
     dim3 Bs3( local_block_size );
     dim3 Gs3( magma_ceildiv( n, local_block_size ) );
-    magma_zcg_d_kernel<<< Gs3, Bs3, 0>>>( n, skp, dh, dd );  
+    magma_zcg_d_kernel<<< Gs3, Bs3, 0, queue->cuda_stream()>>>( n, skp, dh, dd );  
 
    magmablasSetKernelStream( orig_queue );
    return MAGMA_SUCCESS;

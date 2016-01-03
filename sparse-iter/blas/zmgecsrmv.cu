@@ -128,7 +128,7 @@ magma_zmgecsrmv(
     magma_int_t threads = BLOCK_SIZE;
     unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE 
                     * sizeof( magmaDoubleComplex ); // num_vecs vectors 
-    zmgecsrmv_kernel<<< grid, threads, MEM_SIZE >>>
+    zmgecsrmv_kernel<<< grid, threads, MEM_SIZE, queue->cuda_stream()>>>
             (m, n, num_vecs, alpha, dval, drowptr, dcolind, dx, beta, dy);
 
    return MAGMA_SUCCESS;
