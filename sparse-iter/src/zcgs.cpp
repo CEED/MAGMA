@@ -71,7 +71,7 @@ magma_zcgs(
     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     // solver variables
-    double nom0, r0,  res, nomb;
+    double nom0, r0, res=0, nomb;
     magmaDoubleComplex rho, rho_l = c_one, alpha, beta;
     
     magma_int_t dofs = A.num_rows* b.num_cols;

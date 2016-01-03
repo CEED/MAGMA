@@ -94,6 +94,7 @@ magma_zpbicgstab(
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
     double nom, betanom, nom0, r0, res, nomb;
+    res=0;
     //double den;
 
     // solver setup

@@ -68,7 +68,7 @@ magma_zqmr(
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
     // solver variables
-    double nom0, r0,  res, nomb;
+    double nom0, r0, res=0, nomb;
     magmaDoubleComplex rho = c_one, rho1 = c_one, eta = -c_one , pds = c_one, 
                         thet = c_one, thet1 = c_one, epsilon = c_one, 
                         beta = c_one, delta = c_one, pde = c_one, rde = c_one,

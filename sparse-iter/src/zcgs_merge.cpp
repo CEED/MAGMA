@@ -67,7 +67,7 @@ magma_zcgs_merge(
     
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE;
-    double nom0, r0,  res, nomb;
+    double nom0, r0, res=0, nomb;
     magmaDoubleComplex rho, rho_l = c_one, alpha, beta;
     
     magma_int_t dofs = A.num_rows* b.num_cols;
