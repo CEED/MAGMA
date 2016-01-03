@@ -468,7 +468,7 @@ blas_fix/clean:
 	-rm -f $(libblas_fix_a) $(libblas_fix_obj)
 
 control/clean:
-	-rm -f $(control_obj)
+	-rm -f $(control_obj) include/*.mod control/*.mod
 
 interface_cuda/clean:
 	-rm -f $(interface_cuda_obj)

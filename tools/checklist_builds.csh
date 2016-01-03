@@ -58,20 +58,18 @@ foreach build ( $* )
         echo "FAILED"
     endif
 
-    cd sparse-iter
     echo "sparse:"
-    echo "$make lib " `date`
-    ($make lib  >! ../$builds/$build/out-sparse-lib.txt) >&! ../$builds/$build/err-sparse-lib.txt
+    echo "$make sparse-lib " `date`
+    ($make sparse-lib  >! $builds/$build/out-sparse-lib.txt) >&! $builds/$build/err-sparse-lib.txt
     if ( $? ) then
         echo "FAILED"
     endif
 
-    echo "$make test -k" `date`
-    ($make test >! ../$builds/$build/out-sparse-test.txt) >&! ../$builds/$build/err-sparse-test.txt
+    echo "$make sparse-test -k" `date`
+    ($make sparse-test >! $builds/$build/out-sparse-test.txt) >&! $builds/$build/err-sparse-test.txt
     if ( $? ) then
         echo "FAILED"
     endif
-    cd ..
 
     echo "tar objs " `date`
     ./tools/find_obj_files.csh
