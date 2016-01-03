@@ -100,7 +100,6 @@ magma_zgeqrf_ooc(
     magmaDoubleComplex *work, magma_int_t lwork,
     magma_int_t *info )
 {
-printf( "magma_zgeqrf_ooc m %d, n %d\n", m, n );
     #define  A(i_,j_) ( A + (i_) + (j_)*lda )
     #define dA(i_,j_) (dA + (i_) + (j_)*ldda)
 
