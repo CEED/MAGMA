@@ -1563,20 +1563,6 @@ subroutine magmaf_dlarfb_gpu_gemm( side, trans, direct, storev, m, n, k, dV, ldd
     integer          :: ldworkvt
 end subroutine magmaf_dlarfb_gpu_gemm
 
-subroutine magmaf_dlarfb2_gpu( m, n, k, dV, lddv, dT, lddt, dC, lddc, dwork, ldwork )
-    integer          :: m
-    integer          :: n
-    integer          :: k
-    magma_devptr_t   :: dV
-    integer          :: lddv
-    magma_devptr_t   :: dT
-    integer          :: lddt
-    magma_devptr_t   :: dC
-    integer          :: lddc
-    magma_devptr_t   :: dwork
-    integer          :: ldwork
-end subroutine magmaf_dlarfb2_gpu
-
 subroutine magmaf_dlauum_gpu( uplo, n, dA, ldda, info )
     character        :: uplo
     integer          :: n

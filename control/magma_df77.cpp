@@ -1979,22 +1979,6 @@ void magmaf_dlarfb_gpu_gemm(
         magma_ddevptr(dworkvt), *ldworkvt );
 }
 
-#define magmaf_dlarfb2_gpu FORTRAN_NAME( magmaf_dlarfb2_gpu, MAGMAF_DLARFB2_GPU )
-void magmaf_dlarfb2_gpu(
-    magma_int_t *m, magma_int_t *n, magma_int_t *k,
-    devptr_t *dV, magma_int_t *lddv,
-    devptr_t *dT, magma_int_t *lddt,
-    devptr_t *dC, magma_int_t *lddc,
-    devptr_t *dwork, magma_int_t *ldwork )
-{
-    magma_dlarfb2_gpu(
-        *m, *n, *k,
-        magma_ddevptr(dV), *lddv,
-        magma_ddevptr(dT), *lddt,
-        magma_ddevptr(dC), *lddc,
-        magma_ddevptr(dwork), *ldwork );
-}
-
 #define magmaf_dlauum_gpu FORTRAN_NAME( magmaf_dlauum_gpu, MAGMAF_DLAUUM_GPU )
 void magmaf_dlauum_gpu(
     const char* uplo, magma_int_t *n,

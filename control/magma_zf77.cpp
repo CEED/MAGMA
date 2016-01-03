@@ -2169,22 +2169,6 @@ void magmaf_zlarfb_gpu_gemm(
         magma_zdevptr(dworkvt), *ldworkvt );
 }
 
-#define magmaf_zlarfb2_gpu FORTRAN_NAME( magmaf_zlarfb2_gpu, MAGMAF_ZLARFB2_GPU )
-void magmaf_zlarfb2_gpu(
-    magma_int_t *m, magma_int_t *n, magma_int_t *k,
-    devptr_t *dV, magma_int_t *lddv,
-    devptr_t *dT, magma_int_t *lddt,
-    devptr_t *dC, magma_int_t *lddc,
-    devptr_t *dwork, magma_int_t *ldwork )
-{
-    magma_zlarfb2_gpu(
-        *m, *n, *k,
-        magma_zdevptr(dV), *lddv,
-        magma_zdevptr(dT), *lddt,
-        magma_zdevptr(dC), *lddc,
-        magma_zdevptr(dwork), *ldwork );
-}
-
 #define magmaf_zlauum_gpu FORTRAN_NAME( magmaf_zlauum_gpu, MAGMAF_ZLAUUM_GPU )
 void magmaf_zlauum_gpu(
     const char* uplo, magma_int_t *n,

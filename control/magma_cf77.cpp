@@ -2169,22 +2169,6 @@ void magmaf_clarfb_gpu_gemm(
         magma_cdevptr(dworkvt), *ldworkvt );
 }
 
-#define magmaf_clarfb2_gpu FORTRAN_NAME( magmaf_clarfb2_gpu, MAGMAF_CLARFB2_GPU )
-void magmaf_clarfb2_gpu(
-    magma_int_t *m, magma_int_t *n, magma_int_t *k,
-    devptr_t *dV, magma_int_t *lddv,
-    devptr_t *dT, magma_int_t *lddt,
-    devptr_t *dC, magma_int_t *lddc,
-    devptr_t *dwork, magma_int_t *ldwork )
-{
-    magma_clarfb2_gpu(
-        *m, *n, *k,
-        magma_cdevptr(dV), *lddv,
-        magma_cdevptr(dT), *lddt,
-        magma_cdevptr(dC), *lddc,
-        magma_cdevptr(dwork), *ldwork );
-}
-
 #define magmaf_clauum_gpu FORTRAN_NAME( magmaf_clauum_gpu, MAGMAF_CLAUUM_GPU )
 void magmaf_clauum_gpu(
     const char* uplo, magma_int_t *n,
