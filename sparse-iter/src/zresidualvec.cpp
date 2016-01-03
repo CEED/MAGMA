@@ -86,7 +86,7 @@ magma_zresidualvec(
         //               /magma_dznrm2(dofs, b.dval, 1);               /||b||
         //printf( "relative residual: %e\n", *res );
     } else {
-        printf("error: dimensions do not match.\n");
+        printf("%%error: dimensions do not match.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 

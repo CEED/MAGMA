@@ -81,7 +81,7 @@ magma_zresidual(
             res[i] = magma_dznrm2( dofs, r(i), 1, queue );            // res = ||r||
         }
     } else {
-        printf("error: dimensions do not match.\n");
+        printf("%%error: dimensions do not match.\n");
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
     
