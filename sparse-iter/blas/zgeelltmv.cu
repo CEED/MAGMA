@@ -253,8 +253,8 @@ magma_zgeelltmv_shift(
     magmaIndex_ptr dcolind,
     magmaDoubleComplex_ptr dx,
     magmaDoubleComplex beta,
-    int offset,
-    int blocksize,
+    magma_int_t offset,
+    magma_int_t blocksize,
     magmaIndex_ptr addrows,
     magmaDoubleComplex_ptr dy,
     magma_queue_t queue )

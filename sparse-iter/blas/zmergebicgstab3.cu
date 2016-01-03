@@ -80,9 +80,9 @@ magma_zbicgmerge1_kernel(
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge1(  
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr skp,
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r, 
@@ -154,9 +154,9 @@ magma_zbicgmerge2_kernel(
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge2(  
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr skp, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr v, 
@@ -247,9 +247,9 @@ magma_zbicgmerge3_kernel(
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge3(  
-    int n, 
+    magma_int_t n, 
     magmaDoubleComplex_ptr skp,
     magmaDoubleComplex_ptr p,
     magmaDoubleComplex_ptr s,
@@ -325,7 +325,7 @@ magma_zbicgmerge4_kernel_3(
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 
-extern "C" int
+extern "C" magma_int_t
 magma_zbicgmerge4(  
     magma_int_t type, 
     magmaDoubleComplex_ptr skp,

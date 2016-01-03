@@ -188,7 +188,7 @@ magma_zmdotc1_kernel_2(
 
 extern "C" magma_int_t
 magma_zmdotc1(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr d1,
@@ -465,7 +465,7 @@ magma_zmdotc2_kernel_2(
 
 extern "C" magma_int_t
 magma_zmdotc2(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 
@@ -760,7 +760,7 @@ magma_zmdotc3_kernel_2(
 
 extern "C" magma_int_t
 magma_zmdotc3(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 
@@ -1069,7 +1069,7 @@ magma_zmdotc4_kernel_2(
 
 extern "C" magma_int_t
 magma_zmdotc4(
-    int n,  
+    magma_int_t n,  
     magmaDoubleComplex_ptr v0, 
     magmaDoubleComplex_ptr w0,
     magmaDoubleComplex_ptr v1, 

@@ -184,8 +184,8 @@ magma_zpipelinedscale(
 
 extern "C" magma_int_t
 magma_zcopyscale(
-    int n, 
-    int k,
+    magma_int_t n, 
+    magma_int_t k,
     magmaDoubleComplex_ptr r, 
     magmaDoubleComplex_ptr v,
     magmaDoubleComplex_ptr skp,
@@ -209,9 +209,9 @@ magma_zcopyscale(
 
 extern "C" magma_int_t
 magma_dznrm2scale(
-    int m, 
+    magma_int_t m, 
     magmaDoubleComplex_ptr r, 
-    int lddr, 
+    magma_int_t lddr, 
     magmaDoubleComplex_ptr drnorm,
     magma_queue_t queue )
 {

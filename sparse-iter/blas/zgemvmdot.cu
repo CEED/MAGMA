@@ -467,8 +467,8 @@ magma_zblockreduce_kernel_fast(
 
 extern "C" magma_int_t
 magma_zmdotc(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr d1,
@@ -600,8 +600,8 @@ magma_zmdotc(
 
 extern "C" magma_int_t
 magma_zgemvmdot(
-    int n, 
-    int k, 
+    magma_int_t n, 
+    magma_int_t k, 
     magmaDoubleComplex_ptr v, 
     magmaDoubleComplex_ptr r,
     magmaDoubleComplex_ptr d1,
