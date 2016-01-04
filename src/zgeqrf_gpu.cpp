@@ -256,6 +256,8 @@ magma_zgeqrf_gpu(
                                       rows, ib, ib,
                                       dA(i, i   ), ldda, dT(i),  nb,
                                       dA(i, i+ib), ldda, dwork(0), lddwork, queues[1] );
+                    // wait for larfb to finish with dwork before larfb in next iteration starts
+                    magma_queue_sync( queues[1] );
                 }
                 else {
                     // Apply H^H to A(i:m,i+ib:n) from the left

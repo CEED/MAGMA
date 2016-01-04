@@ -166,7 +166,7 @@ magma_zgeqrf2_gpu(
                                   m-old_i, cols, old_ib,
                                   dA(old_i, old_i         ), ldda, dT, nb,
                                   dA(old_i, old_i+2*old_ib), ldda, dwork, lddwork, queues[0] );
-                
+
                 // Fix the diagonal block
                 magma_zsetmatrix_async( old_ib, old_ib,
                                         work(old_i),      ldwork,
@@ -204,6 +204,8 @@ magma_zgeqrf2_gpu(
                                       rows, ib, ib,
                                       dA(i, i   ), ldda, dT, nb,
                                       dA(i, i+ib), ldda, dwork, lddwork, queues[1] );
+                    // wait for larfb to finish with dwork before larfb in next iteration starts
+                    magma_queue_sync( queues[1] );
                     // restore upper triangle of panel
                     magma_zq_to_panel( MagmaUpper, ib, work(i), ldwork, hwork+ib*ib );
                 }
