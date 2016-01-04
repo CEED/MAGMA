@@ -59,10 +59,10 @@ int main( int argc, char** argv )
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];
-            nb  = magma_get_zgeqrf_nb( m );
             ldc = magma_roundup( m, opts.align );  // multiple of 32 by default
             // A is m x k (left) or n x k (right)
             mm = (side[iside] == MagmaLeft ? m : n);
+            nb  = magma_get_zgeqrf_nb( mm );
             lda = magma_roundup( mm, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             
