@@ -147,12 +147,12 @@ magma_ztrtri_gpu(
                 /* Compute rows 0:j of current block column */
                 magma_ztrmm( MagmaLeft, MagmaUpper,
                              MagmaNoTrans, diag, j, jb, c_one,
-                             dA(0,0),  ldda,
+                             dA(0, 0), ldda,
                              dA(0, j), ldda, queues[0] );
     
                 magma_ztrsm( MagmaRight, MagmaUpper,
                              MagmaNoTrans, diag, j, jb, c_neg_one,
-                             dA(j,j),  ldda,
+                             dA(j, j), ldda,
                              dA(0, j), ldda, queues[0] );
             }
 
@@ -166,9 +166,11 @@ magma_ztrtri_gpu(
             lapackf77_ztrtri( MagmaUpperStr, diag_, &jb, work, &jb, info );
             
             /* Send inverted diagonal block to device */
+            // use q0, so trsm is done with dA(j,j)
             magma_zsetmatrix_async( jb, jb,
                                     work,     jb,
                                     dA(j, j), ldda, queues[0] );
+            magma_queue_sync( queues[0] );  // wait until work is available for next iteration
         }
     }
     else {
@@ -182,12 +184,12 @@ magma_ztrtri_gpu(
                 /* Compute rows j+jb:n of current block column */
                 magma_ztrmm( MagmaLeft, MagmaLower,
                              MagmaNoTrans, diag, n-j-jb, jb, c_one,
-                             dA(j+jb,j+jb), ldda,
-                             dA(j+jb, j),   ldda, queues[0] );
+                             dA(j+jb, j+jb), ldda,
+                             dA(j+jb, j),    ldda, queues[0] );
 
                 magma_ztrsm( MagmaRight, MagmaLower,
                              MagmaNoTrans, diag, n-j-jb, jb, c_neg_one,
-                             dA(j,j),     ldda,
+                             dA(j, j),    ldda,
                              dA(j+jb, j), ldda, queues[0] );
             }
             
@@ -201,9 +203,11 @@ magma_ztrtri_gpu(
             lapackf77_ztrtri( MagmaLowerStr, diag_, &jb, work, &jb, info );
             
             /* Send inverted diagonal block to device */
+            // use q0, so trsm is done with dA(j,j)
             magma_zsetmatrix_async( jb, jb,
                                     work,     jb,
                                     dA(j, j), ldda, queues[0] );
+            magma_queue_sync( queues[0] );  // wait until work is available for next iteration
         }
     }
 
