@@ -234,6 +234,8 @@ magma_zgeqlf(
                                       rows, ib, ib,
                                       dA(0, cols),   ldda, dwork(0),  lddwork,
                                       dA(0,cols-ib), ldda, dwork(ib), lddwork, queues[1] );
+                    // wait for larfb to finish with dwork before larfb in next iteration starts
+                    magma_queue_sync( queues[1] );
                 }
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
