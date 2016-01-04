@@ -50,7 +50,7 @@ int main(  int argc, char** argv )
     printf("\n");
 
     for( magma_int_t num_vecs=1; num_vecs <= 32; num_vecs += 1 ) {
-        for( magma_int_t n=5000000; n < 5000001; n += 10000 ) {
+        for( magma_int_t n=500000; n < 500001; n += 10000 ) {
             int iters = 10;
             double computations = (2.* n * iters * num_vecs);
 

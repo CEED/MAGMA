@@ -415,12 +415,13 @@ magma_zparse_opts(
          }
     
     // ensure to take a symmetric preconditioner for the PCG
-    if ( opts->solver_par.solver == Magma_PCG
+    if ( ( opts->solver_par.solver == Magma_PCG || opts->solver_par.solver == Magma_PCGMERGE )
         && opts->precond_par.solver == Magma_ILU )
             opts->precond_par.solver = Magma_ICC;
-    if ( opts->solver_par.solver == Magma_PCG
+    if ( ( opts->solver_par.solver == Magma_PCG || opts->solver_par.solver == Magma_PCGMERGE )
         && opts->precond_par.solver == Magma_AILU )
             opts->precond_par.solver = Magma_AICC;
+            
             
     return info;
 }
