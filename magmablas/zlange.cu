@@ -8,7 +8,12 @@
        @precisions normal z -> s d c
        @author Mark Gates
 */
-#include "common_magma.h"
+
+// include v1 header first; the v2 header will redefine non-q names,
+// but we can undef them to get back to the v1 versions.
+#include "magmablas_v1.h"
+
+#include "magma_internal.h"
 #include "magma_templates.h"
 
 #define NB_X 64
@@ -280,11 +285,15 @@ magmablas_zlange_q(
         zlange_one_kernel<<< grid, threads, 0, queue->cuda_stream() >>>( m, n, dA, ldda, dwork );
         magma_max_nan_kernel<<< 1, 512, 0, queue->cuda_stream() >>>( n, dwork );  // note n instead of m
     }
-    magma_dgetvector( 1, &dwork[0], 1, &result, 1 );
+    magma_dgetvector( 1, &dwork[0], 1, &result, 1, queue );
     
     return result;
 }
 
+
+// ------------------------------------------------------------
+// define v1 interface
+#undef magmablas_zlange
 
 /**
     @see magmablas_zlange_q
