@@ -360,6 +360,7 @@ magma_zhegst(
         }
     }
     
+    magma_queue_sync( queues[0] );  // finish set dA(k,k) for itype 1
     magma_zgetmatrix( n, n, dA(0, 0), ldda, A(0, 0), lda, queues[1] );
     
     magma_queue_destroy( queues[0] );
