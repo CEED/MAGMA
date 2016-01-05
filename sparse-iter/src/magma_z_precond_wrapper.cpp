@@ -310,6 +310,7 @@ cleanup:
 
 extern "C" magma_int_t
 magma_z_applyprecond_left(
+    magma_trans_t trans,
     magma_z_matrix A,
     magma_z_matrix b,
     magma_z_matrix *x,
@@ -403,6 +404,7 @@ cleanup:
 
 extern "C" magma_int_t
 magma_z_applyprecond_right(
+    magma_trans_t trans,
     magma_z_matrix A,
     magma_z_matrix b,
     magma_z_matrix *x,
