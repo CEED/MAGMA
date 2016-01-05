@@ -101,7 +101,7 @@ int main(int argc, char **argv)
             //=====================================================================
             magma_zgetmatrix( N, nrhs, d_X, ldx, h_X, ldx );
             
-            Anorm = lapackf77_zlanhe( "I", lapack_uplo_const(opts.uplo), &N, h_A, &N, h_workd);
+            Anorm = safe_lapackf77_zlanhe( "I", lapack_uplo_const(opts.uplo), &N, h_A, &N, h_workd);
             blasf77_zhemm( "L", lapack_uplo_const(opts.uplo), &N, &nrhs,
                            &c_one,     h_A, &lda,
                                        h_X, &ldx,

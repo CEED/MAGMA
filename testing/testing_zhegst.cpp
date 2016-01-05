@@ -39,7 +39,7 @@ int main( int argc, char** argv)
     // Local variables
     real_Double_t gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_B, *h_R;
-    double      error, work[1];
+    double      Anorm, error, work[1];
     magma_int_t N, n2, lda, info;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t status = 0;
@@ -101,8 +101,9 @@ int main( int argc, char** argv)
                            (int) info, magma_strerror( info ));
                 
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
-                error = lapackf77_zlanhe("f", lapack_uplo_const(opts.uplo), &N, h_R, &lda, work )
-                      / lapackf77_zlanhe("f", lapack_uplo_const(opts.uplo), &N, h_A, &lda, work );
+                Anorm = safe_lapackf77_zlanhe("f", lapack_uplo_const(opts.uplo), &N, h_A, &lda, work );
+                error = safe_lapackf77_zlanhe("f", lapack_uplo_const(opts.uplo), &N, h_R, &lda, work )
+                      / Anorm;
                 
                 bool okay = (error < tol);
                 status += ! okay;

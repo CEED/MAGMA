@@ -154,6 +154,31 @@ void magma_assert( bool condition, const char* msg, ... );
 
 void magma_assert_warn( bool condition, const char* msg, ... );
 
+// work around MKL bug in multi-threaded lanhe/lansy
+double safe_lapackf77_zlanhe(
+    const char *norm, const char *uplo,
+    const magma_int_t *n,
+    const magmaDoubleComplex *A, const magma_int_t *lda,
+    double *work );
+
+float  safe_lapackf77_clanhe(
+    const char *norm, const char *uplo,
+    const magma_int_t *n,
+    const magmaFloatComplex *A, const magma_int_t *lda,
+    float *work );
+
+double safe_lapackf77_dlansy(
+    const char *norm, const char *uplo,
+    const magma_int_t *n,
+    const double *A, const magma_int_t *lda,
+    double *work );
+
+float safe_lapackf77_slansy(
+    const char *norm, const char *uplo,
+    const magma_int_t *n,
+    const float *A, const magma_int_t *lda,
+    float *work );
+
 #define MAX_NTEST 1050
 
 typedef enum {

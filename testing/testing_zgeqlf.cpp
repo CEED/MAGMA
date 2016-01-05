@@ -146,7 +146,7 @@ int main( int argc, char** argv)
                 // error = || I - Q^H*Q || / N
                 lapackf77_zlaset( "Upper", &min_mn, &min_mn, &c_zero, &c_one, L, &ldl );
                 blasf77_zherk( "Upper", "Conj", &min_mn, &M, &d_neg_one, Q, &ldq, &d_one, L, &ldl );
-                error2 = lapackf77_zlanhe( "1", "Upper", &min_mn, L, &ldl, work );
+                error2 = safe_lapackf77_zlanhe( "1", "Upper", &min_mn, L, &ldl, work );
                 if ( N > 0 )
                     error2 /= N;
                 

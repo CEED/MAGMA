@@ -39,7 +39,7 @@ int main( int argc, char** argv)
     double beta = 3.14159;
     
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
-    double           error, work[1];
+    double           Anorm, error, work[1];
     magmaDoubleComplex *hA, *hR, *hR2, *hV, *hW;
     magmaDoubleComplex_ptr dV[MagmaMaxGPUs], dW[MagmaMaxGPUs], dA[MagmaMaxGPUs];
     magma_int_t n, k, size, lda, ldda, nb, ngpu, nstream;
@@ -156,9 +156,9 @@ int main( int argc, char** argv)
                 if ( opts.lapack || opts.check ) {
                     // store ||V||*||W|| + ||A||
                     magma_int_t n_offset = n - offset;
-                    error  = lapackf77_zlange("f", &n_offset, &k, hV, &lda, work );
-                    error *= lapackf77_zlange("f", &n_offset, &k, hW, &lda, work );
-                    error += lapackf77_zlange("f", &n_offset, &n_offset, &hA[offset + offset*lda], &lda, work );
+                    Anorm  = lapackf77_zlange("f", &n_offset, &k, hV, &lda, work );
+                    Anorm *= lapackf77_zlange("f", &n_offset, &k, hW, &lda, work );
+                    Anorm += lapackf77_zlange("f", &n_offset, &n_offset, &hA[offset + offset*lda], &lda, work );
                     
                     cpu_time = magma_wtime();
                     blasf77_zher2k( "Lower", "NoTrans", &n_offset, &k,
@@ -171,7 +171,8 @@ int main( int argc, char** argv)
                     // compute relative error ||R||/||A||, where R := A_magma - A_lapack = R - A
                     size = lda*n;
                     blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR, &ione );
-                    error = lapackf77_zlanhe("fro", "Lower", &n_offset, &hR[offset + offset*lda], &lda, work) / error;
+                    error = safe_lapackf77_zlanhe("fro", "Lower", &n_offset, &hR[offset + offset*lda], &lda, work)
+                          / Anorm;
                     
                     printf( "%5d %5d %5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %s\n",
                             (int) n, (int) k, (int) nb, (int) offset,

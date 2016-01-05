@@ -169,7 +169,7 @@ int main( int argc, char** argv)
                 #endif
 
                 result[0] = 1.;
-                result[0] /= lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_A, &N, rwork);
+                result[0] /= safe_lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_A, &N, rwork);
                 result[0] /= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork);
 
                 if (opts.itype == 1) {

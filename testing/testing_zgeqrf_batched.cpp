@@ -77,7 +77,7 @@ void get_QR_error(magma_int_t M, magma_int_t N, magma_int_t min_mn,
     // error = || I - Q^H*Q || / N
     lapackf77_zlaset( "Upper", &min_mn, &min_mn, &c_zero, &c_one, R, &ldr );
     blasf77_zherk( "Upper", "Conj", &min_mn, &M, &d_neg_one, Q, &ldq, &d_one, R, &ldr );
-    *error2 = lapackf77_zlanhe( "1", "Upper", &min_mn, R, &ldr, work );
+    *error2 = safe_lapackf77_zlanhe( "1", "Upper", &min_mn, R, &ldr, work );
     if ( N > 0 )
         *error2 /= N;
 }

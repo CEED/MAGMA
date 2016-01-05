@@ -463,9 +463,8 @@ aux = (
 	('testing_zlag2c',                 '-c',  mn,   ''),
 	('testing_zlange',                 '-c',  mn,   ''),
 	
-	# lower/upper
-	('testing_zlanhe',  '-L             -c',  n,    ''),
-	('testing_zlanhe',  '-U             -c',  n,    ''),
+	# lower/upper handled internally in one call
+	('testing_zlanhe',                 '-c',  n,    ''),
 	
 	('testing_zlarfg',                 '-c',  n,    ''),
 	('testing_zlascl',                 '-c',  mn,   ''),

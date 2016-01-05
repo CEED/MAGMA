@@ -22,9 +22,10 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#include "magma_threadsetting.h"  // to work around MKL bug
+
 #if defined(_OPENMP)
 #include <omp.h>
-#include "magma_threadsetting.h"
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -146,15 +147,23 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
+                #ifdef MAGMA_WITH_MKL
+                // work around MKL bug in multi-threaded zlanhe
+                int la_threads = magma_get_lapack_numthreads();
+                magma_set_lapack_numthreads( 1 );
+                #endif
+                
                 magma_zgetmatrix( N, columns, d_A, ldda, h_R, lda );
                 magma_int_t NN = lda*N;
                 const char* uplo = lapack_uplo_const(opts.uplo);
                 error = 0;
                 for (int i=0; i < batchCount; i++)
                 {
-                    double err = lapackf77_zlanhe("f", uplo, &N, h_A + i * lda*N, &lda, work);
-                    blasf77_zaxpy(&NN, &c_neg_one, h_A + i * lda*N, &ione, h_R + i  * lda*N, &ione);
-                    err = lapackf77_zlanhe("f", uplo, &N, h_R + i * lda*N, &lda, work) / err;
+                    double Anorm, err;
+                    blasf77_zaxpy(&NN, &c_neg_one, h_A + i * lda*N, &ione, h_R + i * lda*N, &ione);
+                    Anorm = lapackf77_zlanhe("f", uplo, &N, h_A + i * lda*N, &lda, work);
+                    err   = lapackf77_zlanhe("f", uplo, &N, h_R + i * lda*N, &lda, work)
+                          / Anorm;
                     if ( isnan(err) || isinf(err) ) {
                         error = err;
                         break;
@@ -163,7 +172,12 @@ int main( int argc, char** argv)
                 }
                 bool okay = (error < tol);
                 status += ! okay;
-              
+                
+                #ifdef MAGMA_WITH_MKL
+                // end single thread to work around MKL bug
+                magma_set_lapack_numthreads( la_threads );
+                #endif
+                
                 printf("%10d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                        (int)batchCount, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                        error, (okay ? "ok" : "failed"));

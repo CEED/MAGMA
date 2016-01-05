@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     real_Double_t   gpu_time, cpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
     double *w1, *w2;
-    double result[4] = {0, 0, 0, 0};
+    double Anorm, result[4] = {0, 0, 0, 0};
     magma_int_t *iwork;
     magma_int_t N, n2, info, nb, lwork, liwork, lda;
     #ifdef COMPLEX
@@ -175,12 +175,13 @@ int main( int argc, char** argv)
                 else if ( opts.itype == 3 ) {
                     lapackf77_zlacpy( MagmaFullStr, &N, &N, h_B, &lda, h_S, &lda);
                     blasf77_zherk(lapack_uplo_const(opts.uplo), "N", &N, &N, &d_neg_one, h_R, &lda, &d_one, h_S, &lda);
-                    result[1] = lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_S, &lda, rwork) / N
-                              / lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_B, &lda, rwork);
+                    Anorm     = safe_lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_B, &lda, rwork);
+                    result[1] = safe_lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_S, &lda, rwork)
+                              / (N*Anorm);
                 }
                 
                 result[0] = 1.;
-                result[0] /= lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_A, &lda, rwork);
+                result[0] /= safe_lapackf77_zlanhe("1", lapack_uplo_const(opts.uplo), &N, h_A, &lda, rwork);
                 result[0] /= lapackf77_zlange("1", &N, &N, h_R, &lda, rwork);
                 
                 if ( opts.itype == 1 ) {

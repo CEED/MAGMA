@@ -158,8 +158,8 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 #ifdef MAGMA_WITH_MKL
-                // MKL (11.1.2) has bug in multi-threaded zlanhe; use single thread to work around
-                int threads = magma_get_lapack_numthreads();
+                // work around MKL bug in multi-threaded zlanhe
+                int la_threads = magma_get_lapack_numthreads();
                 magma_set_lapack_numthreads( 1 );
                 #endif
                 
@@ -169,9 +169,10 @@ int main( int argc, char** argv)
                 magma_error = 0;
                 for (int i=0; i < batchCount; i++)
                 {
-                    Cnorm = lapackf77_zlanhe("fro", lapack_uplo_const(opts.uplo), &N, h_C+i*ldc*N, &ldc, work);
                     blasf77_zaxpy( &sizeC, &c_neg_one, h_C+i*ldc*N, &ione, h_Cmagma+i*ldc*N, &ione );
-                    double err = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma+i*ldc*N, &ldc, work ) / Cnorm;
+                    Cnorm      = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_C     +i*ldc*N, &ldc, work );
+                    double err = lapackf77_zlanhe( "fro", lapack_uplo_const(opts.uplo), &N, h_Cmagma+i*ldc*N, &ldc, work )
+                               / Cnorm;
                     if ( isnan(err) || isinf(err) ) {
                         magma_error = err;
                         break;
@@ -181,7 +182,7 @@ int main( int argc, char** argv)
 
                 #ifdef MAGMA_WITH_MKL
                 // end single thread to work around MKL bug
-                magma_set_lapack_numthreads( threads );
+                magma_set_lapack_numthreads( la_threads );
                 #endif
                 
                 bool okay = (magma_error < tol);
