@@ -186,11 +186,14 @@ magma_z_precondsetup(
         printf( "error: preconditioner type not yet supported.\n" );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
-    
-    if( solver->solver == Magma_PQMR || solver->solver == Magma_PBICG ) {    // also prepare the transpose
+    if( 
+        ( solver->solver == Magma_PQMR || solver->solver == Magma_PBICG ) &&
+        ( precond->solver == Magma_ILU      || 
+            precond->solver == Magma_AILU   || 
+            precond->solver == Magma_ICC    || 
+            precond->solver == Magma_AICC   ) ) {  // also prepare the transpose
         info = magma_zcumilusetup_transpose( A, precond, queue );
     }
-    
     
     tempo2 = magma_sync_wtime( queue );
     precond->setuptime += tempo2-tempo1;
@@ -246,10 +249,6 @@ magma_z_applyprecond(
     magma_int_t info = 0;
     
     magma_z_matrix tmp={Magma_CSR};
-    
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
 
     if ( precond->solver == Magma_JACOBI ) {
         CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
@@ -269,7 +268,6 @@ magma_z_applyprecond(
     }
     else {
         printf( "error: preconditioner type not yet supported.\n" );
-        //magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
 cleanup:
@@ -324,51 +322,88 @@ magma_z_applyprecond_left(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
-    if ( precond->solver == Magma_JACOBI ) {
-        CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
-    }
-    else if ( ( precond->solver == Magma_ILU ||
-                precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
-        CHECK( magma_zapplycumilu_l( b, x, precond, queue ));
-    }
-    else if ( ( precond->solver == Magma_ILU ||
-                precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
-        magma_z_solver_par solver_par;
-        solver_par.maxiter = precond->maxiter;
-        magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
-        // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
-    }
-    else if ( ( precond->solver == Magma_ICC ||
-                precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
-        CHECK( magma_zapplycumicc_l( b, x, precond, queue ));
-    }
-    else if ( ( precond->solver == Magma_ICC ||
-                precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
-        magma_z_solver_par solver_par;
-        solver_par.maxiter = precond->maxiter;
-        magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
-        // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
-    }
-    else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
-    }
-    else if ( precond->solver == Magma_FUNCTION ) {
-        CHECK( magma_zapplycustomprecond_l( b, x, precond, queue ));
-    }
-    else {
+    if( trans == MagmaNoTrans ) {
+        if ( precond->solver == Magma_JACOBI ) {
+            CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumilu_l( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
+            CHECK( magma_zapplycumicc_l( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->L, b, precond->d, precond->work1, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
+        }
+        else if ( precond->solver == Magma_NONE ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
+        }
+        else if ( precond->solver == Magma_FUNCTION ) {
+            CHECK( magma_zapplycustomprecond_l( b, x, precond, queue ));
+        }
+        else {
+            printf( "error: preconditioner type not yet supported.\n" );
+            info = MAGMA_ERR_NOT_SUPPORTED; 
+        }
+    } else if ( trans == MagmaTrans ){
+        if ( precond->solver == Magma_JACOBI ) {
+            CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumilu_l_transpose( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->LT, b, precond->d, precond->work1, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 )  {
+            CHECK( magma_zapplycumicc_l( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter < 50 )  {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->LT, b, precond->d, precond->work1, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate(precond->maxiter, precond->L, precond->work1, b, precond->d, x, queue ));
+        }
+        else if ( precond->solver == Magma_NONE ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
+        }
+        else if ( precond->solver == Magma_FUNCTION ) {
+            CHECK( magma_zapplycustomprecond_l( b, x, precond, queue ));
+        }
+        else {
+            printf( "error: preconditioner type not yet supported.\n" );
+            info = MAGMA_ERR_NOT_SUPPORTED; 
+        }
+    } else {
         printf( "error: preconditioner type not yet supported.\n" );
-        //magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED; 
     }
+    
 cleanup:
-    //magmablasSetKernelStream( orig_queue );
     return info;
 }
 
@@ -419,50 +454,86 @@ magma_z_applyprecond_right(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
-    if ( precond->solver == Magma_JACOBI ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
+    if( trans == MagmaNoTrans ) {
+        if ( precond->solver == Magma_JACOBI ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumilu_r( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
+        }
+    
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumicc_r( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                   precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
+        }
+        else if ( precond->solver == Magma_NONE ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
+        }
+        else if ( precond->solver == Magma_FUNCTION ) {
+            CHECK( magma_zapplycustomprecond_r( b, x, precond, queue ));
+        }
+        else {
+            printf( "error: preconditioner type not yet supported.\n" );
+            info = MAGMA_ERR_NOT_SUPPORTED;
+        }
+    } else if ( trans == MagmaTrans ){
+        if ( precond->solver == Magma_JACOBI ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );    // x = b
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumilu_r_transpose( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ILU ||
+                    precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->UT, b, precond->d2, precond->work2, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
+        }
+    
+        else if ( ( precond->solver == Magma_ICC ||
+                    precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
+            CHECK( magma_zapplycumicc_r( b, x, precond, queue ));
+        }
+        else if ( ( precond->solver == Magma_ICC ||
+                   precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
+            magma_z_solver_par solver_par;
+            solver_par.maxiter = precond->maxiter;
+            magma_zjacobiiter_sys( precond->UT, b, precond->d2, precond->work2, x, &solver_par, queue );
+            // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
+        }
+        else if ( precond->solver == Magma_NONE ) {
+            magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
+        }
+        else if ( precond->solver == Magma_FUNCTION ) {
+            CHECK( magma_zapplycustomprecond_r( b, x, precond, queue ));
+        }
+        else {
+            printf( "error: preconditioner type not yet supported.\n" );
+            info = MAGMA_ERR_NOT_SUPPORTED;
+        }
     }
-    else if ( ( precond->solver == Magma_ILU ||
-                precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
-        CHECK( magma_zapplycumilu_r( b, x, precond, queue ));
-    }
-    else if ( ( precond->solver == Magma_ILU ||
-                precond->solver == Magma_AILU ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
-        magma_z_solver_par solver_par;
-        solver_par.maxiter = precond->maxiter;
-        magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
-        // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
-    }
-
-    else if ( ( precond->solver == Magma_ICC ||
-                precond->solver == Magma_AICC ) && precond->maxiter >= 50 ) {
-        CHECK( magma_zapplycumicc_r( b, x, precond, queue ));
-    }
-    else if ( ( precond->solver == Magma_ICC ||
-               precond->solver == Magma_AICC ) && precond->maxiter < 50 ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, b.num_cols, x->dval, b.num_cols, queue );
-        magma_z_solver_par solver_par;
-        solver_par.maxiter = precond->maxiter;
-        magma_zjacobiiter_sys( precond->U, b, precond->d2, precond->work2, x, &solver_par, queue );
-        // CHECK( magma_zjacobispmvupdate_bw(precond->maxiter, precond->U, precond->work2, b, precond->d2, x, queue ));
-    }
-    else if ( precond->solver == Magma_NONE ) {
-        magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
-    }
-    else if ( precond->solver == Magma_FUNCTION ) {
-        CHECK( magma_zapplycustomprecond_r( b, x, precond, queue ));
-    }
-    else {
-        printf( "error: preconditioner type not yet supported.\n" );
-        //magmablasSetKernelStream( orig_queue );
-        info = MAGMA_ERR_NOT_SUPPORTED;
-    }
+        
 cleanup:
-    //magmablasSetKernelStream( orig_queue );
     return info;
 }

@@ -833,6 +833,13 @@ magma_zbpcg(
     magma_queue_t queue );
 
 magma_int_t
+magma_zpbicg(
+    magma_z_matrix A, magma_z_matrix b, 
+    magma_z_matrix *x, magma_z_solver_par *solver_par, 
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zpbicgstab(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par, 
@@ -1118,19 +1125,6 @@ magma_zapplycuilu_r(
     magma_queue_t queue );
 
 magma_int_t
-magma_zapplycuilu_l_transpose(
-    magma_z_matrix b, magma_z_matrix *x, 
-    magma_z_preconditioner *precond,
-    magma_queue_t queue );
-
-magma_int_t
-magma_zapplycuilu_r_transpose(
-    magma_z_matrix b, magma_z_matrix *x, 
-    magma_z_preconditioner *precond,
-    magma_queue_t queue );
-
-
-magma_int_t
 magma_zcuiccsetup(
     magma_z_matrix A, magma_z_preconditioner *precond,
     magma_queue_t queue );
@@ -1186,6 +1180,19 @@ magma_zapplycumilu_r(
     magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
+
+magma_int_t
+magma_zapplycumilu_l_transpose(
+    magma_z_matrix b, magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplycumilu_r_transpose(
+    magma_z_matrix b, magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
 
 
 magma_int_t

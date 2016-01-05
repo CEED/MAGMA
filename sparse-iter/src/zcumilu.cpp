@@ -231,7 +231,10 @@ magma_zcumilusetup_transpose(
     cusparseHandle_t cusparseHandle=NULL;
     cusparseMatDescr_t descrLT=NULL;
     cusparseMatDescr_t descrUT=NULL;
-
+    
+    // CUSPARSE context //
+    CHECK_CUSPARSE( cusparseCreate( &cusparseHandle ));
+    CHECK_CUSPARSE( cusparseSetStream( cusparseHandle, queue->cuda_stream() ));
 
     // transpose the matrix
     magma_zmtransfer( precond->L, &Ah1, Magma_DEV, Magma_CPU, queue );
@@ -246,7 +249,6 @@ magma_zcumilusetup_transpose(
     magma_zmtransfer( Ah2, &(precond->LT), Magma_CPU, Magma_DEV, queue );
     magma_zmfree(&Ah2, queue );
     
-    
     magma_zmtransfer( precond->U, &Ah1, Magma_DEV, Magma_CPU, queue );
     magma_zmconvert( Ah1, &Ah2, A.storage_type, Magma_CSR, queue );
     magma_zmfree(&Ah1, queue );
@@ -258,21 +260,18 @@ magma_zcumilusetup_transpose(
     magma_zmfree(&Ah1, queue );
     magma_zmtransfer( Ah2, &(precond->UT), Magma_CPU, Magma_DEV, queue );
     magma_zmfree(&Ah2, queue );
-    
    
-
-
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrLT ));
     CHECK_CUSPARSE( cusparseSetMatType( descrLT, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrLT, CUSPARSE_DIAG_TYPE_UNIT ));
     CHECK_CUSPARSE( cusparseSetMatIndexBase( descrLT, CUSPARSE_INDEX_BASE_ZERO ));
     CHECK_CUSPARSE( cusparseSetMatFillMode( descrLT, CUSPARSE_FILL_MODE_UPPER ));
-    CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &precond->cuinfoL ));
+    CHECK_CUSPARSE( cusparseCreateSolveAnalysisInfo( &precond->cuinfoLT ));
     CHECK_CUSPARSE( cusparseZcsrsm_analysis( cusparseHandle,
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->LT.num_rows,
         precond->LT.nnz, descrLT,
         precond->LT.dval, precond->LT.drow, precond->LT.dcol, precond->cuinfoLT ));
-
+    
     CHECK_CUSPARSE( cusparseCreateMatDescr( &descrUT ));
     CHECK_CUSPARSE( cusparseSetMatType( descrUT, CUSPARSE_MATRIX_TYPE_TRIANGULAR ));
     CHECK_CUSPARSE( cusparseSetMatDiagType( descrUT, CUSPARSE_DIAG_TYPE_NON_UNIT ));
@@ -282,8 +281,7 @@ magma_zcumilusetup_transpose(
     CHECK_CUSPARSE( cusparseZcsrsm_analysis( cusparseHandle,
         CUSPARSE_OPERATION_NON_TRANSPOSE, precond->UT.num_rows,
         precond->UT.nnz, descrUT,
-        precond->UT.dval, precond->U.drow, precond->UT.dcol, precond->cuinfoUT ));
-
+        precond->UT.dval, precond->UT.drow, precond->UT.dcol, precond->cuinfoUT ));
 cleanup:
     cusparseDestroyMatDescr( descrLT );
     cusparseDestroyMatDescr( descrUT );
