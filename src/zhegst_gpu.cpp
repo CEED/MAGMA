@@ -80,8 +80,8 @@
 extern "C" magma_int_t
 magma_zhegst_gpu(
     magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr       dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
     magma_int_t *info)
 {
     #define A(i_, j_) (work + (i_) + (j_)*lda         )
@@ -333,10 +333,10 @@ magma_zhegst_gpu(
                 
                 lapackf77_zhegst( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info );
                 
-                // this could be done on a 3rd queue
                 magma_zsetmatrix_async( kb, kb,
                                          A(0, 0), lda,
                                         dA(k, k), ldda, queues[1] );
+                magma_queue_sync( queues[1] );  // wait for A(0,0) before getting next panel
             }
         }
         else {
@@ -389,10 +389,10 @@ magma_zhegst_gpu(
                 
                 lapackf77_zhegst( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info );
                 
-                // this could be done on a 3rd queue
                 magma_zsetmatrix_async( kb, kb,
                                          A(0, 0), lda,
                                         dA(k, k), ldda, queues[1] );
+                magma_queue_sync( queues[1] );  // wait for A(0,0) before getting next panel
             }
         }
     }

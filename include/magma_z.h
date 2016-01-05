@@ -1354,8 +1354,8 @@ magma_zheevx_gpu(
 magma_int_t
 magma_zhegst_gpu(
     magma_int_t itype, magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr dB, magma_int_t lddb,
+    magmaDoubleComplex_ptr       dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dB, magma_int_t lddb,
     magma_int_t *info);
 
 magma_int_t
