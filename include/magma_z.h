@@ -1456,18 +1456,9 @@ magma_zlaqps2_gpu(
     magmaDoubleComplex_ptr dtau,
     magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
     magmaDoubleComplex_ptr dauxv,
-    magmaDoubleComplex_ptr dF, magma_int_t lddf);
-
-magma_int_t
-magma_zlaqps3_gpu(
-    magma_int_t m, magma_int_t n, magma_int_t offset,
-    magma_int_t nb, magma_int_t *kb,
-    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
-    magma_int_t *jpvt,
-    magmaDoubleComplex_ptr dtau,
-    magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
-    magmaDoubleComplex_ptr dauxv,
-    magmaDoubleComplex_ptr dF, magma_int_t lddf);
+    magmaDoubleComplex_ptr dF,  magma_int_t lddf,
+    magmaDouble_ptr dlsticcs,
+    magma_queue_t queue );
 
 magma_int_t
 magma_zlarf_gpu(

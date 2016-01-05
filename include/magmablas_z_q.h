@@ -499,18 +499,6 @@ magmablas_ztrtri_diag_q(
    * to cleanup (alphabetical order)
    */
 magma_int_t
-magma_zlaqps2_gpu_q(
-    magma_int_t m, magma_int_t n, magma_int_t offset,
-    magma_int_t nb, magma_int_t *kb,
-    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
-    magma_int_t *jpvt,
-    magmaDoubleComplex_ptr dtau,
-    magmaDouble_ptr dvn1, magmaDouble_ptr dvn2,
-    magmaDoubleComplex_ptr dauxv,
-    magmaDoubleComplex_ptr dF,  magma_int_t lddf,
-    magma_queue_t queue );
-
-magma_int_t
 magma_zlarfb_gpu_q(
     magma_side_t side, magma_trans_t trans, magma_direct_t direct, magma_storev_t storev,
     magma_int_t m, magma_int_t n, magma_int_t k,

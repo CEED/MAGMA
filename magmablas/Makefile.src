@@ -63,7 +63,6 @@ libmagma_zsrc += \
 	$(cdir)/zlange.cu		\
 	$(cdir)/zlanhe.cu		\
 	$(cdir)/zlaqps2_gpu.cu		\
-	$(cdir)/zlaqps3_gpu.cu		\
 	$(cdir)/zlarf.cu		\
 	$(cdir)/zlarfbx.cu		\
 	$(cdir)/zlarfx.cu		\

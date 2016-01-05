@@ -156,6 +156,13 @@ magma_zgeqp3_gpu(
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
+    
+    magmaDouble_ptr dlsticcs;
+    if (MAGMA_SUCCESS != magma_dmalloc( &dlsticcs, 1+256*(n+255)/256 )) {
+        magma_free( df );
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
+    }
 
     magma_queue_t queue;
     magma_device_t cdev;
@@ -230,7 +237,8 @@ magma_zgeqp3_gpu(
                       dA(0, j), ldda,
                       &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
                       dwork,
-                      &df[jb],   n_j );
+                      &df[jb], n_j,
+                      dlsticcs, queue );
                 
                 j += fjb;  /* fjb is actual number of columns factored */
             }
@@ -250,8 +258,10 @@ magma_zgeqp3_gpu(
         }*/
     }
 
-    magma_free( df );
     magma_queue_destroy( queue );
+    
+    magma_free( df );
+    magma_free( dlsticcs );
 
     return *info;
 } /* magma_zgeqp3_gpu */
