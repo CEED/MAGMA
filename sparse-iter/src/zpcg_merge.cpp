@@ -100,8 +100,8 @@ magma_zpcg_merge(
     CHECK(  magma_zresidualvec( A, b, *x, &r, &nom0, queue));
     
     // preconditioner
-    CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-    CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+    CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
+    CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
     
     magma_zcopy( dofs, h.dval, 1, d.dval, 1, queue );  
     nom = MAGMA_Z_ABS( magma_zdotc( dofs, r.dval, 1, h.dval, 1, queue ));
@@ -178,8 +178,8 @@ magma_zpcg_merge(
             
             // preconditioner in between
             tempop1 = magma_sync_wtime( queue );
-            CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-            CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+            CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
+            CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
             //            magma_zcopy( dofs, r.dval, 1, h.dval, 1 );  
             tempop2 = magma_sync_wtime( queue );
             precond_par->runtime += tempop2-tempop1;

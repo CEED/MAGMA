@@ -149,8 +149,8 @@ magma_zpbicgstab(
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
-        CHECK( magma_z_applyprecond_left( A, p, &mt, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, mt, &y, precond_par, queue ));
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, p, &mt, precond_par, queue ));
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, mt, &y, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
         
@@ -166,8 +166,8 @@ magma_zpbicgstab(
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
-        CHECK( magma_z_applyprecond_left( A, s, &ms, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, ms, &z, precond_par, queue ));
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, s, &ms, precond_par, queue ));
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, ms, &z, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
         

@@ -131,6 +131,7 @@ cleanup:
 extern "C" magma_int_t
 magma_z_precondsetup(
     magma_z_matrix A, magma_z_matrix b,
+    magma_z_solver_par *solver,
     magma_z_preconditioner *precond,
     magma_queue_t queue )
 {
@@ -185,6 +186,11 @@ magma_z_precondsetup(
         printf( "error: preconditioner type not yet supported.\n" );
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
+    
+    if( solver->solver == Magma_PQMR || solver->solver == Magma_PBICG ) {    // also prepare the transpose
+        info = magma_zcumilusetup_transpose( A, precond, queue );
+    }
+    
     
     tempo2 = magma_sync_wtime( queue );
     precond->setuptime += tempo2-tempo1;

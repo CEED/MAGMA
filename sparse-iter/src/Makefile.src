@@ -25,6 +25,7 @@ libsparse_zsrc += \
 	$(cdir)/zcg_merge.cpp                 \
 	$(cdir)/zpcg_merge.cpp                \
 	$(cdir)/zbicgstab.cpp                 \
+	$(cdir)/zbicg.cpp		      \
 	$(cdir)/zbicgstab_merge.cpp           \
 	$(cdir)/zbicgstab_merge2.cpp          \
 	$(cdir)/zbicgstab_merge3.cpp          \

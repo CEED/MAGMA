@@ -556,7 +556,7 @@ subs = {
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
-    ('sbicgstab',      'dbicgstab',      'cbicgstab',      'zbicgstab',      ),
+    ('sbicg',          'dbicg',          'cbicg',          'zbicg',          ),
     ('sqmr',           'dqmr',           'cqmr',           'zqmr'            ),
     ('spqmr',          'dpqmr',          'cpqmr',          'zpqmr'           ),
     ('stfqmr',         'dtfqmr',         'ctfqmr',         'ztfqmr'          ),

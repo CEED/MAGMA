@@ -285,8 +285,8 @@ magma_zlobpcg(
             bWv.memory_location = Magma_DEV;  bWv.num_rows = m; bWv.num_cols = cBlockSize; bWv.major = MagmaColMajor;  bWv.nnz = m*cBlockSize;  bWv.dval = blockW;
             bRv.memory_location = Magma_DEV;  bRv.num_rows = m; bRv.num_cols = cBlockSize; bRv.major = MagmaColMajor;  bRv.nnz = m*cBlockSize;  bRv.dval = blockR;
             tempop1 = magma_sync_wtime( queue );
-            CHECK( magma_z_applyprecond_left( A, bRv, &bWv, precond_par, queue ));
-            CHECK( magma_z_applyprecond_right( A, bWv, &bRv, precond_par, queue ));
+            CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, bRv, &bWv, precond_par, queue ));
+            CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, bWv, &bRv, precond_par, queue ));
             tempop2 = magma_sync_wtime( queue );
             precond_par->runtime += tempop2-tempop1;
         

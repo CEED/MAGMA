@@ -32,14 +32,14 @@ static const char *usage_sparse =
 "               1   symmetric scaling to unit diagonal\n"
 " --solver      Possibility to choose a solver:\n"
 "               CG, PCG, BICGSTAB, PBICGSTAB, GMRES, PGMRES, LOBPCG, JACOBI,\n"
-"               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR\n"
+"               BAITER, IDR, PIDR, CGS, PCGS, TFQMR, PTFQMR, QMR, BICG\n"
 "               BOMBARDMENT, ITERREF.\n"
 " --basic       Use non-optimized version\n"
 " --restart     For GMRES: possibility to choose the restart.\n"
 "               For IDR: Number of distinct subspaces (1,2,4,8).\n"
 " --precond x   Possibility to choose a preconditioner:\n"
 "               CG, BICGSTAB, GMRES, LOBPCG, JACOBI,\n"
-"               BAITER, IDR, CGS, TFQMR, QMR\n"
+"               BAITER, IDR, CGS, TFQMR, QMR, BICG\n"
 "               BOMBARDMENT, ITERREF, ILU, AILU, NONE.\n"
 "                   --patol atol  Absolute residual stopping criterion for preconditioner.\n"
 "                   --prtol rtol  Relative residual stopping criterion for preconditioner.\n"
@@ -174,6 +174,12 @@ magma_zparse_opts(
             }
             else if ( strcmp("PCG", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_PCGMERGE;
+            }
+            else if ( strcmp("BICG", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_BICG;
+            }
+            else if ( strcmp("PBICG", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_PBICG;
             }
             else if ( strcmp("BICGSTAB", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_BICGSTABMERGE;
@@ -410,6 +416,8 @@ magma_zparse_opts(
          opts->solver_par.solver != Magma_PCGSMERGE &&
          opts->solver_par.solver != Magma_PTFQMR &&
          opts->solver_par.solver != Magma_PTFQMRMERGE &&
+         opts->solver_par.solver != Magma_PQMR &&
+         opts->solver_par.solver != Magma_PBICG &&
          opts->solver_par.solver != Magma_LOBPCG ){
                     opts->precond_par.solver = Magma_NONE;
          }

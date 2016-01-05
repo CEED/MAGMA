@@ -62,6 +62,8 @@ magma_z_solver(
         switch( zopts->solver_par.solver ) {
             case  Magma_CG:
                     CHECK( magma_zcg_res( A, b, x, &zopts->solver_par, queue )); break;
+            case  Magma_BICG:
+                    CHECK( magma_zbicg( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_CGMERGE:
                     CHECK( magma_zcg_merge( A, b, x, &zopts->solver_par, queue )); break;
             case  Magma_PCG:

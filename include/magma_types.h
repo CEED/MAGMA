@@ -521,7 +521,12 @@ typedef enum {
     Magma_AICT         = 496,
     Magma_CUSTOMIC     = 497,
     Magma_CUSTOMILU    = 498,
-    Magma_PIDRMERGE    = 499
+    Magma_PIDRMERGE    = 499,
+    Magma_BICG         = 500,
+    Magma_BICGMERGE    = 501,
+    Magma_PBICG        = 502,
+    Magma_PBICGMERGE   = 503
+    
 } magma_solver_type;
 
 typedef enum {

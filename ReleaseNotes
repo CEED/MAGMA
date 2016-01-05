@@ -27,12 +27,14 @@ single (s), double (d), single-complex (c), double-complex (z).
 
  2.0.0
     * Removed support for CUDA arch 1.x, which NVIDIA no longer supports since CUDA 6.
-    * added TFQMR, preconditioned TFQMR
+    * added QMR, TFQMR, preconditioned TFQMR
     * added CGS, preconditioned CGS
-    * added kernel-fused versions for CGS/PCGS
+    * added kernel-fused versions for CGS/PCGS QMR, TFQMR/PTFQMR 
     * changed relative stopping criterion to be relative to RHS
     * fixed bug in complex version of CG
-
+    * accelerated version of Jacobi-CG
+    * very efficient IDR
+    * performance tuning for SELLP SpMV   
 
  1.7.0 - final:  Sep 11, 2015
        - beta 1: Aug 25, 2015

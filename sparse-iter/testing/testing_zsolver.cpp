@@ -66,7 +66,7 @@ int main(  int argc, char** argv )
         
         // preconditioner
         if ( zopts.solver_par.solver != Magma_ITERREF ) {
-            CHECK( magma_z_precondsetup( A, b, &zopts.precond_par, queue ) );
+            CHECK( magma_z_precondsetup( A, b, &zopts.solver_par, &zopts.precond_par, queue ) );
         }
 
         CHECK( magma_zmconvert( A, &B, Magma_CSR, zopts.output_format, queue ));

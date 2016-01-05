@@ -238,8 +238,8 @@ magma_zfgmres(
             
             // M.apply(n, 1, V(i), n, W(i), n);
             v_t.dval = V(i);
-            CHECK( magma_z_applyprecond_left( A, v_t, &t, precond_par, queue ));
-            CHECK( magma_z_applyprecond_right( A, t, &t2, precond_par, queue ));
+            CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, v_t, &t, precond_par, queue ));
+            CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, t, &t2, precond_par, queue ));
             magma_zcopy( dofs, t2.dval, 1, W(i), 1, queue );
 
             // A.mult(n, 1, W(i), n, V(i+1), n);

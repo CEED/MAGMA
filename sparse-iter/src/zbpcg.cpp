@@ -131,8 +131,8 @@ magma_zbpcg(
     CHECK(  magma_zresidualvec( A, b, *x, &r, nom0, queue));
 
     // preconditioner
-    CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-    CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+    CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
+    CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
 
     magma_zcopy( dofs*num_vecs, h.dval, 1, p.dval, 1 );                 // p = h
 
@@ -178,8 +178,8 @@ magma_zbpcg(
     {
         solver_par->numiter++;
         // preconditioner
-        CHECK( magma_z_applyprecond_left( A, r, &rt, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, rt, &h, precond_par, queue ));
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, r, &rt, precond_par, queue ));
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, rt, &h, precond_par, queue ));
 
 
         for( i=0; i<num_vecs; i++)

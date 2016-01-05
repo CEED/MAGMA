@@ -53,6 +53,12 @@ magma_zsolverinfo(
             case  Magma_PCG:
                     printf("%%   CG performance analysis every %d iteration\n",
                                                                         int(k) ); break;
+            case  Magma_BICG:
+            case  Magma_BICGMERGE:
+            case  Magma_PBICG:
+            case  Magma_PBICGMERGE:
+                    printf("%%   BiCG performance analysis every %d iteration\n",
+                                                                        int(k) ); break;
             case  Magma_CGMERGE:
                     printf("%%   CG (merged) performance analysis every %d iteration\n",
                                                                         int(k) ); break;
@@ -144,6 +150,9 @@ magma_zsolverinfo(
         switch( precond_par->solver ) {
             case  Magma_CG:
                     printf("%%   Preconditioner used: CG.\n"); break;
+            case  Magma_BICGMERGE:
+            case  Magma_BICG:
+                    printf("%%   Preconditioner used: BiCG.\n"); break;
             case  Magma_BICGSTAB:
                     printf("%%   Preconditioner used: BiCGSTAB.\n"); break;
             case  Magma_GMRES:
@@ -193,6 +202,10 @@ magma_zsolverinfo(
             case  Magma_PIDR:
             case  Magma_PIDRMERGE:
             case  Magma_CGS:
+            case  Magma_BICG:
+            case  Magma_BICGMERGE:
+            case  Magma_PBICG:
+            case  Magma_PBICGMERGE:
             case  Magma_PCGS:
             case  Magma_PCGMERGE:
             case  Magma_CGSMERGE:
@@ -253,6 +266,12 @@ magma_zsolverinfo(
             printf("%% BiCGSTAB solver summary:\n"); break;
         case  Magma_BICGSTABMERGE2:
             printf("%% BiCGSTAB solver summary:\n"); break;
+        case  Magma_BICG:
+        case  Magma_BICGMERGE:
+            printf("%% BiCG solver summary:\n"); break;
+        case  Magma_PBICG:
+        case  Magma_PBICGMERGE:
+            printf("%% BiCG solver summary:\n"); break;
         case  Magma_GMRES:
             printf("%% GMRES(%d) solver summary:\n", int(solver_par->restart)); break;
         case  Magma_PGMRES:
@@ -426,6 +445,31 @@ magma_zsolverinfo_free(
         magma_free_cpu( precond_par->L.blockinfo );
         precond_par->L.blockinfo = NULL;
     }
+    if ( precond_par->LT.val != NULL ) {
+        if ( precond_par->LT.memory_location == Magma_DEV )
+            magma_free( precond_par->LT.dval );
+        else
+            magma_free_cpu( precond_par->LT.val );
+        precond_par->LT.val = NULL;
+    }
+    if ( precond_par->LT.col != NULL ) {
+        if ( precond_par->LT.memory_location == Magma_DEV )
+            magma_free( precond_par->LT.col );
+        else
+            magma_free_cpu( precond_par->LT.dcol );
+        precond_par->LT.col = NULL;
+    }
+    if ( precond_par->LT.row != NULL ) {
+        if ( precond_par->LT.memory_location == Magma_DEV )
+            magma_free( precond_par->LT.drow );
+        else
+            magma_free_cpu( precond_par->LT.row );
+        precond_par->LT.row = NULL;
+    }
+    if ( precond_par->LT.blockinfo != NULL ) {
+        magma_free_cpu( precond_par->LT.blockinfo );
+        precond_par->LT.blockinfo = NULL;
+    }
     if ( precond_par->U.val != NULL ) {
         if ( precond_par->U.memory_location == Magma_DEV )
             magma_free( precond_par->U.dval );
@@ -451,6 +495,31 @@ magma_zsolverinfo_free(
         magma_free_cpu( precond_par->U.blockinfo );
         precond_par->U.blockinfo = NULL;
     }
+    if ( precond_par->UT.val != NULL ) {
+        if ( precond_par->UT.memory_location == Magma_DEV )
+            magma_free( precond_par->UT.dval );
+        else
+            magma_free_cpu( precond_par->UT.val );
+        precond_par->UT.val = NULL;
+    }
+    if ( precond_par->UT.col != NULL ) {
+        if ( precond_par->UT.memory_location == Magma_DEV )
+            magma_free( precond_par->UT.col );
+        else
+            magma_free_cpu( precond_par->UT.dcol );
+        precond_par->UT.col = NULL;
+    }
+    if ( precond_par->UT.row != NULL ) {
+        if ( precond_par->UT.memory_location == Magma_DEV )
+            magma_free( precond_par->UT.drow );
+        else
+            magma_free_cpu( precond_par->UT.row );
+        precond_par->UT.row = NULL;
+    }
+    if ( precond_par->UT.blockinfo != NULL ) {
+        magma_free_cpu( precond_par->UT.blockinfo );
+        precond_par->UT.blockinfo = NULL;
+    }
     if ( precond_par->solver == Magma_ILU ||
         precond_par->solver == Magma_AILU ||
         precond_par->solver == Magma_ICC||
@@ -459,6 +528,10 @@ magma_zsolverinfo_free(
         cusparseDestroySolveAnalysisInfo( precond_par->cuinfoU ); 
         precond_par->cuinfoL = NULL;
         precond_par->cuinfoU = NULL;
+        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoLT ); 
+        cusparseDestroySolveAnalysisInfo( precond_par->cuinfoUT ); 
+        precond_par->cuinfoLT = NULL;
+        precond_par->cuinfoUT = NULL;
     }
     if ( precond_par->LD.val != NULL ) {
         if ( precond_par->LD.memory_location == Magma_DEV )
@@ -595,6 +668,16 @@ magma_zsolverinfo_init(
     precond_par->U.col = NULL;
     precond_par->U.row = NULL;
     precond_par->U.blockinfo = NULL;
+    
+    precond_par->LT.val = NULL;
+    precond_par->LT.col = NULL;
+    precond_par->LT.row = NULL;
+    precond_par->LT.blockinfo = NULL;
+
+    precond_par->UT.val = NULL;
+    precond_par->UT.col = NULL;
+    precond_par->UT.row = NULL;
+    precond_par->UT.blockinfo = NULL;
 
     precond_par->LD.val = NULL;
     precond_par->LD.col = NULL;

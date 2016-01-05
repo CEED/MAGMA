@@ -328,8 +328,8 @@ magma_zpidr_merge(
             // preconditioning operation 
             // v = L \ v;
             // v = U \ v;
-            CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queue )); 
-            CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queue )); 
+            CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, dv, &dlu, precond_par, queue )); 
+            CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, dlu, &dv, precond_par, queue )); 
             
             // U(:,k) = om * v + U(:,k:s) c(k:s)
             magmablas_zgemv( MagmaNoTrans, dU.num_rows, sk, c_one, &dU.dval[k*dU.ld], dU.ld, &dc.dval[k], 1, om, dv.dval, 1, queue );
@@ -467,8 +467,8 @@ magma_zpidr_merge(
         // preconditioning operation 
         // v = L \ v;
         // v = U \ v;
-        CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queue )); 
-        CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queue )); 
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, dv, &dlu, precond_par, queue )); 
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, dlu, &dv, precond_par, queue )); 
             
         // t = A v
         CHECK( magma_z_spmv( c_one, A, dv, c_zero, dt, queue ));

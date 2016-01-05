@@ -795,6 +795,12 @@ magma_zbicgstab(
     magma_queue_t queue );
 
 magma_int_t
+magma_zbicg(
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
+    magma_z_solver_par *solver_par,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zbicgstab_merge(
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_solver_par *solver_par,
@@ -1095,6 +1101,11 @@ magma_zcuilusetup(
     magma_queue_t queue );
 
 magma_int_t
+magma_zcumilusetup_transpose(
+    magma_z_matrix A, magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zapplycuilu_l(
     magma_z_matrix b, magma_z_matrix *x, 
     magma_z_preconditioner *precond,
@@ -1102,6 +1113,18 @@ magma_zapplycuilu_l(
 
 magma_int_t
 magma_zapplycuilu_r(
+    magma_z_matrix b, magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplycuilu_l_transpose(
+    magma_z_matrix b, magma_z_matrix *x, 
+    magma_z_preconditioner *precond,
+    magma_queue_t queue );
+
+magma_int_t
+magma_zapplycuilu_r_transpose(
     magma_z_matrix b, magma_z_matrix *x, 
     magma_z_preconditioner *precond,
     magma_queue_t queue );
@@ -1293,6 +1316,7 @@ magma_z_solver(
 magma_int_t
 magma_z_precondsetup(
     magma_z_matrix A, magma_z_matrix b, 
+    magma_z_solver_par *solver,
     magma_z_preconditioner *precond,
     magma_queue_t queue );
 
@@ -1305,6 +1329,7 @@ magma_z_applyprecond(
 
 magma_int_t
 magma_z_applyprecond_left(
+    magma_trans_t trans,
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_preconditioner *precond,
     magma_queue_t queue );
@@ -1312,6 +1337,7 @@ magma_z_applyprecond_left(
 
 magma_int_t
 magma_z_applyprecond_right(
+    magma_trans_t trans,
     magma_z_matrix A, magma_z_matrix b, 
     magma_z_matrix *x, magma_z_preconditioner *precond,
     magma_queue_t queue );

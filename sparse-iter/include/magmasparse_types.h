@@ -464,7 +464,9 @@ typedef struct magma_z_preconditioner
     real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_z_matrix   M;
     magma_z_matrix   L;
+    magma_z_matrix   LT;
     magma_z_matrix   U;
+    magma_z_matrix   UT;
     magma_z_matrix   LD;
     magma_z_matrix   UD;
     magma_z_matrix          d;
@@ -475,7 +477,9 @@ typedef struct magma_z_preconditioner
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
     cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoLT;
     cusparseSolveAnalysisInfo_t cuinfoU;
+    cusparseSolveAnalysisInfo_t cuinfoUT;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -501,7 +505,9 @@ typedef struct magma_c_preconditioner
     real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_c_matrix   M;
     magma_c_matrix   L;
+    magma_c_matrix   LT;
     magma_c_matrix   U;
+    magma_c_matrix   UT;
     magma_c_matrix   LD;
     magma_c_matrix   UD;
     magma_c_matrix          d;
@@ -512,7 +518,9 @@ typedef struct magma_c_preconditioner
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
     cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoLT;
     cusparseSolveAnalysisInfo_t cuinfoU;
+    cusparseSolveAnalysisInfo_t cuinfoUT;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -539,7 +547,9 @@ typedef struct magma_d_preconditioner
     real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_d_matrix   M;
     magma_d_matrix   L;
+    magma_d_matrix   LT;
     magma_d_matrix   U;
+    magma_d_matrix   UT;
     magma_d_matrix   LD;
     magma_d_matrix   UD;
     magma_d_matrix          d;
@@ -550,7 +560,9 @@ typedef struct magma_d_preconditioner
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
     cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoLT;
     cusparseSolveAnalysisInfo_t cuinfoU;
+    cusparseSolveAnalysisInfo_t cuinfoUT;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;
@@ -577,7 +589,9 @@ typedef struct magma_s_preconditioner
     real_Double_t      setuptime;           // feedback: preconditioner setup time needed
     magma_s_matrix   M;
     magma_s_matrix   L;
+    magma_s_matrix   LT;
     magma_s_matrix   U;
+    magma_s_matrix   UT;
     magma_s_matrix   LD;
     magma_s_matrix   UD;
     magma_s_matrix          d;
@@ -588,7 +602,9 @@ typedef struct magma_s_preconditioner
     magma_int_t*            int_array_2;
     cusparseSolveAnalysisInfo_t cuinfo;
     cusparseSolveAnalysisInfo_t cuinfoL;
+    cusparseSolveAnalysisInfo_t cuinfoLT;
     cusparseSolveAnalysisInfo_t cuinfoU;
+    cusparseSolveAnalysisInfo_t cuinfoUT;
 #if defined(HAVE_PASTIX)
     pastix_data_t*          pastix_data;
     magma_int_t*            iparm;

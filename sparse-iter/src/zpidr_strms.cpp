@@ -354,8 +354,8 @@ magma_zpidr_strms(
             // v = L \ v;
             // v = U \ v;
             // Q1
-            CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queues[1] )); 
-            CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queues[1] )); 
+            CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, dv, &dlu, precond_par, queues[1] )); 
+            CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, dlu, &dv, precond_par, queues[1] )); 
 
             // sync Q0 --> U(:,k) = U(:,k) - U(:,1:k) * alpha(1:k)
             magma_queue_sync( queues[0] );
@@ -550,8 +550,8 @@ magma_zpidr_strms(
         // v = L \ v;
         // v = U \ v;
         // Q2
-        CHECK( magma_z_applyprecond_left( A, dv, &dlu, precond_par, queues[2] )); 
-        CHECK( magma_z_applyprecond_right( A, dlu, &dv, precond_par, queues[2] )); 
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, dv, &dlu, precond_par, queues[2] )); 
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, dlu, &dv, precond_par, queues[2] )); 
 
         // t = A v
         // Q2

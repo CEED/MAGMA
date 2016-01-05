@@ -106,8 +106,8 @@ magma_zptfqmr_merge(
     magma_zcopy( dofs, r.dval, 1, u_m.dval, 1, queue );  
     
     // preconditioner
-    CHECK( magma_z_applyprecond_left( A, u_m, &t, precond_par, queue ));
-    CHECK( magma_z_applyprecond_right( A, t, &pu_m, precond_par, queue ));
+    CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, u_m, &t, precond_par, queue ));
+    CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, t, &pu_m, precond_par, queue ));
     
     CHECK( magma_z_spmv( c_one, A, pu_m, c_zero, v, queue ));   // v = A u
     magma_zcopy( dofs, v.dval, 1, Au.dval, 1, queue );  
@@ -198,8 +198,8 @@ magma_zptfqmr_merge(
 
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
-        CHECK( magma_z_applyprecond_left( A, u_mp1, &t, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, t, &pu_m, precond_par, queue ));
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, u_mp1, &t, precond_par, queue ));
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, t, &pu_m, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
         
@@ -271,8 +271,8 @@ magma_zptfqmr_merge(
               
         // preconditioner
         tempop1 = magma_sync_wtime( queue );
-        CHECK( magma_z_applyprecond_left( A, u_mp1, &t, precond_par, queue ));
-        CHECK( magma_z_applyprecond_right( A, t, &pu_m, precond_par, queue ));
+        CHECK( magma_z_applyprecond_left( MagmaNoTrans, A, u_mp1, &t, precond_par, queue ));
+        CHECK( magma_z_applyprecond_right( MagmaNoTrans, A, t, &pu_m, precond_par, queue ));
         tempop2 = magma_sync_wtime( queue );
         precond_par->runtime += tempop2-tempop1;
         
