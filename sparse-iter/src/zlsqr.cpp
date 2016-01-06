@@ -213,7 +213,7 @@ magma_zlsqr(
         }
         // check for convergence in min{|b-A*x|}
         if ( A.num_rows != A.num_cols &&
-                normar/(norma*normr) <= solver_par->rtol || normar <= solver_par->atol ){
+               ( normar/(norma*normr) <= solver_par->rtol || normar <= solver_par->atol ) ){
             printf("%% warning: quit from minimization convergence check.\n");
             info = MAGMA_SUCCESS;
             break;
