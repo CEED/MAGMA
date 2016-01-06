@@ -525,7 +525,8 @@ typedef enum {
     Magma_BICG         = 500,
     Magma_BICGMERGE    = 501,
     Magma_PBICG        = 502,
-    Magma_PBICGMERGE   = 503
+    Magma_PBICGMERGE   = 503,
+    Magma_LSQR         = 504
     
 } magma_solver_type;
 
