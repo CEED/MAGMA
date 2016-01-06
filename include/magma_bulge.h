@@ -22,8 +22,6 @@ extern "C" {
     magma_int_t magma_yield();
     magma_int_t magma_bulge_getlwstg1(magma_int_t n, magma_int_t nb, magma_int_t *lda2);
 
-    magma_int_t magma_bulge_get_nb(magma_int_t n);
-
     void cmp_vals(magma_int_t n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
 
     void magma_bulge_findVTAUpos(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t ldv,

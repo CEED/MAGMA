@@ -98,7 +98,7 @@ magma_zgetrf_nopiv_gpu(
 
     /* Function Body */
     mindim = min( m, n );
-    nb     = magma_get_zgetrf_nb( m );
+    nb     = magma_get_zgetrf_nb( m, n );
     s      = mindim / nb;
 
     magma_queue_t queues[2];

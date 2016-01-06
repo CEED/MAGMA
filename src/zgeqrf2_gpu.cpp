@@ -109,7 +109,7 @@ magma_zgeqrf2_gpu(
     if (minmn == 0)
         return *info;
 
-    nb = magma_get_zgeqrf_nb( min(m,n) );
+    nb = magma_get_zgeqrf_nb( m, n );
 
     // dwork is (n-nb)*nb for larfb
     // dT    is nb*nb

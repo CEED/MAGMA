@@ -305,8 +305,8 @@ magma_zhegvdx_2stage_m(
         }
     }
 
-    magma_int_t nb = magma_zbulge_get_nb(n, parallel_threads);
-    magma_int_t lq2 = magma_zbulge_get_lq2(n, parallel_threads, wantz);
+    magma_int_t nb = magma_get_zbulge_nb(n, parallel_threads);
+    magma_int_t lq2 = magma_get_zbulge_lq2(n, parallel_threads, wantz);
 
     #ifdef COMPLEX
         if (wantz) {

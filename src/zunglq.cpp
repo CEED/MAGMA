@@ -100,7 +100,7 @@ magma_zunglq(
     
     // Test the input arguments
     *info = 0;
-    nb = magma_get_zgelqf_nb( min( m, n ));
+    nb = magma_get_zgelqf_nb( m, n );
     lwkopt = nb*nb;
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     lquery = (lwork == -1);

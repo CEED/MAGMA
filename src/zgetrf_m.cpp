@@ -124,7 +124,7 @@ magma_zgetrf_m(
     magma_getdevice( &orig_dev );
     
     /* initialize nb */
-    nb = magma_get_zgetrf_nb(m);
+    nb = magma_get_zgetrf_nb( m, n );
     maxm = magma_roundup( m, 32 );
 
     /* figure out NB */
@@ -423,7 +423,7 @@ magma_zgetrf2_piv(
         return *info;
 
     /* initialize nb */
-    nb = magma_get_zgetrf_nb(m);
+    nb = magma_get_zgetrf_nb( m, n );
     minmn = min( end, min(m,n) );
 
     for( I=start; I < end-nb; I += nb ) {

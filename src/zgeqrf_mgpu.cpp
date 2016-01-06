@@ -118,7 +118,7 @@ magma_zgeqrf2_mgpu(
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
 
-    nb = magma_get_zgeqrf_nb( m );
+    nb = magma_get_zgeqrf_nb( m, n );
 
     /* dwork is (n*nb) --- for T (nb*nb) and zlarfb work ((n-nb)*nb) ---
      *        + dpanel (ldda*nb), on each GPU.

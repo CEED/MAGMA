@@ -63,7 +63,7 @@ int main( int argc, char** argv )
             max_mn = max(M, N);
             lda    = M;
             ldb    = max_mn;
-            nb     = magma_get_zgeqrf_nb(M);
+            nb     = magma_get_zgeqrf_nb( M, N );
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRS( M, N, nrhs )) / 1e9;
             
             // query for workspace size

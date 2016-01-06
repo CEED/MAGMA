@@ -66,7 +66,7 @@ int main( int argc, char** argv )
             ldb    = max_mn;
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
             lddb   = magma_roundup( max_mn, opts.align );  // multiple of 32 by default
-            nb     = magma_get_zgeqrf_nb(M);
+            nb     = magma_get_zgeqrf_nb( M, N );
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRS( M, N, nrhs )) / 1e9;
             
             lworkgpu = (M - N + nb)*(nrhs + nb) + nrhs*nb;

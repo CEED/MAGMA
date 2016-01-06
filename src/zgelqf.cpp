@@ -110,7 +110,7 @@ magma_zgelqf(
 
     /* Function Body */
     *info = 0;
-    nb = magma_get_zgelqf_nb( m );
+    nb = magma_get_zgelqf_nb( m, n );
     min_mn = min( m, n );
 
     work[0] = MAGMA_Z_MAKE( (double)(m*nb), 0 );

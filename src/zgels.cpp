@@ -65,7 +65,7 @@
     lwork   INTEGER
             The dimension of the array HWORK,
             LWORK >= max( N*NB, 2*NB*NB ),
-            where NB is the blocksize given by magma_get_zgeqrf_nb( M ).
+            where NB is the blocksize given by magma_get_zgeqrf_nb( M, N ).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
@@ -92,7 +92,7 @@ magma_zgels(
     /* Local variables */
     magmaDoubleComplex *tau;
     magma_int_t k;
-    magma_int_t nb     = magma_get_zgeqrf_nb(m);
+    magma_int_t nb     = magma_get_zgeqrf_nb( m, n );
     magma_int_t lwkopt = max( n*nb, 2*nb*nb ); // (m - n + nb)*(nrhs + nb) + nrhs*nb;
     bool lquery = (lwork == -1);
 

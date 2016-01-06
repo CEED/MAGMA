@@ -58,7 +58,7 @@ int main( int argc, char** argv )
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];
-            nb  = magma_get_zgelqf_nb( min( m, n ));
+            nb  = magma_get_zgelqf_nb( m, n );
             ldc = m;
             // A is k x m (left) or k x n (right)
             mm = (side[iside] == MagmaLeft ? m : n);

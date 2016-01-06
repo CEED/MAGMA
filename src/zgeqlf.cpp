@@ -60,7 +60,7 @@
     lwork   INTEGER
             The dimension of the array WORK.  LWORK >= max(1,N,2*NB^2).
             For optimum performance LWORK >= max(N*NB, 2*NB^2) where NB can be obtained
-            through magma_get_zgeqlf_nb(M).
+            through magma_get_zgeqlf_nb( M, N ).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -109,7 +109,7 @@ magma_zgeqlf(
     magma_int_t rows, cols;
     magma_int_t ib, ki, kk, mu, nu, iinfo, ldda;
 
-    nb = magma_get_zgeqlf_nb(m);
+    nb = magma_get_zgeqlf_nb( m, n );
     *info = 0;
     bool lquery = (lwork == -1);
 

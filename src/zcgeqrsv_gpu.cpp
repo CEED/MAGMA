@@ -169,7 +169,7 @@ magma_zcgeqrsv_gpu(
     if ( m == 0 || n == 0 || nrhs == 0 )
         return *info;
 
-    nb   = magma_get_cgeqrf_nb(m);
+    nb   = magma_get_cgeqrf_nb( m, n );
     minmn= min( m, n );
     
     /* dSX contains both B and X, so must be max(m or lddb,n). */
@@ -362,7 +362,7 @@ fallback:
      * Allocate temporary buffers
      */
     /* dworkd = dT for zgeqrf */
-    nb   = magma_get_zgeqrf_nb( m );
+    nb   = magma_get_zgeqrf_nb( m, n );
     size = (2*min(m, n) + magma_roundup( n, 32 ) )*nb;
     if ( size > ldworkd ) {
         magma_free( dworkd );  dworkd = NULL;

@@ -64,7 +64,7 @@ int main( int argc, char** argv )
             lda    = M;
             n2     = lda*N;
             ldda   = magma_roundup( M, opts.align );  // multiple of 32 by default
-            nb     = magma_get_zgeqrf_nb( M );
+            nb     = magma_get_zgeqrf_nb( M, N );
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
             // ngpu must be at least the number of blocks

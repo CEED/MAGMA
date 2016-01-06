@@ -292,7 +292,7 @@ while( $_ ) {
 		
 		if ( $func =~ s/_internal// ) {
 			$args =~ s/,\s+const char\*\s+func,\s+const char\*\s+file,\s+int\s+line//;
-			print STDERR "dropping internal args ($args)\n\n";
+			print STDERR "WARNING: dropping internal args ($args)\n\n";
 		}
 		
 		@args = split( /, */, $args );
@@ -318,15 +318,34 @@ while( $_ ) {
 			$interface = "";
 		}
 		elsif ( $seen{ $funcf } ) {
-			print STDERR "ignoring duplicate $func\n";
+			print STDERR "WARNING: ignoring duplicate $func\n";
 			$wrapper   = "";
 			$interface = "";
 		}
-		elsif ( $func =~ m/get_\w+_nb/ and $#args == 0 ) {  # i.e., len(@args) is 1
+		elsif ( $func =~ m/get_\w+_nb/ ) {
 			# special case for get_nb functions, to return a value
 			# is returning an int safe? otherwise, we could make these take an output argument.
-			$wrapper  .= "magma_int_t ${funcf}( magma_int_t *m )\n{\n    return ${prefix}_$func( *m );\n}\n\n";
-			$interface = "integer function $funcf( m )\n    integer :: m\nend function $funcf\n\n";
+			if ( $#args == 0 ) {     # i.e., len(@args) is 1
+				$wrapper  .= "magma_int_t ${funcf}( magma_int_t *n )\n"
+				           . "{\n"
+				           . "    return ${prefix}_$func( *n );\n"
+				           . "}\n\n";
+				$interface = "integer function $funcf( n )\n"
+				           . "    integer :: n\n"
+				           . "end function $funcf\n\n";
+			}
+			elsif ( $#args == 1 ) {  # i.e., len(@args) is 2
+				$wrapper  .= "magma_int_t ${funcf}( magma_int_t *m, magma_int_t *n )\n"
+				           . "{\n"
+				           . "    return ${prefix}_$func( *m, *n );\n"
+				           . "}\n\n";
+				$interface = "integer function $funcf( m, n )\n"
+				           . "    integer :: m, n\n"
+				           . "end function $funcf\n\n";
+			}
+			else {
+				print STDERR "WARNING: unhandled get_nb function $func\n";
+			}
 		}
 		else {
 			$seen{ $funcf } = 1;

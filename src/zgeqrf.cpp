@@ -62,7 +62,7 @@
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.  LWORK >= max( N*NB, 2*NB*NB ),
-            where NB can be obtained through magma_get_zgeqrf_nb(M).
+            where NB can be obtained through magma_get_zgeqrf_nb( M, N ).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -120,7 +120,7 @@ magma_zgeqrf(
     
     /* Function Body */
     *info = 0;
-    magma_int_t nb = magma_get_zgeqrf_nb( min( m, n ));
+    magma_int_t nb = magma_get_zgeqrf_nb( m, n );
     
     // need 2*nb*nb to store T and upper triangle of V simultaneously
     magma_int_t lwkopt = max( n*nb, 2*nb*nb );

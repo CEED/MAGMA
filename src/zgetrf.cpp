@@ -116,7 +116,7 @@ magma_zgetrf(
         return *info;
 
     /* Function Body */
-    nb = magma_get_zgetrf_nb( m );
+    nb = magma_get_zgetrf_nb( m, n );
 
     if ( (nb <= 1) || (nb >= min(m,n)) ) {
         /* Use CPU code. */

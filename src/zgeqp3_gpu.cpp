@@ -124,7 +124,7 @@ magma_zgeqp3_gpu(
         *info = -4;
     }
     
-    nb = magma_get_zgeqp3_nb(min(m, n));
+    nb = magma_get_zgeqp3_nb( m, n );
     minmn = min(m,n);
     if (*info == 0) {
         if (minmn == 0) {

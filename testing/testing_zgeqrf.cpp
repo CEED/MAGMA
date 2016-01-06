@@ -55,7 +55,7 @@ int main( int argc, char** argv)
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            nb     = magma_get_zgeqrf_nb(M);
+            nb     = magma_get_zgeqrf_nb( M, N );
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
             // query for workspace size

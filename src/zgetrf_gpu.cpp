@@ -110,7 +110,7 @@ magma_zgetrf_gpu(
 
     /* Function Body */
     minmn = min( m, n );
-    nb    = magma_get_zgetrf_nb( m );
+    nb    = magma_get_zgetrf_nb( m, n );
 
     magma_queue_t queues[2] = { NULL };
     magma_device_t cdev;

@@ -87,7 +87,7 @@ int main( int argc, char** argv)
             ldu = M;
             ldv = M_VT;
             n2 = lda*N;
-            nb = magma_get_zgesvd_nb(N);
+            nb = magma_get_zgesvd_nb( M, N );
             
             // query or use formula for workspace size
             switch( opts.svd_work ) {

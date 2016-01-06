@@ -63,7 +63,7 @@
     @param[in]
     lwork   INTEGER
             The dimension of the array WORK.  LWORK >= N*NB,
-            where NB can be obtained through magma_get_zgeqrf_nb(M).
+            where NB can be obtained through magma_get_zgeqrf_nb( M, N ).
     \n
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the WORK array, returns
@@ -106,7 +106,7 @@ magma_zgeqrf_m(
     int i, k, ldda;
 
     *info = 0;
-    int nb = magma_get_zgeqrf_nb(min(m, n));
+    int nb = magma_get_zgeqrf_nb( m, n );
 
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );

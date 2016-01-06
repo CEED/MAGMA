@@ -107,7 +107,7 @@ magma_zgetrf_mgpu(
     }
 
     /* Function Body */
-    nb = magma_get_zgetrf_nb(m);
+    nb = magma_get_zgetrf_nb( m, n );
 
     if (nb <= 1 || nb >= n) {
         /* Use CPU code. */

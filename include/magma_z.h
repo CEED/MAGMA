@@ -27,25 +27,34 @@ extern "C" {
 magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 #endif
 
-magma_int_t magma_get_zpotrf_nb( magma_int_t m );
-magma_int_t magma_get_zgetrf_nb( magma_int_t m );
-magma_int_t magma_get_zgetri_nb( magma_int_t m );
-magma_int_t magma_get_zgeqp3_nb( magma_int_t m );
-magma_int_t magma_get_zgeqrf_nb( magma_int_t m );
-magma_int_t magma_get_zgeqlf_nb( magma_int_t m );
-magma_int_t magma_get_zgehrd_nb( magma_int_t m );
-magma_int_t magma_get_zhetrd_nb( magma_int_t m );
-magma_int_t magma_get_zhetrf_nb( magma_int_t m );
-magma_int_t magma_get_zhetrf_nopiv_nb( magma_int_t m );
-magma_int_t magma_get_zhetrf_aasen_nb( magma_int_t m );
-magma_int_t magma_get_zgelqf_nb( magma_int_t m );
-magma_int_t magma_get_zgebrd_nb( magma_int_t m );
-magma_int_t magma_get_zhegst_nb( magma_int_t m );
-magma_int_t magma_get_zgesvd_nb( magma_int_t m );
-magma_int_t magma_get_zhegst_nb_m( magma_int_t m );
-magma_int_t magma_zbulge_get_nb( magma_int_t m, magma_int_t nbthreads );
-magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t m );
-magma_int_t magma_zbulge_get_Vblksiz( magma_int_t m, magma_int_t nb, magma_int_t nbthreads );
+// Cholesky, LU, symmetric indefinite
+magma_int_t magma_get_zpotrf_nb( magma_int_t n );
+magma_int_t magma_get_zgetrf_nb( magma_int_t m, magma_int_t n );
+magma_int_t magma_get_zgetri_nb( magma_int_t n );
+magma_int_t magma_get_zhetrf_nb( magma_int_t n );
+magma_int_t magma_get_zhetrf_nopiv_nb( magma_int_t n );
+magma_int_t magma_get_zhetrf_aasen_nb( magma_int_t n );
+
+// QR
+magma_int_t magma_get_zgeqp3_nb( magma_int_t m, magma_int_t n );
+magma_int_t magma_get_zgeqrf_nb( magma_int_t m, magma_int_t n );
+magma_int_t magma_get_zgeqlf_nb( magma_int_t m, magma_int_t n );
+magma_int_t magma_get_zgelqf_nb( magma_int_t m, magma_int_t n );
+
+// eigenvalues
+magma_int_t magma_get_zgehrd_nb( magma_int_t n );
+magma_int_t magma_get_zhetrd_nb( magma_int_t n );
+magma_int_t magma_get_zhegst_nb( magma_int_t n );
+magma_int_t magma_get_zhegst_nb_m( magma_int_t n );
+
+// SVD
+magma_int_t magma_get_zgebrd_nb( magma_int_t m, magma_int_t n );
+magma_int_t magma_get_zgesvd_nb( magma_int_t m, magma_int_t n );
+
+// 2-stage eigenvalues
+magma_int_t magma_get_zbulge_nb( magma_int_t n, magma_int_t nbthreads );
+magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t n );
+magma_int_t magma_get_zbulge_vblksiz( magma_int_t n, magma_int_t nb, magma_int_t nbthreads );
 magma_int_t magma_get_zbulge_gcperf();
 
 
@@ -1197,14 +1206,14 @@ magma_zgerfs_nopiv_gpu(
     magma_int_t *iter,
     magma_int_t *info);
 
-magma_int_t
-magma_zgessm_gpu(
-    magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
-    magma_int_t *ipiv,
-    magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
-    magmaDoubleComplex_ptr dL,  magma_int_t lddl,
-    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
-    magma_int_t *info);
+//magma_int_t
+//magma_zgessm_gpu(
+//    magma_order_t order, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
+//    magma_int_t *ipiv,
+//    magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
+//    magmaDoubleComplex_ptr dL,  magma_int_t lddl,
+//    magmaDoubleComplex_ptr dA,  magma_int_t ldda,
+//    magma_int_t *info);
 
 magma_int_t
 magma_zgesv_gpu(
@@ -1553,16 +1562,16 @@ magma_zpotrs_gpu(
     magmaDoubleComplex_ptr dB, magma_int_t lddb,
     magma_int_t *info);
 
-magma_int_t
-magma_zssssm_gpu(
-    magma_order_t order, magma_int_t m1, magma_int_t n1,
-    magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,
-    magmaDoubleComplex_ptr dA1, magma_int_t ldda1,
-    magmaDoubleComplex_ptr dA2, magma_int_t ldda2,
-    magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
-    magmaDoubleComplex_ptr dL2, magma_int_t lddl2,
-    magma_int_t *ipiv,
-    magma_int_t *info);
+//magma_int_t
+//magma_zssssm_gpu(
+//    magma_order_t order, magma_int_t m1, magma_int_t n1,
+//    magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib,
+//    magmaDoubleComplex_ptr dA1, magma_int_t ldda1,
+//    magmaDoubleComplex_ptr dA2, magma_int_t ldda2,
+//    magmaDoubleComplex_ptr dL1, magma_int_t lddl1,
+//    magmaDoubleComplex_ptr dL2, magma_int_t lddl2,
+//    magma_int_t *ipiv,
+//    magma_int_t *info);
 
 magma_int_t
 magma_ztrtri_gpu(

@@ -67,7 +67,7 @@ int main( int argc, char** argv )
             ldda = magma_roundup( m, opts.align );  // multiple of 32 by default
             n2 = lda*n;
             min_mn = min(m, n);
-            nb = magma_get_zgelqf_nb( m );
+            nb = magma_get_zgelqf_nb( m, n );
             lwork  = max( m*nb + nb*nb, nb*nb );
             gflops = FLOPS_ZUNGLQ( m, n, k ) / 1e9;
             

@@ -62,7 +62,7 @@ int main( int argc, char** argv )
             ldc = magma_roundup( m, opts.align );  // multiple of 32 by default
             // A is m x k (left) or n x k (right)
             mm = (side[iside] == MagmaLeft ? m : n);
-            nb  = magma_get_zgeqrf_nb( mm );
+            nb  = magma_get_zgeqrf_nb( mm, k );
             lda = magma_roundup( mm, opts.align );  // multiple of 32 by default
             gflops = FLOPS_ZUNMQR( m, n, k, side[iside] ) / 1e9;
             

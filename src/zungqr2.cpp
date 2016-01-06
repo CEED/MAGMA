@@ -77,7 +77,7 @@ magma_zungqr2(
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
-    magma_int_t nb = magma_get_zgeqrf_nb(min(m, n));
+    magma_int_t nb = magma_get_zgeqrf_nb( m, n );
 
     magma_int_t  m_kk, n_kk, k_kk, mi;
     magma_int_t lwork, ldda;

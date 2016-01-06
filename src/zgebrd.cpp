@@ -167,7 +167,7 @@ magma_zgebrd(
     magma_int_t ldwrkx, ldwrky, lwkopt;
     magma_int_t lquery;
 
-    nb   = magma_get_zgebrd_nb(n);
+    nb   = magma_get_zgebrd_nb( m, n );
     ldda = m;
 
     lwkopt = (m + n) * nb;

@@ -167,7 +167,7 @@ magma_zunmqr(
     }
 
     if (*info == 0) {
-        nb = magma_get_zgelqf_nb( min( m, n ));
+        nb = magma_get_zgelqf_nb( m, n );
         lwkopt = max(1,nw)*nb;
         work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }

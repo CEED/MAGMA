@@ -139,7 +139,7 @@ magma_zunmqr_gpu_2stages(
     magma_int_t *info);
 
 magma_int_t
-magma_zbulge_get_lq2( magma_int_t n, magma_int_t threads, magma_int_t wantz);
+magma_get_zbulge_lq2( magma_int_t n, magma_int_t threads, magma_int_t wantz);
 
 magma_int_t 
 magma_zbulge_getstg2size(magma_int_t n, magma_int_t nb, magma_int_t wantz, 

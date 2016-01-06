@@ -238,7 +238,7 @@ magma_dgesvd(
     maxwrk = (magma_int_t) MAGMA_D_REAL( work[0] );
     if (*info == 0) {
         // Return required workspace in WORK[0]
-        nb = magma_get_dgesvd_nb(n);
+        nb = magma_get_dgesvd_nb( m, n );
         minwrk = (m + n)*nb + 3*minmn;
         
         // multiply by 1+eps (in Double!) to ensure length gets rounded up,

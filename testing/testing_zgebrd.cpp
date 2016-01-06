@@ -54,7 +54,7 @@ int main( int argc, char** argv)
             M = opts.msize[itest];
             N = opts.nsize[itest];
             minmn  = min(M, N);
-            nb     = magma_get_zgebrd_nb(N);
+            nb     = magma_get_zgebrd_nb( M, N );
             lda    = M;
             n2     = lda*N;
             lhwork = (M + N)*nb;

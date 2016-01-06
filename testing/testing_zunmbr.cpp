@@ -61,7 +61,7 @@ int main( int argc, char** argv )
             m = opts.msize[itest];
             n = opts.nsize[itest];
             k = opts.ksize[itest];
-            nb  = magma_get_zgebrd_nb( m );
+            nb  = magma_get_zgebrd_nb( m, n );
             ldc = m;
             // A is nq x k (vect=Q) or k x nq (vect=P)
             // where nq=m (left) or nq=n (right)

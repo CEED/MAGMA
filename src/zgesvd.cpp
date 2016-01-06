@@ -235,7 +235,7 @@ magma_zgesvd(
     maxwrk = (magma_int_t) MAGMA_Z_REAL( work[0] );
     if (*info == 0) {
         // Return required workspace in WORK[0]
-        nb = magma_get_zgesvd_nb(n);
+        nb = magma_get_zgesvd_nb( m, n );
         minwrk = (m + n)*nb + 2*minmn;
         
         // multiply by 1+eps (in Double!) to ensure length gets rounded up,

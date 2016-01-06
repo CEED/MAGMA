@@ -87,7 +87,7 @@ void zsplit_diag_block(
     @param[out]
     dT      (workspace) COMPLEX_16 array on the GPU,
             dimension (2*MIN(M, N) + ceil(N/32)*32 )*NB,
-            where NB can be obtained through magma_get_zgeqrf_nb(M).
+            where NB can be obtained through magma_get_zgeqrf_nb( M, N ).
             It starts with a MIN(M,N)*NB block that stores the triangular T
             matrices, followed by a MIN(M,N)*NB block that stores
             the diagonal blocks of the R matrix.
@@ -157,7 +157,7 @@ magma_zgeqrf3_gpu(
         return *info;
     
     // TODO: use min(m,n), but that affects dT
-    nb = magma_get_zgeqrf_nb( m );
+    nb = magma_get_zgeqrf_nb( m, n );
     
     // dT contains 3 blocks:
     // dT    is minmn*nb

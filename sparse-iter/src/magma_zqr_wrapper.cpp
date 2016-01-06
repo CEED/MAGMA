@@ -87,7 +87,7 @@ magma_zqr(
     CHECK( magma_zmalloc_pinned( &tau, k ) );
 
     // query number of blocks required for QR factorization
-    nb = magma_get_zgeqrf_nb(m);
+    nb = magma_get_zgeqrf_nb( m, n );
     ldt = (2 * k + magma_roundup(n, 32)) * nb;
     CHECK( magma_zmalloc( &dT, ldt ) );
 

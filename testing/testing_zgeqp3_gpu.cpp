@@ -60,7 +60,7 @@ int main( int argc, char** argv)
             min_mn = min(M, N);
             lda    = M;
             n2     = lda*N;
-            nb     = magma_get_zgeqp3_nb( min_mn );
+            nb     = magma_get_zgeqp3_nb( M, N );
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
             lwork = ( N+1 )*nb;

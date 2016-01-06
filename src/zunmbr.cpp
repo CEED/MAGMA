@@ -212,7 +212,7 @@ magma_zunmbr(
         if (nw > 0) {
             // TODO have get_zunmqr_nb and get_zunmlq_nb routines? see original LAPACK zunmbr.
             // TODO make them dependent on m, n, and k?
-            nb = magma_get_zgebrd_nb( min( m, n ));
+            nb = magma_get_zgebrd_nb( m, n );
             lwkopt = max(1, nw*nb);
         }
         else {
