@@ -63,14 +63,6 @@ libmagma_zsrc += \
 	$(cdir)/magma_cfortran.F90	\
 	$(cdir)/magma_zfortran.F90	\
 
-
-wrappers: include/magma_s.i include/magma_d.i include/magma_c.i include/magma_z.i
-	tools/fortran_wrappers.pl include/magma_s.i
-	tools/fortran_wrappers.pl include/magma_d.i
-	tools/fortran_wrappers.pl include/magma_c.i
-	tools/fortran_wrappers.pl include/magma_z.i
-	rm $^
-
 # Extra dependencies for .mod files
 $(cdir)/magma.$(o_ext): $(cdir)/magma_zfortran.$(o_ext) $(cdir)/magma_cfortran.$(o_ext) $(cdir)/magma_dfortran.$(o_ext) $(cdir)/magma_sfortran.$(o_ext) 
 $(cdir)/magma_zfortran.$(o_ext): $(cdir)/magma_param.$(o_ext)

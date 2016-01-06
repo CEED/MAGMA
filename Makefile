@@ -544,11 +544,17 @@ sparse-iter/testing/clean:
 %.$(o_ext): %.cu
 	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
+%.i: %.h
+	$(CC) -E $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
 %.i: %.c
 	$(CC) -E $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 %.i: %.cpp
 	$(CXX) -E $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+%.i: %.cpp
+	$(NVCC) -E $(NVCCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(libs_a):
 	@echo "===== static library $@"
