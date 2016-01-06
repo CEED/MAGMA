@@ -29,6 +29,9 @@ my @files2delete = qw(
     docs/Doxyfile-fast
     docs/output_err
     
+    exp
+    exp_magma_quark
+    
     include/Makefile
     magmablas/obsolete
     make.icl

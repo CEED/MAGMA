@@ -283,8 +283,8 @@ typedef struct magma_queue* magma_queue_t;
 // MAGMA constants
 
 // ----------------------------------------
-#define MAGMA_VERSION_MAJOR 1
-#define MAGMA_VERSION_MINOR 7
+#define MAGMA_VERSION_MAJOR 2
+#define MAGMA_VERSION_MINOR 0
 #define MAGMA_VERSION_MICRO 0
 
 // stage is "svn", "beta#", "rc#" (release candidate), or blank ("") for final release
