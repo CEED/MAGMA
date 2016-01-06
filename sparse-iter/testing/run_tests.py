@@ -186,6 +186,9 @@ parser.add_option(      '--pqmr'             , action='store_true', dest='pqmr' 
 parser.add_option(      '--pqmr_merge'       , action='store_true', dest='pqmr_merge'    , help='run pqmr_merge'    )   
 parser.add_option(      '--bombard'          , action='store_true', dest='bombard'       , help='run bombard'       )
 parser.add_option(      '--bombard_merge'    , action='store_true', dest='bombard_merge' , help='run bombard_merge' )
+parser.add_option(      '--lsqr'             , action='store_true', dest='lsqr'          , help='run lsqr'          )
+parser.add_option(      '--bicg'             , action='store_true', dest='bicg'          , help='run bicg'          )
+parser.add_option(      '--pbicg'            , action='store_true', dest='pbicg'         , help='run pbicg'         )
 
                                                                                            
 parser.add_option(      '--jacobi-prec'      , action='store_true', dest='jacobi_prec'   , help='run Jacobi preconditioner')
@@ -251,6 +254,9 @@ if (     not opts.cg
      and not opts.pcgs_merge
      and not opts.bombard
      and not opts.bombard_merge
+     and not opts.bicg
+     and not opts.pbicg
+     and not opts.lsqr
      and not opts.pidr ):
     opts.cg             = True
     opts.cg_merge       = True
@@ -277,6 +283,9 @@ if (     not opts.cg
     opts.pqmr_merge     = True
     opts.bombard        = True
     opts.bombard_merge  = True
+    opts.bicg           = True
+    opts.pbicg          = True
+    opts.lsqr           = True
 # end
 
 # default if no preconditioners given all
@@ -357,6 +366,12 @@ if ( opts.qmr ):
 if ( opts.qmr_merge ):
     solvers += ['--solver QMR']
 # end
+if ( opts.lsqr ):
+    solvers += ['--solver QMR']
+# end
+if ( opts.bicg ):
+    solvers += ['--solver QMR']
+# end
 if ( opts.bombard ):
     solvers += ['--solver BOMBARDMENT']
 # end
@@ -383,6 +398,12 @@ if ( opts.pidr ):
     precsolvers += ['--solver PQMR']
 # end
 if ( opts.pidr ):
+    precsolvers += ['--solver PCGS']
+# end
+if ( opts.pbicg ):
+    precsolvers += ['--solver PCGS']
+# end
+if ( opts.lsqr ):
     precsolvers += ['--solver PCGS']
 # end
 

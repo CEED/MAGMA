@@ -91,7 +91,7 @@ int main(  int argc, char** argv )
         "======%%\n");
         printf("];\n");
         // for the eigensolver case
-        zopts.solver_par.ev_length = A.num_rows;
+        zopts.solver_par.ev_length = A.num_cols;
         CHECK( magma_zeigensolverinfo_init( &zopts.solver_par, queue ));
         fflush(stdout);
         
