@@ -178,6 +178,7 @@ parser.add_option(      '--geev',       action='store_true', dest='geev',       
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
 parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests; add --ngpu to specify number of GPUs')
+parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='do not run multi-GPU (BLAS, LU, etc.) tests')
 
 # options to select subset of commands
 parser.add_option(      '--itype',      action='store',      dest='itype',      help='select runs matching itype',   default=0 )
@@ -1030,16 +1031,28 @@ if ( opts.batched ):
 # multi-GPU (BLAS, LU, etc.) -- take from other sets
 mgpu = []
 for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
-	for row in s:
-		m1 = re.search( '(_m|_mgpu)$', row[0] )
-		m2 = re.search( '--ngpu',      row[1] )
+	for test in s:
+		m1 = re.search( '(_m|_mgpu)$', test[0] )
+		m2 = re.search( '--ngpu',      test[1] )
 		if (m1 or m2):
-			mgpu.append( row )
+			mgpu.append( test )
 	# end
 # end
 if ( opts.mgpu ):
 	tests += mgpu
 
+
+# ----------------------------------------------------------------------
+if ( opts.no_mgpu ):
+	tests2 = []
+	for test in tests:
+		m1 = re.search( '(_m|_mgpu)$', test[0] )
+		m2 = re.search( '--ngpu',      test[1] )
+		if ( not (m1 or m2) ):
+			tests2.append( test )
+	# end
+	tests = tests2
+# end
 
 # ----------------------------------------------------------------------
 # select subset of commands
