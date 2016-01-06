@@ -117,7 +117,7 @@ magma_zparse_opts(
     opts->solver_par.verbose = 0;
     opts->solver_par.version = 0;
     opts->solver_par.restart = 50;
-    opts->solver_par.num_eigenvalues = 0;
+    opts->solver_par.num_eigenvalues = 32;
     opts->precond_par.solver = Magma_NONE;
     #if defined(PRECISION_z) | defined(PRECISION_d)
         opts->precond_par.atol = 1e-16;
