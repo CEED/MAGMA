@@ -138,7 +138,7 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, opts.queue);
+            magma_zset_pointer( dA_array, dA_magma, ldda, 0, 0, ldda*N, batchCount, opts.queue );
             magma_time = magma_sync_wtime( opts.queue );
             info = magma_zgetrf_nopiv_batched( M, N, dA_array, ldda, dinfo_magma, batchCount, opts.queue);
             magma_time = magma_sync_wtime( opts.queue ) - magma_time;

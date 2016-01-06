@@ -165,8 +165,8 @@ magma_zgetrf_nopiv_batched(
 
     magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
     magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
-    zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
-    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
+    magma_zset_pointer( dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue );
+    magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
 
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
@@ -184,7 +184,7 @@ magma_zgetrf_nopiv_batched(
         ib = min(nb, min_mn-i);
         pm = m-i;
         magma_zdisplace_pointers(dA_displ, dA_array, ldda, i, i, batchCount, queue);
-        zset_pointer(dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue);
+        magma_zset_pointer( dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue );
 #if 0
         /* buggy: TODO */
         arginfo = magma_zgetrf_panel_nopiv_batched(
@@ -218,7 +218,7 @@ magma_zgetrf_nopiv_batched(
         {
             // swap right side and trsm     
             //magma_zdisplace_pointers(dA_displ, dA_array, ldda, i, i+ib, batchCount);
-            zset_pointer(dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue); // I don't think it is needed Azzam
+            magma_zset_pointer( dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue ); // I don't think it is needed Azzam
 
             magma_zdisplace_pointers(dA_displ, dA_array, ldda, i, i, batchCount, queue);
             magma_zdisplace_pointers(dW0_displ, dA_array, ldda, i, i+ib, batchCount, queue);

@@ -69,9 +69,9 @@ magma_zgeqrf_panel_batched(
                     dT_array, ldt, 
                     batchCount, queue);
 
-            magma_zdisplace_pointers(dW1_displ, dA_array, ldda, j, j + jb, batchCount, queue); 
-            zset_pointer(dW2_displ,  dwork, 1, 0, 0,  ldw*n, batchCount, queue );
-            zset_pointer(dW3_displ, dwork + ldw*n*batchCount, 1, 0, 0,  ldw*n, batchCount, queue );    
+            magma_zdisplace_pointers( dW1_displ, dA_array, ldda, j, j + jb, batchCount, queue );
+            magma_zset_pointer( dW2_displ,  dwork, 1, 0, 0,  ldw*n, batchCount, queue );
+            magma_zset_pointer( dW3_displ, dwork + ldw*n*batchCount, 1, 0, 0,  ldw*n, batchCount, queue );
 
             magma_zlarfb_gemm_batched( 
                     MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,

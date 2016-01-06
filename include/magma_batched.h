@@ -43,12 +43,13 @@ void stepinit_ipiv(magma_int_t **ipiv_array,
                  magma_int_t pm,
                  magma_int_t batchCount, magma_queue_t queue);
 
-void set_ipointer(magma_int_t **output_array,
-                 magma_int_t *input,
-                 magma_int_t lda,
-                 magma_int_t row, magma_int_t column, 
-                 magma_int_t batchSize,
-                 magma_int_t batchCount, magma_queue_t queue);
+void magma_iset_pointer(
+    magma_int_t **output_array,
+    magma_int_t *input,
+    magma_int_t lda,
+    magma_int_t row, magma_int_t column, 
+    magma_int_t batchSize,
+    magma_int_t batchCount, magma_queue_t queue);
 
 #ifdef __cplusplus
 }

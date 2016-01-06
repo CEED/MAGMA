@@ -163,8 +163,8 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             magma_zsetmatrix( M, column, h_R, lda,  d_A, ldda );
-            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue);
-            zset_pointer(dtau_array, dtau_magma, 1, 0, 0, min_mn, batchCount, opts.queue);
+            magma_zset_pointer( dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue );
+            magma_zset_pointer( dtau_array, dtau_magma, 1, 0, 0, min_mn, batchCount, opts.queue );
     
             magma_time = magma_sync_wtime( opts.queue );
     
@@ -186,8 +186,8 @@ int main( int argc, char** argv)
             /* cublasZgeqrfBatched is only available from CUBLAS v6.5 */
             #if CUDA_VERSION >= 6050
             magma_zsetmatrix( M, column, h_R, lda,  d_A, ldda );
-            zset_pointer(dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue);
-            zset_pointer(dtau_array, dtau_cublas, 1, 0, 0, min_mn, batchCount, opts.queue);
+            magma_zset_pointer( dA_array, d_A, 1, 0, 0, ldda*N, batchCount, opts.queue );
+            magma_zset_pointer( dtau_array, dtau_cublas, 1, 0, 0, min_mn, batchCount, opts.queue );
 
             cublas_time = magma_sync_wtime( opts.queue );
     

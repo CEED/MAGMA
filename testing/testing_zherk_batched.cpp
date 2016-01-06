@@ -123,8 +123,8 @@ int main( int argc, char** argv)
             magma_zsetmatrix( An, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N*batchCount, h_C, ldc, d_C, lddc );
             
-            zset_pointer(A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, opts.queue);
-            zset_pointer(C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, opts.queue);
+            magma_zset_pointer( A_array, d_A, lda, 0, 0, ldda*Ak, batchCount, opts.queue );
+            magma_zset_pointer( C_array, d_C, ldc, 0, 0, lddc*N,  batchCount, opts.queue );
 
             magma_time = magma_sync_wtime( opts.queue );
             magmablas_zherk_batched(opts.uplo, opts.transA, N, K,

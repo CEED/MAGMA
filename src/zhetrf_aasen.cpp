@@ -371,8 +371,8 @@ magma_zhetrf_aasen(magma_uplo_t uplo, magma_int_t cpu_panel, magma_int_t n,
                         #ifdef USE_BATCHED_ZGETRF
                         //dA_array[0] = dA(j+1,j);
                         //dipiv_array[0] = dipiv_magma;
-                        zset_pointer(dA_array, dA(j+1,j), ldda, 0, 0, 0, 1);
-                        set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min(ib,jb), 1);
+                        magma_zset_pointer( dA_array, dA(j+1,j), ldda, 0, 0, 0, 1 );
+                        magma_iset_pointer( dipiv_array, dipiv_magma, 1, 0, 0, min(ib,jb), 1 );
                         iinfo = magma_zgetrf_batched( ib, jb, dA_array, ldda, dipiv_array, dinfo_magma, 1);
                         // copy ipiv to CPU since permu vector is generated on CPU, for now..
                         magma_igetvector_async( min(ib,jb), dipiv_magma, 1, &ipiv[(1+j)*nb], 1, queues[0]);

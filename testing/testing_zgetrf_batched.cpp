@@ -137,8 +137,8 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             magma_zsetmatrix( M, columns, h_R, lda, dA, ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda*N, batchCount, opts.queue);
-            set_ipointer(dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount, opts.queue);
+            magma_zset_pointer( dA_array, dA, ldda, 0, 0, ldda*N, batchCount, opts.queue );
+            magma_iset_pointer( dipiv_array, dipiv_magma, 1, 0, 0, min_mn, batchCount, opts.queue );
             
             magma_time = magma_sync_wtime( opts.queue );
             info = magma_zgetrf_batched( M, N, dA_array, ldda, dipiv_array,  dinfo_magma, batchCount, opts.queue);
@@ -167,7 +167,7 @@ int main( int argc, char** argv)
                Performs operation using CUBLAS
                =================================================================== */
             magma_zsetmatrix( M, columns, h_R, lda, dA,  ldda );
-            zset_pointer(dA_array, dA, ldda, 0, 0, ldda * N, batchCount, opts.queue);
+            magma_zset_pointer( dA_array, dA, ldda, 0, 0, ldda * N, batchCount, opts.queue );
 
             cublas_time = magma_sync_wtime( opts.queue );
             if (M == N ) {

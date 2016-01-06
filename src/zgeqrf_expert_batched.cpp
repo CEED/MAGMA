@@ -293,9 +293,9 @@ magma_zgeqrf_expert_batched(
             //dwork is used in panel factorization and trailing matrix update
             //reset dW4_displ
             ldw = nb;
-            zset_pointer(dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
+            magma_zset_pointer( dW4_displ, dwork, 1, 0, 0,  ldw*n, batchCount, queue );
             offset = ldw*n*batchCount;
-            zset_pointer(dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
+            magma_zset_pointer( dW5_displ, dwork + offset, 1, 0, 0,  ldw*n, batchCount, queue );    
 
             // set the diagonal of v as one and the upper triangular part as zero already set inside geqrf_panel
             //magmablas_zlaset_batched( MagmaUpper, ib, ib, MAGMA_Z_ZERO, MAGMA_Z_ONE, dW0_displ, ldda, batchCount, queue ); 

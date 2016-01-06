@@ -196,9 +196,9 @@ magma_zgetrf_batched(
 
     magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
     magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
-    zset_pointer(dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue);
-    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
-    set_ipointer(pivinfo_array, pivinfo, 1, 0, 0, m, batchCount, queue);
+    magma_zset_pointer( dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue );
+    magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
+    magma_iset_pointer( pivinfo_array, pivinfo, 1, 0, 0, m, batchCount, queue );
 
     magma_int_t streamid;
     const magma_int_t nbstreams=10;
@@ -281,7 +281,7 @@ magma_zgetrf_batched(
         {
             // swap right side and trsm     
             magma_zdisplace_pointers(dA_displ, dA_array, ldda, i, i+ib, batchCount, queue);
-            zset_pointer(dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue); // I don't think it is needed Azzam
+            magma_zset_pointer( dwork_array, dwork, nb, 0, 0, dwork_msize, batchCount, queue ); // I don't think it is needed Azzam
             magma_zlaswp_rowparallel_batched( n-(i+ib), dA_displ, ldda,
                     dwork_array, nb,
                     i, i+ib,

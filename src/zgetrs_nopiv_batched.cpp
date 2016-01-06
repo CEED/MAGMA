@@ -167,8 +167,8 @@ magma_zgetrs_nopiv_batched(
 
     magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
     magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
-    zset_pointer(dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue);
-    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
+    magma_zset_pointer( dwork_array, dwork, n, 0, 0, dwork_msize, batchCount, queue );
+    magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
 
     magma_zdisplace_pointers(dA_displ, dA_array, ldda, 0, 0, batchCount, queue);
     magma_zdisplace_pointers(dB_displ, dB_array, lddb, 0, 0, batchCount, queue);

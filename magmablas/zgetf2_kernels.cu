@@ -213,12 +213,12 @@ magma_int_t magma_izamax_lg_batched(magma_int_t length, magmaDoubleComplex **x_a
     magma_malloc((void**)&id_pool_array, batchCount * sizeof(*id_pool_array));
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
-    dset_pointer(data_pool_array, data_pool, 1, 0, 0, num_blocks, batchCount, queue);
+    magma_dset_pointer( data_pool_array, data_pool, 1, 0, 0, num_blocks, batchCount, queue );
 #else
-    sset_pointer(data_pool_array, data_pool, 1, 0, 0, num_blocks, batchCount, queue);
+    magma_sset_pointer( data_pool_array, data_pool, 1, 0, 0, num_blocks, batchCount, queue );
 #endif 
 
-    set_ipointer(id_pool_array, id_pool, 1, 0, 0, num_blocks, batchCount, queue);
+    magma_iset_pointer( id_pool_array, id_pool, 1, 0, 0, num_blocks, batchCount, queue );
 
 
     if ( num_blocks > zamax) 

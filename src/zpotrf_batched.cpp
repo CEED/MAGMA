@@ -153,8 +153,8 @@ magma_zpotrf_lg_batched(
     }
     magmablas_zlaset_q( MagmaFull, invA_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dinvA, invA_msize, queue );
     magmablas_zlaset_q( MagmaFull, dwork_msize, batchCount, MAGMA_Z_ZERO, MAGMA_Z_ZERO, dwork, dwork_msize, queue );
-    zset_pointer(dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue);
-    zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
+    magma_zset_pointer( dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue );
+    magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
 
 
     magma_int_t streamid;
@@ -179,8 +179,8 @@ magma_zpotrf_lg_batched(
             //  panel factorization
             //===============================================
             magma_zdisplace_pointers(dA_displ, dA_array, ldda, j, j, batchCount, queue);
-            zset_pointer(dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue);
-            zset_pointer(dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue);
+            magma_zset_pointer( dwork_array, dwork, 1, 0, 0, dwork_msize, batchCount, queue );
+            magma_zset_pointer( dinvA_array, dinvA, TRI_NB, 0, 0, invA_msize, batchCount, queue );
 
 
             if (recnb == nb)

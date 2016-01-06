@@ -98,8 +98,8 @@ int main(int argc, char **argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*N, batchCount, opts.queue);
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue);
+            magma_zset_pointer( d_A_array, d_A, ldda, 0, 0, ldda*N, batchCount, opts.queue );
+            magma_zset_pointer( d_B_array, d_B, lddb, 0, 0, lddb*nrhs, batchCount, opts.queue );
             
             gpu_time = magma_sync_wtime( opts.queue );
             info = magma_zgesv_nopiv_batched( N, nrhs, d_A_array, ldda, d_B_array, lddb, dinfo_magma, batchCount, opts.queue );

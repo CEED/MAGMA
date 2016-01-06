@@ -565,7 +565,7 @@ magmablas_ztrsv_batched(
     magma_zmalloc( &x, size_x * batchCount);
     magma_malloc((void**)&x_array,  batchCount * sizeof(*x_array));
 
-    zset_pointer(x_array, x, n, 0, 0, size_x, batchCount, queue);
+    magma_zset_pointer( x_array, x, n, 0, 0, size_x, batchCount, queue );
 
     magmablas_ztrsv_work_batched(uplo, trans, diag, n, A_array, lda, b_array, incb, x_array, batchCount, queue);
 

@@ -135,8 +135,8 @@ int main( int argc, char** argv)
             magma_zmalloc( &dinvA, dinvA_batchSize * batchCount);
             magma_zmalloc( &dwork, dwork_batchSize * batchCount );
     
-            zset_pointer(dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, opts.queue);
-            zset_pointer(dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, opts.queue);
+            magma_zset_pointer( dwork_array, dwork, lddb, 0, 0, dwork_batchSize, batchCount, opts.queue );
+            magma_zset_pointer( dinvA_array, dinvA, magma_roundup( Ak, TRI_NB ), 0, 0, dinvA_batchSize, batchCount, opts.queue );
 
             memset(h_Bmagma, 0, batchCount*ldb*N*sizeof(magmaDoubleComplex));
             magmablas_zlaset( MagmaFull, lddb, N*batchCount, c_zero, c_zero, dwork, lddb);
@@ -165,9 +165,9 @@ int main( int argc, char** argv)
             magma_zsetmatrix( Ak, Ak*batchCount, h_A, lda, d_A, ldda );
             magma_zsetmatrix( M,  N*batchCount, h_B, ldb, d_B, lddb );
 
-            zset_pointer(d_A_array, d_A, ldda, 0, 0, ldda*Ak, batchCount, opts.queue);
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue);
-            zset_pointer(dwork_array, dwork, lddb, 0, 0, lddb*N, batchCount, opts.queue);
+            magma_zset_pointer( d_A_array, d_A, ldda, 0, 0, ldda*Ak, batchCount, opts.queue );
+            magma_zset_pointer( d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue );
+            magma_zset_pointer( dwork_array, dwork, lddb, 0, 0, lddb*N, batchCount, opts.queue );
 
             magma_time = magma_sync_wtime( opts.queue );
             #if 1
@@ -200,7 +200,7 @@ int main( int argc, char** argv)
                Performs operation using CUBLAS
                =================================================================== */
             magma_zsetmatrix( M, N*batchCount, h_B, ldb, d_B, lddb );
-            zset_pointer(d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue);
+            magma_zset_pointer( d_B_array, d_B, lddb, 0, 0, lddb*N, batchCount, opts.queue );
 
             // CUBLAS version <= 6.0 has magmaDoubleComplex **            dA_array, no cast needed.
             // CUBLAS version    6.5 has magmaDoubleComplex const**       dA_array, requiring cast.

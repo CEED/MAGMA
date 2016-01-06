@@ -13,11 +13,12 @@
 
 #include "common_magma.h"
 ///////////////////////////////////////////////////////////////////////////////////////
-__global__ void kernel_set_pointer(magmaDoubleComplex **output_array,
-                 magmaDoubleComplex *input,
-                 magma_int_t lda,
-                 magma_int_t row, magma_int_t column, 
-                 magma_int_t batch_offset)
+__global__ void kernel_zset_pointer(
+    magmaDoubleComplex **output_array,
+    magmaDoubleComplex *input,
+    magma_int_t lda,
+    magma_int_t row, magma_int_t column, 
+    magma_int_t batch_offset)
 {
     output_array[blockIdx.x] =  input + blockIdx.x * batch_offset + row + column * lda;
     //printf("==> kernel_set_pointer input_array %p output_array %p  \n",input+ blockIdx.x * batch_offset,output_array[blockIdx.x]);
@@ -69,16 +70,16 @@ __global__ void kernel_set_pointer(magmaDoubleComplex **output_array,
 */
 
 extern "C"
-void zset_pointer(magmaDoubleComplex **output_array,
-                 magmaDoubleComplex *input,
-                 magma_int_t lda,
-                 magma_int_t row, magma_int_t column, 
-                 magma_int_t batch_offset,
-                 magma_int_t batchCount, 
-                 magma_queue_t queue)
-
+void magma_zset_pointer(
+    magmaDoubleComplex **output_array,
+    magmaDoubleComplex *input,
+    magma_int_t lda,
+    magma_int_t row, magma_int_t column, 
+    magma_int_t batch_offset,
+    magma_int_t batchCount, 
+    magma_queue_t queue)
 {
-    kernel_set_pointer
+    kernel_zset_pointer
         <<< batchCount, 1, 0, queue->cuda_stream() >>>
         (output_array, input, lda,  row, column, batch_offset);
 }
