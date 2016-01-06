@@ -42,6 +42,10 @@ o_ext      ?= o
 # ----------------------------------------
 # MAGMA-specific programs & flags
 
+ifeq ($(blas_fix),1)
+    LIB += -L./lib -lblas_fix
+endif
+
 LIBEXT     = $(LIBDIR) $(LIB)
 
 # preprocessor flags. See below for MAGMA_INC
@@ -50,6 +54,7 @@ CPPFLAGS   = $(INC) $(MAGMA_INC)
 CFLAGS    += -DHAVE_CUBLAS
 CXXFLAGS  += -DHAVE_CUBLAS
 
+# where testers look for MAGMA libraries
 RPATH      = -Wl,-rpath,../lib
 RPATH2     = -Wl,-rpath,../../lib
 
@@ -304,6 +309,12 @@ $(liblapacktest_a): $(liblapacktest_obj)
 
 # sparse requires libmagma
 $(libsparse_so): | $(libmagma_so)
+
+# if using blas_fix (e.g., on MacOS), libmagma requires libblas_fix
+ifeq ($(blas_fix),1)
+    $(libmagma_a):  | $(libblas_fix_a)
+    $(libmagma_so): | $(libblas_fix_a)
+endif
 
 
 # ----- testers
@@ -650,6 +661,7 @@ echo:
 	@echo "libsparse_a      $(libsparse_a)"
 	@echo "libsparse_so     $(libsparse_so)"
 	@echo "====="
+	@echo "blas_fix        $(blas_fix)"
 	@echo "libblas_fix_src $(libblas_fix_src)"
 	@echo "libblas_fix_a   $(libblas_fix_a)"
 	@echo "====="

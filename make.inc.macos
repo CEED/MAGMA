@@ -89,4 +89,5 @@ INC       = -I$(CUDADIR)/include
 # ========================================
 # replace single & single-complex BLAS functions with reference versions.
 # (i.e., functions that return float; subroutines do not need a fix.)
-LIB      := -L./lib -lblas_fix $(LIB)
+# Adds -lblas_fix to LIB; see Makefile.
+blas_fix = 1
