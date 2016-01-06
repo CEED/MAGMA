@@ -25,7 +25,7 @@ const magmaDoubleComplex MAGMA_Z_INF
                     std::numeric_limits<double>::infinity() );
 
 /** @return true if either real(x) or imag(x) is NAN. */
-bool magma_z_isnan( magmaDoubleComplex x )
+int magma_z_isnan( magmaDoubleComplex x )
 {
 #ifdef COMPLEX
     return isnan( real( x )) ||
@@ -37,7 +37,7 @@ bool magma_z_isnan( magmaDoubleComplex x )
 
 
 /** @return true if either real(x) or imag(x) is INF. */
-bool magma_z_isinf( magmaDoubleComplex x )
+int magma_z_isinf( magmaDoubleComplex x )
 {
 #ifdef COMPLEX
     return isinf( real( x )) ||
@@ -49,7 +49,7 @@ bool magma_z_isinf( magmaDoubleComplex x )
 
 
 /** @return true if either real(x) or imag(x) is NAN or INF. */
-bool magma_z_isnan_inf( magmaDoubleComplex x )
+int magma_z_isnan_inf( magmaDoubleComplex x )
 {
 #ifdef COMPLEX
     return isnan( real( x )) ||
