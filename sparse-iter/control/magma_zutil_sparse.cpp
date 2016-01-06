@@ -100,7 +100,7 @@ magma_zparse_opts(
     
     // fill in default values
     opts->input_format = Magma_CSR;
-    opts->blocksize = 0;
+    opts->blocksize = 32;
     opts->alignment = 1;
     opts->output_format = Magma_CSR;
     opts->input_location = Magma_CPU;
@@ -117,7 +117,7 @@ magma_zparse_opts(
     opts->solver_par.verbose = 0;
     opts->solver_par.version = 0;
     opts->solver_par.restart = 50;
-    opts->solver_par.num_eigenvalues = 32;
+    opts->solver_par.num_eigenvalues = 0;
     opts->precond_par.solver = Magma_NONE;
     #if defined(PRECISION_z) | defined(PRECISION_d)
         opts->precond_par.atol = 1e-16;

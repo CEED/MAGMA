@@ -347,8 +347,8 @@ magma_zgemvmdot_shfl(
         return magma_zgemvmdot(n,k,v,r,d1,d2,skp,queue);
 #else
         magma_zmdotc_shfl( n, k, v, r, d1, d2, skp, queue );
+#endif
     }
 
    return MAGMA_SUCCESS;
-#endif
 }

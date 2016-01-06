@@ -737,8 +737,8 @@ magma_zeigensolverinfo_init(
     solver_par->eigenvectors = NULL;
     solver_par->eigenvalues = NULL;
     if ( solver_par->solver == Magma_LOBPCG ) {
-        if( solver_par->eigenvalues==0 ){
-            solver_par->eigenvalues = 32;
+        if( solver_par->num_eigenvalues==0 ){
+            solver_par->num_eigenvalues = 32;
         }
         CHECK( magma_dmalloc_cpu( &solver_par->eigenvalues ,
                                 3*solver_par->num_eigenvalues ));
