@@ -847,7 +847,7 @@ magma_zprint_matrix(
                         printf( "             " );
                     }
                     // upper right corner
-                    for( j=A.num_rows-4; j < A.num_rows; j++ ) {
+                    for( j=A.num_cols-4; j < A.num_cols; j++ ) {
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
                         magma_index_t rbound = min( A.row[i+1], A.row[i+1]);
                         magma_index_t lbound = max( A.row[i+1]-4, A.row[i]);
@@ -879,7 +879,7 @@ magma_zprint_matrix(
                     }
                     printf( "             ");
                     // lower right corner
-                    for( j=A.num_rows-4; j < A.num_rows; j++ ) {
+                    for( j=A.num_cols-4; j < A.num_cols; j++ ) {
                         magmaDoubleComplex tmp = MAGMA_Z_ZERO;
                         magma_index_t rbound = min( A.row[i+1], A.row[i+1]);
                         magma_index_t lbound = max( A.row[i+1]-4, A.row[i]);

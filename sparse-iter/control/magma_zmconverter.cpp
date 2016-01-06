@@ -1241,7 +1241,7 @@ magma_zmconvert(
             
             
             // conversion using CUSPARSE
-            cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
+            cusparseZcsr2csc(cusparseHandle, A.num_cols, A.num_rows, A.nnz,
                              A.dval, A.dcol, A.drow,
                              B->dval, B->dcol, B->drow,
                              CUSPARSE_ACTION_NUMERIC,

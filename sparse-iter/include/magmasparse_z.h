@@ -167,6 +167,12 @@ magma_zmcsrcompressor(
     magma_queue_t queue );
 
 magma_int_t
+magma_zmshrink(
+    magma_z_matrix A,
+    magma_z_matrix *B,
+    magma_queue_t queue );
+
+magma_int_t
 magma_zmcsrcompressor_gpu( 
     magma_z_matrix *A,
     magma_queue_t queue );
@@ -1029,8 +1035,15 @@ magma_zlobpcg(
     magma_z_preconditioner *precond_par, 
     magma_queue_t queue );
 
-
-
+/*/////////////////////////////////////////////////////////////////////////////
+ -- MAGMA_SPARSE LSQR (Data on GPU)
+*/
+magma_int_t
+magma_zlsqr(
+    magma_z_matrix A, magma_z_matrix b, magma_z_matrix *x,
+    magma_z_solver_par *solver_par,
+    magma_z_preconditioner *precond_par,
+    magma_queue_t queue );
 
 /*/////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE preconditioners (Data on GPU)

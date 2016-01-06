@@ -58,7 +58,7 @@ int main(  int argc, char** argv )
         }
 
         // for the eigensolver case
-        zopts.solver_par.ev_length = A.num_rows;
+        zopts.solver_par.ev_length = A.num_cols;
         CHECK( magma_zeigensolverinfo_init( &zopts.solver_par, queue ));
 
         // scale matrix
@@ -87,7 +87,7 @@ int main(  int argc, char** argv )
         CHECK( magma_zmtransfer( B, &B_d, Magma_CPU, Magma_DEV, queue ));
 
         // vectors and initial guess
-        CHECK( magma_zvinit( &b, Magma_DEV, A.num_cols, 1, one, queue ));
+        CHECK( magma_zvinit( &b, Magma_DEV, A.num_rows, 1, one, queue ));
         //magma_zvinit( &x, Magma_DEV, A.num_cols, 1, one, queue );
         //magma_z_spmv( one, B_d, x, zero, b, queue );                 //  b = A x
         //magma_zmfree(&x, queue );

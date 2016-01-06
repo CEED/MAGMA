@@ -65,6 +65,10 @@ libsparse_zsrc += \
 #	$(cdir)/zcgeig.cpp                    \
 #	$(cdir)/zlancsoz.cpp                  \
 
+# Krylov space least squares
+libsparse_zsrc += \
+	$(cdir)/zlsqr.cpp                   \
+
 # Mixed-precision solvers
 #libsparse_zsrc += \
 #	$(cdir)/zcpbicgstab.cpp               \

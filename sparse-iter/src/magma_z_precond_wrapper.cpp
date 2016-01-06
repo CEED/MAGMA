@@ -102,7 +102,7 @@ cleanup:
     Purpose
     -------
 
-    For a given input matrix A and vectors x, y and the
+    For a given input matrix M and vectors x, y and the
     preconditioner parameters, the respective preconditioner
     is preprocessed.
     E.g. for Jacobi: the scaling-vetor, for ILU the factorization.
@@ -112,7 +112,7 @@ cleanup:
 
     @param[in]
     A           magma_z_matrix
-                sparse matrix A
+                sparse matrix M
 
     @param[in]
     b           magma_z_matrix
@@ -137,12 +137,18 @@ magma_z_precondsetup(
 {
     magma_int_t info = 0;
     
+    
     //Chronometry
     real_Double_t tempo1, tempo2;
     
     tempo1 = magma_sync_wtime( queue );
     
-
+    if( A.num_rows != A.num_cols ){
+        printf("%% warning: non-square matrix.\n");
+        printf("%% Fallback: no preconditioner.\n");
+        precond->solver = Magma_NONE;
+    } 
+    
     if ( precond->solver == Magma_JACOBI ) {
         info = magma_zjacobisetup_diagscal( A, &(precond->d), queue );
     }
@@ -187,18 +193,20 @@ magma_z_precondsetup(
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
     if( 
-        ( solver->solver == Magma_PQMR || solver->solver == Magma_PBICG ) &&
+        ( solver->solver == Magma_PQMR  || 
+          solver->solver == Magma_PBICG ||
+          solver->solver == Magma_LSQR ) &&
         ( precond->solver == Magma_ILU      || 
             precond->solver == Magma_AILU   || 
             precond->solver == Magma_ICC    || 
-            precond->solver == Magma_AICC   ) ) {  // also prepare the transpose
+            precond->solver == Magma_AICC ) ) {  // also prepare the transpose
         info = magma_zcumilusetup_transpose( A, precond, queue );
     }
     
     tempo2 = magma_sync_wtime( queue );
     precond->setuptime += tempo2-tempo1;
     
-   return info;
+    return info;
 }
 
 
@@ -251,17 +259,17 @@ magma_z_applyprecond(
     magma_z_matrix tmp={Magma_CSR};
 
     if ( precond->solver == Magma_JACOBI ) {
-        CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
+        CHECK( magma_zjacobi_diagscal( b.num_rows, precond->d, b, x, queue ));
     }
     else if ( precond->solver == Magma_PASTIX ) {
         //CHECK( magma_zapplypastix( b, x, precond, queue ));
         info = MAGMA_ERR_NOT_SUPPORTED;
     }
     else if ( precond->solver == Magma_ILU ) {
-        CHECK( magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
+        CHECK( magma_zvinit( &tmp, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
     }
     else if ( precond->solver == Magma_ICC ) {
-        CHECK( magma_zvinit( &tmp, Magma_DEV, A.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
+        CHECK( magma_zvinit( &tmp, Magma_DEV, b.num_rows, b.num_cols, MAGMA_Z_ZERO, queue ));
     }
     else if ( precond->solver == Magma_NONE ) {
         magma_zcopy( b.num_rows*b.num_cols, b.dval, 1, x->dval, 1, queue );      //  x = b
@@ -324,7 +332,7 @@ magma_z_applyprecond_left(
     magma_int_t info = 0;
     if( trans == MagmaNoTrans ) {
         if ( precond->solver == Magma_JACOBI ) {
-            CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
+            CHECK( magma_zjacobi_diagscal( b.num_rows, precond->d, b, x, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
                     precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {
@@ -362,7 +370,7 @@ magma_z_applyprecond_left(
         }
     } else if ( trans == MagmaTrans ){
         if ( precond->solver == Magma_JACOBI ) {
-            CHECK( magma_zjacobi_diagscal( A.num_rows, precond->d, b, x, queue ));
+            CHECK( magma_zjacobi_diagscal( b.num_rows, precond->d, b, x, queue ));
         }
         else if ( ( precond->solver == Magma_ILU ||
                     precond->solver == Magma_AILU ) && precond->maxiter >= 50 ) {

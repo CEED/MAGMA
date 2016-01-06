@@ -208,6 +208,9 @@ magma_zparse_opts(
             else if ( strcmp("LOBPCG", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_LOBPCG;
             }
+            else if ( strcmp("LSQR", argv[i]) == 0 ) {
+                opts->solver_par.solver = Magma_LSQR;
+            }
             else if ( strcmp("JACOBI", argv[i]) == 0 ) {
                 opts->solver_par.solver = Magma_JACOBI;
             }
@@ -418,6 +421,7 @@ magma_zparse_opts(
          opts->solver_par.solver != Magma_PTFQMRMERGE &&
          opts->solver_par.solver != Magma_PQMR &&
          opts->solver_par.solver != Magma_PBICG &&
+         opts->solver_par.solver != Magma_LSQR &&
          opts->solver_par.solver != Magma_LOBPCG ){
                     opts->precond_par.solver = Magma_NONE;
          }

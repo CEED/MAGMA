@@ -124,6 +124,9 @@ magma_zsolverinfo(
             case  Magma_QMR:
                     printf("%%  QMR performance analysis every %d iteration\n",
                                                                         int(k) ); break;
+            case  Magma_LSQR:
+                    printf("%%  LSQR performance analysis every %d iteration\n",
+                                                                        int(k) ); break;
             case  Magma_PQMR:
                     printf("%%  PQMR performance analysis every %d iteration\n",
                                                                         int(k) ); break;
@@ -212,6 +215,7 @@ magma_zsolverinfo(
             case  Magma_PCGSMERGE:
             case  Magma_QMR:
             case  Magma_QMRMERGE:
+            case  Magma_LSQR:
             case  Magma_PQMR:
             case  Magma_PQMRMERGE:
             case  Magma_TFQMR:
@@ -297,6 +301,8 @@ magma_zsolverinfo(
         case  Magma_QMR:
         case  Magma_QMRMERGE:
             printf("%% QMR solver summary:\n"); break;
+        case  Magma_LSQR:
+            printf("%% LSQR solver summary:\n"); break;
         case  Magma_PQMR:
         case  Magma_PQMRMERGE:
             printf("%% PQMR solver summary:\n"); break;

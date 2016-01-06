@@ -357,7 +357,6 @@ magma_zmtransposeconjugate(
     cusparseMatDescr_t descrA=NULL;
     cusparseMatDescr_t descrB=NULL;
     
-    
     magma_z_matrix ACSR={Magma_CSR}, BCSR={Magma_CSR};
     magma_z_matrix A_d={Magma_CSR}, B_d={Magma_CSR};
 
@@ -370,7 +369,6 @@ magma_zmtransposeconjugate(
         B->num_cols        = A.num_rows;  // transposed
         B->nnz             = A.nnz;
         B->true_nnz = A.true_nnz;
-        
         if ( A.fill_mode == MagmaFull ) {
             B->fill_mode = MagmaFull;
         }
@@ -380,7 +378,6 @@ magma_zmtransposeconjugate(
         else if ( A.fill_mode == MagmaUpper ) {
             B->fill_mode = MagmaLower;
         }
-        
         B->dval = NULL;
         B->drow = NULL;
         B->dcol = NULL;
@@ -389,7 +386,6 @@ magma_zmtransposeconjugate(
         CHECK( magma_zmalloc( &B->dval, B->nnz ));
         CHECK( magma_index_malloc( &B->drow, B->num_rows + 1 ));
         CHECK( magma_index_malloc( &B->dcol, B->nnz ));
-        
         // CUSPARSE context //
         CHECK_CUSPARSE( cusparseCreate( &handle ));
         CHECK_CUSPARSE( cusparseSetStream( handle, queue->cuda_stream() ));
@@ -405,14 +401,13 @@ magma_zmtransposeconjugate(
                           CUSPARSE_ACTION_NUMERIC,
                           CUSPARSE_INDEX_BASE_ZERO) );
         CHECK( magma_zmconjugate( B, queue ));
-        
-    } else if ( A.storage_type == Magma_CSR && A.memory_location == Magma_CPU ){
+    } else if ( A.memory_location == Magma_CPU ){
         CHECK( magma_zmtransfer( A, &A_d, A.memory_location, Magma_DEV, queue ));
-        CHECK( magma_z_cucsrtranspose( A_d, &B_d, queue ));
+        CHECK( magma_zmtransposeconjugate( A_d, &B_d, queue ));
         CHECK( magma_zmtransfer( B_d, B, Magma_DEV, A.memory_location, queue ));
     } else {
         CHECK( magma_zmconvert( A, &ACSR, A.storage_type, Magma_CSR, queue ));
-        CHECK( magma_z_cucsrtranspose( ACSR, &BCSR, queue ));
+        CHECK( magma_zmtransposeconjugate( ACSR, &BCSR, queue ));
         CHECK( magma_zmconvert( BCSR, B, Magma_CSR, A.storage_type, queue ));
     }
 cleanup:
