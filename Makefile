@@ -43,7 +43,8 @@ o_ext      ?= o
 # MAGMA-specific programs & flags
 
 ifeq ($(blas_fix),1)
-    LIB += -L./lib -lblas_fix
+    # prepend -lblas_fix to LIB (it must come before LAPACK library/framework)
+    LIB := -L./lib -lblas_fix $(LIB)
 endif
 
 LIBEXT     = $(LIBDIR) $(LIB)
