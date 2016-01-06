@@ -154,9 +154,10 @@ parser.add_option(      '--tol',        action='store',      dest='tol',        
 parser.add_option(      '--dev',        action='store',      dest='dev',        help='set GPU device to use')
 parser.add_option(      '--batch',      action='store',      dest='batch',      help='batch count for batched tests', default='100')
 parser.add_option(      '--niter',      action='store',      dest='niter',      help='number of iterations to repeat', default='1')
-parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests', default='2')
+parser.add_option(      '--ngpu',       action='store',      dest='ngpu',       help='number of GPUs for multi-GPU tests; add --mgpu to run only multi-GPU tests', default='2')
 parser.add_option(      '--null-stream',action='store_true', dest='null_stream',help='use null stream (for verifying old behavior)')
 
+# options to specify sizes
 parser.add_option(      '--xsmall',     action='store_true', dest='xsmall',     help='run very few, extra small tests, N=25:100:25, 32:128:32')
 parser.add_option('-s', '--small',      action='store_true', dest='small',      help='run small  tests, N < 300')
 parser.add_option('-m', '--medium',     action='store_true', dest='med',        help='run medium tests, N < 1000')
@@ -164,6 +165,7 @@ parser.add_option('-l', '--large',      action='store_true', dest='large',      
 parser.add_option('-N',                 action='append',     dest='N',          help='run specific sizes; repeatable', default=[])
 parser.add_option(      '--range',      action='append',     dest='range',      help='run specific sizes; repeatable', default=[])
 
+# options to select classes of routines
 parser.add_option(      '--blas',       action='store_true', dest='blas',       help='run BLAS tests')
 parser.add_option(      '--aux',        action='store_true', dest='aux',        help='run auxiliary routine tests')
 parser.add_option(      '--chol',       action='store_true', dest='chol',       help='run Cholesky factorization & solver tests')
@@ -175,14 +177,16 @@ parser.add_option(      '--sygv',       action='store_true', dest='sygv',       
 parser.add_option(      '--geev',       action='store_true', dest='geev',       help='run non-symmetric eigenvalue tests')
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
-parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests')
+parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests; add --ngpu to specify number of GPUs')
 
+# options to select subset of commands
 parser.add_option(      '--itype',      action='store',      dest='itype',      help='select runs matching itype',   default=0 )
 parser.add_option(      '--version',    action='store',      dest='version',    help='select runs matching version', default=0 )
 parser.add_option('-U', '--upper',      action='store_true', dest='upper',      help='select runs matching upper',   default=None )
 parser.add_option('-L', '--lower',      action='store_true', dest='lower',      help='select runs matching lower',   default=None )
 parser.add_option('-J', '--jobz',       action='store',      dest='jobz',       help='select runs matching jobz (-JV, -JN)', default=None )
 parser.add_option('-D', '--diag',       action='store',      dest='diag',       help='select runs matching diag (-DU, -DN)', default=None )
+parser.add_option(      '--fraction',   action='store',      dest='fraction',   help='select runs matching diag (-DU, -DN)', default=None )
 
 (opts, args) = parser.parse_args()
 
@@ -945,20 +949,6 @@ svd = (
 if ( opts.svd ):
 	tests += svd
 
-# ----------
-# multi-GPU (BLAS, LU, etc.) -- take from other sets
-mgpu = []
-for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
-	for row in s:
-		m1 = re.search( '(_m|_mgpu)$', row[0] )
-		m2 = re.search( '--ngpu',      row[1] )
-		if (m1 or m2):
-			mgpu.append( row )
-	# end
-# end
-if ( opts.mgpu ):
-	tests += mgpu
-
 batched = (
 	# ----------
 	# batched (BLAS, LU, etc.)
@@ -1037,6 +1027,21 @@ if ( opts.batched ):
 
 
 # ----------------------------------------------------------------------
+# multi-GPU (BLAS, LU, etc.) -- take from other sets
+mgpu = []
+for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
+	for row in s:
+		m1 = re.search( '(_m|_mgpu)$', row[0] )
+		m2 = re.search( '--ngpu',      row[1] )
+		if (m1 or m2):
+			mgpu.append( row )
+	# end
+# end
+if ( opts.mgpu ):
+	tests += mgpu
+
+
+# ----------------------------------------------------------------------
 # select subset of commands
 options = []
 if (opts.itype):
@@ -1051,6 +1056,8 @@ if (opts.jobz):
 	options.append('-J%s' % (opts.jobz))
 if (opts.diag):
 	options.append('-D%s' % (opts.diag))
+if (opts.fraction):
+	options.append('--fraction %s' % (opts.fraction))
 
 if len(options) > 0:
 	tests2 = []
