@@ -95,6 +95,12 @@ magma_zmslice(
 {
     magma_int_t info = 0;
     
+    if( A.num_rows != A.num_cols ){
+        printf("%%  error: only supported for square matrices.\n");
+        info = MAGMA_ERR_NOT_SUPPORTED;
+        goto cleanup;
+    }
+    
     if ( A.memory_location == Magma_CPU
             && A.storage_type == Magma_CSR ){
         CHECK( magma_zmconvert( A, B, Magma_CSR, Magma_CSR, queue ) );
