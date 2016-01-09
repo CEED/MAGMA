@@ -12,8 +12,6 @@
 #include "common_magma.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
-
 #define NB_X         64
 #define NB_Y          4
 #define bank_shift   33
@@ -678,7 +676,7 @@ magmablas_zhemv_mgpu(
     
     // --------------------
     // CUDA ARCH 2.x (Fermi) version
-    int upper = (uplo == MagmaUpper);
+    bool upper = (uplo == MagmaUpper);
     
     magma_int_t offset_block_id = offset / NB_X;
     magma_int_t offset_gpu_id   = offset_block_id % ngpu;

@@ -15,7 +15,7 @@
 #include "batched_kernel_param.h"
 #include "magma_templates.h"
 
-#define PRECISION_z
+#define COMPLEX
 
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
@@ -260,7 +260,7 @@ static __device__ void zpotf2_device(int m, int n,
         __syncthreads();
 
         //zlacgv conjugates a complex vector of length iter. //TODO
-        #if defined(PRECISION_z) || defined(PRECISION_c)
+        #ifdef COMPLEX
         if (tx < iter)
         {
             sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
@@ -281,7 +281,7 @@ static __device__ void zpotf2_device(int m, int n,
         __syncthreads();  
 
         //zlacgv conjugates a complex vector of length iter.
-        #if defined(PRECISION_z) || defined(PRECISION_c)
+        #ifdef COMPLEX
         if (tx < iter)
         {
             sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
@@ -458,52 +458,4 @@ magma_zpotf2_tile_batched(
         (m, n, dA_array, lda, alpha, beta, info_array, gbstep);
 
     return arginfo;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" magma_int_t
-magma_zpotf2_tile(
-    magma_uplo_t uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex *dA, magma_int_t lda,
-    magma_int_t *info)
-{
-    *info = 0;
-    if ( uplo != MagmaUpper && uplo != MagmaLower) {
-        *info = -1;
-    } else if (m < 0 || n < 0 || m > POTF2_TILE_SIZE) {
-        *info = -2;
-    } else if (lda < max(1,m)) {
-        *info = -4;
-    } else if (m < n) {
-        *info = -10;
-    }
-    if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
-        *info = -1;
-    }
-
-
-    if (*info != 0) {
-        magma_xerbla( __func__, -(*info) );
-        return *info;
-    }
-
-    // Quick return if possible
-    if (m == 0 || n == 0) {
-        return *info;
-    }
-
-    magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex beta  = MAGMA_Z_ONE;
-
-    dim3 dimGrid(1);
-    dim3 threads(POTF2_TILE_SIZE, 1);
-    size_t shmem = sizeof(magmaDoubleComplex)*m*n; // + sizeof(double)*(POTF2_TILE_SIZE+1);
-
-    zpotf2_kernel
-        <<< dimGrid, threads, shmem, magmablasGetQueue()->cuda_stream() >>>
-        (m, n, dA, lda, alpha, beta, info);
-
-    return *info;
 }

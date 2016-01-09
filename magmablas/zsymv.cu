@@ -604,7 +604,7 @@ magmablas_zsymv_work(
 
     // --------------------
     // [sdc] precisions, or z precision with CUDA ARCH 2.x
-    int upper = (uplo == MagmaUpper);
+    bool upper = (uplo == MagmaUpper);
 
     magma_int_t blocks = magma_ceildiv( n, NB_X );
     magma_int_t lwmin  = ldda*blocks;
@@ -765,7 +765,7 @@ magmablas_zsymv(
 
     // --------------------
     // [sdc] precisions, or z precision with CUDA ARCH 2.x
-    int upper = (uplo == MagmaUpper);
+    bool upper = (uplo == MagmaUpper);
 
     /*
      * Test the input parameters.

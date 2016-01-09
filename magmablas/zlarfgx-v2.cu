@@ -168,8 +168,8 @@ magma_zlarfgtx_gpu_q(
     
     if (iter == 0) {
         magmaDoubleComplex tt = MAGMA_Z_ONE;
-        magmablas_zlacpy_q(MagmaUpperLower, 1, 1, dtau, 1, T+iter+iter*ldt, 1, queue);
-        magma_zsetmatrix_q(1,1, &tt,1, dx0,1, queue);
+        magmablas_zlacpy_q( MagmaFull, 1, 1, dtau, 1, T+iter+iter*ldt, 1, queue );
+        magma_zsetmatrix_q( 1, 1, &tt, 1, dx0, 1, queue );
     }
     else {
         /* Compute the iter-th column of T */

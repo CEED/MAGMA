@@ -17,8 +17,6 @@
 
 #include "magma_internal.h"
 
-#define PRECISION_z
-
 #ifdef HAVE_clBLAS
     #define dA( dev, i_, j_ )  dA[dev], ((i_) + (j_)*ldda)
 #else

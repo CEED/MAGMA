@@ -12,8 +12,6 @@
 #include "magma_internal.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
-
 // 512 is maximum number of threads for CUDA capability 1.x
 #define BLOCK_SIZE 512
 

@@ -21,6 +21,7 @@
 #define max_bs 64
 
 #define PRECISION_z
+#define COMPLEX
 
 
 /* ====================================================================== */
@@ -92,7 +93,7 @@ zlanhe_inf_kernel_lower(
             if ( i < tx ) {
                 la[i][tx] = la[tx][i];
             }
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             else if ( i == tx ) {
                 la[i][i] = MAGMA_Z_MAKE( MAGMA_Z_REAL( la[i][i] ), 0 );
             }
@@ -308,7 +309,7 @@ zlanhe_inf_kernel_upper(
             if ( i > tx ) {                            //#
                 la[i][tx] = la[tx][i];
             }
-            #if defined(PRECISION_z) || defined(PRECISION_c)
+            #ifdef COMPLEX
             else if ( i == tx ) {
                 la[i][i] = MAGMA_Z_MAKE( MAGMA_Z_REAL( la[i][i] ), 0 );
             }

@@ -47,7 +47,7 @@ magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
 //==============================================================================
 /*  ----------------------------------------------------------------------------- 
     Call 
-        magma_zgemv_kernel3<<< n, BLOCK_SIZE >>>(m, V, ldv, c, dwork, tau)
+        magma_zgemv_kernel3<<< n, BLOCK_SIZE, 0, queue->cuda_stream() >>>(m, V, ldv, c, dwork, tau)
     to compute
         ZGEMV( "Conjugate transpose", m, n, -tau[0], V, ldv, c, 1, zero, dwork, 1)
         and to set c[0] to 1.

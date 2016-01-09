@@ -10,9 +10,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
-
 //
 //      m, n - dimensions in the output (hA) matrix.
 //             This routine copies the dAT matrix from the GPU

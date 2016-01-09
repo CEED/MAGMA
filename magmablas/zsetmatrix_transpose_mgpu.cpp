@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#define PRECISION_z
-
 //
 //    m, n - dimensions in the source (input) matrix.
 //             This routine copies the hA matrix from the CPU

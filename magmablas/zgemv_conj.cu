@@ -12,8 +12,6 @@
 #include "common_magma.h"
 #include "commonblas_z.h"
 
-#define PRECISION_z
-
 #define num_threads 256
 
 
