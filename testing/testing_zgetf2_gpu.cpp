@@ -84,7 +84,7 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%%   M     N   CPU GFlop/s (ms)    GPU GFlop/s (ms)  Copy time (ms)  ||PA-LU||/(||A||*N)\n");
+    printf("%%   M     N   CPU Gflop/s (ms)    GPU Gflop/s (ms)  Copy time (ms)  ||PA-LU||/(||A||*N)\n");
     printf("%%======================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -108,7 +108,7 @@ int main( int argc, char** argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &N, h_A, &lda, h_R, &lda );
 
             real_Double_t set_time = magma_wtime();
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
@@ -119,7 +119,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
+                lapackf77_zgetrf( &M, &N, h_A, &lda, ipiv, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {
@@ -131,9 +131,9 @@ int main( int argc, char** argv)
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            gpu_time = magma_wtime();
-            magma_zgetf2_gpu( M, N, d_A, ldda, ipiv, &info);
-            gpu_time = magma_wtime() - gpu_time;
+            gpu_time = magma_sync_wtime( opts.queue );
+            magma_zgetf2_gpu( M, N, d_A, ldda, ipiv, opts.queue, &info );
+            gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
                 printf("magma_zgetf2_gpu returned error %d: %s.\n",

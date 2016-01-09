@@ -1233,6 +1233,7 @@ magma_int_t
 magma_zgetf2_gpu(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t *ipiv,
+    magma_queue_t queue,
     magma_int_t *info);
 
 magma_int_t
@@ -1516,6 +1517,7 @@ magma_int_t
 magma_zpotf2_gpu(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
+    magma_queue_t queue,
     magma_int_t *info);
 
 magma_int_t
