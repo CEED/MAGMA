@@ -1511,12 +1511,13 @@ subroutine magmaf_zgesv_nopiv_gpu( n, nrhs, dA, ldda, dB, lddb, info )
     integer          :: info
 end subroutine magmaf_zgesv_nopiv_gpu
 
-subroutine magmaf_zgetf2_gpu( m, n, dA, ldda, ipiv, info )
+subroutine magmaf_zgetf2_gpu( m, n, dA, ldda, ipiv, queue, info )
     integer          :: m
     integer          :: n
     magma_devptr_t   :: dA
     integer          :: ldda
     integer          :: ipiv(*)
+    integer          :: queue
     integer          :: info
 end subroutine magmaf_zgetf2_gpu
 
@@ -1779,11 +1780,12 @@ subroutine magmaf_zposv_gpu( uplo, n, nrhs, dA, ldda, dB, lddb, info )
     integer          :: info
 end subroutine magmaf_zposv_gpu
 
-subroutine magmaf_zpotf2_gpu( uplo, n, dA, ldda, info )
+subroutine magmaf_zpotf2_gpu( uplo, n, dA, ldda, queue, info )
     character        :: uplo
     integer          :: n
     magma_devptr_t   :: dA
     integer          :: ldda
+    integer          :: queue
     integer          :: info
 end subroutine magmaf_zpotf2_gpu
 
@@ -1904,6 +1906,18 @@ subroutine magmaf_zunmtr_gpu( side, uplo, trans, m, n, dA, ldda, tau, dC, lddc, 
     integer          :: ldwa
     integer          :: info
 end subroutine magmaf_zunmtr_gpu
+
+subroutine magmaf_z_isnan( x )
+    complex*16       :: x
+end subroutine magmaf_z_isnan
+
+subroutine magmaf_z_isinf( x )
+    complex*16       :: x
+end subroutine magmaf_z_isinf
+
+subroutine magmaf_z_isnan_inf( x )
+    complex*16       :: x
+end subroutine magmaf_z_isnan_inf
 
 subroutine magmaf_znan_inf( uplo, m, n, A, lda, cnt_nan, cnt_inf )
     character        :: uplo
