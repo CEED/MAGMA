@@ -132,9 +132,10 @@ int main( int argc, char** argv)
                 {
                     magma_int_t locinfo;
                     lapackf77_zpotrf( lapack_uplo_const(opts.uplo), &N, h_A + s * lda * N, &lda, &locinfo );
-                    if (locinfo != 0)
+                    if (locinfo != 0) {
                         printf("lapackf77_zpotrf matrix %d returned error %d: %s.\n",
                                (int) s, (int) locinfo, magma_strerror( locinfo ));
+                    }
                 }
 
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)

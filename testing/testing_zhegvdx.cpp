@@ -247,9 +247,10 @@ int main( int argc, char** argv)
                 #endif
             }
             gpu_time = magma_wtime() - gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zhegvdx returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             bool okay = true;
             if ( opts.check && opts.jobz != MagmaNoVec ) {
@@ -308,9 +309,10 @@ int main( int argc, char** argv)
                 //               #endif
                 //               iwork, liwork,
                 //               &info );
-                //if (info != 0)
+                //if (info != 0) {
                 //    printf("magma_zhegvdx returned error %d: %s.\n",
                 //           (int) info, magma_strerror( info ));
+                //}
                 //
                 //double maxw=0, diff=0;
                 //for (int j=0; j < m2; j++) {

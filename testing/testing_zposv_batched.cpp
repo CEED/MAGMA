@@ -119,8 +119,10 @@ int main(int argc, char **argv)
                     printf("magma_zposv_batched matrix %d returned internal error %d\n", i, (int)cpu_info[i] );
                 }
             }
-            if (info != 0)
-                printf("magma_zposv_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+            if (info != 0) {
+                printf("magma_zposv_batched returned argument error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             // Residual
@@ -166,10 +168,10 @@ int main(int argc, char **argv)
                 {
                     magma_int_t locinfo;
                     lapackf77_zposv( lapack_uplo_const(opts.uplo), &N, &nrhs, h_A + s * lda * N, &lda, h_B + s * ldb * nrhs, &ldb, &locinfo );
-                    if (locinfo != 0){
+                    if (locinfo != 0) {
                         printf("lapackf77_zposv matrix %d returned error %d: %s.\n", 
                                int(s), int(locinfo), magma_strerror( locinfo ));
-                        }
+                    }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
                     magma_set_lapack_numthreads(nthreads);

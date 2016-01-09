@@ -112,9 +112,10 @@ int main( int argc, char** argv )
                 lapackf77_zgeqrf( &M, &N, h_A, &M, tau2, h_work, &lhwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapack_zgeqrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 TESTING_FREE_CPU( tau2 );
             }
             
@@ -127,9 +128,10 @@ int main( int argc, char** argv )
             magma_zgeqrf2_mgpu( ngpu, M, N, d_lA, ldda, tau, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgeqrf2 returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb );
             

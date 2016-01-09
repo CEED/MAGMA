@@ -100,9 +100,10 @@ double get_residual(
     else {
         lapackf77_zhetrs( lapack_uplo_const(uplo), &n, &ione, A, &lda, ipiv, x, &n, &info );
     }
-    if (info != 0)
+    if (info != 0) {
         printf("lapackf77_zhetrs returned error %d: %s.\n",
                (int) info, magma_strerror( info ));
+    }
     // reset to original A
     init_matrix( nopiv, n, n, A, lda );
     
@@ -639,9 +640,10 @@ int main( int argc, char** argv)
                 lapackf77_zhetrf( lapack_uplo_const(opts.uplo), &N, h_A, &lda, ipiv, work, &lwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zhetrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 error_lapack = get_residual( nopiv, opts.uplo, N, h_A, lda, ipiv );
 
                 TESTING_FREE_CPU( work );
@@ -689,9 +691,10 @@ int main( int argc, char** argv)
                 //magma_zhetrf_hybrid( opts.uplo, N, h_A, lda, ipiv, work, lwork, &info);
             }
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zhetrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* =====================================================================
                Check the factorization

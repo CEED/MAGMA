@@ -159,9 +159,10 @@ int main( int argc, char** argv)
                                h_work, lwork, &info );
             }
             gpu_time = magma_wtime() - gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_dgeev returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
 
             /* =====================================================================
                Check the result
@@ -322,9 +323,10 @@ int main( int argc, char** argv)
                                    VL, lda, VR, lda,
                                    h_work, lwork, &info );
                 }
-                if (info != 0)
+                if (info != 0) {
                     printf("magma_dgeev (case V, V) returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 // ----------
                 // Compute eigenvalues only
@@ -342,9 +344,10 @@ int main( int argc, char** argv)
                 //                   &DUM, 1, &DUM, 1,
                 //                   h_work, lwork, &info );
                 //}
-                //if (info != 0)
+                //if (info != 0) {
                 //    printf("magma_dgeev (case N, N) returned error %d: %s.\n",
                 //           (int) info, magma_strerror( info ));
+                //}
                 //
                 //// Do test 5: W(full) = W(partial, W only)
                 //result[4] = 1;
@@ -367,9 +370,10 @@ int main( int argc, char** argv)
                                    &DUM, 1, LRE, lda,
                                    h_work, lwork, &info );
                 }
-                if (info != 0)
+                if (info != 0) {
                     printf("magma_dgeev (case N, V) returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 // Do test 6: W(full) = W(partial, W and VR)
                 result[5] = 1;
@@ -399,9 +403,10 @@ int main( int argc, char** argv)
                                    LRE, lda, &DUM, 1,
                                    h_work, lwork, &info );
                 }
-                if (info != 0)
+                if (info != 0) {
                     printf("magma_dgeev (case V, N) returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 // Do test 7: W(full) = W(partial, W and VL)
                 result[6] = 1;
@@ -430,9 +435,10 @@ int main( int argc, char** argv)
                                  VL, &lda, VR, &lda,
                                  h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_dgeev returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 // check | W_magma - W_lapack | / | W |
                 // need to sort eigenvalues first

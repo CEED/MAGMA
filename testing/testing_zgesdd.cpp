@@ -227,9 +227,10 @@ int main( int argc, char** argv)
                           #endif
                           iwork, &info );
             gpu_time = magma_wtime() - gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgesdd returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
 
             double eps = lapackf77_dlamch( "E" );
             double result[5] = { -1/eps, -1/eps, -1/eps, -1/eps, -1/eps };
@@ -337,9 +338,10 @@ int main( int argc, char** argv)
                                   #endif
                                   iwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgesdd returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 /* =====================================================================
                    Check the result compared to LAPACK

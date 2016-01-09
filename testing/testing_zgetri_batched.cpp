@@ -78,9 +78,10 @@ int main( int argc, char** argv)
             // query for workspace size
             lwork = -1;
             lapackf77_zgetri( &N, NULL, &lda, NULL, &tmp, &lwork, &info );
-            if (info != 0)
+            if (info != 0) {
                 printf("lapackf77_zgetri returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             lwork = magma_int_t( MAGMA_Z_REAL( tmp ));
             
             TESTING_MALLOC_CPU( cpu_info, magma_int_t,        batchCount );
@@ -146,13 +147,15 @@ int main( int argc, char** argv)
                 {
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&N, &N, h_Ainv + i*lda*N, &lda, ipiv + i*N, &locinfo);
-                    if (locinfo != 0)
+                    if (locinfo != 0) {
                         printf("lapackf77_zgetrf returned error %d: %s.\n",
                                (int) locinfo, magma_strerror( locinfo ));
+                    }
                     lapackf77_zgetri(&N, h_Ainv + i*lda*N, &lda, ipiv + i*N, work + i*lwork, &lwork, &locinfo );
-                    if (locinfo != 0)
+                    if (locinfo != 0) {
                         printf("lapackf77_zgetri returned error %d: %s.\n",
                                (int) locinfo, magma_strerror( locinfo ));
+                    }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
                     magma_set_lapack_numthreads(nthreads);

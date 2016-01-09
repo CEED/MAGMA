@@ -84,9 +84,10 @@ int main( int argc, char** argv)
             magma_zgelqf( M, N, h_R, lda, tau, h_work, lwork, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgelqf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
 
             /* =====================================================================
                Check the result, following zlqt01 except using the reduced Q.
@@ -139,9 +140,10 @@ int main( int argc, char** argv)
                 lapackf77_zgelqf( &M, &N, h_A, &lda, tau, h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapack_zgelqf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
             }
             
             /* =====================================================================

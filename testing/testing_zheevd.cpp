@@ -276,9 +276,10 @@ int main( int argc, char** argv)
                 #endif
             }
             gpu_time = magma_wtime() - gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zheevd returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             bool okay = true;
             if ( opts.check && opts.jobz != MagmaNoVec ) {
@@ -321,9 +322,10 @@ int main( int argc, char** argv)
                 //              #endif
                 //              iwork, liwork,
                 //              &info );
-                //if (info != 0)
+                //if (info != 0) {
                 //    printf("magma_zheevd returned error %d: %s.\n",
                 //           (int) info, magma_strerror( info ));
+                //}
                 //
                 //double maxw=0, diff=0;
                 //for( int j=0; j < N; j++ ) {
@@ -383,9 +385,10 @@ int main( int argc, char** argv)
                     lapackf77_zlacpy( "Full", &N, &N, h_Z, &lda, h_A, &lda );
                 }
                 cpu_time = magma_wtime() - cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zheevd returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 // compare eigenvalues
                 double maxw=0, diff=0;

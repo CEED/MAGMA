@@ -124,9 +124,10 @@ int main( int argc, char** argv)
                                 h_A, &lda, ipiv, h_X, &ldb, work, &lwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zhesv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 error_lapack = get_residual( opts.uplo, N, opts.nrhs, h_A, lda, ipiv, h_X, ldb, h_B, ldb );
 
                 TESTING_FREE_CPU( work );
@@ -144,9 +145,10 @@ int main( int argc, char** argv)
             magma_zhesv( opts.uplo, N, opts.nrhs, h_A, lda, ipiv, h_X, ldb, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zhesv returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* =====================================================================
                Check the factorization

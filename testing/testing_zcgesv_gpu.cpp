@@ -98,9 +98,10 @@ int main(int argc, char **argv)
                               d_WORKD, d_WORKS, &gesv_iter, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflopsS / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zcgesv returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             //              ERROR DP vs MIXED  - GPU
@@ -125,9 +126,10 @@ int main(int argc, char **argv)
             magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfdf = gflopsF / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgetrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             //                 Double Precision Solve
@@ -140,9 +142,10 @@ int main(int argc, char **argv)
             magma_zgetrs_gpu( opts.transA, N, nrhs, d_A, ldda, h_ipiv, d_B, lddb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfds = gflopsS / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgetrs returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             //                 Single Precision Factor
@@ -158,9 +161,10 @@ int main(int argc, char **argv)
             magma_cgetrf_gpu(N, N, d_As, ldda, h_ipiv, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfsf = gflopsF / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_cgetrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             //                 Single Precision Solve
@@ -174,9 +178,10 @@ int main(int argc, char **argv)
                               d_Bs, lddb, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perfss = gflopsS / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_cgetrs returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             printf("%5d %5d   %7.2f   %7.2f   %7.2f   %7.2f   %7.2f     %4d   %8.2e   %s\n",
                    (int) N, (int) nrhs,

@@ -86,9 +86,10 @@ int main(int argc, char **argv)
             magma_zgesv( N, nrhs, h_LU, lda, ipiv, h_X, ldb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgesv returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             // Residual
@@ -117,9 +118,10 @@ int main(int argc, char **argv)
                 lapackf77_zgesv( &N, &nrhs, h_LU, &lda, ipiv, h_X, &ldb, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgesv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 //Anorm = lapackf77_zlange("I", &N, &N,    h_A, &lda, work);
                 Xnorm = lapackf77_zlange("I", &N, &nrhs, h_X, &ldb, work);

@@ -194,9 +194,10 @@ int main(int argc, char **argv)
                 hwork, lhwork,
                 dwork, ldwork,
                 opts.ngpu, nb, queues );
-            if ( info != 0 )
+            if (info != 0) {
                 printf("magmablas_zhemv_mgpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             info = magmablas_zhemv_mgpu_sync(
                 opts.uplo, N,
@@ -208,9 +209,10 @@ int main(int argc, char **argv)
                 hwork, lhwork,
                 dwork, ldwork,
                 opts.ngpu, nb, queues );
-            if ( info != 0 )
+            if (info != 0) {
                 printf("magmablas_zhemv_sync returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             mgpu_time = magma_sync_wtime(0) - mgpu_time;
             mgpu_perf = gflops / mgpu_time;

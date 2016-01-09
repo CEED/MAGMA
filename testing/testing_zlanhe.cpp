@@ -154,9 +154,10 @@ int main( int argc, char** argv)
                 &N, h_A, &lda, h_work );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
-            if (norm_lapack < 0)
+            if (norm_lapack < 0) {
                 printf("lapackf77_zlanhe returned error %f: %s.\n",
                        norm_lapack, magma_strerror( (int) norm_lapack ));
+            }
             
             /* =====================================================================
                Check the result compared to LAPACK

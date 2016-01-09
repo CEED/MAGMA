@@ -123,9 +123,10 @@ int main( int argc, char** argv)
             magma_zgegqr_gpu( opts.version, M, N, d_A, ldda, dwork, h_rwork, &info );
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgegqr returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
 
             magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
 
@@ -151,9 +152,10 @@ int main( int argc, char** argv)
 
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zungqr returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 /* =====================================================================
                    Check the result compared to LAPACK

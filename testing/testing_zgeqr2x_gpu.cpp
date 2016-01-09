@@ -208,9 +208,10 @@ int main( int argc, char** argv)
                                   &M, &N, h_A, &lda, tau, h_work, &N );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgeqrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
 
                 /* =====================================================================
                    Check the result compared to LAPACK

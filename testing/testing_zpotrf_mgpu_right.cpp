@@ -118,8 +118,10 @@ int main( int argc, char** argv)
             //magma_zpotrf_mgpu(ngpu, opts.uplo, N, d_lA, ldda, &info);
             magma_zpotrf_mgpu_right(ngpu, opts.uplo, N, d_lA, ldda, &info);
             gpu_time = magma_wtime() - gpu_time;
-            if (info != 0)
-                printf("magma_zpotrf_gpu returned error %d.\n", (int) info);
+            if (info != 0) {
+                printf("magma_zpotrf_mgpu_right returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
+            }
             gpu_perf = gflops / gpu_time;
 
             if ( opts.check && info == 0) {
@@ -132,8 +134,10 @@ int main( int argc, char** argv)
                 //magma_zprint( N, N, h_A, lda );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
-                    printf("lapackf77_zpotrf returned error %d.\n", (int) info);
+                if (info != 0) {
+                    printf("lapackf77_zpotrf returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
+                }
 
                 /* =====================================================================
                    Check the result compared to LAPACK

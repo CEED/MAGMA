@@ -93,9 +93,10 @@ int main(int argc, char **argv)
             magma_zhesv_nopiv_gpu( opts.uplo, N, nrhs, d_A, ldda, d_B, lddb, &info );
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgesv_gpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             // Residual
@@ -129,9 +130,10 @@ int main(int argc, char **argv)
                                  h_A, &lda, ipiv, h_B, &ldb, hwork, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zhesv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,

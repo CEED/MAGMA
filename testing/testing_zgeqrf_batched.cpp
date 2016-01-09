@@ -175,9 +175,10 @@ int main( int argc, char** argv)
 
             magma_zgetmatrix( M, column, d_A, ldda, h_Amagma, lda);
 
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgeqrf_batched returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* ====================================================================
                Performs operation using CUBLAS
@@ -197,9 +198,10 @@ int main( int argc, char** argv)
             cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;
             cublas_perf = gflops / cublas_time;
 
-            if (cublas_info != 0)
+            if (cublas_info != 0) {
                 printf("cublasZgeqrfBatched returned error %d: %s.\n",
                        (int) cublas_info, magma_strerror( cublas_info ));
+            }
             #endif
 
             /* =====================================================================
@@ -218,9 +220,10 @@ int main( int argc, char** argv)
                 {
                     magma_int_t locinfo;
                     lapackf77_zgeqrf(&M, &N, h_A + s * lda * N, &lda, tau + s * min_mn, h_work + s * lwork, &lwork, &locinfo);
-                    if (locinfo != 0)
+                    if (locinfo != 0) {
                         printf("lapackf77_zgeqrf matrix %d returned error %d: %s.\n",
                                (int) s, (int) locinfo, magma_strerror( locinfo ));
+                    }
                 }
 
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
@@ -229,9 +232,10 @@ int main( int argc, char** argv)
                 
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgeqrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 /* =====================================================================
                    Check the MAGMA CUBLAS result compared to LAPACK

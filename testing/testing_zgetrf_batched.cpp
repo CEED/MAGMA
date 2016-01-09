@@ -195,8 +195,10 @@ int main( int argc, char** argv)
                 {
                     magma_int_t locinfo;
                     lapackf77_zgetrf(&M, &N, h_A + s * lda * N, &lda, ipiv + s * min_mn, &locinfo);
-                    if (locinfo != 0)
-                        printf("lapackf77_zgetrf matrix %d returned error %d: %s.\n", (int) s, (int) locinfo, magma_strerror( locinfo ));
+                    if (locinfo != 0) {
+                        printf("lapackf77_zgetrf matrix %d returned error %d: %s.\n",
+                               (int) s, (int) info, magma_strerror( info ));
+                    }
                 }
                 #if !defined (BATCHED_DISABLE_PARCPU) && defined(_OPENMP)
                     magma_set_lapack_numthreads(nthreads);

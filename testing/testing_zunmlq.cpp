@@ -99,9 +99,10 @@ int main( int argc, char** argv )
             
             // compute LQ factorization to get Householder vectors in A, tau
             magma_zgelqf( k, mm, A, lda, tau, W, lwork_max, &info );
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zgelqf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -112,9 +113,10 @@ int main( int argc, char** argv )
                               A, &lda, tau, C, &ldc, W, &lwork_max, &info );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("lapackf77_zunmlq returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -124,9 +126,10 @@ int main( int argc, char** argv )
             magma_zunmlq( side[iside], trans[itran],
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zunmlq (lwork query) returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max ) {
                 printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
@@ -139,9 +142,10 @@ int main( int argc, char** argv )
                           A, lda, tau, R, ldc, W, lwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info != 0)
+            if (info != 0) {
                 printf("magma_zunmlq returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
+            }
             
             /* =====================================================================
                compute relative error |QC_magma - QC_lapack| / |QC_lapack|

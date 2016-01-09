@@ -113,8 +113,10 @@ int main(int argc, char **argv)
                     printf("magma_zgesv_nopiv_batched matrix %d returned internal error %d\n",i, (int)cpu_info[i] );
                 }
             }
-            if (info != 0)
-                printf("magma_zgesv_nopiv_batched returned argument error %d: %s.\n", (int) info, magma_strerror( info ));
+            if (info != 0) {
+                printf("magma_zgesv_nopiv_batched returned argument error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
+            }
             
             //=====================================================================
             // Residual
@@ -150,9 +152,10 @@ int main(int argc, char **argv)
                 lapackf77_zgesv( &N, &nrhs, h_A, &lda, ipiv, h_B, &ldb, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info != 0)
+                if (info != 0) {
                     printf("lapackf77_zgesv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                }
                 
                 printf( "%10d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                         (int)batchCount, (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
