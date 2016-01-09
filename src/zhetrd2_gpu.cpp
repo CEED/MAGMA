@@ -75,8 +75,8 @@
 
     @param[out]
     A       (workspace) COMPLEX_16 array, dimension (LDA,N)
-            On exit the diagonal, the  upper part (UPLO=MagmaUpper)
-            or the lower part (UPLO=MagmaLower) are copies of DA
+            On exit the diagonal, the  upper part (if uplo=MagmaUpper)
+            or the lower part (if uplo=MagmaLower) are copies of DA
 
     @param[in]
     lda     INTEGER

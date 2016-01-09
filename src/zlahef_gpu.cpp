@@ -103,11 +103,11 @@
             interchanged and D(k:k+1,k:k+1) is a 2-by-2 diagonal block.
  
     @param[out]
-    dW      (workspace) COMPLEX*16 array, dimension (LDW,NB)
+    dW      (workspace) COMPLEX*16 array, dimension (LDDW,NB)
  
     @param[in]
     lddw    INTEGER
-            The leading dimension of the array W.  LDW >= max(1,N).
+            The leading dimension of the array W.  LDDW >= max(1,N).
 
     @param[in]
     queues  magma_queue_t
@@ -180,7 +180,7 @@ magma_zlahef_gpu(
             magma_zcopy( k+1, &dA( 0, k ), 1, &dW( 0, kw ), 1, queues[0] );
             // set imaginary part of diagonal to be zero
             #ifdef COMPLEX
-            magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, kw ))+1,1, queues[0] );
+            magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( k, kw ))+1, 1, queues[0] );
             #endif
  
             if (k+1 < n) {
@@ -192,7 +192,7 @@ magma_zlahef_gpu(
 
                 // set imaginary part of diagonal to be zero
                 #ifdef COMPLEX
-                magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, kw ))+1,1, queues[0] );
+                magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( k, kw ))+1, 1, queues[0] );
                 #endif
             }
 
@@ -224,7 +224,7 @@ magma_zlahef_gpu(
                 kp = k;
 
                 #ifdef COMPLEX
-                magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( k, k ))+1,1, queues[0] );
+                magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( k, k ))+1, 1, queues[0] );
                 #endif
             } else {
                 if ( abs_akk >= alpha*colmax ) {
@@ -234,7 +234,7 @@ magma_zlahef_gpu(
                     /* Copy column imax to column KW-1 of W and update it */
                     magma_zcopy( imax+1, &dA( 0, imax ), 1, &dW( 0, kw-1 ), 1, queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1, 1, queues[0] );
                     #endif
 
                     #ifdef COMPLEX
@@ -250,7 +250,7 @@ magma_zlahef_gpu(
                                      queues[0] );
 
                         #ifdef COMPLEX
-                        magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1,1, queues[0] );
+                        magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( imax, kw-1 ))+1, 1, queues[0] );
                         #endif
                     }
                     magma_zgetvector_async( 1, &dW( imax, kw-1 ), 1, &Zimax, 1, queues[0] );
@@ -306,7 +306,7 @@ magma_zlahef_gpu(
                     // now A(kp,kk) should be A(kk,kk), and copy to A(kp,kp)
                     magma_zcopy( kp+1, &dA( 0, kk ), 1, &dA( 0, kp ), 1, queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( kp, kp ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( kp, kp ))+1, 1, queues[0] );
                     #endif
                 }
 
@@ -325,7 +325,7 @@ magma_zlahef_gpu(
                         /* Conjugate W(k) */
 
                         #ifdef COMPLEX
-                        magmablas_zlacpy_conj( k, &dW( 0, kw ),1, &dW( 0, kw ),1, queues[0] );
+                        magmablas_zlacpy_conj( k, &dW( 0, kw ), 1, &dW( 0, kw ), 1, queues[0] );
                         #endif
                     }
                 } else {
@@ -340,12 +340,12 @@ magma_zlahef_gpu(
                     }
 
                     /* Copy D(k) to A */
-                    magma_zcopymatrix( 2,2, &dW( k-1, kw-1 ), lddw, &dA( k-1, k-1 ), ldda, queues[0] );
+                    magma_zcopymatrix( 2, 2, &dW( k-1, kw-1 ), lddw, &dA( k-1, k-1 ), ldda, queues[0] );
 
                     /* Conjugate W(k) and W(k-1) */
 
                     #ifdef COMPLEX
-                    magmablas_zlacpy_conj( k,   &dW( 0, kw ),1, &dW( 0, kw ),1, queues[0] );
+                    magmablas_zlacpy_conj( k,   &dW( 0, kw ),   1, &dW( 0, kw ),   1, queues[0] );
                     magmablas_zlacpy_conj( k-1, &dW( 0, kw-1 ), 1, &dW( 0, kw-1 ), 1, queues[0] );
                     #endif
                 }
@@ -376,7 +376,7 @@ magma_zlahef_gpu(
                 /* Update the upper triangle of the diagonal block */
                 for (int jj = j; jj < j + jb; jj++) {
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( jj, jj ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( jj, jj ))+1, 1, queues[0] );
                     #endif
                     magma_zgemv( MagmaNoTrans, jj-j+1, n-(k+1),
                                  c_neg_one, &dA( j, k+1 ),   ldda,
@@ -384,7 +384,7 @@ magma_zlahef_gpu(
                                  c_one,     &dA( j, jj ),    1,
                                  queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( jj, jj ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( jj, jj ))+1, 1, queues[0] );
                     #endif
                 }
     
@@ -396,7 +396,7 @@ magma_zlahef_gpu(
                              queues[0] );
             #else
                 #ifdef COMPLEX
-                magmablas_dlaset(MagmaFull, 1,jb, d_zero,d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
+                magmablas_dlaset(MagmaFull, 1, jb, d_zero, d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
                 #endif
                 magma_zgemm( MagmaNoTrans, MagmaTrans, j+jb, jb, n-(k+1),
                              c_neg_one, &dA( 0, k+1 ),  ldda,
@@ -404,7 +404,7 @@ magma_zlahef_gpu(
                              c_one,     &dA( 0, j ),    ldda,
                              queues[0] );
                 #ifdef COMPLEX
-                magmablas_dlaset(MagmaFull, 1,jb, d_zero,d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
+                magmablas_dlaset(MagmaFull, 1, jb, d_zero, d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
                 #endif
             #endif
         }
@@ -429,7 +429,7 @@ magma_zlahef_gpu(
         magma_event_record( events[0], queues[0] );
         magma_queue_wait_event( queues[1], events[0] );
         trace_gpu_start( 0, 1, "get", "get" );
-        magma_zgetmatrix_async( n,n-(k+1), &dA(0,k+1),ldda, &A(0,k+1),lda, queues[1] );
+        magma_zgetmatrix_async( n, n-(k+1), &dA(0,k+1), ldda, &A(0,k+1), lda, queues[1] );
 
         /* Set KB to the number of columns factorized */
         *kb = n - (k+1);
@@ -451,7 +451,7 @@ magma_zlahef_gpu(
 
             // set imaginary part of diagonal to be zero
             #ifdef COMPLEX
-            magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, k ))+1,1, queues[0] );
+            magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( k, k ))+1, 1, queues[0] );
             #endif
             trace_gpu_end( 0, 0 );
             /* -------------------------------------------------------------- */
@@ -464,7 +464,7 @@ magma_zlahef_gpu(
                          queues[0] );
             // re-set imaginary part of diagonal to be zero
             #ifdef COMPLEX
-            magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( k, k ))+1,1, queues[0] );
+            magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( k, k ))+1, 1, queues[0] );
             #endif
             trace_gpu_end( 0, 0 );
 
@@ -500,7 +500,7 @@ magma_zlahef_gpu(
 
                 // make sure the imaginary part of diagonal is zero
                 #ifdef COMPLEX
-                magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( k, k ))+1,1, queues[0] );
+                magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( k, k ))+1, 1, queues[0] );
                 #endif
             } else {
                 if ( abs_akk >= alpha*colmax ) {
@@ -517,7 +517,7 @@ magma_zlahef_gpu(
 
                     magma_zcopy( n-imax, &dA( imax, imax ), 1, &dW( imax, k+1 ), 1, queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, k+1 ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( imax, k+1 ))+1, 1, queues[0] );
                     #endif
                     trace_gpu_end( 0, 0 );
 
@@ -528,7 +528,7 @@ magma_zlahef_gpu(
                                  c_one,     &dW( k, k+1 ),  ione,
                                  queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dW( imax, k+1 ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dW( imax, k+1 ))+1, 1, queues[0] );
                     #endif
                     trace_gpu_end( 0, 0 );
 
@@ -588,7 +588,7 @@ magma_zlahef_gpu(
                     #endif
                     magma_zcopy( n-kp, &dA( kp, kk ), 1, &dA( kp, kp ), 1, queues[0] );
                     #ifdef COMPLEX
-                    magma_dsetvector_async( 1, &d_zero,1, ((magmaDouble_ptr)&dA( kp, kp ))+1,1, queues[0] );
+                    magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( kp, kp ))+1, 1, queues[0] );
                     #endif
                     trace_gpu_end( 0, 0 );
                     /* ------------------------------------------------------------------ */
@@ -620,7 +620,7 @@ magma_zlahef_gpu(
 
                         /* Conjugate W(k) */
                         #ifdef COMPLEX
-                        magmablas_zlacpy_conj( (n-1)-k, &dW( k+1, k ),1, &dW( k+1, k ),1, queues[0] );
+                        magmablas_zlacpy_conj( (n-1)-k, &dW( k+1, k ), 1, &dW( k+1, k ), 1, queues[0] );
                         #endif
                     }
                 } else {
@@ -633,11 +633,11 @@ magma_zlahef_gpu(
                         magmablas_zlascl_2x2( MagmaLower, n-(k+2), &dW(k,k), lddw, &dA(k+2,k), ldda, queues[0], &iinfo );
 
                     /* Copy D(k) to A */
-                    magma_zcopymatrix( 2,2, &dW( k, k ), lddw, &dA( k, k ), ldda, queues[0] );
+                    magma_zcopymatrix( 2, 2, &dW( k, k ), lddw, &dA( k, k ), ldda, queues[0] );
 
                     /* Conjugate W(k) and W(k+1) */
                     #ifdef COMPLEX
-                    magmablas_zlacpy_conj( (n-1)-k,   &dW( k+1, k ),1, &dW( k+1, k ),1, queues[0] );
+                    magmablas_zlacpy_conj( (n-1)-k,   &dW( k+1, k ),   1, &dW( k+1, k ),   1, queues[0] );
                     magmablas_zlacpy_conj( (n-1)-k-1, &dW( k+2, k+1 ), 1, &dW( k+2, k+1 ), 1, queues[0] );
                     #endif
                     trace_gpu_end( 0, 0 );
@@ -694,7 +694,7 @@ magma_zlahef_gpu(
                 }
             #else
                 #ifdef COMPLEX
-                magmablas_dlaset(MagmaFull, 1,jb, d_zero,d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
+                magmablas_dlaset(MagmaFull, 1, jb, d_zero, d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
                 #endif
                 magma_zgemm( MagmaNoTrans, MagmaTrans, n-j, jb, k,
                              c_neg_one, &dA( j, 0 ), ldda,
@@ -702,7 +702,7 @@ magma_zlahef_gpu(
                              c_one,     &dA( j, j ), ldda,
                              queues[0] );
                 #ifdef COMPLEX
-                magmablas_dlaset(MagmaFull, 1,jb, d_zero,d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
+                magmablas_dlaset(MagmaFull, 1, jb, d_zero, d_zero, ((magmaDouble_ptr)&dA( j, j ))+1, 2*(1+ldda), queues[0] );
                 #endif
             #endif
             trace_gpu_end( 0, 0 );
@@ -730,7 +730,7 @@ magma_zlahef_gpu(
         magma_event_record( events[0], queues[0] );
         magma_queue_wait_event( queues[1], events[0] );
         trace_gpu_start( 0, 1, "get", "get" );
-        magma_zgetmatrix_async( n,k, &dA(0,0),ldda, &A(0,0),lda, queues[1] );
+        magma_zgetmatrix_async( n, k, &dA(0,0), ldda, &A(0,0), lda, queues[1] );
         trace_gpu_end( 0, 1 );
         /* Set KB to the number of columns factorized */
         *kb = k;

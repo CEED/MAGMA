@@ -165,8 +165,8 @@
 
     @param[in]
     lddz    INTEGER
-            The leading dimension of the array Z.  LDZ >= 1, and if
-            JOBZ = MagmaVec, LDZ >= max(1,N).
+            The leading dimension of the array Z.  LDDZ >= 1, and if
+            JOBZ = MagmaVec, LDDZ >= max(1,N).
 
     @param[out]
     isuppz  INTEGER ARRAY, dimension ( 2*max(1,M) )

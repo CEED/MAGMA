@@ -35,22 +35,22 @@
             of the matrix B.  NRHS >= 0.
 
     @param[in]
-    dA      COMPLEX_16 array on the GPU, dimension (LDA,N)
+    dA      COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The block diagonal matrix D and the multipliers used to
             obtain the factor U or L as computed by ZHETRF_NOPIV_GPU.
 
     @param[in]
     ldda    INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+            The leading dimension of the array A.  LDDA >= max(1,N).
 
     @param[in,out]
-    dB      COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    dB      COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
     @param[in]
     lddb    INTEGER
-            The leading dimension of the array B.  LDB >= max(1,N).
+            The leading dimension of the array B.  LDDB >= max(1,N).
 
     @param[out]
     info    INTEGER

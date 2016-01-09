@@ -83,7 +83,7 @@ magma_zlarfb2_gpu(
             The number of columns of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      COMPLEX_16 array, dimension (LDA,N)
+    dA      COMPLEX_16 array, dimension (LDDA,N)
             On entry, the m by n matrix A.
             On exit, the unitary matrix Q as a
             product of elementary reflectors (see Further Details).
@@ -96,7 +96,7 @@ magma_zlarfb2_gpu(
 
     @param[in]
     ldda    INTEGER
-            The leading dimension of the array A.  LDA >= max(1,M).
+            The leading dimension of the array A.  LDDA >= max(1,M).
 
     @param[out]
     dtau    COMPLEX_16 array, dimension (min(M,N))

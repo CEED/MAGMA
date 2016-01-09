@@ -39,7 +39,7 @@
             The number of columns of the matrix C. NRHS >= 0.
 
     @param[in,out]
-    dA       COMPLEX_16 array on the GPU, dimension (LDA,N)
+    dA       COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N matrix A.
             On exit, A is overwritten by details of its QR
             factorization as returned by ZGEQRF.
