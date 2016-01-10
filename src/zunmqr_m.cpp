@@ -396,6 +396,7 @@ cleanup:
     }
     magma_free_pinned( T );
     magma_setdevice( orig_dev );
+    magma_free_pinned( T );
 
     return *info;
 } /* magma_zunmqr */
