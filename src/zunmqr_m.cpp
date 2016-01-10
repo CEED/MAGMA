@@ -394,7 +394,6 @@ cleanup:
         magma_queue_destroy( queues[dev][1] );
         magma_free( dw[dev] );
     }
-    magma_free_pinned( T );
     magma_setdevice( orig_dev );
     magma_free_pinned( T );
 
