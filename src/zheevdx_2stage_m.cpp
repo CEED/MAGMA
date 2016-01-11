@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
        @precisions normal z -> c d s
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_timer.h"
 
 #define COMPLEX
@@ -458,7 +458,7 @@ magma_zheevdx_2stage_m(
     timer_start( time );
 #else
     magma_int_t nstream = max(3,ngpu+2);
-    magma_queue_t streams[MagmaMaxGPUs][20];
+    magma_queue_t queues[MagmaMaxGPUs][20];
     magmaDoubleComplex *dA[MagmaMaxGPUs], *dT1[MagmaMaxGPUs];
     magma_int_t ldda = magma_roundup( n, 32 );
 
@@ -477,21 +477,32 @@ magma_zheevdx_2stage_m(
         magma_zmalloc(&dA[dev], ldda*mlocal );
         magma_zmalloc(&dT1[dev], (n*nb) );
         for( int i = 0; i < nstream; ++i ) {
-            magma_queue_create( &streams[dev][i] );
+            magma_queue_create( dev, &queues[dev][i] );
         }
     }
     timer_stop( time_alloc );
     
     timer_start( time_dist );
-    magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, dA, ldda, ngpu, distblk );
+    magma_queue_t distqueues[MagmaMaxGPUs];
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_create( dev, &distqueues[dev] );
+    }
+    magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, dA, ldda, ngpu, distblk, distqueues );
+    for( int dev=0; dev < ngpu; dev++ ) {
+        magma_setdevice( dev );
+        magma_queue_sync( distqueues[dev] );
+        magma_queue_destroy( distqueues[dev] );
+    }
+
     magma_setdevice(0);
     timer_stop( time_dist );
 
     timer_start( time_band );
     if (ver == 30) {
-        magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, streams, nstream, info);
+        magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, queues, nstream, info);
     } else {
-        magma_zhetrd_he2hb_mgpu(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, streams, nstream, info);
+        magma_zhetrd_he2hb_mgpu(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, queues, nstream, info);
     }
     timer_stop( time_band );
     timer_printf("    time alloc %7.4f, ditribution %7.4f, zhetrd_he2hb_m only = %7.4f\n", time_alloc, time_dist, time_band );
@@ -501,7 +512,8 @@ magma_zheevdx_2stage_m(
         magma_free( dA[dev] );
         magma_free( dT1[dev] );
         for( int i = 0; i < nstream; ++i ) {
-            magma_queue_destroy( streams[dev][i] );
+            magma_queue_sync( queues[dev][i] );
+            magma_queue_destroy( queues[dev][i] );
         }
     }
 #endif // not SINGLEGPU
@@ -592,12 +604,20 @@ magma_zheevdx_2stage_m(
             return *info;
         }
 
-        magma_zsetmatrix( n, n, A, lda, dAsgpu, lddasgpu );
+        magma_queue_t queues[2];
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+        magma_queue_create( cdev, &queues[0] );
+
+        magma_zsetmatrix( n, n, A, lda, dAsgpu, lddasgpu, queues[0] );
 
         magma_zunmqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dAsgpu+nb, lddasgpu,
                                  dZ+nb, n, dT1sgpu, nb, info);
 
-        magma_zgetmatrix( n, *m, dZ, lddz, A, lda );
+        magma_zgetmatrix( n, *m, dZ, lddz, A, lda, queues[0] );
+
+        magma_queue_sync( queues[0] );
+        magma_queue_destroy( queues[0] );
 #else
         magma_zunmqr_m(ngpu, MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, A+nb, lda, TAU1,
                        Z +ldz*(il-1)+nb, ldz, Wmqr1, lwmqr1, info);

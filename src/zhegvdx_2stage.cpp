@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
 #include "magma_timer.h"
@@ -390,13 +390,16 @@ magma_zhegvdx_2stage(
         goto cleanup;
     }
 
-    magma_queue_create( &queue );
-
+    magma_queue_t queues[2];
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queues[0] );
+    magma_queue_create( cdev, &queues[1] );
     /* Form a Cholesky factorization of B. */
-    magma_zsetmatrix( n, n, B, ldb, dB, lddb );
+    magma_zsetmatrix( n, n, B, ldb, dB, lddb, queues[0] );
     magma_zsetmatrix_async( n, n,
                             A,  lda,
-                            dA, ldda, queue );
+                            dA, ldda, queues[1] );
 
     timer_start( time );
 
@@ -409,10 +412,10 @@ magma_zhegvdx_2stage(
     timer_stop( time );
     timer_printf( "time zpotrf_gpu = %6.2f\n", time );
 
-    magma_queue_sync( queue );
+    magma_queue_sync( queues[1] );
     magma_zgetmatrix_async( n, n,
                             dB, lddb,
-                            B,  ldb, queue );
+                            B,  ldb, queues[1] );
 
     /* Transform problem to standard eigenvalue problem and solve. */
     timer_start( time );
@@ -420,7 +423,7 @@ magma_zhegvdx_2stage(
     timer_stop( time );
     timer_printf( "time zhegst_gpu = %6.2f\n", time );
 
-    magma_zgetmatrix( n, n, dA, ldda, A, lda );
+    magma_zgetmatrix( n, n, dA, ldda, A, lda, queues[0] );
     magma_queue_sync( queue );
     magma_free( dA );  dA = NULL;
     magma_free( dB );  dB = NULL;
@@ -444,8 +447,8 @@ magma_zhegvdx_2stage(
 
         timer_start( time );
 
-        magma_zsetmatrix( n, *mout, A, lda, dA, ldda );
-        magma_zsetmatrix( n,  n,    B, ldb, dB, lddb );
+        magma_zsetmatrix( n, *mout, A, lda, dA, ldda, queues[0] );
+        magma_zsetmatrix( n,  n,    B, ldb, dB, lddb, queues[0] );
 
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
@@ -457,7 +460,7 @@ magma_zhegvdx_2stage(
                 trans = MagmaNoTrans;
             }
 
-            magma_ztrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, dB, lddb, dA, ldda);
+            magma_ztrsm( MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, dB, lddb, dA, ldda, queues[0] );
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
@@ -468,19 +471,22 @@ magma_zhegvdx_2stage(
                 trans = MagmaConjTrans;
             }
 
-            magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, dB, lddb, dA, ldda);
+            magma_ztrmm( MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, dB, lddb, dA, ldda, queues[0] );
         }
 
-        magma_zgetmatrix( n, *mout, dA, ldda, A, lda );
+        magma_zgetmatrix( n, *mout, dA, ldda, A, lda, queues[0] );
 
         timer_stop( time );
         timer_printf( "time trsm/mm + getmatrix = %6.2f\n", time );
     }
 
 cleanup:
+    magma_queue_sync( queues[0] );
+    magma_queue_sync( queues[1] );
+    magma_queue_destroy( queues[0] );
+    magma_queue_destroy( queues[1] );
     magma_free( dA );  dA = NULL;
     magma_free( dB );  dB = NULL;
-    magma_queue_destroy( queue );  queue = NULL;
 
     work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0. );  // round up
     #ifdef COMPLEX

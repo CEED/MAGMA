@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
 #include "magma_timer.h"
@@ -445,14 +445,19 @@ magma_zhegvdx_2stage_m(
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
-            magma_zsetmatrix( n, n, B, ldb, dB, lddb );
-            magma_zsetmatrix( n, n, A, lda, dA, ldda );
+            magma_queue_t queues[2];
+            magma_device_t cdev;
+            magma_getdevice( &cdev );
+            magma_queue_create( cdev, &queues[0] );
+            magma_zsetmatrix( n, n, B, ldb, dB, lddb, queues[0] );
+            magma_zsetmatrix( n, n, A, lda, dA, ldda, queues[0] );
             magma_ztrmm( MagmaLeft, uplo, trans, MagmaNonUnit,
-                         n, n, c_one, dB, lddb, dA, ldda );
-            magma_zgetmatrix( n, n, dA, ldda, A, lda );
+                         n, n, c_one, dB, lddb, dA, ldda, queues[0] );
+            magma_zgetmatrix( n, n, dA, ldda, A, lda, queues[0] );
 
-            //magma_ztrmm_m(ngpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, B, ldb, A, lda);
-            
+            //magma_ztrmm_m( ngpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *mout, c_one, B, ldb, A, lda );
+            magma_queue_sync( queues[0] );
+            magma_queue_destroy( queues[0] );
             magma_free( dA );
             magma_free( dB );
         }

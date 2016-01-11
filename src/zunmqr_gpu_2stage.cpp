@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /**
     Purpose
@@ -160,6 +160,11 @@ magma_zunmqr_gpu_2stages(
         return *info;
     }
 
+    magma_queue_t queues[2];
+    magma_device_t cdev;
+    magma_getdevice( &cdev );
+    magma_queue_create( cdev, &queues[0] );
+
     if ( (left && (! notran)) || ( (! left) && notran ) ) {
         i1 = 0;
         i2 = k;
@@ -194,9 +199,11 @@ magma_zunmqr_gpu_2stages(
         }
         magma_zlarfb_gpu( MagmaLeft, trans, MagmaForward, MagmaColumnwise,
                           mi, ni, ib, dA(i,i), ldda, dT+i*nb, nb,
-                          dC(ic,jc), lddc, dwork, nw );
+                          dC(ic,jc), lddc, dwork, nw, queues[0] );
     }
     
+    magma_queue_sync( queues[0] );
+    magma_queue_destroy( queues[0] );
     magma_free( dwork );
     return *info;
 } /* magma_zunmqr_gpu_2stages */

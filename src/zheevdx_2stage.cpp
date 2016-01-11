@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -12,7 +12,7 @@
        @precisions normal z -> c d s
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_timer.h"
 
 #define COMPLEX
@@ -536,12 +536,20 @@ magma_zheevdx_2stage(
 
         timer_start( time );
 
-        magma_zsetmatrix( n, n, A, lda, dA, ldda );
+        magma_queue_t queues[2];
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+        magma_queue_create( cdev, &queues[0] );
+
+        magma_zsetmatrix( n, n, A, lda, dA, ldda, queues[0] );
 
         magma_zunmqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dA+nb, ldda,
                                  dZ+nb, n, dT1, nb, info);
 
-        magma_zgetmatrix( n, *m, dZ, lddz, A, lda );
+        magma_zgetmatrix( n, *m, dZ, lddz, A, lda, queues[0] );
+
+        magma_queue_sync( queues[0] );
+        magma_queue_destroy( queues[0] );
 
         timer_stop( time );
         timer_printf( "  N= %10d  nb= %5d time zunmqr + copy = %6.2f\n", (int)n, (int)nb, time );
