@@ -17,7 +17,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
 
 int main(int argc, char **argv)
 {
@@ -83,7 +82,7 @@ int main(int argc, char **argv)
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             size = ldb * nrhs;
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &nrhs, h_B, &ldb, h_X, &ldx);
+            lapackf77_zlacpy( MagmaFullStr, &N, &nrhs, h_B, &ldb, h_X, &ldx);
             
             magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, nrhs, h_B, ldb, d_B, lddb );

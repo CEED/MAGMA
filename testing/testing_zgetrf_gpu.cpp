@@ -179,10 +179,10 @@ int main( int argc, char** argv)
     
     printf("%% version %d\n", (int) opts.version );
     if ( opts.check == 2 ) {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
     else {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |PA-LU|/(N*|A|)\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |PA-LU|/(N*|A|)\n");
     }
     printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {

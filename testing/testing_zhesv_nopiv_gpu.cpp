@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     
     nrhs = opts.nrhs;
     
-    printf("%%   N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+    printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
     printf("%%===============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
                 lapackf77_zhesv( lapack_uplo_const(opts.uplo), &N,&nrhs,
                                  h_A, &lda, ipiv, h_B, &ldb, &temp, &lwork, &info );
                 lwork = (magma_int_t) MAGMA_Z_REAL( temp );
-                TESTING_MALLOC_PIN( hwork, magmaDoubleComplex, lwork );
+                TESTING_MALLOC_CPU( hwork, magmaDoubleComplex, lwork );
 
                 cpu_time = magma_wtime();
                 lapackf77_zhesv( lapack_uplo_const(opts.uplo), &N, &nrhs,

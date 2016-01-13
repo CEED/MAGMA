@@ -59,7 +59,7 @@ int main( int argc, char** argv)
 
     magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
 
-    printf("%% BatchCount   N    CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
+    printf("%% BatchCount   N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("%%===================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -76,7 +76,7 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda * N * batchCount);
             TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
             
-            magma_malloc((void**)&d_A_array, batchCount * sizeof(*d_A_array));
+            TESTING_MALLOC_DEV( d_A_array, magmaDoubleComplex*, batchCount );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -86,7 +86,7 @@ int main( int argc, char** argv)
             }
             
             magma_int_t columns = N * batchCount;
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &(columns), h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &N, &(columns), h_A, &lda, h_R, &lda );
 
             magma_zsetmatrix( N, columns, h_A, lda, d_A, ldda );
 
@@ -150,7 +150,7 @@ int main( int argc, char** argv)
                    =================================================================== */
                 #ifdef MAGMA_WITH_MKL
                 // work around MKL bug in multi-threaded zlanhe
-                int la_threads = magma_get_lapack_numthreads();
+                magma_int_t la_threads = magma_get_lapack_numthreads();
                 magma_set_lapack_numthreads( 1 );
                 #endif
                 

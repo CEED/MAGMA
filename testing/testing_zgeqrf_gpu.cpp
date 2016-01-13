@@ -58,11 +58,11 @@ int main( int argc, char** argv)
     
     printf( "%% version %d\n", (int) opts.version );
     if ( opts.check == 1 ) {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |R - Q^H*A|   |I - Q^H*Q|\n");
         printf("%%==============================================================================\n");
     }
     else {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)    |b - A*x|\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)    |b - A*x|\n");
         printf("%%===============================================================\n");
     }
     for( int itest = 0; itest < opts.ntest; ++itest ) {

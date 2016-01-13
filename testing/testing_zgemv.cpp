@@ -19,7 +19,6 @@
 #include "magma.h"
 #include "magma_lapack.h"
 
-#define PRECISION_z
 
 int main(int argc, char **argv)
 {

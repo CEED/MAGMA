@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     ngpu0 = opts.ngpu;
 
     printf("%% ngpu = %d, uplo = %s\n", (int) opts.ngpu, lapack_uplo_const(opts.uplo) );
-    printf("%% N     CPU GFlop/s (sec)   MAGMA GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
+    printf("%% N     CPU Gflop/s (sec)   MAGMA Gflop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("%%============================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -60,10 +60,9 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
 
             magma_setdevice(0);
-            TESTING_MALLOC(    h_A, magmaDoubleComplex, n2 );
-            TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2 );
+            TESTING_MALLOC_CPU( h_A, magmaDoubleComplex, n2 );
+            TESTING_MALLOC_PIN( h_R, magmaDoubleComplex, n2 );
 
-            //TESTING_MALLOC_DEV(  d_A, magmaDoubleComplex, ldda*N );
             nb = magma_get_zpotrf_nb(N);
             if ( ngpu0 > N / nb ) {
                 ngpu = N / nb;
@@ -84,14 +83,14 @@ int main( int argc, char** argv)
                 ldn_local = (ldn_local % 256 == 0) ? ldn_local + 32 : ldn_local;
 
                 magma_setdevice(j);
-                TESTING_DEVALLOC( d_lA[j], magmaDoubleComplex, ldda * ldn_local );
+                TESTING_MALLOC_DEV( d_lA[j], magmaDoubleComplex, ldda * ldn_local );
             }
 
             /* Initialize the matrix */
             if (opts.check) {
                 lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
                 magma_zmake_hpd( N, h_A, lda );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
+                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
             } else {
                 lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
                 magma_zmake_hpd( N, h_A, lda );
@@ -174,11 +173,11 @@ int main( int argc, char** argv)
 
             for (j = 0; j < ngpu; j++) {
                 magma_setdevice(j);
-                TESTING_DEVFREE( d_lA[j] );
+                TESTING_FREE_DEV( d_lA[j] );
             }
             magma_setdevice(0);
-            TESTING_FREE( h_A );
-            TESTING_HOSTFREE( h_R );
+            TESTING_FREE_CPU( h_A );
+            TESTING_FREE_PIN( h_R );
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

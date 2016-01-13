@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     batchCount = opts.batchcount;
 
     printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
-    printf("%% BatchCount   N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+    printf("%% BatchCount   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
     printf("%%==========================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -86,8 +86,8 @@ int main(int argc, char **argv)
             TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*nrhs*batchCount );
             TESTING_MALLOC_DEV( dinfo_array, magma_int_t, batchCount );
 
-            magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
-            magma_malloc((void**)&dB_array, batchCount * sizeof(*dB_array));
+            TESTING_MALLOC_DEV( dA_array, magmaDoubleComplex*, batchCount );
+            TESTING_MALLOC_DEV( dB_array, magmaDoubleComplex*, batchCount );
 
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
@@ -200,8 +200,8 @@ int main(int argc, char **argv)
 
             TESTING_FREE_DEV( dinfo_array );
 
-            magma_free(dA_array);
-            magma_free(dB_array);
+            TESTING_FREE_DEV( dA_array );
+            TESTING_FREE_DEV( dB_array );
 
             fflush( stdout );
         }

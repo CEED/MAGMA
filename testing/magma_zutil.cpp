@@ -103,7 +103,7 @@ double safe_lapackf77_zlanhe(
 {
     #ifdef MAGMA_WITH_MKL
     // work around MKL bug in multi-threaded zlanhe
-    int la_threads = magma_get_lapack_numthreads();
+    magma_int_t la_threads = magma_get_lapack_numthreads();
     magma_set_lapack_numthreads( 1 );
     #endif
     

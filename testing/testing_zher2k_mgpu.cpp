@@ -67,7 +67,7 @@ int main( int argc, char** argv)
     printf( "\n" );
     
     printf("%% nb %d, ngpu %d, nstream %d\n", (int) nb, (int) ngpu, (int) nstream );
-    printf("%%   n     k    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   |R|/(|V|*|W|+|A|)\n");
+    printf("%%   n     k    nb offset  CPU Gflop/s (sec)   GPU Gflop/s (sec)   |R|/(|V|*|W|+|A|)\n");
     printf("%%==================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         n = opts.nsize[itest];

@@ -21,7 +21,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
 
 int main(int argc, char **argv)
 {

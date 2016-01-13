@@ -29,7 +29,7 @@ int main( int argc, char** argv )
     TESTING_INIT();
     
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double error, work[1];
+    double Cnorm, error, work[1];
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione = 1;
     magma_int_t mm, m, n, k, size, info;
@@ -49,7 +49,7 @@ int main( int argc, char** argv )
     magma_side_t  side [] = { MagmaLeft,       MagmaRight   };
     magma_trans_t trans[] = { Magma_ConjTrans, MagmaNoTrans };
 
-    printf("%%   M     N     K   side   trans   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||QC||_F\n");
+    printf("%%   M     N     K   side   trans   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R||_F / ||QC||_F\n");
     printf("%%==============================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int iside = 0; iside < 2; ++iside ) {
@@ -150,10 +150,10 @@ int main( int argc, char** argv )
             /* =====================================================================
                compute relative error |QC_magma - QC_lapack| / |QC_lapack|
                =================================================================== */
-            error = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
             size = ldc*n;
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
-            error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / error;
+            Cnorm = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
+            error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / Cnorm;
             
             printf( "%5d %5d %5d   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                     (int) m, (int) n, (int) k,

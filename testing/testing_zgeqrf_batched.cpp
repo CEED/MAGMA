@@ -115,7 +115,7 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%% BatchCount   M     N   MAGMA GFlop/s (ms)   CUBLAS GFlop/s (ms)    CPU GFlop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub\n");
+    printf("%% BatchCount   M     N   MAGMA Gflop/s (ms)   CUBLAS Gflop/s (ms)    CPU Gflop/s (ms)   |R - Q^H*A|_mag   |I - Q^H*Q|_mag   |R - Q^H*A|_cub   |I - Q^H*Q|_cub\n");
     printf("%%============================================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -138,13 +138,13 @@ int main( int argc, char** argv)
             TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N * batchCount );
 
             TESTING_MALLOC_DEV( dtau_magma,  magmaDoubleComplex, min_mn * batchCount);
-            TESTING_MALLOC_DEV( dtau_cublas,  magmaDoubleComplex, min_mn * batchCount);
+            TESTING_MALLOC_DEV( dtau_cublas, magmaDoubleComplex, min_mn * batchCount);
 
             TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
-            TESTING_MALLOC_DEV(  dinfo_cublas,  magma_int_t, batchCount);
+            TESTING_MALLOC_DEV(  dinfo_cublas, magma_int_t, batchCount);
 
-            magma_malloc((void**)&dA_array, batchCount * sizeof(*dA_array));
-            magma_malloc((void**)&dtau_array, batchCount * sizeof(*dtau_array));
+            TESTING_MALLOC_DEV( dA_array,   magmaDoubleComplex*, batchCount );
+            TESTING_MALLOC_DEV( dtau_array, magmaDoubleComplex*, batchCount );
         
             // to determine the size of lwork
             lwork = -1;
@@ -157,7 +157,7 @@ int main( int argc, char** argv)
             column = N * batchCount;
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &column, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &column, h_A, &lda, h_R, &lda );
        
             /* ====================================================================
                Performs operation using MAGMA
@@ -192,7 +192,7 @@ int main( int argc, char** argv)
 
             cublas_time = magma_sync_wtime( opts.queue );
     
-            int cublas_info;  // int, not magma_int_t
+            int cublas_info;  // not magma_int_t
             cublasZgeqrfBatched( opts.handle, M, N, dA_array, ldda, dtau_array, &cublas_info, batchCount);
 
             cublas_time = magma_sync_wtime( opts.queue ) - cublas_time;

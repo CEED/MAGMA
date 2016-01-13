@@ -53,7 +53,7 @@ int main( int argc, char** argv )
     
     magma_vect_t vects[] = { MagmaQ, MagmaP };
     
-    printf("%% Q/P   m     n     k   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R|| / ||A||\n");
+    printf("%% Q/P   m     n     k   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R|| / ||A||\n");
     printf("%%============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
       for( int ivect = 0; ivect < 2; ++ivect ) {

@@ -24,8 +24,6 @@
 
 #include "magma_operators.h"
 
-#define PRECISION_z
-
 
 // --------------------
 int main(int argc, char **argv)
@@ -33,7 +31,7 @@ int main(int argc, char **argv)
     TESTING_INIT();
 
     real_Double_t gflops, cpu_time=0, cpu_perf=0, gpu_time, gpu_perf, mgpu_time, mgpu_perf, cuda_time, cuda_perf;
-    double      error=0, error2=0, work[1];
+    double      Ynorm, error=0, error2=0, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -234,17 +232,17 @@ int main(int argc, char **argv)
                 /* =====================================================================
                    Compute the Difference LAPACK vs. Magma
                    =================================================================== */
-                error2 = lapackf77_zlange( "F", &Noffset, &ione, Ylapack, &Noffset, work );
+                Ynorm  = lapackf77_zlange( "F", &Noffset, &ione, Ylapack, &Noffset, work );
                 blasf77_zaxpy( &Noffset, &c_neg_one, Ymagma, &incx, Ylapack, &incx );
-                error2 = lapackf77_zlange( "F", &Noffset, &ione, Ylapack, &Noffset, work ) / error2;
+                error2 = lapackf77_zlange( "F", &Noffset, &ione, Ylapack, &Noffset, work ) / Ynorm;
             }
             
             /* =====================================================================
                Compute the Difference Cublas vs. Magma
                =================================================================== */
-            error = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work );
+            Ynorm = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work );
             blasf77_zaxpy( &Noffset, &c_neg_one, Ymagma, &incx, Ycublas, &incx );
-            error = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work ) / error;
+            error = lapackf77_zlange( "F", &Noffset, &ione, Ycublas, &Noffset, work ) / Ynorm;
             
             bool okay = (error < tol && error2 < tol);
             status += ! okay;

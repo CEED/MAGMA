@@ -47,10 +47,10 @@ int main(int argc, char **argv)
     
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if (opts.lapack) {
-        printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||  ||B - AX|| / N*||A||*||X||_CPU\n");
+        printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||  ||B - AX|| / N*||A||*||X||_CPU\n");
         printf("%%================================================================================================================\n");
     } else {
-        printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+        printf("%%   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
         printf("%%===============================================================================\n");
     }
     for( int itest = 0; itest < opts.ntest; ++itest ) {

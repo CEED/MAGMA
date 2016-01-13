@@ -50,7 +50,7 @@
 #       ****************************************************************************************************
 #       ./testing_sgesv_gpu -c --range 1:20:1 ...
 #       ****************************************************************************************************
-#           N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||
+#           N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||
 #       ================================================================================
 #           1     1     ---   (  ---  )      0.00 (   0.00)   9.26e-08   ok
 #           2     1     ---   (  ---  )      0.00 (   0.00)   1.32e-08   ok
@@ -67,7 +67,7 @@
 #       % device 0: GeForce GT 750M, 925.5 MHz clock, 2047.6 MB memory, capability 3.0
 #       Usage: ./testing_sgetri_gpu [options] [-h|--help]
 #
-#           N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / (N*||A||_F)
+#           N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R||_F / (N*||A||_F)
 #       =================================================================
 #           1      0.00 (   0.00)      0.00 (   0.00)   6.87e+01   failed
 #           2      0.00 (   0.00)      0.00 (   0.00)   2.41e+00   failed
@@ -1176,7 +1176,7 @@ if ( opts.dev is not None ):
 if ( opts.null_stream ):
 	global_options += ' --null-stream '
 
-if ( opts.niter != 1 ):
+if ( int(opts.niter) != 1 ):
 	global_options += ' --niter ' + opts.niter + ' '
 
 last_cmd = None

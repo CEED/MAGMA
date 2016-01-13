@@ -67,7 +67,7 @@ int main( int argc, char** argv)
            "%% just chose different Householder reflectors, both valid.\n"
            "%% Number in parenthesis after each error is error/epsilon, for comparison with --tolerance.\n\n");
     
-    printf("%%   M     N    CPU GFlop/s (ms)    GPU GFlop/s (ms)   |R - Q^H*A|        |I - Q^H*Q|        |T - T_lapack|     |Q - Q_lapack|  (error/epsilon)\n");
+    printf("%%   M     N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   |R - Q^H*A|        |I - Q^H*Q|        |T - T_lapack|     |Q - Q_lapack|  (error/epsilon)\n");
     printf("%%=============================================================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

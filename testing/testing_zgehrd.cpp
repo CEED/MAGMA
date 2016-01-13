@@ -55,8 +55,8 @@ int main( int argc, char** argv)
     
     printf("%% version %d, ngpu = %d\n", int(opts.version), int(abs_ngpu) );
     
-    printf("%%   N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QHQ'|/N|A|   |I-QQ'|/N\n");
-    printf("%%========================================================================\n");
+    printf("%%   N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
+    printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];

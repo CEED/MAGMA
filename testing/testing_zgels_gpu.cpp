@@ -21,7 +21,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgels
@@ -50,7 +49,7 @@ int main( int argc, char** argv )
     nrhs = opts.nrhs;
     
     printf("%%                                                           ||b-Ax|| / (N||A||)   ||dx-x||/(N||A||)\n");
-    printf("%%   M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU                         \n");
+    printf("%%   M     N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   CPU        GPU                         \n");
     printf("%%==================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -92,12 +91,12 @@ int main( int argc, char** argv )
             /* Initialize the matrices */
             size = lda*N;
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_A2, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &N, h_A, &lda, h_A2, &lda );
             
             // make random RHS
             size = ldb*nrhs;
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_R, &ldb );
+            lapackf77_zlacpy( MagmaFullStr, &M, &nrhs, h_B, &ldb, h_R, &ldb );
             
             // make consistent RHS
             //size = N*nrhs;
@@ -106,7 +105,7 @@ int main( int argc, char** argv )
             //               &c_one,  h_A, &lda,
             //                        h_X, &ldb,
             //               &c_zero, h_B, &ldb );
-            //lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_R, &ldb );
+            //lapackf77_zlacpy( MagmaFullStr, &M, &nrhs, h_B, &ldb, h_R, &ldb );
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -135,7 +134,7 @@ int main( int argc, char** argv )
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_X, &ldb );
+            lapackf77_zlacpy( MagmaFullStr, &M, &nrhs, h_B, &ldb, h_X, &ldb );
             
             cpu_time = magma_wtime();
             lapackf77_zgels( MagmaNoTransStr, &M, &N, &nrhs,

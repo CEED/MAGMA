@@ -55,7 +55,7 @@ int main( int argc, char** argv)
     double tol = 10. * opts.tolerance * lapackf77_dlamch("E");
     
     printf("%% version %d\n", (int) opts.version );
-    printf("%% M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)      ||I-Q'Q||_F / M     ||I-Q'Q||_I / M    ||A-Q R||_I\n");
+    printf("%% M     N     CPU Gflop/s (ms)    GPU Gflop/s (ms)      ||I-Q'Q||_F / M     ||I-Q'Q||_I / M    ||A-Q R||_I\n");
     printf("%%                                                       MAGMA  /  LAPACK    MAGMA  /  LAPACK\n");
     printf("%%=========================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -106,7 +106,7 @@ int main( int argc, char** argv)
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
 
-            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+            lapackf77_zlacpy( MagmaFullStr, &M, &N, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             // warmup

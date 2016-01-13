@@ -72,13 +72,13 @@ int main( int argc, char** argv)
            (int) abs_ngpu );
 
     if (opts.version == 1) {
-        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |AZ-BZD|   |I-ZZ'B|\n");
+        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |AZ-BZD|   |I-ZZ^H B|\n");
     }
     else if ( opts.version == 2) {
-        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |ABZ-ZD|   |I-ZZ'B|\n");
+        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |ABZ-ZD|   |I-ZZ^H B|\n");
     }
     else if ( opts.version == 3) {
-        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |BAZ-ZD|   |B-ZZ'|\n");
+        printf("%%   N   CPU Time (sec)   GPU Time (sec)   |D-D_magma|   |BAZ-ZD|   |B-ZZ^H|\n");
     }
     printf("%%===========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
@@ -157,8 +157,8 @@ int main( int argc, char** argv)
                    (1)    | A Z - B Z D | / ( |A| |Z| N )   (itype = 1)
                           | A B Z - Z D | / ( |A| |Z| N )   (itype = 2)
                           | B A Z - Z D | / ( |A| |Z| N )   (itype = 3)
-                   (2)    | I - V V' B | / ( N )            (itype = 1,2)
-                          | B - V V' | / ( |B| N )          (itype = 3)
+                   (2)    | I - V V^H B | / ( N )           (itype = 1,2)
+                          | B - V V^H   | / ( |B| N )       (itype = 3)
                    (3)    | D(with V) - D(w/o V) | / | D |
                    =================================================================== */
                 //magmaDoubleComplex *tau;

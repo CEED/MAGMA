@@ -89,7 +89,7 @@ int main( int argc, char** argv)
     // because MAGMA doesn't implement Frobenius norm yet.
     MKLVersion mkl_version;
     mkl_get_version( &mkl_version );
-    int la_threads = magma_get_lapack_numthreads();
+    magma_int_t la_threads = magma_get_lapack_numthreads();
     bool mkl_single_thread = (mkl_version.MajorVersion <= 11 && mkl_version.MinorVersion < 2);
     if ( mkl_single_thread ) {
         printf( "\nNote: using single thread to work around MKL zlanhe bug.\n\n" );

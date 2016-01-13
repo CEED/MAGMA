@@ -48,7 +48,7 @@ int main( int argc, char** argv )
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("%%   N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||I - A*A^{-1}||_1 / (N*cond(A))\n");
+    printf("%%   N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||I - A*A^{-1}||_1 / (N*cond(A))\n");
     printf("%%===============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

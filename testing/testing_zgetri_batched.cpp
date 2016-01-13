@@ -62,7 +62,7 @@ int main( int argc, char** argv)
     magma_int_t batchCount = opts.batchcount;
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%% batchCount   N    CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||I - A*A^{-1}||_1 / (N*cond(A))\n");
+    printf("%% batchCount   N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   ||I - A*A^{-1}||_1 / (N*cond(A))\n");
     printf("%%===============================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {    
         for( int iter = 0; iter < opts.niter; ++iter ) {

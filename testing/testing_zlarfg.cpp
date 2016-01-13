@@ -19,7 +19,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_d
 
 int main( int argc, char** argv)
 {
@@ -42,7 +41,7 @@ int main( int argc, char** argv)
     // does larfg on nb columns, one after another
     nb = (opts.nb > 0 ? opts.nb : 64);
     
-    printf("%%   N    nb    CPU GFLop/s (ms)    GPU GFlop/s (ms)   error      tau error\n");
+    printf("%%   N    nb    CPU GFLop/s (ms)    GPU Gflop/s (ms)   error      tau error\n");
     printf("%%=========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

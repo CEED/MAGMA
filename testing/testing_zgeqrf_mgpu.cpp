@@ -19,7 +19,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf_mgpu
@@ -49,11 +48,11 @@ int main( int argc, char** argv )
 
     printf("%% ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
         printf("%%===============================================================================================\n");
     }
     else {
-        printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
+        printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||R||_F /(M*||A||_F)\n");
         printf("%%=========================================================================\n");
     }
     for( int itest = 0; itest < opts.ntest; ++itest ) {

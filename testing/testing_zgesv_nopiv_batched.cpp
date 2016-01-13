@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     magma_int_t columns;
     nrhs = opts.nrhs;
     
-    printf("%% Batchcount   N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+    printf("%% Batchcount   N  NRHS   CPU Gflop/s (sec)   GPU Gflop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
     printf("%%==========================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -70,13 +70,13 @@ int main(int argc, char **argv)
             TESTING_MALLOC_CPU( ipiv, magma_int_t, N );
             TESTING_MALLOC_CPU( cpu_info, magma_int_t, batchCount);
             
-            TESTING_MALLOC_DEV(  dinfo_magma,  magma_int_t, batchCount);
+            TESTING_MALLOC_DEV( dinfo_magma, magma_int_t, batchCount );
             
             TESTING_MALLOC_DEV( d_A, magmaDoubleComplex, ldda*N*batchCount    );
             TESTING_MALLOC_DEV( d_B, magmaDoubleComplex, lddb*nrhs*batchCount );
             
-            magma_malloc((void**)&d_A_array, batchCount * sizeof(*d_A_array));
-            magma_malloc((void**)&d_B_array, batchCount * sizeof(*d_B_array));
+            TESTING_MALLOC_DEV( d_A_array, magmaDoubleComplex*, batchCount );
+            TESTING_MALLOC_DEV( d_B_array, magmaDoubleComplex*, batchCount );
 
             /* Initialize the matrices */
             sizeA = n2;
@@ -174,8 +174,13 @@ int main(int argc, char **argv)
             TESTING_FREE_CPU( ipiv );
             TESTING_FREE_CPU( cpu_info );
             
+            TESTING_FREE_DEV( dinfo_magma );
             TESTING_FREE_DEV( d_A );
             TESTING_FREE_DEV( d_B );
+            
+            TESTING_FREE_DEV( d_A_array );
+            TESTING_FREE_DEV( d_B_array );
+            
             fflush( stdout );
         }
         if ( opts.niter > 1 ) {

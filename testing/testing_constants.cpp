@@ -12,7 +12,7 @@
 #include "testings.h"
 #include "magma.h"
 
-int gStatus;
+magma_int_t gStatus;
 
 void check_( bool flag, const char* msg, int line )
 {
@@ -31,7 +31,7 @@ void check_( bool flag, const char* msg, int line )
 int main( int argc, char** argv )
 {
     gStatus = 0;
-    int s;
+    magma_int_t s;
 
     // ------------------------------------------------------------
     s = gStatus;

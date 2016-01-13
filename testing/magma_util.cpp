@@ -257,16 +257,16 @@ void magma_opts::parse_opts( int argc, char** argv )
     printf( usage_short, argv[0] );
     
     // negative flag indicating -m, -n, -k not given
-    int m = -1;
-    int n = -1;
-    int k = -1;
+    magma_int_t m = -1;
+    magma_int_t n = -1;
+    magma_int_t k = -1;
     
-    int ndevices;
+    int ndevices;  // not magma_int_t
     cudaGetDeviceCount( &ndevices );
     
     bool null_stream = false;
     
-    int info;
+    magma_int_t info;
     this->ntest = 0;
     for( int i = 1; i < argc; ++i ) {
         // ----- matrix size
@@ -275,7 +275,7 @@ void magma_opts::parse_opts( int argc, char** argv )
             magma_assert( this->ntest < MAX_NTEST, "error: -N %s, max number of tests exceeded, ntest=%d.\n",
                           argv[i], this->ntest );
             i++;
-            int m2, n2, k2;
+            int m2, n2, k2;  // not magma_int_t
             info = sscanf( argv[i], "%d,%d,%d", &m2, &n2, &k2 );
             if ( info == 3 && m2 >= 0 && n2 >= 0 && k2 >= 0 ) {
                 this->msize[ this->ntest ] = m2;
@@ -303,9 +303,9 @@ void magma_opts::parse_opts( int argc, char** argv )
         // with given range and updates ntest
         else if ( strcmp("--range", argv[i]) == 0 && i+1 < argc ) {
             i++;
-            int start_m, stop_m, step_m;
-            int start_n, stop_n, step_n;
-            int start_k, stop_k, step_k;
+            int start_m, stop_m, step_m;  // not magma_int_t
+            int start_n, stop_n, step_n;  // not magma_int_t
+            int start_k, stop_k, step_k;  // not magma_int_t
             
             info = sscanf( argv[i], "%d:%d:%d,%d:%d:%d,%d:%d:%d",
                            &start_m, &stop_m, &step_m,
@@ -505,7 +505,7 @@ void magma_opts::parse_opts( int argc, char** argv )
         // ----- lapack flag arguments
         else if ( strcmp("-L",  argv[i]) == 0 ) { this->uplo = MagmaLower; }
         else if ( strcmp("-U",  argv[i]) == 0 ) { this->uplo = MagmaUpper; }
-        else if ( strcmp("-F",  argv[i]) == 0 ) { this->uplo = MagmaUpperLower; }
+        else if ( strcmp("-F",  argv[i]) == 0 ) { this->uplo = MagmaFull; }
         
         else if ( strcmp("-NN", argv[i]) == 0 ) { this->transA = MagmaNoTrans;   this->transB = MagmaNoTrans;   }
         else if ( strcmp("-NT", argv[i]) == 0 ) { this->transA = MagmaNoTrans;   this->transB = MagmaTrans;     }
@@ -568,7 +568,7 @@ void magma_opts::parse_opts( int argc, char** argv )
     
     // if -N or --range not given, use default range
     if ( this->ntest == 0 ) {
-        int n2 = this->default_nstart;  //1024 + 64;
+        magma_int_t n2 = this->default_nstart;  //1024 + 64;
         while( n2 <= this->default_nend && this->ntest < MAX_NTEST ) {
             this->msize[ this->ntest ] = n2;
             this->nsize[ this->ntest ] = n2;

@@ -89,7 +89,7 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
 
-    printf("%%   M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
+    printf("%%   M     N   CPU Gflop/s (sec)   GPU Gflop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     printf("%%========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -117,7 +117,7 @@ int main( int argc, char** argv)
 
                 init_matrix( N, N, h_A, lda );
                 lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &opts.nrhs, h_B, &ldb, h_X, &ldb );
+                lapackf77_zlacpy( MagmaFullStr, &N, &opts.nrhs, h_B, &ldb, h_X, &ldb );
 
                 cpu_time = magma_wtime();
                 lapackf77_zhesv(lapack_uplo_const(opts.uplo), &N, &opts.nrhs,
@@ -138,7 +138,7 @@ int main( int argc, char** argv)
                =================================================================== */
             init_matrix( N, N, h_A, lda );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &opts.nrhs, h_B, &ldb, h_X, &ldb );
+            lapackf77_zlacpy( MagmaFullStr, &N, &opts.nrhs, h_B, &ldb, h_X, &ldb );
 
             magma_setdevice(0);
             gpu_time = magma_wtime();
