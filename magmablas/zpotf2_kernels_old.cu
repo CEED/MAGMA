@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.4) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
        @precisions normal z -> s d c
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "batched_kernel_param.h"
 #include "magma_templates.h"
 
@@ -46,7 +46,7 @@ __global__ void zdotc_kernel_batched(int n, magmaDoubleComplex **x_array, int in
         res = x[tx*incx];
     }
 
-    sdata[tx] = MAGMA_Z_REAL(res * MAGMA_Z_CNJG(res));
+    sdata[tx] = MAGMA_Z_REAL(res * MAGMA_Z_CONJ(res));
 
     __syncthreads();
 
@@ -159,7 +159,7 @@ __global__ void zlacgv_kernel_batched(int n, magmaDoubleComplex **x_array, int i
     magmaDoubleComplex *x = x_array[blockIdx.z]+offset;
 
     if ( id < n ) {
-        x[id*incx] = MAGMA_Z_CNJG(x[id*incx]);
+        x[id*incx] = MAGMA_Z_CONJ(x[id*incx]);
     }
 }
 
@@ -235,7 +235,7 @@ static __device__ void zpotf2_device(int m, int n,
         //2) updates A[iter,iter] = sqrt(A[iter,iter]-sum);
         if (tx < iter)
         {
-            res = MAGMA_Z_REAL (sdata_A[iter + tx * m] * MAGMA_Z_CNJG(sdata_A[iter + tx * m]));         
+            res = MAGMA_Z_REAL (sdata_A[iter + tx * m] * MAGMA_Z_CONJ(sdata_A[iter + tx * m]));         
             sum[tx] = res;
         }
         else
@@ -263,7 +263,7 @@ static __device__ void zpotf2_device(int m, int n,
         #ifdef COMPLEX
         if (tx < iter)
         {
-            sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
+            sdata_A[iter + tx * m] = MAGMA_Z_CONJ(sdata_A[iter + tx * m]);
         }
         __syncthreads();  
         #endif
@@ -284,7 +284,7 @@ static __device__ void zpotf2_device(int m, int n,
         #ifdef COMPLEX
         if (tx < iter)
         {
-            sdata_A[iter + tx * m] = MAGMA_Z_CNJG(sdata_A[iter + tx * m]);
+            sdata_A[iter + tx * m] = MAGMA_Z_CONJ(sdata_A[iter + tx * m]);
         }
         __syncthreads();  
         #endif

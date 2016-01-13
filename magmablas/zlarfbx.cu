@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "commonblas_z.h"
 #include "magma_templates.h"
 
@@ -34,7 +34,7 @@ magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
     /*  lsum := v**H * C  */
     lsum = MAGMA_Z_ZERO;
     for (int j = i; j < m; j += BLOCK_SIZE)
-       lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), c[j] );
+       lsum += MAGMA_Z_MUL( MAGMA_Z_CONJ( dV[j] ), c[j] );
     
     sum[i] = lsum;
     magma_sum_reduce< BLOCK_SIZE >( i, sum );
@@ -71,7 +71,7 @@ magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv, m
     /*  lsum := v**H * C  */
     lsum = MAGMA_Z_ZERO;
     for (int j = i; j < m; j += BLOCK_SIZE)
-       lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), c[j] );
+       lsum += MAGMA_Z_MUL( MAGMA_Z_CONJ( dV[j] ), c[j] );
 
     sum[i] = lsum;
     magma_sum_reduce< BLOCK_SIZE >( i, sum );
@@ -138,16 +138,4 @@ magma_zlarfbx_gpu_q(
         <<< blocks3, threads3, 0, queue->cuda_stream() >>>
         ( m, k, V, ldv, dwork+k, c);
 }
-
-extern "C" void
-magma_zlarfbx_gpu(
-    magma_int_t m, magma_int_t k,
-    magmaDoubleComplex_ptr V,  magma_int_t ldv,
-    magmaDoubleComplex_ptr dT, magma_int_t ldt,
-    magmaDoubleComplex_ptr c,
-    magmaDoubleComplex_ptr dwork)
-{
-    magma_zlarfbx_gpu_q( m, k, V, ldv, dT, ldt, c, dwork, magmablasGetQueue() );
-}
-
 //==============================================================================

@@ -1391,18 +1391,6 @@ magma_zhetrd_he2hb_mgpu(
     magma_int_t *info);
 
 magma_int_t
-magma_zhetrd_he2hb_mgpu_spec(
-    magma_uplo_t uplo, magma_int_t n, magma_int_t nb,
-    magmaDoubleComplex *A, magma_int_t lda,
-    magmaDoubleComplex *tau,
-    magmaDoubleComplex *work, magma_int_t lwork,
-    magmaDoubleComplex_ptr dAmgpu[], magma_int_t ldda,
-    magmaDoubleComplex_ptr dTmgpu[], magma_int_t lddt,
-    magma_int_t ngpu, magma_int_t distblk,
-    magma_queue_t queues[][20], magma_int_t nqueue,
-    magma_int_t *info);
-
-magma_int_t
 magma_zhetrd_mgpu(
     magma_int_t ngpu, magma_int_t nqueue,
     magma_uplo_t uplo, magma_int_t n,

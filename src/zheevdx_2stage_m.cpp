@@ -438,6 +438,7 @@ magma_zheevdx_2stage_m(
     double *Wedc              = Wstg1 + n*n;
     magma_int_t lwedc         = 1 + 4*n + n*n; // lwork - indWEDC; //used only for wantz>0
     #endif
+    magma_int_t i;
 
     magma_timer_t time=0, time_total=0, time_alloc=0, time_dist=0, time_band=0;
     timer_start( time_total );
@@ -462,11 +463,10 @@ magma_zheevdx_2stage_m(
     magmaDoubleComplex *dA[MagmaMaxGPUs], *dT1[MagmaMaxGPUs];
     magma_int_t ldda = magma_roundup( n, 32 );
 
-    magma_int_t ver = 0;
     magma_int_t distblk = max(256, 4*nb);
 
     #ifdef ENABLE_DEBUG
-    printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ", ngpu, distblk, nb, nstream, ver);
+    printf("voici ngpu %d distblk %d NB %d nstream %d\n ", ngpu, distblk, nb, nstream);
     #endif
 
     timer_start( time_alloc );
@@ -476,7 +476,7 @@ magma_zheevdx_2stage_m(
         // TODO check malloc
         magma_zmalloc(&dA[dev], ldda*mlocal );
         magma_zmalloc(&dT1[dev], (n*nb) );
-        for( int i = 0; i < nstream; ++i ) {
+        for( i = 0; i < nstream; ++i ) {
             magma_queue_create( dev, &queues[dev][i] );
         }
     }
@@ -499,11 +499,8 @@ magma_zheevdx_2stage_m(
     timer_stop( time_dist );
 
     timer_start( time_band );
-    if (ver == 30) {
-        magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, queues, nstream, info);
-    } else {
-        magma_zhetrd_he2hb_mgpu(uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda, dT1, nb, ngpu, distblk, queues, nstream, info);
-    }
+    magma_zhetrd_he2hb_mgpu( uplo, n, nb, A, lda, TAU1, Wstg1, lwstg1, dA, ldda,
+                             dT1, nb, ngpu, distblk, queues, nstream, info );
     timer_stop( time_band );
     timer_printf("    time alloc %7.4f, ditribution %7.4f, zhetrd_he2hb_m only = %7.4f\n", time_alloc, time_dist, time_band );
 
@@ -511,7 +508,7 @@ magma_zheevdx_2stage_m(
         magma_setdevice( dev );
         magma_free( dA[dev] );
         magma_free( dT1[dev] );
-        for( int i = 0; i < nstream; ++i ) {
+        for( i = 0; i < nstream; ++i ) {
             magma_queue_sync( queues[dev][i] );
             magma_queue_destroy( queues[dev][i] );
         }

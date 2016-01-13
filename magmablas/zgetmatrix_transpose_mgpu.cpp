@@ -1,5 +1,5 @@
     /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @precisions normal z -> s d c
        @author Ichitaro Yamazaki
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 //
 //    m, n - dimensions in the output (hA) matrix.

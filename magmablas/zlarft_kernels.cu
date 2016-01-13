@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Azzam Haidar
 */
 
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_templates.h"
 #define zgemv_bs 32
 #define BLOCK_SIZE 512
@@ -43,16 +43,16 @@ void zlarft_gemvcolwise_device( int m, magmaDoubleComplex *v, magmaDoubleComplex
             else
                 tmp = MAGMA_Z_ZERO;
             for( int j = tx+1; j < m; j += BLOCK_SIZE ) {
-                tmp +=  MAGMA_Z_CNJG( v[j] ) * dc[j];
+                tmp +=  MAGMA_Z_CONJ( v[j] ) * dc[j];
             }
             sum[tx] = tmp;
             magma_sum_reduce< BLOCK_SIZE >( tx, sum );
             #if defined (use_gemm_larft)
-            *(T+thblk) = MAGMA_Z_CNJG(sum[0]);
+            *(T+thblk) = MAGMA_Z_CONJ(sum[0]);
             #else
-            tmp = - MAGMA_Z_CNJG(*tau) * sum[0]; 
-            *(T+thblk) = MAGMA_Z_CNJG(tmp); // T = - tau(tx) * V(tx:n,1:tx-1)' * V(tx:n,tx) = tmp'
-            //*(T+thblk) = - MAGMA_Z_CNJG(sum[0]) * (*tau); // T = - tau(tx) * V(tx:n,1:tx-1)' * V(tx:n,tx) = tmp'
+            tmp = - MAGMA_Z_CONJ(*tau) * sum[0]; 
+            *(T+thblk) = MAGMA_Z_CONJ(tmp); // T = - tau(tx) * V(tx:n,1:tx-1)' * V(tx:n,tx) = tmp'
+            //*(T+thblk) = - MAGMA_Z_CONJ(sum[0]) * (*tau); // T = - tau(tx) * V(tx:n,1:tx-1)' * V(tx:n,tx) = tmp'
             #endif
         }
         else {
@@ -155,7 +155,7 @@ zlarft_gemvrowwise_device(
     {
         for (int s=tx; s < m; s += zgemv_bs)
         {
-            res += MAGMA_Z_CNJG (v_ptr[s]) * x_ptr[s*incx];
+            res += MAGMA_Z_CONJ (v_ptr[s]) * x_ptr[s*incx];
         }
     
         sdata[ty * zgemv_bs + tx] = res;
@@ -302,7 +302,7 @@ zlarft_gemv_loop_inside_device(
 
             for (int s=tx; s < m; s += zgemv_bs)
             {
-                res += MAGMA_Z_CNJG (v_ptr[s]) * x_ptr[s*incx];
+                res += MAGMA_Z_CONJ (v_ptr[s]) * x_ptr[s*incx];
             }
     
             sdata[ty * zgemv_bs + tx] = res;

@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
 
        @precisions normal z -> s d c
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "commonblas_z.h"
 #include "magma_templates.h"
 
@@ -224,20 +224,4 @@ magmablas_zgemv_q(
         zgemvc_template_fermi<version(T, 189)>
             ( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, queue );
     }
-}
-
-
-/**
-    @see magmablas_zgemv_q
-    @ingroup magma_zblas2
-    ********************************************************************/
-extern "C" void
-magmablas_zgemv(
-    magma_trans_t trans, magma_int_t m, magma_int_t n, magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_const_ptr dx, magma_int_t incx,
-    magmaDoubleComplex beta,
-    magmaDoubleComplex_ptr dy, magma_int_t incy)
-{
-    magmablas_zgemv_q( trans, m, n, alpha, dA, ldda, dx, incx, beta, dy, incy, magmablasGetQueue() );
 }

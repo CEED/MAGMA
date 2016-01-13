@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Azzam Haidar
 
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 #include "magma_templates.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
@@ -39,14 +39,14 @@ void magma_zlarf_kernel( int m, const magmaDoubleComplex *dv, const magmaDoubleC
         else
             tmp = MAGMA_Z_ZERO;
         for( int j = tx+1; j < m; j += BLOCK_SIZE ) {
-            tmp += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
+            tmp += MAGMA_Z_MUL( MAGMA_Z_CONJ( dv[j] ), dc[j] );
         }
         sum[tx] = tmp;
         magma_sum_reduce< BLOCK_SIZE >( tx, sum );
 
         /*  C := C - v * w  */
         __syncthreads();
-        tmp = - MAGMA_Z_CNJG(*dtau) * sum[0];
+        tmp = - MAGMA_Z_CONJ(*dtau) * sum[0];
         for( int j = m-tx-1; j > 0; j -= BLOCK_SIZE )
              dc[j] += tmp * dv[j];
 
@@ -76,14 +76,14 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComp
                 if (j == 0)
                    lsum += MAGMA_Z_MUL( MAGMA_Z_ONE, dc[j] );
                 else
-                   lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dv[j] ), dc[j] );
+                   lsum += MAGMA_Z_MUL( MAGMA_Z_CONJ( dv[j] ), dc[j] );
             }
             sum[i][col] = lsum;
             magma_sum_reduce_2d< BLOCK_SIZEx, BLOCK_SIZEy+1 >( i, col, sum );
     
             /*  C := C - v * w  */
             __syncthreads();
-            magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*dtau) * sum[0][col];
+            magmaDoubleComplex z__1 = - MAGMA_Z_CONJ(*dtau) * sum[0][col];
             for( int j = m-i-1; j >= 0; j -= BLOCK_SIZEx ) {
                 if (j == 0)
                     dc[j] += z__1;

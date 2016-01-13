@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,11 +9,6 @@
        @precisions normal z -> s d c
 
 */
-
-// include v1 header first; the v2 header will redefine non-q names,
-// but we can undef them to get back to the v1 versions.
-#include "magmablas_v1.h"
-
 #include "magma_internal.h"
 #include "magma_templates.h"
 
@@ -670,22 +665,4 @@ magmablas_zlanhe_q(
     magma_dgetvector( 1, &dwork[0], 1, &res, 1, queue );
     
     return res;
-}
-
-
-// ------------------------------------------------------------
-// define v1 interface
-#undef magmablas_zlanhe
-
-/**
-    @see magmablas_zlanhe_q
-    @ingroup magma_zaux2
-    ********************************************************************/
-extern "C" double
-magmablas_zlanhe(
-    magma_norm_t norm, magma_uplo_t uplo, magma_int_t n,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDouble_ptr dwork, magma_int_t lwork )
-{
-    return magmablas_zlanhe_q( norm, uplo, n, dA, ldda, dwork, lwork, magmablasGetQueue() );
 }
