@@ -261,9 +261,8 @@ magma_zhegvdx_2stage(
     #ifdef COMPLEX
     magma_int_t lrwmin;
     #endif
+    magma_queue_t queues[2] = { NULL };
 
-    magma_queue_t queue = NULL;
-    
     /* determine the number of threads */
     magma_int_t parallel_threads = magma_get_parallel_numthreads();
 
@@ -390,11 +389,11 @@ magma_zhegvdx_2stage(
         goto cleanup;
     }
 
-    magma_queue_t queues[2];
     magma_device_t cdev;
     magma_getdevice( &cdev );
     magma_queue_create( cdev, &queues[0] );
     magma_queue_create( cdev, &queues[1] );
+    
     /* Form a Cholesky factorization of B. */
     magma_zsetmatrix( n, n, B, ldb, dB, lddb, queues[0] );
     magma_zsetmatrix_async( n, n,
@@ -424,7 +423,6 @@ magma_zhegvdx_2stage(
     timer_printf( "time zhegst_gpu = %6.2f\n", time );
 
     magma_zgetmatrix( n, n, dA, ldda, A, lda, queues[0] );
-    magma_queue_sync( queue );
     magma_free( dA );  dA = NULL;
     magma_free( dB );  dB = NULL;
 
