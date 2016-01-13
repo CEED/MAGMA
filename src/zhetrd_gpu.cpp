@@ -173,7 +173,7 @@ magma_zhetrd_gpu(
     magma_int_t lquery;
 
     *info = 0;
-    int upper = (uplo == MagmaUpper);
+    bool upper = (uplo == MagmaUpper);
     lquery = (lwork == -1);
     if (! upper && uplo != MagmaLower) {
         *info = -1;

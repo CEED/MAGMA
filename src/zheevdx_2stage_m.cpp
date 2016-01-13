@@ -484,12 +484,12 @@ magma_zheevdx_2stage_m(
     
     timer_start( time_dist );
     magma_queue_t distqueues[MagmaMaxGPUs];
-    for( int dev=0; dev < ngpu; dev++ ) {
+    for( magma_int_t dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_create( dev, &distqueues[dev] );
     }
     magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, dA, ldda, ngpu, distblk, distqueues );
-    for( int dev=0; dev < ngpu; dev++ ) {
+    for( magma_int_t dev=0; dev < ngpu; dev++ ) {
         magma_setdevice( dev );
         magma_queue_sync( distqueues[dev] );
         magma_queue_destroy( distqueues[dev] );

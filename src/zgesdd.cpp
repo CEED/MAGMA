@@ -126,7 +126,7 @@
             The dimension of the array WORK.
             Let x = max(M,N) and y = min(M,N). The optimal block size
             nb can be obtained through magma_get_dgesvd_nb( M, N ).
-            The threshold for x >> y currently is x >= int( y*17/9 ).
+            The threshold for x >> y currently is x >= floor( y*17/9 ).
             *Required size different than in LAPACK.* In most cases, these
             sizes should give optimal performance for both MAGMA and LAPACK.
       -     If JOBZ = MagmaNoVec,

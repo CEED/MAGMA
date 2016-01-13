@@ -125,12 +125,11 @@ magma_zunmtr_gpu(
     #define wA(i_,j_) (wA + (i_) + (j_)*ldwa)
     
     magma_int_t i1, i2, mi, ni, nq;
-    int left, upper;
     magma_int_t iinfo;
 
     *info = 0;
-    left   = (side == MagmaLeft);
-    upper  = (uplo == MagmaUpper);
+    bool left   = (side == MagmaLeft);
+    bool upper  = (uplo == MagmaUpper);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {

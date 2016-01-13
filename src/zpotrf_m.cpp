@@ -95,7 +95,7 @@ magma_zpotrf_m(
     magmaDoubleComplex     c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex     c_neg_one = MAGMA_Z_NEG_ONE;
     const char* uplo_  = lapack_uplo_const( uplo  );
-    int upper = (uplo == MagmaUpper);
+    bool upper = (uplo == MagmaUpper);
 
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dt[MagmaMaxGPUs];
     magma_int_t     ldda, lddla, nb, iinfo, n_local[MagmaMaxGPUs], J2, d, ngpu0 = ngpu;

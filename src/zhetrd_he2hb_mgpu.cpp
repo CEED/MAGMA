@@ -196,23 +196,23 @@ magma_zhetrd_he2hb_mgpu(
     #define A(a_1,a_2)        ( A  + ((a_2)-1)*( lda) + (a_1)-1)
     #define tau_ref(a_1)      (tau + (a_1)-1)
 
-    magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
-    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
-    double  d_one = MAGMA_D_ONE;
+    /* Constants */
+    const magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    const magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
+    const magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    const double  d_one = MAGMA_D_ONE;
 
+    /* Local variables */
     magma_int_t pm, pn, indi, indj, pk;
     magma_int_t pm_old=0, pn_old=0, indi_old=0, flipV=-1;
     magma_int_t iblock, idev, di;
-    int i;
-    int lwkopt;
-    int lquery;
+    magma_int_t i;
+    magma_int_t lwkopt;
 
-    
     *info = 0;
-    int upper = (uplo == MagmaUpper);
-    lquery = (lwork == -1);
+    bool upper  = (uplo == MagmaUpper);
+    bool lquery = (lwork == -1);
     if (! upper && uplo != MagmaLower) {
         *info = -1;
     } else if (n < 0) {

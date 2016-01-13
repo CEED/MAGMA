@@ -171,7 +171,7 @@ magma_zlahef_gpu(
 
            KW is the column of W which corresponds to column K of A */
 
-        int k, kw = 0;
+        magma_int_t k, kw = 0;
         for (k = n-1; k+1 > max(n-nb+1, nb); k -= kstep) {
             kw = nb - (n-k);
 
@@ -369,12 +369,12 @@ magma_zlahef_gpu(
            actually stored) */
 
         kw = nb - (n-k);
-        for (int j = ( k / nb )*nb; j >= 0; j -= nb ) {
-            int jb = min( nb, k-j+1 );
+        for (magma_int_t j = ( k / nb )*nb; j >= 0; j -= nb ) {
+            magma_int_t jb = min( nb, k-j+1 );
 
             #ifdef SYMMETRIC_UPDATE
                 /* Update the upper triangle of the diagonal block */
-                for (int jj = j; jj < j + jb; jj++) {
+                for (magma_int_t jj = j; jj < j + jb; jj++) {
                     #ifdef COMPLEX
                     magma_dsetvector_async( 1, &d_zero, 1, ((magmaDouble_ptr)&dA( jj, jj ))+1, 1, queues[0] );
                     #endif
@@ -412,9 +412,9 @@ magma_zlahef_gpu(
         /* Put U12 in standard form by partially undoing the interchanges
            in columns k+1:n */
 
-        for (int j = k+1; j < n; ) {
-            int jj = j;
-            int jp = ipiv[ j ];
+        for (magma_int_t j = k+1; j < n; ) {
+            magma_int_t jj = j;
+            magma_int_t jp = ipiv[ j ];
             if ( jp < 0 ) {
                 jp = -jp;
                 j = j + 1;
@@ -441,7 +441,7 @@ magma_zlahef_gpu(
 
            K is the main loop index, increasing from 1 in steps of 1 or 2 */
 
-        int k;
+        magma_int_t k;
         for (k = 0; k < min(nb-1,n); k += kstep) {
             /* Copy column K of A to column K of W and update it */
 
@@ -661,15 +661,15 @@ magma_zlahef_gpu(
            computing blocks of NB columns at a time (note that conjg(W) is
            actually stored) */
 
-        for( int j = k; j < n; j += nb ) {
-            int jb = min( nb, n-j );
+        for( magma_int_t j = k; j < n; j += nb ) {
+            magma_int_t jb = min( nb, n-j );
 
             /* Update the lower triangle of the diagonal block */
 
             trace_gpu_start( 0, 0, "gemm", "gemm" );
             #ifdef SYMMETRIC_UPDATE
-                for (int jj = j; jj < j + jb; jj++) {
-                    int jnb = j + jb - jj;
+                for (magma_int_t jj = j; jj < j + jb; jj++) {
+                    magma_int_t jnb = j + jb - jj;
     
                     /* -------------------------------------------------------- */
                     magma_zgemv( MagmaNoTrans, jnb, k,
@@ -682,7 +682,7 @@ magma_zlahef_gpu(
 
                 /* Update the rectangular subdiagonal block */
                 if ( j+jb < n ) {
-                    int nk = n - (j+jb);
+                    magma_int_t nk = n - (j+jb);
     
                     /* -------------------------------------------- */
                     magma_zgemm( MagmaNoTrans, MagmaTrans, nk, jb, k,
@@ -711,9 +711,9 @@ magma_zlahef_gpu(
         /* Put L21 in standard form by partially undoing the interchanges
            in columns 1:k-1 */
 
-        for (int j = k; j > 0; ) {
-            int jj = j;
-            int jp = ipiv[j-1];
+        for (magma_int_t j = k; j > 0; ) {
+            magma_int_t jj = j;
+            magma_int_t jp = ipiv[j-1];
             if ( jp < 0 ) {
                 jp = -jp;
                 j--;

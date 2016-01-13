@@ -113,12 +113,11 @@ magma_zunmqr_gpu_2stages(
     magmaDoubleComplex_ptr dwork;
 
     magma_int_t i, i1, i2, step, ib, ic, jc, mi, ni, nq, nw;
-    int left, notran;
     //magma_int_t lwkopt;
 
     *info = 0;
-    left   = (side == MagmaLeft);
-    notran = (trans == MagmaNoTrans);
+    bool left   = (side == MagmaLeft);
+    bool notran = (trans == MagmaNoTrans);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {

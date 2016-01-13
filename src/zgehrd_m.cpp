@@ -146,7 +146,7 @@ magma_zgehrd_m(
     magma_int_t lquery;
     struct zgehrd_data data;
 
-    int ngpu = magma_num_gpus();
+    magma_int_t ngpu = magma_num_gpus();
     
     *info = 0;
     iws = n*(nb + nb*ngpu);

@@ -147,8 +147,8 @@ magma_zunmqr_m(
     magma_int_t nb = 128;
     magmaDoubleComplex *T = NULL;
     magmaDoubleComplex_ptr dw[MagmaMaxGPUs] = { NULL };
-    magma_queue_t queues[MagmaMaxGPUs][2] = { NULL };
-    magma_event_t events[MagmaMaxGPUs][2] = { NULL };
+    magma_queue_t queues[MagmaMaxGPUs][2] = {{ NULL }};
+    magma_event_t events[MagmaMaxGPUs][2] = {{ NULL }};
 
     magma_int_t ind_c;
     magma_device_t dev;

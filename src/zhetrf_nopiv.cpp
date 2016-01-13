@@ -81,9 +81,12 @@ magma_zhetrf_nopiv(
     #define dW(i, j)  (dW +(j)*ldda + (i))
     #define dWt(i, j) (dW +(j)*nb   + (i))
 
-    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    int                upper = (uplo == MagmaUpper);
+    /* Constants */
+    const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    
+    /* Local variables */
+    bool upper = (uplo == MagmaUpper);
     magma_int_t j, k, jb, ldda, nb, ib, iinfo;
     magmaDoubleComplex_ptr dA;
     magmaDoubleComplex_ptr dW;

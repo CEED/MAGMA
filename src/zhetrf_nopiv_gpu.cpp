@@ -81,10 +81,12 @@ magma_zhetrf_nopiv_gpu(
     #define dW(i, j)  (dW +(j)*ldda + (i))
     #define dWt(i, j) (dW +(j)*nb   + (i))
 
-    /* Local variables */
+    /* Constants */
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    int                upper = (uplo == MagmaUpper);
+    
+    /* Local variables */
+    bool upper = (uplo == MagmaUpper);
     magma_int_t j, k, jb, nb, ib, iinfo;
 
     *info = 0;

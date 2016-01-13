@@ -258,8 +258,8 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 #endif
     affinity_set original_set;
     affinity_set new_set(my_core_id);
-    int check  = 0;
-    int check2 = 0;
+    magma_int_t check  = 0;
+    magma_int_t check2 = 0;
     // bind threads
     check = original_set.get_affinity();
     if (check == 0) {
