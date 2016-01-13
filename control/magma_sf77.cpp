@@ -1959,13 +1959,13 @@ void magmaf_slarf_gpu(
     magma_int_t *m, magma_int_t *n,
     devptr_t *dv,
     devptr_t *dtau,
-    devptr_t *dC, magma_int_t *lddc )
+    devptr_t *dC, magma_int_t *lddc, magma_queue_t *queue )
 {
     magma_slarf_gpu(
         *m, *n,
         magma_sdevptr(dv),
         magma_sdevptr(dtau),
-        magma_sdevptr(dC), *lddc );
+        magma_sdevptr(dC), *lddc, *queue );
 }
 
 #define magmaf_slarfb2_gpu FORTRAN_NAME( magmaf_slarfb2_gpu, MAGMAF_SLARFB2_GPU )

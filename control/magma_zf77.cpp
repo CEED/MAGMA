@@ -2156,13 +2156,13 @@ void magmaf_zlarf_gpu(
     magma_int_t *m, magma_int_t *n,
     devptr_t *dv,
     devptr_t *dtau,
-    devptr_t *dC, magma_int_t *lddc )
+    devptr_t *dC, magma_int_t *lddc, magma_queue_t *queue )
 {
     magma_zlarf_gpu(
         *m, *n,
         magma_zdevptr(dv),
         magma_zdevptr(dtau),
-        magma_zdevptr(dC), *lddc );
+        magma_zdevptr(dC), *lddc, *queue );
 }
 
 #define magmaf_zlarfb2_gpu FORTRAN_NAME( magmaf_zlarfb2_gpu, MAGMAF_ZLARFB2_GPU )

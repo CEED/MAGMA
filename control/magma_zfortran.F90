@@ -1736,13 +1736,14 @@ subroutine magmaf_zhetrf_nopiv_gpu( uplo, n, dA, ldda, info )
     integer          :: info
 end subroutine magmaf_zhetrf_nopiv_gpu
 
-subroutine magmaf_zlarf_gpu( m, n, dv, dtau, dC, lddc )
+subroutine magmaf_zlarf_gpu( m, n, dv, dtau, dC, lddc, queue )
     integer          :: m
     integer          :: n
     magma_devptr_t   :: dv
     magma_devptr_t   :: dtau
     magma_devptr_t   :: dC
     integer          :: lddc
+    integer          :: queue
 end subroutine magmaf_zlarf_gpu
 
 subroutine magmaf_zlarfb2_gpu( m, n, k, dV, lddv, dT, lddt, dC, lddc, dwork, ldwork,  &
