@@ -1097,6 +1097,7 @@ magma_zgeqr2_gpu(
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr dtau,
     magmaDouble_ptr        dwork,
+    magma_queue_t queue,
     magma_int_t *info);
 
 magma_int_t
