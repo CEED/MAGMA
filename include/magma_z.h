@@ -1474,7 +1474,8 @@ magma_int_t
 magma_zlarf_gpu(
     magma_int_t m,  magma_int_t n,
     magmaDoubleComplex_const_ptr dv, magmaDoubleComplex_const_ptr dtau,
-    magmaDoubleComplex_ptr dC,  magma_int_t lddc);
+    magmaDoubleComplex_ptr dC, magma_int_t lddc,
+    magma_queue_t queue );
 
 // in zgeqr2x_gpu-v3.cpp
 magma_int_t

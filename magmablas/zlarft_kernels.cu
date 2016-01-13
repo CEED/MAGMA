@@ -95,12 +95,13 @@ void magmablas_zlarft_gemvcolwise(
     magma_int_t m,  magma_int_t step,
     magmaDoubleComplex *v, magma_int_t ldv, 
     magmaDoubleComplex *T,  magma_int_t ldt,
-    magmaDoubleComplex *tau)
+    magmaDoubleComplex *tau,
+    magma_queue_t queue )
 {
     dim3 grid( step+1, 1, 1 );
     dim3 threads( BLOCK_SIZE );
     zlarft_gemvcolwise_kernel
-        <<< grid, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        <<< grid, threads, 0, queue->cuda_stream() >>>
         ( m, v, ldv, tau, T, ldt, step);
 }
 
@@ -224,13 +225,14 @@ void magmablas_zlarft_gemvrowwise(
     magmaDoubleComplex *tau, 
     magmaDoubleComplex *v, magma_int_t ldv, 
     magmaDoubleComplex *T, magma_int_t ldt,
-    magmaDoubleComplex *W)
+    magmaDoubleComplex *W,
+    magma_queue_t queue )
 {
     dim3 grid(1);
     dim3 threads(zgemv_bs, max(i,1), 1);
     size_t shmem = sizeof(magmaDoubleComplex)*zgemv_bs*(i+1);
     zlarft_gemvrowwise_kernel
-        <<< grid, threads, shmem, magmablasGetQueue()->cuda_stream() >>>
+        <<< grid, threads, shmem, queue->cuda_stream() >>>
         (m, i, tau, v, ldv, T, ldt);
 }
 
@@ -370,13 +372,14 @@ void magmablas_zlarft_gemv_loop_inside(
     magma_int_t n, magma_int_t k, 
     magmaDoubleComplex *tau, 
     magmaDoubleComplex *v, magma_int_t ldv, 
-    magmaDoubleComplex *T, magma_int_t ldt)
+    magmaDoubleComplex *T, magma_int_t ldt,
+    magma_queue_t queue )
 {
     dim3 grid(1);
     dim3 threads(zgemv_bs, max(k,1), 1);
     size_t shmem = sizeof(magmaDoubleComplex) * (zgemv_bs*(k+1));
     zlarft_gemv_loop_inside_kernel
-        <<< grid, threads, shmem, magmablasGetQueue()->cuda_stream() >>>
+        <<< grid, threads, shmem, queue->cuda_stream() >>>
         (n, k, tau, v, ldv, T, ldt); 
 }
 
@@ -496,13 +499,14 @@ void magmablas_zlarft_ztrmv_sm32x32(
     magma_int_t m, magma_int_t n, 
     magmaDoubleComplex *tau, 
     magmaDoubleComplex *Tin, magma_int_t ldtin, 
-    magmaDoubleComplex *Tout, magma_int_t ldtout)
+    magmaDoubleComplex *Tout, magma_int_t ldtout,
+    magma_queue_t queue )
 {
     dim3 grid(1);
     dim3 threads(max(m,1), 1, 1);
     size_t shmem = sizeof(magmaDoubleComplex)*(m*m);
     zlarft_ztrmv_sm32x32_kernel
-        <<< grid, threads, shmem, magmablasGetQueue()->cuda_stream() >>>
+        <<< grid, threads, shmem, queue->cuda_stream() >>>
         (m, n,  tau, Tin, ldtin, Tout, ldtout);
 }
 
@@ -598,13 +602,14 @@ void magmablas_zlarft_recztrmv_sm32x32(
     magma_int_t m, magma_int_t n, 
     magmaDoubleComplex *tau, 
     magmaDoubleComplex *Trec, magma_int_t ldtrec, 
-    magmaDoubleComplex *Ttri, magma_int_t ldttri)
+    magmaDoubleComplex *Ttri, magma_int_t ldttri,
+    magma_queue_t queue )
 {
     dim3 grid(1);
     dim3 threads(max(m,1), 1, 1);
     size_t shmem = sizeof(magmaDoubleComplex)*(m*n);
     zlarft_recztrmv_sm32x32_kernel
-        <<< grid, threads, shmem, magmablasGetQueue()->cuda_stream() >>>
+        <<< grid, threads, shmem, queue->cuda_stream() >>>
         (m, n,  tau, Trec, ldtrec, Ttri, ldttri);
 }
 

@@ -109,14 +109,17 @@ void magma_zlarf_smkernel( int m, int n, magmaDoubleComplex *dv, magmaDoubleComp
     This routine uses only one SM (block).
  */
 extern "C" void
-magma_zlarf_sm(magma_int_t m, magma_int_t n, magmaDoubleComplex *dv, magmaDoubleComplex *dtau,
-               magmaDoubleComplex *dc, magma_int_t lddc)
+magma_zlarf_sm(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *dv, magmaDoubleComplex *dtau,
+    magmaDoubleComplex *dc, magma_int_t lddc,
+    magma_queue_t queue )
 {
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
 
     magma_zlarf_smkernel
-        <<< blocks, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+        <<< blocks, threads, 0, queue->cuda_stream() >>>
         ( m, n, dv, dtau, dc, lddc );
 }
 //==============================================================================
@@ -137,13 +140,14 @@ magma_zlarf_gpu(
     magma_int_t m,  magma_int_t n,
     magmaDoubleComplex_const_ptr dv,
     magmaDoubleComplex_const_ptr dtau,
-    magmaDoubleComplex_ptr dC,  magma_int_t lddc)
+    magmaDoubleComplex_ptr dC,  magma_int_t lddc,
+    magma_queue_t queue )
 {
     dim3 grid( n, 1, 1 );
     dim3 threads( BLOCK_SIZE );
     if ( n > 0 ) {
         magma_zlarf_kernel
-            <<< grid, threads, 0, magmablasGetQueue()->cuda_stream() >>>
+            <<< grid, threads, 0, queue->cuda_stream() >>>
             ( m, dv, dtau, dC, lddc);
     }
 
