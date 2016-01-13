@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions mixed z -> d
+       @precisions mixed zc -> ds
 
        @author Mark Gates
        
