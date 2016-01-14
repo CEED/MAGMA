@@ -1,11 +1,11 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        @date
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 /*
  * Use strlcat to copy strings. It is available on BSD, but not Linux or

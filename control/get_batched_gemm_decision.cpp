@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
 */
 
 #include "magma.h"
-#include "common_magma.h"
+#include "magma_internal.h"
 
 #ifdef __cplusplus
 extern "C" {

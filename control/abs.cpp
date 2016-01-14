@@ -1,4 +1,11 @@
-#include "common_magma.h"
+/*
+    -- MAGMA (version 2.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       @date
+*/
+#include "magma_internal.h"
 
 // ========================================
 // complex support

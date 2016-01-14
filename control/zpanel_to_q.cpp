@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -8,7 +8,7 @@
        @author Mark Gates
        @precisions normal z -> s d c
 */
-#include "common_magma.h"
+#include "magma_internal.h"
 
 // -------------------------
 // Put 0s in the upper triangular part of a panel and 1s on the diagonal.

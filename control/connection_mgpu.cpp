@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -11,7 +11,7 @@
 */
 #include <cuda_runtime.h>
 
-#include "common_magma.h"
+#include "magma_internal.h"
 
 extern "C"
 magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu)
