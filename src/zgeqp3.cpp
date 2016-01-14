@@ -141,7 +141,7 @@ magma_zgeqp3(
             lwkopt += 2*n;
             #endif
         }
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+        work[0] = magma_zmake_lwork( lwkopt );
 
         if (lwork < lwkopt && ! lquery) {
             *info = -8;
@@ -282,7 +282,7 @@ magma_zgeqp3(
         }
     }
 
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+    work[0] = magma_zmake_lwork( lwkopt );
     magma_free( dwork );
 
     magma_queue_destroy( queue );

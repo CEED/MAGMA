@@ -124,7 +124,7 @@ magma_zgeqrf(
     
     // need 2*nb*nb to store T and upper triangle of V simultaneously
     magma_int_t lwkopt = max( n*nb, 2*nb*nb );
-    work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
     bool lquery = (lwork == -1);
     if (m < 0) {
         *info = -1;

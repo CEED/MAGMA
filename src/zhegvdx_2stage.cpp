@@ -328,12 +328,9 @@ magma_zhegvdx_2stage(
         }
     #endif
 
-    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.
-    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
-    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0. );  // round up
+    work[0]  = magma_zmake_lwork( lwmin );
     #ifdef COMPLEX
-    rwork[0] = lrwmin * one_eps;
+    rwork[0] = magma_dmake_lwork( lrwmin );
     #endif
     iwork[0] = liwmin;
 
@@ -486,9 +483,9 @@ cleanup:
     magma_free( dA );  dA = NULL;
     magma_free( dB );  dB = NULL;
 
-    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0. );  // round up
+    work[0]  = magma_zmake_lwork( lwmin );
     #ifdef COMPLEX
-    rwork[0] = lrwmin * one_eps;
+    rwork[0] = magma_dmake_lwork( lrwmin );
     #endif
     iwork[0] = liwmin;
 

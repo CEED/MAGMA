@@ -170,7 +170,7 @@ magma_zunmtr_m(
     nb = 32;
     lwkopt = max(1,nw) * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
     
     if (*info != 0) {
@@ -221,7 +221,7 @@ magma_zunmtr_m(
                        C(i1,i2), ldc, work, lwork, &iinfo);
     }
 
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
 
     return *info;
 } /* magma_zunmtr */

@@ -337,8 +337,8 @@ magma_zhegvr(
     lrwmin = 24 * n;
     liwmin = 10 * n;
     
-    work[0] = MAGMA_Z_MAKE( lwmin, 0 );
-    rwork[0] = lrwmin;
+    work[0] = magma_zmake_lwork( lwmin );
+    rwork[0] = magma_dmake_lwork( lrwmin );
     iwork[0] = liwmin;
     
     if (lwork < lwmin && ! lquery) {

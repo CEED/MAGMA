@@ -238,10 +238,7 @@ magma_zgesvd(
         nb = magma_get_zgesvd_nb( m, n );
         minwrk = (m + n)*nb + 2*minmn;
         
-        // multiply by 1+eps (in Double!) to ensure length gets rounded up,
-        // if it cannot be exactly represented in floating point.
-        real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
-        work[0] = MAGMA_Z_MAKE( minwrk * one_eps, 0 );
+        work[0] = magma_zmake_lwork( minwrk );
         if ( !lquery && (lwork < minwrk) ) {
             *info = -13;
         }

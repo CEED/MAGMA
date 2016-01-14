@@ -162,7 +162,7 @@ magma_zgehrd(
 
     *info = 0;
     iws = n*nb;
-    work[0] = MAGMA_Z_MAKE( iws, 0 );
+    work[0] = magma_zmake_lwork( iws );
 
     lquery = (lwork == -1);
     if (n < 0) {
@@ -292,7 +292,7 @@ magma_zgehrd(
     // add 1 to i for 1-based index
     i += 1;
     lapackf77_zgehd2(&n, &i, &ihi, A, &lda, tau, work, &iinfo);
-    work[0] = MAGMA_Z_MAKE( iws, 0 );
+    work[0] = magma_zmake_lwork( iws );
 
     return *info;
 } /* magma_zgehrd */

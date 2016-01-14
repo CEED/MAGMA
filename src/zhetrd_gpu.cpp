@@ -192,7 +192,7 @@ magma_zhetrd_gpu(
     lddw = magma_roundup( n, 32 );
     lwkopt = n * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0) {
@@ -320,7 +320,7 @@ magma_zhetrd_gpu(
     magma_free_cpu( work2 );
     magma_queue_destroy( queue );
     
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
     
     return *info;
 } /* magma_zhetrd_gpu */

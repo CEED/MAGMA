@@ -1655,6 +1655,9 @@ int magma_z_isnan( magmaDoubleComplex x );
 int magma_z_isinf( magmaDoubleComplex x );
 int magma_z_isnan_inf( magmaDoubleComplex x );
 
+magmaDoubleComplex
+magma_zmake_lwork( magma_int_t lwork );
+
 magma_int_t
 magma_znan_inf(
     magma_uplo_t uplo, magma_int_t m, magma_int_t n,

@@ -21,6 +21,12 @@ setenv MAKEFILES_SP `egrep Makefile files.txt | egrep    sparse-iter`
 echo "============================================================ required fixes"
 
 # fixed
+echo "========== work[0] query uses magma_[sdcz]make_lwork                       *** required fix ***"
+egrep 'work\[[0-9]\] *=[^=]' $FILES \
+    | egrep -v '\b(magma_[sdcz]make_lwork|c_one|MAGMA_Z_ONE|iwork|ztrevc3|ztrevc3_mt|scripts|tiled|testing)\b'
+echo
+
+# fixed
 # both foo.cu and foo.cpp -> foo.o; can't add two foo.o to same libbar.a file
 # check dense and sparse separately, as they go into different libmagma.a and
 # libmagma_sparse.a files, and both have error.o

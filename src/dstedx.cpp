@@ -192,7 +192,7 @@ magma_dstedx(
             liwmin = 3 + 5*n;
         }
 
-        work[0] = lwmin;
+        work[0] = magma_dmake_lwork( lwmin );
         iwork[0] = liwmin;
 
         if (lwork < lwmin && ! lquery) {
@@ -238,7 +238,7 @@ magma_dstedx(
         orgnrm = lapackf77_dlanst("M", &n, d, e);
 
         if (orgnrm == 0) {
-            work[0]  = lwmin;
+            work[0]  = magma_dmake_lwork( lwmin );
             iwork[0] = liwmin;
             return *info;
         }
@@ -332,7 +332,7 @@ magma_dstedx(
         }
     }
 
-    work[0]  = lwmin;
+    work[0]  = magma_dmake_lwork( lwmin );
     iwork[0] = liwmin;
 
     return *info;

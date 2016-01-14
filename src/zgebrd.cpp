@@ -171,7 +171,7 @@ magma_zgebrd(
     ldda = m;
 
     lwkopt = (m + n) * nb;
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+    work[0] = magma_zmake_lwork( lwkopt );
     lquery = (lwork == -1);
     
     /* Check arguments */
@@ -306,7 +306,7 @@ magma_zgebrd(
     lapackf77_zgebrd( &nrow, &ncol,
                       A(i, i), &lda, d+i, e+i,
                       tauq+i, taup+i, work, &lwork, &iinfo);
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
+    work[0] = magma_zmake_lwork( lwkopt );
 
     magma_free_cpu( work2 );
     magma_free( dA );

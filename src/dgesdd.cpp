@@ -413,7 +413,7 @@ magma_dgesdd(
             }
         }
         maxwrk = max(maxwrk,minwrk);
-        work[1] = (double) maxwrk;
+        work[1] = magma_dmake_lwork( maxwrk );
 
         if (lwork < minwrk && ! lquery) {
             *info = -12;
@@ -1239,7 +1239,7 @@ magma_dgesdd(
     }
 
     /* Return optimal workspace in WORK[0] */
-    work[1] = (double) maxwrk;
+    work[1] = magma_dmake_lwork( maxwrk );
 
     return *info;
 } /* magma_dgesdd */

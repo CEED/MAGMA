@@ -183,7 +183,7 @@ magma_zhetrd(
     lddw = ldda;
     lwkopt = n * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0) {
@@ -338,7 +338,7 @@ magma_zhetrd(
     magma_free( dA );
     magma_queue_destroy( queue );
     
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
 
     return *info;
 } /* magma_zhetrd */

@@ -218,7 +218,7 @@ magma_zunmbr(
         else {
             lwkopt = 1;
         }
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0) {
@@ -312,6 +312,6 @@ magma_zunmbr(
             #endif
         }
     }
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
     return *info;
 } /* magma_zunmbr */

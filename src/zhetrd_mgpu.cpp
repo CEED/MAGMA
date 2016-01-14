@@ -204,7 +204,7 @@ magma_zhetrd_mgpu(
     ldwork = n;
     lwkopt = n * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0) {
@@ -483,7 +483,7 @@ CLEANUP:
     
     magma_setdevice( orig_dev );
     
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
     
     return *info;
 } /* magma_zhetrd */

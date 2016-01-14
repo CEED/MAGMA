@@ -248,10 +248,7 @@ magma_dsyevdx(
         liwmin = 1;
     }
     
-    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.
-    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
-    work[0]  = lwmin * one_eps;
+    work[0]  = magma_dmake_lwork( lwmin );
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -380,7 +377,7 @@ magma_dsyevdx(
         blasf77_dscal(&n, &d__1, w, &ione);
     }
 
-    work[0]  = lwmin * one_eps;  // round up
+    work[0]  = magma_dmake_lwork( lwmin );
     iwork[0] = liwmin;
 
     return *info;

@@ -150,7 +150,7 @@ magma_zgehrd_m(
     
     *info = 0;
     iws = n*(nb + nb*ngpu);
-    work[0] = MAGMA_Z_MAKE( iws, 0 );
+    work[0] = magma_zmake_lwork( iws );
 
     lquery = (lwork == -1);
     if (n < 0) {
@@ -302,7 +302,7 @@ magma_zgehrd_m(
     // add 1 to i for 1-based index
     i += 1;
     lapackf77_zgehd2(&n, &i, &ihi, A, &lda, tau, work, &iinfo);
-    work[0] = MAGMA_Z_MAKE( iws, 0 );
+    work[0] = magma_zmake_lwork( iws );
     
 CLEANUP:
     for( d = 0; d < ngpu; ++d ) {

@@ -284,11 +284,8 @@ magma_zheevdx_2stage(
         liwmin = 1;
     }
 
-    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.
-    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
-    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0.);  // round up
-    rwork[0] = lrwmin * one_eps;
+    work[0]  = magma_zmake_lwork( lwmin );
+    rwork[0] = magma_dmake_lwork( lrwmin );
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -307,10 +304,7 @@ magma_zheevdx_2stage(
         liwmin = 1;
     }
 
-    // multiply by 1+eps (in Double!) to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.
-    real_Double_t one_eps = 1. + lapackf77_dlamch("Epsilon");
-    work[0]  = lwmin * one_eps;
+    work[0]  = magma_dmake_lwork( lwmin );
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -572,9 +566,9 @@ magma_zheevdx_2stage(
         blasf77_dscal(&imax, &d__1, W, &ione);
     }
 
-    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0.);  // round up
+    work[0]  = magma_zmake_lwork( lwmin );
     #ifdef COMPLEX
-    rwork[0] = lrwmin * one_eps;
+    rwork[0] = magma_dmake_lwork( lrwmin );
     #endif
     iwork[0] = liwmin;
 

@@ -113,7 +113,7 @@ magma_zgeqrf_ooc(
     magma_int_t nb = magma_get_zgeqrf_nb( m, n );
 
     magma_int_t lwkopt = n * nb;
-    work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
     bool lquery = (lwork == -1);
     *info = 0;
     if (m < 0) {

@@ -271,7 +271,7 @@ magma_zhegvx(
     
     lwmin = n * (nb + 1);
     
-    work[0] = MAGMA_Z_MAKE( lwmin, 0 );
+    work[0] = magma_zmake_lwork( lwmin );
     
     
     if (lwork < lwmin && ! lquery) {

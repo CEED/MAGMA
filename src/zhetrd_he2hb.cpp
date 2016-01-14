@@ -193,7 +193,7 @@ magma_zhetrd_he2hb(
     /* Determine the block size. */
     lwkopt = n * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0)

@@ -131,7 +131,7 @@ magma_zgeqlf(
             work[0] = c_one;
         }
         else {
-            work[0] = MAGMA_Z_MAKE( max(n*nb, 2*nb*nb), 0 );
+            work[0] = magma_zmake_lwork( max(n*nb, 2*nb*nb) );
         }
 
         if (lwork < max(max(1,n), 2*nb*nb) && ! lquery)

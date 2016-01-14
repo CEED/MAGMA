@@ -192,7 +192,7 @@ magma_zunmqr_m(
 
     magma_int_t lwkopt = max(1,nw) * nb;
     if (*info == 0) {
-        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+        work[0] = magma_zmake_lwork( lwkopt );
     }
 
     if (*info != 0) {
@@ -384,7 +384,7 @@ magma_zunmqr_m(
     }
 
 cleanup:
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    work[0] = magma_zmake_lwork( lwkopt );
 
     for (dev = 0; dev < ngpu; ++dev) {
         magma_setdevice( dev );
