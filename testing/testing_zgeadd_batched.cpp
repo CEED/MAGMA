@@ -97,9 +97,8 @@ int main( int argc, char** argv)
             magma_setvector( ntile, sizeof(magmaDoubleComplex*), hAarray, 1, dAarray, 1 );
             magma_setvector( ntile, sizeof(magmaDoubleComplex*), hBarray, 1, dBarray, 1 );
             
-            magmablasSetKernelStream( opts.queue );
             gpu_time = magma_sync_wtime( opts.queue );
-            magmablas_zgeadd_batched( mb, nb, alpha, dAarray, ldda, dBarray, ldda, ntile );
+            magmablas_zgeadd_batched( mb, nb, alpha, dAarray, ldda, dBarray, ldda, ntile, opts.queue );
             gpu_time = magma_sync_wtime( opts.queue ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             

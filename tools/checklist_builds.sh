@@ -87,7 +87,7 @@ function run {
 builds=builds/`date +%Y-%m-%d`
 echo "builds directory $builds"
 
-make='make -j8'
+make="make -j$j"
 
 if [ ! -d builds ]; then
     mkdir builds
