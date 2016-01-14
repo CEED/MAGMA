@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# MAGMA (version 1.1) --
+# MAGMA (version 2.0) --
 # Univ. of Tennessee, Knoxville
 # Univ. of California, Berkeley
 # Univ. of Colorado, Denver
@@ -94,6 +94,7 @@
 # --batched options run particular sets of tests. By default, all tests are run,
 # except batched because we don't want to run batched with, say, N=1000.
 # --mgpu runs only multi-GPU tests from the above sets.
+# These may be negated with --no-blas, --no-aux, etc.
 #
 # The --start option skips all testers before the given one, then continues
 # with testers from there. This is helpful to restart a non-interactive set
@@ -120,6 +121,11 @@
 #
 #       ./run_tests.py -s -m
 #
+# Specific tests can be chosen using --itype, --version, -U/--upper, -L/--lower,
+# -J/--jobz, -D/--diag, and --fraction. For instance:
+#
+# 		./run_tests.py testing_ssygvdx_2stage -L -JN --itype 1 -s --no-mgpu
+#
 #
 # What is checked
 # ------------------
@@ -128,9 +134,18 @@
 #
 # The --tol option sets the tolerance to verify accuracy. This is 30 by default,
 # which may be too tight for some testers. Setting it somewhat higher
-# (e.g., 50 or 100) filters out spurious accuracy failures.
+# (e.g., 50 or 100) filters out spurious accuracy failures. Also see the
+# run_summarize.py script, which parses the testers output and can filter out
+# tests using a higher tolerance after the fact -- without re-running them.
 #
 # The --dev option sets which GPU device to use.
+#
+# By default, a wide range of sizes and shapes (square, tall, wide) are tested,
+# as applicable. The -N and --range options override these.
+#
+# For multi-GPU codes, --ngpu specifies the number of GPUs, default 2. Most
+# testers accept --ngpu -1 to test the multi-GPU code on a single GPU.
+# (Using --ngpu 1 will usually invoke the single-GPU code.)
 
 import os
 import re
@@ -178,6 +193,17 @@ parser.add_option(      '--geev',       action='store_true', dest='geev',       
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
 parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests; add --ngpu to specify number of GPUs')
+
+parser.add_option(      '--no-blas',    action='store_true', dest='no_blas',    help='do not run BLAS tests')
+parser.add_option(      '--no-aux',     action='store_true', dest='no_aux',     help='do not run auxiliary routine tests')
+parser.add_option(      '--no-chol',    action='store_true', dest='no_chol',    help='do not run Cholesky factorization & solver tests')
+parser.add_option(      '--no-hesv',    action='store_true', dest='no_hesv',    help='do not run Cholesky factorization & solver tests')
+parser.add_option(      '--no-lu',      action='store_true', dest='no_lu',      help='do not run LU factorization & solver tests')
+parser.add_option(      '--no-qr',      action='store_true', dest='no_qr',      help='do not run QR factorization & solver (gels) tests')
+parser.add_option(      '--no-syev',    action='store_true', dest='no_syev',    help='do not run symmetric eigenvalue tests')
+parser.add_option(      '--no-sygv',    action='store_true', dest='no_sygv',    help='do not run generalized symmetric eigenvalue tests')
+parser.add_option(      '--no-geev',    action='store_true', dest='no_geev',    help='do not run non-symmetric eigenvalue tests')
+parser.add_option(      '--no-svd',     action='store_true', dest='no_svd',     help='do not run SVD tests')
 parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='do not run multi-GPU (BLAS, LU, etc.) tests')
 
 # options to select subset of commands
@@ -217,6 +243,18 @@ if ( not opts.blas and not opts.aux  and
 	opts.batched = False   # batched routines must be explicitly requested, as the typical size range is different
 	opts.mgpu    = False   # multi-GPU routines are part of above groups
 # end
+
+# "no" options override whatever was previously set
+if opts.no_blas : opts.blas = False
+if opts.no_aux  : opts.aux  = False
+if opts.no_chol : opts.chol = False
+if opts.no_hesv : opts.hesv = False
+if opts.no_lu   : opts.lu   = False
+if opts.no_qr   : opts.qr   = False
+if opts.no_syev : opts.syev = False
+if opts.no_sygv : opts.sygv = False
+if opts.no_geev : opts.geev = False
+if opts.no_svd  : opts.svd  = False
 
 print 'opts', opts
 print 'args', args

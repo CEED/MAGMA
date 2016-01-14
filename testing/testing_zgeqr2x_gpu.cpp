@@ -55,7 +55,6 @@ int main( int argc, char** argv)
     magma_opts opts;
     opts.parse_opts( argc, argv );
     
-    double eps = lapackf77_dlamch("E");
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
     magma_queue_t queues[2];
@@ -64,11 +63,10 @@ int main( int argc, char** argv)
 
     printf("%% version %d\n", (int) opts.version );
     printf("%% It's okay if |Q - Q_lapack| is large; MAGMA and LAPACK\n"
-           "%% just chose different Householder reflectors, both valid.\n"
-           "%% Number in parenthesis after each error is error/epsilon, for comparison with --tolerance.\n\n");
+           "%% just chose different Householder reflectors, both valid.\n\n");
     
-    printf("%%   M     N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   |R - Q^H*A|        |I - Q^H*Q|        |T - T_lapack|     |Q - Q_lapack|  (error/epsilon)\n");
-    printf("%%=============================================================================================================================================\n");
+    printf("%%   M     N    CPU Gflop/s (ms)    GPU Gflop/s (ms)   |R - Q^H*A|   |I - Q^H*Q|   |T - T_magma|   |Q - Q_magma|\n");
+    printf("%%==============================================================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M     = opts.msize[itest];
@@ -245,12 +243,9 @@ int main( int argc, char** argv)
                 
                 bool okay = (error < tol) && (error2 < tol) && (terr < tol);
                 status += ! okay;
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e (%5.0f)   %8.2e (%5.0f)   %8.2e (%5.0f)   %8.2e (%5.0f)  %s\n",
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e      %8.2e      %8.2e        %8.2e   %s\n",
                        (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
-                       error,  error /eps,
-                       error2, error2/eps,
-                       terr,   terr  /eps,
-                       diff,   diff  /eps,
+                       error, error2, terr, diff,
                        (okay ? "ok" : "failed"));
             }
             else {
