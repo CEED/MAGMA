@@ -217,7 +217,7 @@ public:
     magma_int_t align;
     magma_int_t nb;
     magma_int_t nrhs;
-    magma_int_t nstream;
+    magma_int_t nqueue;
     magma_int_t ngpu;
     magma_int_t nsub;
     magma_int_t niter;

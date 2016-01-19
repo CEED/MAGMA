@@ -165,7 +165,7 @@ const char *usage =
 "  --batch x        number of matrices for the batched routines, default 1000.\n"
 "  --nb x           Block size, default set automatically.\n"
 "  --nrhs x         Number of right hand sides, default 1.\n"
-"  --nstream x      Number of CUDA streams, default 1.\n"
+"  --nqueue x       Number of device queues, default 1.\n"
 "  --ngpu x         Number of GPUs, default 1. Also set with $MAGMA_NUM_GPUS.\n"
 "                   (Some testers take --ngpu -1 to run the multi-GPU code with 1 GPU.\n"
 "  --nsub x         Number of submatrices, default 1.\n"
@@ -204,7 +204,7 @@ magma_opts::magma_opts( magma_opts_t flag )
     this->align    = 32;
     this->nb       = 0;  // auto
     this->nrhs     = 1;
-    this->nstream  = 1;
+    this->nqueue   = 1;
     this->ngpu     = magma_num_gpus();
     this->nsub     = 1;
     this->niter    = 1;
@@ -434,10 +434,10 @@ void magma_opts::parse_opts( int argc, char** argv )
             magma_assert( this->nsub > 0,
                           "error: --nsub %s is invalid; ensure nsub > 0.\n", argv[i] );
         }
-        else if ( strcmp("--nstream", argv[i]) == 0 && i+1 < argc ) {
-            this->nstream = atoi( argv[++i] );
-            magma_assert( this->nstream > 0,
-                          "error: --nstream %s is invalid; ensure nstream > 0.\n", argv[i] );
+        else if ( strcmp("--nqueue", argv[i]) == 0 && i+1 < argc ) {
+            this->nqueue = atoi( argv[++i] );
+            magma_assert( this->nqueue > 0,
+                          "error: --nqueue %s is invalid; ensure nqueue > 0.\n", argv[i] );
         }
         else if ( strcmp("--niter",   argv[i]) == 0 && i+1 < argc ) {
             this->niter = atoi( argv[++i] );

@@ -97,7 +97,7 @@ magma_zbulge_applyQ_v2_m(
     magma_device_t orig_dev;
     magma_getdevice( &orig_dev );
 
-    magma_int_t  nbevents =2, nstream=2;
+    magma_int_t  nevents =2, nstream=2;
     magma_queue_t queues[MagmaMaxGPUs][20];
     magma_event_t  myevent[MagmaMaxGPUs][20];
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
@@ -105,7 +105,7 @@ magma_zbulge_applyQ_v2_m(
         for( magma_int_t i = 0; i < nstream; ++i ) {
             magma_queue_create( dev, &queues[dev][i] );
         }
-        for( magma_int_t i = 0; i < nbevents; ++i ) {
+        for( magma_int_t i = 0; i < nevents; ++i ) {
             cudaEventCreateWithFlags(&myevent[dev][i],cudaEventDisableTiming);
             //magma_event_create(&myevent[dev][i]);
         }
@@ -462,7 +462,7 @@ magma_zbulge_applyQ_v2_m(
         magma_queue_sync(queues[dev][1]);
         magma_free(dwork[dev]);
         magma_free(dE[dev]);
-        for( magma_int_t i = 0; i < nbevents; ++i ) {
+        for( magma_int_t i = 0; i < nevents; ++i ) {
             magma_event_destroy( myevent[dev][i] );
         }
         for( magma_int_t i = 0; i < nstream; ++i ) {

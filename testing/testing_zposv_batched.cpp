@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     opts.parse_opts( argc, argv );
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
-    magma_queue_t queue = opts.queue; //NULL; // The batched routine prefer stream NULL
+    magma_queue_t queue = opts.queue;
 
     nrhs = opts.nrhs;
     batchCount = opts.batchcount;

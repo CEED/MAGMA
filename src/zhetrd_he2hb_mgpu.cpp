@@ -251,23 +251,21 @@ magma_zhetrd_he2hb_mgpu(
     magma_set_lapack_numthreads( min(orig_threads,16) );
 
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
-    magma_int_t nbcmplx=0;
-    magma_buildconnection_mgpu(gnode, &nbcmplx,  ngpu);
+    magma_int_t ncmplx=0;
+    magma_buildconnection_mgpu(gnode, &ncmplx,  ngpu);
     #ifdef ENABLE_DEBUG
-    printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n", nbcmplx);
+    printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n", ncmplx);
     #endif
 
     magmaDoubleComplex *dspace[MagmaMaxGPUs];
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dworkbis[MagmaMaxGPUs];
     magmaDoubleComplex *dvall[MagmaMaxGPUs], *dv[MagmaMaxGPUs], *dw[MagmaMaxGPUs];
-    magmaDoubleComplex *workngpu[MagmaMaxGPUs+1];
-    magma_event_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10];
-    magma_int_t nbevents = MagmaMaxGPUs*MagmaMaxGPUs;
+    magma_event_t     events[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10];
+    magma_int_t nevents = MagmaMaxGPUs*MagmaMaxGPUs;
 
     magma_int_t lddv        = ldda;
     magma_int_t lddw        = lddv;
     magma_int_t dwrk2siz    = ldda*nb*(ngpu+1);
-    magma_int_t worksiz     = n*nb;
     magma_int_t devworksiz  = 2*nb*lddv + nb*lddw + nb*ldda + dwrk2siz; // 2*dv(dv0+dv1) + dw + dwork +dworkbis
 
     // local allocation and stream creation
@@ -275,21 +273,15 @@ magma_zhetrd_he2hb_mgpu(
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         magma_zmalloc( &dspace[dev], devworksiz );
-        magma_zmalloc_pinned ( &workngpu[dev], worksiz);
         dvall[dev]    = dspace[dev];
         dw[dev]       = dvall[dev]   + 2*nb*lddv;
         dwork[dev]    = dw[dev]      + nb*lddw;
         dworkbis[dev] = dwork[dev]   + nb*ldda;
-        for( i = 0; i < nbevents; ++i ) {
-            cudaEventCreateWithFlags( &redevents[dev][i], cudaEventDisableTiming );
-            //magma_create_event( &redevents[dev][i] );
+        for( i = 0; i < nevents; ++i ) {
+            cudaEventCreateWithFlags( &events[dev][i], cudaEventDisableTiming );
+            //magma_create_event( &events[dev][i] );
         }
     }
-    magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);
-    magmaDoubleComplex *worktest = NULL;
-    //magma_zmalloc_cpu( &worktest, n*nb ); // not used
-    // ======================
-  
 
     magmaDoubleComplex *hT = work + lwork - nb*nb;
     lwork -= nb*nb;
@@ -357,7 +349,7 @@ magma_zhetrd_he2hb_mgpu(
                        tau_ref(i), work, &lwork, info);
             
             /* Form the matrix T */
-            pk=min(pm,pn);
+            pk = min(pm,pn);
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                           &pm, &pk, A(indi, indj), &lda,
                           tau_ref(i), hT, &nb);
@@ -430,12 +422,12 @@ magma_zhetrd_he2hb_mgpu(
                     dwork[0], pm,
                     c_zero, dw[0], pm, queues[ 0 ][ 0 ] );
             } else {
-                magmablas_zhemm_mgpu_com( 
+                magmablas_zhemm_mgpu( 
                     MagmaLeft, uplo, pm, pk,
                     c_one, dAmgpu, ldda, indi-1,
                     dwork, pm,
-                    c_zero, dw, pm, dworkbis, dwrk2siz, worktest, pm, workngpu, worksiz,
-                    ngpu, distblk, queues, nqueue-1, redevents, nbevents, gnode, nbcmplx );
+                    c_zero, dw, pm, dworkbis, dwrk2siz,
+                    ngpu, distblk, queues, nqueue-1, events, nevents, gnode, ncmplx );
             }
 
             
@@ -532,15 +524,12 @@ magma_zhetrd_he2hb_mgpu(
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        magma_free( dspace[dev]);
-        magma_free_pinned(workngpu[dev]);
+        magma_free( dspace[dev] );
         // might need a sync oover the queue to make the routine 100% sync
-        for( magma_int_t e = 0; e < nbevents; ++e ) {
-            magma_event_destroy( redevents[dev][e] );
+        for( magma_int_t e = 0; e < nevents; ++e ) {
+            magma_event_destroy( events[dev][e] );
         }
     }
-    magma_free_pinned(workngpu[ngpu]);
-    magma_free_cpu(worktest);
 
     magma_setdevice( orig_dev );
     magma_set_lapack_numthreads( orig_threads );
