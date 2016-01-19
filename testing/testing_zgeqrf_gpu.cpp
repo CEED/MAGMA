@@ -250,7 +250,7 @@ int main( int argc, char** argv)
                 // compute r = Ax - b, saved in b
                 blasf77_zgemv( "Notrans", &M, &N, &c_one, h_A, &lda, x, &ione, &c_neg_one, b, &ione );
 
-                // compute residual |Ax - b| / (n*|A|*|x|)
+                // compute residual |Ax - b| / (max(m,n)*|A|*|x|)
                 double norm_x, norm_A, norm_r, work[1];
                 norm_A = lapackf77_zlange( "F", &M, &N, h_A, &lda, work );
                 norm_r = lapackf77_zlange( "F", &M, &ione, b, &M, work );
@@ -260,7 +260,7 @@ int main( int argc, char** argv)
                 TESTING_FREE_CPU( b );
                 TESTING_FREE_DEV( d_B );
 
-                error = norm_r / (N * norm_A * norm_x);
+                error = norm_r / (max(M,N) * norm_A * norm_x);
             }
             
             /* =====================================================================
