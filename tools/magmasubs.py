@@ -32,8 +32,8 @@
 # becomes
 # [ ['FOO', 'BAR'], ['BAZ', 'ZAB'] ]
 def upper( lcase ):
-	ucase = map( lambda outer: map( lambda inner: inner.upper(), outer ), lcase )
-	return ucase
+    ucase = map( lambda outer: map( lambda inner: inner.upper(), outer ), lcase )
+    return ucase
 # end
 
 
@@ -43,8 +43,8 @@ def upper( lcase ):
 # becomes
 # [ ['foo', 'bar'], ['baz', 'zab'] ]
 def lower( ucase ):
-	lcase = map( lambda outer: map( lambda inner: inner.lower(), outer ), ucase )
-	return lcase
+    lcase = map( lambda outer: map( lambda inner: inner.lower(), outer ), ucase )
+    return lcase
 # end
 
 
@@ -54,8 +54,8 @@ def lower( ucase ):
 # becomes
 # [ ['Foo', 'Bar'], ['Baz', 'Zab'] ]
 def title( ucase ):
-	lcase = map( lambda outer: map( lambda inner: inner.title(), outer ), ucase )
-	return lcase
+    lcase = map( lambda outer: map( lambda inner: inner.title(), outer ), ucase )
+    return lcase
 # end
 
 
@@ -537,7 +537,7 @@ subs = {
     ('smgesellcm',     'dmgesellcm',     'cmgesellcm',     'zmgesellcm'      ),
     ('smdot',          'dmdot',          'cmdot',          'zmdot'           ),
     ('smzdotc',        'dmzdotc',        'cmzdotc',        'zmzdotc'         ),
-	('smt',            'dmt',            'cmt',            'zmt'             ),
+    ('smt',            'dmt',            'cmt',            'zmt'             ),
     ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
     ('mkl_scsrmm',     'mkl_dcsrmm',     'mkl_ccsrmm',     'mkl_zcsrmm'      ),
