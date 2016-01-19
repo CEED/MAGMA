@@ -70,8 +70,8 @@ zgemvn_template_fermi(
     magmaDoubleComplex       * __restrict__ y, magma_int_t incy,
     magma_queue_t queue)
 {
-    dim3 grid( magma_ceildiv(m, TILE_SIZE) );
-    dim3 threads( DIM_X, DIM_Y, 1 );
+    dim3 grid( magma_ceildiv(m, TILE_SIZE), 1 );
+    dim3 threads( DIM_X, DIM_Y );
 
     zgemvn_template_kernel_fermi<DIM_X, DIM_Y, TILE_SIZE>
         <<< grid, threads, 0, queue->cuda_stream() >>>
@@ -90,9 +90,9 @@ zgemvc_template_fermi(
     magmaDoubleComplex       * __restrict__ y, magma_int_t incy,
     magma_queue_t queue)
 {
-    dim3 grid    ( 1,  magma_ceildiv(n, TILE_SIZE),  1 );
-    dim3 threads ( DIM_X, DIM_Y, 1 );
-
+    dim3 grid    ( magma_ceildiv(n, TILE_SIZE), 1 );
+    dim3 threads ( DIM_X, DIM_Y );
+    
     if (trans == MagmaConjTrans) {
         zgemvc_template_kernel_fermi< DIM_X, DIM_Y, TILE_SIZE, MagmaConjTrans >
             <<< grid, threads, 0, queue->cuda_stream() >>>
