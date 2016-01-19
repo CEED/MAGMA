@@ -213,7 +213,26 @@ parser.add_option('-U', '--upper',      action='store_true', dest='upper',      
 parser.add_option('-L', '--lower',      action='store_true', dest='lower',      help='select runs matching lower',   default=None )
 parser.add_option('-J', '--jobz',       action='store',      dest='jobz',       help='select runs matching jobz (-JV, -JN)', default=None )
 parser.add_option('-D', '--diag',       action='store',      dest='diag',       help='select runs matching diag (-DU, -DN)', default=None )
-parser.add_option(      '--fraction',   action='store',      dest='fraction',   help='select runs matching diag (-DU, -DN)', default=None )
+parser.add_option('-C',                 action='store_true', dest='C',          help='select runs matching -C', default=None )
+parser.add_option('-T',                 action='store_true', dest='T',          help='select runs matching -T', default=None )
+parser.add_option(      '--fraction',   action='store',      dest='fraction',   help='select runs matching fraction', default=None )
+
+parser.add_option(      '--UN',         action='store_true', dest='UN',         help='select runs matching -UN', default=None )
+parser.add_option(      '--UO',         action='store_true', dest='UO',         help='select runs matching -UO', default=None )
+parser.add_option(      '--US',         action='store_true', dest='US',         help='select runs matching -US', default=None )
+parser.add_option(      '--UA',         action='store_true', dest='UA',         help='select runs matching -UA', default=None )
+parser.add_option(      '--VN',         action='store_true', dest='VN',         help='select runs matching -VN', default=None )
+parser.add_option(      '--VO',         action='store_true', dest='VO',         help='select runs matching -VO', default=None )
+parser.add_option(      '--VS',         action='store_true', dest='VS',         help='select runs matching -VS', default=None )
+parser.add_option(      '--VA',         action='store_true', dest='VA',         help='select runs matching -VA', default=None )
+
+parser.add_option(      '--NN',         action='store_true', dest='NN',         help='select runs matching -NN', default=None )
+parser.add_option(      '--NT',         action='store_true', dest='NT',         help='select runs matching -NT', default=None )
+parser.add_option(      '--TN',         action='store_true', dest='TN',         help='select runs matching -TN', default=None )
+parser.add_option(      '--TT',         action='store_true', dest='TT',         help='select runs matching -TT', default=None )
+parser.add_option(      '--NC',         action='store_true', dest='NC',         help='select runs matching -NC', default=None )
+parser.add_option(      '--CN',         action='store_true', dest='CN',         help='select runs matching -CN', default=None )
+parser.add_option(      '--CC',         action='store_true', dest='CC',         help='select runs matching -CC', default=None )
 
 (opts, args) = parser.parse_args()
 
@@ -225,11 +244,13 @@ if ( not opts.xsmall and not opts.small and not opts.med and not opts.large ):
 # end
 
 # default if no groups given is all groups
-if ( not opts.blas and not opts.aux  and
+# also, listing specific testers on command line overrides any groups
+if ( len(args) > 0 or (
+	 not opts.blas and not opts.aux  and
 	 not opts.chol and not opts.hesv and not opts.lu   and not opts.qr   and
 	 not opts.syev and not opts.sygv and not opts.geev and
 	 not opts.svd  and not opts.batched and
-	 not opts.mgpu ):
+	 not opts.mgpu )):
 	opts.blas = True
 	opts.aux  = True
 	opts.chol = True
@@ -240,7 +261,7 @@ if ( not opts.blas and not opts.aux  and
 	opts.sygv = True
 	opts.geev = True
 	opts.svd  = True
-	opts.batched = False   # batched routines must be explicitly requested, as the typical size range is different
+	opts.batched = (len(args) > 0)   # batched routines must be explicitly requested, as the typical size range is different
 	opts.mgpu    = False   # multi-GPU routines are part of above groups
 # end
 
@@ -484,8 +505,8 @@ blas = (
 	('testing_ztrsv',       '-U -C -DN  -c',  n,    'cublas only'),
 	('testing_ztrsv',       '-U -C -DU  -c',  n,    'cublas only'),
 	
-	('#testing_zhemm_mgpu',  ngpu + '-L -c',  n,    'tester needs updating'),
-	('#testing_zhemm_mgpu',  ngpu + '-U -c',  n,    'tester needs updating'),
+	('testing_zhemm_mgpu',   ngpu + '-L -c',  n,    ''),
+	('testing_zhemm_mgpu',   ngpu + '-U -c',  n,    ''),
 	('testing_zhemv_mgpu',   ngpu + '-L -c',  n,    ''),
 	('testing_zhemv_mgpu',   ngpu + '-U -c',  n,    ''),
 	('testing_zher2k_mgpu',  ngpu + '-L -c',  n,    ''),
@@ -1095,20 +1116,35 @@ if ( opts.no_mgpu ):
 # ----------------------------------------------------------------------
 # select subset of commands
 options = []
-if (opts.itype):
-	options.append('--itype %s' % (opts.itype))
-if (opts.version):
-	options.append('--version %s' % (opts.version))
-if (opts.lower):
-	options.append('-L')
-elif (opts.upper):
-	options.append('-U')
-if (opts.jobz):
-	options.append('-J%s' % (opts.jobz))
-if (opts.diag):
-	options.append('-D%s' % (opts.diag))
-if (opts.fraction):
-	options.append('--fraction %s' % (opts.fraction))
+if (opts.itype):    options.append('--itype %s' % (opts.itype))
+if (opts.version):  options.append('--version %s' % (opts.version))
+if (opts.jobz):     options.append('-J%s' % (opts.jobz))
+if (opts.diag):     options.append('-D%s' % (opts.diag))
+if (opts.fraction): options.append('--fraction %s' % (opts.fraction))
+
+if   (opts.lower):  options.append('-L')
+elif (opts.upper):  options.append('-U')
+
+if   (opts.C):      options.append('-C')
+elif (opts.T):      options.append('-T')
+
+if (opts.UN): options.append('-UN')
+if (opts.UO): options.append('-UO')
+if (opts.US): options.append('-US')
+if (opts.UA): options.append('-UA')
+
+if (opts.VN): options.append('-VN')
+if (opts.VO): options.append('-VO')
+if (opts.VS): options.append('-VS')
+if (opts.VA): options.append('-VA')
+
+if (opts.NN): options.append('-NN')
+if (opts.NT): options.append('-NT')
+if (opts.TN): options.append('-TN')
+if (opts.TT): options.append('-TT')
+if (opts.NC): options.append('-NC')
+if (opts.CN): options.append('-CN')
+if (opts.CC): options.append('-CC')
 
 if len(options) > 0:
 	tests2 = []
