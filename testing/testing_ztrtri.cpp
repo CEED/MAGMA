@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     magma_int_t N, n2, lda, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    double      work[1], error, norm;
+    double      Anorm, error, work[1];
     magma_int_t status = 0;
 
     magma_opts opts;
@@ -105,9 +105,9 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                norm  = lapackf77_zlantr("f", lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, &N, h_A, &N, work);
                 blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-                error = lapackf77_zlantr("f", lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, &N, h_R, &N, work) / norm;
+                Anorm = lapackf77_zlantr("f", lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, &N, h_A, &lda, work);
+                error = lapackf77_zlantr("f", lapack_uplo_const(opts.uplo), MagmaNonUnitStr, &N, &N, h_R, &lda, work) / Anorm;
                 bool okay = (error < tol);
                 status += ! okay;
                 printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",

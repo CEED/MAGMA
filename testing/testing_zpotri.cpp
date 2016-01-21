@@ -104,8 +104,8 @@ int main( int argc, char** argv)
                    Check the result compared to LAPACK
                    =================================================================== */
                 blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-                Anorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
-                error = lapackf77_zlange("f", &N, &N, h_R, &N, work) / Anorm;
+                Anorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
+                error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / Anorm;
                 printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
                        error, (error < tol ? "ok" : "failed") );

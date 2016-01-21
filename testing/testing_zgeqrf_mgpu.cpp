@@ -108,7 +108,7 @@ int main( int argc, char** argv )
                 magmaDoubleComplex *tau2;
                 TESTING_MALLOC_CPU( tau2, magmaDoubleComplex, min_mn );
                 cpu_time = magma_wtime();
-                lapackf77_zgeqrf( &M, &N, h_A, &M, tau2, h_work, &lhwork, &info );
+                lapackf77_zgeqrf( &M, &N, h_A, &lda, tau2, h_work, &lhwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0) {

@@ -128,17 +128,17 @@ int main( int argc, char** argv)
                        (int) info, magma_strerror( info ));
             }
 
-            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
+            magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
 
             // Regenerate R
-            // blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &M, h_A, &M, &c_zero, h_rwork, &N);
+            // blasf77_zgemm("t", "n", &N, &N, &M, &c_one, h_R, &lda, h_A, &lda, &c_zero, h_rwork, &N);
             // magma_zprint(N, N, h_work, N);
 
-            blasf77_ztrmm("r", "u", "n", "n", &M, &N, &c_one, h_rwork, &N, h_R, &M);
+            blasf77_ztrmm("r", "u", "n", "n", &M, &N, &c_one, h_rwork, &N, h_R, &lda);
             blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
-            e5 = lapackf77_zlange("i", &M, &N, h_R, &M, work) /
+            e5 = lapackf77_zlange("i", &M, &N, h_R, &lda, work) /
                  lapackf77_zlange("i", &M, &N, h_A, &lda, work);
-            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
+            magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
  
             if ( opts.lapack ) {
                 /* =====================================================================
@@ -160,14 +160,14 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result compared to LAPACK
                    =================================================================== */
-                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_R, &M, h_R, &M, &c_zero, h_work, &N);
+                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_R, &lda, h_R, &lda, &c_zero, h_work, &N);
                 for (int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }
                 e1 = lapackf77_zlange("f", &N, &N, h_work, &N, work) / N;
                 e3 = lapackf77_zlange("i", &N, &N, h_work, &N, work) / N;
 
-                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_A, &M, h_A, &M, &c_zero, h_work, &N);
+                blasf77_zgemm("c", "n", &N, &N, &M, &c_one, h_A, &lda, h_A, &lda, &c_zero, h_work, &N);
                 for (int ii = 0; ii < N*N; ii += N+1 ) {
                     h_work[ii] = MAGMA_Z_SUB(h_work[ii], c_one);
                 }

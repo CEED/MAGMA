@@ -70,8 +70,8 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
             magma_zmake_hpd( N, h_A, lda );
             
-            magma_zsetmatrix( N, N,         h_A, N, d_A, ldda );
-            magma_zsetmatrix( N, opts.nrhs, h_B, N, d_B, lddb );
+            magma_zsetmatrix( N, N,         h_A, lda, d_A, ldda );
+            magma_zsetmatrix( N, opts.nrhs, h_B, lda, d_B, lddb );
             
             /* ====================================================================
                Performs operation using MAGMA

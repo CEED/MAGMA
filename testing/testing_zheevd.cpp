@@ -181,7 +181,7 @@ int main( int argc, char** argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            magma_zmake_hermitian( N, h_A, N );
+            magma_zmake_hermitian( N, h_A, lda );
             
             lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
             

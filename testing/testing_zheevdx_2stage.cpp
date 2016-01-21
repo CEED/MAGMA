@@ -47,10 +47,9 @@ int main( int argc, char** argv)
     magma_int_t lrwork;
     #endif
 
-    /* Matrix size */
     double *w1, *w2;
     magma_int_t *iwork;
-    magma_int_t N, n2, info, lwork, liwork;
+    magma_int_t N, n2, info, lda, lwork, liwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t info_ortho     = 0;
@@ -78,7 +77,23 @@ int main( int argc, char** argv)
     for( int itest = 0; itest < opts.ntest; ++itest ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[itest];
-            n2     = N*N;
+            lda = N;
+            n2  = lda*N;
+
+            // TODO: test vl-vu range
+            magma_int_t m1 = 0;
+            double vl = 0;
+            double vu = 0;
+            magma_int_t il = 0;
+            magma_int_t iu = 0;
+            if (opts.fraction == 0) {
+                il = max( 1, magma_int_t(0.1*N) );
+                iu = max( 1, magma_int_t(0.3*N) );
+            }
+            else {
+                il = 1;
+                iu = max( 1, magma_int_t(opts.fraction*N) );
+            }
 
             magma_zheevdx_getworksize(N, threads, (opts.jobz == MagmaVec), 
                                      &lwork, 
@@ -101,31 +116,17 @@ int main( int argc, char** argv)
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            magma_zmake_hermitian( N, h_A, N );
-
-            magma_int_t m1 = 0;
-            double vl = 0;
-            double vu = 0;
-            magma_int_t il = 0;
-            magma_int_t iu = 0;
-            if (opts.fraction == 0) {
-                il = max( 1, magma_int_t(0.1*N) );
-                iu = max( 1, magma_int_t(0.3*N) );
-            }
-            else {
-                il = 1;
-                iu = max( 1, magma_int_t(opts.fraction*N) );
-            }
+            magma_zmake_hermitian( N, h_A, lda );
 
             if (opts.warmup) {
                 // ==================================================================
                 // Warmup using MAGMA
                 // ==================================================================
-                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &N, h_R, &N );
+                lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
                 if (opts.ngpu == 1) {
                     //printf("calling zheevdx_2stage 1 GPU\n");
                     magma_zheevdx_2stage( opts.jobz, range, opts.uplo, N, 
-                                          h_R, N, 
+                                          h_R, lda, 
                                           vl, vu, il, iu, 
                                           &m1, w1, 
                                           h_work, lwork, 
@@ -137,7 +138,7 @@ int main( int argc, char** argv)
                 } else {
                     //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
                     magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
-                                            h_R, N, 
+                                            h_R, lda, 
                                             vl, vu, il, iu, 
                                             &m1, w1, 
                                             h_work, lwork, 
@@ -152,12 +153,12 @@ int main( int argc, char** argv)
             // ===================================================================
             // Performs operation using MAGMA
             // ===================================================================
-            lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &N, h_R, &N );
+            lapackf77_zlacpy( MagmaFullStr, &N, &N, h_A, &lda, h_R, &lda );
             gpu_time = magma_wtime();
             if (opts.ngpu == 1) {
                 //printf("calling zheevdx_2stage 1 GPU\n");
                 magma_zheevdx_2stage( opts.jobz, range, opts.uplo, N, 
-                                      h_R, N, 
+                                      h_R, lda, 
                                       vl, vu, il, iu, 
                                       &m1, w1, 
                                       h_work, lwork, 
@@ -169,7 +170,7 @@ int main( int argc, char** argv)
             } else {
                 //printf("calling zheevdx_2stage_m %d GPU\n", (int) opts.ngpu);
                 magma_zheevdx_2stage_m( abs_ngpu, opts.jobz, range, opts.uplo, N, 
-                                        h_R, N, 
+                                        h_R, lda, 
                                         vl, vu, il, iu, 
                                         &m1, w1, 
                                         h_work, lwork, 
@@ -180,6 +181,10 @@ int main( int argc, char** argv)
                                         &info );
             }
             gpu_time = magma_wtime() - gpu_time;
+            if (info != 0) {
+                printf("magma_zheevdx_2stage returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
+            }
             
             printf("%5d %5d  %7.2f      ",
                    (int) N, (int) m1, gpu_time );
@@ -193,13 +198,13 @@ int main( int argc, char** argv)
               
                 /* Check the orthogonality, reduction and the eigen solutions */
                 if (opts.jobz == MagmaVec) {
-                    info_ortho = check_orthogonality(N, N, h_R, N, eps);
-                    info_reduction = check_reduction(opts.uplo, N, 1, h_A, w1, N, h_R, eps);
+                    info_ortho = check_orthogonality(N, N, h_R, lda, eps);
+                    info_reduction = check_reduction(opts.uplo, N, 1, h_A, w1, lda, h_R, eps);
                 } else {
                     printf("         ---                ---  ");
                 }
                 lapackf77_zheevd("N", "L", &N, 
-                                h_A, &N, w2, 
+                                h_A, &lda, w2, 
                                 h_work, &lwork, 
                                 #ifdef COMPLEX
                                 rwork, &lrwork, 
