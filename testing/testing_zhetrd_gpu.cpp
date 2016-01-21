@@ -60,12 +60,11 @@ int main( int argc, char** argv)
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    printf("Running version %d; available are (specified through --version num):\n",
-           (int) opts.version);
-    printf("1 - uses ZHEMV from CUBLAS (default)\n");
-    printf("2 - uses ZHEMV from MAGMA BLAS that requires extra space\n\n");
+    printf("%% Available versions (specify with --version):\n");
+    printf("%% 1 - magma_zhetrd_gpu:   uses ZHEMV from CUBLAS (default)\n");
+    printf("%% 2 - magma_zhetrd2_gpu:  uses ZHEMV from MAGMA BLAS that requires extra space\n\n");
 
-    printf("%% uplo = %s\n", lapack_uplo_const(opts.uplo) );
+    printf("%% uplo = %s, version %d\n", lapack_uplo_const(opts.uplo), int(opts.version) );
     printf("%% N     CPU Gflop/s (sec)   GPU Gflop/s (sec)   |A-QHQ^H|/N|A|   |I-QQ^H|/N\n");
     printf("%%==========================================================================\n");
     for( int itest = 0; itest < opts.ntest; ++itest ) {

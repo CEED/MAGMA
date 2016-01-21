@@ -180,6 +180,12 @@ parser.add_option('-l', '--large',      action='store_true', dest='large',      
 parser.add_option('-N',                 action='append',     dest='N',          help='run specific sizes; repeatable', default=[])
 parser.add_option(      '--range',      action='append',     dest='range',      help='run specific sizes; repeatable', default=[])
 
+# options to specify shapes
+parser.add_option(      '--square',     action='store_true', dest='square',     help='run square tests (M == N)')
+parser.add_option(      '--tall',       action='store_true', dest='tall',       help='run tall   tests (M > N)')
+parser.add_option(      '--wide',       action='store_true', dest='wide',       help='run wide   tests (M < N)')
+parser.add_option(      '--mnk',        action='store_true', dest='mnk',        help='run mnk    tests (M, N, K not all equal)')
+
 # options to select classes of routines
 parser.add_option(      '--blas',       action='store_true', dest='blas',       help='run BLAS tests')
 parser.add_option(      '--aux',        action='store_true', dest='aux',        help='run auxiliary routine tests')
@@ -243,6 +249,14 @@ if ( not opts.xsmall and not opts.small and not opts.med and not opts.large ):
 	opts.large = True
 # end
 
+# default if no shape is given is all shapes (square, tall, wide, mnk)
+if ( not opts.square and not opts.tall and not opts.wide and not opts.mnk ):
+	opts.square = True
+	opts.tall   = True
+	opts.wide   = True
+	opts.mnk    = True
+# end
+
 # default if no groups given is all groups
 # also, listing specific testers on command line overrides any groups
 if ( len(args) > 0 or (
@@ -293,9 +307,9 @@ batch = '--batch ' + opts.batch + ' '
 
 # ----------
 n = ''
-if opts.xsmall:
+if opts.square and opts.xsmall:
 	n +=  ' --range 32:128:32 --range 25:100:25'
-if opts.small:
+if opts.square and opts.small:
 	n += (' --range 1:20:1'
 	  +   ' -N  30  -N  31  -N  32  -N  33  -N  34'
 	  +   ' -N  62  -N  63  -N  64  -N  65  -N  66'
@@ -303,52 +317,52 @@ if opts.small:
 	  +   ' -N 126  -N 127  -N 128  -N 129  -N 130'
 	  +   ' -N 254  -N 255  -N 256  -N 257  -N 258'
 	)
-if opts.med:
+if opts.square and opts.med:
 	n +=  ' -N 510  -N 511  -N 512  -N 513  -N 514 --range 100:900:100'
-if opts.large:
+if opts.square and opts.large:
 	n +=  ' --range 1000:4000:1000'
 
 
 # ----------
 # to avoid excessive runtime with large m or n in zunmql, etc., k is set to min(m,n)
 tall = ''
-if opts.small:
+if opts.tall and opts.small:
 	tall += (' -N 2,1        -N 3,1        -N 4,2'
 	     +   ' -N 20,19      -N 20,10      -N 20,2      -N 20,1'
 	     +   ' -N 200,199    -N 200,100    -N 200,20    -N 200,10    -N 200,1'
 	)
-if opts.med:
+if opts.tall and opts.med:
 	tall += (' -N 600,599       -N 600,300       -N 10000,63,63   -N 10000,64,64   -N 10000,65,65'
          +   ' -N 10000,31,31   -N 10000,32,32   -N 10000,33,33   -N 10000,10,10   -N 10000,1,1')
-if opts.large:
+if opts.tall and opts.large:
 	tall +=  ' -N 2000,1999  -N 2000,1000  -N 20000,200,200  -N 20000,100,100  -N 200000,10,10  -N 200000,1,1  -N 2000000,10,10  -N 2000000,1,1'
 
 
 # ----------
 # to avoid excessive runtime with large m or n in zunmql, etc., k is set to min(m,n)
 wide = ''
-if opts.small:
+if opts.wide and opts.small:
 	wide += (' -N 1,2        -N 1,3        -N 2,4'
 	     +   ' -N 19,20      -N 10,20      -N 2,20      -N 1,20'
 	     +   ' -N 199,200    -N 100,200    -N 20,200    -N 10,200    -N 1,200'
 	)
-if opts.med:
+if opts.wide and opts.med:
 	wide += (' -N 599,600       -N 300,600       -N 63,10000,63   -N 64,10000,64   -N 65,10000,65'
          +   ' -N 31,10000,31   -N 32,10000,32   -N 33,10000,33   -N 10,10000,10   -N 1,10000,1')
-if opts.large:
+if opts.wide and opts.large:
 	wide +=  ' -N 1999,2000  -N 1000,2000  -N 200,20000,200  -N 100,20000,100  -N 10,200000,10  -N 1,200000,1  -N 10,2000000,10  -N 1,2000000,1'
 
 
 # ----------
 mnk = ''
-if opts.small:
+if opts.mnk and opts.small:
 	mnk  += (' -N 1,2,3           -N 2,1,3           -N 1,3,2           -N 2,3,1           -N 3,1,2           -N 3,2,1'
 	     +   ' -N 10,20,30        -N 20,10,30        -N 10,30,20        -N 20,30,10        -N 30,10,20        -N 30,20,10'
 	     +   ' -N 100,200,300     -N 200,100,300     -N 100,300,200     -N 200,300,100     -N 300,100,200     -N 300,200,100'
 	)
-if opts.med:
+if opts.mnk and opts.med:
 	mnk  +=  ' -N 100,300,600     -N 300,100,600     -N 100,600,300     -N 300,600,100     -N 600,100,300     -N 600,300,100'
-if opts.large:
+if opts.mnk and opts.large:
 	mnk  +=  ' -N 1000,2000,3000  -N 2000,1000,3000  -N 1000,3000,2000  -N 2000,3000,1000  -N 3000,1000,2000  -N 3000,2000,1000'
 
 
@@ -863,15 +877,15 @@ sygv = (
 	('testing_zhegvdx',          '--version 1 -L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -L -JN --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',          '--version 1 -U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -U -JN --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',          '--version 1 -L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -L -JV --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',          '--version 1 -U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',          '--version 1 -U -JV --itype 3 -c',  n,  ''),
@@ -881,15 +895,15 @@ sygv = (
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JN --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JN --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JN --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JN --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -L -JV --itype 3 -c',  n,  ''),
-	 
+	
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JV --itype 2 -c',  n,  ''),
 	('testing_zhegvdx',   ngpu + '--version 1 -U -JV --itype 3 -c',  n,  ''),
