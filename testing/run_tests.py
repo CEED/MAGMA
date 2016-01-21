@@ -931,14 +931,13 @@ sygv = (
 	('testing_zhegvdx', '--version 3 -U -JV --itype 3 -c',  n,  ''),
 	
 	# lower/upper, no-vector/vector, itypes
-	# TODO: add -c
-	('testing_zhegvdx_2stage',   '-L -JN --itype 1',  n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage',   '-L -JN --itype 2',  n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage',   '-L -JN --itype 3',  n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',   '-L -JN --itype 1 -c',  n,  ''),
+	('testing_zhegvdx_2stage',   '-L -JN --itype 2 -c',  n,  ''),
+	('testing_zhegvdx_2stage',   '-L -JN --itype 3 -c',  n,  ''),
 	
-	('#testing_zhegvdx_2stage',  '-U -JN --itype 1',  n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage',  '-U -JN --itype 2',  n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage',  '-U -JN --itype 3',  n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 1 -c',  n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 2 -c',  n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage',  '-U -JN --itype 3 -c',  n,  'upper not implemented'),
 	
 	('testing_zhegvdx_2stage',   '-L -JV --itype 1 -c',  n,  ''),
 	('testing_zhegvdx_2stage',   '-L -JV --itype 2 -c',  n,  ''),
@@ -949,14 +948,13 @@ sygv = (
 	('#testing_zhegvdx_2stage',  '-U -JV --itype 3 -c',  n,  'upper not implemented'),
 	
 	# lower/upper, no-vector/vector, itypes
-	# TODO: add -c
-	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 1', n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 2', n,  '-c implies -JV'),
-	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 3', n,  '-c implies -JV'),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 1 -c', n,  ''),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 2 -c', n,  ''),
+	('testing_zhegvdx_2stage',  ngpu + '-L -JN --itype 3 -c', n,  ''),
 	
-	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 1', n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 2', n,  '-c implies -JV, upper not implemented'),
-	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 3', n,  '-c implies -JV, upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 1 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 2 -c', n,  'upper not implemented'),
+	('#testing_zhegvdx_2stage', ngpu + '-U -JN --itype 3 -c', n,  'upper not implemented'),
 	
 	('testing_zhegvdx_2stage',  ngpu + '-L -JV --itype 1 -c', n,  ''),
 	('testing_zhegvdx_2stage',  ngpu + '-L -JV --itype 2 -c', n,  ''),
