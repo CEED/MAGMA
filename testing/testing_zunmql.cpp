@@ -19,6 +19,7 @@
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
+#include "magma_operators.h"
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,8 @@ int main( int argc, char** argv )
             
             // need at least 2*nb*nb for geqlf
             lwork_max = max( max( m*nb, n*nb ), 2*nb*nb );
+            // this rounds it up slightly if needed to agree with lwork query below
+            lwork_max = int( real( magma_zmake_lwork( lwork_max )));
             
             TESTING_MALLOC_CPU( C,     magmaDoubleComplex, ldc*n );
             TESTING_MALLOC_CPU( R,     magmaDoubleComplex, ldc*n );
@@ -132,7 +135,7 @@ int main( int argc, char** argv )
             }
             lwork = (magma_int_t) MAGMA_Z_REAL( hwork[0] );
             if ( lwork < 0 || lwork > lwork_max ) {
-                printf("optimal lwork %d > lwork_max %d\n", (int) lwork, (int) lwork_max );
+                printf("Warning: optimal lwork %d > allocated lwork_max %d\n", (int) lwork, (int) lwork_max );
                 lwork = lwork_max;
             }
             
@@ -153,7 +156,7 @@ int main( int argc, char** argv )
             size = ldc*n;
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
             Cnorm = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
-            error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / Cnorm;
+            error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / (sqrt(m*n) * Cnorm);
             
             printf( "%5d %5d %5d   %4c   %5c   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %s\n",
                     (int) m, (int) n, (int) k,
