@@ -553,10 +553,23 @@ magma_zheevdx_2stage_m(
     else {
         timer_start( time_total );
         timer_start( time );
-        
+
+#ifdef SINGLEGPU
+        double* dwedc;
+        if (MAGMA_SUCCESS != magma_dmalloc( &dwedc, 3*n*(n/2 + 1) )) {
+            // TODO free dT1, etc. --- see goto cleanup in dlaex0_m.cpp, etc.
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+        magma_zstedx(range, n, vl, vu, il, iu, W, E,
+                     Z, ldz, Wedc, lwedc,
+                     iwork, liwork, dwedc, info);
+        magma_free( dwedc );
+#else
         magma_zstedx_m(ngpu, range, n, vl, vu, il, iu, W, E,
                      Z, ldz, Wedc, lwedc,
                      iwork, liwork, info);
+#endif
 
         timer_stop( time );
         timer_printf( "  N= %10d  nb= %5d time zstedx_m = %6.2f\n", (int)n, (int)nb, time );
@@ -587,28 +600,8 @@ magma_zheevdx_2stage_m(
         timer_start( time );
 
 #ifdef SINGLEGPU
-        magmaDoubleComplex *dAsgpu;
-        magma_int_t lddasgpu = n;
-
-        if (MAGMA_SUCCESS != magma_zmalloc( &dAsgpu, n*lddasgpu )) {
-            *info = MAGMA_ERR_DEVICE_ALLOC;
-            return *info;
-        }
-
-        magma_queue_t queues[2];
-        magma_device_t cdev;
-        magma_getdevice( &cdev );
-        magma_queue_create( cdev, &queues[0] );
-
-        magma_zsetmatrix( n, n, A, lda, dAsgpu, lddasgpu, queues[0] );
-
-        magma_zunmqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, dAsgpu+nb, lddasgpu,
-                                 dZ+nb, n, dT1sgpu, nb, info);
-
-        magma_zgetmatrix( n, *m, dZ, lddz, A, lda, queues[0] );
-
-        magma_queue_sync( queues[0] );
-        magma_queue_destroy( queues[0] );
+        magma_zunmqr( MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, A+nb, lda, TAU1,
+                       Z +ldz*(il-1)+nb, ldz, Wmqr1, lwmqr1, info);
 #else
         magma_zunmqr_m(ngpu, MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, A+nb, lda, TAU1,
                        Z +ldz*(il-1)+nb, ldz, Wmqr1, lwmqr1, info);
@@ -621,7 +614,6 @@ magma_zheevdx_2stage_m(
 #ifdef SINGLEGPU
         magma_free(dT1sgpu);
         magma_free(dZ);
-        magma_free(dAsgpu);
 #endif // not SINGLEGPU
 
         timer_stop( time_total );
