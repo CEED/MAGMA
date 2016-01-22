@@ -83,7 +83,7 @@
     
     @param[in]
     dA_array      Array of pointers, dimension (batchCount).
-             Each is a DOUBLE_PRECISION array A of DIMENSION ( ldda, ka ), where ka is
+             Each is a DOUBLE PRECISION array A of DIMENSION ( ldda, ka ), where ka is
              k  when  trans = MagmaNoTrans,  and is  n  otherwise.
              Before entry with  trans = MagmaNoTrans,  the leading  m by k
              part of the array A must contain the matrix A, otherwise
@@ -104,7 +104,7 @@
     
     @param[in,out]
     dC_array      Array of pointers, dimension (batchCount).
-             Each is a DOUBLE_PRECISION array C of DIMENSION ( lddc, n ).
+             Each is a DOUBLE PRECISION array C of DIMENSION ( lddc, n ).
              Before entry with uplo = MagmaUpper, the leading n by n
              upper triangular part of the array C must contain the upper
              triangular part of the symmetric matrix and the strictly

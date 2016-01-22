@@ -212,7 +212,7 @@ parser.add_option(      '--no-svd',     action='store_true', dest='no_svd',     
 
 # options to select subset of commands
 parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='select multi-GPU tests; add --ngpu to specify number of GPUs')
-parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='select non multi-GPU tests tests')
+parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='select non multi-GPU tests')
 parser.add_option(      '--itype',      action='store',      dest='itype',      help='select tests matching itype',   default=0 )
 parser.add_option(      '--version',    action='store',      dest='version',    help='select tests matching version', default=0 )
 parser.add_option('-U', '--upper',      action='store_true', dest='upper',      help='select tests matching upper',   default=None )
@@ -730,6 +730,7 @@ syev = (
 	# ----------
 	# symmetric eigenvalues, GPU interface
 	# no-vectors/vectors, lower/upper
+	# version 1 is zheevd_gpu
 	('testing_zheevd_gpu',        '--version 1 -L -JN -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 1 -U -JN -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 1 -L -JV -c',  n,    ''),
@@ -1173,8 +1174,8 @@ if len(options) > 0:
 	tests2 = []
 	for test in tests:
 		match = True
-		for o in options:
-			if not re.search( o, test[1] ):
+		for opt in options:
+			if not re.search( opt, test[1] ):
 				match = False
 				break
 		if match:

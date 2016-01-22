@@ -114,8 +114,11 @@ ignore_regexp = r'malloc failed|returned error -11[23]'
 # errors (segfaults, etc.)
 error_regexp = r'exit|memory leak|memory mapping error|CUDA runtime error|illegal value|returned error|ERROR SUMMARY: [1-9]'
 
-# known bugs
-known_regexp = r'geqr2x_gpu.*--version +[24]'
+# testers with known bugs or issues
+known_regexp = '|'.join((
+	r'geqr2x_gpu.*--version +[24]',
+	r'gegqr_gpu.*--version +[34]',   # N=95, specifically
+))
 
 # problem size, possibly with couple words before it, e.g.:
 # "1234 ..."
@@ -145,7 +148,7 @@ def add_ratio( match ):
 def find_ok_failed( line ):
 	global g_failed, g_suspect, g_okay
 	if ( re.search( r'failed', line )):
-		line = re.sub( r' (\d\.\d+e[+-]\d+|nan|inf)', add_ratio, line )
+		line = re.sub( r' (\d\.\d+e[+-]\d+|-?nan|-?inf)', add_ratio, line )
 		if ( not g_failed ):
 			line = re.sub( r'failed', 'suspect', line )
 			g_suspect = True
@@ -318,19 +321,19 @@ def output( field, output ):
 				result += cmd + '\n'
 				num = len(row[Suspect]) + len(row[Failed]) + len(row[Error])
 				if ( num == 0 ):
-					result += 'no failures (has ' + cmd + ' been fixed?)\n'
+					result += 'no failures (has ' + cmd + ' been fixed?)\n\n'
 				elif ( output ):
 					#result += cmd + '\n'
 					if ( len(row[Okay]) > 0 and opts.okay ):
-						result += labels[Okay]    + ':\n' + ''.join( row[Okay]    ) + '\n'
+						result += labels[Okay]    + ':\n' + ''.join( row[Okay]    )
 					if ( len(row[Error]) > 0 ):
-						result += labels[Error]   + ':\n' + ''.join( row[Error]   ) + '\n'
+						result += labels[Error]   + ':\n' + ''.join( row[Error]   )
 					if ( len(row[Failed]) > 0 ):
-						result += labels[Failed]  + ':\n' + ''.join( row[Failed]  ) + '\n'
+						result += labels[Failed]  + ':\n' + ''.join( row[Failed]  )
 					if ( len(row[Suspect]) > 0 ):
-						result += labels[Suspect] + ':\n' + ''.join( row[Suspect] ) + '\n'
+						result += labels[Suspect] + ':\n' + ''.join( row[Suspect] )
 					if ( len(row[Ignore]) > 0 and opts.okay ):
-						result += labels[Ignore]  + ':\n' + ''.join( row[Ignore]  ) + '\n'
+						result += labels[Ignore]  + ':\n' + ''.join( row[Ignore]  )
 					result += '\n'
 				# nd
 				cmds  += 1

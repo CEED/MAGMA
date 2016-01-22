@@ -48,7 +48,7 @@
             Details).
 
     @param
-    dwork   (workspace) DOUBLE_PRECISION array, dimension (N)
+    dwork   (workspace) DOUBLE PRECISION array, dimension (N)
 
     @param[out]
     info    INTEGER

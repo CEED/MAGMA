@@ -337,6 +337,7 @@ subs = {
     # ----- Text
     ('symmetric',                 'hermitian',              ),
     ('symmetric',                 'Hermitian',              ),
+    ('orthogonal',                'unitary',                ),
 
     # ----- CBLAS
     ('',                          'CBLAS_SADDR'             ),
@@ -426,7 +427,7 @@ subs = {
     ('float',               'double',              'PLASMA_Complex32_t',  'PLASMA_Complex64_t'  ),
     ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
     ('real',                'double precision',    'complex',             'complex\*16'         ),
-    ('REAL',                'DOUBLE_PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
+    ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
     ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX\*16'         ),
     ('sizeof_real',         'sizeof_double',       'sizeof_complex',      'sizeof_complex_16'   ),  # before complex
     ('real',                'real',                'complex',             'complex'             ),
@@ -436,6 +437,7 @@ subs = {
     # ----- Text
     ('symmetric',      'symmetric',      'hermitian',      'hermitian'       ),
     ('symmetric',      'symmetric',      'Hermitian',      'Hermitian'       ),
+    ('orthogonal',     'orthogonal',     'unitary',        'unitary',        ),
     ('%f',             '%lf',            '%f',             '%lf'             ),  # for scanf
 
     # ----- CBLAS

@@ -114,7 +114,7 @@ magma_zlarfb2_gpu(
             LAPACK stores this array in A. There are 0s below the diagonal.
 
     @param
-    dwork   (workspace) DOUBLE_PRECISION array, dimension (3 N)
+    dwork   (workspace) DOUBLE PRECISION array, dimension (3 N)
 
     @param[out]
     info    INTEGER

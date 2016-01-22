@@ -50,7 +50,7 @@
             The order of the matrix A.  N >= 0.
 
     @param[in,out]
-    dA      DOUBLE_PRECISION array on the GPU,
+    dA      DOUBLE PRECISION array on the GPU,
             dimension (LDDA, N).
             On entry, the symmetric matrix A.  If UPLO = MagmaUpper, the
             leading N-by-N upper triangular part of A contains the
@@ -79,7 +79,7 @@
             The leading dimension of the array wA.  LDWA >= max(1,N).
 
     @param[out]
-    work    (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
+    work    (workspace) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     @param[in]

@@ -104,9 +104,9 @@
             The leading dimension of the array B.  LDB >= max(1,N).
 
     @param[in]
-    vl      DOUBLE_PRECISION
+    vl      DOUBLE PRECISION
     @param[in]
-    vu      DOUBLE_PRECISION
+    vu      DOUBLE PRECISION
             If RANGE=MagmaRangeV, the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = MagmaRangeAll or MagmaRangeI.
@@ -126,7 +126,7 @@
             If RANGE = MagmaRangeAll, M = N, and if RANGE = MagmaRangeI, M = IU-IL+1.
 
     @param[out]
-    w       DOUBLE_PRECISION array, dimension (N)
+    w       DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
     @param[out]
@@ -154,7 +154,7 @@
 
 #ifdef COMPLEX
     @param[out]
-    rwork   (workspace) DOUBLE_PRECISION array, dimension (MAX(1,LRWORK))
+    rwork   (workspace) DOUBLE PRECISION array, dimension (MAX(1,LRWORK))
             On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
     \n
             COMPLEX [cz]hegvdx only
