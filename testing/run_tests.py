@@ -198,7 +198,6 @@ parser.add_option(      '--sygv',       action='store_true', dest='sygv',       
 parser.add_option(      '--geev',       action='store_true', dest='geev',       help='run non-symmetric eigenvalue tests')
 parser.add_option(      '--svd',        action='store_true', dest='svd',        help='run SVD tests')
 parser.add_option(      '--batched',    action='store_true', dest='batched',    help='run batched (BLAS, LU, etc.) tests')
-parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='run multi-GPU (BLAS, LU, etc.) tests; add --ngpu to specify number of GPUs')
 
 parser.add_option(      '--no-blas',    action='store_true', dest='no_blas',    help='do not run BLAS tests')
 parser.add_option(      '--no-aux',     action='store_true', dest='no_aux',     help='do not run auxiliary routine tests')
@@ -210,35 +209,36 @@ parser.add_option(      '--no-syev',    action='store_true', dest='no_syev',    
 parser.add_option(      '--no-sygv',    action='store_true', dest='no_sygv',    help='do not run generalized symmetric eigenvalue tests')
 parser.add_option(      '--no-geev',    action='store_true', dest='no_geev',    help='do not run non-symmetric eigenvalue tests')
 parser.add_option(      '--no-svd',     action='store_true', dest='no_svd',     help='do not run SVD tests')
-parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='do not run multi-GPU (BLAS, LU, etc.) tests')
 
 # options to select subset of commands
-parser.add_option(      '--itype',      action='store',      dest='itype',      help='select runs matching itype',   default=0 )
-parser.add_option(      '--version',    action='store',      dest='version',    help='select runs matching version', default=0 )
-parser.add_option('-U', '--upper',      action='store_true', dest='upper',      help='select runs matching upper',   default=None )
-parser.add_option('-L', '--lower',      action='store_true', dest='lower',      help='select runs matching lower',   default=None )
-parser.add_option('-J', '--jobz',       action='store',      dest='jobz',       help='select runs matching jobz (-JV, -JN)', default=None )
-parser.add_option('-D', '--diag',       action='store',      dest='diag',       help='select runs matching diag (-DU, -DN)', default=None )
-parser.add_option('-C',                 action='store_true', dest='C',          help='select runs matching -C', default=None )
-parser.add_option('-T',                 action='store_true', dest='T',          help='select runs matching -T', default=None )
-parser.add_option(      '--fraction',   action='store',      dest='fraction',   help='select runs matching fraction', default=None )
+parser.add_option(      '--mgpu',       action='store_true', dest='mgpu',       help='select multi-GPU tests; add --ngpu to specify number of GPUs')
+parser.add_option(      '--no-mgpu',    action='store_true', dest='no_mgpu',    help='select non multi-GPU tests tests')
+parser.add_option(      '--itype',      action='store',      dest='itype',      help='select tests matching itype',   default=0 )
+parser.add_option(      '--version',    action='store',      dest='version',    help='select tests matching version', default=0 )
+parser.add_option('-U', '--upper',      action='store_true', dest='upper',      help='select tests matching upper',   default=None )
+parser.add_option('-L', '--lower',      action='store_true', dest='lower',      help='select tests matching lower',   default=None )
+parser.add_option('-J', '--jobz',       action='store',      dest='jobz',       help='select tests matching jobz (-JV, -JN)', default=None )
+parser.add_option('-D', '--diag',       action='store',      dest='diag',       help='select tests matching diag (-DU, -DN)', default=None )
+parser.add_option('-C',                 action='store_true', dest='C',          help='select tests matching -C', default=None )
+parser.add_option('-T',                 action='store_true', dest='T',          help='select tests matching -T', default=None )
+parser.add_option(      '--fraction',   action='store',      dest='fraction',   help='select tests matching fraction', default=None )
 
-parser.add_option(      '--UN',         action='store_true', dest='UN',         help='select runs matching -UN', default=None )
-parser.add_option(      '--UO',         action='store_true', dest='UO',         help='select runs matching -UO', default=None )
-parser.add_option(      '--US',         action='store_true', dest='US',         help='select runs matching -US', default=None )
-parser.add_option(      '--UA',         action='store_true', dest='UA',         help='select runs matching -UA', default=None )
-parser.add_option(      '--VN',         action='store_true', dest='VN',         help='select runs matching -VN', default=None )
-parser.add_option(      '--VO',         action='store_true', dest='VO',         help='select runs matching -VO', default=None )
-parser.add_option(      '--VS',         action='store_true', dest='VS',         help='select runs matching -VS', default=None )
-parser.add_option(      '--VA',         action='store_true', dest='VA',         help='select runs matching -VA', default=None )
+parser.add_option(      '--UN',         action='store_true', dest='UN',         help='select tests matching -UN', default=None )
+parser.add_option(      '--UO',         action='store_true', dest='UO',         help='select tests matching -UO', default=None )
+parser.add_option(      '--US',         action='store_true', dest='US',         help='select tests matching -US', default=None )
+parser.add_option(      '--UA',         action='store_true', dest='UA',         help='select tests matching -UA', default=None )
+parser.add_option(      '--VN',         action='store_true', dest='VN',         help='select tests matching -VN', default=None )
+parser.add_option(      '--VO',         action='store_true', dest='VO',         help='select tests matching -VO', default=None )
+parser.add_option(      '--VS',         action='store_true', dest='VS',         help='select tests matching -VS', default=None )
+parser.add_option(      '--VA',         action='store_true', dest='VA',         help='select tests matching -VA', default=None )
 
-parser.add_option(      '--NN',         action='store_true', dest='NN',         help='select runs matching -NN', default=None )
-parser.add_option(      '--NT',         action='store_true', dest='NT',         help='select runs matching -NT', default=None )
-parser.add_option(      '--TN',         action='store_true', dest='TN',         help='select runs matching -TN', default=None )
-parser.add_option(      '--TT',         action='store_true', dest='TT',         help='select runs matching -TT', default=None )
-parser.add_option(      '--NC',         action='store_true', dest='NC',         help='select runs matching -NC', default=None )
-parser.add_option(      '--CN',         action='store_true', dest='CN',         help='select runs matching -CN', default=None )
-parser.add_option(      '--CC',         action='store_true', dest='CC',         help='select runs matching -CC', default=None )
+parser.add_option(      '--NN',         action='store_true', dest='NN',         help='select tests matching -NN', default=None )
+parser.add_option(      '--NT',         action='store_true', dest='NT',         help='select tests matching -NT', default=None )
+parser.add_option(      '--TN',         action='store_true', dest='TN',         help='select tests matching -TN', default=None )
+parser.add_option(      '--TT',         action='store_true', dest='TT',         help='select tests matching -TT', default=None )
+parser.add_option(      '--NC',         action='store_true', dest='NC',         help='select tests matching -NC', default=None )
+parser.add_option(      '--CN',         action='store_true', dest='CN',         help='select tests matching -CN', default=None )
+parser.add_option(      '--CC',         action='store_true', dest='CC',         help='select tests matching -CC', default=None )
 
 (opts, args) = parser.parse_args()
 
@@ -263,8 +263,7 @@ if ( len(args) > 0 or (
 	 not opts.blas and not opts.aux  and
 	 not opts.chol and not opts.hesv and not opts.lu   and not opts.qr   and
 	 not opts.syev and not opts.sygv and not opts.geev and
-	 not opts.svd  and not opts.batched and
-	 not opts.mgpu )):
+	 not opts.svd  and not opts.batched )):
 	opts.blas = True
 	opts.aux  = True
 	opts.chol = True
@@ -276,7 +275,6 @@ if ( len(args) > 0 or (
 	opts.geev = True
 	opts.svd  = True
 	opts.batched = (len(args) > 0)   # batched routines must be explicitly requested, as the typical size range is different
-	opts.mgpu    = False   # multi-GPU routines are part of above groups
 # end
 
 # "no" options override whatever was previously set
@@ -737,22 +735,12 @@ syev = (
 	('testing_zheevd_gpu',        '--version 1 -L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 1 -U -JV -c',  n,    ''),
 	
-	('testing_zheevd_gpu', ngpu + '--version 1 -L -JN -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 1 -U -JN -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 1 -L -JV -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 1 -U -JV -c',  n,    ''),
-	
 	# version 2 is zheevdx_gpu
 	# TODO test with --fraction < 1; checks don't seem to work.
 	('testing_zheevd_gpu',        '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
 	('testing_zheevd_gpu',        '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
-	
-	('testing_zheevd_gpu', ngpu + '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
-	('testing_zheevd_gpu', ngpu + '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
 	
 	# version 3 is zheevr_gpu
 	# TODO test with --fraction < 1; checks don't seem to work.
@@ -781,31 +769,42 @@ syev = (
 	# ----------
 	# symmetric eigenvalues, CPU interface
 	# no vectors/vectors, lower/upper
-	('testing_zheevd', '--version 1 -L -JN -c',  n,    ''),
-	('testing_zheevd', '--version 1 -U -JN -c',  n,    ''),
-	('testing_zheevd', '--version 1 -L -JV -c',  n,    ''),
-	('testing_zheevd', '--version 1 -U -JV -c',  n,    ''),
+	# version 1 is zheevd
+	('testing_zheevd',        '--version 1 -L -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 1 -U -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 1 -L -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 1 -U -JV -c',  n,    ''),
+	
+	('testing_zheevd', ngpu + '--version 1 -L -JN -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 1 -U -JN -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 1 -L -JV -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 1 -U -JV -c',  n,    ''),
 	
 	# version 2 is zheevdx
 	# TODO test with --fraction < 1; checks don't seem to work.
-	('testing_zheevd', '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
-	('testing_zheevd', '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
-	('testing_zheevd', '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
-	('testing_zheevd', '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
+	
+	('testing_zheevd', ngpu + '--version 2 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 2 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 2 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd', ngpu + '--version 2 --fraction 1.0 -U -JV -c',  n,    ''),
 	
 	# version 3 is zheevr
 	# TODO test with --fraction < 1; checks don't seem to work.
-	('testing_zheevd', '--version 3 --fraction 1.0 -L -JN -c',  n,    ''),
-	('testing_zheevd', '--version 3 --fraction 1.0 -U -JN -c',  n,    ''),
-	('testing_zheevd', '--version 3 --fraction 1.0 -L -JV -c',  n,    ''),
-	('testing_zheevd', '--version 3 --fraction 1.0 -U -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 3 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 3 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 3 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 3 --fraction 1.0 -U -JV -c',  n,    ''),
 	
 	# version 4 is zheevx
 	# TODO test with --fraction < 1; checks don't seem to work.
-	('testing_zheevd', '--version 4 --fraction 1.0 -L -JN -c',  n,    ''),
-	('testing_zheevd', '--version 4 --fraction 1.0 -U -JN -c',  n,    ''),
-	('testing_zheevd', '--version 4 --fraction 1.0 -L -JV -c',  n,    ''),
-	('testing_zheevd', '--version 4 --fraction 1.0 -U -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 4 --fraction 1.0 -L -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 4 --fraction 1.0 -U -JN -c',  n,    ''),
+	('testing_zheevd',        '--version 4 --fraction 1.0 -L -JV -c',  n,    ''),
+	('testing_zheevd',        '--version 4 --fraction 1.0 -U -JV -c',  n,    ''),
 	
 	# lower/upper
 	('testing_zhetrd',          '-L     -c',  n,    ''),
@@ -1110,21 +1109,21 @@ if ( opts.batched ):
 
 
 # ----------------------------------------------------------------------
-# multi-GPU (BLAS, LU, etc.) -- take from other sets
-mgpu = []
-for s in (blas, aux, chol, hesv, lu, qr, syev, sygv, geev, svd):
-	for test in s:
+# select multi-GPU tests
+if ( opts.mgpu ):
+	tests2 = []
+	for test in tests:
 		m1 = re.search( '(_m|_mgpu)$', test[0] )
 		m2 = re.search( '--ngpu',      test[1] )
 		if (m1 or m2):
-			mgpu.append( test )
+			tests2.append( test )
 	# end
+	tests = tests2
 # end
-if ( opts.mgpu ):
-	tests += mgpu
 
 
 # ----------------------------------------------------------------------
+# select non-multi-GPU tests
 if ( opts.no_mgpu ):
 	tests2 = []
 	for test in tests:
@@ -1135,6 +1134,7 @@ if ( opts.no_mgpu ):
 	# end
 	tests = tests2
 # end
+
 
 # ----------------------------------------------------------------------
 # select subset of commands
