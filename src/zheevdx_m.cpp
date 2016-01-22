@@ -368,6 +368,7 @@ magma_zheevdx_m(
        transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
     }
     else {
         timer_start( time );
