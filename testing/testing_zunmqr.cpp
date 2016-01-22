@@ -46,6 +46,9 @@ int main( int argc, char** argv )
     opts.tolerance = max( 60., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
+    // pass ngpu = -1 to test multi-GPU code using 1 gpu
+    magma_int_t abs_ngpu = abs( opts.ngpu );
+    
     // test all combinations of input parameters
     magma_side_t  side [] = { MagmaLeft,       MagmaRight   };
     magma_trans_t trans[] = { Magma_ConjTrans, MagmaNoTrans };
@@ -140,9 +143,25 @@ int main( int argc, char** argv )
             }
             
             gpu_time = magma_wtime();
-            magma_zunmqr( side[iside], trans[itran],
-                          m, n, k,
-                          A, lda, tau, R, ldc, W, lwork, &info );
+            if ( opts.ngpu == 1 ) {
+                magma_zunmqr( side[iside], trans[itran],
+                              m, n, k,
+                              A, lda, tau, R, ldc, W, lwork, &info );
+            }
+            else {
+                if ( side[iside] == MagmaLeft ) {
+                    magma_zunmqr_m( abs_ngpu, side[iside], trans[itran],
+                                    m, n, k,
+                                    A, lda, tau, R, ldc, W, lwork, &info );
+                }
+                else {
+                    printf( "%5d %5d %5d   %4c   %5c   skipping because magma_zunmqr_m doesn't support MagmaRight\n",
+                            (int) m, (int) n, (int) k,
+                            lapacke_side_const( side[iside] ),
+                            lapacke_trans_const( trans[itran] ) );
+                    goto cleanup;
+                }
+            }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0) {
@@ -166,6 +185,7 @@ int main( int argc, char** argv )
                     error, (error < tol ? "ok" : "failed") );
             status += ! (error < tol);
             
+        cleanup:
             TESTING_FREE_CPU( C );
             TESTING_FREE_CPU( R );
             TESTING_FREE_CPU( A );
