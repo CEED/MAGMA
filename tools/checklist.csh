@@ -22,7 +22,7 @@ echo "============================================================ required fixe
 
 # fixed
 echo "========== don't use MIN_CUDA_ARCH; use __CUDA_ARCH__ and magma_getdevice_arch  *** required fix ***"
-egrep MIN_CUDA_ARCH $FILES | egrep -v 'CMakeLists.txt|Makefile|interface.cpp'
+egrep MIN_CUDA_ARCH $FILES | egrep -v 'CMakeLists.txt|Makefile|interface.cpp|checklist.csh'
 echo
 
 # fixed

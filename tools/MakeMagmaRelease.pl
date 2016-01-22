@@ -293,6 +293,10 @@ if ( ($#ARGV + 1) != 1 ) {
 
 $version = shift;
 ($major, $minor, $micro) = $version =~ m/^(\d+)\.(\d+)\.(\d+)$/;
+if ( not ($major >= 1 and $minor >= 0 and $micro >= 0)) {
+    Usage();
+    exit;
+}
 
 MakeRelease();
 #MakeInstallerRelease();
