@@ -66,10 +66,6 @@ magma_zlobpcg(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
 #define  residualNorms(i,iter)  ( residualNorms + (i) + (iter)*n )
 #define SWAP(x, y)    { pointer = x; x = y; y = pointer; }
 #define hresidualNorms(i,iter)  (hresidualNorms + (i) + (iter)*n )
@@ -664,6 +660,5 @@ cleanup:
     rwork = NULL;
     #endif
 
-    //magmablasSetKernelStream( orig_queue );
     return info; 
 }

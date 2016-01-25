@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define BLOCK_SIZE 512
 
@@ -534,7 +534,7 @@ magma_zqmr_6_kernel(
         for( int j=0; j<num_cols; j++ ){
             
             magmaDoubleComplex wttmp = wt[ i+j*num_rows ]
-                                - MAGMA_Z_CNJG( beta ) * w[ i+j*num_rows ];
+                                - MAGMA_Z_CONJ( beta ) * w[ i+j*num_rows ];
                                 
             wt[ i+j*num_rows ] = wttmp;
             

@@ -396,10 +396,6 @@ magma_z_spmm(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
     if ( A.memory_location != B.memory_location ) {
         printf("error: linear algebra objects are not located in same memory!\n");
         printf("memory locations are: %d   %d\n",
@@ -419,7 +415,6 @@ magma_z_spmm(
             }
             else {
                 printf("error: format not supported.\n");
-                // magmablasSetKernelStream( orig_queue );
                 info = MAGMA_ERR_NOT_SUPPORTED;
             }
         }
@@ -427,11 +422,9 @@ magma_z_spmm(
     // CPU case missing!
     else {
         printf("error: CPU not yet supported.\n");
-        // magmablasSetKernelStream( orig_queue );
         info = MAGMA_ERR_NOT_SUPPORTED; // TODO change to goto cleanup?
     }
     
 cleanup:
-    // magmablasSetKernelStream( orig_queue );
     return info;
 }

@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define BLOCK_SIZE 256
 
@@ -24,7 +24,7 @@ magma_zmconjugate_kernel(
 
     if(row < num_rows ){
         for( int i = rowptr[row]; i < rowptr[row+1]; i++){
-            values[i] = MAGMA_Z_CNJG( values[i] );
+            values[i] = MAGMA_Z_CONJ( values[i] );
         }
     }
 }

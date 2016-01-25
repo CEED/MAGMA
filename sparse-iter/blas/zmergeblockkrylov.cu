@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define BLOCK_SIZE 16
 

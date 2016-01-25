@@ -54,10 +54,6 @@ magma_zmtransfer(
 {
     magma_int_t info = 0;
     
-    // set queue for old dense routines
-    ////magma_queue_t orig_queue=NULL;
-    ////magmablasGetKernelStream( &orig_queue );
-
     B->val = NULL;
     B->diag = NULL;
     B->row = NULL;
@@ -987,6 +983,5 @@ cleanup:
     if( info != 0 ){
         magma_zmfree( B, queue );
     }
-    ////magmablasSetKernelStream( orig_queue );
     return info;
 }

@@ -8,7 +8,7 @@
        @precisions mixed zc -> ds
        @author Hartwig Anzt
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**

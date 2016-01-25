@@ -264,7 +264,6 @@ cleanup:
     magma_free( skp );
     magma_free_cpu( skp_h );
 
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zpcg_merge */

@@ -17,7 +17,7 @@
 #include <vector>
 #include <utility>  // pair
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 #include "mmio.h"
 
 

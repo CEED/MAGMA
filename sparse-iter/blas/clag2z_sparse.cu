@@ -8,7 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define blksize 512
 

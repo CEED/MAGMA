@@ -8,7 +8,7 @@
        @precisions normal z -> c d s
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 #define BLOCK_SIZE 512
 

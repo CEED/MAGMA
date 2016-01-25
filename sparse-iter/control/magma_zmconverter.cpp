@@ -1028,13 +1028,11 @@ magma_zmconvert(
             
             else {
                 printf("error: format not supported.\n");
-                //magmablasSetKernelStream( queue );
                 info = MAGMA_ERR_NOT_SUPPORTED;
             }
         }
         else {
             printf("error: conversion not supported.\n");
-            //magmablasSetKernelStream( queue );
             info = MAGMA_ERR_NOT_SUPPORTED;
         }
     } // end CPU case

@@ -10,7 +10,7 @@
 
 #include <cuda.h>  // for CUDA_VERSION
 
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 /**
     Maps a cuSPARSE error to a MAGMA error.

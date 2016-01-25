@@ -144,8 +144,6 @@ magma_zcg_merge(
     {
         solver_par->numiter++;
 
-        ////magmablasSetKernelStream(queues[0]);
-        
         // computes SpMV and dot product
         CHECK( magma_zcgmerge_spmv1(  A, d1, d2, d.dval, z.dval, skp, queue ));
         solver_par->spmv_count++;

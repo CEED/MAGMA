@@ -280,7 +280,6 @@ magma_z_applyprecond(
     }
 cleanup:
     magma_zmfree( &tmp, queue );
-    //magmablasSetKernelStream( orig_queue );
     return info;
 }
 

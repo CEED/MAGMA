@@ -79,10 +79,6 @@ magma_zjacobidomainoverlap(
     magma_z_matrix r={Magma_CSR}, d={Magma_CSR};
     magma_z_matrix hA={Magma_CSR};
     
-    // set queue for old dense routines
-    //magma_queue_t orig_queue=NULL;
-    //magmablasGetKernelStream( &orig_queue );
-
     // prepare solver feedback
     solver_par->solver = Magma_JACOBI;
 
@@ -149,7 +145,6 @@ cleanup:
     magma_zmfree(&hA, queue );
     magma_free( indices );
     
-    //magmablasSetKernelStream( orig_queue );
     solver_par->info = info;
     return info;
 }   /* magma_zjacobi */

@@ -152,8 +152,6 @@ magma_zbicgstab_merge3(
     {
         solver_par->numiter++;
 
-        //magmablasSetKernelStream(queues[0]);
-
         // computes p=r+beta*(p-omega*v)
         CHECK( magma_zbicgmerge1( dofs, skp, v.dval, r.dval, p.dval, queue ));
 
