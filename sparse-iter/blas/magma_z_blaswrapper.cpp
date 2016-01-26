@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.1) --
+    -- MAGMA (version 2.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -9,7 +9,7 @@
        @author Hartwig Anzt
 
 */
-#include "common_magmasparse.h"
+#include "magmasparse_internal.h"
 
 
 /**
@@ -57,9 +57,6 @@ magma_z_spmv(
     magma_queue_t queue )
 {
     magma_int_t info = 0;
-    // set queue for old dense routines
-    magma_queue_t orig_queue=NULL;
-    magmablasGetKernelStream( &orig_queue );
 
     magma_z_matrix x2={Magma_CSR};
 
@@ -131,7 +128,7 @@ magma_z_spmv(
                  //printf("using DENSE kernel for SpMV: ");
                  magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha,
                                 A.dval, A.num_rows, x.dval, 1, beta,  y.dval,
-                                1 );
+                                1, queue );
                  //printf("done.\n");
              }
              else if ( A.storage_type == Magma_SPMVFUNCTION ) {
@@ -222,7 +219,6 @@ cleanup:
     descr = 0;
     magma_zmfree(&x2, queue );
     
-    magmablasSetKernelStream( orig_queue );
     return info;
 }
 
