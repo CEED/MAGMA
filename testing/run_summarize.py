@@ -65,8 +65,8 @@ dtol_100 = 100.0  * deps
 stol_1k  = 1000.0 * seps
 dtol_1k  = 1000.0 * deps
 
-print 'single epsilon %.2e,  tol %.0f,  tol*eps %.2e,  30*eps %.2e,  100*eps %.2e,  1000*eps %.2e' % (seps, tol2, tol2*seps, 30*seps, 100*seps, 1000*seps)
-print 'double epsilon %.2e,  tol %.0f,  tol*eps %.2e,  30*eps %.2e,  100*eps %.2e,  1000*eps %.2e' % (deps, tol2, tol2*deps, 30*deps, 100*deps, 1000*deps)
+print 'single epsilon %.2e,  tol2 %.0f,  tol2*eps %.2e,  30*eps %.2e,  100*eps %.2e,  1000*eps %.2e' % (seps, tol2, tol2*seps, 30*seps, 100*seps, 1000*seps)
+print 'double epsilon %.2e,  tol2 %.0f,  tol2*eps %.2e,  30*eps %.2e,  100*eps %.2e,  1000*eps %.2e' % (deps, tol2, tol2*deps, 30*deps, 100*deps, 1000*deps)
 
 epsilons = {
 	's': seps,
