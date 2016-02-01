@@ -10,6 +10,7 @@ Makefile.gen: $(Makefiles) tools/magmasubs.py
 		$(libmagma_zsrc)       \
 		$(libsparse_zsrc)      \
 		$(libtest_zsrc)        \
+		$(liblapacktest_zsrc)  \
 		$(testing_zsrc)        \
 		$(sparse_testing_zsrc) \
 		$(zhdr)                \
