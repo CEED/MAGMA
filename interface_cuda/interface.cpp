@@ -42,9 +42,6 @@
 
 #ifdef HAVE_CUBLAS
 
-#define HAVE_PTHREAD_KEY
-
-
 #ifdef DEBUG_MEMORY
 // defined in alloc.cpp
 extern pthread_mutex_t           g_pointers_mutex;

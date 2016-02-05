@@ -50,6 +50,10 @@
     #include <pthread.h>
     #include <unistd.h>
     #include <inttypes.h>
+    
+    // our magma_winthread doesn't have pthread_key;
+    // assume other platforms (Linux, MacOS, etc.) do.
+    #define HAVE_PTHREAD_KEY
 
 #endif
 
