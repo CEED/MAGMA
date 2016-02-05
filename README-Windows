@@ -50,6 +50,10 @@ the setup some.
    For MKL, you can determine what libraries to link with using the
    Intel MKL Link Link Advisor, at
    http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
+   
+   For OpenBLAS, we used (again, no spaces before or after):
+   
+   c:\openblas-0.2.14\lib\libopenblas.a
 
 *  If using Intel MKL, also set MKLROOT. In our case, we used:
    C:\Program Files (x86)\Intel\Composer XE\mkl
