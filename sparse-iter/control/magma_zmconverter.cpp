@@ -1340,7 +1340,7 @@ magma_zmconvert(
 #endif
         }
         else {
-            printf("warning: format not supported on GPU. "
+            printf("%% warning: format not supported on GPU. "
             "Conversion handled by CPU.\n");
             CHECK( magma_zmtransfer( A, &hA, A.memory_location, Magma_CPU, queue ));
             CHECK( magma_zmconvert( hA, &hB, old_format, new_format, queue ));
