@@ -62,7 +62,6 @@ __global__ void zpotf2_smlpout_anywidth_kernel_batched(int m, int n,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /**
-    \n
     This is an internal routine.
     ********************************************************************/
 extern "C" magma_int_t
@@ -84,7 +83,7 @@ magma_zpotrf_lpout_batched(
         arginfo = -10;
     }
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        fprintf( stderr, "%s: uplo=upper is not yet implemented\n", __func__ );
         arginfo = -1;
     }
 

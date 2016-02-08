@@ -38,7 +38,7 @@ magmablas_zsetmatrix_transpose_q(
 
     // TODO standard check arguments
     if (lda < m || ldda < n || lddwork < m) {
-        printf("Wrong arguments in %s.\n", __func__);
+        fprintf( stderr, "%s: wrong arguments.\n", __func__ );
         return;
     }
 

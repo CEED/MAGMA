@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal s
-
        @author Jakub Kurzak
        @author Stan Tomov
        @author Mark Gates
@@ -179,7 +177,7 @@ magmablas_sgemm_batched(
     
     magma_int_t arch = magma_getdevice_arch();
     if ( arch < 200  ) {
-        printf("arch < 200 not supported \n"); // TODO call cublas
+        fprintf( stderr, "%s: CUDA arch < 200 not supported\n", __func__ ); // TODO call cublas
         return;
     }
     

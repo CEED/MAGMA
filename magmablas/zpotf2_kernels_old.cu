@@ -85,7 +85,7 @@ void magma_zpotf2_zdotc_batched(magma_int_t n, magmaDoubleComplex **x_array, mag
     2) updates x[n] = sqrt(x[n]-sum);
     */
     if (n > MAX_NTHREADS) {
-        printf("n = %d > %d is not supported in zpotf2_zdotc\n", (int) n, (int) MAX_NTHREADS);
+        fprintf( stderr, "%s: n = %d > %d is not supported\n", __func__, (int) n, (int) MAX_NTHREADS );
     }
     int threadSize;
 
@@ -432,7 +432,7 @@ magma_zpotf2_tile_batched(
         arginfo = -10;
     }
     if (uplo == MagmaUpper) {
-        printf("Upper side is unavailable \n");
+        fprintf( stderr, "%s: uplo=upper is not yet implemented\n", __func__ );
         arginfo = -1;
     }
 

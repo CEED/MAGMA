@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        @date
 
-       @precisions normal s
-       
        @author Tingxing Dong
        @author Azzam Haidar
 

@@ -149,7 +149,7 @@ adjust_ipiv_batched( magma_int_t **ipiv_array,
     if (offset == 0 ) return;
     if ( m  > MAX_NTHREADS) 
     {
-        printf(" adjust_ipiv_batched_q m=%d > %d, not supported \n", int(m), int(MAX_NTHREADS) );
+        fprintf( stderr, "%s: m=%d > %d, not supported\n", __func__, int(m), int(MAX_NTHREADS) );
         return;
     }
     adjust_ipiv_kernel_batched
@@ -175,7 +175,7 @@ adjust_ipiv( magma_int_t *ipiv,
     if (offset == 0 ) return;
     if ( m  > 1024) 
     {
-        printf(" adjust_ipiv_q m=%d > %d, not supported \n", int(m), int(MAX_NTHREADS) );
+        fprintf( stderr, "%s: m=%d > %d, not supported\n", __func__, int(m), int(MAX_NTHREADS) );
         return;
     }
     adjust_ipiv_kernel
