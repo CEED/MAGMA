@@ -302,6 +302,7 @@ batch = '--batch ' + opts.batch + ' '
 # wide is M < N
 # mn   is all of above
 # mnk  is all of above + combinations of M, N, K where K is unique
+# nk   is square       + combinations of M, N, K where K is unique (for zherk, zher2k; M is ignored)
 
 # ----------
 n = ''
@@ -357,7 +358,7 @@ if opts.mnk and opts.small:
 	mnk  += (' -N 1,2,3           -N 2,1,3           -N 1,3,2           -N 2,3,1           -N 3,1,2           -N 3,2,1'
 	     +   ' -N 10,20,30        -N 20,10,30        -N 10,30,20        -N 20,30,10        -N 30,10,20        -N 30,20,10'
 	     +   ' -N 100,200,300     -N 200,100,300     -N 100,300,200     -N 200,300,100     -N 300,100,200     -N 300,200,100'
-	)
+	)    
 if opts.mnk and opts.med:
 	mnk  +=  ' -N 100,300,600     -N 300,100,600     -N 100,600,300     -N 300,600,100     -N 600,100,300     -N 600,300,100'
 if opts.mnk and opts.large:
@@ -366,6 +367,7 @@ if opts.mnk and opts.large:
 
 # ----------
 mn     = n + tall + wide
+nk     = n + mnk  # nk does NOT include tall, wide
 mnk    = n + tall + wide + mnk
 
 # ----------
@@ -417,16 +419,16 @@ blas = (
 	('testing_zhemv',   '-U             -c',  n,    ''),
 	
 	# lower/upper, no-trans/conj-trans
-	('testing_zherk',   '-L             -c',  n,    'cublas only'),
-	('testing_zherk',   '-L -C          -c',  n,    'cublas only'),
-	('testing_zherk',   '-U             -c',  n,    'cublas only'),
-	('testing_zherk',   '-U -C          -c',  n,    'cublas only'),
+	('testing_zherk',   '-L             -c',  nk,   'cublas only'),
+	('testing_zherk',   '-L -C          -c',  nk,   'cublas only'),
+	('testing_zherk',   '-U             -c',  nk,   'cublas only'),
+	('testing_zherk',   '-U -C          -c',  nk,   'cublas only'),
 	
 	# lower/upper, no-trans/conj-trans
-	('testing_zher2k',  '-L             -c',  n,    'cublas only'),
-	('testing_zher2k',  '-L -C          -c',  n,    'cublas only'),
-	('testing_zher2k',  '-U             -c',  n,    'cublas only'),
-	('testing_zher2k',  '-U -C          -c',  n,    'cublas only'),
+	('testing_zher2k',  '-L             -c',  nk,   'cublas only'),
+	('testing_zher2k',  '-L -C          -c',  nk,   'cublas only'),
+	('testing_zher2k',  '-U             -c',  nk,   'cublas only'),
+	('testing_zher2k',  '-U -C          -c',  nk,   'cublas only'),
 	
 	# lower/upper
 	('testing_zsymv',   '-L             -c',  n,    ''),
@@ -519,10 +521,12 @@ blas = (
 	
 	('testing_zhemm_mgpu',   ngpu + '-L -c',  n,    ''),
 	('testing_zhemm_mgpu',   ngpu + '-U -c',  n,    ''),
+	
 	('testing_zhemv_mgpu',   ngpu + '-L -c',  n,    ''),
 	('testing_zhemv_mgpu',   ngpu + '-U -c',  n,    ''),
-	('testing_zher2k_mgpu',  ngpu + '-L -c',  n,    ''),
-	('testing_zher2k_mgpu',  ngpu + '-U -c',  n,    ''),
+	
+	('testing_zher2k_mgpu',  ngpu + '-L -c',  nk,   ''),
+	('testing_zher2k_mgpu',  ngpu + '-U -c',  nk,   ''),
 	
 	('#testing_blas_z',                '-c',  mnk,  'takes long time; cublas only'),
 	('testing_cblas_z',                '-c',  n,    ''),
@@ -1049,10 +1053,10 @@ batched = (
 	('testing_zgemv_batched',     batch + '-C             -c',  mn,   ''),
 	
 	# lower/upper, no-trans/conj-trans
-	('testing_zherk_batched',     batch + '         -L    -c',  mn,   ''),
-	('testing_zherk_batched',     batch + '         -L -C -c',  mn,   ''),
-	('testing_zherk_batched',     batch + '         -U    -c',  mn,   ''),
-	('testing_zherk_batched',     batch + '         -U -C -c',  mn,   ''),
+	('testing_zherk_batched',     batch + '         -L    -c',  nk,   ''),
+	('testing_zherk_batched',     batch + '         -L -C -c',  nk,   ''),
+	('testing_zherk_batched',     batch + '         -U    -c',  nk,   ''),
+	('testing_zherk_batched',     batch + '         -U -C -c',  nk,   ''),
 	
 	('testing_zlacpy_batched',    batch + '               -c',  mn,   ''),
 	
