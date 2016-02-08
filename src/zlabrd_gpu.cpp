@@ -136,6 +136,10 @@
     lwork   INTEGER
             The dimension of the array WORK. LWORK >= max( M, N ).
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     Further Details
     ---------------
     The matrices Q and P are represented as products of elementary

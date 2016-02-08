@@ -50,6 +50,10 @@
     @param
     dwork   (workspace) DOUBLE PRECISION array, dimension (N)
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @param[out]
     info    INTEGER
       -     = 0: successful exit

@@ -97,16 +97,20 @@
             The leading dimension of the array W. LDW >= max(1,N).
     
     @param
-    dA
+    dA      TODO: dimension (ldda, n)?
     
     @param
-    ldda
+    ldda    TODO: ldda >= n?
     
     @param
-    dW
+    dW      TODO: dimension (lddw, ??)
     
     @param
-    lddw
+    lddw    TODO: lddw >= n ??
+    
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     Further Details
     ---------------

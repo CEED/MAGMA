@@ -115,6 +115,10 @@
     @param
     ldwork  TODO: ldwork >= ceil(n/64)*ldda ??
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     Further Details
     ---------------
     If UPLO = MagmaUpper, the matrix Q is represented as a product of elementary

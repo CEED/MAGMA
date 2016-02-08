@@ -231,6 +231,10 @@ zlange_one_kernel(
             Note this is different than LAPACK, which requires WORK only for
             NORM = MagmaInfNorm, and does not pass LWORK.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" double

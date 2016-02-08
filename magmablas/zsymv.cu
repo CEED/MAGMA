@@ -740,6 +740,10 @@ magmablas_zsymv_work(
             On entry, INCY specifies the increment for the elements of
             Y. INCY must not be zero.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zblas2
     ********************************************************************/
 extern "C"

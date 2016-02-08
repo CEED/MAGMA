@@ -612,6 +612,10 @@ zlanhe_max(
     lwork   INTEGER
             The dimension of the array DWORK. LWORK >= max( 1, N ).
     
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zaux2
     ********************************************************************/
 extern "C" double

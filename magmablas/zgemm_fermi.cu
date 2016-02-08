@@ -136,6 +136,10 @@
             in  the  calling  (sub)  program.   LDC  must  be  at  least
             max( 1, m ).
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C" void

@@ -22,7 +22,7 @@
  * @ingroup magma_magmaDoubleComplex
  *
  *  magma_zhbtype3cb is a kernel that will operate on a region (triangle) of data
- *  bounded by st and ed. This kernel apply a left+right update on the hermitian
+ *  bounded by st and ed. This kernel apply a left+right update on the Hermitian
  *  triangle.  Note that this kernel is very similar to type1 but does not do an
  *  elimination.
  *

@@ -16,7 +16,7 @@
     -------
     ZHESV solves a system of linear equations
         A * X = B
-    where A is an n-by-n hermitian matrix and X and B are n-by-nrhs matrices.
+    where A is an n-by-n Hermitian matrix and X and B are n-by-nrhs matrices.
     The LU decomposition with no pivoting is
     used to factor A as
     The factorization has the form

@@ -67,6 +67,10 @@ void magmablas_zlacgv( magma_int_t n, magmaDoubleComplex *x, magma_int_t incx, m
     ldda    INTEGER
             The leading dimension of the array A.  LDDA >= max(1,N).
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @param[out]
     info    INTEGER
       -     = 0: successful exit
@@ -302,6 +306,10 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
     @param[in]
     incx    INTEGER
             The spacing between successive elements of X.
+
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
 
     @ingroup magma_zaux1
     ********************************************************************/

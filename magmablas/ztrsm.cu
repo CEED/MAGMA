@@ -134,6 +134,10 @@
     dinvA_length   INTEGER.
             On entry, dinvA_length specifies the size of d_dinvA.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @ingroup magma_zblas3
     ********************************************************************/
 extern "C"

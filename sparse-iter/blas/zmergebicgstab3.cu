@@ -322,6 +322,10 @@ magma_zbicgmerge4_kernel_3(
     skp         magmaDoubleComplex_ptr 
                 vector with parameters
 
+    @param[in]
+    queue       magma_queue_t
+                Queue to execute in.
+
     @ingroup magmasparse_zgegpuk
     ********************************************************************/
 

@@ -94,6 +94,10 @@
     @param
     dwork   (workspace) COMPLEX_16 array on the GPU, dimension N*NB.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     Further Details
     ---------------
     This implementation follows the algorithm and notations described in:

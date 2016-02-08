@@ -60,6 +60,10 @@ void magma_zscal_zgeru(
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     @param[out]
     info    INTEGER
       -     = 0: successful exit

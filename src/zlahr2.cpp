@@ -94,6 +94,10 @@
     ldy     INTEGER
             The leading dimension of the array Y. LDY >= N.
 
+    @param[in]
+    queue   magma_queue_t
+            Queue to execute in.
+
     Further Details
     ---------------
     The matrix Q is represented as a product of nb elementary reflectors
