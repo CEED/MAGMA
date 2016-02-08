@@ -43,7 +43,7 @@ int main( int argc, char** argv )
     
     // test all combinations of input parameters
     magma_side_t   side  [] = { MagmaLeft,       MagmaRight    };
-    magma_trans_t  trans [] = { MagmaConjTrans,  MagmaNoTrans  };
+    magma_trans_t  trans [] = { Magma_ConjTrans, MagmaNoTrans  };
     magma_direct_t direct[] = { MagmaForward,    MagmaBackward };
     magma_storev_t storev[] = { MagmaColumnwise, MagmaRowwise  };
 

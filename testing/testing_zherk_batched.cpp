@@ -60,18 +60,18 @@ int main( int argc, char** argv)
     batchCount = opts.batchcount;
 
     double tol = opts.tolerance * lapackf77_dlamch("E");
+    
+    #ifdef COMPLEX
+    if (opts.transA == MagmaTrans) {
+        opts.transA = MagmaConjTrans; 
+        printf("%% WARNING: transA = MagmaTrans changed to MagmaConjTrans\n");
+    }
+    #endif
    
     printf("%% If running lapack (option --lapack), MAGMA error is computed\n"
            "%% relative to CPU BLAS result.\n\n");
     printf("%% uplo = %s, transA = %s\n",
            lapack_uplo_const(opts.uplo), lapack_trans_const(opts.transA) );
-    #ifdef COMPLEX
-    if(opts.transA == MagmaTrans)
-    {
-        opts.transA = MagmaConjTrans; 
-        printf("%% WARNING: transA = MagmaTrans changed to MagmaConjTrans\n");
-    }
-    #endif
     
     printf("%% BatchCount   N     K   MAGMA Gflop/s (ms)    CPU Gflop/s (ms)   MAGMA error\n");
     printf("%%============================================================================\n");

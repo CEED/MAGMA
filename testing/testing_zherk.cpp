@@ -20,6 +20,8 @@
 #include "magma.h"
 #include "magma_lapack.h"
 
+#define COMPLEX
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zherk
@@ -49,6 +51,13 @@ int main( int argc, char** argv)
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
+    
+    #ifdef COMPLEX
+    if (opts.transA == MagmaTrans) {
+        opts.transA = MagmaConjTrans; 
+        printf("%% WARNING: transA = MagmaTrans changed to MagmaConjTrans\n");
+    }
+    #endif
     
     printf("%% If running lapack (option --lapack), CUBLAS error is computed\n"
            "%% relative to CPU BLAS result.\n\n");
