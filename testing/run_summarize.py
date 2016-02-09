@@ -27,7 +27,7 @@
 #     ignore:          ignore issues like using --ngpu 2 with only 1 gpu.
 #
 # tol  is tolerance given when the tester was run, by default tol = 30.
-# tol2 is specified here, using --tol, by default tol2 = 100.
+# tol2 is specified here, using --tol2, by default tol2 = 100.
 #
 # For each suspect or failed command, prints the command and suspect or failed
 # tests. Also adds the ratio {error/eps} in braces after each error.
@@ -44,14 +44,14 @@ from math import isnan, isinf
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option( '--tol',  action='store',      dest='tol',  help='set tolerance (tol2)', default='100' )
+parser.add_option( '--tol2', action='store',      dest='tol2', help='set tolerance (tol2)', default='100' )
 parser.add_option( '--okay', action='store_true', dest='okay', help='print okay tests',     default=False )
 
 (opts, args) = parser.parse_args()
 
 
 # --------------------
-tol2     = int(opts.tol)
+tol2     = int(opts.tol2)
 
 seps     = 5.96e-08
 deps     = 1.11e-16
