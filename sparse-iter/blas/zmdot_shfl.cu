@@ -16,6 +16,20 @@
 
 #define PRECISION_z
 
+#include <cuda.h>  // for CUDA_VERSION
+
+#if (CUDA_VERSION <= 6000)
+// CUDA 6.5 adds Double precision version; here's an implementation for CUDA 6.0 and earlier.
+// from https://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
+__device__ inline
+real_Double_t __shfl_down(real_Double_t var, unsigned int srcLane, int width=32) {
+  int2 a = *reinterpret_cast<int2*>(&var);
+  a.x = __shfl_down(a.x, srcLane, width);
+  a.y = __shfl_down(a.y, srcLane, width);
+  return *reinterpret_cast<double*>(&a);
+}
+#endif
+
 
 template<typename T>
 __inline__ __device__
