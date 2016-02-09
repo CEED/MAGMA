@@ -137,6 +137,7 @@ magma_zcg_res(
         }
 
         CHECK( magma_z_spmv( c_one, A, p, c_zero, q, queue ));   // q = A p
+        solver_par->spmv_count++;
         den = magma_zdotc( dofs, p.dval, 1, q.dval, 1, queue );
                 // den = p dot q
 
